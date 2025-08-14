@@ -131,6 +131,11 @@ QUICK SHORTCUTS:
         action="store_true",
         help="Show verbose output and debug information"
     )
+    ui_group.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help="Run in non-interactive mode (no prompts, use defaults)"
+    )
     
     # Build configuration
     build_group = parser.add_argument_group('Build Configuration')

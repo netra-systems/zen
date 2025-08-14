@@ -1,211 +1,6 @@
 {
   "runs": [
     {
-      "timestamp": "2025-08-14T00:10:55.945226",
-      "level": "unit",
-      "results": {
-        "backend": {
-          "status": "failed",
-          "duration": 13.94562840461731,
-          "exit_code": 4,
-          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 12.86s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:46: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:20: in <module>\n    from app.agents.tool_dispatcher import ToolDispatcher\napp\\agents\\tool_dispatcher.py:159: in <module>\n    class ProductionTool:\napp\\agents\\tool_dispatcher.py:170: in ProductionTool\n    async def arun(self, kwargs: Dict[str, Any]) -> MockToolExecuteResponse:\n                                                    ^^^^^^^^^^^^^^^^^^^^^^^\nE   NameError: name 'MockToolExecuteResponse' is not defined\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "failed",
-          "duration": 0.7565145492553711,
-          "exit_code": 255,
-          "output": "================================================================================\nNETRA AI PLATFORM - FRONTEND TEST RUNNER\n================================================================================\n\n================================================================================\nRunning Jest Tests\n--------------------------------------------------------------------------------\nRunning: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)\n--------------------------------------------------------------------------------\n\n================================================================================\n[FAIL] CHECKS FAILED with exit code 255\n================================================================================\n\nCleaning up test processes...\n\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        }
-      },
-      "summary": {
-        "total": 0,
-        "passed": 0,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 0
-      }
-    },
-    {
-      "timestamp": "2025-08-14T00:11:28.061434",
-      "level": "smoke",
-      "total": 7,
-      "passed": 7,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T00:11:39.855028",
-      "level": "unit",
-      "results": {
-        "backend": {
-          "status": "failed",
-          "duration": 2.7689602375030518,
-          "exit_code": 15,
-          "output": "\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "failed",
-          "duration": 0.0200655460357666,
-          "exit_code": 15,
-          "output": "\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "failed",
-          "start_time": 1755155497.0612562,
-          "end_time": 1755155499.8540144
-        }
-      },
-      "summary": {
-        "total": 0,
-        "passed": 0,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 0
-      }
-    },
-    {
-      "timestamp": "2025-08-14T00:11:40.187366",
-      "level": "unit",
-      "results": {
-        "backend": {
-          "status": "failed",
-          "duration": 36.34500074386597,
-          "exit_code": 2,
-          "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m____ ERROR collecting tests/services/test_supply_research_service_basic.py ____\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_supply_research_service_basic.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_supply_research_service_basic.py:14: in <module>\n    from app.tests.conftest import get_test_db_session\nE   ImportError: cannot import name 'get_test_db_session' from 'app.tests.conftest' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_supply_research_service_basic.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m============================== \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 22.41s\u001b[0m\u001b[31m ==============================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 34.96s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
-          "test_counts": {
-            "total": 1,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 1,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "frontend": {
-          "status": "failed",
-          "duration": 1.1142933368682861,
-          "exit_code": 255,
-          "output": "================================================================================\nNETRA AI PLATFORM - FRONTEND TEST RUNNER\n================================================================================\n\n================================================================================\nRunning Jest Tests\n--------------------------------------------------------------------------------\nRunning: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)\n--------------------------------------------------------------------------------\n\n================================================================================\n[FAIL] CHECKS FAILED with exit code 255\n================================================================================\n\nCleaning up test processes...\n\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0,
-            "test_files": 0
-          },
-          "coverage": null,
-          "test_details": []
-        },
-        "e2e": {
-          "status": "pending",
-          "duration": 0,
-          "exit_code": null,
-          "output": "",
-          "test_counts": {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "errors": 0
-          },
-          "coverage": null
-        },
-        "overall": {
-          "status": "failed",
-          "start_time": 1755155462.7079248,
-          "end_time": 1755155500.1722286
-        }
-      },
-      "summary": {
-        "total": 1,
-        "passed": 0,
-        "failed": 0,
-        "skipped": 0,
-        "errors": 1
-      }
-    },
-    {
-      "timestamp": "2025-08-14T00:12:19.569840",
-      "level": "comprehensive",
-      "total": 0,
-      "passed": 0,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
       "timestamp": "2025-08-14T00:12:19.783053",
       "level": "unit",
       "results": {
@@ -467,6 +262,216 @@
         "passed": 0,
         "failed": 0,
         "skipped": 0,
+        "errors": 0
+      }
+    },
+    {
+      "timestamp": "2025-08-14T00:13:29.131271",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 8.742660999298096,
+          "exit_code": 4,
+          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 7.97s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:46: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:12: in <module>\n    from app.agents.base import BaseSubAgent\napp\\agents\\base.py:10: in <module>\n    from app.agents.state import DeepAgentState\napp\\agents\\state.py:93: in <module>\n    class DeepAgentState(BaseModel):\napp\\agents\\state.py:100: in DeepAgentState\n    triage_result: Optional[TriageResult] = None\n                            ^^^^^^^^^^^^\nE   NameError: name 'TriageResult' is not defined\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "failed",
+          "duration": 0.305560827255249,
+          "exit_code": 255,
+          "output": "================================================================================\nNETRA AI PLATFORM - FRONTEND TEST RUNNER\n================================================================================\n\n================================================================================\nRunning Jest Tests\n--------------------------------------------------------------------------------\nRunning: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)\n--------------------------------------------------------------------------------\n\n================================================================================\n[FAIL] CHECKS FAILED with exit code 255\n================================================================================\n\nCleaning up test processes...\n\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755155600.075823,
+          "end_time": 1755155609.1282234
+        }
+      },
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      }
+    },
+    {
+      "timestamp": "2025-08-14T00:13:34.571896",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 8.260828018188477,
+          "exit_code": 4,
+          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 7.57s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:46: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:12: in <module>\n    from app.agents.base import BaseSubAgent\napp\\agents\\base.py:10: in <module>\n    from app.agents.state import DeepAgentState\napp\\agents\\state.py:7: in <module>\n    from app.agents.triage_sub_agent.models import TriageResult\napp\\agents\\triage_sub_agent\\__init__.py:35: in <module>\n    from ..triage_sub_agent import TriageSubAgent\nE   ImportError: cannot import name 'TriageSubAgent' from partially initialized module 'app.agents.triage_sub_agent' (most likely due to a circular import) (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\triage_sub_agent\\__init__.py)\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "failed",
+          "duration": 0.2880115509033203,
+          "exit_code": 15,
+          "output": "\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755155606.0160356,
+          "end_time": 1755155614.5678966
+        }
+      },
+      "summary": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      }
+    },
+    {
+      "timestamp": "2025-08-14T00:14:25.643975",
+      "level": "comprehensive-backend",
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T00:14:50.182236",
+      "level": "smoke",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T00:14:50.224717",
+      "level": "unit",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 56.02800107002258,
+          "exit_code": 3,
+          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: unit\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n4 workers [1540 items]\n\nscheduling tests via LoadScheduling\n\napp\\tests\\services\\agents\\test_tools.py::test_tool_dispatcher \napp\\tests\\services\\supply_research_scheduler\\test_scheduled_execution.py::TestChangeNotifications::test_check_and_notify_changes_new_models \napp\\tests\\services\\synthetic_data\\test_error_recovery.py::TestErrorRecovery::test_graceful_degradation \napp\\tests\\services\\test_agent_service_orchestration.py::TestAgentLifecycleManagement::test_concurrent_agent_orchestration \n[gw1]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_error_recovery.py::TestErrorRecovery::test_graceful_degradation \napp\\tests\\services\\synthetic_data\\test_ingestion.py::TestIngestionMethods::test_ingest_with_retry_success \n[gw2]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduled_execution.py::TestChangeNotifications::test_check_and_notify_changes_new_models \n[gw1]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_ingestion.py::TestIngestionMethods::test_ingest_with_retry_success \napp\\tests\\services\\supply_research_scheduler\\test_scheduled_execution.py::TestChangeNotifications::test_check_and_notify_changes_no_significant_changes \napp\\tests\\services\\synthetic_data\\test_ingestion.py::TestIngestionMethods::test_ingest_with_retry_failure \n[gw2]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduled_execution.py::TestChangeNotifications::test_check_and_notify_changes_no_significant_changes \napp\\tests\\services\\supply_research_scheduler\\test_scheduled_execution.py::TestChangeNotifications::test_check_and_notify_changes_error_handling \n[gw2]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduled_execution.py::TestChangeNotifications::test_check_and_notify_changes_error_handling \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerInitialization::test_initialization_with_redis \n[gw2]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerInitialization::test_initialization_with_redis \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerInitialization::test_initialization_without_redis \n[gw2]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerInitialization::test_initialization_without_redis \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerInitialization::test_default_schedules_created \n[gw0]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\agents\\test_tools.py::test_tool_dispatcher \n[gw2]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerInitialization::test_default_schedules_created \napp\\tests\\services\\agents\\test_tools.py::test_tool_dispatcher_tool_not_found \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerInitialization::test_default_schedule_configurations \n[gw2]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerInitialization::test_default_schedule_configurations \n[gw0]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\agents\\test_tools.py::test_tool_dispatcher_tool_not_found \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerStartStop::test_start_scheduler \napp\\tests\\services\\agents\\test_tools.py::test_tool_dispatcher_tool_error \n[gw2]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerStartStop::test_start_scheduler \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerStartStop::test_start_scheduler_already_running \n[gw0]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\agents\\test_tools.py::test_tool_dispatcher_tool_error \n[gw2]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerStartStop::test_start_scheduler_already_running \napp\\tests\\services\\apex_optimizer_agent\\test_tool_builder.py::test_tool_builder_and_dispatcher \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerStartStop::test_stop_scheduler \n[gw2]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_initialization.py::TestSchedulerStartStop::test_stop_scheduler \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_loop.py::TestSchedulerLoop::test_scheduler_loop_execution \n[gw1]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_ingestion.py::TestIngestionMethods::test_ingest_with_retry_failure \n[gw3]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_agent_service_orchestration.py::TestAgentLifecycleManagement::test_concurrent_agent_orchestration \napp\\tests\\services\\synthetic_data\\test_ingestion.py::TestIngestionMethods::test_ingest_with_deduplication \napp\\tests\\services\\test_agent_service_orchestration.py::TestAgentLifecycleManagement::test_agent_state_transitions \n[gw1]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_ingestion.py::TestIngestionMethods::test_ingest_with_deduplication \napp\\tests\\services\\synthetic_data\\test_ingestion.py::TestIngestionMethods::test_ingest_with_transform \n[gw1]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_ingestion.py::TestIngestionMethods::test_ingest_with_transform \napp\\tests\\services\\synthetic_data\\test_initialization.py::TestServiceInitialization::test_initialization \n[gw0]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\test_tool_builder.py::test_tool_builder_and_dispatcher \n[gw1]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_initialization.py::TestServiceInitialization::test_initialization \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool \napp\\tests\\services\\synthetic_data\\test_initialization.py::TestServiceInitialization::test_default_tools_structure \n[gw1]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_initialization.py::TestServiceInitialization::test_default_tools_structure \napp\\tests\\services\\synthetic_data\\test_initialization.py::TestWorkloadTypeSelection::test_select_workload_type \n[gw0]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool \n[gw2]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_loop.py::TestSchedulerLoop::test_scheduler_loop_execution \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_loop.py::TestSchedulerLoop::test_scheduler_loop_no_due_schedules \n[gw0]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic \n[gw1]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_initialization.py::TestWorkloadTypeSelection::test_select_workload_type \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestToolMetadata::test_tool_metadata_creation_full \napp\\tests\\services\\synthetic_data\\test_initialization.py::TestWorkloadTypeSelection::test_select_agent_type \n[gw0]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestToolMetadata::test_tool_metadata_creation_full \n[gw1]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_initialization.py::TestWorkloadTypeSelection::test_select_agent_type \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required \napp\\tests\\services\\synthetic_data\\test_integration.py::TestIntegration::test_complete_generation_workflow \n[gw0]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion \n[gw0]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization \n[gw1]\u001b[36m [  2%] \u001b[0m\u001b[33mSKIPPED\u001b[0m app\\tests\\services\\synthetic_data\\test_integration.py::TestIntegration::test_complete_generation_workflow \n[gw0]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization \n[gw2]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_loop.py::TestSchedulerLoop::test_scheduler_loop_no_due_schedules \napp\\tests\\services\\synthetic_data\\test_integration.py::TestIntegration::test_multi_tenant_generation \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases \n[gw0]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_loop.py::TestSchedulerLoop::test_scheduler_loop_error_handling \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_instantiation \n[gw1]\u001b[36m [  2%] \u001b[0m\u001b[33mSKIPPED\u001b[0m app\\tests\\services\\synthetic_data\\test_integration.py::TestIntegration::test_multi_tenant_generation \n[gw0]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_instantiation \napp\\tests\\services\\synthetic_data\\test_integration.py::TestIntegration::test_security_and_access_control \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_get_metadata \n[gw0]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_get_metadata \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_execute_wrapper \n[gw0]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_execute_wrapper \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_execute_failure \n[gw0]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_execute_failure \n[gw3]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_agent_service_orchestration.py::TestAgentLifecycleManagement::test_agent_state_transitions \n[gw2]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_loop.py::TestSchedulerLoop::test_scheduler_loop_error_handling \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_loop.py::TestSchedulerLoop::test_scheduler_loop_disabled_schedules \napp\\tests\\services\\test_agent_service_orchestration.py::TestAgentLifecycleManagement::test_orchestration_metrics_calculation \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_concrete_tool_run_method \n[gw3]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_agent_service_orchestration.py::TestAgentLifecycleManagement::test_orchestration_metrics_calculation \napp\\tests\\services\\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_failure_recovery \n[gw0]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_concrete_tool_run_method \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_with_llm_name \n[gw0]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_with_llm_name \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_multiple_executions \n[gw0]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_multiple_executions \n[gw2]\u001b[36m [  2%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_loop.py::TestSchedulerLoop::test_scheduler_loop_disabled_schedules \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_concurrent_execution \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_loop.py::TestManualExecution::test_run_schedule_now_exists \n[gw0]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_concurrent_execution \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_execute_without_metadata_attribute \n[gw2]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_loop.py::TestManualExecution::test_run_schedule_now_exists \napp\\tests\\services\\supply_research_scheduler\\test_scheduler_loop.py::TestManualExecution::test_run_schedule_now_not_exists \n[gw0]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_execute_without_metadata_attribute \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_inheritance_chain \n[gw2]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\supply_research_scheduler\\test_scheduler_loop.py::TestManualExecution::test_run_schedule_now_not_exists \n[gw0]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_inheritance_chain \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_with_complex_kwargs \napp\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_generation_job_monitoring \n[gw0]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_with_complex_kwargs \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_exception_types \n[gw0]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_exception_types \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_async_delay \n[gw1]\u001b[36m [  3%] \u001b[0m\u001b[31mFAILED\u001b[0m app\\tests\\services\\synthetic_data\\test_integration.py::TestIntegration::test_security_and_access_control \n[gw2]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_generation_job_monitoring \napp\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_corpus_usage_analytics \n[gw3]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_failure_recovery \n[gw2]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_corpus_usage_analytics \napp\\tests\\services\\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_timeout_handling \napp\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_audit_log_generation \n[gw0]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_base.py::TestBaseTool::test_base_tool_async_delay \n[gw2]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_audit_log_generation \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_basic_functionality \napp\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_performance_profiling \n[gw2]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_performance_profiling \n[gw0]\u001b[36m [  3%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_basic_functionality \napp\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_alert_configuration \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_empty_logs \n[gw0]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_empty_logs \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_single_log \n[gw0]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_single_log \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_large_costs \n[gw0]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_large_costs \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_zero_costs \n[gw0]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_zero_costs \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_fractional_cents \n[gw0]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_fractional_cents \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_exception_handling \n[gw3]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_timeout_handling \n[gw0]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_exception_handling \napp\\tests\\services\\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_resource_cleanup_on_error \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_async_execution \n[gw3]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_agent_resource_cleanup_on_error \napp\\tests\\services\\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_circuit_breaker_pattern \n[gw2]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_alert_configuration \napp\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_job_cancellation_by_admin \n[gw0]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_async_execution \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_concurrent_logs \n[gw3]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_circuit_breaker_pattern \napp\\tests\\services\\test_agent_service_orchestration.py::TestAgentServiceBasic::test_run_agent_with_request_model \n[gw3]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_agent_service_orchestration.py::TestAgentServiceBasic::test_run_agent_with_request_model \n[gw0]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_concurrent_logs \napp\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_cost_optimization \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_negative_costs \n[gw0]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_negative_costs \n[gw3]\u001b[36m [  4%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_cost_optimization \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_mixed_model_types \napp\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_latency_optimization \n[gw0]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_mixed_model_types \n[gw3]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_latency_optimization \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_partial_failure \napp\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_cache_optimization \n[gw0]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_partial_failure \n[gw3]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_cache_optimization \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_rounding_edge_cases \napp\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_model_analysis \n[gw2]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_job_cancellation_by_admin \napp\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_resource_usage_tracking \n[gw0]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_analyzer.py::TestCostAnalyzer::test_cost_analyzer_rounding_edge_cases \n[gw3]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_model_analysis \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_reduction_quality_preservation.py::test_cost_reduction_quality_preservation_tool \napp\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_multi_objective \n[gw2]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_resource_usage_tracking \n[gw0]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_reduction_quality_preservation.py::test_cost_reduction_quality_preservation_tool \n[gw3]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_multi_objective \napp\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_admin_diagnostic_tools \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_simulation_for_increased_usage.py::test_cost_simulation_for_increased_usage_tool \napp\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_empty_query \n[gw2]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_admin_diagnostic_tools \n[gw0]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_cost_simulation_for_increased_usage.py::test_cost_simulation_for_increased_usage_tool \napp\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_batch_job_management \n[gw3]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_empty_query \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_kv_cache_optimization_audit.py::test_kv_cache_optimization_audit_tool \napp\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_llm_failure \n[gw0]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_kv_cache_optimization_audit.py::test_kv_cache_optimization_audit_tool \n[gw2]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_admin_visibility.py::TestAdminVisibility::test_batch_job_management \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_basic_functionality \n[gw3]\u001b[36m [  5%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_llm_failure \napp\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_ml_driven_pattern_generation \n[gw0]\u001b[36m [  6%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_basic_functionality \napp\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_invalid_json_response \n[gw2]\u001b[36m [  6%] \u001b[0m\u001b[33mSKIPPED\u001b[0m app\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_ml_driven_pattern_generation \napp\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_anomaly_injection_strategies \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_empty_logs \n[gw3]\u001b[36m [  6%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_tool_selection_invalid_json_response \n[gw2]\u001b[36m [  6%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_anomaly_injection_strategies \n[gw0]\u001b[36m [  6%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_empty_logs \napp\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_custom_tool_selection \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_single_log \napp\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_cross_correlation_generation \n[gw3]\u001b[36m [  6%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolSelection::test_custom_tool_selection \n[gw0]\u001b[36m [  6%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_single_log \napp\\tests\\services\\test_apex_optimizer_tool_selection.py::TestApexOptimizerToolChaining::test_simple_tool_chain_execution \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_high_latency_values \n[gw0]\u001b[36m [  6%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_high_latency_values \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_zero_latency \n[gw2]\u001b[36m [  6%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_cross_correlation_generation \napp\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_temporal_event_sequences \n[gw0]\u001b[36m [  6%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_zero_latency \n[gw2]\u001b[36m [  6%] \u001b[0m\u001b[33mSKIPPED\u001b[0m app\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_temporal_event_sequences \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_sub_millisecond_latency \napp\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_geo_distributed_simulation \n[gw2]\u001b[36m [  6%] \u001b[0m\u001b[33mSKIPPED\u001b[0m app\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_geo_distributed_simulation \napp\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_adaptive_generation_feedback \n[gw0]\u001b[36m [  6%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_sub_millisecond_latency \n[gw2]\u001b[36m [  6%] \u001b[0m\u001b[33mSKIPPED\u001b[0m app\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_adaptive_generation_feedback \napp\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_multi_model_workload_generation \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_exception_handling \n[gw2]\u001b[36m [  6%] \u001b[0m\u001b[33mSKIPPED\u001b[0m app\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_multi_model_workload_generation \napp\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_compliance_aware_generation \n[gw2]\u001b[36m [  7%] \u001b[0m\u001b[33mSKIPPED\u001b[0m app\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_compliance_aware_generation \n[gw0]\u001b[36m [  7%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_exception_handling \napp\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_cost_optimized_generation \n[gw2]\u001b[36m [  7%] \u001b[0m\u001b[33mSKIPPED\u001b[0m app\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_cost_optimized_generation \napp\\tests\\services\\apex_optimizer_agent\\tools\\test_latency_analyzer.py::TestLatencyAnalyzer::test_latency_analyzer_async_execution \napp\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_versioned_corpus_generation \n[gw2]\u001b[36m [  7%] \u001b[0m\u001b[33mSKIPPED\u001b[0m app\\tests\\services\\synthetic_data\\test_advanced_features.py::TestAdvancedFeatures::test_versioned_corpus_generation \napp\\tests\\services\\synthetic_data\\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_temporal_patterns \n[gw2]\u001b[36m [  7%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_temporal_patterns \napp\\tests\\services\\synthetic_data\\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_tool_invocations \n[gw2]\u001b[36m [  7%] \u001b[0m\u001b[32mPASSED\u001b[0m app\\tests\\services\\synthetic_data\\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_tool_invocations Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n\nINTERNALERROR> def worker_internal_error(\nINTERNALERROR>         self, node: WorkerController, formatted_error: str\nINTERNALERROR>     ) -> None:\nINTERNALERROR>         \"\"\"\nINTERNALERROR>         pytest_internalerror() was called on the worker.\nINTERNALERROR>     \nINTERNALERROR>         pytest_internalerror() arguments are an excinfo and an excrepr, which can't\nINTERNALERROR>         be serialized, so we go with a poor man's solution of raising an exception\nINTERNALERROR>         here ourselves using the formatted message.\nINTERNALERROR>         \"\"\"\nINTERNALERROR>         self._active_nodes.remove(node)\nINTERNALERROR>         try:\nINTERNALERROR> >           assert False, formatted_error\nINTERNALERROR> E           AssertionError: Traceback (most recent call last):\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\coverage\\sqlitedb.py\", line 115, in _execute\nINTERNALERROR> E                 return self.con.execute(sql, parameters)    # type: ignore[arg-type]\nINTERNALERROR> E                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nINTERNALERROR> E             sqlite3.OperationalError: no such table: file\nINTERNALERROR> E             \nINTERNALERROR> E             During handling of the above exception, another exception occurred:\nINTERNALERROR> E             \nINTERNALERROR> E             Traceback (most recent call last):\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\coverage\\sqlitedb.py\", line 120, in _execute\nINTERNALERROR> E                 return self.con.execute(sql, parameters)    # type: ignore[arg-type]\nINTERNALERROR> E                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nINTERNALERROR> E             sqlite3.OperationalError: no such table: file\nINTERNALERROR> E             \nINTERNALERROR> E             The above exception was the direct cause of the following exception:\nINTERNALERROR> E             \nINTERNALERROR> E             Traceback (most recent call last):\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\main.py\", line 289, in wrap_session\nINTERNALERROR> E                 session.exitstatus = doit(config, session) or 0\nINTERNALERROR> E                                      ^^^^^^^^^^^^^^^^^^^^^\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\main.py\", line 343, in _main\nINTERNALERROR> E                 config.hook.pytest_runtestloop(session=session)\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_hooks.py\", line 512, in __call__\nINTERNALERROR> E                 return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\nINTERNALERROR> E                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_manager.py\", line 120, in _hookexec\nINTERNALERROR> E                 return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\nINTERNALERROR> E                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 167, in _multicall\nINTERNALERROR> E                 raise exception\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 139, in _multicall\nINTERNALERROR> E                 teardown.throw(exception)\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\logging.py\", line 801, in pytest_runtestloop\nINTERNALERROR> E                 return (yield)  # Run all the tests.\nINTERNALERROR> E                         ^^^^^\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 139, in _multicall\nINTERNALERROR> E                 teardown.throw(exception)\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\terminal.py\", line 688, in pytest_runtestloop\nINTERNALERROR> E                 result = yield\nINTERNALERROR> E                          ^^^^^\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 152, in _multicall\nINTERNALERROR> E                 teardown.send(result)\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pytest_cov\\plugin.py\", line 346, in pytest_runtestloop\nINTERNALERROR> E                 self.cov_controller.finish()\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pytest_cov\\engine.py\", line 57, in ensure_topdir_wrapper\nINTERNALERROR> E                 return meth(self, *args, **kwargs)\nINTERNALERROR> E                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pytest_cov\\engine.py\", line 471, in finish\nINTERNALERROR> E                 self.cov.save()\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\coverage\\control.py\", line 818, in save\nINTERNALERROR> E                 data = self.get_data()\nINTERNALERROR> E                        ^^^^^^^^^^^^^^^\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\coverage\\control.py\", line 899, in get_data\nINTERNALERROR> E                 self._post_save_work()\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\coverage\\control.py\", line 930, in _post_save_work\nINTERNALERROR> E                 self._data.touch_files(paths, plugin_name)\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\coverage\\sqldata.py\", line 620, in touch_files\nINTERNALERROR> E                 self._file_id(filename, add=True)\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\coverage\\sqldata.py\", line 416, in _file_id\nINTERNALERROR> E                 self._file_map[filename] = con.execute_for_rowid(\nINTERNALERROR> E                                            ^^^^^^^^^^^^^^^^^^^^^^\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\coverage\\sqlitedb.py\", line 171, in execute_for_rowid\nINTERNALERROR> E                 with self.execute(sql, parameters) as cur:\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\contextlib.py\", line 137, in __enter__\nINTERNALERROR> E                 return next(self.gen)\nINTERNALERROR> E                        ^^^^^^^^^^^^^^\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\coverage\\sqlitedb.py\", line 150, in execute\nINTERNALERROR> E                 cur = self._execute(sql, parameters)\nINTERNALERROR> E                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nINTERNALERROR> E               File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\coverage\\sqlitedb.py\", line 138, in _execute\nINTERNALERROR> E                 raise DataError(f\"Couldn't use data file {self.filename!r}: {msg}\") from exc\nINTERNALERROR> E             coverage.exceptions.DataError: Couldn't use data file 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\.coverage.Anthony.45980.XdaoThNx.wgw1': no such table: file\nINTERNALERROR> E           assert False\nINTERNALERROR> \nINTERNALERROR> ..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\xdist\\dsession.py:232: AssertionError\nINTERNALERROR> Traceback (most recent call last):\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\main.py\", line 289, in wrap_session\nINTERNALERROR>     session.exitstatus = doit(config, session) or 0\nINTERNALERROR>                          ^^^^^^^^^^^^^^^^^^^^^\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\main.py\", line 343, in _main\nINTERNALERROR>     config.hook.pytest_runtestloop(session=session)\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_hooks.py\", line 512, in __call__\nINTERNALERROR>     return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)\nINTERNALERROR>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_manager.py\", line 120, in _hookexec\nINTERNALERROR>     return self._inner_hookexec(hook_name, methods, kwargs, firstresult)\nINTERNALERROR>            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 167, in _multicall\nINTERNALERROR>     raise exception\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 139, in _multicall\nINTERNALERROR>     teardown.throw(exception)\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\logging.py\", line 801, in pytest_runtestloop\nINTERNALERROR>     return (yield)  # Run all the tests.\nINTERNALERROR>             ^^^^^\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 139, in _multicall\nINTERNALERROR>     teardown.throw(exception)\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\_pytest\\terminal.py\", line 688, in pytest_runtestloop\nINTERNALERROR>     result = yield\nINTERNALERROR>              ^^^^^\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 139, in _multicall\nINTERNALERROR>     teardown.throw(exception)\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pytest_cov\\plugin.py\", line 340, in pytest_runtestloop\nINTERNALERROR>     result = yield\nINTERNALERROR>              ^^^^^\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pluggy\\_callers.py\", line 121, in _multicall\nINTERNALERROR>     res = hook_impl.function(*args)\nINTERNALERROR>           ^^^^^^^^^^^^^^^^^^^^^^^^^\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\xdist\\dsession.py\", line 138, in pytest_runtestloop\nINTERNALERROR>     self.loop_once()\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\xdist\\dsession.py\", line 163, in loop_once\nINTERNALERROR>     call(**kwargs)\nINTERNALERROR>   File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\xdist\\dsession.py\", line 218, in worker_workerfinished\nINTERNALERROR>     self._active_nodes.remove(node)\nINTERNALERROR> KeyError: <WorkerController gw1>\n\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n\u001b[31m================= \u001b[31m\u001b[1m1 failed\u001b[0m, \u001b[32m102 passed\u001b[0m, \u001b[33m10 skipped\u001b[0m\u001b[31m in 41.38s\u001b[0m\u001b[31m ==================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 3 after 54.91s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
+          "test_counts": {
+            "total": 113,
+            "passed": 102,
+            "failed": 1,
+            "skipped": 10,
+            "errors": 0,
+            "test_files": 21
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "failed",
+          "duration": 0.48770689964294434,
+          "exit_code": 15,
+          "output": "\n'hooks' is not recognized as an internal or external command,\noperable program or batch file.\n",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755155633.6668744,
+          "end_time": 1755155690.2001715
+        }
+      },
+      "summary": {
+        "total": 113,
+        "passed": 102,
+        "failed": 1,
+        "skipped": 10,
         "errors": 0
       }
     }

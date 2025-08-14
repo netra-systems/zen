@@ -1,8 +1,8 @@
 {
-  "timestamp": "2025-08-13T20:22:34.509957",
+  "timestamp": "2025-08-14T00:12:19.569840",
   "level": "comprehensive",
   "metrics": {
-    "total_tests": 2,
+    "total_tests": 0,
     "passed": 0,
     "failed": 0,
     "coverage": null
@@ -10,33 +10,35 @@
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 36.97260069847107,
-      "exit_code": 2,
-      "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 6\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -v -n 6 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 --html=reports/tests/report.html --self-contained-html --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 6/6 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m_________ ERROR collecting app/tests/test_api_endpoint_type_safety.py _________\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_api_endpoint_type_safety.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\napp\\tests\\test_api_endpoint_type_safety.py:15: in <module>\n    from app.schemas.Auth import LoginRequest, LoginResponse, TokenData\nE   ImportError: cannot import name 'LoginRequest' from 'app.schemas.Auth' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\schemas\\Auth.py)\n- Generated html report: file:///C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/reports/tests/report.html -\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app/tests/test_api_endpoint_type_safety.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m======================== \u001b[33m1 skipped\u001b[0m, \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 25.49s\u001b[0m\u001b[31m =========================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 36.07s\n\n[Report] HTML Report: reports/tests/report.html\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
+      "duration": 13.049353122711182,
+      "exit_code": 4,
+      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 6\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -v -n 6 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 --html=reports/tests/report.html --self-contained-html --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 12.06s\n\n[Report] HTML Report: reports/tests/report.html\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:46: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:12: in <module>\n    from app.agents.base import BaseSubAgent\napp\\agents\\base.py:10: in <module>\n    from app.agents.state import DeepAgentState\napp\\agents\\state.py:7: in <module>\n    from app.agents.triage_sub_agent.models import TriageResult\napp\\agents\\triage_sub_agent\\__init__.py:27: in <module>\n    from ..triage_sub_agent import TriageSubAgent\nE   ImportError: cannot import name 'TriageSubAgent' from partially initialized module 'app.agents.triage_sub_agent' (most likely due to a circular import) (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\triage_sub_agent\\__init__.py)\n",
       "test_counts": {
-        "total": 2,
+        "total": 0,
         "passed": 0,
         "failed": 0,
-        "skipped": 1,
-        "errors": 1,
+        "skipped": 0,
+        "errors": 0,
         "test_files": 0
       },
       "coverage": null,
       "test_details": []
     },
     "frontend": {
-      "status": "skipped",
-      "duration": 0,
-      "exit_code": null,
-      "output": "",
+      "status": "failed",
+      "duration": 11.01598048210144,
+      "exit_code": 15,
+      "output": "\n> netra-frontend-apex-v1@0.1.0 test\n> jest --forceExit --detectOpenHandles --coverage --coverageDirectory=../reports/frontend-coverage\n\n\n",
       "test_counts": {
         "total": 0,
         "passed": 0,
         "failed": 0,
         "skipped": 0,
-        "errors": 0
+        "errors": 0,
+        "test_files": 0
       },
-      "coverage": null
+      "coverage": null,
+      "test_details": []
     },
     "e2e": {
       "status": "pending",
@@ -54,8 +56,8 @@
     },
     "overall": {
       "status": "failed",
-      "start_time": 1755141717.5284083,
-      "end_time": 1755141754.501009
+      "start_time": 1755155515.4983652,
+      "end_time": 1755155539.5678406
     }
   }
 }

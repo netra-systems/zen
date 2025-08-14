@@ -369,7 +369,11 @@ class ServiceConfigWizard:
         print("     3. MOCK   - Use mock implementation")
         print("     4. SKIP   - Disable this service (not recommended)")
         
-        choice = input("   Choice [1-4, default=1]: ").strip() or "1"
+        try:
+            choice = input("   Choice [1-4, default=1]: ").strip() or "1"
+        except EOFError:
+            logger.info("Non-interactive mode: using default choice=1")
+            choice = "1"
         
         mode_map = {
             "1": ResourceMode.SHARED,
@@ -394,7 +398,11 @@ class ServiceConfigWizard:
             if key == "password":
                 continue  # Skip password fields in interactive mode
             
-            new_value = input(f"     {key} [{value}]: ").strip()
+            try:
+                new_value = input(f"     {key} [{value}]: ").strip()
+            except EOFError:
+                logger.info(f"Non-interactive mode: keeping default {key}={value}")
+                new_value = ""
             if new_value:
                 # Convert to appropriate type
                 if isinstance(value, int):
@@ -410,7 +418,11 @@ class ServiceConfigWizard:
     def _ask_yes_no(self, question: str, default: bool = True) -> bool:
         """Ask a yes/no question."""
         default_str = "Y/n" if default else "y/N"
-        response = input(f"{question} [{default_str}]: ").strip().lower()
+        try:
+            response = input(f"{question} [{default_str}]: ").strip().lower()
+        except EOFError:
+            logger.info(f"Non-interactive mode: using default={default} for '{question}'")
+            return default
         
         if not response:
             return default
@@ -436,10 +448,13 @@ def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
                     print(f"  {warning}")
                 
                 # Ask if user wants to reconfigure
-                reconfigure = input("\nReconfigure services? [y/N]: ").strip().lower()
-                if reconfigure in ["y", "yes"]:
-                    wizard = ServiceConfigWizard()
-                    config = wizard.run()
+                try:
+                    reconfigure = input("\nReconfigure services? [y/N]: ").strip().lower()
+                    if reconfigure in ["y", "yes"]:
+                        wizard = ServiceConfigWizard()
+                        config = wizard.run()
+                except EOFError:
+                    logger.info("Non-interactive mode detected, using existing configuration")
             
             return config
         except Exception as e:
@@ -447,8 +462,13 @@ def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
     
     # Create new configuration
     if interactive:
-        wizard = ServiceConfigWizard()
-        return wizard.run()
+        try:
+            wizard = ServiceConfigWizard()
+            return wizard.run()
+        except EOFError:
+            logger.info("Non-interactive mode detected, using default configuration")
+            config = ServicesConfiguration()
+            return config
     else:
         # Use defaults in non-interactive mode
         config = ServicesConfiguration()

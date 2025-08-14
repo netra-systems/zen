@@ -251,11 +251,11 @@ class ProductionTool:
     async def _execute_synthetic_data_batch(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute synthetic data batch generation via real service"""
         try:
-            from app.services.synthetic_data import synthetic_data_service
             batch_size = parameters.get("batch_size", 100)
             config = type('Config', (), {'num_logs': batch_size})()
             
-            # Use real service to generate batch
+            # Import only when needed to reduce startup time
+            from app.services.synthetic_data import synthetic_data_service
             batch = await synthetic_data_service.generate_batch(config, batch_size)
             
             return {
@@ -274,11 +274,12 @@ class ProductionTool:
     async def _execute_create_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute corpus creation via real service"""
         try:
-            from app.services.corpus import corpus_service
-            from app.schemas import CorpusCreate
-            
             corpus_name = parameters.get('corpus_name', f'corpus_{parameters.get("name", "default")}')
             user_id = parameters.get('user_id', 'default_user')
+            
+            # Import only when needed to reduce startup time
+            from app.services.corpus import corpus_service
+            from app.schemas import CorpusCreate
             
             # Create corpus data object
             corpus_data = CorpusCreate(
@@ -306,14 +307,15 @@ class ProductionTool:
     async def _execute_search_corpus(self, parameters: Dict[str, Any] = None) -> Dict[str, Any]:
         """Execute corpus search via real service"""
         try:
-            from app.services.corpus import corpus_service
-            
             if not parameters:
                 parameters = {}
             
             corpus_id = parameters.get('corpus_id')
             query = parameters.get('query', '')
             limit = parameters.get('limit', 10)
+            
+            # Import only when needed
+            from app.services.corpus import corpus_service
             
             if not corpus_id:
                 return {
@@ -346,8 +348,9 @@ class ProductionTool:
     async def _execute_validate_synthetic_data(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Validate synthetic data"""
         try:
-            from app.services.synthetic_data import validate_data
             data = parameters.get('data', [])
+            # Import only when needed
+            from app.services.synthetic_data import validate_data
             validation = validate_data(data)
             return {
                 "success": True,
@@ -362,9 +365,10 @@ class ProductionTool:
     async def _execute_store_synthetic_data(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Store synthetic data"""
         try:
-            from app.services.synthetic_data import synthetic_data_service
             data = parameters.get('data', [])
             table_name = parameters.get('table_name', 'synthetic_data')
+            # Import only when needed
+            from app.services.synthetic_data import synthetic_data_service
             result = await synthetic_data_service.ingest_batch(data, table_name)
             return {
                 "success": True,
@@ -379,11 +383,13 @@ class ProductionTool:
     async def _execute_update_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Update corpus"""
         try:
-            from app.services.corpus import corpus_service
-            from app.schemas import CorpusUpdate
             corpus_id = parameters.get('corpus_id')
             if not corpus_id:
                 return {"success": False, "error": "corpus_id required", "metadata": {"tool": self.name}}
+            
+            # Import only when needed
+            from app.services.corpus import corpus_service
+            from app.schemas import CorpusUpdate
             
             update_data = CorpusUpdate(**{k: v for k, v in parameters.items() if k != 'corpus_id'})
             result = await corpus_service.update_corpus(None, corpus_id, update_data)
@@ -399,10 +405,12 @@ class ProductionTool:
     async def _execute_delete_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Delete corpus"""
         try:
-            from app.services.corpus import corpus_service
             corpus_id = parameters.get('corpus_id')
             if not corpus_id:
                 return {"success": False, "error": "corpus_id required", "metadata": {"tool": self.name}}
+            
+            # Import only when needed
+            from app.services.corpus import corpus_service
             
             await corpus_service.delete_corpus(None, corpus_id)
             return {
@@ -417,10 +425,12 @@ class ProductionTool:
     async def _execute_analyze_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Analyze corpus"""
         try:
-            from app.services.corpus import corpus_service
             corpus_id = parameters.get('corpus_id')
             if not corpus_id:
                 return {"success": False, "error": "corpus_id required", "metadata": {"tool": self.name}}
+            
+            # Import only when needed
+            from app.services.corpus import corpus_service
             
             stats = await corpus_service.get_corpus_statistics(None, corpus_id)
             return {
@@ -457,10 +467,12 @@ class ProductionTool:
     async def _execute_validate_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Validate corpus"""
         try:
-            from app.services.corpus import corpus_service
             corpus_id = parameters.get('corpus_id')
             if not corpus_id:
                 return {"success": False, "error": "corpus_id required", "metadata": {"tool": self.name}}
+            
+            # Import only when needed
+            from app.services.corpus import corpus_service
             
             corpus = await corpus_service.get_corpus(None, corpus_id)
             validation = {"valid": corpus is not None, "errors": [] if corpus else ["Corpus not found"]}

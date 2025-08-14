@@ -20,6 +20,7 @@ from app.logging_config import central_logger as logger
 from app.core.reliability import (
     get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
 )
+from app.agents.input_validation import validate_agent_input
 
 
 class ReportingSubAgent(BaseSubAgent):
@@ -49,6 +50,7 @@ class ReportingSubAgent(BaseSubAgent):
                 state.data_result is not None and 
                 state.triage_result is not None)
     
+    @validate_agent_input('ReportingSubAgent')
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute the reporting logic."""
         

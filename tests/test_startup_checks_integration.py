@@ -89,44 +89,56 @@ class TestStartupChecker:
                 message="Non-critical failure", critical=False
             ))
         
-        monkeypatch.setattr(checker, 'check_environment_variables', mock_success)
-        monkeypatch.setattr(checker, 'check_configuration', mock_critical_failure)
-        monkeypatch.setattr(checker, 'check_file_permissions', mock_non_critical_failure)
+        monkeypatch.setattr(checker.env_checker, 'check_environment_variables', mock_success)
+        monkeypatch.setattr(checker.env_checker, 'check_configuration', mock_critical_failure)
+        monkeypatch.setattr(checker.system_checker, 'check_file_permissions', mock_non_critical_failure)
         
         # Set remaining methods to success
-        for method_name in ['check_database_connection', 'check_redis', 
-                           'check_clickhouse', 'check_llm_providers',
-                           'check_memory_and_resources', 'check_network_connectivity',
-                           'check_or_create_assistant']:
-            monkeypatch.setattr(checker, method_name, mock_success)
+        monkeypatch.setattr(checker.db_checker, 'check_database_connection', mock_success)
+        monkeypatch.setattr(checker.service_checker, 'check_redis', mock_success)
+        monkeypatch.setattr(checker.service_checker, 'check_clickhouse', mock_success)
+        monkeypatch.setattr(checker.service_checker, 'check_llm_providers', mock_success)
+        monkeypatch.setattr(checker.system_checker, 'check_memory_and_resources', mock_success)
+        monkeypatch.setattr(checker.system_checker, 'check_network_connectivity', mock_success)
+        monkeypatch.setattr(checker.db_checker, 'check_or_create_assistant', mock_success)
     
     def _setup_exception_mocks(self, checker, monkeypatch):
         """Setup mock methods for exception test"""
         async def mock_raise_exception():
             raise RuntimeError("Unexpected error")
         
-        monkeypatch.setattr(checker, 'check_environment_variables', mock_raise_exception)
+        monkeypatch.setattr(checker.env_checker, 'check_environment_variables', mock_raise_exception)
         
         # Mock remaining methods to prevent execution
-        for method_name in ['check_configuration', 'check_file_permissions', 
-                           'check_database_connection', 'check_redis', 
-                           'check_clickhouse', 'check_llm_providers',
-                           'check_memory_and_resources', 'check_network_connectivity',
-                           'check_or_create_assistant']:
-            monkeypatch.setattr(checker, method_name, AsyncMock())
+        monkeypatch.setattr(checker.env_checker, 'check_configuration', AsyncMock())
+        monkeypatch.setattr(checker.system_checker, 'check_file_permissions', AsyncMock())
+        monkeypatch.setattr(checker.db_checker, 'check_database_connection', AsyncMock())
+        monkeypatch.setattr(checker.service_checker, 'check_redis', AsyncMock())
+        monkeypatch.setattr(checker.service_checker, 'check_clickhouse', AsyncMock())
+        monkeypatch.setattr(checker.service_checker, 'check_llm_providers', AsyncMock())
+        monkeypatch.setattr(checker.system_checker, 'check_memory_and_resources', AsyncMock())
+        monkeypatch.setattr(checker.system_checker, 'check_network_connectivity', AsyncMock())
+        monkeypatch.setattr(checker.db_checker, 'check_or_create_assistant', AsyncMock())
     
     def _patch_all_check_methods(self, monkeypatch, checker, mock_func):
-        """Patch all check methods with the same mock function"""
-        method_names = [
-            'check_environment_variables', 'check_configuration',
-            'check_file_permissions', 'check_database_connection',
-            'check_redis', 'check_clickhouse', 'check_llm_providers',
-            'check_memory_and_resources', 'check_network_connectivity',
-            'check_or_create_assistant'
-        ]
+        """Patch all delegated checker methods with the same mock function"""
+        # Patch the environment checker methods
+        monkeypatch.setattr(checker.env_checker, 'check_environment_variables', mock_func)
+        monkeypatch.setattr(checker.env_checker, 'check_configuration', mock_func)
         
-        for method_name in method_names:
-            monkeypatch.setattr(checker, method_name, mock_func)
+        # Patch the system checker methods
+        monkeypatch.setattr(checker.system_checker, 'check_file_permissions', mock_func)
+        monkeypatch.setattr(checker.system_checker, 'check_memory_and_resources', mock_func)
+        monkeypatch.setattr(checker.system_checker, 'check_network_connectivity', mock_func)
+        
+        # Patch the database checker methods
+        monkeypatch.setattr(checker.db_checker, 'check_database_connection', mock_func)
+        monkeypatch.setattr(checker.db_checker, 'check_or_create_assistant', mock_func)
+        
+        # Patch the service checker methods
+        monkeypatch.setattr(checker.service_checker, 'check_redis', mock_func)
+        monkeypatch.setattr(checker.service_checker, 'check_clickhouse', mock_func)
+        monkeypatch.setattr(checker.service_checker, 'check_llm_providers', mock_func)
     
     def _verify_success_results(self, results):
         """Verify successful results structure"""

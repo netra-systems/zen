@@ -10,9 +10,8 @@ from app.agents.base import BaseSubAgent
 from app.logging_config import central_logger
 
 # Import all sub-agents
-from app.agents.triage_sub_agent import TriageSubAgent
-# Lazy import DataSubAgent to avoid circular dependency
-# from app.agents.data_sub_agent.agent import DataSubAgent  # Import directly in init_agents
+from app.agents.triage_sub_agent.agent import TriageSubAgent
+# DataSubAgent is imported later to avoid circular dependency
 from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from app.agents.reporting_sub_agent import ReportingSubAgent

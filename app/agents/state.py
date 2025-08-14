@@ -3,10 +3,10 @@ from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
 from pydantic import BaseModel, Field, validator
 from datetime import datetime
 
-# Import actual types to avoid circular dependencies
+# Import actual types needed at runtime
 from app.agents.triage_sub_agent.models import TriageResult
 
-# Use TYPE_CHECKING to break circular import
+# Import types only for type checking to avoid circular dependencies  
 if TYPE_CHECKING:
     from app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
 
@@ -98,9 +98,10 @@ class DeepAgentState(BaseModel):
     chat_thread_id: Optional[str] = None
     user_id: Optional[str] = None
     
-    # Typed result fields using proper models
-    triage_result: Optional[TriageResult] = None
-    data_result: Optional[Union["DataAnalysisResponse", "AnomalyDetectionResponse"]] = None
+    # Typed result fields - using Any for now to avoid circular dependencies
+    # These will be validated at runtime when the actual models are available
+    triage_result: Optional[Any] = None
+    data_result: Optional[Any] = None
     optimizations_result: Optional[OptimizationsResult] = None
     action_plan_result: Optional[ActionPlanResult] = None
     report_result: Optional[ReportResult] = None

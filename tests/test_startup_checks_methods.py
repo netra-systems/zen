@@ -15,6 +15,7 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.startup_checks import StartupChecker
+from app.startup_checks.environment_checks import EnvironmentChecker
 from app.db.models_postgres import Assistant
 
 
@@ -23,9 +24,8 @@ class TestEnvironmentVariableChecks:
     
     @pytest.fixture
     def checker(self):
-        """Create a StartupChecker instance"""
-        mock_app = MagicMock()
-        return StartupChecker(mock_app)
+        """Create an EnvironmentChecker instance"""
+        return EnvironmentChecker()
     
     @pytest.mark.asyncio
     async def test_check_environment_variables_dev_mode(self, checker, monkeypatch):
@@ -97,9 +97,8 @@ class TestConfigurationChecks:
     
     @pytest.fixture
     def checker(self):
-        """Create a StartupChecker instance"""
-        mock_app = MagicMock()
-        return StartupChecker(mock_app)
+        """Create an EnvironmentChecker instance"""
+        return EnvironmentChecker()
     
     @pytest.mark.asyncio
     async def test_check_configuration_success(self, checker):

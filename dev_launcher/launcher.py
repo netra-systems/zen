@@ -49,9 +49,9 @@ class DevLauncher:
         self.use_emoji = check_emoji_support()
         
         # Load or create service configuration
-        # Use interactive=False when running in CI/automation
+        # Use interactive=False when running in CI/automation or with --non-interactive
         import sys
-        interactive = sys.stdin.isatty()
+        interactive = sys.stdin.isatty() and not config.non_interactive
         self.services_config = load_or_create_config(interactive=interactive)
         
         # Managers

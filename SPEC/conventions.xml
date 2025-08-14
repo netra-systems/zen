@@ -17,6 +17,13 @@
             <enforcement>Split large files into focused modules</enforcement>
         </rule>
         
+        <rule id="function-line-limit" priority="CRITICAL">
+            <title>8 Line Function Limit</title>
+            <description>Every function MUST be 8 lines or less (MANDATORY)</description>
+            <enforcement>Split complex functions into smaller, focused functions</enforcement>
+            <rationale>Forces single responsibility and improves readability</rationale>
+        </rule>
+        
         <rule id="no-duplication" priority="CRITICAL">
             <title>Prevent Function Duplication</title>
             <description>NEVER create "enhanced", "v2", or duplicate versions</description>
