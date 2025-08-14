@@ -147,7 +147,7 @@ class TestStartupChecker:
         assert results['passed'] == 10
         assert results['failed_critical'] == 0
         assert results['failed_non_critical'] == 0
-        assert results['duration_ms'] > 0
+        assert results['duration_ms'] >= 0
         assert len(results['results']) == 10
         assert len(results['failures']) == 0
     

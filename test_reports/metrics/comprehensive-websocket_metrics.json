@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-08-14T09:09:47.162382",
+  "level": "comprehensive-websocket",
+  "metrics": {
+    "total_tests": 4,
+    "passed": 1,
+    "failed": 2,
+    "coverage": null
+  },
+  "results": {
+    "backend": {
+      "status": "failed",
+      "duration": 74.2548816204071,
+      "exit_code": 2,
+      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 2\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -v -n 2 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -k websocket or ws_manager --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 2/2 workers\n2 workers [193 items]\n\nscheduling tests via LoadScheduling\n\napp/tests/services/synthetic_data/test_websocket_updates.py::TestWebSocketUpdates::test_websocket_message_queuing \napp/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_2_websocket_real_time_streaming \n[gw1]\u001b[36m [  0%] \u001b[0m\u001b[31mFAILED\u001b[0m app/tests/services/synthetic_data/test_websocket_updates.py::TestWebSocketUpdates::test_websocket_message_queuing \n[gw0]\u001b[36m [  1%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_2_websocket_real_time_streaming \napp/tests/agents/test_data_sub_agent.py::TestIntegration::test_integration_with_websocket \n[gw0]\u001b[36m [  1%] \u001b[0m\u001b[31mFAILED\u001b[0m app/tests/agents/test_data_sub_agent.py::TestIntegration::test_integration_with_websocket Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n\n\n================================== FAILURES ===================================\n\u001b[31m\u001b[1m_____________ TestWebSocketUpdates.test_websocket_message_queuing _____________\u001b[0m\n[gw1] win32 -- Python 3.12.4 C:\\Users\\antho\\miniconda3\\python.exe\n\u001b[1m\u001b[31mapp\\tests\\services\\synthetic_data\\test_websocket_updates.py\u001b[0m:146: in test_websocket_message_queuing\n    \u001b[0m\u001b[94mawait\u001b[39;49;00m ws_service.broadcast_to_job(\u001b[90m\u001b[39;49;00m\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^\u001b[90m\u001b[39;49;00m\n\u001b[1m\u001b[31mE   AttributeError: 'WebSocketManager' object has no attribute 'broadcast_to_job'\u001b[0m\n----------------------------- Captured log setup ------------------------------\n\u001b[35mDEBUG   \u001b[0m asyncio:proactor_events.py:634 Using proactor: IocpProactor\n\u001b[35mDEBUG   \u001b[0m asyncio:proactor_events.py:634 Using proactor: IocpProactor\n---------------------------- Captured stderr call -----------------------------\n2025-08-14 09:09:11.419 | ERROR    | app.ws_manager_messaging:_handle_retry_or_fail:186 | Send failed after 1 attempts: 'str' object has no attribute 'client_state'\n2025-08-14 09:09:11.422 | ERROR    | app.websocket.heartbeat:_heartbeat_loop:178 | Heartbeat error for conn_1755187751415: 'str' object has no attribute 'client_state'\n---------------------------- Captured log teardown ----------------------------\n\u001b[35mDEBUG   \u001b[0m asyncio:proactor_events.py:634 Using proactor: IocpProactor\n\u001b[31m\u001b[1m_______________ TestIntegration.test_integration_with_websocket _______________\u001b[0m\n[gw0] win32 -- Python 3.12.4 C:\\Users\\antho\\miniconda3\\python.exe\n\u001b[1m\u001b[31mapp\\tests\\agents\\test_data_sub_agent.py\u001b[0m:429: in test_integration_with_websocket\n    \u001b[0m\u001b[94mawait\u001b[39;49;00m agent.process_and_stream(data, mock_ws)\u001b[90m\u001b[39;49;00m\n          ^^^^^^^^^^^^^^^^^^^^^^^^\u001b[90m\u001b[39;49;00m\n\u001b[1m\u001b[31mE   AttributeError: 'DataSubAgent' object has no attribute 'process_and_stream'\u001b[0m\n----------------------------- Captured log setup ------------------------------\n\u001b[35mDEBUG   \u001b[0m asyncio:proactor_events.py:634 Using proactor: IocpProactor\n---------------------------- Captured log teardown ----------------------------\n\u001b[35mDEBUG   \u001b[0m asyncio:proactor_events.py:634 Using proactor: IocpProactor\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mFAILED\u001b[0m app/tests/services/synthetic_data/test_websocket_updates.py::\u001b[1mTestWebSocketUpdates::test_websocket_message_queuing\u001b[0m - AttributeError: 'WebSocketManager' object has no attribute 'broadcast_to_job'\n\u001b[31mFAILED\u001b[0m app/tests/agents/test_data_sub_agent.py::\u001b[1mTestIntegration::test_integration_with_websocket\u001b[0m - AttributeError: 'DataSubAgent' object has no attribute 'process_and_stream'\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 2 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m============== \u001b[31m\u001b[1m2 failed\u001b[0m, \u001b[32m1 passed\u001b[0m, \u001b[33m1 skipped\u001b[0m\u001b[31m in 61.24s (0:01:01)\u001b[0m\u001b[31m ==============\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 72.92s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\n",
+      "test_counts": {
+        "total": 4,
+        "passed": 1,
+        "failed": 2,
+        "skipped": 1,
+        "errors": 0,
+        "test_files": 3
+      },
+      "coverage": null,
+      "test_details": []
+    },
+    "frontend": {
+      "status": "skipped",
+      "duration": 0,
+      "exit_code": null,
+      "output": "",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "coverage": null
+    },
+    "e2e": {
+      "status": "pending",
+      "duration": 0,
+      "exit_code": null,
+      "output": "",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "coverage": null
+    },
+    "overall": {
+      "status": "failed",
+      "start_time": 1755187712.9020064,
+      "end_time": 1755187787.1623821
+    }
+  }
+}

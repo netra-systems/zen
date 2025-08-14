@@ -9,7 +9,7 @@
 # Review: Pending | Score: 85
 # ================================
 import json
-from typing import Union, Dict, Any, Optional
+from typing import Union, Dict, Any, Optional, AsyncGenerator
 from starlette.websockets import WebSocketDisconnect
 from app.logging_config import central_logger
 from fastapi import Depends
@@ -43,7 +43,10 @@ class AgentService:
         """
         # Extract user_request from the request model
         user_request = request_model.user_request if hasattr(request_model, 'user_request') else str(request_model.model_dump())
-        return await self.supervisor.run(user_request, run_id, stream_updates)
+        # Use default values for thread_id and user_id when not available in request_model
+        thread_id = getattr(request_model, 'id', run_id)
+        user_id = getattr(request_model, 'user_id', 'default_user')
+        return await self.supervisor.run(user_request, thread_id, user_id, run_id)
 
     async def handle_websocket_message(
         self, 
@@ -111,6 +114,61 @@ class AgentService:
                 data = json.loads(data)
             return data
         return message
+    
+    async def process_message(self, message: str, thread_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Process a message and return a structured response.
+        """
+        logger.info(f"Processing message: {message[:100]}...")
+        try:
+            # Create a request model for processing
+            request_model = schemas.RequestModel(
+                query=message,
+                id=thread_id or "default",
+                user_request=message
+            )
+            
+            # Process through supervisor
+            result = await self.supervisor.run(
+                message, 
+                thread_id or "default",
+                "default_user",
+                thread_id or "default"
+            )
+            
+            return {
+                "response": str(result),
+                "agent": "supervisor",
+                "status": "success"
+            }
+        except Exception as e:
+            logger.error(f"Error processing message: {e}", exc_info=True)
+            return {
+                "response": f"Error processing message: {str(e)}",
+                "agent": "supervisor", 
+                "status": "error"
+            }
+    
+    async def generate_stream(self, message: str) -> AsyncGenerator[str, None]:
+        """
+        Generate streaming response for a message.
+        """
+        logger.info(f"Starting stream for message: {message[:100]}...")
+        try:
+            # For now, simulate streaming by yielding parts of response
+            response = await self.process_message(message)
+            
+            # Split response into chunks for streaming
+            text = response.get("response", "")
+            chunk_size = max(1, len(text) // 10)  # 10 chunks
+            
+            for i in range(0, len(text), chunk_size):
+                chunk = text[i:i + chunk_size]
+                yield chunk
+                
+        except Exception as e:
+            logger.error(f"Error in generate_stream: {e}", exc_info=True)
+            yield f"Error: {str(e)}"
 
 def get_agent_service(
     db_session: AsyncSession = Depends(get_async_db), 
@@ -121,3 +179,29 @@ def get_agent_service(
     tool_dispatcher = ToolDispatcher(db_session)
     supervisor = Supervisor(db_session, llm_manager, manager, tool_dispatcher)
     return AgentService(supervisor)
+
+# Module-level functions for backward compatibility with tests
+async def process_message(message: str, thread_id: Optional[str] = None) -> Dict[str, Any]:
+    """Module-level wrapper for AgentService.process_message for test compatibility"""
+    from app.db.postgres import get_async_db
+    from app.dependencies import get_llm_manager
+    
+    # Create dependencies
+    async for db in get_async_db():
+        llm_manager = get_llm_manager()
+        agent_service = get_agent_service(db, llm_manager)
+        result = await agent_service.process_message(message, thread_id)
+        return result
+
+async def generate_stream(message: str) -> AsyncGenerator[str, None]:
+    """Module-level wrapper for AgentService.generate_stream for test compatibility"""
+    from app.db.postgres import get_async_db
+    from app.dependencies import get_llm_manager
+    
+    # Create dependencies
+    async for db in get_async_db():
+        llm_manager = get_llm_manager()
+        agent_service = get_agent_service(db, llm_manager)
+        async for chunk in agent_service.generate_stream(message):
+            yield chunk
+        break

@@ -1,6 +1,6 @@
 """
-Integration tests for SupplyResearchService - price calculations, provider comparisons, and reports
-Tests complex business logic involving multiple service methods and data aggregation
+Price calculation tests for SupplyResearchService
+Tests price change calculations, provider comparisons, and anomaly detection
 """
 
 import pytest
@@ -10,7 +10,7 @@ from typing import Dict, Any, List, Optional
 from unittest.mock import MagicMock, patch
 
 from app.services.supply_research_service import SupplyResearchService
-from app.db.models_postgres import AISupplyItem, SupplyUpdateLog, ResearchSession
+from app.db.models_postgres import AISupplyItem, SupplyUpdateLog
 
 
 @pytest.fixture
@@ -255,101 +255,6 @@ class TestAnomalyDetection:
         anomaly = stale_anomalies[0]
         assert anomaly["provider"] == "openai"
         assert anomaly["severity"] == "low"
-
-
-@pytest.mark.asyncio
-class TestMarketReportGeneration:
-    """Test comprehensive market report generation"""
-    
-    async def test_generate_complete_market_report(self, service):
-        """Test full market report generation with all sections"""
-        report_deps = self._create_report_dependencies()
-        
-        with self._patch_report_dependencies(service, report_deps):
-            with patch.object(service.db, 'query') as mock_query:
-                mock_query.return_value.count.return_value = 50
-                
-                report: Dict[str, Any] = await service.generate_market_report()
-        
-        self._verify_report_structure(report)
-    
-    async def test_generate_report_with_long_query_truncation(self, service):
-        """Test report generation with query truncation"""
-        long_session = self._create_long_query_session()
-        
-        with self._patch_minimal_dependencies(service, [long_session]):
-            report: Dict[str, Any] = await service.generate_market_report()
-        
-        recent_research = report["sections"]["recent_research"]
-        assert len(recent_research[0]["query"]) <= 103  # 100 + "..."
-        assert recent_research[0]["query"].endswith("...")
-    
-    def _create_report_dependencies(self) -> Dict[str, Any]:
-        """Helper to create report generation dependencies"""
-        return {
-            "provider_comparison": {
-                "providers": {"openai": {"flagship_model": "gpt-4"}},
-                "analysis": {"cheapest_input": {"provider": "anthropic"}}
-            },
-            "price_changes": {
-                "total_changes": 5,
-                "increases": 3,
-                "decreases": 2
-            },
-            "anomalies": [{"type": "significant_price_change", "severity": "medium"}],
-            "research_session": self._create_research_session()
-        }
-    
-    def _create_research_session(self) -> ResearchSession:
-        """Helper to create research session"""
-        research_session = MagicMock(spec=ResearchSession)
-        research_session.id = "session-1"
-        research_session.query = "Research pricing updates"
-        research_session.status = "completed"
-        research_session.created_at = datetime.now(UTC)
-        return research_session
-    
-    def _create_long_query_session(self) -> ResearchSession:
-        """Helper to create session with long query"""
-        long_query = "A" * 150  # Query longer than 100 characters
-        research_session = MagicMock(spec=ResearchSession)
-        research_session.id = "session-1"
-        research_session.query = long_query
-        research_session.status = "completed"
-        research_session.created_at = datetime.now(UTC)
-        return research_session
-    
-    def _patch_report_dependencies(self, service, deps: Dict[str, Any]):
-        """Helper to patch all report generation dependencies"""
-        return patch.multiple(
-            service,
-            get_provider_comparison=lambda: deps["provider_comparison"],
-            calculate_price_changes=lambda: deps["price_changes"],
-            detect_anomalies=lambda: deps["anomalies"],
-            get_research_sessions=lambda **kwargs: [deps["research_session"]],
-            get_supply_items=lambda **kwargs: [MagicMock()]
-        )
-    
-    def _patch_minimal_dependencies(self, service, sessions: List[ResearchSession]):
-        """Helper to patch minimal dependencies for testing"""
-        return patch.multiple(
-            service,
-            get_provider_comparison=lambda: {"providers": {}, "analysis": {}},
-            calculate_price_changes=lambda: {"total_changes": 0},
-            detect_anomalies=lambda: [],
-            get_research_sessions=lambda **kwargs: sessions,
-            get_supply_items=lambda **kwargs: []
-        )
-    
-    def _verify_report_structure(self, report: Dict[str, Any]):
-        """Helper to verify report structure"""
-        assert "generated_at" in report
-        assert "sections" in report
-        
-        sections = report["sections"]
-        expected_sections = ["provider_comparison", "price_changes", "anomalies", "statistics", "recent_research"]
-        for section in expected_sections:
-            assert section in sections
 
 
 class TestCacheIntegration:

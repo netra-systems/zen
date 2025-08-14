@@ -8,6 +8,7 @@ from .Agent import (
     AgentErrorMessage,
     SubAgentUpdate,
     SubAgentStatus,
+    AgentResult,
 )
 from .Auth import (
     GoogleUser,
@@ -135,6 +136,7 @@ __all__ = [
     "AgentErrorMessage",
     "SubAgentUpdate",
     "SubAgentStatus",
+    "AgentResult",
     "GoogleUser",
     "DevUser",
     "DevLoginRequest",

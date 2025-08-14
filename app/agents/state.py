@@ -1,6 +1,6 @@
 """Agent state management models with immutable patterns."""
 from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 
 # Import actual types needed at runtime
@@ -112,7 +112,8 @@ class DeepAgentState(BaseModel):
     step_count: int = 0  # Added for agent tracking
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
     
-    @validator('step_count')
+    @field_validator('step_count')
+    @classmethod
     def validate_step_count(cls, v: int) -> int:
         """Validate step count is within reasonable bounds."""
         if v < 0:
@@ -121,7 +122,8 @@ class DeepAgentState(BaseModel):
             raise ValueError('Step count exceeds maximum allowed value (10000)')
         return v
     
-    @validator('optimizations_result')
+    @field_validator('optimizations_result')
+    @classmethod
     def validate_optimizations_result(cls, v: OptimizationsResult) -> OptimizationsResult:
         """Validate optimizations result bounds."""
         if v is None:

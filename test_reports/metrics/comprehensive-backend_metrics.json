@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-14T00:15:15.279200",
+  "timestamp": "2025-08-14T06:26:56.270217",
   "level": "comprehensive-backend",
   "metrics": {
     "total_tests": 0,
@@ -10,9 +10,9 @@
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 2.214277505874634,
+      "duration": 124.19652080535889,
       "exit_code": 15,
-      "output": "\n",
+      "output": "\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"<string>\", line 5, in <module>\nOSError: [Errno 22] Invalid argument\n",
       "test_counts": {
         "total": 0,
         "passed": 0,
@@ -54,8 +54,8 @@
     },
     "overall": {
       "status": "failed",
-      "start_time": 1755155713.0629132,
-      "end_time": 1755155715.2782056
+      "start_time": 1755177892.0716817,
+      "end_time": 1755178016.270218
     }
   }
 }
