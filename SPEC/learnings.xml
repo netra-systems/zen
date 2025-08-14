@@ -48,6 +48,22 @@
                     <issue>Frontend test args should avoid Jest-specific options in unified runner</issue>
                 </issues>
             </item>
+            
+            <item id="type-safety-test-mismatches">
+                <problem>Type safety tests fail due to mismatched field expectations between test and actual schemas</problem>
+                <root-cause>Tests written with incorrect assumptions about schema field names and types</root-cause>
+                <solution>Always verify actual schema definitions before writing or fixing type safety tests</solution>
+                <examples>
+                    <example>StartAgentPayload expects agent_id and prompt, not query and user_id</example>
+                    <example>UserMessagePayload uses text field, not content</example>
+                    <example>StreamChunk uses chunk_index and is_final, not index and finished</example>
+                    <example>AgentUpdate uses message field, not content</example>
+                    <example>Message.id must be UUID type, not string</example>
+                    <example>AgentCompleted requires AgentResult object with success field</example>
+                    <example>ToolStarted only has tool_name field, no tool_args or run_id</example>
+                </examples>
+                <resolution-date>2025-08-14</resolution-date>
+            </item>
         </section>
 
         <section id="historical-fixes" order="2">

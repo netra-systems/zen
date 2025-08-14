@@ -73,3 +73,4 @@ terraform/staging/shared-infrastructure/.terraform/providers/registry.terraform.
 .service_discovery/frontend.json
 .service_discovery/backend.json
 .dev_services.json
+frontend/cypress/downloads/downloads.htm

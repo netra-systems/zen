@@ -46,23 +46,22 @@ describe('Complete Authentication Flow', () => {
     // Verify token is stored
     cy.window().its('localStorage.authToken').should('equal', 'test-jwt-token');
     
-    // Verify user menu is visible
-    cy.get('button[aria-label="Toggle user menu"]').should('be.visible');
+    // Verify user info is visible
+    cy.contains('Test User').should('be.visible');
     
     // Test session persistence - reload page
     cy.reload();
     cy.wait('@userRequest');
     
     // Should still be logged in
-    cy.get('button[aria-label="Toggle user menu"]').should('be.visible');
+    cy.contains('Test User').should('be.visible');
     
     // Test protected route access
     cy.visit('/corpus');
     cy.url().should('include', '/corpus');
     
     // Test logout
-    cy.get('button[aria-label="Toggle user menu"]').click();
-    cy.contains('Logout').click();
+    cy.get('button').contains('Logout').click();
     
     // Should redirect to login
     cy.url().should('include', '/login');

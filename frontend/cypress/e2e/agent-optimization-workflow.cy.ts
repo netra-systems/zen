@@ -24,11 +24,11 @@ describe('Full Agent Optimization Workflow', () => {
   it('should complete full optimization request from user input to final report', () => {
     // User submits an optimization request
     const optimizationRequest = 'Optimize my LLM inference pipeline for cost and latency';
-    cy.get('input[placeholder="Type your message..."]').type(optimizationRequest);
+    cy.get('textarea[aria-label="Message input"]').type(optimizationRequest);
     cy.get('button').contains('Send').click();
 
     // Verify user message is displayed
-    cy.get('.bg-blue-50').should('contain', optimizationRequest);
+    cy.contains(optimizationRequest).should('be.visible');
 
     // Simulate WebSocket messages for complete agent workflow
     cy.window().then((win) => {
@@ -269,13 +269,13 @@ Your LLM inference pipeline can achieve **35% latency reduction** and **$2,800/m
     cy.get('.react-json-view').should('contain', 'current_latency_p50');
 
     // Verify input is re-enabled after completion
-    cy.get('input[placeholder="Type your message..."]').should('not.be.disabled');
+    cy.get('textarea[aria-label="Message input"]').should('not.be.disabled');
     cy.get('button').contains('Send').should('not.be.disabled');
   });
 
   it('should handle optimization request interruption', () => {
     // Start an optimization request
-    cy.get('input[placeholder="Type your message..."]').type('Optimize my model serving');
+    cy.get('textarea[aria-label="Message input"]').type('Optimize my model serving');
     cy.get('button').contains('Send').click();
 
     // Simulate agent starting
@@ -320,7 +320,7 @@ Your LLM inference pipeline can achieve **35% latency reduction** and **$2,800/m
     cy.contains('Processing stopped by user request').should('be.visible');
     
     // Input should be re-enabled
-    cy.get('input[placeholder="Type your message..."]').should('not.be.disabled');
+    cy.get('textarea[aria-label="Message input"]').should('not.be.disabled');
   });
 
   it('should display and update optimization progress indicators', () => {
@@ -333,7 +333,7 @@ Your LLM inference pipeline can achieve **35% latency reduction** and **$2,800/m
     ];
 
     // Submit request
-    cy.get('input[placeholder="Type your message..."]').type('Analyze my workload');
+    cy.get('textarea[aria-label="Message input"]').type('Analyze my workload');
     cy.get('button').contains('Send').click();
 
     // Simulate each agent running with progress
