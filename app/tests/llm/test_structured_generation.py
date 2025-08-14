@@ -262,6 +262,57 @@ class TestLLMManagerStructuredGeneration:
                 assert "Structured generation failed" in str(exc_info.value)
 
 
+class TestNestedJSONParsing:
+    """Test nested JSON parsing functionality."""
+    
+    @pytest.mark.asyncio
+    async def test_parse_nested_json_with_tool_recommendations(self, llm_manager):
+        """Test parsing nested JSON strings in tool_recommendations parameters."""
+        # This is the exact structure that was failing
+        raw_data = {
+            "category": "optimization",
+            "confidence_score": 0.85,
+            "tool_recommendations": [
+                {
+                    "tool_name": "latency_analyzer",
+                    "relevance_score": 0.9,
+                    "parameters": '{"feature_X_latency": "50ms", "feature_Y_latency": "200ms"}'
+                },
+                {
+                    "tool_name": "performance_monitor",
+                    "relevance_score": 0.8,
+                    "parameters": '{"threshold": 100, "interval": "5m"}'
+                }
+            ]
+        }
+        
+        parsed = llm_manager._parse_nested_json(raw_data)
+        
+        # Verify parameters are now dictionaries, not strings
+        assert isinstance(parsed["tool_recommendations"][0]["parameters"], dict)
+        assert isinstance(parsed["tool_recommendations"][1]["parameters"], dict)
+        
+        # Verify the actual values
+        assert parsed["tool_recommendations"][0]["parameters"]["feature_X_latency"] == "50ms"
+        assert parsed["tool_recommendations"][1]["parameters"]["threshold"] == 100
+    
+    @pytest.mark.asyncio
+    async def test_parse_deeply_nested_json(self, llm_manager):
+        """Test parsing deeply nested JSON strings."""
+        raw_data = {
+            "outer": {
+                "middle": '{"inner": "{\\"value\\": 42}"}'
+            }
+        }
+        
+        parsed = llm_manager._parse_nested_json(raw_data)
+        
+        # Should parse all levels
+        assert isinstance(parsed["outer"]["middle"], dict)
+        assert isinstance(parsed["outer"]["middle"]["inner"], dict)
+        assert parsed["outer"]["middle"]["inner"]["value"] == 42
+
+
 class TestIntegrationWithAgents:
     """Test integration of structured generation with agents."""
     
@@ -282,6 +333,36 @@ class TestIntegrationWithAgents:
         assert result.category == "Test Category"
         assert result.confidence_score == 0.9
         assert result.priority.value == "medium"  # Default value
+    
+    @pytest.mark.asyncio
+    async def test_triage_result_with_nested_json_parameters(self, llm_manager):
+        """Test TriageResult validation with nested JSON in tool_recommendations."""
+        from app.agents.triage.models import TriageResult
+        
+        # Simulate the exact error case: parameters as JSON string
+        raw_response = {
+            "category": "optimization",
+            "confidence_score": 0.85,
+            "tool_recommendations": [
+                {
+                    "tool_name": "latency_analyzer",
+                    "relevance_score": 0.9,
+                    "parameters": '{"feature_X_latency": "50ms", "feature_Y_latency": "200ms"}'
+                }
+            ]
+        }
+        
+        # Parse nested JSON
+        parsed = llm_manager._parse_nested_json(raw_response)
+        
+        # Should now validate successfully
+        result = TriageResult(**parsed)
+        
+        assert result.category == "optimization"
+        assert result.confidence_score == 0.85
+        assert len(result.tool_recommendations) == 1
+        assert isinstance(result.tool_recommendations[0].parameters, dict)
+        assert result.tool_recommendations[0].parameters["feature_X_latency"] == "50ms"
     
     @pytest.mark.asyncio
     async def test_data_agent_structured_response(self):

@@ -160,7 +160,16 @@ class HeartbeatManager:
                         
                 except asyncio.CancelledError:
                     raise  # Re-raise cancellation to exit gracefully
+                except ConnectionError as e:
+                    # Connection is closed, exit loop gracefully
+                    logger.debug(f"Connection closed for {conn_info.connection_id}: {e}")
+                    break
                 except Exception as e:
+                    # Check if error indicates closed connection
+                    error_msg = str(e).lower()
+                    if 'close' in error_msg or 'disconnect' in error_msg:
+                        logger.debug(f"Connection appears closed for {conn_info.connection_id}: {e}")
+                        break
                     await self._handle_heartbeat_error(conn_info, e)
                     
         except asyncio.CancelledError:
@@ -194,11 +203,25 @@ class HeartbeatManager:
         }
         
         try:
-            if self.connection_manager.is_connection_alive(conn_info):
-                await conn_info.websocket.send_json(ping_message)
-            else:
+            # Check both connection state and websocket state
+            if not self.connection_manager.is_connection_alive(conn_info):
                 raise ConnectionError("WebSocket not in connected state")
+            
+            # Additional check for websocket state
+            from starlette.websockets import WebSocketState
+            if conn_info.websocket.client_state != WebSocketState.CONNECTED:
+                raise ConnectionError("WebSocket already closed")
+            
+            await conn_info.websocket.send_json(ping_message)
+        except ConnectionError:
+            # Re-raise connection errors for proper handling
+            raise
         except Exception as e:
+            # Check if error is due to closed connection
+            error_msg = str(e).lower()
+            if 'close' in error_msg or 'disconnect' in error_msg:
+                logger.debug(f"Connection closed for {conn_info.connection_id}, stopping heartbeat")
+                raise ConnectionError(f"Connection closed: {e}")
             logger.debug(f"Failed to send ping to {conn_info.connection_id}: {e}")
             raise
     
