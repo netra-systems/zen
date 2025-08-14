@@ -520,15 +520,15 @@ class DefaultContext(BaseModel):
     metrics: SystemMetrics
 
 
-class TestInfrastructure(BaseModel):
-    """Test infrastructure configuration"""
+class E2ETestInfrastructure(BaseModel):
+    """E2E test infrastructure configuration"""
     supervisor: Any  # Agent supervisor instance
     quality_service: Any  # Quality gate service instance
     corpus_service: Any  # Corpus service instance
 
 
-class TestResult(BaseModel):
-    """Test execution result"""
+class E2ETestResult(BaseModel):
+    """E2E test execution result"""
     success: bool
     prompt: str
     execution_time: float

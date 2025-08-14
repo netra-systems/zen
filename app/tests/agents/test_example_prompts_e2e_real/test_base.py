@@ -23,8 +23,8 @@ from app.schemas.llm_types import (
     ToolMigrationContext,
     RollbackAnalysisContext,
     DefaultContext,
-    TestInfrastructure,
-    TestResult,
+    E2ETestInfrastructure,
+    E2ETestResult,
     CostMetrics,
     FeatureMetrics,
     LatencyMetrics,
@@ -343,7 +343,7 @@ class BaseExamplePromptsTest:
         ToolMigrationContext,
         RollbackAnalysisContext,
         DefaultContext
-    ], infra: TestInfrastructure) -> TestResult:
+    ], infra: E2ETestInfrastructure) -> E2ETestResult:
         """Run a single E2E test with real LLM calls"""
         supervisor = infra["supervisor"]
         quality_service = infra["quality_service"]
@@ -404,7 +404,7 @@ class BaseExamplePromptsTest:
                 content_type
             )
             
-            return TestResult(
+            return E2ETestResult(
                 success=True,
                 prompt=prompt,
                 execution_time=execution_time,
@@ -416,7 +416,7 @@ class BaseExamplePromptsTest:
             )
             
         except Exception as e:
-            return TestResult(
+            return E2ETestResult(
                 success=False,
                 prompt=prompt,
                 error=str(e),
