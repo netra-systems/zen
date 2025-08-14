@@ -76,3 +76,4 @@ terraform/staging/shared-infrastructure/.terraform/providers/registry.terraform.
 frontend/cypress/downloads/downloads.htm
 /terraform-gcp/github-runner/.terraform/providers
 *.tfstate
+terraform-gcp/github-runner/terraform.tfstate.backup

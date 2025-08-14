@@ -1,0 +1,527 @@
+name: Comprehensive Test Suite
+description: Modular comprehensive testing with organized matrix execution
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: 'Comprehensive test scope'
+        required: false
+        type: choice
+        default: 'full'
+        options:
+          - full              # Complete comprehensive suite (30-45 min)
+          - backend-only      # All backend comprehensive (15-20 min)
+          - frontend-only     # All frontend comprehensive (10-15 min)
+          - core-systems      # Core + Database + API (25-30 min)
+          - agent-systems     # Agents + WebSocket (15-20 min)
+          - quick-validation  # Core + Critical paths (10-15 min)
+      
+      modules:
+        description: 'Specific modules to test (comma-separated)'
+        required: false
+        default: ''
+        type: string
+      
+      parallel_execution:
+        description: 'Run modules in parallel'
+        required: false
+        type: boolean
+        default: true
+      
+      real_llm:
+        description: 'Use real LLM API calls'
+        required: false
+        type: boolean
+        default: false
+      
+      llm_model:
+        description: 'LLM model for real testing'
+        required: false
+        type: choice
+        default: 'gemini-2.5-flash'
+        options:
+          - gemini-2.5-flash
+          - gemini-2.5-pro
+          - gpt-3.5-turbo
+          - gpt-4
+
+  schedule:
+    - cron: '0 3 * * 0'  # Weekly comprehensive run on Sunday at 3 AM UTC
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+
+jobs:
+  # ==========================================
+  # PHASE 1: Test Planning and Strategy
+  # ==========================================
+  
+  plan-tests:
+    name: 📋 Plan Test Execution
+    runs-on: self-hosted
+    outputs:
+      matrix: ${{ steps.build-matrix.outputs.matrix }}
+      execution_mode: ${{ steps.build-matrix.outputs.mode }}
+      test_count: ${{ steps.build-matrix.outputs.count }}
+      estimated_time: ${{ steps.build-matrix.outputs.time }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Build test matrix
+        id: build-matrix
+        run: |
+          # Initialize variables
+          MODULES=()
+          EXECUTION_MODE="parallel"
+          ESTIMATED_TIME=0
+          
+          # Determine modules based on scope
+          SCOPE="${{ github.event.inputs.test_scope || 'full' }}"
+          CUSTOM_MODULES="${{ github.event.inputs.modules }}"
+          
+          if [[ -n "$CUSTOM_MODULES" ]]; then
+            # Use custom module list
+            IFS=',' read -ra MODULES <<< "$CUSTOM_MODULES"
+            ESTIMATED_TIME=15  # Average estimate for custom
+          else
+            case "$SCOPE" in
+              full)
+                MODULES=("comprehensive")
+                ESTIMATED_TIME=45
+                EXECUTION_MODE="sequential"
+                ;;
+              backend-only)
+                MODULES=("comprehensive-backend")
+                ESTIMATED_TIME=20
+                EXECUTION_MODE="sequential"
+                ;;
+              frontend-only)
+                MODULES=("comprehensive-frontend")
+                ESTIMATED_TIME=15
+                EXECUTION_MODE="sequential"
+                ;;
+              core-systems)
+                MODULES=("comprehensive-core" "comprehensive-database" "comprehensive-api")
+                ESTIMATED_TIME=30
+                ;;
+              agent-systems)
+                MODULES=("comprehensive-agents" "comprehensive-websocket")
+                ESTIMATED_TIME=20
+                ;;
+              quick-validation)
+                MODULES=("comprehensive-core" "critical")
+                ESTIMATED_TIME=15
+                ;;
+            esac
+          fi
+          
+          # Override parallel execution if specified
+          if [[ "${{ github.event.inputs.parallel_execution }}" == "false" ]]; then
+            EXECUTION_MODE="sequential"
+          fi
+          
+          # Build matrix JSON
+          MATRIX_JSON='{"module":['
+          for i in "${!MODULES[@]}"; do
+            if [[ $i -gt 0 ]]; then
+              MATRIX_JSON+=','
+            fi
+            MATRIX_JSON+="\"${MODULES[$i]}\""
+          done
+          MATRIX_JSON+=']}'
+          
+          # Output results
+          echo "matrix=$MATRIX_JSON" >> $GITHUB_OUTPUT
+          echo "mode=$EXECUTION_MODE" >> $GITHUB_OUTPUT
+          echo "count=${#MODULES[@]}" >> $GITHUB_OUTPUT
+          echo "time=$ESTIMATED_TIME" >> $GITHUB_OUTPUT
+          
+          # Display plan
+          echo "## 📋 Test Execution Plan" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Scope:** $SCOPE" >> $GITHUB_STEP_SUMMARY
+          echo "**Modules:** ${MODULES[*]}" >> $GITHUB_STEP_SUMMARY
+          echo "**Execution:** $EXECUTION_MODE" >> $GITHUB_STEP_SUMMARY
+          echo "**Estimated Time:** ${ESTIMATED_TIME} minutes" >> $GITHUB_STEP_SUMMARY
+          echo "**Real LLM:** ${{ github.event.inputs.real_llm || 'false' }}" >> $GITHUB_STEP_SUMMARY
+
+  # ==========================================
+  # PHASE 2: Parallel Test Execution
+  # ==========================================
+  
+  run-comprehensive-tests:
+    name: 🧪 ${{ matrix.module }}
+    needs: plan-tests
+    runs-on: self-hosted
+    timeout-minutes: 60
+    
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.plan-tests.outputs.matrix) }}
+      max-parallel: ${{ needs.plan-tests.outputs.execution_mode == 'sequential' && 1 || 4 }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Set up Node.js (if needed)
+        if: contains(matrix.module, 'frontend')
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+      
+      - name: Install Node dependencies (if needed)
+        if: contains(matrix.module, 'frontend')
+        working-directory: ./frontend
+        run: npm ci
+      
+      - name: Configure test environment
+        run: |
+          # Set up test database connections
+          echo "Setting up test environment for ${{ matrix.module }}"
+          
+          # Configure based on module type
+          case "${{ matrix.module }}" in
+            *database*)
+              echo "Configuring database test environment"
+              export TEST_DATABASE_URL="${{ secrets.TEST_DATABASE_URL }}"
+              export TEST_CLICKHOUSE_URL="${{ secrets.TEST_CLICKHOUSE_URL }}"
+              ;;
+            *websocket*)
+              echo "Configuring WebSocket test environment"
+              export TEST_REDIS_URL="${{ secrets.TEST_REDIS_URL }}"
+              ;;
+            *agents*)
+              echo "Configuring agent test environment"
+              if [[ "${{ github.event.inputs.real_llm }}" == "true" ]]; then
+                export GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}"
+                export ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}"
+                export OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"
+              fi
+              ;;
+          esac
+      
+      - name: Run comprehensive tests
+        id: test
+        run: |
+          # Build command
+          CMD="python test_runner.py --level ${{ matrix.module }}"
+          CMD+=" --json-output results-${{ matrix.module }}.json"
+          CMD+=" --coverage-output coverage-${{ matrix.module }}.xml"
+          
+          # Add real LLM flags if enabled
+          if [[ "${{ github.event.inputs.real_llm }}" == "true" ]]; then
+            CMD+=" --real-llm"
+            CMD+=" --llm-model ${{ github.event.inputs.llm_model || 'gemini-2.5-flash' }}"
+            CMD+=" --llm-timeout 60"
+            
+            # Use sequential for real LLM to avoid rate limits
+            if [[ "${{ matrix.module }}" == "comprehensive-agents" ]]; then
+              CMD+=" --parallel 1"
+            fi
+          fi
+          
+          # Execute tests
+          echo "Executing: $CMD"
+          $CMD
+      
+      - name: Generate module report
+        if: always()
+        run: |
+          # Parse results and generate summary
+          if [[ -f "results-${{ matrix.module }}.json" ]]; then
+            python -c "
+import json
+import sys
+
+with open('results-${{ matrix.module }}.json', 'r') as f:
+    data = json.load(f)
+
+print(f'## Module: ${{ matrix.module }}')
+print(f'Status: {data.get(\"status\", \"unknown\")}')
+print(f'Duration: {data.get(\"duration\", 0):.2f}s')
+print(f'Tests: {data.get(\"total\", 0)} total, {data.get(\"passed\", 0)} passed, {data.get(\"failed\", 0)} failed')
+
+if data.get('coverage'):
+    print(f'Coverage: {data.get(\"coverage\", 0):.1f}%')
+            " >> module-summary-${{ matrix.module }}.md
+          fi
+      
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.module }}
+          path: |
+            results-${{ matrix.module }}.json
+            coverage-${{ matrix.module }}.xml
+            module-summary-${{ matrix.module }}.md
+            test_reports/latest_*_report.md
+            htmlcov/
+
+  # ==========================================
+  # PHASE 3: Test Aggregation and Reporting
+  # ==========================================
+  
+  aggregate-results:
+    name: 📊 Aggregate Test Results
+    needs: [plan-tests, run-comprehensive-tests]
+    if: always()
+    runs-on: self-hosted
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: test-artifacts
+      
+      - name: Aggregate results
+        id: aggregate
+        run: |
+          cd test-artifacts
+          
+          # Initialize counters
+          TOTAL_TESTS=0
+          TOTAL_PASSED=0
+          TOTAL_FAILED=0
+          TOTAL_SKIPPED=0
+          TOTAL_DURATION=0
+          COVERAGE_SUM=0
+          COVERAGE_COUNT=0
+          
+          # Process each module result
+          for result_file in */results-*.json; do
+            if [[ -f "$result_file" ]]; then
+              # Extract metrics using Python
+              python3 -c "
+import json
+import sys
+
+with open('$result_file', 'r') as f:
+    data = json.load(f)
+    print(f'{data.get(\"total\", 0)}')
+    print(f'{data.get(\"passed\", 0)}')
+    print(f'{data.get(\"failed\", 0)}')
+    print(f'{data.get(\"skipped\", 0)}')
+    print(f'{data.get(\"duration\", 0)}')
+    print(f'{data.get(\"coverage\", 0)}')
+              " | {
+                read total
+                read passed
+                read failed
+                read skipped
+                read duration
+                read coverage
+                
+                TOTAL_TESTS=$((TOTAL_TESTS + total))
+                TOTAL_PASSED=$((TOTAL_PASSED + passed))
+                TOTAL_FAILED=$((TOTAL_FAILED + failed))
+                TOTAL_SKIPPED=$((TOTAL_SKIPPED + skipped))
+                TOTAL_DURATION=$(echo "$TOTAL_DURATION + $duration" | bc)
+                
+                if [[ "$coverage" != "0" ]]; then
+                  COVERAGE_SUM=$(echo "$COVERAGE_SUM + $coverage" | bc)
+                  COVERAGE_COUNT=$((COVERAGE_COUNT + 1))
+                fi
+              }
+            fi
+          done
+          
+          # Calculate average coverage
+          if [[ $COVERAGE_COUNT -gt 0 ]]; then
+            AVG_COVERAGE=$(echo "scale=1; $COVERAGE_SUM / $COVERAGE_COUNT" | bc)
+          else
+            AVG_COVERAGE=0
+          fi
+          
+          # Determine overall status
+          if [[ $TOTAL_FAILED -gt 0 ]]; then
+            STATUS="❌ FAILED"
+            STATUS_EMOJI="🔴"
+          elif [[ $TOTAL_TESTS -eq 0 ]]; then
+            STATUS="⚠️ NO TESTS"
+            STATUS_EMOJI="🟡"
+          else
+            STATUS="✅ PASSED"
+            STATUS_EMOJI="🟢"
+          fi
+          
+          # Output metrics
+          echo "total_tests=$TOTAL_TESTS" >> $GITHUB_OUTPUT
+          echo "total_passed=$TOTAL_PASSED" >> $GITHUB_OUTPUT
+          echo "total_failed=$TOTAL_FAILED" >> $GITHUB_OUTPUT
+          echo "total_skipped=$TOTAL_SKIPPED" >> $GITHUB_OUTPUT
+          echo "total_duration=$TOTAL_DURATION" >> $GITHUB_OUTPUT
+          echo "avg_coverage=$AVG_COVERAGE" >> $GITHUB_OUTPUT
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "status_emoji=$STATUS_EMOJI" >> $GITHUB_OUTPUT
+      
+      - name: Generate comprehensive report
+        run: |
+          cat > comprehensive-report.md << EOF
+          # 📊 Comprehensive Test Report
+          
+          ## ${{ steps.aggregate.outputs.status }}
+          
+          **Execution Time:** ${{ needs.plan-tests.outputs.estimated_time }} minutes (estimated) / ${{ steps.aggregate.outputs.total_duration }}s (actual)
+          **Test Scope:** ${{ github.event.inputs.test_scope || 'full' }}
+          **Modules Tested:** ${{ needs.plan-tests.outputs.test_count }}
+          **Execution Mode:** ${{ needs.plan-tests.outputs.execution_mode }}
+          
+          ---
+          
+          ### 📈 Test Metrics
+          
+          | Metric | Value |
+          |--------|-------|
+          | **Total Tests** | ${{ steps.aggregate.outputs.total_tests }} |
+          | **Passed** | ${{ steps.aggregate.outputs.total_passed }} |
+          | **Failed** | ${{ steps.aggregate.outputs.total_failed }} |
+          | **Skipped** | ${{ steps.aggregate.outputs.total_skipped }} |
+          | **Pass Rate** | $(echo "scale=1; ${{ steps.aggregate.outputs.total_passed }} * 100 / ${{ steps.aggregate.outputs.total_tests }}" | bc)% |
+          | **Coverage** | ${{ steps.aggregate.outputs.avg_coverage }}% |
+          
+          ### 🔍 Module Results
+          
+          | Module | Status | Tests | Duration | Coverage |
+          |--------|--------|-------|----------|----------|
+          EOF
+          
+          # Add each module result
+          cd test-artifacts
+          for summary in */module-summary-*.md; do
+            if [[ -f "$summary" ]]; then
+              # Parse and format module summary
+              cat "$summary" | python3 -c "
+import sys
+import re
+
+lines = sys.stdin.readlines()
+module = ''
+status = ''
+duration = ''
+tests = ''
+coverage = ''
+
+for line in lines:
+    if 'Module:' in line:
+        module = line.split(':')[1].strip()
+    elif 'Status:' in line:
+        status = '✅' if 'passed' in line.lower() else '❌'
+    elif 'Duration:' in line:
+        duration = re.search(r'[\d.]+s', line).group()
+    elif 'Tests:' in line:
+        tests = re.search(r'\d+ total', line).group()
+    elif 'Coverage:' in line:
+        coverage = re.search(r'[\d.]+%', line).group()
+
+print(f'| {module} | {status} | {tests} | {duration} | {coverage or \"N/A\"} |')
+              " >> ../comprehensive-report.md
+            fi
+          done
+          
+          cd ..
+          
+          # Add configuration section
+          cat >> comprehensive-report.md << EOF
+          
+          ### ⚙️ Configuration
+          
+          - **Real LLM Testing:** ${{ github.event.inputs.real_llm || 'false' }}
+          - **LLM Model:** ${{ github.event.inputs.llm_model || 'N/A' }}
+          - **Python Version:** ${{ env.PYTHON_VERSION }}
+          - **Node Version:** ${{ env.NODE_VERSION }}
+          - **Runner:** self-hosted
+          - **Triggered By:** ${{ github.actor }}
+          
+          ---
+          
+          *Generated at: $(date -u '+%Y-%m-%d %H:%M:%S UTC')*
+          EOF
+          
+          # Output to step summary
+          cat comprehensive-report.md >> $GITHUB_STEP_SUMMARY
+      
+      - name: Upload comprehensive report
+        uses: actions/upload-artifact@v4
+        with:
+          name: comprehensive-test-report
+          path: comprehensive-report.md
+      
+      - name: Post status check
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.aggregate.outputs.status_emoji }}';
+            const message = `${status} Comprehensive Tests: ${{ steps.aggregate.outputs.status }}`;
+            
+            // Set commit status
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: '${{ steps.aggregate.outputs.total_failed }}' === '0' ? 'success' : 'failure',
+              context: 'comprehensive-tests',
+              description: message,
+              target_url: `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            });
+
+  # ==========================================
+  # PHASE 4: Notification and Cleanup
+  # ==========================================
+  
+  notify-completion:
+    name: 📢 Send Notifications
+    needs: [aggregate-results]
+    if: always()
+    runs-on: self-hosted
+    
+    steps:
+      - name: Determine notification level
+        id: notify-level
+        run: |
+          if [[ "${{ needs.aggregate-results.outputs.status }}" == *"FAILED"* ]]; then
+            echo "level=error" >> $GITHUB_OUTPUT
+            echo "color=#FF0000" >> $GITHUB_OUTPUT
+          else
+            echo "level=success" >> $GITHUB_OUTPUT
+            echo "color=#00FF00" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Send Discord notification (if configured)
+        if: vars.DISCORD_WEBHOOK_URL != ''
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{
+              \"embeds\": [{
+                \"title\": \"Comprehensive Test Results\",
+                \"description\": \"${{ needs.aggregate-results.outputs.status }}\",
+                \"color\": \"${{ steps.notify-level.outputs.color }}\",
+                \"fields\": [
+                  {\"name\": \"Total Tests\", \"value\": \"${{ needs.aggregate-results.outputs.total_tests }}\", \"inline\": true},
+                  {\"name\": \"Passed\", \"value\": \"${{ needs.aggregate-results.outputs.total_passed }}\", \"inline\": true},
+                  {\"name\": \"Failed\", \"value\": \"${{ needs.aggregate-results.outputs.total_failed }}\", \"inline\": true}
+                ],
+                \"footer\": {\"text\": \"Triggered by ${{ github.actor }}\"}
+              }]
+            }" \
+            ${{ vars.DISCORD_WEBHOOK_URL }}

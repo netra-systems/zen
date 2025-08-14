@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-08-13T22:27:33.791968",
+  "level": "comprehensive-backend",
+  "metrics": {
+    "total_tests": 0,
+    "passed": 0,
+    "failed": 0,
+    "coverage": null
+  },
+  "results": {
+    "backend": {
+      "status": "failed",
+      "duration": 210.80111074447632,
+      "exit_code": 15,
+      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 6\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -v -n 6 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 --html=reports/tests/report.html --self-contained-html --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 6/6 workers\n6 workers [2873 items]\n\nscheduling tests via LoadScheduling\n\napp/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion \napp/tests/agents/test_example_prompts_e2e_real/test_advanced_features.py::TestMultiObjectiveOptimization::test_prompt_7_variation_3 \napp/tests/agents/test_example_prompts_parameterized.py::TestExamplePromptsParameterized::test_prompt_variations[4-6] \napp/tests/agents/test_supervisor_consolidated_comprehensive.py::TestAgentUtilsHelperFunctions::test_timeout_wrapper \napp/tests/agents/test_triage_sub_agent_comprehensive.py::TestAsyncOperations::test_websocket_streaming_updates \napp/tests/core/test_async_utils.py::TestAsyncResourceManager::test_register_resource_during_shutdown \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncResourceManager::test_register_resource_during_shutdown \napp/tests/core/test_async_utils.py::TestAsyncResourceManager::test_cleanup_all \n[gw2]\u001b[36m [  0%] \u001b[0m\u001b[31mERROR\u001b[0m app/tests/agents/test_example_prompts_parameterized.py::TestExamplePromptsParameterized::test_prompt_variations[4-6] \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncResourceManager::test_cleanup_all \n[gw4]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/agents/test_triage_sub_agent_comprehensive.py::TestAsyncOperations::test_websocket_streaming_updates \napp/tests/core/test_async_utils.py::TestAsyncResourceManager::test_cleanup_all_idempotent \napp/tests/agents/test_triage_sub_agent_comprehensive.py::TestAsyncOperations::test_async_cleanup_operations \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncResourceManager::test_cleanup_all_idempotent \napp/tests/core/test_async_utils.py::TestAsyncResourceManager::test_cleanup_handles_exceptions \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncResourceManager::test_cleanup_handles_exceptions \napp/tests/core/test_async_utils.py::TestAsyncTaskPool::test_initialization \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncTaskPool::test_initialization \napp/tests/core/test_async_utils.py::TestAsyncTaskPool::test_submit_task_success \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncTaskPool::test_submit_task_success \napp/tests/core/test_async_utils.py::TestAsyncTaskPool::test_submit_task_exception \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncTaskPool::test_submit_task_exception \napp/tests/core/test_async_utils.py::TestAsyncTaskPool::test_submit_task_during_shutdown \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncTaskPool::test_submit_task_during_shutdown \napp/tests/core/test_async_utils.py::TestAsyncTaskPool::test_submit_background_task \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncTaskPool::test_submit_background_task \napp/tests/core/test_async_utils.py::TestAsyncTaskPool::test_submit_background_task_during_shutdown \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncTaskPool::test_submit_background_task_during_shutdown \napp/tests/core/test_async_utils.py::TestAsyncTaskPool::test_active_task_count \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncTaskPool::test_active_task_count \napp/tests/core/test_async_utils.py::TestAsyncTaskPool::test_concurrent_task_limit \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncTaskPool::test_concurrent_task_limit \napp/tests/core/test_async_utils.py::TestAsyncTaskPool::test_shutdown \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncTaskPool::test_shutdown \napp/tests/core/test_async_utils.py::TestAsyncTaskPool::test_shutdown_idempotent \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncTaskPool::test_shutdown_idempotent \napp/tests/core/test_async_utils.py::TestAsyncTaskPool::test_shutdown_no_tasks \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncTaskPool::test_shutdown_no_tasks \napp/tests/core/test_async_utils.py::TestAsyncRateLimiter::test_initialization \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncRateLimiter::test_initialization \napp/tests/core/test_async_utils.py::TestAsyncRateLimiter::test_acquire_under_limit \n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncRateLimiter::test_acquire_under_limit \napp/tests/core/test_async_utils.py::TestAsyncRateLimiter::test_acquire_over_limit \n[gw5]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/agents/test_supervisor_consolidated_comprehensive.py::TestAgentUtilsHelperFunctions::test_timeout_wrapper \napp/tests/agents/test_supervisor_consolidated_comprehensive.py::TestAgentUtilsHelperFunctions::test_state_merging_utility \n[gw5]\u001b[36m [  0%] \u001b[0m\u001b[32mPASSED\u001b[0m app/tests/agents/test_supervisor_consolidated_comprehensive.py::TestAgentUtilsHelperFunctions::test_state_merging_utility \napp/tests/agents/test_supervisor_consolidated_comprehensive.py::TestSupervisorAdvancedFeatures::test_supervisor_error_handling \n[gw1]\u001b[36m [  0%] \u001b[0m\u001b[31mFAILED\u001b[0m app/tests/agents/test_example_prompts_e2e_real/test_advanced_features.py::TestMultiObjectiveOptimization::test_prompt_7_variation_3 \n[gw4]\u001b[36m [  0%] \u001b[0m\u001b[31mFAILED\u001b[0m app/tests/agents/test_triage_sub_agent_comprehensive.py::TestAsyncOperations::test_async_cleanup_operations \n[gw5]\u001b[36m [  0%] \u001b[0m\u001b[31mFAILED\u001b[0m app/tests/agents/test_supervisor_consolidated_comprehensive.py::TestSupervisorAdvancedFeatures::test_supervisor_error_handling \n[gw0]\u001b[36m [  0%] \u001b[0m\u001b[31mFAILED\u001b[0m app/tests/agents/test_agent_e2e_critical.py::TestAgentE2ECritical::test_1_complete_agent_lifecycle_request_to_completion \n[gw3] node down: Not properly terminated\n[gw3]\u001b[36m [  0%] \u001b[0m\u001b[31mFAILED\u001b[0m app/tests/core/test_async_utils.py::TestAsyncRateLimiter::test_acquire_over_limit \nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"<string>\", line 5, in <module>\nOSError: [Errno 22] Invalid argument\n",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0,
+        "test_files": 6
+      },
+      "coverage": null,
+      "test_details": []
+    },
+    "frontend": {
+      "status": "skipped",
+      "duration": 0,
+      "exit_code": null,
+      "output": "",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "coverage": null
+    },
+    "e2e": {
+      "status": "pending",
+      "duration": 0,
+      "exit_code": null,
+      "output": "",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "coverage": null
+    },
+    "overall": {
+      "status": "failed",
+      "start_time": 1755149042.986857,
+      "end_time": 1755149253.7909665
+    }
+  }
+}

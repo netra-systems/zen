@@ -26,7 +26,7 @@ from app.schemas.websocket_unified import (
     ToolResult,
     StreamChunk,
     StreamComplete,
-    BaseWebSocketMessage,
+    WebSocketMessage,
     BaseWebSocketPayload,
     ThreadCreated,
     ThreadDeleted,
@@ -176,7 +176,7 @@ class TestFrontendToBackendTypeSafety:
             assert msg_type == WebSocketMessageType.START_AGENT
             
             # Validate full message structure
-            message = BaseWebSocketMessage(
+            message = WebSocketMessage(
                 type=msg_type,
                 payload=frontend_data["payload"]
             )
@@ -441,7 +441,7 @@ class TestBackendToFrontendTypeSafety:
     
     def test_websocket_message_serialization(self):
         """Test WebSocket message serialization."""
-        message = BaseWebSocketMessage(
+        message = WebSocketMessage(
             type=WebSocketMessageType.AGENT_STARTED,
             payload={"run_id": "run123"}
         )

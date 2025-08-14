@@ -192,8 +192,9 @@ def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, A
         
     cmd = [sys.executable, str(frontend_script)] + args
     
-    # Add cleanup flag for frontend tests
-    cmd.append("--cleanup-on-exit")
+    # Add cleanup flag for frontend tests only if script supports it
+    if "test_frontend.py" in str(frontend_script):
+        cmd.append("--cleanup-on-exit")
     
     try:
         # Use Popen for better process control

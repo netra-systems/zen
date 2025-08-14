@@ -107,36 +107,56 @@ install_dependencies() {
     rm -f /var/run/docker.pid
     rm -f /var/run/docker.sock
     
-    # Start Docker
-    systemctl start docker
+    # Start Docker with proper initialization sequence
+    log "Starting Docker services..."
     
-    # Wait for Docker to be ready
-    log "Waiting for Docker daemon..."
-    local max_wait=60
-    local count=0
-    
-    # First ensure containerd is running
-    if ! systemctl is-active --quiet containerd; then
-        log "Starting containerd..."
-        systemctl start containerd
+    # Ensure containerd is running first
+    if systemctl list-units --all | grep -q containerd; then
+        systemctl start containerd || true
         sleep 2
     fi
     
+    # Start Docker daemon
+    systemctl start docker || {
+        log "Initial Docker start failed, retrying with cleanup..."
+        rm -f /var/run/docker.pid /var/run/docker.sock
+        systemctl daemon-reload
+        systemctl start docker
+    }
+    
+    # Wait for Docker to be ready
+    log "Waiting for Docker daemon to be fully ready..."
+    local max_wait=90
+    local count=0
+    local docker_ready=false
+    
     while [ $count -lt $max_wait ]; do
-        # Try multiple methods to verify Docker is ready
-        if docker version &>/dev/null 2>&1; then
-            log "Docker daemon is ready"
-            break
-        elif docker ps &>/dev/null 2>&1; then
-            log "Docker daemon is ready (ps check)"
-            break
-        elif [ -S /var/run/docker.sock ] && systemctl is-active --quiet docker; then
-            # Docker service is running and socket exists, give it more time
-            log "Docker service running, waiting for API..."
-            sleep 5
-            if docker version &>/dev/null 2>&1 || docker ps &>/dev/null 2>&1; then
-                log "Docker daemon is now ready"
-                break
+        # Check if Docker socket exists
+        if [ -S /var/run/docker.sock ]; then
+            # Try to run a simple Docker command
+            if docker version &>/dev/null 2>&1; then
+                log "Docker API is responding"
+                # Final verification with actual container run
+                if docker run --rm hello-world &>/dev/null 2>&1; then
+                    log "Docker daemon is fully operational"
+                    docker_ready=true
+                    break
+                else
+                    log "Docker API responds but cannot run containers yet"
+                fi
+            fi
+        fi
+        
+        # Check service status
+        if [ $((count % 15)) -eq 0 ] && [ $count -gt 0 ]; then
+            log "Docker service status check..."
+            if systemctl is-active --quiet docker; then
+                log "Docker service is active, waiting for full initialization..."
+                # Try restarting docker socket
+                systemctl restart docker.socket 2>/dev/null || true
+            else
+                log "Docker service not active, attempting restart..."
+                systemctl restart docker
             fi
         fi
         
@@ -145,35 +165,57 @@ install_dependencies() {
         [ $((count % 10)) -eq 0 ] && log "Still waiting for Docker... ($count/$max_wait)"
     done
     
-    if [ $count -eq $max_wait ]; then
-        log "WARNING: Docker version check failed, but service is running"
+    if [ "$docker_ready" != "true" ]; then
+        log "WARNING: Docker not fully ready after $max_wait seconds"
         systemctl status docker --no-pager
         
-        # Try a workaround - restart Docker one more time
-        log "Attempting Docker restart workaround..."
-        systemctl restart docker
+        # Final attempt - full Docker restart
+        log "Attempting final Docker restart..."
+        systemctl stop docker
+        sleep 2
+        rm -f /var/run/docker.pid /var/run/docker.sock
+        systemctl start docker
         sleep 10
         
-        if ! docker version &>/dev/null 2>&1; then
-            log "ERROR: Docker still not responding after restart"
-            # Continue anyway as Docker service is running
+        if docker run --rm hello-world &>/dev/null 2>&1; then
+            log "Docker is now working after final restart"
+            docker_ready=true
         else
-            log "Docker is now responding after restart"
+            log "WARNING: Docker still having issues, continuing with installation"
+            log "Manual intervention may be required"
         fi
     fi
     
-    # Install Docker buildx
+    # Install Docker buildx - but don't create builder yet
     log "Installing Docker buildx..."
     mkdir -p /usr/local/lib/docker/cli-plugins
     curl -L "https://github.com/docker/buildx/releases/download/v0.11.2/buildx-v0.11.2.linux-amd64" \
         -o /usr/local/lib/docker/cli-plugins/docker-buildx
     chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
     
-    # Create buildx builder
-    docker buildx create --name runner-builder --use --bootstrap || {
-        log "Buildx builder exists, using it"
-        docker buildx use runner-builder
-    }
+    # Verify Docker is fully operational before creating buildx builder
+    log "Verifying Docker readiness before buildx setup..."
+    if docker run --rm hello-world &>/dev/null; then
+        log "Docker confirmed working with hello-world test"
+        
+        # Now safe to create buildx builder
+        log "Creating buildx builder..."
+        docker buildx create --name runner-builder --driver docker-container --use || {
+            log "Buildx builder creation failed, trying cleanup and retry..."
+            docker buildx rm runner-builder 2>/dev/null || true
+            sleep 2
+            docker buildx create --name runner-builder --driver docker-container --use || {
+                log "WARNING: Could not create buildx builder, will retry later"
+            }
+        }
+        
+        # Try to bootstrap the builder
+        docker buildx inspect --bootstrap 2>/dev/null || {
+            log "WARNING: Buildx bootstrap failed, will be retried by runner"
+        }
+    else
+        log "WARNING: Docker not fully ready, skipping buildx builder creation"
+    fi
     
     log "Dependencies installed successfully"
 }
@@ -305,11 +347,24 @@ install_service() {
         sleep 5
     fi
     
-    # Verify buildx for runner
-    su - $RUNNER_USER -c "docker buildx ls" || {
-        log "Setting up buildx for runner..."
-        su - $RUNNER_USER -c "docker buildx create --name runner-builder --use" || true
-    }
+    # Verify buildx for runner - with proper error handling
+    log "Setting up Docker buildx for runner user..."
+    if su - $RUNNER_USER -c "docker buildx version" &>/dev/null; then
+        log "Docker buildx is installed"
+        
+        # Check if builder exists
+        if ! su - $RUNNER_USER -c "docker buildx ls | grep -q runner-builder" 2>/dev/null; then
+            log "Creating buildx builder for runner user..."
+            su - $RUNNER_USER -c "docker buildx create --name runner-builder --driver docker-container --use" 2>/dev/null || {
+                log "WARNING: Buildx builder creation failed for runner, may need manual setup"
+            }
+        else
+            log "Buildx builder already exists for runner"
+            su - $RUNNER_USER -c "docker buildx use runner-builder" 2>/dev/null || true
+        fi
+    else
+        log "WARNING: Docker buildx not accessible by runner user"
+    fi
     
     cd $RUNNER_DIR
     ./svc.sh install $RUNNER_USER
