@@ -437,6 +437,13 @@ main() {
         exit 1
     }
     
+    # Install essential packages first
+    log "Installing essential system packages..."
+    apt-get install -y curl jq passwd || {
+        log "ERROR: Failed to install essential packages"
+        exit 1
+    }
+    
     # Install GitHub runner first
     log "Phase 1: Installing GitHub Runner..."
     
@@ -444,8 +451,6 @@ main() {
     log "Creating runner user..."
     if ! id "$RUNNER_USER" &>/dev/null; then
         log "User $RUNNER_USER does not exist, creating..."
-        # Ensure passwd package is installed
-        apt-get install -y passwd || true
         if ! useradd -m -s /bin/bash $RUNNER_USER; then
             log "ERROR: Failed to create user $RUNNER_USER with useradd"
             # Try alternative method

@@ -67,7 +67,7 @@ variable "runner_group" {
 variable "runner_version" {
   description = "GitHub Actions runner version"
   type        = string
-  default     = "2.319.1"
+  default     = "2.327.1"
 }
 
 # Instance Configuration
