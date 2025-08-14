@@ -17,9 +17,8 @@ from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.state import DeepAgentState
 from app.agents.utils import extract_json_from_response, extract_partial_json
 from app.logging_config import central_logger as logger
-from app.core.reliability import (
-    get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
-)
+from app.core.reliability_utils import create_agent_reliability_wrapper
+from app.core.fallback_utils import create_agent_fallback_strategy
 
 
 class ActionsToMeetGoalsSubAgent(BaseSubAgent):
@@ -28,19 +27,7 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
         self.tool_dispatcher = tool_dispatcher
         
         # Initialize reliability wrapper
-        self.reliability = get_reliability_wrapper(
-            "ActionsToMeetGoalsSubAgent",
-            CircuitBreakerConfig(
-                failure_threshold=3,
-                recovery_timeout=45.0,
-                name="ActionsToMeetGoalsSubAgent"
-            ),
-            RetryConfig(
-                max_retries=3,
-                base_delay=1.0,
-                max_delay=15.0
-            )
-        )
+        self.reliability = create_agent_reliability_wrapper("ActionsToMeetGoalsSubAgent")
 
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Check if we have optimizations and data results to work with."""
@@ -148,47 +135,53 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
     
     def _build_action_plan_from_partial(self, partial_data: dict) -> dict:
         """Build a complete action plan structure from partial extracted data."""
-        return {
-            "action_plan_summary": partial_data.get("action_plan_summary", "Partial extraction - summary unavailable"),
-            "total_estimated_time": partial_data.get("total_estimated_time", "To be determined"),
-            "required_approvals": partial_data.get("required_approvals", []),
-            "actions": partial_data.get("actions", []),
-            "execution_timeline": partial_data.get("execution_timeline", []),
-            "supply_config_updates": partial_data.get("supply_config_updates", []),
-            "post_implementation": partial_data.get("post_implementation", {
-                "monitoring_period": "30 days",
-                "success_metrics": [],
-                "optimization_review_schedule": "Weekly",
-                "documentation_updates": []
-            }),
-            "cost_benefit_analysis": partial_data.get("cost_benefit_analysis", {
-                "implementation_cost": {"effort_hours": 0, "resource_cost": 0},
-                "expected_benefits": {"cost_savings_per_month": 0, "performance_improvement_percentage": 0, "roi_months": 0}
-            }),
-            "partial_extraction": True,
-            "extracted_fields": list(partial_data.keys())
-        }
+        base_structure = self._get_base_action_plan_structure()
+        for key, default_value in base_structure.items():
+            base_structure[key] = partial_data.get(key, default_value)
+        
+        base_structure["partial_extraction"] = True
+        base_structure["extracted_fields"] = list(partial_data.keys())
+        return base_structure
     
-    def _get_default_action_plan(self) -> dict:
-        """Get a default action plan structure when extraction completely fails."""
+    def _get_base_action_plan_structure(self) -> dict:
+        """Get base action plan structure with defaults."""
         return {
-            "action_plan_summary": "Failed to generate action plan from LLM response",
-            "total_estimated_time": "Unknown",
+            "action_plan_summary": "Partial extraction - summary unavailable",
+            "total_estimated_time": "To be determined",
             "required_approvals": [],
             "actions": [],
             "execution_timeline": [],
             "supply_config_updates": [],
-            "post_implementation": {
-                "monitoring_period": "Not determined",
-                "success_metrics": [],
-                "optimization_review_schedule": "Not scheduled",
-                "documentation_updates": []
-            },
-            "cost_benefit_analysis": {
-                "implementation_cost": {"effort_hours": 0, "resource_cost": 0},
-                "expected_benefits": {"cost_savings_per_month": 0, "performance_improvement_percentage": 0, "roi_months": 0}
+            "post_implementation": self._get_default_post_implementation(),
+            "cost_benefit_analysis": self._get_default_cost_benefit()
+        }
+    
+    def _get_default_post_implementation(self) -> dict:
+        """Get default post implementation structure."""
+        return {
+            "monitoring_period": "30 days",
+            "success_metrics": [],
+            "optimization_review_schedule": "Weekly",
+            "documentation_updates": []
+        }
+    
+    def _get_default_cost_benefit(self) -> dict:
+        """Get default cost benefit analysis structure."""
+        return {
+            "implementation_cost": {"effort_hours": 0, "resource_cost": 0},
+            "expected_benefits": {
+                "cost_savings_per_month": 0,
+                "performance_improvement_percentage": 0,
+                "roi_months": 0
             }
         }
+    
+    def _get_default_action_plan(self) -> dict:
+        """Get a default action plan structure when extraction completely fails."""
+        base_plan = self._get_base_action_plan_structure()
+        base_plan["action_plan_summary"] = "Failed to generate action plan from LLM response"
+        base_plan["total_estimated_time"] = "Unknown"
+        return base_plan
     
     def get_health_status(self) -> dict:
         """Get agent health status"""

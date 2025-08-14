@@ -5,9 +5,7 @@ from pydantic import BaseModel, Field
 from app.schemas import ToolResult, ToolStatus, ToolInput, SimpleToolPayload
 from app.agents.state import DeepAgentState
 from app.logging_config import central_logger
-from app.core.reliability import (
-    get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
-)
+from app.core.reliability_utils import create_tool_reliability_wrapper, create_default_tool_result
 
 logger = central_logger.get_logger(__name__)
 
@@ -24,14 +22,8 @@ class ToolDispatchResponse(BaseModel):
     error: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
-class MockToolExecuteRequest(BaseModel):
-    """Typed request for MockTool execution"""
-    parameters: Dict[str, Any]
-    state: Optional[DeepAgentState] = None
-    run_id: Optional[str] = None
-    
-class MockToolExecuteResponse(BaseModel):
-    """Typed response for MockTool execution"""
+class ToolExecuteResponse(BaseModel):
+    """Typed response for tool execution"""
     success: bool
     data: Optional[Union[str, Dict[str, Any], List[Any]]] = None
     message: Optional[str] = None
@@ -60,17 +52,19 @@ class ToolDispatcher:
     
     def _register_corpus_tools(self):
         """Register corpus management tools"""
-        corpus_tools = [
-            "create_corpus",
-            "search_corpus", 
-            "update_corpus",
-            "delete_corpus",
-            "analyze_corpus",
-            "export_corpus",
-            "import_corpus",
-            "validate_corpus"
+        corpus_tools = self._get_corpus_tool_names()
+        self._register_tool_batch(corpus_tools)
+    
+    def _get_corpus_tool_names(self) -> List[str]:
+        """Get list of corpus tool names"""
+        return [
+            "create_corpus", "search_corpus", "update_corpus", "delete_corpus",
+            "analyze_corpus", "export_corpus", "import_corpus", "validate_corpus"
         ]
-        for tool_name in corpus_tools:
+    
+    def _register_tool_batch(self, tool_names: List[str]) -> None:
+        """Register batch of tools if not already present"""
+        for tool_name in tool_names:
             if tool_name not in self.tools:
                 self.tools[tool_name] = ProductionTool(tool_name)
 
@@ -106,49 +100,60 @@ class ToolDispatcher:
         state: DeepAgentState,
         run_id: str
     ) -> ToolDispatchResponse:
-        """
-        Dispatch a tool with parameters - method expected by sub-agents
-        
-        Args:
-            tool_name: Name of the tool to execute
-            parameters: Tool parameters
-            state: Current agent state
-            run_id: Execution run ID
-            
-        Returns:
-            Tool execution result as typed response
-        """
+        """Dispatch a tool with parameters - method expected by sub-agents"""
         if not self.has_tool(tool_name):
-            logger.warning(f"Tool {tool_name} not found for run_id {run_id}")
-            return ToolDispatchResponse(
-                success=False,
-                error=f"Tool {tool_name} not found"
-            )
+            return self._create_tool_not_found_response(tool_name, run_id)
         
         tool = self.tools[tool_name]
-        
+        return await self._execute_tool_with_error_handling(tool, tool_name, parameters, state, run_id)
+    
+    def _create_tool_not_found_response(self, tool_name: str, run_id: str) -> ToolDispatchResponse:
+        """Create response for tool not found scenario"""
+        logger.warning(f"Tool {tool_name} not found for run_id {run_id}")
+        return ToolDispatchResponse(
+            success=False,
+            error=f"Tool {tool_name} not found"
+        )
+    
+    async def _execute_tool_with_error_handling(
+        self, tool: Any, tool_name: str, parameters: Dict[str, Any], 
+        state: DeepAgentState, run_id: str
+    ) -> ToolDispatchResponse:
+        """Execute tool with comprehensive error handling"""
         try:
-            # Handle different tool types
-            if isinstance(tool, ProductionTool):
-                result = await tool.execute(parameters, state, run_id)
-            elif hasattr(tool, 'arun'):
-                result = await tool.arun(parameters)
-            else:
-                result = tool(parameters)
-            
-            return ToolDispatchResponse(
-                success=True,
-                result=result,
-                metadata={"tool_name": tool_name, "run_id": run_id}
-            )
-                
+            result = await self._execute_tool_by_type(tool, parameters, state, run_id)
+            return self._create_success_response(result, tool_name, run_id)
         except Exception as e:
-            logger.error(f"Tool {tool_name} execution failed: {e}")
-            return ToolDispatchResponse(
-                success=False,
-                error=str(e),
-                metadata={"tool_name": tool_name, "run_id": run_id}
-            )
+            return self._create_error_response(e, tool_name, run_id)
+    
+    async def _execute_tool_by_type(
+        self, tool: Any, parameters: Dict[str, Any], 
+        state: DeepAgentState, run_id: str
+    ) -> Any:
+        """Execute tool based on its type"""
+        if isinstance(tool, ProductionTool):
+            return await tool.execute(parameters, state, run_id)
+        elif hasattr(tool, 'arun'):
+            return await tool.arun(parameters)
+        else:
+            return tool(parameters)
+    
+    def _create_success_response(self, result: Any, tool_name: str, run_id: str) -> ToolDispatchResponse:
+        """Create successful tool execution response"""
+        return ToolDispatchResponse(
+            success=True,
+            result=result,
+            metadata={"tool_name": tool_name, "run_id": run_id}
+        )
+    
+    def _create_error_response(self, error: Exception, tool_name: str, run_id: str) -> ToolDispatchResponse:
+        """Create error response for tool execution failure"""
+        logger.error(f"Tool {tool_name} execution failed: {error}")
+        return ToolDispatchResponse(
+            success=False,
+            error=str(error),
+            metadata={"tool_name": tool_name, "run_id": run_id}
+        )
 
 
 class ProductionTool:
@@ -160,25 +165,13 @@ class ProductionTool:
         
     def _init_circuit_breaker(self) -> None:
         """Initialize circuit breaker for tool reliability."""
-        self.reliability = get_reliability_wrapper(
-            f"Tool_{self.name}",
-            CircuitBreakerConfig(
-                failure_threshold=3,
-                recovery_timeout=30.0,
-                name=f"Tool_{self.name}"
-            ),
-            RetryConfig(
-                max_retries=2,
-                base_delay=1.0,
-                max_delay=5.0
-            )
-        )
+        self.reliability = create_tool_reliability_wrapper(self.name)
         
-    async def arun(self, kwargs: Dict[str, Any]) -> MockToolExecuteResponse:
+    async def arun(self, kwargs: Dict[str, Any]) -> ToolExecuteResponse:
         """Run the production tool with typed response and reliability wrapper"""
         async def _execute_with_reliability():
             response = await self.execute(kwargs, None, None)
-            return MockToolExecuteResponse(**response)
+            return ToolExecuteResponse(**response)
         
         return await self.reliability.execute(_execute_with_reliability)
     
@@ -189,18 +182,27 @@ class ProductionTool:
         run_id: Optional[str]
     ) -> Dict[str, Any]:
         """Execute the production tool with reliability and error handling"""
+        try:
+            return await self._execute_with_reliability(parameters, state, run_id)
+        except Exception as e:
+            return self._create_execution_error_response(e, run_id)
+    
+    async def _execute_with_reliability(
+        self, parameters: Dict[str, Any], state: Optional[DeepAgentState], run_id: Optional[str]
+    ) -> Dict[str, Any]:
+        """Execute tool with reliability wrapper"""
         async def _execute_tool():
             return await self._execute_internal(parameters, state, run_id)
-        
-        try:
-            return await self.reliability.execute(_execute_tool)
-        except Exception as e:
-            logger.error(f"Tool {self.name} execution failed: {e}")
-            return {
-                "success": False,
-                "error": str(e),
-                "metadata": {"tool": self.name, "service": "production", "run_id": run_id}
-            }
+        return await self.reliability.execute(_execute_tool)
+    
+    def _create_execution_error_response(self, error: Exception, run_id: Optional[str]) -> Dict[str, Any]:
+        """Create error response for execution failure"""
+        logger.error(f"Tool {self.name} execution failed: {error}")
+        return {
+            "success": False,
+            "error": str(error),
+            "metadata": {"tool": self.name, "service": "production", "run_id": run_id}
+        }
     
     async def _execute_internal(
         self,
@@ -209,29 +211,42 @@ class ProductionTool:
         run_id: Optional[str]
     ) -> Dict[str, Any]:
         """Internal execution method with service routing"""
-        if self.name == "generate_synthetic_data_batch":
-            return await self._execute_synthetic_data_batch(parameters)
-        elif self.name == "validate_synthetic_data":
-            return await self._execute_validate_synthetic_data(parameters)
-        elif self.name == "store_synthetic_data":
-            return await self._execute_store_synthetic_data(parameters)
-        elif self.name == "create_corpus":
-            return await self._execute_create_corpus(parameters)
-        elif self.name == "search_corpus":
-            return await self._execute_search_corpus(parameters)
-        elif self.name == "update_corpus":
-            return await self._execute_update_corpus(parameters)
-        elif self.name == "delete_corpus":
-            return await self._execute_delete_corpus(parameters)
-        elif self.name == "analyze_corpus":
-            return await self._execute_analyze_corpus(parameters)
-        elif self.name == "export_corpus":
-            return await self._execute_export_corpus(parameters)
-        elif self.name == "import_corpus":
-            return await self._execute_import_corpus(parameters)
-        elif self.name == "validate_corpus":
-            return await self._execute_validate_corpus(parameters)
+        synthetic_result = await self._try_synthetic_tools(parameters)
+        if synthetic_result:
+            return synthetic_result
+        
+        corpus_result = await self._try_corpus_tools(parameters)
+        if corpus_result:
+            return corpus_result
+            
         return await self._execute_default()
+    
+    async def _try_synthetic_tools(self, parameters: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Try to execute synthetic data tools."""
+        synthetic_tools = {
+            "generate_synthetic_data_batch": self._execute_synthetic_data_batch,
+            "validate_synthetic_data": self._execute_validate_synthetic_data,
+            "store_synthetic_data": self._execute_store_synthetic_data
+        }
+        if self.name in synthetic_tools:
+            return await synthetic_tools[self.name](parameters)
+        return None
+    
+    async def _try_corpus_tools(self, parameters: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Try to execute corpus management tools."""
+        corpus_tools = {
+            "create_corpus": self._execute_create_corpus,
+            "search_corpus": self._execute_search_corpus,
+            "update_corpus": self._execute_update_corpus,
+            "delete_corpus": self._execute_delete_corpus,
+            "analyze_corpus": self._execute_analyze_corpus,
+            "export_corpus": self._execute_export_corpus,
+            "import_corpus": self._execute_import_corpus,
+            "validate_corpus": self._execute_validate_corpus
+        }
+        if self.name in corpus_tools:
+            return await corpus_tools[self.name](parameters)
+        return None
     
     async def _execute_synthetic_data_batch(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute synthetic data batch generation via real service"""
@@ -250,11 +265,11 @@ class ProductionTool:
             }
         except Exception as e:
             logger.error(f"Synthetic data batch generation failed: {e}")
-            return {
-                "success": False,
-                "error": f"Failed to generate synthetic data: {str(e)}",
-                "metadata": {"tool": self.name, "service": "synthetic_data"}
-            }
+            return create_default_tool_result(
+                self.name, False, 
+                error=f"Failed to generate synthetic data: {str(e)}",
+                metadata={"service": "synthetic_data"}
+            )
     
     async def _execute_create_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Execute corpus creation via real service"""
@@ -381,16 +396,15 @@ class ProductionTool:
         except Exception as e:
             return {"success": False, "error": str(e), "metadata": {"tool": self.name}}
 
-    def _execute_delete_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_delete_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Delete corpus"""
         try:
             from app.services.corpus import corpus_service
-            import asyncio
             corpus_id = parameters.get('corpus_id')
             if not corpus_id:
                 return {"success": False, "error": "corpus_id required", "metadata": {"tool": self.name}}
             
-            asyncio.run(corpus_service.delete_corpus(None, corpus_id))
+            await corpus_service.delete_corpus(None, corpus_id)
             return {
                 "success": True,
                 "data": {"corpus_id": corpus_id, "deleted": True},
@@ -400,16 +414,15 @@ class ProductionTool:
         except Exception as e:
             return {"success": False, "error": str(e), "metadata": {"tool": self.name}}
 
-    def _execute_analyze_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_analyze_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Analyze corpus"""
         try:
             from app.services.corpus import corpus_service
-            import asyncio
             corpus_id = parameters.get('corpus_id')
             if not corpus_id:
                 return {"success": False, "error": "corpus_id required", "metadata": {"tool": self.name}}
             
-            stats = asyncio.run(corpus_service.get_corpus_statistics(None, corpus_id))
+            stats = await corpus_service.get_corpus_statistics(None, corpus_id)
             return {
                 "success": True,
                 "data": stats,
@@ -419,7 +432,7 @@ class ProductionTool:
         except Exception as e:
             return {"success": False, "error": str(e), "metadata": {"tool": self.name}}
 
-    def _execute_export_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_export_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Export corpus"""
         corpus_id = parameters.get('corpus_id')
         format_type = parameters.get('format', 'json')
@@ -430,7 +443,7 @@ class ProductionTool:
             "metadata": {"tool": self.name, "service": "corpus"}
         }
 
-    def _execute_import_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_import_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Import corpus"""
         source_url = parameters.get('source_url')
         corpus_name = parameters.get('name', 'imported_corpus')
@@ -441,16 +454,15 @@ class ProductionTool:
             "metadata": {"tool": self.name, "service": "corpus"}
         }
 
-    def _execute_validate_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_validate_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
         """Validate corpus"""
         try:
             from app.services.corpus import corpus_service
-            import asyncio
             corpus_id = parameters.get('corpus_id')
             if not corpus_id:
                 return {"success": False, "error": "corpus_id required", "metadata": {"tool": self.name}}
             
-            corpus = asyncio.run(corpus_service.get_corpus(None, corpus_id))
+            corpus = await corpus_service.get_corpus(None, corpus_id)
             validation = {"valid": corpus is not None, "errors": [] if corpus else ["Corpus not found"]}
             return {
                 "success": True,
@@ -461,7 +473,7 @@ class ProductionTool:
         except Exception as e:
             return {"success": False, "error": str(e), "metadata": {"tool": self.name}}
 
-    def _execute_default(self) -> Dict[str, Any]:
+    async def _execute_default(self) -> Dict[str, Any]:
         """Execute default tool response with proper error message"""
         return {
             "success": False, 

@@ -1,12 +1,46 @@
 """Agent state management models with immutable patterns."""
-from typing import Any, Dict, List, Optional, Union, ForwardRef
+from typing import Any, Dict, List, Optional, Union, TYPE_CHECKING
 from pydantic import BaseModel, Field, validator
 from datetime import datetime
 
-# Use forward references to avoid circular dependencies
-TriageResultRef = ForwardRef('TriageResult')
-DataAnalysisResponseRef = ForwardRef('DataAnalysisResponse')
-AnomalyDetectionResponseRef = ForwardRef('AnomalyDetectionResponse')
+# Import actual types to avoid circular dependencies
+from app.agents.triage_sub_agent.models import TriageResult
+
+# Use TYPE_CHECKING to break circular import
+if TYPE_CHECKING:
+    from app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
+
+
+class AgentMetadata(BaseModel):
+    """Metadata for agent execution tracking."""
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    execution_context: Dict[str, str] = Field(default_factory=dict)
+    custom_fields: Dict[str, str] = Field(default_factory=dict)
+    
+    def update_timestamp(self) -> 'AgentMetadata':
+        """Update the last updated timestamp."""
+        return self.model_copy(update={'last_updated': datetime.utcnow()})
+
+
+class PlanStep(BaseModel):
+    """Typed model for action plan steps."""
+    step_id: str
+    description: str
+    estimated_duration: Optional[str] = None
+    dependencies: List[str] = Field(default_factory=list)
+    resources_needed: List[str] = Field(default_factory=list)
+    status: str = "pending"
+    
+    
+class ReportSection(BaseModel):
+    """Typed model for report sections."""
+    section_id: str
+    title: str
+    content: str
+    section_type: str = "standard"
+    metadata: AgentMetadata = Field(default_factory=AgentMetadata)
+
 
 class OptimizationsResult(BaseModel):
     """Typed model for optimization results."""
@@ -15,27 +49,27 @@ class OptimizationsResult(BaseModel):
     cost_savings: Optional[float] = None
     performance_improvement: Optional[float] = None
     confidence_score: float = Field(ge=0.0, le=1.0, default=0.8)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: AgentMetadata = Field(default_factory=AgentMetadata)
 
 
 class ActionPlanResult(BaseModel):
     """Typed model for action plan results."""
-    plan_steps: List[Dict[str, Any]] = Field(default_factory=list)
+    plan_steps: List[PlanStep] = Field(default_factory=list)
     priority: str = "medium"
     estimated_duration: Optional[str] = None
     required_resources: List[str] = Field(default_factory=list)
     success_metrics: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: AgentMetadata = Field(default_factory=AgentMetadata)
 
 
 class ReportResult(BaseModel):
     """Typed model for report results."""
     report_type: str
     content: str
-    sections: List[Dict[str, Any]] = Field(default_factory=list)
+    sections: List[ReportSection] = Field(default_factory=list)
     attachments: List[str] = Field(default_factory=list)
     generated_at: datetime = Field(default_factory=datetime.utcnow)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: AgentMetadata = Field(default_factory=AgentMetadata)
 
 
 class SyntheticDataResult(BaseModel):
@@ -45,17 +79,17 @@ class SyntheticDataResult(BaseModel):
     sample_count: int = 0
     quality_score: float = Field(ge=0.0, le=1.0, default=0.8)
     file_path: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: AgentMetadata = Field(default_factory=AgentMetadata)
 
 
 class SupplyResearchResult(BaseModel):
     """Typed model for supply research results."""
     research_scope: str
-    findings: List[Dict[str, Any]] = Field(default_factory=list)
+    findings: List[str] = Field(default_factory=list)
     recommendations: List[str] = Field(default_factory=list)
     data_sources: List[str] = Field(default_factory=list)
     confidence_level: float = Field(ge=0.0, le=1.0, default=0.8)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: AgentMetadata = Field(default_factory=AgentMetadata)
 
 
 class DeepAgentState(BaseModel):
@@ -65,8 +99,8 @@ class DeepAgentState(BaseModel):
     user_id: Optional[str] = None
     
     # Typed result fields using proper models
-    triage_result: Optional[Union[TriageResultRef, Dict[str, Any]]] = None
-    data_result: Optional[Union[DataAnalysisResponseRef, Dict[str, Any]]] = None
+    triage_result: Optional[TriageResult] = None
+    data_result: Optional[Union["DataAnalysisResponse", "AnomalyDetectionResponse"]] = None
     optimizations_result: Optional[OptimizationsResult] = None
     action_plan_result: Optional[ActionPlanResult] = None
     report_result: Optional[ReportResult] = None
@@ -75,7 +109,7 @@ class DeepAgentState(BaseModel):
     
     final_report: Optional[str] = None
     step_count: int = 0  # Added for agent tracking
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: AgentMetadata = Field(default_factory=AgentMetadata)
     
     @validator('step_count')
     def validate_step_count(cls, v: int) -> int:
@@ -122,10 +156,13 @@ class DeepAgentState(BaseModel):
         """Create a new instance with incremented step count."""
         return self.copy_with_updates(step_count=self.step_count + 1)
     
-    def add_metadata(self, key: str, value: Any) -> 'DeepAgentState':
+    def add_metadata(self, key: str, value: str) -> 'DeepAgentState':
         """Create a new instance with additional metadata."""
-        new_metadata = self.metadata.copy()
-        new_metadata[key] = value
+        updated_custom = self.metadata.custom_fields.copy()
+        updated_custom[key] = value
+        new_metadata = self.metadata.model_copy(
+            update={'custom_fields': updated_custom}
+        ).update_timestamp()
         return self.copy_with_updates(metadata=new_metadata)
     
     def clear_sensitive_data(self) -> 'DeepAgentState':
@@ -139,7 +176,7 @@ class DeepAgentState(BaseModel):
             synthetic_data_result=None,
             supply_research_result=None,
             final_report=None,
-            metadata={}
+            metadata=AgentMetadata()
         )
     
     def merge_from(self, other_state: 'DeepAgentState') -> 'DeepAgentState':
@@ -148,9 +185,17 @@ class DeepAgentState(BaseModel):
             raise TypeError("other_state must be a DeepAgentState instance")
         
         # Prepare merged data
-        merged_metadata = self.metadata.copy()
+        merged_custom = self.metadata.custom_fields.copy()
+        merged_context = self.metadata.execution_context.copy()
+        
         if other_state.metadata:
-            merged_metadata.update(other_state.metadata)
+            merged_custom.update(other_state.metadata.custom_fields)
+            merged_context.update(other_state.metadata.execution_context)
+        
+        merged_metadata = AgentMetadata(
+            execution_context=merged_context,
+            custom_fields=merged_custom
+        )
         
         # Create new instance with merged data
         return self.copy_with_updates(
@@ -167,14 +212,13 @@ class DeepAgentState(BaseModel):
         )
 
 
-def try_resolve_forward_refs() -> None:
-    """Attempt to resolve forward references when models are available."""
+def rebuild_model() -> None:
+    """Rebuild the model after imports are complete."""
     try:
-        # Attempt to resolve forward references
         DeepAgentState.model_rebuild()
     except Exception:
-        # Safe to ignore - references will resolve when models are imported
+        # Safe to ignore - model will rebuild when needed
         pass
 
-# Initialize forward reference resolution
-try_resolve_forward_refs()
+# Initialize model rebuild
+rebuild_model()

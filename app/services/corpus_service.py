@@ -327,69 +327,47 @@ class CorpusService:
 # Legacy functions for backward compatibility
 # TODO: Migrate routes to use async CorpusService directly
 
-def get_corpus(db: Session, corpus_id: str):
-    """Legacy function to get corpus - DEPRECATED
-    
-    Use CorpusService.get_corpus() with async session instead.
-    """
+def _warn_deprecated(func_name: str, replacement: str) -> None:
+    """Helper to emit deprecation warnings"""
     warnings.warn(
-        "get_corpus() is deprecated. Use CorpusService.get_corpus() with async session.",
+        f"{func_name} is deprecated. Use {replacement} with async session.",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=3
     )
-    return asyncio.run(corpus_service.get_corpus(db, corpus_id))
+
+def _run_async_corpus_method(method_name: str, *args) -> any:
+    """Helper to run async corpus service methods"""
+    method = getattr(corpus_service, method_name)
+    return asyncio.run(method(*args))
+
+def get_corpus(db: Session, corpus_id: str):
+    """Legacy function to get corpus - DEPRECATED"""
+    _warn_deprecated("get_corpus()", "CorpusService.get_corpus()")
+    return _run_async_corpus_method("get_corpus", db, corpus_id)
 
 
 def get_corpora(db: Session, skip: int = 0, limit: int = 100):
-    """Legacy function to get corpora list - DEPRECATED
-    
-    Use CorpusService.get_corpora() with async session instead.
-    """
-    warnings.warn(
-        "get_corpora() is deprecated. Use CorpusService.get_corpora() with async session.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    return asyncio.run(corpus_service.get_corpora(db, skip, limit))
+    """Legacy function to get corpora list - DEPRECATED"""
+    _warn_deprecated("get_corpora()", "CorpusService.get_corpora()")
+    return _run_async_corpus_method("get_corpora", db, skip, limit)
 
 
 def create_corpus(db: Session, corpus: schemas.CorpusCreate, user_id: str):
-    """Legacy function to create corpus - DEPRECATED
-    
-    Use CorpusService.create_corpus() with async session instead.
-    """
-    warnings.warn(
-        "create_corpus() is deprecated. Use CorpusService.create_corpus() with async session.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    return asyncio.run(corpus_service.create_corpus(db, corpus, user_id))
+    """Legacy function to create corpus - DEPRECATED"""
+    _warn_deprecated("create_corpus()", "CorpusService.create_corpus()")
+    return _run_async_corpus_method("create_corpus", db, corpus, user_id)
 
 
 def update_corpus(db: Session, corpus_id: str, corpus: schemas.CorpusUpdate):
-    """Legacy function to update corpus - DEPRECATED
-    
-    Use CorpusService.update_corpus() with async session instead.
-    """
-    warnings.warn(
-        "update_corpus() is deprecated. Use CorpusService.update_corpus() with async session.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    return asyncio.run(corpus_service.update_corpus(db, corpus_id, corpus))
+    """Legacy function to update corpus - DEPRECATED"""
+    _warn_deprecated("update_corpus()", "CorpusService.update_corpus()")
+    return _run_async_corpus_method("update_corpus", db, corpus_id, corpus)
 
 
 def delete_corpus(db: Session, corpus_id: str):
-    """Legacy function to delete corpus - DEPRECATED
-    
-    Use CorpusService.delete_corpus() with async session instead.
-    """
-    warnings.warn(
-        "delete_corpus() is deprecated. Use CorpusService.delete_corpus() with async session.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    return asyncio.run(corpus_service.delete_corpus(db, corpus_id))
+    """Legacy function to delete corpus - DEPRECATED"""
+    _warn_deprecated("delete_corpus()", "CorpusService.delete_corpus()")
+    return _run_async_corpus_method("delete_corpus", db, corpus_id)
 
 
 async def generate_corpus_task(corpus_id: str, db: Session):
@@ -406,28 +384,18 @@ async def generate_corpus_task(corpus_id: str, db: Session):
     # Function intentionally does nothing - table creation handled in create_corpus
 
 
-def get_corpus_status(db: Session, corpus_id: str):
-    """Legacy function to get corpus status - DEPRECATED
-    
-    Use CorpusService.get_corpus() with async session instead.
-    """
-    warnings.warn(
-        "get_corpus_status() is deprecated. Use CorpusService.get_corpus() with async session.",
-        DeprecationWarning,
-        stacklevel=2
-    )
-    db_corpus = asyncio.run(corpus_service.get_corpus(db, corpus_id))
+def _get_corpus_status_helper(db: Session, corpus_id: str):
+    """Helper to get corpus and extract status"""
+    db_corpus = _run_async_corpus_method("get_corpus", db, corpus_id)
     return db_corpus.status if db_corpus else None
+
+def get_corpus_status(db: Session, corpus_id: str):
+    """Legacy function to get corpus status - DEPRECATED"""
+    _warn_deprecated("get_corpus_status()", "CorpusService.get_corpus()")
+    return _get_corpus_status_helper(db, corpus_id)
 
 
 async def get_corpus_content(db: Session, corpus_id: str):
-    """Legacy function to get corpus content - DEPRECATED
-    
-    Use CorpusService.get_corpus_content() with async session instead.
-    """
-    warnings.warn(
-        "get_corpus_content() is deprecated. Use CorpusService.get_corpus_content() with async session.",
-        DeprecationWarning,
-        stacklevel=2
-    )
+    """Legacy function to get corpus content - DEPRECATED"""
+    _warn_deprecated("get_corpus_content()", "CorpusService.get_corpus_content()")
     return await corpus_service.get_corpus_content(db, corpus_id)

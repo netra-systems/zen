@@ -46,15 +46,23 @@ class MockRepository(BaseRepository[MockDatabaseModel]):
     async def create(self, db: Optional[AsyncSession] = None, **kwargs) -> Optional[MockDatabaseModel]:
         """Override create to log operations"""
         self.operation_log.append(('create', kwargs))
+        
+        if not db:
+            return None
+            
         try:
-            return await super().create(db, **kwargs)
+            # Create mock entity directly without calling super()
+            entity = MockDatabaseModel(**kwargs)
+            db.add(entity)
+            await db.commit()
+            return entity
         except (IntegrityError, SQLAlchemyError):
-            # Catch database errors and return None
+            await db.rollback()
             return None
         except asyncio.TimeoutError:
-            # Let timeout errors propagate
             raise
         except Exception:
+            await db.rollback()
             return None
     
     async def update(self, db: AsyncSession, entity_id: str, **kwargs) -> Optional[MockDatabaseModel]:

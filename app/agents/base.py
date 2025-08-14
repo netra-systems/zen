@@ -8,6 +8,7 @@ from app.llm.llm_manager import LLMManager
 from app.schemas import SubAgentLifecycle, SubAgentUpdate, SubAgentState
 from app.schemas.websocket_unified import WebSocketMessage, WebSocketMessageType
 from app.agents.state import DeepAgentState
+from app.agents.interfaces import BaseAgentProtocol
 from app.logging_config import central_logger
 from langchain_core.messages import SystemMessage
 from starlette.websockets import WebSocketDisconnect
@@ -33,10 +34,7 @@ class BaseSubAgent(ABC):
         
         # Stream update that agent is starting
         if stream_updates and self.websocket_manager:
-            try:
-                await self._send_update(run_id, {"status": "starting", "message": f"{self.name} is starting"})
-            except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
-                self.logger.debug(f"WebSocket disconnected when sending start update: {e}")
+            await self._send_update(run_id, {"status": "starting", "message": f"{self.name} is starting"})
         
         # Subclasses can override to add specific entry conditions
         return await self.check_entry_conditions(state, run_id)
@@ -57,14 +55,11 @@ class BaseSubAgent(ABC):
         
         # Stream update that agent finished
         if stream_updates and self.websocket_manager:
-            try:
-                await self._send_update(run_id, {
-                    "status": status,
-                    "message": f"{self.name} {status}",
-                    "execution_time": execution_time
-                })
-            except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
-                self.logger.debug(f"WebSocket disconnected when sending finish update: {e}")
+            await self._send_update(run_id, {
+                "status": status,
+                "message": f"{self.name} {status}",
+                "execution_time": execution_time
+            })
         
         # Cleanup
         await self.cleanup(state, run_id)
@@ -72,46 +67,68 @@ class BaseSubAgent(ABC):
     async def run(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Main run method with lifecycle management."""
         try:
-            # Check entry conditions
-            if not await self._pre_run(state, run_id, stream_updates):
-                self.logger.warning(f"{self.name} entry conditions not met for run_id: {run_id}")
-                if stream_updates and self.websocket_manager:
-                    try:
-                        ws_user_id = self.user_id if self.user_id else run_id
-                        await self.websocket_manager.send_agent_log(
-                            ws_user_id, "warning", 
-                            f"Entry conditions not met for {self.name}",
-                            self.name
-                        )
-                    except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
-                        self.logger.debug(f"WebSocket disconnected when sending warning: {e}")
-                await self._post_run(state, run_id, stream_updates, success=False)
+            if not await self._handle_entry_conditions(state, run_id, stream_updates):
                 return
             
-            # Execute the agent's main logic
             await self.execute(state, run_id, stream_updates)
-            
-            # Exit successfully
             await self._post_run(state, run_id, stream_updates, success=True)
             
         except WebSocketDisconnect as e:
-            self.logger.info(f"WebSocket disconnected during {self.name} execution: {e}")
-            await self._post_run(state, run_id, stream_updates, success=False)
-            # Don't re-raise WebSocket disconnects
+            await self._handle_websocket_disconnect(e, state, run_id, stream_updates)
         except Exception as e:
-            self.logger.error(f"{self.name} failed for run_id: {run_id}: {e}")
-            if stream_updates and self.websocket_manager:
-                try:
-                    ws_user_id = self.user_id if self.user_id else run_id
-                    await self.websocket_manager.send_error(
-                        ws_user_id, 
-                        f"{self.name} encountered an error: {str(e)}",
-                        self.name
-                    )
-                except (WebSocketDisconnect, RuntimeError, ConnectionError):
-                    self.logger.debug(f"WebSocket disconnected when sending error")
-            await self._post_run(state, run_id, stream_updates, success=False)
+            await self._handle_execution_error(e, state, run_id, stream_updates)
             raise
+    
+    async def _handle_entry_conditions(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> bool:
+        """Handle entry condition checks and failures."""
+        if await self._pre_run(state, run_id, stream_updates):
+            return True
+        
+        self.logger.warning(f"{self.name} entry conditions not met for run_id: {run_id}")
+        await self._send_entry_condition_warning(run_id, stream_updates)
+        await self._post_run(state, run_id, stream_updates, success=False)
+        return False
+    
+    async def _send_entry_condition_warning(self, run_id: str, stream_updates: bool) -> None:
+        """Send warning about failed entry conditions."""
+        if not (stream_updates and self.websocket_manager):
+            return
+        
+        try:
+            ws_user_id = self.user_id if self.user_id else run_id
+            await self.websocket_manager.send_agent_log(
+                ws_user_id, "warning", 
+                f"Entry conditions not met for {self.name}",
+                self.name
+            )
+        except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
+            self.logger.debug(f"WebSocket disconnected when sending warning: {e}")
+    
+    async def _handle_websocket_disconnect(self, e: WebSocketDisconnect, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+        """Handle WebSocket disconnection during execution."""
+        self.logger.info(f"WebSocket disconnected during {self.name} execution: {e}")
+        await self._post_run(state, run_id, stream_updates, success=False)
+    
+    async def _handle_execution_error(self, e: Exception, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+        """Handle execution errors and send notifications."""
+        self.logger.error(f"{self.name} failed for run_id: {run_id}: {e}")
+        await self._send_error_notification(e, run_id, stream_updates)
+        await self._post_run(state, run_id, stream_updates, success=False)
+    
+    async def _send_error_notification(self, error: Exception, run_id: str, stream_updates: bool) -> None:
+        """Send error notification via WebSocket."""
+        if not (stream_updates and self.websocket_manager):
+            return
+        
+        try:
+            ws_user_id = self.user_id if self.user_id else run_id
+            await self.websocket_manager.send_error(
+                ws_user_id, 
+                f"{self.name} encountered an error: {str(error)}",
+                self.name
+            )
+        except (WebSocketDisconnect, RuntimeError, ConnectionError):
+            self.logger.debug(f"WebSocket disconnected when sending error")
     
     @abstractmethod
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
@@ -186,42 +203,82 @@ class BaseSubAgent(ABC):
         return self.state
     
     async def _send_update(self, run_id: str, data: Dict[str, Any]) -> None:
-        """Send WebSocket update for this agent using unified types."""
-        if self.websocket_manager:
+        """Send WebSocket update with proper error recovery."""
+        if not self.websocket_manager:
+            return
+            
+        max_retries = 3
+        retry_count = 0
+        
+        while retry_count < max_retries:
             try:
-                # Create a proper BaseMessage object
-                message_content = data.get("message", "")
-                message = SystemMessage(content=message_content)
-                
-                sub_agent_state = SubAgentState(
-                    messages=[message],
-                    next_node="",
-                    lifecycle=self.get_state()
-                )
-                # Get user_id from supervisor if available, otherwise use run_id
-                ws_user_id = getattr(self.websocket_manager, '_current_user_id', run_id) if hasattr(self.websocket_manager, '_current_user_id') else run_id
-                
-                # Create properly typed SubAgentUpdate payload
-                update_payload = SubAgentUpdate(
-                    sub_agent_name=self.name,
-                    state=sub_agent_state
-                )
-                
-                # Use unified WebSocketMessage type
-                websocket_message = WebSocketMessage(
-                    type=WebSocketMessageType.SUB_AGENT_UPDATE,
-                    payload=update_payload.model_dump()
-                )
-                
-                await self.websocket_manager.send_message(
-                    ws_user_id,
-                    websocket_message.model_dump()
-                )
+                await self._attempt_websocket_update(run_id, data)
+                return  # Success, exit retry loop
             except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
-                self.logger.debug(f"WebSocket disconnected when sending update: {e}")
-                # Don't re-raise, just log and continue
+                retry_count += 1
+                if retry_count >= max_retries:
+                    self.logger.warning(f"WebSocket update failed after {max_retries} attempts: {e}")
+                    await self._handle_websocket_failure(run_id, data, e)
+                    return
+                
+                # Exponential backoff for retries
+                await asyncio.sleep(0.1 * (2 ** retry_count))
+            except Exception as e:
+                self.logger.error(f"Unexpected error in WebSocket update: {e}")
+                return
+                
+    async def _attempt_websocket_update(self, run_id: str, data: Dict[str, Any]) -> None:
+        """Attempt to send WebSocket update."""
+        message_content = data.get("message", "")
+        message = SystemMessage(content=message_content)
+        
+        sub_agent_state = SubAgentState(
+            messages=[message],
+            next_node="",
+            lifecycle=self.get_state()
+        )
+        
+        ws_user_id = self._get_websocket_user_id(run_id)
+        
+        update_payload = SubAgentUpdate(
+            sub_agent_name=self.name,
+            state=sub_agent_state
+        )
+        
+        websocket_message = WebSocketMessage(
+            type=WebSocketMessageType.SUB_AGENT_UPDATE,
+            payload=update_payload.model_dump()
+        )
+        
+        await self.websocket_manager.send_message(
+            ws_user_id,
+            websocket_message.model_dump()
+        )
+        
+    def _get_websocket_user_id(self, run_id: str) -> str:
+        """Get WebSocket user ID with fallback."""
+        if hasattr(self.websocket_manager, '_current_user_id'):
+            return getattr(self.websocket_manager, '_current_user_id', run_id)
+        return run_id
+        
+    async def _handle_websocket_failure(self, run_id: str, data: Dict[str, Any], error: Exception) -> None:
+        """Handle WebSocket failure with graceful degradation."""
+        # Store failed update for potential retry later
+        if not hasattr(self, '_failed_updates'):
+            self._failed_updates = []
+        
+        self._failed_updates.append({
+            "run_id": run_id,
+            "data": data,
+            "timestamp": time.time(),
+            "error": str(error)
+        })
+        
+        # Keep only recent failed updates (max 10)
+        if len(self._failed_updates) > 10:
+            self._failed_updates = self._failed_updates[-10:]
 
-    async def run_in_background(self, state: DeepAgentState, run_id: str, stream_updates: bool):
+    async def run_in_background(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         loop = asyncio.get_event_loop()
         loop.create_task(self.run(state, run_id, stream_updates))
     

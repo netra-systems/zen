@@ -10,8 +10,8 @@ from datetime import datetime, timezone
 import json
 import time
 
-from app.agents.supervisor_consolidated import (
-    SupervisorAgent, 
+from app.agents.supervisor_consolidated import SupervisorAgent
+from app.agents.supervisor.execution_context import (
     ExecutionStrategy,
     AgentExecutionContext,
     AgentExecutionResult
