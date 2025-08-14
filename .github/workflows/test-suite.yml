@@ -39,7 +39,7 @@ env:
 jobs:
   determine-tests:
     name: Determine Test Strategy
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       test_level: ${{ steps.strategy.outputs.level }}
       affected_services: ${{ steps.strategy.outputs.services }}
@@ -125,7 +125,7 @@ jobs:
     name: Backend Tests
     needs: determine-tests
     if: needs.determine-tests.outputs.skip != 'true' && contains(needs.determine-tests.outputs.affected_services, 'backend')
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     
     steps:
       - name: Checkout code
@@ -169,7 +169,7 @@ jobs:
     name: Frontend Tests
     needs: determine-tests
     if: needs.determine-tests.outputs.skip != 'true' && contains(needs.determine-tests.outputs.affected_services, 'frontend')
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     
     steps:
       - name: Checkout code
@@ -219,7 +219,7 @@ jobs:
     name: Test Summary
     needs: [determine-tests, backend-tests, frontend-tests]
     if: always() && needs.determine-tests.outputs.skip != 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     
     steps:
       - name: Download all artifacts

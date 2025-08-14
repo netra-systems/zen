@@ -110,9 +110,14 @@ def run_jest_tests(args, isolation_manager=None) -> int:
     """Run Jest tests"""
     jest_args = ["npm", "run", "test"]
     
+    # Always add force exit and detect open handles for Windows
+    if "--" not in jest_args:
+        jest_args.append("--")
+    jest_args.extend(["--forceExit", "--detectOpenHandles"])
+    
     # Add Jest-specific arguments
     if args.coverage:
-        jest_args.extend(["--", "--coverage"])
+        jest_args.extend(["--coverage"])
         if isolation_manager and isolation_manager.directories:
             coverage_dir = isolation_manager.directories.get('frontend_coverage')
             jest_args.extend([f"--coverageDirectory={coverage_dir}"])
@@ -120,16 +125,16 @@ def run_jest_tests(args, isolation_manager=None) -> int:
             jest_args.extend(["--coverageDirectory=../reports/frontend-coverage"])
     
     if args.watch:
-        jest_args.extend(["--", "--watch"])
+        jest_args.extend(["--watch"])
     
     if args.update_snapshots:
-        jest_args.extend(["--", "--updateSnapshot"])
+        jest_args.extend(["--updateSnapshot"])
     
     if args.verbose:
-        jest_args.extend(["--", "--verbose"])
+        jest_args.extend(["--verbose"])
     
     if args.keyword:
-        jest_args.extend(["--", f"--testNamePattern={args.keyword}"])
+        jest_args.extend([f"--testNamePattern={args.keyword}"])
     
     # Add isolation-specific Jest arguments
     if isolation_manager:
@@ -140,12 +145,11 @@ def run_jest_tests(args, isolation_manager=None) -> int:
                 jest_args.extend([arg])
     
     if args.tests:
-        jest_args.extend(["--"] + args.tests)
+        jest_args.extend(args.tests)
     elif args.category and args.category != "e2e":
         patterns = TEST_CATEGORIES.get(args.category, [])
         if patterns:
             # Jest accepts multiple patterns, pass them properly
-            jest_args.append("--")
             jest_args.extend(patterns)
     
     # Run Jest
@@ -430,6 +434,13 @@ Examples:
         help="Use test isolation for concurrent execution"
     )
     
+    # Cleanup options
+    parser.add_argument(
+        "--cleanup-on-exit",
+        action="store_true",
+        help="Clean up Node processes on exit (automatic on Windows)"
+    )
+    
     args = parser.parse_args()
     
     # Setup test isolation if requested
@@ -508,6 +519,17 @@ Examples:
     else:
         print(f"[FAIL] CHECKS FAILED with exit code {exit_code}")
     print("=" * 80)
+    
+    # Clean up Node processes on Windows if requested or if tests failed
+    if args.cleanup_on_exit or (exit_code != 0 and sys.platform == "win32"):
+        cleanup_script = PROJECT_ROOT / "scripts" / "cleanup_test_processes.py"
+        if cleanup_script.exists():
+            try:
+                print("\nCleaning up test processes...")
+                subprocess.run([sys.executable, str(cleanup_script), "--force"], 
+                             timeout=10, capture_output=True)
+            except:
+                pass
     
     sys.exit(exit_code)
 

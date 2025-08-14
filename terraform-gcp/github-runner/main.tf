@@ -64,6 +64,7 @@ resource "google_project_iam_member" "runner_monitoring" {
 
 # Secret for GitHub Personal Access Token
 resource "google_secret_manager_secret" "github_token" {
+  project   = var.project_id  # EXPLICIT project specification
   secret_id = "github-runner-token"
   
   replication {
@@ -80,6 +81,7 @@ resource "google_secret_manager_secret_version" "github_token" {
 
 # IAM for accessing the secret
 resource "google_secret_manager_secret_iam_member" "github_token_access" {
+  project   = var.project_id  # EXPLICIT project specification
   secret_id = google_secret_manager_secret.github_token.secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.github_runner.email}"
@@ -112,6 +114,9 @@ locals {
     project_id        = var.project_id
     runner_version    = var.runner_version
   })
+  
+  # Additional script to ensure Docker is ready
+  docker_fix_script = file("${path.module}/scripts/fix-docker-daemon.sh")
 }
 
 # Compute instance for GitHub Runner

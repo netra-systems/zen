@@ -15,6 +15,11 @@ RUNNER_USER="runner"
 RUNNER_HOME="/home/$RUNNER_USER"
 RUNNER_DIR="$RUNNER_HOME/actions-runner"
 
+# Log file for debugging
+LOG_FILE="/var/log/github-runner-install.log"
+exec 1> >(tee -a "$LOG_FILE")
+exec 2>&1
+
 # Logging
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
@@ -23,24 +28,70 @@ log() {
 # Install dependencies
 install_dependencies() {
     log "Installing dependencies..."
-    apt-get update
-    apt-get install -y \
-        curl \
-        jq \
-        git \
-        build-essential \
-        libssl-dev \
-        libffi-dev \
-        python3 \
-        python3-venv \
-        python3-dev \
-        python3-pip \
-        docker.io \
-        docker-compose
+    apt-get update || { log "ERROR: apt-get update failed"; exit 1; }
     
-    # Enable Docker
+    # Install packages one by one to identify failures
+    PACKAGES="curl jq git build-essential libssl-dev libffi-dev python3 python3-venv python3-dev python3-pip"
+    for pkg in $PACKAGES; do
+        log "Installing $pkg..."
+        apt-get install -y $pkg || log "WARNING: Failed to install $pkg"
+    done
+    
+    # Install Docker separately with retry
+    log "Installing Docker..."
+    local max_retries=3
+    local retry_count=0
+    
+    while [ $retry_count -lt $max_retries ]; do
+        if apt-get install -y docker.io docker-compose; then
+            log "Docker installed successfully"
+            break
+        fi
+        retry_count=$((retry_count + 1))
+        log "Docker installation attempt $retry_count failed, retrying..."
+        sleep 5
+    done
+    
+    if [ $retry_count -eq $max_retries ]; then
+        log "ERROR: Failed to install Docker after $max_retries attempts"
+        exit 1
+    fi
+    
+    # Enable and start Docker with verification
+    log "Starting Docker service..."
+    systemctl daemon-reload
     systemctl enable docker
     systemctl start docker
+    
+    # Wait for Docker to be ready
+    local docker_ready=false
+    for i in {1..30}; do
+        if docker version &>/dev/null; then
+            docker_ready=true
+            log "Docker is ready"
+            break
+        fi
+        log "Waiting for Docker to start... ($i/30)"
+        sleep 2
+    done
+    
+    if [ "$docker_ready" = false ]; then
+        log "ERROR: Docker failed to start properly"
+        systemctl status docker --no-pager
+        journalctl -xe -u docker --no-pager | tail -50
+        exit 1
+    fi
+    
+    # Install Docker buildx
+    log "Installing Docker buildx..."
+    mkdir -p /usr/local/lib/docker/cli-plugins
+    curl -L "https://github.com/docker/buildx/releases/download/v0.11.2/buildx-v0.11.2.linux-amd64" \
+        -o /usr/local/lib/docker/cli-plugins/docker-buildx
+    chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+    
+    # Create default buildx builder
+    docker buildx create --name runner-builder --use || log "Buildx builder already exists"
+    docker buildx inspect --bootstrap || log "Failed to bootstrap buildx"
 }
 
 # Create runner user
@@ -48,6 +99,9 @@ create_runner_user() {
     if ! id "$RUNNER_USER" &>/dev/null; then
         log "Creating runner user..."
         useradd -m -s /bin/bash $RUNNER_USER
+        usermod -aG docker $RUNNER_USER
+    else
+        log "Runner user exists, adding to docker group..."
         usermod -aG docker $RUNNER_USER
     fi
 }
@@ -68,27 +122,39 @@ get_registration_token() {
     local github_token=$1
     log "Getting runner registration token..."
     
-    if [ -n "$GITHUB_REPO" ]; then
-        # Repository runner
-        RESPONSE=$(curl -sX POST \
-            -H "Authorization: token $github_token" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/$GITHUB_ORG/$GITHUB_REPO/actions/runners/registration-token")
-    else
-        # Organization runner
-        RESPONSE=$(curl -sX POST \
-            -H "Authorization: token $github_token" \
-            -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/orgs/$GITHUB_ORG/actions/runners/registration-token")
-    fi
+    # Add retry logic
+    local max_retries=3
+    local retry_count=0
     
-    REG_TOKEN=$(echo "$RESPONSE" | jq -r .token)
-    if [ "$REG_TOKEN" == "null" ] || [ -z "$REG_TOKEN" ]; then
-        log "ERROR: Failed to get registration token"
-        log "Response: $RESPONSE"
-        exit 1
-    fi
-    echo "$REG_TOKEN"
+    while [ $retry_count -lt $max_retries ]; do
+        if [ -n "$GITHUB_REPO" ]; then
+            # Repository runner
+            RESPONSE=$(curl -sX POST \
+                -H "Authorization: token $github_token" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/$GITHUB_ORG/$GITHUB_REPO/actions/runners/registration-token")
+        else
+            # Organization runner
+            RESPONSE=$(curl -sX POST \
+                -H "Authorization: token $github_token" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/orgs/$GITHUB_ORG/actions/runners/registration-token")
+        fi
+        
+        REG_TOKEN=$(echo "$RESPONSE" | jq -r .token)
+        if [ "$REG_TOKEN" != "null" ] && [ -n "$REG_TOKEN" ]; then
+            log "Successfully obtained registration token"
+            echo "$REG_TOKEN"
+            return 0
+        fi
+        
+        retry_count=$((retry_count + 1))
+        log "Attempt $retry_count failed. Response: $RESPONSE"
+        [ $retry_count -lt $max_retries ] && sleep 5
+    done
+    
+    log "ERROR: Failed to get registration token after $max_retries attempts"
+    exit 1
 }
 
 # Download and install runner
@@ -135,6 +201,16 @@ configure_runner() {
 # Install runner as service
 install_service() {
     log "Installing runner as service..."
+    
+    # Ensure Docker is accessible before starting runner
+    log "Verifying Docker access for runner user..."
+    su - $RUNNER_USER -c "docker version" || {
+        log "Docker not accessible, fixing permissions..."
+        systemctl restart docker
+        sleep 5
+        # Force group membership update
+        newgrp docker || true
+    }
     
     cd $RUNNER_DIR
     ./svc.sh install $RUNNER_USER
@@ -252,23 +328,64 @@ EOF
 # Main installation flow
 main() {
     log "Starting GitHub Actions runner installation..."
+    log "Script version: Enhanced with Docker fixes"
     
-    install_dependencies
-    create_runner_user
+    # Trap errors to log them
+    trap 'log "ERROR: Script failed at line $LINENO"' ERR
     
-    GITHUB_TOKEN=$(get_github_token)
-    REG_TOKEN=$(get_registration_token "$GITHUB_TOKEN")
+    # Step 1: Install dependencies
+    install_dependencies || { log "ERROR: Failed to install dependencies"; exit 1; }
     
-    install_runner
-    configure_runner "$REG_TOKEN"
-    install_service
-    setup_monitoring
-    setup_auto_update
-    cleanup_runner
+    # Step 2: Create runner user
+    create_runner_user || { log "ERROR: Failed to create runner user"; exit 1; }
     
-    log "GitHub Actions runner installation completed successfully!"
-    log "Runner status:"
-    systemctl status actions.runner.* --no-pager || true
+    # Step 3: Verify Docker is accessible by runner user
+    log "Verifying Docker access for runner user..."
+    if ! su - $RUNNER_USER -c "docker version" &>/dev/null; then
+        log "Fixing Docker permissions for runner user..."
+        # Force group reload
+        systemctl restart docker
+        sleep 3
+        # Try again
+        if ! su - $RUNNER_USER -c "docker version" &>/dev/null; then
+            log "WARNING: Runner user still cannot access Docker"
+        fi
+    fi
+    
+    # Step 4: Get GitHub tokens
+    log "Getting GitHub tokens..."
+    GITHUB_TOKEN=$(get_github_token) || { log "ERROR: Failed to get GitHub token"; exit 1; }
+    REG_TOKEN=$(get_registration_token "$GITHUB_TOKEN") || { log "ERROR: Failed to get registration token"; exit 1; }
+    
+    # Step 5: Install and configure runner
+    install_runner || { log "ERROR: Failed to install runner"; exit 1; }
+    configure_runner "$REG_TOKEN" || { log "ERROR: Failed to configure runner"; exit 1; }
+    
+    # Step 6: Install as service
+    install_service || { log "ERROR: Failed to install service"; exit 1; }
+    
+    # Step 7: Setup additional features
+    setup_monitoring || log "WARNING: Failed to setup monitoring"
+    setup_auto_update || log "WARNING: Failed to setup auto-update"
+    cleanup_runner || log "WARNING: Failed to setup cleanup"
+    
+    # Final verification
+    log "Performing final verification..."
+    if systemctl is-active --quiet actions.runner.*; then
+        log "✓ GitHub Actions runner is running"
+    else
+        log "✗ GitHub Actions runner is not running"
+        systemctl status actions.runner.* --no-pager || true
+    fi
+    
+    if su - $RUNNER_USER -c "docker version" &>/dev/null; then
+        log "✓ Docker is accessible by runner user"
+    else
+        log "✗ Docker is not accessible by runner user"
+    fi
+    
+    log "GitHub Actions runner installation completed!"
+    log "Check /var/log/github-runner-install.log for details"
 }
 
 # Run main function

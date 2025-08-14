@@ -17,32 +17,28 @@ class RecoveryMixin:
         retry_delay_ms: int = 100
     ) -> Dict[str, Any]:
         """Ingest data with retry logic"""
-        success = False
         retry_count = 0
         
         for attempt in range(max_retries):
             try:
-                # Simulate ingestion attempt
-                if attempt < 3:  # Fail first 3 attempts
-                    raise Exception("Connection failed")
-                    
-                # Success on 4th attempt (index 3)
-                success = True
-                break
+                # Try ingestion
+                result = await self.ingest_batch(records)
+                return {
+                    "success": True,
+                    "retry_count": retry_count,
+                    "records_ingested": result.get("records_ingested", len(records))
+                }
                 
             except Exception:
                 retry_count += 1
                 if attempt < max_retries - 1:
                     await asyncio.sleep(retry_delay_ms / 1000)
-        
-        # If max_retries is 5 but we only failed 3 times, set retry_count to 3
-        if max_retries == 5 and success:
-            retry_count = 3
                     
         return {
-            "success": success,
+            "success": False,
             "retry_count": retry_count,
-            "records_ingested": len(records) if success else 0
+            "records_ingested": 0,
+            "failed_records": len(records)
         }
     
     async def generate_monitored(

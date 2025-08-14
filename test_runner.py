@@ -55,7 +55,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=f"""
 Test Levels:
-{chr(10).join([f"  {level:<12} - {config['description']}" for level, config in TEST_LEVELS.items()])}
+{chr(10).join([f"  {level:<24} - {config['description']}" for level, config in TEST_LEVELS.items()])}
 
 Usage Examples:
   # Quick smoke tests (recommended for pre-commit)
@@ -66,6 +66,11 @@ Usage Examples:
   
   # Full comprehensive testing
   python test_runner.py --level comprehensive
+  
+  # Modular comprehensive testing (faster, more focused)
+  python test_runner.py --level comprehensive-backend
+  python test_runner.py --level comprehensive-agents
+  python test_runner.py --level comprehensive-database
   
   # Backend only testing
   python test_runner.py --level unit --backend-only

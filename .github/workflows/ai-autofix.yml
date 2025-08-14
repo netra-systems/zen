@@ -25,7 +25,7 @@ permissions:
 jobs:
   check-trigger:
     name: Check Trigger Conditions
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
       pr_number: ${{ steps.check.outputs.pr_number }}
@@ -72,7 +72,7 @@ jobs:
     name: Analyze Test Failures
     needs: check-trigger
     if: needs.check-trigger.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       fixable_tests: ${{ steps.analyze.outputs.fixable }}
       fix_strategy: ${{ steps.analyze.outputs.strategy }}
@@ -124,7 +124,7 @@ jobs:
     name: Generate AI Fixes
     needs: [check-trigger, analyze-failures]
     if: needs.analyze-failures.outputs.fixable_tests != '[]'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       max-parallel: 3
       matrix:
@@ -270,7 +270,7 @@ jobs:
     name: Create Tracking Issue
     needs: [generate-fixes]
     if: failure()
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     
     steps:
       - name: Create Issue

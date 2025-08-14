@@ -14,7 +14,7 @@ on:
 jobs:
   check-infrastructure:
     name: Check Infrastructure
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       cluster_exists: ${{ steps.check.outputs.cluster_exists }}
       cluster_status: ${{ steps.check.outputs.cluster_status }}
@@ -59,7 +59,7 @@ jobs:
     name: Check Services
     needs: check-infrastructure
     if: needs.check-infrastructure.outputs.cluster_exists == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       backend_status: ${{ steps.services.outputs.backend_status }}
       frontend_status: ${{ steps.services.outputs.frontend_status }}
@@ -121,7 +121,7 @@ jobs:
     name: Check Endpoints
     needs: check-infrastructure
     if: needs.check-infrastructure.outputs.cluster_exists == 'true'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       backend_url: ${{ steps.endpoints.outputs.backend_url }}
       frontend_url: ${{ steps.endpoints.outputs.frontend_url }}
@@ -181,7 +181,7 @@ jobs:
     name: Generate Status Report
     needs: [check-infrastructure, check-services, check-endpoints]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Generate status report
         uses: actions/github-script@v7

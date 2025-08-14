@@ -43,7 +43,7 @@ env:
 jobs:
   configure:
     name: Configure Environment
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       environment_name: ${{ steps.config.outputs.environment_name }}
       action: ${{ steps.config.outputs.action }}

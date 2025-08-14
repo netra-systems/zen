@@ -46,6 +46,69 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "run_coverage": True,
         "run_both": True
     },
+    "comprehensive-backend": {
+        "description": "Comprehensive backend tests only (15-20 minutes)",
+        "purpose": "Full backend validation without frontend",
+        "backend_args": ["--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 1200,
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-frontend": {
+        "description": "Comprehensive frontend tests only (10-15 minutes)",
+        "purpose": "Full frontend validation without backend",
+        "backend_args": [],
+        "frontend_args": ["--coverage"],
+        "timeout": 900,
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-core": {
+        "description": "Core functionality comprehensive tests (10-15 minutes)",
+        "purpose": "Deep validation of core components only",
+        "backend_args": ["--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-k", "core or config or dependencies", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 900,
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-agents": {
+        "description": "Agent system comprehensive tests (10-15 minutes)",
+        "purpose": "Deep validation of multi-agent system",
+        "backend_args": ["--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-k", "agent", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 900,
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-websocket": {
+        "description": "WebSocket comprehensive tests (5-10 minutes)",
+        "purpose": "Deep validation of WebSocket functionality",
+        "backend_args": ["--coverage", f"--parallel={min(2, OPTIMAL_WORKERS)}", "-k", "websocket or ws_manager", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 600,
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-database": {
+        "description": "Database comprehensive tests (10-15 minutes)",
+        "purpose": "Deep validation of all database operations",
+        "backend_args": ["--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-k", "database or repository or clickhouse or postgres", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 900,
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-api": {
+        "description": "API comprehensive tests (10-15 minutes)",
+        "purpose": "Deep validation of all API endpoints",
+        "backend_args": ["--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-k", "routes or api", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 900,
+        "run_coverage": True,
+        "run_both": False
+    },
     "critical": {
         "description": "Critical path tests only (1-2 minutes)",
         "purpose": "Essential functionality verification",

@@ -24,7 +24,7 @@ env:
 jobs:
   cleanup-terraform-locks:
     name: Cleanup Terraform Locks
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 10
     
     steps:
@@ -209,7 +209,7 @@ jobs:
 
   monitor-active-locks:
     name: Monitor Active Locks
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: github.event_name == 'schedule'
     
     steps:

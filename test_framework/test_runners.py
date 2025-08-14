@@ -8,6 +8,8 @@ import sys
 import os
 import subprocess
 import time
+import atexit
+import signal
 from pathlib import Path
 from typing import Tuple, List, Dict, Optional, Any
 from dotenv import load_dotenv
@@ -19,6 +21,36 @@ from .test_parser import parse_test_counts, parse_coverage, parse_cypress_counts
 load_dotenv()
 
 PROJECT_ROOT = Path(__file__).parent.parent
+
+# Track subprocesses for cleanup
+_active_processes = []
+
+def cleanup_processes():
+    """Clean up any active subprocesses on exit."""
+    global _active_processes
+    for proc in _active_processes:
+        try:
+            if proc.poll() is None:  # Process is still running
+                proc.terminate()
+                try:
+                    proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+        except:
+            pass
+    _active_processes = []
+
+# Register cleanup on exit
+atexit.register(cleanup_processes)
+
+def handle_signal(signum, frame):
+    """Handle interrupt signals."""
+    cleanup_processes()
+    sys.exit(1)
+
+# Register signal handlers
+signal.signal(signal.SIGINT, handle_signal)
+signal.signal(signal.SIGTERM, handle_signal)
 
 
 def print_output(stdout: str, stderr: str):
@@ -137,6 +169,8 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
 
 def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, Any] = None) -> Tuple[int, str]:
     """Run frontend tests with specified arguments."""
+    global _active_processes
+    
     print(f"\n{'='*60}")
     print("RUNNING FRONTEND TESTS")
     print(f"{'='*60}")
@@ -158,46 +192,73 @@ def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, A
         
     cmd = [sys.executable, str(frontend_script)] + args
     
+    # Add cleanup flag for frontend tests
+    cmd.append("--cleanup-on-exit")
+    
     try:
-        result = subprocess.run(
+        # Use Popen for better process control
+        process = subprocess.Popen(
             cmd, 
             cwd=PROJECT_ROOT, 
-            capture_output=True, 
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
             encoding='utf-8',
-            errors='replace',
-            timeout=timeout
+            errors='replace'
         )
         
+        # Track the process for cleanup
+        _active_processes.append(process)
+        
+        # Wait for completion with timeout
+        stdout, stderr = process.communicate(timeout=timeout)
+        result_code = process.returncode
+        
+        # Remove from active processes
+        if process in _active_processes:
+            _active_processes.remove(process)
+        
         duration = time.time() - start_time
+        output = stdout + "\n" + stderr
         
         if results:
             results["frontend"]["duration"] = duration
-            results["frontend"]["exit_code"] = result.returncode
-            results["frontend"]["output"] = result.stdout + "\n" + result.stderr
-            results["frontend"]["status"] = "passed" if result.returncode == 0 else "failed"
+            results["frontend"]["exit_code"] = result_code
+            results["frontend"]["output"] = output
+            results["frontend"]["status"] = "passed" if result_code == 0 else "failed"
             
             # Parse test counts from output
-            counts = parse_test_counts(result.stdout + result.stderr, "frontend")
+            counts = parse_test_counts(output, "frontend")
             results["frontend"]["test_counts"] = counts
             
             # Extract test details for unified reporter
-            test_details = extract_test_details(result.stdout + result.stderr, "frontend")
+            test_details = extract_test_details(output, "frontend")
             results["frontend"]["test_details"] = test_details
             
             # Parse coverage
-            coverage = parse_coverage(result.stdout + result.stderr)
+            coverage = parse_coverage(output)
             if coverage is not None:
                 results["frontend"]["coverage"] = coverage
         
         # Print output with proper encoding handling
-        print_output(result.stdout, result.stderr)
+        print_output(stdout, stderr)
         
-        print(f"[{'PASS' if result.returncode == 0 else 'FAIL'}] Frontend tests completed in {duration:.2f}s")
+        print(f"[{'PASS' if result_code == 0 else 'FAIL'}] Frontend tests completed in {duration:.2f}s")
         
-        return result.returncode, result.stdout + result.stderr
+        return result_code, output
         
     except subprocess.TimeoutExpired:
+        # Kill the process and its children
+        try:
+            process.kill()
+            process.wait(timeout=5)
+        except:
+            pass
+        
+        # Remove from active processes
+        if process in _active_processes:
+            _active_processes.remove(process)
+        
         duration = time.time() - start_time
         if results:
             results["frontend"]["duration"] = duration
@@ -206,6 +267,16 @@ def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, A
             results["frontend"]["output"] = f"Tests timed out after {timeout}s"
         
         print(f"[TIMEOUT] Frontend tests timed out after {timeout}s")
+        
+        # Run cleanup script to kill any hanging Node processes
+        cleanup_script = PROJECT_ROOT / "scripts" / "cleanup_test_processes.py"
+        if cleanup_script.exists():
+            try:
+                subprocess.run([sys.executable, str(cleanup_script), "--force"], 
+                             timeout=10, capture_output=True)
+            except:
+                pass
+        
         return -1, f"Tests timed out after {timeout}s"
 
 

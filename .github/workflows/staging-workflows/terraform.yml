@@ -35,7 +35,7 @@ env:
 jobs:
   terraform:
     name: Terraform ${{ inputs.action }}
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 45
     outputs:
       backend_url: ${{ steps.outputs.outputs.backend_url }}
