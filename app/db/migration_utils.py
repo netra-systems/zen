@@ -4,8 +4,15 @@ import alembic.config
 import alembic.script
 from sqlalchemy import create_engine
 from alembic.runtime.migration import MigrationContext
+from pathlib import Path
 from typing import Optional, Tuple
 import logging
+
+
+def _get_alembic_ini_path() -> str:
+    """Get absolute path to alembic.ini file."""
+    project_root = Path(__file__).parent.parent.parent
+    return str(project_root / "config" / "alembic.ini")
 
 
 def get_sync_database_url(database_url: str) -> str:
@@ -31,7 +38,10 @@ def get_head_revision(alembic_cfg: alembic.config.Config) -> str:
 
 def create_alembic_config(database_url: str) -> alembic.config.Config:
     """Create Alembic configuration."""
-    cfg = alembic.config.Config("config/alembic.ini")
+    alembic_ini_path = _get_alembic_ini_path()
+    if not Path(alembic_ini_path).exists():
+        raise FileNotFoundError(f"Alembic configuration file not found: {alembic_ini_path}")
+    cfg = alembic.config.Config(alembic_ini_path)
     cfg.set_main_option("sqlalchemy.url", database_url)
     return cfg
 
