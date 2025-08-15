@@ -22,6 +22,10 @@ from app.core.reliability import (
     get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
 )
 from app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
+from app.llm.observability import (
+    start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
+    log_agent_communication, log_agent_input, log_agent_output
+)
 
 # Import from modular structure
 from app.agents.triage_sub_agent.models import (
@@ -118,6 +122,9 @@ class TriageSubAgent(BaseSubAgent):
     async def execute(self, state: DeepAgentState, run_id: str, 
                      stream_updates: bool) -> None:
         """Execute enhanced triage with comprehensive fallback handling."""
+        # Log agent communication start
+        log_agent_communication("Supervisor", "TriageSubAgent", run_id, "execute_request")
+        
         start_time = time.time()
         
         try:
@@ -349,7 +356,12 @@ class TriageSubAgent(BaseSubAgent):
         await self._send_processing_status_update(run_id, stream_updates)
         triage_result = await self._get_or_generate_triage_result(state, run_id, start_time)
         
-        return self._finalize_triage_result(triage_result, state.user_request, run_id)
+        result = self._finalize_triage_result(triage_result, state.user_request, run_id)
+        
+        # Log agent communication completion
+        log_agent_communication("TriageSubAgent", "Supervisor", run_id, "execute_response")
+        
+        return result
     
     async def _send_processing_status_update(self, run_id: str, stream_updates: bool) -> None:
         """Send processing status update via WebSocket."""
@@ -406,13 +418,31 @@ class TriageSubAgent(BaseSubAgent):
     
     async def _try_structured_then_fallback_llm(self, enhanced_prompt: str, run_id: str) -> dict:
         """Try structured LLM first, then fallback to regular LLM."""
+        correlation_id = generate_llm_correlation_id()
+        
+        # Start heartbeat for LLM operation
+        start_llm_heartbeat(correlation_id, "TriageSubAgent")
+        
         try:
+            # Log input to LLM
+            log_agent_input("TriageSubAgent", "LLM", len(enhanced_prompt), correlation_id)
+            
             validated_result = await self.llm_manager.ask_structured_llm(
                 enhanced_prompt, llm_config_name='triage', schema=TriageResult, use_cache=False
             )
+            
+            # Log output from LLM
+            log_agent_output("LLM", "TriageSubAgent", 
+                           len(str(validated_result)), "success", correlation_id)
+            
             return validated_result.model_dump()
-        except Exception:
+        except Exception as e:
+            # Log error output
+            log_agent_output("LLM", "TriageSubAgent", 0, "error", correlation_id)
             return await self._fallback_llm_processing(enhanced_prompt, run_id)
+        finally:
+            # Stop heartbeat
+            stop_llm_heartbeat(correlation_id)
     
     async def _execute_llm_with_fallback_protection(self, _llm_operation) -> Any:
         """Execute LLM operation with fallback protection."""
@@ -440,10 +470,27 @@ class TriageSubAgent(BaseSubAgent):
     
     async def _get_llm_response_with_json_instruction(self, enhanced_prompt: str) -> str:
         """Get LLM response with JSON formatting instruction."""
-        return await self.llm_manager.ask_llm(
-            enhanced_prompt + "\n\nIMPORTANT: Return a properly formatted JSON object.",
-            llm_config_name='triage'
-        )
+        correlation_id = generate_llm_correlation_id()
+        
+        # Start heartbeat for fallback LLM operation
+        start_llm_heartbeat(correlation_id, "TriageSubAgent-Fallback")
+        
+        try:
+            prompt = enhanced_prompt + "\n\nIMPORTANT: Return a properly formatted JSON object."
+            
+            # Log input to LLM
+            log_agent_input("TriageSubAgent-Fallback", "LLM", len(prompt), correlation_id)
+            
+            response = await self.llm_manager.ask_llm(prompt, llm_config_name='triage')
+            
+            # Log output from LLM
+            log_agent_output("LLM", "TriageSubAgent-Fallback", 
+                           len(response), "success", correlation_id)
+            
+            return response
+        finally:
+            # Stop heartbeat
+            stop_llm_heartbeat(correlation_id)
     
     def _process_extracted_json(self, extracted_json: Optional[dict]) -> dict:
         """Process extracted JSON with validation attempt."""

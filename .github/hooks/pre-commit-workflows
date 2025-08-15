@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""Pre-commit hook for validating GitHub Actions workflows."""
+
+import subprocess
+import sys
+from pathlib import Path
+
+
+def main():
+    """Validate workflows before commit."""
+    # Check if any workflow files are being committed
+    result = subprocess.run(
+        ["git", "diff", "--cached", "--name-only"],
+        capture_output=True,
+        text=True
+    )
+    
+    files = result.stdout.strip().split("\n")
+    workflow_files = [f for f in files if f.startswith(".github/workflows/") and f.endswith((".yml", ".yaml"))]
+    
+    if not workflow_files:
+        return 0
+    
+    print("Validating GitHub Actions workflows...")
+    
+    # Run workflow validation
+    validator_path = Path(__file__).parent.parent.parent / "scripts" / "workflow_validator.py"
+    
+    if not validator_path.exists():
+        print(f"Warning: Validator not found at {validator_path}")
+        return 0
+    
+    result = subprocess.run([sys.executable, str(validator_path)], capture_output=True, text=True)
+    
+    if result.returncode != 0:
+        print("Workflow validation failed!")
+        print(result.stdout)
+        print(result.stderr)
+        print("\nFix the issues above before committing.")
+        return 1
+    
+    print("Workflow validation passed!")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

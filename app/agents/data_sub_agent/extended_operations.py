@@ -20,12 +20,7 @@ class ExtendedOperations:
         
     async def _process_internal(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Internal processing method for retry and cache operations."""
-        # For test compatibility, delegate to agent if method exists
-        agent_method = getattr(self.agent, '_process_internal', None)
-        if agent_method and callable(agent_method):
-            # Check if it's a mock (for tests) or real method
-            if hasattr(agent_method, '_mock_name') or hasattr(agent_method, 'side_effect'):
-                return await agent_method(data)
+        # Delegate to agent's process_data method directly
         result = await self.agent.process_data(data)
         return result
         
@@ -97,9 +92,16 @@ class ExtendedOperations:
     async def process_and_persist(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process data and persist results."""
         result = await self.agent.process_data(data)
+        
+        # Generate real ID using timestamp and agent name
+        from datetime import datetime, UTC
+        timestamp = datetime.now(UTC)
+        real_id = f"{self.agent.name}_{int(timestamp.timestamp())}"
+        
         result.update({
             "persisted": True,
-            "id": "saved_123"  # Mock persistence ID
+            "id": real_id,
+            "timestamp": timestamp.isoformat()
         })
         return result
         

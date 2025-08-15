@@ -257,6 +257,44 @@
         - Check SPEC/no_test_stubs.xml before adding any test-like code
       </prevention>
     </pattern>
+    
+    <pattern id="clickhouse_array_syntax">
+      <name>ClickHouse Array Syntax Errors</name>
+      <triggers>
+        - Writing ClickHouse queries manually
+        - Using SQL-style array access syntax
+        - Query simplification or transformation
+        - LLM-generated queries
+        - Cached queries from old implementations
+      </triggers>
+      <regression>
+        - Error 386: NO_COMMON_TYPE in ClickHouse
+        - Type mismatch between Array(T) and T in conditionals
+        - Queries fail at runtime despite looking correct
+        - Query simplification breaks function names with .lower()
+      </regression>
+      <prevention>
+        - ALWAYS use arrayElement(array, index) not array[index]
+        - Use query_builder.py for all query generation
+        - Enable ClickHouseQueryInterceptor on all clients
+        - Validate queries with query_fix_validator.py
+        - Detect LLM queries with llm_query_detector.py
+        - NEVER use .lower() on ClickHouse queries
+        - Test all query patterns before deployment
+      </prevention>
+      <detection>
+        - Monitor for Error Code 386 in logs
+        - Check for patterns: metrics.value[idx]
+        - Look for lowercased functions: arrayfirstindex
+        - Validate all conditional statements with arrays
+      </detection>
+      <files>
+        <file>app/agents/data_sub_agent/query_builder.py</file>
+        <file>app/agents/data_sub_agent/query_fix_validator.py</file>
+        <file>app/agents/data_sub_agent/llm_query_detector.py</file>
+        <file>app/db/clickhouse_query_fixer.py</file>
+      </files>
+    </pattern>
   </common_regression_patterns>
 
   <ambiguous_prompt_handling>

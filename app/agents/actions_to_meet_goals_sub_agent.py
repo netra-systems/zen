@@ -17,6 +17,10 @@ from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.state import DeepAgentState
 from app.agents.utils import extract_json_from_response, extract_partial_json
 from app.logging_config import central_logger as logger
+from app.llm.observability import (
+    start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
+    log_agent_communication, log_agent_input, log_agent_output
+)
 from app.core.reliability_utils import create_agent_reliability_wrapper
 from app.core.fallback_utils import create_agent_fallback_strategy
 from app.agents.input_validation import validate_agent_input
@@ -38,10 +42,16 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
     @validate_agent_input('ActionsToMeetGoalsSubAgent')
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute the actions to meet goals logic."""
+        # Log agent communication start
+        log_agent_communication("Supervisor", "ActionsToMeetGoalsSubAgent", run_id, "execute_request")
+        
         main_executor = self._create_main_executor(state, run_id, stream_updates)
         fallback_executor = self._create_fallback_executor(state, run_id, stream_updates)
         result = await self._execute_with_protection(main_executor, fallback_executor, run_id)
         await self._apply_reliability_protection(result)
+        
+        # Log agent communication completion
+        log_agent_communication("ActionsToMeetGoalsSubAgent", "Supervisor", run_id, "execute_response")
 
     def _create_main_executor(self, state: DeepAgentState, run_id: str, stream_updates: bool):
         """Create main execution function."""
@@ -83,10 +93,28 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
 
     async def _get_llm_response(self, prompt: str, run_id: str) -> str:
         """Get response from LLM with size monitoring."""
-        self._log_prompt_size(prompt, run_id)
-        llm_response = await self.llm_manager.ask_llm(prompt, llm_config_name='actions_to_meet_goals')
-        self._log_response_size(llm_response, run_id)
-        return llm_response
+        correlation_id = generate_llm_correlation_id()
+        
+        # Start heartbeat for LLM operation
+        start_llm_heartbeat(correlation_id, "ActionsToMeetGoalsSubAgent")
+        
+        try:
+            self._log_prompt_size(prompt, run_id)
+            
+            # Log input to LLM
+            log_agent_input("ActionsToMeetGoalsSubAgent", "LLM", len(prompt), correlation_id)
+            
+            llm_response = await self.llm_manager.ask_llm(prompt, llm_config_name='actions_to_meet_goals')
+            
+            # Log output from LLM
+            log_agent_output("LLM", "ActionsToMeetGoalsSubAgent", 
+                           len(llm_response) if llm_response else 0, "success", correlation_id)
+            
+            self._log_response_size(llm_response, run_id)
+            return llm_response
+        finally:
+            # Stop heartbeat
+            stop_llm_heartbeat(correlation_id)
 
     def _log_prompt_size(self, prompt: str, run_id: str):
         """Log prompt size if large."""

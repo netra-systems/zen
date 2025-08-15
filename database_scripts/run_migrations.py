@@ -2,10 +2,11 @@ import os
 import alembic.config
 
 print(os.getcwd())
-os.environ['DATABASE_URL'] = 'postgresql+asyncpg://postgres:123@localhost/netra'
+user = os.environ.get('USER')
+os.environ['DATABASE_URL'] = f'postgresql+asyncpg://{user}@localhost/netra'
 alembic_args = [
     '-c',
-    'alembic.ini',
+    'config/alembic.ini',
     'upgrade',
     'head',
 ]

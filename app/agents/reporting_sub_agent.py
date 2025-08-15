@@ -21,6 +21,10 @@ from app.core.reliability import (
     get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
 )
 from app.agents.input_validation import validate_agent_input
+from app.llm.observability import (
+    start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
+    log_agent_communication, log_agent_input, log_agent_output
+)
 
 
 class ReportingSubAgent(BaseSubAgent):
@@ -53,6 +57,9 @@ class ReportingSubAgent(BaseSubAgent):
     @validate_agent_input('ReportingSubAgent')
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute the reporting logic."""
+        # Log agent communication start
+        log_agent_communication("Supervisor", "ReportingSubAgent", run_id, "execute_request")
+        
         main_operation = self._create_main_reporting_operation(state, run_id, stream_updates)
         fallback_operation = self._create_fallback_reporting_operation(state, run_id, stream_updates)
         
@@ -62,13 +69,38 @@ class ReportingSubAgent(BaseSubAgent):
             fallback=fallback_operation,
             timeout=30.0
         )
+        
+        # Log agent communication completion
+        log_agent_communication("ReportingSubAgent", "Supervisor", run_id, "execute_response")
     
     def _create_main_reporting_operation(self, state: DeepAgentState, run_id: str, stream_updates: bool):
         """Create the main reporting operation function."""
         async def _execute_reporting():
             await self._send_processing_update(run_id, stream_updates)
             prompt = self._build_reporting_prompt(state)
-            llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='reporting')
+            
+            # Generate correlation ID and start heartbeat
+            correlation_id = generate_llm_correlation_id()
+            start_llm_heartbeat(correlation_id, "ReportingSubAgent")
+            
+            try:
+                # Log input to LLM
+                log_agent_input("ReportingSubAgent", "LLM", len(prompt), correlation_id)
+                
+                llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='reporting')
+                
+                # Log output from LLM
+                log_agent_output("LLM", "ReportingSubAgent", 
+                               len(llm_response_str), "success", correlation_id)
+                
+            except Exception as e:
+                # Log error output
+                log_agent_output("LLM", "ReportingSubAgent", 0, "error", correlation_id)
+                raise
+            finally:
+                # Stop heartbeat
+                stop_llm_heartbeat(correlation_id)
+            
             report_result = self._extract_and_validate_report(llm_response_str, run_id)
             state.report_result = self._create_report_result(report_result)
             await self._send_success_update(run_id, stream_updates, report_result)

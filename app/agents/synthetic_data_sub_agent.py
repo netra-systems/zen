@@ -24,6 +24,10 @@ from app.agents.synthetic_data_generator import (
     SyntheticDataGenerator, SyntheticDataResult, GenerationStatus
 )
 from app.logging_config import central_logger
+from app.llm.observability import (
+    start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
+    log_agent_communication, log_agent_input, log_agent_output
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -70,6 +74,9 @@ class SyntheticDataSubAgent(BaseSubAgent):
 
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute synthetic data generation"""
+        # Log agent communication start
+        log_agent_communication("Supervisor", "SyntheticDataSubAgent", run_id, "execute_request")
+        
         start_time = time.time()
         
         try:
@@ -84,6 +91,9 @@ class SyntheticDataSubAgent(BaseSubAgent):
             await self._execute_generation(
                 workload_profile, state, run_id, stream_updates, start_time
             )
+            
+            # Log agent communication completion
+            log_agent_communication("SyntheticDataSubAgent", "Supervisor", run_id, "execute_response")
             
         except Exception as e:
             await self._handle_generation_error(e, state, run_id, stream_updates)
@@ -207,7 +217,29 @@ class SyntheticDataSubAgent(BaseSubAgent):
         """Parse custom profile from user request"""
         try:
             prompt = self._create_parsing_prompt(user_request)
-            response = await self.llm_manager.ask_llm(prompt, llm_config_name='default')
+            
+            # Generate correlation ID and start heartbeat
+            correlation_id = generate_llm_correlation_id()
+            start_llm_heartbeat(correlation_id, "SyntheticDataSubAgent")
+            
+            try:
+                # Log input to LLM
+                log_agent_input("SyntheticDataSubAgent", "LLM", len(prompt), correlation_id)
+                
+                response = await self.llm_manager.ask_llm(prompt, llm_config_name='default')
+                
+                # Log output from LLM
+                log_agent_output("LLM", "SyntheticDataSubAgent", 
+                               len(response), "success", correlation_id)
+                
+            except Exception as e:
+                # Log error output
+                log_agent_output("LLM", "SyntheticDataSubAgent", 0, "error", correlation_id)
+                raise
+            finally:
+                # Stop heartbeat
+                stop_llm_heartbeat(correlation_id)
+            
             params = extract_json_from_response(response)
             
             if params:

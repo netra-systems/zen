@@ -53,8 +53,11 @@ class ConfigValidator:
             # Allow SQLite for testing environment
             errors.append("Database URL must be a PostgreSQL connection string")
             
+        # Skip ClickHouse validation if ClickHouse is disabled in dev mode
+        if hasattr(config, 'dev_mode_clickhouse_enabled') and not config.dev_mode_clickhouse_enabled:
+            self._logger.info("ClickHouse disabled in dev mode - skipping ClickHouse validation")
         # Check ClickHouse configurations
-        if config.clickhouse_logging.enabled:
+        elif config.clickhouse_logging.enabled:
             clickhouse_configs = [
                 ("clickhouse_native", config.clickhouse_native),
                 ("clickhouse_https", config.clickhouse_https),
@@ -146,8 +149,11 @@ class ConfigValidator:
         """Validate external service configurations."""
         errors = []
         
+        # Skip Redis validation if Redis is disabled in dev mode
+        if hasattr(config, 'dev_mode_redis_enabled') and not config.dev_mode_redis_enabled:
+            self._logger.info("Redis disabled in dev mode - skipping Redis validation")
         # Check Redis configuration (if used)
-        if hasattr(config, 'redis') and config.redis:
+        elif hasattr(config, 'redis') and config.redis:
             if not config.redis.host:
                 errors.append("Redis host is not configured")
             if not config.redis.password and config.environment == "production":
