@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, AsyncGenerator, Callable, Dict, List, Optional
 
 from app.core.error_recovery import RecoveryContext, OperationType
 from app.core.error_codes import ErrorSeverity
@@ -367,3 +367,69 @@ class RetryManager:
 
 # Global retry manager instance
 retry_manager = RetryManager()
+
+
+async def exponential_backoff_retry(
+    async_generator_func: AsyncGenerator,
+    retry_config: RetryConfig,
+    retryable_exceptions: tuple = (),
+    exception_classifier: Optional[Callable] = None,
+    logger: Optional[Any] = None
+) -> AsyncGenerator:
+    """Execute async generator with exponential backoff retry logic.
+    
+    Args:
+        async_generator_func: Async generator function to retry
+        retry_config: Configuration for retry behavior
+        retryable_exceptions: Tuple of exceptions to retry on
+        exception_classifier: Function to classify if error is retryable
+        logger: Logger for retry messages
+        
+    Yields:
+        Results from the async generator with retry metadata
+    """
+    retry_count = 0
+    last_exception = None
+    
+    while retry_count <= retry_config.max_retries:
+        try:
+            async for result in async_generator_func:
+                # Add retry metadata to result
+                if hasattr(result, '__dict__'):
+                    result.retry_count = retry_count
+                yield result
+                return
+        except retryable_exceptions as e:
+            last_exception = e
+            
+            # Check if we should retry
+            if exception_classifier and not exception_classifier(e):
+                raise
+                
+            if retry_count >= retry_config.max_retries:
+                if logger:
+                    logger.error(f"Max retries ({retry_config.max_retries}) exceeded: {e}")
+                raise
+                
+            # Calculate delay with exponential backoff
+            delay = min(
+                retry_config.base_delay * (2 ** retry_count),
+                retry_config.max_delay
+            )
+            
+            if logger:
+                logger.warning(
+                    f"Retrying after {delay}s (attempt {retry_count + 1}/{retry_config.max_retries}): {e}"
+                )
+                
+            await asyncio.sleep(delay)
+            retry_count += 1
+        except Exception as e:
+            # Non-retryable exception
+            if logger:
+                logger.error(f"Non-retryable exception: {e}")
+            raise
+    
+    # If we get here, we exhausted retries
+    if last_exception:
+        raise last_exception

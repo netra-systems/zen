@@ -173,8 +173,21 @@ class AgentErrorHandler:
             error.context = context
             return error
         
-        # Map common exception types to categories
-        category_mapping = {
+        error_type = type(error).__name__
+        category = self._determine_error_category(error_type)
+        severity = self._determine_error_severity(error_type)
+        
+        return AgentError(
+            message=str(error),
+            severity=severity,
+            category=category,
+            context=context,
+            recoverable=self._is_error_recoverable(category)
+        )
+    
+    def _get_category_mapping(self) -> dict:
+        """Get mapping of exception types to error categories."""
+        return {
             'ValidationError': ErrorCategory.VALIDATION,
             'pydantic.ValidationError': ErrorCategory.VALIDATION,
             'ConnectionError': ErrorCategory.NETWORK,
@@ -185,27 +198,30 @@ class AgentErrorHandler:
             'MemoryError': ErrorCategory.RESOURCE,
             'FileNotFoundError': ErrorCategory.CONFIGURATION,
         }
-        
-        error_type = type(error).__name__
-        category = category_mapping.get(error_type, ErrorCategory.UNKNOWN)
-        
-        # Determine severity based on error type
-        severity = ErrorSeverity.MEDIUM
-        if 'validation' in error_type.lower():
-            severity = ErrorSeverity.HIGH
-        elif 'websocket' in error_type.lower():
-            severity = ErrorSeverity.LOW
-        elif 'memory' in error_type.lower():
-            severity = ErrorSeverity.CRITICAL
-        
-        return AgentError(
-            message=str(error),
-            severity=severity,
-            category=category,
-            context=context,
-            recoverable=category not in [ErrorCategory.VALIDATION, ErrorCategory.CONFIGURATION]
-        )
     
+    def _determine_error_category(self, error_type: str) -> ErrorCategory:
+        """Determine error category based on exception type."""
+        category_mapping = self._get_category_mapping()
+        return category_mapping.get(error_type, ErrorCategory.UNKNOWN)
+    
+    def _determine_error_severity(self, error_type: str) -> ErrorSeverity:
+        """Determine error severity based on exception type."""
+        error_type_lower = error_type.lower()
+        
+        if 'validation' in error_type_lower:
+            return ErrorSeverity.HIGH
+        elif 'websocket' in error_type_lower:
+            return ErrorSeverity.LOW
+        elif 'memory' in error_type_lower:
+            return ErrorSeverity.CRITICAL
+        else:
+            return ErrorSeverity.MEDIUM
+    
+    def _is_error_recoverable(self, category: ErrorCategory) -> bool:
+        """Determine if error is recoverable based on category."""
+        non_recoverable = [ErrorCategory.VALIDATION, ErrorCategory.CONFIGURATION]
+        return category not in non_recoverable
+
     def _log_error(self, error: AgentError) -> None:
         """Log error with appropriate level."""
         context = error.context

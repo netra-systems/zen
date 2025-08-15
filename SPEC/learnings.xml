@@ -1272,6 +1272,63 @@
                 </key-insight>
             </fix>
             
+            <fix id="startup-coverage-gaps" date="2025-08-15" status="documented">
+                <title>System Startup Coverage Gaps Analysis</title>
+                <problem>Comprehensive analysis reveals significant gaps in startup coverage and error handling</problem>
+                <symptoms>
+                    <symptom>Backend/frontend routinely crash in dev mode without recovery</symptom>
+                    <symptom>Migrations run state not tracked between startups</symptom>
+                    <symptom>Service config prompts even with existing configuration</symptom>
+                    <symptom>No mechanism for Claude to diagnose startup issues</symptom>
+                    <symptom>Errors scattered across logs without aggregation</symptom>
+                    <symptom>Health checks start too early during initialization</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>No persistent tracking of migration state - causes confusion on subsequent runs</cause>
+                    <cause>Service config validation logic prompts unnecessarily with valid configs</cause>
+                    <cause>No crash recovery mechanism - manual restart required</cause>
+                    <cause>No spec for Claude self-diagnosis of startup problems</cause>
+                    <cause>Status not persisted between runs - cannot detect recurring issues</cause>
+                    <cause>Errors logged but not collected centrally for analysis</cause>
+                    <cause>Health monitoring starts before services fully initialized</cause>
+                    <cause>Dependency validation incomplete - runtime failures from missing deps</cause>
+                </root-causes>
+                <comprehensive-solution>
+                    <step>Created SPEC/startup_coverage.xml with complete gap analysis and solutions</step>
+                    <step>Designed startup status management system with persistent JSON tracking</step>
+                    <step>Specified enhanced migration management with state tracking</step>
+                    <step>Defined intelligent service configuration detection</step>
+                    <step>Architected crash detection and recovery system with auto-restart</step>
+                    <step>Created Claude self-diagnosis protocol for startup debugging</step>
+                    <step>Designed centralized error aggregation with pattern detection</step>
+                    <step>Specified staged health check system based on service state</step>
+                </comprehensive-solution>
+                <required-implementations>
+                    <component>app/startup/status_manager.py - Startup status persistence (300 lines)</component>
+                    <component>app/startup/migration_tracker.py - Migration state tracking (250 lines)</component>
+                    <component>dev_launcher/config_validator.py - Smart config validation (200 lines)</component>
+                    <component>dev_launcher/crash_recovery.py - Auto-recovery system (300 lines)</component>
+                    <component>scripts/startup_diagnostics.py - Claude diagnosis interface (300 lines)</component>
+                    <component>app/startup/error_aggregator.py - Error collection system (250 lines)</component>
+                    <component>scripts/dependency_scanner.py - Comprehensive dep validation (200 lines)</component>
+                    <component>dev_launcher/staged_health_monitor.py - Progressive health checks (250 lines)</component>
+                </required-implementations>
+                <prevention>
+                    <action>Implement startup status tracking immediately to catch issues</action>
+                    <action>Add migration state persistence to prevent re-run confusion</action>
+                    <action>Create crash recovery with automatic restart capability</action>
+                    <action>Build Claude diagnostic interface for self-healing</action>
+                    <action>Establish error aggregation for pattern detection</action>
+                </prevention>
+                <key-insight>
+                    Startup failures cascade from lack of state persistence and error aggregation.
+                    Without tracking what happened in previous runs, the system cannot learn from
+                    or recover from failures. The solution requires comprehensive state management,
+                    intelligent recovery mechanisms, and Claude-compatible diagnostic interfaces.
+                    This is critical for both development velocity and production reliability.
+                </key-insight>
+            </fix>
+            
             <fix id="unit-test-failures-august-2025" date="2025-08-15" status="resolved">
                 <title>Unit Test Suite Failure Analysis and Resolution</title>
                 <problem>Unit test suite had critical failures preventing reliable development workflow</problem>

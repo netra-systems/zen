@@ -1,0 +1,714 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification type="startup_coverage">
+    <metadata>
+        <title>Comprehensive Startup Coverage Specification</title>
+        <version>2.0.0</version>
+        <created>2025-08-15</created>
+        <description>
+            Complete startup coverage with enhanced error handling, status persistence,
+            migration tracking, and Claude self-debugging capabilities
+        </description>
+    </metadata>
+
+    <section id="root-cause-analysis">
+        <title>Identified Startup Coverage Gaps</title>
+        <description>Root causes of startup failures and missing coverage</description>
+        
+        <gaps>
+            <gap id="GAP-001" severity="CRITICAL">
+                <name>Migration Status Persistence</name>
+                <problem>No tracking of migration state between runs</problem>
+                <impact>Confusion about whether migrations need to run</impact>
+                <solution>Implement migration status tracking file</solution>
+            </gap>
+            
+            <gap id="GAP-002" severity="HIGH">
+                <name>Service Config Prompting</name>
+                <problem>Config prompts even with existing .dev_services.json</problem>
+                <impact>Unnecessary user interaction on every startup</impact>
+                <solution>Smart config detection and validation</solution>
+            </gap>
+            
+            
+            <gap id="GAP-004" severity="HIGH">
+                <name>Claude Self-Diagnosis</name>
+                <problem>No spec for Claude to debug startup issues</problem>
+                <impact>Cannot self-diagnose startup problems</impact>
+                <solution>Claude startup error analysis protocol</solution>
+            </gap>
+            
+            <gap id="GAP-005" severity="MEDIUM">
+                <name>Status Persistence</name>
+                <problem>No startup status saved between runs</problem>
+                <impact>Cannot detect recurring issues</impact>
+                <solution>Startup status database</solution>
+            </gap>
+            
+            <gap id="GAP-006" severity="HIGH">
+                <name>Error Collection</name>
+                <problem>Errors scattered across logs</problem>
+                <impact>Difficult to diagnose systematic issues</impact>
+                <solution>Centralized error collection</solution>
+            </gap>
+            
+            <gap id="GAP-007" severity="MEDIUM">
+                <name>Health Check Timing</name>
+                <problem>Health checks start too early</problem>
+                <impact>False positives during initialization</impact>
+                <solution>Staged health check activation</solution>
+            </gap>
+            
+            <gap id="GAP-008" severity="HIGH">
+                <name>Dependency Validation</name>
+                <problem>Incomplete dependency checks</problem>
+                <impact>Runtime failures from missing dependencies</impact>
+                <solution>Comprehensive dependency scanner</solution>
+            </gap>
+
+            <gap id="IGNORE" severity="IGNORE FOR NOW">
+                <name>Crash Recovery Mechanism</name>
+            </gap>
+        </gaps>
+    </section>
+
+    <section id="startup-status-management">
+        <title>Startup Status Management System</title>
+        <description>Persistent tracking of startup state and history</description>
+        
+        <status-file>
+            <path>.netra/startup_status.json</path>
+            <schema>
+                {
+                    "last_startup": {
+                        "timestamp": "ISO-8601",
+                        "success": boolean,
+                        "duration_ms": number,
+                        "environment": "dev|test|staging|prod",
+                        "errors": [],
+                        "warnings": []
+                    },
+                    "migration_status": {
+                        "last_run": "ISO-8601",
+                        "current_version": "string",
+                        "pending_migrations": [],
+                        "failed_migrations": [],
+                        "auto_run": boolean
+                    },
+                    "service_config": {
+                        "hash": "string",
+                        "last_validated": "ISO-8601",
+                        "validation_errors": []
+                    },
+                    "crash_history": [
+                        {
+                            "service": "backend|frontend",
+                            "timestamp": "ISO-8601",
+                            "error": "string",
+                            "stack_trace": "string",
+                            "recovery_attempted": boolean,
+                            "recovery_success": boolean
+                        }
+                    ],
+                    "health_check_history": {
+                        "consecutive_failures": {},
+                        "last_healthy": {}
+                    }
+                }
+            </schema>
+        </status-file>
+        
+        <operations>
+            <operation name="LoadStatus">
+                <description>Load startup status on initialization</description>
+                <fallback>Create new status if not exists</fallback>
+            </operation>
+            
+            <operation name="SaveStatus">
+                <description>Save status after each significant event</description>
+                <trigger>Migration run, config change, crash, recovery</trigger>
+            </operation>
+            
+            <operation name="ValidateStatus">
+                <description>Validate status file integrity</description>
+                <action>Recreate if corrupted</action>
+            </operation>
+        </operations>
+    </section>
+
+    <section id="migration-management">
+        <title>Enhanced Migration Management</title>
+        <description>Intelligent migration tracking and execution</description>
+        
+        <migration-tracker>
+            <file>.netra/migration_state.json</file>
+            <tracking>
+                <current_version>Alembic head revision</current_version>
+                <applied_migrations>List of applied migration IDs</applied_migrations>
+                <pending_migrations>Detected but not applied</pending_migrations>
+                <failed_migrations>Migrations that failed with errors</failed_migrations>
+            </tracking>
+        </migration-tracker>
+        
+        <migration-strategy>
+            <check_interval>On every startup</check_interval>
+            <auto_run_conditions>
+                <condition>Development environment</condition>
+                <condition>No failed migrations</condition>
+                <condition>User confirmation (first time)</condition>
+            </auto_run_conditions>
+            <failure_handling>
+                <action>Log detailed error</action>
+                <action>Save to failed_migrations</action>
+                <action>Prompt for manual intervention</action>
+                <action>Continue with warning if non-critical</action>
+            </failure_handling>
+        </migration-strategy>
+        
+        <commands>
+            <command name="check-migrations">
+                <description>Check for pending migrations</description>
+                <implementation>alembic current && alembic history</implementation>
+            </command>
+            
+            <command name="run-migrations">
+                <description>Run pending migrations</description>
+                <implementation>alembic upgrade head</implementation>
+                <rollback>alembic downgrade -1</rollback>
+            </command>
+            
+            <command name="validate-schema">
+                <description>Validate database schema integrity</description>
+                <implementation>app.db.migration_utils.validate_schema()</implementation>
+            </command>
+        </commands>
+    </section>
+
+    <section id="service-config-intelligence">
+        <title>Intelligent Service Configuration</title>
+        <description>Smart configuration detection and validation</description>
+        
+        <config-detection>
+            <priority>
+                <level priority="1">Command line arguments</level>
+                <level priority="2">Environment variables</level>
+                <level priority="3">.dev_services.json (if valid)</level>
+                <level priority="4">Interactive prompt (if needed)</level>
+            </priority>
+        </config-detection>
+        
+        <validation-rules>
+            <rule name="config-exists">
+                <check>File .dev_services.json exists</check>
+                <action>Load and validate silently</action>
+            </rule>
+            
+            <rule name="config-valid">
+                <check>All service endpoints reachable</check>
+                <action>Use without prompting</action>
+            </rule>
+            
+            <rule name="config-stale">
+                <check>Config older than 30 days</check>
+                <action>Prompt for revalidation</action>
+            </rule>
+            
+            <rule name="config-invalid">
+                <check>Service endpoints unreachable</check>
+                <action>Prompt for reconfiguration</action>
+            </rule>
+        </validation-rules>
+        
+        <silent-mode>
+            <trigger>--non-interactive flag</trigger>
+            <trigger>CI environment detected</trigger>
+            <trigger>Valid config exists</trigger>
+            <behavior>Use defaults or existing config</behavior>
+        </silent-mode>
+    </section>
+
+    <section id="crash-recovery">
+        <title>Crash Detection and Recovery</title>
+        <description>Automatic recovery from service crashes</description>
+        
+        <crash-detection>
+            <method name="process-monitoring">
+                <check>Process.poll() returns non-None</check>
+                <interval>Every 5 seconds</interval>
+            </method>
+            
+            <method name="health-endpoint">
+                <check>Health endpoint fails</check>
+                <interval>Every 30 seconds</interval>
+            </method>
+            
+            <method name="log-analysis">
+                <check>Error patterns in logs</check>
+                <patterns>
+                    <pattern>FATAL</pattern>
+                    <pattern>CRITICAL ERROR</pattern>
+                    <pattern>Segmentation fault</pattern>
+                    <pattern>Out of memory</pattern>
+                </patterns>
+            </method>
+        </crash-detection>
+        
+        <recovery-strategy>
+            <stage order="1">
+                <name>Error Capture</name>
+                <actions>
+                    <action>Capture last 100 lines of logs</action>
+                    <action>Save stack trace if available</action>
+                    <action>Record system state (memory, CPU)</action>
+                </actions>
+            </stage>
+            
+            <stage order="2">
+                <name>Diagnose Cause</name>
+                <actions>
+                    <action>Check for port conflicts</action>
+                    <action>Verify database connectivity</action>
+                    <action>Check memory availability</action>
+                    <action>Validate configuration</action>
+                </actions>
+            </stage>
+            
+            <stage order="3">
+                <name>Recovery Attempt</name>
+                <actions>
+                    <action>Kill zombie processes</action>
+                    <action>Clear temporary files</action>
+                    <action>Reset connections</action>
+                    <action>Restart service with backoff</action>
+                </actions>
+                <max_attempts>3</max_attempts>
+                <backoff>Exponential: 5s, 15s, 45s</backoff>
+            </stage>
+            
+            <stage order="4">
+                <name>Fallback</name>
+                <actions>
+                    <action>Save crash report</action>
+                    <action>Notify user with actionable message</action>
+                    <action>Suggest manual interventions</action>
+                    <action>Exit with detailed error code</action>
+                </actions>
+            </stage>
+        </recovery-strategy>
+        
+        <crash-report>
+            <path>.netra/crash_reports/crash_{timestamp}.json</path>
+            <content>
+                <timestamp>ISO-8601</timestamp>
+                <service>Service name</service>
+                <error>Error message</error>
+                <stack_trace>Full stack trace</stack_trace>
+                <logs>Last 100 log lines</logs>
+                <system_state>CPU, memory, disk</system_state>
+                <recovery_attempts>List of attempts</recovery_attempts>
+                <suggested_fixes>Actionable suggestions</suggested_fixes>
+            </content>
+        </crash-report>
+    </section>
+
+    <section id="claude-self-diagnosis">
+        <title>Claude Self-Diagnosis Protocol</title>
+        <description>Enable Claude to diagnose and fix startup issues</description>
+        
+        <diagnosis-interface>
+            <command>python startup_diagnostics.py --mode claude</command>
+            <output-format>Structured JSON with error context</output-format>
+            <capabilities>
+                <capability>Run startup sequence</capability>
+                <capability>Capture all errors</capability>
+                <capability>Analyze error patterns</capability>
+                <capability>Suggest fixes</capability>
+                <capability>Apply fixes automatically</capability>
+            </capabilities>
+        </diagnosis-interface>
+        
+        <error-collection>
+            <sources>
+                <source>Process stdout/stderr</source>
+                <source>Log files</source>
+                <source>Health check results</source>
+                <source>System metrics</source>
+                <source>Database connection tests</source>
+            </sources>
+            
+            <format>
+                {
+                    "errors": [
+                        {
+                            "service": "string",
+                            "phase": "startup|runtime|shutdown",
+                            "severity": "critical|high|medium|low",
+                            "message": "string",
+                            "context": {},
+                            "suggested_fix": "string",
+                            "can_auto_fix": boolean
+                        }
+                    ],
+                    "system_state": {},
+                    "configuration": {},
+                    "recommendations": []
+                }
+            </format>
+        </error-collection>
+        
+        <auto-fix-capabilities>
+            <fix name="port-conflict">
+                <detect>Port already in use</detect>
+                <action>Find and use alternative port</action>
+            </fix>
+            
+            <fix name="missing-env-var">
+                <detect>Required environment variable not set</detect>
+                <action>Set to default or prompt for value</action>
+            </fix>
+            
+            <fix name="database-connection">
+                <detect>Cannot connect to database</detect>
+                <action>Start local database or update connection string</action>
+            </fix>
+            
+            <fix name="missing-dependency">
+                <detect>Python/Node package not installed</detect>
+                <action>Run pip install or npm install</action>
+            </fix>
+            
+            <fix name="migration-pending">
+                <detect>Database schema out of date</detect>
+                <action>Run alembic upgrade head</action>
+            </fix>
+        </auto-fix-capabilities>
+        
+        <claude-commands>
+            <command name="diagnose-startup">
+                <description>Run full startup diagnosis</description>
+                <usage>python scripts/startup_diagnostics.py --diagnose</usage>
+            </command>
+            
+            <command name="fix-startup">
+                <description>Apply automatic fixes</description>
+                <usage>python scripts/startup_diagnostics.py --fix</usage>
+            </command>
+            
+            <command name="verify-startup">
+                <description>Verify startup health</description>
+                <usage>python scripts/startup_diagnostics.py --verify</usage>
+            </command>
+        </claude-commands>
+    </section>
+
+    <section id="error-aggregation">
+        <title>Centralized Error Aggregation</title>
+        <description>Collect and analyze all startup errors</description>
+        
+        <error-database>
+            <path>.netra/error_db.sqlite</path>
+            <schema>
+                CREATE TABLE startup_errors (
+                    id INTEGER PRIMARY KEY,
+                    timestamp DATETIME,
+                    service TEXT,
+                    phase TEXT,
+                    severity TEXT,
+                    error_type TEXT,
+                    message TEXT,
+                    stack_trace TEXT,
+                    context JSON,
+                    resolved BOOLEAN,
+                    resolution TEXT
+                );
+                
+                CREATE TABLE error_patterns (
+                    pattern_id INTEGER PRIMARY KEY,
+                    pattern TEXT,
+                    frequency INTEGER,
+                    last_seen DATETIME,
+                    suggested_fix TEXT,
+                    auto_fixable BOOLEAN
+                );
+            </schema>
+        </error-database>
+        
+        <error-analysis>
+            <pattern-detection>
+                <algorithm>Levenshtein distance clustering</algorithm>
+                <threshold>0.8 similarity</threshold>
+                <action>Group similar errors</action>
+            </pattern-detection>
+            
+            <trend-analysis>
+                <metrics>
+                    <metric>Error frequency over time</metric>
+                    <metric>Most common error types</metric>
+                    <metric>Service reliability scores</metric>
+                    <metric>Recovery success rates</metric>
+                </metrics>
+            </trend-analysis>
+            
+            <reporting>
+                <daily-summary>Errors in last 24 hours</daily-summary>
+                <weekly-trends>Pattern changes over week</weekly-trends>
+                <critical-alerts>Immediate notification for critical errors</critical-alerts>
+            </reporting>
+        </error-analysis>
+    </section>
+
+    <section id="dependency-validation">
+        <title>Comprehensive Dependency Validation</title>
+        <description>Complete validation of all system dependencies</description>
+        
+        <python-dependencies>
+            <validation>
+                <check>Parse requirements.txt</check>
+                <check>Verify each package installed</check>
+                <check>Check version compatibility</check>
+                <check>Validate import paths</check>
+            </validation>
+            
+            <auto-fix>
+                <action>pip install -r requirements.txt</action>
+                <action>pip install --upgrade for outdated</action>
+            </auto-fix>
+        </python-dependencies>
+        
+        <node-dependencies>
+            <validation>
+                <check>Parse package.json</check>
+                <check>Verify node_modules exists</check>
+                <check>Check package-lock.json sync</check>
+                <check>Validate peer dependencies</check>
+            </validation>
+            
+            <auto-fix>
+                <action>npm install</action>
+                <action>npm audit fix</action>
+            </auto-fix>
+        </node-dependencies>
+        
+        <system-dependencies>
+            <required>
+                <dependency name="python" version=">=3.10">
+                    <check>python --version</check>
+                    <install>Visit python.org</install>
+                </dependency>
+                
+                <dependency name="node" version=">=18.0">
+                    <check>node --version</check>
+                    <install>Visit nodejs.org</install>
+                </dependency>
+                
+                <dependency name="postgresql" version=">=13">
+                    <check>psql --version</check>
+                    <install>docker run postgres:13</install>
+                </dependency>
+                
+                <dependency name="redis" version=">=6.0">
+                    <check>redis-cli --version</check>
+                    <install>docker run redis:6</install>
+                </dependency>
+            </required>
+            
+            <optional>
+                <dependency name="docker">
+                    <check>docker --version</check>
+                    <benefit>Simplified service management</benefit>
+                </dependency>
+                
+                <dependency name="terraform">
+                    <check>terraform --version</check>
+                    <benefit>Infrastructure provisioning</benefit>
+                </dependency>
+            </optional>
+        </system-dependencies>
+    </section>
+
+    <section id="staged-health-checks">
+        <title>Staged Health Check System</title>
+        <description>Progressive health monitoring based on service state</description>
+        
+        <health-stages>
+            <stage name="initialization" duration="0-30s">
+                <checks>Process running</checks>
+                <frequency>Every 2 seconds</frequency>
+                <failures-allowed>Unlimited</failures-allowed>
+            </stage>
+            
+            <stage name="startup" duration="30-90s">
+                <checks>Basic health endpoint</checks>
+                <frequency>Every 5 seconds</frequency>
+                <failures-allowed>10</failures-allowed>
+            </stage>
+            
+            <stage name="warming" duration="90-180s">
+                <checks>Ready endpoint</checks>
+                <frequency>Every 10 seconds</frequency>
+                <failures-allowed>5</failures-allowed>
+            </stage>
+            
+            <stage name="operational" duration="180s+">
+                <checks>Full health suite</checks>
+                <frequency>Every 30 seconds</frequency>
+                <failures-allowed>3</failures-allowed>
+            </stage>
+        </health-stages>
+        
+        <adaptive-monitoring>
+            <rule name="slow-startup">
+                <condition>Startup takes > 60s</condition>
+                <action>Extend grace period by 50%</action>
+            </rule>
+            
+            <rule name="frequent-failures">
+                <condition>3 failures in 5 minutes</condition>
+                <action>Increase check interval to reduce load</action>
+            </rule>
+            
+            <rule name="stable-operation">
+                <condition>No failures for 30 minutes</condition>
+                <action>Reduce check frequency to save resources</action>
+            </rule>
+        </adaptive-monitoring>
+    </section>
+
+    <section id="startup-metrics">
+        <title>Startup Performance Metrics</title>
+        <description>Track and optimize startup performance</description>
+        
+        <metrics>
+            <metric name="total-startup-time">
+                <measure>From launch to ready</measure>
+                <target>&lt; 30 seconds</target>
+                <alert>&gt; 60 seconds</alert>
+            </metric>
+            
+            <metric name="service-startup-times">
+                <backend>&lt; 10 seconds</backend>
+                <frontend>&lt; 20 seconds</frontend>
+                <database>&lt; 5 seconds</database>
+            </metric>
+            
+            <metric name="migration-time">
+                <measure>Time to run migrations</measure>
+                <target>&lt; 5 seconds</target>
+                <alert>&gt; 30 seconds</alert>
+            </metric>
+            
+            <metric name="dependency-check-time">
+                <measure>Time to validate dependencies</measure>
+                <target>&lt; 2 seconds</target>
+            </metric>
+            
+            <metric name="recovery-success-rate">
+                <measure>Successful recoveries / total crashes</measure>
+                <target>&gt; 80%</target>
+                <alert>&lt; 50%</alert>
+            </metric>
+        </metrics>
+        
+        <optimization-suggestions>
+            <suggestion trigger="slow-migration">
+                <condition>Migration time > 30s</condition>
+                <action>Consider migration batching</action>
+            </suggestion>
+            
+            <suggestion trigger="slow-frontend">
+                <condition>Frontend startup > 30s</condition>
+                <action>Enable build caching</action>
+            </suggestion>
+            
+            <suggestion trigger="frequent-crashes">
+                <condition>Crash rate > 20%</condition>
+                <action>Increase memory allocation</action>
+            </suggestion>
+        </optimization-suggestions>
+    </section>
+
+    <section id="implementation-checklist">
+        <title>Implementation Checklist</title>
+        <description>Required components for complete coverage</description>
+        
+        <components>
+            <component priority="1" status="pending">
+                <name>Startup Status Manager</name>
+                <file>app/startup/status_manager.py</file>
+                <lines>300</lines>
+            </component>
+            
+            <component priority="1" status="pending">
+                <name>Migration Tracker</name>
+                <file>app/startup/migration_tracker.py</file>
+                <lines>250</lines>
+            </component>
+            
+            <component priority="2" status="pending">
+                <name>Service Config Validator</name>
+                <file>dev_launcher/config_validator.py</file>
+                <lines>200</lines>
+            </component>
+            
+            <component priority="1" status="pending">
+                <name>Claude Diagnostics Interface</name>
+                <file>scripts/startup_diagnostics.py</file>
+                <lines>300</lines>
+            </component>
+            
+            <component priority="2" status="pending">
+                <name>Error Aggregator</name>
+                <file>app/startup/error_aggregator.py</file>
+                <lines>250</lines>
+            </component>
+            
+            <component priority="3" status="pending">
+                <name>Dependency Scanner</name>
+                <file>scripts/dependency_scanner.py</file>
+                <lines>200</lines>
+            </component>
+            
+            <component priority="2" status="pending">
+                <name>Staged Health Monitor</name>
+                <file>dev_launcher/staged_health_monitor.py</file>
+                <lines>250</lines>
+            </component>
+        </components>
+    </section>
+
+    <section id="testing-requirements">
+        <title>Testing Requirements</title>
+        <description>Tests to ensure startup coverage</description>
+        
+        <test-categories>
+            <category name="unit">
+                <test>Status manager CRUD operations</test>
+                <test>Migration tracker state transitions</test>
+                <test>Config validation logic</test>
+                <test>Error pattern detection</test>
+                <test>Crash detection algorithms</test>
+            </category>
+            
+            <category name="integration">
+                <test>Full startup with all components</test>
+                <test>Migration execution and rollback</test>
+                <test>Health check staging</test>
+                <test>Error aggregation pipeline</test>
+            </category>
+            
+            <category name="e2e">
+                <test>Clean startup from scratch</test>
+                <test>Startup with existing state</test>
+                <test>Startup after crash</test>
+                <test>Claude diagnosis workflow</test>
+                <test>Multi-service coordination</test>
+            </category>
+            
+            <category name="stress">
+                <test>Rapid restart cycles</test>
+                <test>Startup under high load</test>
+                <test>Recovery from cascading failures</test>
+                <test>Concurrent startup attempts</test>
+            </category>
+        </test-categories>
+    </section>
+</specification>

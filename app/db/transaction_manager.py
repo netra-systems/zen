@@ -22,7 +22,7 @@ from sqlalchemy.exc import (
 from sqlalchemy import text
 
 from app.logging_config import central_logger
-from app.core.enhanced_retry_strategies import RetryConfig
+from app.core.enhanced_retry_strategies import RetryConfig, exponential_backoff_retry
 
 logger = central_logger.get_logger(__name__)
 

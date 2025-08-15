@@ -13,9 +13,16 @@ class ClickHouseOperations:
     
     async def get_table_schema(self, table_name: str) -> Optional[Dict[str, Any]]:
         """Get schema information for a table."""
+        # SECURITY: Validate table name to prevent SQL injection
+        if not table_name or not table_name.replace('_', '').replace('.', '').isalnum():
+            logger.error(f"Invalid table name format: {table_name}")
+            return None
+            
         try:
             async with get_clickhouse_client() as client:
-                result = await client.execute_query(f"DESCRIBE TABLE {table_name}")
+                # Use parameterized query or escape table name properly
+                query = "DESCRIBE TABLE {}"
+                result = await client.execute_query(query.format(client.escape_identifier(table_name)))
                 return {
                     "columns": [{"name": row[0], "type": row[1]} for row in result],
                     "table": table_name

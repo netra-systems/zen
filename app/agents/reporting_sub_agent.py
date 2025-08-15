@@ -53,84 +53,99 @@ class ReportingSubAgent(BaseSubAgent):
     @validate_agent_input('ReportingSubAgent')
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute the reporting logic."""
+        main_operation = self._create_main_reporting_operation(state, run_id, stream_updates)
+        fallback_operation = self._create_fallback_reporting_operation(state, run_id, stream_updates)
         
-        async def _execute_reporting():
-            # Update status via WebSocket
-            if stream_updates:
-                await self._send_update(run_id, {
-                    "status": "processing",
-                    "message": "Generating final report with all analysis results..."
-                })
-
-            prompt = reporting_prompt_template.format(
-                action_plan=state.action_plan_result,
-                optimizations=state.optimizations_result,
-                data=state.data_result,
-                triage_result=state.triage_result,
-                user_request=state.user_request
-            )
-
-            llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='reporting')
-            
-            report_result = extract_json_from_response(llm_response_str)
-            if not report_result:
-                self.logger.warning(f"Could not extract JSON from LLM response for run_id: {run_id}. Using default report.")
-                report_result = {
-                    "report": "No report could be generated.",
-                }
-
-            # Convert to typed ReportResult object
-            from app.agents.state import ReportResult
-            state.report_result = self._create_report_result(report_result)
-            
-            # Update with results
-            if stream_updates:
-                await self._send_update(run_id, {
-                    "status": "processed",
-                    "message": "Final report generated successfully",
-                    "result": report_result
-                })
-            
-            return report_result
-        
-        async def _fallback_reporting():
-            """Fallback reporting when main operation fails"""
-            logger.warning(f"Using fallback reporting for run_id: {run_id}")
-            fallback_result = {
-                "report": "Report generation failed. Using fallback summary.",
-                "summary": {
-                    "status": "Analysis completed with limitations",
-                    "data_analyzed": bool(state.data_result),
-                    "optimizations_provided": bool(state.optimizations_result),
-                    "action_plan_created": bool(state.action_plan_result),
-                    "fallback_used": True
-                },
-                "metadata": {
-                    "fallback_used": True,
-                    "reason": "Primary report generation failed"
-                }
-            }
-            # Convert to typed ReportResult object
-            from app.agents.state import ReportResult
-            state.report_result = self._create_report_result(fallback_result)
-            
-            if stream_updates:
-                await self._send_update(run_id, {
-                    "status": "completed_with_fallback",
-                    "message": "Report completed with fallback method",
-                    "result": fallback_result
-                })
-            
-            return fallback_result
-        
-        # Execute with reliability protection
         await self.reliability.execute_safely(
-            _execute_reporting,
+            main_operation,
             "execute_reporting",
-            fallback=_fallback_reporting,
+            fallback=fallback_operation,
             timeout=30.0
         )
     
+    def _create_main_reporting_operation(self, state: DeepAgentState, run_id: str, stream_updates: bool):
+        """Create the main reporting operation function."""
+        async def _execute_reporting():
+            await self._send_processing_update(run_id, stream_updates)
+            prompt = self._build_reporting_prompt(state)
+            llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='reporting')
+            report_result = self._extract_and_validate_report(llm_response_str, run_id)
+            state.report_result = self._create_report_result(report_result)
+            await self._send_success_update(run_id, stream_updates, report_result)
+            return report_result
+        return _execute_reporting
+    
+    def _create_fallback_reporting_operation(self, state: DeepAgentState, run_id: str, stream_updates: bool):
+        """Create the fallback reporting operation function."""
+        async def _fallback_reporting():
+            logger.warning(f"Using fallback reporting for run_id: {run_id}")
+            fallback_result = self._create_default_fallback_report(state)
+            state.report_result = self._create_report_result(fallback_result)
+            await self._send_fallback_update(run_id, stream_updates, fallback_result)
+            return fallback_result
+        return _fallback_reporting
+    
+    async def _send_processing_update(self, run_id: str, stream_updates: bool) -> None:
+        """Send processing status update via WebSocket."""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "processing",
+                "message": "Generating final report with all analysis results..."
+            })
+    
+    def _build_reporting_prompt(self, state: DeepAgentState) -> str:
+        """Build the reporting prompt from state data."""
+        return reporting_prompt_template.format(
+            action_plan=state.action_plan_result,
+            optimizations=state.optimizations_result,
+            data=state.data_result,
+            triage_result=state.triage_result,
+            user_request=state.user_request
+        )
+    
+    def _extract_and_validate_report(self, llm_response_str: str, run_id: str) -> dict:
+        """Extract and validate JSON result from LLM response."""
+        report_result = extract_json_from_response(llm_response_str)
+        if not report_result:
+            self.logger.warning(f"Could not extract JSON from LLM response for run_id: {run_id}. Using default report.")
+            report_result = {"report": "No report could be generated."}
+        return report_result
+    
+    async def _send_success_update(self, run_id: str, stream_updates: bool, result: dict) -> None:
+        """Send success status update via WebSocket."""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "processed",
+                "message": "Final report generated successfully",
+                "result": result
+            })
+    
+    def _create_default_fallback_report(self, state: DeepAgentState) -> dict:
+        """Create default fallback report result."""
+        return {
+            "report": "Report generation failed. Using fallback summary.",
+            "summary": {
+                "status": "Analysis completed with limitations",
+                "data_analyzed": bool(state.data_result),
+                "optimizations_provided": bool(state.optimizations_result),
+                "action_plan_created": bool(state.action_plan_result),
+                "fallback_used": True
+            },
+            "metadata": {
+                "fallback_used": True,
+                "reason": "Primary report generation failed"
+            }
+        }
+    
+    async def _send_fallback_update(self, run_id: str, stream_updates: bool, result: dict) -> None:
+        """Send fallback completion update via WebSocket."""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "completed_with_fallback",
+                "message": "Report completed with fallback method",
+                "result": result
+            })
+
     def get_health_status(self) -> dict:
         """Get agent health status"""
         return self.reliability.get_health_status()

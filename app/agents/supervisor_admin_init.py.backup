@@ -150,48 +150,29 @@ async def handle_admin_request(
     Returns:
         Result dictionary
     """
-    # Validate admin permissions
-    admin_check_result = _check_admin_permissions(supervisor)
-    if admin_check_result:
-        return admin_check_result
     
-    # Validate command type
-    command_validation_result = _validate_command_type(command_type)
-    if command_validation_result:
-        return command_validation_result
-    
-    # Execute admin request
-    try:
-        return await _execute_admin_request(supervisor, message, run_id, stream_updates, command_type)
-    except Exception as e:
-        return _handle_admin_request_error(e)
-
-
-def _check_admin_permissions(supervisor: SupervisorAgent) -> Optional[dict]:
-    """Check if supervisor has admin permissions."""
+    # Check if supervisor has admin capabilities
     if not hasattr(supervisor.tool_dispatcher, 'has_admin_access'):
-        return {"status": "error", "message": "Admin tools not available"}
+        return {
+            "status": "error",
+            "message": "Admin tools not available"
+        }
     
     if not supervisor.tool_dispatcher.has_admin_access():
-        return {"status": "error", "message": "Insufficient permissions for admin operations"}
+        return {
+            "status": "error",
+            "message": "Insufficient permissions for admin operations"
+        }
     
-    return None
-
-
-def _get_agent_mapping() -> dict:
-    """Get mapping of command types to agent names."""
-    return {
+    # Route to appropriate admin agent based on command type
+    agent_mapping = {
         'corpus': 'corpus_admin',
         'synthetic': 'synthetic_data',
         'users': 'user_admin',
         'config': 'system_config',
         'logs': 'log_analyzer'
     }
-
-
-def _validate_command_type(command_type: str) -> Optional[dict]:
-    """Validate that command type is supported."""
-    agent_mapping = _get_agent_mapping()
+    
     target_agent = agent_mapping.get(command_type)
     
     if not target_agent:
@@ -199,40 +180,25 @@ def _validate_command_type(command_type: str) -> Optional[dict]:
             "status": "error",
             "message": f"Unknown admin command type: {command_type}"
         }
-    return None
-
-
-async def _execute_admin_request(
-    supervisor: SupervisorAgent,
-    message: str,
-    run_id: str,
-    stream_updates: bool,
-    command_type: str
-) -> dict:
-    """Execute the admin request through supervisor."""
-    state = await supervisor.run(
-        user_request=message,
-        run_id=run_id,
-        stream_updates=stream_updates
-    )
     
-    return _create_success_response(state, command_type, supervisor)
-
-
-def _create_success_response(state, command_type: str, supervisor: SupervisorAgent) -> dict:
-    """Create successful admin request response."""
-    return {
-        "status": "success",
-        "state": state,
-        "admin_action": command_type,
-        "circuit_breaker_status": supervisor.circuit_breaker_status
-    }
-
-
-def _handle_admin_request_error(e: Exception) -> dict:
-    """Handle admin request execution errors."""
-    logger.error(f"Admin request failed: {e}", exc_info=True)
-    return {
-        "status": "error",
-        "message": str(e)
-    }
+    # Execute through supervisor with admin context
+    try:
+        state = await supervisor.run(
+            user_request=message,
+            run_id=run_id,
+            stream_updates=stream_updates
+        )
+        
+        return {
+            "status": "success",
+            "state": state,
+            "admin_action": command_type,
+            "circuit_breaker_status": supervisor.circuit_breaker_status
+        }
+        
+    except Exception as e:
+        logger.error(f"Admin request failed: {e}", exc_info=True)
+        return {
+            "status": "error",
+            "message": str(e)
+        }

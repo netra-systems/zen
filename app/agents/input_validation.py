@@ -149,52 +149,75 @@ class InputValidator:
         stream_updates: bool = False
     ) -> ValidationResult:
         """Validate execution input for specific agent."""
-        
-        # Get the appropriate validation schema
-        schema_class = cls.VALIDATION_SCHEMAS.get(agent_name, AgentExecutionInput)
+        schema_class = cls._get_validation_schema(agent_name)
+        input_data = cls._create_input_data(state, run_id, stream_updates)
         
         try:
-            # Create the input object for validation
-            input_data = {
-                'state': state,
-                'run_id': run_id, 
-                'stream_updates': stream_updates
-            }
-            
             validated_input = schema_class(**input_data)
-            
-            return ValidationResult(
-                is_valid=True,
-                validated_input=validated_input
-            )
-            
+            return cls._create_success_result(validated_input)
         except ValidationError as e:
-            error_messages = []
-            warnings = []
-            
-            for error in e.errors():
-                field = '.'.join(str(loc) for loc in error['loc'])
-                message = f"{field}: {error['msg']}"
-                
-                # Some validations might be warnings rather than hard errors
-                if 'warning' in error.get('type', '').lower():
-                    warnings.append(message)
-                else:
-                    error_messages.append(message)
-            
-            return ValidationResult(
-                is_valid=len(error_messages) == 0,
-                errors=error_messages,
-                warnings=warnings
-            )
-            
+            return cls._handle_validation_error(e)
         except Exception as e:
-            logger.error(f"Unexpected validation error for {agent_name}: {e}")
-            return ValidationResult(
-                is_valid=False,
-                errors=[f"Unexpected validation error: {str(e)}"]
-            )
+            return cls._handle_unexpected_error(agent_name, e)
     
+    @classmethod
+    def _get_validation_schema(cls, agent_name: str):
+        """Get the appropriate validation schema for agent."""
+        return cls.VALIDATION_SCHEMAS.get(agent_name, AgentExecutionInput)
+    
+    @classmethod
+    def _create_input_data(cls, state: DeepAgentState, run_id: str, stream_updates: bool) -> dict:
+        """Create input data dictionary for validation."""
+        return {
+            'state': state,
+            'run_id': run_id, 
+            'stream_updates': stream_updates
+        }
+    
+    @classmethod
+    def _create_success_result(cls, validated_input) -> ValidationResult:
+        """Create successful validation result."""
+        return ValidationResult(
+            is_valid=True,
+            validated_input=validated_input
+        )
+    
+    @classmethod
+    def _handle_validation_error(cls, e: ValidationError) -> ValidationResult:
+        """Handle Pydantic validation errors."""
+        error_messages, warnings = cls._process_validation_errors(e)
+        return ValidationResult(
+            is_valid=len(error_messages) == 0,
+            errors=error_messages,
+            warnings=warnings
+        )
+    
+    @classmethod
+    def _process_validation_errors(cls, e: ValidationError) -> tuple[list, list]:
+        """Process validation errors into messages and warnings."""
+        error_messages = []
+        warnings = []
+        
+        for error in e.errors():
+            field = '.'.join(str(loc) for loc in error['loc'])
+            message = f"{field}: {error['msg']}"
+            
+            if 'warning' in error.get('type', '').lower():
+                warnings.append(message)
+            else:
+                error_messages.append(message)
+        
+        return error_messages, warnings
+    
+    @classmethod
+    def _handle_unexpected_error(cls, agent_name: str, e: Exception) -> ValidationResult:
+        """Handle unexpected validation errors."""
+        logger.error(f"Unexpected validation error for {agent_name}: {e}")
+        return ValidationResult(
+            is_valid=False,
+            errors=[f"Unexpected validation error: {str(e)}"]
+        )
+
     @classmethod
     def validate_and_raise(
         cls, 

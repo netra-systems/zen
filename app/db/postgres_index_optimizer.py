@@ -4,7 +4,7 @@ This module provides PostgreSQL-specific database index optimization
 with proper async/await handling and modular architecture.
 """
 
-from typing import Dict, List, Optional, Set, Any
+from typing import Dict, List, Optional, Set, Any, Tuple
 from sqlalchemy import text
 from sqlalchemy.exc import ProgrammingError
 
@@ -135,48 +135,21 @@ class PostgreSQLIndexLoader:
 class PostgreSQLPerformanceAnalyzer:
     """Analyze PostgreSQL query performance."""
     
-    async def get_slow_queries(self, session) -> List[tuple]:
-        """Get slow queries from pg_stat_statements."""
-        try:
-            slow_queries_query = text("""
-                SELECT query, calls, total_time, mean_time, rows
-                FROM pg_stat_statements 
-                WHERE mean_time > 100  -- queries slower than 100ms
-                ORDER BY mean_time DESC
-                LIMIT 20
-            """)
-            result = await session.execute(slow_queries_query)
-            return result.fetchall()
-        except Exception as e:
-            logger.debug(f"pg_stat_statements not available: {e}")
-            return []
+    def __init__(self):
+        from app.db.postgres_query_analyzer import (
+            PostgreSQLSlowQueryAnalyzer,
+            PostgreSQLRecommendationProvider
+        )
+        self.slow_query_analyzer = PostgreSQLSlowQueryAnalyzer()
+        self.recommendation_provider = PostgreSQLRecommendationProvider()
     
-    def analyze_query_for_recommendations(self, query_data: tuple) -> List[IndexRecommendation]:
+    async def get_slow_queries(self, session) -> List[Tuple]:
+        """Get slow queries from pg_stat_statements."""
+        return await self.slow_query_analyzer.get_slow_queries(session)
+    
+    def analyze_query_for_recommendations(self, query_data: Tuple) -> List[IndexRecommendation]:
         """Analyze query and generate recommendations."""
-        query, calls, total_time, mean_time, rows = query_data
-        recommendations = []
-        
-        # Extract table and conditions
-        table_name = QueryAnalyzer.extract_table_name(query)
-        if not table_name:
-            return recommendations
-        
-        # WHERE clause recommendations
-        where_conditions = QueryAnalyzer.extract_where_conditions(query)
-        if where_conditions:
-            benefit = PerformanceMetrics.calculate_benefit_estimate(mean_time)
-            priority = PerformanceMetrics.get_priority_from_benefit(benefit)
-            
-            rec = IndexRecommendation(
-                table_name=table_name,
-                columns=where_conditions[:3],  # Limit to 3 columns
-                reason=f"WHERE clause equality: {', '.join(where_conditions)}",
-                estimated_benefit=benefit,
-                priority=priority
-            )
-            recommendations.append(rec)
-        
-        return recommendations
+        return self.slow_query_analyzer.analyze_single_query(query_data)
 
 
 class PostgreSQLIndexOptimizer:
@@ -259,17 +232,15 @@ class PostgreSQLIndexOptimizer:
             
             # Fallback to general recommendations if no slow queries
             if not recommendations:
-                recommendations.extend(self._get_general_recommendations())
+                recommendations.extend(
+                    self.performance_analyzer.recommendation_provider.get_all_recommendations()
+                )
         
         return recommendations
     
     def _get_general_recommendations(self) -> List[IndexRecommendation]:
         """Get general index recommendations."""
-        return [
-            IndexRecommendation("userbase", ["email"], reason="Frequent user lookups", priority=1),
-            IndexRecommendation("corpus_audit_logs", ["timestamp"], reason="Time queries", priority=1),
-            IndexRecommendation("corpus_audit_logs", ["user_id", "action"], reason="User filtering", priority=2)
-        ]
+        return self.performance_analyzer.recommendation_provider.get_general_recommendations()
     
     async def get_index_usage_stats(self) -> Dict[str, Any]:
         """Get index usage statistics."""
