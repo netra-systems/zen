@@ -88,3 +88,4 @@ terraform-dev-postgres/connection_info.txt
 terraform-dev-postgres/backups/
 
 *.exe
+/app/app/data/generated/content_corpuses

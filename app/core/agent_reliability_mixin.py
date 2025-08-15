@@ -7,7 +7,7 @@ comprehensive error recovery, health monitoring, and resilience patterns.
 import asyncio
 import time
 from typing import Dict, Any, Optional, Callable, Awaitable, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass, field
 
 from app.logging_config import central_logger
@@ -151,7 +151,7 @@ class AgentReliabilityMixin:
             operation=operation_name,
             error_type=type(error).__name__,
             message=str(error),
-            timestamp=datetime.now(datetime.timezone.utc),
+            timestamp=datetime.now(timezone.utc),
             severity=self._classify_error_severity(error),
             context=context or {}
         )
@@ -335,7 +335,7 @@ class AgentReliabilityMixin:
     
     def _count_recent_errors(self, seconds: int) -> int:
         """Count errors in the last N seconds."""
-        cutoff_time = datetime.now(datetime.timezone.utc) - timedelta(seconds=seconds)
+        cutoff_time = datetime.now(timezone.utc) - timedelta(seconds=seconds)
         return len([e for e in self.error_history if e.timestamp >= cutoff_time])
     
     def _calculate_success_rate(self) -> float:
@@ -390,7 +390,7 @@ class AgentReliabilityMixin:
         # Count error types
         error_types = {}
         recent_errors = 0
-        cutoff_time = datetime.now(datetime.timezone.utc) - timedelta(minutes=5)
+        cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=5)
         
         for error in self.error_history:
             error_types[error.error_type] = error_types.get(error.error_type, 0) + 1

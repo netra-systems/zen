@@ -125,7 +125,7 @@ class TestLLMManagerStructuredGeneration:
         
         assert isinstance(structured_llm, MockStructuredLLM)
     
-    @patch('app.llm.llm_manager.ChatOpenAI')
+    @patch('langchain_openai.ChatOpenAI')
     def test_get_structured_llm_with_real(self, mock_openai, llm_manager):
         """Test getting structured LLM with real provider."""
         llm_manager.enabled = True
@@ -319,7 +319,8 @@ class TestIntegrationWithAgents:
     @pytest.mark.asyncio
     async def test_triage_agent_structured_response(self):
         """Test that triage agent can use structured responses."""
-        from app.agents.triage_sub_agent import TriageResult, TriageSubAgent
+        from app.agents.triage_sub_agent import TriageResult
+        from app.agents.triage_sub_agent.agent import TriageSubAgent
         
         # This is more of an integration test placeholder
         # Real test would require full agent setup

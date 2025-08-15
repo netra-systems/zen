@@ -6,6 +6,7 @@ All functions maintain 8-line limit with single responsibility.
 """
 
 import pytest
+import pytest_asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
@@ -19,7 +20,7 @@ from app.ws_manager import WebSocketManager
 class TestAdminAgentIntegration:
     """Integration tests for admin agents"""
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def mock_supervisor(self):
         """Create mock supervisor with agents"""
         supervisor = AsyncMock(spec=Supervisor)
@@ -28,7 +29,7 @@ class TestAdminAgentIntegration:
         supervisor.tool_dispatcher = AsyncMock(spec=AdminToolDispatcher)
         return supervisor
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def mock_websocket(self):
         """Create mock WebSocket manager"""
         ws_manager = AsyncMock(spec=WebSocketManager)

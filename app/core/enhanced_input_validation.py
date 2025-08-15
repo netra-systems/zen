@@ -14,7 +14,7 @@ from enum import Enum
 from pydantic import BaseModel, Field, field_validator, ValidationError
 
 from app.logging_config import central_logger
-from app.core.exceptions import NetraSecurityException
+from app.core.exceptions_auth import NetraSecurityException
 
 logger = central_logger.get_logger(__name__)
 
@@ -222,9 +222,8 @@ class EnhancedInputValidator:
                 result.errors.append(f"Security threats detected in {field_name}: {[t.value for t in threats]}")
                 result.confidence_score = 0.0
             
-            # Sanitization
-            if result.is_valid or self.validation_level in [ValidationLevel.BASIC, ValidationLevel.MODERATE]:
-                result.sanitized_value = self._sanitize_input(input_value, threats)
+            # Sanitization - always sanitize input regardless of validity
+            result.sanitized_value = self._sanitize_input(input_value, threats)
             
             # Additional context-based validation
             if context:
@@ -405,8 +404,7 @@ def validate_input_data(validation_level: ValidationLevel = ValidationLevel.MODE
                     result = validator.validate_input(arg, f"arg_{i}")
                     if not result.is_valid:
                         raise NetraSecurityException(
-                            f"Invalid input in argument {i}: {result.errors}",
-                            error_code="INVALID_INPUT"
+                            message=f"Invalid input in argument {i}: {result.errors}"
                         )
             
             # Validate string keyword arguments
@@ -415,8 +413,7 @@ def validate_input_data(validation_level: ValidationLevel = ValidationLevel.MODE
                     result = validator.validate_input(value, key)
                     if not result.is_valid:
                         raise NetraSecurityException(
-                            f"Invalid input in parameter {key}: {result.errors}",
-                            error_code="INVALID_INPUT"
+                            message=f"Invalid input in parameter {key}: {result.errors}"
                         )
             
             return func(*args, **kwargs)

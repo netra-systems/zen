@@ -26,17 +26,20 @@ class WebSocketTestCompatibilityMixin:
 
     async def connect(self, websocket: WebSocket, connection_id: str, user_id: Optional[str] = None, 
                      role: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None) -> None:
-        """Connect with connection-ID-based API."""
-        conn_info = self._create_connection_info(connection_id, user_id, role, metadata)
+        """Connect with connection-ID-based API (bypasses modular components for tests)."""
+        conn_info = self._create_connection_info(connection_id, user_id, role, metadata, websocket)
         self.connections_dict[connection_id] = websocket
         self.connection_info_dict[connection_id] = conn_info
 
     def _create_connection_info(self, connection_id: str, user_id: Optional[str], 
-                               role: Optional[str], metadata: Optional[Dict[str, Any]]) -> ConnectionInfo:
-        """Create ConnectionInfo object."""
+                               role: Optional[str], metadata: Optional[Dict[str, Any]], websocket) -> ConnectionInfo:
+        """Create ConnectionInfo object with correct parameters."""
+        # Create a simple info object for test compatibility - role and metadata are stored separately
         return ConnectionInfo(
-            connection_id=connection_id, connected_at=datetime.now(timezone.utc),
-            user_id=user_id, role=role, metadata=metadata or {}
+            websocket=websocket,
+            user_id=user_id or f"test_user_{connection_id}",
+            connected_at=datetime.now(timezone.utc),
+            connection_id=connection_id
         )
 
     async def disconnect(self, connection_id: str, code: Optional[int] = None, reason: Optional[str] = None) -> None:
@@ -61,10 +64,11 @@ class WebSocketTestCompatibilityMixin:
     async def send_message(self, connection_id: str, message: Dict[str, Any]) -> None:
         """Send message to specific connection ID."""
         websocket = self.connections_dict.get(connection_id)
-        if websocket and websocket.client_state == WebSocketState.CONNECTED:
-            await self._safe_send_json(websocket, message)
-        elif websocket and websocket.client_state == WebSocketState.DISCONNECTED:
-            self._cleanup_connection(connection_id)
+        if websocket:
+            if websocket.client_state == WebSocketState.CONNECTED:
+                await self._safe_send_json(websocket, message)
+            elif websocket.client_state == WebSocketState.DISCONNECTED:
+                self._cleanup_connection(connection_id)
 
     async def _safe_send_json(self, websocket: WebSocket, message: Dict[str, Any]) -> None:
         """Safely send JSON message to websocket."""
@@ -72,6 +76,17 @@ class WebSocketTestCompatibilityMixin:
             await websocket.send_json(message)
         except Exception as e:
             logger.warning(f"Error sending message: {e}")
+            # If sending fails, clean up the connection
+            connection_id = self._find_connection_id(websocket)
+            if connection_id:
+                self._cleanup_connection(connection_id)
+
+    def _find_connection_id(self, websocket: WebSocket) -> Optional[str]:
+        """Find connection ID for a given websocket."""
+        for conn_id, ws in self.connections_dict.items():
+            if ws is websocket:
+                return conn_id
+        return None
 
     async def send_to_connection(self, connection_id: str, message_type: str, data: Dict[str, Any]) -> None:
         """Send formatted message to specific connection."""

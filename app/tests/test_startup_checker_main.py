@@ -33,6 +33,11 @@ class TestStartupCheckerMain:
         
         setup_all_check_mocks(checker, mock_check)
         
+        # Ensure some time passes for duration calculation
+        import time
+        original_start = checker.start_time
+        checker.start_time = original_start - 0.001  # Subtract 1ms to ensure non-zero duration
+        
         results = await checker.run_all_checks()
         
         assert results["success"] == True
@@ -50,15 +55,18 @@ class TestStartupCheckerMain:
         checker.env_checker.check_environment_variables = AsyncMock(side_effect=mock_critical_failure)
         checker.env_checker.check_configuration = AsyncMock(side_effect=mock_non_critical_failure)
         
-        # Setup remaining checks as empty
-        checker.system_checker.check_file_permissions = AsyncMock()
-        checker.db_checker.check_database_connection = AsyncMock()
-        checker.service_checker.check_redis = AsyncMock()
-        checker.service_checker.check_clickhouse = AsyncMock()
-        checker.service_checker.check_llm_providers = AsyncMock()
-        checker.system_checker.check_memory_and_resources = AsyncMock()
-        checker.system_checker.check_network_connectivity = AsyncMock()
-        checker.db_checker.check_or_create_assistant = AsyncMock()
+        # Setup remaining checks as successful
+        async def mock_success():
+            return create_success_check_result()
+        
+        checker.system_checker.check_file_permissions = AsyncMock(side_effect=mock_success)
+        checker.db_checker.check_database_connection = AsyncMock(side_effect=mock_success)
+        checker.service_checker.check_redis = AsyncMock(side_effect=mock_success)
+        checker.service_checker.check_clickhouse = AsyncMock(side_effect=mock_success)
+        checker.service_checker.check_llm_providers = AsyncMock(side_effect=mock_success)
+        checker.system_checker.check_memory_and_resources = AsyncMock(side_effect=mock_success)
+        checker.system_checker.check_network_connectivity = AsyncMock(side_effect=mock_success)
+        checker.db_checker.check_or_create_assistant = AsyncMock(side_effect=mock_success)
         
         results = await checker.run_all_checks()
         
@@ -71,16 +79,19 @@ class TestStartupCheckerMain:
         """Test handling of unexpected exceptions during checks."""
         checker.env_checker.check_environment_variables = AsyncMock(side_effect=mock_exception_check)
         
-        # Setup remaining checks as empty
-        checker.env_checker.check_configuration = AsyncMock()
-        checker.system_checker.check_file_permissions = AsyncMock()
-        checker.db_checker.check_database_connection = AsyncMock()
-        checker.service_checker.check_redis = AsyncMock()
-        checker.service_checker.check_clickhouse = AsyncMock()
-        checker.service_checker.check_llm_providers = AsyncMock()
-        checker.system_checker.check_memory_and_resources = AsyncMock()
-        checker.system_checker.check_network_connectivity = AsyncMock()
-        checker.db_checker.check_or_create_assistant = AsyncMock()
+        # Setup remaining checks as successful
+        async def mock_success():
+            return create_success_check_result()
+        
+        checker.env_checker.check_configuration = AsyncMock(side_effect=mock_success)
+        checker.system_checker.check_file_permissions = AsyncMock(side_effect=mock_success)
+        checker.db_checker.check_database_connection = AsyncMock(side_effect=mock_success)
+        checker.service_checker.check_redis = AsyncMock(side_effect=mock_success)
+        checker.service_checker.check_clickhouse = AsyncMock(side_effect=mock_success)
+        checker.service_checker.check_llm_providers = AsyncMock(side_effect=mock_success)
+        checker.system_checker.check_memory_and_resources = AsyncMock(side_effect=mock_success)
+        checker.system_checker.check_network_connectivity = AsyncMock(side_effect=mock_success)
+        checker.db_checker.check_or_create_assistant = AsyncMock(side_effect=mock_success)
         
         results = await checker.run_all_checks()
         

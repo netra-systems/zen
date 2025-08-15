@@ -515,6 +515,24 @@
       "failed": 3,
       "coverage": null,
       "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:15:54.726997",
+      "level": "agents",
+      "total": 20,
+      "passed": 16,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:16:37.314653",
+      "level": "agents",
+      "total": 20,
+      "passed": 16,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
     }
   ],
   "flaky_tests": {},

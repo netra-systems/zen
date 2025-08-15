@@ -77,8 +77,8 @@ class WebSocketManager(WebSocketTestCompatibilityMixin):
         """Sanitize message content."""
         return self.messaging.sanitize_message_content(message)
 
-    async def send_message(self, user_id: str, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 
-                         retry: bool = True) -> bool:
+    async def send_message_to_user(self, user_id: str, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 
+                                  retry: bool = True) -> bool:
         """Send a message to all connections for a user.
         
         Returns:
@@ -237,20 +237,9 @@ class WebSocketManager(WebSocketTestCompatibilityMixin):
         """Get message queue size for a job (for testing compatibility)."""
         return getattr(self.core.queue_manager, 'get_queue_size', lambda x: 0)(job_id)
 
-    # Legacy method names for test compatibility
-    async def connect(self, user_id_or_websocket, websocket_or_job_id=None) -> ConnectionInfo:
-        """Connect method with dual signature support for backward compatibility."""
-        if isinstance(user_id_or_websocket, str) and websocket_or_job_id is not None:
-            return await self.connect_user(user_id_or_websocket, websocket_or_job_id)
-        else:
-            return await self.connect_to_job(user_id_or_websocket, websocket_or_job_id)
+    # Legacy method names for backward compatibility (overridden by test compatibility mixin)
 
-    async def disconnect(self, user_id_or_job_id, websocket=None, code: int = 1000, reason: str = "Normal closure") -> None:
-        """Disconnect method with dual signature support for backward compatibility."""
-        if websocket is not None:
-            await self.disconnect_user(user_id_or_job_id, websocket, code, reason)
-        else:
-            await self.disconnect_from_job(user_id_or_job_id)
+    # disconnect method provided by test compatibility mixin
 
 
 # Global manager instance

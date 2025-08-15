@@ -295,3 +295,7 @@ class LLMManager:
                 error=str(e),
                 last_checked=datetime.utcnow()
             )
+    
+    def _parse_nested_json(self, data: Any) -> Any:
+        """Parse nested JSON strings within data structure."""
+        return parse_nested_json_recursive(data)

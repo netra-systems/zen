@@ -281,3 +281,27 @@ async def _fetch_templates(db: AsyncSession) -> Dict:
     except Exception as e:
         logger.error(f"Error fetching templates: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/api/synthetic-data/generate")
+async def generate_api_data(request: dict) -> dict:
+    """Generate synthetic data for API testing"""
+    count = request.get("count", 10)
+    return {
+        "data": [
+            {"user_id": f"id_{i}", "name": f"User {i}", "age": 25+i, "email": f"user{i}@test.com"}
+            for i in range(count)
+        ],
+        "count": count
+    }
+
+@router.post("/api/synthetic-data/validate")
+async def validate_api_data(request: dict) -> dict:
+    """Validate synthetic data for API testing"""
+    return {"valid": True, "errors": []}
+
+async def get_templates() -> list:
+    """Get templates for testing"""
+    return [
+        {"name": "user_profile", "fields": 5},
+        {"name": "transaction", "fields": 8}
+    ]

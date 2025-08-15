@@ -24,10 +24,13 @@ class TestStartupCheckerEnvConfig:
         return StartupChecker(mock_app)
     
     @pytest.mark.asyncio
-    async def test_check_environment_variables_dev_mode(self, checker, monkeypatch):
+    async def test_check_environment_variables_dev_mode(self, mock_app, monkeypatch):
         """Test environment variable check in development mode."""
         setup_env_vars_development(monkeypatch)
         clear_required_env_vars(monkeypatch)
+        
+        # Create checker after setting environment
+        checker = StartupChecker(mock_app)
         
         result = await checker.env_checker.check_environment_variables()
         
@@ -35,10 +38,13 @@ class TestStartupCheckerEnvConfig:
         assert "Development mode" in result.message
     
     @pytest.mark.asyncio
-    async def test_check_environment_variables_production_missing(self, checker, monkeypatch):
+    async def test_check_environment_variables_production_missing(self, mock_app, monkeypatch):
         """Test environment variable check in production with missing required vars."""
         monkeypatch.setenv("ENVIRONMENT", "production")
         clear_required_env_vars(monkeypatch)
+        
+        # Create checker after setting environment
+        checker = StartupChecker(mock_app)
         
         result = await checker.env_checker.check_environment_variables()
         
@@ -47,10 +53,13 @@ class TestStartupCheckerEnvConfig:
         assert result.critical == True
     
     @pytest.mark.asyncio
-    async def test_check_environment_variables_with_optional(self, checker, monkeypatch):
+    async def test_check_environment_variables_with_optional(self, mock_app, monkeypatch):
         """Test environment variable check with optional variables missing."""
         setup_env_vars_production(monkeypatch)
         clear_optional_env_vars(monkeypatch)
+        
+        # Create checker after setting environment
+        checker = StartupChecker(mock_app)
         
         result = await checker.env_checker.check_environment_variables()
         
@@ -60,7 +69,7 @@ class TestStartupCheckerEnvConfig:
     @pytest.mark.asyncio
     async def test_check_configuration_success(self, checker):
         """Test configuration validation success."""
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.environment_checks.settings') as mock_settings:
             mock_settings.database_url = "postgresql://localhost/test"
             mock_settings.secret_key = "a" * 32
             mock_settings.environment = "development"
@@ -72,7 +81,7 @@ class TestStartupCheckerEnvConfig:
     @pytest.mark.asyncio
     async def test_check_configuration_missing_database(self, checker):
         """Test configuration validation with missing database URL."""
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.environment_checks.settings') as mock_settings:
             mock_settings.database_url = None
             
             result = await checker.env_checker.check_configuration()
@@ -83,7 +92,7 @@ class TestStartupCheckerEnvConfig:
     @pytest.mark.asyncio
     async def test_check_configuration_short_secret_production(self, checker):
         """Test configuration validation with short secret key in production."""
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.environment_checks.settings') as mock_settings:
             mock_settings.database_url = "postgresql://localhost/test"
             mock_settings.secret_key = "short"
             mock_settings.environment = "production"
@@ -96,7 +105,7 @@ class TestStartupCheckerEnvConfig:
     @pytest.mark.asyncio
     async def test_check_configuration_invalid_environment(self, checker):
         """Test configuration validation with invalid environment."""
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.environment_checks.settings') as mock_settings:
             mock_settings.database_url = "postgresql://localhost/test"
             mock_settings.secret_key = "a" * 32
             mock_settings.environment = "invalid"

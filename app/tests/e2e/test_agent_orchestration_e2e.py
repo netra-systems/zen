@@ -22,7 +22,7 @@ from app.schemas import SubAgentLifecycle
 
 
 @pytest.fixture
-async def orchestration_setup():
+def orchestration_setup():
     """Setup real orchestration environment with mocked external dependencies."""
     mocks = _create_mock_dependencies()
     agents = _create_test_agents(mocks)
@@ -39,8 +39,10 @@ def _create_test_agents(mocks):
     """Create test agent instances."""
     return {
         'triage': TriageSubAgent(mocks['llm'], mocks['dispatcher'], mocks['redis']),
-        'data': DataSubAgent(mocks['llm']), 'optimization': OptimizationsCoreSubAgent(mocks['llm']),
-        'actions': ActionsToMeetGoalsSubAgent(mocks['llm']), 'reporting': ReportingSubAgent(mocks['llm'])
+        'data': DataSubAgent(mocks['llm'], mocks['dispatcher']), 
+        'optimization': OptimizationsCoreSubAgent(mocks['llm'], mocks['dispatcher']),
+        'actions': ActionsToMeetGoalsSubAgent(mocks['llm'], mocks['dispatcher']), 
+        'reporting': ReportingSubAgent(mocks['llm'], mocks['dispatcher'])
     }
 
 def _build_setup_dict(agents, mocks):

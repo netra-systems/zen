@@ -69,7 +69,8 @@ class TestStartupChecker:
         monkeypatch.setenv("DATABASE_URL", "postgresql://test")
         monkeypatch.setenv("SECRET_KEY", "test-secret-key")
         
-        await checker.check_environment_variables()
+        result = await checker.env_checker.check_environment_variables()
+        checker.results.append(result)
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -83,7 +84,8 @@ class TestStartupChecker:
         monkeypatch.delenv("DATABASE_URL", raising=False)
         monkeypatch.setenv("SECRET_KEY", "test-secret-key")
         
-        await checker.check_environment_variables()
+        result = await checker.env_checker.check_environment_variables()
+        checker.results.append(result)
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -95,27 +97,29 @@ class TestStartupChecker:
     @pytest.mark.asyncio
     async def test_check_configuration_valid(self, checker):
         """Test configuration check with valid settings"""
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.environment_checks.settings') as mock_settings:
             mock_settings.database_url = "postgresql://test"
             mock_settings.secret_key = "a" * 32  # 32 character key
             mock_settings.environment = "development"
             
-            await checker.check_configuration()
-            
-            assert len(checker.results) == 1
-            result = checker.results[0]
-            assert result.name == "configuration"
-            assert result.success == True
+            result = await checker.env_checker.check_configuration()
+        checker.results.append(result)
+        
+        assert len(checker.results) == 1
+        result = checker.results[0]
+        assert result.name == "configuration"
+        assert result.success == True
     
     @pytest.mark.asyncio
     async def test_check_configuration_invalid_secret(self, checker):
         """Test configuration check with invalid secret key"""
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.environment_checks.settings') as mock_settings:
             mock_settings.database_url = "postgresql://test"
             mock_settings.secret_key = "short"  # Too short
             mock_settings.environment = "development"
             
-            await checker.check_configuration()
+            result = await checker.env_checker.check_configuration()
+        checker.results.append(result)
             
             assert len(checker.results) == 1
             result = checker.results[0]
@@ -132,7 +136,8 @@ class TestStartupChecker:
             os.chdir(tmpdir)
             
             try:
-                await checker.check_file_permissions()
+                result = await checker.system_checker.check_file_permissions()
+                checker.results.append(result)
                 
                 assert len(checker.results) == 1
                 result = checker.results[0]
@@ -174,7 +179,8 @@ class TestStartupChecker:
         mock_context.__aexit__.return_value = None
         checker.app.state.db_session_factory.return_value = mock_context
         
-        await checker.check_database_connection()
+        result = await checker.db_checker.check_database_connection()
+        checker.results.append(result)
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -187,7 +193,8 @@ class TestStartupChecker:
         """Test database connection failure"""
         checker.app.state.db_session_factory.side_effect = Exception("Connection failed")
         
-        await checker.check_database_connection()
+        result = await checker.db_checker.check_database_connection()
+        checker.results.append(result)
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -205,7 +212,8 @@ class TestStartupChecker:
         mock_redis.delete.return_value = None
         
         with patch('time.time', return_value=1234567890.0):
-            await checker.check_redis()
+            result = await checker.service_checker.check_redis()
+            checker.results.append(result)
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -217,10 +225,11 @@ class TestStartupChecker:
         """Test Redis failure in non-production environment"""
         checker.app.state.redis_manager.connect.side_effect = Exception("Connection refused")
         
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.service_checks.settings') as mock_settings:
             mock_settings.environment = "development"
             
-            await checker.check_redis()
+            result = await checker.service_checker.check_redis()
+            checker.results.append(result)
             
             assert len(checker.results) == 1
             result = checker.results[0]
@@ -238,7 +247,8 @@ class TestStartupChecker:
         mock_client.__aexit__ = AsyncMock()
         
         with patch('app.db.clickhouse.get_clickhouse_client', return_value=mock_client):
-            await checker.check_clickhouse()
+            result = await checker.service_checker.check_clickhouse()
+            checker.results.append(result)
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -252,10 +262,11 @@ class TestStartupChecker:
         mock_llm_manager = checker.app.state.llm_manager
         mock_llm_manager.get_llm.return_value = Mock()  # Return a valid LLM object
         
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.service_checks.settings') as mock_settings:
             mock_settings.llm_configs = ['anthropic-claude-3-sonnet', 'gpt-4']
             
-            await checker.check_llm_providers()
+            result = await checker.service_checker.check_llm_providers()
+            checker.results.append(result)
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -269,10 +280,11 @@ class TestStartupChecker:
         mock_llm_manager = checker.app.state.llm_manager
         mock_llm_manager.get_llm.side_effect = [Mock(), Exception("API key invalid")]
         
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.service_checks.settings') as mock_settings:
             mock_settings.llm_configs = ['anthropic-claude-3-sonnet', 'gpt-4']
             
-            await checker.check_llm_providers()
+            result = await checker.service_checker.check_llm_providers()
+            checker.results.append(result)
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -296,7 +308,8 @@ class TestStartupChecker:
             )
             mock_cpu.return_value = 8
             
-            await checker.check_memory_and_resources()
+            result = await checker.system_checker.check_memory_and_resources()
+            checker.results.append(result)
             
             assert len(checker.results) == 1
             result = checker.results[0]
@@ -320,7 +333,8 @@ class TestStartupChecker:
             )
             mock_cpu.return_value = 1  # Low CPU count
             
-            await checker.check_memory_and_resources()
+            result = await checker.system_checker.check_memory_and_resources()
+            checker.results.append(result)
             
             assert len(checker.results) == 1
             result = checker.results[0]
@@ -345,7 +359,8 @@ class TestStartupChecker:
         mock_context.__aexit__.return_value = None
         checker.app.state.db_session_factory.return_value = mock_context
         
-        await checker.check_or_create_assistant()
+        result = await checker.db_checker.check_or_create_assistant()
+        checker.results.append(result)
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -369,7 +384,8 @@ class TestStartupChecker:
         mock_context.__aexit__.return_value = None
         checker.app.state.db_session_factory.return_value = mock_context
         
-        await checker.check_or_create_assistant()
+        result = await checker.db_checker.check_or_create_assistant()
+        checker.results.append(result)
         
         assert len(checker.results) == 1
         result = checker.results[0]
