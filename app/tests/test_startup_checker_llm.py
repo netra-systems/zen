@@ -40,19 +40,25 @@ class TestStartupCheckerLLM:
     @pytest.mark.asyncio
     async def test_check_llm_providers_partial_failure(self, mock_app, checker):
         """Test LLM providers check with some providers failing."""
+        from app.schemas.llm_types import LLMProvider
         llm_manager = mock_app.state.llm_manager
         
         def get_llm_side_effect(name):
-            if name == 'gpt-4':
+            if name == 'google-gemini':
                 raise Exception("API key missing")
             return Mock()
         
         llm_manager.get_llm = Mock(side_effect=get_llm_side_effect)
         
         with patch('app.startup_checks.service_checks.settings') as mock_settings:
-            mock_settings.llm_configs = {
-                'anthropic-claude-3-sonnet': {}, 'gpt-4': {}
-            }
+            # Use a GOOGLE provider to trigger failed_providers logic
+            mock_configs = Mock()
+            mock_configs.__iter__ = Mock(return_value=iter(['anthropic-claude-3-sonnet', 'google-gemini']))
+            mock_configs.get = Mock(side_effect=lambda k: 
+                Mock(provider=LLMProvider.ANTHROPIC) if k == 'anthropic-claude-3-sonnet' 
+                else Mock(provider=LLMProvider.GOOGLE) if k == 'google-gemini' 
+                else None)
+            mock_settings.llm_configs = mock_configs
             mock_settings.environment = "development"
             
             result = await checker.service_checker.check_llm_providers()

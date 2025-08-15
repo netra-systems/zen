@@ -52,19 +52,21 @@ class TestStartupCheckerRedis:
             assert "read/write test failed" in result.message
     
     @pytest.mark.asyncio
-    async def test_check_redis_connection_failure_production(self, mock_app, checker):
+    async def test_check_redis_connection_failure_production(self, mock_app, monkeypatch):
         """Test Redis check with connection failure in production (critical)."""
+        monkeypatch.setenv("ENVIRONMENT", "production")
+        
+        # Create checker after setting environment
+        checker = StartupChecker(mock_app)
+        
         redis_manager = mock_app.state.redis_manager
         redis_manager.connect = AsyncMock(side_effect=Exception("Connection refused"))
         
-        with patch('app.startup_checks.service_checks.settings') as mock_settings:
-            mock_settings.environment = "production"
-            
-            result = await checker.service_checker.check_redis()
-            
-            assert result.success == False
-            assert result.critical == True
-            assert "Connection refused" in result.message
+        result = await checker.service_checker.check_redis()
+        
+        assert result.success == False
+        assert result.critical == True
+        assert "Connection refused" in result.message
     
     @pytest.mark.asyncio
     async def test_check_redis_connection_failure_development(self, mock_app, checker):

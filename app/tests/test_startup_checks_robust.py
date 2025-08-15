@@ -103,7 +103,7 @@ class TestStartupChecker:
             mock_settings.environment = "development"
             
             result = await checker.env_checker.check_configuration()
-        checker.results.append(result)
+            checker.results.append(result)
         
         assert len(checker.results) == 1
         result = checker.results[0]
@@ -119,7 +119,7 @@ class TestStartupChecker:
             mock_settings.environment = "development"
             
             result = await checker.env_checker.check_configuration()
-        checker.results.append(result)
+            checker.results.append(result)
             
             assert len(checker.results) == 1
             result = checker.results[0]

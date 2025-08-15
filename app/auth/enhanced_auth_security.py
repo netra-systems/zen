@@ -187,7 +187,7 @@ class EnhancedAuthSecurity:
         
         # Check rate limiting for this IP
         recent_attempts = self._get_recent_attempts_by_ip(ip_address, minutes=5)
-        if len(recent_attempts) > 10:  # More than 10 attempts in 5 minutes
+        if len(recent_attempts) >= 10:  # 10 or more attempts in 5 minutes
             self._block_ip(ip_address, minutes=30)
             logger.warning(f"Rate limiting triggered for IP: {ip_address}")
             return AuthenticationResult.BLOCKED

@@ -23,6 +23,8 @@ class WebSocketTestCompatibilityMixin:
         """Initialize connection tracking attributes."""
         self.connections_dict: Dict[str, WebSocket] = {}
         self.connection_info_dict: Dict[str, ConnectionInfo] = {}
+        self.connection_roles: Dict[str, Optional[str]] = {}
+        self.connection_metadata: Dict[str, Dict[str, Any]] = {}
 
     async def connect(self, websocket: WebSocket, connection_id: str, user_id: Optional[str] = None, 
                      role: Optional[str] = None, metadata: Optional[Dict[str, Any]] = None) -> None:
@@ -30,6 +32,8 @@ class WebSocketTestCompatibilityMixin:
         conn_info = self._create_connection_info(connection_id, user_id, role, metadata, websocket)
         self.connections_dict[connection_id] = websocket
         self.connection_info_dict[connection_id] = conn_info
+        self.connection_roles[connection_id] = role
+        self.connection_metadata[connection_id] = metadata or {}
 
     def _create_connection_info(self, connection_id: str, user_id: Optional[str], 
                                role: Optional[str], metadata: Optional[Dict[str, Any]], websocket) -> ConnectionInfo:
@@ -60,6 +64,8 @@ class WebSocketTestCompatibilityMixin:
         """Clean up connection from tracking dictionaries."""
         self.connections_dict.pop(connection_id, None)
         self.connection_info_dict.pop(connection_id, None)
+        self.connection_roles.pop(connection_id, None)
+        self.connection_metadata.pop(connection_id, None)
 
     async def send_message(self, connection_id: str, message: Dict[str, Any]) -> None:
         """Send message to specific connection ID."""
@@ -101,7 +107,7 @@ class WebSocketTestCompatibilityMixin:
 
     async def send_to_role(self, role: str, message_type: str, data: Dict[str, Any]) -> None:
         """Send message to all connections with specific role."""
-        role_connections = [cid for cid, info in self.connection_info_dict.items() if info.role == role]
+        role_connections = [cid for cid, conn_role in self.connection_roles.items() if conn_role == role]
         for connection_id in role_connections:
             await self.send_to_connection(connection_id, message_type, data)
 

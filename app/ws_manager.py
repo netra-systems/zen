@@ -55,10 +55,7 @@ class WebSocketManager(WebSocketTestCompatibilityMixin):
         self._setup_connection_tracking()
         self._initialized = True
 
-    def _setup_connection_tracking(self) -> None:
-        """Initialize connection tracking attributes for test compatibility."""
-        self.connections_dict: Dict[str, WebSocket] = {}
-        self.connection_info_dict: Dict[str, ConnectionInfo] = {}
+    # _setup_connection_tracking provided by test compatibility mixin
 
     async def connect_user(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish and register a new WebSocket connection for a user."""
@@ -127,7 +124,7 @@ class WebSocketManager(WebSocketTestCompatibilityMixin):
             for conn_id in room_connections:
                 self.core.room_manager.leave_all_rooms(conn_id)
 
-    async def broadcast(self, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> BroadcastResult:
+    async def broadcast_to_all_users(self, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> BroadcastResult:
         """Broadcast a message to all connected users."""
         return await self.broadcasting.broadcast_to_all(message)
 

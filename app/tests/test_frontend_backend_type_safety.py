@@ -18,7 +18,6 @@ from app.schemas.registry import (
     CreateThreadPayload,
     SwitchThreadPayload,
     DeleteThreadPayload,
-    RenameThreadPayload,
     StopAgentPayload,
     AgentUpdate,
     AgentLog,
@@ -27,11 +26,7 @@ from app.schemas.registry import (
     StreamChunk,
     StreamComplete,
     WebSocketMessage,
-    BaseWebSocketPayload,
-    ThreadCreated,
-    ThreadDeleted,
-    ThreadRenamed,
-    ThreadList
+    BaseWebSocketPayload
 )
 from app.schemas.Request import RequestModel, StartAgentPayload as StartAgentPayloadPydantic
 from app.schemas.registry import Message, MessageType
