@@ -127,15 +127,16 @@ class SyntheticDataGenerator:
         """Generate a single batch of data"""
         actual_size = min(batch_size, profile.volume - start_index)
         
-        # Try using tool dispatcher first
-        if self.tool_dispatcher.has_tool("generate_synthetic_data_batch"):
-            return await self._generate_via_tool(
-                profile, actual_size, run_id
+        # Always use tool dispatcher - no fallback to mock data
+        if not self.tool_dispatcher.has_tool("generate_synthetic_data_batch"):
+            raise RuntimeError(
+                "generate_synthetic_data_batch tool not available - "
+                "real synthetic data generation required for demo"
             )
-        else:
-            return self._generate_mock_data(
-                profile, actual_size
-            )
+        
+        return await self._generate_via_tool(
+            profile, actual_size, run_id
+        )
     
     async def _generate_via_tool(
         self,

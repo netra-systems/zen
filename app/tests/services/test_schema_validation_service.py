@@ -77,5 +77,15 @@ class TestSchemaValidationService:
 
     def test_agent_message_schema(self):
         """Test agent message schema."""
-        agent_msg = AgentMessage(text="Agent response")
-        assert agent_msg.text == "Agent response"
+        # AgentMessage is an alias for AgentUpdatePayload
+        from app.schemas.core_enums import AgentStatus
+        agent_msg = AgentMessage(
+            run_id="run-123",
+            agent_id="test-agent", 
+            status=AgentStatus.ACTIVE,
+            message="Agent response"
+        )
+        assert agent_msg.run_id == "run-123"
+        assert agent_msg.agent_id == "test-agent"
+        assert agent_msg.status == AgentStatus.ACTIVE
+        assert agent_msg.message == "Agent response"

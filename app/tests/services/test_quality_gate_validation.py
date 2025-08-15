@@ -181,7 +181,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         """Test error during metrics calculation"""
         with patch.object(
             quality_service,
-            '_calculate_metrics',
+            '_calculate_content_metrics',
             side_effect=ValueError("Calculation error")
         ):
             result = await quality_service.validate_content("Test")
@@ -192,9 +192,10 @@ class TestErrorHandling(SharedTestErrorHandling):
     @pytest.mark.asyncio
     async def test_validate_content_threshold_error(self, quality_service):
         """Test error during threshold checking"""
+        # The actual threshold checking is done in the validator component
         with patch.object(
-            quality_service,
-            '_check_thresholds',
+            quality_service.validator,
+            'check_thresholds',
             side_effect=KeyError("Missing threshold")
         ):
             result = await quality_service.validate_content("Test")
@@ -210,7 +211,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         quality_service.metrics_history = None
         
         # Should not raise, just log warning
-        with patch('app.services.quality_gate_service.logger') as mock_logger:
+        with patch('app.services.quality_gate.quality_gate_core.logger') as mock_logger:
             await quality_service._store_metrics(metrics, ContentType.GENERAL)
             mock_logger.warning.assert_called()
 

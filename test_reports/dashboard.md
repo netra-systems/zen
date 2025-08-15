@@ -1,26 +1,26 @@
 # Test Dashboard
-Updated: 2025-08-15 14:51:10
+Updated: 2025-08-15 14:59:57
 
 ## Last 3 Runs
 
 | Run | Time | Total | ✅ Pass | ❌ Fail | ⏭️ Skip | Trend |
 |-----|------|-------|---------|---------|---------|-------|
-| 1 | 08/15 14:51 | 949 | 927 | 3 | 19 | 📉 |
-| 2 | 08/15 14:50 | 85 | 85 | 0 | 0 | ➡️ |
-| 3 | 08/15 14:49 | 7 | 7 | 0 | 0 | — |
+| 1 | 08/15 14:59 | 1072 | 1046 | 2 | 23 | ➡️ |
+| 2 | 08/15 14:57 | 1070 | 1044 | 2 | 23 | 📈 |
+| 3 | 08/15 14:54 | 1068 | 1041 | 3 | 23 | — |
 
 ## Latest Run Details
 
 | Component | Status | Tests | Pass Rate | Duration |
 |-----------|--------|-------|-----------|----------|
-| Backend | ❌ | 949 | 97.7% | 55.1s |
+| Backend | ❌ | 1072 | 97.6% | 58.7s |
 | Frontend | ❌ | 0 | 0.0% | 0.3s |
 | E2E | ❌ | 0 | 0.0% | 0.0s |
 
 ## Key Metrics
 
-- **Total Failures (last 3 runs)**: 3
-- **Average Duration**: 31.7s
+- **Total Failures (last 3 runs)**: 7
+- **Average Duration**: 57.5s
 - **Flaky Tests**: 0
 
 ## Quick Actions

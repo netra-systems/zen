@@ -24,7 +24,7 @@ resource "google_project_service" "apis" {
     "compute.googleapis.com",
     "container.googleapis.com",
     "sqladmin.googleapis.com",
-    "cloudrun.googleapis.com",
+    "run.googleapis.com",
     "artifactregistry.googleapis.com",
     "secretmanager.googleapis.com"
   ])

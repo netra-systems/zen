@@ -334,13 +334,29 @@ class DataSubAgent(BaseSubAgent):
             # First process the data
             processed_result = await self.process_data(data)
             
-            # Mock persistence for test compatibility
+            # Real persistence using ClickHouse
+            timestamp = datetime.now(UTC)
+            record_id = f"{self.name}_{int(timestamp.timestamp())}"
+            
+            # Store in ClickHouse workload_events table
+            await self.clickhouse_ops.insert_data(
+                table="workload_events",
+                data=[{
+                    "event_id": record_id,
+                    "timestamp": timestamp,
+                    "event_type": "data_processing",
+                    "agent": self.name,
+                    "status": processed_result.get("status", "processed"),
+                    "data": json.dumps(processed_result.get("data", data))
+                }]
+            )
+            
             persist_result = {
                 "persisted": True,
-                "id": "saved_123",  # Mock ID for test
+                "id": record_id,
                 "status": processed_result.get("status", "processed"),
                 "data": processed_result.get("data", data),
-                "timestamp": datetime.now(UTC).isoformat()
+                "timestamp": timestamp.isoformat()
             }
             
             # Log persistence
