@@ -932,6 +932,74 @@
                     npm cache corruption can prevent proper package installation and should be cleared when issues occur.
                 </key-insight>
             </fix>
+            
+            <fix date="2025-08-15">
+                <title>Local Deployment to Remote GCP Staging Environment</title>
+                <problem>Need to deploy to remote GCP staging without using GitHub Actions workflow runner</problem>
+                <context>
+                    <requirement>Deploy from local machine to remote GCP staging infrastructure</requirement>
+                    <requirement>Mirror GitHub Actions staging workflow functionality locally</requirement>
+                    <requirement>Support Docker image building and pushing to GCR</requirement>
+                    <requirement>Support Terraform infrastructure deployment</requirement>
+                </context>
+                <solution>Created local deployment scripts that replicate GitHub Actions staging workflow</solution>
+                <implementation>
+                    <step>Created deploy_staging_remote.ps1 for Windows PowerShell deployment</step>
+                    <step>Created deploy_staging_remote.sh for Unix/Linux deployment</step>
+                    <step>Scripts authenticate with GCP using gcloud CLI</step>
+                    <step>Build Docker images locally with proper platform targeting (linux/amd64)</step>
+                    <step>Push images to Google Container Registry (gcr.io)</step>
+                    <step>Deploy infrastructure using Terraform to GCP</step>
+                    <step>Support all workflow actions: deploy, destroy, restart, status, rebuild</step>
+                </implementation>
+                <prerequisites>
+                    <prerequisite>Docker Desktop installed and running</prerequisite>
+                    <prerequisite>Google Cloud SDK (gcloud) installed and authenticated</prerequisite>
+                    <prerequisite>Terraform installed (version 1.5.0 or later)</prerequisite>
+                    <prerequisite>Git installed for commit SHA retrieval</prerequisite>
+                    <prerequisite>GCP project permissions for Cloud Run, Cloud SQL, and networking</prerequisite>
+                </prerequisites>
+                <usage>
+                    <command>PowerShell: .\deploy_staging_remote.ps1 -Action deploy -PrNumber 123</command>
+                    <command>Bash: ./deploy_staging_remote.sh deploy 123</command>
+                    <command>Status check: .\deploy_staging_remote.ps1 -Action status</command>
+                    <command>Destroy: .\deploy_staging_remote.ps1 -Action destroy -PrNumber 123</command>
+                </usage>
+                <environment-variables>
+                    <var>GCP_STAGING_PROJECT_ID - GCP project ID for staging</var>
+                    <var>TF_STAGING_STATE_BUCKET - Terraform state bucket name</var>
+                    <var>POSTGRES_PASSWORD_STAGING - PostgreSQL password for staging</var>
+                    <var>CLICKHOUSE_PASSWORD_STAGING - ClickHouse password for staging</var>
+                    <var>JWT_SECRET_KEY_STAGING - JWT secret for authentication</var>
+                    <var>FERNET_KEY_STAGING - Fernet encryption key</var>
+                    <var>GEMINI_API_KEY_STAGING - Gemini API key for LLM</var>
+                </environment-variables>
+                <files-created>
+                    <file>deploy_staging_remote.ps1 - PowerShell deployment script</file>
+                    <file>deploy_staging_remote.sh - Bash deployment script</file>
+                </files-created>
+                <key-features>
+                    <feature>Automatic environment name sanitization based on PR/branch</feature>
+                    <feature>Docker image caching to skip rebuilds when images exist</feature>
+                    <feature>Terraform state management with GCS backend</feature>
+                    <feature>Smoke tests for deployment verification</feature>
+                    <feature>Service restart capability for running deployments</feature>
+                    <feature>Deployment status checking with health verification</feature>
+                </features>
+                <prevention>
+                    <action>Always verify GCP authentication before deployment: gcloud auth list</action>
+                    <action>Ensure Docker is running before build attempts</action>
+                    <action>Use proper image tags based on commit SHA for versioning</action>
+                    <action>Create terraform.tfvars file to avoid manual variable entry</action>
+                </prevention>
+                <key-insight>
+                    Local deployment to remote staging provides flexibility for developers to test changes
+                    without relying on GitHub Actions runners. This enables faster iteration cycles and
+                    debugging capabilities while maintaining the same deployment architecture as CI/CD.
+                    The scripts handle all authentication, building, pushing, and deployment steps
+                    automatically, mirroring the GitHub workflow functionality.
+                </key-insight>
+            </fix>
         </section>
     </sections>
 </specification>

@@ -169,37 +169,32 @@ class CorpusService:
     
     # Mock operations for test compatibility
     async def index_document(self, document: Dict) -> Dict:
-        """Index a single document - mock implementation"""
-        if hasattr(self, 'llm_manager'):
-            content = document.get("content", "")
-            embeddings = await self.llm_manager.generate_embeddings(content)
-            document["embeddings"] = embeddings
+        """Index a single document with real vector processing."""
+        document_id = document.get("id")
+        if not document_id:
+            raise ValueError("Document must have an 'id' field")
         
-        if hasattr(self, 'vector_store'):
-            await self.vector_store.index_document(document)
+        content = document.get("content", "")
+        if not content:
+            raise ValueError("Document must have non-empty 'content' field")
         
-        return {
-            "indexed": True, "status": "indexed",
-            "document_id": document.get("id", "doc_1"), "index": "corpus_index"
-        }
+        # Use modular service for real indexing
+        return await self._modular_service.index_document(document)
     
     async def batch_index_documents(self, documents: List[Dict], 
                                    progress_callback=None) -> Dict:
-        """Index multiple documents in batch"""
-        indexed, failed = [], []
-        for i, doc in enumerate(documents):
-            try:
-                result = await self.index_document(doc)
-                indexed.append(result)
-                if progress_callback:
-                    await progress_callback(i + 1, len(documents))
-            except Exception as e:
-                failed.append({"document": doc, "error": str(e)})
+        """Index multiple documents in batch with real processing."""
+        if not documents:
+            raise ValueError("Documents list cannot be empty")
         
-        return {
-            "indexed": len(indexed), "failed": len(failed), "total": len(documents),
-            "results": indexed, "errors": failed
-        }
+        # Use modular service for real batch indexing
+        result = await self._modular_service.batch_index_documents(documents)
+        
+        # Call progress callback if provided
+        if progress_callback:
+            await progress_callback(len(documents), len(documents))
+        
+        return result
     
     async def batch_index_with_recovery(self, documents: List[Dict]) -> Dict:
         """Index documents with recovery from partial failures"""
