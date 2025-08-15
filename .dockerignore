@@ -49,7 +49,11 @@ test_reports
 
 # Node modules (for frontend)
 node_modules
-.next
+# Preserve .next/cache for build optimization
+.next/server
+.next/static
+# Keep cache directory for faster builds
+# .next/cache
 out
 build
 dist
