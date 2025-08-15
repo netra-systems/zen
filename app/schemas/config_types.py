@@ -14,6 +14,10 @@ class Environment(str, Enum):
     TESTING = "testing"
 
 
+# Backward compatibility alias
+EnvironmentType = Environment
+
+
 class ConfigurationStatus(str, Enum):
     """Configuration loading status."""
     LOADED = "loaded"

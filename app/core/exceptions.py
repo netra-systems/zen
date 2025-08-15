@@ -25,7 +25,7 @@ from app.core.error_codes import ErrorCode, ErrorSeverity
 from app.core.exceptions_base import ErrorDetails, NetraException
 from app.core.exceptions_config import ConfigurationError, ValidationError
 from app.core.exceptions_auth import (
-    AuthenticationError, AuthorizationError, TokenExpiredError, TokenInvalidError
+    AuthenticationError, AuthorizationError, TokenExpiredError, TokenInvalidError, NetraSecurityException
 )
 from app.core.exceptions_database import (
     DatabaseError, DatabaseConnectionError, RecordNotFoundError, 
