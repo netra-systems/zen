@@ -69,10 +69,10 @@ class TestSchemaValidationService:
     def test_websocket_message_schema(self):
         """Test WebSocket message schemas."""
         message = WebSocketMessage(
-            type="test_message",
+            type="user_message",  # Use a valid WebSocketMessageType
             payload={"content": "Hello World"}
         )
-        assert message.type == "test_message"
+        assert message.type == "user_message"
         assert message.payload["content"] == "Hello World"
 
     def test_agent_message_schema(self):

@@ -7,7 +7,6 @@ import type { UnifiedWebSocketEvent } from '@/types/unified-chat';
 import { generateUniqueId } from '@/lib/utils';
 import { logger } from '@/lib/logger';
 import { Message } from '@/types/chat';
-import { useChatStore } from '@/store/chat';
 
 interface AgentMetrics {
   currentAgent: string | null;
@@ -36,7 +35,6 @@ export const useChatWebSocket = (options: UseChatWebSocketOptions | string = {})
     
   const { messages } = useWebSocket();
   const unifiedStore = useUnifiedChatStore();
-  const chatStore = useChatStore();
   const { handleWebSocketEvent } = unifiedStore;
   
   // Track the last processed message index to avoid reprocessing
@@ -92,20 +90,20 @@ export const useChatWebSocket = (options: UseChatWebSocketOptions | string = {})
           );
           
           // Add transition message
-          const transitionMessage: Message & any = {
+          const transitionMessage: any = {
             id: generateUniqueId('msg'),
-            type: 'system',
+            role: 'system',
             content: `Transitioning from ${metrics.currentAgent} to ${newAgentName}`,
-            created_at: new Date().toISOString(),
-            sub_agent_name: 'System',
-            displayed_to_user: true,
-            agent_transition: {
-              from: metrics.currentAgent,
-              to: newAgentName,
-              timestamp: new Date().toISOString()
+            timestamp: Date.now(),
+            metadata: {
+              agentTransition: {
+                from: metrics.currentAgent,
+                to: newAgentName,
+                timestamp: new Date().toISOString()
+              }
             }
           };
-          chatStore.addMessage(transitionMessage);
+          unifiedStore.addMessage(transitionMessage);
         }
         
         // Update metrics
@@ -118,9 +116,9 @@ export const useChatWebSocket = (options: UseChatWebSocketOptions | string = {})
         }));
         
         try {
-          chatStore.setSubAgentName(newAgentName);
+          unifiedStore.setSubAgentName(newAgentName);
           if (payload?.state) {
-            chatStore.setSubAgentStatus({
+            unifiedStore.setSubAgentStatus({
               status: payload.state.lifecycle || 'idle',
               tools: payload.state.tools || []
             });
@@ -156,7 +154,7 @@ export const useChatWebSocket = (options: UseChatWebSocketOptions | string = {})
         return { ...prev, toolCallCount: newCount };
       });
     } else if (wsMessage.type === 'agent_started') {
-      chatStore.setProcessing(true);
+      unifiedStore.setProcessing(true);
       setMetrics(prev => ({
         ...prev,
         totalStartTime: now,
@@ -165,7 +163,7 @@ export const useChatWebSocket = (options: UseChatWebSocketOptions | string = {})
         toolCallCount: new Map()
       }));
     } else if (wsMessage.type === 'agent_finished' || wsMessage.type === 'agent_completed') {
-      chatStore.setProcessing(false);
+      unifiedStore.setProcessing(false);
       
       // Record final timing for current agent
       if (metrics.currentAgent) {

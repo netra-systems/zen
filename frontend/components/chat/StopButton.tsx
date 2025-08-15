@@ -1,11 +1,11 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { Square } from 'lucide-react';
 
 export const StopButton: React.FC = () => {
-  const { isProcessing, setProcessing } = useChatStore();
+  const { isProcessing, setProcessing } = useUnifiedChatStore();
   const { sendMessage } = useWebSocket();
 
   const handleClick = () => {

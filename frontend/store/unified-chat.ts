@@ -58,7 +58,17 @@ const initialState = {
     lastRenderTime: 0,
     averageResponseTime: 0,
     memoryUsage: 0
-  }
+  },
+  
+  // Sub-agent status (for compatibility with old chatStore)
+  subAgentName: null,
+  subAgentStatus: null,
+  subAgentTools: [],
+  subAgentProgress: null,
+  subAgentError: null,
+  subAgentDescription: null,
+  subAgentExecutionTime: null,
+  queuedSubAgents: []
 };
 
 export const useUnifiedChatStore = create<UnifiedChatState>()(
@@ -200,7 +210,10 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
               mediumLayerData: currentIteration > 1 ? state.mediumLayerData : null,
               slowLayerData: currentIteration > 1 ? state.slowLayerData : null,
               executedAgents,
-              agentIterations
+              agentIterations,
+              // Update sub-agent status for compatibility
+              subAgentName: displayName,
+              subAgentStatus: 'running'
             }, false, 'agent_started');
             break;
           }
@@ -372,6 +385,16 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             }, false, 'thread_renamed');
             break;
             
+          case 'thread_loaded':
+            // Handle thread loading event - load messages from thread
+            if (event.payload.messages && Array.isArray(event.payload.messages)) {
+              set({
+                messages: event.payload.messages,
+                activeThreadId: event.payload.thread_id
+              }, false, 'thread_loaded');
+            }
+            break;
+            
           case 'final_report':
             const finalReport: FinalReport = {
               report: event.payload.report,
@@ -409,7 +432,9 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
                   total_tokens: 0, // Will be populated from agent_metrics
                   ...event.payload
                 }
-              }
+              },
+              // Clear sub-agent status when processing is complete
+              subAgentStatus: 'completed'
             }, false, 'final_report');
             
             // Add final message to history
@@ -453,7 +478,16 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
         slowLayerData: null,
         currentRunId: null,
         isProcessing: false,
-        messages: []
+        messages: [],
+        // Reset sub-agent status
+        subAgentName: null,
+        subAgentStatus: null,
+        subAgentTools: [],
+        subAgentProgress: null,
+        subAgentError: null,
+        subAgentDescription: null,
+        subAgentExecutionTime: null,
+        queuedSubAgents: []
       }, false, 'resetLayers'),
       
       // Add message to history
@@ -482,6 +516,24 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
       loadMessages: (messages) => set({ 
         messages 
       }, false, 'loadMessages'),
+      
+      // Sub-agent actions (for compatibility with old chatStore)
+      setSubAgentName: (name) => set((state) => ({
+        subAgentName: name,
+        // Also update fastLayerData if it exists for consistency
+        fastLayerData: state.fastLayerData
+          ? { ...state.fastLayerData, agentName: name || '' }
+          : state.fastLayerData
+      }), false, 'setSubAgentName'),
+      
+      setSubAgentStatus: (statusData) => set({
+        subAgentStatus: statusData?.status || null,
+        subAgentTools: statusData?.tools || [],
+        subAgentProgress: statusData?.progress || null,
+        subAgentError: statusData?.error || null,
+        subAgentDescription: statusData?.description || null,
+        subAgentExecutionTime: statusData?.executionTime || null
+      }, false, 'setSubAgentStatus'),
     }),
     {
       name: 'unified-chat-store',

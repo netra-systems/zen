@@ -322,6 +322,16 @@ export interface UnifiedChatState {
     memoryUsage: number;
   };
   
+  // Sub-agent status (for compatibility with old chatStore)
+  subAgentName: string | null;
+  subAgentStatus: string | null;
+  subAgentTools: string[];
+  subAgentProgress: { current: number; total: number; message?: string } | null;
+  subAgentError: string | null;
+  subAgentDescription: string | null;
+  subAgentExecutionTime: number | null;
+  queuedSubAgents: string[];
+  
   // Actions
   updateFastLayer: (data: Partial<FastLayerData>) => void;
   updateMediumLayer: (data: Partial<MediumLayerData>) => void;
@@ -334,6 +344,17 @@ export interface UnifiedChatState {
   setActiveThread: (threadId: string | null) => void;
   clearMessages: () => void;
   loadMessages: (messages: ChatMessage[]) => void;
+  
+  // Sub-agent actions (for compatibility with old chatStore)
+  setSubAgentName: (name: string | null) => void;
+  setSubAgentStatus: (statusData: { 
+    status: string; 
+    tools?: string[]; 
+    progress?: { current: number; total: number; message?: string }; 
+    error?: string; 
+    description?: string; 
+    executionTime?: number; 
+  } | null) => void;
 }
 
 export interface ChatMessage {

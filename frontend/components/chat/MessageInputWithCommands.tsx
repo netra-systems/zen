@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { Send, Paperclip, Mic, Command, Loader2, Database, Sparkles, Users, Settings, FileText, Shield } from 'lucide-react';
@@ -116,7 +116,7 @@ export const MessageInputWithCommands: React.FC = () => {
   
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { sendMessage } = useWebSocket();
-  const { setProcessing, isProcessing, addMessage } = useChatStore();
+  const { setProcessing, isProcessing, addMessage } = useUnifiedChatStore();
   const { currentThreadId, setCurrentThread, addThread } = useThreadStore();
   const { isAuthenticated, isDeveloperOrHigher } = useAuthStore();
   

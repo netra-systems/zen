@@ -76,7 +76,9 @@ class SupervisorAgent(BaseSubAgent):
         self.pipeline_executor = PipelineExecutor(
             self.engine, websocket_manager, self.db_session
         )
-        self.state_manager = StateManager(self.db_session)
+        # Create a factory that returns the existing session
+        db_session_factory = lambda: self.db_session
+        self.state_manager = StateManager(db_session_factory)
         self.pipeline_builder = PipelineBuilder()
     
     def _init_hooks(self) -> Dict[str, List]:
