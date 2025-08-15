@@ -126,12 +126,14 @@ def truncate_at_error_position(json_str: str, error_pos: int) -> Optional[str]:
     return None
 
 
-def check_required_fields(result: Dict[str, Any], required_fields: Optional[List[str]]) -> None:
-    """Log warning if required fields are missing."""
+def check_required_fields(result: Dict[str, Any], required_fields: Optional[List[str]]) -> bool:
+    """Check if all required fields are present."""
     if required_fields:
         missing = [f for f in required_fields if f not in result]
         if missing:
             logger.warning(f"Missing required fields: {missing}")
+            return False
+    return True
 
 
 def find_json_boundaries(text: str) -> tuple[int, int]:

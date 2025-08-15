@@ -362,7 +362,7 @@ class SyntheticDataService(RecoveryMixin):
     
     async def _send_generation_started_notification(self, job_id: str, config: schemas.LogGenParams) -> None:
         """Send WebSocket notification that generation has started"""
-        await manager.broadcast({
+        await manager.broadcasting.broadcast_to_all({
             "type": "generation:started",
             "payload": {
                 "job_id": job_id,
@@ -417,7 +417,7 @@ class SyntheticDataService(RecoveryMixin):
     async def _send_progress_notification(self, job_id: str, progress: float, batch_num: int) -> None:
         """Send progress notification via WebSocket"""
         if self.active_jobs[job_id]["records_generated"] % 100 == 0:
-            await manager.broadcast({
+            await manager.broadcasting.broadcast_to_all({
                 "type": "generation:progress",
                 "payload": self._create_progress_payload(job_id, progress, batch_num)
             })
@@ -450,7 +450,7 @@ class SyntheticDataService(RecoveryMixin):
         table_name = self.active_jobs[job_id]["table_name"]
         duration = (self.active_jobs[job_id]["end_time"] - self.active_jobs[job_id]["start_time"]).total_seconds()
         
-        await manager.broadcast({
+        await manager.broadcasting.broadcast_to_all({
             "type": "generation:complete",
             "payload": {
                 "job_id": job_id,
@@ -474,7 +474,7 @@ class SyntheticDataService(RecoveryMixin):
     
     async def _send_error_notification(self, job_id: str, error: Exception) -> None:
         """Send error notification via WebSocket"""
-        await manager.broadcast({
+        await manager.broadcasting.broadcast_to_all({
             "type": "generation:error",
             "payload": {
                 "job_id": job_id,

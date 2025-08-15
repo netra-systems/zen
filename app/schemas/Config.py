@@ -231,6 +231,14 @@ class DevelopmentConfig(AppConfig):
     
     def __init__(self, **data):
         import os
+        # Load database URL from environment if not provided
+        # Note: 'database_url' is the Pydantic field name (lowercase)
+        # 'DATABASE_URL' is the environment variable name (uppercase)
+        if 'database_url' not in data:
+            env_db_url = os.environ.get('DATABASE_URL')
+            if env_db_url:
+                data['database_url'] = env_db_url
+        
         # Check service modes from environment (set by dev launcher)
         redis_mode = os.environ.get("REDIS_MODE", "shared").lower()
         clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()

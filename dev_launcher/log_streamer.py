@@ -71,9 +71,21 @@ class LogStreamer(threading.Thread):
             logger.error(f"Failed to decode line: {e}")
             return None
     
+    def _is_informational_line(self, lower_line: str) -> bool:
+        """Check if line is informational despite containing error keywords."""
+        info_patterns = [
+            'critical secrets present',
+            'critical secrets loaded',
+            'critical secrets missing'
+        ]
+        return any(pattern in lower_line for pattern in info_patterns)
+    
     def _get_line_emoji(self, line: str) -> str:
         """Get emoji indicator for line type."""
         lower_line = line.lower()
+        # Skip error detection for known informational patterns
+        if self._is_informational_line(lower_line):
+            return "✅ " if any(kw in lower_line for kw in self.success_keywords) else ""
         if any(kw in lower_line for kw in self.error_keywords):
             return "❌ "
         elif any(kw in lower_line for kw in self.warning_keywords):
@@ -85,6 +97,11 @@ class LogStreamer(threading.Thread):
     def _format_content(self, line: str) -> str:
         """Apply standard color based on content type."""
         lower_line = line.lower()
+        # Skip error detection for known informational patterns
+        if self._is_informational_line(lower_line):
+            if any(kw in lower_line for kw in self.success_keywords):
+                return f"{Colors.GREEN}{line}{Colors.RESET}"
+            return line
         # Apply appropriate color based on message type
         if any(kw in lower_line for kw in self.error_keywords):
             return f"{Colors.RED}{line}{Colors.RESET}"

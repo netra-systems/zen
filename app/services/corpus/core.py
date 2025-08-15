@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from ...db import models_postgres as models
 from ... import schemas
 from ...ws_manager import manager
+from ...core.exceptions_base import NetraException
 from .base import CorpusStatus, ContentSource, CorpusNotFoundError, ClickHouseOperationError
 from .document_manager import DocumentManager
 from .search_operations import SearchOperations
@@ -74,9 +75,18 @@ class CorpusService:
                 "version": 1
             })
         )
-        db.add(db_corpus)
-        db.commit()
-        db.refresh(db_corpus)
+        
+        try:
+            db.add(db_corpus)
+            db.commit()
+            db.refresh(db_corpus)
+        except Exception as e:
+            db.rollback()
+            raise NetraException(
+                message=f"Database connection failure during corpus creation",
+                error_code="DB_CORPUS_CREATE_FAILED",
+                context={"corpus_name": corpus_data.name, "user_id": user_id, "error": str(e)}
+            )
         
         # Create ClickHouse table asynchronously
         asyncio.create_task(self.clickhouse_ops.create_corpus_table(corpus_id, table_name, db))

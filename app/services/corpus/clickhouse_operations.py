@@ -51,7 +51,7 @@ class ClickHouseOperations:
                 db.commit()
                 
                 # Send WebSocket notification
-                await manager.broadcast({
+                await manager.broadcasting.broadcast_to_all({
                     "type": "corpus:created",
                     "payload": {
                         "corpus_id": corpus_id,
@@ -72,7 +72,7 @@ class ClickHouseOperations:
             db.commit()
             
             # Send error notification
-            await manager.broadcast({
+            await manager.broadcasting.broadcast_to_all({
                 "type": "corpus:error",
                 "payload": {
                     "corpus_id": corpus_id,

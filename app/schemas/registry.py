@@ -410,10 +410,10 @@ class BaseWebSocketPayload(BaseModel):
 
 class StartAgentPayload(BaseWebSocketPayload):
     """Payload for starting an agent."""
-    agent_id: str
-    prompt: str
+    query: str
+    user_id: str
     thread_id: Optional[str] = None
-    configuration: Optional[Dict[str, Any]] = None
+    context: Optional[Dict[str, Any]] = None
 
 
 class CreateThreadPayload(BaseWebSocketPayload):
@@ -496,10 +496,9 @@ class WebSocketError(BaseModel):
 
 class UserMessagePayload(BaseWebSocketPayload):
     """User message WebSocket payload."""
-    text: str
-    references: Optional[List[str]] = Field(default_factory=list)
+    content: str
     thread_id: Optional[str] = None
-    attachments: Optional[List[Dict[str, Any]]] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 class AgentUpdatePayload(BaseWebSocketPayload):

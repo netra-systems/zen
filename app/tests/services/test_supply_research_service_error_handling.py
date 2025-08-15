@@ -15,9 +15,11 @@ from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestE
 
 
 @pytest.fixture
-def service(db_session):
-    """Create SupplyResearchService instance with real database"""
-    return SupplyResearchService(db_session)
+def service():
+    """Create SupplyResearchService instance with mocked database"""
+    from unittest.mock import MagicMock
+    mock_db = MagicMock()
+    return SupplyResearchService(mock_db)
 
 
 class TestErrorHandling(SharedTestErrorHandling):
@@ -60,7 +62,8 @@ class TestErrorHandling(SharedTestErrorHandling):
         # Service already initialized without Redis, should continue working
         with patch.object(service, 'redis_manager', None):
             with patch.object(service.db, 'query') as mock_query:
-                mock_query.return_value.all.return_value = []
+                # Mock the complete query chain: query().order_by().all()
+                mock_query.return_value.order_by.return_value.all.return_value = []
                 
                 # Should not raise exception
                 result = service.get_supply_items()

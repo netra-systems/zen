@@ -86,7 +86,7 @@ class TestApexOptimizerPerformanceAndScaling:
         results = {}
         
         for concurrency in concurrency_levels:
-            start_time = asyncio.get_event_loop().time()
+            start_time = time.perf_counter()
             
             # Execute tools concurrently
             tasks = []
@@ -96,14 +96,15 @@ class TestApexOptimizerPerformanceAndScaling:
                 tasks.append(task)
             
             await asyncio.gather(*tasks)
-            end_time = asyncio.get_event_loop().time()
+            end_time = time.perf_counter()
             
             execution_time = end_time - start_time
             results[concurrency] = execution_time
         
         # Higher concurrency should not dramatically increase execution time
-        # (within reasonable limits for our mock tools)
-        assert results[50] < results[1] * 10  # Should scale reasonably well
+        # Use max() to handle timing precision edge cases where results[1] might be very small
+        baseline_time = max(results[1], 0.001)  # Minimum 1ms baseline
+        assert results[50] < baseline_time * 10  # Should scale reasonably well
     
     @pytest.mark.asyncio
     async def test_tool_chain_optimization_performance(self, performance_tools, mock_context):

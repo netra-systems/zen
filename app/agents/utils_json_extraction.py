@@ -153,5 +153,5 @@ def extract_partial_json(response: str, required_fields: Optional[List[str]] = N
         actions = extract_truncated_array(response, 'actions')
         if actions is not None:
             result['actions'] = actions
-    check_required_fields(result, required_fields)
-    return result if result else None
+    has_required_fields = check_required_fields(result, required_fields)
+    return result if result and has_required_fields else None

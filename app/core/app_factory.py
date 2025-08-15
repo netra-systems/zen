@@ -28,29 +28,11 @@ from app.auth.auth import oauth_client
 
 def create_fastapi_app() -> FastAPI:
     """Create and configure FastAPI application."""
-    app = FastAPI()
-    _setup_startup_event(app)
-    _setup_shutdown_event(app)
+    app = FastAPI(lifespan=lifespan)
     return app
 
 
-def _setup_startup_event(app: FastAPI) -> None:
-    """Setup startup event handler."""
-    @app.on_event("startup")
-    async def startup_event():
-        from app.startup import run_complete_startup
-        global _startup_logger
-        _, _startup_logger = await run_complete_startup(app)
-
-
-def _setup_shutdown_event(app: FastAPI) -> None:
-    """Setup shutdown event handler."""
-    @app.on_event("shutdown")
-    async def shutdown_event():
-        from app.shutdown import run_complete_shutdown
-        global _startup_logger
-        if '_startup_logger' in globals():
-            await run_complete_shutdown(app, _startup_logger)
+# Startup and shutdown events now handled by lifespan manager
 
 
 def register_error_handlers(app: FastAPI) -> None:
@@ -93,7 +75,7 @@ def _import_route_modules() -> dict:
         supply, generation, admin, references, health, 
         corpus, synthetic_data, config, demo, unified_tools, quality
     )
-    from app.routes.auth import auth as auth_router
+    from app.routes.auth import router as auth_router
     from app.routes.agent_route import router as agent_router
     from app.routes.llm_cache import router as llm_cache_router
     from app.routes.threads_route import router as threads_router
@@ -114,7 +96,7 @@ def _import_route_modules() -> dict:
 def _get_route_configurations(modules: dict) -> dict:
     """Get route configuration mapping."""
     return {
-        "auth": (modules["auth_router"].router, "/api/auth", ["auth"]),
+        "auth": (modules["auth_router"], "/api/auth", ["auth"]),
         "agent": (modules["agent_router"], "/api/agent", ["agent"]),
         "threads": (modules["threads_router"], "", ["threads"]),
         "llm_cache": (modules["llm_cache_router"], "/api/llm-cache", ["llm-cache"]),

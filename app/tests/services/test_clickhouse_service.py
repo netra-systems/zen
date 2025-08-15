@@ -289,13 +289,10 @@ class TestBasicOperations:
         assert len(tables_after) == 0
 
 
-@pytest.mark.asyncio
-class TestWorkloadEventsOperations:
-    """Test operations on workload_events table."""
-    
-    @pytest_asyncio.fixture
-    async def ensure_workload_table(self):
-        """Ensure workload_events table exists."""
+@pytest.fixture
+def ensure_workload_table(event_loop):
+    """Ensure workload_events table exists."""
+    async def _ensure_table():
         success = await create_workload_events_table_if_missing()
         if not success:
             pytest.skip("Cannot create workload_events table")
@@ -303,6 +300,13 @@ class TestWorkloadEventsOperations:
         exists = await verify_workload_events_table()
         if not exists:
             pytest.skip("workload_events table not accessible")
+    
+    event_loop.run_until_complete(_ensure_table())
+
+
+@pytest.mark.asyncio
+class TestWorkloadEventsOperations:
+    """Test operations on workload_events table."""
     
     @pytest.mark.asyncio
     async def test_workload_events_operations(self, real_clickhouse_client, ensure_workload_table):

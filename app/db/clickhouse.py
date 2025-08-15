@@ -41,6 +41,12 @@ class DisabledClickHouseDatabase:
         logger.debug("ClickHouse disabled - Ping successful")
         return True
     
+    async def command(self, cmd: str, parameters: Optional[Dict[str, Any]] = None, 
+                     settings: Optional[Dict[str, Any]] = None) -> Any:
+        """Execute command with disabled ClickHouse - no-op for schema operations."""
+        logger.debug(f"ClickHouse disabled - Command logged: {cmd[:50]}...")
+        return None
+    
     def _create_empty_result_set(self) -> List[Dict[str, Any]]:
         """Create empty result set for queries."""
         return []

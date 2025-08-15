@@ -40,8 +40,8 @@ class TestResultRetrieval:
     
     async def test_get_recent_results_with_redis(self, scheduler):
         """Test getting recent results from Redis"""
-        mock_redis = MockRedisManager()
-        scheduler.redis_manager = mock_redis
+        # Use the existing redis_manager from the scheduler
+        mock_redis = scheduler.redis_manager
         
         # Add some test data to Redis
         test_result = {
@@ -61,8 +61,8 @@ class TestResultRetrieval:
     
     async def test_get_recent_results_all_schedules(self, scheduler):
         """Test getting results for all schedules"""
-        mock_redis = MockRedisManager()
-        scheduler.redis_manager = mock_redis
+        # Use the existing redis_manager from the scheduler
+        mock_redis = scheduler.redis_manager
         
         # Add results for multiple schedules
         today = datetime.now(UTC).date()
@@ -80,8 +80,8 @@ class TestResultRetrieval:
     
     async def test_get_recent_results_multiple_days(self, scheduler):
         """Test getting results across multiple days"""
-        mock_redis = MockRedisManager()
-        scheduler.redis_manager = mock_redis
+        # Use the existing redis_manager from the scheduler
+        mock_redis = scheduler.redis_manager
         
         schedule_name = "test_schedule"
         
@@ -101,14 +101,14 @@ class TestResultRetrieval:
     
     async def test_get_recent_results_redis_errors(self, scheduler):
         """Test handling Redis errors when getting results"""
-        mock_redis = MockRedisManager()
+        # Use the existing redis_manager from the scheduler
+        mock_redis = scheduler.redis_manager
         
         # Mock Redis get to raise exception
         async def failing_get(key):
             raise Exception("Redis error")
         
         mock_redis.get = failing_get
-        scheduler.redis_manager = mock_redis
         
         # Should handle errors gracefully
         results = await scheduler.get_recent_results("test_schedule")

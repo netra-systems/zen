@@ -1,8 +1,8 @@
 {
-  "timestamp": "2025-08-14T17:00:33.596627",
+  "timestamp": "2025-08-14T22:06:32.017293",
   "level": "comprehensive-database",
   "metrics": {
-    "total_tests": 2,
+    "total_tests": 0,
     "passed": 0,
     "failed": 0,
     "coverage": null
@@ -10,15 +10,15 @@
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 23.69679355621338,
-      "exit_code": 2,
-      "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -v -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -k database or repository or clickhouse or postgres --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m_____ ERROR collecting app/tests/security/test_comprehensive_security.py ______\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\security\\test_comprehensive_security.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\napp\\tests\\security\\test_comprehensive_security.py:16: in <module>\n    from app.middleware.security_middleware import SecurityMiddleware, RateLimitTracker\napp\\middleware\\security_middleware.py:16: in <module>\n    from app.core.exceptions import NetraSecurityException\nE   ImportError: cannot import name 'NetraSecurityException' from 'app.core.exceptions' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\core\\exceptions.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app/tests/security/test_comprehensive_security.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m======================== \u001b[33m1 skipped\u001b[0m, \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 16.19s\u001b[0m\u001b[31m =========================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 23.04s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nC:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\llm\\test_llm_integration_real.py:26: PytestCollectionWarning: cannot collect test class 'TestResponseModel' because it has a __init__ constructor (from: app/tests/llm/test_llm_integration_real.py)\n  class TestResponseModel(BaseModel):\nC:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\llm\\test_llm_integration_real.py:26: PytestCollectionWarning: cannot collect test class 'TestResponseModel' because it has a __init__ constructor (from: app/tests/llm/test_llm_integration_real.py)\n  class TestResponseModel(BaseModel):\nC:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\llm\\test_llm_integration_real.py:26: PytestCollectionWarning: cannot collect test class 'TestResponseModel' because it has a __init__ constructor (from: app/tests/llm/test_llm_integration_real.py)\n  class TestResponseModel(BaseModel):\nC:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\llm\\test_llm_integration_real.py:26: PytestCollectionWarning: cannot collect test class 'TestResponseModel' because it has a __init__ constructor (from: app/tests/llm/test_llm_integration_real.py)\n  class TestResponseModel(BaseModel):\n",
+      "duration": 18.631521940231323,
+      "exit_code": 15,
+      "output": "\n",
       "test_counts": {
-        "total": 2,
+        "total": 0,
         "passed": 0,
         "failed": 0,
-        "skipped": 1,
-        "errors": 1,
+        "skipped": 0,
+        "errors": 0,
         "test_files": 0
       },
       "coverage": null,
@@ -54,8 +54,8 @@
     },
     "overall": {
       "status": "failed",
-      "start_time": 1755216009.8998342,
-      "end_time": 1755216033.5966277
+      "start_time": 1755234373.3826146,
+      "end_time": 1755234392.0162942
     }
   }
 }

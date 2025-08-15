@@ -6,7 +6,7 @@
     "mode": "shared"
   },
   "postgres": {
-    "mode": "shared"
+    "mode": "local"
   },
   "llm": {
     "mode": "shared"

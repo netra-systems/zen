@@ -56,12 +56,17 @@ class TestFallbackResponseService:
         
         # Verify response quality
         assert response != None
-        assert len(response) > 100  # Should be substantial
-        assert "specific" in response.lower() or "information" in response.lower()
-        assert "GPU workload" in response  # Should reference the context
+        # Handle both string and dict responses
+        if isinstance(response, dict):
+            response_text = response.get('response', '')
+        else:
+            response_text = response
+        assert len(response_text) > 100  # Should be substantial
+        assert "specific" in response_text.lower() or "information" in response_text.lower()
+        assert "GPU workload" in response_text  # Should reference the context
         
         # Should include actionable requests for information
-        assert any(term in response for term in ["metrics", "performance", "constraints"])
+        assert any(term in response_text for term in ["metrics", "performance", "constraints"])
     
     async def test_generate_data_analysis_fallback_parsing_error(self, fallback_service):
         """Test fallback for data analysis parsing errors"""

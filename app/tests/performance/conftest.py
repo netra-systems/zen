@@ -12,12 +12,8 @@ from unittest.mock import AsyncMock, MagicMock
 from app.config import settings
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create event loop for async tests"""
-    loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
+# Removed session-scoped event_loop fixture to prevent conflicts with pytest-asyncio
+# pytest-asyncio automatically manages event loops for async tests
 
 
 @pytest.fixture

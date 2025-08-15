@@ -81,7 +81,7 @@ class DocumentManager:
             await self._insert_corpus_records(db_corpus.table_name, records)
             
             # Send progress notification
-            await manager.broadcast({
+            await manager.broadcasting.broadcast_to_all({
                 "type": "corpus:upload_progress",
                 "payload": {
                     "corpus_id": db_corpus.id,
@@ -209,7 +209,7 @@ class DocumentManager:
                 db.commit()
                 
                 # Send notification
-                await manager.broadcast({
+                await manager.broadcasting.broadcast_to_all({
                     "type": "corpus:clone_complete",
                     "payload": {
                         "corpus_id": corpus_id

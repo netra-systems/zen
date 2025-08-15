@@ -244,7 +244,7 @@ class ReliableConnectionManager:
             
             # Send message
             prepared_message = prepare_websocket_message(message)
-            await conn_info.websocket.send_text(safe_json_dumps(prepared_message))
+            await conn_info.websocket.send_json(prepared_message)
             return True
         
         async def _fallback_send_message():

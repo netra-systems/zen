@@ -98,6 +98,10 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         async def slow_execute(state, rid, stream):
             await asyncio.sleep(10)  # Simulate long-running task
             return state
+            
+        # Create a mock entry condition that returns True
+        async def mock_entry_conditions(state, rid):
+            return True
         
         # Handle both consolidated and legacy implementations
         sub_agents = []
@@ -111,6 +115,7 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
             
         if len(sub_agents) > 1:
             sub_agents[1].execute = slow_execute
+            sub_agents[1].check_entry_conditions = mock_entry_conditions
         
         # Set timeout
         timeout_seconds = 2

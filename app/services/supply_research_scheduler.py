@@ -64,7 +64,7 @@ class SupplyResearchScheduler:
         return self.schedule_manager.get_schedule_status()
     
     @property
-    def schedules(self) -> Dict[str, Any]:
+    def schedules(self) -> List[ResearchSchedule]:
         """Get all schedules - compatibility property for tests"""
         return self.schedule_manager.schedules
     

@@ -455,7 +455,7 @@ class TestDemoService:
     async def test_error_handling_redis_failure(self, demo_service):
         """Test error handling when Redis operations fail."""
         # Make Redis operations fail
-        with patch.object(demo_service, '_get_redis', side_effect=Exception("Redis connection failed")):
+        with patch.object(demo_service.session_manager, '_get_redis', side_effect=Exception("Redis connection failed")):
             with pytest.raises(Exception) as exc_info:
                 await demo_service.process_demo_chat(
                     message="Test",

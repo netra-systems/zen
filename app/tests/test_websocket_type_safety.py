@@ -11,7 +11,40 @@ from pydantic import ValidationError
 
 from app.schemas.registry import (
     WebSocketMessageType,
-    WebSocketConnectionState
+    WebSocketConnectionState,
+    StartAgentPayload,
+    UserMessagePayload,
+    CreateThreadPayload,
+    SwitchThreadPayload,
+    DeleteThreadPayload,
+    StopAgentPayload,
+    WebSocketMessage,
+    BaseWebSocketPayload
+)
+from app.schemas.websocket_payloads import (
+    RenameThreadPayload,
+    ListThreadsPayload,
+    ThreadHistoryPayload,
+    AgentStartedPayload,
+    AgentErrorPayload,
+    ToolStartedPayload,
+    ToolCompletedPayload,
+    ToolCallPayload,
+    ToolResultPayload,
+    SubAgentStartedPayload,
+    SubAgentCompletedPayload,
+    ThreadCreatedPayload,
+    ThreadSwitchedPayload,
+    ThreadDeletedPayload,
+    ThreadRenamedPayload,
+    ThreadListPayload,
+    StreamChunkPayload,
+    StreamCompletePayload,
+    ErrorPayload,
+    ConnectionEstablishedPayload,
+    BaseWebSocketMessage,
+    ClientToServerMessage,
+    ServerToClientMessage
 )
 from app.core.error_codes import ErrorSeverity
 from app.schemas.Agent import AgentStarted, AgentCompleted, AgentErrorMessage, SubAgentUpdate

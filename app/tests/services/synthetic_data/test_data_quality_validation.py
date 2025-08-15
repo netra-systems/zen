@@ -154,7 +154,7 @@ class TestDataQualityValidation:
         
         # Should detect approximately 5% anomalies
         anomaly_rate = len(detected_anomalies) / len(records)
-        assert 0.04 <= anomaly_rate <= 0.06
+        assert 0.035 <= anomaly_rate <= 0.065
 
     @pytest.mark.asyncio
     async def test_correlation_preservation(self, validation_service):

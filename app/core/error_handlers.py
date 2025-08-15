@@ -324,7 +324,7 @@ async def netra_exception_handler(request: Request, exc: NetraException) -> JSON
     
     return JSONResponse(
         status_code=status_code,
-        content=error_response.dict()
+        content=error_response.model_dump()
     )
 
 
@@ -334,7 +334,7 @@ async def validation_exception_handler(request: Request, exc: ValidationError) -
     
     return JSONResponse(
         status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-        content=error_response.dict()
+        content=error_response.model_dump()
     )
 
 
@@ -344,7 +344,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     
     return JSONResponse(
         status_code=exc.status_code,
-        content=error_response.dict()
+        content=error_response.model_dump()
     )
 
 
@@ -354,5 +354,5 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
     
     return JSONResponse(
         status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-        content=error_response.dict()
+        content=error_response.model_dump()
     )

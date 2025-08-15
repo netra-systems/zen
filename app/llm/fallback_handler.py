@@ -104,7 +104,16 @@ class LLMFallbackHandler:
         """Execute LLM operation with fallback handling"""
         circuit_breaker = self._get_circuit_breaker(provider)
         
-        if self.config.use_circuit_breaker and circuit_breaker.is_open():
+        # Handle case where circuit_breaker might not be properly initialized
+        is_circuit_open = False
+        if self.config.use_circuit_breaker and hasattr(circuit_breaker, 'is_open'):
+            try:
+                is_circuit_open = circuit_breaker.is_open()
+            except (TypeError, AttributeError):
+                logger.warning(f"Circuit breaker for {provider} not properly initialized")
+                is_circuit_open = False
+        
+        if is_circuit_open:
             logger.warning(f"Circuit breaker open for {provider}, using fallback")
             return self._create_fallback_response(fallback_type)
         
@@ -118,8 +127,11 @@ class LLMFallbackHandler:
                     timeout=self.config.timeout
                 )
                 
-                if self.config.use_circuit_breaker:
-                    circuit_breaker.record_success()
+                if self.config.use_circuit_breaker and hasattr(circuit_breaker, 'record_success'):
+                    try:
+                        circuit_breaker.record_success()
+                    except (TypeError, AttributeError):
+                        logger.debug(f"Could not record success for circuit breaker {provider}")
                 
                 return result
                 

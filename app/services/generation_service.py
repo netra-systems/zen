@@ -185,24 +185,24 @@ async def run_content_generation_job(job_id: str, params: dict):
         await update_job_status(job_id, "failed", error=str(e))
         return
 
-    total_tasks = len(list(META_PROMPTS.keys())) * params.get('samples_per_type', 10)
+    total_tasks = len(list(META_PROMPTS.keys())) * getattr(params, 'samples_per_type', 10)
     await update_job_status(job_id, "running", progress=0, total_tasks=total_tasks)
 
     # Create a serializable dictionary for generation_config
     generation_config_dict = {
-        'temperature': params.get('temperature', 0.7),
-        'top_p': params.get('top_p'),
-        'top_k': params.get('top_k')
+        'temperature': getattr(params, 'temperature', 0.7),
+        'top_p': getattr(params, 'top_p', None),
+        'top_k': getattr(params, 'top_k', None)
     }
     # Filter out None values so the Google API doesn't complain
     generation_config_dict = {k: v for k, v in generation_config_dict.items() if v is not None}
 
 
     workload_types = list(META_PROMPTS.keys())
-    num_processes = min(cpu_count(), params.get('max_cores', 4))
+    num_processes = min(cpu_count(), getattr(params, 'max_cores', 4))
 
     # Prepare tasks with serializable data
-    tasks = [(w_type, generation_config_dict) for w_type in workload_types for _ in range(params.get('samples_per_type', 10))]
+    tasks = [(w_type, generation_config_dict) for w_type in workload_types for _ in range(getattr(params, 'samples_per_type', 10))]
 
     corpus = {key: [] for key in workload_types}
     completed_tasks = 0
@@ -242,7 +242,7 @@ async def run_content_generation_job(job_id: str, params: dict):
         return
 
 
-    clickhouse_table = params.get('clickhouse_table', 'content_corpus')
+    clickhouse_table = getattr(params, 'clickhouse_table', 'content_corpus')
     try:
         await save_corpus_to_clickhouse(corpus, clickhouse_table, job_id=job_id)
         summary = {
@@ -367,10 +367,10 @@ from app.data.synthetic.synthetic_data import main as synthetic_data_main
 
 async def run_synthetic_data_generation_job(job_id: str, params: dict):
     """Generates and ingests synthetic logs in batches from a ClickHouse corpus."""
-    batch_size = params.get('batch_size', 1000)
-    total_logs_to_gen = params.get('num_traces', 10000)
-    source_table = params.get('source_table', 'content_corpus')
-    destination_table = params.get('destination_table', 'synthetic_data')
+    batch_size = getattr(params, 'batch_size', 1000)
+    total_logs_to_gen = getattr(params, 'num_traces', 10000)
+    source_table = getattr(params, 'source_table', 'content_corpus')
+    destination_table = getattr(params, 'destination_table', 'synthetic_data')
     
     await update_job_status(job_id, "running", progress=0, total_tasks=total_logs_to_gen, records_ingested=0)
 

@@ -213,7 +213,7 @@ class HeartbeatManager:
                 raise ConnectionError("WebSocket already closed")
             
             prepared_message = prepare_websocket_message(ping_message)
-            await conn_info.websocket.send_text(safe_json_dumps(prepared_message))
+            await conn_info.websocket.send_json(prepared_message)
         except ConnectionError:
             # Re-raise connection errors for proper handling
             raise

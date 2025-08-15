@@ -210,7 +210,7 @@ class BroadcastManager:
         try:
             if conn_info.websocket.client_state == WebSocketState.CONNECTED:
                 prepared_message = prepare_websocket_message(message)
-                await conn_info.websocket.send_text(safe_json_dumps(prepared_message))
+                await conn_info.websocket.send_json(prepared_message)
                 return True
             else:
                 logger.debug(f"Connection {conn_info.connection_id} not in CONNECTED state")

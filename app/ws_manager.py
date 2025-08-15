@@ -100,7 +100,12 @@ class WebSocketManager:
         Returns:
             bool: True if message was sent successfully
         """
-        return await self.broadcasting.broadcast_to_job(job_id, message)
+        self.core.queue_manager.increment_active_send(job_id)
+        try:
+            result = await self.broadcasting.broadcast_to_job(job_id, message)
+            return result
+        finally:
+            self.core.queue_manager.decrement_active_send(job_id)
 
     async def connect_to_job(self, websocket: WebSocket, job_id: str) -> ConnectionInfo:
         """Connect a websocket to a specific job/room.
@@ -234,6 +239,42 @@ class WebSocketManager:
     def get_queue_size(self, job_id: str) -> int:
         """Get message queue size for a job."""
         return getattr(self.core.queue_manager, 'get_queue_size', lambda x: 0)(job_id)
+
+    async def notify_batch_complete(self, job_id: str, batch_num: int, batch_size: int) -> bool:
+        """Send batch completion notification to job connections."""
+        message = {
+            "type": "batch_complete",
+            "job_id": job_id,
+            "batch_num": batch_num,
+            "batch_size": batch_size
+        }
+        return await self.broadcast_to_job(job_id, message)
+
+    async def notify_error(self, job_id: str, error_data: Dict[str, Any]) -> bool:
+        """Send error notification to job connections."""
+        return await self.broadcast_to_job(job_id, error_data)
+
+    async def notify_completion(self, job_id: str, completion_data: Dict[str, Any]) -> bool:
+        """Send completion notification to job connections."""
+        return await self.broadcast_to_job(job_id, completion_data)
+
+    def set_job_state(self, job_id: str, state: Dict[str, Any]) -> None:
+        """Store job state."""
+        if not hasattr(self.core, 'job_states'):
+            self.core.job_states = {}
+        self.core.job_states[job_id] = state
+
+    def get_job_state(self, job_id: str) -> Dict[str, Any]:
+        """Retrieve job state."""
+        return getattr(self.core, 'job_states', {}).get(job_id, {})
+
+    async def start_heartbeat(self, job_id: str, interval_seconds: int = 30) -> None:
+        """Start heartbeat for job connections."""
+        room_connections = self.core.room_manager.get_room_connections(job_id)
+        for conn_id in room_connections:
+            conn_info = self.core.connection_manager.get_connection_info(conn_id)
+            if conn_info:
+                await self.core.heartbeat_manager.start_heartbeat_for_connection(conn_info)
 
     # Legacy method names for backward compatibility
     async def connect(self, websocket: WebSocket, job_id: str) -> ConnectionInfo:

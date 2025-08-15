@@ -117,14 +117,14 @@ class TestPydanticValidationCritical:
             ]
         }
         
-        # This should raise validation error
-        with pytest.raises(ValidationError) as exc_info:
-            OptimizationsResult(**invalid_response)
+        # This should NOT raise validation error - the validator should handle dict to string conversion
+        result = OptimizationsResult(**invalid_response)
         
-        # Verify error matches production
-        error = exc_info.value
-        assert "Input should be a valid string" in str(error)
-        assert "recommendations.0" in str(error)
+        # Verify the dict was converted to a string properly
+        assert len(result.recommendations) == 1
+        assert isinstance(result.recommendations[0], str)
+        # The validator should convert the dict to its description or string representation
+        assert "Optimize" in result.recommendations[0] or "general" in result.recommendations[0]
     
     @pytest.mark.asyncio
     async def test_optimizations_fallback_format_error(self):

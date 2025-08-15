@@ -179,10 +179,10 @@ class CoreMetricsCalculator:
         
         if sentences:
             avg_sentence_length = len(words) / len(sentences)
-            if avg_sentence_length > 30:
-                score -= 0.2
-            elif avg_sentence_length > 40:
-                score -= 0.4
+            if avg_sentence_length > 40:
+                score -= 0.5  # Heavy penalty for very long sentences
+            elif avg_sentence_length > 30:
+                score -= 0.2  # Moderate penalty for long sentences
         
         # Check for excessive jargon without explanation
         jargon_pattern = r'\b[A-Z]{3,}\b'
@@ -191,7 +191,10 @@ class CoreMetricsCalculator:
             score -= 0.1
         
         # Check for nested parentheses or excessive punctuation
-        if content.count('(') > 5 or content.count(',') > len(sentences) * 3:
+        paren_count = content.count('(')
+        if paren_count > 2 and sentences:  # 3+ parentheses in a sentence is confusing
+            score -= min(paren_count * 0.02, 0.1)  # Progressive penalty
+        if content.count(',') > len(sentences) * 3:
             score -= 0.1
         
         # Check for clear structure markers

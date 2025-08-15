@@ -103,9 +103,8 @@ class TriageSubAgent(BaseSubAgent):
                 confidence_score=0.5
             )
 
-    @agent_type_safe
     async def execute(self, state: DeepAgentState, run_id: str, 
-                     stream_updates: bool) -> TypedAgentResult:
+                     stream_updates: bool) -> None:
         """Execute enhanced triage with comprehensive fallback handling."""
         start_time = time.time()
         
@@ -129,8 +128,6 @@ class TriageSubAgent(BaseSubAgent):
                 
                 if stream_updates:
                     await self._send_completion_update(run_id, triage_result)
-                
-                return self._create_success_result(start_time, triage_result)
             else:
                 # Fallback case
                 fallback_result = await self._create_emergency_fallback(state, run_id)
@@ -139,11 +136,9 @@ class TriageSubAgent(BaseSubAgent):
                 if stream_updates:
                     await self._send_emergency_update(run_id, fallback_result)
                 
-                return self._create_success_result(start_time, fallback_result)
-                
         except Exception as e:
             logger.error(f"Triage execution failed for run_id {run_id}: {e}")
-            return self._create_failure_result(f"Triage execution failed: {e}", start_time)
+            raise
     
     
     def _build_enhanced_prompt(self, user_request):
@@ -421,14 +416,24 @@ Categorize into one of these main categories:
         except Exception:
             return self._create_basic_triage_fallback()
     
-    async def _send_completion_update(self, run_id: str, result: dict) -> None:
+    async def _send_completion_update(self, run_id: str, result) -> None:
         """Send completion update with result details."""
-        status = "completed_with_fallback" if result.get("metadata", {}).get("fallback_used") else "completed"
+        # Handle both dict and TriageResult objects
+        if hasattr(result, 'model_dump'):
+            result_dict = result.model_dump()
+            category = result.category if hasattr(result, 'category') else 'Unknown'
+        else:
+            result_dict = result if isinstance(result, dict) else {}
+            category = result_dict.get('category', 'Unknown')
+        
+        metadata = result_dict.get("metadata", {}) or {}
+        fallback_used = metadata.get("fallback_used", False)
+        status = "completed_with_fallback" if fallback_used else "completed"
         
         await self._send_update(run_id, {
             "status": status,
-            "message": f"Request categorized as: {result.get('category', 'Unknown')}",
-            "result": result
+            "message": f"Request categorized as: {category}",
+            "result": result_dict
         })
     
     async def _send_emergency_update(self, run_id: str, result: dict) -> None:

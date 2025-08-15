@@ -166,11 +166,22 @@ class ServicesConfiguration:
                 env_vars["CLICKHOUSE_URL"] = f"clickhouse://{ch_config['user']}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
         
         if self.postgres.mode != ResourceMode.DISABLED:
-            if self.postgres.mode == ResourceMode.MOCK:
+            # Check if DATABASE_URL is already set in environment
+            existing_db_url = os.environ.get("DATABASE_URL")
+            if existing_db_url:
+                # Use existing DATABASE_URL from environment
+                env_vars["DATABASE_URL"] = existing_db_url
+                logger.info(f"Using existing DATABASE_URL from environment")
+            elif self.postgres.mode == ResourceMode.MOCK:
                 env_vars["DATABASE_URL"] = "postgresql://mock:mock@localhost:5432/mock"
-            else:
+            elif self.postgres.mode == ResourceMode.LOCAL:
                 pg_config = self.postgres.get_config()
                 env_vars["DATABASE_URL"] = f"postgresql://{pg_config['user']}:{pg_config['password']}@{pg_config['host']}:{pg_config['port']}/{pg_config['database']}"
+            elif self.postgres.mode == ResourceMode.SHARED:
+                # For shared mode, require DATABASE_URL to be set in environment
+                logger.warning("PostgreSQL is in SHARED mode but DATABASE_URL not found in environment")
+                logger.warning("Please set DATABASE_URL environment variable for shared PostgreSQL")
+                # Don't set a default with example.com - this will cause connection errors
         
         # IMPORTANT: Remove all DEV_MODE_DISABLE flags - all services are enabled by default
         # Users should explicitly choose mock or disabled mode if needed

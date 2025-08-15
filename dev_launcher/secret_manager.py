@@ -146,16 +146,17 @@ class SecretLoader:
         }
     
     def _get_static_config(self) -> Dict[str, Tuple[str, str]]:
-        """Get static configuration values."""
+        """Get static configuration values - only non-sensitive defaults."""
         return {
-            "CLICKHOUSE_HOST": ("xedvrr4c3r.us-central1.gcp.clickhouse.cloud", "static"),
-            "CLICKHOUSE_PORT": ("8443", "static"),
-            "CLICKHOUSE_USER": ("default", "static"),
-            "CLICKHOUSE_DB": ("default", "static"),
+            # Environment setting
             "ENVIRONMENT": ("development", "static"),
+            
+            # Service hosts and ports only - no credentials
             "REDIS_HOST": ("localhost", "static"),
             "REDIS_PORT": ("6379", "static"),
-            "DATABASE_URL": ("postgresql://localhost/netra", "static"),
+            
+            # Note: DATABASE_URL should come from .env files only
+            # Removed hardcoded credentials for security
         }
     
     def _mask_value(self, value: str) -> str:

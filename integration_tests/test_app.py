@@ -11,6 +11,7 @@ from app.schemas.Generation import ContentGenParams, LogGenParams, DataIngestion
 
 # Set testing flags to simplify startup
 os.environ["TESTING"] = "1"
+os.environ["ENVIRONMENT"] = "testing"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 os.environ["SKIP_CLICKHOUSE_INIT"] = "true"
 
@@ -21,6 +22,7 @@ def test_client():
     import os
     # Set testing flags to prevent complex startup
     os.environ["TESTING"] = "1"
+    os.environ["ENVIRONMENT"] = "testing"
     os.environ["SKIP_STARTUP_CHECKS"] = "true"
     os.environ["SKIP_CLICKHOUSE_INIT"] = "true"
     

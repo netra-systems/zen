@@ -224,7 +224,7 @@ class ReliableMessageHandler:
             from starlette.websockets import WebSocketState
             if conn_info.websocket.client_state == WebSocketState.CONNECTED:
                 prepared_message = prepare_websocket_message(error_response)
-                await conn_info.websocket.send_text(safe_json_dumps(prepared_message))
+                await conn_info.websocket.send_json(prepared_message)
             else:
                 logger.debug(f"Cannot send error response to {conn_info.connection_id}: connection closed")
                 

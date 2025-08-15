@@ -11,6 +11,7 @@ from app.services.supply_research_service import SupplyResearchService
 from app.llm.llm_manager import LLMManager
 from app.redis_manager import RedisManager
 from app.db.postgres import Database
+from app.config import settings
 from app.logging_config import central_logger as logger
 from .scheduler_models import ResearchSchedule
 
@@ -39,7 +40,7 @@ class ResearchExecutor:
         
         try:
             # Get database session
-            db_manager = Database()
+            db_manager = Database(settings.database_url)
             with db_manager.get_db() as db:
                 # Create agent and service
                 supply_service = SupplyResearchService(db)

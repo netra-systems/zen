@@ -281,7 +281,7 @@ class TestResilientHTTPClient:
     async def test_extract_error_data_json(self, client):
         """Test extracting JSON error data."""
         mock_response = AsyncMock()
-        mock_response.json.return_value = {"error": "Bad Request"}
+        mock_response.json = AsyncMock(return_value={"error": "Bad Request"})
         
         error_data = await client._extract_error_data(mock_response)
         assert error_data == {"error": "Bad Request"}
@@ -302,7 +302,7 @@ class TestResilientHTTPClient:
         """Test processing successful JSON response."""
         mock_response = AsyncMock()
         mock_response.status = 200
-        mock_response.json.return_value = {"data": "success"}
+        mock_response.json = AsyncMock(return_value={"data": "success"})
         
         result = await client._process_response(mock_response, "test_api")
         assert result == {"data": "success"}
@@ -323,7 +323,7 @@ class TestResilientHTTPClient:
         """Test processing error response."""
         mock_response = AsyncMock()
         mock_response.status = 400
-        mock_response.json.return_value = {"error": "Bad Request"}
+        mock_response.json = AsyncMock(return_value={"error": "Bad Request"})
         
         with pytest.raises(HTTPError) as exc_info:
             await client._process_response(mock_response, "test_api")
@@ -465,12 +465,29 @@ class TestResilientHTTPClient:
     @pytest.mark.asyncio
     async def test_test_connectivity_success(self, client):
         """Test successful connectivity test."""
-        mock_session = AsyncMock()
-        mock_response = AsyncMock()
-        mock_response.status = 200
-        mock_session.get.return_value.__aenter__.return_value = mock_response
+        # Create a proper async context manager class
+        class MockResponse:
+            def __init__(self, status):
+                self.status = status
         
-        with patch.object(client, '_get_session', return_value=mock_session):
+        class MockAsyncContextManager:
+            def __init__(self, response):
+                self.response = response
+            
+            async def __aenter__(self):
+                return self.response
+            
+            async def __aexit__(self, exc_type, exc_val, exc_tb):
+                pass
+        
+        mock_session = Mock()
+        mock_response = MockResponse(200)
+        mock_session.get.return_value = MockAsyncContextManager(mock_response)
+        
+        async def mock_get_session():
+            return mock_session
+        
+        with patch.object(client, '_get_session', side_effect=mock_get_session):
             result = await client._test_connectivity()
             
             assert result["status"] == "healthy"
@@ -479,10 +496,13 @@ class TestResilientHTTPClient:
     @pytest.mark.asyncio
     async def test_test_connectivity_failure(self, client):
         """Test failed connectivity test."""
-        mock_session = AsyncMock()
+        mock_session = Mock()
         mock_session.get.side_effect = Exception("Connection failed")
         
-        with patch.object(client, '_get_session', return_value=mock_session):
+        async def mock_get_session():
+            return mock_session
+        
+        with patch.object(client, '_get_session', side_effect=mock_get_session):
             result = await client._test_connectivity()
             
             assert result["status"] == "unhealthy"
@@ -814,9 +834,21 @@ class TestIntegrationScenarios:
         
         # Setup mocks
         mock_response.status = 200
-        mock_response.json.return_value = {"result": "success"}
-        mock_session.request.return_value.__aenter__.return_value = mock_response
-        mock_circuit.call = AsyncMock(side_effect=lambda func: func())
+        mock_response.json = AsyncMock(return_value={"result": "success"})
+        # Create a proper async context manager mock
+        from unittest.mock import MagicMock
+        
+        class MockAsyncContextManager:
+            async def __aenter__(self):
+                return mock_response
+            async def __aexit__(self, exc_type, exc_val, exc_tb):
+                return None
+        
+        # Make session.request return the async context manager
+        mock_session.request = MagicMock(return_value=MockAsyncContextManager())
+        async def mock_circuit_call(func):
+            return await func()
+        mock_circuit.call = AsyncMock(side_effect=mock_circuit_call)
         
         with patch('app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
              patch('app.services.external_api_client.circuit_registry') as mock_registry, \
@@ -840,9 +872,21 @@ class TestIntegrationScenarios:
         
         # Setup error response
         mock_response.status = 500
-        mock_response.json.return_value = {"error": "Internal Server Error"}
-        mock_session.request.return_value.__aenter__.return_value = mock_response
-        mock_circuit.call = AsyncMock(side_effect=lambda func: func())
+        mock_response.json = AsyncMock(return_value={"error": "Internal Server Error"})
+        # Create a proper async context manager mock for error case
+        from unittest.mock import MagicMock
+        
+        class MockAsyncContextManagerError:
+            async def __aenter__(self):
+                return mock_response
+            async def __aexit__(self, exc_type, exc_val, exc_tb):
+                return None
+        
+        # Make session.request return the async context manager
+        mock_session.request = MagicMock(return_value=MockAsyncContextManagerError())
+        async def mock_circuit_call_error(func):
+            return await func()
+        mock_circuit.call = AsyncMock(side_effect=mock_circuit_call_error)
         
         with patch('app.services.external_api_client.CircuitBreaker') as mock_cb_class, \
              patch('app.services.external_api_client.circuit_registry') as mock_registry, \

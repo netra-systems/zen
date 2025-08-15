@@ -212,7 +212,7 @@ class MessageBatcher:
             batched_msg = self._create_batched_message(batch)
             
             # Send the batch
-            await connection_info.websocket.send_text(json.dumps(batched_msg, default=str))
+            await connection_info.websocket.send_json(batched_msg)
             
             # Update metrics
             wait_time = start_time - min(msg.timestamp for msg in batch)
@@ -397,7 +397,7 @@ class BatchedBroadcastManager:
         success_count = 0
         for conn_info in connections:
             try:
-                await conn_info.websocket.send_text(json.dumps(message, default=str))
+                await conn_info.websocket.send_json(message)
                 conn_info.message_count += 1
                 success_count += 1
             except Exception as e:

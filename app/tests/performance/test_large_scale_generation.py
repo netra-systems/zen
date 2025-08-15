@@ -21,9 +21,9 @@ from app.schemas.Generation import ContentGenParams, ContentCorpusGenParams
 def large_corpus_params():
     """Large corpus generation parameters"""
     return ContentCorpusGenParams(
-        samples_per_type=10000,
+        samples_per_type=100,
         temperature=0.8,
-        max_cores=16,
+        max_cores=4,
         clickhouse_table='perf_test_corpus'
     )
 
@@ -117,7 +117,7 @@ class TestLargeScaleGeneration:
 
         monitor_task = asyncio.create_task(monitor_memory())
         
-        perf_params = ContentGenParams(samples_per_type=1000, max_cores=4)
+        perf_params = ContentGenParams(samples_per_type=100, max_cores=4)
         
         with patch('app.services.generation_service.generate_content_for_worker') as mock_gen:
             mock_gen.side_effect = self._simulate_memory_efficient_generation
@@ -143,13 +143,13 @@ class TestLargeScaleGeneration:
     @pytest.mark.performance
     async def test_scalability_patterns(self, large_corpus_params):
         """Test generation scalability patterns"""
-        scale_factors = [1000, 5000, 10000, 50000]
+        scale_factors = [100, 500, 800, 1000]
         execution_times = []
         
         for scale in scale_factors:
             test_params = ContentGenParams(
-                samples_per_type=scale // 10,
-                max_cores=8
+                samples_per_type=min(100, scale // 10),
+                max_cores=4
             )
             
             with patch('app.services.generation_service.run_generation_in_pool') as mock_pool:

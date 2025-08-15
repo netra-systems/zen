@@ -17,6 +17,41 @@ from app.websocket.heartbeat import HeartbeatManager
 from app.websocket.error_handler import WebSocketErrorHandler
 from app.websocket.room_manager import RoomManager
 
+
+class QueueManager:
+    """Simple queue manager for job-based message queuing."""
+    
+    def __init__(self) -> None:
+        """Initialize queue tracking."""
+        self._job_queues: Dict[str, int] = {}
+        self._job_active_sends: Dict[str, int] = {}
+    
+    def get_queue_size(self, job_id: str) -> int:
+        """Get queue size for a specific job."""
+        return self._job_queues.get(job_id, 0)
+    
+    def increment_queue(self, job_id: str) -> None:
+        """Increment queue size for a job."""
+        self._job_queues[job_id] = self._job_queues.get(job_id, 0) + 1
+    
+    def decrement_queue(self, job_id: str) -> None:
+        """Decrement queue size for a job."""
+        current = self._job_queues.get(job_id, 0)
+        self._job_queues[job_id] = max(0, current - 1)
+    
+    def increment_active_send(self, job_id: str) -> None:
+        """Track active send for a job."""
+        current = self._job_active_sends.get(job_id, 0)
+        self._job_active_sends[job_id] = current + 1
+        # If we have multiple active sends, consider it queuing
+        if current >= 1:  # Second or later concurrent send = queuing
+            self.increment_queue(job_id)
+    
+    def decrement_active_send(self, job_id: str) -> None:
+        """Complete active send for a job."""
+        current = self._job_active_sends.get(job_id, 0)
+        self._job_active_sends[job_id] = max(0, current - 1)
+
 logger = central_logger.get_logger(__name__)
 
 
@@ -50,6 +85,7 @@ class WebSocketManagerCore:
         self.room_manager = RoomManager(self.connection_manager)
         self.broadcast_manager = BroadcastManager(self.connection_manager, self.room_manager)
         self.heartbeat_manager = HeartbeatManager(self.connection_manager, self.error_handler)
+        self.queue_manager = QueueManager()
 
     def _initialize_configuration(self) -> None:
         """Set up configuration constants."""
