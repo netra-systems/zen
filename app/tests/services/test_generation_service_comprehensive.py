@@ -47,6 +47,7 @@ def mock_clickhouse():
     client.create_table = AsyncMock()
     client.command = AsyncMock()
     client.insert = AsyncMock()
+    client.disconnect = AsyncMock()
     return client
 
 
@@ -87,7 +88,7 @@ class TestJobStatusManagement:
         with patch('app.services.generation_service.job_store') as mock_store:
             with patch('app.services.generation_service.manager') as mock_manager:
                 mock_store.update = AsyncMock()
-                mock_manager.broadcast = AsyncMock()
+                mock_manager.broadcast_to_job = AsyncMock()
                 
                 await update_job_status("job123", "running", progress=50)
                 
@@ -98,7 +99,7 @@ class TestJobStatusManagement:
                 # Check keyword arguments
                 assert mock_store.update.call_args[1]["progress"] == 50
                 
-                mock_manager.broadcast.assert_called_once()
+                mock_manager.broadcast_to_job.assert_called_once()
     
     @pytest.mark.asyncio
     async def test_update_job_status_completed(self):
@@ -106,7 +107,7 @@ class TestJobStatusManagement:
         with patch('app.services.generation_service.job_store') as mock_store:
             with patch('app.services.generation_service.manager') as mock_manager:
                 mock_store.update = AsyncMock()
-                mock_manager.broadcast = AsyncMock()
+                mock_manager.broadcast_to_job = AsyncMock()
                 
                 await update_job_status(
                     "job456", 
@@ -129,7 +130,7 @@ class TestJobStatusManagement:
         with patch('app.services.generation_service.job_store') as mock_store:
             with patch('app.services.generation_service.manager') as mock_manager:
                 mock_store.update = AsyncMock()
-                mock_manager.broadcast = AsyncMock()
+                mock_manager.broadcast_to_job = AsyncMock()
                 
                 await update_job_status(
                     "job789",
@@ -150,7 +151,7 @@ class TestJobStatusManagement:
         with patch('app.services.generation_service.job_store') as mock_store:
             with patch('app.services.generation_service.manager') as mock_manager:
                 mock_store.update = AsyncMock()
-                mock_manager.broadcast = AsyncMock()
+                mock_manager.broadcast_to_job = AsyncMock()
                 
                 await update_job_status(
                     "job_meta",
@@ -283,12 +284,12 @@ class TestExistingFunctions:
         with patch('app.services.generation_service.job_store') as mock_store:
             with patch('app.services.generation_service.manager') as mock_manager:
                 mock_store.update = AsyncMock()
-                mock_manager.broadcast = AsyncMock()
+                mock_manager.broadcast_to_job = AsyncMock()
                 
                 await update_job_status("test_job", "running", progress=25)
                 
                 # Verify broadcast was called with correct message
-                broadcast_call = mock_manager.broadcast.call_args[0][0]
+                broadcast_call = mock_manager.broadcast_to_job.call_args[0][1]  # Second argument contains the message
                 assert broadcast_call["job_id"] == "test_job"
                 assert broadcast_call["status"] == "running"
                 assert broadcast_call["progress"] == 25

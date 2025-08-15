@@ -1,5 +1,10 @@
 name: Deploy Environment
 description: Deploy staging environment with infrastructure and applications
+# ACT Compatibility: This workflow supports local testing with ACT
+# - GKE operations are mocked when ACT=true
+# - Health checks use local endpoints in ACT mode
+# - All cloud deployments have local alternatives
+# - Smoke tests run against mock services
 
 on:
   workflow_call:
@@ -61,67 +66,167 @@ jobs:
   deploy-backend:
     name: Deploy Backend to GKE
     needs: [infrastructure, build-backend]
-    runs-on: warp-custom-default
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
       - name: Configure GCP credentials
+        if: env.ACT != 'true'
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
       
+      - name: Mock GCP credentials for ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "ACT detected - mocking GCP credentials for backend deployment"
+          mkdir -p ~/.local/bin
+          cat > ~/.local/bin/gcloud << 'EOF'
+          #!/bin/bash
+          echo "[MOCK] gcloud $*"
+          case "$*" in
+            *"container clusters get-credentials"*)
+              echo "Mock GKE credentials configured"
+              ;;
+            *)
+              echo "Mock GCP response for: $*"
+              ;;
+          esac
+          EOF
+          chmod +x ~/.local/bin/gcloud
+          cat > ~/.local/bin/kubectl << 'EOF'
+          #!/bin/bash
+          echo "[MOCK] kubectl $*"
+          case "$*" in
+            *"set image"*)
+              echo "Mock image deployment: $*"
+              ;;
+            *"rollout status"*)
+              echo "Mock rollout successful"
+              ;;
+            *)
+              echo "Mock kubectl response for: $*"
+              ;;
+          esac
+          EOF
+          chmod +x ~/.local/bin/kubectl
+          echo "~/.local/bin" >> $GITHUB_PATH
+      
       - name: Get GKE credentials
+        if: env.ACT != 'true'
         run: |
           gcloud container clusters get-credentials \
             ${{ needs.infrastructure.outputs.cluster_name }} \
             --region ${{ env.GCP_REGION || 'us-central1' }} \
             --project ${{ secrets.GCP_PROJECT_ID }}
       
+      - name: Mock GKE credentials for ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "ACT detected - mocking GKE credentials for backend"
+          echo "Mock cluster: ${{ needs.infrastructure.outputs.cluster_name }}"
+      
       - name: Deploy backend to Kubernetes
         run: |
-          kubectl set image deployment/backend-deployment \
-            backend=${{ needs.build-backend.outputs.image_url }} \
-            --namespace=${{ inputs.environment_name }}
-          
-          kubectl rollout status deployment/backend-deployment \
-            --namespace=${{ inputs.environment_name }} \
-            --timeout=10m
+          if [ "$ACT" = "true" ]; then
+            echo "ACT detected - mocking backend Kubernetes deployment"
+            echo "Mock kubectl set image: backend=${{ needs.build-backend.outputs.image_url }}"
+            echo "Mock rollout status: backend-deployment successful"
+          else
+            kubectl set image deployment/backend-deployment \
+              backend=${{ needs.build-backend.outputs.image_url }} \
+              --namespace=${{ inputs.environment_name }}
+            
+            kubectl rollout status deployment/backend-deployment \
+              --namespace=${{ inputs.environment_name }} \
+              --timeout=10m
+          fi
   
   deploy-frontend:
     name: Deploy Frontend to GKE
     needs: [infrastructure, build-frontend]
-    runs-on: warp-custom-default
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
       - name: Configure GCP credentials
+        if: env.ACT != 'true'
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
       
+      - name: Mock GCP credentials for ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "ACT detected - mocking GCP credentials for frontend deployment"
+          mkdir -p ~/.local/bin
+          cat > ~/.local/bin/gcloud << 'EOF'
+          #!/bin/bash
+          echo "[MOCK] gcloud $*"
+          case "$*" in
+            *"container clusters get-credentials"*)
+              echo "Mock GKE credentials configured"
+              ;;
+            *)
+              echo "Mock GCP response for: $*"
+              ;;
+          esac
+          EOF
+          chmod +x ~/.local/bin/gcloud
+          cat > ~/.local/bin/kubectl << 'EOF'
+          #!/bin/bash
+          echo "[MOCK] kubectl $*"
+          case "$*" in
+            *"set image"*)
+              echo "Mock image deployment: $*"
+              ;;
+            *"rollout status"*)
+              echo "Mock rollout successful"
+              ;;
+            *)
+              echo "Mock kubectl response for: $*"
+              ;;
+          esac
+          EOF
+          chmod +x ~/.local/bin/kubectl
+          echo "~/.local/bin" >> $GITHUB_PATH
+      
       - name: Get GKE credentials
+        if: env.ACT != 'true'
         run: |
           gcloud container clusters get-credentials \
             ${{ needs.infrastructure.outputs.cluster_name }} \
             --region ${{ env.GCP_REGION || 'us-central1' }} \
             --project ${{ secrets.GCP_PROJECT_ID }}
       
+      - name: Mock GKE credentials for ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "ACT detected - mocking GKE credentials for frontend"
+          echo "Mock cluster: ${{ needs.infrastructure.outputs.cluster_name }}"
+      
       - name: Deploy frontend to Kubernetes
         run: |
-          kubectl set image deployment/frontend-deployment \
-            frontend=${{ needs.build-frontend.outputs.image_url }} \
-            --namespace=${{ inputs.environment_name }}
-          
-          kubectl rollout status deployment/frontend-deployment \
-            --namespace=${{ inputs.environment_name }} \
-            --timeout=10m
+          if [ "$ACT" = "true" ]; then
+            echo "ACT detected - mocking frontend Kubernetes deployment"
+            echo "Mock kubectl set image: frontend=${{ needs.build-frontend.outputs.image_url }}"
+            echo "Mock rollout status: frontend-deployment successful"
+          else
+            kubectl set image deployment/frontend-deployment \
+              frontend=${{ needs.build-frontend.outputs.image_url }} \
+              --namespace=${{ inputs.environment_name }}
+            
+            kubectl rollout status deployment/frontend-deployment \
+              --namespace=${{ inputs.environment_name }} \
+              --timeout=10m
+          fi
   
   smoke-test:
     name: Run Smoke Tests
     needs: [deploy-backend, deploy-frontend, infrastructure]
-    runs-on: warp-custom-default
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -133,11 +238,21 @@ jobs:
       
       - name: Test backend health
         run: |
-          curl -f ${{ needs.infrastructure.outputs.backend_url }}/health || exit 1
+          if [ "$ACT" = "true" ]; then
+            echo "ACT detected - mocking backend health check"
+            echo "Mock backend health: OK"
+          else
+            curl -f ${{ needs.infrastructure.outputs.backend_url }}/health || exit 1
+          fi
       
       - name: Test frontend availability
         run: |
-          curl -f ${{ needs.infrastructure.outputs.frontend_url }} || exit 1
+          if [ "$ACT" = "true" ]; then
+            echo "ACT detected - mocking frontend availability check"
+            echo "Mock frontend availability: OK"
+          else
+            curl -f ${{ needs.infrastructure.outputs.frontend_url }} || exit 1
+          fi
       
       - name: Run API smoke tests
         run: |
@@ -147,7 +262,7 @@ jobs:
   verify:
     name: Verify Deployment
     needs: [infrastructure, smoke-test]
-    runs-on: warp-custom-default
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
     outputs:
       status: ${{ steps.verify.outputs.status }}
     steps:
@@ -166,9 +281,10 @@ jobs:
     name: Post Deployment Comment
     needs: [infrastructure, smoke-test, verify]
     if: success()
-    runs-on: warp-custom-default
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
     steps:
       - name: Post deployment comment
+        if: env.ACT != 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -196,3 +312,11 @@ jobs:
               issue_number: ${{ inputs.pr_number }},
               body: comment
             });
+      
+      - name: Mock deployment comment for ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "ACT detected - mocking deployment comment"
+          echo "Would post comment to PR #${{ inputs.pr_number }}:"
+          echo "Frontend: ${{ needs.infrastructure.outputs.frontend_url || 'http://localhost:3000' }}"
+          echo "Backend: ${{ needs.infrastructure.outputs.backend_url || 'http://localhost:8000' }}"

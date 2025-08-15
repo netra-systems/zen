@@ -19,7 +19,7 @@ def service():
 class TestTableOperations:
     """Test ClickHouse table operations"""
     
-    @patch('app.services.synthetic_data.service.create_destination_table')
+    @patch('app.services.synthetic_data.ingestion_manager.IngestionManager.create_destination_table')
     async def test_create_destination_table(self, mock_create_table, service):
         """Test creating destination table through service ingestion"""
         # The service doesn't have a direct _create_destination_table method
@@ -37,7 +37,7 @@ class TestTableOperations:
         mock_create_table.assert_called_once()
         assert result["table_name"] == "test_table"
     
-    @patch('app.services.synthetic_data.service.get_clickhouse_client')
+    @patch('app.db.clickhouse.get_clickhouse_client')
     async def test_ingest_batch_empty(self, mock_get_client, service):
         """Test ingesting empty batch"""
         await service.ingest_batch([], "test_table")
@@ -45,13 +45,12 @@ class TestTableOperations:
         # Should not attempt ClickHouse operation
         mock_get_client.assert_not_called()
     
-    @patch('app.services.synthetic_data.service.create_destination_table')
-    @patch('app.services.synthetic_data.service.get_clickhouse_client')
-    async def test_ingest_batch_with_data(self, mock_get_client, mock_create_table, service):
+    @patch('app.services.synthetic_data.ingestion_manager.IngestionManager.create_destination_table')
+    @patch('app.services.synthetic_data.ingestion_manager.ingest_batch_to_clickhouse')
+    async def test_ingest_batch_with_data(self, mock_ingest_batch, mock_create_table, service):
         """Test ingesting batch with data"""
-        mock_client = AsyncMock()
-        mock_get_client.return_value.__aenter__.return_value = mock_client
         mock_create_table.return_value = None
+        mock_ingest_batch.return_value = None
         
         batch = [
             {
@@ -72,7 +71,7 @@ class TestTableOperations:
         
         await service.ingest_batch(batch, "test_table")
         
-        mock_client.execute.assert_called_once()
-        call_args = mock_client.execute.call_args
-        assert "INSERT INTO test_table" in call_args[0][0]
+        mock_ingest_batch.assert_called_once()
+        call_args = mock_ingest_batch.call_args
+        assert call_args[0][0] == "test_table"  # table_name
         assert len(call_args[0][1]) == 1  # One record

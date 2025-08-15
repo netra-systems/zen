@@ -1,6 +1,9 @@
 name: Comprehensive Test Suite
 description: Modular comprehensive testing with organized matrix execution
 
+# ACT Compatibility: This workflow is designed to work with both GitHub Actions and ACT (act)
+# Use: act --secret-file .secrets --env-file .env.act push
+
 # Disabled - only smoke tests and staging workflows are active
 # on:
 #   workflow_dispatch:
@@ -54,6 +57,8 @@ env:
   CONFIG_FILE: .github/workflow-config.yml
   PYTHON_VERSION: '3.11'  # Default, overridden by config
   NODE_VERSION: '18'  # Default, overridden by config
+  # ACT compatibility: detect ACT environment
+  ACT: ${{ env.ACT || 'false' }}
 
 jobs:
   # ==========================================
@@ -62,7 +67,7 @@ jobs:
   
   plan-tests:
     name: 📋 Plan Test Execution
-    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
     outputs:
       matrix: ${{ steps.build-matrix.outputs.matrix }}
       execution_mode: ${{ steps.build-matrix.outputs.mode }}
@@ -82,10 +87,18 @@ jobs:
         run: |
           if [ -f "${{ env.CONFIG_FILE }}" ]; then
             echo "::notice::Loading configuration from ${{ env.CONFIG_FILE }}"
-            # Install yq if not available
+            # Install yq if not available (ACT compatibility: use safer installation)
             if ! command -v yq &> /dev/null; then
-              wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-              chmod +x /usr/local/bin/yq
+              if [ "${{ env.ACT }}" = "true" ]; then
+                # For ACT, try to install via package manager first
+                sudo apt-get update && sudo apt-get install -y yq || {
+                  wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+                  sudo chmod +x /usr/local/bin/yq
+                }
+              else
+                wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+                chmod +x /usr/local/bin/yq
+              fi
             fi
             
             # Extract configuration values
@@ -196,8 +209,8 @@ jobs:
   run-comprehensive-tests:
     name: 🧪 ${{ matrix.module }}
     needs: plan-tests
-    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
-    timeout-minutes: 60  # TODO: Load from config
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    timeout-minutes: ${{ env.ACT && '30' || '60' }}  # ACT compatibility: shorter timeout for local runs
     
     strategy:
       fail-fast: false
@@ -212,10 +225,18 @@ jobs:
         id: config
         run: |
           if [ -f "${{ env.CONFIG_FILE }}" ]; then
-            # Install yq if not available
+            # Install yq if not available (ACT compatibility: use safer installation)
             if ! command -v yq &> /dev/null; then
-              wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-              chmod +x /usr/local/bin/yq
+              if [ "${{ env.ACT }}" = "true" ]; then
+                # For ACT, try to install via package manager first
+                sudo apt-get update && sudo apt-get install -y yq || {
+                  wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+                  sudo chmod +x /usr/local/bin/yq
+                }
+              else
+                wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+                chmod +x /usr/local/bin/yq
+              fi
             fi
             
             PYTHON_VERSION=$(yq '.global.versions.python // "3.11"' ${{ env.CONFIG_FILE }})
@@ -232,15 +253,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ steps.config.outputs.python_version || env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: ${{ env.ACT && '' || 'pip' }}  # ACT compatibility: disable pip cache for ACT
       
       - name: Set up Node.js (if needed)
         if: contains(matrix.module, 'frontend')
         uses: actions/setup-node@v4
         with:
           node-version: ${{ steps.config.outputs.node_version || env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache: ${{ env.ACT && '' || 'npm' }}  # ACT compatibility: disable npm cache for ACT
+          cache-dependency-path: ${{ env.ACT && '' || 'frontend/package-lock.json' }}
       
       - name: Install Python dependencies
         run: |
@@ -262,19 +283,24 @@ jobs:
           case "${{ matrix.module }}" in
             *database*)
               echo "Configuring database test environment"
-              export TEST_DATABASE_URL="${{ secrets.TEST_DATABASE_URL }}"
-              export TEST_CLICKHOUSE_URL="${{ secrets.TEST_CLICKHOUSE_URL }}"
+              # ACT compatibility: provide fallback values for missing secrets
+              export TEST_DATABASE_URL="${{ secrets.TEST_DATABASE_URL || 'sqlite:///test.db' }}"
+              export TEST_CLICKHOUSE_URL="${{ secrets.TEST_CLICKHOUSE_URL || 'http://localhost:8123' }}"
               ;;
             *websocket*)
               echo "Configuring WebSocket test environment"
-              export TEST_REDIS_URL="${{ secrets.TEST_REDIS_URL }}"
+              export TEST_REDIS_URL="${{ secrets.TEST_REDIS_URL || 'redis://localhost:6379' }}"
               ;;
             *agents*)
               echo "Configuring agent test environment"
               if [[ "${{ github.event.inputs.real_llm }}" == "true" ]]; then
-                export GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY }}"
-                export ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY }}"
-                export OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}"
+                # ACT compatibility: warn if secrets are missing instead of failing
+                export GEMINI_API_KEY="${{ secrets.GEMINI_API_KEY || '' }}"
+                export ANTHROPIC_API_KEY="${{ secrets.ANTHROPIC_API_KEY || '' }}"
+                export OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY || '' }}"
+                if [ "${{ env.ACT }}" = "true" ] && [ -z "$GEMINI_API_KEY" ]; then
+                  echo "::warning::LLM API keys not set for ACT environment - using mock responses"
+                fi
               fi
               ;;
           esac
@@ -326,7 +352,7 @@ if data.get('coverage'):
           fi
       
       - name: Upload test artifacts
-        if: always()
+        if: ${{ !env.ACT && always() }}  # ACT compatibility: skip artifact upload for ACT
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.module }}
@@ -336,6 +362,16 @@ if data.get('coverage'):
             module-summary-${{ matrix.module }}.md
             test_reports/latest_*_report.md
             htmlcov/
+      
+      - name: Store test results locally (ACT)
+        if: ${{ env.ACT && always() }}
+        run: |
+          # ACT compatibility: store results locally instead of uploading
+          mkdir -p act-results/${{ matrix.module }}
+          cp -f results-${{ matrix.module }}.json act-results/${{ matrix.module }}/ 2>/dev/null || true
+          cp -f coverage-${{ matrix.module }}.xml act-results/${{ matrix.module }}/ 2>/dev/null || true
+          cp -f module-summary-${{ matrix.module }}.md act-results/${{ matrix.module }}/ 2>/dev/null || true
+          echo "Test results stored in: act-results/${{ matrix.module }}/"
 
   # ==========================================
   # PHASE 3: Test Aggregation and Reporting
@@ -345,13 +381,28 @@ if data.get('coverage'):
     name: 📊 Aggregate Test Results
     needs: [plan-tests, run-comprehensive-tests]
     if: always()
-    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
     
     steps:
       - name: Download all artifacts
+        if: ${{ !env.ACT }}
         uses: actions/download-artifact@v4
         with:
           path: test-artifacts
+      
+      - name: Gather local results (ACT)
+        if: ${{ env.ACT }}
+        run: |
+          # ACT compatibility: gather results from local storage
+          mkdir -p test-artifacts
+          if [ -d "act-results" ]; then
+            cp -r act-results/* test-artifacts/ 2>/dev/null || true
+            echo "Gathered local test results for aggregation"
+          else
+            echo "::warning::No local test results found for ACT environment"
+            mkdir -p test-artifacts/dummy
+            echo '{"total": 0, "passed": 0, "failed": 0, "duration": 0}' > test-artifacts/dummy/results-dummy.json
+          fi
       
       - name: Aggregate results
         id: aggregate
@@ -521,10 +572,19 @@ print(f'| {module} | {status} | {tests} | {duration} | {coverage or \"N/A\"} |')
           cat comprehensive-report.md >> $GITHUB_STEP_SUMMARY
       
       - name: Upload comprehensive report
+        if: ${{ !env.ACT }}
         uses: actions/upload-artifact@v4
         with:
           name: comprehensive-test-report
           path: comprehensive-report.md
+      
+      - name: Store comprehensive report locally (ACT)
+        if: ${{ env.ACT }}
+        run: |
+          # ACT compatibility: store report locally
+          mkdir -p act-results
+          cp -f comprehensive-report.md act-results/ 2>/dev/null || true
+          echo "Comprehensive report stored locally: act-results/comprehensive-report.md"
       
       - name: Post status check
         if: always()
@@ -553,7 +613,7 @@ print(f'| {module} | {status} | {tests} | {duration} | {coverage or \"N/A\"} |')
     name: 📢 Send Notifications
     needs: [aggregate-results]
     if: always()
-    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
     
     steps:
       - name: Determine notification level
@@ -568,7 +628,7 @@ print(f'| {module} | {status} | {tests} | {duration} | {coverage or \"N/A\"} |')
           fi
       
       - name: Send Discord notification (if configured)
-        if: vars.DISCORD_WEBHOOK_URL != ''
+        if: ${{ !env.ACT && vars.DISCORD_WEBHOOK_URL != '' }}  # ACT compatibility: skip notification for ACT
         run: |
           curl -H "Content-Type: application/json" \
             -d "{
@@ -585,3 +645,15 @@ print(f'| {module} | {status} | {tests} | {duration} | {coverage or \"N/A\"} |')
               }]
             }" \
             ${{ vars.DISCORD_WEBHOOK_URL }}
+      
+      - name: Local notification summary (ACT)
+        if: ${{ env.ACT }}
+        run: |
+          # ACT compatibility: show local summary instead of Discord notification
+          echo "=== Comprehensive Test Results Summary ==="
+          echo "Status: ${{ needs.aggregate-results.outputs.status }}"
+          echo "Total Tests: ${{ needs.aggregate-results.outputs.total_tests }}"
+          echo "Passed: ${{ needs.aggregate-results.outputs.total_passed }}"
+          echo "Failed: ${{ needs.aggregate-results.outputs.total_failed }}"
+          echo "Triggered by: ${{ github.actor }}"
+          echo "============================================"

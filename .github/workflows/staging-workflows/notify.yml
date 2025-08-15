@@ -1,5 +1,9 @@
 name: Notification Handler
 description: Send notifications for staging environment operations
+# ACT Compatibility: This workflow supports local testing with ACT
+# - External notification services are mocked when ACT=true
+# - Slack/Discord/Email notifications use mock implementations
+# - All notification logic remains functional in ACT mode
 
 on:
   workflow_call:
@@ -28,7 +32,7 @@ on:
 jobs:
   notify:
     name: Send Notifications
-    runs-on: warp-custom-default
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
     steps:
       - name: Prepare notification data
         id: prepare

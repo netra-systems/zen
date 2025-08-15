@@ -21,6 +21,10 @@ env:
   GCP_PROJECT_ID: netra-staging
   GCP_REGION: us-central1
   STALE_LOCK_MINUTES: 15  # Consider locks stale after 15 minutes for GitHub Actions
+  # ACT compatibility flags
+  ACT_DETECTED: ${{ env.ACT || 'false' }}
+  ACT_DRY_RUN: ${{ env.ACT_DRY_RUN || 'true' }}
+  ACT_MOCK_GCP: ${{ env.ACT_MOCK_GCP || 'true' }}
 
 jobs:
   cleanup-terraform-locks:
@@ -32,15 +36,70 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: ACT Detection and Setup
+        run: |
+          echo "=== ACT Compatibility Check ==="
+          if [[ "${{ env.ACT_DETECTED }}" == "true" ]]; then
+            echo "🧪 Running in ACT (local) mode"
+            echo "- Mock mode: ${{ env.ACT_MOCK_GCP }}"
+            echo "- Dry run: ${{ env.ACT_DRY_RUN }}"
+            echo "ACT_MODE=true" >> $GITHUB_ENV
+          else
+            echo "☁️ Running in GitHub Actions (cloud) mode"
+            echo "ACT_MODE=false" >> $GITHUB_ENV
+          fi
+
       - name: Authenticate to Google Cloud
+        if: env.ACT_MODE != 'true'
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
 
       - name: Set up Cloud SDK
+        if: env.ACT_MODE != 'true'
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Setup Mock GCP Environment (ACT)
+        if: env.ACT_MODE == 'true'
+        run: |
+          echo "🧪 Setting up mock GCP environment for ACT"
+          # Create mock gsutil command
+          mkdir -p ~/bin
+          cat > ~/bin/gsutil << 'EOF'
+          #!/bin/bash
+          echo "[ACT-MOCK] gsutil $@"
+          case "$1" in
+            "stat")
+              echo "[ACT-MOCK] Mock file stats for: $2"
+              echo "Creation time: $(date)"
+              ;;
+            "cat")
+              echo "[ACT-MOCK] Mock lock content: {\"ID\":\"test-123\",\"Who\":\"runner@act\",\"Created\":\"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\"}"
+              ;;
+            "ls")
+              echo "[ACT-MOCK] Mock PR directories:"
+              echo "gs://netra-staging-terraform-state/staging/pr-123/"
+              echo "gs://netra-staging-terraform-state/staging/pr-456/"
+              ;;
+            "rm")
+              if [[ "${{ env.ACT_DRY_RUN }}" == "true" ]]; then
+                echo "[ACT-MOCK-DRY-RUN] Would remove: $2"
+                exit 0
+              else
+                echo "[ACT-MOCK] Removed: $2"
+              fi
+              ;;
+            *)
+              echo "[ACT-MOCK] Unknown gsutil command: $@"
+              ;;
+          esac
+          exit 0
+          EOF
+          chmod +x ~/bin/gsutil
+          export PATH="$HOME/bin:$PATH"
+          echo "PATH=$HOME/bin:$PATH" >> $GITHUB_ENV
 
       - name: Cleanup Terraform locks
         run: |
@@ -50,6 +109,17 @@ jobs:
           echo "Time: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
           echo "Mode: ${{ github.event_name }}"
           echo "Force: ${{ github.event.inputs.force }}"
+          
+          # ACT-specific verbose logging
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo ""
+            echo "🧪 ACT LOCAL MODE DETECTED"
+            echo "- Mock GCP operations: ${{ env.ACT_MOCK_GCP }}"
+            echo "- Dry run mode: ${{ env.ACT_DRY_RUN }}"
+            echo "- gsutil command: $(which gsutil)"
+            echo "- PATH: $PATH"
+            echo ""
+          fi
           echo ""
           
           SPECIFIC_PR="${{ github.event.inputs.pr_number }}"
@@ -214,15 +284,56 @@ jobs:
     if: github.event_name == 'schedule'
     
     steps:
+      - name: ACT Detection for Monitor Job
+        run: |
+          if [[ "${{ env.ACT_DETECTED }}" == "true" ]]; then
+            echo "🧪 Monitor job running in ACT mode"
+            echo "ACT_MODE=true" >> $GITHUB_ENV
+          else
+            echo "☁️ Monitor job running in GitHub Actions"
+            echo "ACT_MODE=false" >> $GITHUB_ENV
+          fi
+
       - name: Authenticate to Google Cloud
+        if: env.ACT_MODE != 'true'
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
 
       - name: Set up Cloud SDK
+        if: env.ACT_MODE != 'true'
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Setup Mock GCP for Monitor (ACT)
+        if: env.ACT_MODE == 'true'
+        run: |
+          echo "🧪 Setting up mock GCP for monitor job"
+          mkdir -p ~/bin
+          cat > ~/bin/gsutil << 'EOF'
+          #!/bin/bash
+          echo "[ACT-MOCK-MONITOR] gsutil $@"
+          case "$1" in
+            "ls")
+              echo "[ACT-MOCK] Mock active locks:"
+              echo "gs://netra-staging-terraform-state/staging/pr-123/default.tflock"
+              echo "gs://netra-staging-terraform-state/staging/pr-456/default.tflock"
+              ;;
+            "cat")
+              # Mock long-running lock for testing
+              AGE_MINUTES=60
+              echo "[ACT-MOCK] Mock lock (${AGE_MINUTES} min old): {\"ID\":\"long-running-123\",\"Who\":\"runner@act-test\",\"Created\":\"$(date -u -d "${AGE_MINUTES} minutes ago" +%Y-%m-%dT%H:%M:%S.000Z)\"}"
+              ;;
+            *)
+              echo "[ACT-MOCK] Monitor gsutil: $@"
+              ;;
+          esac
+          exit 0
+          EOF
+          chmod +x ~/bin/gsutil
+          export PATH="$HOME/bin:$PATH"
+          echo "PATH=$HOME/bin:$PATH" >> $GITHUB_ENV
 
       - name: Check for long-running locks
         run: |

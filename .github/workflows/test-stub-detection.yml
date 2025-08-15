@@ -1,5 +1,8 @@
 name: 🔍 Test Stub Detection
 
+# ACT Compatibility: This workflow is designed to work with both GitHub Actions and ACT (act)
+# Use: act --secret-file .secrets --env-file .env.act push
+
 on:
   push:
     branches: [ main, develop ]
@@ -24,10 +27,14 @@ on:
         required: false
         default: 'false'
 
+env:
+  # ACT compatibility: detect ACT environment
+  ACT: ${{ env.ACT || 'false' }}
+
 jobs:
   detect-test-stubs:
     name: 🔍 Detect Test Stubs in Production Code
-    runs-on: warp-custom-default
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
     timeout-minutes: 10
     
     permissions:
@@ -45,7 +52,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-          cache: 'pip'
+          cache: ${{ env.ACT && '' || 'pip' }}  # ACT compatibility: disable pip cache for ACT
       
       - name: 📦 Install minimal dependencies
         run: |
@@ -72,22 +79,31 @@ jobs:
         if: failure() && steps.stub_check.outcome == 'failure'
         run: |
           mkdir -p reports
-          python scripts/remove_test_stubs.py --scan --report --format json --output test_stubs_report.json
+          python scripts/remove_test_stubs.py --scan --report --format json --output reports/test_stubs_report.json
       
       - name: 📤 Upload test stub report
-        if: failure() && steps.stub_check.outcome == 'failure'
-        uses: actions/upload-artifact@v3
+        if: ${{ !env.ACT && failure() && steps.stub_check.outcome == 'failure' }}  # ACT compatibility: skip artifact upload for ACT
+        uses: actions/upload-artifact@v4
         with:
           name: test-stub-report
           path: reports/test_stubs_report.json
           retention-days: 30
       
+      - name: Store stub report locally (ACT)
+        if: ${{ env.ACT && failure() && steps.stub_check.outcome == 'failure' }}
+        run: |
+          # ACT compatibility: store report locally
+          mkdir -p act-results
+          cp -f reports/test_stubs_report.json act-results/ 2>/dev/null || true
+          echo "Test stub report stored locally: act-results/test_stubs_report.json"
+      
       - name: 💬 Comment on PR with stub violations
         if: |
+          !env.ACT &&
           failure() && 
           steps.stub_check.outcome == 'failure' && 
           github.event_name == 'pull_request'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
@@ -153,6 +169,21 @@ jobs:
           echo "::error::Run 'python scripts/remove_test_stubs.py --scan' locally to identify issues."
           exit 1
       
+      - name: Local stub detection summary (ACT)
+        if: ${{ env.ACT && always() }}
+        run: |
+          # ACT compatibility: show local summary
+          echo "=== Test Stub Detection Results Summary (ACT) ==="
+          echo "Status: ${{ steps.stub_check.outcome }}"
+          echo "Environment: ACT (Local)"
+          if [ -f "reports/test_stubs_report.json" ]; then
+            echo "--- Stub Report Available ---"
+            echo "Report stored locally: act-results/test_stubs_report.json"
+          else
+            echo "No test stub violations found"
+          fi
+          echo "============================================"
+      
       - name: ✅ Success notification
         if: success()
         run: |
@@ -161,8 +192,8 @@ jobs:
   # Separate job for monitoring stub trends
   stub-metrics:
     name: 📈 Track Stub Metrics
-    runs-on: warp-custom-default
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    if: ${{ !env.ACT && github.event_name == 'push' && github.ref == 'refs/heads/main' }}  # ACT compatibility: skip for ACT
     needs: detect-test-stubs
     continue-on-error: true  # Don't fail build for metrics
     
@@ -174,10 +205,12 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
+          cache: ${{ env.ACT && '' || 'pip' }}  # ACT compatibility: disable pip cache for ACT
       
       - name: 📊 Generate metrics
         run: |
-          python scripts/remove_test_stubs.py --scan --report --format json --output stub_metrics.json
+          mkdir -p reports
+          python scripts/remove_test_stubs.py --scan --report --format json --output reports/stub_metrics.json
           
           # Extract key metrics for monitoring
           echo "## Test Stub Metrics" >> $GITHUB_STEP_SUMMARY

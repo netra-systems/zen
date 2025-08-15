@@ -1,5 +1,5 @@
 name: Workflow Health Monitor
-description: Monitor and report on workflow health, performance, and costs
+description: Monitor and report on workflow health, performance, and costs (ACT compatible)
 
 # Disabled - only smoke tests and staging workflows are active
 # on:
@@ -24,6 +24,11 @@ description: Monitor and report on workflow health, performance, and costs
 #         required: false
 #         type: string
 #         default: '7'
+#       act_local_run:
+#         description: 'Running with ACT (local testing)'
+#         required: false
+#         type: boolean
+#         default: false
 
 env:
   CONFIG_FILE: .github/workflow-config.yml
@@ -33,6 +38,7 @@ env:
   ALERT_THRESHOLD_DURATION: 200     # Alert if >200% of baseline
   COST_BUDGET_DAILY: 20
   COST_BUDGET_MONTHLY: 500
+  ACT_DETECTION: ${{ github.event.inputs.act_local_run || env.ACT || 'false' }}
 
 permissions:
   contents: read
@@ -61,8 +67,19 @@ jobs:
       - name: Load configuration
         id: config
         run: |
-          if [ -f "${{ env.CONFIG_FILE }}" ]; then
-            # Install yq
+          # ACT Detection and Debug Output
+          if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+            echo "🧪 ACT LOCAL RUN DETECTED - Using default configuration"
+            echo "Debug: ACT environment variables:"
+            env | grep -E "^(ACT|GITHUB_|CI)" | sort || true
+            
+            # Use defaults for ACT
+            echo "METRICS_RETENTION_DAYS=7" >> $GITHUB_ENV
+            echo "ALERT_THRESHOLD_FAILURE_RATE=10" >> $GITHUB_ENV
+            echo "COST_BUDGET_DAILY=20" >> $GITHUB_ENV
+            echo "COST_BUDGET_MONTHLY=500" >> $GITHUB_ENV
+          elif [ -f "${{ env.CONFIG_FILE }}" ]; then
+            # Install yq for real GitHub Actions
             wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
             chmod +x /usr/local/bin/yq
             
@@ -77,6 +94,8 @@ jobs:
             echo "ALERT_THRESHOLD_FAILURE_RATE=$FAILURE_RATE" >> $GITHUB_ENV
             echo "COST_BUDGET_DAILY=$DAILY_BUDGET" >> $GITHUB_ENV
             echo "COST_BUDGET_MONTHLY=$MONTHLY_BUDGET" >> $GITHUB_ENV
+          else
+            echo "No config file found, using defaults"
           fi
         
       - name: Setup Python
@@ -86,7 +105,12 @@ jobs:
           
       - name: Install dependencies
         run: |
-          pip install pandas matplotlib seaborn requests
+          if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+            echo "🧪 ACT LOCAL RUN - Installing minimal dependencies"
+            pip install requests || echo "Warning: Could not install requests, continuing..."
+          else
+            pip install pandas matplotlib seaborn requests
+          fi
           
       - name: Collect workflow runs data
         id: collect
@@ -94,24 +118,75 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           DAYS_BACK="${{ github.event.inputs.days_back || '7' }}"
-          SINCE_DATE=$(date -d "$DAYS_BACK days ago" --iso-8601)
+          SINCE_DATE=$(date -d "$DAYS_BACK days ago" --iso-8601 2>/dev/null || date -v-"$DAYS_BACK"d +%Y-%m-%d)
           
           echo "Collecting workflow data since $SINCE_DATE"
           
-          # Get workflow runs
-          gh api \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "/repos/${{ github.repository }}/actions/runs?created=>=$SINCE_DATE&per_page=100" \
-            > workflow_runs.json
+          if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+            echo "🧪 ACT LOCAL RUN - Generating mock workflow data"
             
-          # Get workflow metadata
-          gh api \
-            -H "Accept: application/vnd.github+json" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "/repos/${{ github.repository }}/actions/workflows" \
-            > workflows.json
+            # Generate mock workflow runs data
+            cat > workflow_runs.json << 'EOF'
+          {
+            "total_count": 25,
+            "workflow_runs": [
+              {
+                "id": 1001,
+                "name": "CI Pipeline",
+                "conclusion": "success",
+                "status": "completed",
+                "created_at": "2024-01-15T10:00:00Z",
+                "updated_at": "2024-01-15T10:15:00Z"
+              },
+              {
+                "id": 1002,
+                "name": "Test Suite", 
+                "conclusion": "success",
+                "status": "completed",
+                "created_at": "2024-01-15T11:00:00Z",
+                "updated_at": "2024-01-15T11:08:00Z"
+              },
+              {
+                "id": 1003,
+                "name": "Deploy Staging",
+                "conclusion": "failure",
+                "status": "completed",
+                "created_at": "2024-01-15T12:00:00Z",
+                "updated_at": "2024-01-15T12:05:00Z"
+              }
+            ]
+          }
+          EOF
             
+            # Generate mock workflow metadata
+            cat > workflows.json << 'EOF'
+          {
+            "total_count": 5,
+            "workflows": [
+              {"id": 101, "name": "CI Pipeline", "path": ".github/workflows/ci.yml"},
+              {"id": 102, "name": "Test Suite", "path": ".github/workflows/test.yml"},
+              {"id": 103, "name": "Deploy Staging", "path": ".github/workflows/deploy.yml"}
+            ]
+          }
+          EOF
+            
+            echo "Generated mock data for ACT testing"
+          else
+            # Get workflow runs from GitHub API
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "/repos/${{ github.repository }}/actions/runs?created=>=$SINCE_DATE&per_page=100" \
+              > workflow_runs.json
+              
+            # Get workflow metadata
+            gh api \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "/repos/${{ github.repository }}/actions/workflows" \
+              > workflows.json
+          fi
+          
           echo "metrics_file=workflow_runs.json" >> $GITHUB_OUTPUT
           
       - name: Analyze metrics
@@ -345,79 +420,120 @@ jobs:
           
       - name: Analyze performance trends
         run: |
-          python << 'EOF'
+          if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+            echo "🧪 ACT LOCAL RUN - Creating mock performance chart"
+            # Create a simple text-based chart for ACT
+            cat > workflow_performance.txt << 'EOF'
+          ACT Mock Performance Analysis
+          =============================
+          
+          Success Rate by Workflow:
+          - CI Pipeline: 95%
+          - Test Suite: 100%
+          - Deploy Staging: 80%
+          
+          Average Duration:
+          - CI Pipeline: 12 minutes
+          - Test Suite: 8 minutes  
+          - Deploy Staging: 5 minutes
+          
+          Run Distribution:
+          - Success: 85%
+          - Failed: 10%
+          - Cancelled: 5%
+          EOF
+            echo "Created mock performance analysis for ACT"
+          else
+            python << 'EOF'
           import json
-          import matplotlib.pyplot as plt
-          import seaborn as sns
+          try:
+              import matplotlib.pyplot as plt
+              import seaborn as sns
+              import pandas as pd
+              PLOTTING_AVAILABLE = True
+          except ImportError:
+              print("Plotting libraries not available, creating text summary")
+              PLOTTING_AVAILABLE = False
           from datetime import datetime
-          import pandas as pd
           
           # Load data
           with open('workflow_health_report.json', 'r') as f:
               report = json.load(f)
           
-          # Create performance visualizations
-          fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+          if not PLOTTING_AVAILABLE:
+              print("Creating text-based performance summary")
+              with open('workflow_performance.txt', 'w') as f:
+                  f.write("Performance Analysis Summary\n")
+                  f.write("============================\n\n")
+                  f.write(f"Total Runs: {report['summary']['total_runs']}\n")
+                  f.write(f"Success Rate: {report['summary']['success_rate']:.1f}%\n")
+                  f.write(f"Average Duration: {report['summary']['avg_duration_minutes']:.1f} minutes\n")
+              exit(0)
           
-          # 1. Success rate by workflow
-          workflow_names = []
-          success_rates = []
-          for name, stats in report['per_workflow'].items():
-              if stats['total'] > 0:
-                  workflow_names.append(name[:20])  # Truncate long names
-                  success_rates.append(stats['success'] / stats['total'] * 100)
-          
-          axes[0, 0].bar(workflow_names, success_rates)
-          axes[0, 0].set_title('Success Rate by Workflow')
-          axes[0, 0].set_xlabel('Workflow')
-          axes[0, 0].set_ylabel('Success Rate (%)')
-          axes[0, 0].tick_params(axis='x', rotation=45)
-          axes[0, 0].axhline(y=95, color='g', linestyle='--', label='Target (95%)')
-          axes[0, 0].axhline(y=90, color='y', linestyle='--', label='Warning (90%)')
-          axes[0, 0].legend()
-          
-          # 2. Average duration by workflow
-          workflow_names = []
-          avg_durations = []
-          for name, stats in report['per_workflow'].items():
-              if stats['duration']:
-                  workflow_names.append(name[:20])
-                  avg_durations.append(sum(stats['duration']) / len(stats['duration']))
-          
-          axes[0, 1].bar(workflow_names, avg_durations)
-          axes[0, 1].set_title('Average Duration by Workflow')
-          axes[0, 1].set_xlabel('Workflow')
-          axes[0, 1].set_ylabel('Duration (minutes)')
-          axes[0, 1].tick_params(axis='x', rotation=45)
-          
-          # 3. Run distribution
-          labels = ['Success', 'Failed', 'Cancelled']
-          sizes = [
-              report['summary']['successful_runs'],
-              report['summary']['failed_runs'],
-              report['summary']['cancelled_runs']
-          ]
-          colors = ['#28a745', '#dc3545', '#ffc107']
-          axes[1, 0].pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%')
-          axes[1, 0].set_title('Run Distribution')
-          
-          # 4. Top failures
-          if report['problematic_workflows']:
-              problem_names = [w['name'][:20] for w in report['problematic_workflows'][:5]]
-              failure_rates = [w['failure_rate'] for w in report['problematic_workflows'][:5]]
-              axes[1, 1].barh(problem_names, failure_rates, color='red')
-              axes[1, 1].set_title('Top 5 Problematic Workflows')
-              axes[1, 1].set_xlabel('Failure Rate (%)')
-          else:
-              axes[1, 1].text(0.5, 0.5, 'No problematic workflows', 
-                             ha='center', va='center', transform=axes[1, 1].transAxes)
-              axes[1, 1].set_title('Top 5 Problematic Workflows')
-          
-          plt.tight_layout()
-          plt.savefig('workflow_performance.png', dpi=100, bbox_inches='tight')
-          
-          print("Performance analysis complete")
+          if PLOTTING_AVAILABLE:
+              # Create performance visualizations
+              fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+              
+              # 1. Success rate by workflow
+              workflow_names = []
+              success_rates = []
+              for name, stats in report['per_workflow'].items():
+                  if stats['total'] > 0:
+                      workflow_names.append(name[:20])  # Truncate long names
+                      success_rates.append(stats['success'] / stats['total'] * 100)
+              
+              axes[0, 0].bar(workflow_names, success_rates)
+              axes[0, 0].set_title('Success Rate by Workflow')
+              axes[0, 0].set_xlabel('Workflow')
+              axes[0, 0].set_ylabel('Success Rate (%)')
+              axes[0, 0].tick_params(axis='x', rotation=45)
+              axes[0, 0].axhline(y=95, color='g', linestyle='--', label='Target (95%)')
+              axes[0, 0].axhline(y=90, color='y', linestyle='--', label='Warning (90%)')
+              axes[0, 0].legend()
+              
+              # 2. Average duration by workflow
+              workflow_names = []
+              avg_durations = []
+              for name, stats in report['per_workflow'].items():
+                  if stats['duration']:
+                      workflow_names.append(name[:20])
+                      avg_durations.append(sum(stats['duration']) / len(stats['duration']))
+              
+              axes[0, 1].bar(workflow_names, avg_durations)
+              axes[0, 1].set_title('Average Duration by Workflow')
+              axes[0, 1].set_xlabel('Workflow')
+              axes[0, 1].set_ylabel('Duration (minutes)')
+              axes[0, 1].tick_params(axis='x', rotation=45)
+              
+              # 3. Run distribution
+              labels = ['Success', 'Failed', 'Cancelled']
+              sizes = [
+                  report['summary']['successful_runs'],
+                  report['summary']['failed_runs'],
+                  report['summary']['cancelled_runs']
+              ]
+              colors = ['#28a745', '#dc3545', '#ffc107']
+              axes[1, 0].pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%')
+              axes[1, 0].set_title('Run Distribution')
+              
+              # 4. Top failures
+              if report['problematic_workflows']:
+                  problem_names = [w['name'][:20] for w in report['problematic_workflows'][:5]]
+                  failure_rates = [w['failure_rate'] for w in report['problematic_workflows'][:5]]
+                  axes[1, 1].barh(problem_names, failure_rates, color='red')
+                  axes[1, 1].set_title('Top 5 Problematic Workflows')
+                  axes[1, 1].set_xlabel('Failure Rate (%)')
+              else:
+                  axes[1, 1].text(0.5, 0.5, 'No problematic workflows', 
+                                 ha='center', va='center', transform=axes[1, 1].transAxes)
+                  axes[1, 1].set_title('Top 5 Problematic Workflows')
+              
+              plt.tight_layout()
+              plt.savefig('workflow_performance.png', dpi=100, bbox_inches='tight')
+              
+              print("Performance analysis complete")
           EOF
+          fi
           
       - name: Upload performance report
         uses: actions/upload-artifact@v4

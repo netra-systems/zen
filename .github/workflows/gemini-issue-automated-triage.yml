@@ -15,6 +15,16 @@ name: '🏷️ Gemini Automated Issue Triage'
 #         description: 'issue number to triage'
 #         required: true
 #         type: 'number'
+#       dry_run:
+#         description: 'Run in dry-run mode (ACT compatible)'
+#         required: false
+#         default: false
+#         type: boolean
+
+env:
+  # ACT environment detection
+  IS_ACT: ${{ env.ACT || 'false' }}
+  DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
 
 concurrency:
   group: '${{ github.workflow }}-${{ github.event.issue.number }}'
@@ -44,6 +54,16 @@ jobs:
     runs-on: 'warp-custom-default'
 
     steps:
+      - name: 'Detect Environment'
+        id: 'detect_environment'
+        run: |-
+          if [ "${{ env.IS_ACT }}" = "true" ] || [ "${{ env.DRY_RUN }}" = "true" ]; then
+            echo "is_act=true" >> $GITHUB_OUTPUT
+            echo "🧪 Running in ACT/dry-run mode - using mock responses"
+          else
+            echo "is_act=false" >> $GITHUB_OUTPUT
+            echo "🚀 Running in GitHub Actions - using real API calls"
+          fi
       - name: 'Checkout repository'
         uses: 'actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683' # ratchet:actions/checkout@v4
 
@@ -56,7 +76,40 @@ jobs:
           app-id: '${{ vars.APP_ID }}'
           private-key: '${{ secrets.APP_PRIVATE_KEY }}'
 
-      - name: 'Run Gemini Issue Triage'
+      - name: 'Run Gemini Issue Triage Mock (ACT Mode)'
+        if: steps.detect_environment.outputs.is_act == 'true'
+        env:
+          GITHUB_TOKEN: '${{ steps.generate_token.outputs.token || secrets.GITHUB_TOKEN }}'
+          ISSUE_TITLE: '${{ github.event.issue.title }}'
+          ISSUE_BODY: '${{ github.event.issue.body }}'
+          ISSUE_NUMBER: '${{ github.event.issue.number || github.event.inputs.issue_number }}'
+          REPOSITORY: '${{ github.repository }}'
+        run: |-
+          echo "🧪 ACT/Dry-run mode: Simulating issue triage"
+          echo "Repository: ${REPOSITORY}"
+          echo "Issue: ${ISSUE_NUMBER}"
+          echo "Title: ${ISSUE_TITLE}"
+          echo "Body: ${ISSUE_BODY}"
+          echo ""
+          echo "## Mock Triage Analysis"
+          
+          # Simulate label analysis
+          echo "🏷️ Mock labels that would be applied:"
+          echo "- kind/bug (example classification)"
+          echo "- priority/p2 (example priority)"
+          echo "- status/needs-investigation (example status)"
+          echo ""
+          
+          # Simulate the gh commands that would be run
+          echo "🧪 Commands that would be executed:"
+          echo "gh label list"
+          echo "gh issue edit \"${ISSUE_NUMBER}\" --add-label \"kind/bug,priority/p2,status/needs-investigation\""
+          echo "gh issue edit \"${ISSUE_NUMBER}\" --remove-label \"status/needs-triage\""
+          echo ""
+          echo "✅ Mock triage completed successfully"
+
+      - name: 'Run Gemini Issue Triage (Real Mode)'
+        if: steps.detect_environment.outputs.is_act == 'false'
         uses: 'google-github-actions/run-gemini-cli@v0'
         id: 'gemini_issue_triage'
         env:
@@ -117,15 +170,17 @@ jobs:
             - Reference all shell variables as "${VAR}" (with quotes and braces)
 
       - name: 'Post Issue Triage Failure Comment'
-        if: |-
-          ${{ failure() && steps.gemini_issue_triage.outcome == 'failure' }}
-        uses: 'actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea'
-        with:
-          github-token: '${{ steps.generate_token.outputs.token || secrets.GITHUB_TOKEN }}'
-          script: |-
-            github.rest.issues.createComment({
-              owner: '${{ github.repository }}'.split('/')[0],
-              repo: '${{ github.repository }}'.split('/')[1],
-              issue_number: '${{ github.event.issue.number }}',
-              body: 'There is a problem with the Gemini CLI issue triaging. Please check the [action logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.'
-            })
+        if: failure()
+        env:
+          GITHUB_TOKEN: '${{ steps.generate_token.outputs.token || secrets.GITHUB_TOKEN }}'
+          ISSUE_NUMBER: '${{ github.event.issue.number || github.event.inputs.issue_number }}'
+          IS_ACT_ENV: '${{ steps.detect_environment.outputs.is_act }}'
+        run: |-
+          if [ "${IS_ACT_ENV}" = "true" ]; then
+            echo "🧪 ACT/Dry-run mode: Would post failure comment"
+            echo "Issue: ${ISSUE_NUMBER}"
+            echo "There is a problem with the Gemini CLI issue triaging."
+            echo "Please check the action logs for details."
+          else
+            gh issue comment "${ISSUE_NUMBER}" --body "There is a problem with the Gemini CLI issue triaging. Please check the [action logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details."
+          fi

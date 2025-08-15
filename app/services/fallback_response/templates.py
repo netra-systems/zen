@@ -81,7 +81,15 @@ class TemplateManager:
             "• Baseline performance data\n"
             "• System architecture details\n"
             "• Specific bottlenecks you're experiencing\n"
-            "With this information, I can suggest targeted optimizations with expected improvements."
+            "With this information, I can suggest targeted optimizations with expected improvements.",
+            
+            "After multiple attempts to optimize {context}, let's try a different approach. "
+            "Please consider:\n"
+            "• Breaking the optimization into smaller, more focused tasks\n"
+            "• Providing a simplified version of your requirements\n"
+            "• Starting with basic performance profiling first\n"
+            "• Describing the most critical performance issue only\n"
+            "Sometimes a step-by-step approach yields better results."
         ]
     
     def _get_optimization_context_missing_templates(self) -> List[str]:

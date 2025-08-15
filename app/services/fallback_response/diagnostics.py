@@ -58,17 +58,17 @@ class DiagnosticsManager:
             ContentType.OPTIMIZATION: [
                 {
                     "action": "Use Optimization Template",
-                    "description": "Start with our proven optimization patterns",
+                    "description": "Provide specific optimization patterns and metrics",
                     "link": "/templates/optimization"
                 },
                 {
                     "action": "Run Diagnostics",
-                    "description": "Analyze your system to identify bottlenecks",
+                    "description": "Analyze your system to identify specific bottlenecks",
                     "link": "/tools/diagnostics"
                 },
                 {
                     "action": "Schedule Consultation",
-                    "description": "Get expert help for complex optimizations",
+                    "description": "Get expert help with specific optimization requirements",
                     "link": "/support/consultation"
                 }
             ],
@@ -140,17 +140,17 @@ class DiagnosticsManager:
         return [
             {
                 "action": "Refine Request",
-                "description": "Add more specific details and constraints",
+                "description": "Provide more specific details and constraints",
                 "link": "/help/requests"
             },
             {
                 "action": "View Examples",
-                "description": "See successful request examples",
+                "description": "See successful request examples with specific patterns",
                 "link": "/examples"
             },
             {
                 "action": "Get Help",
-                "description": "Contact support for assistance",
+                "description": "Contact support to provide tailored assistance",
                 "link": "/support"
             }
         ]

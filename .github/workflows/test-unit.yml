@@ -1,5 +1,8 @@
 name: Unit Tests
 
+# ACT Compatibility: This workflow is designed to work with both GitHub Actions and ACT (act)
+# Use: act --secret-file .secrets --env-file .env.act push
+
 # Disabled - only smoke tests and staging workflows are active
 # on:
 #   pull_request:
@@ -31,6 +34,8 @@ concurrency:
 
 env:
   CONFIG_FILE: .github/workflow-config.yml
+  # ACT compatibility: detect ACT environment
+  ACT: ${{ env.ACT || 'false' }}
 
 permissions:
   contents: read
@@ -41,7 +46,7 @@ permissions:
 jobs:
   determine-shards:
     name: Determine Test Shards
-    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
     outputs:
       shards: ${{ steps.shards.outputs.matrix }}
       
@@ -58,10 +63,18 @@ jobs:
         run: |
           if [ -f "${{ env.CONFIG_FILE }}" ]; then
             echo "::notice::Loading configuration from ${{ env.CONFIG_FILE }}"
-            # Install yq if not available
+            # Install yq if not available (ACT compatibility)
             if ! command -v yq &> /dev/null; then
-              wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-              chmod +x /usr/local/bin/yq
+              if [ "${{ env.ACT }}" = "true" ]; then
+                # For ACT, try to install via package manager first
+                sudo apt-get update && sudo apt-get install -y yq || {
+                  wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+                  sudo chmod +x /usr/local/bin/yq
+                }
+              else
+                wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+                chmod +x /usr/local/bin/yq
+              fi
             fi
             
             # Extract test shards from config
@@ -93,7 +106,7 @@ jobs:
   unit-test:
     name: Unit Tests - ${{ matrix.shard }}
     needs: determine-shards
-    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
     timeout-minutes: 10  # TODO: Load from config
     
     strategy:
@@ -114,10 +127,18 @@ jobs:
         run: |
           if [ -f "${{ env.CONFIG_FILE }}" ]; then
             echo "::notice::Loading configuration from ${{ env.CONFIG_FILE }}"
-            # Install yq if not available
+            # Install yq if not available (ACT compatibility)
             if ! command -v yq &> /dev/null; then
-              wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-              chmod +x /usr/local/bin/yq
+              if [ "${{ env.ACT }}" = "true" ]; then
+                # For ACT, try to install via package manager first
+                sudo apt-get update && sudo apt-get install -y yq || {
+                  wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+                  sudo chmod +x /usr/local/bin/yq
+                }
+              else
+                wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+                chmod +x /usr/local/bin/yq
+              fi
             fi
             
             PYTHON_VERSION=$(yq '.global.versions.python // "3.11"' ${{ env.CONFIG_FILE }})
@@ -145,9 +166,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ steps.config.outputs.python_version || '3.11' }}
-          cache: 'pip'
+          cache: ${{ env.ACT && '' || 'pip' }}  # ACT compatibility: disable pip cache for ACT
           
       - name: Cache Dependencies
+        if: ${{ !env.ACT }}  # ACT compatibility: skip caching for ACT
         uses: actions/cache@v4
         with:
           path: |
@@ -175,7 +197,7 @@ jobs:
         continue-on-error: true
         
       - name: Upload Coverage
-        if: always() && hashFiles('coverage-${{ matrix.shard }}.xml') != ''
+        if: ${{ !env.ACT && always() && hashFiles('coverage-${{ matrix.shard }}.xml') != '' }}  # ACT compatibility: skip coverage upload for ACT
         uses: codecov/codecov-action@v4
         with:
           files: ./coverage-${{ matrix.shard }}.xml
@@ -184,7 +206,7 @@ jobs:
           fail_ci_if_error: false
           
       - name: Upload Results
-        if: always()
+        if: ${{ !env.ACT && always() }}  # ACT compatibility: skip artifact upload for ACT
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-results-${{ matrix.shard }}-${{ github.sha }}
@@ -193,6 +215,16 @@ jobs:
             test-report-${{ matrix.shard }}.html
             coverage-${{ matrix.shard }}.xml
           retention-days: 7
+      
+      - name: Store test results locally (ACT)
+        if: ${{ env.ACT && always() }}
+        run: |
+          # ACT compatibility: store results locally
+          mkdir -p act-results/unit-${{ matrix.shard }}
+          cp -f test-results-${{ matrix.shard }}.json act-results/unit-${{ matrix.shard }}/ 2>/dev/null || true
+          cp -f test-report-${{ matrix.shard }}.html act-results/unit-${{ matrix.shard }}/ 2>/dev/null || true
+          cp -f coverage-${{ matrix.shard }}.xml act-results/unit-${{ matrix.shard }}/ 2>/dev/null || true
+          echo "Unit test results for ${{ matrix.shard }} stored locally: act-results/unit-${{ matrix.shard }}/"
           
       - name: Check Test Status
         if: steps.test.outcome == 'failure'
@@ -203,7 +235,7 @@ jobs:
   unit-test-summary:
     name: Unit Test Summary
     needs: unit-test
-    runs-on: warp-custom-default  # TODO: Use vars.RUNNER_TYPE_DEFAULT when available
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
     if: always()
     
     steps:
@@ -216,10 +248,25 @@ jobs:
           python-version: '3.11'
           
       - name: Download All Results
+        if: ${{ !env.ACT }}
         uses: actions/download-artifact@v4
         with:
           pattern: unit-test-results-*-${{ github.sha }}
           path: test-results/
+      
+      - name: Gather local results (ACT)
+        if: ${{ env.ACT }}
+        run: |
+          # ACT compatibility: gather results from local storage
+          mkdir -p test-results
+          if [ -d "act-results" ]; then
+            cp -r act-results/* test-results/ 2>/dev/null || true
+            echo "Gathered local unit test results for aggregation"
+          else
+            echo "::warning::No local unit test results found for ACT environment"
+            mkdir -p test-results/dummy
+            echo '{"total": 0, "passed": 0, "failed": 0, "duration": 0}' > test-results/dummy/test-results-dummy.json
+          fi
           
       - name: Merge Results
         run: |
@@ -237,7 +284,7 @@ jobs:
             --output unit-report.md
             
       - name: Comment PR
-        if: github.event_name == 'pull_request'
+        if: ${{ !env.ACT && github.event_name == 'pull_request' }}  # ACT compatibility: skip PR comments for ACT
         uses: actions/github-script@v7
         with:
           script: |
@@ -290,7 +337,7 @@ jobs:
             }
             
       - name: Set Commit Status
-        if: always()
+        if: ${{ !env.ACT && always() }}  # ACT compatibility: skip commit status for ACT
         uses: actions/github-script@v7
         with:
           script: |
@@ -304,3 +351,22 @@ jobs:
               description: `Unit tests ${success ? 'passed' : 'failed'}`,
               target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
             });
+      
+      - name: Local unit test summary (ACT)
+        if: ${{ env.ACT && always() }}
+        run: |
+          # ACT compatibility: show local summary
+          echo "=== Unit Test Results Summary (ACT) ==="
+          echo "Status: ${{ needs.unit-test.result }}"
+          echo "Environment: ACT (Local)"
+          if [ -d "act-results" ]; then
+            echo "--- Shard Results ---"
+            for shard in act-results/unit-*; do
+              if [ -d "$shard" ]; then
+                shard_name=$(basename "$shard")
+                echo "$shard_name: Results stored locally"
+              fi
+            done
+          fi
+          echo "Results stored in: act-results/"
+          echo "============================================"

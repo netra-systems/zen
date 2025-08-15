@@ -58,7 +58,7 @@ class ACTWrapper:
     def _parse_workflow(self, file_path: Path) -> Dict[str, str]:
         """Parse workflow file for metadata."""
         import yaml
-        with open(file_path) as f:
+        with open(file_path, encoding='utf-8') as f:
             data = yaml.safe_load(f)
         return {
             "file": file_path.name,
@@ -147,7 +147,7 @@ class StagingDeployer:
     
     def __init__(self, wrapper: ACTWrapper):
         self.wrapper = wrapper
-        self.staging_workflow = "staging-deploy.yml"
+        self.staging_workflow = "staging-environment.yml"
     
     def deploy(self, environment: str = "staging") -> int:
         """Run staging deployment."""

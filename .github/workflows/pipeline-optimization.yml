@@ -27,6 +27,10 @@ description: Automatically optimize CI/CD pipeline performance and resource usag
 env:
   ANALYZE_PERIOD: ${{ github.event.inputs.analyze_period_days || '30' }}
   PYTHON_VERSION: '3.11'
+  # ACT local testing environment variables
+  ACT_RUNNER_NAME: ${{ env.ACT && 'act-runner' || 'github-runner' }}
+  ACT_TEST_MODE: ${{ env.ACT || 'false' }}
+  GITHUB_API_AVAILABLE: ${{ !env.ACT || 'false' }}
 
 permissions:
   contents: read
@@ -65,8 +69,17 @@ jobs:
         id: collect
         env:
           GH_TOKEN: ${{ github.token }}
+          # ACT compatibility: Handle missing GitHub API access gracefully
         run: |
           echo "Collecting workflow performance data for last ${{ env.ANALYZE_PERIOD }} days..."
+          
+          # ACT compatibility: Skip API calls in local testing
+          if [[ "${{ env.ACT_TEST_MODE }}" == "true" ]]; then
+            echo "::notice::ACT Mode - Creating dummy workflow data for testing"
+            echo '{"workflow_runs": []}' > workflow_runs.json
+            echo '[]' > job_details.json
+            exit 0
+          fi
           
           SINCE_DATE=$(date -d "${{ env.ANALYZE_PERIOD }} days ago" --iso-8601)
           
@@ -248,6 +261,8 @@ jobs:
           EOF
           
       - name: Upload performance analysis
+        # ACT compatibility: Skip artifact upload in local testing
+        if: env.ACT != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: performance-analysis
@@ -256,6 +271,14 @@ jobs:
             job_details.json
             workflow_runs.json
           retention-days: 30
+          
+      - name: Store performance analysis locally (ACT)
+        # ACT compatibility: Store analysis locally when running with ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "::notice::ACT Mode - Storing performance analysis locally"
+          mkdir -p /tmp/act-artifacts/performance-analysis
+          cp performance_analysis.json job_details.json workflow_runs.json /tmp/act-artifacts/performance-analysis/ || true
 
   # ==========================================
   # Cost Analysis
@@ -271,9 +294,19 @@ jobs:
       
     steps:
       - name: Download performance data
+        # ACT compatibility: Skip artifact download in local testing
+        if: env.ACT != 'true'
         uses: actions/download-artifact@v4
         with:
           name: performance-analysis
+          
+      - name: Setup performance data (ACT)
+        # ACT compatibility: Create dummy performance data for local testing
+        if: env.ACT == 'true'
+        run: |
+          echo "::notice::ACT Mode - Creating dummy performance data"
+          echo '{"workflow_runs": [], "total_jobs_analyzed": 0, "average_job_duration": 0, "slowest_jobs": [], "optimization_opportunities": []}' > performance_analysis.json
+          echo '[]' > job_details.json || true
           
       - name: Analyze costs and optimization potential
         id: cost-analysis
@@ -369,11 +402,21 @@ jobs:
           EOF
           
       - name: Upload cost analysis
+        # ACT compatibility: Skip artifact upload in local testing
+        if: env.ACT != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: cost-analysis
           path: cost_analysis.json
           retention-days: 30
+          
+      - name: Store cost analysis locally (ACT)
+        # ACT compatibility: Store analysis locally when running with ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "::notice::ACT Mode - Storing cost analysis locally"
+          mkdir -p /tmp/act-artifacts/cost-analysis
+          cp cost_analysis.json /tmp/act-artifacts/cost-analysis/ || true
 
   # ==========================================
   # Cache Optimization
@@ -493,11 +536,21 @@ jobs:
           fi
           
       - name: Upload cache analysis
+        # ACT compatibility: Skip artifact upload in local testing
+        if: env.ACT != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: cache-optimization
           path: cache_recommendations.md
           retention-days: 30
+          
+      - name: Store cache analysis locally (ACT)
+        # ACT compatibility: Store analysis locally when running with ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "::notice::ACT Mode - Storing cache analysis locally"
+          mkdir -p /tmp/act-artifacts/cache-optimization
+          cp cache_recommendations.md /tmp/act-artifacts/cache-optimization/ || true
 
   # ==========================================
   # Parallelization Analysis
@@ -517,9 +570,18 @@ jobs:
         uses: actions/checkout@v4
         
       - name: Download performance data
+        # ACT compatibility: Skip artifact download in local testing
+        if: env.ACT != 'true'
         uses: actions/download-artifact@v4
         with:
           name: performance-analysis
+          
+      - name: Setup performance data for parallelization (ACT)
+        # ACT compatibility: Create dummy performance data for local testing
+        if: env.ACT == 'true'
+        run: |
+          echo "::notice::ACT Mode - Creating dummy performance data for parallelization analysis"
+          echo '{"slowest_jobs": [], "optimization_opportunities": []}' > performance_analysis.json || true
           
       - name: Analyze workflow dependencies
         id: dependency-analysis
@@ -700,6 +762,8 @@ jobs:
           EOF
           
       - name: Upload parallelization analysis
+        # ACT compatibility: Skip artifact upload in local testing
+        if: env.ACT != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: parallelization-analysis
@@ -707,6 +771,14 @@ jobs:
             parallelization_analysis.json
             parallelization_recommendations.md
           retention-days: 30
+          
+      - name: Store parallelization analysis locally (ACT)
+        # ACT compatibility: Store analysis locally when running with ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "::notice::ACT Mode - Storing parallelization analysis locally"
+          mkdir -p /tmp/act-artifacts/parallelization-analysis
+          cp parallelization_analysis.json parallelization_recommendations.md /tmp/act-artifacts/parallelization-analysis/ || true
 
   # ==========================================
   # Generate Optimization Report
@@ -720,9 +792,23 @@ jobs:
     
     steps:
       - name: Download all analysis artifacts
+        # ACT compatibility: Skip artifact download in local testing
+        if: env.ACT != 'true'
         uses: actions/download-artifact@v4
         with:
           path: analysis-results/
+          
+      - name: Setup analysis artifacts (ACT)
+        # ACT compatibility: Create dummy analysis data for local testing
+        if: env.ACT == 'true'
+        run: |
+          echo "::notice::ACT Mode - Creating dummy analysis artifacts"
+          mkdir -p analysis-results/performance-analysis
+          mkdir -p analysis-results/cost-analysis
+          mkdir -p analysis-results/parallelization-analysis
+          echo '{"total_jobs_analyzed": 0, "average_job_duration": 0, "slowest_jobs": [], "optimization_opportunities": []}' > analysis-results/performance-analysis/performance_analysis.json
+          echo '{"monthly_cost_estimate": 0, "optimization_potential": 0, "top_expensive_jobs": []}' > analysis-results/cost-analysis/cost_analysis.json
+          echo '{"optimization_opportunities": [], "matrix_recommendations": []}' > analysis-results/parallelization-analysis/parallelization_analysis.json || true
           
       - name: Generate comprehensive optimization report
         run: |
@@ -933,6 +1019,8 @@ jobs:
           cat optimization_report.md >> $GITHUB_STEP_SUMMARY
           
       - name: Create optimization issue
+        # ACT compatibility: Skip GitHub API issue creation in local testing
+        if: env.ACT != 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -969,6 +1057,8 @@ jobs:
             }
             
       - name: Upload final optimization report
+        # ACT compatibility: Skip artifact upload in local testing
+        if: env.ACT != 'true'
         uses: actions/upload-artifact@v4
         with:
           name: optimization-report-final
@@ -976,3 +1066,13 @@ jobs:
             optimization_report.json
             optimization_report.md
           retention-days: 90
+          
+      - name: Store final optimization report locally (ACT)
+        # ACT compatibility: Store final report locally when running with ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "::notice::ACT Mode - Storing optimization report locally"
+          mkdir -p /tmp/act-artifacts/optimization-report-final
+          cp optimization_report.json optimization_report.md /tmp/act-artifacts/optimization-report-final/ || true
+          echo "::notice::Local ACT artifacts stored in /tmp/act-artifacts/"
+          ls -la /tmp/act-artifacts/ || true

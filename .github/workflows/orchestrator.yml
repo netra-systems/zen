@@ -34,6 +34,11 @@ env:
   CONFIG_FILE: .github/workflow-config.yml
   PYTHON_VERSION: '3.11'
   NODE_VERSION: '20'
+  # ACT compatibility flags
+  ACT_DETECTED: ${{ env.ACT || 'false' }}
+  ACT_MOCK_SERVICES: ${{ env.ACT_MOCK_SERVICES || 'true' }}
+  ACT_SKIP_EXTERNAL: ${{ env.ACT_SKIP_EXTERNAL || 'true' }}
+  ACT_VERBOSE: ${{ env.ACT_VERBOSE || 'true' }}
 
 permissions:
   contents: read
@@ -59,6 +64,7 @@ jobs:
       smoke_timeout: ${{ steps.load.outputs.smoke_timeout }}
       unit_timeout: ${{ steps.load.outputs.unit_timeout }}
       integration_timeout: ${{ steps.load.outputs.integration_timeout }}
+      act_mode: ${{ steps.act-setup.outputs.act_mode }}
       
     steps:
       - name: Checkout
@@ -67,8 +73,55 @@ jobs:
           sparse-checkout: |
             .github/workflow-config.yml
             .github/workflows
+
+      - name: ACT Detection and Setup
+        id: act-setup
+        run: |
+          echo "=== Orchestrator ACT Compatibility ==="
+          if [[ "${{ env.ACT_DETECTED }}" == "true" ]]; then
+            echo "🧪 Running in ACT (local) mode"
+            echo "- Mock services: ${{ env.ACT_MOCK_SERVICES }}"
+            echo "- Skip external: ${{ env.ACT_SKIP_EXTERNAL }}"
+            echo "- Verbose logging: ${{ env.ACT_VERBOSE }}"
+            echo "ACT_MODE=true" >> $GITHUB_ENV
+            echo "act_mode=true" >> $GITHUB_OUTPUT
+            
+            # Mock yq installation for ACT
+            echo "🧪 Setting up mock yq for ACT"
+            mkdir -p ~/bin
+            cat > ~/bin/yq << 'EOF'
+#!/bin/bash
+echo "[ACT-MOCK-YQ] yq $@"
+# Return default values for common queries
+case "$2" in
+  ".global.runners.custom")
+    echo "warp-custom-default"
+    ;;
+  ".timeouts.smoke")
+    echo "5"
+    ;;
+  ".timeouts.unit")
+    echo "10"
+    ;;
+  ".timeouts.integration")
+    echo "20"
+    ;;
+  *)
+    echo "null"
+    ;;
+esac
+EOF
+            chmod +x ~/bin/yq
+            export PATH="$HOME/bin:$PATH"
+            echo "PATH=$HOME/bin:$PATH" >> $GITHUB_ENV
+          else
+            echo "☁️ Running in GitHub Actions (cloud) mode"
+            echo "ACT_MODE=false" >> $GITHUB_ENV
+            echo "act_mode=false" >> $GITHUB_OUTPUT
+          fi
             
       - name: Install yq for YAML parsing
+        if: env.ACT_MODE != 'true'
         run: |
           wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           chmod +x /usr/local/bin/yq
@@ -76,6 +129,38 @@ jobs:
       - name: Load configuration
         id: load
         run: |
+          echo "🔧 Loading workflow configuration..."
+          
+          # ACT mode configuration handling
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT MODE: Using mock configuration"
+            
+            # Create mock config if it doesn't exist
+            if [ ! -f "${{ env.CONFIG_FILE }}" ]; then
+              echo "Creating mock workflow config for ACT"
+              mkdir -p .github
+              cat > ${{ env.CONFIG_FILE }} << 'EOF'
+global:
+  runners:
+    custom: warp-custom-default
+  python_version: "3.11"
+  node_version: "20"
+
+timeouts:
+  smoke: 5
+  unit: 10
+  integration: 20
+  comprehensive: 45
+
+test_shards:
+  smoke: ["basic", "health"]
+  unit: ["backend", "frontend"]
+  integration: ["api", "services"]
+  comprehensive: ["e2e", "performance"]
+EOF
+            fi
+          fi
+          
           if [ -f "${{ env.CONFIG_FILE }}" ]; then
             echo "::notice::Loading configuration from ${{ env.CONFIG_FILE }}"
             
@@ -103,6 +188,10 @@ jobs:
             echo 'test_levels=["smoke","unit","integration","comprehensive"]' >> $GITHUB_OUTPUT
             
             echo "::notice::Configuration loaded successfully"
+            
+            if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+              echo "🧪 ACT MODE: Configuration loaded with mock data"
+            fi
           else
             echo "::warning::Config file not found at ${{ env.CONFIG_FILE }}, using defaults"
             
@@ -120,6 +209,13 @@ jobs:
         run: |
           SHOULD_RUN=true
           
+          # ACT mode always runs for testing
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT MODE: Always running tests for local validation"
+            echo "should_run=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
           # Check skip conditions
           if [[ "${{ github.event.head_commit.message }}" == *"[skip ci]"* ]] || \
              [[ "${{ github.event.head_commit.message }}" == *"[ci skip]"* ]]; then
@@ -127,14 +223,19 @@ jobs:
             echo "::notice::Skipping due to commit message"
           fi
           
-          # Check if only docs changed
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            CHANGED_FILES=$(gh pr diff ${{ github.event.pull_request.number }} --name-only)
-            if echo "$CHANGED_FILES" | grep -v '\.md$' | grep -v '\.txt$' | grep -v '^docs/' > /dev/null; then
-              echo "::notice::Non-documentation files changed, running tests"
+          # Check if only docs changed (skip in ACT mode)
+          if [[ "${{ github.event_name }}" == "pull_request" ]] && [[ "${{ env.ACT_SKIP_EXTERNAL }}" != "true" ]]; then
+            # Only run gh command if not in ACT mode
+            CHANGED_FILES=$(gh pr diff ${{ github.event.pull_request.number }} --name-only 2>/dev/null || echo "")
+            if [ -n "$CHANGED_FILES" ]; then
+              if echo "$CHANGED_FILES" | grep -v '\.md$' | grep -v '\.txt$' | grep -v '^docs/' > /dev/null; then
+                echo "::notice::Non-documentation files changed, running tests"
+              else
+                SHOULD_RUN=false
+                echo "::notice::Only documentation changed, skipping tests"
+              fi
             else
-              SHOULD_RUN=false
-              echo "::notice::Only documentation changed, skipping tests"
+              echo "::notice::Could not determine changed files, running tests as precaution"
             fi
           fi
           
@@ -162,10 +263,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: ACT Detection for Analysis
+        run: |
+          if [[ "${{ needs.load-config.outputs.act_mode }}" == "true" ]]; then
+            echo "🧪 Change analysis in ACT mode"
+            echo "ACT_MODE=true" >> $GITHUB_ENV
+          else
+            echo "☁️ Change analysis in GitHub Actions"
+            echo "ACT_MODE=false" >> $GITHUB_ENV
+          fi
           
       - name: Analyze changes
         id: analyze
         run: |
+          echo "📊 Analyzing code changes..."
+          
           # Initialize variables
           BACKEND_CHANGED=false
           FRONTEND_CHANGED=false
@@ -173,17 +286,29 @@ jobs:
           WORKFLOW_CHANGED=false
           CRITICAL_CHANGED=false
           
-          # Get changed files
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          # ACT mode: create mock changes for testing
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT MODE: Using mock change analysis"
+            CHANGED_FILES="app/main.py
+app/agents/supervisor.py
+frontend/components/chat.tsx
+.github/workflows/test.yml"
+            FILE_COUNT=4
+            echo "Mock changed files:"
+            echo "$CHANGED_FILES"
           else
-            BASE_SHA="HEAD~1"
-            HEAD_SHA="HEAD"
+            # Real mode: get changed files
+            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+              BASE_SHA="${{ github.event.pull_request.base.sha }}"
+              HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+            else
+              BASE_SHA="HEAD~1"
+              HEAD_SHA="HEAD"
+            fi
+            
+            CHANGED_FILES=$(git diff --name-only $BASE_SHA..$HEAD_SHA 2>/dev/null || echo "")
+            FILE_COUNT=$(echo "$CHANGED_FILES" | grep -v '^$' | wc -l)
           fi
-          
-          CHANGED_FILES=$(git diff --name-only $BASE_SHA..$HEAD_SHA)
-          FILE_COUNT=$(echo "$CHANGED_FILES" | wc -l)
           
           # Analyze file types
           while IFS= read -r file; do
@@ -301,11 +426,52 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: ACT Detection for Integration Tests
+        run: |
+          if [[ "${{ needs.load-config.outputs.act_mode }}" == "true" ]]; then
+            echo "🧪 Integration tests in ACT mode"
+            echo "ACT_MODE=true" >> $GITHUB_ENV
+          else
+            echo "☁️ Integration tests in GitHub Actions"
+            echo "ACT_MODE=false" >> $GITHUB_ENV
+          fi
         
       - name: Run integration tests for ${{ matrix.component }}
         run: |
           echo "Running integration tests for ${{ matrix.component }}"
-          # Integration test implementation here
+          
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT MODE: Mock integration tests for ${{ matrix.component }}"
+            case "${{ matrix.component }}" in
+              "backend")
+                echo "✅ Mock backend integration tests passed"
+                echo "- API endpoints tested"
+                echo "- Database connections verified"
+                echo "- Service integrations validated"
+                ;;
+              "frontend")
+                echo "✅ Mock frontend integration tests passed"
+                echo "- Component interactions tested"
+                echo "- API communication verified"
+                echo "- User flows validated"
+                ;;
+              "api")
+                echo "✅ Mock API integration tests passed"
+                echo "- REST endpoints tested"
+                echo "- WebSocket connections verified"
+                echo "- Authentication flows validated"
+                ;;
+            esac
+            
+            # Simulate test duration
+            sleep 2
+            echo "🧪 Integration tests completed for ${{ matrix.component }}"
+          else
+            # Real integration test implementation
+            echo "Implementing real integration tests for ${{ matrix.component }}"
+            # TODO: Add actual integration test commands here
+          fi
           
   run-comprehensive-tests:
     name: 📦 Comprehensive Tests
@@ -326,14 +492,26 @@ jobs:
   
   handle-failures:
     name: Handle Test Failures
-    needs: [run-smoke-tests, run-unit-tests, run-integration-tests, run-comprehensive-tests]
+    needs: [load-config, run-smoke-tests, run-unit-tests, run-integration-tests, run-comprehensive-tests]
     if: always() && contains(needs.*.result, 'failure')
     runs-on: warp-custom-default
     
     steps:
+      - name: ACT Detection for Failure Handling
+        run: |
+          if [[ "${{ needs.load-config.outputs.act_mode }}" == "true" ]]; then
+            echo "🧪 Failure handling in ACT mode"
+            echo "ACT_MODE=true" >> $GITHUB_ENV
+          else
+            echo "☁️ Failure handling in GitHub Actions"
+            echo "ACT_MODE=false" >> $GITHUB_ENV
+          fi
+    
       - name: Analyze failure pattern
         id: analyze
         run: |
+          echo "🔍 Analyzing failure patterns..."
+          
           # Determine failure point
           if [[ "${{ needs.run-smoke-tests.result }}" == "failure" ]]; then
             FAILED_AT="smoke"
@@ -352,15 +530,30 @@ jobs:
           echo "failed_at=$FAILED_AT" >> $GITHUB_OUTPUT
           echo "severity=$SEVERITY" >> $GITHUB_OUTPUT
           
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT MODE: Failure analysis completed"
+            echo "- Failed at: $FAILED_AT"
+            echo "- Severity: $SEVERITY"
+          fi
+          
       - name: Trigger AI auto-fix
-        if: vars.WORKFLOWS_AI_AUTOFIX_ENABLED == 'true'
+        if: vars.WORKFLOWS_AI_AUTOFIX_ENABLED == 'true' && env.ACT_MODE != 'true'
         uses: ./.github/workflows/ai-autofix.yml
         with:
           test_run_id: ${{ github.run_id }}
           max_attempts: 2
+
+      - name: Mock AI Auto-fix (ACT)
+        if: env.ACT_MODE == 'true'
+        run: |
+          echo "🧪 ACT MODE: Mock AI auto-fix triggered"
+          echo "- Test run ID: ${{ github.run_id }}"
+          echo "- Failed at: ${{ steps.analyze.outputs.failed_at }}"
+          echo "- Severity: ${{ steps.analyze.outputs.severity }}"
+          echo "✅ Auto-fix simulation completed"
           
       - name: Create failure report
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && env.ACT_MODE != 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -390,6 +583,18 @@ jobs:
               issue_number: context.issue.number,
               body: comment
             });
+
+      - name: Mock Failure Report (ACT)
+        if: env.ACT_MODE == 'true'
+        run: |
+          echo "🧪 ACT MODE: Mock failure report"
+          echo "## ❌ Test Execution Failed (Mock)"
+          echo ""
+          echo "**Failed at:** ${{ steps.analyze.outputs.failed_at }} tests"
+          echo "**Severity:** ${{ steps.analyze.outputs.severity }}"
+          echo "**Run:** #${{ github.run_id }}"
+          echo ""
+          echo "✅ Failure report simulation completed"
             
   # ==========================================
   # PHASE 5: Reporting and Metrics
@@ -397,14 +602,26 @@ jobs:
   
   generate-report:
     name: Generate Test Report
-    needs: [analyze-changes, run-smoke-tests, run-unit-tests, run-integration-tests, run-comprehensive-tests]
+    needs: [load-config, analyze-changes, run-smoke-tests, run-unit-tests, run-integration-tests, run-comprehensive-tests]
     if: always()
     runs-on: warp-custom-default
     
     steps:
+      - name: ACT Detection for Reporting
+        run: |
+          if [[ "${{ needs.load-config.outputs.act_mode }}" == "true" ]]; then
+            echo "🧪 Report generation in ACT mode"
+            echo "ACT_MODE=true" >> $GITHUB_ENV
+          else
+            echo "☁️ Report generation in GitHub Actions"
+            echo "ACT_MODE=false" >> $GITHUB_ENV
+          fi
+    
       - name: Collect metrics
         id: metrics
         run: |
+          echo "📊 Collecting test execution metrics..."
+          
           # Calculate success rate
           TOTAL_JOBS=4
           SUCCESS_COUNT=0
@@ -419,8 +636,14 @@ jobs:
           echo "success_rate=$SUCCESS_RATE" >> $GITHUB_OUTPUT
           echo "total_duration=$((SECONDS / 60))" >> $GITHUB_OUTPUT
           
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT MODE: Metrics collected"
+            echo "- Success rate: $SUCCESS_RATE%"
+            echo "- Jobs succeeded: $SUCCESS_COUNT/$TOTAL_JOBS"
+          fi
+          
       - name: Update PR status
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && env.ACT_MODE != 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -439,6 +662,26 @@ jobs:
               description: `Tests ${success_rate}% passed in ${duration}m`,
               target_url: `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`
             });
+
+      - name: Mock PR Status Update (ACT)
+        if: env.ACT_MODE == 'true'
+        run: |
+          echo "🧪 ACT MODE: Mock PR status update"
+          SUCCESS_RATE="${{ steps.metrics.outputs.success_rate }}"
+          DURATION="${{ steps.metrics.outputs.total_duration }}"
+          
+          if [ "$SUCCESS_RATE" -eq 100 ]; then
+            STATUS="success"
+          elif [ "$SUCCESS_RATE" -ge 75 ]; then
+            STATUS="pending"
+          else
+            STATUS="failure"
+          fi
+          
+          echo "- Status: $STATUS"
+          echo "- Success rate: $SUCCESS_RATE%"
+          echo "- Duration: ${DURATION}m"
+          echo "✅ PR status simulation completed"
             
       - name: Generate summary
         run: |

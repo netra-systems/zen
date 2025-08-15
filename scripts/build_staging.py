@@ -8,6 +8,12 @@ import subprocess
 import sys
 import os
 import time
+
+# Set UTF-8 encoding for Windows
+if sys.platform == "win32":
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 import argparse
 import json
 from pathlib import Path

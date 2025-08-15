@@ -23,7 +23,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     """Test complete integration scenarios"""
     
     @pytest.fixture
-    def quality_service(self):
+    def service(self):
         mock_redis = AsyncMock(spec=RedisManager)
         mock_redis.get_list = AsyncMock(return_value=[])
         mock_redis.add_to_list = AsyncMock()
@@ -31,7 +31,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         return QualityGateService(redis_manager=mock_redis)
         
     @pytest.mark.asyncio
-    async def test_complete_optimization_workflow(self, quality_service):
+    async def test_complete_optimization_workflow(self, service):
         """Test complete workflow for optimization content"""
         content = """
         System Optimization Plan
@@ -49,6 +49,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         3. Synchronous I/O operations blocking GPU
         
         Optimization Strategy:
+        We will optimize the system to improve performance and reduce costs.
         
         Phase 1 - Quick Wins (Week 1):
         - Increase batch_size to 32
@@ -81,6 +82,10 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         - Memory: 14GB → 8GB (43% reduction)
         - Cost: $3,500 → $2,100/month (40% savings)
         
+        Configuration Changes Required:
+        - Change the batch processing settings from synchronous to asynchronous
+        - Reduce memory footprint by implementing efficient caching
+        
         Success Metrics:
         - All API endpoints respond < 200ms p95
         - Zero downtime during migration
@@ -103,7 +108,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
             "constraints": "Must maintain 99.9% uptime"
         }
         
-        result = await quality_service.validate_content(
+        result = await service.validate_content(
             content,
             ContentType.OPTIMIZATION,
             context,
@@ -133,7 +138,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         assert result.retry_prompt_adjustments == None
         
     @pytest.mark.asyncio
-    async def test_poor_content_improvement_cycle(self, quality_service):
+    async def test_poor_content_improvement_cycle(self, service):
         """Test improvement cycle for poor content"""
         # Start with poor content
         poor_content = """
@@ -143,7 +148,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         Generally speaking, things could be better.
         """
         
-        result1 = await quality_service.validate_content(
+        result1 = await service.validate_content(
             poor_content,
             ContentType.OPTIMIZATION
         )
@@ -163,7 +168,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         Expected results: 200ms latency reduction, $500/month cost savings
         """
         
-        result2 = await quality_service.validate_content(
+        result2 = await service.validate_content(
             improved_content,
             ContentType.OPTIMIZATION
         )
@@ -174,7 +179,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         assert result2.metrics.generic_phrase_count < result1.metrics.generic_phrase_count
 
     @pytest.mark.asyncio
-    async def test_action_plan_validation_workflow(self, quality_service):
+    async def test_action_plan_validation_workflow(self, service):
         """Test validation workflow for action plan content"""
         content = """
         Database Migration Action Plan
@@ -217,7 +222,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
             "constraints": "Minimize downtime, ensure data integrity"
         }
         
-        result = await quality_service.validate_content(
+        result = await service.validate_content(
             content,
             ContentType.ACTION_PLAN,
             context,
@@ -236,7 +241,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         assert result.retry_suggested == False
 
     @pytest.mark.asyncio
-    async def test_error_message_validation_workflow(self, quality_service):
+    async def test_error_message_validation_workflow(self, service):
         """Test validation workflow for error message content"""
         content = """
         Error Analysis: Database Connection Timeout
@@ -268,7 +273,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         System Status: Monitoring for stability
         """
         
-        result = await quality_service.validate_content(
+        result = await service.validate_content(
             content,
             ContentType.ERROR_MESSAGE,
             context={"user_request": "Analyze database timeout error"}

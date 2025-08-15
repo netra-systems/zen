@@ -1,5 +1,8 @@
 name: On-Demand Testing
 
+# ACT Compatibility: This workflow is designed to work with both GitHub Actions and ACT (act)
+# Use: act --secret-file .secrets --env-file .env.act issue_comment or workflow_dispatch
+
 # Disabled - only smoke tests and staging workflows are active
 # on:
 #   issue_comment:
@@ -30,13 +33,17 @@ permissions:
   issues: write
   statuses: write
 
+env:
+  # ACT compatibility: detect ACT environment
+  ACT: ${{ env.ACT || 'false' }}
+
 jobs:
   parse-command:
     name: Parse Test Command
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@test')) ||
       github.event_name == 'workflow_dispatch'
-    runs-on: warp-custom-default
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
     outputs:
       should_run: ${{ steps.parse.outputs.should_run }}
       test_level: ${{ steps.parse.outputs.test_level }}
@@ -143,11 +150,11 @@ jobs:
     name: Notify Test Start
     needs: parse-command
     if: needs.parse-command.outputs.should_run == 'true'
-    runs-on: warp-custom-default
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
     
     steps:
       - name: Comment PR
-        if: needs.parse-command.outputs.pr_number != ''
+        if: ${{ !env.ACT && needs.parse-command.outputs.pr_number != '' }}  # ACT compatibility: skip PR comments for ACT
         uses: actions/github-script@v7
         with:
           script: |
@@ -160,6 +167,7 @@ jobs:
               **Triggered by:** @${{ github.actor }}
               **Branch:** \`${{ needs.parse-command.outputs.branch }}\`
               **Started:** ${new Date().toISOString()}
+              **Environment:** ${{ env.ACT && 'ACT (Local)' || 'GitHub Actions' }}
               
               View progress: [Run #${{ github.run_id }}](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`
             });
@@ -206,7 +214,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
+          cache: ${{ env.ACT && '' || 'pip' }}  # ACT compatibility: disable pip cache for ACT
           
       - name: Install Dependencies
         run: |
@@ -219,9 +227,15 @@ jobs:
         run: |
           # Special handling for performance and security tests
           if [[ "${{ needs.parse-command.outputs.test_level }}" == "performance" ]]; then
+            if [ "${{ env.ACT }}" = "true" ]; then
+              echo "::warning::Performance tests in ACT environment may not be accurate"
+            fi
             python scripts/ci/run_performance_tests.py \
               --output performance-results.json
           elif [[ "${{ needs.parse-command.outputs.test_level }}" == "security" ]]; then
+            if [ "${{ env.ACT }}" = "true" ]; then
+              echo "::warning::Security tests in ACT environment may have limited capabilities"
+            fi
             python scripts/ci/run_security_tests.py \
               --output security-results.json
           else
@@ -251,7 +265,7 @@ jobs:
           fi
           
       - name: Upload Results
-        if: always()
+        if: ${{ !env.ACT && always() }}  # ACT compatibility: skip artifact upload for ACT
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ needs.parse-command.outputs.test_level }}-${{ github.run_id }}
@@ -262,9 +276,21 @@ jobs:
             test-report.html
             report.md
           retention-days: 30
+      
+      - name: Store results locally (ACT)
+        if: ${{ env.ACT && always() }}
+        run: |
+          # ACT compatibility: store results locally
+          mkdir -p act-results
+          cp -f test-results.json act-results/ 2>/dev/null || true
+          cp -f performance-results.json act-results/ 2>/dev/null || true
+          cp -f security-results.json act-results/ 2>/dev/null || true
+          cp -f test-report.html act-results/ 2>/dev/null || true
+          cp -f report.md act-results/ 2>/dev/null || true
+          echo "Test results stored locally: act-results/"
           
       - name: Comment Results
-        if: always() && needs.parse-command.outputs.pr_number != ''
+        if: ${{ !env.ACT && always() && needs.parse-command.outputs.pr_number != '' }}  # ACT compatibility: skip PR comments for ACT
         uses: actions/github-script@v7
         with:
           script: |
@@ -296,7 +322,7 @@ jobs:
             });
             
       - name: Set Commit Status
-        if: always() && needs.parse-command.outputs.pr_number != ''
+        if: ${{ !env.ACT && always() && needs.parse-command.outputs.pr_number != '' }}  # ACT compatibility: skip commit status for ACT
         uses: actions/github-script@v7
         with:
           script: |
@@ -315,3 +341,19 @@ jobs:
               description: `${{ needs.parse-command.outputs.test_level }} tests ${{ steps.test.outcome }}`,
               target_url: `https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}`
             });
+      
+      - name: Local test summary (ACT)
+        if: ${{ env.ACT && always() }}
+        run: |
+          # ACT compatibility: show local summary
+          echo "=== ${{ needs.parse-command.outputs.test_level }} Test Results Summary (ACT) ==="
+          echo "Test Level: ${{ needs.parse-command.outputs.test_level }}"
+          echo "Branch: ${{ needs.parse-command.outputs.branch }}"
+          echo "Status: ${{ steps.test.outcome }}"
+          echo "Triggered by: ${{ github.actor }}"
+          if [ -f "report.md" ]; then
+            echo "--- Test Report ---"
+            cat report.md
+          fi
+          echo "Test results stored in: act-results/"
+          echo "============================================"

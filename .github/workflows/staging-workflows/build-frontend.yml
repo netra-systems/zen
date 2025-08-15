@@ -1,5 +1,10 @@
 name: Build Frontend
 description: Build and push frontend Docker image
+# ACT Compatibility: This workflow supports local testing with ACT
+# - Frontend builds use local registry when ACT=true
+# - Node.js tests are skipped in ACT mode for faster testing
+# - Docker builds simulated for rapid local development
+# - Build artifacts handled appropriately for ACT testing
 
 on:
   workflow_call:
@@ -27,7 +32,7 @@ on:
 jobs:
   build:
     name: Build Frontend Image
-    runs-on: warp-custom-default
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
     timeout-minutes: 30
     outputs:
       image_tag: ${{ steps.build.outputs.image_tag }}
@@ -50,13 +55,36 @@ jobs:
         uses: docker/setup-buildx-action@v3
       
       - name: Configure GCP credentials
+        if: env.ACT != 'true'
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
       
       - name: Configure Docker for GCR
+        if: env.ACT != 'true'
         run: |
           gcloud auth configure-docker gcr.io
+      
+      - name: Mock GCP and Docker configuration for ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "ACT detected - mocking GCP credentials and Docker configuration for frontend"
+          mkdir -p ~/.local/bin ~/.docker
+          cat > ~/.local/bin/gcloud << 'EOF'
+          #!/bin/bash
+          echo "[MOCK] gcloud $*"
+          case "$*" in
+            *"auth configure-docker"*)
+              echo "Docker configured for mock registry"
+              ;;
+            *)
+              echo "Mock GCP response for: $*"
+              ;;
+          esac
+          EOF
+          chmod +x ~/.local/bin/gcloud
+          echo '{}' > ~/.docker/config.json
+          echo "~/.local/bin" >> $GITHUB_PATH
       
       - name: Generate image tag
         id: tag
@@ -67,17 +95,20 @@ jobs:
           echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
       
       - name: Install dependencies
+        if: env.ACT != 'true'
         working-directory: ./frontend
         run: |
           npm ci
           npm run lint
       
       - name: Run tests
+        if: env.ACT != 'true'
         working-directory: ./frontend
         run: |
           npm run test:ci
       
       - name: Build application
+        if: env.ACT != 'true'
         working-directory: ./frontend
         env:
           NEXT_PUBLIC_API_URL: ${{ inputs.backend_url }}
@@ -86,26 +117,53 @@ jobs:
         run: |
           npm run build
       
+      - name: Mock frontend build for ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "ACT detected - mocking frontend build process"
+          echo "Skipping npm install, lint, test, and build for faster testing"
+          mkdir -p frontend/.next frontend/out
+          echo "Mock frontend build complete" > frontend/.next/BUILD_ID
+      
       - name: Build and push Docker image
         id: build
         run: |
           IMAGE_TAG="${{ steps.tag.outputs.image_tag }}"
-          IMAGE_URL="${{ inputs.registry_url }}/${{ secrets.GCP_PROJECT_ID }}/netra-frontend:$IMAGE_TAG"
           
-          # Build with cache
-          docker buildx build \
-            --platform linux/amd64 \
-            --cache-from type=registry,ref=${{ inputs.registry_url }}/${{ secrets.GCP_PROJECT_ID }}/netra-frontend:cache \
-            --cache-to type=registry,ref=${{ inputs.registry_url }}/${{ secrets.GCP_PROJECT_ID }}/netra-frontend:cache,mode=max \
-            --build-arg COMMIT_SHA=${{ inputs.commit_sha }} \
-            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
-            --build-arg NEXT_PUBLIC_API_URL=${{ inputs.backend_url }} \
-            --tag $IMAGE_URL \
-            --push \
-            --file frontend/Dockerfile \
-            ./frontend
+          if [ "$ACT" = "true" ]; then
+            echo "ACT detected - mocking frontend Docker build"
+            IMAGE_URL="localhost:5000/netra-frontend:$IMAGE_TAG"
+            
+            echo "Simulating frontend Docker build process..."
+            echo "Would build with:"
+            echo "  - Platform: linux/amd64"
+            echo "  - Commit SHA: ${{ inputs.commit_sha }}"
+            echo "  - Build Date: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo "  - API URL: ${{ inputs.backend_url || 'http://localhost:8000' }}"
+            echo "  - Image URL: $IMAGE_URL"
+            
+            # Simulate build time
+            sleep 2
+            echo "Mock frontend build complete!"
+          else
+            IMAGE_URL="${{ inputs.registry_url }}/${{ secrets.GCP_PROJECT_ID }}/netra-frontend:$IMAGE_TAG"
+            
+            # Build with cache
+            docker buildx build \
+              --platform linux/amd64 \
+              --cache-from type=registry,ref=${{ inputs.registry_url }}/${{ secrets.GCP_PROJECT_ID }}/netra-frontend:cache \
+              --cache-to type=registry,ref=${{ inputs.registry_url }}/${{ secrets.GCP_PROJECT_ID }}/netra-frontend:cache,mode=max \
+              --build-arg COMMIT_SHA=${{ inputs.commit_sha }} \
+              --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+              --build-arg NEXT_PUBLIC_API_URL=${{ inputs.backend_url }} \
+              --tag $IMAGE_URL \
+              --push \
+              --file frontend/Dockerfile \
+              ./frontend
+          fi
           
           echo "image_url=$IMAGE_URL" >> $GITHUB_OUTPUT
+          echo "::notice::Frontend image: $IMAGE_URL"
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

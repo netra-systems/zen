@@ -1,114 +1,6 @@
 {
   "runs": [
     {
-      "timestamp": "2025-08-14T17:12:39.145567",
-      "level": "agents",
-      "total": 15,
-      "passed": 11,
-      "failed": 3,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T17:14:04.892300",
-      "level": "agents",
-      "total": 17,
-      "passed": 13,
-      "failed": 3,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T17:15:15.221601",
-      "level": "unit",
-      "total": 176,
-      "passed": 164,
-      "failed": 3,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T17:15:54.726997",
-      "level": "agents",
-      "total": 20,
-      "passed": 16,
-      "failed": 1,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T17:16:37.314653",
-      "level": "agents",
-      "total": 20,
-      "passed": 16,
-      "failed": 1,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T17:18:14.179679",
-      "level": "unit",
-      "total": 0,
-      "passed": 0,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T17:22:12.076778",
-      "level": "comprehensive-core",
-      "total": 2,
-      "passed": 0,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T17:23:43.534215",
-      "level": "unit",
-      "total": 176,
-      "passed": 164,
-      "failed": 3,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T17:49:02.320842",
-      "level": "smoke",
-      "total": 7,
-      "passed": 7,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T17:52:08.884399",
-      "level": "unit",
-      "total": 176,
-      "passed": 164,
-      "failed": 3,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T17:52:18.213930",
-      "level": "critical",
-      "total": 0,
-      "passed": 0,
-      "failed": 0,
-      "coverage": null,
-      "duration": 0
-    },
-    {
-      "timestamp": "2025-08-14T17:58:18.279291",
-      "level": "unit",
-      "total": 176,
-      "passed": 164,
-      "failed": 3,
-      "coverage": null,
-      "duration": 0
-    },
-    {
       "timestamp": "2025-08-14T17:58:24.626925",
       "level": "smoke",
       "total": 7,
@@ -897,6 +789,114 @@
       "total": 439,
       "passed": 419,
       "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-15T08:50:37.251786",
+      "level": "unit",
+      "total": 472,
+      "passed": 448,
+      "failed": 2,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-15T08:54:31.783118",
+      "level": "unit",
+      "total": 479,
+      "passed": 455,
+      "failed": 2,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-15T08:56:18.271467",
+      "level": "unit",
+      "total": 443,
+      "passed": 424,
+      "failed": 2,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-15T08:57:13.535273",
+      "level": "unit",
+      "total": 444,
+      "passed": 425,
+      "failed": 2,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-15T08:58:26.856333",
+      "level": "unit",
+      "total": 483,
+      "passed": 459,
+      "failed": 2,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-15T09:00:52.003462",
+      "level": "unit",
+      "total": 397,
+      "passed": 373,
+      "failed": 2,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-15T09:05:46.328849",
+      "level": "unit",
+      "total": 495,
+      "passed": 471,
+      "failed": 2,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-15T09:08:59.633619",
+      "level": "unit",
+      "total": 601,
+      "passed": 572,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-15T09:29:00.191269",
+      "level": "unit",
+      "total": 601,
+      "passed": 572,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-15T09:35:01.076010",
+      "level": "unit",
+      "total": 671,
+      "passed": 642,
+      "failed": 2,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-15T09:40:39.710806",
+      "level": "unit",
+      "total": 709,
+      "passed": 680,
+      "failed": 2,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-15T09:42:07.868936",
+      "level": "unit",
+      "total": 709,
+      "passed": 680,
+      "failed": 2,
       "coverage": null,
       "duration": 0
     }

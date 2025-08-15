@@ -1,5 +1,10 @@
 name: Terraform Operations
 description: Core Terraform operations for infrastructure management
+# ACT Compatibility: This workflow supports local testing with ACT
+# - Terraform operations are mocked when ACT=true
+# - State operations use local files in ACT mode
+# - All cloud provider calls have local alternatives
+# - Dry-run mode enabled for ACT testing
 
 on:
   workflow_call:
@@ -31,11 +36,14 @@ on:
 
 env:
   TERRAFORM_VERSION: '1.5.0'
+  # ACT environment detection
+  ACT: ${{ env.ACT }}
+  LOCAL_DEPLOY: ${{ env.LOCAL_DEPLOY || 'false' }}
 
 jobs:
   terraform:
     name: Terraform ${{ inputs.action }}
-    runs-on: warp-custom-default
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
     timeout-minutes: 45
     outputs:
       backend_url: ${{ steps.outputs.outputs.backend_url }}
@@ -47,26 +55,111 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Setup Terraform
+        if: env.ACT != 'true'
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
           terraform_wrapper: false
       
+      - name: Mock Terraform for ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "ACT detected - mocking Terraform setup"
+          mkdir -p ~/.local/bin
+          cat > ~/.local/bin/terraform << 'EOF'
+          #!/bin/bash
+          echo "[MOCK] terraform $*"
+          case "$1" in
+            "init")
+              echo "Terraform initialized (mock)"
+              mkdir -p .terraform
+              echo '{"version": 4}' > terraform.tfstate
+              ;;
+            "validate")
+              echo "Configuration is valid (mock)"
+              ;;
+            "plan")
+              echo "Plan: 3 to add, 0 to change, 0 to destroy (mock)"
+              echo "terraform plan output" > tfplan
+              exit 2  # Changes present
+              ;;
+            "apply")
+              echo "Apply complete! Resources: 3 added, 0 changed, 0 destroyed (mock)"
+              mkdir -p terraform.tfstate.d
+              echo '{"version": 4, "terraform_version": "1.5.0"}' > terraform.tfstate
+              ;;
+            "destroy")
+              echo "Destroy complete! Resources: 3 destroyed (mock)"
+              ;;
+            "output")
+              case "$3" in
+                "backend_url")
+                  echo "http://localhost:8000"
+                  ;;
+                "frontend_url")
+                  echo "http://localhost:3000"
+                  ;;
+                "cluster_name")
+                  echo "mock-cluster-${{ inputs.environment_name }}"
+                  ;;
+                *)
+                  echo "mock-output-value"
+                  ;;
+              esac
+              ;;
+            *)
+              echo "Mock terraform command: $*"
+              ;;
+          esac
+          EOF
+          chmod +x ~/.local/bin/terraform
+          echo "~/.local/bin" >> $GITHUB_PATH
+      
       - name: Configure GCP credentials
+        if: env.ACT != 'true'
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
       
       - name: Set up Cloud SDK
+        if: env.ACT != 'true'
         uses: google-github-actions/setup-gcloud@v2
+      
+      - name: Mock Cloud SDK for ACT
+        if: env.ACT == 'true'
+        run: |
+          echo "ACT detected - mocking Cloud SDK"
+          mkdir -p ~/.local/bin
+          cat > ~/.local/bin/gcloud << 'EOF'
+          #!/bin/bash
+          echo "[MOCK] gcloud $*"
+          case "$*" in
+            *"storage buckets describe"*)
+              echo "Mock bucket exists"
+              ;;
+            *"storage buckets create"*)
+              echo "Mock bucket created"
+              ;;
+            *)
+              echo "Mock GCP response for: $*"
+              ;;
+          esac
+          EOF
+          chmod +x ~/.local/bin/gcloud
+          echo "~/.local/bin" >> $GITHUB_PATH
       
       - name: Initialize Terraform
         working-directory: ${{ inputs.terraform_dir }}
         run: |
-          terraform init \
-            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
-            -backend-config="prefix=${{ inputs.environment_name }}" \
-            -upgrade
+          if [ "$ACT" = "true" ]; then
+            echo "ACT detected - mocking Terraform init"
+            terraform init -backend=false
+          else
+            terraform init \
+              -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+              -backend-config="prefix=${{ inputs.environment_name }}" \
+              -upgrade
+          fi
       
       - name: Validate Terraform
         if: inputs.action != 'destroy'
@@ -78,44 +171,79 @@ jobs:
         id: plan
         working-directory: ${{ inputs.terraform_dir }}
         run: |
-          terraform plan \
-            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
-            -var="environment_name=${{ inputs.environment_name }}" \
-            -var="pr_number=${{ inputs.pr_number }}" \
-            -var="region=${{ env.GCP_REGION || 'us-central1' }}" \
-            -out=tfplan \
-            -detailed-exitcode
+          if [ "$ACT" = "true" ]; then
+            echo "ACT detected - mocking Terraform plan"
+            terraform plan \
+              -var="project_id=mock-project-id" \
+              -var="environment_name=${{ inputs.environment_name }}" \
+              -var="pr_number=${{ inputs.pr_number }}" \
+              -var="region=${{ env.GCP_REGION || 'us-central1' }}" \
+              -out=tfplan \
+              -detailed-exitcode || true
+          else
+            terraform plan \
+              -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+              -var="environment_name=${{ inputs.environment_name }}" \
+              -var="pr_number=${{ inputs.pr_number }}" \
+              -var="region=${{ env.GCP_REGION || 'us-central1' }}" \
+              -out=tfplan \
+              -detailed-exitcode
+          fi
       
       - name: Apply Terraform
         if: inputs.action == 'apply'
         id: apply
         working-directory: ${{ inputs.terraform_dir }}
         run: |
-          terraform apply -auto-approve tfplan
+          if [ "$ACT" = "true" ]; then
+            echo "ACT detected - mocking Terraform apply"
+            terraform apply -auto-approve tfplan || terraform apply -auto-approve
+          else
+            terraform apply -auto-approve tfplan
+          fi
       
       - name: Destroy Terraform
         if: inputs.action == 'destroy'
         working-directory: ${{ inputs.terraform_dir }}
         run: |
-          terraform destroy \
-            -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
-            -var="environment_name=${{ inputs.environment_name }}" \
-            -var="pr_number=${{ inputs.pr_number }}" \
-            -var="region=${{ env.GCP_REGION || 'us-central1' }}" \
-            -auto-approve
+          if [ "$ACT" = "true" ]; then
+            echo "ACT detected - mocking Terraform destroy"
+            terraform destroy \
+              -var="project_id=mock-project-id" \
+              -var="environment_name=${{ inputs.environment_name }}" \
+              -var="pr_number=${{ inputs.pr_number }}" \
+              -var="region=${{ env.GCP_REGION || 'us-central1' }}" \
+              -auto-approve || true
+          else
+            terraform destroy \
+              -var="project_id=${{ secrets.GCP_PROJECT_ID }}" \
+              -var="environment_name=${{ inputs.environment_name }}" \
+              -var="pr_number=${{ inputs.pr_number }}" \
+              -var="region=${{ env.GCP_REGION || 'us-central1' }}" \
+              -auto-approve
+          fi
       
       - name: Extract outputs
         if: inputs.action == 'apply'
         id: outputs
         working-directory: ${{ inputs.terraform_dir }}
         run: |
-          BACKEND_URL=$(terraform output -raw backend_url 2>/dev/null || echo "")
-          FRONTEND_URL=$(terraform output -raw frontend_url 2>/dev/null || echo "")
-          CLUSTER_NAME=$(terraform output -raw cluster_name 2>/dev/null || echo "")
+          if [ "$ACT" = "true" ]; then
+            echo "ACT detected - using mock Terraform outputs"
+            BACKEND_URL="http://localhost:8000"
+            FRONTEND_URL="http://localhost:3000"
+            CLUSTER_NAME="mock-cluster-${{ inputs.environment_name }}"
+          else
+            BACKEND_URL=$(terraform output -raw backend_url 2>/dev/null || echo "")
+            FRONTEND_URL=$(terraform output -raw frontend_url 2>/dev/null || echo "")
+            CLUSTER_NAME=$(terraform output -raw cluster_name 2>/dev/null || echo "")
+          fi
           
           echo "backend_url=$BACKEND_URL" >> $GITHUB_OUTPUT
           echo "frontend_url=$FRONTEND_URL" >> $GITHUB_OUTPUT
           echo "cluster_name=$CLUSTER_NAME" >> $GITHUB_OUTPUT
+          
+          echo "::notice::Terraform outputs - Backend: $BACKEND_URL, Frontend: $FRONTEND_URL, Cluster: $CLUSTER_NAME"
       
       - name: Save Terraform state
         if: failure() && (inputs.action == 'apply' || inputs.action == 'destroy')

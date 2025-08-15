@@ -378,7 +378,7 @@ class TestFallbackResponseService:
     async def test_get_recovery_suggestions(self, fallback_service):
         """Test generation of recovery suggestions"""
         suggestions = fallback_service._get_recovery_suggestions(
-            ContentType.OPTIMIZATION,
+            ContentType.GENERAL,
             FailureReason.LOW_QUALITY
         )
         

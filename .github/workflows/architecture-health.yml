@@ -1,4 +1,5 @@
 name: Architecture Health Monitor
+description: Monitor architecture compliance with ACT compatibility
 
 # Disabled - only smoke tests and staging workflows are active
 # on:
@@ -21,10 +22,16 @@ name: Architecture Health Monitor
 #         required: false
 #         default: 'true'
 #         type: boolean
+#       act_local_run:
+#         description: 'Running with ACT (local testing)'
+#         required: false
+#         type: boolean
+#         default: false
 
 env:
   REPORTS_DIR: reports/architecture-health
   DASHBOARD_URL: https://netra-ai.github.io/architecture-health
+  ACT_DETECTION: ${{ github.event.inputs.act_local_run || env.ACT || 'false' }}
 
 jobs:
   architecture-health-scan:
@@ -63,6 +70,13 @@ jobs:
       run: |
         echo "🔍 Running comprehensive architecture health scan..."
         
+        # ACT Detection and Debug Output
+        if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+          echo "🧪 ACT LOCAL RUN DETECTED - Using mock architecture scan"
+          echo "Debug: ACT environment variables:"
+          env | grep -E "^(ACT|GITHUB_|CI)" | sort || true
+        fi
+        
         # Determine if we should fail on violations
         FAIL_ON_VIOLATIONS="${{ inputs.fail_on_violations }}"
         if [ "$FAIL_ON_VIOLATIONS" = "true" ]; then
@@ -71,26 +85,97 @@ jobs:
           FAIL_FLAG=""
         fi
         
-        # Run the health scan
-        python scripts/architecture_health.py \
-          --path . \
-          --output-html "${{ env.REPORTS_DIR }}/dashboard.html" \
-          --output-json "${{ env.REPORTS_DIR }}/health-report.json" \
-          $FAIL_FLAG | tee scan-output.txt
+        if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+          # Create mock health report for ACT
+          echo "🧪 ACT LOCAL RUN - Generating mock architecture health data"
+          
+          cat > "${{ env.REPORTS_DIR }}/health-report.json" << 'EOF'
+        {
+          "timestamp": "2024-01-15T12:00:00Z",
+          "metrics": {
+            "compliance_scores": {
+              "overall_compliance": 85.5,
+              "file_size_compliance": 90.0,
+              "function_complexity_compliance": 82.0,
+              "type_safety_compliance": 88.0
+            },
+            "violation_counts": {
+              "total_violations": 15,
+              "file_size_violations": 3,
+              "function_complexity_violations": 8,
+              "duplicate_types": 2,
+              "test_stubs": 2
+            }
+          },
+          "files_analyzed": 125,
+          "act_mock": true
+        }
+        EOF
+          
+          cat > "${{ env.REPORTS_DIR }}/dashboard.html" << 'EOF'
+        <!DOCTYPE html>
+        <html><head><title>ACT Mock Architecture Health</title></head>
+        <body>
+          <h1>🧪 ACT Mock Architecture Health Dashboard</h1>
+          <p>Overall Compliance: 85.5%</p>
+          <p>Total Violations: 15</p>
+          <p>This is a mock dashboard for ACT local testing.</p>
+        </body></html>
+        EOF
+          
+          echo "ACT Mock Architecture Health Scan Results" > scan-output.txt
+          echo "=========================================" >> scan-output.txt
+          echo "Overall Compliance: 85.5%" >> scan-output.txt
+          echo "Total Violations: 15" >> scan-output.txt
+          echo "Files Analyzed: 125" >> scan-output.txt
+          echo "" >> scan-output.txt
+          echo "Violation Breakdown:" >> scan-output.txt
+          echo "- File Size Violations: 3" >> scan-output.txt
+          echo "- Function Complexity: 8" >> scan-output.txt
+          echo "- Duplicate Types: 2" >> scan-output.txt
+          echo "- Test Stubs: 2" >> scan-output.txt
+          
+          COMPLIANCE_SCORE="85.5"
+          TOTAL_VIOLATIONS="15"
+        else
+          # Run the real health scan
+          python scripts/architecture_health.py \
+            --path . \
+            --output-html "${{ env.REPORTS_DIR }}/dashboard.html" \
+            --output-json "${{ env.REPORTS_DIR }}/health-report.json" \
+            $FAIL_FLAG | tee scan-output.txt
+          
+          # Extract key metrics for GitHub summary
+          if [ -f "${{ env.REPORTS_DIR }}/health-report.json" ]; then
+            COMPLIANCE_SCORE=$(python -c "import json; data=json.load(open('${{ env.REPORTS_DIR }}/health-report.json')); print(data['metrics']['compliance_scores']['overall_compliance'])")
+            TOTAL_VIOLATIONS=$(python -c "import json; data=json.load(open('${{ env.REPORTS_DIR }}/health-report.json')); print(data['metrics']['violation_counts']['total_violations'])")
+          else
+            COMPLIANCE_SCORE="0"
+            TOTAL_VIOLATIONS="999"
+          fi
+        fi
         
-        # Extract key metrics for GitHub summary
-        if [ -f "${{ env.REPORTS_DIR }}/health-report.json" ]; then
-          COMPLIANCE_SCORE=$(python -c "import json; data=json.load(open('${{ env.REPORTS_DIR }}/health-report.json')); print(data['metrics']['compliance_scores']['overall_compliance'])")
-          TOTAL_VIOLATIONS=$(python -c "import json; data=json.load(open('${{ env.REPORTS_DIR }}/health-report.json')); print(data['metrics']['violation_counts']['total_violations'])")
-          
-          echo "compliance_score=$COMPLIANCE_SCORE" >> $GITHUB_OUTPUT
-          echo "total_violations=$TOTAL_VIOLATIONS" >> $GITHUB_OUTPUT
-          
-          # Set status based on compliance score
+        echo "compliance_score=$COMPLIANCE_SCORE" >> $GITHUB_OUTPUT
+        echo "total_violations=$TOTAL_VIOLATIONS" >> $GITHUB_OUTPUT
+        
+        # Set status based on compliance score (with ACT-safe bc alternative)
+        if command -v bc >/dev/null 2>&1; then
           if (( $(echo "$COMPLIANCE_SCORE >= 90" | bc -l) )); then
             echo "status=excellent" >> $GITHUB_OUTPUT
             echo "status_emoji=🟢" >> $GITHUB_OUTPUT
           elif (( $(echo "$COMPLIANCE_SCORE >= 70" | bc -l) )); then
+            echo "status=good" >> $GITHUB_OUTPUT
+            echo "status_emoji=🟡" >> $GITHUB_OUTPUT
+          else
+            echo "status=needs_improvement" >> $GITHUB_OUTPUT
+            echo "status_emoji=🔴" >> $GITHUB_OUTPUT
+          fi
+        else
+          # Fallback for ACT environments without bc
+          if (( $(echo "$COMPLIANCE_SCORE >= 90" | awk '{print ($1 >= 90)}') )); then
+            echo "status=excellent" >> $GITHUB_OUTPUT
+            echo "status_emoji=🟢" >> $GITHUB_OUTPUT
+          elif (( $(echo "$COMPLIANCE_SCORE >= 70" | awk '{print ($1 >= 70)}') )); then
             echo "status=good" >> $GITHUB_OUTPUT
             echo "status_emoji=🟡" >> $GITHUB_OUTPUT
           else
@@ -295,19 +380,33 @@ except Exception as e:
           }
 
     - name: Setup Pages for Dashboard
-      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false'
+      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false' && env.ACT_DETECTION != 'true'
       uses: actions/configure-pages@v4
 
     - name: Upload Dashboard to Pages
-      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false'
+      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false' && env.ACT_DETECTION != 'true'
       uses: actions/upload-pages-artifact@v3
       with:
         path: ${{ env.REPORTS_DIR }}
 
     - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false'
+      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false' && env.ACT_DETECTION != 'true'
       id: deployment
       uses: actions/deploy-pages@v4
+      
+    - name: ACT Local Dashboard Info
+      if: env.ACT_DETECTION == 'true'
+      run: |
+        echo "🧪 ACT LOCAL RUN - Dashboard deployment skipped"
+        echo "📄 Mock dashboard created at: ${{ env.REPORTS_DIR }}/dashboard.html"
+        echo "📊 Mock health report at: ${{ env.REPORTS_DIR }}/health-report.json"
+        echo "📋 View scan output in: scan-output.txt"
+        
+        if [ -f "${{ env.REPORTS_DIR }}/dashboard.html" ]; then
+          echo "✅ Mock dashboard file exists"
+        else
+          echo "❌ Mock dashboard file missing"
+        fi
 
     - name: Update Job Summary
       if: always()
@@ -334,7 +433,7 @@ except Exception as e:
         fi
 
     - name: Notify Team on Slack
-      if: failure() || steps.health_scan.outputs.status == 'needs_improvement'
+      if: (failure() || steps.health_scan.outputs.status == 'needs_improvement') && env.ACT_DETECTION != 'true'
       uses: 8398a7/action-slack@v3
       with:
         status: custom
@@ -394,6 +493,28 @@ except Exception as e:
           }
       env:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        
+    - name: ACT Local Notification Log
+      if: (failure() || steps.health_scan.outputs.status == 'needs_improvement') && env.ACT_DETECTION == 'true'
+      run: |
+        echo "🧪 ACT LOCAL RUN - Slack notification skipped"
+        echo "Would send Slack alert for status: ${{ steps.health_scan.outputs.status }}"
+        
+        # Create local notification log for ACT testing
+        cat > act_slack_notification.json << EOF
+        {
+          "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+          "alert_type": "architecture_health",
+          "status": "${{ steps.health_scan.outputs.status }}",
+          "compliance_score": "${{ steps.health_scan.outputs.compliance_score }}",
+          "total_violations": "${{ steps.health_scan.outputs.total_violations }}",
+          "repository": "${{ github.repository }}",
+          "branch": "${{ github.ref_name }}",
+          "slack_configured": $([ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ] && echo "true" || echo "false"),
+          "act_mock": true
+        }
+        EOF
+        echo "📝 Created local notification log: act_slack_notification.json"
 
   benchmark-performance:
     name: Benchmark Scan Performance
@@ -414,13 +535,29 @@ except Exception as e:
       run: |
         echo "⏱️ Benchmarking architecture health scan performance..."
         
-        # Run multiple iterations to get average performance
-        for i in {1..3}; do
-          echo "Run $i:"
-          time python scripts/architecture_health.py --cli-only --path .
-        done
-        
-        # Performance recommendations
-        echo "## Performance Metrics" >> $GITHUB_STEP_SUMMARY
-        echo "Benchmark completed - 3 runs average" >> $GITHUB_STEP_SUMMARY
-        echo "Target: <30 seconds for full scan" >> $GITHUB_STEP_SUMMARY
+        if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+          echo "🧪 ACT LOCAL RUN - Using mock benchmark results"
+          
+          echo "Mock Benchmark Results:" | tee -a $GITHUB_STEP_SUMMARY
+          echo "Run 1: 12.5 seconds" | tee -a $GITHUB_STEP_SUMMARY
+          echo "Run 2: 11.8 seconds" | tee -a $GITHUB_STEP_SUMMARY
+          echo "Run 3: 12.2 seconds" | tee -a $GITHUB_STEP_SUMMARY
+          echo "Average: 12.2 seconds" | tee -a $GITHUB_STEP_SUMMARY
+          
+          # Performance recommendations
+          echo "## Performance Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "Mock benchmark completed - 3 runs average: 12.2s" >> $GITHUB_STEP_SUMMARY
+          echo "Target: <30 seconds for full scan ✅" >> $GITHUB_STEP_SUMMARY
+          echo "Status: Mock results show good performance" >> $GITHUB_STEP_SUMMARY
+        else
+          # Run multiple iterations to get average performance
+          for i in {1..3}; do
+            echo "Run $i:"
+            time python scripts/architecture_health.py --cli-only --path .
+          done
+          
+          # Performance recommendations
+          echo "## Performance Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "Benchmark completed - 3 runs average" >> $GITHUB_STEP_SUMMARY
+          echo "Target: <30 seconds for full scan" >> $GITHUB_STEP_SUMMARY
+        fi

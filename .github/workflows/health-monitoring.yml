@@ -1,5 +1,5 @@
 name: Health Check Monitoring
-description: Continuous health monitoring for production and staging environments
+description: Continuous health monitoring for production and staging environments (ACT compatible)
 
 # Disabled - only smoke tests and staging workflows are active
 # on:
@@ -22,11 +22,17 @@ description: Continuous health monitoring for production and staging environment
 #         required: false
 #         type: boolean
 #         default: false
+#       act_local_run:
+#         description: 'Running with ACT (local testing)'
+#         required: false
+#         type: boolean
+#         default: false
 
 env:
   HEALTH_CHECK_TIMEOUT: 30
   ALERT_THRESHOLD_RESPONSE_TIME: 2000  # 2 seconds
   ALERT_THRESHOLD_ERROR_RATE: 5        # 5% error rate
+  ACT_DETECTION: ${{ github.event.inputs.act_local_run || env.ACT || 'false' }}
 
 permissions:
   contents: read
@@ -51,6 +57,13 @@ jobs:
       - name: Health check production endpoints
         id: health-check
         run: |
+          # ACT Detection and Debug Output
+          if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+            echo "🧪 ACT LOCAL RUN DETECTED - Using mock health checks"
+            echo "Debug: ACT environment variables:"
+            env | grep -E "^(ACT|GITHUB_|CI)" | sort || true
+          fi
+          
           PROD_URL="https://api.netra.ai"  # Replace with actual production URL
           
           # Initialize metrics
@@ -68,18 +81,24 @@ jobs:
             "/api/v1/health/storage"
           )
           
-          # Test each endpoint
+          # Test each endpoint (with ACT mocking)
           for endpoint in "${ENDPOINTS[@]}"; do
             TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
             
             echo "Testing $PROD_URL$endpoint"
             
-            # Measure response time and status
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code},%{time_total}" "$PROD_URL$endpoint" --max-time ${{ env.HEALTH_CHECK_TIMEOUT }} || echo "000,0")
-            
-            HTTP_CODE=$(echo "$RESPONSE" | cut -d',' -f1)
-            RESPONSE_TIME=$(echo "$RESPONSE" | cut -d',' -f2)
-            RESPONSE_TIME_MS=$(echo "$RESPONSE_TIME * 1000" | bc | cut -d'.' -f1)
+            if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+              # Mock responses for ACT local testing
+              HTTP_CODE="200"
+              RESPONSE_TIME_MS=$((RANDOM % 500 + 100))  # Random 100-600ms
+              echo "🧪 ACT MOCK: $endpoint -> $HTTP_CODE (${RESPONSE_TIME_MS}ms)"
+            else
+              # Real health check
+              RESPONSE=$(curl -s -o /dev/null -w "%{http_code},%{time_total}" "$PROD_URL$endpoint" --max-time ${{ env.HEALTH_CHECK_TIMEOUT }} || echo "000,0")
+              HTTP_CODE=$(echo "$RESPONSE" | cut -d',' -f1)
+              RESPONSE_TIME=$(echo "$RESPONSE" | cut -d',' -f2)
+              RESPONSE_TIME_MS=$(echo "$RESPONSE_TIME * 1000" | bc | cut -d'.' -f1)
+            fi
             
             if [[ "$HTTP_CODE" == "200" ]]; then
               SUCCESSFUL_CHECKS=$((SUCCESSFUL_CHECKS + 1))
@@ -89,7 +108,7 @@ jobs:
               echo "❌ $endpoint: $HTTP_CODE (${RESPONSE_TIME_MS}ms)"
             fi
             
-            TOTAL_RESPONSE_TIME=$(echo "$TOTAL_RESPONSE_TIME + $RESPONSE_TIME_MS" | bc)
+            TOTAL_RESPONSE_TIME=$((TOTAL_RESPONSE_TIME + RESPONSE_TIME_MS))
           done
           
           # Calculate metrics
@@ -123,14 +142,49 @@ jobs:
           
           echo "Running detailed production diagnostics..."
           
-          # Database performance check
-          curl -s "$PROD_URL/api/v1/health/database/performance" > db_performance.json || echo '{"error": "unavailable"}' > db_performance.json
-          
-          # Cache performance check
-          curl -s "$PROD_URL/api/v1/health/cache/performance" > cache_performance.json || echo '{"error": "unavailable"}' > cache_performance.json
-          
-          # System metrics
-          curl -s "$PROD_URL/api/v1/metrics/system" > system_metrics.json || echo '{"error": "unavailable"}' > system_metrics.json
+          if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+            echo "🧪 ACT LOCAL RUN - Generating mock diagnostic data"
+            
+            # Mock database performance data
+            cat > db_performance.json << 'EOF'
+          {
+            "status": "healthy",
+            "connection_pool": {"active": 12, "idle": 8, "max": 20},
+            "query_performance": {"avg_ms": 45, "slow_queries": 0},
+            "mock": true,
+            "act_generated": true
+          }
+          EOF
+            
+            # Mock cache performance data
+            cat > cache_performance.json << 'EOF'
+          {
+            "status": "healthy",
+            "hit_rate": 0.95,
+            "memory_usage": "512MB",
+            "evictions_per_hour": 10,
+            "mock": true,
+            "act_generated": true
+          }
+          EOF
+            
+            # Mock system metrics
+            cat > system_metrics.json << 'EOF'
+          {
+            "cpu_usage": 0.65,
+            "memory_usage": 0.72,
+            "disk_usage": 0.45,
+            "load_average": [1.2, 1.1, 1.0],
+            "mock": true,
+            "act_generated": true
+          }
+          EOF
+          else
+            # Real diagnostic checks
+            curl -s "$PROD_URL/api/v1/health/database/performance" > db_performance.json || echo '{"error": "unavailable"}' > db_performance.json
+            curl -s "$PROD_URL/api/v1/health/cache/performance" > cache_performance.json || echo '{"error": "unavailable"}' > cache_performance.json
+            curl -s "$PROD_URL/api/v1/metrics/system" > system_metrics.json || echo '{"error": "unavailable"}' > system_metrics.json
+          fi
           
       - name: Check for production alerts
         id: alerts
@@ -220,30 +274,43 @@ jobs:
           HEALTHY_ENVS=0
           DEGRADED_ENVS=0
           
-          # Parse staging environments
-          echo "$STAGING_ENVS" | jq -r '.[]' | while read env; do
-            TOTAL_ENVS=$((TOTAL_ENVS + 1))
+          if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+            echo "🧪 ACT LOCAL RUN - Using mock staging environment data"
+            TOTAL_ENVS=2
+            HEALTHY_ENVS=2
+            DEGRADED_ENVS=0
+            echo "✅ staging-main: Healthy (MOCK)"
+            echo "✅ staging-develop: Healthy (MOCK)"
+          else
+            # Parse staging environments
+            echo "$STAGING_ENVS" | jq -r '.[]' | while read env; do
+              TOTAL_ENVS=$((TOTAL_ENVS + 1))
+              
+              STAGING_URL="https://$env.netra.dev"  # Replace with actual staging URL pattern
+              
+              echo "Testing staging environment: $env ($STAGING_URL)"
+              
+              # Basic health check
+              HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$STAGING_URL/health" --max-time 15 || echo "000")
+              
+              if [[ "$HEALTH_STATUS" == "200" ]]; then
+                HEALTHY_ENVS=$((HEALTHY_ENVS + 1))
+                echo "✅ $env: Healthy"
+              else
+                DEGRADED_ENVS=$((DEGRADED_ENVS + 1))
+                echo "❌ $env: Degraded (HTTP $HEALTH_STATUS)"
+              fi
+            done
             
-            STAGING_URL="https://$env.netra.dev"  # Replace with actual staging URL pattern
-            
-            echo "Testing staging environment: $env ($STAGING_URL)"
-            
-            # Basic health check
-            HEALTH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$STAGING_URL/health" --max-time 15 || echo "000")
-            
-            if [[ "$HEALTH_STATUS" == "200" ]]; then
-              HEALTHY_ENVS=$((HEALTHY_ENVS + 1))
-              echo "✅ $env: Healthy"
-            else
-              DEGRADED_ENVS=$((DEGRADED_ENVS + 1))
-              echo "❌ $env: Degraded (HTTP $HEALTH_STATUS)"
-            fi
-          done
+            # Save results (this is a workaround for the while loop subshell issue)
+            TOTAL_ENVS=2  # Hardcoded for demo
+            HEALTHY_ENVS=2
+            DEGRADED_ENVS=0
+          fi
           
-          # Save results (this is a workaround for the while loop subshell issue)
-          echo "total_envs=2" >> $GITHUB_OUTPUT  # Hardcoded for demo
-          echo "healthy_envs=2" >> $GITHUB_OUTPUT
-          echo "degraded_envs=0" >> $GITHUB_OUTPUT
+          echo "total_envs=$TOTAL_ENVS" >> $GITHUB_OUTPUT
+          echo "healthy_envs=$HEALTHY_ENVS" >> $GITHUB_OUTPUT
+          echo "degraded_envs=$DEGRADED_ENVS" >> $GITHUB_OUTPUT
 
   # ==========================================
   # Alert Management
@@ -391,54 +458,73 @@ jobs:
           
           echo "Health alert: $ALERT_LEVEL - $ALERT_MESSAGE"
           
-          # Send to Slack (if configured)
-          if [[ -n "${{ vars.SLACK_WEBHOOK_URL }}" ]]; then
-            COLOR="danger"
-            if [[ "$ALERT_LEVEL" == "warning" ]]; then
-              COLOR="warning"
-            fi
+          if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+            echo "🧪 ACT LOCAL RUN - Skipping external notifications"
+            echo "Would send Slack notification: $ALERT_LEVEL - $ALERT_MESSAGE"
+            echo "Would send Discord notification: $ALERT_LEVEL - $ALERT_MESSAGE"
             
-            curl -X POST -H 'Content-type: application/json' \
-              --data "{
-                \"attachments\": [{
-                  \"color\": \"$COLOR\",
-                  \"title\": \"🚨 Health Alert: $ALERT_LEVEL\",
-                  \"text\": \"$ALERT_MESSAGE\",
-                  \"fields\": [
-                    {\"title\": \"Environment\", \"value\": \"Production\", \"short\": true},
-                    {\"title\": \"Time\", \"value\": \"$(date -u)\", \"short\": true}
-                  ],
-                  \"actions\": [{
-                    \"type\": \"button\",
-                    \"text\": \"View Details\",
-                    \"url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
+            # Create local notification log for ACT testing
+            cat > local_notifications.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "alert_level": "$ALERT_LEVEL",
+            "alert_message": "$ALERT_MESSAGE",
+            "slack_configured": $([ -n "${{ vars.SLACK_WEBHOOK_URL }}" ] && echo "true" || echo "false"),
+            "discord_configured": $([ -n "${{ vars.DISCORD_WEBHOOK_URL }}" ] && echo "true" || echo "false"),
+            "act_mock": true
+          }
+          EOF
+            echo "📝 Created local notification log: local_notifications.json"
+          else
+            # Send to Slack (if configured)
+            if [[ -n "${{ vars.SLACK_WEBHOOK_URL }}" ]]; then
+              COLOR="danger"
+              if [[ "$ALERT_LEVEL" == "warning" ]]; then
+                COLOR="warning"
+              fi
+              
+              curl -X POST -H 'Content-type: application/json' \
+                --data "{
+                  \"attachments\": [{
+                    \"color\": \"$COLOR\",
+                    \"title\": \"🚨 Health Alert: $ALERT_LEVEL\",
+                    \"text\": \"$ALERT_MESSAGE\",
+                    \"fields\": [
+                      {\"title\": \"Environment\", \"value\": \"Production\", \"short\": true},
+                      {\"title\": \"Time\", \"value\": \"$(date -u)\", \"short\": true}
+                    ],
+                    \"actions\": [{
+                      \"type\": \"button\",
+                      \"text\": \"View Details\",
+                      \"url\": \"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
+                    }]
                   }]
-                }]
-              }" \
-              ${{ vars.SLACK_WEBHOOK_URL }}
-          fi
-          
-          # Send to Discord (if configured)
-          if [[ -n "${{ vars.DISCORD_WEBHOOK_URL }}" ]]; then
-            COLOR="16711680"  # Red
-            if [[ "$ALERT_LEVEL" == "warning" ]]; then
-              COLOR="16776960"  # Yellow
+                }" \
+                ${{ vars.SLACK_WEBHOOK_URL }}
             fi
             
-            curl -H "Content-Type: application/json" \
-              -d "{
-                \"embeds\": [{
-                  \"title\": \"🚨 Health Alert: $ALERT_LEVEL\",
-                  \"description\": \"$ALERT_MESSAGE\",
-                  \"color\": $COLOR,
-                  \"fields\": [
-                    {\"name\": \"Environment\", \"value\": \"Production\", \"inline\": true},
-                    {\"name\": \"Time\", \"value\": \"$(date -u)\", \"inline\": true}
-                  ],
-                  \"footer\": {\"text\": \"Netra Health Monitor\"}
-                }]
-              }" \
-              ${{ vars.DISCORD_WEBHOOK_URL }}
+            # Send to Discord (if configured)
+            if [[ -n "${{ vars.DISCORD_WEBHOOK_URL }}" ]]; then
+              COLOR="16711680"  # Red
+              if [[ "$ALERT_LEVEL" == "warning" ]]; then
+                COLOR="16776960"  # Yellow
+              fi
+              
+              curl -H "Content-Type: application/json" \
+                -d "{
+                  \"embeds\": [{
+                    \"title\": \"🚨 Health Alert: $ALERT_LEVEL\",
+                    \"description\": \"$ALERT_MESSAGE\",
+                    \"color\": $COLOR,
+                    \"fields\": [
+                      {\"name\": \"Environment\", \"value\": \"Production\", \"inline\": true},
+                      {\"name\": \"Time\", \"value\": \"$(date -u)\", \"inline\": true}
+                    ],
+                    \"footer\": {\"text\": \"Netra Health Monitor\"}
+                  }]
+                }" \
+                ${{ vars.DISCORD_WEBHOOK_URL }}
+            fi
           fi
 
   # ==========================================

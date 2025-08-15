@@ -143,31 +143,56 @@ class CoreMetricsCalculator:
     async def calculate_quantification(self, content: str) -> float:
         """Calculate the level of quantification in the content"""
         score = 0.0
-        
-        # Count different types of numeric values
-        patterns = {
+        score += self._calculate_pattern_scores(content)
+        score += self._calculate_comparison_bonus(content)
+        score += self._calculate_metric_names_bonus(content)
+        return min(1.0, score)
+    
+    def _calculate_pattern_scores(self, content: str) -> float:
+        """Calculate scores from numeric pattern matches"""
+        patterns = self._get_quantification_patterns()
+        score = 0.0
+        for pattern in patterns.values():
+            matches = re.findall(pattern, content, re.IGNORECASE)
+            score += min(len(matches) * 0.15, 0.3)
+        return score
+    
+    def _get_quantification_patterns(self) -> Dict[str, str]:
+        """Get quantification regex patterns"""
+        patterns = {}
+        patterns.update(self._get_basic_numeric_patterns())
+        patterns.update(self._get_advanced_numeric_patterns())
+        return patterns
+    
+    def _get_basic_numeric_patterns(self) -> Dict[str, str]:
+        """Get basic numeric patterns"""
+        return {
             'percentage': r'\b\d+\.?\d*\s*%',
             'time': r'\b\d+\.?\d*\s*(ms|microseconds|seconds?|minutes?|hours?)\b',
             'size': r'\b\d+\.?\d*\s*(GB|MB|KB|bytes?)\b',
-            'count': r'\b\d+\.?\d*\s*(tokens?|requests?|queries|items?|elements?)\b',
+            'count': r'\b\d+\.?\d*\s*(tokens?|requests?|queries|items?|elements?)\b'
+        }
+    
+    def _get_advanced_numeric_patterns(self) -> Dict[str, str]:
+        """Get advanced numeric patterns"""
+        return {
             'rate': r'\b\d+\.?\d*\s*(QPS|RPS|/s|per second)\b',
             'multiplier': r'\b\d+\.?\d*x\b',
             'comparison': r'(increase|decrease|improve|reduce) by \d+\.?\d*'
         }
-        
-        for pattern_type, pattern in patterns.items():
-            matches = re.findall(pattern, content, re.IGNORECASE)
-            score += min(len(matches) * 0.15, 0.3)
-        
-        # Bonus for before/after comparisons
+    
+    def _calculate_comparison_bonus(self, content: str) -> float:
+        """Calculate bonus for before/after comparisons"""
         if re.search(r'(from|before).*\d+.*to.*\d+', content, re.IGNORECASE):
-            score += 0.2
-        
-        # Bonus for specific metric names with values
-        if re.search(r'(latency|throughput|accuracy|precision|recall|f1).{0,20}\d+', content, re.IGNORECASE):
-            score += 0.1
-        
-        return min(1.0, score)
+            return 0.2
+        return 0.0
+    
+    def _calculate_metric_names_bonus(self, content: str) -> float:
+        """Calculate bonus for specific metric names with values"""
+        pattern = r'(latency|throughput|accuracy|precision|recall|f1).{0,20}\d+'
+        metric_names = re.findall(pattern, content, re.IGNORECASE)
+        unique_metrics = len(set(metric_names))
+        return min(unique_metrics * 0.1, 0.3)
     
     async def calculate_clarity(self, content: str) -> float:
         """Calculate clarity and readability of content"""

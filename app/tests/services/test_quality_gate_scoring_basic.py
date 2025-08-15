@@ -222,7 +222,7 @@ class TestRelevanceCalculation:
             "user_request": "How to speed up neural network training with multiple graphics cards"
         }
         
-        score = await quality_service._calculate_relevance(content, context)
+        score = await quality_service.metrics_calculator.specialized_calculator.calculate_relevance(content, context)
         assert score > 0.5  # Should match technical concepts
         
     @pytest.mark.asyncio
@@ -231,7 +231,7 @@ class TestRelevanceCalculation:
         content = "Optimization strategy"
         context = {"user_request": ""}
         
-        score = await quality_service._calculate_relevance(content, context)
+        score = await quality_service.metrics_calculator.specialized_calculator.calculate_relevance(content, context)
         assert score >= 0  # Should handle empty request gracefully
 
 

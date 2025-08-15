@@ -4,6 +4,7 @@ Core Synthetic Data Service - Main service initialization and coordination
 
 import asyncio
 import uuid
+import random
 from datetime import datetime, UTC
 from typing import Dict, List, Optional, Any, Union, TYPE_CHECKING
 from sqlalchemy.orm import Session
@@ -386,6 +387,55 @@ class SyntheticDataService(RecoveryMixin):
             "worker_pool_status": "active",
             "cache_hit_rate": 0.85
         }
+
+    def _select_workload_type(self) -> str:
+        """Select random workload type for synthetic data generation"""
+        workload_types = [
+            "simple_queries", "tool_orchestration", "data_analysis",
+            "optimization_workflows", "error_scenarios"
+        ]
+        return random.choice(workload_types)
+
+    def _select_agent_type(self, workload_type: str) -> str:
+        """Select agent type based on workload type"""
+        agent_mapping = {
+            "simple_queries": "triage",
+            "tool_orchestration": "supervisor", 
+            "data_analysis": "data_analysis",
+            "optimization_workflows": "optimization",
+            "error_scenarios": "triage"
+        }
+        return agent_mapping.get(workload_type, "general")
+
+    def _generate_tool_invocations(self, pattern: str) -> List[Dict]:
+        """Generate tool invocations for specific patterns"""
+        if pattern == "error_scenarios":
+            return [{
+                "name": "error_test_tool",
+                "type": "query",
+                "latency_ms": 150,
+                "status": "failed",
+                "error": "Simulated error"
+            }]
+        return []
+
+    def _create_tool_invocation(self, tool: Dict) -> Dict:
+        """Create individual tool invocation from tool definition"""
+        latency_range = tool.get("latency_ms_range", (50, 200))
+        latency_ms = random.randint(latency_range[0], latency_range[1])
+        
+        failure_rate = tool.get("failure_rate", 0.0)
+        is_failed = random.random() < failure_rate
+        
+        invocation = {
+            "name": tool["name"],
+            "type": tool["type"],
+            "latency_ms": latency_ms,
+            "status": "failed" if is_failed else "success",
+            "error": "Tool execution failed" if is_failed else None
+        }
+        
+        return invocation
 
 
 # Create singleton instance

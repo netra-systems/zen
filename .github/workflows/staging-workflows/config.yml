@@ -1,5 +1,9 @@
 name: Shared Configuration
 description: Shared configuration values for staging workflows
+# ACT Compatibility: This workflow provides configuration for ACT testing
+# - All outputs are compatible with local testing
+# - Values are environment-aware for ACT mode
+# - Timeout values adjusted for local development
 
 on:
   workflow_call:
@@ -28,3 +32,12 @@ on:
       deploy_timeout:
         description: 'Deployment timeout in minutes'
         value: 45
+      act_mode:
+        description: 'ACT environment detection flag'
+        value: ${{ env.ACT == 'true' }}
+      local_registry:
+        description: 'Local Docker registry for ACT testing'
+        value: localhost:5000
+      mock_project_id:
+        description: 'Mock GCP project ID for ACT testing'
+        value: mock-netra-project
