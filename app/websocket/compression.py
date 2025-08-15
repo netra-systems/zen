@@ -63,87 +63,13 @@ class WebSocketCompressor:
     
     def compress_message(self, message: Dict[str, Any]) -> Tuple[Union[str, bytes], CompressionResult]:
         """Compress a WebSocket message if beneficial."""
-        import time
-        start_time = time.time()
+        start_time = self._start_compression_timer()
+        json_data, original_size = self._serialize_and_track(message)
         
-        # Serialize message to JSON
-        json_data = json.dumps(message, default=str)
-        original_size = len(json_data.encode('utf-8'))
-        
-        # Update stats
-        self.stats["total_messages"] += 1
-        self.stats["total_bytes_original"] += original_size
-        
-        # Check if compression is needed
         if original_size < self.config.min_size_bytes:
-            compression_time = (time.time() - start_time) * 1000
-            return json_data, CompressionResult(
-                original_size=original_size,
-                compressed_size=original_size,
-                compression_ratio=1.0,
-                algorithm=CompressionAlgorithm.NONE,
-                compression_time_ms=compression_time,
-                is_compressed=False
-            )
+            return self._create_uncompressed_result(json_data, original_size, start_time)
         
-        # Select compression algorithm
-        algorithm = self._select_algorithm(json_data)
-        
-        try:
-            # Perform compression
-            compressed_data = self._compress_data(json_data, algorithm)
-            compressed_size = len(compressed_data)
-            
-            # Check if compression is beneficial
-            compression_ratio = compressed_size / original_size
-            
-            if compression_ratio > 0.9:  # Less than 10% savings, not worth it
-                compression_time = (time.time() - start_time) * 1000
-                return json_data, CompressionResult(
-                    original_size=original_size,
-                    compressed_size=original_size,
-                    compression_ratio=1.0,
-                    algorithm=CompressionAlgorithm.NONE,
-                    compression_time_ms=compression_time,
-                    is_compressed=False
-                )
-            
-            # Create compressed message wrapper
-            compressed_message = {
-                "compressed": True,
-                "algorithm": algorithm.value,
-                "original_size": original_size,
-                "data": base64.b64encode(compressed_data).decode('utf-8')
-            }
-            
-            compression_time = (time.time() - start_time) * 1000
-            
-            # Update compression stats
-            self.stats["compressed_messages"] += 1
-            self.stats["total_bytes_compressed"] += compressed_size
-            self.stats["compression_time_ms"] += compression_time
-            self.stats["algorithm_usage"][algorithm.value] += 1
-            
-            return json.dumps(compressed_message), CompressionResult(
-                original_size=original_size,
-                compressed_size=compressed_size,
-                compression_ratio=compression_ratio,
-                algorithm=algorithm,
-                compression_time_ms=compression_time,
-                is_compressed=True
-            )
-            
-        except Exception as e:
-            logger.warning(f"Compression failed with {algorithm.value}: {e}")
-            compression_time = (time.time() - start_time) * 1000
-            return json_data, CompressionResult(
-                original_size=original_size,
-                compressed_size=original_size,
-                compression_ratio=1.0,
-                algorithm=CompressionAlgorithm.NONE,
-                compression_time_ms=compression_time,
-                is_compressed=False
-            )
+        return self._attempt_compression(json_data, original_size, start_time)
     
     def decompress_message(self, compressed_data: str) -> Dict[str, Any]:
         """Decompress a WebSocket message."""
@@ -259,6 +185,79 @@ class WebSocketCompressor:
         """Update compression configuration."""
         self.config = new_config
         logger.info(f"Updated compression configuration: {new_config}")
+    
+    def _start_compression_timer(self) -> float:
+        """Start compression timing."""
+        import time
+        return time.time()
+    
+    def _serialize_and_track(self, message: Dict[str, Any]) -> Tuple[str, int]:
+        """Serialize message and update tracking stats."""
+        json_data = json.dumps(message, default=str)
+        original_size = len(json_data.encode('utf-8'))
+        self.stats["total_messages"] += 1
+        self.stats["total_bytes_original"] += original_size
+        return json_data, original_size
+    
+    def _create_uncompressed_result(self, json_data: str, original_size: int, start_time: float) -> Tuple[str, CompressionResult]:
+        """Create result for uncompressed data."""
+        import time
+        compression_time = (time.time() - start_time) * 1000
+        result = CompressionResult(
+            original_size=original_size, compressed_size=original_size,
+            compression_ratio=1.0, algorithm=CompressionAlgorithm.NONE,
+            compression_time_ms=compression_time, is_compressed=False
+        )
+        return json_data, result
+    
+    def _attempt_compression(self, json_data: str, original_size: int, start_time: float) -> Tuple[Union[str, bytes], CompressionResult]:
+        """Attempt to compress data with fallback."""
+        algorithm = self._select_algorithm(json_data)
+        try:
+            return self._perform_compression(json_data, original_size, algorithm, start_time)
+        except Exception as e:
+            logger.warning(f"Compression failed with {algorithm.value}: {e}")
+            return self._create_uncompressed_result(json_data, original_size, start_time)
+    
+    def _perform_compression(self, json_data: str, original_size: int, algorithm: CompressionAlgorithm, start_time: float) -> Tuple[str, CompressionResult]:
+        """Perform actual compression operation."""
+        compressed_data = self._compress_data(json_data, algorithm)
+        compressed_size = len(compressed_data)
+        compression_ratio = compressed_size / original_size
+        
+        if compression_ratio > 0.9:
+            return self._create_uncompressed_result(json_data, original_size, start_time)
+        
+        return self._create_compressed_result(json_data, original_size, compressed_data, compressed_size, algorithm, start_time)
+    
+    def _create_compressed_result(self, json_data: str, original_size: int, compressed_data: bytes, compressed_size: int, algorithm: CompressionAlgorithm, start_time: float) -> Tuple[str, CompressionResult]:
+        """Create result for successfully compressed data."""
+        import time
+        compressed_message = self._create_compressed_message(compressed_data, algorithm, original_size)
+        compression_time = (time.time() - start_time) * 1000
+        self._update_compression_stats(compressed_size, compression_time, algorithm)
+        
+        result = CompressionResult(
+            original_size=original_size, compressed_size=compressed_size,
+            compression_ratio=compressed_size / original_size, algorithm=algorithm,
+            compression_time_ms=compression_time, is_compressed=True
+        )
+        return json.dumps(compressed_message), result
+    
+    def _create_compressed_message(self, compressed_data: bytes, algorithm: CompressionAlgorithm, original_size: int) -> Dict[str, Any]:
+        """Create compressed message wrapper."""
+        return {
+            "compressed": True, "algorithm": algorithm.value,
+            "original_size": original_size,
+            "data": base64.b64encode(compressed_data).decode('utf-8')
+        }
+    
+    def _update_compression_stats(self, compressed_size: int, compression_time: float, algorithm: CompressionAlgorithm) -> None:
+        """Update internal compression statistics."""
+        self.stats["compressed_messages"] += 1
+        self.stats["total_bytes_compressed"] += compressed_size
+        self.stats["compression_time_ms"] += compression_time
+        self.stats["algorithm_usage"][algorithm.value] += 1
     
     def benchmark_algorithms(self, test_data: str) -> Dict[str, Any]:
         """Benchmark different compression algorithms on test data."""

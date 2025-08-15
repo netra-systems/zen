@@ -24,7 +24,7 @@ async def live() -> Dict[str, str]:
     """
     Liveness probe to check if the application is running.
     """
-    return {"status": "ok"}
+    return {"status": "healthy", "service": "netra-ai-platform"}
 
 @router.get("/ready")
 async def ready() -> Dict[str, str]:
@@ -57,7 +57,7 @@ async def ready() -> Dict[str, str]:
                     raise
 
         # If all checks pass, return a success response
-        return {"status": "ok"}
+        return {"status": "ready", "service": "netra-ai-platform"}
     except Exception as e:
         logger.error(f"Readiness probe failed: {e}")
         raise HTTPException(status_code=503, detail="Service Unavailable")

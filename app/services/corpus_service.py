@@ -178,8 +178,20 @@ class CorpusService:
         if not content:
             raise ValueError("Document must have non-empty 'content' field")
         
-        # Use modular service for real indexing
-        return await self._modular_service.index_document(document)
+        # Check if modular service supports indexing
+        if hasattr(self._modular_service, 'index_document'):
+            return await self._modular_service.index_document(document)
+        
+        # Fallback to real implementation using document manager
+        try:
+            document_manager = getattr(self._modular_service, 'document_manager', None)
+            if document_manager and hasattr(document_manager, 'process_document'):
+                return await document_manager.process_document(document)
+        except Exception as e:
+            logger.warning(f"Document indexing failed: {e}")
+        
+        # Real indexing not available, return proper error
+        raise RuntimeError("Document indexing service not available")
     
     async def batch_index_documents(self, documents: List[Dict], 
                                    progress_callback=None) -> Dict:

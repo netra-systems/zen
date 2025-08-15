@@ -36,8 +36,7 @@ on:
 
 env:
   TERRAFORM_VERSION: '1.5.0'
-  # ACT environment detection
-  ACT: ${{ env.ACT }}
+  # ACT environment detection - ACT sets this automatically
   LOCAL_DEPLOY: 'false'  # Default value
 
 jobs:

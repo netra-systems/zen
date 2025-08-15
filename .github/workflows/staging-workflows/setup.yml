@@ -43,8 +43,7 @@ on:
 
 env:
   PROJECT_NAME: netra-staging
-  # ACT environment detection
-  ACT: ${{ env.ACT }}
+  # ACT environment detection - ACT sets this automatically
   LOCAL_DEPLOY: 'false'  # Default value
 
 jobs:

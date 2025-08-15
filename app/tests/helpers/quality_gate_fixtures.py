@@ -42,7 +42,7 @@ def setup_novelty_mocks_duplicate(quality_service, content):
 
 def setup_redis_error_mocks(quality_service):
     """Setup Redis mocks to simulate errors"""
-    quality_service.redis_manager.store_metrics = AsyncMock(side_effect=Exception("Redis error"))
+    quality_service.redis_manager.set = AsyncMock(side_effect=Exception("Redis error"))
 
 
 def setup_validation_error_mock(quality_service):
