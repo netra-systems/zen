@@ -5,9 +5,13 @@ import sys
 
 async def test_connection():
     """Test PostgreSQL connection."""
-    password = 'wL3hNia9peARTuEV6b5DMXZrEGaore4M'
+    import os
+    password = os.getenv('POSTGRES_PASSWORD')
+    if not password:
+        print("ERROR: POSTGRES_PASSWORD environment variable not set")
+        return False
     
-    print(f"Testing connection with password: {password[:10]}...")
+    print(f"Testing connection with password: {password[:3]}...")
     
     try:
         conn = await asyncpg.connect(
