@@ -7,6 +7,28 @@
         <last_updated>2025-08-15</last_updated>
         <description>Historical learnings, troubleshooting patterns, and resolved issues</description>
     </metadata>
+    
+    <gcp-project-configuration>
+        <learning id="staging-project-name">
+            <title>GCP Staging Project Configuration</title>
+            <date>2025-08-15</date>
+            <category>Infrastructure</category>
+            <description>
+                The GCP project for Netra staging deployments is "netra-staging".
+                This is the project ID that should be used for all staging environment deployments.
+            </description>
+            <details>
+                <item>Project ID: netra-staging</item>
+                <item>Used for PR-based staging deployments</item>
+                <item>Contains shared infrastructure resources (VPC, databases, Redis)</item>
+                <item>Cloud Run services are deployed to this project</item>
+            </details>
+            <commands>
+                <command>gcloud config set project netra-staging</command>
+                <command>gcloud auth application-default set-quota-project netra-staging</command>
+            </commands>
+        </learning>
+    </gcp-project-configuration>
 
     <specification-alignment-analysis>
         <analysis-date>2025-08-15</analysis-date>

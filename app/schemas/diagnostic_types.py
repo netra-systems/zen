@@ -80,3 +80,30 @@ class FixResult(BaseModel):
     successful: bool
     message: str
     timestamp: datetime = Field(default_factory=datetime.now)
+
+
+class DependencyStatus(str, Enum):
+    """Status of dependency validation"""
+    VALID = "valid"
+    MISSING = "missing"
+    OUTDATED = "outdated"
+    INCOMPATIBLE = "incompatible"
+    ERROR = "error"
+
+
+class DependencyInfo(BaseModel):
+    """Information about a single dependency"""
+    name: str
+    required_version: str
+    installed_version: Optional[str] = None
+    status: DependencyStatus
+    can_auto_fix: bool = False
+
+
+class DependencyReport(BaseModel):
+    """Complete dependency scan report"""
+    python_dependencies: List[DependencyInfo] = Field(default_factory=list)
+    node_dependencies: List[DependencyInfo] = Field(default_factory=list)
+    system_dependencies: List[DependencyInfo] = Field(default_factory=list)
+    summary: Dict[str, int] = Field(default_factory=dict)
+    auto_fixes_available: bool = False

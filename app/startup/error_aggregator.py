@@ -176,19 +176,13 @@ class ErrorAggregator:
         )
 
     def _suggest_fix(self, error_type: ErrorType) -> Optional[str]:
-        """Generate suggested fix based on error type."""
-        fixes = self._get_error_type_fixes()
-        return fixes.get(error_type, "Review error details and system logs")
-
-    def _get_error_type_fixes(self) -> Dict[ErrorType, str]:
-        """Get mapping of error types to suggested fixes."""
         fixes = {ErrorType.CONNECTION: "Check network connectivity and service availability",
                 ErrorType.CONFIGURATION: "Verify configuration files and environment variables",
                 ErrorType.DEPENDENCY: "Run dependency installation and version checks",
                 ErrorType.MIGRATION: "Check database migration status and run pending migrations",
                 ErrorType.TIMEOUT: "Increase timeout values or check system resources",
                 ErrorType.PERMISSION: "Verify file/directory permissions and access rights"}
-        return fixes
+        return fixes.get(error_type, "Review error details and system logs")
 
     async def _update_pattern_frequency(self, pattern: ErrorPattern) -> None:
         """Update or insert pattern frequency."""
