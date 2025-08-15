@@ -44,7 +44,22 @@ class TestWebSocketUpdates:
         
         await ws_service.broadcast_to_job(job_id, progress_update)
         
-        mock_websocket.send_json.assert_called_with(progress_update)
+        # Check all sent messages for the generation_progress message
+        import json
+        generation_message = None
+        for call in mock_websocket.send_text.call_args_list:
+            call_args = call[0][0]
+            sent_message = json.loads(call_args)
+            if sent_message.get("type") == "generation_progress":
+                generation_message = sent_message
+                break
+        
+        # Verify the generation progress message was sent with correct content
+        assert generation_message is not None, "generation_progress message was not sent"
+        assert generation_message["job_id"] == job_id
+        assert generation_message["progress_percentage"] == 50
+        assert generation_message["records_generated"] == 500
+        assert generation_message["records_ingested"] == 450
 
     @pytest.mark.asyncio
     async def test_batch_completion_notifications(self, ws_service):

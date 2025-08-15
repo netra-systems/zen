@@ -109,7 +109,7 @@ class WebSocketManager:
         """
         user_id = f"job_{job_id}_{id(websocket)}"
         connection_info = await self.connect_user(user_id, websocket)
-        self.core.room_manager.join_room(connection_info.connection_id, job_id)
+        self.core.room_manager.join_room(user_id, job_id)
         return connection_info
 
     async def disconnect_from_job(self, job_id: str, websocket: WebSocket = None) -> None:

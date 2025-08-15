@@ -27,14 +27,16 @@ class WebSocketBroadcastingManager:
         validated_message = self._prepare_message(message)
         if validated_message is None:
             return False
-        return await self._broadcast_to_room(thread_id, validated_message)
+        result = await self._broadcast_to_room(thread_id, validated_message)
+        return result
 
     async def _broadcast_to_room(self, thread_id: str, validated_message: Dict[str, Any]) -> bool:
         """Broadcast validated message to all users in room."""
         room_connections = self.core.room_manager.get_room_connections(thread_id)
         if not room_connections:
             return False
-        return await self._send_to_room_users(room_connections, validated_message)
+        result = await self._send_to_room_users(room_connections, validated_message)
+        return result
 
     async def _send_to_room_users(self, room_connections: List[str], validated_message: Dict[str, Any]) -> bool:
         """Send message to all users in room connection list."""
@@ -48,7 +50,8 @@ class WebSocketBroadcastingManager:
         """Send message to single user with messaging manager."""
         from app.ws_manager_messaging import WebSocketMessagingManager
         messaging = WebSocketMessagingManager(self.core)
-        return await messaging.send_to_user(user_id, validated_message)
+        result = await messaging.send_to_user(user_id, validated_message)
+        return result
 
     async def broadcast_to_all(self, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> BroadcastResult:
         """Broadcast message to all connected users."""

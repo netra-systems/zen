@@ -184,7 +184,7 @@ class TestResearchSchedule:
         # Use real datetime objects
         initial_time = datetime(2024, 1, 1, 10, 30, 0, tzinfo=UTC)
         
-        with patch('app.services.supply_research_scheduler.datetime') as mock_datetime:
+        with patch('app.services.supply_research.scheduler_models.datetime') as mock_datetime:
             # Configure the mock datetime class
             mock_datetime.now.return_value = initial_time
             mock_datetime.side_effect = lambda *args, **kw: datetime(*args, **kw)
@@ -248,7 +248,7 @@ class TestScheduleTimeBoundaries:
         
         # Manually set current date to end of year
         mock_time = datetime(2023, 12, 31, 23, 59, 59, tzinfo=UTC)
-        with patch('app.services.supply_research_scheduler.datetime') as mock_datetime:
+        with patch('app.services.supply_research.scheduler_models.datetime') as mock_datetime:
             # Set up the mock to handle both datetime() constructor and datetime.now(UTC)
             mock_datetime.side_effect = lambda *args, **kwargs: datetime(*args, **kwargs)
             mock_datetime.now.return_value = mock_time

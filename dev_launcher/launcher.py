@@ -254,6 +254,7 @@ class DevLauncher:
             **self.config.env_overrides
         )
         
+        
         # Create log file
         self.config.log_dir.mkdir(exist_ok=True)
         log_file = self.config.log_dir / f"backend_{time.strftime('%Y%m%d_%H%M%S')}.log"

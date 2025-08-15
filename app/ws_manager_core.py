@@ -48,7 +48,7 @@ class WebSocketManagerCore:
         self.message_validator = MessageValidator()
         self.error_handler = WebSocketErrorHandler()
         self.room_manager = RoomManager(self.connection_manager)
-        self.broadcast_manager = BroadcastManager(self.connection_manager)
+        self.broadcast_manager = BroadcastManager(self.connection_manager, self.room_manager)
         self.heartbeat_manager = HeartbeatManager(self.connection_manager, self.error_handler)
 
     def _initialize_configuration(self) -> None:

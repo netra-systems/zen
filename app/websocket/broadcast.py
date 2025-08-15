@@ -23,14 +23,15 @@ logger = central_logger.get_logger(__name__)
 class BroadcastManager:
     """Manages broadcasting messages to WebSocket connections."""
     
-    def __init__(self, connection_manager: ConnectionManager):
+    def __init__(self, connection_manager: ConnectionManager, room_manager: RoomManager = None):
         """Initialize broadcast manager.
         
         Args:
             connection_manager: Connection manager instance
+            room_manager: Optional room manager instance (creates new one if None)
         """
         self.connection_manager = connection_manager
-        self.room_manager = RoomManager(connection_manager)
+        self.room_manager = room_manager if room_manager is not None else RoomManager(connection_manager)
         self._stats = {
             "total_broadcasts": 0,
             "successful_sends": 0,

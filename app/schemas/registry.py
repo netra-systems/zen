@@ -98,6 +98,12 @@ class WebSocketMessageType(str, Enum):
     CONNECTION_ESTABLISHED = "connection_established"
     STREAM_CHUNK = "stream_chunk"
     STREAM_COMPLETE = "stream_complete"
+    
+    # Synthetic data generation messages
+    GENERATION_PROGRESS = "generation_progress"
+    GENERATION_COMPLETE = "generation_complete"
+    GENERATION_ERROR = "generation_error"
+    BATCH_COMPLETE = "batch_complete"
 
 
 class WebSocketConnectionState(str, Enum):
@@ -150,7 +156,11 @@ MessageTypeLiteral = Literal[
     "error",
     "connection_established",
     "stream_chunk",
-    "stream_complete"
+    "stream_complete",
+    "generation_progress",
+    "generation_complete",
+    "generation_error",
+    "batch_complete"
 ]
 
 

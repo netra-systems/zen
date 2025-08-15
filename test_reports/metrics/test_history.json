@@ -848,6 +848,15 @@
       "failed": 3,
       "coverage": null,
       "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T22:03:37.506718",
+      "level": "unit",
+      "total": 322,
+      "passed": 298,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
     }
   ],
   "flaky_tests": {},
