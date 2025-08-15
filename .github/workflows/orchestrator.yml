@@ -1,33 +1,34 @@
 name: Workflow Orchestrator
 description: Master orchestrator for hierarchical test execution and workflow management
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-  push:
-    branches: [main, master, develop]
-  workflow_dispatch:
-    inputs:
-      test_level:
-        description: 'Highest test level to run'
-        required: false
-        type: choice
-        options:
-          - smoke
-          - unit
-          - integration
-          - comprehensive
-        default: integration
-      skip_hierarchy:
-        description: 'Skip hierarchical execution'
-        required: false
-        type: boolean
-        default: false
-      force_all:
-        description: 'Force all tests regardless of changes'
-        required: false
-        type: boolean
-        default: false
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   pull_request:
+#     types: [opened, synchronize, reopened, ready_for_review]
+#   push:
+#     branches: [main, master, develop]
+#   workflow_dispatch:
+#     inputs:
+#       test_level:
+#         description: 'Highest test level to run'
+#         required: false
+#         type: choice
+#         options:
+#           - smoke
+#           - unit
+#           - integration
+#           - comprehensive
+#         default: integration
+#       skip_hierarchy:
+#         description: 'Skip hierarchical execution'
+#         required: false
+#         type: boolean
+#         default: false
+#       force_all:
+#         description: 'Force all tests regardless of changes'
+#         required: false
+#         type: boolean
+#         default: false
 
 env:
   CONFIG_FILE: .github/workflow-config.yml

@@ -1,26 +1,27 @@
 name: Health Check Monitoring
 description: Continuous health monitoring for production and staging environments
 
-on:
-  schedule:
-    - cron: '*/15 * * * *'  # Every 15 minutes
-    - cron: '0 */6 * * *'   # Every 6 hours for detailed check
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to monitor'
-        required: true
-        type: choice
-        options:
-          - production
-          - staging
-          - all
-        default: 'all'
-      detailed_check:
-        description: 'Run detailed health checks'
-        required: false
-        type: boolean
-        default: false
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   schedule:
+#     - cron: '*/15 * * * *'  # Every 15 minutes
+#     - cron: '0 */6 * * *'   # Every 6 hours for detailed check
+#   workflow_dispatch:
+#     inputs:
+#       environment:
+#         description: 'Environment to monitor'
+#         required: true
+#         type: choice
+#         options:
+#           - production
+#           - staging
+#           - all
+#         default: 'all'
+#       detailed_check:
+#         description: 'Run detailed health checks'
+#         required: false
+#         type: boolean
+#         default: false
 
 env:
   HEALTH_CHECK_TIMEOUT: 30

@@ -71,6 +71,44 @@
                 </examples>
                 <resolution-date>2025-08-14</resolution-date>
             </item>
+            
+            <item id="boundary-limit-violations">
+                <problem>Files and functions growing beyond 300/8 limits without early intervention</problem>
+                <root-cause>Lack of proactive monitoring and refactoring triggers</root-cause>
+                <solution>Monitor approach to limits and trigger refactoring before violations occur</solution>
+                <prevention-patterns>
+                    <pattern>Alert when file reaches 250 lines - plan subdivision</pattern>
+                    <pattern>Alert when function reaches 6 lines - plan extraction</pattern>
+                    <pattern>Run compliance checks on every commit</pattern>
+                    <pattern>Use growth patterns from SPEC/growth_control.xml</pattern>
+                </prevention-patterns>
+                <common-mistakes>
+                    <mistake>Adding "just one more function" to large files</mistake>
+                    <mistake>Extending functions instead of extracting helpers</mistake>
+                    <mistake>Postponing refactoring until later</mistake>
+                    <mistake>Not using subdivision patterns early enough</mistake>
+                </common-mistakes>
+                <reference>SPEC/system_boundaries.xml, SPEC/growth_control.xml</reference>
+            </item>
+            
+            <item id="architectural-decay-prevention">
+                <problem>System architecture degrading over time through small violations</problem>
+                <root-cause>Incremental boundary erosion without intervention</root-cause>
+                <solution>Enforce boundaries automatically and respond to violations immediately</solution>
+                <enforcement-mechanisms>
+                    <mechanism>Pre-commit hooks running architecture compliance checks</mechanism>
+                    <mechanism>CI/CD pipeline blocking merges on violations</mechanism>
+                    <mechanism>Weekly architectural health monitoring</mechanism>
+                    <mechanism>Escalation paths for repeated violations</mechanism>
+                </enforcement-mechanisms>
+                <health-indicators>
+                    <indicator>100% compliance score with 300/8 limits</indicator>
+                    <indicator>Module count growing faster than average file size</indicator>
+                    <indicator>Zero duplicate type definitions</indicator>
+                    <indicator>Dependency depth staying under 5 levels</indicator>
+                </health-indicators>
+                <reference>SPEC/system_boundaries.xml, scripts/check_architecture_compliance.py</reference>
+            </item>
         </section>
 
         <section id="historical-fixes" order="2">

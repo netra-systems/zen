@@ -136,12 +136,33 @@ class CorpusMetricsHelpers:
         issues = quality_report.get("issue_analysis", {}).get("top_issues", [])
         return QualityMetrics(
             overall_score=dist.get("mean", 0.0),
-            validation_score=0.8,  # Placeholder - would come from actual validation
-            completeness_score=0.9,  # Placeholder
-            consistency_score=0.85,  # Placeholder
+            validation_score=self._calculate_validation_score(quality_report),
+            completeness_score=self._calculate_completeness_score(quality_report),
+            consistency_score=self._calculate_consistency_score(quality_report),
             timestamp=datetime.now(UTC),
             issues_detected=[issue[0] for issue in issues[:5]]
         )
+    
+    def _calculate_validation_score(self, quality_report: Dict[str, Any]) -> float:
+        """Calculate validation score from quality report."""
+        validation_data = quality_report.get("validation_analysis", {})
+        valid_entries = validation_data.get("valid_entries", 0)
+        total_entries = validation_data.get("total_entries", 1)
+        return valid_entries / total_entries if total_entries > 0 else 0.0
+    
+    def _calculate_completeness_score(self, quality_report: Dict[str, Any]) -> float:
+        """Calculate completeness score from quality report."""
+        completeness_data = quality_report.get("completeness_analysis", {})
+        complete_fields = completeness_data.get("complete_fields", 0)
+        total_fields = completeness_data.get("total_fields", 1)
+        return complete_fields / total_fields if total_fields > 0 else 0.0
+    
+    def _calculate_consistency_score(self, quality_report: Dict[str, Any]) -> float:
+        """Calculate consistency score from quality report."""
+        consistency_data = quality_report.get("consistency_analysis", {})
+        consistent_entries = consistency_data.get("consistent_entries", 0)
+        total_entries = consistency_data.get("total_entries", 1)
+        return consistent_entries / total_entries if total_entries > 0 else 0.0
     
     def categorize_health_score(self, health_score: float) -> str:
         """Categorize health score into status levels"""

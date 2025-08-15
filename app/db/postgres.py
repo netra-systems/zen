@@ -1,13 +1,18 @@
 from contextlib import contextmanager, asynccontextmanager
-from typing import Optional, Generator, AsyncGenerator, Union
-from sqlalchemy import create_engine, pool, event
+from typing import Optional, Generator, AsyncGenerator, Union, Dict, Any
+from sqlalchemy import create_engine, pool, event, text
 from sqlalchemy.engine import Connection
 from sqlalchemy.pool import Pool, ConnectionPoolEntry, _ConnectionFairy
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import QueuePool, NullPool, AsyncAdaptedQueuePool
+from sqlalchemy.exc import OperationalError, IntegrityError, DisconnectionError
 from app.config import settings
 from app.logging_config import central_logger
+from app.core.enhanced_retry_strategies import RetryConfig
+import asyncio
+import time
+from functools import wraps
 
 logger = central_logger.get_logger(__name__)
 
@@ -26,6 +31,21 @@ class DatabaseConfig:
     MAX_CONNECTIONS = 100  # Hard limit on total connections
     CONNECTION_TIMEOUT = 10  # Timeout for establishing new connections
     STATEMENT_TIMEOUT = 30000  # 30 seconds max statement execution time (ms)
+    
+    # Read/write splitting configuration
+    ENABLE_READ_WRITE_SPLIT = False
+    READ_db_url: Optional[str] = None
+    write_db_url: Optional[str] = None
+    
+    # Query caching configuration
+    ENABLE_QUERY_CACHE = True
+    QUERY_CACHE_TTL = 300  # 5 minutes
+    QUERY_CACHE_SIZE = 1000  # Max cached queries
+    
+    # Transaction retry configuration
+    TRANSACTION_RETRY_ATTEMPTS = 3
+    TRANSACTION_RETRY_DELAY = 0.1  # Base delay in seconds
+    TRANSACTION_RETRY_BACKOFF = 2.0  # Exponential backoff multiplier
 
 class Database:
     """Synchronous database connection manager with proper pooling."""

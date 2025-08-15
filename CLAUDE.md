@@ -210,6 +210,36 @@ python test_runner.py --level unit # DEFAULT tests
 - Glassmorphic design
 - `generateUniqueId()` for React keys
 
+## 🚧 SYSTEM BOUNDARIES (ENFORCE 300/8 LIMITS)
+
+### Automated Boundary Enforcement
+- **COMPLIANCE CHECK**: `python scripts/check_architecture_compliance.py`
+- **PRE-COMMIT**: Run compliance check before every commit
+- **CI/CD**: Block merges on violations (0 tolerance policy)
+- **MONITORING**: Weekly architectural health reports
+
+### Growth Control Patterns
+- **SUBDIVISION**: Split files approaching 250 lines BEFORE they hit 300
+- **EXTRACTION**: Extract functions approaching 6 lines BEFORE they hit 8
+- **HORIZONTAL GROWTH**: Add new modules, don't expand existing ones
+- **COMPOSITION**: Use small focused components, not monoliths
+
+### Boundary Response Levels
+1. **SINGLE VIOLATION**: Developer self-remediation (same day)
+2. **MULTIPLE VIOLATIONS**: Team review + pair programming (2 days)  
+3. **SYSTEMIC VIOLATIONS**: Architecture review + training (1 week)
+
+### Health Indicators
+- **COMPLIANCE SCORE**: 100% of files/functions within limits
+- **GROWTH PATTERN**: Module count grows faster than file size
+- **TYPE SAFETY**: Zero duplicate type definitions
+- **DEPENDENCY DEPTH**: Under 5 levels of imports
+
+### Critical References
+- [`SPEC/system_boundaries.xml`](SPEC/system_boundaries.xml) - Hard limits & enforcement
+- [`SPEC/growth_control.xml`](SPEC/growth_control.xml) - Good vs bad growth patterns
+- [`SPEC/conventions.xml`](SPEC/conventions.xml) - Boundary enforcement integration
+
 ## Testing (ALWAYS run UNIT tests for noticeable changes)
 - Choose a category using test discovery
 

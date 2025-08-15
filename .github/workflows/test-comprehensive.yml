@@ -1,33 +1,34 @@
 name: Comprehensive Test Suite
 description: Modular comprehensive testing with organized matrix execution
 
-on:
-  workflow_dispatch:
-    inputs:
-      test_scope:
-        description: 'Comprehensive test scope'
-        required: false
-        type: choice
-        default: 'full'
-        options:
-          - full              # Complete comprehensive suite (30-45 min)
-          - backend-only      # All backend comprehensive (15-20 min)
-          - frontend-only     # All frontend comprehensive (10-15 min)
-          - core-systems      # Core + Database + API (25-30 min)
-          - agent-systems     # Agents + WebSocket (15-20 min)
-          - quick-validation  # Core + Critical paths (10-15 min)
-      
-      modules:
-        description: 'Specific modules to test (comma-separated)'
-        required: false
-        default: ''
-        type: string
-      
-      parallel_execution:
-        description: 'Run modules in parallel'
-        required: false
-        type: boolean
-        default: true
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       test_scope:
+#         description: 'Comprehensive test scope'
+#         required: false
+#         type: choice
+#         default: 'full'
+#         options:
+#           - full              # Complete comprehensive suite (30-45 min)
+#           - backend-only      # All backend comprehensive (15-20 min)
+#           - frontend-only     # All frontend comprehensive (10-15 min)
+#           - core-systems      # Core + Database + API (25-30 min)
+#           - agent-systems     # Agents + WebSocket (15-20 min)
+#           - quick-validation  # Core + Critical paths (10-15 min)
+#       
+#       modules:
+#         description: 'Specific modules to test (comma-separated)'
+#         required: false
+#         default: ''
+#         type: string
+#       
+#       parallel_execution:
+#         description: 'Run modules in parallel'
+#         required: false
+#         type: boolean
+#         default: true
       
       real_llm:
         description: 'Use real LLM API calls'

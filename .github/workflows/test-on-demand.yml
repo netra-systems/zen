@@ -1,27 +1,28 @@
 name: On-Demand Testing
 
-on:
-  issue_comment:
-    types: [created]
-  workflow_dispatch:
-    inputs:
-      test_level:
-        description: 'Test level to run'
-        required: true
-        type: choice
-        options:
-          - smoke
-          - unit
-          - integration
-          - comprehensive
-          - critical
-          - performance
-          - security
-        default: integration
-      target_branch:
-        description: 'Branch to test'
-        required: false
-        default: ''
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   issue_comment:
+#     types: [created]
+#   workflow_dispatch:
+#     inputs:
+#       test_level:
+#         description: 'Test level to run'
+#         required: true
+#         type: choice
+#         options:
+#           - smoke
+#           - unit
+#           - integration
+#           - comprehensive
+#           - critical
+#           - performance
+#           - security
+#         default: integration
+#       target_branch:
+#         description: 'Branch to test'
+#         required: false
+#         default: ''
 
 permissions:
   contents: read

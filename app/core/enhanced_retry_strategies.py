@@ -14,6 +14,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from app.core.error_recovery import RecoveryContext, OperationType
 from app.core.error_codes import ErrorSeverity
+from app.schemas.shared_types import RetryConfig
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -35,15 +36,14 @@ class JitterType(Enum):
     DECORRELATED = "decorrelated"
 
 
+# RetryConfig now imported from shared_types.py
+# Additional fields for enhanced retry functionality
 @dataclass
-class RetryConfig:
-    """Configuration for retry behavior."""
-    max_retries: int = 3
-    base_delay: float = 1.0
-    max_delay: float = 300.0
+class EnhancedRetryConfig:
+    """Enhanced configuration extending the base RetryConfig."""
+    base_config: RetryConfig
     backoff_strategy: BackoffStrategy = BackoffStrategy.EXPONENTIAL
     jitter_type: JitterType = JitterType.FULL
-    timeout_seconds: int = 600
 
 
 class EnhancedRetryStrategy(ABC):

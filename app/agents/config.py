@@ -4,6 +4,8 @@ from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
 import os
 
+from app.schemas.shared_types import RetryConfig, AgentConfig as BaseAgentConfig
+
 
 class CacheConfig(BaseModel):
     """Configuration for caching behavior."""
@@ -21,22 +23,7 @@ class CacheConfig(BaseModel):
         )
 
 
-class RetryConfig(BaseModel):
-    """Configuration for retry behavior."""
-    max_retries: int = Field(default=3, description="Maximum retry attempts")
-    base_delay: float = Field(default=1.0, description="Base delay between retries")
-    max_delay: float = Field(default=60.0, description="Maximum delay between retries")
-    backoff_factor: float = Field(default=2.0, description="Exponential backoff factor")
-    
-    @classmethod
-    def from_env(cls) -> 'RetryConfig':
-        """Create config from environment variables."""
-        return cls(
-            max_retries=int(os.getenv('AGENT_MAX_RETRIES', 3)),
-            base_delay=float(os.getenv('AGENT_BASE_DELAY', 1.0)),
-            max_delay=float(os.getenv('AGENT_MAX_DELAY', 60.0)),
-            backoff_factor=float(os.getenv('AGENT_BACKOFF_FACTOR', 2.0))
-        )
+# RetryConfig now imported from shared_types.py
 
 
 class TimeoutConfig(BaseModel):
@@ -69,27 +56,23 @@ class UserConfig(BaseModel):
         )
 
 
-class AgentConfig(BaseModel):
-    """Centralized agent configuration."""
+class AgentConfig(BaseAgentConfig):
+    """Extended agent configuration with additional components."""
     cache: CacheConfig = Field(default_factory=CacheConfig)
-    retry: RetryConfig = Field(default_factory=RetryConfig)
     timeout: TimeoutConfig = Field(default_factory=TimeoutConfig)
     user: UserConfig = Field(default_factory=UserConfig)
-    
-    # Circuit breaker settings - optimized for responsive error handling
-    failure_threshold: int = Field(default=3, description="Circuit breaker failure threshold")
-    reset_timeout: float = Field(default=30.0, description="Circuit breaker reset timeout")
-    
-    # Performance settings
-    max_concurrent_operations: int = Field(default=10, description="Max concurrent operations")
-    batch_size: int = Field(default=100, description="Default batch processing size")
     
     @classmethod
     def from_env(cls) -> 'AgentConfig':
         """Create complete config from environment variables."""
         return cls(
             cache=CacheConfig.from_env(),
-            retry=RetryConfig.from_env(),
+            retry=RetryConfig(
+                max_retries=int(os.getenv('AGENT_MAX_RETRIES', 3)),
+                base_delay=float(os.getenv('AGENT_BASE_DELAY', 1.0)),
+                max_delay=float(os.getenv('AGENT_MAX_DELAY', 60.0)),
+                backoff_factor=float(os.getenv('AGENT_BACKOFF_FACTOR', 2.0))
+            ),
             timeout=TimeoutConfig.from_env(),
             user=UserConfig.from_env(),
             failure_threshold=int(os.getenv('AGENT_FAILURE_THRESHOLD', 3)),

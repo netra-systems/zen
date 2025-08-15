@@ -1,20 +1,21 @@
 name: Terraform Lock Cleanup
 
-on:
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'PR number to cleanup (leave empty to cleanup all stale locks)'
-        required: false
-        type: string
-      force:
-        description: 'Force remove locks even if recent'
-        required: false
-        type: boolean
-        default: false
-  schedule:
-    # Run every hour to clean up stale locks
-    - cron: '0 * * * *'
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   workflow_dispatch:
+#     inputs:
+#       pr_number:
+#         description: 'PR number to cleanup (leave empty to cleanup all stale locks)'
+#         required: false
+#         type: string
+#       force:
+#         description: 'Force remove locks even if recent'
+#         required: false
+#         type: boolean
+#         default: false
+#   schedule:
+#     # Run every hour to clean up stale locks
+#     - cron: '0 * * * *'
 
 env:
   GCP_PROJECT_ID: netra-staging

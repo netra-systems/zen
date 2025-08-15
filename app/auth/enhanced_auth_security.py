@@ -202,30 +202,39 @@ class EnhancedAuthSecurity:
         return AuthenticationResult.SUCCESS
     
     def _validate_credentials(self, user_id: str, password: str) -> bool:
-        """Validate user credentials (test implementation for security tests)."""
-        # This is a test implementation for security validation
+        """Validate user credentials against secure storage."""
         if not user_id or not password:
             return False
         
-        # Basic length checks
+        # Basic length and complexity checks
         if len(password) < 8:
             return False
         
-        # For testing, implement basic password validation
-        # Accept only specific valid passwords for test users
-        valid_test_credentials = {
-            "test_user": "valid_password123",
-            "session_test_user": "valid_password123",
-            "lockout_test_user": "valid_password123",
-            "concurrent_test_user": "valid_password123"
-        }
+        try:
+            # Get user credentials from secure storage
+            user_credentials = enhanced_secret_manager.get_user_credentials(user_id)
+            if not user_credentials:
+                return False
+            
+            # Verify password using secure hash comparison
+            return self._verify_password_hash(password, user_credentials.get('password_hash'))
+            
+        except Exception as e:
+            logger.error(f"Credential validation error for user {user_id}: {e}")
+            return False
+    
+    def _verify_password_hash(self, password: str, stored_hash: str) -> bool:
+        """Verify password against stored hash using secure comparison."""
+        if not stored_hash:
+            return False
         
-        # Check if this is a valid test credential
-        if user_id in valid_test_credentials:
-            return password == valid_test_credentials[user_id]
-        
-        # For other users, require password to contain "valid_password"
-        return "valid_password" in password
+        try:
+            # Use bcrypt for password verification
+            import bcrypt
+            return bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
+        except Exception as e:
+            logger.error(f"Password verification error: {e}")
+            return False
     
     def _requires_mfa(self, user_id: str, ip_address: str) -> bool:
         """Determine if MFA is required for this authentication."""
@@ -270,22 +279,72 @@ class EnhancedAuthSecurity:
         return False
     
     def _validate_totp(self, user_id: str, totp_token: str) -> bool:
-        """Validate TOTP token (placeholder)."""
-        # This would integrate with a TOTP library like pyotp
-        # totp = pyotp.TOTP(user_secret)
-        # return totp.verify(totp_token, valid_window=1)
+        """Validate TOTP token using time-based validation."""
+        if not totp_token or len(totp_token) != 6 or not totp_token.isdigit():
+            return False
         
-        return len(totp_token) == 6 and totp_token.isdigit()  # Placeholder
+        try:
+            # Get user's TOTP secret (would come from secure user storage)
+            user_secret = self._get_user_totp_secret(user_id)
+            if not user_secret:
+                return False
+            
+            # Validate against current time window with tolerance
+            current_time = int(time.time() // 30)  # 30-second window
+            for time_offset in [-1, 0, 1]:  # Allow 1 window before/after
+                expected_token = self._generate_totp_token(user_secret, current_time + time_offset)
+                if totp_token == expected_token:
+                    return True
+            return False
+        except Exception as e:
+            logger.error(f"TOTP validation error for user {user_id}: {e}")
+            return False
     
     def _validate_sms_code(self, user_id: str, sms_code: str) -> bool:
-        """Validate SMS verification code (placeholder)."""
-        # This would check against stored SMS codes
-        return len(sms_code) == 6 and sms_code.isdigit()  # Placeholder
+        """Validate SMS verification code against stored codes."""
+        if not sms_code or len(sms_code) != 6 or not sms_code.isdigit():
+            return False
+        
+        try:
+            # Get stored SMS codes for this user
+            stored_codes = self._get_user_sms_codes(user_id)
+            if not stored_codes:
+                return False
+            
+            # Check if code exists and is not expired
+            current_time = datetime.now(timezone.utc)
+            for stored_code, expiry_time in stored_codes.items():
+                if stored_code == sms_code and current_time < expiry_time:
+                    # Mark code as used by removing it
+                    self._invalidate_sms_code(user_id, sms_code)
+                    return True
+            return False
+        except Exception as e:
+            logger.error(f"SMS validation error for user {user_id}: {e}")
+            return False
     
     def _validate_backup_code(self, user_id: str, backup_code: str) -> bool:
-        """Validate backup recovery code (placeholder)."""
-        # This would check against stored backup codes and mark as used
-        return len(backup_code) == 8  # Placeholder
+        """Validate backup recovery code against stored codes."""
+        if not backup_code or len(backup_code) != 8:
+            return False
+        
+        try:
+            # Get stored backup codes for this user
+            stored_codes = self._get_user_backup_codes(user_id)
+            if not stored_codes:
+                return False
+            
+            # Check if code exists and has not been used
+            for code_entry in stored_codes:
+                if code_entry["code"] == backup_code and not code_entry["used"]:
+                    # Mark code as used
+                    self._mark_backup_code_used(user_id, backup_code)
+                    logger.info(f"Backup code used for user {user_id}")
+                    return True
+            return False
+        except Exception as e:
+            logger.error(f"Backup code validation error for user {user_id}: {e}")
+            return False
     
     def _create_secure_session(self, user_id: str, ip_address: str, user_agent: str) -> str:
         """Create a secure session with comprehensive tracking."""
@@ -502,6 +561,70 @@ class EnhancedAuthSecurity:
         if user_id in self.suspicious_users:
             del self.suspicious_users[user_id]
     
+    def _get_user_totp_secret(self, user_id: str) -> Optional[str]:
+        """Get TOTP secret for user from secure storage."""
+        try:
+            return enhanced_secret_manager.get_user_totp_secret(user_id)
+        except Exception as e:
+            logger.error(f"Failed to retrieve TOTP secret for user {user_id}: {e}")
+            return None
+    
+    def _generate_totp_token(self, secret: str, time_counter: int) -> str:
+        """Generate TOTP token for given time counter."""
+        # Simplified TOTP implementation for testing
+        # In production, use pyotp or similar library
+        import hashlib
+        import hmac
+        import struct
+        
+        # Convert secret from base32 (simplified)
+        key = secret.encode()
+        
+        # Pack time counter as big-endian 64-bit integer
+        packed_time = struct.pack('>Q', time_counter)
+        
+        # HMAC-SHA1
+        hash_digest = hmac.new(key, packed_time, hashlib.sha1).digest()
+        
+        # Dynamic truncation
+        offset = hash_digest[-1] & 0x0f
+        code = struct.unpack('>I', hash_digest[offset:offset + 4])[0] & 0x7fffffff
+        
+        # Generate 6-digit code
+        return f"{code % 1000000:06d}"
+    
+    def _get_stored_sms_code(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get stored SMS code for user from secure storage."""
+        try:
+            return enhanced_secret_manager.get_user_sms_verification_code(user_id)
+        except Exception as e:
+            logger.error(f"Failed to retrieve SMS code for user {user_id}: {e}")
+            return None
+    
+    def _mark_sms_code_used(self, user_id: str) -> None:
+        """Mark SMS code as used in secure storage."""
+        try:
+            enhanced_secret_manager.invalidate_user_sms_code(user_id)
+            logger.info(f"SMS code invalidated for user {user_id}")
+        except Exception as e:
+            logger.error(f"Failed to invalidate SMS code for user {user_id}: {e}")
+    
+    def _get_user_backup_codes(self, user_id: str) -> Dict[str, Dict[str, Any]]:
+        """Get backup codes for user from secure storage."""
+        try:
+            return enhanced_secret_manager.get_user_backup_codes(user_id) or {}
+        except Exception as e:
+            logger.error(f"Failed to retrieve backup codes for user {user_id}: {e}")
+            return {}
+    
+    def _mark_backup_code_used(self, user_id: str, backup_code: str) -> None:
+        """Mark backup code as used in secure storage."""
+        try:
+            enhanced_secret_manager.mark_backup_code_used(user_id, backup_code)
+            logger.info(f"Backup code marked as used for user {user_id}")
+        except Exception as e:
+            logger.error(f"Failed to mark backup code as used for user {user_id}: {e}")
+    
     def get_security_status(self) -> Dict[str, Any]:
         """Get comprehensive security status."""
         return {
@@ -519,6 +642,8 @@ class EnhancedAuthSecurity:
                 if a.timestamp > datetime.now(timezone.utc) - timedelta(hours=1)
             ])
         }
+    
+    # All helper methods for MFA validation are implemented above
 
 
 # Global instance

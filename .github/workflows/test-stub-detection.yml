@@ -1,0 +1,192 @@
+name: 🔍 Test Stub Detection
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'app/**/*.py'
+      - 'frontend/**/*.ts'
+      - 'frontend/**/*.tsx'
+      - 'frontend/**/*.js'
+      - 'frontend/**/*.jsx'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'app/**/*.py'
+      - 'frontend/**/*.ts'
+      - 'frontend/**/*.tsx'
+      - 'frontend/**/*.js'
+      - 'frontend/**/*.jsx'
+  workflow_dispatch:
+    inputs:
+      force_run:
+        description: 'Force run even if no code changes'
+        required: false
+        default: 'false'
+
+jobs:
+  detect-test-stubs:
+    name: 🔍 Detect Test Stubs in Production Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    permissions:
+      contents: read
+      pull-requests: write  # For PR comments
+      checks: write         # For check annotations
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1  # Only need current commit for stub detection
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: 📦 Install minimal dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Only install what's needed for stub detection
+          pip install pytest  # For any test framework imports
+      
+      - name: 🔍 Run test stub detection
+        id: stub_check
+        run: |
+          echo "::group::Test Stub Detection"
+          python scripts/ci/check_test_stubs.py --github-actions
+          echo "::endgroup::"
+        continue-on-error: true
+      
+      - name: 📊 Generate detailed report on failure
+        if: failure() && steps.stub_check.outcome == 'failure'
+        run: |
+          echo "::group::Detailed Test Stub Report"
+          python scripts/remove_test_stubs.py --scan --report --format text
+          echo "::endgroup::"
+      
+      - name: 📝 Save report artifact
+        if: failure() && steps.stub_check.outcome == 'failure'
+        run: |
+          mkdir -p reports
+          python scripts/remove_test_stubs.py --scan --report --format json --output test_stubs_report.json
+      
+      - name: 📤 Upload test stub report
+        if: failure() && steps.stub_check.outcome == 'failure'
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-stub-report
+          path: reports/test_stubs_report.json
+          retention-days: 30
+      
+      - name: 💬 Comment on PR with stub violations
+        if: |
+          failure() && 
+          steps.stub_check.outcome == 'failure' && 
+          github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Check if report file exists
+            if (!fs.existsSync('reports/test_stubs_report.json')) {
+              console.log('No report file found');
+              return;
+            }
+            
+            const report = JSON.parse(fs.readFileSync('reports/test_stubs_report.json', 'utf8'));
+            
+            if (report.total_violations === 0) {
+              return;
+            }
+            
+            const severityEmoji = {
+              'HIGH': '🚨',
+              'MEDIUM': '⚠️',
+              'LOW': '💡'
+            };
+            
+            let comment = `## 🔍 Test Stub Detection Report\n\n`;
+            comment += `❌ **Found ${report.total_violations} test stubs in production code**\n\n`;
+            
+            comment += `### Summary\n`;
+            for (const [severity, count] of Object.entries(report.severity_breakdown)) {
+              comment += `${severityEmoji[severity] || '📋'} **${severity}**: ${count} violations\n`;
+            }
+            
+            comment += `\n### Files Affected: ${report.files_affected}\n\n`;
+            
+            comment += `### Top Violations\n`;
+            const topViolations = report.violations.slice(0, 10);
+            for (const violation of topViolations) {
+              const fileName = violation.file_path.split('/').pop();
+              comment += `- **${fileName}:${violation.line_number}** - ${violation.description}\n`;
+            }
+            
+            if (report.violations.length > 10) {
+              comment += `\n... and ${report.violations.length - 10} more violations\n`;
+            }
+            
+            comment += `\n### 🔧 How to Fix\n`;
+            comment += `1. Review [SPEC/no_test_stubs.xml](./SPEC/no_test_stubs.xml) for guidelines\n`;
+            comment += `2. Replace test stubs with real implementations\n`;
+            comment += `3. Move test helpers to \`app/tests/\` directory\n`;
+            comment += `4. Run \`python scripts/remove_test_stubs.py --scan\` locally to check\n\n`;
+            
+            comment += `📊 [Download detailed report](${context.payload.pull_request.html_url}/checks) from the Actions tab.\n`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: ❌ Fail build if stubs found
+        if: failure() && steps.stub_check.outcome == 'failure'
+        run: |
+          echo "::error::Test stubs found in production code. See SPEC/no_test_stubs.xml for guidelines."
+          echo "::error::Run 'python scripts/remove_test_stubs.py --scan' locally to identify issues."
+          exit 1
+      
+      - name: ✅ Success notification
+        if: success()
+        run: |
+          echo "::notice::✅ No test stubs found in production code - build can proceed"
+
+  # Separate job for monitoring stub trends
+  stub-metrics:
+    name: 📈 Track Stub Metrics
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: detect-test-stubs
+    continue-on-error: true  # Don't fail build for metrics
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: 📊 Generate metrics
+        run: |
+          python scripts/remove_test_stubs.py --scan --report --format json --output stub_metrics.json
+          
+          # Extract key metrics for monitoring
+          echo "## Test Stub Metrics" >> $GITHUB_STEP_SUMMARY
+          python -c "
+          import json
+          with open('reports/stub_metrics.json') as f:
+              data = json.load(f)
+          print(f'- Total violations: {data[\"total_violations\"]}')
+          print(f'- Files affected: {data[\"files_affected\"]}')
+          for severity, count in data['severity_breakdown'].items():
+              print(f'- {severity}: {count}')
+          " >> $GITHUB_STEP_SUMMARY

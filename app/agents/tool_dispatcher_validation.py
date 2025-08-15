@@ -1,15 +1,12 @@
 """Input/output validation for tool dispatcher."""
 from typing import Dict, Any, Optional, Union, List
 from pydantic import BaseModel, Field, ValidationError
+from app.schemas.shared_types import ValidationResult
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-class ValidationResult(BaseModel):
-    """Result of validation operation"""
-    is_valid: bool
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
+# ValidationResult now imported from shared_types.py
 
 class ToolValidator:
     """Handles input/output validation for tools"""

@@ -306,114 +306,207 @@ class ArchitectureEnforcer:
     
     def generate_report(self) -> str:
         """Generate compliance report"""
+        self._print_report_header()
+        results = self.run_all_checks()
+        self._report_file_size_violations(results)
+        self._report_function_complexity_violations(results)
+        self._report_duplicate_type_violations(results)
+        self._report_test_stub_violations(results)
+        return self._generate_final_summary(results)
+    
+    def _print_report_header(self) -> None:
+        """Print report header"""
         print("\n" + "="*80)
         print("ARCHITECTURE COMPLIANCE REPORT")
         print("="*80)
-        
-        # Get results using new structured approach
-        results = self.run_all_checks()
-        
-        # File size violations
+    
+    def _report_file_size_violations(self, results) -> None:
+        """Report file size violations"""
         print(f"\n[FILE SIZE VIOLATIONS] (>{self.max_file_lines} lines)")
         print("-" * 40)
-        file_violations = [v for v in results.violations if v.violation_type == "file_size"]
+        file_violations = self._get_violations_by_type(results, "file_size")
+        self._print_file_violations(file_violations)
+    
+    def _get_violations_by_type(self, results, violation_type: str) -> List:
+        """Get violations filtered by type"""
+        return [v for v in results.violations if v.violation_type == violation_type]
+    
+    def _print_file_violations(self, file_violations: List) -> None:
+        """Print file violation details"""
         if file_violations:
-            for violation in file_violations[:10]:
-                print(f"  {violation.actual_value:4d} lines: {violation.file_path}")
-            if len(file_violations) > 10:
-                print(f"  ... and {len(file_violations)-10} more files")
+            self._print_violation_list(file_violations, 10, "lines")
             print(f"\n  Total violations: {len(file_violations)}")
         else:
             print("  [PASS] No violations found")
-        
-        # Function complexity violations
+    
+    def _print_violation_list(self, violations: List, limit: int, suffix: str) -> None:
+        """Print a limited list of violations"""
+        for violation in violations[:limit]:
+            print(f"  {violation.actual_value:4d} {suffix}: {violation.file_path}")
+        if len(violations) > limit:
+            print(f"  ... and {len(violations)-limit} more files")
+    
+    def _report_function_complexity_violations(self, results) -> None:
+        """Report function complexity violations"""
         print(f"\n[FUNCTION COMPLEXITY VIOLATIONS] (>{self.max_function_lines} lines)")
         print("-" * 40)
-        func_violations = [v for v in results.violations if v.violation_type == "function_complexity"]
-        
-        # Separate violations and warnings based on severity
+        func_violations = self._get_violations_by_type(results, "function_complexity")
+        func_errors, func_warnings = self._categorize_function_violations(func_violations)
+        self._print_function_violations(func_errors, func_warnings)
+    
+    def _categorize_function_violations(self, func_violations: List) -> tuple:
+        """Categorize function violations by severity"""
         func_errors = [v for v in func_violations if v.severity == "medium"]
         func_warnings = [v for v in func_violations if v.severity == "low"]
-        
+        return func_errors, func_warnings
+    
+    def _print_function_violations(self, func_errors: List, func_warnings: List) -> None:
+        """Print function violation details"""
         if func_errors:
-            print("  VIOLATIONS (must fix):")
-            for violation in func_errors[:5]:
-                print(f"    {violation.actual_value:3d} lines: {violation.function_name}() in {violation.file_path}")
-            if len(func_errors) > 5:
-                print(f"    ... and {len(func_errors)-5} more violations")
-        
+            self._print_function_error_list(func_errors)
         if func_warnings:
-            print("\n  WARNINGS (example/demo files):")
-            for violation in func_warnings[:5]:
-                print(f"    {violation.actual_value:3d} lines: {violation.function_name}() in {violation.file_path}")
-            if len(func_warnings) > 5:
-                print(f"    ... and {len(func_warnings)-5} more warnings")
-        
-        if func_violations:
+            self._print_function_warning_list(func_warnings)
+        self._print_function_summary(func_errors, func_warnings)
+    
+    def _print_function_error_list(self, func_errors: List) -> None:
+        """Print function error violations"""
+        print("  VIOLATIONS (must fix):")
+        for violation in func_errors[:5]:
+            print(f"    {violation.actual_value:3d} lines: {violation.function_name}() in {violation.file_path}")
+        if len(func_errors) > 5:
+            print(f"    ... and {len(func_errors)-5} more violations")
+    
+    def _print_function_warning_list(self, func_warnings: List) -> None:
+        """Print function warning violations"""
+        print("\n  WARNINGS (example/demo files):")
+        for violation in func_warnings[:5]:
+            print(f"    {violation.actual_value:3d} lines: {violation.function_name}() in {violation.file_path}")
+        if len(func_warnings) > 5:
+            print(f"    ... and {len(func_warnings)-5} more warnings")
+    
+    def _print_function_summary(self, func_errors: List, func_warnings: List) -> None:
+        """Print function violation summary"""
+        if func_errors or func_warnings:
             print(f"\n  Total: {len(func_errors)} violations, {len(func_warnings)} warnings")
         else:
             print("  [PASS] No violations found")
-        
-        # Duplicate types
+    
+    def _report_duplicate_type_violations(self, results) -> None:
+        """Report duplicate type violations"""
         print("\n[DUPLICATE TYPE DEFINITIONS]")
         print("-" * 40)
-        duplicate_violations = [v for v in results.violations if v.violation_type == "duplicate_types"]
+        duplicate_violations = self._get_violations_by_type(results, "duplicate_types")
+        self._print_duplicate_violations(duplicate_violations)
+    
+    def _print_duplicate_violations(self, duplicate_violations: List) -> None:
+        """Print duplicate type violation details"""
         if duplicate_violations:
-            for violation in duplicate_violations[:10]:
-                print(f"  {violation.description}")
-                print(f"    Files: {violation.file_path}")
-            if len(duplicate_violations) > 10:
-                print(f"\n  ... and {len(duplicate_violations)-10} more duplicate types")
+            self._print_duplicate_list(duplicate_violations)
             print(f"\n  Total duplicate types: {len(duplicate_violations)}")
         else:
             print("  [PASS] No duplicates found")
-        
-        # Test stubs
+    
+    def _print_duplicate_list(self, duplicate_violations: List) -> None:
+        """Print duplicate violation list"""
+        for violation in duplicate_violations[:10]:
+            print(f"  {violation.description}")
+            print(f"    Files: {violation.file_path}")
+        if len(duplicate_violations) > 10:
+            print(f"\n  ... and {len(duplicate_violations)-10} more duplicate types")
+    
+    def _report_test_stub_violations(self, results) -> None:
+        """Report test stub violations"""
         print("\n[TEST STUBS IN PRODUCTION]")
         print("-" * 40)
-        test_stub_violations = [v for v in results.violations if v.violation_type == "test_stub"]
+        test_stub_violations = self._get_violations_by_type(results, "test_stub")
+        self._print_test_stub_violations(test_stub_violations)
+    
+    def _print_test_stub_violations(self, test_stub_violations: List) -> None:
+        """Print test stub violation details"""
         if test_stub_violations:
-            for violation in test_stub_violations[:10]:
-                line_info = f" (line {violation.line_number})" if violation.line_number else ""
-                print(f"  {violation.file_path}{line_info}: {violation.description}")
-            if len(test_stub_violations) > 10:
-                print(f"  ... and {len(test_stub_violations)-10} more files")
+            self._print_test_stub_list(test_stub_violations)
             print(f"\n  Total suspicious files: {len(test_stub_violations)}")
         else:
             print("  [PASS] No test stubs found")
-        
-        # Summary
+    
+    def _print_test_stub_list(self, test_stub_violations: List) -> None:
+        """Print test stub violation list"""
+        for violation in test_stub_violations[:10]:
+            line_info = f" (line {violation.line_number})" if violation.line_number else ""
+            print(f"  {violation.file_path}{line_info}: {violation.description}")
+        if len(test_stub_violations) > 10:
+            print(f"  ... and {len(test_stub_violations)-10} more files")
+    
+    def _generate_final_summary(self, results) -> str:
+        """Generate final compliance summary"""
         print("\n" + "="*80)
         print("SUMMARY")
         print("="*80)
-        
-        # Count only actual violations (not warnings)
+        actual_violations, total_warnings = self._count_violations(results)
+        return self._determine_compliance_status(results, actual_violations, total_warnings)
+    
+    def _count_violations(self, results) -> tuple:
+        """Count actual violations vs warnings"""
         actual_violations = len([v for v in results.violations if v.severity in ["high", "medium"]])
         total_warnings = len([v for v in results.violations if v.severity == "low"])
-        
+        return actual_violations, total_warnings
+    
+    def _determine_compliance_status(self, results, actual_violations: int, total_warnings: int) -> str:
+        """Determine final compliance status"""
         if actual_violations == 0:
-            if total_warnings > 0:
-                print(f"[PASS WITH WARNINGS] No critical violations, but {total_warnings} warnings in example/demo files")
-            else:
-                print("[PASS] FULL COMPLIANCE - All architectural rules satisfied!")
-            return "PASS"
+            return self._handle_pass_status(total_warnings)
         else:
-            print(f"[FAIL] VIOLATIONS FOUND: {actual_violations} issues requiring fixes")
-            if total_warnings > 0:
-                print(f"       WARNINGS: {total_warnings} issues in example/demo files")
-            print(f"Compliance Score: {results.compliance_score:.1f}%")
-            print("\nRequired Actions:")
-            if file_violations:
-                print(f"  - Split {len(file_violations)} oversized files")
-            if func_errors:
-                print(f"  - Refactor {len(func_errors)} complex functions")
-            if duplicate_violations:
-                print(f"  - Deduplicate {len(duplicate_violations)} type definitions")
-            if test_stub_violations:
-                print(f"  - Remove {len(test_stub_violations)} test stubs from production")
-            
-            print("\nRefer to ALIGNMENT_ACTION_PLAN.md for remediation steps")
-            return "FAIL"
+            return self._handle_fail_status(results, actual_violations, total_warnings)
+    
+    def _handle_pass_status(self, total_warnings: int) -> str:
+        """Handle pass status with optional warnings"""
+        if total_warnings > 0:
+            print(f"[PASS WITH WARNINGS] No critical violations, but {total_warnings} warnings in example/demo files")
+        else:
+            print("[PASS] FULL COMPLIANCE - All architectural rules satisfied!")
+        return "PASS"
+    
+    def _handle_fail_status(self, results, actual_violations: int, total_warnings: int) -> str:
+        """Handle fail status with remediation actions"""
+        self._print_fail_summary(results, actual_violations, total_warnings)
+        self._print_required_actions(results)
+        print("\nRefer to ALIGNMENT_ACTION_PLAN.md for remediation steps")
+        return "FAIL"
+    
+    def _print_fail_summary(self, results, actual_violations: int, total_warnings: int) -> None:
+        """Print failure summary details"""
+        print(f"[FAIL] VIOLATIONS FOUND: {actual_violations} issues requiring fixes")
+        if total_warnings > 0:
+            print(f"       WARNINGS: {total_warnings} issues in example/demo files")
+        print(f"Compliance Score: {results.compliance_score:.1f}%")
+    
+    def _print_required_actions(self, results) -> None:
+        """Print required remediation actions"""
+        print("\nRequired Actions:")
+        violations_by_type = self._get_violation_counts_by_type(results)
+        if violations_by_type["file_size"] > 0:
+            print(f"  - Split {violations_by_type['file_size']} oversized files")
+        if violations_by_type["function_errors"] > 0:
+            print(f"  - Refactor {violations_by_type['function_errors']} complex functions")
+        if violations_by_type["duplicate_types"] > 0:
+            print(f"  - Deduplicate {violations_by_type['duplicate_types']} type definitions")
+        if violations_by_type["test_stub"] > 0:
+            print(f"  - Remove {violations_by_type['test_stub']} test stubs from production")
+    
+    def _get_violation_counts_by_type(self, results) -> Dict[str, int]:
+        """Get violation counts by type"""
+        file_violations = self._get_violations_by_type(results, "file_size")
+        func_violations = self._get_violations_by_type(results, "function_complexity")
+        func_errors = [v for v in func_violations if v.severity == "medium"]
+        duplicate_violations = self._get_violations_by_type(results, "duplicate_types")
+        test_stub_violations = self._get_violations_by_type(results, "test_stub")
+        
+        return {
+            "file_size": len(file_violations),
+            "function_errors": len(func_errors),
+            "duplicate_types": len(duplicate_violations),
+            "test_stub": len(test_stub_violations)
+        }
 
 def main():
     """Main entry point with enhanced CI/CD features"""

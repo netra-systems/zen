@@ -1,28 +1,29 @@
 name: Enhanced CI/CD Pipeline
 description: Comprehensive CI/CD with reliability features, security scanning, and automatic rollback
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-  push:
-    branches: [main, master, develop]
-  workflow_dispatch:
-    inputs:
-      force_full_pipeline:
-        description: 'Force full pipeline execution'
-        required: false
-        type: boolean
-        default: false
-      skip_security_scan:
-        description: 'Skip security scanning (emergency only)'
-        required: false
-        type: boolean
-        default: false
-      deploy_to_staging:
-        description: 'Deploy to staging after tests'
-        required: false
-        type: boolean
-        default: true
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   pull_request:
+#     types: [opened, synchronize, reopened, ready_for_review]
+#   push:
+#     branches: [main, master, develop]
+#   workflow_dispatch:
+#     inputs:
+#       force_full_pipeline:
+#         description: 'Force full pipeline execution'
+#         required: false
+#         type: boolean
+#         default: false
+#       skip_security_scan:
+#         description: 'Skip security scanning (emergency only)'
+#         required: false
+#         type: boolean
+#         default: false
+#       deploy_to_staging:
+#         description: 'Deploy to staging after tests'
+#         required: false
+#         type: boolean
+#         default: true
 
 env:
   CONFIG_FILE: .github/workflow-config.yml

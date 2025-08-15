@@ -1,27 +1,28 @@
 name: Pipeline Optimization & Performance
 description: Automatically optimize CI/CD pipeline performance and resource usage
 
-on:
-  schedule:
-    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
-  workflow_dispatch:
-    inputs:
-      optimization_type:
-        description: 'Type of optimization to run'
-        required: true
-        type: choice
-        options:
-          - full
-          - performance
-          - cost
-          - parallelization
-          - cache
-        default: 'full'
-      analyze_period_days:
-        description: 'Days of history to analyze'
-        required: false
-        type: string
-        default: '30'
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   schedule:
+#     - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+#   workflow_dispatch:
+#     inputs:
+#       optimization_type:
+#         description: 'Type of optimization to run'
+#         required: true
+#         type: choice
+#         options:
+#           - full
+#           - performance
+#           - cost
+#           - parallelization
+#           - cache
+#         default: 'full'
+#       analyze_period_days:
+#         description: 'Days of history to analyze'
+#         required: false
+#         type: string
+#         default: '30'
 
 env:
   ANALYZE_PERIOD: ${{ github.event.inputs.analyze_period_days || '30' }}

@@ -97,11 +97,9 @@ class ServiceChecker:
                         logger.info(f"LLM '{llm_name}' not available (optional provider without key)")
                         
                 except Exception as e:
-                    config = settings.llm_configs.get(llm_name)
-                    if config and config.provider == LLMProvider.GOOGLE:
-                        failed_providers.append(f"{llm_name}: {e}")
-                    else:
-                        logger.info(f"Optional LLM '{llm_name}' not available: {e}")
+                    # settings.llm_configs is a list, not a dict
+                    failed_providers.append(f"{llm_name}: {e}")
+                    logger.info(f"LLM '{llm_name}' failed: {e}")
             
             return self._create_llm_result(available_providers, failed_providers)
             
@@ -133,9 +131,12 @@ class ServiceChecker:
         async with get_clickhouse_client() as client:
             client.ping()
             
-            result = await client.execute_query(
+            result = client.execute(
                 "SELECT name FROM system.tables WHERE database = currentDatabase()"
             )
+            # Handle both sync and async result types
+            if asyncio.iscoroutine(result):
+                result = await result
             return [row.get('name', row) if isinstance(row, dict) else row[0] for row in result]
     
     def _create_llm_result(

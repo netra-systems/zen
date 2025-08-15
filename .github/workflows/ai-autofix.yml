@@ -1,20 +1,21 @@
 name: AI Auto-Fix
 
-on:
-  workflow_run:
-    workflows: ["Smoke Tests", "Unit Tests", "Integration Tests"]
-    types: [completed]
-  issue_comment:
-    types: [created]
-  workflow_dispatch:
-    inputs:
-      test_run_id:
-        description: 'Test run ID to fix'
-        required: true
-      max_attempts:
-        description: 'Maximum fix attempts'
-        required: false
-        default: '3'
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   workflow_run:
+#     workflows: ["Smoke Tests", "Unit Tests", "Integration Tests"]
+#     types: [completed]
+#   issue_comment:
+#     types: [created]
+#   workflow_dispatch:
+#     inputs:
+#       test_run_id:
+#         description: 'Test run ID to fix'
+#         required: true
+#       max_attempts:
+#         description: 'Maximum fix attempts'
+#         required: false
+#         default: '3'
 
 permissions:
   contents: write

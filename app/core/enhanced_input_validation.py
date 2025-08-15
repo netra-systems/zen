@@ -40,14 +40,13 @@ class SecurityThreat(str, Enum):
     HEADER_INJECTION = "header_injection"
 
 
-class ValidationResult(BaseModel):
-    """Result of input validation."""
-    is_valid: bool = Field(..., description="Whether input passed validation")
-    sanitized_value: Optional[str] = Field(default=None, description="Sanitized input value")
-    threats_detected: List[SecurityThreat] = Field(default_factory=list, description="Security threats found")
-    warnings: List[str] = Field(default_factory=list, description="Validation warnings")
-    errors: List[str] = Field(default_factory=list, description="Validation errors")
-    confidence_score: float = Field(default=1.0, description="Confidence in validation (0-1)")
+# ValidationResult now imported from shared_types.py
+# Using import alias for this specific validation context
+from app.schemas.shared_types import ValidationResult as BaseValidationResult
+
+class SecurityValidationResult(BaseValidationResult):
+    """Extended validation result for security-specific validation."""
+    threats_detected: List[str] = Field(default_factory=list, description="Security threats found")
 
 
 class ThreatPattern:

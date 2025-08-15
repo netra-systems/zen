@@ -13,7 +13,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Callable, Awaitable, Union
 
 from app.core.error_recovery import OperationType, RecoveryContext
-from app.services.transaction_manager import transaction_manager
+from app.db.transaction_manager import transaction_manager
 from app.services.database.rollback_manager import rollback_manager
 from app.logging_config import central_logger
 

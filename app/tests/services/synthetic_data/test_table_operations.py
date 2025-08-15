@@ -37,7 +37,7 @@ class TestTableOperations:
         mock_create_table.assert_called_once()
         assert result["table_name"] == "test_table"
     
-    @patch('app.services.synthetic_data_service.get_clickhouse_client')
+    @patch('app.services.synthetic_data.service.get_clickhouse_client')
     async def test_ingest_batch_empty(self, mock_get_client, service):
         """Test ingesting empty batch"""
         await service.ingest_batch([], "test_table")
@@ -45,11 +45,13 @@ class TestTableOperations:
         # Should not attempt ClickHouse operation
         mock_get_client.assert_not_called()
     
-    @patch('app.services.synthetic_data_service.get_clickhouse_client')
-    async def test_ingest_batch_with_data(self, mock_get_client, service):
+    @patch('app.services.synthetic_data.service.create_destination_table')
+    @patch('app.services.synthetic_data.service.get_clickhouse_client')
+    async def test_ingest_batch_with_data(self, mock_get_client, mock_create_table, service):
         """Test ingesting batch with data"""
         mock_client = AsyncMock()
         mock_get_client.return_value.__aenter__.return_value = mock_client
+        mock_create_table.return_value = None
         
         batch = [
             {

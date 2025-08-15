@@ -9,19 +9,24 @@ import random
 from dataclasses import dataclass
 from typing import Callable, Awaitable, Any, Optional, Tuple
 
+from app.schemas.shared_types import RetryConfig
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 
+# RetryConfig now imported from shared_types.py
+# Using compatibility wrapper for existing code
 @dataclass
-class RetryConfig:
-    """Configuration for retry logic"""
-    max_retries: int = 3
-    base_delay: float = 1.0
-    max_delay: float = 60.0
+class ReliabilityRetryConfig:
+    """Compatibility wrapper for reliability retry configuration."""
+    base_config: RetryConfig
     exponential_base: float = 2.0
-    jitter: bool = True
+    
+    @classmethod
+    def from_retry_config(cls, config: RetryConfig) -> 'ReliabilityRetryConfig':
+        """Create from base RetryConfig."""
+        return cls(base_config=config)
 
 
 class RetryHandler:

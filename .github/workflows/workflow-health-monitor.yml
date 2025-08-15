@@ -1,28 +1,29 @@
 name: Workflow Health Monitor
 description: Monitor and report on workflow health, performance, and costs
 
-on:
-  schedule:
-    - cron: '0 */4 * * *'  # Every 4 hours
-    - cron: '0 9 * * 1'    # Weekly report on Monday 9 AM
-  workflow_dispatch:
-    inputs:
-      report_type:
-        description: 'Type of report to generate'
-        required: false
-        type: choice
-        options:
-          - summary
-          - detailed
-          - cost
-          - performance
-          - failures
-        default: summary
-      days_back:
-        description: 'Number of days to analyze'
-        required: false
-        type: string
-        default: '7'
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   schedule:
+#     - cron: '0 */4 * * *'  # Every 4 hours
+#     - cron: '0 9 * * 1'    # Weekly report on Monday 9 AM
+#   workflow_dispatch:
+#     inputs:
+#       report_type:
+#         description: 'Type of report to generate'
+#         required: false
+#         type: choice
+#         options:
+#           - summary
+#           - detailed
+#           - cost
+#           - performance
+#           - failures
+#         default: summary
+#       days_back:
+#         description: 'Number of days to analyze'
+#         required: false
+#         type: string
+#         default: '7'
 
 env:
   CONFIG_FILE: .github/workflow-config.yml

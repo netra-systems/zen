@@ -1,0 +1,44 @@
+name: Boundary Enforcement
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  boundary-enforcement:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          pip install radon
+      
+      - name: Run Boundary Enforcer
+        run: |
+          python scripts/boundary_enforcer.py --enforce --json-output boundary-report.json
+      
+      - name: Check Critical Violations
+        run: |
+          python scripts/boundary_enforcer.py --fail-on-emergency
+      
+      - name: Upload Boundary Report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: boundary-report
+          path: boundary-report.json
+      
+      - name: Comment PR with Report
+        if: github.event_name == 'pull_request'
+        run: |
+          python scripts/boundary_enforcer.py --pr-comment

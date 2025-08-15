@@ -1,28 +1,29 @@
 name: Unit Tests
 
-on:
-  pull_request:
-    types: [opened, synchronize, ready_for_review]
-  push:
-    branches:
-      - main
-      - master
-  workflow_dispatch:
-    inputs:
-      shard:
-        description: 'Specific shard to run'
-        required: false
-        type: choice
-        options:
-          - all
-          - core
-          - agents
-          - websocket
-          - database
-          - api
-          - frontend
-        default: all
-  workflow_call:
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   pull_request:
+#     types: [opened, synchronize, ready_for_review]
+#   push:
+#     branches:
+#       - main
+#       - master
+#   workflow_dispatch:
+#     inputs:
+#       shard:
+#         description: 'Specific shard to run'
+#         required: false
+#         type: choice
+#         options:
+#           - all
+#           - core
+#           - agents
+#           - websocket
+#           - database
+#           - api
+#           - frontend
+#         default: all
+#   workflow_call:
 
 concurrency:
   group: unit-${{ github.ref }}

@@ -192,7 +192,7 @@ def create_mock_clickhouse_client(tables):
     """Create mock ClickHouse client with specified tables."""
     mock_client = AsyncMock()
     mock_client.ping = Mock()
-    mock_client.execute_query = AsyncMock(return_value=tables)
+    mock_client.execute = Mock(return_value=tables)
     mock_client.__aenter__ = AsyncMock(return_value=mock_client)
     mock_client.__aexit__ = AsyncMock(return_value=None)
     return mock_client

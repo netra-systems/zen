@@ -111,10 +111,36 @@ class NotificationManager:
         log_func(f"ALERT [{alert.level.value.upper()}] {alert.title}: {alert.message}")
     
     async def _send_database_notification(self, alert: Alert) -> None:
-        """Store alert in database (placeholder for actual implementation)."""
-        # This would store the alert in the database
-        # Implementation depends on the database schema
-        logger.debug(f"Storing alert {alert.alert_id} in database")
+        """Store alert in database for audit and analysis."""
+        try:
+            from app.db.postgres import get_db_session
+            async with get_db_session() as session:
+                await self._store_alert_in_db(session, alert)
+                await session.commit()
+            logger.debug(f"Stored alert {alert.alert_id} in database")
+        except Exception as e:
+            logger.error(f"Failed to store alert {alert.alert_id}: {e}")
+
+    async def _store_alert_in_db(self, session, alert: Alert) -> None:
+        """Store alert record in database."""
+        from sqlalchemy import text
+        insert_query = text("""
+            INSERT INTO system_alerts (alert_id, level, title, message, component, 
+                                     timestamp, metadata, resolved)
+            VALUES (:alert_id, :level, :title, :message, :component, 
+                   :timestamp, :metadata, :resolved)
+        """)
+        
+        await session.execute(insert_query, {
+            'alert_id': alert.alert_id,
+            'level': alert.level.value,
+            'title': alert.title,
+            'message': alert.message,
+            'component': alert.component,
+            'timestamp': alert.timestamp,
+            'metadata': str(alert.metadata) if alert.metadata else None,
+            'resolved': alert.resolved
+        })
     
     def _track_notification(self, alert: Alert, channel: NotificationChannel) -> None:
         """Track sent notification for audit purposes."""

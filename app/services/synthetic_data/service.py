@@ -332,111 +332,149 @@ class SyntheticDataService(RecoveryMixin):
     ):
         """Worker function for generating synthetic data"""
         try:
-            self.active_jobs[job_id]["status"] = GenerationStatus.RUNNING.value
-            
-            # Update database status if db session available
-            if db is not None and synthetic_data_id is not None:
-                db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({"status": "running"})
-                db.commit()
-            
-            # Send WebSocket update
-            await manager.broadcast({
-                "type": "generation:started",
-                "payload": {
-                    "job_id": job_id,
-                    "total_records": config.num_logs,
-                    "start_time": datetime.now(UTC).isoformat()
-                }
-            })
-            
-            # Load corpus if specified
-            corpus_content = await load_corpus(corpus_id, db, self.corpus_cache, 
-                                              get_clickhouse_client, central_logger) if corpus_id else None
-            
-            # Create destination table
-            table_name = self.active_jobs[job_id]["table_name"]
-            await create_destination_table(table_name, get_clickhouse_client)
-            
-            # Generate data in batches
-            batch_size = 100
-            total_records = config.num_logs
-            
-            async for batch_num, batch in enumerate(self._generate_batches(
-                config, corpus_content, batch_size, total_records
-            )):
-                # Ingest batch to ClickHouse
-                await ingest_batch_to_clickhouse(table_name, batch, get_clickhouse_client)
-                
-                # Update progress
-                self.active_jobs[job_id]["records_generated"] += len(batch)
-                self.active_jobs[job_id]["records_ingested"] += len(batch)
-                
-                progress = (self.active_jobs[job_id]["records_generated"] / total_records * 100)
-                
-                # Update database if available
-                if db is not None and synthetic_data_id is not None:
-                    db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({
-                        "status": f"running: {progress:.2f}%"
-                    })
-                    db.commit()
-                
-                # Send progress update via WebSocket
-                if self.active_jobs[job_id]["records_generated"] % 100 == 0:
-                    await manager.broadcast({
-                        "type": "generation:progress",
-                        "payload": {
-                            "job_id": job_id,
-                            "progress_percentage": progress,
-                            "records_generated": self.active_jobs[job_id]["records_generated"],
-                            "records_ingested": self.active_jobs[job_id]["records_ingested"],
-                            "current_batch": batch_num,
-                            "generation_rate": calculate_generation_rate(self.active_jobs[job_id])
-                        }
-                    })
-            
-            # Mark job as completed
-            self.active_jobs[job_id]["status"] = GenerationStatus.COMPLETED.value
-            self.active_jobs[job_id]["end_time"] = datetime.now(UTC)
-            
-            # Update database if available
-            if db is not None and synthetic_data_id is not None:
-                db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({"status": "completed"})
-                db.commit()
-            
-            # Send completion notification
-            await manager.broadcast({
-                "type": "generation:complete",
-                "payload": {
-                    "job_id": job_id,
-                    "total_records": self.active_jobs[job_id]["records_generated"],
-                    "duration_seconds": (self.active_jobs[job_id]["end_time"] - 
-                                       self.active_jobs[job_id]["start_time"]).total_seconds(),
-                    "destination_table": table_name
-                }
-            })
-            
-            central_logger.info(f"Generation job {job_id} completed successfully")
-            
+            await self._initialize_generation_job(job_id, config, db, synthetic_data_id)
+            corpus_content = await self._load_corpus_content(corpus_id, db)
+            await self._setup_destination_table(job_id)
+            await self._execute_batch_generation(job_id, config, corpus_content, db, synthetic_data_id)
+            await self._finalize_successful_job(job_id, db, synthetic_data_id)
         except Exception as e:
-            central_logger.error(f"Generation job {job_id} failed: {str(e)}")
-            self.active_jobs[job_id]["status"] = GenerationStatus.FAILED.value
-            self.active_jobs[job_id]["errors"].append(str(e))
-            
-            # Update database if available
-            if db is not None and synthetic_data_id is not None:
-                db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({"status": "failed"})
-                db.commit()
-            
-            # Send error notification
+            await self._handle_generation_error(job_id, e, db, synthetic_data_id)
+    
+    async def _initialize_generation_job(self, job_id: str, config: schemas.LogGenParams, db: Optional[Session], synthetic_data_id: Optional[str]) -> None:
+        """Initialize generation job and update status"""
+        self.active_jobs[job_id]["status"] = GenerationStatus.RUNNING.value
+        await self._update_database_status(db, synthetic_data_id, "running")
+        await self._send_generation_started_notification(job_id, config)
+    
+    async def _update_database_status(self, db: Optional[Session], synthetic_data_id: Optional[str], status: str) -> None:
+        """Update database status if available"""
+        if db is not None and synthetic_data_id is not None:
+            db.query(models.Corpus).filter(models.Corpus.id == synthetic_data_id).update({"status": status})
+            db.commit()
+    
+    async def _send_generation_started_notification(self, job_id: str, config: schemas.LogGenParams) -> None:
+        """Send WebSocket notification that generation has started"""
+        await manager.broadcast({
+            "type": "generation:started",
+            "payload": {
+                "job_id": job_id,
+                "total_records": config.num_logs,
+                "start_time": datetime.now(UTC).isoformat()
+            }
+        })
+    
+    async def _load_corpus_content(self, corpus_id: Optional[str], db: Optional[Session]) -> Optional[List[Dict]]:
+        """Load corpus content if corpus ID is specified"""
+        if corpus_id:
+            return await load_corpus(corpus_id, db, self.corpus_cache, get_clickhouse_client, central_logger)
+        return None
+    
+    async def _setup_destination_table(self, job_id: str) -> None:
+        """Create destination table for generated data"""
+        table_name = self.active_jobs[job_id]["table_name"]
+        await create_destination_table(table_name, get_clickhouse_client)
+    
+    async def _execute_batch_generation(self, job_id: str, config: schemas.LogGenParams, corpus_content: Optional[List[Dict]], db: Optional[Session], synthetic_data_id: Optional[str]) -> None:
+        """Execute the main batch generation loop"""
+        batch_size = 100
+        total_records = config.num_logs
+        table_name = self.active_jobs[job_id]["table_name"]
+        
+        async for batch_num, batch in enumerate(self._generate_batches(config, corpus_content, batch_size, total_records)):
+            await self._process_single_batch(job_id, batch, batch_num, total_records, table_name, db, synthetic_data_id)
+    
+    async def _process_single_batch(self, job_id: str, batch: List[Dict], batch_num: int, total_records: int, table_name: str, db: Optional[Session], synthetic_data_id: Optional[str]) -> None:
+        """Process a single batch of generated data"""
+        await ingest_batch_to_clickhouse(table_name, batch, get_clickhouse_client)
+        self._update_job_progress(job_id, len(batch))
+        progress = self._calculate_progress(job_id, total_records)
+        await self._update_progress_status(job_id, progress, db, synthetic_data_id)
+        await self._send_progress_notification(job_id, progress, batch_num)
+    
+    def _update_job_progress(self, job_id: str, batch_size: int) -> None:
+        """Update job progress counters"""
+        self.active_jobs[job_id]["records_generated"] += batch_size
+        self.active_jobs[job_id]["records_ingested"] += batch_size
+    
+    def _calculate_progress(self, job_id: str, total_records: int) -> float:
+        """Calculate generation progress percentage"""
+        return (self.active_jobs[job_id]["records_generated"] / total_records * 100)
+    
+    async def _update_progress_status(self, job_id: str, progress: float, db: Optional[Session], synthetic_data_id: Optional[str]) -> None:
+        """Update database with current progress"""
+        if db is not None and synthetic_data_id is not None:
+            status = f"running: {progress:.2f}%"
+            await self._update_database_status(db, synthetic_data_id, status)
+    
+    async def _send_progress_notification(self, job_id: str, progress: float, batch_num: int) -> None:
+        """Send progress notification via WebSocket"""
+        if self.active_jobs[job_id]["records_generated"] % 100 == 0:
             await manager.broadcast({
-                "type": "generation:error",
-                "payload": {
-                    "job_id": job_id,
-                    "error_type": "generation_failure",
-                    "error_message": str(e),
-                    "recoverable": False
-                }
+                "type": "generation:progress",
+                "payload": self._create_progress_payload(job_id, progress, batch_num)
             })
+    
+    def _create_progress_payload(self, job_id: str, progress: float, batch_num: int) -> Dict:
+        """Create progress notification payload"""
+        return {
+            "job_id": job_id,
+            "progress_percentage": progress,
+            "records_generated": self.active_jobs[job_id]["records_generated"],
+            "records_ingested": self.active_jobs[job_id]["records_ingested"],
+            "current_batch": batch_num,
+            "generation_rate": calculate_generation_rate(self.active_jobs[job_id])
+        }
+    
+    async def _finalize_successful_job(self, job_id: str, db: Optional[Session], synthetic_data_id: Optional[str]) -> None:
+        """Finalize successful generation job"""
+        self._mark_job_completed(job_id)
+        await self._update_database_status(db, synthetic_data_id, "completed")
+        await self._send_completion_notification(job_id)
+        central_logger.info(f"Generation job {job_id} completed successfully")
+    
+    def _mark_job_completed(self, job_id: str) -> None:
+        """Mark job as completed with timestamp"""
+        self.active_jobs[job_id]["status"] = GenerationStatus.COMPLETED.value
+        self.active_jobs[job_id]["end_time"] = datetime.now(UTC)
+    
+    async def _send_completion_notification(self, job_id: str) -> None:
+        """Send job completion notification"""
+        table_name = self.active_jobs[job_id]["table_name"]
+        duration = (self.active_jobs[job_id]["end_time"] - self.active_jobs[job_id]["start_time"]).total_seconds()
+        
+        await manager.broadcast({
+            "type": "generation:complete",
+            "payload": {
+                "job_id": job_id,
+                "total_records": self.active_jobs[job_id]["records_generated"],
+                "duration_seconds": duration,
+                "destination_table": table_name
+            }
+        })
+    
+    async def _handle_generation_error(self, job_id: str, error: Exception, db: Optional[Session], synthetic_data_id: Optional[str]) -> None:
+        """Handle generation job errors"""
+        central_logger.error(f"Generation job {job_id} failed: {str(error)}")
+        self._mark_job_failed(job_id, error)
+        await self._update_database_status(db, synthetic_data_id, "failed")
+        await self._send_error_notification(job_id, error)
+    
+    def _mark_job_failed(self, job_id: str, error: Exception) -> None:
+        """Mark job as failed and record error"""
+        self.active_jobs[job_id]["status"] = GenerationStatus.FAILED.value
+        self.active_jobs[job_id]["errors"].append(str(error))
+    
+    async def _send_error_notification(self, job_id: str, error: Exception) -> None:
+        """Send error notification via WebSocket"""
+        await manager.broadcast({
+            "type": "generation:error",
+            "payload": {
+                "job_id": job_id,
+                "error_type": "generation_failure",
+                "error_message": str(error),
+                "recoverable": False
+            }
+        })
     
     async def _generate_batches(
         self,

@@ -15,7 +15,7 @@ from typing import Dict, Any
 from app.llm.client import ResilientLLMClient
 from app.db.client import ResilientDatabaseClient
 from app.services.external_api_client import ResilientHTTPClient
-from app.services.circuit_breaker_monitor import CircuitBreakerMonitor
+from app.services.circuit_breaker_monitor import CircuitBreakerMonitor, AlertSeverity
 from app.core.circuit_breaker import CircuitBreakerOpenError, CircuitConfig
 
 
@@ -100,14 +100,20 @@ class TestDatabaseClientCircuitBreaker:
     async def test_successful_db_query(self, mock_session_factory):
         """Test successful database query through circuit breaker."""
         mock_session = AsyncMock()
+        
+        # Create mock result with proper row structure
+        mock_row = MagicMock()
+        mock_row._mapping = {"id": 1, "name": "test"}
         mock_result = MagicMock()
-        mock_result.fetchall.return_value = [{"id": 1, "name": "test"}]
+        mock_result.fetchall.return_value = [mock_row]
+        
         mock_session.execute = AsyncMock(return_value=mock_result)
         mock_session.commit = AsyncMock()
         mock_session.rollback = AsyncMock()
         mock_session.close = AsyncMock()
-        mock_session_factory.return_value.__aenter__ = AsyncMock(return_value=mock_session)
-        mock_session_factory.return_value.__aexit__ = AsyncMock(return_value=None)
+        
+        # Mock the session factory to return the session directly
+        mock_session_factory.return_value = mock_session
         
         result = await self.db_client.execute_read_query("SELECT * FROM test")
         
@@ -123,7 +129,11 @@ class TestDatabaseClientCircuitBreaker:
         circuit = await self.db_client._get_read_circuit()
         circuit.config.failure_threshold = 1
         
-        # First call should fail and open circuit
+        # First call should fail with exception (not caught by execute_read_query)
+        with pytest.raises(Exception, match="Database connection error"):
+            await self.db_client.execute_read_query("SELECT * FROM test")
+        
+        # Second call should be blocked by circuit breaker and return empty result
         result = await self.db_client.execute_read_query("SELECT * FROM test")
         
         # Should return empty result as fallback
@@ -227,7 +237,7 @@ class TestCircuitBreakerMonitoring:
         # Simulate creating an alert
         await self.monitor._create_alert(
             circuit_name="test_circuit",
-            severity=self.monitor.AlertSeverity.HIGH,
+            severity=AlertSeverity.HIGH,
             message="Test alert",
             state="open",
             metrics={}

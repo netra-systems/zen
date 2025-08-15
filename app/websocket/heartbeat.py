@@ -86,10 +86,9 @@ class HeartbeatManager:
             except Exception as e:
                 logger.debug(f"Error stopping heartbeat for {connection_id}: {e}")
         
-        if connection_id in self.heartbeat_tasks:
-            del self.heartbeat_tasks[connection_id]
-        if connection_id in self.missed_heartbeats:
-            del self.missed_heartbeats[connection_id]
+        # Use .pop() to avoid KeyError race condition
+        self.heartbeat_tasks.pop(connection_id, None)
+        self.missed_heartbeats.pop(connection_id, None)
         
         logger.debug(f"Stopped heartbeat for connection {connection_id}")
     
@@ -187,11 +186,9 @@ class HeartbeatManager:
                     ErrorSeverity.MEDIUM
                 )
         finally:
-            # Clean up
-            if conn_info.connection_id in self.heartbeat_tasks:
-                del self.heartbeat_tasks[conn_info.connection_id]
-            if conn_info.connection_id in self.missed_heartbeats:
-                del self.missed_heartbeats[conn_info.connection_id]
+            # Clean up - use pop() to avoid KeyError race condition
+            self.heartbeat_tasks.pop(conn_info.connection_id, None)
+            self.missed_heartbeats.pop(conn_info.connection_id, None)
     
     async def _send_ping(self, conn_info: ConnectionInfo):
         """Send ping message to connection.

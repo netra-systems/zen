@@ -149,6 +149,52 @@ DEFAULT_CACHE_TTL = 300  # 5 minutes
 DEFAULT_TIMEOUT = 30  # 30 seconds
 DEFAULT_RETRY_ATTEMPTS = 3
 
+# =============================================================================
+# CONSOLIDATED TYPE DEFINITIONS - SINGLE SOURCE OF TRUTH
+# =============================================================================
+
+class RetryConfig(BaseModel):
+    """Centralized retry configuration for all components."""
+    max_retries: int = Field(default=3, description="Maximum retry attempts")
+    base_delay: float = Field(default=1.0, description="Base delay between retries")
+    max_delay: float = Field(default=60.0, description="Maximum delay between retries")
+    backoff_factor: float = Field(default=2.0, description="Exponential backoff factor")
+    timeout_seconds: int = Field(default=600, description="Operation timeout")
+    jitter: bool = Field(default=True, description="Add jitter to delays")
+
+
+class ValidationResult(BaseModel):
+    """Centralized validation result for all validation operations."""
+    is_valid: bool = Field(..., description="Whether input passed validation")
+    errors: List[str] = Field(default_factory=list, description="Validation errors")
+    warnings: List[str] = Field(default_factory=list, description="Validation warnings")
+    sanitized_value: Optional[str] = Field(default=None, description="Sanitized input value")
+    confidence_score: float = Field(default=1.0, description="Confidence in validation (0-1)")
+    validated_input: Optional[Any] = Field(default=None, description="Validated input object")
+    threats_detected: List[str] = Field(default_factory=list, description="Security threats found")
+
+
+class AgentConfig(BaseModel):
+    """Centralized agent configuration for all agents."""
+    retry: RetryConfig = Field(default_factory=RetryConfig)
+    default_timeout: float = Field(default=30.0, description="Default operation timeout")
+    max_concurrent_operations: int = Field(default=10, description="Max concurrent operations")
+    batch_size: int = Field(default=100, description="Default batch processing size")
+    failure_threshold: int = Field(default=3, description="Circuit breaker failure threshold")
+    reset_timeout: float = Field(default=30.0, description="Circuit breaker reset timeout")
+
+
+class WebSocketConnectionConfig(BaseModel):
+    """Configuration for WebSocket connections."""
+    max_attempts: int = Field(default=10, description="Maximum reconnection attempts")
+    initial_delay: float = Field(default=1.0, description="Initial reconnection delay")
+    max_delay: float = Field(default=60.0, description="Maximum reconnection delay")
+    backoff_multiplier: float = Field(default=2.0, description="Backoff multiplier")
+    timeout_seconds: int = Field(default=30, description="Connection timeout")
+    heartbeat_interval: float = Field(default=30.0, description="Heartbeat interval")
+    max_missed_heartbeats: int = Field(default=3, description="Max missed heartbeats")
+
+
 # Type aliases for common patterns
 AgentConfigDict = Dict[str, Any]
 ProcessingContextDict = Dict[str, Any]

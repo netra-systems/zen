@@ -3,6 +3,7 @@
 from typing import Dict, Any, Optional, List, Union
 from pydantic import BaseModel, Field, field_validator, ValidationError, ConfigDict
 from app.agents.state import DeepAgentState
+from app.schemas.shared_types import ValidationResult
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -123,12 +124,7 @@ class SyntheticDataExecutionInput(AgentExecutionInput):
         return v
 
 
-class ValidationResult(BaseModel):
-    """Result of input validation."""
-    is_valid: bool
-    errors: List[str] = Field(default_factory=list)
-    warnings: List[str] = Field(default_factory=list)
-    validated_input: Optional[AgentExecutionInput] = None
+# ValidationResult now imported from shared_types.py
 
 
 class InputValidator:

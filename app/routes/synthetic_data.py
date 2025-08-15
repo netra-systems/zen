@@ -13,6 +13,7 @@ from app import schemas
 from app.services.synthetic_data_service import synthetic_data_service
 from app.dependencies import get_db_session, get_async_db
 from app.auth.auth_dependencies import get_current_user
+from app.schemas.shared_types import AgentConfig as BaseAgentConfig
 from app.db.models_postgres import User
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.synthetic_data_service import SyntheticDataService
@@ -38,10 +39,9 @@ class ScaleConfig(BaseModel):
     peak_load_multiplier: float = Field(default=1.0, gt=0)
 
 
-class AgentConfig(BaseModel):
-    """Agent configuration for generation"""
+class SyntheticDataAgentConfig(BaseAgentConfig):
+    """Extended agent configuration for synthetic data generation"""
     supervisor_strategy: str = Field(default="round_robin")
-    max_retries: int = Field(default=3, ge=0)
     backoff_strategy: str = Field(default="exponential")
 
 
@@ -52,7 +52,7 @@ class GenerationRequest(BaseModel):
     tool_catalog: List[ToolConfig]
     workload_distribution: Dict[str, float]
     scale_parameters: ScaleConfig
-    agent_configuration: Optional[AgentConfig] = None
+    agent_configuration: Optional[SyntheticDataAgentConfig] = None
 
 
 class GenerationResponse(BaseModel):

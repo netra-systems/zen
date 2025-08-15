@@ -84,12 +84,18 @@ class RateLimitTracker:
 class InputValidator:
     """Validate and sanitize inputs."""
     
-    # Dangerous patterns to block
+    # Enhanced dangerous patterns to block
     SQL_INJECTION_PATTERNS = [
-        r'(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)',
+        r'(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION|GRANT|REVOKE)\b)',
         r'(-{2}|/\*|\*/)',  # SQL comments
         r'(\b(OR|AND)\s+\d+\s*=\s*\d+)',  # OR 1=1, AND 1=1
         r'(\bxp_cmdshell\b)',  # SQL Server command execution
+        r'(\bsp_executesql\b)',  # SQL Server stored procedure
+        r'(\bINTO\s+OUTFILE\b)',  # MySQL file operations
+        r'(\bLOAD_FILE\b)',  # MySQL file reading
+        r'(\bUNION\s+ALL\s+SELECT\b)',  # UNION injection
+        r'(\bINFORMATION_SCHEMA\b)',  # Schema enumeration
+        r'(\bSYS\.\b)',  # System table access
     ]
     
     XSS_PATTERNS = [
@@ -99,11 +105,39 @@ class InputValidator:
         r'<iframe[^>]*>',
         r'<object[^>]*>',
         r'<embed[^>]*>',
+        r'<form[^>]*>',  # unauthorized forms
+        r'<input[^>]*>',  # unauthorized inputs
+        r'vbscript:',  # VBScript
+        r'data:text/html',  # Data URLs with HTML
+        r'expression\s*\(',  # CSS expressions
+        r'@import',  # CSS imports
+        r'<link[^>]*>',  # unauthorized stylesheets
+    ]
+    
+    COMMAND_INJECTION_PATTERNS = [
+        r'(\||\||&|&&|;|`)',  # Command separators
+        r'(\$\(|\`)',  # Command substitution
+        r'(\bwget\b|\bcurl\b|\bpowershell\b|\bcmd\b|\bsh\b|\bbash\b)',
+        r'(\brm\s+|\bdel\s+|\brmdir\b)',  # File deletion
+        r'(\bcat\s+|\btype\s+)',  # File reading
+        r'(\bchmod\b|\bchown\b)',  # Permission changes
+    ]
+    
+    PATH_TRAVERSAL_PATTERNS = [
+        r'\.\./',  # Directory traversal
+        r'\.\.\\\\',  # Windows directory traversal
+        r'%2e%2e%2f',  # URL encoded traversal
+        r'%2e%2e\/',  # Mixed encoding
+        r'/etc/passwd',  # Common target files
+        r'/windows/system32',
+        r'C:\\',  # Windows paths
     ]
     
     def __init__(self):
         self.sql_regex = re.compile('|'.join(self.SQL_INJECTION_PATTERNS), re.IGNORECASE)
         self.xss_regex = re.compile('|'.join(self.XSS_PATTERNS), re.IGNORECASE)
+        self.command_regex = re.compile('|'.join(self.COMMAND_INJECTION_PATTERNS), re.IGNORECASE)
+        self.path_regex = re.compile('|'.join(self.PATH_TRAVERSAL_PATTERNS), re.IGNORECASE)
     
     def validate_input(self, data: str, field_name: str = "input") -> None:
         """Validate input for security threats."""
@@ -122,6 +156,20 @@ class InputValidator:
             logger.error(f"XSS attempt detected in {field_name}: {data[:100]}")
             raise NetraSecurityException(
                 message=f"XSS attempt detected in {field_name}"
+            )
+        
+        # Check for command injection
+        if self.command_regex.search(data):
+            logger.error(f"Command injection attempt detected in {field_name}: {data[:100]}")
+            raise NetraSecurityException(
+                message=f"Command injection attempt detected in {field_name}"
+            )
+        
+        # Check for path traversal
+        if self.path_regex.search(data):
+            logger.error(f"Path traversal attempt detected in {field_name}: {data[:100]}")
+            raise NetraSecurityException(
+                message=f"Path traversal attempt detected in {field_name}"
             )
     
     def sanitize_headers(self, headers: Dict[str, str]) -> Dict[str, str]:

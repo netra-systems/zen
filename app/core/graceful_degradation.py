@@ -101,10 +101,16 @@ class DatabaseDegradationStrategy(DegradationStrategy):
     async def can_restore_service(self) -> bool:
         """Check if primary database is available."""
         try:
-            # Simulate primary DB health check
-            await asyncio.sleep(0.1)
-            return True  # Placeholder
-        except Exception:
+            # Perform actual database health check
+            from app.db.postgres import get_postgres_client
+            db_client = await get_postgres_client()
+            if db_client:
+                # Test connection with simple query
+                await db_client.execute("SELECT 1")
+                return True
+            return False
+        except Exception as e:
+            logger.warning(f"Database health check failed: {e}")
             return False
     
     async def _use_read_replica(self, context: Dict[str, Any]) -> Any:
@@ -168,10 +174,15 @@ class LLMDegradationStrategy(DegradationStrategy):
     async def can_restore_service(self) -> bool:
         """Check if primary LLM is available."""
         try:
-            # Simulate LLM health check
-            await asyncio.sleep(0.1)
-            return True  # Placeholder
-        except Exception:
+            # Perform actual LLM health check
+            from app.llm.llm_manager import llm_manager
+            if llm_manager and llm_manager.enabled:
+                # Test with simple completion
+                response = await llm_manager.complete("test", max_tokens=1)
+                return response is not None
+            return False
+        except Exception as e:
+            logger.warning(f"LLM health check failed: {e}")
             return False
     
     async def _use_smaller_model(self, context: Dict[str, Any]) -> Any:
@@ -240,10 +251,15 @@ class WebSocketDegradationStrategy(DegradationStrategy):
     async def can_restore_service(self) -> bool:
         """Check if WebSocket service can be restored."""
         try:
-            # Simulate WebSocket health check
-            await asyncio.sleep(0.1)
-            return True  # Placeholder
-        except Exception:
+            # Check WebSocket manager health
+            from app.ws_manager import manager as ws_manager
+            if ws_manager and hasattr(ws_manager, 'core'):
+                stats = ws_manager.get_stats()
+                # Service is healthy if we can get stats and have low error rate
+                return stats.total_errors < 10  # Configurable threshold
+            return False
+        except Exception as e:
+            logger.warning(f"WebSocket health check failed: {e}")
             return False
     
     async def _reduce_message_frequency(self, context: Dict[str, Any]) -> Any:

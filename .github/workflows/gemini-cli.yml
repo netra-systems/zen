@@ -1,15 +1,16 @@
 name: '💬 Gemini CLI'
 
-on:
-  pull_request_review_comment:
-    types:
-      - 'created'
-  pull_request_review:
-    types:
-      - 'submitted'
-  issue_comment:
-    types:
-      - 'created'
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   pull_request_review_comment:
+#     types:
+#       - 'created'
+#   pull_request_review:
+#     types:
+#       - 'submitted'
+#   issue_comment:
+#     types:
+#       - 'created'
 
 concurrency:
   group: '${{ github.workflow }}-${{ github.event.issue.number }}'

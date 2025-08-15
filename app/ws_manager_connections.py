@@ -13,12 +13,16 @@ from fastapi import WebSocket
 from app.logging_config import central_logger
 from app.websocket.connection import ConnectionInfo
 from app.ws_manager_core import WebSocketManagerCore
+from app.core.websocket_recovery_strategies import WebSocketConnectionManager as BaseWebSocketConnectionManager
 
 logger = central_logger.get_logger(__name__)
 
 
 class WebSocketConnectionManager:
-    """Manages WebSocket connection lifecycle operations."""
+    """Simplified WebSocket connection manager for lifecycle operations.
+    
+    Uses the advanced recovery manager internally but provides a simpler interface.
+    """
 
     def __init__(self, core: WebSocketManagerCore) -> None:
         """Initialize with core manager reference."""

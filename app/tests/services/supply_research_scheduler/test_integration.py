@@ -37,6 +37,18 @@ def scheduler():
         return SupplyResearchScheduler(mock_background_manager, mock_llm_manager)
 
 
+@pytest.fixture
+def service(scheduler):
+    """Alias scheduler as service for shared test compatibility"""
+    return scheduler
+
+
+@pytest.fixture
+def agent_or_service(scheduler):
+    """Alias scheduler as agent_or_service for shared test compatibility"""
+    return scheduler
+
+
 class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     """Test integration scenarios"""
     
@@ -60,11 +72,11 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
             mock_db_session = MagicMock()
             mock_db_class.return_value = MockDatabase(mock_db_session)
             
-            with patch('app.services.supply_research_scheduler.SupplyResearchService') as mock_service_class:
+            with patch('app.services.supply_research_service.SupplyResearchService') as mock_service_class:
                 mock_service = MockSupplyResearchService()
                 mock_service_class.return_value = mock_service
                 
-                with patch('app.services.supply_research_scheduler.SupplyResearcherAgent') as mock_agent_class:
+                with patch('app.agents.supply_researcher_sub_agent.SupplyResearcherAgent') as mock_agent_class:
                     mock_agent = MockAgent()
                     mock_agent_class.return_value = mock_agent
                     
@@ -104,11 +116,11 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
             mock_db_session = MagicMock()
             mock_db_class.return_value = MockDatabase(mock_db_session)
             
-            with patch('app.services.supply_research_scheduler.SupplyResearchService') as mock_service_class:
+            with patch('app.services.supply_research_service.SupplyResearchService') as mock_service_class:
                 mock_service = MockSupplyResearchService()
                 mock_service_class.return_value = mock_service
                 
-                with patch('app.services.supply_research_scheduler.SupplyResearcherAgent') as mock_agent_class:
+                with patch('app.agents.supply_researcher_sub_agent.SupplyResearcherAgent') as mock_agent_class:
                     mock_agent = MockAgent()
                     mock_agent_class.return_value = mock_agent
                     
@@ -149,11 +161,11 @@ class TestErrorHandling(SharedTestErrorHandling):
             mock_db_session = MagicMock()
             mock_db_class.return_value = MockDatabase(mock_db_session)
             
-            with patch('app.services.supply_research_scheduler.SupplyResearchService') as mock_service_class:
+            with patch('app.services.supply_research_service.SupplyResearchService') as mock_service_class:
                 mock_service = MockSupplyResearchService()
                 mock_service_class.return_value = mock_service
                 
-                with patch('app.services.supply_research_scheduler.SupplyResearcherAgent') as mock_agent_class:
+                with patch('app.agents.supply_researcher_sub_agent.SupplyResearcherAgent') as mock_agent_class:
                     mock_agent = MockAgent()
                     mock_agent.process_scheduled_research.side_effect = Exception("Agent failed")
                     mock_agent_class.return_value = mock_agent
@@ -181,11 +193,11 @@ class TestErrorHandling(SharedTestErrorHandling):
             mock_db_session = MagicMock()
             mock_db_class.return_value = MockDatabase(mock_db_session)
             
-            with patch('app.services.supply_research_scheduler.SupplyResearchService') as mock_service_class:
+            with patch('app.services.supply_research_service.SupplyResearchService') as mock_service_class:
                 mock_service = MockSupplyResearchService()
                 mock_service_class.return_value = mock_service
                 
-                with patch('app.services.supply_research_scheduler.SupplyResearcherAgent') as mock_agent_class:
+                with patch('app.agents.supply_researcher_sub_agent.SupplyResearcherAgent') as mock_agent_class:
                     mock_agent = MockAgent()
                     mock_agent_class.return_value = mock_agent
                     

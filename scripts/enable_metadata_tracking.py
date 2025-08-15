@@ -209,8 +209,27 @@ exit 0
     def create_validator_script(self) -> bool:
         """Create metadata validator script"""
         try:
-            validator_path = self.scripts_dir / "metadata_validator.py"
-            validator_content = '''#!/usr/bin/env python3
+            validator_path = self._get_validator_path()
+            validator_content = self._generate_validator_content()
+            return self._write_validator_script(validator_path, validator_content)
+        except Exception as e:
+            print(f"[ERROR] Failed to create validator script: {e}")
+            return False
+    
+    def _get_validator_path(self) -> Path:
+        """Get validator script path"""
+        return self.scripts_dir / "metadata_validator.py"
+    
+    def _generate_validator_content(self) -> str:
+        """Generate validator script content"""
+        imports = self._get_validator_imports()
+        class_def = self._get_validator_class()
+        main_def = self._get_validator_main()
+        return f"{imports}\n\n{class_def}\n\n{main_def}"
+    
+    def _get_validator_imports(self) -> str:
+        """Get validator script imports"""
+        return '''#!/usr/bin/env python3
 """
 Metadata Validator - Validates AI agent metadata headers in modified files
 """
@@ -220,9 +239,17 @@ import sys
 import re
 import subprocess
 from pathlib import Path
-from typing import List, Tuple, Dict, Any
-
-class MetadataValidator:
+from typing import List, Tuple, Dict, Any'''
+    
+    def _get_validator_class(self) -> str:
+        """Get validator class definition"""
+        class_header = self._get_class_header()
+        methods = self._get_class_methods()
+        return f"{class_header}\n{methods}"
+    
+    def _get_class_header(self) -> str:
+        """Get validator class header and constants"""
+        return '''class MetadataValidator:
     """Validates metadata headers in files"""
     
     REQUIRED_FIELDS = [
@@ -237,9 +264,18 @@ class MetadataValidator:
     
     def __init__(self):
         self.errors = []
-        self.warnings = []
+        self.warnings = []'''
     
-    def get_modified_files(self) -> List[str]:
+    def _get_class_methods(self) -> str:
+        """Get validator class methods"""
+        get_files = self._get_modified_files_method()
+        validate_file = self._get_validate_file_method()
+        validate_all = self._get_validate_all_method()
+        return f"\n\n{get_files}\n\n{validate_file}\n\n{validate_all}"
+    
+    def _get_modified_files_method(self) -> str:
+        """Get modified files method"""
+        return '''    def get_modified_files(self) -> List[str]:
         """Get list of modified files from git"""
         try:
             result = subprocess.run(
@@ -250,9 +286,11 @@ class MetadataValidator:
             )
             return [f for f in result.stdout.splitlines() if f.endswith(('.py', '.js', '.ts', '.jsx', '.tsx'))]
         except subprocess.CalledProcessError:
-            return []
+            return []'''
     
-    def validate_file(self, file_path: str) -> bool:
+    def _get_validate_file_method(self) -> str:
+        """Get validate file method"""
+        return '''    def validate_file(self, file_path: str) -> bool:
         """Validate metadata header in a single file"""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -283,9 +321,11 @@ class MetadataValidator:
             
         except Exception as e:
             self.errors.append(f"{file_path}: Error reading file - {e}")
-            return False
+            return False'''
     
-    def validate_all(self) -> bool:
+    def _get_validate_all_method(self) -> str:
+        """Get validate all method"""
+        return '''    def validate_all(self) -> bool:
         """Validate all modified files"""
         files = self.get_modified_files()
         
@@ -314,9 +354,11 @@ class MetadataValidator:
         if all_valid and not self.errors:
             print("\\n✅ All files have valid metadata headers")
         
-        return all_valid and not self.errors
-
-def main():
+        return all_valid and not self.errors'''
+    
+    def _get_validator_main(self) -> str:
+        """Get validator main function"""
+        return '''def main():
     import argparse
     parser = argparse.ArgumentParser(description="Validate AI agent metadata headers")
     parser.add_argument("--validate-all", action="store_true", help="Validate all modified files")
@@ -336,21 +378,15 @@ def main():
         parser.print_help()
 
 if __name__ == "__main__":
-    main()
-'''
-            
-            with open(validator_path, 'w') as f:
-                f.write(validator_content)
-            
-            # Make script executable
-            os.chmod(validator_path, 0o755)
-            
-            print(f"[SUCCESS] Validator script created at {validator_path}")
-            return True
-            
-        except Exception as e:
-            print(f"[ERROR] Failed to create validator script: {e}")
-            return False
+    main()'''
+    
+    def _write_validator_script(self, validator_path: Path, content: str) -> bool:
+        """Write validator script to file"""
+        with open(validator_path, 'w') as f:
+            f.write(content)
+        os.chmod(validator_path, 0o755)
+        print(f"[SUCCESS] Validator script created at {validator_path}")
+        return True
     
     def create_archiver_script(self) -> bool:
         """Create metadata archiver script"""

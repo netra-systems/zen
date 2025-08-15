@@ -22,48 +22,41 @@ except ImportError as e:
     sys.exit(1)
 
 
-def main():
-    """Main schema synchronization function."""
-    
-    # Configuration
-    backend_modules = [
-        'app.schemas.Agent',
-        'app.schemas.Analysis', 
-        'app.schemas.Auth',
-        'app.schemas.Config',
-        'app.schemas.Corpus',
-        'app.schemas.Event',
-        'app.schemas.FinOps',
-        'app.schemas.Generation',
-        'app.schemas.Log',
-        'app.schemas.Message',
-        'app.schemas.Metrics',
-        'app.schemas.Pattern',
-        'app.schemas.Performance',
-        'app.schemas.Policy',
-        'app.schemas.Reference',
-        'app.schemas.Request',
-        'app.schemas.Run',
-        'app.schemas.Supply',
-        'app.schemas.Token',
-        'app.schemas.Tool',
-        'app.schemas.User',
+def get_backend_modules():
+    """Get list of backend modules to synchronize."""
+    return [
+        'app.schemas.Agent', 'app.schemas.Analysis', 'app.schemas.Auth',
+        'app.schemas.Config', 'app.schemas.Corpus', 'app.schemas.Event',
+        'app.schemas.FinOps', 'app.schemas.Generation', 'app.schemas.Log',
+        'app.schemas.Message', 'app.schemas.Metrics', 'app.schemas.Pattern',
+    ]
+
+
+def get_additional_modules():
+    """Get additional backend modules to synchronize."""
+    return [
+        'app.schemas.Performance', 'app.schemas.Policy', 'app.schemas.Reference',
+        'app.schemas.Request', 'app.schemas.Run', 'app.schemas.Supply',
+        'app.schemas.Token', 'app.schemas.Tool', 'app.schemas.User',
         'app.schemas.WebSocket'
     ]
-    
-    frontend_output_path = "frontend/types/backend_schema_auto_generated.ts"
-    validation_level = SchemaValidationLevel.MODERATE
-    
-    # Parse command line arguments
+
+
+def parse_command_line_args():
+    """Parse command line arguments and return configuration."""
     force_sync = '--force' in sys.argv
     strict_validation = '--strict' in sys.argv
     lenient_validation = '--lenient' in sys.argv
-    
+    validation_level = SchemaValidationLevel.MODERATE
     if strict_validation:
         validation_level = SchemaValidationLevel.STRICT
     elif lenient_validation:
         validation_level = SchemaValidationLevel.LENIENT
-    
+    return force_sync, validation_level
+
+
+def print_configuration(backend_modules, frontend_output_path, validation_level, force_sync):
+    """Print synchronization configuration."""
     print("Enhanced Schema Synchronization")
     print("=" * 40)
     print(f"Backend modules: {len(backend_modules)} modules")
@@ -71,67 +64,109 @@ def main():
     print(f"Validation level: {validation_level.value}")
     print(f"Force sync: {force_sync}")
     print()
+
+
+def create_synchronizer(backend_modules, frontend_output_path, validation_level):
+    """Create and return schema synchronizer instance."""
+    return SchemaSynchronizer(
+        backend_modules=backend_modules,
+        frontend_output_path=frontend_output_path,
+        validation_level=validation_level
+    )
+
+
+def print_sync_results(report):
+    """Print synchronization results summary."""
+    print(f"✅ Synchronization completed at {report.timestamp}")
+    print(f"📊 Processed {report.schemas_processed} schemas")
+    print(f"🔄 Changes detected: {len(report.changes_detected)}")
+    print(f"📁 Files generated: {len(report.files_generated)}")
+
+
+def print_changes_detected(changes_detected):
+    """Print detected changes details."""
+    if not changes_detected:
+        return
+    print("\n📋 Changes detected:")
+    for change in changes_detected:
+        icon = "➕" if change.change_type == "added" else "➖" if change.change_type == "removed" else "🔄"
+        field_info = f" ({change.field_name})" if change.field_name else ""
+        print(f"   {icon} {change.schema_name}{field_info}: {change.description}")
+
+
+def print_validation_errors(validation_errors):
+    """Print validation errors."""
+    if not validation_errors:
+        return
+    print("\n⚠️ Validation warnings:")
+    for error in validation_errors:
+        print(f"   ⚠️ {error}")
+
+
+def print_generated_files(files_generated):
+    """Print list of generated files."""
+    if not files_generated:
+        return
+    print("\n📄 Generated files:")
+    for file_path in files_generated:
+        print(f"   📄 {file_path}")
+
+
+def validate_typescript_output(frontend_output_path):
+    """Validate generated TypeScript output file."""
+    output_path = Path(frontend_output_path)
+    if not output_path.exists():
+        return
+    content = output_path.read_text(encoding='utf-8')
+    print(f"   📏 Generated file size: {len(content)} characters")
+    print(f"   📋 Contains {content.count('export interface')} interfaces")
+    print(f"   📋 Contains {content.count('export type')} type definitions")
+
+
+def run_additional_validations(frontend_output_path):
+    """Run additional validation checks."""
+    print("\n🔍 Running additional validations...")
+    validate_typescript_output(frontend_output_path)
+    print("✅ All validations passed!")
+
+
+def handle_sync_error(error):
+    """Handle synchronization errors."""
+    if isinstance(error, ServiceError):
+        print(f"\n❌ Service error: {error}")
+    else:
+        print(f"\n❌ Unexpected error: {error}")
+        print("Consider running with --force if schemas have breaking changes")
+    return 1
+
+
+def main():
+    """Main schema synchronization function."""
+    backend_modules = get_backend_modules() + get_additional_modules()
+    frontend_output_path = "frontend/types/backend_schema_auto_generated.ts"
+    force_sync, validation_level = parse_command_line_args()
+    
+    print_configuration(backend_modules, frontend_output_path, validation_level, force_sync)
     
     try:
-        # Create synchronizer
-        synchronizer = SchemaSynchronizer(
-            backend_modules=backend_modules,
-            frontend_output_path=frontend_output_path,
-            validation_level=validation_level
-        )
-        
-        # Perform synchronization
+        synchronizer = create_synchronizer(backend_modules, frontend_output_path, validation_level)
         print("Starting schema synchronization...")
         report = synchronizer.sync_schemas(force=force_sync)
         
-        # Display results
-        print(f"✅ Synchronization completed at {report.timestamp}")
-        print(f"📊 Processed {report.schemas_processed} schemas")
-        print(f"🔄 Changes detected: {len(report.changes_detected)}")
-        print(f"📁 Files generated: {len(report.files_generated)}")
-        
-        if report.changes_detected:
-            print("\n📋 Changes detected:")
-            for change in report.changes_detected:
-                icon = "➕" if change.change_type == "added" else "➖" if change.change_type == "removed" else "🔄"
-                field_info = f" ({change.field_name})" if change.field_name else ""
-                print(f"   {icon} {change.schema_name}{field_info}: {change.description}")
-        
-        if report.validation_errors:
-            print("\n⚠️ Validation warnings:")
-            for error in report.validation_errors:
-                print(f"   ⚠️ {error}")
-        
-        if report.files_generated:
-            print("\n📄 Generated files:")
-            for file_path in report.files_generated:
-                print(f"   📄 {file_path}")
+        print_sync_results(report)
+        print_changes_detected(report.changes_detected)
+        print_validation_errors(report.validation_errors)
+        print_generated_files(report.files_generated)
         
         print(f"\n{'✅ Sync succeeded!' if report.success else '❌ Sync failed!'}")
         
-        # Additional validation
         if report.success:
-            print("\n🔍 Running additional validations...")
-            
-            # Check if TypeScript file is valid
-            output_path = Path(frontend_output_path)
-            if output_path.exists():
-                content = output_path.read_text(encoding='utf-8')
-                print(f"   📏 Generated file size: {len(content)} characters")
-                print(f"   📋 Contains {content.count('export interface')} interfaces")
-                print(f"   📋 Contains {content.count('export type')} type definitions")
-            
-            print("✅ All validations passed!")
+            run_additional_validations(frontend_output_path)
         
         return 0 if report.success else 1
         
-    except ServiceError as e:
-        print(f"\n❌ Service error: {e}")
-        return 1
-    except Exception as e:
-        print(f"\n❌ Unexpected error: {e}")
-        print("Consider running with --force if schemas have breaking changes")
-        return 1
+    except (ServiceError, Exception) as e:
+        return handle_sync_error(e)
 
 
 def print_usage():

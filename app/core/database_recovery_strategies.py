@@ -310,9 +310,15 @@ class DatabaseFailoverStrategy(DatabaseRecoveryStrategy):
                 f"{backup_config.host}:{backup_config.port}"
             )
             
-            # This is a placeholder - actual failover would require
-            # recreating the pool with new configuration
-            return False
+            # Perform actual failover by updating connection configuration
+            try:
+                from app.db.postgres import update_connection_config
+                await update_connection_config(backup_config)
+                logger.info(f"Successfully failed over to backup database")
+                return True
+            except Exception as failover_error:
+                logger.error(f"Failed to update connection config: {failover_error}")
+                return False
             
         except Exception as e:
             logger.error(f"Database failover failed: {e}")

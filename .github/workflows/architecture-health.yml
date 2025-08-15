@@ -1,25 +1,26 @@
 name: Architecture Health Monitor
 
-on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
-  schedule:
-    # Run daily at 9 AM UTC
-    - cron: '0 9 * * *'
-  workflow_dispatch:
-    inputs:
-      fail_on_violations:
-        description: 'Fail workflow on violations'
-        required: false
-        default: 'false'
-        type: boolean
-      generate_reports:
-        description: 'Generate HTML and JSON reports'
-        required: false
-        default: 'true'
-        type: boolean
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   push:
+#     branches: [ main, develop ]
+#   pull_request:
+#     branches: [ main, develop ]
+#   schedule:
+#     # Run daily at 9 AM UTC
+#     - cron: '0 9 * * *'
+#   workflow_dispatch:
+#     inputs:
+#       fail_on_violations:
+#         description: 'Fail workflow on violations'
+#         required: false
+#         default: 'false'
+#         type: boolean
+#       generate_reports:
+#         description: 'Generate HTML and JSON reports'
+#         required: false
+#         default: 'true'
+#         type: boolean
 
 env:
   REPORTS_DIR: reports/architecture-health

@@ -27,7 +27,9 @@ class TestStartupCheckerEnvConfig:
     async def test_check_environment_variables_dev_mode(self, mock_app, monkeypatch):
         """Test environment variable check in development mode."""
         setup_env_vars_development(monkeypatch)
-        clear_required_env_vars(monkeypatch)
+        # Don't clear required vars - they're always required now
+        monkeypatch.setenv("DATABASE_URL", "postgresql://test")
+        monkeypatch.setenv("SECRET_KEY", "test-secret-key")
         
         # Create checker after setting environment
         checker = StartupChecker(mock_app)
@@ -35,7 +37,7 @@ class TestStartupCheckerEnvConfig:
         result = await checker.env_checker.check_environment_variables()
         
         assert result.success == True
-        assert "Development mode" in result.message
+        assert "Development mode - using default configs" in result.message
     
     @pytest.mark.asyncio
     async def test_check_environment_variables_production_missing(self, mock_app, monkeypatch):
