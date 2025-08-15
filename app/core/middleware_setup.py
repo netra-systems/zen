@@ -27,9 +27,9 @@ def _get_production_cors_origins() -> list[str]:
 
 def _get_development_cors_origins() -> list[str]:
     """Get CORS origins for development environment."""
-    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
-    if cors_origins_env:
-        return cors_origins_env.split(",")
+    #cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+    #if cors_origins_env:
+    #    return cors_origins_env.split(",")
     return ["*"]
 
 
