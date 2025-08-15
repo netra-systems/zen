@@ -550,6 +550,34 @@ class StreamEvent(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
 
 
+class AgentStarted(BaseWebSocketPayload):
+    """Agent started WebSocket payload."""
+    agent_id: str
+    agent_type: str
+    run_id: str
+    status: AgentStatus = AgentStatus.ACTIVE
+    message: Optional[str] = None
+
+
+class SubAgentUpdate(BaseWebSocketPayload):
+    """Sub-agent update WebSocket payload."""
+    agent_id: str
+    sub_agent_name: str
+    status: AgentStatus
+    message: Optional[str] = None
+    progress: Optional[float] = Field(default=None, ge=0, le=100)
+    current_task: Optional[str] = None
+
+
+class AgentCompleted(BaseWebSocketPayload):
+    """Agent completed WebSocket payload."""
+    agent_id: str
+    run_id: str
+    result: AgentResult
+    status: AgentStatus = AgentStatus.COMPLETED
+    message: Optional[str] = None
+
+
 # ============================================================================
 # AUDIT MODELS - CORPUS OPERATIONS
 # ============================================================================
@@ -649,6 +677,7 @@ __all__ = [
     "WebSocketMessage", "WebSocketError", "BaseWebSocketPayload", 
     "UserMessagePayload", "AgentUpdatePayload", "MessageToUser", "AnalysisRequest",
     "UserMessage", "AgentMessage", "StopAgent", "StreamEvent",
+    "AgentStarted", "SubAgentUpdate", "AgentCompleted",
     "WebSocketMessageIn", "MessageTypeLiteral", "CreateThreadPayload", 
     "SwitchThreadPayload", "DeleteThreadPayload", "MessageData", "ThreadHistoryResponse",
     "AgentResponseData", "AgentResponse", "AgentCompletedPayload", "AgentStoppedPayload",

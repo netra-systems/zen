@@ -583,11 +583,6 @@ class TestSecurityServiceOAuth:
         """Test creating new user from OAuth data"""
         mock_db_session = AsyncMock()
         
-        # Mock no existing user
-        mock_result = MagicMock()
-        mock_result.scalars.return_value.first.return_value = None
-        mock_db_session.execute.return_value = mock_result
-        
         oauth_user_info = {
             "email": "oauth@example.com",
             "name": "OAuth User",
@@ -598,7 +593,14 @@ class TestSecurityServiceOAuth:
         created_user = MockUser("oauth_123", "oauth@example.com", "OAuth User")
         created_user.picture = "https://example.com/avatar.jpg"
         
-        with patch('app.db.models_postgres.User', return_value=created_user):
+        # Mock the database session operations
+        mock_db_session.add.return_value = None
+        mock_db_session.commit.return_value = None
+        mock_db_session.refresh.return_value = None
+        
+        # Mock get_user to return None (no existing user) and User constructor
+        with patch.object(oauth_security_service, 'get_user', return_value=None), \
+             patch('app.db.models_postgres.User', return_value=created_user):
             user = await oauth_security_service.get_or_create_user_from_oauth(
                 mock_db_session, oauth_user_info
             )

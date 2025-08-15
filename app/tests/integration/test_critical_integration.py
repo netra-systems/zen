@@ -24,8 +24,9 @@ from app.services.database.message_repository import MessageRepository
 from app.services.database.run_repository import RunRepository
 from app.ws_manager import WebSocketManager
 from app.schemas.registry import (
-    WebSocketMessage, AgentStarted, SubAgentUpdate, AgentCompleted
+    WebSocketMessage, SubAgentUpdate, AgentCompleted
 )
+from app.schemas.Agent import AgentStarted
 from starlette.websockets import WebSocketState
 from app.schemas.registry import UserBase
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine

@@ -1,12 +1,14 @@
-from typing import Annotated
+from typing import Annotated, TYPE_CHECKING
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.postgres import get_async_db
 from app.llm.llm_manager import LLMManager
 from app.services.security_service import SecurityService
-from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.logging_config import central_logger
+
+if TYPE_CHECKING:
+    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 
 logger = central_logger.get_logger(__name__)
 
@@ -25,5 +27,5 @@ def get_security_service(request: Request) -> SecurityService:
 
 LLMManagerDep = Annotated[LLMManager, Depends(get_llm_manager)]
 
-def get_agent_supervisor(request: Request) -> Supervisor:
+def get_agent_supervisor(request: Request) -> "Supervisor":
     return request.app.state.agent_supervisor

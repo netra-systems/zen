@@ -1,56 +1,29 @@
-# ==========================================
-# CENTRALIZED WORKFLOW CONFIGURATION
-# ==========================================
-# This file contains shared configuration for all GitHub Actions workflows
-# in the Netra repository. All workflows should reference this config
-# to ensure consistency and maintainability.
+# Enhanced CI/CD Pipeline Configuration
+# This file centralizes workflow configuration for all pipelines
 
-# ==========================================
-# GLOBAL SETTINGS
-# ==========================================
 global:
-  # Repository-wide settings
-  repository:
-    default_branch: main
-    protected_branches:
-      - main
-      - develop
-      - release/*
-  
-  # Versioning
   versions:
-    python: '3.11'
-    node: '24.5.0'
-    terraform: '1.12.2'
-    docker_buildkit: '1'
+    python: "3.11"
+    node: "20"
+    terraform: "1.6.0"
+    kubectl: "1.28.0"
   
-  # Runner configurations
   runners:
-    default: 'warp-custom-default'
-    custom: 'warp-custom-default'
-
-# ==========================================
-# TIMEOUT CONFIGURATIONS
-# ==========================================
-timeouts:
-  # Test workflow timeouts (in minutes)
-  smoke: 5
-  unit: 10
-  integration: 20
-  comprehensive: 60
+    default: "ubuntu-latest"
+    custom: "warp-custom-default"
+    windows: "windows-latest"
+    macos: "macos-latest"
   
-  # Deployment timeouts
-  staging_deploy: 30
-  production_deploy: 45
-  rollback: 15
-  
-  # Build timeouts
-  docker_build: 20
-  npm_build: 15
-  python_build: 10
-  
-  # Default timeout for unspecified jobs
-  default: 30
+  # Global timeout settings (minutes)
+  timeouts:
+    smoke: 5
+    unit: 10
+    integration: 20
+    comprehensive: 60
+    security_scan: 15
+    performance_test: 20
+    staging_deployment: 30
+    rollback: 5
 
 # ==========================================
 # TEST CONFIGURATIONS
