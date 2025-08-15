@@ -174,8 +174,8 @@ class ValidationResult(BaseModel):
     threats_detected: List[str] = Field(default_factory=list, description="Security threats found")
 
 
-class AgentConfig(BaseModel):
-    """Centralized agent configuration for all agents."""
+class BaseAgentConfig(BaseModel):
+    """Base agent configuration for all agents."""
     retry: RetryConfig = Field(default_factory=RetryConfig)
     default_timeout: float = Field(default=30.0, description="Default operation timeout")
     max_concurrent_operations: int = Field(default=10, description="Max concurrent operations")

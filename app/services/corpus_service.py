@@ -358,6 +358,21 @@ class CorpusService:
             "last_updated": "2024-08-14T10:30:00Z"
         }
 
+    async def _copy_corpus_content(self, source_table: str, dest_table: str, corpus_id: str, db):
+        """Copy content from source ClickHouse table to destination table"""
+        try:
+            async with get_clickhouse_client() as client:
+                # Copy all content from source to destination table
+                copy_query = f"""
+                INSERT INTO {dest_table}
+                SELECT * FROM {source_table}
+                """
+                await client.execute(copy_query)
+                logger.info(f"Successfully copied content from {source_table} to {dest_table}")
+        except Exception as e:
+            logger.error(f"Failed to copy corpus content from {source_table} to {dest_table}: {e}")
+            raise
+
 
 # Legacy functions for backward compatibility
 # Legacy functions for backward compatibility - migrate routes to use async CorpusService directly

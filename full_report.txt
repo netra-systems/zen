@@ -1,0 +1,100 @@
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\scripts\check_architecture_compliance.py:254: DeprecationWarning: ast.Str is deprecated and will be removed in Python 3.14; use ast.Constant instead
+  isinstance(node.body[0].value, (ast.Constant, ast.Str))):
+
+================================================================================
+ARCHITECTURE COMPLIANCE REPORT
+================================================================================
+
+[FILE SIZE VIOLATIONS] (>300 lines)
+----------------------------------------
+   905 lines: app\tests\services\test_external_api_client.py
+   855 lines: app\tests\services\test_agent_service_orchestration.py
+   835 lines: frontend\__tests__\components\chat\MainChat.test.tsx
+   831 lines: frontend\cypress\e2e\critical-websocket-resilience.cy.ts
+   830 lines: scripts\enhanced_test_reporter.py
+   829 lines: scripts\test_updater.py
+   814 lines: app\schemas\registry.py
+   809 lines: scripts\boundary_enforcer.py
+   795 lines: scripts\status_report_generator.py
+   782 lines: scripts\install_dev_env.py
+  ... and 333 more files
+
+  Total violations: 343
+
+[FUNCTION COMPLEXITY VIOLATIONS] (>8 lines)
+----------------------------------------
+  VIOLATIONS (must fix):
+     93 lines: _generate_html_report() in scripts\run_real_service_tests_enhanced.py
+     92 lines: generate_report() in scripts\categorize_tests.py
+     91 lines: _perform_analysis() in app\agents\data_sub_agent\agent_backup.py
+     91 lines: main() in scripts\boundary_enforcer.py
+     88 lines: create_archiver_script() in scripts\enable_metadata_tracking.py
+    ... and 2655 more violations
+
+  WARNINGS (example/demo files):
+    219 lines: main() in scripts\test_frontend.py
+    150 lines: main() in scripts\test_backend.py
+    126 lines: test_agent_coordination_with_external_api_call() in app\tests\integration\test_critical_system_integration.py
+    125 lines: test_authentication_expiry_during_connection() in app\tests\websocket\test_compression_auth.py
+    119 lines: generate_comprehensive_report() in scripts\enhanced_test_reporter.py
+    ... and 2738 more warnings
+
+  Total: 2660 violations, 2743 warnings
+
+[DUPLICATE TYPE DEFINITIONS]
+----------------------------------------
+  Type 'DemoAgent' defined in 3 files
+    Files: app\agents\demo_agent.py, app\tests\agents\test_supervisor_corpus_data.py, app\tests\helpers\supervisor_test_classes.py
+  Type 'ErrorCategory' defined in 2 files
+    Files: app\agents\error_handler.py, app\core\error_logging.py
+  Type 'DatabaseError' defined in 2 files
+    Files: app\agents\error_handler.py, app\core\exceptions_database.py
+  Type 'InputValidator' defined in 2 files
+    Files: app\agents\input_validation.py, app\middleware\security_middleware.py
+  Type 'ProductionTool' defined in 2 files
+    Files: app\agents\production_tool.py, app\agents\tool_dispatcher_old.py
+  Type 'QualityValidator' defined in 2 files
+    Files: app\agents\quality_checks.py, app\services\quality_gate\quality_gate_validators.py
+  Type 'AgentMetadata' defined in 4 files
+    Files: app\agents\state.py, app\schemas\agent_models.py, app\schemas\registry.py...
+  Type 'SyntheticDataResult' defined in 2 files
+    Files: app\agents\state.py, app\agents\synthetic_data_generator.py
+  Type 'DeepAgentState' defined in 3 files
+    Files: app\agents\state.py, app\schemas\agent_models.py, app\schemas\registry.py
+  Type 'CircuitBreakerState' defined in 2 files
+    Files: app\agents\supervisor_circuit_breaker.py, app\core\reliability_circuit_breaker.py
+
+  ... and 354 more duplicate types
+
+  Total duplicate types: 364
+
+[TEST STUBS IN PRODUCTION]
+----------------------------------------
+  app\agents\admin_tool_dispatcher\dispatcher_core.py (line 1): Test stub detected: For testing docstring
+  app\core\async_retry_logic.py (line 32): Test stub detected: Args/kwargs with static return
+  app\core\config_validator.py (line 1): Test stub detected: For testing docstring
+  app\db\query_cache.py (line 1): Test stub detected: Placeholder docstring
+  app\middleware\metrics_middleware.py (line 49): Test stub detected: Args/kwargs with static return
+  app\middleware\metrics_middleware_compact.py (line 34): Test stub detected: Args/kwargs with static return
+  app\routes\health.py (line 27): Test stub detected: Static status return
+  app\routes\llm_cache.py (line 11): Test stub detected: For testing docstring
+  app\routes\quality.py (line 1): Test stub detected: For testing docstring
+  app\routes\supply.py (line 24): Test stub detected: For testing docstring
+  ... and 128 more files
+
+  Total suspicious files: 138
+
+================================================================================
+SUMMARY
+================================================================================
+[FAIL] VIOLATIONS FOUND: 3505 issues requiring fixes
+       WARNINGS: 2743 issues in example/demo files
+Compliance Score: 19.8%
+
+Required Actions:
+  - Split 343 oversized files
+  - Refactor 2660 complex functions
+  - Deduplicate 364 type definitions
+  - Remove 138 test stubs from production
+
+Refer to ALIGNMENT_ACTION_PLAN.md for remediation steps

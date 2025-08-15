@@ -54,81 +54,98 @@ class MessageValidator:
             True if valid, WebSocketValidationError if invalid
         """
         try:
-            # Basic structure validation
-            if not isinstance(message, dict):
-                return WebSocketValidationError(
-                    error_type="format_error",
-                    message=f"Message is not a dictionary: {type(message)}",
-                    received_data=message
-                )
-            
-            # Required fields
-            if "type" not in message:
-                return WebSocketValidationError(
-                    error_type="validation_error",
-                    message="Message missing 'type' field",
-                    field="type",
-                    received_data=message
-                )
-            
-            # SECURITY VALIDATION FIRST - Check for malicious content before anything else
+            structure_error = self._validate_basic_structure(message)
+            if structure_error:
+                return structure_error
             security_error = self._validate_payload_content(message)
             if security_error:
                 return security_error
-            
-            # Validate message type using enum
-            message_type = message.get("type")
-            try:
-                WebSocketMessageType(message_type)
-            except ValueError:
-                if self.allow_unknown_types:
-                    logger.warning(f"Unknown message type allowed: {message_type}")
-                else:
-                    return WebSocketValidationError(
-                        error_type="type_error",
-                        message=f"Invalid message type: {message_type}",
-                        field="type",
-                        received_data=message
-                    )
-            
-            # Validate using Pydantic model with flexible payload handling
-            try:
-                # If message doesn't have payload field, create one from the other fields
-                if "payload" not in message:
-                    # Extract type and create payload from remaining fields
-                    payload_data = {k: v for k, v in message.items() if k != "type"}
-                    flexible_message = {
-                        "type": message["type"],
-                        "payload": payload_data
-                    }
-                    validated_message = WebSocketMessage(**flexible_message)
-                else:
-                    validated_message = WebSocketMessage(**message)
-            except ValidationError as e:
-                return WebSocketValidationError(
-                    error_type="validation_error",
-                    message=f"Message validation failed: {str(e)}",
-                    received_data=message
-                )
-            
-            # Size validation (prevent large payloads)
-            message_str = json.dumps(message, cls=DateTimeEncoder)
-            if len(message_str) > self.max_message_size:
-                return WebSocketValidationError(
-                    error_type="validation_error",
-                    message=f"Message too large: {len(message_str)} bytes",
-                    received_data=message
-                )
-            
+            type_error = self._validate_message_type(message)
+            if type_error:
+                return type_error
+            pydantic_error = self._validate_with_pydantic(message)
+            if pydantic_error:
+                return pydantic_error
+            size_error = self._validate_message_size(message)
+            if size_error:
+                return size_error
             return True
-            
         except Exception as e:
-            logger.error(f"Error validating message: {e}")
+            return self._handle_validation_exception(e, message)
+    
+    def _validate_basic_structure(self, message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
+        """Validate basic message structure."""
+        if not isinstance(message, dict):
             return WebSocketValidationError(
-                error_type="validation_error",
-                message=f"Unexpected validation error: {str(e)}",
+                error_type="format_error",
+                message=f"Message is not a dictionary: {type(message)}",
                 received_data=message
             )
+        if "type" not in message:
+            return WebSocketValidationError(
+                error_type="validation_error",
+                message="Message missing 'type' field",
+                field="type",
+                received_data=message
+            )
+        return None
+    
+    def _validate_message_type(self, message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
+        """Validate message type using enum."""
+        message_type = message.get("type")
+        try:
+            WebSocketMessageType(message_type)
+            return None
+        except ValueError:
+            if self.allow_unknown_types:
+                logger.warning(f"Unknown message type allowed: {message_type}")
+                return None
+            return WebSocketValidationError(
+                error_type="type_error",
+                message=f"Invalid message type: {message_type}",
+                field="type",
+                received_data=message
+            )
+    
+    def _validate_with_pydantic(self, message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
+        """Validate message using Pydantic model."""
+        try:
+            flexible_message = self._create_flexible_message(message)
+            WebSocketMessage(**flexible_message)
+            return None
+        except ValidationError as e:
+            return WebSocketValidationError(
+                error_type="validation_error",
+                message=f"Message validation failed: {str(e)}",
+                received_data=message
+            )
+    
+    def _create_flexible_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
+        """Create flexible message format for Pydantic validation."""
+        if "payload" not in message:
+            payload_data = {k: v for k, v in message.items() if k != "type"}
+            return {"type": message["type"], "payload": payload_data}
+        return message
+    
+    def _validate_message_size(self, message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
+        """Validate message size limits."""
+        message_str = json.dumps(message, cls=DateTimeEncoder)
+        if len(message_str) > self.max_message_size:
+            return WebSocketValidationError(
+                error_type="validation_error",
+                message=f"Message too large: {len(message_str)} bytes",
+                received_data=message
+            )
+        return None
+    
+    def _handle_validation_exception(self, e: Exception, message: Dict[str, Any]) -> WebSocketValidationError:
+        """Handle unexpected validation exceptions."""
+        logger.error(f"Error validating message: {e}")
+        return WebSocketValidationError(
+            error_type="validation_error",
+            message=f"Unexpected validation error: {str(e)}",
+            received_data=message
+        )
     
     def _validate_payload_content(self, message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
         """Validate payload content for security and size limits.
@@ -139,48 +156,64 @@ class MessageValidator:
         Returns:
             WebSocketValidationError if invalid, None if valid
         """
-        if "payload" not in message or not isinstance(message["payload"], dict):
+        if not self._has_valid_payload(message):
             return None
-        
         payload = message["payload"]
-        
-        # Validate text fields
-        if "text" in payload:
-            text = payload["text"]
-            if isinstance(text, str):
-                # Remove potential script injections
-                if "<script" in text.lower() or "javascript:" in text.lower():
-                    return WebSocketValidationError(
-                        error_type="security_error",
-                        message="Potential script injection detected in message",
-                        field="payload.text",
-                        received_data=message
-                    )
-                
-                # Check for common XSS patterns
-                dangerous_patterns = [
-                    "onclick=", "onerror=", "onload=", "onmouseover=",
-                    "<iframe", "<object", "<embed", "<form"
-                ]
-                text_lower = text.lower()
-                for pattern in dangerous_patterns:
-                    if pattern in text_lower:
-                        return WebSocketValidationError(
-                            error_type="security_error",
-                            message=f"Potentially dangerous content detected: {pattern}",
-                            field="payload.text",
-                            received_data=message
-                        )
-                
-                # Limit text length
-                if len(text) > self.max_text_length:
-                    return WebSocketValidationError(
-                        error_type="validation_error",
-                        message=f"Text too long: {len(text)} characters",
-                        field="payload.text",
-                        received_data=message
-                    )
-        
+        if "text" in payload and isinstance(payload["text"], str):
+            return self._validate_text_content(payload["text"], message)
+        return None
+    
+    def _has_valid_payload(self, message: Dict[str, Any]) -> bool:
+        """Check if message has valid payload structure."""
+        return "payload" in message and isinstance(message["payload"], dict)
+    
+    def _validate_text_content(self, text: str, message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
+        """Validate text content for security and length."""
+        script_error = self._check_script_injection(text, message)
+        if script_error:
+            return script_error
+        xss_error = self._check_xss_patterns(text, message)
+        if xss_error:
+            return xss_error
+        return self._check_text_length(text, message)
+    
+    def _check_script_injection(self, text: str, message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
+        """Check for script injection patterns."""
+        if "<script" in text.lower() or "javascript:" in text.lower():
+            return WebSocketValidationError(
+                error_type="security_error",
+                message="Potential script injection detected in message",
+                field="payload.text",
+                received_data=message
+            )
+        return None
+    
+    def _check_xss_patterns(self, text: str, message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
+        """Check for XSS attack patterns."""
+        dangerous_patterns = [
+            "onclick=", "onerror=", "onload=", "onmouseover=",
+            "<iframe", "<object", "<embed", "<form"
+        ]
+        text_lower = text.lower()
+        for pattern in dangerous_patterns:
+            if pattern in text_lower:
+                return WebSocketValidationError(
+                    error_type="security_error",
+                    message=f"Potentially dangerous content detected: {pattern}",
+                    field="payload.text",
+                    received_data=message
+                )
+        return None
+    
+    def _check_text_length(self, text: str, message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
+        """Check text length limits."""
+        if len(text) > self.max_text_length:
+            return WebSocketValidationError(
+                error_type="validation_error",
+                message=f"Text too long: {len(text)} characters",
+                field="payload.text",
+                received_data=message
+            )
         return None
     
     def sanitize_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
@@ -193,27 +226,20 @@ class MessageValidator:
             Sanitized message copy
         """
         try:
-            # Create a copy to avoid modifying original
             sanitized = message.copy()
-            
-            # Sanitize payload if present
-            if "payload" in sanitized and isinstance(sanitized["payload"], dict):
-                payload = sanitized["payload"].copy()
-                
-                # Sanitize text content first
-                if "text" in payload and isinstance(payload["text"], str):
-                    payload["text"] = self._sanitize_text(payload["text"])
-                
-                # Sanitize other string fields recursively (excluding "text" to avoid double sanitization)
-                payload = self._sanitize_dict_strings_except_text(payload)
-                
-                sanitized["payload"] = payload
-            
+            if self._has_valid_payload(sanitized):
+                sanitized["payload"] = self._sanitize_payload(sanitized["payload"])
             return sanitized
-            
         except Exception as e:
             logger.error(f"Error sanitizing message: {e}")
             return message
+    
+    def _sanitize_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Sanitize payload content."""
+        sanitized_payload = payload.copy()
+        if "text" in sanitized_payload and isinstance(sanitized_payload["text"], str):
+            sanitized_payload["text"] = self._sanitize_text(sanitized_payload["text"])
+        return self._sanitize_dict_strings_except_text(sanitized_payload)
     
     def _sanitize_text(self, text: str) -> str:
         """Sanitize text content.
@@ -224,26 +250,28 @@ class MessageValidator:
         Returns:
             Sanitized text
         """
-        # More robust check for already encoded text
-        # If text contains HTML entities, assume it's already been sanitized
+        if self._is_already_encoded(text):
+            return text
+        text = self._encode_html_entities(text)
+        text = self._remove_control_characters(text)
+        return text
+    
+    def _is_already_encoded(self, text: str) -> bool:
+        """Check if text is already HTML encoded."""
         html_entities = ["&lt;", "&gt;", "&amp;", "&quot;", "&#x27;"]
-        if any(entity in text for entity in html_entities):
-            return text  # Already encoded, don't double-encode
-        
-        # Basic HTML entity encoding for safety - encode dangerous characters
-        # Order matters: do < and > first, then other chars to avoid conflicts
+        return any(entity in text for entity in html_entities)
+    
+    def _encode_html_entities(self, text: str) -> str:
+        """Encode dangerous HTML characters."""
         text = text.replace("<", "&lt;").replace(">", "&gt;")
-        text = text.replace('"', "&quot;").replace("'", "&#x27;")
-        # NOTE: Not encoding & to &amp; to avoid double-encoding issues
-        
-        # Remove null bytes and other control characters
+        return text.replace('"', "&quot;").replace("'", "&#x27;")
+    
+    def _remove_control_characters(self, text: str) -> str:
+        """Remove null bytes and control characters."""
         text = text.replace("\x00", "")
-        
-        # Remove other potentially dangerous characters
-        dangerous_chars = ["\x08", "\x0c", "\x0e", "\x0f"]  # Backspace, form feed, etc.
+        dangerous_chars = ["\x08", "\x0c", "\x0e", "\x0f"]
         for char in dangerous_chars:
             text = text.replace(char, "")
-        
         return text
     
     def _sanitize_dict_strings(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -256,18 +284,19 @@ class MessageValidator:
             Sanitized dictionary
         """
         sanitized = {}
-        
         for key, value in data.items():
-            if isinstance(value, str):
-                sanitized[key] = self._sanitize_text(value)
-            elif isinstance(value, dict):
-                sanitized[key] = self._sanitize_dict_strings(value)
-            elif isinstance(value, list):
-                sanitized[key] = self._sanitize_list(value)
-            else:
-                sanitized[key] = value
-        
+            sanitized[key] = self._sanitize_value(value)
         return sanitized
+    
+    def _sanitize_value(self, value: Any) -> Any:
+        """Sanitize a single value based on its type."""
+        if isinstance(value, str):
+            return self._sanitize_text(value)
+        elif isinstance(value, dict):
+            return self._sanitize_dict_strings(value)
+        elif isinstance(value, list):
+            return self._sanitize_list(value)
+        return value
     
     def _sanitize_dict_strings_except_text(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Recursively sanitize string values in a dictionary, excluding 'text' field.
@@ -279,21 +308,21 @@ class MessageValidator:
             Sanitized dictionary with 'text' field unchanged
         """
         sanitized = {}
-        
         for key, value in data.items():
-            if key == "text":
-                # Don't re-sanitize the text field
-                sanitized[key] = value
-            elif isinstance(value, str):
-                sanitized[key] = self._sanitize_text(value)
-            elif isinstance(value, dict):
-                sanitized[key] = self._sanitize_dict_strings_except_text(value)
-            elif isinstance(value, list):
-                sanitized[key] = self._sanitize_list(value)
-            else:
-                sanitized[key] = value
-        
+            sanitized[key] = self._sanitize_value_except_text(key, value)
         return sanitized
+    
+    def _sanitize_value_except_text(self, key: str, value: Any) -> Any:
+        """Sanitize value based on type, excluding 'text' field."""
+        if key == "text":
+            return value
+        elif isinstance(value, str):
+            return self._sanitize_text(value)
+        elif isinstance(value, dict):
+            return self._sanitize_dict_strings_except_text(value)
+        elif isinstance(value, list):
+            return self._sanitize_list(value)
+        return value
     
     def _sanitize_list(self, data: list) -> list:
         """Recursively sanitize string values in a list.

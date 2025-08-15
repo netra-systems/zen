@@ -113,7 +113,7 @@ def get_corpus_content(
         raise HTTPException(status_code=404, detail="Corpus not found")
     return content
 
-@router.post("/api/corpus")
+@router.post("/document", status_code=201)
 async def create_document(document: DocumentCreate):
     """Create a document in the corpus"""
     return {
@@ -123,7 +123,7 @@ async def create_document(document: DocumentCreate):
         "metadata": document.metadata
     }
 
-@router.get("/api/corpus/search")
+@router.get("/search")
 async def search_corpus(q: str = Query(...)):
     """Search corpus documents"""
     return [
@@ -131,7 +131,8 @@ async def search_corpus(q: str = Query(...)):
         {"id": "2", "title": "Result 2", "score": 0.87}
     ]
 
-async def bulk_index_documents(documents: List[Dict[str, Any]]) -> Dict[str, int]:
-    """Bulk index documents for testing"""
-    return {"indexed": len(documents), "failed": 0}
+@router.post("/bulk")
+async def bulk_index_documents(request: BulkIndexRequest):
+    """Bulk index documents"""
+    return {"indexed": len(request.documents), "failed": 0}
 

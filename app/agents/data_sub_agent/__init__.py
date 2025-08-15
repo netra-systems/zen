@@ -14,6 +14,9 @@ from .metrics_analyzer import MetricsAnalyzer
 from .performance_data_processor import PerformanceDataProcessor
 from .usage_pattern_processor import UsagePatternProcessor
 
+# Import ClickHouse initialization function
+from app.db.clickhouse_init import create_workload_events_table_if_missing
+
 # Import ExecutionEngine only for type checking to avoid circular imports
 if TYPE_CHECKING:
     from .execution_engine import ExecutionEngine
@@ -29,5 +32,6 @@ __all__ = [
     # 'ExecutionEngine',  # Removed to avoid circular import - import directly from .execution_engine when needed
     'MetricsAnalyzer',
     'PerformanceDataProcessor',
-    'UsagePatternProcessor'
+    'UsagePatternProcessor',
+    'create_workload_events_table_if_missing'
 ]

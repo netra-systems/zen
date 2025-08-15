@@ -15,11 +15,13 @@ class AnalysisEngine:
             return None
         
         arr = np.array(values)
+        std_value = float(np.std(arr))
         return {
             "count": len(values),
             "mean": float(np.mean(arr)),
             "median": float(np.median(arr)),
-            "std_dev": float(np.std(arr)),
+            "std_dev": std_value,
+            "std": std_value,  # Alias for backward compatibility
             "min": float(np.min(arr)),
             "max": float(np.max(arr)),
             "p25": float(np.percentile(arr, 25)),

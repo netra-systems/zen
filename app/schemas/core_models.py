@@ -1,0 +1,130 @@
+"""
+Core Domain Models: Single Source of Truth for User, Message, and Thread Models
+
+This module contains the fundamental domain models used across the Netra platform,
+ensuring consistency and preventing duplication.
+
+CRITICAL ARCHITECTURAL COMPLIANCE:
+- All core model definitions MUST be imported from this module
+- NO duplicate model definitions allowed anywhere else in codebase
+- This file maintains strong typing and single sources of truth
+- Maximum file size: 300 lines (currently under limit)
+
+Usage:
+    from app.schemas.core_models import User, Message, Thread
+"""
+
+from typing import Dict, List, Optional, Union, Any
+from datetime import datetime
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
+import uuid
+
+# Import enums from the dedicated module
+from app.schemas.core_enums import MessageType
+
+
+class UserBase(BaseModel):
+    """Base user model."""
+    email: EmailStr
+    full_name: Optional[str] = None
+    picture: Optional[str] = None
+
+
+class UserCreate(UserBase):
+    """User creation model."""
+    password: str
+
+
+class UserCreateOAuth(UserBase):
+    """OAuth user creation model."""
+    pass
+
+
+class User(BaseModel):
+    """Unified User model - single source of truth."""
+    id: str
+    email: EmailStr
+    full_name: Optional[str] = None
+    picture: Optional[str] = None
+    is_active: bool = True
+    is_superuser: bool = False
+    hashed_password: Optional[str] = None
+    access_token: Optional[str] = None
+    token_type: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True, extra="allow")
+
+
+class MessageMetadata(BaseModel):
+    """Unified message metadata."""
+    model: Optional[str] = None
+    tokens_used: Optional[int] = None
+    processing_time: Optional[float] = None  
+    agent_name: Optional[str] = None
+    run_id: Optional[str] = None
+    step_id: Optional[str] = None
+    tool_calls: Optional[List[Dict[str, Any]]] = None
+    custom_fields: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
+
+
+class Message(BaseModel):
+    """Unified Message model - single source of truth."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    content: str
+    type: MessageType
+    thread_id: Optional[str] = None
+    sub_agent_name: Optional[str] = None
+    tool_info: Optional[Dict[str, Any]] = None
+    raw_data: Optional[Dict[str, Any]] = None
+    displayed_to_user: bool = True
+    metadata: Optional[MessageMetadata] = None
+    references: Optional[List[str]] = None
+    attachments: Optional[List[Dict[str, Any]]] = None
+    
+    model_config = ConfigDict(
+        json_encoders={
+            datetime: lambda v: v.isoformat() if v else None
+        }
+    )
+
+
+class ThreadMetadata(BaseModel):
+    """Unified thread metadata."""
+    tags: List[str] = Field(default_factory=list)
+    priority: Optional[int] = Field(default=None, ge=0, le=10)
+    category: Optional[str] = None
+    user_id: Optional[str] = None
+    custom_fields: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
+
+
+class Thread(BaseModel):
+    """Unified Thread model - single source of truth."""
+    id: str
+    name: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    metadata: Optional[ThreadMetadata] = None
+    message_count: int = 0
+    is_active: bool = True
+    last_message: Optional[Message] = None
+    participants: Optional[List[str]] = None
+    
+    model_config = ConfigDict(
+        json_encoders={
+            datetime: lambda v: v.isoformat() if v else None
+        }
+    )
+
+
+# Export all core models
+__all__ = [
+    "UserBase",
+    "UserCreate", 
+    "UserCreateOAuth",
+    "User",
+    "MessageMetadata",
+    "Message",
+    "ThreadMetadata", 
+    "Thread"
+]

@@ -28,11 +28,23 @@ async def stream_agent_response(
         # Fallback for backward compatibility
         from app.services.agent_service import generate_stream
         async for chunk in generate_stream(message, thread_id):
-            yield json.dumps(chunk)
+            # Ensure chunk is properly formatted
+            if isinstance(chunk, dict):
+                yield json.dumps(chunk)
+            elif isinstance(chunk, str):
+                yield chunk
+            else:
+                yield json.dumps({"type": "data", "content": str(chunk)})
         yield json.dumps({"type": "complete", "status": "finished"})
     else:
         async for chunk in agent_service.generate_stream(message, thread_id):
-            yield json.dumps(chunk)
+            # Ensure chunk is properly formatted
+            if isinstance(chunk, dict):
+                yield json.dumps(chunk)
+            elif isinstance(chunk, str):
+                yield chunk
+            else:
+                yield json.dumps({"type": "data", "content": str(chunk)})
         yield json.dumps({"type": "complete", "status": "finished"})
 
 def get_agent_supervisor(request: Request) -> Supervisor:
