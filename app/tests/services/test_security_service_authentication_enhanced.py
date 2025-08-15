@@ -239,9 +239,9 @@ class TestSecurityServiceAuthenticationEnhanced:
         email = enhanced_security_service.get_user_email_from_token(token)
         assert email == "test@example.com"
         
-        # Wait for expiry
+        # Wait for expiry - need to wait more than 5 seconds due to tolerance
         import time
-        time.sleep(1.1)
+        time.sleep(6.1)  # Wait 6.1 seconds to exceed the 5-second tolerance
         
         # Token should be expired
         expired_email = enhanced_security_service.get_user_email_from_token(token)
