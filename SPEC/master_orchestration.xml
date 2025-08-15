@@ -29,7 +29,8 @@
         <principle id="compliance-first">
             <title>Architecture Compliance Priority</title>
             <description>All changes must maintain 300/8 line limits and modular design</description>
-            <enforcement>Run compliance checks before and after all changes</enforcement>
+            <enforcement>Run compliance checks before and after all changes.</enforcement>
+            <enforcement-history>Save versions of enforcements reports in history</enforcement-history>
         </principle>
     </principles>
 

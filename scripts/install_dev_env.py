@@ -10,6 +10,10 @@ import platform
 from pathlib import Path
 from typing import List
 
+# Add scripts directory to path for imports
+script_dir = Path(__file__).parent
+sys.path.insert(0, str(script_dir))
+
 from installer_types import (
     create_installer_config, create_version_requirements,
     InstallerConfig, VersionRequirements, InstallerResult
@@ -46,19 +50,19 @@ class DevEnvironmentInstaller:
 
     def print_step(self, text: str) -> None:
         """Print step indicator"""
-        print(f"{Colors.CYAN}➤ {text}{Colors.ENDC}")
+        print(f"{Colors.CYAN}> {text}{Colors.ENDC}")
 
     def print_success(self, text: str) -> None:
         """Print success message"""
-        print(f"{Colors.GREEN}✓ {text}{Colors.ENDC}")
+        print(f"{Colors.GREEN}[+] {text}{Colors.ENDC}")
 
     def print_warning(self, text: str) -> None:
         """Print warning message"""
-        print(f"{Colors.WARNING}⚠ {text}{Colors.ENDC}")
+        print(f"{Colors.WARNING}[!] {text}{Colors.ENDC}")
 
     def print_error(self, text: str) -> None:
         """Print error message"""
-        print(f"{Colors.FAIL}✗ {text}{Colors.ENDC}")
+        print(f"{Colors.FAIL}[x] {text}{Colors.ENDC}")
 
     def print_info(self, text: str) -> None:
         """Print info message"""
@@ -145,10 +149,10 @@ class DevEnvironmentInstaller:
         print(f"\n{Colors.CYAN}{'='*60}{Colors.ENDC}\n")
         
         if not self.all_errors:
-            print(f"{Colors.GREEN}{Colors.BOLD}✅ Installation completed!{Colors.ENDC}\n")
+            print(f"{Colors.GREEN}{Colors.BOLD}[+] Installation completed!{Colors.ENDC}\n")
             self.show_success_next_steps()
         else:
-            print(f"{Colors.WARNING}⚠ Installation completed with issues{Colors.ENDC}\n")
+            print(f"{Colors.WARNING}[!] Installation completed with issues{Colors.ENDC}\n")
             self.show_troubleshooting_steps()
 
     def show_success_next_steps(self) -> None:

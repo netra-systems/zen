@@ -7,9 +7,14 @@ Complies with 300-line and 8-line function limits.
 
 from pathlib import Path
 from typing import Dict, List, Optional
-from .status_types import (
-    SupervisorStatus, SubAgentInfo, ApexOptimizerStatus, AgentSystemStatus, StatusConfig
-)
+try:
+    from .status_types import (
+        SupervisorStatus, SubAgentInfo, ApexOptimizerStatus, AgentSystemStatus, StatusConfig
+    )
+except ImportError:
+    from status_types import (
+        SupervisorStatus, SubAgentInfo, ApexOptimizerStatus, AgentSystemStatus, StatusConfig
+    )
 
 
 class AgentSystemAnalyzer:

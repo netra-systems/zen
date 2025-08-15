@@ -5,7 +5,14 @@ PostgreSQL, Redis, and ClickHouse installation guidance.
 CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
 """
 
+import sys
 from typing import List
+from pathlib import Path
+
+# Add scripts directory to path for imports
+script_dir = Path(__file__).parent
+sys.path.insert(0, str(script_dir))
+
 from installer_types import InstallerResult
 from env_checker import check_command_exists, get_version_from_output, run_command
 

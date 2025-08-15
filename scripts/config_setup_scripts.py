@@ -6,8 +6,13 @@ CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
 """
 
 import os
+import sys
 from typing import List
 from pathlib import Path
+
+# Add scripts directory to path for imports
+script_dir = Path(__file__).parent
+sys.path.insert(0, str(script_dir))
 
 from installer_types import InstallerConfig, InstallerResult
 from env_checker import run_command
@@ -166,9 +171,9 @@ def test_frontend_status(config: InstallerConfig) -> InstallerResult:
     node_modules = config.frontend_path / "node_modules"
     
     if node_modules.exists():
-        return InstallerResult(True, ["Frontend dependencies: ✓"], [], [])
+        return InstallerResult(True, ["Frontend dependencies: OK"], [], [])
     
-    return InstallerResult(True, [], [], ["Frontend dependencies: ✗"])
+    return InstallerResult(True, [], [], ["Frontend dependencies: MISSING"])
 
 
 def test_database_connectivity(python_path: Path) -> InstallerResult:
@@ -194,9 +199,9 @@ async def test_db():
         engine = create_async_engine("sqlite+aiosqlite:///:memory:")
         async with engine.connect() as conn:
             result = await conn.execute("SELECT 1")
-            print("Database connectivity: ✓")
+            print("Database connectivity: OK")
     except Exception as e:
-        print(f"Database connectivity: ✗ ({e})")
+        print(f"Database connectivity: FAILED ({e})")
 
 asyncio.run(test_db())
 """

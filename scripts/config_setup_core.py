@@ -7,7 +7,12 @@ CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
 
 import os
 import shutil
+import sys
 from pathlib import Path
+
+# Add scripts directory to path for imports
+script_dir = Path(__file__).parent
+sys.path.insert(0, str(script_dir))
 
 from installer_types import InstallerConfig, InstallerResult
 from env_checker import run_command, check_command_exists

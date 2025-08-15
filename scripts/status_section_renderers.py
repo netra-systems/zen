@@ -6,12 +6,20 @@ Complies with 300-line and 8-line function limits.
 """
 
 from typing import Dict, List, Tuple
-from .status_types import (
-    StatusReportData, PatternMatch, IntegrationStatus, AgentSystemStatus,
-    TestCoverageStatus, TestResults, ComponentHealthData, WebSocketStatus,
-    ApiSyncStatus, OAuthStatus, SupervisorStatus, SubAgentInfo,
-    ApexOptimizerStatus, TestCoverageInfo
-)
+try:
+    from .status_types import (
+        StatusReportData, PatternMatch, IntegrationStatus, AgentSystemStatus,
+        TestCoverageStatus, TestResults, ComponentHealthData, WebSocketStatus,
+        ApiSyncStatus, OAuthStatus, SupervisorStatus, SubAgentInfo,
+        ApexOptimizerStatus, TestCoverageInfo
+    )
+except ImportError:
+    from status_types import (
+        StatusReportData, PatternMatch, IntegrationStatus, AgentSystemStatus,
+        TestCoverageStatus, TestResults, ComponentHealthData, WebSocketStatus,
+        ApiSyncStatus, OAuthStatus, SupervisorStatus, SubAgentInfo,
+        ApexOptimizerStatus, TestCoverageInfo
+    )
 
 
 class ComponentDetailsRenderer:

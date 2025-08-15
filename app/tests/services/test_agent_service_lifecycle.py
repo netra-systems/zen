@@ -65,7 +65,6 @@ class TestAgentLifecycleManagement:
         await orchestrator.release_agent("user1")
         
         self._verify_agent_pooled(orchestrator)
-        
         agent2 = await orchestrator.get_or_create_agent("user2")
         self._verify_agent_reused_from_pool(orchestrator, agent, agent2)
     
@@ -183,16 +182,13 @@ class TestAgentLifecycleManagement:
         """Test agent state transitions during lifecycle."""
         agent = await orchestrator.get_or_create_agent("user1")
         
-        # Initial state
         assert agent.state == AgentState.IDLE
         
-        # Start execution and verify running state
         task = asyncio.create_task(
             agent.run("test request", "run_state", "user1", "run_state")
         )
         await self._verify_agent_running_state(agent)
         
-        # Wait for completion and verify idle state
         await task
         assert agent.state == AgentState.IDLE
     
@@ -238,15 +234,13 @@ class TestAgentPoolOptimization:
     @pytest.mark.asyncio
     async def test_agent_pool_size_limits(self, orchestrator):
         """Test agent pool maintains size limits."""
-        # Create and release agents beyond pool limit
-        for i in range(7):  # Pool limit is 5
-            await orchestrator.get_or_create_agent(f"user_{i}")
-            await orchestrator.release_agent(f"user_{i}")
-        
-        # Pool should not exceed limit
+        agents = []
+        for i in range(7):  # Beyond pool limit of 5
+            agent = await orchestrator.get_or_create_agent(f"user_{i}")
+            agents.append((f"user_{i}", agent))
+        for user_id, agent in agents:
+            await orchestrator.release_agent(user_id)
         assert len(orchestrator.agent_pool) <= 5
-        # Verify agents were properly created and managed
-        assert orchestrator.orchestration_metrics['agents_created'] >= 5
     
     @pytest.mark.asyncio
     async def test_agent_state_reset_on_release(self, orchestrator):

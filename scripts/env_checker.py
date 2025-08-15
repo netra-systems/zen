@@ -13,6 +13,10 @@ import socket
 from typing import Optional, List, Tuple
 from pathlib import Path
 
+# Add scripts directory to path for imports
+script_dir = Path(__file__).parent
+sys.path.insert(0, str(script_dir))
+
 from installer_types import (
     InstallerConfig, VersionRequirements, InstallerResult
 )
@@ -33,11 +37,12 @@ def check_command_exists(command: str) -> bool:
     return shutil.which(command) is not None
 
 
-def run_command(command: List[str]) -> Optional[str]:
+def run_command(command: List[str], cwd: Optional[Path] = None, shell: bool = False) -> Optional[str]:
     """Run a command and return output safely"""
     try:
+        cmd = ' '.join(command) if shell else command
         result = subprocess.run(
-            command, capture_output=True, text=True, check=False
+            cmd, capture_output=True, text=True, check=False, cwd=cwd, shell=shell
         )
         return result.stdout.strip() if result.returncode == 0 else None
     except Exception:

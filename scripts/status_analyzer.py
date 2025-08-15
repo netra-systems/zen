@@ -6,10 +6,16 @@ Complies with 300-line and 8-line function limits.
 """
 
 # Import all analyzer classes for easy access
-from .status_integration_analyzer import IntegrationAnalyzer
-from .status_agent_analyzer import (
-    AgentSystemAnalyzer, TestCoverageAnalyzer, HealthScoreCalculator
-)
+try:
+    from .status_integration_analyzer import IntegrationAnalyzer
+    from .status_agent_analyzer import (
+        AgentSystemAnalyzer, TestCoverageAnalyzer, HealthScoreCalculator
+    )
+except ImportError:
+    from status_integration_analyzer import IntegrationAnalyzer
+    from status_agent_analyzer import (
+        AgentSystemAnalyzer, TestCoverageAnalyzer, HealthScoreCalculator
+    )
 
 # Re-export classes for backward compatibility
 __all__ = [

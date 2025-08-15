@@ -121,10 +121,12 @@ class EnhancedTestReporter:
         performance_section = self.performance_formatter.format_performance_analysis(
             backend_data, frontend_data
         )
-        failure_section = self.failure_formatter.format_failure_analysis(
-            backend_data, frontend_data
-        )
-        
+        return self._combine_sections(category_section, performance_section, backend_data, frontend_data)
+    
+    def _combine_sections(self, category_section: str, performance_section: str,
+                         backend_data, frontend_data) -> str:
+        """Combine report sections"""
+        failure_section = self.failure_formatter.format_failure_analysis(backend_data, frontend_data)
         return f"""## 🏷️ Test Categories
 
 {category_section}
@@ -161,11 +163,14 @@ class EnhancedTestReporter:
             return "*First run or no historical data available*"
         
         summary_parts = []
+        self._add_all_change_sections(changes, summary_parts)
+        return '\n\n'.join(summary_parts) if summary_parts else "*No significant changes detected*"
+    
+    def _add_all_change_sections(self, changes: Dict, summary_parts: list) -> None:
+        """Add all change sections to summary"""
         self._add_change_section(changes, 'new_failures', '🆕 New Failures', summary_parts)
         self._add_change_section(changes, 'fixed_tests', '✅ Fixed Tests', summary_parts)
         self._add_change_section(changes, 'flaky_tests', '🎲 Flaky Tests', summary_parts)
-        
-        return '\n\n'.join(summary_parts) if summary_parts else "*No significant changes detected*"
     
     def _add_change_section(self, changes: Dict, key: str, title: str, summary_parts: list) -> None:
         """Add change section to summary"""

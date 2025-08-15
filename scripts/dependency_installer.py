@@ -11,8 +11,13 @@ import shutil
 from typing import List, Optional
 from pathlib import Path
 
+# Add scripts directory to path for imports
+script_dir = Path(__file__).parent
+sys.path.insert(0, str(script_dir))
+
 from installer_types import InstallerConfig, InstallerResult
-from env_checker import run_command, check_command_exists, get_version_from_output
+from env_checker import run_command
+from dependency_services import install_all_services
 
 
 class DependencyInstaller:
@@ -129,119 +134,6 @@ def setup_python_environment(config: InstallerConfig) -> InstallerResult:
     return combine_dependency_results(results)
 
 
-def check_postgresql_installation() -> InstallerResult:
-    """Check or provide PostgreSQL installation guidance"""
-    if check_command_exists("psql"):
-        version = get_version_from_output(
-            run_command(["psql", "--version"]), r'(\d+\.\d+)'
-        )
-        return InstallerResult(True, [f"PostgreSQL {version} found"], [], [])
-    
-    return get_postgresql_install_instructions()
-
-
-def get_postgresql_install_instructions() -> InstallerResult:
-    """Provide PostgreSQL installation instructions"""
-    import platform
-    
-    os_type = platform.system().lower()
-    instructions = get_os_specific_pg_instructions(os_type)
-    
-    return InstallerResult(False, [], [], instructions)
-
-
-def get_os_specific_pg_instructions(os_type: str) -> List[str]:
-    """Get PostgreSQL installation instructions for specific OS"""
-    if os_type == 'windows':
-        return [
-            "PostgreSQL not found",
-            "Install from: https://www.postgresql.org/download/windows/",
-            "Or via Chocolatey: choco install postgresql"
-        ]
-    elif os_type == 'darwin':
-        return get_mac_pg_instructions()
-    else:
-        return [
-            "Install PostgreSQL using your package manager:",
-            "Ubuntu/Debian: sudo apt-get install postgresql postgresql-contrib",
-            "RHEL/CentOS: sudo yum install postgresql-server postgresql-contrib"
-        ]
-
-
-def get_mac_pg_instructions() -> List[str]:
-    """Get macOS PostgreSQL installation instructions"""
-    if check_command_exists("brew"):
-        run_command(["brew", "install", "postgresql@14"])
-        run_command(["brew", "services", "start", "postgresql@14"])
-        return ["Installing PostgreSQL via Homebrew..."]
-    else:
-        return [
-            "Install Homebrew first:",
-            '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"',
-            "Then run: brew install postgresql@14"
-        ]
-
-
-def check_redis_installation() -> InstallerResult:
-    """Check or provide Redis installation guidance"""
-    if check_command_exists("redis-cli"):
-        version = get_version_from_output(
-            run_command(["redis-cli", "--version"]), r'(\d+\.\d+\.\d+)'
-        )
-        return InstallerResult(True, [f"Redis {version} found"], [], [])
-    
-    return get_redis_install_instructions()
-
-
-def get_redis_install_instructions() -> InstallerResult:
-    """Provide Redis installation instructions"""
-    import platform
-    
-    os_type = platform.system().lower()
-    instructions = get_os_specific_redis_instructions(os_type)
-    
-    return InstallerResult(False, [], [], instructions)
-
-
-def get_os_specific_redis_instructions(os_type: str) -> List[str]:
-    """Get Redis installation instructions for specific OS"""
-    if os_type == 'windows':
-        return [
-            "Redis not found",
-            "Enable WSL2: wsl --install",
-            "Install in WSL: sudo apt update && sudo apt install redis-server",
-            "Or use: https://github.com/microsoftarchive/redis/releases"
-        ]
-    elif os_type == 'darwin':
-        return get_mac_redis_instructions()
-    else:
-        return [
-            "Install Redis using your package manager:",
-            "Ubuntu/Debian: sudo apt-get install redis-server",
-            "RHEL/CentOS: sudo yum install redis"
-        ]
-
-
-def get_mac_redis_instructions() -> List[str]:
-    """Get macOS Redis installation instructions"""
-    if check_command_exists("brew"):
-        run_command(["brew", "install", "redis"])
-        run_command(["brew", "services", "start", "redis"])
-        return ["Installing Redis via Homebrew..."]
-    else:
-        return ["Install Homebrew first, then run: brew install redis"]
-
-
-def check_clickhouse_installation() -> InstallerResult:
-    """Check ClickHouse installation (optional)"""
-    if check_command_exists("clickhouse-client"):
-        return InstallerResult(True, ["ClickHouse found"], [], [])
-    
-    messages = [
-        "ClickHouse not found (optional for development)",
-        "To install: https://clickhouse.com/docs/en/install"
-    ]
-    return InstallerResult(True, messages, [], [])
 
 
 def install_frontend_dependencies(config: InstallerConfig) -> InstallerResult:
@@ -268,7 +160,7 @@ def clean_node_modules(config: InstallerConfig) -> None:
     
     if node_modules.exists():
         if config.is_windows:
-            run_command(["rmdir", "/s", "/q", str(node_modules)])
+            run_command(["rmdir", "/s", "/q", str(node_modules)], shell=True)
         else:
             run_command(["rm", "-rf", str(node_modules)])
 
@@ -299,15 +191,6 @@ def build_frontend(config: InstallerConfig) -> InstallerResult:
     return InstallerResult(True, messages, [], warnings)
 
 
-def install_all_services() -> InstallerResult:
-    """Install or check all external services"""
-    service_results = [
-        check_postgresql_installation(),
-        check_redis_installation(),
-        check_clickhouse_installation()
-    ]
-    
-    return combine_dependency_results(service_results)
 
 
 def combine_dependency_results(results: List[InstallerResult]) -> InstallerResult:
