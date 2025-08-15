@@ -243,17 +243,32 @@ resource "google_cloud_run_service" "backend" {
         
         env {
           name  = "GOOGLE_GEMINI_API_KEY"
-          value = "dummy-api-key"
+          value_from {
+            secret_key_ref {
+              name = "gemini-api-key-staging"
+              key  = "latest"
+            }
+          }
         }
         
         env {
           name  = "FERNET_KEY"
-          value = "YlJvdE1BczB1eUtleUZvckVuY3J5cHRpb24xMjM0NTY3ODkwMTIzNDU2Nzg5MA=="
+          value_from {
+            secret_key_ref {
+              name = "fernet-key-staging"
+              key  = "latest"
+            }
+          }
         }
         
         env {
           name  = "SECRET_KEY"
-          value = random_password.jwt_secret.result
+          value_from {
+            secret_key_ref {
+              name = "jwt-secret-key-staging"
+              key  = "latest"
+            }
+          }
         }
         
         env {
