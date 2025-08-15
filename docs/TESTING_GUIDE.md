@@ -905,37 +905,70 @@ locust -f tests/performance/locustfile.py \
   --headless
 ```
 
+## Architecture Compliance Testing
+
+### CRITICAL: 300-Line and 8-Line Limits
+
+**MANDATORY**: All code must pass architecture compliance checks:
+
+```bash
+# Check architecture compliance (run before commits)
+python scripts/check_architecture_compliance.py
+
+# Include in test suite
+python test_runner.py --level comprehensive  # Includes compliance checks
+
+# Generate compliance report
+python scripts/check_architecture_compliance.py --report --output test_reports/
+```
+
+**Compliance Requirements**:
+- Every file ≤300 lines (no exceptions)
+- Every function ≤8 lines (no exceptions)  
+- Modular design with clear interfaces
+- Single responsibility per module/function
+
 ## Testing Best Practices
 
-### 1. Test Isolation
+### 1. Architecture-First Testing
+- **Always check compliance first**: Run architecture checks before functional tests
+- **Module isolation**: Each 300-line module should be independently testable
+- **Function composition**: Test 8-line functions in combination and isolation
+
+### 2. Test Isolation
 - Each test should be independent
 - Use fixtures for setup/teardown
 - Mock external dependencies
 
-### 2. Test Data Management
+### 3. Test Data Management
 - Use factories for test data creation
 - Clean up test data after tests
 - Use separate test database
 
-### 3. Async Testing
+### 4. Async Testing
 - Use pytest-asyncio for async tests
 - Properly handle event loops
 - Test timeout scenarios
 
-### 4. WebSocket Testing
+### 5. WebSocket Testing
 - Mock WebSocket connections
 - Test reconnection logic
 - Verify message ordering
 
-### 5. Error Scenarios
+### 6. Error Scenarios
 - Test error handling paths
 - Verify error messages
 - Test recovery mechanisms
 
-### 6. Performance Considerations
+### 7. Performance Considerations
 - Set appropriate timeouts
 - Test under load conditions
 - Monitor resource usage
+
+### 8. Compliance Verification
+- **Pre-commit**: Always run compliance checks
+- **CI/CD Integration**: Fail builds on compliance violations
+- **Regular Audits**: Weekly architecture compliance reviews
 
 ## Troubleshooting
 

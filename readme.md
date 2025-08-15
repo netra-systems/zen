@@ -412,7 +412,7 @@ ORDER BY timestamp;
 ```bash
 # BEST CONFIGURATION FOR NEW DEVELOPERS
 # Single command that handles everything optimally
-python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets
+python dev_launcher.py --dynamic --no-backend-reload --load-secrets
 
 # What this does:
 # ✅ Finds free ports automatically (no conflicts)
@@ -425,13 +425,13 @@ python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets
 ##### Other Useful Configurations:
 ```bash
 # Development with hot reload (slower but auto-refreshes)
-python scripts/dev_launcher.py --dynamic
+python dev_launcher.py --dynamic
 
 # Maximum performance (no hot reload at all)
-python scripts/dev_launcher.py --dynamic --no-reload
+python dev_launcher.py --dynamic --no-reload
 
 # Custom ports
-python scripts/dev_launcher.py --backend-port 8080 --frontend-port 3001
+python dev_launcher.py --backend-port 8080 --frontend-port 3001
 
 # Check service status
 python scripts/service_discovery.py status
@@ -566,13 +566,13 @@ interface WebSocketMessage {
 # Quick smoke tests (< 30 seconds) - Use before commits
 python test_runner.py --level smoke
 
-# Unit tests (1-2 minutes) - Development validation
+# Unit tests (1-2 minutes) - Development validation (DEFAULT)
 python test_runner.py --level unit
 
 # Integration tests (3-5 minutes) - Feature validation
 python test_runner.py --level integration
 
-# Comprehensive tests with coverage (10-15 minutes)
+# Comprehensive tests with coverage (30-45 minutes)
 python test_runner.py --level comprehensive
 
 # Critical path tests only (1-2 minutes)
