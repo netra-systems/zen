@@ -26,7 +26,7 @@ class TestStartupCheckerLLM:
         llm_manager = mock_app.state.llm_manager
         llm_manager.get_llm = Mock(return_value=Mock())
         
-        with patch('app.config.settings') as mock_settings:
+        with patch('app.startup_checks.service_checks.settings') as mock_settings:
             mock_settings.llm_configs = {
                 'anthropic-claude-3-sonnet': {}, 'gpt-4': {}
             }
@@ -49,7 +49,7 @@ class TestStartupCheckerLLM:
         
         llm_manager.get_llm = Mock(side_effect=get_llm_side_effect)
         
-        with patch('app.config.settings') as mock_settings:
+        with patch('app.startup_checks.service_checks.settings') as mock_settings:
             mock_settings.llm_configs = {
                 'anthropic-claude-3-sonnet': {}, 'gpt-4': {}
             }
@@ -66,7 +66,7 @@ class TestStartupCheckerLLM:
         llm_manager = mock_app.state.llm_manager
         llm_manager.get_llm = Mock(side_effect=Exception("No providers available"))
         
-        with patch('app.config.settings') as mock_settings:
+        with patch('app.startup_checks.service_checks.settings') as mock_settings:
             mock_settings.llm_configs = {'anthropic-claude-3-sonnet': {}}
             mock_settings.environment = "development"
             
@@ -81,7 +81,7 @@ class TestStartupCheckerLLM:
         llm_manager = mock_app.state.llm_manager
         llm_manager.get_llm = Mock(return_value=None)
         
-        with patch('app.config.settings') as mock_settings:
+        with patch('app.startup_checks.service_checks.settings') as mock_settings:
             mock_settings.llm_configs = {'anthropic-claude-3-opus': {}}
             mock_settings.environment = "development"
             
@@ -94,7 +94,7 @@ class TestStartupCheckerLLM:
         """Test LLM providers check with unexpected exception."""
         mock_app.state.llm_manager = None
         
-        with patch('app.config.settings') as mock_settings:
+        with patch('app.startup_checks.service_checks.settings') as mock_settings:
             mock_settings.environment = "production"
             
             result = await checker.service_checker.check_llm_providers()

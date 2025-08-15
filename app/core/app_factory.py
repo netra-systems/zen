@@ -91,7 +91,7 @@ def _import_route_modules() -> dict:
     """Import all route modules."""
     from app.routes import (
         supply, generation, admin, references, health, 
-        corpus, synthetic_data, config, demo, unified_tools
+        corpus, synthetic_data, config, demo, unified_tools, quality
     )
     from app.routes.auth import auth as auth_router
     from app.routes.agent_route import router as agent_router
@@ -100,13 +100,14 @@ def _import_route_modules() -> dict:
     from app.routes.health_extended import router as health_extended_router
     from app.routes.monitoring import router as monitoring_router
     from app.routes.websockets import router as websockets_router
+    from app.routes.mcp.main import router as mcp_router
     return {
         "auth_router": auth_router, "agent_router": agent_router,
         "llm_cache_router": llm_cache_router, "threads_router": threads_router,
         "health_extended_router": health_extended_router, "monitoring_router": monitoring_router,
-        "websockets_router": websockets_router, "supply": supply, "generation": generation,
+        "websockets_router": websockets_router, "mcp_router": mcp_router, "supply": supply, "generation": generation,
         "admin": admin, "references": references, "health": health, "corpus": corpus,
-        "synthetic_data": synthetic_data, "config": config, "demo": demo, "unified_tools": unified_tools
+        "synthetic_data": synthetic_data, "config": config, "demo": demo, "unified_tools": unified_tools, "quality": quality
     }
 
 
@@ -117,6 +118,8 @@ def _get_route_configurations(modules: dict) -> dict:
         "agent": (modules["agent_router"], "/api/agent", ["agent"]),
         "threads": (modules["threads_router"], "", ["threads"]),
         "llm_cache": (modules["llm_cache_router"], "/api/llm-cache", ["llm-cache"]),
+        "mcp": (modules["mcp_router"], "", ["mcp"]),
+        "quality": (modules["quality"].router, "", ["quality"]),
         "supply": (modules["supply"].router, "/api/supply", ["supply"]),
         "generation": (modules["generation"].router, "/api/generation", ["generation"]),
         "websockets": (modules["websockets_router"], "", ["websockets"]),

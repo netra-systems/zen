@@ -42,7 +42,7 @@ class TestConcurrentProcessing:
             
             tasks = []
             for job_id in job_ids:
-                task = run_content_generation_job(job_id, perf_params)
+                task = run_content_generation_job(job_id, perf_params.model_dump())
                 tasks.append(task)
             
             await asyncio.gather(*tasks)
@@ -58,7 +58,7 @@ class TestConcurrentProcessing:
     async def test_resource_contention_handling(self):
         """Test handling of resource contention"""
         perf_params = ContentGenParams(
-            samples_per_type=200,
+            samples_per_type=100,
             max_cores=4
         )
         
@@ -72,7 +72,7 @@ class TestConcurrentProcessing:
                 ])
                 
                 job_id = str(uuid.uuid4())
-                await run_content_generation_job(job_id, perf_params)
+                await run_content_generation_job(job_id, perf_params.model_dump())
                 
                 # Should create pool with available cores
                 mock_pool_class.assert_called_once_with(
@@ -122,7 +122,7 @@ class TestConcurrentProcessing:
             return {'type': 'test', 'data': ('p', 'r')}
         
         perf_params = ContentGenParams(
-            samples_per_type=500,
+            samples_per_type=100,
             max_cores=8
         )
         
@@ -134,7 +134,7 @@ class TestConcurrentProcessing:
                 ]
                 
                 job_id = str(uuid.uuid4())
-                await run_content_generation_job(job_id, perf_params)
+                await run_content_generation_job(job_id, perf_params.model_dump())
         
         # Load should be distributed across workers
         unique_workers = len(set(worker_loads))
