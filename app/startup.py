@@ -222,7 +222,7 @@ async def _handle_startup_failure(logger: logging.Logger, error: Exception) -> N
     logger.critical(f"CRITICAL: Startup checks failed: {error}")
     logger.info("Application shutting down due to startup failure.")
     await _emergency_cleanup(logger)
-    sys.exit(1)
+    raise RuntimeError(f"Application startup failed: {error}")
 
 
 async def _emergency_cleanup(logger: logging.Logger) -> None:
