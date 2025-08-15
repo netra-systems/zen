@@ -29,22 +29,9 @@ const MainChat: React.FC = () => {
 
   const hasMessages = messages.length > 0;
   
-  // Listen for thread loaded events to populate messages
-  useEffect(() => {
-    const handleThreadLoaded = (event: CustomEvent) => {
-      const { messages: threadMessages } = event.detail;
-      if (threadMessages && Array.isArray(threadMessages)) {
-        // Load messages into the store
-        const store = useUnifiedChatStore.getState();
-        store.loadMessages(threadMessages);
-      }
-    };
-
-    window.addEventListener('threadLoaded', handleThreadLoaded as EventListener);
-    return () => {
-      window.removeEventListener('threadLoaded', handleThreadLoaded as EventListener);
-    };
-  }, []);
+  // Thread loading is now handled via WebSocket events in the store
+  // The handleWebSocketEvent function in useUnifiedChatStore will process
+  // 'thread_loaded' events and automatically update the messages
   const showResponseCard = currentRunId !== null || isProcessing;
 
   // Auto-collapse card after completion
