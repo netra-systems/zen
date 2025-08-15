@@ -286,7 +286,7 @@ class TestLLMCacheRoute:
     
     def test_cache_metrics(self, client):
         """Test cache metrics retrieval."""
-        with patch('app.services.llm_cache_service.get_metrics') as mock_metrics:
+        with patch('app.services.llm_cache_service.llm_cache_service.get_cache_metrics') as mock_metrics:
             mock_metrics.return_value = {
                 "hits": 150,
                 "misses": 50,
@@ -304,10 +304,10 @@ class TestLLMCacheRoute:
     
     def test_cache_invalidation(self, client):
         """Test cache invalidation endpoint."""
-        with patch('app.services.llm_cache_service.clear_cache') as mock_clear:
-            mock_clear.return_value = {"cleared": 50, "remaining": 0}
+        with patch('app.services.llm_cache_service.llm_cache_service.clear_cache') as mock_clear:
+            mock_clear.return_value = 50
             
-            response = client.delete("/api/llm-cache")
+            response = client.delete("/api/llm-cache/")
             
             if response.status_code == 200:
                 result = response.json()
@@ -318,8 +318,8 @@ class TestLLMCacheRoute:
         """Test selective cache invalidation."""
         from app.routes.llm_cache import clear_cache_pattern
         
-        with patch('app.services.llm_cache_service.clear_pattern') as mock_clear:
-            mock_clear.return_value = {"cleared": 10, "pattern": "user_*"}
+        with patch('app.services.llm_cache_service.llm_cache_service.clear_cache_pattern') as mock_clear:
+            mock_clear.return_value = 10
             
             result = await clear_cache_pattern("user_*")
             assert result["cleared"] == 10
