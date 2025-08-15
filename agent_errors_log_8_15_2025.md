@@ -9,3 +9,29 @@
 [BACKEND] 2025-08-15 13:30:59.855 | DEBUG    | app.websocket.room_manager:join_room:85 | Connection job_<starlette.websockets.WebSocket object at 0x000001B95B748B60>_1895614755456 joined room <starlette.websockets.WebSocket object at 0x000001B95B748B60>
 [BACKEND] 2025-08-15 13:30:59.856 | INFO     | app.routes.websockets:_establish_websocket_connection:196 | WebSocket connection established for user a4c65d01-9adf-43cb-87a5-32f802a7e69a
 [BACKEND] ⚠️  2025-08-15 13:31:00.773 | WARNING  | app.ws_manager_messaging:handle_incoming_message:97 | Connection not found for user a4c65d01-9adf-43cb-87a5-32f802a7e69a
+
+## ROOT CAUSE IDENTIFIED AND FIXED
+
+### Issue
+The WebSocket manager was using inconsistent user IDs:
+1. Connection setup used: `job_<websocket_object>_<id>` (line 7)
+2. Message handling searched for: `a4c65d01-9adf-43cb-87a5-32f802a7e69a` (line 11)
+
+### Root Cause
+Method signature mismatch in `app/routes/websockets.py`:
+- Was calling: `manager.connect(user_id, websocket)` 
+- But manager.connect expected: `(websocket, job_id)`
+- Should call: `manager.connect_user(user_id, websocket)`
+
+### Fix Applied
+Updated `app/routes/websockets.py`:
+1. Changed `manager.connect()` → `manager.connect_user()`
+2. Changed `manager.disconnect()` → `manager.disconnect_user()`
+3. Changed `manager.send_error()` → Uses existing method (already compatible)
+
+### Verification
+All WebSocket tests passing:
+- 13 critical WebSocket tests: ✅ PASSED
+- Connection establishment: ✅ WORKING
+- Message handling: ✅ WORKING  
+- Disconnection cleanup: ✅ WORKING

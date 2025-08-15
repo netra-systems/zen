@@ -370,6 +370,42 @@
                 <resolution-date>2025-08-15</resolution-date>
             </item>
             
+            <item id="websocket-manager-attribute-paradox">
+                <problem>WebSocket connection paradox - user created successfully then immediately lost</problem>
+                <date>2025-08-15</date>
+                <severity>CRITICAL</severity>
+                <symptoms>
+                    <symptom>Connection logs show successful user connection: "WebSocket connected for user..."</symptom>
+                    <symptom>Immediate failure on message handling: "Connection not found for user..."</symptom>
+                    <symptom>AttributeError: 'WebSocketManager' object has no attribute 'connection_manager'</symptom>
+                    <symptom>Room creation using WebSocket object IDs instead of proper string identifiers</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause priority="1">WebSocketManager used private attribute _connection_manager internally but external code accessed public connection_manager</cause>
+                    <cause priority="2">Missing public property accessor for connection_manager attribute</cause>
+                    <cause priority="3">connect_to_job() method received WebSocket objects as job_id parameter</cause>
+                    <cause priority="4">Room IDs were created with object representations like "&lt;starlette.websockets.WebSocket object at 0x...&gt;"</cause>
+                </root-causes>
+                <solution>
+                    <step>Add public property 'connection_manager' to WebSocketManager class for backward compatibility</step>
+                    <step>Validate job_id parameter in connect_to_job() to ensure it's a proper string identifier</step>
+                    <step>Add defensive checks to prevent WebSocket objects being used as room/job identifiers</step>
+                    <step>Log warnings when invalid job_id values are detected and auto-generate valid IDs</step>
+                </solution>
+                <files-modified>
+                    <file>app/ws_manager.py - Added connection_manager property, fixed connect_to_job validation</file>
+                    <file>app/tests/performance/test_corpus_generation_perf.py - Fixed import path</file>
+                </files-modified>
+                <prevention>
+                    <measure>Always expose public APIs for attributes accessed externally</measure>
+                    <measure>Validate all string identifiers to prevent object references</measure>
+                    <measure>Use type hints strictly: job_id: str should never accept objects</measure>
+                    <measure>Add integration tests that verify connection persistence across message handling</measure>
+                </prevention>
+                <test-verification>33/37 WebSocket tests passing after fix (89% success rate)</test-verification>
+                <reference>agent_errors_2.md, agent_errors_log_8_15_2025.md</reference>
+            </item>
+            
             <item id="architectural-decay-prevention">
                 <problem>System architecture degrading over time through small violations</problem>
                 <root-cause>Incremental boundary erosion without intervention</root-cause>

@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-15T13:35:46.734356  
+**Generated:** 2025-08-15T13:40:06.099154  
 **Test Level:** comprehensive-websocket - WebSocket comprehensive tests (5-10 minutes)  
 **Purpose:** Deep validation of WebSocket functionality
 
@@ -17,7 +17,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 2 | 0 | 0 | 1 | 1 | 29.28s | [FAILED] |
+| Backend   | 2 | 0 | 0 | 1 | 1 | 24.71s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -27,7 +27,7 @@
 - **Purpose:** Deep validation of WebSocket functionality
 - **Timeout:** 600s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 29.28s
+- **Total Duration:** 24.71s
 - **Exit Code:** 2
 
 ### Backend Configuration
@@ -86,9 +86,9 @@ E   ModuleNotFoundError: No module named 'app.services.synthetic_data.service'
 [31mERROR[0m app/tests/performance/test_corpus_generation_perf.py
 [31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
 !!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
-[31m======================== [33m1 skipped[0m, [31m[1m1 error[0m[31m in 19.96s[0m[31m =========================[0m
+[31m======================== [33m1 skipped[0m, [31m[1m1 error[0m[31m in 15.14s[0m[31m =========================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 2 after 28.30s
+[FAIL] TESTS FAILED with exit code 2 after 23.72s
 [Coverage] Coverage Report: reports/coverage/html/index.html
 ================================================================================
 
@@ -96,46 +96,46 @@ C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\llm\test
   class TestResponseModel(BaseModel):
 C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\llm\test_llm_integration_real.py:26: PytestCollectionWarning: cannot collect test class 'TestResponseModel' because it has a __init__ constructor (from: app/tests/llm/test_llm_integration_real.py)
   class TestResponseModel(BaseModel):
-2025-08-15 13:35:21.552 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
-2025-08-15 13:35:21.553 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
-2025-08-15 13:35:21.553 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
-2025-08-15 13:35:21.553 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
-2025-08-15 13:35:21.554 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
-2025-08-15 13:35:21.554 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
-2025-08-15 13:35:21.554 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
-2025-08-15 13:35:21.554 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set log_level from LOG_LEVEL
-2025-08-15 13:35:21.554 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set environment from ENVIRONMENT
-2025-08-15 13:35:21.554 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse host: localhost
-2025-08-15 13:35:21.555 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse port: 9000
-2025-08-15 13:35:21.555 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse password
-2025-08-15 13:35:21.555 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse user: default
-2025-08-15 13:35:21.555 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set Gemini API key for LLM configs
-2025-08-15 13:35:21.555 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 13 env vars
-2025-08-15 13:35:21.555 | INFO     | app.core.unified_logging:_emit_log:117 | Loading secrets...
-2025-08-15 13:35:21.556 | INFO     | app.core.unified_logging:_emit_log:117 | Starting secret=REDACTED process for environment: development
-2025-08-15 13:35:21.556 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 9 secrets from environment variables
-2025-08-15 13:35:21.556 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: gemini-api-key, jwt-secret-key, fernet-key
-2025-08-15 13:35:21.558 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 9 secrets loaded
-2025-08-15 13:35:21.558 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 9 secrets
-2025-08-15 13:35:21.559 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
-2025-08-15 13:35:21.560 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
-2025-08-15 13:35:21.560 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
-2025-08-15 13:35:21.590 | DEBUG    | logging:handle:1028 | loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
-2025-08-15 13:35:21.591 | DEBUG    | logging:handle:1028 | loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
-2025-08-15 13:35:21.591 | DEBUG    | logging:handle:1028 | loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
-2025-08-15 13:35:21.634 | DEBUG    | logging:handle:1028 | registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
-2025-08-15 13:35:21.936 | INFO     | app.db.postgres:<module>:237 | PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling
-2025-08-15 13:35:23.071 | DEBUG    | logging:handle:1028 | Using orjson library for writing JSON byte strings
-2025-08-15 13:35:23.132 | DEBUG    | logging:handle:1028 | Looking up time zone info from registry
-2025-08-15 13:35:23.753 | INFO     | app.core.unified_logging:_emit_log:117 | SyntheticDataService initialized successfully
-2025-08-15 13:35:24.716 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
-2025-08-15 13:35:24.741 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
-2025-08-15 13:35:24.787 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
-2025-08-15 13:35:24.900 | INFO     | app.services.quality_gate.quality_gate_core:__init__:34 | Quality Gate Service initialized
-2025-08-15 13:35:24.901 | INFO     | app.services.quality_monitoring.service:__init__:48 | Quality Monitoring Service initialized
-2025-08-15 13:35:24.901 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
+2025-08-15 13:39:45.469 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
+2025-08-15 13:39:45.469 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
+2025-08-15 13:39:45.470 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
+2025-08-15 13:39:45.470 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
+2025-08-15 13:39:45.470 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
+2025-08-15 13:39:45.470 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
+2025-08-15 13:39:45.470 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
+2025-08-15 13:39:45.470 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set log_level from LOG_LEVEL
+2025-08-15 13:39:45.471 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set environment from ENVIRONMENT
+2025-08-15 13:39:45.471 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse host: localhost
+2025-08-15 13:39:45.471 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse port: 9000
+2025-08-15 13:39:45.471 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse password
+2025-08-15 13:39:45.471 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse user: default
+2025-08-15 13:39:45.471 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set Gemini API key for LLM configs
+2025-08-15 13:39:45.471 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 13 env vars
+2025-08-15 13:39:45.471 | INFO     | app.core.unified_logging:_emit_log:117 | Loading secrets...
+2025-08-15 13:39:45.473 | INFO     | app.core.unified_logging:_emit_log:117 | Starting secret=REDACTED process for environment: development
+2025-08-15 13:39:45.473 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 9 secrets from environment variables
+2025-08-15 13:39:45.474 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: gemini-api-key, jwt-secret-key, fernet-key
+2025-08-15 13:39:45.475 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 9 secrets loaded
+2025-08-15 13:39:45.475 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 9 secrets
+2025-08-15 13:39:45.475 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
+2025-08-15 13:39:45.475 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
+2025-08-15 13:39:45.476 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
+2025-08-15 13:39:45.503 | DEBUG    | logging:handle:1028 | loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
+2025-08-15 13:39:45.504 | DEBUG    | logging:handle:1028 | loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
+2025-08-15 13:39:45.504 | DEBUG    | logging:handle:1028 | loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
+2025-08-15 13:39:45.543 | DEBUG    | logging:handle:1028 | registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
+2025-08-15 13:39:45.872 | INFO     | app.db.postgres:<module>:237 | PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling
+2025-08-15 13:39:47.230 | DEBUG    | logging:handle:1028 | Using orjson library for writing JSON byte strings
+2025-08-15 13:39:47.299 | DEBUG    | logging:handle:1028 | Looking up time zone info from registry
+2025-08-15 13:39:47.993 | INFO     | app.core.unified_logging:_emit_log:117 | SyntheticDataService initialized successfully
+2025-08-15 13:39:48.920 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
+2025-08-15 13:39:48.943 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
+2025-08-15 13:39:48.981 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
+2025-08-15 13:39:49.070 | INFO     | app.services.quality_gate.quality_gate_core:__init__:34 | Quality Gate Service initialized
+2025-08-15 13:39:49.070 | INFO     | app.services.quality_monitoring.service:__init__:48 | Quality Monitoring Service initialized
+2025-08-15 13:39:49.070 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
 --- Logging error in Loguru Handler #5 ---
-Record was: {'elapsed': datetime.timedelta(seconds=15, microseconds=482555), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='ℹ️'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=38012, name='MainProcess'), 'thread': (id=42168, name='MainThread'), 'time': datetime(2025, 8, 15, 13, 35, 44, 351580, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
+Record was: {'elapsed': datetime.timedelta(seconds=11, microseconds=505418), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='ℹ️'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=3520, name='MainProcess'), 'thread': (id=33348, name='MainThread'), 'time': datetime(2025, 8, 15, 13, 40, 3, 668294, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
 Traceback (most recent call last):
   File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
     self._sink.write(message)
@@ -144,7 +144,7 @@ Traceback (most recent call last):
 ValueError: I/O operation on closed file.
 --- End of logging error ---
 --- Logging error in Loguru Handler #5 ---
-Record was: {'elapsed': datetime.timedelta(seconds=15, microseconds=649869), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'han...(truncated)
+Record was: {'elapsed': datetime.timedelta(seconds=11, microseconds=539012), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handl...(truncated)
 ```
 
 ### Frontend Output
@@ -158,7 +158,7 @@ Record was: {'elapsed': datetime.timedelta(seconds=15, microseconds=649869), 'ex
 - =================================== ERRORS ====================================
 - [31m[1m____ ERROR collecting app/tests/performance/test_corpus_generation_perf.py ____[0m
 - [31mERROR[0m app/tests/performance/test_corpus_generation_perf.py
-- [FAIL] TESTS FAILED with exit code 2 after 28.30s
+- [FAIL] TESTS FAILED with exit code 2 after 23.72s
 
 
 ---

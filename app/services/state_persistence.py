@@ -269,9 +269,9 @@ class StatePersistenceService:
             thread_id=request.thread_id,
             user_id=request.user_id,
             state_data=request.state_data,  # Store as JSON in database
-            serialization_format=serialization_format.value,
-            checkpoint_type=request.checkpoint_type.value,
-            agent_phase=request.agent_phase.value if request.agent_phase else None,
+            serialization_format=serialization_format.value if hasattr(serialization_format, 'value') else serialization_format,
+            checkpoint_type=request.checkpoint_type.value if hasattr(request.checkpoint_type, 'value') else request.checkpoint_type,
+            agent_phase=request.agent_phase.value if request.agent_phase and hasattr(request.agent_phase, 'value') else request.agent_phase,
             execution_context=request.execution_context,
             is_recovery_point=request.is_recovery_point,
             expires_at=request.expires_at or self._calculate_expiry_date()
@@ -293,7 +293,7 @@ class StatePersistenceService:
             run_id=request.run_id,
             operation_type=operation_type,
             triggered_by="system",
-            execution_phase=request.agent_phase.value if request.agent_phase else None,
+            execution_phase=request.agent_phase.value if request.agent_phase and hasattr(request.agent_phase, 'value') else request.agent_phase,
             status="pending"
         )
         
@@ -319,7 +319,7 @@ class StatePersistenceService:
             "current_run_id": request.run_id,
             "user_id": request.user_id,
             "last_updated": time.time(),
-            "checkpoint_type": request.checkpoint_type.value
+            "checkpoint_type": request.checkpoint_type.value if hasattr(request.checkpoint_type, 'value') else request.checkpoint_type
         }
         await redis_client.set(thread_key, json.dumps(thread_context), ex=self.redis_ttl * 24)
     
@@ -436,7 +436,7 @@ class StatePersistenceService:
             id=recovery_id,
             run_id=request.run_id,
             thread_id=request.thread_id,
-            recovery_type=request.recovery_type.value,
+            recovery_type=request.recovery_type.value if hasattr(request.recovery_type, 'value') else request.recovery_type,
             target_snapshot_id=request.target_snapshot_id,
             failure_reason=request.failure_reason,
             trigger_event="recovery_request",

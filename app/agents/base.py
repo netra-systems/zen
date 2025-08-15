@@ -298,8 +298,14 @@ class BaseSubAgent(ABC):
         
     def _get_websocket_user_id(self, run_id: str) -> str:
         """Get WebSocket user ID with fallback."""
+        if hasattr(self, '_user_id'):
+            return self._user_id
         if hasattr(self.websocket_manager, '_current_user_id'):
             return getattr(self.websocket_manager, '_current_user_id', run_id)
+        # Extract user_id from run_id pattern if possible
+        # run_id format: run_<uuid> vs user_id format: <uuid>
+        if run_id.startswith('run_'):
+            logger.warning(f"Using run_id {run_id} as fallback for user_id")
         return run_id
         
     async def _handle_websocket_failure(self, run_id: str, data: "Dict[str, Any]", error: Exception) -> None:

@@ -297,6 +297,13 @@ class DataSubAgent(BaseSubAgent):
     ) -> Union[AnomalyDetectionResponse, DataAnalysisResponse]:
         """Try converting to AnomalyDetectionResponse, fallback to DataAnalysisResponse."""
         try:
+            # Fix common format issues from LLM responses
+            if 'anomalies_detected' in result_dict and isinstance(result_dict['anomalies_detected'], list):
+                # LLM returned list instead of boolean - fix it
+                anomaly_list = result_dict['anomalies_detected']
+                result_dict['anomalies_detected'] = bool(anomaly_list)
+                result_dict['anomaly_details'] = anomaly_list
+                result_dict['anomaly_count'] = len(anomaly_list)
             return AnomalyDetectionResponse(**result_dict)
         except Exception as e:
             logger.warning(f"Failed to convert dict to typed result: {e}")

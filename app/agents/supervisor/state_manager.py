@@ -18,8 +18,8 @@ logger = central_logger.get_logger(__name__)
 class StateManager:
     """Enhanced state manager with atomic persistence and recovery."""
     
-    def __init__(self, db_session: AsyncSession):
-        self.db_session = db_session
+    def __init__(self, db_session_factory):
+        self.db_session_factory = db_session_factory
         self.state_persistence = state_persistence_service
         self.current_checkpoint_id: Optional[str] = None
         self.auto_checkpoint_interval = 300  # 5 minutes
@@ -57,8 +57,9 @@ class StateManager:
     
     async def _load_previous_state(self, run_id: str) -> Optional[DeepAgentState]:
         """Load the most recent state."""
-        return await self.state_persistence.load_agent_state(
-            run_id, None, self.db_session)
+        async with self.db_session_factory() as session:
+            return await self.state_persistence.load_agent_state(
+                run_id, None, session)
     
     def _validate_recovered_state(self, recovered_state: Optional[DeepAgentState], 
                                  run_id: str) -> Optional[DeepAgentState]:
@@ -73,8 +74,9 @@ class StateManager:
         """Create initial state checkpoint."""
         request = self._build_initial_checkpoint_request(
             state, run_id, thread_id, user_id)
-        success, checkpoint_id = await self.state_persistence.save_agent_state(
-            request, self.db_session)
+        async with self.db_session_factory() as session:
+            success, checkpoint_id = await self.state_persistence.save_agent_state(
+                request, session)
         if success:
             self._update_checkpoint_tracking(checkpoint_id)
     
@@ -118,8 +120,9 @@ class StateManager:
     async def _execute_checkpoint_save(self, request: StatePersistenceRequest,
                                       run_id: str) -> bool:
         """Execute checkpoint save operation."""
-        success, checkpoint_id = await self.state_persistence.save_agent_state(
-            request, self.db_session)
+        async with self.db_session_factory() as session:
+            success, checkpoint_id = await self.state_persistence.save_agent_state(
+                request, session)
         if success:
             self._finalize_checkpoint_save(checkpoint_id, run_id)
         return success

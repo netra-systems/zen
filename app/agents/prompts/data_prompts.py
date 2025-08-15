@@ -76,7 +76,8 @@ data_prompt_template = PromptTemplate(
             "traffic_pattern": "steady|bursty|periodic|growing",
             "workload_distribution": {{"model_name": percentage}}
         }},
-        "anomalies_detected": [
+        "anomalies_detected": true|false,
+        "anomaly_details": [
             {{
                 "type": "latency_spike|error_surge|cost_anomaly|quality_degradation",
                 "timestamp": "ISO timestamp",

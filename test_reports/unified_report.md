@@ -1,13 +1,13 @@
 # Unified Test Report
-**Level**: comprehensive-websocket | **Time**: 2025-08-15 13:35:46
+**Level**: unit | **Time**: 2025-08-15 13:45:17
 
 ## ⚠️ Test Failures Detected
 
 ## Current Run Summary
 | Component | Status | Tests | Passed | Failed | Duration |
 |-----------|--------|-------|--------|--------|----------|
-| Backend | ❌ | 2 | 0 | 0 | 29.3s |
-| Frontend | ⏭️ | 0 | 0 | 0 | 0.0s |
+| Backend | ❌ | 521 | 499 | 3 | 56.9s |
+| Frontend | ❌ | 0 | 0 | 0 | 0.5s |
 | E2E | ⏸️ | 0 | 0 | 0 | 0.0s |
 
 ## Failed Tests

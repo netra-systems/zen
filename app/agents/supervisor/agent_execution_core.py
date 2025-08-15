@@ -50,6 +50,9 @@ class AgentExecutionCore:
     async def _execute_agent_lifecycle(self, agent, context: AgentExecutionContext,
                                       state: DeepAgentState) -> None:
         """Execute agent with lifecycle events."""
+        # Set user_id on agent if available for proper websocket routing
+        if hasattr(state, 'user_id') and state.user_id:
+            agent._user_id = state.user_id
         await agent.execute(state, context.run_id, True)
     
     def _handle_execution_error(self, context: AgentExecutionContext,

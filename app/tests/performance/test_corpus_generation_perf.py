@@ -13,7 +13,7 @@ from typing import Dict, List, Any
 from unittest.mock import AsyncMock, MagicMock
 
 from app.services.corpus_service import CorpusService
-from app.services.synthetic_data.service import SyntheticDataService
+from app.services.synthetic_data.core_service import SyntheticDataService
 from app.agents.corpus_admin import CorpusAdminSubAgent
 from app.schemas.Corpus import Corpus
 from app.agents.corpus_admin.models import CorpusMetadata

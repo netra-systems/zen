@@ -79,9 +79,13 @@ class ExecutionEngine:
     
     def _extract_analysis_params(self, state: "DeepAgentState") -> Dict[str, Any]:
         """Extract analysis parameters from triage result."""
-        triage_result = state.triage_result or {}
-        key_params = triage_result.get("key_parameters", {})
-        intent = triage_result.get("intent", {})
+        triage_result = state.triage_result
+        if not triage_result:
+            return self._build_analysis_params_dict({}, {})
+        
+        # Access TriageResult object attributes properly
+        key_params = getattr(triage_result, 'key_parameters', {})
+        intent = getattr(triage_result, 'intent', {})
         
         return self._build_analysis_params_dict(key_params, intent)
     
@@ -469,8 +473,8 @@ class ExecutionEngine:
     
     def _create_emergency_data_fallback(self, state: 'DeepAgentState', error: Exception) -> Dict[str, Any]:
         """Create emergency fallback when all analysis methods fail."""
-        triage_result = state.triage_result or {}
-        category = triage_result.get("category", "Unknown")
+        triage_result = state.triage_result
+        category = getattr(triage_result, 'category', 'Unknown') if triage_result else 'Unknown'
         
         return {
             "analysis_type": "emergency_fallback",
