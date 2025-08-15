@@ -14,7 +14,7 @@ from app.llm.llm_provider_handlers import create_llm_for_provider, validate_prov
 from app.llm.llm_response_processing import create_cached_llm_response, create_llm_response, stream_llm_response
 from app.services.llm_cache_service import llm_cache_service
 from app.logging_config import central_logger
-from app.llm.observability import generate_llm_correlation_id, start_llm_heartbeat, stop_llm_heartbeat
+from app.llm.observability import generate_llm_correlation_id, start_llm_heartbeat, stop_llm_heartbeat, get_heartbeat_logger
 import time
 
 logger = central_logger.get_logger(__name__)
@@ -27,6 +27,12 @@ class LLMCoreOperations:
         self.settings = settings
         self._llm_cache: Dict[str, Any] = {}
         self.enabled = self._check_if_enabled()
+        self._configure_heartbeat_logger()
+
+    def _configure_heartbeat_logger(self) -> None:
+        """Configure the heartbeat logger with settings."""
+        heartbeat_logger = get_heartbeat_logger()
+        heartbeat_logger.interval_seconds = self.settings.llm_heartbeat_interval_seconds
 
     def _check_if_enabled(self) -> bool:
         """Check if LLMs should be enabled based on service mode configuration."""
@@ -153,7 +159,15 @@ class LLMCoreOperations:
             await llm_cache_service.cache_response(prompt, content, llm_config_name)
 
     async def stream_llm(self, prompt: str, llm_config_name: str) -> AsyncIterator[str]:
-        """Stream LLM response content."""
-        llm = self.get_llm(llm_config_name)
-        async for chunk in stream_llm_response(llm, prompt):
-            yield chunk
+        """Stream LLM response content with heartbeat logging."""
+        correlation_id = generate_llm_correlation_id()
+        if self.settings.llm_heartbeat_enabled:
+            start_llm_heartbeat(correlation_id, llm_config_name)
+        
+        try:
+            llm = self.get_llm(llm_config_name)
+            async for chunk in stream_llm_response(llm, prompt):
+                yield chunk
+        finally:
+            if self.settings.llm_heartbeat_enabled:
+                stop_llm_heartbeat(correlation_id)

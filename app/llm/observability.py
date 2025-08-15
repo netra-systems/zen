@@ -90,25 +90,28 @@ class HeartbeatLogger:
         }
 
 
-# Global heartbeat logger instance
-_heartbeat_logger = HeartbeatLogger()
+# Global heartbeat logger instance (will be configured on first use)
+_heartbeat_logger: Optional[HeartbeatLogger] = None
 
 
 def get_heartbeat_logger() -> HeartbeatLogger:
     """Get the global heartbeat logger instance."""
+    global _heartbeat_logger
+    if _heartbeat_logger is None:
+        _heartbeat_logger = HeartbeatLogger()
     return _heartbeat_logger
 
 
 def start_llm_heartbeat(correlation_id: str, agent_name: str) -> None:
     """Start heartbeat logging for an LLM operation."""
-    _heartbeat_logger.start_heartbeat(correlation_id, agent_name)
+    get_heartbeat_logger().start_heartbeat(correlation_id, agent_name)
 
 
 def stop_llm_heartbeat(correlation_id: str) -> None:
     """Stop heartbeat logging for an LLM operation."""
-    _heartbeat_logger.stop_heartbeat(correlation_id)
+    get_heartbeat_logger().stop_heartbeat(correlation_id)
 
 
 def generate_llm_correlation_id() -> str:
     """Generate a new correlation ID for LLM operations."""
-    return _heartbeat_logger.generate_correlation_id()
+    return get_heartbeat_logger().generate_correlation_id()
