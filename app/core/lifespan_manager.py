@@ -5,7 +5,7 @@ Manages FastAPI application startup and shutdown lifecycle.
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from app.startup import run_complete_startup
+from app.startup_module import run_complete_startup
 from app.shutdown import run_complete_shutdown
 
 
