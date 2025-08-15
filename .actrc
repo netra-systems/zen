@@ -1,1 +1,20 @@
+# ACT Configuration for Local GitHub Actions Testing
+
+# Always bind mount the repository
+--bind
+
+# Use Linux AMD64 architecture
+--container-architecture linux/amd64
+
+# Default runner image mappings
 -P ubuntu-latest=catthehacker/ubuntu:act-latest
+-P ubuntu-22.04=catthehacker/ubuntu:act-22.04
+-P ubuntu-20.04=catthehacker/ubuntu:act-20.04
+-P warp-custom-default=catthehacker/ubuntu:act-latest
+-P warp-custom-test=catthehacker/ubuntu:act-latest
+
+# Don't pull images if they exist
+--pull=false
+
+# Reuse containers between runs
+--reuse

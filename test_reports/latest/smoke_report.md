@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-15T18:49:01.875504  
+**Generated:** 2025-08-15T18:53:24.171924  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -17,7 +17,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 6.93s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 6.29s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -27,7 +27,7 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 6.93s
+- **Total Duration:** 6.29s
 - **Exit Code:** 4
 
 ### Backend Configuration
@@ -62,36 +62,36 @@ Loaded .env file from /mnt/c/Users/antho/OneDrive/Desktop/Netra/netra-core-gener
 Loaded .env.development file from /mnt/c/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/.env.development
 Loaded .env.development.local file from /mnt/c/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/.env.development.local
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 6.31s
+[FAIL] TESTS FAILED with exit code 4 after 5.68s
 ================================================================================
 
-2025-08-15 18:49:00.258 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
-2025-08-15 18:49:00.258 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
-2025-08-15 18:49:00.258 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
-2025-08-15 18:49:00.258 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
-2025-08-15 18:49:00.259 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
-2025-08-15 18:49:00.259 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
-2025-08-15 18:49:00.259 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
-2025-08-15 18:49:00.259 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set log_level from LOG_LEVEL
-2025-08-15 18:49:00.259 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set environment from ENVIRONMENT
-2025-08-15 18:49:00.259 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse host: localhost
-2025-08-15 18:49:00.259 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse port: 9000
-2025-08-15 18:49:00.259 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse password
-2025-08-15 18:49:00.259 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse user: default
-2025-08-15 18:49:00.259 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set Gemini API key for LLM configs
-2025-08-15 18:49:00.259 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 13 env vars
-2025-08-15 18:49:00.259 | INFO     | app.core.unified_logging:_emit_log:117 | Loading secrets...
-2025-08-15 18:49:00.260 | INFO     | app.core.unified_logging:_emit_log:117 | Starting secret=REDACTED process for environment: development
-2025-08-15 18:49:00.260 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 9 secrets from environment variables
-2025-08-15 18:49:00.260 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: gemini-api-key, jwt-secret-key, fernet-key
-2025-08-15 18:49:00.260 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 9 secrets loaded
-2025-08-15 18:49:00.260 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 9 secrets
-2025-08-15 18:49:00.260 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
-2025-08-15 18:49:00.260 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
-2025-08-15 18:49:00.260 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
-2025-08-15 18:49:00.537 | DEBUG    | logging:handle:968 | loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
-2025-08-15 18:49:00.538 | DEBUG    | logging:handle:968 | loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
-2025-08-15 18:49:00.538 | DEBUG    | logging:handle:968 | loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
+2025-08-15 18:53:22.094 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
+2025-08-15 18:53:22.095 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
+2025-08-15 18:53:22.095 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
+2025-08-15 18:53:22.095 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
+2025-08-15 18:53:22.095 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
+2025-08-15 18:53:22.096 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
+2025-08-15 18:53:22.096 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
+2025-08-15 18:53:22.096 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set log_level from LOG_LEVEL
+2025-08-15 18:53:22.096 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set environment from ENVIRONMENT
+2025-08-15 18:53:22.096 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse host: localhost
+2025-08-15 18:53:22.096 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse port: 9000
+2025-08-15 18:53:22.097 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse password
+2025-08-15 18:53:22.097 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse user: default
+2025-08-15 18:53:22.097 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set Gemini API key for LLM configs
+2025-08-15 18:53:22.097 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 13 env vars
+2025-08-15 18:53:22.097 | INFO     | app.core.unified_logging:_emit_log:117 | Loading secrets...
+2025-08-15 18:53:22.097 | INFO     | app.core.unified_logging:_emit_log:117 | Starting secret=REDACTED process for environment: development
+2025-08-15 18:53:22.097 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 9 secrets from environment variables
+2025-08-15 18:53:22.098 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: gemini-api-key, jwt-secret-key, fernet-key
+2025-08-15 18:53:22.098 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 9 secrets loaded
+2025-08-15 18:53:22.098 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 9 secrets
+2025-08-15 18:53:22.098 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
+2025-08-15 18:53:22.098 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
+2025-08-15 18:53:22.098 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
+2025-08-15 18:53:22.265 | DEBUG    | logging:handle:968 | loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
+2025-08-15 18:53:22.265 | DEBUG    | logging:handle:968 | loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
+2025-08-15 18:53:22.265 | DEBUG    | logging:handle:968 | loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
 ImportError while loading conftest '/mnt/c/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/app/tests/conftest.py'.
 app/tests/conftest.py:52: in <module>
     from app.main import app
@@ -107,7 +107,7 @@ app/services/security_service.py:8: in <module>
     from datetime import datetime, timedelta, UTC
 E   ImportError: cannot import name 'UTC' from 'datetime' (/usr/lib/python3.10/datetime.py)
 --- Logging error in Loguru Handler #1 ---
-Record was: {'elapsed': datetime.timedelta(seconds=4, microseconds=433499), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='/usr/lib/python3.10/logging/__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='ℹ️'), 'line': 968, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=110, name='MainProcess'), 'thread': (id=126221594890240, name='MainThread'), 'time': datetime(2025, 8, 15, 18, 49, 1, 493868, tzinfo=datetime.timezone(datetime.timedelta(0), 'UTC'))}
+Record was: {'elapsed': datetime.timedelta(seconds=3, microseconds=969501), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='/usr/lib/python3.10/logging/__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='ℹ️'), 'line': 968, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=109, name='MainProcess'), 'thread': (id=125686816055296, name='MainThread'), 'time': datetime(2025, 8, 15, 18, 53, 23, 554401, tzinfo=datetime.timezone(datetime.timedelta(0), 'UTC'))}
 Traceback (most recent call last):
   File "/usr/local/lib/python3.10/dist-packages/loguru/_handler.py", line 315, in _queued_writer
     self._sink.write(message)

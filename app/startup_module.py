@@ -37,18 +37,31 @@ async def _initialize_performance_optimizations(app: FastAPI, logger: logging.Lo
         await performance_manager.initialize()
         app.state.performance_manager = performance_manager
         
-        # Run database index optimizations
-        optimization_results = await index_manager.optimize_all_databases()
-        logger.info(f"Database optimization completed: {optimization_results}")
-        
         # Store optimization components in app state
         app.state.index_manager = index_manager
+        
+        # Schedule index optimization as background task
+        if hasattr(app.state, 'background_task_manager'):
+            app.state.background_task_manager.add_task(
+                _run_index_optimization_background(logger)
+            )
+            logger.info("Database index optimization scheduled as background task")
         
         logger.info("Performance optimizations initialized successfully")
         
     except Exception as e:
         logger.error(f"Failed to initialize performance optimizations: {e}")
         # Don't fail startup, but log the error
+
+
+async def _run_index_optimization_background(logger: logging.Logger) -> None:
+    """Run database index optimization in background."""
+    try:
+        logger.info("Starting background database index optimization...")
+        optimization_results = await index_manager.optimize_all_databases()
+        logger.info(f"Background database optimization completed: {optimization_results}")
+    except Exception as e:
+        logger.error(f"Background index optimization failed: {e}")
 
 
 def initialize_logging() -> Tuple[float, logging.Logger]:

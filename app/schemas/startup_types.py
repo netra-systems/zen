@@ -99,6 +99,60 @@ class StartupEvent(BaseModel):
     context: Dict[str, Any] = Field(default_factory=dict)
 
 
+class ErrorPhase(str, Enum):
+    """Error phase during startup."""
+    STARTUP = "startup"
+    RUNTIME = "runtime" 
+    SHUTDOWN = "shutdown"
+
+
+class ErrorType(str, Enum):
+    """Error type classification."""
+    CONNECTION = "connection"
+    CONFIGURATION = "configuration"
+    DEPENDENCY = "dependency"
+    MIGRATION = "migration"
+    TIMEOUT = "timeout"
+    PERMISSION = "permission"
+    RESOURCE = "resource"
+    OTHER = "other"
+
+
+class StartupError(BaseModel):
+    """Single error record for aggregation database."""
+    id: Optional[int] = None
+    timestamp: datetime
+    service: str
+    phase: ErrorPhase
+    severity: str
+    error_type: ErrorType
+    message: str
+    stack_trace: Optional[str] = None
+    context: Dict[str, Any] = Field(default_factory=dict)
+    resolved: bool = False
+    resolution: Optional[str] = None
+
+
+class ErrorPattern(BaseModel):
+    """Detected error pattern with frequency tracking."""
+    pattern_id: Optional[int] = None
+    pattern: str
+    frequency: int = Field(default=1, ge=1)
+    last_seen: datetime
+    suggested_fix: Optional[str] = None
+    auto_fixable: bool = False
+
+
+class ErrorTrend(BaseModel):
+    """Error trend analysis results."""
+    period: str
+    total_errors: int
+    error_types: Dict[str, int] = Field(default_factory=dict)
+    services: Dict[str, int] = Field(default_factory=dict)
+    severity_breakdown: Dict[str, int] = Field(default_factory=dict)
+    patterns: List[ErrorPattern] = Field(default_factory=list)
+
+
 # Export all startup types
 __all__ = [
     "ServiceType",
@@ -109,5 +163,10 @@ __all__ = [
     "CrashEntry",
     "HealthCheckHistory",
     "StartupStatus",
-    "StartupEvent"
+    "StartupEvent",
+    "ErrorPhase",
+    "ErrorType",
+    "StartupError",
+    "ErrorPattern",
+    "ErrorTrend"
 ]

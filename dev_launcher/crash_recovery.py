@@ -28,7 +28,7 @@ from app.core.exceptions_base import NetraException
 # Import modular components
 from .crash_recovery_models import (
     CrashReport, CrashSeverity, DetectionResult, RecoveryAttempt, 
-    RecoveryStage, MonitoringConfig, ServiceConfig
+    RecoveryStage, MonitoringConfig, ServiceConfig, DetectionMethod
 )
 from .crash_detector import CrashDetector
 from .recovery_manager import RecoveryManager
@@ -225,7 +225,11 @@ class CrashRecoveryManager:
         
         process = self._get_service_process(service_name)
         detection_results = [
-            DetectionResult(method="manual", is_crashed=True, error_message="Manual recovery triggered")
+            DetectionResult(
+                method=DetectionMethod.PROCESS_MONITORING, 
+                is_crashed=True, 
+                error_message="Manual recovery triggered"
+            )
         ]
         
         crash_report = self._create_crash_report(service_name, detection_results)
