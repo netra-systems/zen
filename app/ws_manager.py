@@ -112,6 +112,10 @@ class WebSocketManager:
         
         This method supports the job-based connection pattern expected by tests.
         """
+        # Validate job_id is a proper string, not a websocket object
+        if not isinstance(job_id, str) or "websocket" in str(job_id).lower():
+            job_id = f"job_{id(websocket)}"
+            logger.warning(f"Invalid job_id provided, using generated ID: {job_id}")
         user_id = f"job_{job_id}_{id(websocket)}"
         connection_info = await self.connect_user(user_id, websocket)
         self.core.room_manager.join_room(user_id, job_id)
@@ -151,6 +155,11 @@ class WebSocketManager:
                 return conn_info
         return None
 
+    @property
+    def connection_manager(self) -> ConnectionManager:
+        """Public access to connection manager for compatibility."""
+        return self._connection_manager
+    
     # Original convenience methods for existing API
     async def send_error_to_user(self, user_id: str, error_message: str, sub_agent_name: str = "System") -> bool:
         """Send an error message to a specific user."""
