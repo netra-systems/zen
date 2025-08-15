@@ -91,6 +91,47 @@
                 <reference>SPEC/system_boundaries.xml, SPEC/growth_control.xml</reference>
             </item>
             
+            <item id="github-actions-env-variable-issues">
+                <problem>GitHub Actions workflows fail with "Unknown Variable Access env" errors</problem>
+                <root-cause>Environment variables cannot self-reference in env section</root-cause>
+                <solution>Use static defaults in env section, let ACT override at runtime</solution>
+                <examples>
+                    <example>
+                        <!-- Wrong: env variables cannot reference themselves -->
+                        env:
+                          ACT: ${{ env.ACT || 'false' }}
+                          IS_ACT: ${{ env.ACT || 'false' }}
+                        
+                        <!-- Correct: use static defaults -->
+                        env:
+                          ACT: 'false'  # Will be overridden by ACT when running locally
+                          IS_ACT: 'false'  # Will be overridden by ACT when running locally
+                    </example>
+                    <example>
+                        <!-- Wrong: conditional runs-on syntax -->
+                        runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+                        
+                        <!-- Correct: use fixed value with comment -->
+                        runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
+                    </example>
+                </examples>
+                <affected-files>
+                    <file>test-on-demand.yml</file>
+                    <file>gemini-cli.yml</file>
+                    <file>staging-environment.yml</file>
+                    <file>test-comprehensive.yml</file>
+                    <file>test-unit.yml</file>
+                    <file>test-smoke.yml</file>
+                    <file>health-monitoring.yml</file>
+                    <file>workflow-health-monitor.yml</file>
+                    <file>pipeline-optimization.yml</file>
+                    <file>staging-cleanup.yml</file>
+                    <file>staging-workflows/config.yml</file>
+                </affected-files>
+                <validation-command>act --list --workflows workflow.yml</validation-command>
+                <resolution-date>2025-08-15</resolution-date>
+            </item>
+            
             <item id="architectural-decay-prevention">
                 <problem>System architecture degrading over time through small violations</problem>
                 <root-cause>Incremental boundary erosion without intervention</root-cause>
@@ -108,6 +149,24 @@
                     <indicator>Dependency depth staying under 5 levels</indicator>
                 </health-indicators>
                 <reference>SPEC/system_boundaries.xml, scripts/check_architecture_compliance.py</reference>
+            </item>
+            
+            <item id="frontend-test-npm-bus-errors">
+                <problem>Frontend tests fail with npm/npx bus errors on Windows Git Bash</problem>
+                <root-cause>Node/npm compatibility issues with Git Bash on Windows, possible memory constraints</root-cause>
+                <symptoms>
+                    <symptom>"/c/Program Files/nodejs/npm: line 65: Bus error" when running npm test</symptom>
+                    <symptom>Jest commands fail through npm scripts (test, test:fast, test:clear-cache)</symptom>
+                    <symptom>npx commands also timeout or fail with bus errors</symptom>
+                </symptoms>
+                <workarounds>
+                    <workaround>Use Windows Command Prompt or PowerShell instead of Git Bash</workaround>
+                    <workaround>Run Jest directly with node: node node_modules/.bin/jest</workaround>
+                    <workaround>Use WSL (Windows Subsystem for Linux) for more stable Node environment</workaround>
+                    <workaround>Run tests through test_runner.py which handles environment better</workaround>
+                </workarounds>
+                <solution>Execute frontend tests using alternative shells or test runner framework</solution>
+                <resolution-date>2025-08-15</resolution-date>
             </item>
         </section>
 

@@ -15,8 +15,7 @@ class AuthService {
         if (!response.ok) {
           if (i < retries - 1) {
             logger.warn(`Auth config fetch failed, retrying... (${i + 1}/${retries})`, {
-              component: 'AuthService',
-              status: response.status
+              component: 'AuthService'
             });
             await new Promise(resolve => setTimeout(resolve, delay));
             continue;

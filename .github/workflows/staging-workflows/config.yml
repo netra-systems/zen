@@ -34,7 +34,7 @@ on:
         value: 45
       act_mode:
         description: 'ACT environment detection flag'
-        value: ${{ env.ACT == 'true' }}
+        value: 'false'  # Will be overridden by ACT when running locally
       local_registry:
         description: 'Local Docker registry for ACT testing'
         value: localhost:5000

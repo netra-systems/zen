@@ -59,8 +59,6 @@ COPY frontend/auth ./auth
 COPY frontend/config ./config
 COPY frontend/providers ./providers
 COPY frontend/styles ./styles
-COPY frontend/chat ./chat
-COPY frontend/contexts ./contexts
 
 # UI components and pages (most frequently changed)
 COPY frontend/components ./components
