@@ -174,6 +174,19 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
               ? `${agentName} (${currentIteration})` 
               : agentName;
             
+            // Create agent started message
+            const startMessage: ChatMessage = {
+              id: generateUniqueId('agent-start'),
+              role: 'assistant',
+              content: `🚀 Starting ${displayName}...`,
+              timestamp: Date.now(),
+              metadata: {
+                agentName: agentName,
+                runId: event.payload.run_id
+              }
+            };
+            get().addMessage(startMessage);
+            
             set({
               isProcessing: true,
               currentRunId: event.payload.run_id,
@@ -209,7 +222,19 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             }
             break;
             
-          case 'agent_thinking':
+          case 'agent_thinking': {
+            // Create thinking message for display
+            const thinkingMessage: ChatMessage = {
+              id: generateUniqueId('thinking'),
+              role: 'assistant',
+              content: `🤔 ${event.payload.agent_name}: ${event.payload.thought}`,
+              timestamp: Date.now(),
+              metadata: {
+                agentName: event.payload.agent_name
+              }
+            };
+            get().addMessage(thinkingMessage);
+            
             set({
               mediumLayerData: {
                 thought: event.payload.thought,
@@ -220,9 +245,25 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
               }
             }, false, 'agent_thinking');
             break;
+          }
             
-          case 'partial_result':
+          case 'partial_result': {
             const currentMedium = state.mediumLayerData;
+            
+            // Create partial result message for display
+            if (event.payload.content) {
+              const partialMessage: ChatMessage = {
+                id: generateUniqueId('partial'),
+                role: 'assistant',
+                content: event.payload.content,
+                timestamp: Date.now(),
+                metadata: {
+                  agentName: event.payload.agent_name
+                }
+              };
+              get().addMessage(partialMessage);
+            }
+            
             set({
               mediumLayerData: {
                 thought: currentMedium?.thought || '',
@@ -235,6 +276,7 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
               }
             }, false, 'partial_result');
             break;
+          }
             
           case 'agent_completed': {
             const agentName = event.payload.agent_name;
@@ -260,6 +302,19 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
               metrics: event.payload.metrics,
               iteration: (event.payload as any).iteration || iteration
             };
+            
+            // Create agent completed message
+            const completedMessage: ChatMessage = {
+              id: generateUniqueId('agent-complete'),
+              role: 'assistant',
+              content: `✅ ${displayName} completed in ${(event.payload.duration_ms / 1000).toFixed(2)}s`,
+              timestamp: Date.now(),
+              metadata: {
+                agentName: agentName,
+                duration: event.payload.duration_ms
+              }
+            };
+            get().addMessage(completedMessage);
             
             const currentSlow = state.slowLayerData;
             
@@ -330,6 +385,19 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
               confidence_scores: event.payload.confidence_scores,
               technical_details: event.payload.technical_details
             };
+            
+            // Create final report message
+            const reportMessage: ChatMessage = {
+              id: generateUniqueId('final-report'),
+              role: 'assistant',
+              content: event.payload.executive_summary || 
+                `📊 Analysis complete! Found ${event.payload.recommendations?.length || 0} recommendations.`,
+              timestamp: Date.now(),
+              metadata: {
+                runId: state.currentRunId || undefined
+              }
+            };
+            get().addMessage(reportMessage);
             
             set({
               isProcessing: false,

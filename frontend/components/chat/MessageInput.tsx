@@ -1,12 +1,10 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { useChatStore } from '@/store/chat';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { Send, Paperclip, Mic, Command, ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
-import { Message } from '@/types/chat';
 import { ThreadService } from '@/services/threadService';
 import { ThreadRenameService } from '@/services/threadRenameService';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,11 +18,12 @@ export const MessageInput: React.FC = () => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { sendMessage } = useWebSocket();
-  const { setProcessing, isProcessing } = useChatStore();
   const { 
     addMessage, 
     activeThreadId,
-    setActiveThread 
+    setActiveThread,
+    setProcessing,
+    isProcessing
   } = useUnifiedChatStore();
   const { currentThreadId, setCurrentThread, addThread } = useThreadStore();
   const { isAuthenticated } = useAuthStore();

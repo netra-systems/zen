@@ -2,18 +2,17 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { examplePrompts } from '@/lib/examplePrompts';
 import { generateUniqueId } from '@/lib/utils';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAuthStore } from '@/store/authStore';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Send, Sparkles, Zap, TrendingUp, Shield, Database, Brain } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Message } from '@/types/chat';
 
 export const ExamplePrompts: React.FC = () => {
   const { sendMessage } = useWebSocket();
-  const { setProcessing, addMessage } = useChatStore();
+  const { setProcessing, addMessage } = useUnifiedChatStore();
   const { isAuthenticated } = useAuthStore();
   const [isOpen, setIsOpen] = React.useState(true);
 
@@ -24,12 +23,11 @@ export const ExamplePrompts: React.FC = () => {
       return;
     }
     // Add user message to chat immediately
-    const userMessage: Message = {
+    const userMessage = {
       id: generateUniqueId('msg'),
-      type: 'user',
+      role: 'user' as const,
       content: prompt,
-      created_at: new Date().toISOString(),
-      displayed_to_user: true
+      timestamp: Date.now()
     };
     addMessage(userMessage);
     

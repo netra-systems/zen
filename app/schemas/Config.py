@@ -157,6 +157,16 @@ class AppConfig(BaseModel):
     llm_heartbeat_enabled: bool = True
     llm_heartbeat_interval_seconds: float = 2.5  # Heartbeat every 2.5 seconds
     
+    # LLM Data Logging Settings (DEBUG level)
+    llm_data_logging_enabled: bool = True
+    llm_data_truncate_length: int = 1000  # Characters to truncate prompts/responses
+    llm_data_log_format: str = "json"  # "json" or "text" format
+    llm_data_json_depth: int = 3  # Maximum depth for JSON logging
+    llm_heartbeat_log_json: bool = True  # Log heartbeat as JSON
+    
+    # SubAgent Communication Logging Settings (INFO level)
+    subagent_logging_enabled: bool = True  # Enable/disable subagent communication logging
+    
     # Service configuration is now managed through dev_launcher service config
     # Services use the mode specified in the launcher (local/shared/mock)
     dev_mode_redis_enabled: bool = Field(

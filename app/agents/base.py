@@ -15,6 +15,11 @@ from app.logging_config import central_logger
 from app.agents.error_handler import (
     global_error_handler, ErrorContext, WebSocketError, handle_agent_error
 )
+from app.llm.observability import (
+    generate_llm_correlation_id, log_agent_communication, 
+    log_agent_input, log_agent_output
+)
+from app.config import get_config
 from langchain_core.messages import SystemMessage
 from starlette.websockets import WebSocketDisconnect
 
@@ -30,12 +35,25 @@ class BaseSubAgent(ABC):
         self.websocket_manager = None  # Will be set by Supervisor
         self.user_id = None  # Will be set by Supervisor for WebSocket messages
         self.logger = central_logger.get_logger(name)
+        self.correlation_id = generate_llm_correlation_id()  # Unique ID for tracing
+        self._subagent_logging_enabled = self._get_subagent_logging_enabled()
+
+    def _get_subagent_logging_enabled(self) -> bool:
+        """Get subagent logging configuration setting."""
+        try:
+            config = get_config()
+            return getattr(config, 'subagent_logging_enabled', True)
+        except Exception:
+            return True  # Default to enabled if config unavailable
 
     async def _pre_run(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> bool:
         """Entry conditions and setup. Returns True if agent should proceed."""
         self.logger.info(f"{self.name} checking entry conditions for run_id: {run_id}")
         self.start_time = time.time()
         self.set_state(SubAgentLifecycle.RUNNING)
+        
+        # Log agent starting communication
+        self._log_agent_start(run_id)
         
         # Stream update that agent is starting
         if stream_updates and self.websocket_manager:
@@ -57,6 +75,9 @@ class BaseSubAgent(ABC):
             status = "failed"
         
         self.logger.info(f"{self.name} {status} for run_id: {run_id} in {execution_time:.2f}s")
+        
+        # Log agent completion communication
+        self._log_agent_completion(run_id, status)
         
         # Stream update that agent finished
         if stream_updates and self.websocket_manager:
@@ -350,3 +371,41 @@ class BaseSubAgent(ABC):
         # Clear any remaining context
         self.context.clear()
         # Subclasses can override to add specific shutdown logic
+
+    def _log_agent_start(self, run_id: str) -> None:
+        """Log agent starting communication."""
+        if not self._subagent_logging_enabled:
+            return
+        log_agent_communication("system", self.name, self.correlation_id, "agent_start")
+    
+    def _log_agent_completion(self, run_id: str, status: str) -> None:
+        """Log agent completion communication."""
+        if not self._subagent_logging_enabled:
+            return
+        log_agent_communication(self.name, "system", self.correlation_id, f"agent_{status}")
+    
+    def log_input_from_agent(self, from_agent: str, data: Any) -> None:
+        """Log input data received from another agent."""
+        if not self._subagent_logging_enabled:
+            return
+        data_size = self._calculate_data_size(data)
+        log_agent_input(from_agent, self.name, data_size, self.correlation_id)
+    
+    def log_output_to_agent(self, to_agent: str, data: Any, status: str = "success") -> None:
+        """Log output data sent to another agent."""
+        if not self._subagent_logging_enabled:
+            return
+        data_size = self._calculate_data_size(data)
+        log_agent_output(to_agent, self.name, data_size, status, self.correlation_id)
+    
+    def _calculate_data_size(self, data: Any) -> int:
+        """Calculate size of data for logging."""
+        try:
+            if isinstance(data, str):
+                return len(data)
+            if isinstance(data, (list, dict)):
+                import json
+                return len(json.dumps(data))
+            return len(str(data))
+        except Exception:
+            return 0

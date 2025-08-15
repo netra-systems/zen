@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useThreadStore } from '@/store/threadStore';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
 import { ThreadService } from '@/services/threadService';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -28,7 +28,7 @@ export const ThreadSidebar: React.FC = () => {
     setError
   } = useThreadStore();
   
-  const { clearMessages, loadMessages } = useChatStore();
+  const { clearMessages, loadMessages, setActiveThread } = useUnifiedChatStore();
   const { isAuthenticated } = useAuthStore();
   const [editingThreadId, setEditingThreadId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
@@ -76,12 +76,21 @@ export const ThreadSidebar: React.FC = () => {
     
     try {
       setCurrentThread(threadId);
+      setActiveThread(threadId);
       clearMessages();
       
       // Load messages for the selected thread
       const response = await ThreadService.getThreadMessages(threadId);
       if (response.messages.length > 0) {
-        loadMessages(response.messages);
+        // Convert messages to ChatMessage format for unified store
+        const chatMessages = response.messages.map((msg: any) => ({
+          id: msg.id,
+          role: msg.type === 'user' ? 'user' : msg.type === 'system' ? 'system' : 'assistant',
+          content: msg.content,
+          timestamp: msg.created_at ? new Date(msg.created_at).getTime() : Date.now(),
+          threadId: threadId
+        }));
+        loadMessages(chatMessages);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load conversation';
