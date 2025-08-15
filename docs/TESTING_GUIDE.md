@@ -39,17 +39,20 @@ The Netra platform employs a comprehensive testing strategy across multiple laye
 ### Setup
 
 ```bash
-# Create virtual environment
+# RECOMMENDED: Use test runner for consistent environment setup
+python test_runner.py --level unit
+
+# Manual setup (if needed)
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# Install test dependencies
+# Install test dependencies  
 pip install -r requirements.txt
 pip install pytest pytest-asyncio pytest-cov pytest-mock httpx
 
 # Setup test database
 export TEST_DATABASE_URL="postgresql://test_user:password@localhost:5432/netra_test"
-python create_db.py --test
+python database_scripts/create_db.py --test
 ```
 
 ### Running Tests
@@ -722,13 +725,19 @@ Cypress.Commands.add('createThread', (title: string) => {
 ### Backend Coverage
 
 ```bash
-# Generate coverage report
+# RECOMMENDED: Generate coverage with test runner
+python test_runner.py --level comprehensive  # Includes coverage report
+
+# Traditional coverage generation
 pytest --cov=app --cov-report=html --cov-report=term
 
 # View HTML report
 open htmlcov/index.html  # macOS
 xdg-open htmlcov/index.html  # Linux
 start htmlcov/index.html  # Windows
+
+# Coverage reports are automatically generated in test_reports/ directory
+open test_reports/coverage/index.html  # View unified coverage report
 ```
 
 ### Frontend Coverage
