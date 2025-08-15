@@ -13,7 +13,8 @@ from fastapi import Request, Response, HTTPException, status
 from fastapi.security import HTTPBearer
 from starlette.middleware.base import BaseHTTPMiddleware
 from app.logging_config import central_logger
-from app.core.exceptions import NetraSecurityException
+from app.core.exceptions_auth import NetraSecurityException
+from app.core.error_codes import ErrorCode
 
 logger = central_logger.get_logger(__name__)
 
@@ -113,16 +114,14 @@ class InputValidator:
         if self.sql_regex.search(data):
             logger.error(f"SQL injection attempt detected in {field_name}: {data[:100]}")
             raise NetraSecurityException(
-                f"Invalid input detected in {field_name}",
-                error_code="SECURITY_SQL_INJECTION"
+                message=f"SQL injection attempt detected in {field_name}"
             )
         
         # Check for XSS
         if self.xss_regex.search(data):
             logger.error(f"XSS attempt detected in {field_name}: {data[:100]}")
             raise NetraSecurityException(
-                f"Invalid input detected in {field_name}",
-                error_code="SECURITY_XSS_ATTEMPT"
+                message=f"XSS attempt detected in {field_name}"
             )
     
     def sanitize_headers(self, headers: Dict[str, str]) -> Dict[str, str]:

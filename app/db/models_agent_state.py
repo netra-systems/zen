@@ -46,8 +46,8 @@ class AgentStateSnapshot(Base):
     
     # Relationships
     user = relationship("User")
-    parent_snapshot = relationship("AgentStateSnapshot", remote_side=[id])
-    child_snapshots = relationship("AgentStateSnapshot", backref="parent")
+    parent_snapshot = relationship("AgentStateSnapshot", remote_side=[id], back_populates="child_snapshots")
+    child_snapshots = relationship("AgentStateSnapshot", back_populates="parent_snapshot")
     
     # Indexes for performance
     __table_args__ = (

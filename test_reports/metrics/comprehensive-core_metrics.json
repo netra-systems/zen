@@ -1,8 +1,8 @@
 {
-  "timestamp": "2025-08-14T17:01:52.938794",
+  "timestamp": "2025-08-14T17:04:00.383406",
   "level": "comprehensive-core",
   "metrics": {
-    "total_tests": 2,
+    "total_tests": 0,
     "passed": 0,
     "failed": 0,
     "coverage": null
@@ -10,15 +10,15 @@
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 26.452898502349854,
-      "exit_code": 2,
-      "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -v -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -k core or config or dependencies --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\ncreated: 4/4 workers\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m_____ ERROR collecting app/tests/security/test_comprehensive_security.py ______\u001b[0m\nImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\security\\test_comprehensive_security.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\napp\\tests\\security\\test_comprehensive_security.py:18: in <module>\n    from app.core.enhanced_secret_manager import EnhancedSecretManager, SecretAccessLevel, EnvironmentType\napp\\core\\enhanced_secret_manager.py:20: in <module>\n    from app.schemas.config_types import SecretType, EnvironmentType\nE   ImportError: cannot import name 'EnvironmentType' from 'app.schemas.config_types' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\schemas\\config_types.py)\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app/tests/security/test_comprehensive_security.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!\n\u001b[31m======================== \u001b[33m1 skipped\u001b[0m, \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 18.67s\u001b[0m\u001b[31m =========================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 2 after 25.71s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nC:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\llm\\test_llm_integration_real.py:26: PytestCollectionWarning: cannot collect test class 'TestResponseModel' because it has a __init__ constructor (from: app/tests/llm/test_llm_integration_real.py)\n  class TestResponseModel(BaseModel):\nC:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\llm\\test_llm_integration_real.py:26: PytestCollectionWarning: cannot collect test class 'TestResponseModel' because it has a __init__ constructor (from: app/tests/llm/test_llm_integration_real.py)\n  class TestResponseModel(BaseModel):\nC:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\llm\\test_llm_integration_real.py:26: PytestCollectionWarning: cannot collect test class 'TestResponseModel' because it has a __init__ constructor (from: app/tests/llm/test_llm_integration_real.py)\n  class TestResponseModel(BaseModel):\nC:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\llm\\test_llm_integration_real.py:26: PytestCollectionWarning: cannot collect test class 'TestResponseModel' because it has a __init__ constructor (from: app/tests/llm/test_llm_integration_real.py)\n  class TestResponseModel(BaseModel):\n",
+      "duration": 21.91521406173706,
+      "exit_code": 15,
+      "output": "\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"<string>\", line 5, in <module>\nOSError: [Errno 22] Invalid argument\n",
       "test_counts": {
-        "total": 2,
+        "total": 0,
         "passed": 0,
         "failed": 0,
-        "skipped": 1,
-        "errors": 1,
+        "skipped": 0,
+        "errors": 0,
         "test_files": 0
       },
       "coverage": null,
@@ -54,8 +54,8 @@
     },
     "overall": {
       "status": "failed",
-      "start_time": 1755216086.481222,
-      "end_time": 1755216112.93713
+      "start_time": 1755216218.4681926,
+      "end_time": 1755216240.3834066
     }
   }
 }

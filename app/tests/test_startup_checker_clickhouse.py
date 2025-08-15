@@ -33,11 +33,10 @@ class TestStartupCheckerClickHouse:
             with patch('app.startup_checks.settings') as mock_settings:
                 mock_settings.environment = "development"
                 
-                await checker.check_clickhouse()
+                result = await checker.service_checker.check_clickhouse()
                 
-                assert len(checker.results) == 1
-                assert checker.results[0].success == True
-                assert "2 tables" in checker.results[0].message
+                assert result.success == True
+                assert "2 tables" in result.message
     
     @pytest.mark.asyncio
     async def test_check_clickhouse_missing_tables(self, checker):
@@ -50,11 +49,10 @@ class TestStartupCheckerClickHouse:
             with patch('app.startup_checks.settings') as mock_settings:
                 mock_settings.environment = "development"
                 
-                await checker.check_clickhouse()
+                result = await checker.service_checker.check_clickhouse()
                 
-                assert len(checker.results) == 1
-                assert checker.results[0].success == False
-                assert "Missing ClickHouse tables" in checker.results[0].message
+                assert result.success == False
+                assert "Missing ClickHouse tables" in result.message
     
     @pytest.mark.asyncio
     async def test_check_clickhouse_connection_failure(self, checker):
@@ -64,12 +62,11 @@ class TestStartupCheckerClickHouse:
             with patch('app.startup_checks.settings') as mock_settings:
                 mock_settings.environment = "development"
                 
-                await checker.check_clickhouse()
+                result = await checker.service_checker.check_clickhouse()
                 
-                assert len(checker.results) == 1
-                assert checker.results[0].success == False
-                assert "Connection failed" in checker.results[0].message
-                assert checker.results[0].critical == False
+                assert result.success == False
+                assert "Connection failed" in result.message
+                assert result.critical == False
     
     @pytest.mark.asyncio
     async def test_check_clickhouse_tuple_result(self, checker):
@@ -82,7 +79,6 @@ class TestStartupCheckerClickHouse:
             with patch('app.startup_checks.settings') as mock_settings:
                 mock_settings.environment = "development"
                 
-                await checker.check_clickhouse()
+                result = await checker.service_checker.check_clickhouse()
                 
-                assert len(checker.results) == 1
-                assert checker.results[0].success == True
+                assert result.success == True

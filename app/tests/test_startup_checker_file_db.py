@@ -32,11 +32,10 @@ class TestStartupCheckerFileDb:
         tmpdir, original_cwd = setup_temp_directory_test()
         
         try:
-            await checker.check_file_permissions()
+            result = await checker.system_checker.check_file_permissions()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == True
-            assert "accessible" in checker.results[0].message
+            assert result.success == True
+            assert "accessible" in result.message
             verify_directories_created()
         finally:
             os.chdir(original_cwd)
@@ -48,11 +47,10 @@ class TestStartupCheckerFileDb:
         with patch('pathlib.Path.mkdir') as mock_mkdir:
             mock_mkdir.side_effect = PermissionError("No permission")
             
-            await checker.check_file_permissions()
+            result = await checker.system_checker.check_file_permissions()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == False
-            assert "Permission issues" in checker.results[0].message
+            assert result.success == False
+            assert "Permission issues" in result.message
     
     @pytest.mark.asyncio
     async def test_check_database_connection_success(self, mock_app, checker):
@@ -60,11 +58,10 @@ class TestStartupCheckerFileDb:
         db_session = create_mock_database_session(mock_app)
         setup_successful_db_queries(db_session)
         
-        await checker.check_database_connection()
+        result = await checker.db_checker.check_database_connection()
         
-        assert len(checker.results) == 1
-        assert checker.results[0].success == True
-        assert "PostgreSQL connected" in checker.results[0].message
+        assert result.success == True
+        assert "PostgreSQL connected" in result.message
     
     @pytest.mark.asyncio
     async def test_check_database_connection_missing_table(self, mock_app, checker):
@@ -72,11 +69,10 @@ class TestStartupCheckerFileDb:
         db_session = create_mock_database_session(mock_app)
         setup_missing_table_db_queries(db_session)
         
-        await checker.check_database_connection()
+        result = await checker.db_checker.check_database_connection()
         
-        assert len(checker.results) == 1
-        assert checker.results[0].success == False
-        assert "does not exist" in checker.results[0].message
+        assert result.success == False
+        assert "does not exist" in result.message
     
     @pytest.mark.asyncio
     async def test_check_database_connection_failure(self, mock_app, checker):
@@ -84,8 +80,7 @@ class TestStartupCheckerFileDb:
         db_session = create_mock_database_session(mock_app)
         db_session.execute = Mock(side_effect=Exception("Connection failed"))
         
-        await checker.check_database_connection()
+        result = await checker.db_checker.check_database_connection()
         
-        assert len(checker.results) == 1
-        assert checker.results[0].success == False
-        assert "Connection failed" in checker.results[0].message
+        assert result.success == False
+        assert "Connection failed" in result.message

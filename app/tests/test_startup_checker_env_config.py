@@ -29,11 +29,10 @@ class TestStartupCheckerEnvConfig:
         setup_env_vars_development(monkeypatch)
         clear_required_env_vars(monkeypatch)
         
-        await checker.check_environment_variables()
+        result = await checker.env_checker.check_environment_variables()
         
-        assert len(checker.results) == 1
-        assert checker.results[0].success == True
-        assert "Development mode" in checker.results[0].message
+        assert result.success == True
+        assert "Development mode" in result.message
     
     @pytest.mark.asyncio
     async def test_check_environment_variables_production_missing(self, checker, monkeypatch):
@@ -41,12 +40,11 @@ class TestStartupCheckerEnvConfig:
         monkeypatch.setenv("ENVIRONMENT", "production")
         clear_required_env_vars(monkeypatch)
         
-        await checker.check_environment_variables()
+        result = await checker.env_checker.check_environment_variables()
         
-        assert len(checker.results) == 1
-        assert checker.results[0].success == False
-        assert "Missing required" in checker.results[0].message
-        assert checker.results[0].critical == True
+        assert result.success == False
+        assert "Missing required" in result.message
+        assert result.critical == True
     
     @pytest.mark.asyncio
     async def test_check_environment_variables_with_optional(self, checker, monkeypatch):
@@ -54,11 +52,10 @@ class TestStartupCheckerEnvConfig:
         setup_env_vars_production(monkeypatch)
         clear_optional_env_vars(monkeypatch)
         
-        await checker.check_environment_variables()
+        result = await checker.env_checker.check_environment_variables()
         
-        assert len(checker.results) == 1
-        assert checker.results[0].success == True
-        assert "Optional missing" in checker.results[0].message
+        assert result.success == True
+        assert "Optional missing" in result.message
     
     @pytest.mark.asyncio
     async def test_check_configuration_success(self, checker):
@@ -68,10 +65,9 @@ class TestStartupCheckerEnvConfig:
             mock_settings.secret_key = "a" * 32
             mock_settings.environment = "development"
             
-            await checker.check_configuration()
+            result = await checker.env_checker.check_configuration()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == True
+            assert result.success == True
     
     @pytest.mark.asyncio
     async def test_check_configuration_missing_database(self, checker):
@@ -79,11 +75,10 @@ class TestStartupCheckerEnvConfig:
         with patch('app.startup_checks.settings') as mock_settings:
             mock_settings.database_url = None
             
-            await checker.check_configuration()
+            result = await checker.env_checker.check_configuration()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == False
-            assert "DATABASE_URL" in checker.results[0].message
+            assert result.success == False
+            assert "DATABASE_URL" in result.message
     
     @pytest.mark.asyncio
     async def test_check_configuration_short_secret_production(self, checker):
@@ -93,11 +88,10 @@ class TestStartupCheckerEnvConfig:
             mock_settings.secret_key = "short"
             mock_settings.environment = "production"
             
-            await checker.check_configuration()
+            result = await checker.env_checker.check_configuration()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == False
-            assert "SECRET_KEY" in checker.results[0].message
+            assert result.success == False
+            assert "SECRET_KEY" in result.message
     
     @pytest.mark.asyncio
     async def test_check_configuration_invalid_environment(self, checker):
@@ -107,8 +101,7 @@ class TestStartupCheckerEnvConfig:
             mock_settings.secret_key = "a" * 32
             mock_settings.environment = "invalid"
             
-            await checker.check_configuration()
+            result = await checker.env_checker.check_configuration()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == False
-            assert "Invalid environment" in checker.results[0].message
+            assert result.success == False
+            assert "Invalid environment" in result.message

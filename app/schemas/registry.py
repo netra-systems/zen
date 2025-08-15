@@ -395,6 +395,14 @@ class BaseWebSocketPayload(BaseModel):
     )
 
 
+class StartAgentPayload(BaseWebSocketPayload):
+    """Payload for starting an agent."""
+    agent_id: str
+    prompt: str
+    thread_id: Optional[str] = None
+    configuration: Optional[Dict[str, Any]] = None
+
+
 class CreateThreadPayload(BaseWebSocketPayload):
     """Payload for creating a thread."""
     name: Optional[str] = None
@@ -677,7 +685,7 @@ __all__ = [
     "WebSocketMessage", "WebSocketError", "BaseWebSocketPayload", 
     "UserMessagePayload", "AgentUpdatePayload", "MessageToUser", "AnalysisRequest",
     "UserMessage", "AgentMessage", "StopAgent", "StreamEvent",
-    "AgentStarted", "SubAgentUpdate", "AgentCompleted",
+    "AgentStarted", "SubAgentUpdate", "AgentCompleted", "StartAgentPayload",
     "WebSocketMessageIn", "MessageTypeLiteral", "CreateThreadPayload", 
     "SwitchThreadPayload", "DeleteThreadPayload", "MessageData", "ThreadHistoryResponse",
     "AgentResponseData", "AgentResponse", "AgentCompletedPayload", "AgentStoppedPayload",

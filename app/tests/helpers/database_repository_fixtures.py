@@ -26,6 +26,7 @@ def _setup_session_methods(session):
     session.commit = AsyncMock()
     session.rollback = AsyncMock()
     session.close = AsyncMock()
+    session.begin = AsyncMock()
     session.add = MagicMock()
     session.refresh = AsyncMock(side_effect=_mock_refresh)
     session.execute = AsyncMock()

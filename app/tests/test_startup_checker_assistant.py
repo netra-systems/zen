@@ -31,11 +31,10 @@ class TestStartupCheckerAssistant:
         mock_result = create_mock_assistant_query_result(mock_assistant)
         db_session.execute = AsyncMock(return_value=mock_result)
         
-        await checker.check_or_create_assistant()
+        result = await checker.db_checker.check_or_create_assistant()
         
-        assert len(checker.results) == 1
-        assert checker.results[0].success == True
-        assert "already exists" in checker.results[0].message
+        assert result.success == True
+        assert "already exists" in result.message
     
     @pytest.mark.asyncio
     async def test_check_or_create_assistant_create_new(self, mock_app, checker):
@@ -47,11 +46,10 @@ class TestStartupCheckerAssistant:
         db_session.add = Mock()
         db_session.commit = AsyncMock()
         
-        await checker.check_or_create_assistant()
+        result = await checker.db_checker.check_or_create_assistant()
         
-        assert len(checker.results) == 1
-        assert checker.results[0].success == True
-        assert "created successfully" in checker.results[0].message
+        assert result.success == True
+        assert "created successfully" in result.message
         
         # Verify assistant was added
         db_session.add.assert_called_once()
@@ -63,9 +61,8 @@ class TestStartupCheckerAssistant:
         db_session = create_mock_database_session(mock_app)
         db_session.execute = AsyncMock(side_effect=Exception("Database error"))
         
-        await checker.check_or_create_assistant()
+        result = await checker.db_checker.check_or_create_assistant()
         
-        assert len(checker.results) == 1
-        assert checker.results[0].success == False
-        assert "Database error" in checker.results[0].message
-        assert checker.results[0].critical == False
+        assert result.success == False
+        assert "Database error" in result.message
+        assert result.critical == False

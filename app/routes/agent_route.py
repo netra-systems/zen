@@ -29,9 +29,11 @@ async def stream_agent_response(
         from app.services.agent_service import generate_stream
         async for chunk in generate_stream(message, thread_id):
             yield json.dumps(chunk)
+        yield json.dumps({"type": "complete", "status": "finished"})
     else:
         async for chunk in agent_service.generate_stream(message, thread_id):
             yield json.dumps(chunk)
+        yield json.dumps({"type": "complete", "status": "finished"})
 
 def get_agent_supervisor(request: Request) -> Supervisor:
     return request.app.state.agent_supervisor

@@ -391,11 +391,110 @@
       "duration": 0
     },
     {
-      "timestamp": "2025-08-14T17:01:52.938794",
-      "level": "comprehensive-core",
+      "timestamp": "2025-08-14T17:01:46.222320",
+      "level": "real_services",
       "total": 2,
       "passed": 0,
       "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:04:00.737495",
+      "level": "comprehensive",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:04:38.680253",
+      "level": "critical",
+      "total": 66,
+      "passed": 65,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:05:41.979582",
+      "level": "critical",
+      "total": 68,
+      "passed": 67,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:06:13.470569",
+      "level": "critical",
+      "total": 71,
+      "passed": 70,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:06:41.177789",
+      "level": "critical",
+      "total": 74,
+      "passed": 73,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:07:07.418561",
+      "level": "critical",
+      "total": 83,
+      "passed": 82,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:08:07.284893",
+      "level": "critical",
+      "total": 85,
+      "passed": 85,
+      "failed": 0,
+      "coverage": 22.02,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:09:27.961533",
+      "level": "integration",
+      "total": 8,
+      "passed": 6,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:10:34.155186",
+      "level": "unit",
+      "total": 123,
+      "passed": 111,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:12:13.745386",
+      "level": "unit",
+      "total": 156,
+      "passed": 144,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:12:39.145567",
+      "level": "agents",
+      "total": 15,
+      "passed": 11,
+      "failed": 3,
       "coverage": null,
       "duration": 0
     }

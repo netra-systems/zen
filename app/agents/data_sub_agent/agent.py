@@ -28,6 +28,8 @@ from .execution_engine import ExecutionEngine
 from .data_operations import DataOperations
 from .metrics_analyzer import MetricsAnalyzer
 from .models import DataAnalysisResponse, AnomalyDetectionResponse
+from .extended_operations import ExtendedOperations
+from .delegation import AgentDelegation
 
 
 class DataSubAgent(BaseSubAgent):
@@ -50,6 +52,8 @@ class DataSubAgent(BaseSubAgent):
         self.analysis_engine = AnalysisEngine()
         self.clickhouse_ops = ClickHouseOperations()
         self.cache_ttl = agent_config.cache.default_ttl
+        self.extended_ops = ExtendedOperations(self)
+        self.delegation = AgentDelegation(self, self.extended_ops)
         
     def _init_redis(self) -> None:
         """Initialize Redis connection."""
@@ -243,28 +247,24 @@ class DataSubAgent(BaseSubAgent):
 
     def _validate_data(self, data: Dict[str, Any]) -> bool:
         """Validate data has required fields."""
-        required_fields = ["input", "type", "timestamp"]
+        required_fields = ["input", "type"]
         return all(field in data for field in required_fields)
 
     async def _transform_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Transform data and preserve type."""
-        return {
+        result = {
             "transformed": True,
             "type": data.get("type", "unknown"),
             "content": data.get("content", ""),
             "original": data
         }
+        if data.get("type") == "json" and "content" in data:
+            try:
+                result["parsed"] = json.loads(data["content"])
+            except (json.JSONDecodeError, TypeError):
+                result["parsed"] = {}
+        return result
 
-    async def enrich_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Enrich data with metadata."""
-        from datetime import datetime, timezone
-        enriched = data.copy()
-        enriched["metadata"] = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "source": data.get("source", "unknown"),
-            "enriched": True
-        }
-        return enriched
 
     async def process_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process individual data item."""
@@ -277,3 +277,18 @@ class DataSubAgent(BaseSubAgent):
             result = await self.process_data(item)
             results.append(result)
         return results
+    
+    def __getattr__(self, name: str):
+        """Dynamic delegation to extended operations and delegation modules."""
+        delegation_methods = [
+            "_process_internal", "process_with_retry", "process_with_cache",
+            "process_batch_safe", "process_concurrent", "process_stream",
+            "process_and_persist", "handle_supervisor_request", "enrich_data",
+            "_transform_with_pipeline", "_apply_operation", "save_state",
+            "load_state", "recover"
+        ]
+        if name in delegation_methods and hasattr(self, 'delegation'):
+            if name == "enrich_data":
+                return self.delegation.enrich_data_external
+            return getattr(self.delegation, name)
+        raise AttributeError(f"'{self.__class__.__name__}' has no attribute '{name}'")
