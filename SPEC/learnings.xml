@@ -1737,6 +1737,158 @@
                     <test>Connection pool properly manages sessions</test>
                 </testing>
             </fix>
+            
+            <fix id="agent-communication-cascade-failures" date="2025-08-15" status="resolved">
+                <title>Agent Communication Cascade Failures - Type Safety and Identity Loss</title>
+                <problem>Critical cascade of failures in agent communication pipeline causing complete communication breakdown</problem>
+                <symptoms>
+                    <symptom>Error: 'async_sessionmaker' object has no attribute 'execute'</symptom>
+                    <symptom>Error: 'str' object has no attribute 'value' when processing enums</symptom>
+                    <symptom>Error: 'TriageResult' object has no attribute 'get'</symptom>
+                    <symptom>Warning: No active connections for user run_xxxxx (using run_id instead of user_id)</symptom>
+                    <symptom>Pydantic validation: anomalies_detected expects bool, got list</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>StateManager receiving db_session_factory (AsyncSessionMaker) instead of AsyncSession</cause>
+                    <cause>Attempting to call .value on already-converted enum strings</cause>
+                    <cause>User identity lost - WebSocket broadcasts using run_id instead of user_id</cause>
+                    <cause>TriageResult object treated as dictionary with .get() method</cause>
+                    <cause>LLM prompt schema mismatch - instructed to return array for boolean field</cause>
+                </root-causes>
+                <solution>
+                    <step>Modified StateManager to accept db_session_factory and create sessions as needed</step>
+                    <step>Added safe enum value extraction with hasattr() checks before accessing .value</step>
+                    <step>Preserved user_id through agent execution chain with _user_id attribute</step>
+                    <step>Changed from dict.get() to getattr() for TriageResult objects</step>
+                    <step>Fixed LLM prompt schema and added conversion safeguards for malformed responses</step>
+                </solution>
+                <implementation>
+                    <code>
+                        # Session Management Fix
+                        async with self.db_session_factory() as session:
+                            return await self.state_persistence.load_agent_state(run_id, None, session)
+                        
+                        # Safe Enum Handling
+                        serialization_format.value if hasattr(serialization_format, 'value') else serialization_format
+                        
+                        # User ID Preservation
+                        if hasattr(state, 'user_id') and state.user_id:
+                            agent._user_id = state.user_id
+                        
+                        # TriageResult Type Handling
+                        key_params = getattr(triage_result, 'key_parameters', {})
+                        
+                        # LLM Response Fixing
+                        if isinstance(result_dict['anomalies_detected'], list):
+                            anomaly_list = result_dict['anomalies_detected']
+                            result_dict['anomalies_detected'] = bool(anomaly_list)
+                            result_dict['anomaly_details'] = anomaly_list
+                    </code>
+                </implementation>
+                <files-modified>
+                    <file>app/agents/supervisor/state_manager.py - Handle sessionmaker properly</file>
+                    <file>app/services/state_persistence.py - Safe enum value extraction</file>
+                    <file>app/agents/base.py - User ID preservation in _get_websocket_user_id</file>
+                    <file>app/agents/supervisor/agent_execution_core.py - Set _user_id on agents</file>
+                    <file>app/agents/data_sub_agent/execution_engine.py - Use getattr for TriageResult</file>
+                    <file>app/agents/prompts/data_prompts.py - Fix anomalies_detected schema</file>
+                    <file>app/agents/data_sub_agent/agent.py - Add LLM response conversion</file>
+                </files-modified>
+                <prevention>
+                    <action>Always validate types at agent boundaries using isinstance() or type guards</action>
+                    <action>Use type guards for critical type conversions</action>
+                    <action>Preserve user identity explicitly through execution chain</action>
+                    <action>Never assume object types - use isinstance() or hasattr()</action>
+                    <action>Validate and auto-fix LLM response schemas</action>
+                    <action>Create comprehensive integration tests for agent pipelines</action>
+                    <action>Enable strict type checking with mypy/pyright in CI/CD</action>
+                </prevention>
+                <key-insight>
+                    This incident revealed a fundamental architectural issue: inconsistent type handling across 
+                    agent boundaries. The system mixed typed objects and dictionaries, creating cascading failures
+                    as data flowed through the pipeline. User identity loss created a "paradox" where users were
+                    created but then immediately lost, breaking all real-time communication.
+                </key-insight>
+                <testing>
+                    <test>test_sessionmaker_handling - Verify proper session creation from factory</test>
+                    <test>test_user_id_preserved_through_pipeline - Track identity preservation</test>
+                    <test>test_malformed_llm_response_handling - Handle various bad schemas</test>
+                    <test>test_complete_agent_pipeline_with_state_persistence - End-to-end test</test>
+                    <test>test_enum_value_extraction - Test safe enum handling with mixed types</test>
+                    <test>test_websocket_channel_resolution - Verify correct user channel usage</test>
+                </testing>
+                <reference>docs/ROOT_CAUSE_ANALYSIS_2025_08_15.md</reference>
+            </fix>
+        </section>
+        
+        <section name="Type-Serialization-Paradox">
+            <fix id="datetime-json-serialization-pydantic-model-dict-access">
+                <title>DateTime JSON Serialization and Pydantic Model Dict Access Paradox</title>
+                <date>2025-08-15</date>
+                <category>Type Safety</category>
+                <severity>Critical</severity>
+                <symptoms>
+                    <symptom>Object of type datetime is not JSON serializable in state_persistence</symptom>
+                    <symptom>KeyParameters object has no attribute get in DataSubAgent</symptom>
+                    <symptom>Failed to save state for agent runs</symptom>
+                    <symptom>DataSubAgent execution failures</symptom>
+                </symptoms>
+                <root-cause>
+                    The system exhibited a paradox: strongly-typed Pydantic models were used (good practice per type_safety.xml),
+                    but code treated them as dictionaries in some places. Additionally, datetime objects were not being
+                    serialized before JSON storage, and serialized data was being discarded.
+                </root-cause>
+                <analysis>
+                    <finding>state_persistence.py serialized data but then used raw unserialized data for JSON column</finding>
+                    <finding>DataSubAgent code used dict.get() on Pydantic KeyParameters objects</finding>
+                    <finding>Inconsistent handling of typed objects vs dictionaries throughout codebase</finding>
+                    <finding>DateTimeEncoder existed but was not being applied correctly</finding>
+                </analysis>
+                <implementation>
+                    <code language="python">
+                        # Fix 1: DateTime serialization in state_persistence.py
+                        # BEFORE (line 271):
+                        state_data=request.state_data,  # Raw data with datetime objects
+                        
+                        # AFTER (line 263, 271):
+                        json_safe_data = json.loads(json.dumps(request.state_data, cls=DateTimeEncoder))
+                        state_data=json_safe_data,  # JSON-safe data
+                        
+                        # Fix 2: KeyParameters handling in execution_engine.py
+                        # Handle both Pydantic models and dicts
+                        if hasattr(key_params, '__dict__'):  # Pydantic model
+                            user_id = getattr(key_params, "user_id", 1)
+                            workload_id = getattr(key_params, "workload_id", None)
+                        else:  # Dict
+                            user_id = key_params.get("user_id", 1) if isinstance(key_params, dict) else 1
+                            workload_id = key_params.get("workload_id") if isinstance(key_params, dict) else None
+                    </code>
+                </implementation>
+                <files-modified>
+                    <file>app/services/state_persistence.py - Serialize datetime objects before JSON storage</file>
+                    <file>app/agents/data_sub_agent/execution_engine.py - Handle both Pydantic and dict types</file>
+                    <file>app/agents/data_sub_agent/agent_backup.py - Handle both Pydantic and dict types</file>
+                </files-modified>
+                <prevention>
+                    <action>Always serialize datetime objects using DateTimeEncoder before JSON storage</action>
+                    <action>Use hasattr() to check if object is Pydantic model before using dict methods</action>
+                    <action>Handle both typed objects and dicts at system boundaries</action>
+                    <action>Use getattr() for Pydantic models, dict.get() for dictionaries</action>
+                    <action>Never discard serialized data - use it immediately</action>
+                    <action>Add type guards at all agent boundaries</action>
+                    <action>Validate JSON compatibility before database operations</action>
+                </prevention>
+                <key-insight>
+                    This paradox revealed a fundamental tension: the system correctly uses strong typing with
+                    Pydantic models but inconsistently treats them as dictionaries in legacy code paths.
+                    The solution requires dual-mode handling that respects both patterns during migration.
+                </key-insight>
+                <testing>
+                    <test>test_datetime_serialization_in_state_persistence</test>
+                    <test>test_key_parameters_pydantic_model_access</test>
+                    <test>test_mixed_type_handling_in_agents</test>
+                </testing>
+            </fix>
         </section>
     </sections>
 </specification>

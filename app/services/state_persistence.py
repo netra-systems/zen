@@ -259,8 +259,8 @@ class StatePersistenceService:
         # Determine serialization format
         serialization_format = self._choose_serialization_format(request.state_data)
         
-        # Serialize and potentially compress
-        serialized_data = self.serializer.serialize(request.state_data, serialization_format)
+        # Serialize datetime objects to ISO format strings for JSON storage
+        json_safe_data = json.loads(json.dumps(request.state_data, cls=DateTimeEncoder))
         
         # Create snapshot record
         snapshot = AgentStateSnapshot(
@@ -268,7 +268,7 @@ class StatePersistenceService:
             run_id=request.run_id,
             thread_id=request.thread_id,
             user_id=request.user_id,
-            state_data=request.state_data,  # Store as JSON in database
+            state_data=json_safe_data,  # Store JSON-safe data in database
             serialization_format=serialization_format.value if hasattr(serialization_format, 'value') else serialization_format,
             checkpoint_type=request.checkpoint_type.value if hasattr(request.checkpoint_type, 'value') else request.checkpoint_type,
             agent_phase=request.agent_phase.value if request.agent_phase and hasattr(request.agent_phase, 'value') else request.agent_phase,

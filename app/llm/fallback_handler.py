@@ -43,6 +43,7 @@ class FallbackConfig:
     exponential_base: float = 2.0
     timeout: float = 60.0
     use_circuit_breaker: bool = True
+    log_circuit_breaker_warnings: bool = False
 
 
 @dataclass
@@ -110,7 +111,8 @@ class LLMFallbackHandler:
             try:
                 is_circuit_open = circuit_breaker.is_open()
             except (TypeError, AttributeError):
-                logger.warning(f"Circuit breaker for {provider} not properly initialized")
+                if self.config.log_circuit_breaker_warnings:
+                    logger.warning(f"Circuit breaker for {provider} not properly initialized")
                 is_circuit_open = False
         
         if is_circuit_open:

@@ -89,15 +89,25 @@ class ExecutionEngine:
         
         return self._build_analysis_params_dict(key_params, intent)
     
-    def _build_analysis_params_dict(self, key_params: Dict[str, Any], intent: Dict[str, Any]) -> Dict[str, Any]:
+    def _build_analysis_params_dict(self, key_params: Any, intent: Dict[str, Any]) -> Dict[str, Any]:
         """Build analysis parameters dictionary."""
-        return {
-            "user_id": key_params.get("user_id", 1),
-            "workload_id": key_params.get("workload_id"),
-            "metric_names": key_params.get("metrics", ["latency_ms", "throughput", "cost_cents"]),
-            "time_range_str": key_params.get("time_range", "last_24_hours"),
-            "primary_intent": intent.get("primary", "general")
-        }
+        # Handle both KeyParameters object and dict
+        if hasattr(key_params, '__dict__'):  # Pydantic model
+            return {
+                "user_id": getattr(key_params, "user_id", 1),
+                "workload_id": getattr(key_params, "workload_id", None),
+                "metric_names": getattr(key_params, "metrics", ["latency_ms", "throughput", "cost_cents"]),
+                "time_range_str": getattr(key_params, "time_range", "last_24_hours"),
+                "primary_intent": intent.get("primary", "general")
+            }
+        else:  # Dict or empty dict
+            return {
+                "user_id": key_params.get("user_id", 1) if isinstance(key_params, dict) else 1,
+                "workload_id": key_params.get("workload_id") if isinstance(key_params, dict) else None,
+                "metric_names": key_params.get("metrics", ["latency_ms", "throughput", "cost_cents"]) if isinstance(key_params, dict) else ["latency_ms", "throughput", "cost_cents"],
+                "time_range_str": key_params.get("time_range", "last_24_hours") if isinstance(key_params, dict) else "last_24_hours",
+                "primary_intent": intent.get("primary", "general")
+            }
     
     def _parse_time_range(self, time_range_str: str) -> Tuple[datetime, datetime]:
         """Parse time range string into datetime tuple."""

@@ -79,13 +79,24 @@ class DataSubAgent(BaseSubAgent):
             
             # Extract parameters from triage result
             triage_result = state.triage_result or {}
-            key_params = triage_result.get("key_parameters", {})
             
-            # Determine analysis parameters
-            user_id = key_params.get("user_id", 1)  # Default user for demo
-            workload_id = key_params.get("workload_id")
-            metric_names = key_params.get("metrics", ["latency_ms", "throughput", "cost_cents"])
-            time_range_str = key_params.get("time_range", "last_24_hours")
+            # Handle both object and dict for triage_result
+            if hasattr(triage_result, 'key_parameters'):
+                key_params = getattr(triage_result, 'key_parameters', {})
+            else:
+                key_params = triage_result.get("key_parameters", {}) if isinstance(triage_result, dict) else {}
+            
+            # Determine analysis parameters - handle both KeyParameters object and dict
+            if hasattr(key_params, '__dict__'):  # Pydantic model
+                user_id = getattr(key_params, "user_id", 1)
+                workload_id = getattr(key_params, "workload_id", None)
+                metric_names = getattr(key_params, "metrics", ["latency_ms", "throughput", "cost_cents"])
+                time_range_str = getattr(key_params, "time_range", "last_24_hours")
+            else:  # Dict
+                user_id = key_params.get("user_id", 1) if isinstance(key_params, dict) else 1
+                workload_id = key_params.get("workload_id") if isinstance(key_params, dict) else None
+                metric_names = key_params.get("metrics", ["latency_ms", "throughput", "cost_cents"]) if isinstance(key_params, dict) else ["latency_ms", "throughput", "cost_cents"]
+                time_range_str = key_params.get("time_range", "last_24_hours") if isinstance(key_params, dict) else "last_24_hours"
             
             # Parse time range
             time_range = self._parse_time_range(time_range_str)
