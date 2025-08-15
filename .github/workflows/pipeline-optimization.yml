@@ -1,0 +1,977 @@
+name: Pipeline Optimization & Performance
+description: Automatically optimize CI/CD pipeline performance and resource usage
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
+  workflow_dispatch:
+    inputs:
+      optimization_type:
+        description: 'Type of optimization to run'
+        required: true
+        type: choice
+        options:
+          - full
+          - performance
+          - cost
+          - parallelization
+          - cache
+        default: 'full'
+      analyze_period_days:
+        description: 'Days of history to analyze'
+        required: false
+        type: string
+        default: '30'
+
+env:
+  ANALYZE_PERIOD: ${{ github.event.inputs.analyze_period_days || '30' }}
+  PYTHON_VERSION: '3.11'
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  # ==========================================
+  # Performance Analysis
+  # ==========================================
+  
+  analyze-performance:
+    name: 📈 Analyze Pipeline Performance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      avg_duration: ${{ steps.analyze.outputs.avg_duration }}
+      slowest_jobs: ${{ steps.analyze.outputs.slowest_jobs }}
+      optimization_opportunities: ${{ steps.analyze.outputs.optimization_opportunities }}
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Install analysis tools
+        run: |
+          pip install pandas matplotlib seaborn requests
+          
+      - name: Collect workflow performance data
+        id: collect
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Collecting workflow performance data for last ${{ env.ANALYZE_PERIOD }} days..."
+          
+          SINCE_DATE=$(date -d "${{ env.ANALYZE_PERIOD }} days ago" --iso-8601)
+          
+          # Get workflow runs with timing data
+          gh api \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "/repos/${{ github.repository }}/actions/runs?created=>=$SINCE_DATE&per_page=100" \
+            > workflow_runs.json
+            
+          # Get job details for recent runs
+          echo "Collecting job details..."
+          echo "[]" > job_details.json
+          
+          python << 'EOF'
+          import json
+          import requests
+          import os
+          from datetime import datetime
+          
+          # Load workflow runs
+          with open('workflow_runs.json', 'r') as f:
+              data = json.load(f)
+          
+          runs = data.get('workflow_runs', [])[:20]  # Analyze last 20 runs
+          job_details = []
+          
+          headers = {
+              'Authorization': f'token {os.environ["GH_TOKEN"]}',
+              'Accept': 'application/vnd.github+json',
+              'X-GitHub-Api-Version': '2022-11-28'
+          }
+          
+          for run in runs:
+              try:
+                  # Get jobs for this run
+                  jobs_url = run['jobs_url']
+                  response = requests.get(jobs_url, headers=headers)
+                  
+                  if response.status_code == 200:
+                      jobs_data = response.json()
+                      
+                      for job in jobs_data.get('jobs', []):
+                          if job.get('started_at') and job.get('completed_at'):
+                              start_time = datetime.fromisoformat(job['started_at'].replace('Z', '+00:00'))
+                              end_time = datetime.fromisoformat(job['completed_at'].replace('Z', '+00:00'))
+                              duration = (end_time - start_time).total_seconds()
+                              
+                              job_details.append({
+                                  'run_id': run['id'],
+                                  'workflow_name': run['name'],
+                                  'job_name': job['name'],
+                                  'job_id': job['id'],
+                                  'duration_seconds': duration,
+                                  'conclusion': job['conclusion'],
+                                  'runner_name': job.get('runner_name', 'unknown'),
+                                  'steps_count': len(job.get('steps', []))
+                              })
+              except Exception as e:
+                  print(f"Error processing run {run['id']}: {e}")
+                  continue
+          
+          # Save job details
+          with open('job_details.json', 'w') as f:
+              json.dump(job_details, f, indent=2)
+          
+          print(f"Collected {len(job_details)} job records")
+          EOF
+          
+      - name: Analyze performance patterns
+        id: analyze
+        run: |
+          python << 'EOF'
+          import json
+          import pandas as pd
+          import os
+          from collections import defaultdict
+          
+          # Load job details
+          with open('job_details.json', 'r') as f:
+              job_details = json.load(f)
+          
+          if not job_details:
+              print("No job data to analyze")
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                  f.write("avg_duration=0\n")
+                  f.write("slowest_jobs=[]\n")
+                  f.write("optimization_opportunities=[]\n")
+              exit(0)
+          
+          df = pd.DataFrame(job_details)
+          
+          # Basic statistics
+          avg_duration = df['duration_seconds'].mean()
+          total_jobs = len(df)
+          
+          # Find slowest jobs by type
+          job_avg_duration = df.groupby('job_name')['duration_seconds'].agg(['mean', 'count', 'max']).reset_index()
+          job_avg_duration = job_avg_duration.sort_values('mean', ascending=False)
+          
+          slowest_jobs = []
+          for _, row in job_avg_duration.head(5).iterrows():
+              slowest_jobs.append({
+                  'name': row['job_name'],
+                  'avg_duration': round(row['mean'], 2),
+                  'max_duration': round(row['max'], 2),
+                  'count': int(row['count'])
+              })
+          
+          # Identify optimization opportunities
+          opportunities = []
+          
+          # 1. Jobs that could benefit from parallelization
+          long_sequential_jobs = job_avg_duration[
+              (job_avg_duration['mean'] > 300) &  # >5 minutes
+              (job_avg_duration['count'] >= 3)    # Run at least 3 times
+          ]
+          
+          for _, job in long_sequential_jobs.iterrows():
+              opportunities.append({
+                  'type': 'parallelization',
+                  'job': job['job_name'],
+                  'current_duration': round(job['mean'], 2),
+                  'potential_saving': round(job['mean'] * 0.3, 2),  # Assume 30% improvement
+                  'description': f"Consider parallelizing {job['job_name']} (avg: {job['mean']:.1f}s)"
+              })
+          
+          # 2. Cache optimization opportunities
+          test_jobs = df[df['job_name'].str.contains('test|build', case=False, na=False)]
+          if not test_jobs.empty:
+              avg_test_duration = test_jobs['duration_seconds'].mean()
+              if avg_test_duration > 180:  # >3 minutes
+                  opportunities.append({
+                      'type': 'cache',
+                      'job': 'test jobs',
+                      'current_duration': round(avg_test_duration, 2),
+                      'potential_saving': round(avg_test_duration * 0.4, 2),  # Assume 40% improvement
+                      'description': f"Optimize caching for test jobs (avg: {avg_test_duration:.1f}s)"
+                  })
+          
+          # 3. Runner optimization
+          runner_performance = df.groupby('runner_name')['duration_seconds'].mean()
+          if len(runner_performance) > 1:
+              fastest_runner = runner_performance.idxmin()
+              slowest_runner = runner_performance.idxmax()
+              
+              if runner_performance[slowest_runner] > runner_performance[fastest_runner] * 1.2:
+                  opportunities.append({
+                      'type': 'runner',
+                      'job': 'general',
+                      'current_duration': round(runner_performance[slowest_runner], 2),
+                      'potential_saving': round(runner_performance[slowest_runner] - runner_performance[fastest_runner], 2),
+                      'description': f"Switch from {slowest_runner} to {fastest_runner} runner"
+                  })
+          
+          # Output results
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"avg_duration={avg_duration:.2f}\n")
+              f.write(f"slowest_jobs={json.dumps(slowest_jobs)}\n")
+              f.write(f"optimization_opportunities={json.dumps(opportunities)}\n")
+          
+          # Generate detailed report
+          report = {
+              'analysis_period_days': int(os.environ['ANALYZE_PERIOD']),
+              'total_jobs_analyzed': total_jobs,
+              'average_job_duration': round(avg_duration, 2),
+              'slowest_jobs': slowest_jobs,
+              'optimization_opportunities': opportunities,
+              'runner_performance': {
+                  runner: round(duration, 2) 
+                  for runner, duration in runner_performance.items()
+              }
+          }
+          
+          with open('performance_analysis.json', 'w') as f:
+              json.dump(report, f, indent=2)
+          
+          print(f"Analysis complete: {total_jobs} jobs, avg duration {avg_duration:.2f}s")
+          EOF
+          
+      - name: Upload performance analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-analysis
+          path: |
+            performance_analysis.json
+            job_details.json
+            workflow_runs.json
+          retention-days: 30
+
+  # ==========================================
+  # Cost Analysis
+  # ==========================================
+  
+  analyze-costs:
+    name: 💰 Analyze Pipeline Costs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      monthly_cost_estimate: ${{ steps.cost-analysis.outputs.monthly_cost }}
+      cost_optimization_potential: ${{ steps.cost-analysis.outputs.optimization_potential }}
+      
+    steps:
+      - name: Download performance data
+        uses: actions/download-artifact@v4
+        with:
+          name: performance-analysis
+          
+      - name: Analyze costs and optimization potential
+        id: cost-analysis
+        run: |
+          python << 'EOF'
+          import json
+          import os
+          from collections import defaultdict
+          
+          # Load job details
+          with open('job_details.json', 'r') as f:
+              job_details = json.load(f)
+          
+          if not job_details:
+              print("No job data for cost analysis")
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+                  f.write("monthly_cost=0\n")
+                  f.write("optimization_potential=0\n")
+              exit(0)
+          
+          # Cost factors (per minute)
+          COST_PER_MINUTE = {
+              'ubuntu-latest': 0.008,
+              'ubuntu-22.04': 0.008,
+              'ubuntu-20.04': 0.008,
+              'windows-latest': 0.016,
+              'macos-latest': 0.08,
+              'warp-custom-default': 0.012,
+              'unknown': 0.008  # Default
+          }
+          
+          # Calculate costs
+          total_cost = 0
+          runner_costs = defaultdict(float)
+          job_costs = defaultdict(float)
+          
+          for job in job_details:
+              duration_minutes = job['duration_seconds'] / 60
+              runner = job.get('runner_name', 'unknown')
+              cost_per_min = COST_PER_MINUTE.get(runner, 0.008)
+              
+              job_cost = duration_minutes * cost_per_min
+              total_cost += job_cost
+              
+              runner_costs[runner] += job_cost
+              job_costs[job['job_name']] += job_cost
+          
+          # Project monthly cost
+          days_analyzed = int(os.environ['ANALYZE_PERIOD'])
+          daily_cost = total_cost / days_analyzed if days_analyzed > 0 else 0
+          monthly_cost = daily_cost * 30
+          
+          # Calculate optimization potential
+          optimization_potential = 0
+          
+          # 1. Runner optimization potential
+          if len(runner_costs) > 1:
+              most_expensive_runner = max(runner_costs.items(), key=lambda x: x[1])
+              ubuntu_cost_equivalent = runner_costs.get('ubuntu-latest', 0)
+              
+              if most_expensive_runner[0] != 'ubuntu-latest' and ubuntu_cost_equivalent > 0:
+                  potential_saving = most_expensive_runner[1] - ubuntu_cost_equivalent
+                  if potential_saving > 0:
+                      optimization_potential += potential_saving
+          
+          # 2. Duration optimization potential (assume 25% improvement possible)
+          optimization_potential += total_cost * 0.25
+          
+          # Generate cost report
+          cost_report = {
+              'total_cost_period': round(total_cost, 2),
+              'daily_cost_average': round(daily_cost, 2),
+              'monthly_cost_estimate': round(monthly_cost, 2),
+              'optimization_potential': round(optimization_potential, 2),
+              'runner_costs': {k: round(v, 2) for k, v in runner_costs.items()},
+              'top_expensive_jobs': sorted(
+                  [(k, round(v, 2)) for k, v in job_costs.items()],
+                  key=lambda x: x[1],
+                  reverse=True
+              )[:5]
+          }
+          
+          with open('cost_analysis.json', 'w') as f:
+              json.dump(cost_report, f, indent=2)
+          
+          # Output key metrics
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write(f"monthly_cost={monthly_cost:.2f}\n")
+              f.write(f"optimization_potential={optimization_potential:.2f}\n")
+          
+          print(f"Monthly cost estimate: ${monthly_cost:.2f}")
+          print(f"Optimization potential: ${optimization_potential:.2f}")
+          EOF
+          
+      - name: Upload cost analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: cost-analysis
+          path: cost_analysis.json
+          retention-days: 30
+
+  # ==========================================
+  # Cache Optimization
+  # ==========================================
+  
+  optimize-caching:
+    name: 🗄️ Optimize Caching Strategy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: |
+      github.event.inputs.optimization_type == 'full' ||
+      github.event.inputs.optimization_type == 'cache'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Analyze current caching patterns
+        id: cache-analysis
+        run: |
+          echo "Analyzing current caching patterns..."
+          
+          # Find all workflow files
+          WORKFLOW_FILES=$(find .github/workflows -name "*.yml" -o -name "*.yaml")
+          
+          CACHE_USAGE_COUNT=0
+          NO_CACHE_WORKFLOWS=()
+          CACHE_PATTERNS=()
+          
+          for file in $WORKFLOW_FILES; do
+            if grep -q "cache:" "$file"; then
+              CACHE_USAGE_COUNT=$((CACHE_USAGE_COUNT + 1))
+              
+              # Extract cache patterns
+              grep -A 2 -B 2 "cache:" "$file" | while read -r line; do
+                if [[ "$line" == *"cache:"* ]]; then
+                  CACHE_PATTERNS+=("$(echo "$line" | sed 's/.*cache: *//')")
+                fi
+              done
+            else
+              if grep -q "setup-python\|setup-node" "$file"; then
+                NO_CACHE_WORKFLOWS+=("$(basename "$file")")
+              fi
+            fi
+          done
+          
+          echo "cache_usage_count=$CACHE_USAGE_COUNT" >> $GITHUB_OUTPUT
+          echo "no_cache_workflows=${NO_CACHE_WORKFLOWS[*]}" >> $GITHUB_OUTPUT
+          
+          # Generate cache optimization recommendations
+          cat > cache_recommendations.md << EOF
+          # 🗄️ Cache Optimization Recommendations
+          
+          ## Current State
+          - **Workflows using cache:** $CACHE_USAGE_COUNT
+          - **Workflows without cache:** ${#NO_CACHE_WORKFLOWS[@]}
+          
+          ## Recommendations
+          
+          ### Workflows Missing Cache
+          EOF
+          
+          for workflow in "${NO_CACHE_WORKFLOWS[@]}"; do
+            echo "- \`$workflow\` - Add dependency caching" >> cache_recommendations.md
+          done
+          
+          cat >> cache_recommendations.md << EOF
+          
+          ### Suggested Cache Strategies
+          
+          #### Python Projects
+          \`\`\`yaml
+          - name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+              python-version: '3.11'
+              cache: 'pip'
+              cache-dependency-path: requirements*.txt
+          \`\`\`
+          
+          #### Node.js Projects
+          \`\`\`yaml
+          - name: Set up Node.js
+            uses: actions/setup-node@v4
+            with:
+              node-version: '20'
+              cache: 'npm'
+              cache-dependency-path: frontend/package-lock.json
+          \`\`\`
+          
+          #### Custom Cache for Build Artifacts
+          \`\`\`yaml
+          - name: Cache build artifacts
+            uses: actions/cache@v4
+            with:
+              path: |
+                ~/.cache/pip
+                node_modules
+                .pytest_cache
+              key: \${{ runner.os }}-build-\${{ hashFiles('**/requirements*.txt', '**/package-lock.json') }}
+              restore-keys: |
+                \${{ runner.os }}-build-
+          \`\`\`
+          EOF
+          
+      - name: Generate cache optimization suggestions
+        run: |
+          echo "## Cache Optimization Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "- Workflows using cache: ${{ steps.cache-analysis.outputs.cache_usage_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Workflows needing cache: $(echo '${{ steps.cache-analysis.outputs.no_cache_workflows }}' | wc -w)" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ -n "${{ steps.cache-analysis.outputs.no_cache_workflows }}" ]]; then
+            echo "### Workflows needing cache optimization:" >> $GITHUB_STEP_SUMMARY
+            for workflow in ${{ steps.cache-analysis.outputs.no_cache_workflows }}; do
+              echo "- $workflow" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+          
+      - name: Upload cache analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: cache-optimization
+          path: cache_recommendations.md
+          retention-days: 30
+
+  # ==========================================
+  # Parallelization Analysis
+  # ==========================================
+  
+  analyze-parallelization:
+    name: ⚡ Analyze Parallelization Opportunities
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: analyze-performance
+    if: |
+      github.event.inputs.optimization_type == 'full' ||
+      github.event.inputs.optimization_type == 'parallelization'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download performance data
+        uses: actions/download-artifact@v4
+        with:
+          name: performance-analysis
+          
+      - name: Analyze workflow dependencies
+        id: dependency-analysis
+        run: |
+          python << 'EOF'
+          import os
+          import yaml
+          import json
+          import glob
+          from collections import defaultdict, deque
+          
+          # Find all workflow files
+          workflow_files = glob.glob('.github/workflows/*.yml') + glob.glob('.github/workflows/*.yaml')
+          
+          workflows = {}
+          job_dependencies = defaultdict(list)
+          parallelizable_jobs = []
+          
+          for file_path in workflow_files:
+              try:
+                  with open(file_path, 'r') as f:
+                      workflow = yaml.safe_load(f)
+                  
+                  if not workflow or 'jobs' not in workflow:
+                      continue
+                  
+                  workflow_name = os.path.basename(file_path)
+                  workflows[workflow_name] = workflow
+                  
+                  jobs = workflow['jobs']
+                  
+                  # Analyze job dependencies within workflow
+                  for job_name, job_config in jobs.items():
+                      needs = job_config.get('needs', [])
+                      if isinstance(needs, str):
+                          needs = [needs]
+                      
+                      job_dependencies[f"{workflow_name}:{job_name}"] = needs
+                      
+                      # Check if job could be parallelized
+                      if not needs:  # No dependencies
+                          parallelizable_jobs.append({
+                              'workflow': workflow_name,
+                              'job': job_name,
+                              'reason': 'No dependencies'
+                          })
+                      elif len(needs) == 1:  # Single dependency
+                          parallelizable_jobs.append({
+                              'workflow': workflow_name,
+                              'job': job_name,
+                              'reason': f'Single dependency: {needs[0]}'
+                          })
+              
+              except Exception as e:
+                  print(f"Error analyzing {file_path}: {e}")
+                  continue
+          
+          # Load performance data for context
+          performance_data = {}
+          if os.path.exists('performance_analysis.json'):
+              with open('performance_analysis.json', 'r') as f:
+                  perf_data = json.load(f)
+              
+              slowest_jobs = {job['name']: job['avg_duration'] for job in perf_data.get('slowest_jobs', [])}
+          
+          # Identify optimization opportunities
+          optimization_opportunities = []
+          
+          for opp in parallelizable_jobs:
+              job_key = f"{opp['workflow']}:{opp['job']}"
+              duration = slowest_jobs.get(opp['job'], 0)
+              
+              if duration > 120:  # Jobs longer than 2 minutes
+                  optimization_opportunities.append({
+                      'type': 'parallelization',
+                      'workflow': opp['workflow'],
+                      'job': opp['job'],
+                      'current_duration': duration,
+                      'reason': opp['reason'],
+                      'potential_improvement': '30-50% faster execution'
+                  })
+          
+          # Generate matrix strategy recommendations
+          matrix_recommendations = []
+          
+          for workflow_name, workflow in workflows.items():
+              for job_name, job_config in workflow.get('jobs', {}).items():
+                  # Look for opportunities to use matrix strategy
+                  steps = job_config.get('steps', [])
+                  
+                  # Check for repeated patterns that could use matrix
+                  test_patterns = ['pytest', 'npm test', 'test']
+                  for step in steps:
+                      step_run = step.get('run', '')
+                      if any(pattern in step_run.lower() for pattern in test_patterns):
+                          matrix_recommendations.append({
+                              'workflow': workflow_name,
+                              'job': job_name,
+                              'suggestion': 'Consider using matrix strategy for test parallelization'
+                          })
+                          break
+          
+          # Save analysis results
+          analysis_results = {
+              'parallelizable_jobs': len(parallelizable_jobs),
+              'optimization_opportunities': optimization_opportunities,
+              'matrix_recommendations': matrix_recommendations,
+              'job_dependencies': dict(job_dependencies)
+          }
+          
+          with open('parallelization_analysis.json', 'w') as f:
+              json.dump(analysis_results, f, indent=2)
+          
+          print(f"Found {len(optimization_opportunities)} parallelization opportunities")
+          print(f"Found {len(matrix_recommendations)} matrix strategy recommendations")
+          EOF
+          
+      - name: Generate parallelization recommendations
+        run: |
+          python << 'EOF'
+          import json
+          
+          # Load analysis results
+          with open('parallelization_analysis.json', 'r') as f:
+              analysis = json.load(f)
+          
+          # Generate markdown report
+          with open('parallelization_recommendations.md', 'w') as f:
+              f.write("# ⚡ Parallelization Optimization Recommendations\n\n")
+              
+              f.write("## Summary\n")
+              f.write(f"- **Parallelizable Jobs:** {analysis['parallelizable_jobs']}\n")
+              f.write(f"- **Optimization Opportunities:** {len(analysis['optimization_opportunities'])}\n")
+              f.write(f"- **Matrix Strategy Recommendations:** {len(analysis['matrix_recommendations'])}\n\n")
+              
+              if analysis['optimization_opportunities']:
+                  f.write("## High-Impact Optimization Opportunities\n\n")
+                  for opp in analysis['optimization_opportunities']:
+                      f.write(f"### {opp['workflow']} - {opp['job']}\n")
+                      f.write(f"- **Current Duration:** {opp['current_duration']:.1f}s\n")
+                      f.write(f"- **Reason:** {opp['reason']}\n")
+                      f.write(f"- **Potential Improvement:** {opp['potential_improvement']}\n\n")
+              
+              if analysis['matrix_recommendations']:
+                  f.write("## Matrix Strategy Recommendations\n\n")
+                  for rec in analysis['matrix_recommendations']:
+                      f.write(f"### {rec['workflow']} - {rec['job']}\n")
+                      f.write(f"- **Suggestion:** {rec['suggestion']}\n\n")
+              
+              f.write("## Implementation Examples\n\n")
+              f.write("### Matrix Strategy for Tests\n")
+              f.write("```yaml\n")
+              f.write("strategy:\n")
+              f.write("  matrix:\n")
+              f.write("    python-version: ['3.9', '3.10', '3.11']\n")
+              f.write("    test-type: ['unit', 'integration']\n")
+              f.write("  fail-fast: false\n")
+              f.write("  max-parallel: 4\n")
+              f.write("```\n\n")
+              
+              f.write("### Parallel Job Dependencies\n")
+              f.write("```yaml\n")
+              f.write("jobs:\n")
+              f.write("  test-backend:\n")
+              f.write("    runs-on: ubuntu-latest\n")
+              f.write("    # No dependencies - runs immediately\n")
+              f.write("  \n")
+              f.write("  test-frontend:\n")
+              f.write("    runs-on: ubuntu-latest\n")
+              f.write("    # No dependencies - runs in parallel with backend\n")
+              f.write("  \n")
+              f.write("  deploy:\n")
+              f.write("    needs: [test-backend, test-frontend]\n")
+              f.write("    # Waits for both test jobs to complete\n")
+              f.write("```\n")
+          
+          print("Parallelization recommendations generated")
+          EOF
+          
+      - name: Upload parallelization analysis
+        uses: actions/upload-artifact@v4
+        with:
+          name: parallelization-analysis
+          path: |
+            parallelization_analysis.json
+            parallelization_recommendations.md
+          retention-days: 30
+
+  # ==========================================
+  # Generate Optimization Report
+  # ==========================================
+  
+  generate-optimization-report:
+    name: 📊 Generate Optimization Report
+    needs: [analyze-performance, analyze-costs, optimize-caching, analyze-parallelization]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Download all analysis artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: analysis-results/
+          
+      - name: Generate comprehensive optimization report
+        run: |
+          python << 'EOF'
+          import json
+          import os
+          import glob
+          from datetime import datetime
+          
+          # Collect all analysis results
+          analysis_data = {}
+          
+          # Load performance analysis
+          perf_file = glob.glob('analysis-results/*/performance_analysis.json')
+          if perf_file:
+              with open(perf_file[0], 'r') as f:
+                  analysis_data['performance'] = json.load(f)
+          
+          # Load cost analysis
+          cost_file = glob.glob('analysis-results/*/cost_analysis.json')
+          if cost_file:
+              with open(cost_file[0], 'r') as f:
+                  analysis_data['cost'] = json.load(f)
+          
+          # Load parallelization analysis
+          parallel_file = glob.glob('analysis-results/*/parallelization_analysis.json')
+          if parallel_file:
+              with open(parallel_file[0], 'r') as f:
+                  analysis_data['parallelization'] = json.load(f)
+          
+          # Generate comprehensive report
+          report = {
+              'generated_at': datetime.now().isoformat(),
+              'analysis_period_days': int(os.environ.get('ANALYZE_PERIOD', '30')),
+              'summary': {},
+              'recommendations': [],
+              'implementation_plan': []
+          }
+          
+          # Performance summary
+          if 'performance' in analysis_data:
+              perf = analysis_data['performance']
+              report['summary']['performance'] = {
+                  'avg_job_duration': perf.get('average_job_duration', 0),
+                  'slowest_jobs_count': len(perf.get('slowest_jobs', [])),
+                  'optimization_opportunities': len(perf.get('optimization_opportunities', []))
+              }
+              
+              # Add performance recommendations
+              for opp in perf.get('optimization_opportunities', []):
+                  report['recommendations'].append({
+                      'category': 'performance',
+                      'priority': 'high' if opp.get('potential_saving', 0) > 300 else 'medium',
+                      'description': opp.get('description', ''),
+                      'estimated_saving': f"{opp.get('potential_saving', 0):.1f}s",
+                      'implementation_effort': 'medium'
+                  })
+          
+          # Cost summary
+          if 'cost' in analysis_data:
+              cost = analysis_data['cost']
+              report['summary']['cost'] = {
+                  'monthly_estimate': cost.get('monthly_cost_estimate', 0),
+                  'optimization_potential': cost.get('optimization_potential', 0),
+                  'top_expensive_jobs': cost.get('top_expensive_jobs', [])[:3]
+              }
+              
+              # Add cost recommendations
+              if cost.get('optimization_potential', 0) > 10:  # >$10 potential saving
+                  report['recommendations'].append({
+                      'category': 'cost',
+                      'priority': 'high',
+                      'description': f"Optimize pipeline costs - potential saving: ${cost.get('optimization_potential', 0):.2f}/month",
+                      'estimated_saving': f"${cost.get('optimization_potential', 0):.2f}/month",
+                      'implementation_effort': 'low'
+                  })
+          
+          # Parallelization summary
+          if 'parallelization' in analysis_data:
+              parallel = analysis_data['parallelization']
+              report['summary']['parallelization'] = {
+                  'opportunities_count': len(parallel.get('optimization_opportunities', [])),
+                  'matrix_recommendations': len(parallel.get('matrix_recommendations', []))
+              }
+              
+              # Add parallelization recommendations
+              for opp in parallel.get('optimization_opportunities', []):
+                  if opp.get('current_duration', 0) > 300:  # >5 minutes
+                      report['recommendations'].append({
+                          'category': 'parallelization',
+                          'priority': 'high',
+                          'description': f"Parallelize {opp['job']} in {opp['workflow']}",
+                          'estimated_saving': '30-50% execution time',
+                          'implementation_effort': 'medium'
+                      })
+          
+          # Generate implementation plan
+          high_priority = [r for r in report['recommendations'] if r['priority'] == 'high']
+          medium_priority = [r for r in report['recommendations'] if r['priority'] == 'medium']
+          
+          report['implementation_plan'] = [
+              {
+                  'phase': 'Phase 1 (Week 1-2)',
+                  'items': high_priority[:3],  # Top 3 high priority items
+                  'description': 'Quick wins with high impact'
+              },
+              {
+                  'phase': 'Phase 2 (Week 3-4)',
+                  'items': high_priority[3:] + medium_priority[:2],
+                  'description': 'Additional optimizations'
+              },
+              {
+                  'phase': 'Phase 3 (Month 2)',
+                  'items': medium_priority[2:],
+                  'description': 'Long-term improvements'
+              }
+          ]
+          
+          # Save comprehensive report
+          with open('optimization_report.json', 'w') as f:
+              json.dump(report, f, indent=2)
+          
+          print(f"Generated optimization report with {len(report['recommendations'])} recommendations")
+          EOF
+          
+      - name: Create markdown report
+        run: |
+          python << 'EOF'
+          import json
+          
+          # Load the optimization report
+          with open('optimization_report.json', 'r') as f:
+              report = json.load(f)
+          
+          # Generate markdown report
+          with open('optimization_report.md', 'w') as f:
+              f.write("# 🚀 CI/CD Pipeline Optimization Report\n\n")
+              f.write(f"**Generated:** {report['generated_at']}\n")
+              f.write(f"**Analysis Period:** {report['analysis_period_days']} days\n\n")
+              
+              # Executive Summary
+              f.write("## 📊 Executive Summary\n\n")
+              summary = report.get('summary', {})
+              
+              if 'performance' in summary:
+                  perf = summary['performance']
+                  f.write(f"- **Average Job Duration:** {perf.get('avg_job_duration', 0):.1f}s\n")
+                  f.write(f"- **Performance Optimization Opportunities:** {perf.get('optimization_opportunities', 0)}\n")
+              
+              if 'cost' in summary:
+                  cost = summary['cost']
+                  f.write(f"- **Monthly Cost Estimate:** ${cost.get('monthly_estimate', 0):.2f}\n")
+                  f.write(f"- **Cost Optimization Potential:** ${cost.get('optimization_potential', 0):.2f}\n")
+              
+              if 'parallelization' in summary:
+                  parallel = summary['parallelization']
+                  f.write(f"- **Parallelization Opportunities:** {parallel.get('opportunities_count', 0)}\n")
+              
+              f.write("\n")
+              
+              # Recommendations
+              f.write("## 🎯 Optimization Recommendations\n\n")
+              recommendations = report.get('recommendations', [])
+              
+              if recommendations:
+                  # Group by category
+                  categories = {}
+                  for rec in recommendations:
+                      cat = rec['category']
+                      if cat not in categories:
+                          categories[cat] = []
+                      categories[cat].append(rec)
+                  
+                  for category, recs in categories.items():
+                      f.write(f"### {category.title()} Optimizations\n\n")
+                      for rec in recs:
+                          priority_emoji = "🔴" if rec['priority'] == 'high' else "🟡"
+                          f.write(f"- {priority_emoji} **{rec['description']}**\n")
+                          f.write(f"  - Estimated Saving: {rec['estimated_saving']}\n")
+                          f.write(f"  - Implementation Effort: {rec['implementation_effort']}\n\n")
+              
+              # Implementation Plan
+              f.write("## 📅 Implementation Plan\n\n")
+              for phase in report.get('implementation_plan', []):
+                  f.write(f"### {phase['phase']}\n")
+                  f.write(f"*{phase['description']}*\n\n")
+                  
+                  for item in phase['items']:
+                      f.write(f"- [ ] {item['description']}\n")
+                  f.write("\n")
+              
+              # Next Steps
+              f.write("## 🚀 Next Steps\n\n")
+              f.write("1. **Review and prioritize** the recommendations based on your current needs\n")
+              f.write("2. **Implement Phase 1** optimizations for quick wins\n")
+              f.write("3. **Monitor performance** after each optimization\n")
+              f.write("4. **Re-run this analysis** monthly to track improvements\n")
+              f.write("5. **Consider automation** for the most impactful optimizations\n\n")
+              
+              f.write("---\n")
+              f.write("*This report was automatically generated by the Pipeline Optimization workflow*\n")
+          
+          print("Markdown report generated")
+          EOF
+          
+      - name: Add report to step summary
+        run: |
+          cat optimization_report.md >> $GITHUB_STEP_SUMMARY
+          
+      - name: Create optimization issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportContent = fs.readFileSync('optimization_report.md', 'utf8');
+            
+            // Check for existing optimization issues
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['pipeline-optimization', 'automated']
+            });
+            
+            const title = `🚀 Pipeline Optimization Report - ${new Date().toISOString().split('T')[0]}`;
+            
+            if (issues.data.length === 0) {
+              // Create new optimization issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: reportContent,
+                labels: ['pipeline-optimization', 'automated', 'enhancement']
+              });
+            } else {
+              // Update existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body: `## Updated Report\n\n${reportContent}`
+              });
+            }
+            
+      - name: Upload final optimization report
+        uses: actions/upload-artifact@v4
+        with:
+          name: optimization-report-final
+          path: |
+            optimization_report.json
+            optimization_report.md
+          retention-days: 90

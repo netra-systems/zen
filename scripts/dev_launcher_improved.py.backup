@@ -656,11 +656,31 @@ class ImprovedDevLauncher:
     
     def run(self):
         """Run the development environment."""
+        self._print_startup_banner()
+        self._show_configuration_summary()
+        
+        if not self._validate_environment():
+            return 1
+        
+        self._prepare_environment()
+        
+        if not self._start_backend_service():
+            return 1
+        
+        if not self._start_frontend_service():
+            return 1
+        
+        self._print_startup_summary()
+        return self._monitor_services()
+    
+    def _print_startup_banner(self):
+        """Print the startup banner"""
         print("=" * 60)
         self._print("🚀", "LAUNCH", "Netra AI Development Environment (Improved)")
         print("=" * 60)
-        
-        # Show configuration summary
+    
+    def _show_configuration_summary(self):
+        """Show the configuration summary"""
         self._print("\n📝", "Configuration", ":")
         print(f"   * Dynamic ports: {'YES' if self.dynamic_ports else 'NO'}")
         print(f"   * Backend hot reload: {'YES' if self.backend_reload else 'NO'}")
@@ -670,41 +690,53 @@ class ImprovedDevLauncher:
         if self.load_secrets:
             print("   * Secret loading: YES")
         print("")
-        
-        # Check dependencies
+    
+    def _validate_environment(self) -> bool:
+        """Validate the development environment"""
         if not self.check_dependencies():
             self._print("\n❌", "ERROR", "Please install missing dependencies and try again")
-            return 1
-        
-        # Load secrets if requested
+            return False
+        return True
+    
+    def _prepare_environment(self):
+        """Prepare the development environment"""
         if self.load_secrets:
             self.load_secrets_from_gcp()
-        
-        # Clear old service discovery
         self.service_discovery.clear_all()
-        
-        # Create process monitors if auto-restart is enabled
+    
+    def _start_backend_service(self) -> bool:
+        """Start the backend service with or without monitoring"""
         if self.auto_restart:
-            self.backend_monitor = ProcessMonitor(
-                "Backend",
-                self.start_backend,
-                restart_delay=5,
-                max_restarts=3
-            )
-            
-            if not self.backend_monitor.start():
-                self._print("❌", "ERROR", "Failed to start backend")
-                self.cleanup()
-                return 1
+            return self._start_backend_with_monitoring()
         else:
-            # Start backend without monitoring
-            backend_process = self.start_backend()
-            if not backend_process:
-                self._print("❌", "ERROR", "Failed to start backend")
-                self.cleanup()
-                return 1
+            return self._start_backend_direct()
+    
+    def _start_backend_with_monitoring(self) -> bool:
+        """Start backend with auto-restart monitoring"""
+        self.backend_monitor = ProcessMonitor(
+            "Backend", self.start_backend, restart_delay=5, max_restarts=3
+        )
         
-        # Wait for backend to be ready
+        if not self.backend_monitor.start():
+            self._print("❌", "ERROR", "Failed to start backend")
+            self.cleanup()
+            return False
+        return True
+    
+    def _start_backend_direct(self) -> bool:
+        """Start backend without monitoring"""
+        backend_process = self.start_backend()
+        if not backend_process:
+            self._print("❌", "ERROR", "Failed to start backend")
+            self.cleanup()
+            return False
+        
+        # Store for later monitoring
+        self.backend_process = backend_process
+        return True
+    
+    def _wait_for_backend_ready(self):
+        """Wait for backend to be ready"""
         backend_info = self.service_discovery.read_backend_info()
         if backend_info:
             self._print("\n⏳", "WAIT", "Waiting for backend to be ready...")
@@ -713,52 +745,71 @@ class ImprovedDevLauncher:
                 self._print("✅", "OK", "Backend is ready")
             else:
                 self._print("⚠️", "WARN", "Backend health check timed out, continuing anyway...")
+    
+    def _start_frontend_service(self) -> bool:
+        """Start the frontend service with or without monitoring"""
+        self._wait_for_backend_ready()
         
-        # Start frontend
         if self.auto_restart:
-            self.frontend_monitor = ProcessMonitor(
-                "Frontend",
-                self.start_frontend,
-                restart_delay=5,
-                max_restarts=3
-            )
-            
-            if not self.frontend_monitor.start():
-                self._print("❌", "ERROR", "Failed to start frontend")
-                self.cleanup()
-                return 1
+            return self._start_frontend_with_monitoring()
         else:
-            # Start frontend without monitoring
-            frontend_process = self.start_frontend()
-            if not frontend_process:
-                self._print("❌", "ERROR", "Failed to start frontend")
-                self.cleanup()
-                return 1
+            return self._start_frontend_direct()
+    
+    def _start_frontend_with_monitoring(self) -> bool:
+        """Start frontend with auto-restart monitoring"""
+        self.frontend_monitor = ProcessMonitor(
+            "Frontend", self.start_frontend, restart_delay=5, max_restarts=3
+        )
         
-        # Wait for frontend to be ready
+        if not self.frontend_monitor.start():
+            self._print("❌", "ERROR", "Failed to start frontend")
+            self.cleanup()
+            return False
+        
+        self._wait_for_frontend_ready()
+        return True
+    
+    def _start_frontend_direct(self) -> bool:
+        """Start frontend without monitoring"""
+        frontend_process = self.start_frontend()
+        if not frontend_process:
+            self._print("❌", "ERROR", "Failed to start frontend")
+            self.cleanup()
+            return False
+        
+        # Store for later monitoring
+        self.frontend_process = frontend_process
+        self._wait_for_frontend_ready()
+        return True
+    
+    def _wait_for_frontend_ready(self):
+        """Wait for frontend to be ready and optionally open browser"""
         self._print("\n⏳", "WAIT", "Waiting for frontend to be ready...")
         frontend_url = f"http://localhost:{self.frontend_port}"
         
-        # Give Next.js a bit more time to compile initially
         print("   Allowing Next.js to compile...")
         time.sleep(3)
         
-        frontend_ready = False
         if self.wait_for_service(frontend_url, timeout=90):
             self._print("✅", "OK", "Frontend is ready")
-            frontend_ready = True
-            
-            # Automatically open browser when frontend is ready
             if not self.no_browser:
                 self.open_browser(frontend_url)
         else:
             self._print("⚠️", "WARN", "Frontend readiness check timed out")
-        
-        # Print summary
+    
+    def _print_startup_summary(self):
+        """Print the startup summary"""
         print("\n" + "=" * 60)
         self._print("✨", "SUCCESS", "Development environment is running!")
         print("=" * 60)
         
+        self._print_service_urls()
+        self._print_auto_restart_status()
+        self._print_command_help()
+    
+    def _print_service_urls(self):
+        """Print service URLs"""
+        backend_info = self.service_discovery.read_backend_info()
         if backend_info:
             self._print("\nℹ️", "INFO", "Backend:")
             print(f"   API: {backend_info['api_url']}")
@@ -766,47 +817,60 @@ class ImprovedDevLauncher:
         
         self._print("\n🌐", "Frontend", "")
         print(f"   URL: http://localhost:{self.frontend_port}")
-        
+    
+    def _print_auto_restart_status(self):
+        """Print auto-restart status if enabled"""
         if self.auto_restart:
             self._print("\n🔄", "Auto-Restart", "Enabled")
             print("   Services will automatically restart if they crash")
-        
+    
+    def _print_command_help(self):
+        """Print command help information"""
         print("\n[COMMANDS]:")
         print("   Press Ctrl+C to stop all services")
         print("   Logs are saved in: logs/")
         print("-" * 60)
-        
-        # Wait for processes
+    
+    def _monitor_services(self) -> int:
+        """Monitor running services until interrupt or failure"""
         try:
             while True:
-                # If not using auto-restart, check if processes are still running
-                if not self.auto_restart:
-                    if hasattr(self, 'backend_process') and backend_process.poll() is not None:
-                        self._print(f"\n⚠️", "WARN", "Backend process has stopped")
-                        self.cleanup()
-                        return 1
-                    if hasattr(self, 'frontend_process') and frontend_process.poll() is not None:
-                        self._print(f"\n⚠️", "WARN", "Frontend process has stopped")
-                        self.cleanup()
-                        return 1
-                else:
-                    # Check if monitors are still running
-                    if self.backend_monitor and not self.backend_monitor.monitoring:
-                        self._print(f"\n⚠️", "WARN", "Backend monitoring stopped (exceeded max restarts)")
-                        self.cleanup()
-                        return 1
-                    if self.frontend_monitor and not self.frontend_monitor.monitoring:
-                        self._print(f"\n⚠️", "WARN", "Frontend monitoring stopped (exceeded max restarts)")
-                        self.cleanup()
-                        return 1
-                
+                if not self._check_service_health():
+                    self.cleanup()
+                    return 1
                 time.sleep(2)
-                
         except KeyboardInterrupt:
             self._print("\n\n🔄", "INTERRUPT", "Received interrupt signal")
         
         self.cleanup()
         return 0
+    
+    def _check_service_health(self) -> bool:
+        """Check if services are still healthy"""
+        if not self.auto_restart:
+            return self._check_direct_processes()
+        else:
+            return self._check_monitored_processes()
+    
+    def _check_direct_processes(self) -> bool:
+        """Check directly managed processes"""
+        if hasattr(self, 'backend_process') and self.backend_process.poll() is not None:
+            self._print(f"\n⚠️", "WARN", "Backend process has stopped")
+            return False
+        if hasattr(self, 'frontend_process') and self.frontend_process.poll() is not None:
+            self._print(f"\n⚠️", "WARN", "Frontend process has stopped")
+            return False
+        return True
+    
+    def _check_monitored_processes(self) -> bool:
+        """Check monitored processes"""
+        if self.backend_monitor and not self.backend_monitor.monitoring:
+            self._print(f"\n⚠️", "WARN", "Backend monitoring stopped (exceeded max restarts)")
+            return False
+        if self.frontend_monitor and not self.frontend_monitor.monitoring:
+            self._print(f"\n⚠️", "WARN", "Frontend monitoring stopped (exceeded max restarts)")
+            return False
+        return True
 
 
 def main():

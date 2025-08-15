@@ -346,17 +346,26 @@
       "duration": 0
     },
     {
-      "timestamp": "2025-08-14T16:57:50.680133",
-      "level": "comprehensive-core",
-      "total": 1,
-      "passed": 0,
-      "failed": 0,
+      "timestamp": "2025-08-14T16:58:32.090149",
+      "level": "integration",
+      "total": 131,
+      "passed": 40,
+      "failed": 89,
       "coverage": null,
       "duration": 0
     },
     {
-      "timestamp": "2025-08-14T16:58:10.040006",
+      "timestamp": "2025-08-14T16:58:40.497558",
       "level": "real_services",
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T16:59:37.083649",
+      "level": "comprehensive-core",
       "total": 1,
       "passed": 0,
       "failed": 0,
@@ -364,9 +373,18 @@
       "duration": 0
     },
     {
-      "timestamp": "2025-08-14T16:58:36.149963",
-      "level": "comprehensive-core",
-      "total": 0,
+      "timestamp": "2025-08-14T17:00:08.279320",
+      "level": "real_services",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T17:00:33.596627",
+      "level": "comprehensive-database",
+      "total": 2,
       "passed": 0,
       "failed": 0,
       "coverage": null,

@@ -11,8 +11,8 @@ from typing import Dict, Any
 
 from app.agents.corpus_admin import CorpusAdminSubAgent
 from app.agents.admin_tool_dispatcher import AdminToolDispatcher
-from app.agents.triage_sub_agent import TriageSubAgent
-from app.agents.supervisor import Supervisor
+from app.agents.triage_sub_agent.agent import TriageSubAgent
+from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.ws_manager import WebSocketManager
 
 

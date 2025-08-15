@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 from app.logging_config import central_logger
-from app.schemas.websocket_message_types import ServerMessage, BatchedMessage
+from app.schemas.websocket_message_types import ServerMessage
 from app.websocket.connection import ConnectionInfo, ConnectionManager
 
 logger = central_logger.get_logger(__name__)
