@@ -690,6 +690,25 @@ class RollbackManager:
         logger.error(f"Rollback session failed completely: {session_id}")
         return False
 
+    async def _finalize_session_execution(
+        self, 
+        session_id: str, 
+        session: RollbackSession, 
+        execution_result: Dict[str, Any]
+    ) -> bool:
+        """Finalize session execution with state determination and cleanup."""
+        try:
+            return await self._determine_final_state(session_id, session, execution_result)
+        finally:
+            await self._cleanup_session(session_id)
+
+    async def _handle_execution_failure_with_cleanup(self, session_id: str, error: Exception) -> bool:
+        """Handle execution failure with proper state management and cleanup."""
+        try:
+            return await self._handle_execution_failure(session_id, error)
+        finally:
+            await self._cleanup_session(session_id)
+
     async def _handle_execution_failure(self, session_id: str, error: Exception) -> bool:
         """Handle execution failure with proper state management."""
         if session_id in self.active_sessions:

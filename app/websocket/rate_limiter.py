@@ -35,6 +35,10 @@ class RateLimiter:
         Returns:
             True if the connection is rate limited, False otherwise
         """
+        return self._evaluate_rate_limit(conn_info)
+    
+    def _evaluate_rate_limit(self, conn_info: ConnectionInfo) -> bool:
+        """Evaluate rate limit for connection."""
         now = datetime.now(timezone.utc)
         self._reset_window_if_expired(conn_info, now)
         if self._is_limit_exceeded(conn_info):
@@ -66,6 +70,10 @@ class RateLimiter:
         Returns:
             Dictionary with rate limit details
         """
+        return self._build_rate_limit_info(conn_info)
+    
+    def _build_rate_limit_info(self, conn_info: ConnectionInfo) -> Dict[str, Any]:
+        """Build rate limit information dictionary."""
         now = datetime.now(timezone.utc)
         time_in_window = self._calculate_time_in_window(conn_info, now)
         effective_count, time_remaining = self._calculate_effective_values(conn_info, time_in_window)
@@ -83,11 +91,22 @@ class RateLimiter:
     
     def _create_rate_limit_dict(self, effective_count: int, time_remaining: float) -> Dict[str, Any]:
         """Create rate limit information dictionary."""
+        basic_info = self._get_basic_rate_info(effective_count, time_remaining)
+        status_info = self._get_rate_status_info(effective_count)
+        return {**basic_info, **status_info}
+    
+    def _get_basic_rate_info(self, effective_count: int, time_remaining: float) -> Dict[str, Any]:
+        """Get basic rate limit information."""
         return {
             "max_requests": self.max_requests,
             "window_seconds": self.window_seconds,
             "current_count": effective_count,
-            "time_remaining_in_window": time_remaining,
+            "time_remaining_in_window": time_remaining
+        }
+    
+    def _get_rate_status_info(self, effective_count: int) -> Dict[str, Any]:
+        """Get rate limit status information."""
+        return {
             "is_limited": effective_count >= self.max_requests,
             "requests_remaining": max(0, self.max_requests - effective_count)
         }
@@ -143,7 +162,16 @@ class AdaptiveRateLimiter(RateLimiter):
             connection_id: Connection to adjust limit for
             multiplier: Multiplier to apply to base rate limit (1.0 = normal, 0.5 = half, 2.0 = double)
         """
-        self.connection_multipliers[connection_id] = max(0.1, min(10.0, multiplier))
+        validated_multiplier = self._validate_multiplier(multiplier)
+        self._apply_multiplier(connection_id, validated_multiplier)
+    
+    def _validate_multiplier(self, multiplier: float) -> float:
+        """Validate and clamp multiplier to safe range."""
+        return max(0.1, min(10.0, multiplier))
+    
+    def _apply_multiplier(self, connection_id: str, multiplier: float) -> None:
+        """Apply validated multiplier to connection."""
+        self.connection_multipliers[connection_id] = multiplier
         logger.info(f"Rate limit multiplier for connection {connection_id} set to {multiplier}")
     
     def promote_connection(self, connection_id: str):

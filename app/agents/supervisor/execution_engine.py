@@ -2,7 +2,7 @@
 
 import asyncio
 import time
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.ws_manager import WebSocketManager
@@ -87,11 +87,17 @@ class ExecutionEngine:
                                      state: DeepAgentState) -> List[AgentExecutionResult]:
         """Execute pipeline steps sequentially."""
         results = []
+        await self._process_steps_with_early_termination(steps, context, state, results)
+        return results
+    
+    async def _process_steps_with_early_termination(self, steps: List[PipelineStep],
+                                                  context: AgentExecutionContext,
+                                                  state: DeepAgentState, results: List) -> None:
+        """Process steps with early termination on failure."""
         for step in steps:
             should_stop = await self._process_pipeline_step(step, context, state, results)
             if should_stop:
                 break
-        return results
     
     async def _process_pipeline_step(self, step: PipelineStep, context: AgentExecutionContext,
                                     state: DeepAgentState, results: List) -> bool:
@@ -127,13 +133,19 @@ class ExecutionEngine:
     def _create_step_context(self, base_context: AgentExecutionContext,
                            step: PipelineStep) -> AgentExecutionContext:
         """Create context for a pipeline step."""
-        return AgentExecutionContext(
-            run_id=base_context.run_id,
-            thread_id=base_context.thread_id,
-            user_id=base_context.user_id,
-            agent_name=step.agent_name,
-            metadata=step.metadata
-        )
+        params = self._extract_step_context_params(base_context, step)
+        return AgentExecutionContext(**params)
+    
+    def _extract_step_context_params(self, base_context: AgentExecutionContext,
+                                   step: PipelineStep) -> Dict[str, Any]:
+        """Extract parameters for step context creation."""
+        return {
+            "run_id": base_context.run_id,
+            "thread_id": base_context.thread_id,
+            "user_id": base_context.user_id,
+            "agent_name": step.agent_name,
+            "metadata": step.metadata
+        }
     
     def _should_stop_pipeline(self, result: AgentExecutionResult, 
                             step: PipelineStep) -> bool:

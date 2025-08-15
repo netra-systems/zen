@@ -56,12 +56,16 @@ class TestMetricsStorage:
         
         await quality_service._store_metrics(metrics, ContentType.DATA_ANALYSIS)
         
-        mock_redis.store_metrics.assert_called_once()
-        call_args = mock_redis.store_metrics.call_args
+        mock_redis.set.assert_called_once()
+        call_args = mock_redis.set.call_args
         
-        assert "quality_metrics:data_analysis" in call_args[0]
-        assert call_args[1][1] == metrics.__dict__
-        assert call_args[1][2] == 86400  # 24 hour TTL
+        # Check key contains content type
+        assert "quality_metrics:data_analysis" in call_args[0][0]
+        # Check value is JSON serialized metrics
+        import json
+        assert json.loads(call_args[0][1]) == metrics.__dict__
+        # Check TTL is 24 hours
+        assert call_args[1]['ex'] == 86400
 
 
 class TestQualityStats:

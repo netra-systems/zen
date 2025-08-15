@@ -69,3 +69,31 @@ class QualityPatterns:
         "beam search", "temperature", "top-p", "top-k", "context window",
         "KV cache", "flash attention", "tensor parallel", "pipeline parallel"
     ]
+    
+    # Error message specific patterns (indicates high specificity for errors)
+    ERROR_SPECIFIC_PATTERNS = {
+        'error_codes': r'\b[A-Z_]+_[A-Z0-9_]+\b|\b[A-Z]{3,}_\d+\b',
+        'timestamps': r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?',
+        'service_identifiers': r'\b\w+-\w+-v?\d+\.\d+\.\d+\b|\b\w+://[\w\-.:/@]+\b',
+        'database_connections': r'\b(max_connections|connection_timeout|pool_size)\s*[=:]\s*\d+',
+        'system_commands': r'(SELECT|UPDATE|ALTER|systemctl|pg_dump|pip install)\s+[\w\s\-=.()>*]+',
+        'log_levels': r'\b(ERROR|WARN|INFO|DEBUG|FATAL|TRACE):\s',
+        'stack_trace_indicators': r'(at\s+[\w.]+\([^)]+\)|Traceback|Exception in|Stack trace)',
+        'process_ids': r'\bpid[:\s=]*\d+\b|\bprocess\s+\d+\b',
+        'port_numbers': r':\d{2,5}(?:/|\b)',
+        'memory_addresses': r'0x[0-9a-fA-F]+',
+        'file_paths': r'/[\w\-./]+\.\w+|[A-Z]:\\[\w\\\-.]+\.\w+',
+        'configuration_keys': r'\b\w+_\w+\s*[=:]\s*(?:true|false|\d+|"[^"]*")'
+    }
+    
+    # Error message domain terms
+    ERROR_DOMAIN_TERMS = [
+        "timeout", "connection", "database", "query", "transaction",
+        "deadlock", "rollback", "constraint", "index", "table",
+        "exception", "error", "failure", "crash", "abort",
+        "memory leak", "segfault", "null pointer", "buffer overflow",
+        "authentication", "authorization", "permission", "access denied",
+        "network", "socket", "TCP", "UDP", "HTTP", "SSL", "TLS",
+        "thread", "process", "lock", "mutex", "semaphore",
+        "heap", "stack", "garbage collection", "out of memory"
+    ]
