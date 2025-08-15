@@ -163,6 +163,9 @@ class MessageHandlerService:
         text, references, thread_id = self._extract_message_data(payload)
         logger.info(f"Received user message from {user_id}: {text}, thread_id: {thread_id}")
         thread, run = await self._setup_thread_and_run(user_id, text, references, thread_id, db_session)
+        # Join user to thread room for WebSocket broadcasts
+        if thread and thread_id:
+            await manager.broadcasting.join_room(user_id, thread_id)
         await self._process_user_message(user_id, text, thread, run, db_session)
     
     def _extract_message_data(self, payload: UserMessagePayload) -> tuple:
@@ -272,3 +275,19 @@ class MessageHandlerService:
     async def handle_stop_agent(self, user_id: str) -> None:
         """Handle stop_agent message type"""
         await _handle_stop_agent(user_id)
+    
+    async def handle_switch_thread(
+        self,
+        user_id: str,
+        payload: SwitchThreadPayload,
+        db_session: Optional[AsyncSession]
+    ) -> None:
+        """Handle switch_thread message type - join user to thread room"""
+        thread_id = payload.get("thread_id")
+        if not thread_id:
+            await manager.send_error(user_id, "Thread ID required")
+            return
+        # Leave all current rooms and join new thread room
+        await manager.broadcasting.leave_all_rooms(user_id)
+        await manager.broadcasting.join_room(user_id, thread_id)
+        logger.info(f"User {user_id} switched to thread {thread_id}")

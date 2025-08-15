@@ -1889,6 +1889,86 @@
                     <test>test_mixed_type_handling_in_agents</test>
                 </testing>
             </fix>
+            <fix id="anomaly-detection-llm-response-type-mismatch">
+                <title>Anomaly Detection LLM Response Type Mismatch</title>
+                <date>2025-08-15</date>
+                <category>Type Safety</category>
+                <severity>Critical</severity>
+                <symptoms>
+                    <symptom>Failed to convert dict to typed result: 5 validation errors for AnomalyDetectionResponse</symptom>
+                    <symptom>anomaly_details fields missing: metric_name, actual_value, expected_value, deviation_percentage, z_score</symptom>
+                    <symptom>LLM returns different anomaly structure than expected by AnomalyDetail model</symptom>
+                </symptoms>
+                <root-cause>
+                    The data_prompts.py prompt template instructed LLM to return anomaly_details with fields
+                    like 'type', 'timestamp', 'severity', 'affected_models', 'description'. However, the
+                    AnomalyDetail model expects completely different fields: 'metric_name', 'actual_value',
+                    'expected_value', 'deviation_percentage', 'z_score'. This mismatch caused validation failures.
+                </root-cause>
+                <analysis>
+                    <finding>Prompt template in data_prompts.py specified wrong anomaly detail structure</finding>
+                    <finding>DataSubAgent tried to create AnomalyDetectionResponse with mismatched fields</finding>
+                    <finding>No conversion logic existed to transform LLM format to expected model format</finding>
+                    <finding>Type safety was correctly enforced by Pydantic validation</finding>
+                </analysis>
+                <implementation>
+                    <code language="python">
+                        # Fix in app/agents/data_sub_agent/agent.py
+                        # Added conversion methods to transform LLM response format to expected model format
+                        
+                        def _convert_anomaly_details(self, llm_anomaly_list: list) -> list:
+                            """Convert LLM anomaly format to AnomalyDetail format."""
+                            converted_details = []
+                            for item in llm_anomaly_list:
+                                if isinstance(item, dict):
+                                    detail = self._create_anomaly_detail(item)
+                                    converted_details.append(detail.model_dump())
+                            return converted_details
+                        
+                        def _create_anomaly_detail(self, item: dict) -> 'AnomalyDetail':
+                            """Create AnomalyDetail from LLM response."""
+                            # Map LLM fields to AnomalyDetail fields
+                            metric_name = item.get('type', 'unknown_metric')
+                            # Derive or use defaults for required numeric fields
+                            actual_value = item.get('actual_value', 0.0)
+                            expected_value = item.get('expected_value', 0.0)
+                            # ... map other fields ...
+                            
+                            return AnomalyDetail(
+                                timestamp=timestamp,
+                                metric_name=metric_name,
+                                actual_value=actual_value,
+                                expected_value=expected_value,
+                                deviation_percentage=deviation_percentage,
+                                z_score=z_score,
+                                severity=severity,
+                                description=description
+                            )
+                    </code>
+                </implementation>
+                <files-modified>
+                    <file>app/agents/data_sub_agent/agent.py - Added conversion logic for anomaly details</file>
+                </files-modified>
+                <prevention>
+                    <action>Always verify LLM prompt outputs match expected Pydantic model structures</action>
+                    <action>Create conversion functions when LLM output format differs from model schema</action>
+                    <action>Use strong typing to catch mismatches early in development</action>
+                    <action>Update prompts to match expected model structures when possible</action>
+                    <action>Add fallback conversion logic for format variations</action>
+                    <action>Test LLM response parsing with various response formats</action>
+                </prevention>
+                <key-insight>
+                    This issue revealed a disconnect between prompt design and type definitions. While
+                    prompts guide LLM output structure, the actual typed models enforce the contract.
+                    Conversion logic is essential when these structures diverge, acting as an adapter
+                    between the flexible LLM world and the strictly-typed application domain.
+                </key-insight>
+                <testing>
+                    <test>test_anomaly_detection_llm_response_conversion</test>
+                    <test>test_anomaly_detail_field_mapping</test>
+                    <test>test_fallback_for_missing_anomaly_fields</test>
+                </testing>
+            </fix>
         </section>
     </sections>
 </specification>

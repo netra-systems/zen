@@ -292,6 +292,59 @@ class DataSubAgent(BaseSubAgent):
         except Exception:
             return self._try_anomaly_detection_conversion(result_dict)
     
+    def _convert_anomaly_details(self, llm_anomaly_list: list) -> list:
+        """Convert LLM anomaly format to AnomalyDetail format."""
+        from app.schemas.shared_types import AnomalyDetail, AnomalySeverity
+        from datetime import datetime
+        
+        converted_details = []
+        for item in llm_anomaly_list:
+            if isinstance(item, dict):
+                # Convert LLM format to AnomalyDetail
+                detail = self._create_anomaly_detail(item)
+                converted_details.append(detail.model_dump())
+        return converted_details
+    
+    def _create_anomaly_detail(self, item: dict) -> 'AnomalyDetail':
+        """Create AnomalyDetail from LLM response."""
+        from app.schemas.shared_types import AnomalyDetail, AnomalySeverity
+        from datetime import datetime
+        
+        # Map severity strings
+        severity_map = {
+            'high': AnomalySeverity.HIGH,
+            'medium': AnomalySeverity.MEDIUM,
+            'low': AnomalySeverity.LOW,
+            'critical': AnomalySeverity.CRITICAL
+        }
+        
+        # Extract or derive required fields
+        timestamp = datetime.utcnow()
+        if 'timestamp' in item:
+            try:
+                timestamp = datetime.fromisoformat(item['timestamp'].replace('Z', '+00:00'))
+            except:
+                pass
+        
+        metric_name = item.get('type', 'unknown_metric')
+        actual_value = item.get('actual_value', 0.0)
+        expected_value = item.get('expected_value', 0.0)
+        deviation_percentage = item.get('deviation_percentage', 0.0)
+        z_score = item.get('z_score', 0.0)
+        severity = severity_map.get(item.get('severity', 'low').lower(), AnomalySeverity.LOW)
+        description = item.get('description', '')
+        
+        return AnomalyDetail(
+            timestamp=timestamp,
+            metric_name=metric_name,
+            actual_value=actual_value,
+            expected_value=expected_value,
+            deviation_percentage=deviation_percentage,
+            z_score=z_score,
+            severity=severity,
+            description=description
+        )
+    
     def _try_anomaly_detection_conversion(
         self, result_dict: dict
     ) -> Union[AnomalyDetectionResponse, DataAnalysisResponse]:
@@ -304,6 +357,11 @@ class DataSubAgent(BaseSubAgent):
                 result_dict['anomalies_detected'] = bool(anomaly_list)
                 result_dict['anomaly_details'] = anomaly_list
                 result_dict['anomaly_count'] = len(anomaly_list)
+            
+            # Convert LLM anomaly format to AnomalyDetail format
+            if 'anomaly_details' in result_dict and isinstance(result_dict['anomaly_details'], list):
+                result_dict['anomaly_details'] = self._convert_anomaly_details(result_dict['anomaly_details'])
+            
             return AnomalyDetectionResponse(**result_dict)
         except Exception as e:
             logger.warning(f"Failed to convert dict to typed result: {e}")
