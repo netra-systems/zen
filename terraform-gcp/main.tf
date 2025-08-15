@@ -202,11 +202,6 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
-          name  = "PORT"
-          value = "8080"
-        }
-        
-        env {
           name  = "GOOGLE_OAUTH_CLIENT_ID"
           value = "dummy-client-id"
         }
