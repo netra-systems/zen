@@ -91,7 +91,8 @@ class Database:
         def receive_connect(dbapi_conn: Connection, connection_record: ConnectionPoolEntry) -> None:
             connection_record.info['pid'] = dbapi_conn.get_backend_pid() if hasattr(dbapi_conn, 'get_backend_pid') else None
             self._configure_connection_timeouts(dbapi_conn)
-            logger.debug(f"Database connection established with safety limits: {connection_record.info.get('pid')}")
+            if settings.log_async_checkout:
+                logger.debug(f"Database connection established with safety limits: {connection_record.info.get('pid')}")
     
     def _check_pool_usage_warning(self, pool):
         """Check and warn if pool usage is high."""
@@ -105,7 +106,9 @@ class Database:
         @event.listens_for(self.engine, "checkout")
         def receive_checkout(dbapi_conn: Connection, connection_record: ConnectionPoolEntry, connection_proxy: _ConnectionFairy) -> None:
             self._check_pool_usage_warning(self.engine.pool)
-            logger.debug(f"Connection checked out from pool: {connection_record.info.get('pid')}")
+            # Only log checkout events if explicitly enabled in config
+            if settings.log_async_checkout:
+                logger.debug(f"Connection checked out from pool: {connection_record.info.get('pid')}")
     
     def _setup_connection_events(self):
         """Setup database connection event listeners for monitoring and configuration."""
@@ -214,9 +217,13 @@ try:
         # Setup async connection events
         @event.listens_for(async_engine.sync_engine, "connect")
         def receive_async_connect(dbapi_conn: Connection, connection_record: ConnectionPoolEntry) -> None:
+            # Note: asyncpg connections don't have get_backend_pid() method
+            # PID is None for async connections until they execute queries
+            # This is expected behavior and not an issue
             connection_record.info['pid'] = dbapi_conn.get_backend_pid() if hasattr(dbapi_conn, 'get_backend_pid') else None
             _configure_async_connection_timeouts(dbapi_conn)
-            logger.debug(f"Async database connection established with safety limits: {connection_record.info.get('pid')}")
+            if settings.log_async_checkout:
+                logger.debug(f"Async database connection established with safety limits: {connection_record.info.get('pid')}")
         
 
         def _monitor_async_pool_usage(pool):
@@ -230,8 +237,10 @@ try:
         @event.listens_for(async_engine.sync_engine, "checkout")
         def receive_async_checkout(dbapi_conn: Connection, connection_record: ConnectionPoolEntry, connection_proxy: _ConnectionFairy) -> None:
             _monitor_async_pool_usage(async_engine.pool)
-            pid = connection_record.info.get('pid', 'unknown')
-            logger.debug(f"Async connection checked out from pool: PID={pid}")
+            # Only log checkout events if explicitly enabled in config
+            if settings.log_async_checkout:
+                pid = connection_record.info.get('pid', 'unknown')
+                logger.debug(f"Async connection checked out from pool: PID={pid}")
         
         
         logger.info("PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling")

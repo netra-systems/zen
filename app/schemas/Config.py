@@ -145,6 +145,7 @@ class AppConfig(BaseModel):
     clickhouse_url: str = None  # Added for staging/production ClickHouse URL
     log_level: str = "DEBUG"
     log_secrets: bool = False
+    log_async_checkout: bool = False  # Control async connection checkout debug logging
     frontend_url: str = "http://localhost:3010"
     redis: "RedisConfig" = Field(default_factory=lambda: RedisConfig())
     
