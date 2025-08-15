@@ -1,7 +1,7 @@
 """
-Recovery Manager for crashed services using 4-stage recovery process.
+Recovery Manager - Main orchestrator for 4-stage recovery process.
 
-Implements the recovery strategy:
+Coordinates the recovery strategy:
 1. Error Capture: Collect logs, process info, system state
 2. Diagnose: Analyze ports, database, memory, config issues  
 3. Recovery Attempt: Kill zombies, clear temp files, reset connections
@@ -12,6 +12,7 @@ ARCHITECTURE COMPLIANCE:
 - Function size: ≤8 lines each (MANDATORY)
 - Strong typing throughout
 - Async patterns for all I/O operations
+- Modular design with separate components
 """
 
 import asyncio
@@ -23,31 +24,27 @@ from typing import List, Optional, Dict, Any
 import shutil
 
 from .crash_recovery_models import DiagnosisResult, RecoveryStage
+from .system_diagnostics import SystemDiagnostics
+from .recovery_actions import RecoveryActions
 
 
 logger = logging.getLogger(__name__)
 
 
 class RecoveryManager:
-    """Manages the 4-stage recovery process for crashed services."""
+    """Orchestrates the 4-stage recovery process for crashed services."""
     
     def __init__(self):
-        """Initialize recovery manager with system tools."""
+        """Initialize recovery manager with diagnostic and action components."""
+        self.diagnostics = SystemDiagnostics()
+        self.actions = RecoveryActions()
         self.capture_tools = self._get_system_tools()
-        self.temp_directories = self._get_temp_directories()
     
     def _get_system_tools(self) -> List[str]:
         """Get available system diagnostic tools."""
         if os.name == 'nt':
             return ['tasklist', 'netstat', 'wmic']
         return ['ps', 'netstat', 'lsof', 'top']
-    
-    def _get_temp_directories(self) -> List[Path]:
-        """Get temporary directories for cleanup."""
-        common_temps = [Path("temp"), Path(".netra/temp"), Path("logs/temp")]
-        if os.name != 'nt':
-            common_temps.append(Path("/tmp"))
-        return [d for d in common_temps if d.exists()]
     
     async def capture_error_context(self, service_name: str, 
                                   process: Optional[subprocess.Popen]) -> List[str]:
