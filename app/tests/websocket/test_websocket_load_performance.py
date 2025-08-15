@@ -122,7 +122,7 @@ class WebSocketLoadTester:
                 
                 # Create test message
                 test_message = {
-                    "type": "test_message",
+                    "type": "ping",
                     "connection_id": connection_id,
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "data": "x" * 100  # 100 character payload
@@ -205,15 +205,16 @@ class TestWebSocketPerformanceComponents:
                     message = {"data": "x" * 1000}  # 1KB message
                     memory_manager.track_message(connection_id, message)
             
-            # Force cleanup
+            # Force cleanup and collect metrics
             cleanup_stats = await memory_manager.force_cleanup()
+            await memory_manager._collect_metrics()  # Manually collect metrics for testing
             
             # Verify memory management
             memory_stats = memory_manager.get_memory_stats()
             assert memory_stats["monitoring_active"] is True
             assert cleanup_stats["cleanup_time_seconds"] < 1.0  # Should be fast
             
-            # Check memory health
+            # Check memory health (now that we have metrics)
             health = memory_manager.check_memory_health()
             assert health["status"] in ["healthy", "issues_detected"]
             
@@ -243,7 +244,7 @@ class TestWebSocketPerformanceComponents:
             
             for i in range(1000):
                 message = WebSocketMessage(
-                    type="test_message",
+                    type="ping",
                     payload={"data": f"message_{i}", "size": "x" * 100}
                 )
                 connection_id = f"conn_{i % 5}"  # 5 connections
@@ -286,7 +287,7 @@ class TestWebSocketPerformanceComponents:
         
         for test_case in test_cases:
             message = {
-                "type": "test_message",
+                "type": "user_message",
                 "payload": test_case["data"],
                 "timestamp": datetime.now(timezone.utc).isoformat()
             }
@@ -506,7 +507,7 @@ async def test_integrated_performance_improvements():
             memory_manager.track_message(connection_id, message_data)
             
             # Add to batcher
-            ws_message = WebSocketMessage(type="integrated_test", payload=message_data["payload"])
+            ws_message = WebSocketMessage(type="pong", payload=message_data["payload"])
             await batcher.add_message(connection_id, ws_message)
             
             # Record metrics

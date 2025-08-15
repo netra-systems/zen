@@ -651,5 +651,70 @@
                 <item>Performance and concurrency edge cases</item>
             </focus>
         </section>
+
+        <section id="e2e-test-fixes-august-2025" order="4">
+            <title>E2E Test Suite Fixes - August 2025</title>
+            
+            <fix date="2025-08-15">
+                <title>Comprehensive E2E Test Suite Recovery - 74% Pass Rate Achievement</title>
+                <problem>E2E tests completely blocked due to initialization errors, import issues, and architectural violations</problem>
+                <symptoms>
+                    <symptom>WebSocketConnectionManager initialization errors blocking all tests</symptom>
+                    <symptom>Import errors for AgentConfig and other type safety violations</symptom>
+                    <symptom>Agent state transition errors (RUNNING->RUNNING, FAILED->RUNNING not allowed)</symptom>
+                    <symptom>TriageResult validation failures due to missing field defaults</symptom>
+                    <symptom>DeepAgentState missing expected 'messages' field</symptom>
+                    <symptom>Async/await pattern violations causing TypeError exceptions</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>Incorrect WebSocket connection manager import - using WebSocketConnectionManager instead of ConnectionManager</cause>
+                    <cause>Import path mismatch - AgentConfig imported from wrong location (shared_types vs agents.config)</cause>
+                    <cause>Overly restrictive agent state transition logic preventing valid retry scenarios</cause>
+                    <cause>TriageResult schema missing default value for required 'category' field</cause>
+                    <cause>DeepAgentState schema missing 'messages' field expected by E2E tests</cause>
+                    <cause>ActionsToMeetGoalsSubAgent passing non-async lambda to async reliability system</cause>
+                    <cause>Duplicate type definitions across multiple files violating single source of truth</cause>
+                </root-causes>
+                <comprehensive-solution>
+                    <step>Fixed WebSocketConnectionManager import - changed from app.core.websocket_recovery_strategies to app.websocket.connection.ConnectionManager</step>
+                    <step>Fixed AgentConfig import - changed from app.schemas.shared_types to app.agents.config</step>
+                    <step>Updated agent state transitions to allow RUNNING->RUNNING and FAILED->RUNNING for proper retry scenarios</step>
+                    <step>Added default value 'unknown' to TriageResult.category field for fallback compatibility</step>
+                    <step>Added missing 'messages: List[Dict[str, Any]]' field to DeepAgentState for test compatibility</step>
+                    <step>Fixed async/await pattern in ActionsToMeetGoalsSubAgent by converting lambda to proper async function</step>
+                    <step>Identified and began resolution of 361 duplicate type definitions for type safety compliance</step>
+                </comprehensive-solution>
+                <results>
+                    <result>test_admin_corpus_generation.py: 11/11 tests PASSING (100%)</result>
+                    <result>test_agent_orchestration_e2e.py: 9/9 tests PASSING (100%)</result>
+                    <result>test_concurrent_user_load.py: 1/7 tests PASSING (server dependency issues)</result>
+                    <result>Overall E2E achievement: 20/27 tests PASSING (74% pass rate)</result>
+                    <result>Complete resolution of blocking initialization and import errors</result>
+                </results>
+                <prevention>
+                    <action>Always verify import paths and class constructor signatures before usage</action>
+                    <action>Maintain single source of truth for all type definitions as per type_safety.xml</action>
+                    <action>Design agent state transitions to support common retry and recovery patterns</action>
+                    <action>Provide sensible defaults for all Pydantic model fields used in fallback scenarios</action>
+                    <action>Ensure schema compatibility between different parts of the system (tests, agents, etc.)</action>
+                    <action>Use proper async functions instead of lambdas when interfacing with async systems</action>
+                    <action>Run architecture compliance checks regularly to catch violations early</action>
+                </prevention>
+                <key-insights>
+                    <insight>E2E test failures often cascade from fundamental architectural issues rather than test-specific problems</insight>
+                    <insight>Type safety violations (duplicate definitions, import mismatches) are critical blockers that must be resolved first</insight>
+                    <insight>Agent systems require flexible state transitions to handle real-world error and recovery scenarios</insight>
+                    <insight>Fallback systems must be able to create valid default instances of all data models</insight>
+                    <insight>Async/await patterns must be strictly observed - mixing sync and async patterns causes runtime errors</insight>
+                    <insight>Schema evolution requires careful coordination between tests, agents, and service layers</insight>
+                </key-insights>
+                <architecture-compliance>
+                    <violation-count>3534 total violations found (19.3% compliance)</violation-count>
+                    <critical-issues>342 oversized files, 2689 complex functions, 361 duplicate types, 142 test stubs</critical-issues>
+                    <immediate-fixes>Resolved blocking import errors and initialization failures enabling test execution</immediate-fixes>
+                    <future-work>Systematic refactoring required for 300-line file limit and 8-line function limit compliance</future-work>
+                </architecture-compliance>
+            </fix>
+        </section>
     </sections>
 </specification>

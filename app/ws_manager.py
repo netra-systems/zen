@@ -138,7 +138,18 @@ class WebSocketManager:
 
     async def handle_pong(self, user_id: str, websocket: WebSocket) -> None:
         """Handle pong response from client."""
-        await self.connections.handle_pong_response(user_id, websocket)
+        # Get connection info and pass to heartbeat manager
+        conn_info = self._get_connection_info_for_user(user_id, websocket)
+        if conn_info:
+            await self.core.heartbeat_manager.handle_pong_response(conn_info.connection_id, websocket)
+
+    def _get_connection_info_for_user(self, user_id: str, websocket: WebSocket) -> Optional[ConnectionInfo]:
+        """Find connection info for user and websocket."""
+        user_connections = self.core.connection_manager.active_connections.get(user_id, [])
+        for conn_info in user_connections:
+            if conn_info.websocket == websocket:
+                return conn_info
+        return None
 
     # Original convenience methods for existing API
     async def send_error_to_user(self, user_id: str, error_message: str, sub_agent_name: str = "System") -> bool:
@@ -226,7 +237,7 @@ class WebSocketManager:
 
     def get_connection_info(self, user_id: str) -> List[Dict[str, Any]]:
         """Get detailed information about a user's connections."""
-        return self.connections.get_user_connection_info(user_id)
+        return self._connection_manager.get_connection_info(user_id)
 
     @property
     def active_connections(self) -> Dict[str, Any]:
@@ -270,11 +281,35 @@ class WebSocketManager:
 
     async def start_heartbeat(self, job_id: str, interval_seconds: int = 30) -> None:
         """Start heartbeat for job connections."""
+        self._update_heartbeat_config(interval_seconds)
         room_connections = self.core.room_manager.get_room_connections(job_id)
-        for conn_id in room_connections:
-            conn_info = self.core.connection_manager.get_connection_info(conn_id)
-            if conn_info:
+        await self._start_heartbeats_for_room(room_connections)
+
+    def _update_heartbeat_config(self, interval_seconds: int) -> None:
+        """Update heartbeat configuration if needed."""
+        if interval_seconds != self.core.heartbeat_manager.config.interval_seconds:
+            self.core.heartbeat_manager.config.interval_seconds = interval_seconds
+
+    async def _start_heartbeats_for_room(self, room_connections) -> None:
+        """Start heartbeats for all connections in room."""
+        for user_id in room_connections:
+            user_connections = self.core.connection_manager.get_user_connections(user_id)
+            for conn_info in user_connections:
                 await self.core.heartbeat_manager.start_heartbeat_for_connection(conn_info)
+
+    # Agent compatibility methods (required by BaseAgent)
+    async def send_message(self, user_id: str, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 
+                          retry: bool = True) -> bool:
+        """Send message - alias for send_message_to_user (agent compatibility)."""
+        return await self.send_message_to_user(user_id, message, retry)
+    
+    async def send_error(self, user_id: str, error_message: str, sub_agent_name: str = "System") -> bool:
+        """Send error - alias for send_error_to_user (agent compatibility)."""
+        return await self.send_error_to_user(user_id, error_message, sub_agent_name)
+    
+    async def send_agent_update(self, user_id: str, sub_agent_name: str, state: Dict[str, Any]) -> None:
+        """Send agent update - alias for send_sub_agent_update (agent compatibility)."""
+        await self.send_sub_agent_update(user_id, sub_agent_name, state)
 
     # Legacy method names for backward compatibility
     async def connect(self, websocket: WebSocket, job_id: str) -> ConnectionInfo:

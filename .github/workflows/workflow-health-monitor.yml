@@ -255,7 +255,7 @@ jobs:
           
           # Cost factors (simplified)
           COST_PER_MINUTE = {
-              'ubuntu-latest': 0.008,
+              'warp-custom-default': 0.008,
               'ubuntu-22.04': 0.008,
               'ubuntu-20.04': 0.008,
               'windows-latest': 0.016,
@@ -274,7 +274,7 @@ jobs:
                   duration_minutes = (end - start).total_seconds() / 60
                   
                   # Estimate runner type (would need job details for accuracy)
-                  runner = 'ubuntu-latest'  # Default assumption
+                  runner = 'warp-custom-default'  # Default assumption
                   cost_per_min = COST_PER_MINUTE.get(runner, 0.008)
                   
                   run_cost = duration_minutes * cost_per_min

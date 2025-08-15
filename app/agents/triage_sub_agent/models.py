@@ -84,11 +84,12 @@ class TriageMetadata(BaseModel):
     cache_hit: bool = False
     fallback_used: bool = False
     retry_count: int = 0
+    error_details: Optional[str] = None
 
 
 class TriageResult(BaseModel):
     """Enhanced triage result with comprehensive categorization and metadata"""
-    category: str
+    category: str = "unknown"
     secondary_categories: List[str] = Field(default_factory=list)
     confidence_score: float = Field(ge=0.0, le=1.0, default=0.8)
     priority: Priority = Priority.MEDIUM

@@ -7,6 +7,7 @@ from sqlalchemy.future import select
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, UTC
 from cryptography.fernet import Fernet
+import secrets
 
 from app.db import models_postgres
 from app import schemas
@@ -50,36 +51,46 @@ class SecurityService:
 
     def create_access_token(self, data: schemas.TokenPayload, expires_delta: Optional[timedelta] = None):
         to_encode = data.model_dump()
+        current_time = datetime.now(UTC)
+        
         if expires_delta:
-            expire = datetime.now(UTC) + expires_delta
+            expire = current_time + expires_delta
         else:
-            expire = datetime.now(UTC) + timedelta(minutes=settings.access_token_expire_minutes)
-        to_encode.update({"exp": expire})
+            expire = current_time + timedelta(minutes=settings.access_token_expire_minutes)
+        
+        # SECURITY FIX: Add proper JWT claims for enhanced security
+        to_encode.update({
+            "exp": expire,
+            "iat": current_time,  # Issued at timestamp
+            "nbf": current_time,  # Not before timestamp
+            "jti": secrets.token_hex(16),  # JWT ID for token blacklisting support
+            "iss": "netra-auth-service",  # Issuer claim
+            "aud": "netra-api"  # Audience claim
+        })
+        
         encoded_jwt = jwt.encode(to_encode, self.key_manager.jwt_secret_key, algorithm="HS256")
         return encoded_jwt
 
     def get_user_email_from_token(self, token: str) -> Optional[str]:
         try:
-            payload = jwt.decode(token, self.key_manager.jwt_secret_key, algorithms=["HS256"])
-            
-            # Manual expiration check due to python-jose bug
-            exp_timestamp = payload.get("exp")
-            if exp_timestamp:
-                from datetime import datetime, UTC
-                current_timestamp = datetime.now(UTC).timestamp()
-                if current_timestamp > exp_timestamp:
-                    logger.info(f"Token manually verified as expired: {token}")
-                    return None
+            # SECURITY FIX: Use the same enhanced JWT validation logic
+            payload = self.decode_access_token(token)
+            if payload is None:
+                return None
             
             email: str = payload.get("sub")
-            if email is None:
+            if email is None or not isinstance(email, str):
+                logger.error("Invalid or missing email in token subject claim")
                 return None
+                
+            # Additional email validation
+            if "@" not in email or len(email) < 3:
+                logger.error(f"Invalid email format in token: {email}")
+                return None
+                
             return email
-        except jwt.ExpiredSignatureError:
-            logger.info(f"Token expired during email extraction: {token}")
-            return None
-        except JWTError as e:
-            logger.error(f"JWT decode error during email extraction: {e}")
+        except Exception as e:
+            logger.error(f"Error extracting email from token: {e}")
             return None
 
     async def get_user(self, db_session: AsyncSession, email: str) -> Optional[models_postgres.User]:
@@ -107,23 +118,59 @@ class SecurityService:
 
     def decode_access_token(self, token: str) -> Optional[dict]:
         try:
-            payload = jwt.decode(token, self.key_manager.jwt_secret_key, algorithms=["HS256"])
+            # SECURITY FIX: Enhanced JWT validation with strict checks
+            payload = jwt.decode(
+                token, 
+                self.key_manager.jwt_secret_key, 
+                algorithms=["HS256"],
+                audience="netra-api",  # Verify audience claim
+                issuer="netra-auth-service",  # Verify issuer claim
+                options={
+                    "verify_exp": True,
+                    "verify_iat": True,
+                    "verify_nbf": True,
+                    "verify_aud": True,
+                    "verify_iss": True,
+                    "verify_signature": True,
+                    "require_exp": True,
+                    "require_iat": True,
+                    "require_nbf": True,
+                    "require_aud": True,
+                    "require_iss": True
+                }
+            )
             
-            # Manual expiration check due to python-jose bug
+            # Additional security checks
             exp_timestamp = payload.get("exp")
-            if exp_timestamp:
-                from datetime import datetime, UTC
-                current_timestamp = datetime.now(UTC).timestamp()
-                if current_timestamp > exp_timestamp:
-                    logger.info(f"Token manually verified as expired: {token}")
+            iat_timestamp = payload.get("iat")
+            current_timestamp = datetime.now(UTC).timestamp()
+            
+            # Verify token not too old (max 24 hours)
+            if iat_timestamp and (current_timestamp - iat_timestamp) > 86400:
+                logger.warning(f"Token too old, issued: {iat_timestamp}, current: {current_timestamp}")
+                return None
+                
+            # Strict expiration check with tolerance
+            if exp_timestamp and current_timestamp > (exp_timestamp + 5):  # 5 second tolerance
+                logger.info(f"Token expired with strict check: exp={exp_timestamp}, current={current_timestamp}")
+                return None
+            
+            # Validate required claims
+            required_claims = ["sub", "exp", "iat"]
+            for claim in required_claims:
+                if claim not in payload:
+                    logger.error(f"Missing required claim: {claim}")
                     return None
             
             return payload
         except jwt.ExpiredSignatureError:
-            logger.info(f"Token expired: {token}")
+            logger.info("Token expired during JWT validation")
+            return None
+        except jwt.InvalidTokenError as e:
+            logger.error(f"Invalid JWT token: {e}")
             return None
         except JWTError as e:
-            logger.error(f"JWT decode error: {e}, token: {token}")
+            logger.error(f"JWT decode error: {e}")
             return None
 
     async def get_user_by_id(self, db_session: AsyncSession, user_id: str) -> Optional[models_postgres.User]:

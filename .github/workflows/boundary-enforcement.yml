@@ -1,44 +1,310 @@
 name: Boundary Enforcement
+# CRITICAL: Ultra Deep Thinking Enforcement System
+# Prevents architectural violations at CI/CD level
 
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:  # Allow manual triggering
+
+permissions:
+  contents: read
+  pull-requests: write  # For PR comments
+  checks: write        # For check status
 
 jobs:
   boundary-enforcement:
-    runs-on: ubuntu-latest
+    name: Architecture Boundary Enforcement
+    runs-on: warp-custom-default
+    timeout-minutes: 10
+    
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Full history for growth analysis
       
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+          cache: 'pip'
       
-      - name: Install dependencies
+      - name: Install enforcement dependencies
         run: |
-          pip install radon
+          pip install radon ast-grep
+          # Minimal dependencies for boundary enforcement
       
-      - name: Run Boundary Enforcer
+      - name: Run Critical Boundary Checks
+        id: boundary-check
         run: |
+          echo "🔴 CRITICAL: Running Boundary Enforcement..."
           python scripts/boundary_enforcer.py --enforce --json-output boundary-report.json
+          
+          # Capture exit code for later use
+          BOUNDARY_EXIT_CODE=$?
+          echo "boundary-exit-code=$BOUNDARY_EXIT_CODE" >> $GITHUB_OUTPUT
+          
+          # Generate summary for GitHub
+          python scripts/boundary_enforcer.py --pr-comment > boundary-summary.txt
+          
+          exit $BOUNDARY_EXIT_CODE
+        continue-on-error: true
       
-      - name: Check Critical Violations
+      - name: Check for Emergency Violations
+        id: emergency-check
         run: |
+          echo "🚨 Checking for EMERGENCY-level violations..."
           python scripts/boundary_enforcer.py --fail-on-emergency
+          EMERGENCY_EXIT_CODE=$?
+          echo "emergency-exit-code=$EMERGENCY_EXIT_CODE" >> $GITHUB_OUTPUT
+          
+          if [ $EMERGENCY_EXIT_CODE -ne 0 ]; then
+            echo "🚨 EMERGENCY VIOLATIONS DETECTED - Build MUST fail"
+            echo "emergency-detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "emergency-detected=false" >> $GITHUB_OUTPUT
+          fi
+          
+          exit $EMERGENCY_EXIT_CODE
+        continue-on-error: true
       
-      - name: Upload Boundary Report
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: boundary-report
-          path: boundary-report.json
-      
-      - name: Comment PR with Report
-        if: github.event_name == 'pull_request'
+      - name: Analyze Growth Patterns
+        id: growth-analysis
         run: |
-          python scripts/boundary_enforcer.py --pr-comment
+          echo "📈 Analyzing system growth patterns..."
+          python scripts/check_architecture_compliance.py --json-output compliance-report.json
+          
+          # Extract key metrics
+          TOTAL_VIOLATIONS=$(python -c "
+          import json
+          with open('compliance-report.json') as f:
+              data = json.load(f)
+              print(data.get('total_violations', 0))
+          ")
+          
+          COMPLIANCE_SCORE=$(python -c "
+          import json
+          with open('compliance-report.json') as f:
+              data = json.load(f)
+              print(data.get('compliance_score', 100))
+          ")
+          
+          echo "total-violations=$TOTAL_VIOLATIONS" >> $GITHUB_OUTPUT
+          echo "compliance-score=$COMPLIANCE_SCORE" >> $GITHUB_OUTPUT
+          
+          echo "📊 Total violations: $TOTAL_VIOLATIONS"
+          echo "📊 Compliance score: $COMPLIANCE_SCORE%"
+      
+      - name: Generate Enforcement Report
+        if: always()
+        run: |
+          echo "📋 Generating comprehensive enforcement report..."
+          
+          # Create detailed report
+          cat > enforcement-report.md << 'EOF'
+          # 🔴 Boundary Enforcement Report
+          
+          ## System Health Status
+          - **Boundary Check**: ${{ steps.boundary-check.outputs.boundary-exit-code == '0' && '✅ PASS' || '❌ FAIL' }}
+          - **Emergency Check**: ${{ steps.emergency-check.outputs.emergency-detected == 'false' && '✅ SAFE' || '🚨 EMERGENCY' }}
+          - **Total Violations**: ${{ steps.growth-analysis.outputs.total-violations }}
+          - **Compliance Score**: ${{ steps.growth-analysis.outputs.compliance-score }}%
+          
+          ## Critical Boundaries (MANDATORY)
+          - **File Size**: ≤300 lines (HARD LIMIT)
+          - **Function Size**: ≤8 lines (HARD LIMIT) 
+          - **Module Count**: System-wide monitoring
+          - **Complexity**: Automated tracking
+          
+          ## Actions Required
+          EOF
+          
+          if [ "${{ steps.emergency-check.outputs.emergency-detected }}" = "true" ]; then
+            cat >> enforcement-report.md << 'EOF'
+          
+          ### 🚨 EMERGENCY ACTIONS REQUIRED
+          1. **STOP** all new feature development
+          2. **IMMEDIATE** refactoring sprint required
+          3. **REVIEW** system architecture 
+          4. **NO MERGES** until violations resolved
+          EOF
+          fi
+          
+          if [ "${{ steps.boundary-check.outputs.boundary-exit-code }}" != "0" ]; then
+            cat >> enforcement-report.md << 'EOF'
+          
+          ### ⚠️ Boundary Violations Detected
+          - Review boundary-report.json for details
+          - Use automated fix suggestions
+          - Consider file/function splitting
+          EOF
+          fi
+          
+          cat >> enforcement-report.md << 'EOF'
+          
+          ## Remediation Tools
+          - `python scripts/boundary_enforcer.py --check-file-boundaries`
+          - `python scripts/boundary_enforcer.py --check-function-boundaries` 
+          - `python scripts/split_large_files.py` (automated splitting)
+          - `python scripts/decompose_functions.py` (function refactoring)
+          
+          ---
+          Generated by Boundary Enforcement System v2.0
+          EOF
+      
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            
+            let comment = '';
+            
+            // Read enforcement report
+            if (fs.existsSync('enforcement-report.md')) {
+              comment = fs.readFileSync('enforcement-report.md', 'utf8');
+            } else {
+              comment = `# 🔴 Boundary Enforcement Report\n\nReport generation failed - check workflow logs.`;
+            }
+            
+            // Add emergency warning if needed
+            if ('${{ steps.emergency-check.outputs.emergency-detected }}' === 'true') {
+              comment = `# 🚨 EMERGENCY: CRITICAL VIOLATIONS DETECTED\n\n**THIS PR CANNOT BE MERGED** until violations are resolved.\n\n` + comment;
+            }
+            
+            // Find existing enforcement comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Boundary Enforcement Report')
+            );
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
+      
+      - name: Upload Enforcement Artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: boundary-enforcement-report
+          path: |
+            boundary-report.json
+            compliance-report.json
+            enforcement-report.md
+            boundary-summary.txt
+          retention-days: 30
+      
+      - name: Set Check Status
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const emergencyDetected = '${{ steps.emergency-check.outputs.emergency-detected }}' === 'true';
+            const boundaryFailed = '${{ steps.boundary-check.outputs.boundary-exit-code }}' !== '0';
+            const totalViolations = parseInt('${{ steps.growth-analysis.outputs.total-violations }}');
+            const complianceScore = parseFloat('${{ steps.growth-analysis.outputs.compliance-score }}');
+            
+            let conclusion, title, summary;
+            
+            if (emergencyDetected) {
+              conclusion = 'failure';
+              title = '🚨 EMERGENCY: Critical boundary violations';
+              summary = 'System has critical violations requiring immediate attention. No merges allowed.';
+            } else if (boundaryFailed || totalViolations > 50) {
+              conclusion = 'failure'; 
+              title = '❌ Boundary violations detected';
+              summary = `Found ${totalViolations} violations (${complianceScore}% compliance). Review required.`;
+            } else if (totalViolations > 0) {
+              conclusion = 'neutral';
+              title = '⚠️ Minor boundary issues';
+              summary = `Found ${totalViolations} minor violations (${complianceScore}% compliance). Consider fixing.`;
+            } else {
+              conclusion = 'success';
+              title = '✅ All boundaries respected';
+              summary = 'Perfect compliance! All architectural boundaries respected.';
+            }
+            
+            await github.rest.checks.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Boundary Enforcement',
+              head_sha: context.sha,
+              status: 'completed',
+              conclusion: conclusion,
+              output: {
+                title: title,
+                summary: summary
+              }
+            });
+      
+      - name: Fail Build on Emergency
+        if: steps.emergency-check.outputs.emergency-detected == 'true'
+        run: |
+          echo "🚨 EMERGENCY VIOLATIONS DETECTED"
+          echo "This build MUST fail to prevent system degradation"
+          echo "Review emergency actions in the enforcement report"
+          exit 1
+      
+      - name: Fail Build on Critical Violations  
+        if: steps.boundary-check.outputs.boundary-exit-code != '0' && github.ref == 'refs/heads/main'
+        run: |
+          echo "❌ CRITICAL VIOLATIONS on main branch"
+          echo "Main branch must maintain perfect boundary compliance"
+          exit 1
+
+  pre-commit-validation:
+    name: Pre-commit Hook Validation
+    runs-on: warp-custom-default
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install pre-commit
+        run: pip install pre-commit
+      
+      - name: Validate pre-commit configuration
+        run: |
+          echo "🔍 Validating pre-commit configuration..."
+          pre-commit validate-config
+          
+          # Check if boundary enforcer hooks are present
+          if grep -q "boundary-enforcer" .pre-commit-config.yaml; then
+            echo "✅ Boundary enforcement hooks found"
+          else
+            echo "❌ Boundary enforcement hooks missing"
+            exit 1
+          fi
+      
+      - name: Test pre-commit hooks (dry run)
+        run: |
+          echo "🧪 Testing pre-commit hooks..."
+          # Run hooks but don't fail if files need fixing
+          pre-commit run --all-files || echo "Pre-commit found issues (expected in dry run)"

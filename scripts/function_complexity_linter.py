@@ -207,7 +207,7 @@ on: [push, pull_request]
 
 jobs:
   function-complexity:
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python

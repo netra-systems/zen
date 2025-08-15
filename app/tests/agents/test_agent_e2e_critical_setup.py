@@ -44,9 +44,20 @@ class AgentE2ETestBase:
         })
         # ask_llm should return a JSON string for triage and other agents
         llm_manager.ask_llm = AsyncMock(return_value=json.dumps({
-            "category": "optimization",
-            "analysis": "Test analysis",
-            "recommendations": ["Optimize GPU", "Reduce memory usage"]
+            "plan_steps": [
+                {
+                    "step_id": "step_1",
+                    "description": "Optimize GPU utilization",
+                    "estimated_duration": "2 hours",
+                    "dependencies": [],
+                    "resources_needed": ["GPU monitoring tools"],
+                    "status": "pending"
+                }
+            ],
+            "priority": "medium",
+            "estimated_duration": "4 hours",
+            "required_resources": ["GPU monitoring tools", "Performance analytics"],
+            "success_metrics": ["Improved throughput", "Reduced costs"]
         }))
         
         # Mock ask_structured_llm for TriageSubAgent
@@ -96,10 +107,14 @@ class AgentE2ETestBase:
             "result": "Tool executed successfully"
         })
         
-        # Mock state persistence service
-        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
-            with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
-                with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
+        # Mock state persistence service with proper async return values
+        mock_save_state = AsyncMock(return_value=None)
+        mock_load_state = AsyncMock(return_value=None) 
+        mock_get_context = AsyncMock(return_value=None)
+        
+        with patch.object(state_persistence_service, 'save_agent_state', mock_save_state):
+            with patch.object(state_persistence_service, 'load_agent_state', mock_load_state):
+                with patch.object(state_persistence_service, 'get_thread_context', mock_get_context):
                     # Create Supervisor
                     supervisor = Supervisor(db_session, llm_manager, websocket_manager, tool_dispatcher)
                     supervisor.thread_id = str(uuid.uuid4())

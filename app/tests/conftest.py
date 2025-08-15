@@ -87,3 +87,85 @@ def client(db_session):
     with TestClient(app) as c:
         yield c
     del app.dependency_overrides[get_db_session]
+
+
+# Real LLM Testing Fixtures
+@pytest.fixture(scope="function")
+def real_llm_manager():
+    """Create real LLM manager when ENABLE_REAL_LLM_TESTING=true, otherwise proper mock."""
+    if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
+        from app.llm.llm_manager import LLMManager
+        from app.config import settings
+        return LLMManager(settings)
+    else:
+        from unittest.mock import AsyncMock, MagicMock
+        mock_manager = MagicMock()
+        # Mock all expected async methods to return proper responses
+        mock_manager.get_response = AsyncMock(return_value="Mock LLM response")
+        mock_manager.get_structured_response = AsyncMock(return_value={"analysis": "mock analysis", "recommendations": []})
+        mock_manager.generate = AsyncMock(return_value="Mock generated content")
+        mock_manager.stream_response = AsyncMock()
+        return mock_manager
+
+
+@pytest.fixture(scope="function") 
+def real_websocket_manager():
+    """Create real WebSocket manager for E2E tests with interface compatibility."""
+    from app.ws_manager import WebSocketManager
+    from unittest.mock import AsyncMock
+    manager = WebSocketManager()
+    # Add interface compatibility for agents expecting send_message
+    if not hasattr(manager, 'send_message'):
+        manager.send_message = manager.send_message_to_user
+    # Mock methods to prevent actual WebSocket operations in tests
+    manager.send_message = AsyncMock(return_value=True)
+    manager.send_to_thread = AsyncMock(return_value=True)
+    manager.send_message_to_user = AsyncMock(return_value=True)
+    return manager
+
+
+@pytest.fixture(scope="function")
+def real_tool_dispatcher():
+    """Create real tool dispatcher when needed, otherwise proper mock."""
+    if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
+        from app.agents.tool_dispatcher import ToolDispatcher
+        dispatcher = ToolDispatcher()
+        return dispatcher
+    else:
+        from unittest.mock import AsyncMock, MagicMock
+        mock_dispatcher = MagicMock()
+        # Mock expected methods for tool dispatch
+        mock_dispatcher.execute = AsyncMock(return_value={"result": "mock tool execution", "success": True})
+        mock_dispatcher.dispatch_tool = AsyncMock(return_value={"output": "mock output"})
+        mock_dispatcher.get_available_tools = MagicMock(return_value=[])
+        return mock_dispatcher
+
+
+@pytest.fixture(scope="function")
+def real_agent_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
+    """Create real agent setup for E2E testing."""
+    agents = _create_real_agents(real_llm_manager, real_tool_dispatcher)
+    return _build_real_setup_dict(agents, real_llm_manager, real_websocket_manager, real_tool_dispatcher)
+
+
+def _create_real_agents(llm_manager, tool_dispatcher):
+    """Create real agent instances with proper dependencies."""
+    from app.agents.triage_sub_agent.agent import TriageSubAgent
+    from app.agents.data_sub_agent.agent import DataSubAgent
+    from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+    from app.agents.reporting_sub_agent import ReportingSubAgent
+    return {
+        'triage': TriageSubAgent(llm_manager, tool_dispatcher),
+        'data': DataSubAgent(llm_manager, tool_dispatcher),
+        'optimization': OptimizationsCoreSubAgent(llm_manager, tool_dispatcher),
+        'reporting': ReportingSubAgent(llm_manager, tool_dispatcher)
+    }
+
+
+def _build_real_setup_dict(agents, llm_manager, websocket_manager, tool_dispatcher):
+    """Build real setup dictionary for E2E tests."""
+    import uuid
+    return {
+        'agents': agents, 'llm': llm_manager, 'websocket': websocket_manager,
+        'dispatcher': tool_dispatcher, 'run_id': str(uuid.uuid4()), 'user_id': 'test-user-e2e'
+    }

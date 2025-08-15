@@ -25,7 +25,7 @@ from .service_factory import get_mcp_service
 from .handlers import MCPHandlers
 from .websocket_handler import MCPWebSocketHandler
 
-router = APIRouter(prefix="/api/mcp", tags=["MCP"])
+router = APIRouter(tags=["MCP"])
 
 
 @router.get("/info")
@@ -165,7 +165,7 @@ async def websocket_endpoint(
     handler = MCPWebSocketHandler(mcp_service)
     await handler.handle_websocket(websocket, api_key)
 
-@router.post("")
+@router.post("/")
 async def handle_mcp_message(
     request: dict,
     mcp_service = Depends(get_mcp_service)

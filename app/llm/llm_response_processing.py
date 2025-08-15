@@ -5,7 +5,8 @@ Each function must be ≤8 lines as per module architecture requirements.
 """
 from typing import Any, AsyncIterator, Type, TypeVar, Dict, Optional
 from pydantic import BaseModel
-from app.schemas.llm_types import LLMResponse, LLMProvider, TokenUsage
+from app.schemas.llm_response_types import LLMResponse
+from app.schemas.llm_base_types import LLMProvider, TokenUsage
 from app.services.llm_cache_service import llm_cache_service
 from app.logging_config import central_logger
 import json

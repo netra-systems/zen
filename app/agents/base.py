@@ -202,7 +202,7 @@ class BaseSubAgent(ABC):
         return {
             SubAgentLifecycle.PENDING: self._get_pending_transitions(),
             SubAgentLifecycle.RUNNING: self._get_running_transitions(), 
-            SubAgentLifecycle.COMPLETED: [SubAgentLifecycle.SHUTDOWN],
+            SubAgentLifecycle.COMPLETED: self._get_completed_transitions(),
             SubAgentLifecycle.FAILED: self._get_failed_transitions(),
             SubAgentLifecycle.SHUTDOWN: []  # Terminal state
         }
@@ -218,6 +218,7 @@ class BaseSubAgent(ABC):
     def _get_running_transitions(self) -> List[SubAgentLifecycle]:
         """Get valid transitions from RUNNING state.""" 
         return [
+            SubAgentLifecycle.RUNNING,    # Allow staying in running state
             SubAgentLifecycle.COMPLETED,
             SubAgentLifecycle.FAILED,
             SubAgentLifecycle.SHUTDOWN
@@ -226,8 +227,17 @@ class BaseSubAgent(ABC):
     def _get_failed_transitions(self) -> List[SubAgentLifecycle]:
         """Get valid transitions from FAILED state."""
         return [
-            SubAgentLifecycle.PENDING,  # Allow retry
+            SubAgentLifecycle.PENDING,  # Allow retry via pending
+            SubAgentLifecycle.RUNNING,  # Allow direct retry
             SubAgentLifecycle.SHUTDOWN
+        ]
+    
+    def _get_completed_transitions(self) -> List[SubAgentLifecycle]:
+        """Get valid transitions from COMPLETED state."""
+        return [
+            SubAgentLifecycle.RUNNING,   # Allow retry from completed state
+            SubAgentLifecycle.PENDING,   # Allow reset to pending
+            SubAgentLifecycle.SHUTDOWN   # Allow final shutdown
         ]
 
     def get_state(self) -> SubAgentLifecycle:

@@ -63,11 +63,24 @@ def create_agent_state(user_request: str, **kwargs) -> DeepAgentState:
 
 def setup_triage_agent_mock(supervisor: SupervisorAgent, return_data: Dict[str, Any]):
     """Setup triage agent mock with return data."""
+    from app.agents.triage_sub_agent.models import TriageResult
     triage_agent = supervisor.agents.get("triage")
     triage_agent.execute = AsyncMock()
+    
+    # Convert dict to TriageResult model
+    triage_dict = return_data.get('triage_result', {'message_type': 'query'})
+    if isinstance(triage_dict, dict):
+        # Map common test fields to TriageResult fields
+        triage_result = TriageResult(
+            category=triage_dict.get('message_type', 'query'),
+            confidence_score=triage_dict.get('confidence', 0.8)
+        )
+    else:
+        triage_result = triage_dict
+    
     triage_agent.execute.return_value = DeepAgentState(
         user_request=return_data.get('user_request', 'Test query'),
-        triage_result=return_data.get('triage_result', {'message_type': 'query'})
+        triage_result=triage_result
     )
 
 
@@ -91,11 +104,34 @@ def setup_optimization_agent_mock(supervisor: SupervisorAgent, return_data: Dict
 
 def setup_data_agent_mock(supervisor: SupervisorAgent, return_data: Dict[str, Any]):
     """Setup data agent mock with return data."""
+    from app.schemas.shared_types import AnomalyDetectionResponse
     data_agent = supervisor.agents.get("data")
     data_agent.execute = AsyncMock()
+    
+    # Convert dict to appropriate model
+    data_dict = return_data.get('data_result', {'processed': True})
+    if isinstance(data_dict, dict):
+        if 'analysis' in data_dict:
+            # Create mock response based on expected structure
+            confidence_score = data_dict.get('analysis', {}).get('metrics', {}).get('accuracy', 0.95)
+        elif data_dict.get('processed') is True:
+            # Simple processed case - set a default confidence score
+            confidence_score = 0.95
+        else:
+            confidence_score = 0.8
+            
+        data_result = AnomalyDetectionResponse(
+            summary=f"Analysis complete: {data_dict.get('analysis', {}).get('trends', 'processed')}",
+            anomalies=[],  # Empty list for test simplicity
+            confidence_score=confidence_score,
+            processing_time_ms=100
+        )
+    else:
+        data_result = data_dict
+    
     data_agent.execute.return_value = DeepAgentState(
         user_request=return_data.get('user_request', 'Test query'),
-        data_result=return_data.get('data_result', {'processed': True})
+        data_result=data_result
     )
 
 
@@ -107,9 +143,24 @@ def setup_failing_agent_mock(supervisor: SupervisorAgent, agent_name: str, error
 
 def setup_retry_agent_mock(supervisor: SupervisorAgent, agent_name: str, failures: List[str], success_data: Dict[str, Any]):
     """Setup agent mock with retry behavior."""
+    from app.agents.triage_sub_agent.models import TriageResult
     agent = supervisor.agents.get(agent_name)
     agent.execute = AsyncMock()
     side_effects = [Exception(err) for err in failures]
+    
+    # Create proper success state
+    if agent_name == "triage" and 'triage_result' in success_data:
+        triage_dict = success_data['triage_result']
+        if isinstance(triage_dict, dict):
+            # If dict contains success=True, set category to "success"
+            if triage_dict.get('success') is True:
+                category = "success"
+            else:
+                category = triage_dict.get('message_type', 'query')
+            triage_result = TriageResult(category=category)
+            success_data = success_data.copy()
+            success_data['triage_result'] = triage_result
+    
     side_effects.append(DeepAgentState(**success_data))
     agent.execute.side_effect = side_effects
 

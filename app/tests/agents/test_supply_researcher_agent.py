@@ -75,13 +75,13 @@ class TestSupplyResearcherAgent:
         assert agent.name == "SupplyResearcherAgent"
         assert agent.confidence_threshold == 0.7
         assert agent.research_timeout == 300
-        assert len(agent.provider_patterns) > 0
+        assert len(agent.parser.provider_patterns) > 0
     
     # Test 2: Parse natural language - pricing request
     def test_parse_pricing_request(self, agent):
         """Test parsing pricing-related requests"""
         request = "Add GPT-5 pricing information"
-        parsed = agent._parse_natural_language_request(request)
+        parsed = agent.parser.parse_natural_language_request(request)
         
         assert parsed["research_type"] == ResearchType.PRICING
         assert parsed["provider"] == "openai"
@@ -91,7 +91,7 @@ class TestSupplyResearcherAgent:
     def test_parse_capability_request(self, agent):
         """Test parsing capability-related requests"""
         request = "What are the context window limits for Claude-3"
-        parsed = agent._parse_natural_language_request(request)
+        parsed = agent.parser.parse_natural_language_request(request)
         
         assert parsed["research_type"] == ResearchType.CAPABILITIES
         assert parsed["provider"] == "anthropic"
@@ -101,7 +101,7 @@ class TestSupplyResearcherAgent:
     def test_parse_availability_request(self, agent):
         """Test parsing availability-related requests"""
         request = "Check API availability for Gemini models"
-        parsed = agent._parse_natural_language_request(request)
+        parsed = agent.parser.parse_natural_language_request(request)
         
         assert parsed["research_type"] == ResearchType.AVAILABILITY
         assert parsed["provider"] == "google"
@@ -116,7 +116,7 @@ class TestSupplyResearcherAgent:
             "timeframe": "current"
         }
         
-        query = agent._generate_research_query(parsed)
+        query = agent.research_engine.generate_research_query(parsed)
         assert "pricing" in query.lower()
         assert "input tokens" in query.lower()
         assert "output tokens" in query.lower()
@@ -131,7 +131,7 @@ class TestSupplyResearcherAgent:
             "timeframe": "monthly"
         }
         
-        query = agent._generate_research_query(parsed)
+        query = agent.research_engine.generate_research_query(parsed)
         assert "comprehensive overview" in query.lower()
         assert "market" in query.lower()
     
@@ -148,7 +148,7 @@ class TestSupplyResearcherAgent:
         }
         parsed_request = {"provider": "openai", "model_name": "GPT-4"}
         
-        supply_items = agent._extract_supply_data(research_result, parsed_request)
+        supply_items = agent.data_extractor.extract_supply_data(research_result, parsed_request)
         
         assert len(supply_items) > 0
         assert supply_items[0]["pricing_input"] == Decimal("15")
@@ -172,7 +172,7 @@ class TestSupplyResearcherAgent:
             }
         ]
         
-        score = agent._calculate_confidence_score(research_result, extracted_data)
+        score = agent.data_extractor.calculate_confidence_score(research_result, extracted_data)
         assert score > 0.5
         assert score <= 1.0
     
@@ -187,7 +187,7 @@ class TestSupplyResearcherAgent:
         )
         
         # Mock Deep Research API
-        with patch.object(agent, '_call_deep_research_api', new_callable=AsyncMock) as mock_api:
+        with patch.object(agent.research_engine, 'call_deep_research_api', new_callable=AsyncMock) as mock_api:
             mock_api.return_value = {
                 "session_id": "test_session",
                 "status": "completed",
@@ -411,12 +411,10 @@ class TestSupplyResearcherAgent:
             providers=["openai"]
         )
         
-        with patch('app.services.supply_research_scheduler.Database') as mock_db_manager:
+        with patch('app.db.postgres.Database') as mock_db_manager:
             mock_db = Mock()
-            mock_manager_instance = Mock()
-            mock_manager_instance.get_db.return_value.__enter__ = Mock(return_value=mock_db)
-            mock_manager_instance.get_db.return_value.__exit__ = Mock(return_value=None)
-            mock_db_manager.return_value = mock_manager_instance
+            mock_db_manager.return_value.get_db.return_value.__enter__ = Mock(return_value=mock_db)
+            mock_db_manager.return_value.get_db.return_value.__exit__ = Mock(return_value=None)
             
             with patch.object(SupplyResearcherAgent, 'process_scheduled_research', new_callable=AsyncMock) as mock_process:
                 mock_process.return_value = {"results": []}
@@ -489,7 +487,7 @@ class TestSupplyResearcherAgent:
             user_id="test_user"
         )
         
-        with patch.object(agent, '_call_deep_research_api', side_effect=Exception("API Error")):
+        with patch.object(agent.research_engine, 'call_deep_research_api', side_effect=Exception("API Error")):
             mock_db.query().filter().first.return_value = Mock(status="failed")
             
             with pytest.raises(Exception):
@@ -533,10 +531,10 @@ class TestSupplyResearcherAgent:
         # Test update existing item
         update_data = {"pricing_input": Decimal("25")}
         
-        with patch.object(agent, '_update_database') as mock_update:
+        with patch.object(agent.db_manager, 'update_database') as mock_update:
             mock_update.return_value = {"updates_count": 1}
             
-            result = await agent._update_database([update_data], "session_123")
+            result = await agent.db_manager.update_database([update_data], "session_123")
             assert result["updates_count"] == 1
     
     # Test 27: Integration - Scheduler with agent
@@ -547,12 +545,10 @@ class TestSupplyResearcherAgent:
         llm_manager = Mock()
         scheduler = SupplyResearchScheduler(background_manager, llm_manager)
         
-        with patch('app.services.supply_research_scheduler.Database') as mock_db_manager:
+        with patch('app.db.postgres.Database') as mock_db_manager:
             mock_db = Mock()
-            mock_manager_instance = Mock()
-            mock_manager_instance.get_db.return_value.__enter__ = Mock(return_value=mock_db)
-            mock_manager_instance.get_db.return_value.__exit__ = Mock(return_value=None)
-            mock_db_manager.return_value = mock_manager_instance
+            mock_db_manager.return_value.get_db.return_value.__enter__ = Mock(return_value=mock_db)
+            mock_db_manager.return_value.get_db.return_value.__exit__ = Mock(return_value=None)
             
             # Mock agent execution
             with patch.object(SupplyResearcherAgent, 'execute', new_callable=AsyncMock):
@@ -589,7 +585,7 @@ class TestSupplyResearcherAgent:
     @pytest.mark.asyncio
     async def test_redis_cache_integration(self, agent):
         """Test Redis caching for research results"""
-        with patch('app.agents.supply_researcher_sub_agent.RedisManager') as mock_redis:
+        with patch('app.redis_manager.RedisManager') as mock_redis:
             mock_redis_instance = Mock()
             mock_redis_instance.set = AsyncMock()
             mock_redis_instance.get = AsyncMock(return_value=None)
@@ -604,14 +600,14 @@ class TestSupplyResearcherAgent:
                 user_id="test_user"
             )
             
-            with patch.object(agent, '_call_deep_research_api', new_callable=AsyncMock) as mock_api:
+            with patch.object(agent.research_engine, 'call_deep_research_api', new_callable=AsyncMock) as mock_api:
                 mock_api.return_value = {
                     "session_id": "test_cache_session",
                     "status": "completed",
                     "questions_answered": [],
                     "citations": []
                 }
-                with patch.object(agent, '_extract_supply_data', return_value=[]):
+                with patch.object(agent.data_extractor, 'extract_supply_data', return_value=[]):
                     await agent.execute(state, "test_run", False)
             
             # Should attempt to cache results if Redis is available
@@ -654,7 +650,7 @@ class TestSupplyResearcherAgent:
         )
         
         # Mock Deep Research API response
-        with patch.object(agent, '_call_deep_research_api', new_callable=AsyncMock) as mock_api:
+        with patch.object(agent.research_engine, 'call_deep_research_api', new_callable=AsyncMock) as mock_api:
             mock_api.return_value = {
                 "session_id": "admin_session_123",
                 "status": "completed",
@@ -738,11 +734,9 @@ class TestSupplyResearchIntegration:
         scheduler.add_schedule(custom_schedule)
         
         # Mock database and API calls
-        with patch('app.db.postgres.Database') as MockDatabase:
-            mock_db_instance = Mock()
-            mock_db_instance.get_db.return_value.__enter__ = Mock(return_value=mock_db)
-            mock_db_instance.get_db.return_value.__exit__ = Mock(return_value=None)
-            MockDatabase.return_value = mock_db_instance
+        with patch('app.db.postgres.Database') as mock_db_class:
+            mock_db_class.return_value.get_db.return_value.__enter__ = Mock(return_value=mock_db)
+            mock_db_class.return_value.get_db.return_value.__exit__ = Mock(return_value=None)
             
             with patch('app.services.supply_research_service.SupplyResearchService') as MockService:
                 mock_service = Mock()

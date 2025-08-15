@@ -80,7 +80,7 @@ class MockSupervisorAgent:
         self.should_fail = False
         self.failure_message = "Mock agent failure"
         
-    async def run(self, user_request: str, run_id: str, stream_updates: bool = False):
+    async def run(self, user_prompt: str, thread_id: str, user_id: str, run_id: str):
         """Mock agent run method.
         
         SIMULATES: The actual agent.run() without LLM calls
@@ -106,19 +106,18 @@ class MockSupervisorAgent:
             
             # Record run
             run_record = {
-                'user_request': user_request,
+                'user_prompt': user_prompt,
+                'thread_id': thread_id,
+                'user_id': user_id,
                 'run_id': run_id,
-                'stream_updates': stream_updates,
-                'timestamp': datetime.now(UTC),
-                'user_id': self.user_id,
-                'thread_id': self.thread_id
+                'timestamp': datetime.now(UTC)
             }
             self.run_history.append(run_record)
             
             self.state = AgentState.IDLE
             return {
                 'status': 'completed',
-                'response': f'Processed: {user_request}',
+                'response': f'Processed: {user_prompt}',
                 'run_id': run_id,
                 'execution_time': self.execution_time
             }
@@ -208,7 +207,7 @@ class AgentOrchestrator:
             del self.agents[user_id]
             self.active_agents -= 1
     
-    async def execute_agent_task(self, user_id: str, user_request: str, run_id: str, stream_updates: bool = False):
+    async def execute_agent_task(self, user_id: str, user_request: str, run_id: str, thread_id: str = None):
         """Execute task using orchestrated agent"""
         agent = await self.get_or_create_agent(user_id)
         
@@ -217,7 +216,7 @@ class AgentOrchestrator:
         
         try:
             start_time = datetime.now(UTC)
-            result = await agent.run(user_request, run_id, stream_updates)
+            result = await agent.run(user_request, thread_id or run_id, user_id, run_id)
             execution_time = (datetime.now(UTC) - start_time).total_seconds()
             
             # Update average execution time
@@ -309,6 +308,8 @@ class TestAgentServiceOrchestration:
         # Setup
         request_model = MagicMock()
         request_model.user_request = "Test user request"
+        request_model.id = "test_thread_123"
+        request_model.user_id = "test_user_456"
         run_id = "test_run_123"
         
         mock_supervisor.run = AsyncMock(return_value={'status': 'completed'})
@@ -318,7 +319,7 @@ class TestAgentServiceOrchestration:
         
         # Assert
         assert result == {'status': 'completed'}
-        mock_supervisor.run.assert_called_once_with("Test user request", run_id, True)
+        mock_supervisor.run.assert_called_once_with("Test user request", "test_thread_123", "test_user_456", run_id)
     
     @pytest.mark.asyncio
     async def test_agent_run_with_model_dump_fallback(self, agent_service, mock_supervisor):
@@ -327,6 +328,8 @@ class TestAgentServiceOrchestration:
         request_model = MagicMock()
         del request_model.user_request  # Remove user_request attribute
         request_model.model_dump.return_value = {'query': 'test query'}
+        request_model.id = "test_thread_456"
+        request_model.user_id = "test_user_789"
         run_id = "test_run_456"
         
         mock_supervisor.run = AsyncMock(return_value={'status': 'completed'})
@@ -335,7 +338,7 @@ class TestAgentServiceOrchestration:
         result = await agent_service.run(request_model, run_id)
         
         # Assert
-        mock_supervisor.run.assert_called_once_with("{'query': 'test query'}", run_id, False)
+        mock_supervisor.run.assert_called_once_with("{'query': 'test query'}", "test_thread_456", "test_user_789", run_id)
     
     @pytest.mark.asyncio
     async def test_websocket_message_handling_start_agent(self, agent_service):
@@ -452,12 +455,13 @@ class TestAgentServiceOrchestration:
         invalid_message = "invalid json {broken"
         
         with patch('app.ws_manager.manager.send_error') as mock_send_error:
-            mock_send_error = AsyncMock()
+            mock_send_error.return_value = None  # Configure the mock
             
             # Execute
             await agent_service.handle_websocket_message(user_id, invalid_message)
             
-            # Should handle JSON error gracefully
+            # Assert that send_error was called for JSON decode error
+            mock_send_error.assert_called_once_with(user_id, "Invalid message format")
     
     @pytest.mark.asyncio
     async def test_websocket_disconnect_handling(self, agent_service):
@@ -657,7 +661,7 @@ class TestAgentLifecycleManagement:
         
         # Start execution
         task = asyncio.create_task(
-            agent.run("test request", "run_state", False)
+            agent.run("test request", "run_state", "user1", "run_state")
         )
         
         # Wait briefly for state change
@@ -852,4 +856,4 @@ class TestAgentServiceBasic:
         # Assert
         assert result == {"status": "started"}
         expected_user_request = str(request_model.model_dump())
-        mock_supervisor.run.assert_called_once_with(expected_user_request, "test_run", False)
+        mock_supervisor.run.assert_called_once_with(expected_user_request, "test_req", "test_user", "test_run")

@@ -4,7 +4,8 @@ Handles provider-specific LLM initialization and configuration.
 Each function must be ≤8 lines as per module architecture requirements.
 """
 from typing import Any, Dict, Optional
-from app.schemas.llm_types import LLMProvider, GenerationConfig
+from app.schemas.llm_base_types import LLMProvider
+from app.schemas.llm_config_types import LLMConfig as GenerationConfig
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

@@ -446,7 +446,7 @@ on:
 
 jobs:
   real-service-tests:
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
     - uses: actions/checkout@v3

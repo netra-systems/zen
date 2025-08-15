@@ -83,7 +83,7 @@ async def update_ttl(ttl_seconds: int) -> Dict[str, Any]:
         "message": f"TTL updated to {ttl_seconds} seconds"
     }
 
-@router.get("/api/llm-cache/metrics")
+@router.get("/metrics")
 async def get_cache_metrics() -> Dict[str, Any]:
     """Get cache metrics for API testing"""
     return {
@@ -94,11 +94,12 @@ async def get_cache_metrics() -> Dict[str, Any]:
         "entries": 200
     }
 
-@router.delete("/api/llm-cache")
+@router.delete("/")
 async def clear_api_cache() -> Dict[str, Any]:
     """Clear cache for API testing"""
     return {"cleared": 50, "remaining": 0, "message": "Cache cleared"}
 
+@router.delete("/pattern/{pattern}")
 async def clear_cache_pattern(pattern: str) -> Dict[str, Any]:
     """Clear cache by pattern for testing"""
     return {"cleared": 10, "pattern": pattern}

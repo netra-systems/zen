@@ -131,20 +131,20 @@ class DataSubAgent(BaseSubAgent):
             start_time = end_time - timedelta(days=1)  # Default to last 24 hours
         return (start_time, end_time)
     
-    async def _perform_analysis(
-        self, primary_intent: str, user_id: int, workload_id: Optional[str],
-        metric_names: List[str], time_range: Tuple[datetime, datetime],
-        run_id: str, stream_updates: bool
-    ) -> Dict[str, Any]:
-        """Perform analysis based on intent"""
-        
+    def _setup_analysis_operations(self) -> Any:
+        """Setup analysis operations with required dependencies"""
         from .analysis_operations import AnalysisOperations
-        ops = AnalysisOperations(
-            self.query_builder, self.analysis_engine, 
+        return AnalysisOperations(
+            self.query_builder, self.analysis_engine,
             self.clickhouse_ops, self.redis_manager
         )
-        
-        data_result = {
+    
+    def _initialize_analysis_result(
+        self, primary_intent: str, user_id: int, workload_id: Optional[str],
+        metric_names: List[str], time_range: Tuple[datetime, datetime]
+    ) -> Dict[str, Any]:
+        """Initialize base analysis result structure"""
+        return {
             "analysis_type": primary_intent,
             "parameters": {
                 "user_id": user_id,
@@ -157,76 +157,125 @@ class DataSubAgent(BaseSubAgent):
             },
             "results": {}
         }
+    
+    async def _handle_optimization_intent(
+        self, ops: Any, user_id: int, workload_id: Optional[str],
+        time_range: Tuple[datetime, datetime], data_result: Dict[str, Any],
+        run_id: str, stream_updates: bool
+    ) -> None:
+        """Handle optimization and performance intent analysis"""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "analyzing",
+                "message": "Analyzing performance metrics..."
+            })
         
-        # Execute appropriate analyses
+        perf_analysis = await ops.analyze_performance_metrics(
+            user_id, workload_id, time_range
+        )
+        data_result["results"]["performance"] = perf_analysis
+        
+        await self._check_key_metric_anomalies(
+            ops, user_id, time_range, data_result
+        )
+    
+    async def _check_key_metric_anomalies(
+        self, ops: Any, user_id: int, time_range: Tuple[datetime, datetime],
+        data_result: Dict[str, Any]
+    ) -> None:
+        """Check for anomalies in key performance metrics"""
+        for metric in ["latency_ms", "error_rate"]:
+            anomalies = await ops.detect_anomalies(
+                user_id, metric, time_range
+            )
+            if anomalies.get("anomaly_count", 0) > 0:
+                data_result["results"][f"{metric}_anomalies"] = anomalies
+    
+    async def _handle_analysis_intent(
+        self, ops: Any, user_id: int, metric_names: List[str],
+        time_range: Tuple[datetime, datetime], data_result: Dict[str, Any],
+        run_id: str, stream_updates: bool
+    ) -> None:
+        """Handle analysis intent with correlation and usage patterns"""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "analyzing",
+                "message": "Performing correlation analysis..."
+            })
+        
+        correlations = await ops.analyze_correlations(
+            user_id, metric_names, time_range
+        )
+        data_result["results"]["correlations"] = correlations
+        
+        usage_patterns = await ops.analyze_usage_patterns(user_id)
+        data_result["results"]["usage_patterns"] = usage_patterns
+    
+    async def _handle_monitoring_intent(
+        self, ops: Any, user_id: int, metric_names: List[str],
+        time_range: Tuple[datetime, datetime], data_result: Dict[str, Any],
+        run_id: str, stream_updates: bool
+    ) -> None:
+        """Handle monitoring intent with anomaly detection"""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "analyzing",
+                "message": "Checking for anomalies..."
+            })
+        
+        for metric in metric_names:
+            anomalies = await ops.detect_anomalies(
+                user_id, metric, time_range, z_score_threshold=2.5
+            )
+            data_result["results"][f"{metric}_monitoring"] = anomalies
+    
+    async def _handle_default_intent(
+        self, ops: Any, user_id: int, workload_id: Optional[str],
+        time_range: Tuple[datetime, datetime], data_result: Dict[str, Any],
+        run_id: str, stream_updates: bool
+    ) -> None:
+        """Handle default comprehensive analysis"""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "analyzing",
+                "message": "Performing comprehensive analysis..."
+            })
+        
+        perf_analysis = await ops.analyze_performance_metrics(
+            user_id, workload_id, time_range
+        )
+        data_result["results"]["performance"] = perf_analysis
+        
+        usage_patterns = await ops.analyze_usage_patterns(user_id, 7)
+        data_result["results"]["usage_patterns"] = usage_patterns
+    
+    async def _perform_analysis(
+        self, primary_intent: str, user_id: int, workload_id: Optional[str],
+        metric_names: List[str], time_range: Tuple[datetime, datetime],
+        run_id: str, stream_updates: bool
+    ) -> Dict[str, Any]:
+        """Perform analysis based on intent"""
+        ops = self._setup_analysis_operations()
+        data_result = self._initialize_analysis_result(
+            primary_intent, user_id, workload_id, metric_names, time_range
+        )
+        
         if primary_intent in ["optimize", "performance"]:
-            if stream_updates:
-                await self._send_update(run_id, {
-                    "status": "analyzing",
-                    "message": "Analyzing performance metrics..."
-                })
-            
-            perf_analysis = await ops.analyze_performance_metrics(
-                user_id, workload_id, time_range
+            await self._handle_optimization_intent(
+                ops, user_id, workload_id, time_range, data_result, run_id, stream_updates
             )
-            data_result["results"]["performance"] = perf_analysis
-            
-            # Check for anomalies in key metrics
-            for metric in ["latency_ms", "error_rate"]:
-                anomalies = await ops.detect_anomalies(
-                    user_id, metric, time_range
-                )
-                if anomalies.get("anomaly_count", 0) > 0:
-                    data_result["results"][f"{metric}_anomalies"] = anomalies
-        
         elif primary_intent == "analyze":
-            if stream_updates:
-                await self._send_update(run_id, {
-                    "status": "analyzing",
-                    "message": "Performing correlation analysis..."
-                })
-            
-            # Correlation analysis
-            correlations = await ops.analyze_correlations(
-                user_id, metric_names, time_range
+            await self._handle_analysis_intent(
+                ops, user_id, metric_names, time_range, data_result, run_id, stream_updates
             )
-            data_result["results"]["correlations"] = correlations
-            
-            # Usage patterns
-            usage_patterns = await ops.analyze_usage_patterns(user_id)
-            data_result["results"]["usage_patterns"] = usage_patterns
-        
         elif primary_intent == "monitor":
-            if stream_updates:
-                await self._send_update(run_id, {
-                    "status": "analyzing",
-                    "message": "Checking for anomalies..."
-                })
-            
-            # Anomaly detection for all metrics
-            for metric in metric_names:
-                anomalies = await ops.detect_anomalies(
-                    user_id, metric, time_range, z_score_threshold=2.5
-                )
-                data_result["results"][f"{metric}_monitoring"] = anomalies
-        
-        else:
-            # Default: comprehensive analysis
-            if stream_updates:
-                await self._send_update(run_id, {
-                    "status": "analyzing",
-                    "message": "Performing comprehensive analysis..."
-                })
-            
-            # Performance metrics
-            perf_analysis = await ops.analyze_performance_metrics(
-                user_id, workload_id, time_range
+            await self._handle_monitoring_intent(
+                ops, user_id, metric_names, time_range, data_result, run_id, stream_updates
             )
-            data_result["results"]["performance"] = perf_analysis
-            
-            # Usage patterns
-            usage_patterns = await ops.analyze_usage_patterns(user_id, 7)
-            data_result["results"]["usage_patterns"] = usage_patterns
+        else:
+            await self._handle_default_intent(
+                ops, user_id, workload_id, time_range, data_result, run_id, stream_updates
+            )
         
         return data_result
     

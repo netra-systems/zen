@@ -3,19 +3,9 @@ Configuration and optimization context types for LLM operations.
 Following Netra conventions with strong typing.
 """
 
-from typing import Dict, Any, Optional, List, Union, Literal, TYPE_CHECKING
+from typing import Dict, Any, Optional, List, Union, Literal
 from pydantic import BaseModel, Field, ConfigDict
-
-if TYPE_CHECKING:
-    from app.schemas.llm_types import LLMProvider, LLMModel
-else:
-    # Import the actual types for runtime resolution
-    try:
-        from app.schemas.llm_types import LLMProvider, LLMModel
-    except ImportError:
-        # If imports fail, define placeholder types
-        LLMProvider = 'LLMProvider'
-        LLMModel = 'LLMModel'
+from app.schemas.llm_base_types import LLMProvider, LLMModel
 
 
 class LLMConfig(BaseModel):

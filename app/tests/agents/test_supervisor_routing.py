@@ -54,7 +54,7 @@ class TestSupervisorConsolidatedAgentRouting:
         
         assert result.success
         assert_agent_called(supervisor, "triage")
-        assert result.state.triage_result["message_type"] == "optimization_query"
+        assert result.state.triage_result.category == "optimization_query"
     
     @pytest.mark.asyncio
     async def test_routes_to_optimization_for_ai_workloads(self):
@@ -103,7 +103,7 @@ class TestSupervisorConsolidatedAgentRouting:
         
         assert result.success
         assert_agent_called(supervisor, "data")
-        assert result.state.data_result["analysis"]["metrics"]["accuracy"] == 0.95
+        assert result.state.data_result.confidence_score == 0.95
     
     @pytest.mark.asyncio
     async def test_routing_with_conditional_pipeline(self):
@@ -157,7 +157,7 @@ class TestSupervisorErrorCascadePrevention:
         # But data agent should still be callable
         data_result = await supervisor._route_to_agent(state, context, "data")
         assert data_result.success
-        assert data_result.state.data_result["processed"]
+        assert data_result.state.data_result.confidence_score > 0
     
     @pytest.mark.asyncio
     async def test_retry_mechanism_on_transient_failures(self):
@@ -175,7 +175,7 @@ class TestSupervisorErrorCascadePrevention:
         agent = supervisor.agents.get("triage")
         assert result.success
         assert agent.execute.call_count == 3
-        assert result.state.triage_result["success"]
+        assert result.state.triage_result.category == "success"
     
     @pytest.mark.asyncio
     async def test_circuit_breaker_after_multiple_failures(self):

@@ -1,80 +1,49 @@
 """
 Strong type definitions for LLM operations following Netra conventions.
-Core types and base models.
+Main types module that aggregates and extends base types.
 """
 
 from typing import Dict, Any, Optional, List, Union, TypeVar, Generic
 from datetime import datetime
-from enum import Enum
 from abc import ABC, abstractmethod
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 import uuid
 
+# Import base types (no circular dependencies)
+from app.schemas.llm_base_types import (
+    LLMProvider, LLMModel, LLMRole, TokenUsage, LLMMessage, 
+    LLMError, LLMHealthCheck, LLMConfigInfo, LLMManagerStats
+)
 
-class LLMProvider(str, Enum):
-    """Supported LLM providers"""
-    OPENAI = "openai"
-    ANTHROPIC = "anthropic"
-    AZURE_OPENAI = "azure_openai"
-    BEDROCK = "bedrock"
-    VERTEXAI = "vertexai"
-    GOOGLE = "google"
-    COHERE = "cohere"
-    HUGGINGFACE = "huggingface"
-    LOCAL = "local"
+T = TypeVar('T', bound=BaseModel)
 
 
-class LLMModel(str, Enum):
-    """Available LLM models"""
-    GPT_4 = "gpt-4"
-    GPT_4_TURBO = "gpt-4-turbo"
-    GPT_35_TURBO = "gpt-3.5-turbo"
-    CLAUDE_3_OPUS = "claude-3-opus"
-    CLAUDE_3_SONNET = "claude-3-sonnet"
-    CLAUDE_3_HAIKU = "claude-3-haiku"
-    CLAUDE_35_SONNET = "claude-3.5-sonnet"
-    GEMINI_PRO = "gemini-pro"
-    GEMINI_ULTRA = "gemini-ultra"
-    GEMINI_25_PRO = "gemini-2.5-pro"
-    GEMINI_25_FLASH = "gemini-2.5-flash"
-    GEMINI_20_FLASH = "gemini-2.0-flash"
-    LLAMA_3_70B = "llama-3-70b"
-    LLAMA_3_8B = "llama-3-8b"
-    MISTRAL_LARGE = "mistral-large"
-    MIXTRAL_8X7B = "mixtral-8x7b"
+class LLMResponse(BaseModel):
+    """Response from LLM generation"""
+    content: str = Field(description="Generated content")
+    provider: LLMProvider
+    model: str = Field(description="Model used for generation")
+    usage: Optional[TokenUsage] = Field(default=None, description="Token usage information")
+    response_time_ms: float = Field(default=0.0, description="Response time in milliseconds")
+    cached: bool = Field(default=False, description="Whether response was cached")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
-class LLMRole(str, Enum):
-    """Message roles in LLM conversations"""
-    SYSTEM = "system"
-    USER = "user"
-    ASSISTANT = "assistant"
-    FUNCTION = "function"
-    TOOL = "tool"
+class GenerationConfig(BaseModel):
+    """Configuration for LLM generation operations"""
+    num_traces: int = Field(default=1000, ge=1, description="Number of traces to generate")
+    num_logs: Optional[int] = Field(default=None, ge=1, description="Number of logs to generate (defaults to num_traces)")
+    workload_distribution: Dict[str, float] = Field(default_factory=dict, description="Distribution of workload types")
+    time_window_hours: int = Field(default=24, ge=1, le=8760, description="Time window in hours")
+    domain_focus: str = Field(default="general", description="Domain focus for generation")
+    error_rate: float = Field(default=0.01, ge=0.0, le=1.0, description="Error rate for generation")
+    corpus_id: Optional[str] = Field(default=None, description="Corpus ID to use for generation")
+    batch_size: int = Field(default=100, ge=1, description="Batch size for processing")
 
-
-class TokenUsage(BaseModel):
-    """Token usage statistics"""
-    prompt_tokens: int = 0
-    completion_tokens: int = 0
-    total_tokens: int = 0
-    cached_tokens: Optional[int] = None
-    
     @property
-    def cost_estimate(self) -> Optional[float]:
-        """Estimate cost based on token usage"""
-        # This would need provider-specific pricing
-        return None
-
-
-class LLMMessage(BaseModel):
-    """Strongly typed LLM message"""
-    role: LLMRole
-    content: str
-    name: Optional[str] = None
-    function_call: Optional[Dict[str, Union[str, dict]]] = None
-    tool_calls: Optional[List[Dict[str, Union[str, dict]]]] = None
-    metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
+    def effective_num_logs(self) -> int:
+        """Get effective number of logs (num_logs or num_traces)"""
+        return self.num_logs if self.num_logs is not None else self.num_traces
 
 
 class LLMMetrics(BaseModel):
@@ -104,20 +73,6 @@ class LLMProviderStatus(BaseModel):
     error_message: Optional[str] = None
     rate_limit_remaining: Optional[int] = None
     rate_limit_reset: Optional[datetime] = None
-
-
-class LLMError(BaseModel):
-    """Structured LLM error"""
-    error_type: str  # "api", "rate_limit", "timeout", "validation", "unknown"
-    message: str
-    provider: Optional[LLMProvider] = None
-    model: Optional[str] = None
-    request_id: Optional[str] = None
-    retry_after: Optional[int] = None  # Seconds to wait before retry
-    details: Dict[str, Any] = Field(default_factory=dict)
-
-
-T = TypeVar('T', bound=BaseModel)
 
 
 class LLMInstance(ABC, Generic[T]):
@@ -166,92 +121,95 @@ class LLMValidationError(Exception):
     pass
 
 
-class LLMHealthCheck(BaseModel):
-    """Health check result for LLM"""
-    healthy: bool
-    provider: str
-    model: str
+# Note: Imports from other LLM schema modules are handled in app.llm.schemas 
+# to avoid circular dependencies. This module contains only core types and interfaces.
 
+# Aliases for backward compatibility - these will be properly defined when imported
 
-class LLMConfigInfo(BaseModel):
-    """Information about LLM configuration"""
-    provider: str
-    model_name: str
-    api_key_configured: bool
-    generation_config: 'LLMConfig'
-    enabled: bool = True
+# Context classes for different optimization scenarios
+class BaseContext(BaseModel):
+    """Base context for optimization scenarios"""
+    timestamp: datetime = Field(default_factory=datetime.now)
+    user_id: Optional[str] = None
+    session_id: Optional[str] = None
 
+class CostOptimizationContext(BaseContext):
+    """Context for cost optimization scenarios"""
+    current_cost: float = Field(default=0.0, description="Current cost")
+    target_reduction: float = Field(default=0.3, description="Target cost reduction")
 
-class LLMManagerStats(BaseModel):
-    """Statistics for LLM Manager"""
-    total_requests: int = 0
-    cache_hits: int = 0
-    cache_misses: int = 0
-    total_errors: int = 0
-    avg_response_time_ms: float = 0.0
+class LatencyOptimizationContext(BaseContext):
+    """Context for latency optimization scenarios"""
+    current_latency_ms: float = Field(default=100.0, description="Current latency in ms")
+    target_latency_ms: float = Field(default=50.0, description="Target latency in ms")
 
+class CapacityPlanningContext(BaseContext):
+    """Context for capacity planning scenarios"""
+    current_capacity: int = Field(default=1000, description="Current capacity")
+    projected_growth: float = Field(default=1.5, description="Projected growth factor")
 
-# Import types from split modules to maintain backward compatibility
-from app.schemas.llm_request_types import (
-    LLMRequest,
-    BatchLLMRequest,
-    StructuredOutputSchema,
-    LLMFunction,
-    LLMTool
-)
+class FunctionOptimizationContext(BaseContext):
+    """Context for function optimization scenarios"""
+    function_name: str = Field(default="", description="Function to optimize")
+    performance_target: str = Field(default="faster", description="Performance target")
 
-from app.schemas.llm_response_types import (
-    LLMResponse,
-    LLMStreamChunk,
-    BatchLLMResponse,
-    LLMCache,
-    MockLLMResponse
-)
+class ModelSelectionContext(BaseContext):
+    """Context for model selection scenarios"""
+    use_case: str = Field(default="general", description="Use case")
+    requirements: List[str] = Field(default_factory=list, description="Requirements")
 
-from app.schemas.llm_config_types import (
-    LLMConfig,
-    LLMManagerConfig,
-    CostMetrics,
-    FeatureMetrics,
-    CostOptimizationContext,
-    LatencyMetrics,
-    InfrastructureConfig,
-    LatencyOptimizationContext,
-    UsageMetrics,
-    RateLimitConfig,
-    CapacityPlanningContext,
-    FunctionMetrics,
-    FunctionOptimizationContext,
-    ModelInfo,
-    EvaluationMetrics,
-    WorkloadCharacteristics,
-    ModelSelectionContext,
-    CacheConfiguration,
-    AuditContext,
-    OptimizationObjectives,
-    OptimizationConstraints,
-    CurrentSystemState,
-    MultiObjectiveContext,
-    AgentTool,
-    MigrationCriteria,
-    ToolMigrationContext,
-    ComparisonMetrics,
-    MetricsComparison,
-    RollbackAnalysisContext,
-    SystemInfo,
-    SystemMetrics,
-    DefaultContext
-)
+class AuditContext(BaseContext):
+    """Context for audit scenarios"""
+    audit_type: str = Field(default="compliance", description="Type of audit")
+    scope: str = Field(default="full", description="Audit scope")
 
-# Aliases for backward compatibility
-GenerationConfig = LLMConfig  # Alias for backward compatibility
-LLMCacheEntry = LLMCache  # Alias
-StructuredLLMResponse = LLMResponse  # Structured responses use same base
+class MultiObjectiveContext(BaseContext):
+    """Context for multi-objective optimization"""
+    objectives: List[str] = Field(default_factory=list, description="Optimization objectives")
 
-from app.schemas.llm_response_types import (
-    E2ETestInfrastructure,
-    E2ETestResult
-)
+class ToolMigrationContext(BaseContext):
+    """Context for tool migration scenarios"""
+    source_tool: str = Field(default="", description="Source tool")
+    target_tool: str = Field(default="", description="Target tool")
 
-# Models will be rebuilt by importing the rebuilder module when needed
-# This ensures proper resolution of forward references
+class RollbackAnalysisContext(BaseContext):
+    """Context for rollback analysis"""
+    deployment_id: str = Field(default="", description="Deployment ID")
+    issues: List[str] = Field(default_factory=list, description="Issues found")
+
+class DefaultContext(BaseContext):
+    """Default context for general scenarios"""
+    scenario: str = Field(default="general", description="Scenario type")
+
+# Metrics classes
+class CostMetrics(BaseModel):
+    """Metrics for cost tracking"""
+    total_cost: float = Field(default=0.0)
+    cost_per_request: float = Field(default=0.0)
+    cost_reduction: float = Field(default=0.0)
+
+class FeatureMetrics(BaseModel):
+    """Metrics for feature tracking"""
+    feature_count: int = Field(default=0)
+    feature_quality: float = Field(default=0.0)
+
+class LatencyMetrics(BaseModel):
+    """Metrics for latency tracking"""
+    avg_latency_ms: float = Field(default=0.0)
+    p95_latency_ms: float = Field(default=0.0)
+    p99_latency_ms: float = Field(default=0.0)
+
+# E2E Test Infrastructure classes
+class E2ETestInfrastructure(BaseModel):
+    """Infrastructure for E2E testing"""
+    test_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    environment: str = Field(default="test")
+    services: List[str] = Field(default_factory=list)
+
+class E2ETestResult(BaseModel):
+    """Result of an E2E test"""
+    test_id: str
+    passed: bool = Field(default=False)
+    duration_ms: float = Field(default=0.0)
+    error: Optional[str] = None
+# through the main llm/schemas.py module

@@ -296,8 +296,8 @@ class TestCaching:
         triage_agent.llm_manager.ask_llm.assert_not_called()
         
         # Check result uses cached data
-        assert sample_state.triage_result["category"] == "Cost Optimization"
-        assert sample_state.triage_result["metadata"]["cache_hit"] == True
+        assert sample_state.triage_result.category == "Cost Optimization"
+        assert sample_state.triage_result.metadata.cache_hit == True
     
     @pytest.mark.asyncio
     async def test_cache_miss_and_store(self, triage_agent, sample_state, mock_redis_manager):
@@ -323,8 +323,8 @@ class TestCaching:
         mock_redis_manager.set.assert_called_once()
         
         # Check result
-        assert sample_state.triage_result["category"] == "Cost Optimization"
-        assert sample_state.triage_result["metadata"]["cache_hit"] == False
+        assert sample_state.triage_result.category == "Cost Optimization"
+        assert sample_state.triage_result.metadata.cache_hit == False
 
 
 class TestExecuteMethod:
@@ -343,10 +343,10 @@ class TestExecuteMethod:
         await triage_agent.execute(sample_state, "test_run", stream_updates=False)
         
         assert sample_state.triage_result != None
-        assert sample_state.triage_result["category"] == "Cost Optimization"
-        assert sample_state.triage_result["priority"] == "high"
-        assert "metadata" in sample_state.triage_result
-        assert "extracted_entities" in sample_state.triage_result
+        assert sample_state.triage_result.category == "Cost Optimization"
+        assert sample_state.triage_result.priority == Priority.HIGH
+        assert hasattr(sample_state.triage_result, 'metadata')
+        assert hasattr(sample_state.triage_result, 'extracted_entities')
         assert "user_intent" in sample_state.triage_result
         assert "tool_recommendations" in sample_state.triage_result
     
@@ -363,8 +363,8 @@ class TestExecuteMethod:
         
         # Should have called LLM twice (initial + 1 retry)
         assert triage_agent.llm_manager.ask_llm.call_count == 2
-        assert sample_state.triage_result["category"] == "Cost Optimization"
-        assert sample_state.triage_result["metadata"]["retry_count"] == 1
+        assert sample_state.triage_result.category == "Cost Optimization"
+        assert sample_state.triage_result.metadata.retry_count == 1
     
     @pytest.mark.asyncio
     async def test_execution_with_fallback(self, triage_agent, sample_state):
@@ -379,8 +379,8 @@ class TestExecuteMethod:
         
         # Should use fallback
         assert sample_state.triage_result != None
-        assert sample_state.triage_result["metadata"]["fallback_used"] == True
-        assert sample_state.triage_result["confidence_score"] == 0.5
+        assert sample_state.triage_result.metadata.fallback_used == True
+        assert sample_state.triage_result.confidence_score == 0.5
     
     @pytest.mark.asyncio
     async def test_execution_with_websocket_updates(self, triage_agent, sample_state):
@@ -418,7 +418,9 @@ class TestEntryConditions:
         state = DeepAgentState(user_request="a")  # Too short
         result = await triage_agent.check_entry_conditions(state, "test_run")
         assert result == False
-        assert state.triage_result["error"] == "Invalid request"
+        # Check validation status instead of error field
+        assert hasattr(state.triage_result, 'validation_status')
+        assert not state.triage_result.validation_status.is_valid
 
 
 class TestPydanticModels:

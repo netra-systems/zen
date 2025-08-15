@@ -2,10 +2,10 @@
 
 from typing import TYPE_CHECKING
 
-# Import only models first to avoid circular dependencies
-from .models import DataAnalysisResponse, AnomalyDetectionResponse
-# Delay import of agent to avoid circular dependency with base.py
-# from .agent import DataSubAgent  # Import directly when needed
+# Import shared models from central location
+from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+# Import agent class - circular dependency resolved by moving shared models
+from .agent import DataSubAgent
 from .query_builder import QueryBuilder
 from .analysis_engine import AnalysisEngine
 from .clickhouse_operations import ClickHouseOperations
@@ -14,24 +14,25 @@ from .metrics_analyzer import MetricsAnalyzer
 from .performance_data_processor import PerformanceDataProcessor
 from .usage_pattern_processor import UsagePatternProcessor
 
-# Import ClickHouse initialization function
+# Import ClickHouse initialization function and client
 from app.db.clickhouse_init import create_workload_events_table_if_missing
+from app.db.clickhouse import get_clickhouse_client
 
-# Import ExecutionEngine only for type checking to avoid circular imports
-if TYPE_CHECKING:
-    from .execution_engine import ExecutionEngine
+# Import ExecutionEngine - no longer circular dependency
+from .execution_engine import ExecutionEngine
 
 __all__ = [
-    # 'DataSubAgent',  # Removed to avoid circular import - import directly from .agent when needed
-    'DataAnalysisResponse',
+    'DataSubAgent',
+    'DataAnalysisResponse', 
     'AnomalyDetectionResponse',
     'QueryBuilder',
     'AnalysisEngine',
     'ClickHouseOperations',
     'DataOperations',
-    # 'ExecutionEngine',  # Removed to avoid circular import - import directly from .execution_engine when needed
+    'ExecutionEngine',
     'MetricsAnalyzer',
     'PerformanceDataProcessor',
     'UsagePatternProcessor',
-    'create_workload_events_table_if_missing'
+    'create_workload_events_table_if_missing',
+    'get_clickhouse_client'
 ]

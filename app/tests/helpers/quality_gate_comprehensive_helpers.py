@@ -154,8 +154,8 @@ def setup_quality_service_with_large_cache():
 def setup_validation_error_patch(quality_service):
     """Setup patch for validation error testing"""
     return patch.object(
-        quality_service,
-        '_calculate_metrics',
+        quality_service.metrics_calculator,
+        'calculate_metrics',
         side_effect=ValueError("Calculation error")
     )
 
@@ -163,8 +163,8 @@ def setup_validation_error_patch(quality_service):
 def setup_threshold_error_patch(quality_service):
     """Setup patch for threshold checking error"""
     return patch.object(
-        quality_service,
-        '_check_thresholds',
+        quality_service.validator,
+        'check_thresholds',
         side_effect=KeyError("Missing threshold")
     )
 

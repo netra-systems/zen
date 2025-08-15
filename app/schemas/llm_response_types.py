@@ -3,24 +3,14 @@ Response-related type definitions for LLM operations.
 Following Netra conventions with strong typing.
 """
 
-from typing import Dict, Any, Optional, List, Union, TYPE_CHECKING
+from typing import Dict, Any, Optional, List, Union, ForwardRef
 from datetime import datetime
 from pydantic import BaseModel, Field
 import uuid
+from app.schemas.llm_base_types import LLMProvider, TokenUsage
 
-if TYPE_CHECKING:
-    from app.schemas.llm_types import LLMProvider, TokenUsage
-    from app.schemas.llm_request_types import LLMRequest
-else:
-    # Import the actual types for runtime resolution
-    try:
-        from app.schemas.llm_types import LLMProvider, TokenUsage
-        from app.schemas.llm_request_types import LLMRequest
-    except ImportError:
-        # If imports fail, define placeholder types
-        LLMProvider = 'LLMProvider'
-        TokenUsage = 'TokenUsage'
-        LLMRequest = 'LLMRequest'
+# Forward reference for LLMRequest to avoid circular imports
+LLMRequest = ForwardRef('LLMRequest')
 
 
 class LLMResponse(BaseModel):

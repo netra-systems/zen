@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-15T07:46:30.511233",
+  "timestamp": "2025-08-15T08:33:24.616769",
   "level": "agents",
   "metrics": {
     "total_tests": 0,
@@ -10,9 +10,9 @@
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 4.4638872146606445,
+      "duration": 4.893658876419067,
       "exit_code": 4,
-      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 4\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/agents/test_data_sub_agent.py tests/test_actions_sub_agent.py -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 3.82s\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:30: in <module>\n    from app.core.app_factory import create_app\napp\\core\\app_factory.py:9: in <module>\n    from app.core.lifespan_manager import lifespan\napp\\core\\lifespan_manager.py:9: in <module>\n    from app.shutdown import run_complete_shutdown\napp\\shutdown.py:12: in <module>\n    from app.ws_manager import manager as websocket_manager\napp\\ws_manager.py:290: in <module>\n    manager = WebSocketManager()\n              ^^^^^^^^^^^^^^^^^^\napp\\ws_manager.py:44: in __new__\n    cls._instance._initialize_managers()\napp\\ws_manager.py:52: in _initialize_managers\n    self._connection_manager = WebSocketConnectionManager(self.core)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: WebSocketConnectionManager.__init__() missing 1 required positional argument: 'url'\n",
+      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 4\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/agents/test_data_sub_agent.py tests/test_actions_sub_agent.py -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 4.15s\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:32: in <module>\n    app = create_app()\n          ^^^^^^^^^^^^\napp\\core\\app_factory.py:144: in create_app\n    register_api_routes(app)\napp\\core\\app_factory.py:62: in register_api_routes\n    _import_and_register_routes(app)\napp\\core\\app_factory.py:67: in _import_and_register_routes\n    route_modules = _import_route_modules()\n                    ^^^^^^^^^^^^^^^^^^^^^^^\napp\\core\\app_factory.py:74: in _import_route_modules\n    from app.routes import (\napp\\routes\\demo.py:7: in <module>\n    from app.services.demo_service import DemoService, get_demo_service\napp\\services\\demo_service.py:6: in <module>\n    from app.services.demo import (\napp\\services\\demo\\__init__.py:3: in <module>\n    from .demo_service import DemoService, get_demo_service\napp\\services\\demo\\demo_service.py:6: in <module>\n    from app.services.agent_service import AgentService\napp\\services\\agent_service.py:16: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:27: in <module>\n    from app.agents.supervisor.execution_context import PipelineStep\napp\\agents\\supervisor\\__init__.py:4: in <module>\n    from .execution_engine import ExecutionEngine\napp\\agents\\supervisor\\execution_engine.py:24: in <module>\n    class ExecutionEngine:\napp\\agents\\supervisor\\execution_engine.py:237: in ExecutionEngine\n    def _create_fallback_config(self) -> FallbackConfig:\n                                         ^^^^^^^^^^^^^^\nE   NameError: name 'FallbackConfig' is not defined\n",
       "test_counts": {
         "total": 0,
         "passed": 0,
@@ -54,8 +54,8 @@
     },
     "overall": {
       "status": "failed",
-      "start_time": 1755269186.0438557,
-      "end_time": 1755269190.510257
+      "start_time": 1755271999.7231104,
+      "end_time": 1755272004.6167693
     }
   }
 }

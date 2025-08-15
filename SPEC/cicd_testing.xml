@@ -99,8 +99,7 @@
     <runner_types>
       <runner type="github_hosted">
         <use_for>smoke,unit</use_for>
-        <specs>ubuntu-latest</specs>
-        <cost>free</cost>
+        <specs>warp-custom-default</specs>
       </runner>
       
       <runner type="gcp_spot">

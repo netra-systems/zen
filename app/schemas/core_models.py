@@ -15,7 +15,7 @@ Usage:
 """
 
 from typing import Dict, List, Optional, Union, Any
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 import uuid
 
@@ -70,7 +70,7 @@ class MessageMetadata(BaseModel):
 class Message(BaseModel):
     """Unified Message model - single source of truth."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     content: str
     type: MessageType
     thread_id: Optional[str] = None
@@ -83,9 +83,6 @@ class Message(BaseModel):
     attachments: Optional[List[Dict[str, Any]]] = None
     
     model_config = ConfigDict(
-        json_encoders={
-            datetime: lambda v: v.isoformat() if v else None
-        }
     )
 
 
@@ -111,9 +108,6 @@ class Thread(BaseModel):
     participants: Optional[List[str]] = None
     
     model_config = ConfigDict(
-        json_encoders={
-            datetime: lambda v: v.isoformat() if v else None
-        }
     )
 
 

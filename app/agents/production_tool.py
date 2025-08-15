@@ -31,7 +31,7 @@ class ProductionTool:
             response = await self.execute(kwargs, None, None)
             return ToolExecuteResponse(**response)
         
-        return await self.reliability.execute(_execute_with_reliability)
+        return await self.reliability.execute_safely(_execute_with_reliability, "arun")
     
     async def execute(
         self,
@@ -51,7 +51,7 @@ class ProductionTool:
         """Execute tool with reliability wrapper"""
         async def _execute_tool():
             return await self._execute_internal(parameters, state, run_id)
-        return await self.reliability.execute(_execute_tool)
+        return await self.reliability.execute_safely(_execute_tool, "execute")
     
     def _create_execution_error_response(self, error: Exception, run_id: Optional[str]) -> Dict[str, Any]:
         """Create error response for execution failure"""
@@ -98,3 +98,34 @@ class ProductionTool:
             "error": f"Tool '{self.name}' is not implemented. Available tools: synthetic data tools, corpus tools",
             "metadata": {"tool": self.name, "status": "not_implemented"}
         }
+    
+    # Direct methods for test compatibility
+    async def _execute_synthetic_data_batch(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute synthetic data batch generation (test compatibility method)"""
+        from app.agents.production_tool_synthetic import SyntheticToolExecutor
+        executor = SyntheticToolExecutor("generate_synthetic_data_batch")
+        return await executor._execute_synthetic_data_batch(parameters)
+    
+    async def _execute_validate_synthetic_data(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute synthetic data validation (test compatibility method)"""
+        from app.agents.production_tool_synthetic import SyntheticToolExecutor
+        executor = SyntheticToolExecutor("validate_synthetic_data")
+        return await executor._execute_validate_synthetic_data(parameters)
+    
+    async def _execute_store_synthetic_data(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute synthetic data storage (test compatibility method)"""
+        from app.agents.production_tool_synthetic import SyntheticToolExecutor
+        executor = SyntheticToolExecutor("store_synthetic_data")
+        return await executor._execute_store_synthetic_data(parameters)
+    
+    async def _execute_create_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute corpus creation (test compatibility method)"""
+        from app.agents.production_tool_corpus import CorpusToolExecutor
+        executor = CorpusToolExecutor("create_corpus")
+        return await executor._execute_create_corpus(parameters)
+    
+    async def _execute_search_corpus(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute corpus search (test compatibility method)"""
+        from app.agents.production_tool_corpus import CorpusToolExecutor
+        executor = CorpusToolExecutor("search_corpus")
+        return await executor._execute_search_corpus(parameters)

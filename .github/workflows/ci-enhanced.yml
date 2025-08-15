@@ -54,7 +54,7 @@ jobs:
   
   preflight-checks:
     name: 🔍 Pre-flight Checks
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
@@ -133,7 +133,7 @@ jobs:
     name: 🏗️ Architecture Compliance
     needs: preflight-checks
     if: needs.preflight-checks.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     
     steps:
@@ -202,7 +202,7 @@ jobs:
     name: 🔒 Security Scanning
     needs: [preflight-checks, architecture-compliance]
     if: needs.preflight-checks.outputs.security_required == 'true'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: ${{ fromJson(env.SECURITY_SCAN_TIMEOUT) }}
     
     steps:
@@ -344,7 +344,7 @@ jobs:
   coverage-analysis:
     name: 📊 Coverage Analysis
     needs: [preflight-checks, run-tests]
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     
     steps:
@@ -443,7 +443,7 @@ jobs:
     name: ⚡ Performance Tests
     needs: [preflight-checks, run-tests]
     if: needs.preflight-checks.outputs.performance_required == 'true'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: ${{ fromJson(env.PERFORMANCE_TEST_TIMEOUT) }}
     
     steps:
@@ -590,7 +590,7 @@ jobs:
     name: ✅ Staging Validation
     needs: [deploy-staging]
     if: needs.deploy-staging.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 15
     
     steps:
@@ -666,7 +666,7 @@ jobs:
       always() && 
       contains(needs.*.result, 'failure') &&
       needs.preflight-checks.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: ${{ fromJson(env.ROLLBACK_TIMEOUT) }}
     
     steps:
@@ -778,7 +778,7 @@ jobs:
       github.ref == 'refs/heads/main' &&
       needs.run-tests.result == 'success' &&
       needs.staging-validation.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     
     steps:
@@ -818,7 +818,7 @@ jobs:
       production-smoke-tests
     ]
     if: always() && needs.preflight-checks.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: Calculate pipeline success rate

@@ -212,10 +212,9 @@ class RealServiceTestMetrics:
         
         return "\n".join(report)
     
-    def _generate_html_report(self) -> str:
-        """Generate HTML report with charts"""
-        html = []
-        html.append("""
+    def _build_html_header(self) -> str:
+        """Build HTML header with styling"""
+        return """
 <!DOCTYPE html>
 <html>
 <head>
@@ -242,71 +241,99 @@ class RealServiceTestMetrics:
 <body>
     <div class="container">
         <h1>Real Service Test Report</h1>
-        """)
-        
-        # Summary
-        html.append(f"<p><strong>Generated:</strong> {self.metrics['end_time']}</p>")
-        html.append(f"<p><strong>Duration:</strong> {self.metrics['duration']:.2f} seconds</p>")
-        
-        # Test Results
+        """
+    
+    def _build_summary_section(self) -> str:
+        """Build summary section with timing info"""
+        return f"""<p><strong>Generated:</strong> {self.metrics['end_time']}</p>
+<p><strong>Duration:</strong> {self.metrics['duration']:.2f} seconds</p>"""
+    
+    def _build_test_results_section(self) -> str:
+        """Build test results section with progress bar"""
         total_tests = sum(len(tests) for tests in self.metrics["test_results"].values())
-        passed_tests = sum(1 for tests in self.metrics["test_results"].values() 
-                          for test in tests if test["passed"])
+        passed_tests = sum(1 for tests in self.metrics["test_results"].values() for test in tests if test["passed"])
         pass_rate = (passed_tests/total_tests*100) if total_tests > 0 else 0
-        
-        html.append("<h2>Test Results</h2>")
-        html.append('<div class="metric-card">')
-        html.append(f'<p>Total Tests: {total_tests}</p>')
-        html.append(f'<p class="success">Passed: {passed_tests}</p>')
-        html.append(f'<p class="failure">Failed: {total_tests - passed_tests}</p>')
-        html.append('<div class="progress-bar">')
-        html.append(f'<div class="progress-fill" style="width: {pass_rate}%">{pass_rate:.1f}% Pass Rate</div>')
-        html.append('</div>')
-        html.append('</div>')
-        
-        # LLM Usage Chart
-        if self.metrics["llm_calls"]:
-            html.append("<h2>LLM API Usage</h2>")
-            html.append('<canvas id="llmChart" width="400" height="200"></canvas>')
-            html.append("<script>")
-            html.append("new Chart(document.getElementById('llmChart'), {")
-            html.append("  type: 'bar',")
-            html.append("  data: {")
-            html.append(f"    labels: {json.dumps(list(self.metrics['llm_calls'].keys()))},")
-            html.append("    datasets: [{")
-            html.append("      label: 'API Calls',")
-            html.append(f"      data: {json.dumps(list(self.metrics['llm_calls'].values()))},")
-            html.append("      backgroundColor: 'rgba(0, 123, 255, 0.5)'")
-            html.append("    }]")
-            html.append("  }")
-            html.append("});")
-            html.append("</script>")
-            
-            html.append(f"<p><strong>Total LLM Cost:</strong> ${self.metrics['total_llm_cost']:.4f}</p>")
-        
-        # Database Performance Table
-        if self.metrics["db_queries"]:
-            html.append("<h2>Database Performance</h2>")
-            html.append("<table>")
-            html.append("<tr><th>Database</th><th>Queries</th><th>Avg Latency (ms)</th></tr>")
-            for db in sorted(self.metrics["db_queries"].keys()):
-                queries = self.metrics["db_queries"][db]
-                avg_latency = self.metrics.get(f"{db}_latency_avg", 0) * 1000
-                html.append(f"<tr><td>{db}</td><td>{queries}</td><td>{avg_latency:.2f}</td></tr>")
-            html.append("</table>")
-        
-        # Quality Scores
-        if "quality_summary" in self.metrics:
-            html.append("<h2>Quality Gate Performance</h2>")
-            html.append('<div class="metric-card">')
-            html.append(f"<p>Average Score: {self.metrics['quality_summary']['average']:.3f}</p>")
-            html.append(f"<p>Score Range: {self.metrics['quality_summary']['min']:.3f} - {self.metrics['quality_summary']['max']:.3f}</p>")
-            html.append(f"<p>Total Validations: {self.metrics['quality_summary']['count']}</p>")
-            html.append('</div>')
-        
-        html.append("</div></body></html>")
-        
-        return "\n".join(html)
+        return f"""<h2>Test Results</h2>
+<div class="metric-card">
+<p>Total Tests: {total_tests}</p>
+<p class="success">Passed: {passed_tests}</p>
+<p class="failure">Failed: {total_tests - passed_tests}</p>
+<div class="progress-bar">
+<div class="progress-fill" style="width: {pass_rate}%">{pass_rate:.1f}% Pass Rate</div>
+</div>
+</div>"""
+    
+    def _build_llm_usage_section(self) -> str:
+        """Build LLM usage chart section"""
+        if not self.metrics["llm_calls"]:
+            return ""
+        labels_json = json.dumps(list(self.metrics['llm_calls'].keys()))
+        values_json = json.dumps(list(self.metrics['llm_calls'].values()))
+        cost_display = f"${self.metrics['total_llm_cost']:.4f}"
+        return f"""<h2>LLM API Usage</h2>
+<canvas id="llmChart" width="400" height="200"></canvas>
+<script>
+new Chart(document.getElementById('llmChart'), {{
+  type: 'bar',
+  data: {{
+    labels: {labels_json},
+    datasets: [{{
+      label: 'API Calls',
+      data: {values_json},
+      backgroundColor: 'rgba(0, 123, 255, 0.5)'
+    }}]
+  }}
+}});
+</script>
+<p><strong>Total LLM Cost:</strong> {cost_display}</p>"""
+    
+    def _build_database_section(self) -> str:
+        """Build database performance table section"""
+        if not self.metrics["db_queries"]:
+            return ""
+        rows = []
+        for db in sorted(self.metrics["db_queries"].keys()):
+            queries = self.metrics["db_queries"][db]
+            avg_latency = self.metrics.get(f"{db}_latency_avg", 0) * 1000
+            rows.append(f"<tr><td>{db}</td><td>{queries}</td><td>{avg_latency:.2f}</td></tr>")
+        table_rows = "\n".join(rows)
+        return f"""<h2>Database Performance</h2>
+<table>
+<tr><th>Database</th><th>Queries</th><th>Avg Latency (ms)</th></tr>
+{table_rows}
+</table>"""
+    
+    def _build_quality_section(self) -> str:
+        """Build quality scores section"""
+        if "quality_summary" not in self.metrics:
+            return ""
+        avg_score = self.metrics['quality_summary']['average']
+        min_score = self.metrics['quality_summary']['min']
+        max_score = self.metrics['quality_summary']['max']
+        count = self.metrics['quality_summary']['count']
+        return f"""<h2>Quality Gate Performance</h2>
+<div class="metric-card">
+<p>Average Score: {avg_score:.3f}</p>
+<p>Score Range: {min_score:.3f} - {max_score:.3f}</p>
+<p>Total Validations: {count}</p>
+</div>"""
+    
+    def _build_html_footer(self) -> str:
+        """Build HTML footer"""
+        return "</div></body></html>"
+    
+    def _generate_html_report(self) -> str:
+        """Generate HTML report with charts"""
+        sections = [
+            self._build_html_header(),
+            self._build_summary_section(),
+            self._build_test_results_section(),
+            self._build_llm_usage_section(),
+            self._build_database_section(),
+            self._build_quality_section(),
+            self._build_html_footer()
+        ]
+        return "\n".join(filter(None, sections))
 
 
 class EnhancedRealServiceTestRunner:

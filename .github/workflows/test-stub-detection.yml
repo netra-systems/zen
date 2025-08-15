@@ -27,7 +27,7 @@ on:
 jobs:
   detect-test-stubs:
     name: 🔍 Detect Test Stubs in Production Code
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     
     permissions:
@@ -161,7 +161,7 @@ jobs:
   # Separate job for monitoring stub trends
   stub-metrics:
     name: 📈 Track Stub Metrics
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: detect-test-stubs
     continue-on-error: true  # Don't fail build for metrics

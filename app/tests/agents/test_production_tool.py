@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
-from app.agents.tool_dispatcher import ProductionTool, ToolExecuteResponse
+from app.agents.production_tool import ProductionTool, ToolExecuteResponse
 from app.tests.helpers.tool_dispatcher_assertions import (
     assert_production_tool_initialized,
     assert_tool_execute_response_success,
@@ -58,7 +58,7 @@ class TestProductionTool:
     async def _execute_arun_with_mocks(self, tool: ProductionTool):
         """Execute arun with reliability mocks."""
         with patch.object(tool, 'reliability') as mock_reliability:
-            mock_reliability.execute = AsyncMock(return_value=ToolExecuteResponse(success=True, data="test_result"))
+            mock_reliability.execute_safely = AsyncMock(return_value=ToolExecuteResponse(success=True, data="test_result"))
             return await tool.arun({"param": "value"})
     
     def _verify_arun_success(self, result: ToolExecuteResponse) -> None:
@@ -70,18 +70,18 @@ class TestProductionTool:
     def _setup_execute_success_test(self) -> ProductionTool:
         """Setup execute success test."""
         tool = ProductionTool("test_tool")
-        tool._execute_with_reliability = AsyncMock(return_value={"success": True, "data": "result"})
+        tool._execute_with_reliability_wrapper = AsyncMock(return_value={"success": True, "data": "result"})
         return tool
     
     def _verify_execute_success(self, result, tool: ProductionTool) -> None:
         """Verify execute success result."""
         assert result == {"success": True, "data": "result"}
-        tool._execute_with_reliability.assert_called_once()
+        tool._execute_with_reliability_wrapper.assert_called_once()
     
     def _setup_execute_failure_test(self) -> ProductionTool:
         """Setup execute failure test."""
         tool = ProductionTool("test_tool")
-        tool._execute_with_reliability = AsyncMock(side_effect=Exception("Tool failed"))
+        tool._execute_with_reliability_wrapper = AsyncMock(side_effect=Exception("Tool failed"))
         return tool
     
     def _verify_execute_failure(self, result) -> None:
@@ -119,8 +119,10 @@ class TestProductionToolInternalExecution:
     async def test_try_synthetic_tools_batch_generation(self):
         """Test _try_synthetic_tools with batch generation."""
         tool = self._setup_batch_generation_test()
-        result = await tool._try_synthetic_tools({"batch_size": 100})
-        self._verify_batch_generation_result(result, tool)
+        with patch('app.services.synthetic_data.synthetic_data_service.generate_batch') as mock_service:
+            mock_service.return_value = [{"data": "item1"}, {"data": "item2"}]
+            result = await tool._try_synthetic_tools({"batch_size": 100})
+            self._verify_batch_generation_result_real(result)
     
     @pytest.mark.asyncio
     async def test_try_synthetic_tools_validation(self):
@@ -140,15 +142,23 @@ class TestProductionToolInternalExecution:
     async def test_try_corpus_tools_create(self):
         """Test _try_corpus_tools with create operation."""
         tool = self._setup_corpus_create_test()
-        result = await tool._try_corpus_tools({"name": "test_corpus"})
-        self._verify_corpus_create_result(result, tool)
+        with patch('app.services.corpus.corpus_service.create_corpus') as mock_service:
+            from unittest.mock import Mock
+            mock_corpus = Mock()
+            mock_corpus.id = "test_corpus_123"
+            mock_corpus.name = "test_corpus"
+            mock_service.return_value = mock_corpus
+            result = await tool._try_corpus_tools({"name": "test_corpus", "description": "test"})
+            self._verify_corpus_create_result_real(result)
     
     @pytest.mark.asyncio
     async def test_try_corpus_tools_search(self):
         """Test _try_corpus_tools with search operation."""
         tool = self._setup_corpus_search_test()
-        result = await tool._try_corpus_tools({"query": "test"})
-        assert_tool_execute_response_success(result)
+        with patch('app.services.corpus.corpus_service.search_corpus_content') as mock_service:
+            mock_service.return_value = {"results": ["doc1", "doc2"], "total": 2}
+            result = await tool._try_corpus_tools({"corpus_id": "123", "query": "test"})
+            assert_tool_execute_response_success(result)
     
     @pytest.mark.asyncio
     async def test_try_corpus_tools_unknown(self):
@@ -193,10 +203,11 @@ class TestProductionToolInternalExecution:
         tool._execute_synthetic_data_batch = AsyncMock(return_value={"success": True, "batch_size": 100})
         return tool
     
-    def _verify_batch_generation_result(self, result, tool: ProductionTool) -> None:
-        """Verify batch generation result."""
-        assert result == {"success": True, "batch_size": 100}
-        tool._execute_synthetic_data_batch.assert_called_once_with({"batch_size": 100})
+    def _verify_batch_generation_result_real(self, result) -> None:
+        """Verify batch generation result with real service response."""
+        assert result["success"] is True
+        assert "data" in result
+        assert result["metadata"]["tool"] == "generate_synthetic_data_batch"
     
     def _setup_validation_test(self) -> ProductionTool:
         """Setup validation test."""
@@ -216,10 +227,11 @@ class TestProductionToolInternalExecution:
         tool._execute_create_corpus = AsyncMock(return_value={"success": True, "corpus_id": "123"})
         return tool
     
-    def _verify_corpus_create_result(self, result, tool: ProductionTool) -> None:
-        """Verify corpus create result."""
-        assert result == {"success": True, "corpus_id": "123"}
-        tool._execute_create_corpus.assert_called_once_with({"name": "test_corpus"})
+    def _verify_corpus_create_result_real(self, result) -> None:
+        """Verify corpus create result with real service response."""
+        assert result["success"] is True
+        assert result["data"]["corpus_id"] == "test_corpus_123"
+        assert result["data"]["name"] == "test_corpus"
     
     def _setup_corpus_search_test(self) -> ProductionTool:
         """Setup corpus search test."""

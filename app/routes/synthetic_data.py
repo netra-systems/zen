@@ -82,7 +82,7 @@ class PreviewResponse(BaseModel):
     estimated_characteristics: Dict
 
 
-router = APIRouter(prefix="/api/synthetic", tags=["synthetic_data"])
+router = APIRouter(tags=["synthetic_data"])
 
 
 @router.post("/generate", response_model=GenerationResponse)
@@ -282,7 +282,7 @@ async def _fetch_templates(db: AsyncSession) -> Dict:
         logger.error(f"Error fetching templates: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/api/synthetic-data/generate")
+@router.post("/generate-test")
 async def generate_api_data(request: dict) -> dict:
     """Generate synthetic data for API testing"""
     count = request.get("count", 10)
@@ -294,12 +294,13 @@ async def generate_api_data(request: dict) -> dict:
         "count": count
     }
 
-@router.post("/api/synthetic-data/validate")
+@router.post("/validate")
 async def validate_api_data(request: dict) -> dict:
     """Validate synthetic data for API testing"""
     return {"valid": True, "errors": []}
 
-async def get_templates() -> list:
+@router.get("/templates-test")
+async def get_templates_test() -> list:
     """Get templates for testing"""
     return [
         {"name": "user_profile", "fields": 5},

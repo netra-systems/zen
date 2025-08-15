@@ -1,12 +1,12 @@
 """Agent state management models with immutable patterns."""
 from typing import Dict, List, Optional, Union, Any, TYPE_CHECKING
 from pydantic import BaseModel, Field, field_validator
-from datetime import datetime
+from datetime import datetime, timezone
 from app.core.json_parsing_utils import parse_string_list_field
 
 # Import actual types needed at runtime
 from app.agents.triage_sub_agent.models import TriageResult
-from app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
+from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
 
 # Import types only for type checking to avoid circular dependencies  
 if TYPE_CHECKING:
@@ -15,14 +15,14 @@ if TYPE_CHECKING:
 
 class AgentMetadata(BaseModel):
     """Metadata for agent execution tracking."""
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_updated: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     execution_context: Dict[str, str] = Field(default_factory=dict)
     custom_fields: Dict[str, str] = Field(default_factory=dict)
     
     def update_timestamp(self) -> 'AgentMetadata':
         """Update the last updated timestamp."""
-        return self.model_copy(update={'last_updated': datetime.utcnow()})
+        return self.model_copy(update={'last_updated': datetime.now(timezone.utc)})
 
 
 class PlanStep(BaseModel):
@@ -88,7 +88,7 @@ class ReportResult(BaseModel):
     content: str
     sections: List[ReportSection] = Field(default_factory=list)
     attachments: List[str] = Field(default_factory=list)
-    generated_at: datetime = Field(default_factory=datetime.utcnow)
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
     
     @field_validator('attachments', mode='before')
@@ -135,6 +135,7 @@ class DeepAgentState(BaseModel):
     
     final_report: Optional[str] = None
     step_count: int = 0  # Added for agent tracking
+    messages: List[Dict[str, Any]] = Field(default_factory=list)  # Added for E2E test compatibility
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
     
     @field_validator('step_count')

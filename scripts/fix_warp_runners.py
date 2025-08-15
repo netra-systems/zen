@@ -13,7 +13,7 @@ def update_runners(workflow_dir=".github/workflows"):
     
     # Pattern to match warp-custom-default runner
     pattern = re.compile(r'runs-on:\s*warp-custom-default')
-    replacement = 'runs-on: ubuntu-latest  # Temporary: Using GitHub-hosted while Warp runners are offline'
+    replacement = 'runs-on: warp-custom-default  # Temporary: Using GitHub-hosted while Warp runners are offline'
     
     # Process all YAML files
     for yaml_file in workflow_path.rglob("*.yml"):

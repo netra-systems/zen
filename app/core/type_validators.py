@@ -12,7 +12,7 @@ from beartype import beartype
 from beartype.roar import BeartypeException
 
 from app.agents.triage_sub_agent.models import TriageResult
-from app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
+from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
 from app.schemas.shared_types import AgentState
 
 T = TypeVar('T')

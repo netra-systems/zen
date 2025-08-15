@@ -768,7 +768,7 @@ on:
 
 jobs:
   backend-tests:
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     services:
       postgres:
@@ -815,7 +815,7 @@ jobs:
           file: ./coverage.xml
   
   frontend-tests:
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - uses: actions/checkout@v3

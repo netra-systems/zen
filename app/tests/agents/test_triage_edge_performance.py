@@ -154,7 +154,7 @@ class TestPerformanceOptimization:
         await triage_agent.execute(state, "memory_test", stream_updates=False)
         
         assert state.triage_result != None
-        assert state.triage_result["category"] == "Performance Optimization"
+        assert state.triage_result.category == "Performance Optimization"
     
     def test_hash_generation_performance(self, triage_agent):
         """Test hash generation performance"""

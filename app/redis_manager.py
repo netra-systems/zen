@@ -87,4 +87,28 @@ class RedisManager:
             return await self.redis_client.delete(key)
         return None
 
+    async def get_list(self, key: str, limit: int = None):
+        """Get list items from Redis"""
+        if self.redis_client:
+            try:
+                items = await self.redis_client.lrange(key, 0, limit - 1 if limit else -1)
+                return items
+            except Exception as e:
+                logger.warning(f"Failed to get list {key}: {e}")
+                return []
+        return []
+
+    async def add_to_list(self, key: str, value: str, max_size: int = None):
+        """Add item to Redis list with optional size limit"""
+        if self.redis_client:
+            try:
+                await self.redis_client.lpush(key, value)
+                if max_size:
+                    await self.redis_client.ltrim(key, 0, max_size - 1)
+                return True
+            except Exception as e:
+                logger.warning(f"Failed to add to list {key}: {e}")
+                return False
+        return False
+
 redis_manager = RedisManager()

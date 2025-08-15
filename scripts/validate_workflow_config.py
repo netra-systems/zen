@@ -71,7 +71,7 @@ def check_workflow_references(workflows_dir: Path, config: Dict[str, Any]) -> Li
             
         # Check if workflow uses the custom runner
         if runner_reference not in content and 'runs-on:' in content:
-            # Some workflows might use ubuntu-latest legitimately
+            # Some workflows might use warp-custom-default legitimately
             if workflow_path.name not in ['terraform-lock-cleanup.yml', 'gemini-pr-review.yml']:
                 issues.append(f"{workflow_path.name}: Not using custom runner")
         

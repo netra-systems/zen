@@ -10,7 +10,7 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from app.agents.triage_sub_agent.models import TriageResult
-from app.agents.data_sub_agent.models import (
+from app.schemas.shared_types import (
     DataAnalysisResponse, AnomalyDetectionResponse, PerformanceMetrics
 )
 from app.schemas.websocket_message_types import WebSocketMessage

@@ -35,26 +35,16 @@ class TestCompletenessCalculation:
         )
         assert score == 1.0  # Has all required elements
         
-    def _setup_general_content_metrics(self, content):
-        """Setup metrics for general content testing"""
-        metrics = QualityMetrics()
-        metrics.word_count = len(content.split())
-        metrics.sentence_count = len(re.split(r'[.!?]+', content))
-        return metrics
-        
     @pytest.mark.asyncio
     async def test_completeness_general_type(self, quality_service):
         """Test completeness for general content type"""
         content = setup_completeness_general_content()
         
-        metrics = self._setup_general_content_metrics(content)
-        
-        with patch.object(quality_service, '_calculate_metrics', return_value=metrics):
-            score = await quality_service.metrics_calculator.specialized_calculator.calculate_completeness(
-                content,
-                ContentType.GENERAL
-            )
-            assert score > 0  # Should calculate based on general criteria
+        score = await quality_service.metrics_calculator.specialized_calculator.calculate_completeness(
+            content,
+            ContentType.GENERAL
+        )
+        assert score > 0  # Should calculate based on general criteria
 
 
 class TestNoveltyCalculation:

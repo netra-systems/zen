@@ -252,7 +252,7 @@ on:
 
 jobs:
   interactive-job:
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: 'Process Lark trigger'

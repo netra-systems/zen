@@ -18,7 +18,11 @@ All original functionality is preserved with 100% test coverage.
 """
 
 # Import all test modules to maintain backward compatibility
-from app.tests.agents.test_data_sub_agent_comprehensive import *
+from app.tests.agents.test_data_sub_agent_comprehensive_suite.test_query_builder import *
+from app.tests.agents.test_data_sub_agent_comprehensive_suite.test_analysis_engine import *
+from app.tests.agents.test_data_sub_agent_comprehensive_suite.test_data_sub_agent_basic import *
+from app.tests.agents.test_data_sub_agent_comprehensive_suite.test_data_sub_agent_analysis import *
+from app.tests.agents.test_data_sub_agent_comprehensive_suite.test_data_sub_agent_processing import *
 
 # This file maintains backward compatibility while the actual tests are
 # organized into modular components that each stay under 300 lines

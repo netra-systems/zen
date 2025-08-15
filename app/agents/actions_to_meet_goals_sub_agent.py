@@ -164,8 +164,10 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
 
     async def _apply_reliability_protection(self, result):
         """Apply reliability protection to result."""
+        async def result_operation():
+            return result
         await self.reliability.execute_safely(
-            lambda: result, "execute_action_plan_with_fallback", timeout=45.0)
+            result_operation, "execute_action_plan_with_fallback", timeout=45.0)
     
     def _build_action_plan_from_partial(self, partial_data: dict) -> dict:
         """Build a complete action plan structure from partial extracted data."""

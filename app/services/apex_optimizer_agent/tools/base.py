@@ -27,7 +27,7 @@ class BaseTool(ABC):
     llm_name: Optional[str] = None
 
     def get_metadata(self) -> dict:
-        return self.metadata.dict()
+        return self.metadata.model_dump()
 
     @abstractmethod
     async def run(self, context: ToolContext, **kwargs) -> Any:

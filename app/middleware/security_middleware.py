@@ -201,8 +201,14 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         # Sensitive endpoints requiring stricter limits
         self.sensitive_endpoints = {
             "/api/auth/login", "/api/auth/logout", "/api/auth/token",
-            "/api/admin", "/api/tools", "/api/synthetic-data"
+            "/api/auth/callback", "/api/auth/refresh",
+            "/api/admin", "/api/tools", "/api/synthetic-data",
+            "/api/users/create", "/api/users/password"
         }
+        
+        # SECURITY FIX: Enhanced tracking for authentication attempts
+        self.auth_attempt_tracker: Dict[str, list] = {}
+        self.failed_auth_ips: Dict[str, int] = {}
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request through security layers."""
@@ -377,6 +383,41 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         # Add custom security headers
         response.headers["X-Security-Middleware"] = "enabled"
         response.headers["X-Request-ID"] = f"req_{int(time.time())}"
+    
+    def track_auth_attempt(self, ip_address: str, success: bool) -> None:
+        """Track authentication attempts for enhanced security."""
+        current_time = time.time()
+        
+        # Track all attempts
+        if ip_address not in self.auth_attempt_tracker:
+            self.auth_attempt_tracker[ip_address] = []
+        
+        # Clean old attempts (older than 1 hour)
+        self.auth_attempt_tracker[ip_address] = [
+            attempt_time for attempt_time in self.auth_attempt_tracker[ip_address]
+            if current_time - attempt_time < 3600
+        ]
+        
+        self.auth_attempt_tracker[ip_address].append(current_time)
+        
+        # Track failed attempts specifically
+        if not success:
+            self.failed_auth_ips[ip_address] = self.failed_auth_ips.get(ip_address, 0) + 1
+            
+            # Auto-block IPs with too many failed attempts
+            if self.failed_auth_ips[ip_address] >= 10:  # 10 failed attempts
+                logger.error(f"IP {ip_address} blocked due to {self.failed_auth_ips[ip_address]} failed auth attempts")
+                # In production, this would integrate with firewall/WAF
+        else:
+            # Reset failed count on successful auth
+            self.failed_auth_ips[ip_address] = 0
+    
+    def is_ip_suspicious(self, ip_address: str) -> bool:
+        """Check if IP should be treated as suspicious."""
+        failed_count = self.failed_auth_ips.get(ip_address, 0)
+        recent_attempts = len(self.auth_attempt_tracker.get(ip_address, []))
+        
+        return failed_count >= 5 or recent_attempts >= 20  # Suspicious thresholds
 
 
 def create_security_middleware(rate_limiter: Optional[RateLimitTracker] = None) -> SecurityMiddleware:

@@ -394,7 +394,7 @@ async def create_api_thread(request: dict):
         "created_at": "2024-01-01T00:00:00"
     }
 
-@router.get("/api/threads")
+@router.get("/test-list")
 async def list_api_threads(page: int = 1, per_page: int = 10):
     """List threads for API testing"""
     return {
@@ -407,7 +407,8 @@ async def list_api_threads(page: int = 1, per_page: int = 10):
         "per_page": per_page
     }
 
-async def archive_thread(thread_id: str) -> dict:
+@router.post("/{thread_id}/archive")
+async def archive_thread_test(thread_id: str) -> dict:
     """Archive thread for testing"""
     return {
         "success": True,

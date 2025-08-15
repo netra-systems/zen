@@ -74,3 +74,50 @@ class AgentDelegation:
     async def recover(self) -> None:
         """Delegate to extended operations."""
         await self.extended_ops.recover()
+    
+    async def _analyze_performance_metrics(self, user_id: int, workload_id: str, time_range) -> Dict[str, Any]:
+        """Delegate to analysis operations."""
+        from .analysis_operations import AnalysisOperations
+        ops = AnalysisOperations(
+            self.agent.query_builder, self.agent.analysis_engine,
+            self.agent.clickhouse_ops, self.agent.redis_manager
+        )
+        return await ops.analyze_performance_metrics(user_id, workload_id, time_range)
+    
+    async def _detect_anomalies(self, user_id: int, metric_name: str, time_range, threshold: float = 2.5) -> Dict[str, Any]:
+        """Delegate to analysis operations."""
+        from .analysis_operations import AnalysisOperations
+        ops = AnalysisOperations(
+            self.agent.query_builder, self.agent.analysis_engine,
+            self.agent.clickhouse_ops, self.agent.redis_manager
+        )
+        return await ops.detect_anomalies(user_id, metric_name, time_range, threshold)
+    
+    async def _analyze_usage_patterns(self, user_id: int, days_back: int = 7) -> Dict[str, Any]:
+        """Delegate to analysis operations with days_back parameter."""
+        from .analysis_operations import AnalysisOperations
+        from datetime import datetime, timedelta
+        
+        # Convert days_back to time_range
+        end_time = datetime.now()
+        start_time = end_time - timedelta(days=days_back)
+        time_range = (start_time, end_time)
+        
+        ops = AnalysisOperations(
+            self.agent.query_builder, self.agent.analysis_engine,
+            self.agent.clickhouse_ops, self.agent.redis_manager
+        )
+        return await ops.analyze_usage_patterns(user_id, time_range)
+    
+    async def _analyze_correlations(self, user_id: int, metric1: str, metric2: str, time_range) -> Dict[str, Any]:
+        """Delegate to analysis operations with individual metric parameters."""
+        from .analysis_operations import AnalysisOperations
+        
+        # Convert individual metrics to list
+        metrics = [metric1, metric2]
+        
+        ops = AnalysisOperations(
+            self.agent.query_builder, self.agent.analysis_engine,
+            self.agent.clickhouse_ops, self.agent.redis_manager
+        )
+        return await ops.analyze_correlations(user_id, metrics, time_range)

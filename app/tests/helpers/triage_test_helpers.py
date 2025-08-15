@@ -41,6 +41,7 @@ class MockLLMManager:
     
     def __init__(self):
         self.ask_llm = AsyncMock()
+        self.ask_structured_llm = AsyncMock()
         self.call_count = 0
         self.responses = []
         self.failures = []
@@ -50,6 +51,7 @@ class MockLLMManager:
         self.responses = responses
         self.call_count = 0
         self.ask_llm.side_effect = self._create_side_effect()
+        self.ask_structured_llm.side_effect = self._create_structured_side_effect()
     
     def _create_side_effect(self):
         """Create side effect function for mock"""
@@ -79,6 +81,28 @@ class MockLLMManager:
     def set_failure_pattern(self, failures):
         """Set failure pattern (True for failure, False for success)"""
         self.failures = failures
+    
+    def _create_structured_side_effect(self):
+        """Create side effect for structured LLM calls"""
+        def side_effect(*args, **kwargs):
+            return self._get_structured_response()
+        return side_effect
+    
+    def _get_structured_response(self):
+        """Convert JSON response to TriageResult object"""
+        import json
+        from app.agents.triage_sub_agent.models import TriageResult
+        
+        # Use the same response without incrementing the call count
+        response_str = self._get_response_or_default()
+        self.call_count += 1  # Increment here to stay in sync
+        
+        try:
+            response_dict = json.loads(response_str)
+            return TriageResult(**response_dict)
+        except Exception:
+            # Fallback to default TriageResult
+            return TriageResult(category="General Inquiry")
 
 
 class MockToolDispatcher:

@@ -41,7 +41,7 @@ jobs:
   
   analyze-performance:
     name: 📈 Analyze Pipeline Performance
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 15
     outputs:
       avg_duration: ${{ steps.analyze.outputs.avg_duration }}
@@ -263,7 +263,7 @@ jobs:
   
   analyze-costs:
     name: 💰 Analyze Pipeline Costs
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     outputs:
       monthly_cost_estimate: ${{ steps.cost-analysis.outputs.monthly_cost }}
@@ -296,7 +296,7 @@ jobs:
           
           # Cost factors (per minute)
           COST_PER_MINUTE = {
-              'ubuntu-latest': 0.008,
+              'warp-custom-default': 0.008,
               'ubuntu-22.04': 0.008,
               'ubuntu-20.04': 0.008,
               'windows-latest': 0.016,
@@ -332,9 +332,9 @@ jobs:
           # 1. Runner optimization potential
           if len(runner_costs) > 1:
               most_expensive_runner = max(runner_costs.items(), key=lambda x: x[1])
-              ubuntu_cost_equivalent = runner_costs.get('ubuntu-latest', 0)
+              ubuntu_cost_equivalent = runner_costs.get('warp-custom-default', 0)
               
-              if most_expensive_runner[0] != 'ubuntu-latest' and ubuntu_cost_equivalent > 0:
+              if most_expensive_runner[0] != 'warp-custom-default' and ubuntu_cost_equivalent > 0:
                   potential_saving = most_expensive_runner[1] - ubuntu_cost_equivalent
                   if potential_saving > 0:
                       optimization_potential += potential_saving
@@ -381,7 +381,7 @@ jobs:
   
   optimize-caching:
     name: 🗄️ Optimize Caching Strategy
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     if: |
       github.event.inputs.optimization_type == 'full' ||
@@ -505,7 +505,7 @@ jobs:
   
   analyze-parallelization:
     name: ⚡ Analyze Parallelization Opportunities
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     needs: analyze-performance
     if: |
@@ -684,11 +684,11 @@ jobs:
               f.write("```yaml\n")
               f.write("jobs:\n")
               f.write("  test-backend:\n")
-              f.write("    runs-on: ubuntu-latest\n")
+              f.write("    runs-on: warp-custom-default\n")
               f.write("    # No dependencies - runs immediately\n")
               f.write("  \n")
               f.write("  test-frontend:\n")
-              f.write("    runs-on: ubuntu-latest\n")
+              f.write("    runs-on: warp-custom-default\n")
               f.write("    # No dependencies - runs in parallel with backend\n")
               f.write("  \n")
               f.write("  deploy:\n")
@@ -716,7 +716,7 @@ jobs:
     name: 📊 Generate Optimization Report
     needs: [analyze-performance, analyze-costs, optimize-caching, analyze-parallelization]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: Download all analysis artifacts

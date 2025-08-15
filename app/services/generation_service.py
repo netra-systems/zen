@@ -62,7 +62,7 @@ async def get_corpus_from_clickhouse(table_name: str) -> dict:
         raise
     finally:
         if 'db' in locals() and db:
-            db.disconnect()
+            await db.disconnect()
 
 def _process_sample_record(w_type: str, sample, timestamp):
     """Process a single sample record efficiently."""
@@ -147,7 +147,7 @@ async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str =
         raise
     finally:
         if 'db' in locals() and db:
-            db.disconnect()
+            await db.disconnect()
 
 
 # --- Content Generation Service ---

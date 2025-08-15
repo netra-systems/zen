@@ -3,20 +3,13 @@ Request-related type definitions for LLM operations.
 Following Netra conventions with strong typing.
 """
 
-from typing import Dict, Any, Optional, List, Union, Literal, TYPE_CHECKING
+from typing import Dict, Any, Optional, List, Union, Literal, ForwardRef
 from pydantic import BaseModel, Field, field_validator
 from app.core.json_parsing_utils import parse_dict_field
+from app.schemas.llm_base_types import LLMMessage
 
-if TYPE_CHECKING:
-    from app.schemas.llm_types import LLMMessage, LLMConfig
-else:
-    # Import the actual types for runtime resolution
-    try:
-        from app.schemas.llm_types import LLMMessage, LLMConfig
-    except ImportError:
-        # If imports fail, define placeholder types
-        LLMMessage = 'LLMMessage'
-        LLMConfig = 'LLMConfig'
+# Forward reference for LLMConfig to avoid circular imports
+LLMConfig = ForwardRef('LLMConfig')
 
 
 class StructuredOutputSchema(BaseModel):

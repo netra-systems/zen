@@ -40,7 +40,7 @@ jobs:
   
   monitor-production:
     name: 🏭 Production Health Check
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     if: |
       github.event.inputs.environment == 'production' || 
@@ -191,7 +191,7 @@ jobs:
   
   monitor-staging:
     name: 🚀 Staging Health Check
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     if: |
       github.event.inputs.environment == 'staging' || 
@@ -253,7 +253,7 @@ jobs:
     name: 🚨 Manage Health Alerts
     needs: [monitor-production, monitor-staging]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: Aggregate health status
@@ -449,7 +449,7 @@ jobs:
     name: 📊 Collect Health Metrics
     needs: [monitor-production, monitor-staging]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: Aggregate health metrics

@@ -31,6 +31,11 @@ class ToolDispatcher:
         self._init_components()
         self._register_initial_tools(tools)
     
+    @property
+    def tools(self) -> Dict[str, Any]:
+        """Expose tools registry for backward compatibility"""
+        return self.registry.tools
+    
     def _init_components(self) -> None:
         """Initialize dispatcher components"""
         self.registry = ToolRegistry()
@@ -84,3 +89,40 @@ class ToolDispatcher:
             success=False,
             error=f"Tool {tool_name} not found"
         )
+    
+    async def _execute_tool(self, tool_input: ToolInput, tool: Any, kwargs: Dict[str, Any]) -> ToolResult:
+        """Execute tool via executor - backward compatibility method"""
+        return await self.executor.execute_tool(tool_input, tool, kwargs)
+    
+    async def _execute_tool_with_error_handling(
+        self,
+        tool: Any,
+        tool_name: str,
+        parameters: Dict[str, Any],
+        state: DeepAgentState,
+        run_id: str
+    ) -> ToolDispatchResponse:
+        """Execute tool with comprehensive error handling"""
+        return await self.executor.execute_with_state(tool, tool_name, parameters, state, run_id)
+    
+    async def _execute_tool_by_type(
+        self,
+        tool: Any,
+        parameters: Dict[str, Any],
+        state: DeepAgentState,
+        run_id: str
+    ) -> Any:
+        """Execute tool by type - backward compatibility method"""
+        return await self.executor._execute_by_type(tool, parameters, state, run_id)
+    
+    def _create_success_response(self, result: Any, tool_name: str, run_id: str) -> ToolDispatchResponse:
+        """Create success response - backward compatibility method"""
+        return self.executor._create_success_response(result, tool_name, run_id)
+    
+    def _create_error_response(self, error: Exception, tool_name: str, run_id: str) -> ToolDispatchResponse:
+        """Create error response - backward compatibility method"""
+        return self.executor._create_error_response(error, tool_name, run_id)
+    
+    def _register_tool_batch(self, tool_names: List[str]) -> None:
+        """Register batch of tools - backward compatibility method"""
+        return self.registry._register_tool_batch(tool_names)

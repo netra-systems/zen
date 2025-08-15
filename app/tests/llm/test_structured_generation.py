@@ -8,7 +8,8 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import json
 
-from app.llm.llm_manager import LLMManager, MockLLM, MockStructuredLLM
+from app.llm.llm_manager import LLMManager
+from app.llm.llm_mocks import MockLLM, MockStructuredLLM
 from app.schemas import AppConfig, LLMConfig
 
 

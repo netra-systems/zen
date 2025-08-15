@@ -35,7 +35,7 @@ env:
 jobs:
   notify-lark:
     name: Send Notification to Lark
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     if: always()
     
     steps:
@@ -70,7 +70,7 @@ jobs:
 
   handle-command:
     name: Handle Lark Command
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     if: github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch'
     
     steps:

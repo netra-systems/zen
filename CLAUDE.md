@@ -5,10 +5,11 @@ You are an Elite Engineer.
 ## 🔴 CRITICAL: MODULE-BASED ARCHITECTURE (300 LINES MAX, 8 LINES PER FUNCTION)
 **MANDATORY**: Every file MUST be ≤300 lines. ALL functions MUST be ≤8 lines.
 - Files exceeding 300 lines MUST be split into focused modules BEFORE implementation
-- Functions exceeding 8 lines MUST be split into smaller functions IMMEDIATELY
+- Functions exceeding 8 lines MUST be split into smaller functions IMMEDIATELY.
 - Plan module boundaries BEFORE coding - don't code first then split
 - Each module = single responsibility, clear interface, testable unit
 - Each function = single task, 8 lines maximum (no exceptions)
+- Composable - All concepts are designed for composable reuse throughout the system.
 - COMPLIANCE STATUS Run: `python scripts/check_architecture_compliance.py` to check current status
 
 ## Core Principles
@@ -27,13 +28,16 @@ You are an Elite Engineer.
 
 MANAGE SCOPE
 - Changes must stay within the overall scope and bounds of the existing system architecture unless expressly requested.
-- Keep overall architecture limited in complexity.
+- Keep architecture limited in complexity.
+- Spend extra thinking energy to find elegant and "simple" solutions
+- Modular code ALWAY.
 
 300-LINE MODULE 
 **CRITICAL**: No file exceeds 300 lines - enforce through modular design:
 - Split by responsibility
 - Plan modules during design phase
 - Each module must have clear interface and single purpose
+- It's okay to have many modules.
 
 ## Project Overview
 **Netra AI Optimization Platform** - Enterprise AI workload optimization with multi-agent architecture.
@@ -206,42 +210,24 @@ python test_runner.py --level unit # DEFAULT tests
 - Database via repositories only
 - NetraException for errors
 
-### UI Standards
-- Glassmorphic design
-- `generateUniqueId()` for React keys
-
 ## 🚧 SYSTEM BOUNDARIES (ENFORCE 300/8 LIMITS)
-
-### Automated Boundary Enforcement
-- **COMPLIANCE CHECK**: `python scripts/check_architecture_compliance.py`
-- **PRE-COMMIT**: Run compliance check before every commit
-- **CI/CD**: Block merges on violations (0 tolerance policy)
-- **MONITORING**: Weekly architectural health reports
 
 ### Growth Control Patterns
 - **SUBDIVISION**: Split files approaching 250 lines BEFORE they hit 300
 - **EXTRACTION**: Extract functions approaching 6 lines BEFORE they hit 8
-- **HORIZONTAL GROWTH**: Add new modules, don't expand existing ones
+- **Healthy GROWTH**: Subdivide concepts. Use existing modules.
 - **COMPOSITION**: Use small focused components, not monoliths
-
-### Boundary Response Levels
-1. **SINGLE VIOLATION**: Developer self-remediation (same day)
-2. **MULTIPLE VIOLATIONS**: Team review + pair programming (2 days)  
-3. **SYSTEMIC VIOLATIONS**: Architecture review + training (1 week)
-
-### Health Indicators
-- **COMPLIANCE SCORE**: 100% of files/functions within limits
-- **GROWTH PATTERN**: Module count grows faster than file size
-- **TYPE SAFETY**: Zero duplicate type definitions
-- **DEPENDENCY DEPTH**: Under 5 levels of imports
 
 ### Critical References
 - [`SPEC/system_boundaries.xml`](SPEC/system_boundaries.xml) - Hard limits & enforcement
 - [`SPEC/growth_control.xml`](SPEC/growth_control.xml) - Good vs bad growth patterns
 - [`SPEC/conventions.xml`](SPEC/conventions.xml) - Boundary enforcement integration
 
-## Testing (ALWAYS run UNIT tests for noticeable changes)
+## Testing
 - Choose a category using test discovery
+- ALWAYS run UNIT tests for noticeable changes
+- ALWAYS run E2E real tests for agent changes
+- Think about DATA, data flow, data types, critical paths
 
 ## 📝 MODULE PLANNING (3rd Reminder: 300 Lines MAX)
 
@@ -270,7 +256,7 @@ python test_runner.py --level unit # DEFAULT tests
 2. **8-LINE FUNCTIONS** - Every function ≤8 lines (MANDATORY)
 3. **TYPE SAFETY FIRST** - Read [`type_safety.xml`](SPEC/type_safety.xml) 
 4. **EXTEND and UPDATE SINGLE SOURCES OF TRUTH.**
-5. **UNIT TESTS** - Run before ANY commit (smoke only for most trivial)
+5. **UNIT TESTS** - Run before and after all changes.
 6. **ULTRA DEEP THINK** - This is your masterpiece
 
-**Specs = Law. 300 lines = Maximum. 8 lines per function = Maximum. Ultra think = Always.**
+**Specs = Law. 300 lines = Maximum. 8 lines per function = Maximum. Modular elite quality code. Ultra think = Always.**

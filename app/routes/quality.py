@@ -24,7 +24,7 @@ from .quality_handlers import (
     handle_service_health
 )
 
-router = APIRouter(prefix="/api/quality", tags=["quality"])
+router = APIRouter(tags=["quality"])
 
 # Initialize services
 quality_gate_service = QualityGateService()
@@ -184,6 +184,7 @@ async def get_quality_aggregation(period: str = Query("daily")) -> Dict[str, Any
         "trend": "stable"
     }
 
+@router.get("/check-alerts")
 async def check_quality_alerts() -> List[Dict[str, Any]]:
     """Check quality threshold alerts for testing"""
     return [

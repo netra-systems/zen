@@ -54,7 +54,7 @@ class AgentOperationRecord:
 @dataclass 
 class AgentMetrics:
     """Aggregated metrics for an agent."""
-    agent_name: str
+    agent_name: str = ""
     total_operations: int = 0
     successful_operations: int = 0
     failed_operations: int = 0
@@ -73,54 +73,114 @@ def create_operation_record(
     metadata: Optional[Dict[str, Any]] = None
 ) -> AgentOperationRecord:
     """Create a new operation record."""
-    operation_id = str(uuid.uuid4())
-    
+    operation_id = _generate_operation_id()
+    return _build_operation_record(operation_id, agent_name, operation_type, metadata)
+
+
+def _generate_operation_id() -> str:
+    """Generate unique operation ID."""
+    return str(uuid.uuid4())
+
+
+def _build_operation_record(operation_id: str, agent_name: str, operation_type: str, metadata: Optional[Dict[str, Any]]) -> AgentOperationRecord:
+    """Build operation record with provided data."""
+    base_record = _create_base_record(operation_id, agent_name, operation_type)
+    base_record.metadata = metadata or {}
+    return base_record
+
+
+def _create_base_record(operation_id: str, agent_name: str, operation_type: str) -> AgentOperationRecord:
+    """Create base operation record."""
+    start_time = datetime.now(UTC)
     return AgentOperationRecord(
-        operation_id=operation_id,
-        agent_name=agent_name,
-        operation_type=operation_type,
-        start_time=datetime.now(UTC),
-        metadata=metadata or {}
+        operation_id=operation_id, agent_name=agent_name, 
+        operation_type=operation_type, start_time=start_time
     )
 
 
 def calculate_operation_metrics(record: AgentOperationRecord) -> Dict[str, Any]:
     """Calculate metrics from an operation record."""
+    execution_time_ms = _calculate_execution_time(record)
+    return _build_metrics_dict(record, execution_time_ms)
+
+
+def _calculate_execution_time(record: AgentOperationRecord) -> float:
+    """Calculate execution time from record timestamps."""
     if record.end_time and record.start_time:
         duration = record.end_time - record.start_time
-        execution_time_ms = duration.total_seconds() * 1000
-    else:
-        execution_time_ms = 0.0
-    
+        return duration.total_seconds() * 1000
+    return 0.0
+
+
+def _build_metrics_dict(record: AgentOperationRecord, execution_time_ms: float) -> Dict[str, Any]:
+    """Build metrics dictionary from record data."""
+    base_metrics = _get_base_metrics(execution_time_ms, record.success, record.failure_type)
+    resource_metrics = _get_resource_metrics(record.memory_usage_mb, record.cpu_usage_percent)
+    return {**base_metrics, **resource_metrics}
+
+
+def _get_base_metrics(execution_time_ms: float, success: bool, failure_type: Optional[FailureType]) -> Dict[str, Any]:
+    """Get base metric values."""
     return {
         "execution_time_ms": execution_time_ms,
-        "success": record.success,
-        "failure_type": record.failure_type,
-        "memory_usage_mb": record.memory_usage_mb,
-        "cpu_usage_percent": record.cpu_usage_percent
+        "success": success,
+        "failure_type": failure_type
+    }
+
+
+def _get_resource_metrics(memory_usage_mb: float, cpu_usage_percent: float) -> Dict[str, Any]:
+    """Get resource usage metrics."""
+    return {
+        "memory_usage_mb": memory_usage_mb,
+        "cpu_usage_percent": cpu_usage_percent
     }
 
 
 def update_agent_metrics(metrics: AgentMetrics, record: AgentOperationRecord) -> None:
     """Update agent metrics with new operation record."""
+    _update_operation_counts(metrics, record)
+    _update_failure_breakdown(metrics, record)
+    _calculate_success_rates(metrics)
+    _update_specific_error_counts(metrics, record)
+
+
+def _update_operation_counts(metrics: AgentMetrics, record: AgentOperationRecord) -> None:
+    """Update basic operation counts."""
+    _increment_total_operations(metrics, record)
+    _update_success_failure_counts(metrics, record)
+
+
+def _increment_total_operations(metrics: AgentMetrics, record: AgentOperationRecord) -> None:
+    """Increment total operation count and update timestamp."""
     metrics.total_operations += 1
     metrics.last_operation_time = record.end_time
-    
+
+
+def _update_success_failure_counts(metrics: AgentMetrics, record: AgentOperationRecord) -> None:
+    """Update success/failure operation counts."""
     if record.success:
         metrics.successful_operations += 1
     else:
         metrics.failed_operations += 1
-        if record.failure_type:
-            if record.failure_type not in metrics.failure_breakdown:
-                metrics.failure_breakdown[record.failure_type] = 0
-            metrics.failure_breakdown[record.failure_type] += 1
-    
-    # Calculate rates
+
+
+def _update_failure_breakdown(metrics: AgentMetrics, record: AgentOperationRecord) -> None:
+    """Update failure breakdown if operation failed."""
+    if not record.success and record.failure_type:
+        if record.failure_type not in metrics.failure_breakdown:
+            metrics.failure_breakdown[record.failure_type] = 0
+        metrics.failure_breakdown[record.failure_type] += 1
+
+
+def _calculate_success_rates(metrics: AgentMetrics) -> None:
+    """Calculate success and error rates."""
     if metrics.total_operations > 0:
         metrics.success_rate = metrics.successful_operations / metrics.total_operations
         metrics.error_rate = metrics.failed_operations / metrics.total_operations
-    
-    # Track specific error types
+
+
+def _update_specific_error_counts(metrics: AgentMetrics, record: AgentOperationRecord) -> None:
+    """Update specific error type counts."""
     if record.failure_type == FailureType.TIMEOUT:
         metrics.timeout_count += 1
     elif record.failure_type == FailureType.VALIDATION_ERROR:
@@ -131,20 +191,23 @@ def calculate_health_score(metrics: AgentMetrics) -> float:
     """Calculate health score for an agent (0.0 to 1.0)."""
     if metrics.total_operations == 0:
         return 1.0  # No data means healthy
-    
-    # Calculate health score based on multiple factors
+    factors = _calculate_health_factors(metrics)
+    return _compute_final_score(factors)
+
+
+def _calculate_health_factors(metrics: AgentMetrics) -> Dict[str, float]:
+    """Calculate individual health factors."""
     success_factor = metrics.success_rate
-    
-    # Penalize high execution times
     avg_time_factor = max(0.0, 1.0 - (metrics.avg_execution_time_ms / 30000))
-    
-    # Penalize timeouts and validation errors
     timeout_penalty = min(0.3, metrics.timeout_count / metrics.total_operations)
     validation_penalty = min(0.2, metrics.validation_error_count / metrics.total_operations)
-    
-    score = (success_factor * 0.5 + 
-            avg_time_factor * 0.3 - 
-            timeout_penalty - 
-            validation_penalty)
-    
+    return {'success': success_factor, 'time': avg_time_factor, 'timeout': timeout_penalty, 'validation': validation_penalty}
+
+
+def _compute_final_score(factors: Dict[str, float]) -> float:
+    """Compute final health score from factors."""
+    score = (factors['success'] * 0.5 + 
+            factors['time'] * 0.3 - 
+            factors['timeout'] - 
+            factors['validation'])
     return max(0.0, min(1.0, score))
