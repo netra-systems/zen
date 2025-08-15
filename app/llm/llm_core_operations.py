@@ -57,10 +57,7 @@ class LLMCoreOperations:
         
         error_msg = f"LLM '{name}' is not available - LLM service is disabled in production"
         logger.error(error_msg)
-        raise ServiceUnavailableError(
-            message=error_msg,
-            user_message="AI features are currently unavailable. Please try again later."
-        )
+        raise RuntimeError(error_msg)
 
     def get_llm(self, name: str, generation_config: Optional[GenerationConfig] = None) -> Any:
         """Get LLM instance with caching."""

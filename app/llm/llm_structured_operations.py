@@ -5,7 +5,6 @@ Each function must be ≤8 lines as per architecture requirements.
 """
 from typing import Any, Type, TypeVar, Optional
 from pydantic import BaseModel
-from app.llm.llm_mocks import MockLLM
 from app.llm.llm_response_processing import (
     parse_nested_json_recursive, attempt_json_fallback_parse,
     create_structured_cache_key, get_cached_structured_response,
@@ -30,11 +29,7 @@ class LLMStructuredOperations:
         """Get an LLM configured for structured output with a Pydantic schema."""
         llm = self.core.get_llm(name, generation_config)
         
-        # Mock LLMs already have with_structured_output
-        if isinstance(llm, MockLLM):
-            return llm.with_structured_output(schema, **kwargs)
-        
-        # For LangChain models, use with_structured_output
+        # All LLMs (including mocks) support with_structured_output
         return llm.with_structured_output(schema, **kwargs)
     
     async def ask_structured_llm(self, prompt: str, llm_config_name: str, 

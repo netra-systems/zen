@@ -109,9 +109,9 @@ class ServicesConfiguration:
         mode=ResourceMode.LOCAL,  # Usually local for development
         local_config={
             "host": "localhost",
-            "port": 5432,
+            "port": 5433,
             "user": "postgres",
-            "password": "postgres",
+            "password": "",
             "database": "netra_dev"
         },
         shared_config={

@@ -85,22 +85,44 @@ async def update_ttl(ttl_seconds: int) -> Dict[str, Any]:
 
 @router.get("/metrics")
 async def get_cache_metrics() -> Dict[str, Any]:
-    """Get cache metrics for API testing"""
-    return {
-        "hits": 150,
-        "misses": 50,
-        "hit_rate": 0.75,
-        "size_mb": 24.5,
-        "entries": 200
-    }
+    """Get comprehensive cache metrics"""
+    try:
+        metrics = await llm_cache_service.get_cache_metrics()
+        return {
+            "success": True,
+            **metrics
+        }
+    except Exception as e:
+        logger.error(f"Error getting cache metrics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/")
 async def clear_api_cache() -> Dict[str, Any]:
-    """Clear cache for API testing"""
-    return {"cleared": 50, "remaining": 0, "message": "Cache cleared"}
+    """Clear all cache entries"""
+    try:
+        deleted_count = await llm_cache_service.clear_cache()
+        return {
+            "success": True,
+            "cleared": deleted_count,
+            "remaining": 0,
+            "message": f"Successfully cleared {deleted_count} cache entries"
+        }
+    except Exception as e:
+        logger.error(f"Error clearing all cache entries: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.delete("/pattern/{pattern}")
 async def clear_cache_pattern(pattern: str) -> Dict[str, Any]:
-    """Clear cache by pattern for testing"""
-    return {"cleared": 10, "pattern": pattern}
+    """Clear cache entries matching a specific pattern"""
+    try:
+        deleted_count = await llm_cache_service.clear_cache_pattern(pattern)
+        return {
+            "success": True,
+            "cleared": deleted_count,
+            "pattern": pattern,
+            "message": f"Successfully cleared {deleted_count} cache entries matching pattern '{pattern}'"
+        }
+    except Exception as e:
+        logger.error(f"Error clearing cache with pattern '{pattern}': {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 

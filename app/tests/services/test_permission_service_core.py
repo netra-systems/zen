@@ -58,7 +58,7 @@ class TestDetectDeveloperStatus:
             result = PermissionService.detect_developer_status(user)
             assert result == True
         
-        with patch.dict(os.environ, {"DEV_MODE": "false"}):
+        with patch.dict(os.environ, {"DEV_MODE": "false"}, clear=True):
             result = PermissionService.detect_developer_status(user)
             assert result == False
     
@@ -75,8 +75,9 @@ class TestDetectDeveloperStatus:
         assert result == True
         
         user.email = "user@example.com"
-        result = PermissionService.detect_developer_status(user)
-        assert result == False
+        with patch.dict(os.environ, {}, clear=True):
+            result = PermissionService.detect_developer_status(user)
+            assert result == False
     
     def test_detect_developer_with_dev_environment(self):
         """Test developer detection with development environment"""

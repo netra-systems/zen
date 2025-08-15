@@ -311,6 +311,65 @@
                 <prevention>Always verify service requirements: Cloud Run = HTTP only, GKE/GCE = any workload type</prevention>
             </fix>
             
+            <fix date="2025-08-15">
+                <title>PostgreSQL Docker Connection on Windows with Port Conflicts</title>
+                <problem>Docker PostgreSQL container cannot connect to application - authentication failures</problem>
+                <symptoms>
+                    <symptom>asyncpg.exceptions.InvalidPasswordError: password authentication failed</symptom>
+                    <symptom>Container running healthy but connection fails from host</symptom>
+                    <symptom>Multiple PostgreSQL instances on same port</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>Windows PostgreSQL service running on default port 5432</cause>
+                    <cause>Docker container port 5432 conflicts with host PostgreSQL</cause>
+                    <cause>Connection attempts reach Windows PostgreSQL instead of Docker container</cause>
+                    <cause>Password mismatch between Terraform state and actual container configuration</cause>
+                </root-causes>
+                <solution>Run Docker PostgreSQL on alternative port to avoid conflicts</solution>
+                <implementation>
+                    <step>Stop conflicting Windows PostgreSQL or use different port</step>
+                    <step>Run Docker container on port 5433: docker run -p 5433:5432</step>
+                    <step>Update all configuration files with new port</step>
+                    <step>Use trust authentication for local development simplicity</step>
+                    <code>
+                        # Docker command
+                        docker run -d --name netra-postgres-dev \
+                          --network netra-dev-network \
+                          -p 5433:5432 \
+                          -e POSTGRES_HOST_AUTH_METHOD=trust \
+                          -e POSTGRES_USER=postgres \
+                          -e POSTGRES_DB=netra_dev \
+                          postgres:14
+                        
+                        # Connection string
+                        DATABASE_URL=postgresql+asyncpg://postgres@localhost:5433/netra_dev
+                    </code>
+                </implementation>
+                <files-changed>
+                    <file>.env - Updated DATABASE_URL with port 5433</file>
+                    <file>.env.development.local - Updated DATABASE_URL and POSTGRES_PORT</file>
+                    <file>dev_launcher/service_config.py - Changed PostgreSQL port to 5433</file>
+                </files-changed>
+                <debugging-steps>
+                    <step>Check for Windows PostgreSQL: tasklist | findstr postgres</step>
+                    <step>Find service name: sc query | findstr -i postgres</step>
+                    <step>Check port usage: netstat -an | findstr :5432</step>
+                    <step>Verify container network: docker inspect container_name</step>
+                    <step>Check container logs: docker logs container_name</step>
+                </debugging-steps>
+                <prevention>
+                    <action>Always check for port conflicts before deploying Docker containers</action>
+                    <action>Use non-standard ports for Docker services in development</action>
+                    <action>Document port mappings clearly in configuration</action>
+                    <action>Consider using Docker Compose for consistent port management</action>
+                </prevention>
+                <key-insight>
+                    Windows often has PostgreSQL installed locally which conflicts with Docker containers.
+                    Using alternative ports (5433, 5434) avoids conflicts and simplifies development.
+                    Trust authentication is acceptable for local Docker development environments.
+                </key-insight>
+            </fix>
+            
             <fix date="2025-08-13">
                 <title>GitHub Actions Deployment Permission Error</title>
                 <problem>RequestError [HttpError]: Resource not accessible by integration when creating deployments</problem>
@@ -714,6 +773,49 @@
                     <immediate-fixes>Resolved blocking import errors and initialization failures enabling test execution</immediate-fixes>
                     <future-work>Systematic refactoring required for 300-line file limit and 8-line function limit compliance</future-work>
                 </architecture-compliance>
+            </fix>
+            
+            <fix date="2025-08-15">
+                <title>Jest Command Not Found on Windows PATH</title>
+                <problem>Jest command not found when running tests on Windows despite being installed</problem>
+                <symptoms>
+                    <symptom>bash: jest: command not found error when running Jest directly</symptom>
+                    <symptom>npm cache corruption preventing clean reinstallation</symptom>
+                    <symptom>Jest available through npx but not directly in PATH</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>Jest binary not properly linked in node_modules/.bin directory</cause>
+                    <cause>npm cache integrity errors preventing proper package installation</cause>
+                    <cause>Windows PATH environment not recognizing npm package binaries</cause>
+                </root-causes>
+                <solution>Use npx to run Jest or create wrapper scripts for Windows environments</solution>
+                <implementation>
+                    <step>Verified Jest is installed in frontend/package.json as devDependency</step>
+                    <step>Confirmed npx jest works properly in frontend directory</step>
+                    <step>Created jest.cmd wrapper script for command line usage</step>
+                    <step>Created run-jest.ps1 PowerShell script as alternative</step>
+                    <step>Cleared npm cache to resolve corruption issues: rm -rf C:\Users\antho\AppData\Local\npm-cache</step>
+                </implementation>
+                <workarounds>
+                    <workaround>Use npx jest to run tests: cd frontend && npx jest</workaround>
+                    <workaround>Use npm scripts: cd frontend && npm test</workaround>
+                    <workaround>Create batch file wrapper: @echo off\n"C:\Program Files\nodejs\npx.cmd" jest %*</workaround>
+                </workarounds>
+                <files-created>
+                    <file>frontend/jest.cmd - Windows batch wrapper for Jest</file>
+                    <file>frontend/run-jest.ps1 - PowerShell script for Jest execution</file>
+                </files-created>
+                <prevention>
+                    <action>Always use npx for running npm package binaries in scripts</action>
+                    <action>Document that Jest should be run via npx or npm scripts</action>
+                    <action>Clear npm cache when encountering integrity errors</action>
+                    <action>Consider using npm scripts as primary test execution method</action>
+                </prevention>
+                <key-insight>
+                    On Windows, npm package binaries may not be directly accessible in PATH even when installed.
+                    Using npx ensures proper resolution of package binaries regardless of PATH configuration.
+                    npm cache corruption can prevent proper package installation and should be cleared when issues occur.
+                </key-insight>
             </fix>
         </section>
     </sections>

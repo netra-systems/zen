@@ -21,20 +21,27 @@ class SpecializedMetricsCalculator:
     def _get_gpu_mappings(self) -> Dict[str, set]:
         """Get GPU-related semantic mappings"""
         return {
-            'gpu': {'graphics', 'card', 'cards'},
-            'gpus': {'graphics', 'card', 'cards'},
+            'gpu': {'graphics', 'card', 'cards', 'memory'},
+            'gpus': {'graphics', 'card', 'cards', 'memory'},
             'graphics': {'gpu', 'gpus'},
-            'cards': {'gpu', 'gpus'}
+            'cards': {'gpu', 'gpus'},
+            'memory': {'gpu', 'consumption', 'usage'},
+            'usage': {'consumption', 'memory'},
+            'consumption': {'usage', 'memory'}
         }
 
     def _get_training_mappings(self) -> Dict[str, set]:
         """Get training-related semantic mappings"""
         return {
-            'training': {'convergence'},
+            'training': {'convergence', 'precision', 'mixed'},
             'distributed': {'multiple', 'parallel'},
             'neural': {'network'},
             'speed': {'faster', 'fast'},
-            'faster': {'speed', 'fast'}
+            'faster': {'speed', 'fast'},
+            'reduce': {'optimize', 'minimize', 'improve'},
+            'help': {'optimize', 'improve', 'reduce'},
+            'optimize': {'reduce', 'improve', 'help', 'enabling'},
+            'enabling': {'optimize', 'improve'}
         }
 
     def _get_semantic_mappings(self) -> Dict[str, set]:
