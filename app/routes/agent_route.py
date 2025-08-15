@@ -5,8 +5,7 @@ from app.schemas import RequestModel
 from typing import Dict, Any, Optional, AsyncGenerator
 from app.services.state_persistence_service import state_persistence_service
 from app.services.agent_service import get_agent_service, AgentService
-from app.db.postgres import get_async_db
-from app.dependencies import get_llm_manager
+from app.dependencies import get_llm_manager, DbDep
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
@@ -83,7 +82,7 @@ async def get_agent_status(run_id: str, supervisor: Supervisor = Depends(get_age
 @router.get("/{run_id}/state")
 async def get_agent_state(
     run_id: str, 
-    db: AsyncSession = Depends(get_async_db)
+    db: DbDep
 ) -> Dict[str, Any]:
     """Get the full agent state for a run"""
     state = await state_persistence_service.load_agent_state(run_id, db)
@@ -98,8 +97,8 @@ async def get_agent_state(
 @router.get("/thread/{thread_id}/runs")
 async def get_thread_runs(
     thread_id: str,
-    limit: int = 10,
-    db: AsyncSession = Depends(get_async_db)
+    db: DbDep,
+    limit: int = 10
 ) -> Dict[str, Any]:
     """Get all runs for a thread"""
     runs = await state_persistence_service.list_thread_runs(thread_id, db, limit)
@@ -129,7 +128,7 @@ async def process_agent_message(
 @router.post("/stream")
 async def stream_response(
     request_model: RequestModel,
-    db_session: AsyncSession = Depends(get_async_db),
+    db_session: DbDep,
     llm_manager: LLMManager = Depends(get_llm_manager)
 ):
     """Stream agent response with proper SSE format."""

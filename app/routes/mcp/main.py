@@ -9,7 +9,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.postgres import get_async_db
+from app.dependencies import DbDep
 from app.auth.auth_dependencies import get_current_user, get_current_user_optional
 from app.schemas import UserInDB
 from app.services.mcp_service import MCPClient
@@ -49,7 +49,7 @@ async def get_mcp_status(
 @router.post("/clients")
 async def register_client(
     request: MCPClientCreateRequest,
-    db: AsyncSession = Depends(get_async_db),
+    db: DbDep,
     mcp_service = Depends(get_mcp_service),
     current_user: UserInDB = Depends(get_current_user)
 ) -> MCPClient:
@@ -100,7 +100,7 @@ async def list_tools(
 @router.post("/tools/call")
 async def call_tool(
     request: MCPToolCallRequest,
-    db: AsyncSession = Depends(get_async_db),
+    db: DbDep,
     mcp_service = Depends(get_mcp_service),
     current_user: UserInDB = Depends(get_current_user)
 ):

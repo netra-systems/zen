@@ -21,8 +21,7 @@ from app.schemas.registry import (
 )
 from app.ws_manager import manager
 from app.llm.llm_manager import LLMManager
-from app.db.postgres import get_async_db
-from app.dependencies import get_llm_manager
+from app.dependencies import get_llm_manager, DbDep
 from app.services.thread_service import ThreadService
 from app.services.message_handlers import MessageHandlerService
 from app.services.streaming_service import (
@@ -237,7 +236,7 @@ class AgentService:
         return AgentResponseProcessor(self.supervisor, message, thread_id)
 
 def get_agent_service(
-    db_session: AsyncSession = Depends(get_async_db), 
+    db_session: DbDep, 
     llm_manager: LLMManager = Depends(get_llm_manager)
 ) -> AgentService:
     supervisor = _create_supervisor_agent(db_session, llm_manager)
@@ -253,10 +252,9 @@ def _create_supervisor_agent(db_session: AsyncSession, llm_manager: LLMManager):
 # Module-level functions for backward compatibility with tests
 async def process_message(message: str, thread_id: Optional[str] = None) -> Dict[str, Any]:
     """Module-level wrapper for AgentService.process_message for test compatibility"""
-    from app.db.postgres import get_async_db
-    from app.dependencies import get_llm_manager
+    from app.dependencies import get_db_dependency, get_llm_manager
     
-    async with get_async_db() as db:
+    async with get_db_dependency() as db:
         return await _execute_module_process_message(db, message, thread_id)
 
 async def _execute_module_process_message(db, message: str, thread_id: Optional[str]) -> Dict[str, Any]:
@@ -267,10 +265,10 @@ async def _execute_module_process_message(db, message: str, thread_id: Optional[
 
 async def generate_stream(message: str, thread_id: Optional[str] = None) -> AsyncGenerator[Dict[str, Any], None]:
     """Module-level wrapper for AgentService.generate_stream for test compatibility"""
-    from app.db.postgres import get_async_db
+    from app.dependencies import get_db_dependency
     from app.config import settings
     
-    async with get_async_db() as db:
+    async with get_db_dependency() as db:
         async for chunk in _execute_module_generate_stream(db, message, thread_id):
             yield chunk
 

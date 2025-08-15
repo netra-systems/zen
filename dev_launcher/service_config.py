@@ -454,18 +454,9 @@ def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
             # Validate the loaded configuration
             warnings = config.validate()
             if warnings and interactive:
-                print("\n⚠️  Configuration warnings:")
+                # Log warnings but don't prompt user
                 for warning in warnings:
-                    print(f"  {warning}")
-                
-                # Ask if user wants to reconfigure
-                try:
-                    reconfigure = input("\nReconfigure services? [y/N]: ").strip().lower()
-                    if reconfigure in ["y", "yes"]:
-                        wizard = ServiceConfigWizard()
-                        config = wizard.run()
-                except EOFError:
-                    logger.info("Non-interactive mode detected, using existing configuration")
+                    logger.debug(f"Configuration notice: {warning}")
             
             return config
         except Exception as e:

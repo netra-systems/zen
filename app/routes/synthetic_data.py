@@ -11,7 +11,7 @@ from datetime import datetime
 
 from app import schemas
 from app.services.synthetic_data_service import synthetic_data_service
-from app.dependencies import get_db_session, get_async_db
+from app.dependencies import get_db_session, get_db_dependency, DbDep
 from app.auth.auth_dependencies import get_current_user
 from app.schemas.shared_types import BaseAgentConfig
 from app.db.models_postgres import User
@@ -278,7 +278,7 @@ def _calculate_tool_diversity(samples: List[Dict]) -> int:
 # Corpus endpoints moved to synthetic_data_corpus.py for modularity
 
 @router.get("/templates")
-async def get_templates(db: AsyncSession = Depends(get_async_db)):
+async def get_templates(db: AsyncSession = Depends(get_db_dependency)):
     """Get available templates"""
     return await _fetch_templates(db)
 

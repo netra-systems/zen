@@ -1,7 +1,8 @@
 """Extended health check endpoints with detailed monitoring."""
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.postgres import get_async_db, get_pool_status, async_engine
+from app.db.postgres import get_pool_status, async_engine
+from app.dependencies import get_db_dependency
 from app.logging_config import central_logger
 from typing import Dict, Any
 import psutil
@@ -12,7 +13,7 @@ logger = central_logger.get_logger(__name__)
 router = APIRouter(prefix="/health", tags=["health"])
 
 @router.get("/database")
-async def health_database(db: AsyncSession = Depends(get_async_db)) -> Dict[str, Any]:
+async def health_database(db: AsyncSession = Depends(get_db_dependency)) -> Dict[str, Any]:
     """Check database health and connection pool status."""
     try:
         # Test database connectivity
