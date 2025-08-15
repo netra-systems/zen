@@ -172,19 +172,19 @@ async def _handle_message_loop(user_id_str: str, websocket: WebSocket, conn_info
 async def _handle_websocket_disconnect(e: WebSocketDisconnect, user_id_str: str, websocket: WebSocket):
     """Handle WebSocket disconnect."""
     logger.info(f"WebSocket disconnected for user {user_id_str}: {e.code} - {e.reason}")
-    await manager.disconnect(user_id_str, websocket, code=e.code, reason=e.reason or "Client disconnect")
+    await manager.disconnect_user(user_id_str, websocket, code=e.code, reason=e.reason or "Client disconnect")
 
 async def _handle_websocket_error(e: Exception, user_id_str: str, websocket: WebSocket):
     """Handle WebSocket error."""
     logger.error(f"WebSocket error for user {user_id_str}: {e}", exc_info=True)
-    await manager.disconnect(user_id_str, websocket, code=1011, reason="Server error")
+    await manager.disconnect_user(user_id_str, websocket, code=1011, reason="Server error")
 
 async def _cleanup_connection(user_id_str: str, websocket: WebSocket):
     """Ensure connection cleanup happens."""
     if user_id_str and user_id_str in manager.connection_manager.active_connections:
         connections = manager.connection_manager.active_connections.get(user_id_str, [])
         if any(conn.websocket == websocket for conn in connections):
-            await manager.disconnect(user_id_str, websocket)
+            await manager.disconnect_user(user_id_str, websocket)
 
 async def _establish_websocket_connection(websocket: WebSocket):
     """Establish and authenticate WebSocket connection."""
@@ -192,7 +192,7 @@ async def _establish_websocket_connection(websocket: WebSocket):
     security_service, agent_service = await _get_app_services(websocket)
     user_id_str = await _authenticate_websocket_user(websocket, token, security_service)
     
-    conn_info = await manager.connect(user_id_str, websocket)
+    conn_info = await manager.connect_user(user_id_str, websocket)
     logger.info(f"WebSocket connection established for user {user_id_str}")
     return user_id_str, conn_info, agent_service
 

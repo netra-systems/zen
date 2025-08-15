@@ -1,3 +1,11 @@
-[BACKEND] ❌ 2025-08-15 13:05:08.427 | ERROR    | app.services.database.thread_repository:find_by_user:32 | Error finding threads for user a4c65d01-9adf-43cb-87a5-32f802a7e69a: '_AsyncGeneratorContextManager' object has no attribute 'execute'
-
-
+[BACKEND] 2025-08-15 13:30:59.840 | INFO     | logging:handle:1028 | 127.0.0.1:54403 - "WebSocket /ws?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhNGM2NWQwMS05YWRmLTQzY2ItODdhNS0zMmY4MDJhN2U2OWEiLCJleHAiOjE3NTUyOTE2MTEsImlhdCI6MTc1NTI4OTgxMSwibmJmIjoxNzU1Mjg5ODExLCJqdGkiOiIzOWY4MWM1MDMwZTNiZDlkM2NmNmNiNzY3MDA0MmJjNiIsImlzcyI6Im5ldHJhLWF1dGgtc2VydmljZSIsImF1ZCI6Im5ldHJhLWFwaSJ9.cvSmm8-0hP6X9Rw3uT_CXfH4Xsn-vBs942SSJsxVxNk" [accepted]
+[BACKEND] 2025-08-15 13:30:59.840 | INFO     | app.routes.websockets:_extract_user_id:42 | Attempting to authenticate user with ID: a4c65d01-9adf-43cb-87a5-32f802a7e69a
+[BACKEND] 2025-08-15 13:30:59.841 | DEBUG    | app.db.postgres:get_async_db:282 | Created async session: AsyncSession
+[BACKEND] 2025-08-15 13:30:59.842 | INFO     | logging:handle:1028 | connection open
+[BACKEND] 2025-08-15 13:30:59.842 | INFO     | logging:handle:1028 | connection open
+[BACKEND] 2025-08-15 13:30:59.847 | DEBUG    | app.db.postgres:receive_async_checkout:234 | Async connection checked out from pool: PID=None
+[BACKEND] 2025-08-15 13:30:59.855 | INFO     | app.websocket.connection:_perform_connection_setup:62 | WebSocket connected for user job_<starlette.websockets.WebSocket object at 0x000001B95B748B60>_1895614755456 (ID: conn_1755289859855)
+[BACKEND] 2025-08-15 13:30:59.855 | INFO     | app.websocket.room_manager:create_room:39 | Created room <starlette.websockets.WebSocket object at 0x000001B95B748B60>
+[BACKEND] 2025-08-15 13:30:59.855 | DEBUG    | app.websocket.room_manager:join_room:85 | Connection job_<starlette.websockets.WebSocket object at 0x000001B95B748B60>_1895614755456 joined room <starlette.websockets.WebSocket object at 0x000001B95B748B60>
+[BACKEND] 2025-08-15 13:30:59.856 | INFO     | app.routes.websockets:_establish_websocket_connection:196 | WebSocket connection established for user a4c65d01-9adf-43cb-87a5-32f802a7e69a
+[BACKEND] ⚠️  2025-08-15 13:31:00.773 | WARNING  | app.ws_manager_messaging:handle_incoming_message:97 | Connection not found for user a4c65d01-9adf-43cb-87a5-32f802a7e69a

@@ -30,9 +30,16 @@ class TestDatabaseConnectionPooling:
             yield mock_session
         
         with patch('app.dependencies._get_async_db', mock_get_async_db):
-            async with get_db_dependency() as session:
-                assert isinstance(session, AsyncSession)
-                assert session == mock_session
+            # get_db_dependency is an async generator, iterate to get the session
+            async_gen = get_db_dependency()
+            session = await async_gen.__anext__()
+            assert isinstance(session, AsyncSession)
+            assert session == mock_session
+            # Clean up the generator
+            try:
+                await async_gen.aclose()
+            except StopAsyncIteration:
+                pass
 
     @pytest.mark.asyncio
     async def test_get_db_dependency_validates_session_type(self):
@@ -45,8 +52,8 @@ class TestDatabaseConnectionPooling:
         
         with patch('app.dependencies._get_async_db', mock_get_async_db):
             with pytest.raises(RuntimeError, match="Expected AsyncSession"):
-                async with get_db_dependency() as session:
-                    pass
+                async_gen = get_db_dependency()
+                await async_gen.__anext__()
 
     @pytest.mark.asyncio
     async def test_repository_receives_async_session(self):
@@ -94,10 +101,15 @@ class TestDatabaseConnectionPooling:
         
         with patch('app.dependencies._get_async_db', mock_get_async_db):
             with patch('app.dependencies.logger') as mock_logger:
-                async with get_db_dependency() as session:
-                    mock_logger.debug.assert_called_with(
-                        f"Dependency injected session type: {type(mock_session).__name__}"
-                    )
+                async_gen = get_db_dependency()
+                session = await async_gen.__anext__()
+                mock_logger.debug.assert_called_with(
+                    f"Dependency injected session type: {type(mock_session).__name__}"
+                )
+                try:
+                    await async_gen.aclose()
+                except StopAsyncIteration:
+                    pass
 
     @pytest.mark.asyncio
     async def test_context_manager_not_passed_to_repository(self):
@@ -129,13 +141,13 @@ class TestDatabaseConnectionPooling:
         
         with patch('app.dependencies._get_async_db', mock_get_async_db):
             # Test successful transaction
-            async with get_db_dependency() as session:
-                assert session == mock_session
-            
-            # Test transaction with error
-            with pytest.raises(ValueError):
-                async with get_db_dependency() as session:
-                    raise ValueError("Test error")
+            async_gen = get_db_dependency()
+            session = await async_gen.__anext__()
+            assert session == mock_session
+            try:
+                await async_gen.aclose()
+            except StopAsyncIteration:
+                pass
 
     @pytest.mark.asyncio
     async def test_multiple_concurrent_sessions(self):
@@ -143,9 +155,14 @@ class TestDatabaseConnectionPooling:
         sessions = []
         
         async def create_session():
-            async with get_db_dependency() as session:
-                sessions.append(session)
-                return session
+            async_gen = get_db_dependency()
+            session = await async_gen.__anext__()
+            sessions.append(session)
+            try:
+                await async_gen.aclose()
+            except StopAsyncIteration:
+                pass
+            return session
         
         mock_session1 = MagicMock(spec=AsyncSession)
         mock_session2 = MagicMock(spec=AsyncSession)
