@@ -27,10 +27,21 @@ class HeartbeatLogger:
 
     def start_heartbeat(self, correlation_id: str, agent_name: str) -> None:
         """Start heartbeat logging for an LLM operation."""
+        self._record_heartbeat_start(correlation_id, agent_name)
+        self._create_heartbeat_task(correlation_id)
+
+    def _record_heartbeat_start(self, correlation_id: str, agent_name: str) -> None:
+        """Record the start of a heartbeat operation."""
         self._start_times[correlation_id] = time.time()
         self._agent_names[correlation_id] = agent_name
-        task = asyncio.create_task(self._heartbeat_loop(correlation_id))
-        self._active_tasks[correlation_id] = task
+
+    def _create_heartbeat_task(self, correlation_id: str) -> None:
+        """Create the async heartbeat task."""
+        try:
+            task = asyncio.create_task(self._heartbeat_loop(correlation_id))
+            self._active_tasks[correlation_id] = task
+        except RuntimeError:
+            pass
 
     def stop_heartbeat(self, correlation_id: str) -> None:
         """Stop heartbeat logging for an LLM operation."""
