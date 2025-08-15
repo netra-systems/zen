@@ -27,16 +27,12 @@ class TestKeyParametersAccess:
 
     def test_build_analysis_params_with_pydantic_model(self, execution_engine):
         """Test _build_analysis_params_dict handles Pydantic KeyParameters."""
-        # Create KeyParameters as Pydantic model
+        # Create KeyParameters as Pydantic model with its actual fields
         key_params = KeyParameters(
             workload_type="batch_processing",
             optimization_focus="latency",
             time_sensitivity="high",
-            scope="global",
-            user_id=123,
-            workload_id="workload_456",
-            metrics=["cpu_usage", "memory_usage", "response_time"],
-            time_range="last_12_hours"
+            scope="global"
         )
         
         intent = {"primary": "optimization", "secondary": "cost_reduction"}
@@ -44,11 +40,11 @@ class TestKeyParametersAccess:
         # Call method - should not raise AttributeError
         result = execution_engine._build_analysis_params_dict(key_params, intent)
         
-        # Verify correct extraction
-        assert result["user_id"] == 123
-        assert result["workload_id"] == "workload_456"
-        assert result["metric_names"] == ["cpu_usage", "memory_usage", "response_time"]
-        assert result["time_range_str"] == "last_12_hours"
+        # Verify it uses defaults when fields don't exist
+        assert result["user_id"] == 1  # Default
+        assert result["workload_id"] is None  # Default
+        assert result["metric_names"] == ["latency_ms", "throughput", "cost_cents"]  # Default
+        assert result["time_range_str"] == "last_24_hours"  # Default
         assert result["primary_intent"] == "optimization"
 
     def test_build_analysis_params_with_dict(self, execution_engine):
@@ -89,12 +85,12 @@ class TestKeyParametersAccess:
         assert result["primary_intent"] == "general"
 
     def test_build_analysis_params_with_partial_pydantic(self, execution_engine):
-        """Test _build_analysis_params_dict handles Pydantic model with missing fields."""
+        """Test _build_analysis_params_dict handles Pydantic model with some fields."""
         # Create KeyParameters with only some fields
         key_params = KeyParameters(
             workload_type="streaming",
             optimization_focus="throughput"
-            # user_id, workload_id, metrics, time_range not set
+            # time_sensitivity and scope not set
         )
         
         intent = {"primary": "monitoring"}
@@ -102,7 +98,7 @@ class TestKeyParametersAccess:
         # Call method
         result = execution_engine._build_analysis_params_dict(key_params, intent)
         
-        # Verify defaults for missing fields
+        # Verify defaults for non-existent fields
         assert result["user_id"] == 1  # Default
         assert result["workload_id"] is None  # Default
         assert result["metric_names"] == ["latency_ms", "throughput", "cost_cents"]  # Default
@@ -115,29 +111,35 @@ class TestKeyParametersAccess:
         state = DeepAgentState(
             run_id="test_run",
             thread_id="test_thread",
-            user_id="test_user"
+            user_id="test_user",
+            user_request="Test request"
         )
         
-        # Create TriageResult with KeyParameters
+        # Create TriageResult with KeyParameters (using actual fields)
+        from app.agents.triage_sub_agent.models import UserIntent
+        
         triage_result = TriageResult(
             key_parameters=KeyParameters(
-                user_id=999,
-                workload_id="workload_xyz",
-                metrics=["error_rate", "latency"],
-                time_range="last_hour"
+                workload_type="api_service",
+                optimization_focus="reliability",
+                time_sensitivity="critical",
+                scope="production"
             ),
-            intent={"primary": "debugging", "secondary": "performance"}
+            user_intent=UserIntent(
+                primary_intent="debugging",
+                secondary_intents=["performance"]
+            )
         )
         state.triage_result = triage_result
         
         # Call method
-        result = execution_engine._build_analysis_params(state)
+        result = execution_engine._extract_analysis_params(state)
         
-        # Verify extraction through the chain
-        assert result["user_id"] == 999
-        assert result["workload_id"] == "workload_xyz"
-        assert result["metric_names"] == ["error_rate", "latency"]
-        assert result["time_range_str"] == "last_hour"
+        # Verify extraction through the chain - should use defaults since KeyParameters doesn't have those fields
+        assert result["user_id"] == 1  # Default
+        assert result["workload_id"] is None  # Default
+        assert result["metric_names"] == ["latency_ms", "throughput", "cost_cents"]  # Default
+        assert result["time_range_str"] == "last_24_hours"  # Default
         assert result["primary_intent"] == "debugging"
 
     def test_build_analysis_params_no_triage_result(self, execution_engine):
@@ -145,12 +147,13 @@ class TestKeyParametersAccess:
         state = DeepAgentState(
             run_id="test_run",
             thread_id="test_thread",
-            user_id="test_user"
+            user_id="test_user",
+            user_request="Test request"
         )
         state.triage_result = None
         
         # Call method
-        result = execution_engine._build_analysis_params(state)
+        result = execution_engine._extract_analysis_params(state)
         
         # Should return defaults
         assert result["user_id"] == 1
@@ -162,9 +165,9 @@ class TestKeyParametersAccess:
     def test_mixed_type_handling_no_errors(self, execution_engine):
         """Test that mixed types don't cause AttributeError."""
         test_cases = [
-            # Pydantic model
-            KeyParameters(user_id=100, metrics=["metric1"]),
-            # Dict
+            # Pydantic model with its actual fields
+            KeyParameters(workload_type="batch", optimization_focus="cost"),
+            # Dict with the expected fields
             {"user_id": 200, "metrics": ["metric2"]},
             # Empty dict
             {},

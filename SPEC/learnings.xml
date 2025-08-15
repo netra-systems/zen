@@ -1970,5 +1970,83 @@
                 </testing>
             </fix>
         </section>
+        
+        <section name="clickhouse-query-issues">
+            <fix id="metrics-value-type-mismatch" date="2025-08-15">
+                <title>ClickHouse metrics.value Array Type Mismatch Error</title>
+                <symptoms>
+                    <symptom>Error code 386: "There is no supertype for types Array(Float64), Float64"</symptom>
+                    <symptom>Query fails with "some of them are Array and some of them are not"</symptom>
+                    <symptom>Happens with queries like: if(idx > 0, metrics.value[idx], 0.)</symptom>
+                    <symptom>Occurs after triage completion when querying workload_events</symptom>
+                </symptoms>
+                <root-cause>
+                    The workload_events table uses a Nested structure for metrics, making metrics.value 
+                    an Array(Float64). The problematic queries use incorrect array access syntax 
+                    metrics.value[idx] instead of arrayElement(metrics.value, idx). While there's a 
+                    query fixer in place (clickhouse_query_fixer.py), some queries are bypassing it or 
+                    being generated with bad syntax that isn't caught.
+                </root-cause>
+                <analysis>
+                    <finding>Schema defines metrics as Nested(name Array(String), value Array(Float64), unit Array(String))</finding>
+                    <finding>Query builder correctly uses arrayElement() function</finding>
+                    <finding>Query fixer exists and can fix the bad syntax</finding>
+                    <finding>Some queries still reach ClickHouse with bad syntax</finding>
+                    <finding>Error happens during automatic metrics collection after triage</finding>
+                </analysis>
+                <implementation>
+                    <code language="python">
+                        # The query fixer in app/db/clickhouse_query_fixer.py handles this:
+                        def fix_clickhouse_array_syntax(query: str) -> str:
+                            # Pattern to match incorrect array access like metrics.value[idx]
+                            pattern = r'(\w+)\.(\w+)\[([^\]]+)\]'
+                            
+                            def replace_array_access(match):
+                                nested_field = match.group(1)  # e.g., 'metrics'
+                                array_field = match.group(2)   # e.g., 'value'
+                                index_expr = match.group(3)    # e.g., 'idx'
+                                
+                                # Convert to proper ClickHouse syntax
+                                return f"arrayElement({nested_field}.{array_field}, {index_expr})"
+                            
+                            return re.sub(pattern, replace_array_access, query)
+                        
+                        # All ClickHouse clients should be wrapped with the interceptor:
+                        base_client = ClickHouseDatabase(...)
+                        client = ClickHouseQueryInterceptor(base_client)  # Applies fixes
+                    </code>
+                </implementation>
+                <solution>
+                    <step>Ensure all ClickHouse clients use get_clickhouse_client() which applies the query fixer</step>
+                    <step>Never create ClickHouseDatabase directly without wrapping with ClickHouseQueryInterceptor</step>
+                    <step>Verify query_builder.py uses arrayElement() for all array accesses</step>
+                    <step>Check for any dynamic query generation that might bypass the fixer</step>
+                </solution>
+                <files-modified>
+                    <file>app/db/clickhouse_query_fixer.py - Fixes array syntax in queries</file>
+                    <file>app/db/clickhouse.py - Wraps client with query interceptor</file>
+                    <file>app/agents/data_sub_agent/query_builder.py - Uses correct arrayElement syntax</file>
+                    <file>app/tests/unit/test_metrics_value_type_mismatch.py - Test case for this issue</file>
+                </files-modified>
+                <prevention>
+                    <action>Always use get_clickhouse_client() instead of creating ClickHouseDatabase directly</action>
+                    <action>Use arrayElement(array, index) instead of array[index] in ClickHouse queries</action>
+                    <action>Test all query patterns with the query fixer before deployment</action>
+                    <action>Monitor for Error Code 386 in ClickHouse logs</action>
+                    <action>Use query_builder.py methods instead of constructing queries manually</action>
+                </prevention>
+                <key-insight>
+                    ClickHouse Nested structures expand into parallel arrays, so metrics.value is already
+                    an array. Using metrics.value[idx] in an if() statement causes a type mismatch because
+                    ClickHouse can't determine if the result should be Float64 (element) or Array(Float64) 
+                    (whole array). Always use arrayElement() for accessing array elements in ClickHouse.
+                </key-insight>
+                <testing>
+                    <test>test_fix_metrics_value_array_syntax - Verifies query fixer works</test>
+                    <test>test_query_interceptor_fixes_queries - Ensures interceptor applies fixes</test>
+                    <test>test_complex_nested_array_access - Tests various array access patterns</test>
+                </testing>
+            </fix>
+        </section>
     </sections>
 </specification>

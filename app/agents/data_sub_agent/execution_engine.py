@@ -85,7 +85,16 @@ class ExecutionEngine:
         
         # Access TriageResult object attributes properly
         key_params = getattr(triage_result, 'key_parameters', {})
-        intent = getattr(triage_result, 'intent', {})
+        # Extract user_intent and convert to dict for backward compatibility
+        user_intent = getattr(triage_result, 'user_intent', None)
+        if user_intent:
+            # Convert UserIntent to dict format expected by _build_analysis_params_dict
+            intent = {
+                "primary": getattr(user_intent, 'primary_intent', 'general'),
+                "secondary": getattr(user_intent, 'secondary_intents', [])
+            }
+        else:
+            intent = {}
         
         return self._build_analysis_params_dict(key_params, intent)
     
