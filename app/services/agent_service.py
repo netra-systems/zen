@@ -256,7 +256,7 @@ async def process_message(message: str, thread_id: Optional[str] = None) -> Dict
     from app.db.postgres import get_async_db
     from app.dependencies import get_llm_manager
     
-    async for db in get_async_db():
+    async with get_async_db() as db:
         return await _execute_module_process_message(db, message, thread_id)
 
 async def _execute_module_process_message(db, message: str, thread_id: Optional[str]) -> Dict[str, Any]:
