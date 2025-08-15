@@ -12,6 +12,7 @@ from app.agents.base import BaseSubAgent
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.state import DeepAgentState
 from app.logging_config import central_logger
+from app.llm.observability import log_agent_communication
 from .models import CorpusOperationResult, CorpusMetadata, CorpusType, CorpusOperation
 from .parsers import CorpusRequestParser
 from .validators import CorpusApprovalValidator
@@ -46,6 +47,9 @@ class CorpusAdminSubAgent(BaseSubAgent):
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute corpus administration operation"""
+        # Log agent communication start
+        log_agent_communication("Supervisor", "CorpusAdminSubAgent", run_id, "execute_request")
+        
         start_time = time.time()
         
         try:
@@ -65,6 +69,9 @@ class CorpusAdminSubAgent(BaseSubAgent):
             return
         
         await self._complete_corpus_operation(operation_request, state, run_id, stream_updates, start_time)
+        
+        # Log agent communication completion
+        log_agent_communication("CorpusAdminSubAgent", "Supervisor", run_id, "execute_response")
     
     async def _complete_corpus_operation(
         self, operation_request, state: DeepAgentState, run_id: str, stream_updates: bool, start_time: float

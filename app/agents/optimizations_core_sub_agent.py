@@ -20,6 +20,10 @@ from app.logging_config import central_logger as logger
 from app.core.reliability import (
     get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
 )
+from app.llm.observability import (
+    start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
+    log_agent_communication, log_agent_input, log_agent_output
+)
 
 
 class OptimizationsCoreSubAgent(BaseSubAgent):
@@ -48,6 +52,9 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute the optimizations core logic."""
+        # Log agent communication start
+        log_agent_communication("Supervisor", "OptimizationsCoreSubAgent", run_id, "execute_request")
+        
         main_operation = self._create_main_optimization_operation(state, run_id, stream_updates)
         fallback_operation = self._create_fallback_optimization_operation(state, run_id, stream_updates)
         
@@ -57,13 +64,38 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
             fallback=fallback_operation,
             timeout=30.0
         )
+        
+        # Log agent communication completion
+        log_agent_communication("OptimizationsCoreSubAgent", "Supervisor", run_id, "execute_response")
     
     def _create_main_optimization_operation(self, state: DeepAgentState, run_id: str, stream_updates: bool):
         """Create the main optimization operation function."""
         async def _execute_optimization():
             await self._send_processing_update(run_id, stream_updates)
             prompt = self._build_optimization_prompt(state)
-            llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='optimizations_core')
+            
+            # Generate correlation ID and start heartbeat
+            correlation_id = generate_llm_correlation_id()
+            start_llm_heartbeat(correlation_id, "OptimizationsCoreSubAgent")
+            
+            try:
+                # Log input to LLM
+                log_agent_input("OptimizationsCoreSubAgent", "LLM", len(prompt), correlation_id)
+                
+                llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='optimizations_core')
+                
+                # Log output from LLM
+                log_agent_output("LLM", "OptimizationsCoreSubAgent", 
+                               len(llm_response_str), "success", correlation_id)
+                
+            except Exception as e:
+                # Log error output
+                log_agent_output("LLM", "OptimizationsCoreSubAgent", 0, "error", correlation_id)
+                raise
+            finally:
+                # Stop heartbeat
+                stop_llm_heartbeat(correlation_id)
+            
             optimizations_result = self._extract_and_validate_result(llm_response_str, run_id)
             state.optimizations_result = self._create_optimizations_result(optimizations_result)
             await self._send_success_update(run_id, stream_updates, optimizations_result)

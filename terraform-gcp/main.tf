@@ -317,5 +317,7 @@ resource "google_storage_bucket" "backups" {
     enabled = false  # Disabled to save costs
   }
   
+  public_access_prevention = "enforced"
+  
   depends_on = [google_project_service.apis]
 }

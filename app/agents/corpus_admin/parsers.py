@@ -9,6 +9,10 @@ from typing import Dict, Any
 from app.llm.llm_manager import LLMManager
 from app.agents.utils import extract_json_from_response
 from app.logging_config import central_logger
+from app.llm.observability import (
+    start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
+    log_agent_input, log_agent_output
+)
 from .models import CorpusOperation, CorpusType, CorpusMetadata, CorpusOperationRequest
 
 logger = central_logger.get_logger(__name__)
@@ -22,13 +26,31 @@ class CorpusRequestParser:
     
     async def parse_operation_request(self, user_request: str) -> CorpusOperationRequest:
         """Parse corpus operation from user request"""
-        prompt = self._build_parsing_prompt(user_request)
-        response = await self.llm_manager.ask_llm(prompt, llm_config_name='default')
-        params = extract_json_from_response(response)
+        correlation_id = generate_llm_correlation_id()
         
-        if params:
-            return self._create_operation_request(params)
-        return self._create_default_request()
+        # Start heartbeat for LLM operation
+        start_llm_heartbeat(correlation_id, "CorpusAdminSubAgent-Parser")
+        
+        try:
+            prompt = self._build_parsing_prompt(user_request)
+            
+            # Log input to LLM
+            log_agent_input("CorpusAdminSubAgent", "LLM", len(prompt), correlation_id)
+            
+            response = await self.llm_manager.ask_llm(prompt, llm_config_name='default')
+            
+            # Log output from LLM
+            log_agent_output("LLM", "CorpusAdminSubAgent", 
+                           len(response), "success", correlation_id)
+            
+            params = extract_json_from_response(response)
+            
+            if params:
+                return self._create_operation_request(params)
+            return self._create_default_request()
+        finally:
+            # Stop heartbeat
+            stop_llm_heartbeat(correlation_id)
     
     def _build_parsing_prompt(self, user_request: str) -> str:
         """Build LLM prompt for parsing corpus requests"""
