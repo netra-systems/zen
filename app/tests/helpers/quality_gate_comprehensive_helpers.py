@@ -371,9 +371,9 @@ def create_nested_parentheses_content():
 def create_high_overlap_content():
     """Create content with high word overlap for redundancy testing"""
     return """
-    The optimization improves system performance significantly.
-    System performance improves significantly with the optimization.
-    Significant performance improvements come from system optimization.
+    The optimization improves system performance significantly today.
+    System performance optimization improves significantly with results today.
+    Performance optimization system significantly improves results today.
     """
 
 

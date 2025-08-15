@@ -108,17 +108,35 @@ class ResilientHTTPClient:
     def _select_config(self, api_name: str) -> CircuitConfig:
         """Select circuit config based on API name."""
         api_lower = api_name.lower()
-        
-        if "google" in api_lower or "oauth" in api_lower:
+        return self._get_config_by_type(api_lower)
+    
+    def _get_config_by_type(self, api_lower: str) -> CircuitConfig:
+        """Get config based on API type matching."""
+        if self._is_google_api(api_lower):
             return ExternalAPIConfig.GOOGLE_API_CONFIG
-        elif "openai" in api_lower or "gpt" in api_lower:
+        elif self._is_openai_api(api_lower):
             return ExternalAPIConfig.OPENAI_API_CONFIG
-        elif "anthropic" in api_lower or "claude" in api_lower:
+        elif self._is_anthropic_api(api_lower):
             return ExternalAPIConfig.ANTHROPIC_API_CONFIG
-        elif "health" in api_lower or "ping" in api_lower:
+        elif self._is_fast_api(api_lower):
             return ExternalAPIConfig.FAST_API_CONFIG
-        else:
-            return ExternalAPIConfig.GENERIC_API_CONFIG
+        return ExternalAPIConfig.GENERIC_API_CONFIG
+    
+    def _is_google_api(self, api_lower: str) -> bool:
+        """Check if API is Google-based."""
+        return "google" in api_lower or "oauth" in api_lower
+    
+    def _is_openai_api(self, api_lower: str) -> bool:
+        """Check if API is OpenAI-based."""
+        return "openai" in api_lower or "gpt" in api_lower
+    
+    def _is_anthropic_api(self, api_lower: str) -> bool:
+        """Check if API is Anthropic-based."""
+        return "anthropic" in api_lower or "claude" in api_lower
+    
+    def _is_fast_api(self, api_lower: str) -> bool:
+        """Check if API is fast/health API."""
+        return "health" in api_lower or "ping" in api_lower
     
     async def get(self, 
                   url: str, 
@@ -165,24 +183,33 @@ class ResilientHTTPClient:
                       headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """Execute HTTP request with circuit breaker protection."""
         circuit = await self._get_circuit(api_name)
-        
+        request_func = self._create_request_function(method, url, api_name, params, data, json_data, headers)
+        return await self._execute_with_circuit(circuit, request_func, method, url, api_name)
+    
+    def _create_request_function(self, method: str, url: str, api_name: str, 
+                                params: Optional[Dict[str, Any]], data: Optional[Union[Dict[str, Any], str]], 
+                                json_data: Optional[Dict[str, Any]], headers: Optional[Dict[str, str]]):
+        """Create request function for circuit execution."""
         async def _make_request() -> Dict[str, Any]:
             session = await self._get_session()
             full_url = self._build_url(url)
             request_headers = self._merge_headers(headers)
-            
-            async with session.request(
-                method=method,
-                url=full_url,
-                params=params,
-                data=data,
-                json=json_data,
-                headers=request_headers
-            ) as response:
-                return await self._process_response(response, api_name)
-        
+            return await self._execute_http_request(session, method, full_url, params, data, json_data, request_headers, api_name)
+        return _make_request
+    
+    async def _execute_http_request(self, session, method: str, full_url: str, 
+                                   params, data, json_data, request_headers, api_name: str) -> Dict[str, Any]:
+        """Execute HTTP request with session."""
+        async with session.request(
+            method=method, url=full_url, params=params, 
+            data=data, json=json_data, headers=request_headers
+        ) as response:
+            return await self._process_response(response, api_name)
+    
+    async def _execute_with_circuit(self, circuit, request_func, method: str, url: str, api_name: str) -> Dict[str, Any]:
+        """Execute request with circuit breaker handling."""
         try:
-            return await circuit.call(_make_request)
+            return await circuit.call(request_func)
         except CircuitBreakerOpenError:
             logger.warning(f"HTTP request blocked - circuit open: {api_name}")
             return self._get_fallback_response(method, url, api_name)
@@ -203,13 +230,20 @@ class ResilientHTTPClient:
     async def _process_response(self, response: aiohttp.ClientResponse, api_name: str) -> Dict[str, Any]:
         """Process HTTP response and handle errors."""
         if response.status >= 400:
-            error_data = await self._extract_error_data(response)
-            raise HTTPError(
-                status_code=response.status,
-                message=f"{api_name} API error: {response.status}",
-                response_data=error_data
-            )
-        
+            await self._handle_error_response(response, api_name)
+        return await self._extract_response_data(response)
+    
+    async def _handle_error_response(self, response: aiohttp.ClientResponse, api_name: str) -> None:
+        """Handle error response by raising appropriate exception."""
+        error_data = await self._extract_error_data(response)
+        raise HTTPError(
+            status_code=response.status,
+            message=f"{api_name} API error: {response.status}",
+            response_data=error_data
+        )
+    
+    async def _extract_response_data(self, response: aiohttp.ClientResponse) -> Dict[str, Any]:
+        """Extract response data as JSON or text."""
         try:
             return await response.json()
         except json.JSONDecodeError:
@@ -236,54 +270,80 @@ class ResilientHTTPClient:
     async def health_check(self, api_name: str = "generic") -> Dict[str, Any]:
         """Health check for external API."""
         try:
-            circuit = await self._get_circuit(api_name)
-            circuit_status = circuit.get_status()
-            
-            # Test basic connectivity if base_url is set
-            connectivity_status = await self._test_connectivity()
-            
-            return {
-                "api_name": api_name,
-                "circuit": circuit_status,
-                "connectivity": connectivity_status,
-                "overall_health": self._assess_health(circuit_status, connectivity_status)
-            }
+            return await self._perform_health_check(api_name)
         except Exception as e:
             logger.error(f"Health check failed for {api_name}: {e}")
-            return {
-                "api_name": api_name,
-                "error": str(e),
-                "overall_health": "unhealthy"
-            }
+            return self._create_unhealthy_status(api_name, str(e))
+    
+    async def _perform_health_check(self, api_name: str) -> Dict[str, Any]:
+        """Perform health check operations."""
+        circuit = await self._get_circuit(api_name)
+        circuit_status = circuit.get_status()
+        connectivity_status = await self._test_connectivity()
+        return self._build_health_status(api_name, circuit_status, connectivity_status)
+    
+    def _build_health_status(self, api_name: str, circuit_status: Dict[str, Any], 
+                            connectivity_status: Dict[str, Any]) -> Dict[str, Any]:
+        """Build complete health status response."""
+        return {
+            "api_name": api_name,
+            "circuit": circuit_status,
+            "connectivity": connectivity_status,
+            "overall_health": self._assess_health(circuit_status, connectivity_status)
+        }
+    
+    def _create_unhealthy_status(self, api_name: str, error: str) -> Dict[str, Any]:
+        """Create unhealthy status response."""
+        return {
+            "api_name": api_name,
+            "error": error,
+            "overall_health": "unhealthy"
+        }
     
     async def _test_connectivity(self) -> Dict[str, Any]:
         """Test basic connectivity to base URL."""
         if not self.base_url:
             return {"status": "skipped", "reason": "no_base_url"}
-        
+        return await self._perform_connectivity_test()
+    
+    async def _perform_connectivity_test(self) -> Dict[str, Any]:
+        """Perform actual connectivity test."""
         try:
             session = await self._get_session()
             async with session.get(self.base_url, timeout=ClientTimeout(total=3.0)) as response:
-                return {
-                    "status": "healthy",
-                    "response_code": response.status
-                }
+                return self._create_healthy_connectivity_status(response.status)
         except Exception as e:
-            return {
-                "status": "unhealthy",
-                "error": str(e)
-            }
+            return self._create_unhealthy_connectivity_status(str(e))
+    
+    def _create_healthy_connectivity_status(self, status_code: int) -> Dict[str, Any]:
+        """Create healthy connectivity status."""
+        return {"status": "healthy", "response_code": status_code}
+    
+    def _create_unhealthy_connectivity_status(self, error: str) -> Dict[str, Any]:
+        """Create unhealthy connectivity status."""
+        return {"status": "unhealthy", "error": error}
     
     def _assess_health(self, circuit_status: Dict[str, Any], connectivity_status: Dict[str, Any]) -> str:
         """Assess overall API health."""
-        if circuit_status.get("health") == "unhealthy":
+        if self._is_circuit_unhealthy(circuit_status):
             return "unhealthy"
-        elif connectivity_status.get("status") == "unhealthy":
+        elif self._is_connectivity_unhealthy(connectivity_status):
             return "degraded"
-        elif circuit_status.get("health") == "recovering":
+        elif self._is_circuit_recovering(circuit_status):
             return "recovering"
-        else:
-            return "healthy"
+        return "healthy"
+    
+    def _is_circuit_unhealthy(self, circuit_status: Dict[str, Any]) -> bool:
+        """Check if circuit is unhealthy."""
+        return circuit_status.get("health") == "unhealthy"
+    
+    def _is_connectivity_unhealthy(self, connectivity_status: Dict[str, Any]) -> bool:
+        """Check if connectivity is unhealthy."""
+        return connectivity_status.get("status") == "unhealthy"
+    
+    def _is_circuit_recovering(self, circuit_status: Dict[str, Any]) -> bool:
+        """Check if circuit is recovering."""
+        return circuit_status.get("health") == "recovering"
     
     async def close(self) -> None:
         """Close HTTP session."""
@@ -330,10 +390,10 @@ class HTTPClientManager:
     
     async def health_check_all(self) -> Dict[str, Dict[str, Any]]:
         """Health check for all HTTP clients."""
-        return {
-            name: await client.health_check(name)
-            for name, client in self._clients.items()
-        }
+        health_checks = {}
+        for name, client in self._clients.items():
+            health_checks[name] = await client.health_check(name)
+        return health_checks
     
     async def close_all(self) -> None:
         """Close all HTTP clients."""
@@ -367,12 +427,17 @@ async def call_google_api(endpoint: str,
                          **kwargs) -> Dict[str, Any]:
     """Call Google API with circuit breaker protection."""
     async with get_http_client("google", "https://googleapis.com") as client:
-        if method.upper() == "GET":
-            return await client.get(endpoint, "google_api", headers=headers, **kwargs)
-        elif method.upper() == "POST":
-            return await client.post(endpoint, "google_api", headers=headers, **kwargs)
-        else:
-            return await client._request(method, endpoint, "google_api", headers=headers, **kwargs)
+        return await _execute_google_api_call(client, endpoint, method, headers, **kwargs)
+
+async def _execute_google_api_call(client, endpoint: str, method: str, 
+                                  headers: Optional[Dict[str, str]], **kwargs) -> Dict[str, Any]:
+    """Execute Google API call with method routing."""
+    method_upper = method.upper()
+    if method_upper == "GET":
+        return await client.get(endpoint, "google_api", headers=headers, **kwargs)
+    elif method_upper == "POST":
+        return await client.post(endpoint, "google_api", headers=headers, **kwargs)
+    return await client._request(method, endpoint, "google_api", headers=headers, **kwargs)
 
 
 async def call_openai_api(endpoint: str,
@@ -381,9 +446,14 @@ async def call_openai_api(endpoint: str,
                          **kwargs) -> Dict[str, Any]:
     """Call OpenAI API with circuit breaker protection."""
     async with get_http_client("openai", "https://api.openai.com") as client:
-        if method.upper() == "POST":
-            return await client.post(endpoint, "openai_api", headers=headers, **kwargs)
-        elif method.upper() == "GET":
-            return await client.get(endpoint, "openai_api", headers=headers, **kwargs)
-        else:
-            return await client._request(method, endpoint, "openai_api", headers=headers, **kwargs)
+        return await _execute_openai_api_call(client, endpoint, method, headers, **kwargs)
+
+async def _execute_openai_api_call(client, endpoint: str, method: str, 
+                                  headers: Optional[Dict[str, str]], **kwargs) -> Dict[str, Any]:
+    """Execute OpenAI API call with method routing."""
+    method_upper = method.upper()
+    if method_upper == "POST":
+        return await client.post(endpoint, "openai_api", headers=headers, **kwargs)
+    elif method_upper == "GET":
+        return await client.get(endpoint, "openai_api", headers=headers, **kwargs)
+    return await client._request(method, endpoint, "openai_api", headers=headers, **kwargs)

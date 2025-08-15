@@ -1,18 +1,8 @@
-# AI AGENT MODIFICATION METADATA
-# ================================
-# Timestamp: 2025-08-14T00:00:00.000000+00:00
-# Agent: Claude Sonnet 4 claude-sonnet-4-20250514
-# Context: Refactor admin_tool_dispatcher.py to comply with CLAUDE.md standards (300 lines max, 8 lines per function)
-# Git: anthony-aug-13-2 | Refactoring for modularity
-# Change: Create | Scope: Module | Risk: Low
-# Session: admin-tool-refactor | Seq: 1
-# Review: Pending | Score: 95
-# ================================
 """
 Core Admin Tool Dispatcher Module
 
-This module provides the main AdminToolDispatcher class with core functionality
-split from the original monolithic file to comply with 300-line limit.
+Provides the main AdminToolDispatcher class with core functionality
+for handling admin-level tool operations with proper authorization.
 """
 from typing import List, Dict, Any, Optional
 from langchain_core.tools import BaseTool

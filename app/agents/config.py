@@ -4,17 +4,17 @@ from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
 import os
 
-from app.schemas.shared_types import RetryConfig, AgentConfig as BaseAgentConfig
+from app.schemas.shared_types import RetryConfig, BaseAgentConfig
 
 
-class CacheConfig(BaseModel):
+class AgentCacheConfig(BaseModel):
     """Configuration for caching behavior."""
     default_ttl: int = Field(default=300, description="Default cache TTL in seconds")
     max_cache_size: int = Field(default=1000, description="Maximum cache entries")
     redis_ttl: int = Field(default=3600, description="Redis cache TTL in seconds")
     
     @classmethod
-    def from_env(cls) -> 'CacheConfig':
+    def from_env(cls) -> 'AgentCacheConfig':
         """Create config from environment variables."""
         return cls(
             default_ttl=int(os.getenv('AGENT_CACHE_TTL', 300)),
@@ -58,7 +58,7 @@ class UserConfig(BaseModel):
 
 class AgentConfig(BaseAgentConfig):
     """Extended agent configuration with additional components."""
-    cache: CacheConfig = Field(default_factory=CacheConfig)
+    cache: AgentCacheConfig = Field(default_factory=AgentCacheConfig)
     timeout: TimeoutConfig = Field(default_factory=TimeoutConfig)
     user: UserConfig = Field(default_factory=UserConfig)
     
@@ -66,7 +66,7 @@ class AgentConfig(BaseAgentConfig):
     def from_env(cls) -> 'AgentConfig':
         """Create complete config from environment variables."""
         return cls(
-            cache=CacheConfig.from_env(),
+            cache=AgentCacheConfig.from_env(),
             retry=RetryConfig(
                 max_retries=int(os.getenv('AGENT_MAX_RETRIES', 3)),
                 base_delay=float(os.getenv('AGENT_BASE_DELAY', 1.0)),

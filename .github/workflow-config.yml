@@ -1,20 +1,14 @@
-# Enhanced CI/CD Pipeline Configuration
-# This file centralizes workflow configuration for all pipelines
-
 global:
   versions:
-    python: "3.11"
-    node: "20"
-    terraform: "1.6.0"
-    kubectl: "1.28.0"
-  
+    python: '3.11'
+    node: '20'
+    terraform: 1.6.0
+    kubectl: 1.28.0
   runners:
-    default: "ubuntu-latest"
-    custom: "warp-custom-default"
-    windows: "windows-latest"
-    macos: "macos-latest"
-  
-  # Global timeout settings (minutes)
+    default: ubuntu-latest
+    custom: warp-custom-default
+    windows: windows-latest
+    macos: macos-latest
   timeouts:
     smoke: 5
     unit: 10
@@ -24,223 +18,160 @@ global:
     performance_test: 20
     staging_deployment: 30
     rollback: 5
-
-# ==========================================
-# TEST CONFIGURATIONS
-# ==========================================
 testing:
-  # Test shards for parallel execution
   shards:
     unit:
-      - core
-      - agents
-      - websocket
-      - database
-      - api
-    
+    - core
+    - agents
+    - websocket
+    - database
+    - api
     integration:
-      - backend
-      - frontend
-      - api
-    
+    - backend
+    - frontend
+    - api
     comprehensive:
       modules:
-        - comprehensive
-        - comprehensive-backend
-        - comprehensive-frontend
-        - comprehensive-core
-        - comprehensive-database
-        - comprehensive-api
-        - comprehensive-agents
-        - comprehensive-websocket
-  
-  # Coverage thresholds
+      - comprehensive
+      - comprehensive-backend
+      - comprehensive-frontend
+      - comprehensive-core
+      - comprehensive-database
+      - comprehensive-api
+      - comprehensive-agents
+      - comprehensive-websocket
   coverage:
     minimum: 80
     target: 90
     fail_under: 75
-  
-  # Retry configurations
   retry:
     max_attempts: 3
     delay_seconds: 30
     backoff_multiplier: 2
-
-# ==========================================
-# DEPLOYMENT CONFIGURATIONS
-# ==========================================
 deployment:
-  # Staging environment settings
   staging:
-    gcp_region: 'us-central1'
-    project_prefix: 'netra-staging'
+    gcp_region: us-central1
+    project_prefix: netra-staging
     max_environments: 10
     auto_cleanup_days: 7
     resource_limits:
       cpu: '2'
-      memory: '4Gi'
-      disk: '20Gi'
-  
-  # Production settings (future use)
+      memory: 4Gi
+      disk: 20Gi
   production:
-    gcp_region: 'us-central1'
-    project_prefix: 'netra-prod'
+    gcp_region: us-central1
+    project_prefix: netra-prod
     min_replicas: 2
     max_replicas: 10
     auto_scaling: true
-  
-  # Docker settings
   docker:
-    registry: 'gcr.io'
+    registry: gcr.io
     cache_enabled: true
     buildkit_enabled: true
     platforms:
-      - 'linux/amd64'
-
-# ==========================================
-# MONITORING & ALERTS
-# ==========================================
+    - linux/amd64
 monitoring:
-  # Workflow health thresholds
   health:
-    failure_rate_threshold: 10  # percentage
-    cost_budget_daily: 20       # USD
-    cost_budget_monthly: 500    # USD
+    failure_rate_threshold: 10
+    cost_budget_daily: 20
+    cost_budget_monthly: 500
     metrics_retention_days: 30
-  
-  # Alert configurations
   alerts:
     enabled: true
     channels:
-      - github_issues
-      - discord
-      - email
-    
+    - github_issues
+    - discord
+    - email
     thresholds:
       critical_failure_rate: 25
       high_failure_rate: 15
-      cost_overrun: 1.2  # 120% of budget
-  
-  # Reporting
+      cost_overrun: 1.2
   reporting:
-    frequency: 'weekly'
+    frequency: weekly
     include_metrics:
-      - success_rate
-      - average_duration
-      - cost_analysis
-      - failure_patterns
-
-# ==========================================
-# AI/LLM CONFIGURATIONS
-# ==========================================
+    - success_rate
+    - average_duration
+    - cost_analysis
+    - failure_patterns
 ai:
-  # Supported providers
   providers:
-    - name: 'claude'
-      models: ['claude-3-opus', 'claude-3-sonnet']
-      priority: 1
-    
-    - name: 'gemini'
-      models: ['gemini-2.5-flash', 'gemini-2.5-pro']
-      priority: 2
-    
-    - name: 'openai'
-      models: ['gpt-3.5-turbo', 'gpt-4']
-      priority: 3
-  
-  # Auto-fix settings
+  - name: claude
+    models:
+    - claude-3-opus
+    - claude-3-sonnet
+    priority: 1
+  - name: gemini
+    models:
+    - gemini-2.5-flash
+    - gemini-2.5-pro
+    priority: 2
+  - name: openai
+    models:
+    - gpt-3.5-turbo
+    - gpt-4
+    priority: 3
   autofix:
     enabled: false
     max_attempts: 3
     confidence_threshold: 80
     require_validation: true
     test_before_commit: true
-  
-  # Review settings
   review:
     enabled: false
     auto_approve_threshold: 95
     require_human_review: true
-
-# ==========================================
-# CACHING CONFIGURATIONS
-# ==========================================
 caching:
-  # Dependency caching
   dependencies:
     python:
       enabled: true
       paths:
-        - '~/.cache/pip'
-        - 'venv'
-      key_prefix: 'py-deps'
-    
+      - ~/.cache/pip
+      - venv
+      key_prefix: py-deps
     node:
       enabled: true
       paths:
-        - '~/.npm'
-        - 'node_modules'
-      key_prefix: 'node-deps'
-    
+      - ~/.npm
+      - node_modules
+      key_prefix: node-deps
     docker:
       enabled: true
       registry_cache: true
       layer_cache: true
-  
-  # Artifact retention
   artifacts:
-    test_results: 7      # days
-    build_artifacts: 14  # days
-    deployment_logs: 30  # days
-    performance_data: 90 # days
-
-# ==========================================
-# SECURITY CONFIGURATIONS
-# ==========================================
+    test_results: 7
+    build_artifacts: 14
+    deployment_logs: 30
+    performance_data: 90
 security:
-  # Secret scanning
   secret_scanning:
     enabled: true
     patterns:
-      - 'api[_-]?key'
-      - 'secret[_-]?key'
-      - 'password'
-      - 'token'
-      - 'credential'
-  
-  # Dependency scanning
+    - api[_-]?key
+    - secret[_-]?key
+    - password
+    - token
+    - credential
   dependency_scanning:
     enabled: true
     check_vulnerabilities: true
     auto_fix_patches: true
-    severity_threshold: 'medium'
-  
-  # Code scanning
+    severity_threshold: medium
   code_scanning:
     enabled: true
     languages:
-      - python
-      - javascript
-      - typescript
+    - python
+    - javascript
+    - typescript
     tools:
-      - codeql
-      - semgrep
-
-# ==========================================
-# WORKFLOW CONTROL
-# ==========================================
+    - codeql
+    - semgrep
 workflow_control:
-  # Enable/disable workflows via repository variables
-  # Set ENABLE_WORKFLOW_<NAME> = false to disable
   enabled_by_default: true
-  
-  # Concurrency settings
   concurrency:
-    default_group: '${{ github.workflow }}-${{ github.ref }}'
+    default_group: ${{ github.workflow }}-${{ github.ref }}
     cancel_in_progress: true
     max_parallel_jobs: 10
-  
-  # Permissions (default for all workflows)
   default_permissions:
     contents: read
     issues: write
@@ -248,78 +179,48 @@ workflow_control:
     statuses: write
     actions: read
     packages: read
-
-# ==========================================
-# NOTIFICATION SETTINGS
-# ==========================================
 notifications:
-  # PR comment settings
   pr_comments:
     enabled: true
     update_existing: true
     include_coverage: true
     include_performance: true
     include_artifacts: true
-  
-  # Commit status settings
   commit_status:
     enabled: true
     include_details: true
-    context_prefix: 'netra'
-  
-  # Discord notifications
+    context_prefix: netra
   discord:
     enabled: '{{ vars.DISCORD_WEBHOOK_URL != "" }}'
     mention_on_failure: true
     include_artifacts: false
-
-# ==========================================
-# PERFORMANCE OPTIMIZATIONS
-# ==========================================
 performance:
-  # Parallel execution
   parallel:
     matrix_max_parallel: 10
     test_shards_max: 5
     build_jobs_max: 3
-  
-  # Resource allocation
   resources:
-    large_runner_threshold: 30  # minutes
+    large_runner_threshold: 30
     use_custom_runners: true
     prefer_cached_runners: true
-  
-  # Build optimizations
   build:
     incremental: true
     cache_dependencies: true
     skip_unchanged: true
     parallel_install: true
-
-# ==========================================
-# REPOSITORY VARIABLES MAPPING
-# ==========================================
-# These can be overridden via GitHub repository variables
 variable_mappings:
   ENABLE_WORKFLOW_ORCHESTRATOR: workflow_control.orchestrator.enabled
   ENABLE_WORKFLOW_TESTS: workflow_control.testing.enabled
   ENABLE_WORKFLOW_STAGING: workflow_control.staging.enabled
   ENABLE_WORKFLOW_AI: workflow_control.ai.enabled
   ENABLE_WORKFLOW_MONITORING: workflow_control.monitoring.enabled
-  
   ALERT_THRESHOLD_FAILURE_RATE: monitoring.health.failure_rate_threshold
   COST_BUDGET_DAILY: monitoring.health.cost_budget_daily
   COST_BUDGET_MONTHLY: monitoring.health.cost_budget_monthly
-  
   DISCORD_WEBHOOK_URL: notifications.discord.webhook_url
   SLACK_WEBHOOK_URL: notifications.slack.webhook_url
-  
   RUNNER_TYPE_DEFAULT: global.runners.default
   RUNNER_TYPE_CUSTOM: global.runners.custom
-
-# ==========================================
-# ENVIRONMENT-SPECIFIC OVERRIDES
-# ==========================================
 environments:
   development:
     testing:
@@ -328,14 +229,12 @@ environments:
     monitoring:
       alerts:
         enabled: false
-  
   staging:
     deployment:
       auto_cleanup_days: 3
     monitoring:
       alerts:
         enabled: true
-  
   production:
     testing:
       coverage:
@@ -346,6 +245,27 @@ environments:
       alerts:
         enabled: false
         channels:
-          - pagerduty
-          - slack
-          - email
+        - pagerduty
+        - slack
+        - email
+features:
+  hierarchical_testing: true
+  smart_retry: true
+  ai_assistance: true
+  cost_monitoring: true
+  auto_cleanup: true
+workflows:
+  testing:
+    smoke:
+      enabled: true
+    unit:
+      enabled: true
+    integration:
+      enabled: true
+    comprehensive:
+      enabled: true
+  ai:
+    autofix:
+      enabled: true
+    pr_review:
+      enabled: true

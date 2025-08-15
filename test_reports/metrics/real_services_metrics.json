@@ -1,25 +1,25 @@
 {
-  "timestamp": "2025-08-14T21:29:12.619560",
+  "timestamp": "2025-08-15T07:46:16.279682",
   "level": "real_services",
   "metrics": {
-    "total_tests": 3944,
+    "total_tests": 0,
     "passed": 0,
-    "failed": 1,
+    "failed": 0,
     "coverage": null
   },
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 15.313082218170166,
-      "exit_code": 1,
-      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -vv -x --maxfail=1 -m real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\n\u001b[1mcollecting ... \u001b[0mcollected 4149 items / 3942 deselected / 1 skipped / 207 selected\n\napp/tests/agents/test_example_prompts_e2e_real/test_advanced_features.py::TestAuditPrompts::test_prompt_6_variation_0 \u001b[31mFAILED\u001b[0m\u001b[31m [  0%]\u001b[0m\n\n================================== FAILURES ===================================\n\u001b[31m\u001b[1m_________________ TestAuditPrompts.test_prompt_6_variation_0 __________________\u001b[0m\n\u001b[1m\u001b[31mapp\\tests\\agents\\test_example_prompts_e2e_real\\test_advanced_features.py\u001b[0m:24: in test_prompt_6_variation_0\n    \u001b[0m\u001b[94massert\u001b[39;49;00m result.success, \u001b[33mf\u001b[39;49;00m\u001b[33m\"\u001b[39;49;00m\u001b[33mTest failed: \u001b[39;49;00m\u001b[33m{\u001b[39;49;00mresult.error\u001b[33m}\u001b[39;49;00m\u001b[33m\"\u001b[39;49;00m\u001b[90m\u001b[39;49;00m\n\u001b[1m\u001b[31mE   AssertionError: Test failed: 'bool' object is not callable\u001b[0m\n\u001b[1m\u001b[31mE   assert False\u001b[0m\n\u001b[1m\u001b[31mE    +  where False = E2ETestResult(success=False, prompt='I want to audit all uses of KV caching in my system to find optimization opportunities.', execution_time=0.004989, quality_passed=False, response_length=0, state=None, response='', error=\"'bool' object is not callable\").success\u001b[0m\n----------------------------- Captured log setup ------------------------------\n\u001b[35mDEBUG   \u001b[0m asyncio:selector_events.py:64 Using selector: SelectSelector\n\u001b[35mDEBUG   \u001b[0m asyncio:selector_events.py:64 Using selector: SelectSelector\n---------------------------- Captured stderr call -----------------------------\nC:\\Users\\antho\\miniconda3\\Lib\\site-packages\\pydantic\\main.py:253: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n  validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)\n2025-08-14 21:29:10.306 | ERROR    | app.services.state_persistence:load_agent_state:216 | Failed to load state for run 492d2484-cb1b-4aa9-a286-81cb352e8767: 'coroutine' object has no attribute 'state_data'\nC:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\supervisor\\state_manager.py:53: RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited\n  recovered_state = await self.state_persistence.load_agent_state(\nRuntimeWarning: Enable tracemalloc to get the object allocation traceback\n2025-08-14 21:29:10.308 | ERROR    | app.services.state_persistence:save_agent_state:184 | Failed to save state for run 492d2484-cb1b-4aa9-a286-81cb352e8767: 'str' object has no attribute 'value'\n2025-08-14 21:29:10.308 | ERROR    | app.agents.supervisor.pipeline_executor:_handle_pipeline_error:67 | Pipeline execution failed: 'bool' object is not callable\n---------------------------- Captured log teardown ----------------------------\n\u001b[35mDEBUG   \u001b[0m asyncio:selector_events.py:64 Using selector: SelectSelector\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mFAILED\u001b[0m app/tests/agents/test_example_prompts_e2e_real/test_advanced_features.py::\u001b[1mTestAuditPrompts::test_prompt_6_variation_0\u001b[0m - AssertionError: Test failed: 'bool' object is not callable\nassert False\n +  where False = E2ETestResult(success=False, prompt='I want to audit all uses of KV caching in my system to find optimization opportunities.', execution_time=0.004989, quality_passed=False, response_length=0, state=None, response='', error=\"'bool' object is not callable\").success\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n\u001b[31m================ \u001b[31m\u001b[1m1 failed\u001b[0m, \u001b[33m1 skipped\u001b[0m, \u001b[33m3942 deselected\u001b[0m\u001b[31m in 7.42s\u001b[0m\u001b[31m ================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 1 after 14.10s\n================================================================================\n\nC:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\llm\\test_llm_integration_real.py:26: PytestCollectionWarning: cannot collect test class 'TestResponseModel' because it has a __init__ constructor (from: app/tests/llm/test_llm_integration_real.py)\n  class TestResponseModel(BaseModel):\n",
+      "duration": 4.661319017410278,
+      "exit_code": 4,
+      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -vv -x --maxfail=1 -m real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 4.00s\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:30: in <module>\n    from app.core.app_factory import create_app\napp\\core\\app_factory.py:9: in <module>\n    from app.core.lifespan_manager import lifespan\napp\\core\\lifespan_manager.py:9: in <module>\n    from app.shutdown import run_complete_shutdown\napp\\shutdown.py:12: in <module>\n    from app.ws_manager import manager as websocket_manager\napp\\ws_manager.py:290: in <module>\n    manager = WebSocketManager()\n              ^^^^^^^^^^^^^^^^^^\napp\\ws_manager.py:44: in __new__\n    cls._instance._initialize_managers()\napp\\ws_manager.py:52: in _initialize_managers\n    self._connection_manager = WebSocketConnectionManager(self.core)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: WebSocketConnectionManager.__init__() missing 1 required positional argument: 'url'\n",
       "test_counts": {
-        "total": 3944,
+        "total": 0,
         "passed": 0,
-        "failed": 1,
-        "skipped": 3943,
+        "failed": 0,
+        "skipped": 0,
         "errors": 0,
-        "test_files": 1
+        "test_files": 0
       },
       "coverage": null,
       "test_details": []
@@ -54,8 +54,8 @@
     },
     "overall": {
       "status": "failed",
-      "start_time": 1755232137.3018608,
-      "end_time": 1755232152.6180284
+      "start_time": 1755269171.6139328,
+      "end_time": 1755269176.2780347
     }
   }
 }

@@ -40,6 +40,10 @@ class AgentRegistry:
         # Import DataSubAgent here to avoid circular dependency
         from app.agents.data_sub_agent.agent import DataSubAgent
         
+        self._register_workflow_agents(DataSubAgent)
+    
+    def _register_workflow_agents(self, DataSubAgent) -> None:
+        """Register workflow agents with manager and dispatcher."""
         self.register("triage", TriageSubAgent(
             self.llm_manager, self.tool_dispatcher))
         self.register("data", DataSubAgent(

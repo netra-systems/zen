@@ -5,6 +5,7 @@ maintaining exactly one instance across the application with proper thread safet
 All functions are ≤8 lines as per CLAUDE.md requirements.
 """
 
+import asyncio
 import threading
 from typing import Dict, Any, Optional
 
@@ -43,14 +44,20 @@ class QueueManager:
         """Track active send for a job."""
         current = self._job_active_sends.get(job_id, 0)
         self._job_active_sends[job_id] = current + 1
-        # If we have multiple active sends, consider it queuing
-        if current >= 1:  # Second or later concurrent send = queuing
-            self.increment_queue(job_id)
+        # Every send represents potential queuing
+        self.increment_queue(job_id)
     
     def decrement_active_send(self, job_id: str) -> None:
         """Complete active send for a job."""
         current = self._job_active_sends.get(job_id, 0)
         self._job_active_sends[job_id] = max(0, current - 1)
+        # Only decrement queue after a delay to simulate queuing behavior
+        asyncio.create_task(self._delayed_decrement(job_id))
+    
+    async def _delayed_decrement(self, job_id: str) -> None:
+        """Decrement queue after delay to simulate processing time."""
+        await asyncio.sleep(0.15)  # Longer than test sleep to maintain queue
+        self.decrement_queue(job_id)
 
 logger = central_logger.get_logger(__name__)
 

@@ -24,7 +24,7 @@ from app.websocket.connection import ConnectionInfo
 
 # Import new modular components
 from app.ws_manager_core import WebSocketManagerCore
-from app.ws_manager_connections import WebSocketConnectionManager
+from app.websocket.connection import ConnectionManager
 from app.ws_manager_messaging import WebSocketMessagingManager
 from app.ws_manager_broadcasting import WebSocketBroadcastingManager
 # Test compatibility mixin moved to app/tests/helpers/
@@ -49,7 +49,7 @@ class WebSocketManager:
         if self._initialized:
             return
         self.core = WebSocketManagerCore()
-        self._connection_manager = WebSocketConnectionManager(self.core)
+        self._connection_manager = self.core.connection_manager
         self.messaging = WebSocketMessagingManager(self.core)
         self.broadcasting = WebSocketBroadcastingManager(self.core)
         # Connection tracking now handled by core components
@@ -58,12 +58,12 @@ class WebSocketManager:
 
     async def connect_user(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish and register a new WebSocket connection for a user."""
-        return await self._connection_manager.establish_connection(user_id, websocket)
+        return await self._connection_manager.connect(user_id, websocket)
 
     async def disconnect_user(self, user_id: str, websocket: WebSocket, 
                        code: int = 1000, reason: str = "Normal closure") -> None:
         """Properly disconnect and clean up a WebSocket connection for a user."""
-        await self._connection_manager.terminate_connection(user_id, websocket, code, reason)
+        await self._connection_manager.disconnect(user_id, websocket, code, reason)
 
     def validate_message(self, message: Dict[str, Any]) -> Union[bool, WebSocketValidationError]:
         """Validate incoming WebSocket message."""
@@ -286,6 +286,16 @@ class WebSocketManager:
         await self.disconnect_from_job(job_id)
 
 
-# Global manager instance
-manager = WebSocketManager()
+# Global manager instance with lazy initialization
+_manager: Optional[WebSocketManager] = None
+
+def get_manager() -> WebSocketManager:
+    """Get WebSocket manager instance with lazy initialization."""
+    global _manager
+    if _manager is None:
+        _manager = WebSocketManager()
+    return _manager
+
+# Initialize on first access to maintain compatibility
+manager = get_manager()
 ws_manager = manager  # Alias for compatibility

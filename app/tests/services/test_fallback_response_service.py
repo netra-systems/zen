@@ -83,9 +83,14 @@ class TestFallbackResponseService:
         
         # Verify appropriate error guidance
         assert response != None
-        assert "system logs" in response
-        assert any(term in response.lower() for term in ["format", "json", "csv", "parsing", "data"])
-        assert any(term in response.lower() for term in ["verify", "check", "validate"])
+        # Handle both string and dict responses
+        if isinstance(response, dict):
+            response_text = response.get('response', '')
+        else:
+            response_text = response
+        assert "system logs" in response_text
+        assert any(term in response_text.lower() for term in ["format", "json", "csv", "parsing", "data"])
+        assert any(term in response_text.lower() for term in ["verify", "check", "validate"])
     
     async def test_generate_action_plan_fallback_context_missing(self, fallback_service):
         """Test fallback for action plan with missing context"""

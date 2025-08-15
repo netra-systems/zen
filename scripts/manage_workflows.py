@@ -13,6 +13,9 @@ import yaml
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 
+from workflow_presets import WorkflowPresets
+from workflow_config_utils import WorkflowConfigUtils
+
 
 class WorkflowManager:
     """Manage GitHub workflow configurations and settings"""
@@ -139,179 +142,24 @@ class WorkflowManager:
         
     def show_config(self):
         """Display current configuration"""
-        print("\n[CONFIG] Current Workflow Configuration")
-        print("=" * 50)
-        
-        # Features
-        print("\n[FEATURES]:")
-        features = self.config.get('features', {})
-        for feature, enabled in features.items():
-            status = "[ON]" if enabled else "[OFF]"
-            print(f"  {status} {feature}: {enabled}")
-            
-        # Workflows
-        print("\n[WORKFLOWS]:")
-        status = self.get_workflow_status()
-        for name, info in status.items():
-            status_icon = "[ENABLED]" if info['enabled'] else "[DISABLED]"
-            print(f"  {status_icon} {name} ({info['category']})")
-            
-        # Cost Control
-        print("\n[COST CONTROL]:")
-        cost = self.config.get('cost_control', {})
-        print(f"  Daily limit: ${cost.get('daily_limit', 'Not set')}")
-        print(f"  Monthly budget: ${cost.get('monthly_budget', 'Not set')}")
-        
-        # Test Hierarchy
-        print("\n[TEST HIERARCHY]:")
-        hierarchy = self.config.get('test_hierarchy', {}).get('levels', [])
-        for level in hierarchy:
-            deps = level.get('depends_on', [])
-            blocks = level.get('blocks', [])
-            print(f"  {level['name']}:")
-            if deps:
-                print(f"    Depends on: {', '.join(deps)}")
-            if blocks:
-                print(f"    Blocks: {', '.join(blocks)}")
+        WorkflowConfigUtils.show_config_display(self.config, self.get_workflow_status)
                 
     def apply_preset(self, preset: str):
         """Apply a configuration preset"""
-        presets = {
-            'minimal': {
-                'features': {
-                    'hierarchical_testing': False,
-                    'smart_retry': False,
-                    'ai_assistance': False,
-                    'cost_monitoring': True,
-                    'auto_cleanup': True
-                },
-                'workflows': {
-                    'testing': {
-                        'smoke': {'enabled': True},
-                        'unit': {'enabled': False},
-                        'integration': {'enabled': False},
-                        'comprehensive': {'enabled': False}
-                    },
-                    'ai': {
-                        'autofix': {'enabled': False},
-                        'pr_review': {'enabled': False}
-                    }
-                }
-            },
-            'standard': {
-                'features': {
-                    'hierarchical_testing': True,
-                    'smart_retry': True,
-                    'ai_assistance': False,
-                    'cost_monitoring': True,
-                    'auto_cleanup': True
-                },
-                'workflows': {
-                    'testing': {
-                        'smoke': {'enabled': True},
-                        'unit': {'enabled': True},
-                        'integration': {'enabled': True},
-                        'comprehensive': {'enabled': False}
-                    },
-                    'ai': {
-                        'autofix': {'enabled': False},
-                        'pr_review': {'enabled': False}
-                    }
-                }
-            },
-            'full': {
-                'features': {
-                    'hierarchical_testing': True,
-                    'smart_retry': True,
-                    'ai_assistance': True,
-                    'cost_monitoring': True,
-                    'auto_cleanup': True
-                },
-                'workflows': {
-                    'testing': {
-                        'smoke': {'enabled': True},
-                        'unit': {'enabled': True},
-                        'integration': {'enabled': True},
-                        'comprehensive': {'enabled': True}
-                    },
-                    'ai': {
-                        'autofix': {'enabled': True},
-                        'pr_review': {'enabled': True}
-                    }
-                }
-            },
-            'cost_optimized': {
-                'features': {
-                    'hierarchical_testing': True,
-                    'smart_retry': False,
-                    'ai_assistance': False,
-                    'cost_monitoring': True,
-                    'auto_cleanup': True
-                },
-                'workflows': {
-                    'testing': {
-                        'smoke': {'enabled': True},
-                        'unit': {'enabled': True, 'skip_on_draft_pr': True},
-                        'integration': {'enabled': False},
-                        'comprehensive': {'enabled': False}
-                    }
-                },
-                'cost_control': {
-                    'daily_limit': 10,
-                    'monthly_budget': 200
-                }
-            }
-        }
-        
-        if preset not in presets:
-            print(f"[ERROR] Unknown preset: {preset}")
-            print(f"Available presets: {', '.join(presets.keys())}")
+        presets = WorkflowPresets.get_presets()
+        if not WorkflowPresets.validate_preset(preset, presets):
             return
-            
-        # Apply preset
-        preset_config = presets[preset]
+        self._apply_preset_config(presets[preset], preset)
+        
+    def _apply_preset_config(self, preset_config: dict, preset_name: str):
+        """Apply preset configuration and save"""
         self.config.update(preset_config)
         self.save_config()
-        print(f"[SUCCESS] Applied preset: {preset}")
+        print(f"[SUCCESS] Applied preset: {preset_name}")
         
     def validate_config(self):
         """Validate workflow configuration"""
-        issues = []
-        
-        # Check for circular dependencies in test hierarchy
-        hierarchy = self.config.get('test_hierarchy', {}).get('levels', [])
-        for level in hierarchy:
-            name = level['name']
-            depends = level.get('depends_on', [])
-            blocks = level.get('blocks', [])
-            
-            # Check if any dependency also blocks this level
-            for dep in depends:
-                for other in hierarchy:
-                    if other['name'] == dep and name in other.get('blocks', []):
-                        issues.append(f"Circular dependency: {name} <-> {dep}")
-                        
-        # Check cost limits
-        cost = self.config.get('cost_control', {})
-        daily = cost.get('daily_limit', 0)
-        monthly = cost.get('monthly_budget', 0)
-        
-        if daily * 30 > monthly and daily > 0 and monthly > 0:
-            issues.append(f"Daily limit (${daily}) * 30 exceeds monthly budget (${monthly})")
-            
-        # Check for conflicting settings
-        features = self.config.get('features', {})
-        if features.get('hierarchical_testing') and not hierarchy:
-            issues.append("Hierarchical testing enabled but no hierarchy defined")
-            
-        if issues:
-            print("[WARNING] Configuration issues found:")
-            for issue in issues:
-                print(f"  - {issue}")
-            return False
-        else:
-            print("[OK] Configuration is valid")
-            return True
+        return WorkflowConfigUtils.validate_config_issues(self.config)
 
 
 def main():

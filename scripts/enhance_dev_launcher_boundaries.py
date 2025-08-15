@@ -56,7 +56,7 @@ def enhance_launcher_config():
         with open(config_file, 'w') as f:
             f.write(content)
         
-        print("✅ Enhanced launcher config with boundary monitoring")
+        print("Enhanced launcher config with boundary monitoring")
 
 def enhance_launcher_args():
     """Add boundary monitoring arguments to argument parser."""
@@ -107,7 +107,7 @@ def enhance_launcher_args():
         with open(main_file, 'w') as f:
             f.write(content)
         
-        print("✅ Enhanced argument parser with boundary monitoring flags")
+        print("Enhanced argument parser with boundary monitoring flags")
 
 def enhance_launcher_main():
     """Add boundary monitoring integration to main launcher."""
@@ -164,16 +164,11 @@ def enhance_launcher_main():
     with open(launcher_file, 'w') as f:
         f.write(content)
     
-    print("✅ Enhanced main launcher with boundary monitoring integration")
+    print("Enhanced main launcher with boundary monitoring integration")
 
-def create_vscode_config():
-    """Create VS Code configuration for real-time boundary feedback."""
-    vscode_dir = Path(__file__).parent.parent / ".vscode"
-    vscode_dir.mkdir(exist_ok=True)
-    
-    # Create settings.json for boundary monitoring
-    settings_file = vscode_dir / "settings.json"
-    settings_content = '''{{
+def _get_vscode_settings_content() -> str:
+    """Generate VS Code settings.json content for boundary monitoring."""
+    return '''{
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
@@ -182,92 +177,111 @@ def create_vscode_config():
         "--max-complexity=8",
         "--extend-ignore=E203,W503"
     ],
-    "files.watcherExclude": {{
+    "files.watcherExclude": {
         "**/node_modules/**": true,
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,
         "**/logs/**": true,
         "**/__pycache__/**": true
-    }},
+    },
     "editor.rulers": [300],
     "python.analysis.extraPaths": [
         "./scripts"
     ],
-    "files.associations": {{
+    "files.associations": {
         "*.py": "python"
-    }},
-    "workbench.colorCustomizations": {{
+    },
+    "workbench.colorCustomizations": {
         "editorRuler.foreground": "#ff0000"
-    }},
-    "editor.tokenColorCustomizations": {{
+    },
+    "editor.tokenColorCustomizations": {
         "comments": "#888888"
-    }}
-}}'''
-    
-    with open(settings_file, 'w') as f:
-        f.write(settings_content)
-    
-    # Create tasks.json for boundary checking
-    tasks_file = vscode_dir / "tasks.json"
-    tasks_content = '''{{
+    }
+}'''
+
+def _get_vscode_tasks_content() -> str:
+    """Generate VS Code tasks.json content for boundary checking."""
+    return '''{
     "version": "2.0.0",
     "tasks": [
-        {{
+        {
             "label": "Check Boundaries",
             "type": "shell",
             "command": "python",
             "args": ["scripts/boundary_enforcer.py", "--enforce"],
-            "group": {{
+            "group": {
                 "kind": "build",
                 "isDefault": false
-            }},
-            "presentation": {{
+            },
+            "presentation": {
                 "echo": true,
                 "reveal": "always",
                 "focus": false,
                 "panel": "shared"
-            }},
+            },
             "problemMatcher": []
-        }},
-        {{
+        },
+        {
             "label": "Check Architecture Compliance",
             "type": "shell",
             "command": "python",
             "args": ["scripts/check_architecture_compliance.py"],
             "group": "build",
-            "presentation": {{
+            "presentation": {
                 "echo": true,
                 "reveal": "always",
                 "focus": false,
                 "panel": "shared"
-            }},
+            },
             "problemMatcher": []
-        }},
-        {{
+        },
+        {
             "label": "Split Large Files",
             "type": "shell",
             "command": "python",
             "args": ["scripts/split_large_files.py"],
             "group": "build",
-            "presentation": {{
+            "presentation": {
                 "echo": true,
                 "reveal": "always",
                 "focus": false,
                 "panel": "shared"
-            }},
+            },
             "problemMatcher": []
-        }}
+        }
     ]
-}}'''
+}'''
+
+def _write_vscode_file(file_path: Path, content: str) -> None:
+    """Write content to VS Code configuration file."""
+    with open(file_path, 'w') as f:
+        f.write(content)
+
+def _create_vscode_settings(vscode_dir: Path) -> None:
+    """Create VS Code settings.json file."""
+    settings_file = vscode_dir / "settings.json"
+    settings_content = _get_vscode_settings_content()
+    _write_vscode_file(settings_file, settings_content)
+
+def _create_vscode_tasks(vscode_dir: Path) -> None:
+    """Create VS Code tasks.json file."""
+    tasks_file = vscode_dir / "tasks.json"
+    tasks_content = _get_vscode_tasks_content()
+    _write_vscode_file(tasks_file, tasks_content)
+
+def create_vscode_config() -> None:
+    """Create VS Code configuration for real-time boundary feedback."""
+    vscode_dir = Path(__file__).parent.parent / ".vscode"
+    vscode_dir.mkdir(exist_ok=True)
     
-    with open(tasks_file, 'w') as f:
-        f.write(tasks_content)
+    _create_vscode_settings(vscode_dir)
+    _create_vscode_tasks(vscode_dir)
     
-    print("✅ Created VS Code configuration for boundary monitoring")
+    print("Created VS Code configuration for boundary monitoring")
 
 def main():
     """Main enhancement script."""
-    print("🔴 BOUNDARY ENFORCEMENT ENHANCEMENT")
+    print("BOUNDARY ENFORCEMENT ENHANCEMENT")
     print("=" * 50)
     
     try:
@@ -277,7 +291,7 @@ def main():
         create_vscode_config()
         
         print("\n" + "=" * 50)
-        print("✨ ENHANCEMENT COMPLETE")
+        print("ENHANCEMENT COMPLETE")
         print("=" * 50)
         print("\nBoundary monitoring features added:")
         print("  • Real-time boundary monitoring in dev launcher")
@@ -290,7 +304,7 @@ def main():
         print("  python dev_launcher.py --watch-boundaries --fail-on-boundary-violations")
         
     except Exception as e:
-        print(f"❌ Enhancement failed: {e}")
+        print(f"Enhancement failed: {e}")
         return 1
     
     return 0

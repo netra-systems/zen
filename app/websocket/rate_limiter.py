@@ -36,20 +36,26 @@ class RateLimiter:
             True if the connection is rate limited, False otherwise
         """
         now = datetime.now(timezone.utc)
-        
-        # Reset counter if window has passed
+        self._reset_window_if_expired(conn_info, now)
+        if self._is_limit_exceeded(conn_info):
+            return True
+        self._increment_request_counter(conn_info, now)
+        return False
+    
+    def _reset_window_if_expired(self, conn_info: ConnectionInfo, now: datetime) -> None:
+        """Reset counter if rate limit window has passed."""
         if (now - conn_info.rate_limit_window_start).total_seconds() >= self.window_seconds:
             conn_info.rate_limit_count = 0
             conn_info.rate_limit_window_start = now
-        
-        # Check if limit exceeded
-        if conn_info.rate_limit_count >= self.max_requests:
-            return True
-        
-        # Increment counter
+    
+    def _is_limit_exceeded(self, conn_info: ConnectionInfo) -> bool:
+        """Check if rate limit is exceeded."""
+        return conn_info.rate_limit_count >= self.max_requests
+    
+    def _increment_request_counter(self, conn_info: ConnectionInfo, now: datetime) -> None:
+        """Increment request counter and update timestamp."""
         conn_info.rate_limit_count += 1
         conn_info.last_message_time = now
-        return False
     
     def get_rate_limit_info(self, conn_info: ConnectionInfo) -> Dict[str, Any]:
         """Get current rate limit information for a connection.
@@ -61,16 +67,22 @@ class RateLimiter:
             Dictionary with rate limit details
         """
         now = datetime.now(timezone.utc)
-        time_in_window = (now - conn_info.rate_limit_window_start).total_seconds()
-        
-        # If window has passed, effective count is 0
+        time_in_window = self._calculate_time_in_window(conn_info, now)
+        effective_count, time_remaining = self._calculate_effective_values(conn_info, time_in_window)
+        return self._create_rate_limit_dict(effective_count, time_remaining)
+    
+    def _calculate_time_in_window(self, conn_info: ConnectionInfo, now: datetime) -> float:
+        """Calculate time elapsed in current window."""
+        return (now - conn_info.rate_limit_window_start).total_seconds()
+    
+    def _calculate_effective_values(self, conn_info: ConnectionInfo, time_in_window: float) -> tuple:
+        """Calculate effective count and time remaining."""
         if time_in_window >= self.window_seconds:
-            effective_count = 0
-            time_remaining = self.window_seconds
-        else:
-            effective_count = conn_info.rate_limit_count
-            time_remaining = self.window_seconds - time_in_window
-        
+            return 0, self.window_seconds
+        return conn_info.rate_limit_count, self.window_seconds - time_in_window
+    
+    def _create_rate_limit_dict(self, effective_count: int, time_remaining: float) -> Dict[str, Any]:
+        """Create rate limit information dictionary."""
         return {
             "max_requests": self.max_requests,
             "window_seconds": self.window_seconds,
@@ -107,17 +119,22 @@ class AdaptiveRateLimiter(RateLimiter):
     
     def is_rate_limited(self, conn_info: ConnectionInfo) -> bool:
         """Check if connection is rate limited with adaptive limits."""
-        # Get adaptive limit for this connection
-        multiplier = self.connection_multipliers.get(conn_info.connection_id, 1.0)
+        adaptive_limit = self._get_adaptive_limit(conn_info.connection_id)
+        return self._check_with_temporary_limit(conn_info, adaptive_limit)
+    
+    def _get_adaptive_limit(self, connection_id: str) -> int:
+        """Get adaptive rate limit for connection."""
+        multiplier = self.connection_multipliers.get(connection_id, 1.0)
+        return int(self.base_max_requests * multiplier)
+    
+    def _check_with_temporary_limit(self, conn_info: ConnectionInfo, adaptive_limit: int) -> bool:
+        """Check rate limit with temporary limit adjustment."""
         original_max = self.max_requests
-        self.max_requests = int(self.base_max_requests * multiplier)
-        
+        self.max_requests = adaptive_limit
         try:
-            result = super().is_rate_limited(conn_info)
+            return super().is_rate_limited(conn_info)
         finally:
             self.max_requests = original_max
-        
-        return result
     
     def adjust_limit_for_connection(self, connection_id: str, multiplier: float):
         """Adjust rate limit multiplier for a specific connection.

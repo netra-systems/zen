@@ -99,7 +99,7 @@ class BatchOperationResult(BaseModel):
     failed_items: List[Dict[str, Any]] = Field(default_factory=list)
 
 
-class CacheConfig(BaseModel):
+class ServiceCacheConfig(BaseModel):
     """Cache configuration for services"""
     enabled: bool = Field(default=True)
     ttl_seconds: int = Field(default=300)
@@ -112,7 +112,7 @@ class ServiceConfig(BaseModel):
     """Base configuration for services"""
     name: str
     version: str = "1.0.0"
-    cache_config: Optional[CacheConfig] = None
+    cache_config: Optional[ServiceCacheConfig] = None
     rate_limit_per_minute: Optional[int] = None
     timeout_seconds: int = Field(default=30)
     retry_attempts: int = Field(default=3)

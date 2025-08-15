@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-14T22:06:32.017293",
+  "timestamp": "2025-08-15T07:47:45.863136",
   "level": "comprehensive-database",
   "metrics": {
     "total_tests": 0,
@@ -10,9 +10,9 @@
   "results": {
     "backend": {
       "status": "failed",
-      "duration": 18.631521940231323,
-      "exit_code": 15,
-      "output": "\n",
+      "duration": 6.9775190353393555,
+      "exit_code": 4,
+      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 4\n  Coverage: enabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -v -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -k database or repository or clickhouse or postgres --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 6.29s\n[Coverage] Coverage Report: reports/coverage/html/index.html\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:32: in <module>\n    app = create_app()\n          ^^^^^^^^^^^^\napp\\core\\app_factory.py:144: in create_app\n    register_api_routes(app)\napp\\core\\app_factory.py:62: in register_api_routes\n    _import_and_register_routes(app)\napp\\core\\app_factory.py:67: in _import_and_register_routes\n    route_modules = _import_route_modules()\n                    ^^^^^^^^^^^^^^^^^^^^^^^\napp\\core\\app_factory.py:74: in _import_route_modules\n    from app.routes import (\napp\\routes\\synthetic_data.py:16: in <module>\n    from app.schemas.shared_types import AgentConfig as BaseAgentConfig\nE   ImportError: cannot import name 'AgentConfig' from 'app.schemas.shared_types' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\schemas\\shared_types.py)\n",
       "test_counts": {
         "total": 0,
         "passed": 0,
@@ -54,8 +54,8 @@
     },
     "overall": {
       "status": "failed",
-      "start_time": 1755234373.3826146,
-      "end_time": 1755234392.0162942
+      "start_time": 1755269258.882615,
+      "end_time": 1755269265.8621361
     }
   }
 }

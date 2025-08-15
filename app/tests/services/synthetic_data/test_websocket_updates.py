@@ -194,14 +194,15 @@ class TestWebSocketUpdates:
             ))
             tasks.append(task)
         
-        # Wait a short time to allow tasks to start
+        # Wait a short time to allow tasks to start and queue up
         await asyncio.sleep(0.05)
+        
+        # Check queue size while tasks are still running
+        queue_size_during = ws_service.get_queue_size(job_id)
+        assert queue_size_during > 0, f"Expected queue size > 0 during concurrent sends, got {queue_size_during}"
         
         # Complete all tasks
         await asyncio.gather(*tasks)
-        
-        # Should queue messages
-        assert ws_service.get_queue_size(job_id) > 0
 
     @pytest.mark.asyncio
     async def test_websocket_heartbeat(self, ws_service, mock_websocket):

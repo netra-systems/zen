@@ -1,25 +1,25 @@
 {
-  "timestamp": "2025-08-14T22:13:42.313211",
+  "timestamp": "2025-08-15T07:45:57.748026",
   "level": "smoke",
   "metrics": {
-    "total_tests": 7,
-    "passed": 7,
+    "total_tests": 0,
+    "passed": 0,
     "failed": 0,
     "coverage": null
   },
   "results": {
     "backend": {
-      "status": "passed",
-      "duration": 6.214946031570435,
-      "exit_code": 0,
-      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: smoke\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\n\u001b[1mcollecting ... \u001b[0mcollected 7 items\n\napp/tests/routes/test_health_route.py::test_basic_import \u001b[32mPASSED\u001b[0m\u001b[32m          [ 14%]\u001b[0m\napp/tests/routes/test_health_route.py::test_health_endpoint_direct \u001b[32mPASSED\u001b[0m\u001b[32m [ 28%]\u001b[0m\napp/tests/routes/test_health_route.py::test_live_endpoint \u001b[32mPASSED\u001b[0m\u001b[32m         [ 42%]\u001b[0m\napp/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error \u001b[32mPASSED\u001b[0m\u001b[32m [ 57%]\u001b[0m\napp/tests/core/test_config_manager.py::TestConfigManager::test_initialization \u001b[32mPASSED\u001b[0m\u001b[32m [ 71%]\u001b[0m\napp/tests/services/test_security_service.py::test_encrypt_and_decrypt \u001b[32mPASSED\u001b[0m\u001b[32m [ 85%]\u001b[0m\ntests/test_system_startup.py::TestSystemStartup::test_configuration_loading \u001b[32mPASSED\u001b[0m\u001b[32m [100%]\u001b[0m\n\n\u001b[32m============================== \u001b[32m\u001b[1m7 passed\u001b[0m\u001b[32m in 0.24s\u001b[0m\u001b[32m ==============================\u001b[0m\n================================================================================\n[PASS] ALL TESTS PASSED in 5.38s\n================================================================================\n\n",
+      "status": "failed",
+      "duration": 4.880111932754517,
+      "exit_code": 4,
+      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: smoke\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 4.09s\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:30: in <module>\n    from app.core.app_factory import create_app\napp\\core\\app_factory.py:9: in <module>\n    from app.core.lifespan_manager import lifespan\napp\\core\\lifespan_manager.py:9: in <module>\n    from app.shutdown import run_complete_shutdown\napp\\shutdown.py:12: in <module>\n    from app.ws_manager import manager as websocket_manager\napp\\ws_manager.py:290: in <module>\n    manager = WebSocketManager()\n              ^^^^^^^^^^^^^^^^^^\napp\\ws_manager.py:44: in __new__\n    cls._instance._initialize_managers()\napp\\ws_manager.py:52: in _initialize_managers\n    self._connection_manager = WebSocketConnectionManager(self.core)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nE   TypeError: WebSocketConnectionManager.__init__() missing 1 required positional argument: 'url'\n",
       "test_counts": {
-        "total": 7,
-        "passed": 7,
+        "total": 0,
+        "passed": 0,
         "failed": 0,
         "skipped": 0,
         "errors": 0,
-        "test_files": 5
+        "test_files": 4
       },
       "coverage": null,
       "test_details": []
@@ -53,9 +53,9 @@
       "coverage": null
     },
     "overall": {
-      "status": "passed",
-      "start_time": 1755234816.095257,
-      "end_time": 1755234822.312209
+      "status": "failed",
+      "start_time": 1755269152.8644075,
+      "end_time": 1755269157.7465203
     }
   }
 }

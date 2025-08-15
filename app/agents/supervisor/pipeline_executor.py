@@ -107,18 +107,7 @@ class PipelineExecutor:
         from starlette.websockets import WebSocketDisconnect
         
         try:
-            content = AgentCompleted(
-                run_id=run_id,
-                result=AgentResult(
-                    success=True,
-                    output=state.to_dict()
-                ),
-                execution_time_ms=0.0
-            )
-            message = WebSocketMessage(
-                type="agent_completed", 
-                payload=content.model_dump()
-            )
+            message = self._build_completion_message(state, run_id)
             await self.websocket_manager.send_to_thread(
                 thread_id, message.model_dump()
             )
@@ -126,3 +115,16 @@ class PipelineExecutor:
             logger.warning(f"WebSocket disconnected for thread {thread_id}")
         except Exception as e:
             logger.error(f"Failed to send completion: {e}")
+    
+    def _build_completion_message(self, state: DeepAgentState, 
+                                 run_id: str) -> 'WebSocketMessage':
+        """Build completion message."""
+        from app.schemas import WebSocketMessage, AgentCompleted, AgentResult
+        content = AgentCompleted(
+            run_id=run_id,
+            result=AgentResult(success=True, output=state.to_dict()),
+            execution_time_ms=0.0
+        )
+        return WebSocketMessage(
+            type="agent_completed", payload=content.model_dump()
+        )
