@@ -1,8 +1,8 @@
-from typing import Annotated, TYPE_CHECKING
+from typing import Annotated, TYPE_CHECKING, AsyncGenerator
 from fastapi import Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.postgres import get_async_db
+from app.db.postgres import get_async_db as _get_async_db
 from app.llm.llm_manager import LLMManager
 from app.services.security_service import SecurityService
 from app.logging_config import central_logger
@@ -15,7 +15,16 @@ if TYPE_CHECKING:
 
 logger = central_logger.get_logger(__name__)
 
-DbDep = Annotated[AsyncSession, Depends(get_async_db)]
+async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
+    """Wrapper for database dependency with validation."""
+    async with _get_async_db() as session:
+        if not isinstance(session, AsyncSession):
+            logger.error(f"Invalid session type: {type(session)}")
+            raise RuntimeError(f"Expected AsyncSession, got {type(session)}")
+        logger.debug(f"Dependency injected session type: {type(session).__name__}")
+        yield session
+
+DbDep = Annotated[AsyncSession, Depends(get_db_dependency)]
 
 def get_llm_manager(request: Request) -> LLMManager:
     return request.app.state.llm_manager

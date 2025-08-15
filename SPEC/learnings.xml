@@ -59,6 +59,45 @@
         </learning>
     </gcp-project-configuration>
 
+    <database-connection-issues>
+        <learning id="async-context-manager-dependency-injection">
+            <title>AsyncSession Context Manager Dependency Injection Issue</title>
+            <date>2025-08-15</date>
+            <category>Database/AsyncIO</category>
+            <description>
+                FastAPI dependency injection was passing AsyncGeneratorContextManager instead of AsyncSession
+                to repository methods, causing "_AsyncGeneratorContextManager' object has no attribute 'execute'" errors.
+            </description>
+            <symptoms>
+                <symptom>Error: '_AsyncGeneratorContextManager' object has no attribute 'execute'</symptom>
+                <symptom>Log: "Async connection checked out from pool: None"</symptom>
+                <symptom>Repository methods receiving context manager instead of session</symptom>
+            </symptoms>
+            <root-causes>
+                <cause>Direct use of async context manager in FastAPI Depends without proper wrapper</cause>
+                <cause>FastAPI dependency injection not properly entering async context manager</cause>
+                <cause>Missing validation of session type in dependency injection</cause>
+            </root-causes>
+            <solution>
+                <step>Create wrapper function get_db_dependency() that explicitly enters context manager</step>
+                <step>Add validation to ensure AsyncSession type is returned</step>
+                <step>Add debug logging to track session creation and type</step>
+                <step>Update DbDep to use the wrapper function instead of direct context manager</step>
+            </solution>
+            <files-modified>
+                <file>app/dependencies.py - Added get_db_dependency wrapper with validation</file>
+                <file>app/db/postgres.py - Added debug logging for session tracking</file>
+            </files-modified>
+            <prevention>
+                <item>Always wrap async context managers in explicit functions for FastAPI dependencies</item>
+                <item>Add type validation when passing database sessions</item>
+                <item>Use debug logging to track session lifecycle</item>
+                <item>Test dependency injection separately from business logic</item>
+            </prevention>
+            <test-case>test_database_connection_pooling.py</test-case>
+        </learning>
+    </database-connection-issues>
+
     <specification-alignment-analysis>
         <analysis-date>2025-08-15</analysis-date>
         <analysis-scope>Complete XML specification review and implementation alignment check</analysis-scope>
@@ -631,6 +670,52 @@
                     Development database setup requires explicit table creation after container initialization.
                     Environment variables must be loaded from .env files when running standalone scripts.
                     The startup health checks correctly enforce schema requirements but don't auto-create tables.
+                </key-insight>
+            </fix>
+            
+            <fix date="2025-08-15">
+                <title>Frontend WebSocket Connection URL Undefined Issue</title>
+                <problem>Frontend WebSocket connection fails with URL "ws://localhost:60806/undefined?token=..."</problem>
+                <symptoms>
+                    <symptom>WebSocket URL contains "undefined" in path</symptom>
+                    <symptom>Frontend fetches /api/config but doesn't receive ws_url field</symptom>
+                    <symptom>WebSocketProvider tries to use config.ws_url which is undefined</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>/api/config endpoint missing ws_url field in response</cause>
+                    <cause>Frontend expects ws_url from config but backend doesn't provide it</cause>
+                    <cause>WebSocketConfig schema exists but not used in /api/config endpoint</cause>
+                </root-causes>
+                <solution>
+                    <step>Add ws_url to /api/config endpoint response</step>
+                    <step>Use settings.ws_config.ws_url from backend configuration</step>
+                    <step>Ensure consistent config response across all endpoints</step>
+                </solution>
+                <implementation>
+                    <code>
+                        # app/routes/config.py
+                        @router.get("/config")
+                        async def get_api_config():
+                            return {
+                                "log_level": "INFO",
+                                "max_retries": 3,
+                                "timeout": 30,
+                                "ws_url": settings.ws_config.ws_url  # Added this field
+                            }
+                    </code>
+                </implementation>
+                <files-modified>
+                    <file>app/routes/config.py - Added ws_url to /api/config response</file>
+                </files-modified>
+                <prevention>
+                    <action>Ensure all config endpoints return consistent fields</action>
+                    <action>Add integration test to verify WebSocket URL configuration</action>
+                    <action>Check frontend-backend config contract regularly</action>
+                </prevention>
+                <key-insight>
+                    Frontend-backend configuration contracts must be explicitly maintained.
+                    Missing config fields cause silent failures in JavaScript/TypeScript.
+                    Always verify config endpoint responses match frontend expectations.
                 </key-insight>
             </fix>
             
@@ -1560,6 +1645,61 @@
                     This implementation addresses GAP-002 (HIGH) from startup_coverage.xml
                     and demonstrates proper modular architecture following all Elite Engineer principles.
                 </note>
+            </fix>
+            
+            <fix date="2025-08-15">
+                <title>AsyncSession Factory Incorrect Usage in UnitOfWork</title>
+                <problem>Database operations fail with "_AsyncGeneratorContextManager' object has no attribute 'execute'" error</problem>
+                <root-causes>
+                    <cause>UnitOfWork calling async_session_factory() directly without entering context manager</cause>
+                    <cause>async_session_factory() returns AsyncGeneratorContextManager, not AsyncSession</cause>
+                    <cause>Incorrect assumption that factory returns session directly</cause>
+                    <cause>Missing async context manager entry (__aenter__) for session creation</cause>
+                </root-causes>
+                <symptoms>
+                    <symptom>Connection pool logs show "None" for checked out connections</symptom>
+                    <symptom>Repository methods receive context manager instead of session</symptom>
+                    <symptom>Error occurs when trying to execute queries on context manager</symptom>
+                </symptoms>
+                <solution>
+                    <step>Store session context manager separately in UnitOfWork</step>
+                    <step>Call __aenter__ on context manager to get actual AsyncSession</step>
+                    <step>Call __aexit__ on context manager in cleanup to properly close session</step>
+                    <step>Initialize _session_context to None in __init__ to avoid AttributeError</step>
+                </solution>
+                <implementation>
+                    <code>
+                        # INCORRECT - Returns context manager, not session
+                        self._session = async_session_factory()
+                        
+                        # CORRECT - Enter context manager to get session
+                        self._session_context = async_session_factory()
+                        self._session = await self._session_context.__aenter__()
+                        
+                        # CLEANUP - Exit context manager properly
+                        if hasattr(self, '_session_context'):
+                            await self._session_context.__aexit__(exc_type, exc_val, exc_tb)
+                    </code>
+                </implementation>
+                <files-modified>
+                    <file>app/services/database/unit_of_work.py - Fixed async session factory usage</file>
+                </files-modified>
+                <prevention>
+                    <action>Always use async with when working with async context managers</action>
+                    <action>Verify return types of factory functions match expected types</action>
+                    <action>Store context managers separately from resources they yield</action>
+                    <action>Test database operations after modifying connection management</action>
+                </prevention>
+                <key-insight>
+                    async_session_factory() from SQLAlchemy returns an async context manager that must be 
+                    entered to get the actual AsyncSession. Direct assignment without entering the context 
+                    results in storing the context manager itself, not the session.
+                </key-insight>
+                <testing>
+                    <test>Verified database connections work with test script</test>
+                    <test>Confirmed queries execute successfully after fix</test>
+                    <test>Connection pool properly manages sessions</test>
+                </testing>
             </fix>
         </section>
     </sections>

@@ -230,7 +230,8 @@ try:
         @event.listens_for(async_engine.sync_engine, "checkout")
         def receive_async_checkout(dbapi_conn: Connection, connection_record: ConnectionPoolEntry, connection_proxy: _ConnectionFairy) -> None:
             _monitor_async_pool_usage(async_engine.pool)
-            logger.debug(f"Async connection checked out from pool: {connection_record.info.get('pid')}")
+            pid = connection_record.info.get('pid', 'unknown')
+            logger.debug(f"Async connection checked out from pool: PID={pid}")
         
         
         logger.info("PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling")
@@ -278,6 +279,7 @@ async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
     _validate_async_session_factory()
     async with async_session_factory() as session:
         _validate_async_session(session)
+        logger.debug(f"Created async session: {type(session).__name__}")
         try:
             yield session
             await session.commit()

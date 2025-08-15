@@ -20,6 +20,7 @@ class UnitOfWork:
     
     def __init__(self, session: Optional[AsyncSession] = None):
         self._session = session
+        self._session_context = None
         self._external_session = session is not None
         self.threads: Optional[ThreadRepository] = None
         self.messages: Optional[MessageRepository] = None
@@ -32,12 +33,11 @@ class UnitOfWork:
             if async_session_factory is None:
                 raise RuntimeError("Database not configured - async_session_factory is None")
             # Properly create a session using the async session factory
-            self._session = async_session_factory()
+            self._session_context = async_session_factory()
+            self._session = await self._session_context.__aenter__()
             if not validate_session(self._session):
                 error_msg = get_session_validation_error(self._session)
                 raise RuntimeError(f"UnitOfWork session error: {error_msg}")
-            # Begin a transaction
-            await self._session.begin()
             
         self._init_repositories()
         logger.debug("UnitOfWork context entered")
@@ -65,8 +65,8 @@ class UnitOfWork:
             await self.commit()
             logger.debug("UnitOfWork committed successfully")
         
-        if not self._external_session and self._session:
-            await self._session.close()
+        if not self._external_session and hasattr(self, '_session_context'):
+            await self._session_context.__aexit__(exc_type, exc_val, exc_tb)
     
     async def commit(self):
         """Commit the transaction"""
@@ -109,20 +109,19 @@ class UnitOfWork:
             if async_session_factory is None:
                 raise RuntimeError("Database not configured - async_session_factory is None")
             # Properly create a session using the async session factory
-            self._session = async_session_factory()
+            self._session_context = async_session_factory()
+            self._session = await self._session_context.__aenter__()
             if not validate_session(self._session):
                 error_msg = get_session_validation_error(self._session)
                 raise RuntimeError(f"UnitOfWork session error: {error_msg}")
-            # Begin a transaction
-            await self._session.begin()
         
         self._init_repositories()
         logger.debug("UnitOfWork initialized")
     
     async def close(self):
         """Close the UnitOfWork - for backward compatibility with tests"""
-        if not self._external_session and self._session:
-            await self._session.close()
+        if not self._external_session and hasattr(self, '_session_context'):
+            await self._session_context.__aexit__(None, None, None)
             logger.debug("UnitOfWork closed")
     
     async def execute_in_transaction(self, func, *args, **kwargs):

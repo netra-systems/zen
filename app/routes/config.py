@@ -35,7 +35,8 @@ async def get_api_config():
     return {
         "log_level": "INFO",
         "max_retries": 3,
-        "timeout": 30
+        "timeout": 30,
+        "ws_url": settings.ws_config.ws_url
     }
 
 @router.put("/config")
