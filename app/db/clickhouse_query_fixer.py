@@ -109,10 +109,30 @@ class ClickHouseQueryInterceptor:
         # Fix the query if needed
         if self.fix_enabled:
             original_query = query
-            query = fix_clickhouse_array_syntax(query)
+            llm_was_fixed = False
             
-            if query != original_query:
-                self.queries_fixed += 1
+            # First check if it's LLM-generated (lazy import to avoid circular dependency)
+            try:
+                from app.agents.data_sub_agent.llm_query_detector import LLMQueryDetector
+                query, metadata = LLMQueryDetector.validate_and_fix(query)
+                if metadata['is_llm_generated']:
+                    logger.warning(
+                        f"LLM query detected (reasons: {', '.join(metadata['detection_reasons'][:2])})"
+                    )
+                    if metadata['was_fixed']:
+                        llm_was_fixed = True
+                        self.queries_fixed += 1
+            except ImportError:
+                logger.debug("LLMQueryDetector not available, skipping LLM detection")
+            
+            # Then apply standard fixes (only if LLM didn't already fix it)
+            if not llm_was_fixed:
+                fixed_query = fix_clickhouse_array_syntax(query)
+                if fixed_query != query:
+                    query = fixed_query
+                    self.queries_fixed += 1
+            
+            if query != original_query and not llm_was_fixed:
                 logger.info(f"Fixed query #{self.queries_executed} (total fixed: {self.queries_fixed})")
         
         # Validate the query

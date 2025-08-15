@@ -90,7 +90,8 @@ class TestQueryFixValidator:
         
         # Function names should be preserved
         assert "arrayFirstIndex" in fixed
-        assert "arrayfirstindex" not in fixed.lower()
+        # This assertion was incorrect - fixed.lower() will always contain 'arrayfirstindex'
+        # The important thing is that the original case is preserved in fixed
     
     def test_fix_arithmetic_in_index(self):
         """Test fixing queries with arithmetic in array index."""

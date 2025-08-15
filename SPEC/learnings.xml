@@ -2041,11 +2041,37 @@
                     ClickHouse can't determine if the result should be Float64 (element) or Array(Float64) 
                     (whole array). Always use arrayElement() for accessing array elements in ClickHouse.
                 </key-insight>
+                <root-causes>
+                    <cause>Query simplification in clickhouse_recovery.py was using .lower() which breaks ClickHouse function names</cause>
+                    <cause>LLM-generated queries may use SQL-style array[index] instead of arrayElement(array, index)</cause>
+                    <cause>Cached or persisted queries from before fixes were applied</cause>
+                    <cause>Direct query generation bypassing query_builder.py safety mechanisms</cause>
+                </root-causes>
+                <detection-methods>
+                    <method>Check for pattern: metrics.value[idx] or metrics.name[idx]</method>
+                    <method>Check for lowercased ClickHouse functions: arrayfirstindex instead of arrayFirstIndex</method>
+                    <method>Check for missing subquery structure in correlation queries</method>
+                    <method>Check for SQL-style syntax: ARRAY[...] instead of [...]</method>
+                </detection-methods>
+                <multi-layer-fix>
+                    <layer>query_builder.py - Always generates correct arrayElement syntax</layer>
+                    <layer>query_fix_validator.py - Validates and fixes any query before execution</layer>
+                    <layer>llm_query_detector.py - Detects and fixes LLM-generated queries</layer>
+                    <layer>ClickHouseQueryInterceptor - Wraps all clients to fix queries automatically</layer>
+                    <layer>clickhouse_recovery.py - Fixed to not lowercase queries</layer>
+                </multi-layer-fix>
                 <testing>
                     <test>test_fix_metrics_value_array_syntax - Verifies query fixer works</test>
                     <test>test_query_interceptor_fixes_queries - Ensures interceptor applies fixes</test>
                     <test>test_complex_nested_array_access - Tests various array access patterns</test>
+                    <test>test_query_fix_validator.py - Tests the comprehensive validator</test>
+                    <test>test_llm_query_detection - Verifies LLM query detection and fixing</test>
                 </testing>
+                <files-created>
+                    <file>app/agents/data_sub_agent/query_fix_validator.py - Comprehensive query validation</file>
+                    <file>app/agents/data_sub_agent/llm_query_detector.py - LLM query detection and fixing</file>
+                    <file>app/tests/unit/test_query_fix_validator.py - Tests for validator</file>
+                </files-created>
             </fix>
         </section>
         <section id="observability-logging">

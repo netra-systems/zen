@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-15T14:12:53.467508  
+**Generated:** 2025-08-15T14:50:14.780751  
 **Test Level:** critical - Critical path tests only (1-2 minutes)  
 **Purpose:** Essential functionality verification
 
@@ -17,7 +17,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 85 | 85 | 0 | 0 | 0 | 33.73s | [FAILED] |
+| Backend   | 85 | 85 | 0 | 0 | 0 | 33.74s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Coverage Summary
@@ -32,7 +32,7 @@
 - **Purpose:** Essential functionality verification
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 33.73s
+- **Total Duration:** 33.74s
 - **Exit Code:** 1
 
 ### Backend Configuration
