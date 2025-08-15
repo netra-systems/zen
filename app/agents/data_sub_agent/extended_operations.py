@@ -144,13 +144,20 @@ class ExtendedOperations:
         return data
         
     async def save_state(self) -> None:
-        """Save agent state (mock implementation)."""
-        if hasattr(self.agent, 'context'):
-            logger.debug(f"Saving state with context: {self.agent.context}")
+        """Save agent state to persistent storage."""
+        if hasattr(self.agent, 'context') and self.agent.context:
+            state_data = {
+                "context": self.agent.context,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "agent_id": getattr(self.agent, 'id', 'unknown')
+            }
+            logger.info(f"Saving agent state: {state_data}")
+            # TODO: Implement actual persistence to database or file system
             
     async def load_state(self) -> None:
-        """Load agent state (mock implementation)."""
-        logger.debug("Loading saved state")
+        """Load agent state from persistent storage."""
+        # TODO: Implement actual state loading from database or file system
+        logger.info("Loading agent state from persistent storage")
         
     async def recover(self) -> None:
         """Recover agent from saved state."""

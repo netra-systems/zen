@@ -261,16 +261,17 @@ class AdminToolDispatcher(ToolDispatcher):
         if not tool_name:
             return {"success": False, "error": f"Unknown operation type: {operation_type}"}
         
-        # Execute the tool via the mock tool dispatcher
+        # Execute the tool via the real tool dispatcher
         if hasattr(self, 'tool_dispatcher') and self.tool_dispatcher:
             result = await self.tool_dispatcher.execute_tool(tool_name, params)
             await self._log_audit_operation(operation)
             return result
         
-        # Return mock response for testing
-        result = {"success": True, "result": f"Operation {operation_type} completed"}
+        # No tool dispatcher available - this is an error condition
+        error_msg = f"No tool dispatcher available for operation {operation_type}"
+        logger.error(error_msg)
         await self._log_audit_operation(operation)
-        return result
+        return {"success": False, "error": error_msg}
     
     async def _log_audit_operation(self, operation: Dict[str, Any]) -> None:
         """Log audit information for admin operations"""
