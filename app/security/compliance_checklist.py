@@ -67,220 +67,130 @@ class SecurityComplianceChecklist:
     
     def _add_owasp_checks(self):
         """Add OWASP Top 10 2021 compliance checks."""
-        
-        # A01:2021 - Broken Access Control
-        self.checks["OWASP_A01_001"] = ComplianceCheck(
-            id="OWASP_A01_001",
-            title="Access Control Implementation",
-            description="Ensure proper access control mechanisms are implemented",
-            standard=ComplianceStandard.OWASP_TOP_10,
-            requirement="A01:2021 - Broken Access Control",
-            status=ComplianceStatus.COMPLIANT,
-            evidence=[
-                "Role-based access control implemented",
-                "Permission service validates user permissions",
-                "Admin endpoints protected with proper authorization",
-                "API endpoints use authentication middleware"
-            ],
-            remediation_steps=[],
-            priority="high",
-            last_checked=datetime.now(timezone.utc),
+        self._add_owasp_access_control_check()
+        self._add_owasp_cryptographic_check()
+        self._add_owasp_injection_check()
+        self._add_owasp_design_check()
+        self._add_owasp_misconfiguration_check()
+        self._add_owasp_component_check()
+        self._add_owasp_authentication_check()
+        self._add_owasp_integrity_check()
+        self._add_owasp_logging_check()
+        self._add_owasp_ssrf_check()
+    
+    def _create_owasp_check(self, check_id: str, title: str, description: str, 
+                           requirement: str, status: ComplianceStatus, evidence: List[str], 
+                           remediation_steps: List[str], priority: str) -> None:
+        """Create and store an OWASP compliance check."""
+        self.checks[check_id] = ComplianceCheck(
+            id=check_id, title=title, description=description,
+            standard=ComplianceStandard.OWASP_TOP_10, requirement=requirement,
+            status=status, evidence=evidence, remediation_steps=remediation_steps,
+            priority=priority, last_checked=datetime.now(timezone.utc),
             next_check_date=datetime.now(timezone.utc)
         )
-        
-        # A02:2021 - Cryptographic Failures
-        self.checks["OWASP_A02_001"] = ComplianceCheck(
-            id="OWASP_A02_001",
-            title="Cryptographic Implementation",
-            description="Ensure proper cryptographic practices",
-            standard=ComplianceStandard.OWASP_TOP_10,
-            requirement="A02:2021 - Cryptographic Failures",
-            status=ComplianceStatus.COMPLIANT,
-            evidence=[
-                "JWT tokens use strong signing algorithms",
-                "Passwords are hashed using bcrypt",
-                "Fernet encryption for sensitive data",
-                "API keys are hashed for storage",
-                "Strong session management"
-            ],
-            remediation_steps=[],
-            priority="high",
-            last_checked=datetime.now(timezone.utc),
-            next_check_date=datetime.now(timezone.utc)
-        )
-        
-        # A03:2021 - Injection
-        self.checks["OWASP_A03_001"] = ComplianceCheck(
-            id="OWASP_A03_001",
-            title="Injection Prevention",
-            description="Prevent injection attacks through input validation",
-            standard=ComplianceStandard.OWASP_TOP_10,
-            requirement="A03:2021 - Injection",
-            status=ComplianceStatus.COMPLIANT,
-            evidence=[
-                "SQL injection detection patterns implemented",
-                "XSS prevention in security middleware",
-                "Command injection detection",
-                "Path traversal protection",
-                "Input validation on all endpoints",
-                "Parameterized queries used"
-            ],
-            remediation_steps=[],
-            priority="high",
-            last_checked=datetime.now(timezone.utc),
-            next_check_date=datetime.now(timezone.utc)
-        )
-        
-        # A04:2021 - Insecure Design
-        self.checks["OWASP_A04_001"] = ComplianceCheck(
-            id="OWASP_A04_001",
-            title="Secure Design Practices",
-            description="Implement secure design principles",
-            standard=ComplianceStandard.OWASP_TOP_10,
-            requirement="A04:2021 - Insecure Design",
-            status=ComplianceStatus.COMPLIANT,
-            evidence=[
-                "Threat modeling conducted",
-                "Security requirements defined",
-                "Defense in depth implemented",
-                "Principle of least privilege applied",
-                "Secure development lifecycle followed"
-            ],
-            remediation_steps=[],
-            priority="high",
-            last_checked=datetime.now(timezone.utc),
-            next_check_date=datetime.now(timezone.utc)
-        )
-        
-        # A05:2021 - Security Misconfiguration
-        self.checks["OWASP_A05_001"] = ComplianceCheck(
-            id="OWASP_A05_001",
-            title="Security Configuration",
-            description="Ensure proper security configuration",
-            standard=ComplianceStandard.OWASP_TOP_10,
-            requirement="A05:2021 - Security Misconfiguration",
-            status=ComplianceStatus.COMPLIANT,
-            evidence=[
-                "Security headers implemented",
-                "CORS properly configured",
-                "Error handling doesn't leak information",
-                "Debug mode disabled in production",
-                "Default credentials changed",
-                "Unnecessary features disabled"
-            ],
-            remediation_steps=[],
-            priority="high",
-            last_checked=datetime.now(timezone.utc),
-            next_check_date=datetime.now(timezone.utc)
-        )
-        
-        # A06:2021 - Vulnerable and Outdated Components
-        self.checks["OWASP_A06_001"] = ComplianceCheck(
-            id="OWASP_A06_001",
-            title="Component Security",
-            description="Manage vulnerable and outdated components",
-            standard=ComplianceStandard.OWASP_TOP_10,
-            requirement="A06:2021 - Vulnerable and Outdated Components",
-            status=ComplianceStatus.NEEDS_REVIEW,
-            evidence=[
-                "Dependency scanning in place"
-            ],
-            remediation_steps=[
-                "Implement automated dependency vulnerability scanning",
-                "Establish process for regular dependency updates",
-                "Monitor security advisories for used components"
-            ],
-            priority="medium",
-            last_checked=datetime.now(timezone.utc),
-            next_check_date=datetime.now(timezone.utc)
-        )
-        
-        # A07:2021 - Identification and Authentication Failures
-        self.checks["OWASP_A07_001"] = ComplianceCheck(
-            id="OWASP_A07_001",
-            title="Authentication Security",
-            description="Secure authentication and session management",
-            standard=ComplianceStandard.OWASP_TOP_10,
-            requirement="A07:2021 - Identification and Authentication Failures",
-            status=ComplianceStatus.COMPLIANT,
-            evidence=[
-                "Multi-factor authentication support",
-                "Account lockout mechanisms",
-                "Session management with timeouts",
-                "Strong password requirements",
-                "Secure session tokens",
-                "Brute force protection"
-            ],
-            remediation_steps=[],
-            priority="high",
-            last_checked=datetime.now(timezone.utc),
-            next_check_date=datetime.now(timezone.utc)
-        )
-        
-        # A08:2021 - Software and Data Integrity Failures
-        self.checks["OWASP_A08_001"] = ComplianceCheck(
-            id="OWASP_A08_001",
-            title="Data Integrity",
-            description="Ensure software and data integrity",
-            standard=ComplianceStandard.OWASP_TOP_10,
-            requirement="A08:2021 - Software and Data Integrity Failures",
-            status=ComplianceStatus.PARTIALLY_COMPLIANT,
-            evidence=[
-                "Input validation implemented",
-                "API data validation with Pydantic"
-            ],
-            remediation_steps=[
-                "Implement code signing for deployments",
-                "Add integrity checks for critical data",
-                "Implement secure CI/CD pipeline"
-            ],
-            priority="medium",
-            last_checked=datetime.now(timezone.utc),
-            next_check_date=datetime.now(timezone.utc)
-        )
-        
-        # A09:2021 - Security Logging and Monitoring Failures
-        self.checks["OWASP_A09_001"] = ComplianceCheck(
-            id="OWASP_A09_001",
-            title="Security Logging and Monitoring",
-            description="Implement comprehensive logging and monitoring",
-            standard=ComplianceStandard.OWASP_TOP_10,
-            requirement="A09:2021 - Security Logging and Monitoring Failures",
-            status=ComplianceStatus.COMPLIANT,
-            evidence=[
-                "Comprehensive logging framework",
-                "Security event logging",
-                "Authentication attempt logging",
-                "Error logging with correlation IDs",
-                "Security audit framework"
-            ],
-            remediation_steps=[],
-            priority="high",
-            last_checked=datetime.now(timezone.utc),
-            next_check_date=datetime.now(timezone.utc)
-        )
-        
-        # A10:2021 - Server-Side Request Forgery (SSRF)
-        self.checks["OWASP_A10_001"] = ComplianceCheck(
-            id="OWASP_A10_001",
-            title="SSRF Prevention",
-            description="Prevent server-side request forgery attacks",
-            standard=ComplianceStandard.OWASP_TOP_10,
-            requirement="A10:2021 - Server-Side Request Forgery (SSRF)",
-            status=ComplianceStatus.PARTIALLY_COMPLIANT,
-            evidence=[
-                "Input validation for URLs",
-                "Network segmentation"
-            ],
-            remediation_steps=[
-                "Implement URL validation whitelist",
-                "Add network-level SSRF protection",
-                "Validate and sanitize all user-provided URLs"
-            ],
-            priority="medium",
-            last_checked=datetime.now(timezone.utc),
-            next_check_date=datetime.now(timezone.utc)
-        )
+    
+    def _add_owasp_access_control_check(self):
+        """Add OWASP A01 - Broken Access Control check."""
+        evidence = ["Role-based access control implemented", 
+                   "Permission service validates user permissions",
+                   "Admin endpoints protected with proper authorization",
+                   "API endpoints use authentication middleware"]
+        self._create_owasp_check("OWASP_A01_001", "Access Control Implementation",
+                                "Ensure proper access control mechanisms are implemented",
+                                "A01:2021 - Broken Access Control", ComplianceStatus.COMPLIANT,
+                                evidence, [], "high")
+    
+    def _add_owasp_cryptographic_check(self):
+        """Add OWASP A02 - Cryptographic Failures check."""
+        evidence = ["JWT tokens use strong signing algorithms", "Passwords are hashed using bcrypt",
+                   "Fernet encryption for sensitive data", "API keys are hashed for storage",
+                   "Strong session management"]
+        self._create_owasp_check("OWASP_A02_001", "Cryptographic Implementation",
+                                "Ensure proper cryptographic practices",
+                                "A02:2021 - Cryptographic Failures", ComplianceStatus.COMPLIANT,
+                                evidence, [], "high")
+    
+    def _add_owasp_injection_check(self):
+        """Add OWASP A03 - Injection check."""
+        evidence = ["SQL injection detection patterns implemented", "XSS prevention in security middleware",
+                   "Command injection detection", "Path traversal protection",
+                   "Input validation on all endpoints", "Parameterized queries used"]
+        self._create_owasp_check("OWASP_A03_001", "Injection Prevention",
+                                "Prevent injection attacks through input validation",
+                                "A03:2021 - Injection", ComplianceStatus.COMPLIANT,
+                                evidence, [], "high")
+    
+    def _add_owasp_design_check(self):
+        """Add OWASP A04 - Insecure Design check."""
+        evidence = ["Threat modeling conducted", "Security requirements defined",
+                   "Defense in depth implemented", "Principle of least privilege applied",
+                   "Secure development lifecycle followed"]
+        self._create_owasp_check("OWASP_A04_001", "Secure Design Practices",
+                                "Implement secure design principles",
+                                "A04:2021 - Insecure Design", ComplianceStatus.COMPLIANT,
+                                evidence, [], "high")
+    
+    def _add_owasp_misconfiguration_check(self):
+        """Add OWASP A05 - Security Misconfiguration check."""
+        evidence = ["Security headers implemented", "CORS properly configured",
+                   "Error handling doesn't leak information", "Debug mode disabled in production",
+                   "Default credentials changed", "Unnecessary features disabled"]
+        self._create_owasp_check("OWASP_A05_001", "Security Configuration",
+                                "Ensure proper security configuration",
+                                "A05:2021 - Security Misconfiguration", ComplianceStatus.COMPLIANT,
+                                evidence, [], "high")
+    
+    def _add_owasp_component_check(self):
+        """Add OWASP A06 - Vulnerable and Outdated Components check."""
+        remediation = ["Implement automated dependency vulnerability scanning",
+                      "Establish process for regular dependency updates",
+                      "Monitor security advisories for used components"]
+        self._create_owasp_check("OWASP_A06_001", "Component Security",
+                                "Manage vulnerable and outdated components",
+                                "A06:2021 - Vulnerable and Outdated Components", 
+                                ComplianceStatus.NEEDS_REVIEW, ["Dependency scanning in place"],
+                                remediation, "medium")
+    
+    def _add_owasp_authentication_check(self):
+        """Add OWASP A07 - Authentication Failures check."""
+        evidence = ["Multi-factor authentication support", "Account lockout mechanisms",
+                   "Session management with timeouts", "Strong password requirements",
+                   "Secure session tokens", "Brute force protection"]
+        self._create_owasp_check("OWASP_A07_001", "Authentication Security",
+                                "Secure authentication and session management",
+                                "A07:2021 - Identification and Authentication Failures",
+                                ComplianceStatus.COMPLIANT, evidence, [], "high")
+    
+    def _add_owasp_integrity_check(self):
+        """Add OWASP A08 - Software and Data Integrity Failures check."""
+        evidence = ["Input validation implemented", "API data validation with Pydantic"]
+        remediation = ["Implement code signing for deployments", "Add integrity checks for critical data",
+                      "Implement secure CI/CD pipeline"]
+        self._create_owasp_check("OWASP_A08_001", "Data Integrity",
+                                "Ensure software and data integrity",
+                                "A08:2021 - Software and Data Integrity Failures",
+                                ComplianceStatus.PARTIALLY_COMPLIANT, evidence, remediation, "medium")
+    
+    def _add_owasp_logging_check(self):
+        """Add OWASP A09 - Security Logging and Monitoring Failures check."""
+        evidence = ["Comprehensive logging framework", "Security event logging",
+                   "Authentication attempt logging", "Error logging with correlation IDs",
+                   "Security audit framework"]
+        self._create_owasp_check("OWASP_A09_001", "Security Logging and Monitoring",
+                                "Implement comprehensive logging and monitoring",
+                                "A09:2021 - Security Logging and Monitoring Failures",
+                                ComplianceStatus.COMPLIANT, evidence, [], "high")
+    
+    def _add_owasp_ssrf_check(self):
+        """Add OWASP A10 - Server-Side Request Forgery check."""
+        evidence = ["Input validation for URLs", "Network segmentation"]
+        remediation = ["Implement URL validation whitelist", "Add network-level SSRF protection",
+                      "Validate and sanitize all user-provided URLs"]
+        self._create_owasp_check("OWASP_A10_001", "SSRF Prevention",
+                                "Prevent server-side request forgery attacks",
+                                "A10:2021 - Server-Side Request Forgery (SSRF)",
+                                ComplianceStatus.PARTIALLY_COMPLIANT, evidence, remediation, "medium")
     
     def _add_nist_checks(self):
         """Add NIST Cybersecurity Framework checks."""

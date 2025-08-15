@@ -686,6 +686,168 @@
       "failed": 1,
       "coverage": null,
       "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:21:23.761207",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:21:38.799671",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:22:07.351482",
+      "level": "agents",
+      "total": 20,
+      "passed": 16,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:22:41.890402",
+      "level": "unit",
+      "total": 4,
+      "passed": 3,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:23:03.829730",
+      "level": "real_services",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:23:32.933065",
+      "level": "real_services",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:24:11.148160",
+      "level": "unit",
+      "total": 205,
+      "passed": 193,
+      "failed": 4,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:24:56.253874",
+      "level": "agents",
+      "total": 55,
+      "passed": 52,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:25:12.455871",
+      "level": "real_services",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:25:48.060473",
+      "level": "real_services",
+      "total": 2,
+      "passed": 0,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:26:54.456341",
+      "level": "unit",
+      "total": 218,
+      "passed": 203,
+      "failed": 4,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:27:10.201975",
+      "level": "agents",
+      "total": 56,
+      "passed": 54,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:27:26.711755",
+      "level": "smoke",
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:27:47.439609",
+      "level": "real_services",
+      "total": 3944,
+      "passed": 0,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:29:12.619560",
+      "level": "real_services",
+      "total": 3944,
+      "passed": 0,
+      "failed": 1,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:29:47.818692",
+      "level": "unit",
+      "total": 135,
+      "passed": 128,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:38:49.499958",
+      "level": "unit",
+      "total": 244,
+      "passed": 222,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
+    },
+    {
+      "timestamp": "2025-08-14T21:53:04.541278",
+      "level": "unit",
+      "total": 321,
+      "passed": 297,
+      "failed": 3,
+      "coverage": null,
+      "duration": 0
     }
   ],
   "flaky_tests": {},

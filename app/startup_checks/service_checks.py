@@ -20,8 +20,16 @@ class ServiceChecker:
     
     def __init__(self, app):
         self.app = app
-        self.environment = os.getenv("ENVIRONMENT", "development").lower()
-        self.is_staging = self.environment == "staging" or os.getenv("K_SERVICE")
+    
+    @property
+    def environment(self):
+        """Get current environment from settings"""
+        return settings.environment.lower()
+    
+    @property 
+    def is_staging(self):
+        """Check if running in staging environment"""
+        return self.environment == "staging" or os.getenv("K_SERVICE")
     
     async def check_redis(self) -> StartupCheckResult:
         """Check Redis connection"""
@@ -139,30 +147,36 @@ class ServiceChecker:
                 result = await result
             return [row.get('name', row) if isinstance(row, dict) else row[0] for row in result]
     
-    def _create_llm_result(
-        self, 
-        available_providers: List[str], 
-        failed_providers: List[str]
-    ) -> StartupCheckResult:
+    def _create_llm_result(self, available_providers: List[str], failed_providers: List[str]) -> StartupCheckResult:
         """Create LLM providers check result"""
         if not available_providers:
-            return StartupCheckResult(
-                name="llm_providers",
-                success=False,
-                message="No LLM providers available",
-                critical=True
-            )
+            return self._create_no_providers_result()
         elif failed_providers:
-            return StartupCheckResult(
-                name="llm_providers",
-                success=True,
-                message=f"LLM providers: {len(available_providers)} available, {len(failed_providers)} failed",
-                critical=False
-            )
+            return self._create_partial_providers_result(available_providers, failed_providers)
         else:
-            return StartupCheckResult(
-                name="llm_providers",
-                success=True,
-                message=f"All {len(available_providers)} LLM providers configured",
-                critical=False
-            )
+            return self._create_all_providers_result(available_providers)
+    
+    def _create_no_providers_result(self) -> StartupCheckResult:
+        """Create result when no providers are available"""
+        return StartupCheckResult(
+            name="llm_providers",
+            success=False,
+            message="No LLM providers available",
+            critical=True
+        )
+    
+    def _create_partial_providers_result(self, available_providers: List[str], failed_providers: List[str]) -> StartupCheckResult:
+        """Create result when some providers failed"""
+        message = f"LLM providers: {len(available_providers)} available, {len(failed_providers)} failed"
+        return StartupCheckResult(
+            name="llm_providers", success=True, message=message, critical=False
+        )
+    
+    def _create_all_providers_result(self, available_providers: List[str]) -> StartupCheckResult:
+        """Create result when all providers are available"""
+        return StartupCheckResult(
+            name="llm_providers",
+            success=True,
+            message=f"All {len(available_providers)} LLM providers configured",
+            critical=False
+        )

@@ -2,6 +2,7 @@
 Main launcher class for the development environment.
 """
 
+import os
 import sys
 import time
 import subprocess
@@ -143,10 +144,16 @@ class DevLauncher:
             True if secrets loaded successfully or not needed
         """
         if not self.config.load_secrets:
+            self._print("🔒", "SECRETS", "Secret loading disabled (--no-secrets flag)")
             return True
         
-        self._print("🔐", "SECRETS", "Loading secrets...")
-        return self.secret_loader.load_all_secrets()
+        self._print("🔐", "SECRETS", "Starting enhanced environment variable loading...")
+        result = self.secret_loader.load_all_secrets()
+        
+        if self.config.verbose:
+            self._show_env_var_debug_info()
+        
+        return result
     
     def register_health_monitoring(self):
         """Register health monitoring after services are verified ready."""
@@ -559,7 +566,55 @@ class DevLauncher:
         print(f"  • Real-time logging: YES")
         print(f"  • Turbopack: {'YES' if self.config.use_turbopack else 'NO'}")
         print(f"  • Secret loading: {'YES' if self.config.load_secrets else 'NO'}")
+        print(f"  • Verbose output: {'YES' if self.config.verbose else 'NO'}")
         print()
+    
+    def _show_env_var_debug_info(self):
+        """Show debug information about environment variables."""
+        print("\n" + "=" * 60)
+        print("🔍 ENVIRONMENT VARIABLE DEBUG INFO")
+        print("=" * 60)
+        
+        # Check for key environment files
+        env_files = [
+            (".env", "Base configuration"),
+            (".env.development", "Development overrides"),
+            (".env.development.local", "Terraform-generated"),
+        ]
+        
+        print("\n📁 Environment Files Status:")
+        for filename, description in env_files:
+            filepath = self.config.project_root / filename
+            if filepath.exists():
+                size = filepath.stat().st_size
+                print(f"  ✅ {filename:25} - {description} ({size} bytes)")
+            else:
+                print(f"  ❌ {filename:25} - {description} (not found)")
+        
+        # Show key environment variables (masked)
+        print("\n🔑 Key Environment Variables (current state):")
+        important_vars = [
+            "GOOGLE_CLIENT_ID",
+            "GEMINI_API_KEY",
+            "CLICKHOUSE_HOST",
+            "DATABASE_URL",
+            "REDIS_HOST",
+            "JWT_SECRET_KEY",
+            "ENVIRONMENT",
+        ]
+        
+        for var in important_vars:
+            value = os.environ.get(var)
+            if value:
+                if len(value) > 10:
+                    masked = value[:3] + "***" + value[-3:]
+                else:
+                    masked = "***"
+                print(f"  {var:30} = {masked}")
+            else:
+                print(f"  {var:30} = <not set>")
+        
+        print("=" * 60)
     
     def _show_success_summary(self):
         """Show success summary."""
@@ -577,6 +632,15 @@ class DevLauncher:
         self._print("🌐", "FRONTEND", "")
         print(f"  URL: http://localhost:{self.config.frontend_port}")
         print(f"  Logs: Real-time streaming (magenta)")
+        
+        print("\n📝 ENVIRONMENT FILES:")
+        print("  Priority (highest to lowest):")
+        print("  1. OS Environment Variables")
+        print("  2. .env.development.local (Terraform)")
+        print("  3. .env.development (local overrides)")
+        print("  4. .env (base configuration)")
+        print("  5. Google Secret Manager")
+        print("  6. Static defaults")
         
         print("\n[COMMANDS]:")
         print("  Press Ctrl+C to stop all services")

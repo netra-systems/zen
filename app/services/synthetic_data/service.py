@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 from sqlalchemy.orm import Session
 
 from .enums import WorkloadCategory, GenerationStatus
-from .tools import initialize_default_tools, generate_tool_invocations, calculate_metrics
+from .tools import initialize_default_tools, generate_tool_invocations, calculate_metrics, create_tool_invocation
 from .content_generator import (
     select_workload_type, generate_timestamp, select_agent_type, 
     generate_content, generate_child_spans
@@ -83,6 +83,14 @@ class SyntheticDataService(RecoveryMixin):
                 item['invocation_id'] = str(uuid.uuid4())
                 invocations.append(item)
         return invocations
+    
+    def _generate_tool_invocations(self, pattern: str) -> List[Dict]:
+        """Generate tool invocations for a specific pattern"""
+        return generate_tool_invocations(pattern, self.default_tools)
+    
+    def _create_tool_invocation(self, tool: Dict) -> Dict:
+        """Create a single tool invocation from tool definition"""
+        return create_tool_invocation(tool)
     
     async def generate_with_errors(self, config) -> List[Dict]:
         """Generate with error scenarios"""

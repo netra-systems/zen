@@ -31,7 +31,10 @@ class ExtendedOperations:
         
     async def process_with_retry(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process data with retry mechanism."""
-        max_attempts = self.config.get("max_retries", 3)
+        # Use agent's current config, not the cached config
+        agent_config = getattr(self.agent, 'config', self.config)
+        max_retries = agent_config.get("max_retries", 3)
+        max_attempts = max_retries
         for attempt in range(max_attempts):
             try:
                 return await self._process_internal(data)
@@ -61,7 +64,9 @@ class ExtendedOperations:
         for item in batch:
             try:
                 result = await self.agent.process_data(item)
-                results.append({"status": "success", **result})
+                # Ensure "success" status is not overwritten by result's status
+                safe_result = {**result, "status": "success"}
+                results.append(safe_result)
             except Exception as e:
                 results.append({"status": "error", "error": str(e)})
         return results

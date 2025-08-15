@@ -20,17 +20,20 @@ from app.ws_manager import WebSocketManager
 class TestAdminAgentIntegration:
     """Integration tests for admin agents"""
     
-    @pytest_asyncio.fixture
-    async def mock_supervisor(self):
+    @pytest.fixture
+    def mock_supervisor(self):
         """Create mock supervisor with agents"""
         supervisor = AsyncMock(spec=Supervisor)
         supervisor.triage_agent = AsyncMock(spec=TriageSubAgent)
+        supervisor.triage_agent.process = AsyncMock()
         supervisor.corpus_admin = AsyncMock(spec=CorpusAdminSubAgent)
+        supervisor.corpus_admin.process = AsyncMock()
         supervisor.tool_dispatcher = AsyncMock(spec=AdminToolDispatcher)
+        supervisor.tool_dispatcher.dispatch_tool = AsyncMock()
         return supervisor
     
-    @pytest_asyncio.fixture
-    async def mock_websocket(self):
+    @pytest.fixture
+    def mock_websocket(self):
         """Create mock WebSocket manager"""
         ws_manager = AsyncMock(spec=WebSocketManager)
         ws_manager.send_message = AsyncMock()

@@ -209,9 +209,9 @@ class TestCustomExceptions:
     
     def test_authentication_exception_details(self):
         """Test authentication exception includes auth details."""
-        from app.core.exceptions import AuthenticationException
+        from app.core.exceptions import AuthenticationError
         
-        exc = AuthenticationException(
+        exc = AuthenticationError(
             "Invalid credentials",
             auth_method="jwt",
             user_id="123",

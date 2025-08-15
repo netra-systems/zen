@@ -1,6 +1,7 @@
 import pytest
 import pandas as pd
 import asyncio
+import os
 from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from app.main import app
@@ -8,10 +9,21 @@ from app.db.testing import override_get_db
 from app.dependencies import get_async_db
 from app.schemas.Generation import ContentGenParams, LogGenParams, DataIngestionParams
 
+# Set testing flags to simplify startup
+os.environ["TESTING"] = "1"
+os.environ["SKIP_STARTUP_CHECKS"] = "true"
+os.environ["SKIP_CLICKHOUSE_INIT"] = "true"
+
 app.dependency_overrides[get_async_db] = override_get_db
 
 @pytest.fixture(scope="module")
 def test_client():
+    import os
+    # Set testing flags to prevent complex startup
+    os.environ["TESTING"] = "1"
+    os.environ["SKIP_STARTUP_CHECKS"] = "true"
+    os.environ["SKIP_CLICKHOUSE_INIT"] = "true"
+    
     with TestClient(app=app, base_url="http://test") as c:
         yield c
 

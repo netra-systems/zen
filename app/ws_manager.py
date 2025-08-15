@@ -27,12 +27,12 @@ from app.ws_manager_core import WebSocketManagerCore
 from app.ws_manager_connections import WebSocketConnectionManager
 from app.ws_manager_messaging import WebSocketMessagingManager
 from app.ws_manager_broadcasting import WebSocketBroadcastingManager
-from app.ws_manager_test_compat import WebSocketTestCompatibilityMixin
+# Test compatibility mixin moved to app/tests/helpers/
 
 logger = central_logger.get_logger(__name__)
 
 
-class WebSocketManager(WebSocketTestCompatibilityMixin):
+class WebSocketManager:
     """Enhanced WebSocket manager using modular components."""
     _instance: Optional['WebSocketManager'] = None
     _initialized = False
@@ -52,10 +52,9 @@ class WebSocketManager(WebSocketTestCompatibilityMixin):
         self._connection_manager = WebSocketConnectionManager(self.core)
         self.messaging = WebSocketMessagingManager(self.core)
         self.broadcasting = WebSocketBroadcastingManager(self.core)
-        self._setup_connection_tracking()
+        # Connection tracking now handled by core components
         self._initialized = True
 
-    # _setup_connection_tracking provided by test compatibility mixin
 
     async def connect_user(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish and register a new WebSocket connection for a user."""
@@ -110,7 +109,7 @@ class WebSocketManager(WebSocketTestCompatibilityMixin):
         """
         user_id = f"job_{job_id}_{id(websocket)}"
         connection_info = await self.connect_user(user_id, websocket)
-        self.core.room_manager.join_room(user_id, job_id)
+        self.core.room_manager.join_room(connection_info.connection_id, job_id)
         return connection_info
 
     async def disconnect_from_job(self, job_id: str, websocket: WebSocket = None) -> None:
@@ -226,17 +225,24 @@ class WebSocketManager(WebSocketTestCompatibilityMixin):
 
     @property
     def active_connections(self) -> Dict[str, Any]:
-        """Get active connections for job-based testing compatibility."""
-        stats = self.get_stats()
-        return stats.connections_by_user
+        """Get active connections for job-based operations."""
+        room_stats = self.core.room_manager.get_stats()
+        room_connections = room_stats.get("room_connections", {})
+        # Filter out rooms with 0 connections (job disconnected)
+        return {job_id: count for job_id, count in room_connections.items() if count > 0}
 
     def get_queue_size(self, job_id: str) -> int:
-        """Get message queue size for a job (for testing compatibility)."""
+        """Get message queue size for a job."""
         return getattr(self.core.queue_manager, 'get_queue_size', lambda x: 0)(job_id)
 
-    # Legacy method names for backward compatibility (overridden by test compatibility mixin)
+    # Legacy method names for backward compatibility
+    async def connect(self, websocket: WebSocket, job_id: str) -> ConnectionInfo:
+        """Connect to a job - alias for connect_to_job."""
+        return await self.connect_to_job(websocket, job_id)
 
-    # disconnect method provided by test compatibility mixin
+    async def disconnect(self, job_id: str) -> None:
+        """Disconnect from a job - alias for disconnect_from_job."""
+        await self.disconnect_from_job(job_id)
 
 
 # Global manager instance

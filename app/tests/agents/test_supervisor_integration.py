@@ -433,7 +433,7 @@ class AgentUtils:
         merged = DeepAgentState(user_request=state1.user_request)
         
         # Get valid fields from the Pydantic model
-        valid_fields = merged.__fields__.keys() if hasattr(merged, '__fields__') else merged.model_fields.keys()
+        valid_fields = merged.model_fields.keys() if hasattr(merged, 'model_fields') else merged.__fields__.keys()
         
         # Merge all valid attributes
         for attr in valid_fields:

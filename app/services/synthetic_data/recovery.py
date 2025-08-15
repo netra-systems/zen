@@ -232,6 +232,11 @@ class CircuitBreaker:
     def state(self, value):
         """Set circuit breaker state"""
         self._state = value
+    
+    @property
+    def is_open(self) -> bool:
+        """Check if circuit breaker is in open state."""
+        return self.state == "open"
         
     async def call(self, func):
         """Call function with circuit breaker"""
@@ -266,6 +271,14 @@ class CircuitBreaker:
         if self.failure_count >= 5:
             self.state = "open"
             self._open_time = asyncio.get_event_loop().time()
+    
+    def record_success(self) -> None:
+        """Record successful execution"""
+        self._handle_success(self.state)
+    
+    def record_failure(self) -> None:
+        """Record failed execution"""
+        self._handle_failure()
 
 
 class Transaction:

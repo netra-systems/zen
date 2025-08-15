@@ -68,6 +68,11 @@ class CircuitBreaker:
         else:  # HALF_OPEN
             return self._handle_half_open_state()
     
+    @property
+    def is_open(self) -> bool:
+        """Check if circuit breaker is in open state"""
+        return self.state == CircuitBreakerState.OPEN
+    
     def _handle_open_state(self) -> bool:
         """Handle execution check for OPEN state"""
         if self._should_attempt_reset():

@@ -363,10 +363,19 @@ class BaseExamplePromptsTest:
         start_time = datetime.now()
         
         try:
-            # Run the supervisor with the prompt
-            with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
-                with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
-                    with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=context_with_run_id)):
+            # Run the supervisor with the prompt  
+            async def mock_save_state(*args, **kwargs):
+                return None
+            
+            async def mock_load_state(*args, **kwargs):
+                return None
+                
+            async def mock_get_context(*args, **kwargs):
+                return context_with_run_id
+            
+            with patch.object(state_persistence_service, 'save_agent_state', mock_save_state):
+                with patch.object(state_persistence_service, 'load_agent_state', mock_load_state):
+                    with patch.object(state_persistence_service, 'get_thread_context', mock_get_context):
                         result_state = await supervisor.run(prompt, supervisor.thread_id, supervisor.user_id, run_id)
             
             end_time = datetime.now()

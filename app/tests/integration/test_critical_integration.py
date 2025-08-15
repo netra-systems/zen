@@ -356,141 +356,112 @@ class TestCriticalIntegration:
         session = db_setup["session"]
         infra = setup_integration_infrastructure
         
-        # Create repositories
-        thread_repo = ThreadRepository()
-        run_repo = RunRepository()
-        message_repo = MessageRepository()
+        # Setup test data and run database operations
+        user_id, thread, run_id = await self._setup_test_entities(session)
+        state_service = self._create_state_service(session)
         
-        # Setup test data
+        # Test initial state persistence
+        initial_state = await self._test_initial_state_save(state_service, run_id, thread.id, user_id)
+        
+        # Test partial execution state save
+        triage_output = self._get_triage_output()
+        partial_state = await self._test_partial_state_save(state_service, run_id, thread.id, user_id, triage_output)
+        
+        # Test state recovery
+        recovered_state = await self._test_state_recovery(state_service, run_id, triage_output)
+        
+        # Test final state persistence
+        await self._test_final_state_save(state_service, run_id, thread.id, user_id, triage_output)
+        
+        # Verify complete workflow
+        await self._verify_complete_workflow(state_service, run_id, thread.id)
+        
+        # Cleanup
+        await session.commit()
+
+    async def _setup_test_entities(self, session):
+        """Setup test entities for state persistence test"""
         user_id = str(uuid.uuid4())
-        thread = Mock(
-            id=str(uuid.uuid4()),
-            name="State Recovery Test",
-            user_id=user_id
-        )
-        
+        thread = Mock(id=str(uuid.uuid4()), name="State Recovery Test", user_id=user_id)
         run_id = str(uuid.uuid4())
-        run = Mock(
-            id=run_id,
-            thread_id=thread.id,
-            status="in_progress"
-        )
-        
-        # Create state persistence service with real database
-        state_service = StatePersistenceService()
-        state_service.db_session = session
-        
-        # Create a Run object in the database first
+        await self._create_run_in_database(session, run_id, thread.id)
+        return user_id, thread, run_id
+
+    async def _create_run_in_database(self, session, run_id, thread_id):
+        """Create run object in database"""
         from app.db.models_postgres import Run
         import time
         run = Run(
-            id=run_id,
-            thread_id=thread.id,
-            assistant_id="test-assistant",
-            status="in_progress",
-            created_at=int(time.time()),
-            metadata_={}
+            id=run_id, thread_id=thread_id, assistant_id="test-assistant",
+            status="in_progress", created_at=int(time.time()), metadata_={}
         )
         session.add(run)
         await session.commit()
-        
-        # Initial agent state
-        initial_state = DeepAgentState(
-            user_request="Optimize performance"
-        )
-        
-        # Save initial state
+
+    def _create_state_service(self, session):
+        """Create state persistence service with database session"""
+        state_service = StatePersistenceService()
+        state_service.db_session = session
+        return state_service
+
+    async def _test_initial_state_save(self, state_service, run_id, thread_id, user_id):
+        """Test saving initial agent state"""
+        initial_state = DeepAgentState(user_request="Optimize performance")
         await state_service.save_agent_state(
-            run_id=run_id,
-            thread_id=thread.id,
-            user_id=user_id,
-            state=initial_state,
-            db_session=session
+            run_id=run_id, thread_id=thread_id, user_id=user_id,
+            state=initial_state, db_session=state_service.db_session
         )
-        
-        # Simulate partial execution - triage completes
-        triage_output = {
+        return initial_state
+
+    def _get_triage_output(self):
+        """Get triage output for testing"""
+        return {
             "category": "optimization",
             "analysis": "GPU optimization needed",
             "priority": "high"
         }
-        
+
+    async def _test_partial_state_save(self, state_service, run_id, thread_id, user_id, triage_output):
+        """Test saving partial execution state"""
         partial_state = DeepAgentState(
-            user_request="Optimize performance",
-            triage_result=triage_output
+            user_request="Optimize performance", triage_result=triage_output
         )
-        
         await state_service.save_agent_state(
-            run_id=run_id,
-            thread_id=thread.id,
-            user_id=user_id,
-            state=partial_state,
-            db_session=session
+            run_id=run_id, thread_id=thread_id, user_id=user_id,
+            state=partial_state, db_session=state_service.db_session
         )
-        
-        # Simulate failure and recovery
-        # Load state from database
+        return partial_state
+
+    async def _test_state_recovery(self, state_service, run_id, triage_output):
+        """Test loading state from database after simulated failure"""
         recovered_state = await state_service.load_agent_state(
-            run_id=run_id,
-            db_session=session
+            run_id=run_id, db_session=state_service.db_session
         )
-        
-        # Verify state was recovered correctly
         assert recovered_state != None
         assert recovered_state.triage_result == triage_output
-        assert recovered_state.data_result == None  # Not yet completed
-        
-        # Create new supervisor with recovered state
-        supervisor = Supervisor(
-            session,
-            infra["llm_manager"],
-            infra["websocket_manager"],
-            Mock()
-        )
-        supervisor.thread_id = thread.id
-        supervisor.user_id = user_id
-        
-        # For this test, we're primarily verifying state persistence
-        # The supervisor's internal agent execution would normally happen here
-        # but we're focusing on testing the state load/save functionality
-        
-        # Save final state - create a proper DeepAgentState object
+        assert recovered_state.data_result == None
+        return recovered_state
+
+    async def _test_final_state_save(self, state_service, run_id, thread_id, user_id, triage_output):
+        """Test saving final complete state"""
         final_state = DeepAgentState(
-            user_request="Optimize performance",
-            triage_result=triage_output,
-            data_result={"data": "collected"},
-            optimizations_result={"optimizations": "applied"}
+            user_request="Optimize performance", triage_result=triage_output,
+            data_result={"data": "collected"}, optimizations_result={"optimizations": "applied"}
         )
-        
         await state_service.save_agent_state(
-            run_id=run_id,
-            thread_id=thread.id,
-            user_id=user_id,
-            state=final_state,
-            db_session=session
+            run_id=run_id, thread_id=thread_id, user_id=user_id,
+            state=final_state, db_session=state_service.db_session
         )
-        
-        # Verify complete execution
+
+    async def _verify_complete_workflow(self, state_service, run_id, thread_id):
+        """Verify complete workflow state persistence"""
         final_recovered = await state_service.load_agent_state(
-            run_id=run_id,
-            db_session=session
+            run_id=run_id, db_session=state_service.db_session
         )
-        
         assert final_recovered != None
         assert final_recovered.triage_result != None
         assert final_recovered.data_result != None
         assert final_recovered.optimizations_result != None
-        
-        # Note: Thread context is stored in Redis which is disabled during testing
-        # The main state persistence (to database) has been verified above
-        
-        # Verify run status would be updated
-        # In a real integration test with database
-        assert run.id == run_id
-        assert run.thread_id == thread.id
-        
-        # Cleanup
-        await session.commit()
 
 
 if __name__ == "__main__":

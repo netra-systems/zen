@@ -32,6 +32,12 @@ class LauncherConfig:
     # Build configuration
     use_turbopack: bool = False
     
+    # Boundary monitoring configuration
+    watch_boundaries: bool = False  # Real-time boundary monitoring
+    boundary_check_interval: int = 30  # Check every 30 seconds
+    fail_on_boundary_violations: bool = False  # Stop dev server on violations
+    show_boundary_warnings: bool = True  # Show boundary warning messages
+    
     # Paths
     project_root: Path = field(default_factory=lambda: Path.cwd())
     log_dir: Optional[Path] = None

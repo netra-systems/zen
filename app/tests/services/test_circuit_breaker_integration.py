@@ -15,7 +15,7 @@ from typing import Dict, Any
 from app.llm.client import ResilientLLMClient
 from app.db.client import ResilientDatabaseClient
 from app.services.external_api_client import ResilientHTTPClient
-from app.services.circuit_breaker_monitor import CircuitBreakerMonitor, AlertSeverity
+from app.services.circuit_breaker_monitor import CircuitBreakerMonitor, AlertSeverity, CircuitBreakerEvent
 from app.core.circuit_breaker import CircuitBreakerOpenError, CircuitConfig
 
 
@@ -268,7 +268,7 @@ class TestCircuitBreakerMonitoring:
         from datetime import datetime
         
         # Add test events
-        event1 = self.monitor.CircuitBreakerEvent(
+        event1 = CircuitBreakerEvent(
             circuit_name="test1",
             old_state="closed",
             new_state="open",

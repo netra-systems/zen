@@ -97,6 +97,11 @@ class CircuitBreaker:
         self._half_open_calls = 0
         self._lock = asyncio.Lock()
     
+    @property
+    def is_open(self) -> bool:
+        """Check if circuit breaker is in open state."""
+        return self.state == CircuitState.OPEN
+    
     async def call(self, func: Callable[[], T]) -> T:
         """Execute function with circuit breaker protection."""
         if not await self._can_execute():

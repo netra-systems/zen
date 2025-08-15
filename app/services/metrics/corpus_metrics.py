@@ -224,6 +224,23 @@ class CorpusMetricsCollector:
             "resource_monitoring": self.enable_resource_monitoring
         }
     
+    async def get_time_series_data(self, series_key: str, time_range_hours: int = 1) -> List[Dict[str, Any]]:
+        """Retrieve time-series data for the specified series and time range"""
+        end_time = datetime.now(UTC)
+        start_time = end_time - timedelta(hours=time_range_hours)
+        points = await self.time_series.get_series(series_key, start_time, end_time)
+        return [{"timestamp": p.timestamp.isoformat(), "value": p.value, "tags": p.tags} for p in points]
+    
+    async def get_comprehensive_report(self, corpus_id: str) -> Dict[str, Any]:
+        """Generate comprehensive report for corpus including all metrics"""
+        report_timestamp = datetime.now(UTC)
+        metrics_snapshot = await self.generate_metrics_snapshot(corpus_id)
+        quality_analysis = await self._get_latest_quality_metrics(corpus_id)
+        collector_status = await self.get_collector_status()
+        return {"corpus_id": corpus_id, "report_timestamp": report_timestamp.isoformat(), 
+                "metrics_snapshot": metrics_snapshot, "quality_analysis": quality_analysis, 
+                "collector_status": collector_status}
+
     async def cleanup_old_data(self, age_hours: int = 24) -> None:
         """Clean up old data from all collectors"""
         await self.core_collector.clear_old_data(age_hours)

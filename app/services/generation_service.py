@@ -32,7 +32,7 @@ from app.ws_manager import manager
 async def update_job_status(job_id: str, status: str, **kwargs):
     """Updates the status and other attributes of a generation job and sends a WebSocket message."""
     await job_store.update(job_id, status, **kwargs)
-    await manager.broadcast({"job_id": job_id, "status": status, **kwargs})
+    await manager.broadcast_to_job(job_id, {"job_id": job_id, "status": status, **kwargs})
 
 async def get_corpus_from_clickhouse(table_name: str) -> dict:
     """Fetches the content corpus from a specified ClickHouse table."""

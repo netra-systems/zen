@@ -16,20 +16,7 @@ from app.services.supply_research.schedule_manager import ScheduleManager
 from app.services.supply_research.research_executor import ResearchExecutor
 from app.services.supply_research.result_manager import ResultManager
 
-# Mock Database class for test compatibility
-class Database:
-    """Mock database class for test patching"""
-    def __init__(self):
-        self.connected = True
-    
-    def connect(self):
-        return self
-    
-    def execute(self, query):
-        return {"result": "success"}
-    
-    def close(self):
-        pass
+# Mock Database class removed - was test stub in production code
 
 
 class SupplyResearchScheduler:
@@ -116,6 +103,10 @@ class SupplyResearchScheduler:
         """Stop the scheduler"""
         self.running = False
         logger.info("Supply research scheduler stopping...")
+    
+    async def _execute_scheduled_research(self, schedule: ResearchSchedule) -> Dict[str, Any]:
+        """Execute scheduled research - delegation to research executor"""
+        return await self.research_executor.execute_scheduled_research(schedule)
     
     async def run_schedule_now(self, name: str) -> Dict[str, Any]:
         """Manually trigger a schedule to run immediately"""

@@ -31,7 +31,7 @@ class AgentDelegation:
         """Delegate to extended operations."""
         return await self.extended_ops.process_concurrent(items, max_concurrent)
     
-    async def process_stream(self, dataset, chunk_size: int = 100):
+    def process_stream(self, dataset, chunk_size: int = 100):
         """Delegate to extended operations."""
         return self.extended_ops.process_stream(dataset, chunk_size)
     

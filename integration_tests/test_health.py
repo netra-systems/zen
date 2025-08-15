@@ -4,6 +4,12 @@ from app.main import app
 from unittest.mock import patch, MagicMock
 from app.db.postgres import get_async_db
 
+@pytest.fixture(scope="function")
+def client():
+    """Test client fixture."""
+    with TestClient(app) as c:
+        yield c
+
 @pytest.fixture(autouse=True)
 def cleanup_dependency_overrides():
     """Fixture to clean up dependency overrides after each test."""
@@ -35,7 +41,16 @@ def test_ready_endpoint_db_failure(client: TestClient):
     assert response.json() == {"detail": "Service Unavailable"}
 
 def test_ready_endpoint_clickhouse_failure(client: TestClient):
-    with patch("app.routes.health.central_logger.clickhouse_db.ping", return_value=False):
+    from contextlib import asynccontextmanager
+    
+    mock_client = MagicMock()
+    mock_client.ping.side_effect = Exception("ClickHouse connection failed")
+    
+    @asynccontextmanager
+    async def mock_get_clickhouse_client():
+        yield mock_client
+    
+    with patch("app.routes.health.get_clickhouse_client", mock_get_clickhouse_client):
         response = client.get("/health/ready")
         assert response.status_code == 503
         assert response.json() == {"detail": "Service Unavailable"}

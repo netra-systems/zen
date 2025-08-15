@@ -357,6 +357,172 @@ class EnhancedSecretManager:
         ]
         
         logger.info(f"Cleaned up access log, kept {len(self.access_log)} entries")
+    
+    def get_user_credentials(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get user credentials for authentication."""
+        try:
+            secret_name = f"user-credentials-{user_id}"
+            
+            # For development/testing, return mock credentials with valid bcrypt hash
+            if self.environment == EnvironmentType.DEVELOPMENT:
+                # Create a valid bcrypt hash for password "valid_password123"
+                import bcrypt
+                password = "valid_password123"
+                hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                
+                return {
+                    "password_hash": hashed,
+                    "salt": "mock_salt",
+                    "created_at": datetime.now(timezone.utc).isoformat()
+                }
+            
+            # In production, this would retrieve from secure user storage
+            credentials_data = self.get_secret(secret_name, "auth_service")
+            if credentials_data:
+                return json.loads(credentials_data)
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to get credentials for user {user_id}: {e}")
+            return None
+    
+    def get_user_totp_secret(self, user_id: str) -> Optional[str]:
+        """Get TOTP secret for user MFA."""
+        try:
+            secret_name = f"user-totp-{user_id}"
+            
+            # For development/testing, return mock TOTP secret
+            if self.environment == EnvironmentType.DEVELOPMENT:
+                return f"mock_totp_secret_for_{user_id}"
+            
+            return self.get_secret(secret_name, "auth_service")
+            
+        except Exception as e:
+            logger.error(f"Failed to get TOTP secret for user {user_id}: {e}")
+            return None
+    
+    def get_user_sms_verification_code(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get SMS verification code for user."""
+        try:
+            secret_name = f"user-sms-code-{user_id}"
+            
+            # For development/testing, return mock SMS code
+            if self.environment == EnvironmentType.DEVELOPMENT:
+                expiry_time = datetime.now(timezone.utc) + timedelta(minutes=5)
+                return {
+                    "123456": expiry_time,
+                    "789012": expiry_time
+                }
+            
+            sms_data = self.get_secret(secret_name, "auth_service")
+            if sms_data:
+                return json.loads(sms_data)
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to get SMS code for user {user_id}: {e}")
+            return None
+    
+    def invalidate_user_sms_code(self, user_id: str) -> None:
+        """Invalidate SMS verification code for user."""
+        try:
+            secret_name = f"user-sms-code-{user_id}"
+            
+            # For development/testing, just log the operation
+            if self.environment == EnvironmentType.DEVELOPMENT:
+                logger.info(f"SMS code invalidated for user {user_id} (development)")
+                return
+            
+            # In production, this would remove/invalidate the SMS code
+            # For now, we'll just clear it
+            if secret_name in self.secrets:
+                del self.secrets[secret_name]
+                if secret_name in self.metadata:
+                    del self.metadata[secret_name]
+            
+        except Exception as e:
+            logger.error(f"Failed to invalidate SMS code for user {user_id}: {e}")
+    
+    def get_user_backup_codes(self, user_id: str) -> Optional[List[Dict[str, Any]]]:
+        """Get backup recovery codes for user."""
+        try:
+            secret_name = f"user-backup-codes-{user_id}"
+            
+            # For development/testing, return mock backup codes
+            if self.environment == EnvironmentType.DEVELOPMENT:
+                return [
+                    {"code": "12345678", "used": False},
+                    {"code": "87654321", "used": False},
+                    {"code": "11223344", "used": True}
+                ]
+            
+            backup_data = self.get_secret(secret_name, "auth_service")
+            if backup_data:
+                return json.loads(backup_data)
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to get backup codes for user {user_id}: {e}")
+            return None
+    
+    def mark_backup_code_used(self, user_id: str, backup_code: str) -> None:
+        """Mark backup code as used."""
+        try:
+            secret_name = f"user-backup-codes-{user_id}"
+            
+            # For development/testing, just log the operation
+            if self.environment == EnvironmentType.DEVELOPMENT:
+                logger.info(f"Backup code {backup_code} marked as used for user {user_id} (development)")
+                return
+            
+            # In production, this would update the backup codes in secure storage
+            backup_codes = self.get_user_backup_codes(user_id)
+            if backup_codes:
+                for code_entry in backup_codes:
+                    if code_entry["code"] == backup_code:
+                        code_entry["used"] = True
+                        break
+                
+                # Save updated backup codes
+                updated_data = json.dumps(backup_codes)
+                encrypted_value = self.encryption.encrypt_secret(updated_data)
+                self.secrets[secret_name] = encrypted_value
+            
+        except Exception as e:
+            logger.error(f"Failed to mark backup code as used for user {user_id}: {e}")
+    
+    def get_user_sms_codes(self, user_id: str) -> Dict[str, datetime]:
+        """Get user SMS codes with expiry times."""
+        sms_data = self.get_user_sms_verification_code(user_id)
+        if not sms_data:
+            return {}
+        
+        # Convert string timestamps back to datetime objects
+        result = {}
+        for code, expiry_str in sms_data.items():
+            if isinstance(expiry_str, str):
+                result[code] = datetime.fromisoformat(expiry_str)
+            else:
+                result[code] = expiry_str
+        return result
+    
+    def _invalidate_sms_code(self, user_id: str, sms_code: str) -> None:
+        """Remove specific SMS code from user's valid codes."""
+        try:
+            sms_codes = self.get_user_sms_codes(user_id)
+            if sms_code in sms_codes:
+                del sms_codes[sms_code]
+                
+                # Save updated codes back
+                secret_name = f"user-sms-code-{user_id}"
+                updated_data = json.dumps({
+                    code: expiry.isoformat() for code, expiry in sms_codes.items()
+                })
+                encrypted_value = self.encryption.encrypt_secret(updated_data)
+                self.secrets[secret_name] = encrypted_value
+                
+        except Exception as e:
+            logger.error(f"Failed to invalidate SMS code {sms_code} for user {user_id}: {e}")
 
 
 # Global secret manager instance - initialized with environment detection

@@ -32,6 +32,39 @@ class QualitySupervisor:
 from app.agents.admin_tool_dispatcher import AdminToolDispatcher
 
 
+class MockAdminToolDispatcher:
+    """Mock AdminToolDispatcher for testing with required methods"""
+    
+    def __init__(self, llm_manager, tool_dispatcher):
+        self.llm_manager = llm_manager
+        self.tool_dispatcher = tool_dispatcher
+        self.audit_logger = AsyncMock()
+    
+    async def dispatch_admin_operation(self, operation):
+        """Mock dispatch admin operation method"""
+        user_role = operation.get("user_role", "admin")
+        if user_role == "viewer" and operation.get("type") == "delete_all_data":
+            raise PermissionError("Insufficient permissions")
+        
+        tool_name = self._get_tool_name(operation.get("type"))
+        result = await self.tool_dispatcher.execute_tool(tool_name, operation["params"])
+        
+        # Call audit logger if it exists
+        if hasattr(self, 'audit_logger') and self.audit_logger:
+            await self.audit_logger.log_admin_operation(operation, result)
+        
+        return result
+    
+    def _get_tool_name(self, operation_type):
+        """Map operation type to tool name"""
+        mapping = {
+            "create_user": "admin_user_management",
+            "system_config": "admin_system_config",
+            "delete_all_data": "admin_data_management"
+        }
+        return mapping.get(operation_type, "default_admin_tool")
+
+
 class CorpusAdminSubAgent:
     """Mock CorpusAdminSubAgent for testing."""
     

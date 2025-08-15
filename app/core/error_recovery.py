@@ -174,6 +174,11 @@ class CircuitBreaker:
         self.last_failure_time: Optional[datetime] = None
         self.state = "closed"  # closed, open, half_open
     
+    @property
+    def is_open(self) -> bool:
+        """Check if circuit breaker is in open state."""
+        return self.state == "open"
+    
     def should_allow_request(self) -> bool:
         """Check if request should be allowed through."""
         if self.state == "closed":

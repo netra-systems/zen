@@ -76,6 +76,7 @@ class WebSocketMessageType(str, Enum):
     AGENT_UPDATE = "agent_update"
     AGENT_LOG = "agent_log"
     AGENT_THINKING = "agent_thinking"
+    AGENT_FALLBACK = "agent_fallback"
     TOOL_STARTED = "tool_started"
     TOOL_COMPLETED = "tool_completed"
     TOOL_CALL = "tool_call"
@@ -111,6 +112,7 @@ class WebSocketConnectionState(str, Enum):
 MessageTypeLiteral = Literal[
     "start_agent",
     "user_message",
+    "chat_message",
     "get_thread_history",
     "stop_agent",
     "create_thread",
@@ -127,6 +129,7 @@ MessageTypeLiteral = Literal[
     "agent_update",
     "agent_log",
     "agent_thinking",
+    "agent_fallback",
     "tool_started",
     "tool_completed",
     "tool_call",
@@ -551,6 +554,57 @@ class StopAgent(BaseModel):
     reason: Optional[str] = None
 
 
+class StopAgentPayload(BaseWebSocketPayload):
+    """Stop agent WebSocket payload."""
+    agent_id: str
+    reason: Optional[str] = None
+
+
+class AgentUpdate(BaseWebSocketPayload):
+    """Agent update message payload."""
+    agent_id: str
+    status: str
+    message: Optional[str] = None
+    progress: Optional[float] = None
+
+
+class AgentLog(BaseWebSocketPayload):
+    """Agent log message payload."""
+    agent_id: str
+    level: str
+    message: str
+    metadata: Optional[Dict[str, Any]] = None
+
+
+class ToolCall(BaseWebSocketPayload):
+    """Tool call message payload."""
+    tool_name: str
+    parameters: Dict[str, Any] = Field(default_factory=dict)
+    call_id: str
+
+
+class ToolResult(BaseWebSocketPayload):
+    """Tool result message payload."""
+    call_id: str
+    result: Optional[Union[str, Dict[str, Any]]] = None
+    error: Optional[str] = None
+    execution_time_ms: Optional[float] = None
+
+
+class StreamChunk(BaseWebSocketPayload):
+    """Stream chunk message payload."""
+    chunk_id: str
+    content: str
+    is_final: bool = False
+
+
+class StreamComplete(BaseWebSocketPayload):
+    """Stream complete message payload."""
+    stream_id: str
+    total_chunks: int
+    metadata: Optional[Dict[str, Any]] = None
+
+
 class StreamEvent(BaseModel):
     """Stream event payload."""
     event_type: str
@@ -684,11 +738,12 @@ __all__ = [
     # WebSocket models
     "WebSocketMessage", "WebSocketError", "BaseWebSocketPayload", 
     "UserMessagePayload", "AgentUpdatePayload", "MessageToUser", "AnalysisRequest",
-    "UserMessage", "AgentMessage", "StopAgent", "StreamEvent",
+    "UserMessage", "AgentMessage", "StopAgent", "StopAgentPayload", "StreamEvent",
     "AgentStarted", "SubAgentUpdate", "AgentCompleted", "StartAgentPayload",
     "WebSocketMessageIn", "MessageTypeLiteral", "CreateThreadPayload", 
     "SwitchThreadPayload", "DeleteThreadPayload", "MessageData", "ThreadHistoryResponse",
     "AgentResponseData", "AgentResponse", "AgentCompletedPayload", "AgentStoppedPayload",
+    "AgentUpdate", "AgentLog", "ToolCall", "ToolResult", "StreamChunk", "StreamComplete",
     
     # Audit models
     "CorpusAuditRecord", "CorpusAuditMetadata", "CorpusAuditSearchFilter", 
@@ -730,6 +785,13 @@ TYPE_REGISTRY = {
     "CorpusAuditReport": CorpusAuditReport,
     "CorpusAuditAction": CorpusAuditAction,
     "CorpusAuditStatus": CorpusAuditStatus,
+    "StopAgentPayload": StopAgentPayload,
+    "AgentUpdate": AgentUpdate,
+    "AgentLog": AgentLog,
+    "ToolCall": ToolCall,
+    "ToolResult": ToolResult,
+    "StreamChunk": StreamChunk,
+    "StreamComplete": StreamComplete,
 }
 
 

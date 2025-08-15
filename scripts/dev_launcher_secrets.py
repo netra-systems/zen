@@ -195,9 +195,15 @@ class EnhancedSecretLoader:
             print(f"      - {secret}: {error[:50]}")
     
     def _write_env_file(self, secrets: Dict[str, Tuple[str, str]]) -> None:
-        """Write secrets to .env file for persistence."""
+        """Write secrets to .env file ONLY if it doesn't exist."""
         env_file = get_project_root() / ".env"
-        print(f"\n[SAVE] Writing secrets to {env_file}")
+        
+        if env_file.exists():
+            print(f"\n[PRESERVE] Keeping existing .env file at {env_file}")
+            print("[INFO] Use .env.development for local overrides")
+            return
+        
+        print(f"\n[CREATE] Creating initial .env file at {env_file}")
         
         with open(env_file, 'w') as f:
             self._write_env_file_header(f)
@@ -205,8 +211,10 @@ class EnhancedSecretLoader:
     
     def _write_env_file_header(self, f) -> None:
         """Write header to env file."""
-        f.write("# Auto-generated .env file\n")
-        f.write(f"# Generated at {datetime.now().isoformat()}\n\n")
+        f.write("# Initial .env file - created by dev_launcher\n")
+        f.write("# This file will NOT be overwritten on subsequent runs\n")
+        f.write(f"# Created at {datetime.now().isoformat()}\n")
+        f.write("# Use .env.development for local overrides\n\n")
     
     def _write_env_file_categories(self, f, secrets: Dict[str, Tuple[str, str]]) -> None:
         """Write categorized secrets to env file."""

@@ -16,6 +16,7 @@ from collections import defaultdict, deque
 
 from app.core.error_codes import ErrorCode, ErrorSeverity
 from app.core.error_recovery import RecoveryContext, OperationType
+from app.schemas.shared_types import ErrorContext
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

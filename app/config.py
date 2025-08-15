@@ -222,6 +222,7 @@ class ConfigManager:
         count = 0
         for name, value in secrets.items():
             if value and name in mappings:
+                self._logger.debug(f"Applying secret '{name}' to config")
                 self._apply_secret_mapping(config, mappings[name], value)
                 count += 1
         return count
@@ -334,7 +335,9 @@ class ConfigManager:
         """Set a nested field in the configuration object."""
         try:
             self._choose_field_setter(config, target_path, field, value)
+            self._logger.debug(f"Successfully set {target_path}.{field}")
         except AttributeError as e:
+            self._logger.debug(f"Failed to set {target_path}.{field}: {e}")
             self._handle_nested_field_error(field, target_path, e)
             
     def _set_deep_nested_field(self, config: AppConfig, target_path: str, field: str, value: str) -> None:
@@ -354,6 +357,12 @@ class ConfigManager:
         """Set field if target object is valid."""
         if target_obj and hasattr(target_obj, field):
             setattr(target_obj, field, value)
+            # Verify the field was actually set
+            actual_value = getattr(target_obj, field, None)
+            if actual_value != value:
+                self._logger.warning(f"Field {field} not properly set. Expected: {value[:10]}..., Got: {actual_value}")
+            else:
+                self._logger.debug(f"Successfully set {field} on {type(target_obj).__name__}")
     
     def _load_from_environment_variables(self, config: AppConfig):
         """Fallback method to load configuration from environment variables."""

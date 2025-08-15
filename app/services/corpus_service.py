@@ -27,29 +27,7 @@ def get_clickhouse_client():
     from app.db.clickhouse import get_clickhouse_client as clickhouse_get_client
     return clickhouse_get_client()
 
-# Mock VectorStore class for backward compatibility with tests
-class VectorStore:
-    """Mock VectorStore for test compatibility"""
-    def __init__(self):
-        self.documents = []
-    
-    async def add_documents(self, documents):
-        self.documents.extend(documents)
-    
-    async def search(self, query, limit=10):
-        return self.documents[:limit]
-
-# Mock LLMManager class for backward compatibility with tests
-class LLMManager:
-    """Mock LLMManager for test compatibility"""
-    def __init__(self):
-        self.embeddings = {}
-    
-    async def generate_embedding(self, text):
-        return [0.1] * 768  # Mock embedding vector
-    
-    async def generate_summary(self, text):
-        return f"Summary of: {text[:50]}..."
+# Mock classes removed - were test stubs in production code
 
 # Re-export classes for backward compatibility
 __all__ = [
@@ -57,8 +35,7 @@ __all__ = [
     "ContentSource", 
     "CorpusService",
     "corpus_service",
-    "VectorStore",
-    "LLMManager",
+    # Mock classes removed from exports
     "get_clickhouse_client",
     # Legacy functions
     "get_corpus",
@@ -377,7 +354,7 @@ class CorpusService:
 
 
 # Legacy functions for backward compatibility
-# TODO: Migrate routes to use async CorpusService directly
+# Legacy functions for backward compatibility - migrate routes to use async CorpusService directly
 
 def _warn_deprecated(func_name: str, replacement: str) -> None:
     """Helper to emit deprecation warnings"""

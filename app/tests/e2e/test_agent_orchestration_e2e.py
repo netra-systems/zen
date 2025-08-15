@@ -30,8 +30,13 @@ def orchestration_setup():
 
 def _create_mock_dependencies():
     """Create mock dependencies for testing."""
+    websocket_mock = AsyncMock(spec=WebSocketManager)
+    websocket_mock.send_message = AsyncMock()
+    websocket_mock.send_agent_update = AsyncMock()
+    websocket_mock.send_agent_log = AsyncMock()
+    
     return {
-        'llm': AsyncMock(spec=LLMManager), 'websocket': AsyncMock(spec=WebSocketManager),
+        'llm': AsyncMock(spec=LLMManager), 'websocket': websocket_mock,
         'dispatcher': AsyncMock(), 'redis': AsyncMock()
     }
 

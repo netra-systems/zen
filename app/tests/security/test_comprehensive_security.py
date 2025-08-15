@@ -501,9 +501,9 @@ class TestIntegratedSecurity:
         """Create FastAPI app with all security middleware."""
         app = FastAPI()
         
-        # Add security middleware
-        security_middleware = SecurityMiddleware(app)
-        headers_middleware = SecurityHeadersMiddleware(app, "development")
+        # Add security middleware properly to the app (order matters)
+        app.add_middleware(SecurityMiddleware)  # Input validation comes first
+        app.add_middleware(SecurityHeadersMiddleware, environment="development")
         
         @app.post("/api/test")
         async def test_endpoint(data: dict):

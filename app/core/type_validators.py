@@ -61,9 +61,12 @@ def strict_types(func: F) -> F:
     """Decorator that enforces strict typing with beartype."""
     @beartype
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs):
         try:
-            return func(*args, **kwargs)
+            if inspect.iscoroutinefunction(func):
+                return await func(*args, **kwargs)
+            else:
+                return func(*args, **kwargs)
         except BeartypeException as e:
             _log_type_error(func.__name__, str(e))
             raise TypeValidationError(
@@ -78,12 +81,12 @@ def strict_types(func: F) -> F:
 def validate_agent_execute_params(func: F) -> F:
     """Decorator for validating agent execute method parameters."""
     @wraps(func)
-    def wrapper(self, state: AgentState, run_id: str, 
-                stream_updates: bool = False):
+    async def wrapper(self, state: AgentState, run_id: str, 
+                     stream_updates: bool = False):
         _validate_execute_state(state)
         _validate_execute_run_id(run_id)
         _validate_execute_stream_flag(stream_updates)
-        return func(self, state, run_id, stream_updates)
+        return await func(self, state, run_id, stream_updates)
     return wrapper
 
 

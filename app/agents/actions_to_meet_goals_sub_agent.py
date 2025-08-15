@@ -38,108 +38,134 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
     @validate_agent_input('ActionsToMeetGoalsSubAgent')
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute the actions to meet goals logic."""
-        
+        main_executor = self._create_main_executor(state, run_id, stream_updates)
+        fallback_executor = self._create_fallback_executor(state, run_id, stream_updates)
+        result = await self._execute_with_protection(main_executor, fallback_executor, run_id)
+        await self._apply_reliability_protection(result)
+
+    def _create_main_executor(self, state: DeepAgentState, run_id: str, stream_updates: bool):
+        """Create main execution function."""
         async def _execute_action_plan():
-            # Update status via WebSocket
-            if stream_updates:
-                await self._send_update(run_id, {
-                    "status": "processing",
-                    "message": "Creating action plan based on optimization strategies..."
-                })
-
-            prompt = actions_to_meet_goals_prompt_template.format(
-                optimizations=state.optimizations_result,
-                data=state.data_result,
-                user_request=state.user_request
-            )
-
-            # Check response size and potentially adjust approach
-            response_size_mb = len(prompt) / (1024 * 1024)
-            if response_size_mb > 1:  # If prompt is larger than 1MB
-                logger.info(f"Large prompt detected ({response_size_mb:.2f}MB) for run_id: {run_id}")
-            
-            llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='actions_to_meet_goals')
-            
-            # Log response size for monitoring
-            if llm_response_str:
-                logger.debug(f"Received LLM response of {len(llm_response_str)} characters for run_id: {run_id}")
-            
-            # Try enhanced JSON extraction with recovery mechanisms
-            action_plan_result = extract_json_from_response(llm_response_str, max_retries=5)
-            
-            # If full extraction fails, try partial extraction of critical fields
-            if not action_plan_result:
-                logger.debug(
-                    f"Full JSON extraction failed for run_id: {run_id}. "
-                    f"Response length: {len(llm_response_str) if llm_response_str else 0} chars. "
-                    f"Attempting partial extraction..."
-                )
-                
-                # Try to extract at least the critical fields
-                required_fields = ['action_plan_summary', 'total_estimated_time', 'actions']
-                partial_result = extract_partial_json(llm_response_str, required_fields=None)  # Get whatever we can
-                
-                if partial_result:
-                    # If we got substantial data, this is actually a success
-                    if len(partial_result) > 10:
-                        logger.info(f"Successfully recovered {len(partial_result)} fields via partial extraction for run_id: {run_id}")
-                    else:
-                        logger.warning(f"Partial extraction recovered only {len(partial_result)} fields for run_id: {run_id}")
-                    
-                    # Build a complete structure with extracted partial data
-                    action_plan_result = self._build_action_plan_from_partial(partial_result)
-                else:
-                    logger.error(
-                        f"Both full and partial JSON extraction failed for run_id: {run_id}. "
-                        f"First 500 chars of response: {llm_response_str[:500] if llm_response_str else 'None'}"
-                    )
-                    # Provide a more comprehensive default action plan structure
-                    action_plan_result = self._get_default_action_plan()
-                    action_plan_result["error"] = "JSON extraction failed - using default structure"
-
+            await self._send_processing_update(run_id, stream_updates)
+            prompt = self._build_action_plan_prompt(state)
+            llm_response = await self._get_llm_response(prompt, run_id)
+            action_plan_result = await self._process_llm_response(llm_response, run_id)
             state.action_plan_result = action_plan_result
-            
-            # Update with results
-            if stream_updates:
-                await self._send_update(run_id, {
-                    "status": "processed",
-                    "message": "Action plan created successfully",
-                    "result": action_plan_result
-                })
-            
+            await self._send_completion_update(run_id, stream_updates, action_plan_result)
             return action_plan_result
-        
+        return _execute_action_plan
+
+    def _create_fallback_executor(self, state: DeepAgentState, run_id: str, stream_updates: bool):
+        """Create fallback execution function."""
         async def _fallback_action_plan():
-            """Fallback action plan when main operation fails"""
             fallback_result = self.fallback_strategy.create_default_fallback_result(
-                "action_plan_generation",
-                **self._get_default_action_plan()
-            )
+                "action_plan_generation", **self._get_default_action_plan())
             state.action_plan_result = fallback_result
-            
-            if stream_updates:
-                await self._send_update(run_id, {
-                    "status": "completed_with_fallback",
-                    "message": "Action plan completed with fallback method",
-                    "result": fallback_result
-                })
-            
+            await self._send_fallback_update(run_id, stream_updates, fallback_result)
             return fallback_result
-        
-        # Execute with unified fallback strategy
-        result = await self.fallback_strategy.execute_with_fallback(
-            _execute_action_plan,
-            _fallback_action_plan,
-            "action_plan_generation",
-            run_id
+        return _fallback_action_plan
+
+    async def _send_processing_update(self, run_id: str, stream_updates: bool):
+        """Send processing status update."""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "processing",
+                "message": "Creating action plan based on optimization strategies..."
+            })
+
+    def _build_action_plan_prompt(self, state: DeepAgentState) -> str:
+        """Build prompt for action plan generation."""
+        return actions_to_meet_goals_prompt_template.format(
+            optimizations=state.optimizations_result,
+            data=state.data_result,
+            user_request=state.user_request
         )
-        
-        # Apply reliability protection as well
+
+    async def _get_llm_response(self, prompt: str, run_id: str) -> str:
+        """Get response from LLM with size monitoring."""
+        self._log_prompt_size(prompt, run_id)
+        llm_response = await self.llm_manager.ask_llm(prompt, llm_config_name='actions_to_meet_goals')
+        self._log_response_size(llm_response, run_id)
+        return llm_response
+
+    def _log_prompt_size(self, prompt: str, run_id: str):
+        """Log prompt size if large."""
+        response_size_mb = len(prompt) / (1024 * 1024)
+        if response_size_mb > 1:
+            logger.info(f"Large prompt detected ({response_size_mb:.2f}MB) for run_id: {run_id}")
+
+    def _log_response_size(self, llm_response: str, run_id: str):
+        """Log LLM response size."""
+        if llm_response:
+            logger.debug(f"Received LLM response of {len(llm_response)} characters for run_id: {run_id}")
+
+    async def _process_llm_response(self, llm_response: str, run_id: str) -> dict:
+        """Process LLM response with fallback extraction."""
+        action_plan_result = extract_json_from_response(llm_response, max_retries=5)
+        if not action_plan_result:
+            action_plan_result = await self._handle_extraction_failure(llm_response, run_id)
+        return action_plan_result
+
+    async def _handle_extraction_failure(self, llm_response: str, run_id: str) -> dict:
+        """Handle JSON extraction failure with partial recovery."""
+        self._log_extraction_failure(llm_response, run_id)
+        partial_result = extract_partial_json(llm_response, required_fields=None)
+        if partial_result:
+            return self._process_partial_extraction(partial_result, run_id)
+        else:
+            return self._create_error_fallback_plan(llm_response, run_id)
+
+    def _log_extraction_failure(self, llm_response: str, run_id: str):
+        """Log JSON extraction failure details."""
+        response_length = len(llm_response) if llm_response else 0
+        logger.debug(f"Full JSON extraction failed for run_id: {run_id}. "
+                    f"Response length: {response_length} chars. Attempting partial extraction...")
+
+    def _process_partial_extraction(self, partial_result: dict, run_id: str) -> dict:
+        """Process partial extraction results."""
+        field_count = len(partial_result)
+        if field_count > 10:
+            logger.info(f"Successfully recovered {field_count} fields via partial extraction for run_id: {run_id}")
+        else:
+            logger.warning(f"Partial extraction recovered only {field_count} fields for run_id: {run_id}")
+        return self._build_action_plan_from_partial(partial_result)
+
+    def _create_error_fallback_plan(self, llm_response: str, run_id: str) -> dict:
+        """Create fallback plan when extraction completely fails."""
+        response_preview = llm_response[:500] if llm_response else 'None'
+        logger.error(f"Both full and partial JSON extraction failed for run_id: {run_id}. "
+                    f"First 500 chars of response: {response_preview}")
+        action_plan_result = self._get_default_action_plan()
+        action_plan_result["error"] = "JSON extraction failed - using default structure"
+        return action_plan_result
+
+    async def _send_completion_update(self, run_id: str, stream_updates: bool, action_plan_result: dict):
+        """Send completion status update."""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "processed",
+                "message": "Action plan created successfully",
+                "result": action_plan_result
+            })
+
+    async def _send_fallback_update(self, run_id: str, stream_updates: bool, fallback_result: dict):
+        """Send fallback completion update."""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "completed_with_fallback",
+                "message": "Action plan completed with fallback method",
+                "result": fallback_result
+            })
+
+    async def _execute_with_protection(self, main_executor, fallback_executor, run_id: str):
+        """Execute with unified fallback strategy."""
+        return await self.fallback_strategy.execute_with_fallback(
+            main_executor, fallback_executor, "action_plan_generation", run_id)
+
+    async def _apply_reliability_protection(self, result):
+        """Apply reliability protection to result."""
         await self.reliability.execute_safely(
-            lambda: result,
-            "execute_action_plan_with_fallback",
-            timeout=45.0
-        )
+            lambda: result, "execute_action_plan_with_fallback", timeout=45.0)
     
     def _build_action_plan_from_partial(self, partial_data: dict) -> dict:
         """Build a complete action plan structure from partial extracted data."""

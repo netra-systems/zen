@@ -126,8 +126,10 @@ class ConfigValidator:
                 if llm_config.api_key:
                     # If any config has an API key, we assume Gemini key was loaded
                     gemini_key_found = True
+                    self._logger.debug(f"LLM config '{name}' has API key set")
                 elif config.environment != "testing":
                     missing_keys.append(name)
+                    self._logger.debug(f"LLM config '{name}' missing API key")
             
             # Only require Gemini API key to be present in at least one config
             if not gemini_key_found and config.environment != "testing":

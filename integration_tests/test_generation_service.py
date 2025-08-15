@@ -150,12 +150,13 @@ async def test_save_and_get_corpus(MockClickHouseDatabase):
 async def test_run_synthetic_data_generation_job_e2e(MockClickHouseDatabase, mock_get_corpus, mock_synth_main, mock_ingest):
     """An end-to-end test for the synthetic data generation job."""
     # Arrange
-    await job_store.set("test", {})
+    job_id = str(uuid.uuid4())
+    await job_store.set(job_id, {"status": "pending"})
+    
     mock_db_instance = MagicMock()
     mock_db_instance.command = AsyncMock()
     MockClickHouseDatabase.return_value = mock_db_instance
 
-    job_id = str(uuid.uuid4())
     source_table = 'source_corpus'
     destination_table = 'dest_table'
     
@@ -181,5 +182,6 @@ async def test_run_synthetic_data_generation_job_e2e(MockClickHouseDatabase, moc
     mock_db_instance.command.assert_called_once_with(get_llm_events_table_schema(destination_table))
     assert mock_ingest.call_count == 3
 
+    # Cleanup
     if job_id in job_store._jobs:
         del job_store._jobs[job_id]

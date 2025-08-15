@@ -255,6 +255,16 @@ async def close_async_db():
         logger.info("Async database connections closed")
         async_engine = None
 
+
+@asynccontextmanager
+async def get_postgres_session() -> AsyncGenerator[AsyncSession, None]:
+    """
+    Alias for get_async_db() for compatibility with existing code.
+    Get a PostgreSQL async database session with proper transaction handling.
+    """
+    async with get_async_db() as session:
+        yield session
+
 def get_pool_status() -> dict:
     """Get current connection pool status for monitoring."""
     # This function is now deprecated in favor of the comprehensive monitoring system

@@ -176,18 +176,13 @@ class TestConfigRoute:
     
     def test_config_retrieval(self, client):
         """Test configuration retrieval endpoint."""
-        with patch('app.services.config_service.get_config') as mock_get:
-            mock_get.return_value = {
-                "log_level": "INFO",
-                "max_retries": 3,
-                "timeout": 30
-            }
-            
-            response = client.get("/api/config")
-            
-            if response.status_code == 200:
-                config = response.json()
-                assert "log_level" in config or "error" in config
+        response = client.get("/api/config")
+        
+        if response.status_code == 200:
+            config = response.json()
+            assert "log_level" in config
+            assert "max_retries" in config
+            assert "timeout" in config
     
     def test_config_update_validation(self, client):
         """Test configuration update validation."""
@@ -209,11 +204,8 @@ class TestConfigRoute:
             "feature_flags": {"new_feature": True}
         }
         
-        with patch('app.services.config_service.save_config') as mock_save:
-            mock_save.return_value = True
-            
-            result = await update_config(new_config)
-            assert result["success"] == True
+        result = await update_config(new_config)
+        assert result["success"] == True
 
 
 # Test 24: corpus_route_operations

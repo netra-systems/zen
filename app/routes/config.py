@@ -12,8 +12,8 @@ class ConfigUpdate(BaseModel):
     timeout: int = None
     feature_flags: Dict[str, Any] = None
 
-@router.get("/config", response_model=schemas.WebSocketConfig)
-async def get_config():
+@router.get("/config/websocket", response_model=schemas.WebSocketConfig)
+async def get_websocket_config():
     return settings.ws_config
 
 @router.get("/config/public")
@@ -29,7 +29,7 @@ async def get_public_config():
         })
     }
 
-@router.get("/api/config")
+@router.get("/config")
 async def get_api_config():
     """Get configuration for API testing"""
     return {
@@ -38,7 +38,7 @@ async def get_api_config():
         "timeout": 30
     }
 
-@router.put("/api/config")
+@router.put("/config")
 async def update_api_config(config: ConfigUpdate):
     """Update configuration with validation"""
     if config.log_level and config.log_level not in ["DEBUG", "INFO", "WARNING", "ERROR"]:

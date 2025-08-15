@@ -28,7 +28,7 @@ from app.tests.helpers.supervisor_test_helpers import (
     create_admin_operation, setup_tool_dispatcher_mock
 )
 from app.tests.helpers.supervisor_test_classes import (
-    QualitySupervisor, AdminToolDispatcher, PermissionError
+    QualitySupervisor, MockAdminToolDispatcher, PermissionError
 )
 
 
@@ -121,7 +121,7 @@ class TestAdminToolDispatcherRouting:
     async def test_routes_to_correct_admin_tool(self):
         """Test routing to correct admin tool based on operation"""
         mocks = create_admin_dispatcher_mocks()
-        admin_dispatcher = AdminToolDispatcher(mocks['llm_manager'], mocks['tool_dispatcher'])
+        admin_dispatcher = MockAdminToolDispatcher(mocks['llm_manager'], mocks['tool_dispatcher'])
         setup_tool_dispatcher_mock(mocks['tool_dispatcher'], {"success": True, "result": "User created"})
         operation = create_admin_operation("create_user", {"username": "testuser", "role": "admin"})
         
@@ -135,7 +135,7 @@ class TestAdminToolDispatcherRouting:
     async def test_validates_admin_permissions(self):
         """Test security checks for privileged operations"""
         mocks = create_admin_dispatcher_mocks()
-        admin_dispatcher = AdminToolDispatcher(mocks['llm_manager'], mocks['tool_dispatcher'])
+        admin_dispatcher = MockAdminToolDispatcher(mocks['llm_manager'], mocks['tool_dispatcher'])
         operation = create_admin_operation("delete_all_data", {}, user_role="viewer")
         
         with pytest.raises(PermissionError) as exc:
@@ -147,7 +147,7 @@ class TestAdminToolDispatcherRouting:
     async def test_admin_tool_audit_logging(self):
         """Test audit logging for admin operations"""
         mocks = create_admin_dispatcher_mocks()
-        admin_dispatcher = AdminToolDispatcher(mocks['llm_manager'], mocks['tool_dispatcher'])
+        admin_dispatcher = MockAdminToolDispatcher(mocks['llm_manager'], mocks['tool_dispatcher'])
         admin_dispatcher.audit_logger = AsyncMock()
         setup_tool_dispatcher_mock(mocks['tool_dispatcher'], {"success": True, "result": "Config updated"})
         operation = create_admin_operation("system_config", {"setting": "debug_mode", "value": True}, user_id="admin-123")

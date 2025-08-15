@@ -40,7 +40,7 @@ class SecurityThreat(str, Enum):
     HEADER_INJECTION = "header_injection"
 
 
-# ValidationResult now imported from shared_types.py
+# ValidationResult imported from shared_types.py
 # Using import alias for this specific validation context
 from app.schemas.shared_types import ValidationResult as BaseValidationResult
 
@@ -195,17 +195,17 @@ class EnhancedInputValidator:
         return length_limits[self.validation_level]
     
     def validate_input(self, input_value: str, field_name: str = "input",
-                      context: Optional[Dict[str, Any]] = None) -> ValidationResult:
+                      context: Optional[Dict[str, Any]] = None) -> BaseValidationResult:
         """Comprehensive input validation."""
         try:
             if not input_value:
-                return ValidationResult(
+                return BaseValidationResult(
                     is_valid=True,
                     sanitized_value="",
                     confidence_score=1.0
                 )
             
-            result = ValidationResult(is_valid=True, sanitized_value=input_value)
+            result = BaseValidationResult(is_valid=True, sanitized_value=input_value)
             
             # Basic checks
             self._check_length(input_value, result)
@@ -232,19 +232,19 @@ class EnhancedInputValidator:
             
         except Exception as e:
             logger.error(f"Input validation error for {field_name}: {e}")
-            return ValidationResult(
+            return BaseValidationResult(
                 is_valid=False,
                 errors=[f"Validation error: {str(e)}"],
                 confidence_score=0.0
             )
     
-    def _check_length(self, input_value: str, result: ValidationResult) -> None:
+    def _check_length(self, input_value: str, result: BaseValidationResult) -> None:
         """Check input length."""
         if len(input_value) > self.max_input_length:
             result.warnings.append(f"Input length ({len(input_value)}) exceeds maximum ({self.max_input_length})")
             result.confidence_score *= 0.8
     
-    def _check_encoding(self, input_value: str, result: ValidationResult) -> None:
+    def _check_encoding(self, input_value: str, result: BaseValidationResult) -> None:
         """Check for encoding issues."""
         try:
             # Check for double encoding
@@ -321,7 +321,7 @@ class EnhancedInputValidator:
         return sanitized
     
     def _validate_context(self, input_value: str, context: Dict[str, Any], 
-                         result: ValidationResult) -> None:
+                         result: BaseValidationResult) -> None:
         """Perform context-specific validation."""
         input_type = context.get('type', 'general')
         
@@ -334,14 +334,14 @@ class EnhancedInputValidator:
         elif input_type == 'json':
             self._validate_json(input_value, result)
     
-    def _validate_email(self, email: str, result: ValidationResult) -> None:
+    def _validate_email(self, email: str, result: BaseValidationResult) -> None:
         """Validate email format."""
         email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
         if not re.match(email_pattern, email):
             result.warnings.append("Invalid email format")
             result.confidence_score *= 0.8
     
-    def _validate_url(self, url: str, result: ValidationResult) -> None:
+    def _validate_url(self, url: str, result: BaseValidationResult) -> None:
         """Validate URL format and security."""
         # Check for suspicious protocols
         if re.match(r'^(javascript|data|vbscript|file):', url, re.IGNORECASE):
@@ -355,7 +355,7 @@ class EnhancedInputValidator:
             result.warnings.append("Invalid URL format")
             result.confidence_score *= 0.8
     
-    def _validate_filename(self, filename: str, result: ValidationResult) -> None:
+    def _validate_filename(self, filename: str, result: BaseValidationResult) -> None:
         """Validate filename security."""
         # Check for path traversal
         if '..' in filename or '/' in filename or '\\' in filename:
@@ -370,7 +370,7 @@ class EnhancedInputValidator:
             result.warnings.append("Potentially dangerous file extension")
             result.confidence_score *= 0.5
     
-    def _validate_json(self, json_str: str, result: ValidationResult) -> None:
+    def _validate_json(self, json_str: str, result: BaseValidationResult) -> None:
         """Validate JSON input."""
         try:
             json.loads(json_str)
@@ -379,7 +379,7 @@ class EnhancedInputValidator:
             result.confidence_score *= 0.7
     
     def validate_bulk(self, inputs: Dict[str, str], 
-                     contexts: Optional[Dict[str, Dict[str, Any]]] = None) -> Dict[str, ValidationResult]:
+                     contexts: Optional[Dict[str, Dict[str, Any]]] = None) -> Dict[str, BaseValidationResult]:
         """Validate multiple inputs efficiently."""
         results = {}
         

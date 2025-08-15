@@ -19,7 +19,7 @@ from app.schemas import (
     SubAgentUpdate, AgentCompleted, SubAgentState
 )
 from app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
-from app.core.reliability import CircuitBreaker, CircuitBreakerConfig
+from app.core.circuit_breaker import CircuitBreaker, CircuitConfig
 
 logger = central_logger.get_logger(__name__)
 
@@ -271,7 +271,7 @@ class ExecutionEngine:
     def _get_agent_circuit_breaker(self, agent_name: str) -> CircuitBreaker:
         """Get or create circuit breaker for agent."""
         if agent_name not in self.agent_circuit_breakers:
-            config = CircuitBreakerConfig(
+            config = CircuitConfig(
                 failure_threshold=3,
                 recovery_timeout=60.0,
                 name=f"agent_{agent_name}"
@@ -285,7 +285,7 @@ class ExecutionEngine:
         circuit_breaker = self._get_agent_circuit_breaker(context.agent_name)
         
         # Check circuit breaker state
-        if circuit_breaker.is_open():
+        if circuit_breaker.is_open:
             logger.warning(f"Circuit breaker open for {context.agent_name}, using fallback")
             return await self._create_circuit_breaker_fallback(context, state)
         
@@ -301,17 +301,14 @@ class ExecutionEngine:
             )
             
             if isinstance(result, AgentExecutionResult):
-                if result.success:
-                    circuit_breaker.record_success()
-                else:
-                    circuit_breaker.record_failure()
+                # Circuit breaker automatically handles success/failure tracking internally
                 return result
             else:
                 # Fallback response was used
                 return self._wrap_fallback_response(result, context)
                 
         except Exception as e:
-            circuit_breaker.record_failure()
+            # Circuit breaker automatically handles failure tracking internally
             return await self._create_final_fallback(context, state, e)
     
     def _get_agent_fallback_type(self, agent_name: str) -> str:

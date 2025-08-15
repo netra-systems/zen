@@ -23,6 +23,22 @@ from datetime import datetime
 
 from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling, TestIntegration as SharedTestIntegration
 
+# Test fixtures for shared test classes
+@pytest.fixture
+def service():
+    """Service fixture for shared integration tests."""
+    mock_llm_manager = Mock()
+    mock_tool_dispatcher = Mock()
+    agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
+    return agent
+
+@pytest.fixture
+def db_session():
+    """Database session fixture for shared error handling tests."""
+    db_mock = Mock()
+    db_mock.query = Mock()
+    return db_mock
+
 # Import the module under test
 try:
     from app.agents.data_sub_agent.agent import DataSubAgent
@@ -304,6 +320,19 @@ class TestDataEnrichment:
 class TestErrorHandling(SharedTestErrorHandling):
     """Test error handling and recovery - extends shared error handling."""
     
+    def test_database_connection_failure(self, service):
+        """Test graceful handling of database connection failures"""
+        # DataSubAgent-specific implementation
+        mock_clickhouse = Mock()
+        service.clickhouse_ops = mock_clickhouse
+        mock_clickhouse.fetch_data = Mock(side_effect=Exception("Database unavailable"))
+        
+        with pytest.raises(Exception) as exc_info:
+            # Test that database errors are properly handled
+            service.clickhouse_ops.fetch_data("SELECT 1")
+        
+        assert "Database unavailable" in str(exc_info.value)
+    
     @pytest.mark.asyncio
     async def test_retry_on_failure(self):
         """Test retry mechanism on processing failure"""
@@ -354,6 +383,14 @@ class TestErrorHandling(SharedTestErrorHandling):
             {"id": 2, "valid": False},  # This will fail
             {"id": 3, "valid": True}
         ]
+        
+        # Mock process_data to fail on invalid items
+        async def mock_process_data(data):
+            if not data.get("valid", True):
+                raise Exception("Invalid data")
+            return {"status": "processed", "data": data}
+        
+        agent.process_data = mock_process_data
         
         results = await agent.process_batch_safe(data_batch)
         

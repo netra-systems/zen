@@ -399,7 +399,11 @@ class TestDemoService:
                 "timestamp": datetime.now(UTC).isoformat()
             })
         ]
-        mock_redis_client.lrange.return_value = analytics_data
+        
+        # Store analytics data in mock storage using the correct key format
+        today_key = f"demo:analytics:{datetime.now(UTC).strftime('%Y%m%d')}"
+        for data_item in analytics_data:
+            await mock_redis_client.lpush(today_key, data_item)
         
         # Execute
         summary = await demo_service.get_analytics_summary(days=7)

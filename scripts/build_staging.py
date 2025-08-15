@@ -232,108 +232,147 @@ class StagingBuilder:
         subprocess.run(cmd)
         
 def main():
-    parser = argparse.ArgumentParser(description="Build and manage staging environment")
-    parser.add_argument(
-        "--action",
-        choices=["build", "start", "stop", "test", "health", "logs", "full"],
-        default="full",
-        help="Action to perform"
-    )
-    parser.add_argument(
-        "--tag",
-        default="latest",
-        help="Docker image tag"
-    )
-    parser.add_argument(
-        "--api-url",
-        default="http://localhost:8080",
-        help="API URL for frontend build"
-    )
-    parser.add_argument(
-        "--service",
-        help="Service name for logs"
-    )
-    parser.add_argument(
-        "--skip-build",
-        action="store_true",
-        help="Skip building Docker images"
-    )
-    
+    """Main entry point for staging build script."""
+    parser = _create_argument_parser()
     args = parser.parse_args()
-    
-    # Get project root
+    builder = _initialize_builder()
+    _validate_docker_environment(builder)
+    _execute_action(args, builder)
+
+def _create_argument_parser() -> argparse.ArgumentParser:
+    """Create and configure argument parser."""
+    parser = argparse.ArgumentParser(description="Build and manage staging environment")
+    _add_action_arguments(parser)
+    _add_configuration_arguments(parser)
+    return parser
+
+def _add_action_arguments(parser: argparse.ArgumentParser):
+    """Add action-related arguments to parser."""
+    parser.add_argument("--action", choices=["build", "start", "stop", "test", "health", "logs", "full"],
+                       default="full", help="Action to perform")
+    parser.add_argument("--service", help="Service name for logs")
+    parser.add_argument("--skip-build", action="store_true", help="Skip building Docker images")
+
+def _add_configuration_arguments(parser: argparse.ArgumentParser):
+    """Add configuration-related arguments to parser."""
+    parser.add_argument("--tag", default="latest", help="Docker image tag")
+    parser.add_argument("--api-url", default="http://localhost:8080", help="API URL for frontend build")
+
+def _initialize_builder() -> StagingBuilder:
+    """Initialize staging builder with project root."""
     project_root = Path(__file__).parent.parent
-    builder = StagingBuilder(project_root)
-    
-    # Check Docker
+    return StagingBuilder(project_root)
+
+def _validate_docker_environment(builder: StagingBuilder):
+    """Validate Docker is available and running."""
     if not builder.check_docker():
         sys.exit(1)
-        
-    # Execute action
-    if args.action == "build":
-        success = builder.build_backend(args.tag) and builder.build_frontend(args.tag, args.api_url)
-        sys.exit(0 if success else 1)
-        
-    elif args.action == "start":
-        success = builder.start_staging_env()
-        if success:
-            builder.health_check()
-        sys.exit(0 if success else 1)
-        
-    elif args.action == "stop":
-        success = builder.stop_staging_env()
-        sys.exit(0 if success else 1)
-        
-    elif args.action == "test":
-        success = builder.run_tests()
-        sys.exit(0 if success else 1)
-        
-    elif args.action == "health":
-        success = builder.health_check()
-        sys.exit(0 if success else 1)
-        
-    elif args.action == "logs":
-        builder.view_logs(args.service)
-        
-    elif args.action == "full":
-        # Full workflow: build, start, health check, test
-        print("🚀 Running full staging workflow...")
-        
-        # Build images
-        if not args.skip_build:
-            if not builder.build_backend(args.tag):
-                print("❌ Backend build failed")
-                sys.exit(1)
-                
-            if not builder.build_frontend(args.tag, args.api_url):
-                print("❌ Frontend build failed")
-                sys.exit(1)
-                
-        # Stop any existing environment
-        builder.stop_staging_env()
-        
-        # Start new environment
-        if not builder.start_staging_env():
-            print("❌ Failed to start environment")
-            sys.exit(1)
-            
-        # Health checks
-        if not builder.health_check():
-            print("❌ Health checks failed")
-            builder.view_logs()
-            sys.exit(1)
-            
-        # Run tests
-        if not builder.run_tests():
-            print("❌ Tests failed")
-            builder.view_logs()
-            sys.exit(1)
-            
-        print("\n✅ Staging environment is ready!")
-        print(f"   Frontend: http://localhost:3000")
-        print(f"   Backend API: http://localhost:8080")
-        print(f"   API Docs: http://localhost:8080/docs")
-        print(f"\nRun 'python {__file__} --action stop' to shut down")
+
+def _execute_action(args: argparse.Namespace, builder: StagingBuilder):
+    """Execute the specified action."""
+    action_map = {
+        "build": lambda: _handle_build_action(args, builder),
+        "start": lambda: _handle_start_action(builder),
+        "stop": lambda: _handle_stop_action(builder),
+        "test": lambda: _handle_test_action(builder),
+        "health": lambda: _handle_health_action(builder),
+        "logs": lambda: _handle_logs_action(args, builder),
+        "full": lambda: _handle_full_workflow(args, builder)
+    }
+    action_map[args.action]()
+
+def _handle_build_action(args: argparse.Namespace, builder: StagingBuilder):
+    """Handle build action."""
+    backend_success = builder.build_backend(args.tag)
+    frontend_success = builder.build_frontend(args.tag, args.api_url)
+    success = backend_success and frontend_success
+    sys.exit(0 if success else 1)
+
+def _handle_start_action(builder: StagingBuilder):
+    """Handle start action."""
+    success = builder.start_staging_env()
+    if success:
+        builder.health_check()
+    sys.exit(0 if success else 1)
+
+def _handle_stop_action(builder: StagingBuilder):
+    """Handle stop action."""
+    success = builder.stop_staging_env()
+    sys.exit(0 if success else 1)
+
+def _handle_test_action(builder: StagingBuilder):
+    """Handle test action."""
+    success = builder.run_tests()
+    sys.exit(0 if success else 1)
+
+def _handle_health_action(builder: StagingBuilder):
+    """Handle health check action."""
+    success = builder.health_check()
+    sys.exit(0 if success else 1)
+
+def _handle_logs_action(args: argparse.Namespace, builder: StagingBuilder):
+    """Handle logs viewing action."""
+    builder.view_logs(args.service)
+
+def _handle_full_workflow(args: argparse.Namespace, builder: StagingBuilder):
+    """Handle full staging workflow."""
+    print("🚀 Running full staging workflow...")
+    _execute_build_phase(args, builder)
+    _execute_deployment_phase(builder)
+    _execute_validation_phase(builder)
+    _print_success_message()
+
+def _execute_build_phase(args: argparse.Namespace, builder: StagingBuilder):
+    """Execute build phase of full workflow."""
+    if not args.skip_build:
+        _build_backend_with_exit(args, builder)
+        _build_frontend_with_exit(args, builder)
+
+def _build_backend_with_exit(args: argparse.Namespace, builder: StagingBuilder):
+    """Build backend and exit on failure."""
+    if not builder.build_backend(args.tag):
+        print("❌ Backend build failed")
+        sys.exit(1)
+
+def _build_frontend_with_exit(args: argparse.Namespace, builder: StagingBuilder):
+    """Build frontend and exit on failure."""
+    if not builder.build_frontend(args.tag, args.api_url):
+        print("❌ Frontend build failed")
+        sys.exit(1)
+
+def _execute_deployment_phase(builder: StagingBuilder):
+    """Execute deployment phase of full workflow."""
+    builder.stop_staging_env()
+    if not builder.start_staging_env():
+        print("❌ Failed to start environment")
+        sys.exit(1)
+
+def _execute_validation_phase(builder: StagingBuilder):
+    """Execute validation phase of full workflow."""
+    _run_health_checks_with_exit(builder)
+    _run_tests_with_exit(builder)
+
+def _run_health_checks_with_exit(builder: StagingBuilder):
+    """Run health checks and exit on failure."""
+    if not builder.health_check():
+        print("❌ Health checks failed")
+        builder.view_logs()
+        sys.exit(1)
+
+def _run_tests_with_exit(builder: StagingBuilder):
+    """Run tests and exit on failure."""
+    if not builder.run_tests():
+        print("❌ Tests failed")
+        builder.view_logs()
+        sys.exit(1)
+
+def _print_success_message():
+    """Print success message with service URLs."""
+    print("\n✅ Staging environment is ready!")
+    print(f"   Frontend: http://localhost:3000")
+    print(f"   Backend API: http://localhost:8080")
+    print(f"   API Docs: http://localhost:8080/docs")
+    print(f"\nRun 'python {__file__} --action stop' to shut down")
 
 if __name__ == "__main__":
     main()
