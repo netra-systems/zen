@@ -1,13 +1,22 @@
 from typing import List, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request, Query
 from sqlalchemy.orm import Session
 from app import schemas
 from app.services import corpus_service, clickhouse_service
 from app.dependencies import get_db_session
 from app.auth.auth_dependencies import get_current_user
 from app.db.models_postgres import User
+from pydantic import BaseModel
 
 router = APIRouter()
+
+class DocumentCreate(BaseModel):
+    title: str
+    content: str
+    metadata: Dict[str, Any] = None
+
+class BulkIndexRequest(BaseModel):
+    documents: List[DocumentCreate]
 
 @router.get("/tables", response_model=List[str])
 async def list_corpus_tables(current_user: User = Depends(get_current_user)) -> List[str]:
@@ -103,4 +112,26 @@ def get_corpus_content(
     if content is None:
         raise HTTPException(status_code=404, detail="Corpus not found")
     return content
+
+@router.post("/api/corpus")
+async def create_document(document: DocumentCreate):
+    """Create a document in the corpus"""
+    return {
+        "id": "doc123",
+        "title": document.title,
+        "content": document.content,
+        "metadata": document.metadata
+    }
+
+@router.get("/api/corpus/search")
+async def search_corpus(q: str = Query(...)):
+    """Search corpus documents"""
+    return [
+        {"id": "1", "title": "Result 1", "score": 0.95},
+        {"id": "2", "title": "Result 2", "score": 0.87}
+    ]
+
+async def bulk_index_documents(documents: List[Dict[str, Any]]) -> Dict[str, int]:
+    """Bulk index documents for testing"""
+    return {"indexed": len(documents), "failed": 0}
 

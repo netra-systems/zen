@@ -175,7 +175,7 @@ def run_generation_in_pool(tasks, num_processes):
         for result in pool.imap_unordered(generate_content_for_worker, tasks):
             yield result
 
-async def run_content_generation_job(job_id: str, params: ContentGenParams):
+async def run_content_generation_job(job_id: str, params: dict):
     """The core worker process for generating a content corpus."""
     try:
         # Basic check to ensure the API key is available before starting the pool
@@ -185,24 +185,24 @@ async def run_content_generation_job(job_id: str, params: ContentGenParams):
         await update_job_status(job_id, "failed", error=str(e))
         return
 
-    total_tasks = len(list(META_PROMPTS.keys())) * params.samples_per_type
+    total_tasks = len(list(META_PROMPTS.keys())) * params.get('samples_per_type', 10)
     await update_job_status(job_id, "running", progress=0, total_tasks=total_tasks)
 
     # Create a serializable dictionary for generation_config
     generation_config_dict = {
-        'temperature': params.temperature,
-        'top_p': params.top_p,
-        'top_k': params.top_k
+        'temperature': params.get('temperature', 0.7),
+        'top_p': params.get('top_p'),
+        'top_k': params.get('top_k')
     }
     # Filter out None values so the Google API doesn't complain
     generation_config_dict = {k: v for k, v in generation_config_dict.items() if v is not None}
 
 
     workload_types = list(META_PROMPTS.keys())
-    num_processes = min(cpu_count(), params.max_cores)
+    num_processes = min(cpu_count(), params.get('max_cores', 4))
 
     # Prepare tasks with serializable data
-    tasks = [(w_type, generation_config_dict) for w_type in workload_types for _ in range(params.samples_per_type)]
+    tasks = [(w_type, generation_config_dict) for w_type in workload_types for _ in range(params.get('samples_per_type', 10))]
 
     corpus = {key: [] for key in workload_types}
     completed_tasks = 0
@@ -297,7 +297,7 @@ def generate_data_chunk_for_service(args):
     df['total_cost'] = df['prompt_cost'] + df['completion_cost']
     return df
 
-async def run_log_generation_job(job_id: str, params: LogGenParams):
+async def run_log_generation_job(job_id: str, params: dict):
     """The core worker process for generating a synthetic log set."""
     await update_job_status(job_id, "running", progress={'completed_logs': 0, 'total_logs': params['num_logs']})
     
@@ -365,7 +365,7 @@ async def run_data_ingestion_job(job_id: str, params: dict):
 
 from app.data.synthetic.synthetic_data import main as synthetic_data_main
 
-async def run_synthetic_data_generation_job(job_id: str, params: SyntheticDataGenParams):
+async def run_synthetic_data_generation_job(job_id: str, params: dict):
     """Generates and ingests synthetic logs in batches from a ClickHouse corpus."""
     batch_size = params.get('batch_size', 1000)
     total_logs_to_gen = params.get('num_traces', 10000)

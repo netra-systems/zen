@@ -8,7 +8,7 @@ import json
 import hashlib
 import time
 from typing import Dict, Optional, Any, List, Set
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
@@ -16,7 +16,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import base64
 
 from app.logging_config import central_logger
-from app.core.exceptions import NetraSecurityException
+from app.core.exceptions_auth import NetraSecurityException
 from app.schemas.config_types import SecretType, EnvironmentType
 
 logger = central_logger.get_logger(__name__)
@@ -38,9 +38,9 @@ class SecretMetadata:
         self.secret_name = secret_name
         self.access_level = access_level
         self.environment = environment
-        self.created_at = datetime.utcnow()
-        self.last_accessed = datetime.utcnow()
-        self.last_rotated = datetime.utcnow()
+        self.created_at = datetime.now(timezone.utc)
+        self.last_accessed = datetime.now(timezone.utc)
+        self.last_rotated = datetime.now(timezone.utc)
         self.rotation_days = rotation_days
         self.access_count = 0
         self.authorized_components: Set[str] = set()
@@ -48,18 +48,18 @@ class SecretMetadata:
     @property
     def needs_rotation(self) -> bool:
         """Check if secret needs rotation."""
-        days_since_rotation = (datetime.utcnow() - self.last_rotated).days
+        days_since_rotation = (datetime.now(timezone.utc) - self.last_rotated).days
         return days_since_rotation >= self.rotation_days
     
     @property
     def is_expired(self) -> bool:
         """Check if secret is expired (past rotation deadline)."""
-        days_since_rotation = (datetime.utcnow() - self.last_rotated).days
+        days_since_rotation = (datetime.now(timezone.utc) - self.last_rotated).days
         return days_since_rotation > (self.rotation_days + 30)  # 30 day grace period
     
     def record_access(self, component: str) -> None:
         """Record secret access."""
-        self.last_accessed = datetime.utcnow()
+        self.last_accessed = datetime.now(timezone.utc)
         self.access_count += 1
         self.authorized_components.add(component)
 
@@ -236,15 +236,16 @@ class EnhancedSecretManager:
             # Check if secret exists
             if secret_name not in self.secrets:
                 logger.warning(f"Secret {secret_name} not found")
-                return None
+                raise NetraSecurityException(
+                    message=f"Secret {secret_name} not found"
+                )
             
             # Check if secret is expired
             metadata = self.metadata[secret_name]
             if metadata.is_expired:
                 logger.error(f"Secret {secret_name} is expired and needs rotation")
                 raise NetraSecurityException(
-                    f"Secret {secret_name} is expired",
-                    error_code="SECRET_EXPIRED"
+                    message=f"Secret {secret_name} is expired"
                 )
             
             # Decrypt and return secret
@@ -267,30 +268,27 @@ class EnhancedSecretManager:
         # Check if component is blocked
         if component in self.blocked_components:
             raise NetraSecurityException(
-                f"Component {component} is blocked from accessing secrets",
-                error_code="COMPONENT_BLOCKED"
+                message=f"Component {component} is blocked from accessing secrets"
             )
         
         # Check environment isolation
         if self.environment == EnvironmentType.PRODUCTION:
             if not secret_name.startswith("prod-"):
                 raise NetraSecurityException(
-                    f"Production environment cannot access non-production secret: {secret_name}",
-                    error_code="ENVIRONMENT_VIOLATION"
+                    message=f"Production environment cannot access non-production secret: {secret_name}"
                 )
         
         # Check access attempts
         if self.access_attempts.get(component, 0) >= self.max_access_attempts:
             self.blocked_components.add(component)
             raise NetraSecurityException(
-                f"Component {component} exceeded access attempts",
-                error_code="TOO_MANY_ATTEMPTS"
+                message=f"Component {component} exceeded access attempts"
             )
     
     def _log_access(self, secret_name: str, component: str, result: str) -> None:
         """Log secret access attempt."""
         log_entry = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "secret_name": secret_name,
             "component": component,
             "result": result,
@@ -319,7 +317,7 @@ class EnhancedSecretManager:
             
             # Update metadata
             metadata = self.metadata[secret_name]
-            metadata.last_rotated = datetime.utcnow()
+            metadata.last_rotated = datetime.now(timezone.utc)
             
             logger.info(f"Successfully rotated secret: {secret_name}")
             return True
@@ -351,7 +349,7 @@ class EnhancedSecretManager:
     
     def cleanup_access_log(self, days_to_keep: int = 30) -> None:
         """Clean up old access log entries."""
-        cutoff_date = datetime.utcnow() - timedelta(days=days_to_keep)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_to_keep)
         
         self.access_log = [
             entry for entry in self.access_log

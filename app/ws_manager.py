@@ -6,8 +6,10 @@ All functions are ≤8 lines as per CLAUDE.md requirements.
 """
 
 from typing import Dict, Any, Union, List, Optional, Literal
+from datetime import datetime, timezone
 
 from fastapi import WebSocket
+from starlette.websockets import WebSocketState
 
 from app.logging_config import central_logger
 from app.schemas.registry import WebSocketMessage
@@ -25,13 +27,15 @@ from app.ws_manager_core import WebSocketManagerCore
 from app.ws_manager_connections import WebSocketConnectionManager
 from app.ws_manager_messaging import WebSocketMessagingManager
 from app.ws_manager_broadcasting import WebSocketBroadcastingManager
+from app.ws_manager_test_compat import WebSocketTestCompatibilityMixin
 
 logger = central_logger.get_logger(__name__)
 
 
-class WebSocketManager:
+class WebSocketManager(WebSocketTestCompatibilityMixin):
     """Enhanced WebSocket manager using modular components."""
     _instance: Optional['WebSocketManager'] = None
+    _initialized = False
 
     def __new__(cls) -> 'WebSocketManager':
         """Singleton pattern delegating to core."""
@@ -42,19 +46,28 @@ class WebSocketManager:
 
     def _initialize_managers(self) -> None:
         """Initialize all manager components."""
+        if self._initialized:
+            return
         self.core = WebSocketManagerCore()
-        self.connections = WebSocketConnectionManager(self.core)
+        self._connection_manager = WebSocketConnectionManager(self.core)
         self.messaging = WebSocketMessagingManager(self.core)
         self.broadcasting = WebSocketBroadcastingManager(self.core)
+        self._setup_connection_tracking()
+        self._initialized = True
+
+    def _setup_connection_tracking(self) -> None:
+        """Initialize connection tracking attributes for test compatibility."""
+        self.connections_dict: Dict[str, WebSocket] = {}
+        self.connection_info_dict: Dict[str, ConnectionInfo] = {}
 
     async def connect_user(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish and register a new WebSocket connection for a user."""
-        return await self.connections.establish_connection(user_id, websocket)
+        return await self._connection_manager.establish_connection(user_id, websocket)
 
     async def disconnect_user(self, user_id: str, websocket: WebSocket, 
                        code: int = 1000, reason: str = "Normal closure") -> None:
         """Properly disconnect and clean up a WebSocket connection for a user."""
-        await self.connections.terminate_connection(user_id, websocket, code, reason)
+        await self._connection_manager.terminate_connection(user_id, websocket, code, reason)
 
     def validate_message(self, message: Dict[str, Any]) -> Union[bool, WebSocketValidationError]:
         """Validate incoming WebSocket message."""
@@ -126,9 +139,8 @@ class WebSocketManager:
         """Handle pong response from client."""
         await self.connections.handle_pong_response(user_id, websocket)
 
-
-    # Convenience methods for sending specific message types
-    async def send_error(self, user_id: str, error_message: str, sub_agent_name: str = "System") -> bool:
+    # Original convenience methods for existing API
+    async def send_error_to_user(self, user_id: str, error_message: str, sub_agent_name: str = "System") -> bool:
         """Send an error message to a specific user."""
         return await self.messaging.send_error_message(user_id, error_message, sub_agent_name)
 

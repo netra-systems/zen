@@ -26,17 +26,16 @@ class TestStartupCheckerLLM:
         llm_manager = mock_app.state.llm_manager
         llm_manager.get_llm = Mock(return_value=Mock())
         
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.config.settings') as mock_settings:
             mock_settings.llm_configs = {
                 'anthropic-claude-3-sonnet': {}, 'gpt-4': {}
             }
             mock_settings.environment = "development"
             
-            await checker.check_llm_providers()
+            result = await checker.service_checker.check_llm_providers()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == True
-            assert "2 LLM providers configured" in checker.results[0].message
+            assert result.success == True
+            assert "2 LLM providers configured" in result.message
     
     @pytest.mark.asyncio
     async def test_check_llm_providers_partial_failure(self, mock_app, checker):
@@ -50,17 +49,16 @@ class TestStartupCheckerLLM:
         
         llm_manager.get_llm = Mock(side_effect=get_llm_side_effect)
         
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.config.settings') as mock_settings:
             mock_settings.llm_configs = {
                 'anthropic-claude-3-sonnet': {}, 'gpt-4': {}
             }
             mock_settings.environment = "development"
             
-            await checker.check_llm_providers()
+            result = await checker.service_checker.check_llm_providers()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == True
-            assert "1 available, 1 failed" in checker.results[0].message
+            assert result.success == True
+            assert "1 available, 1 failed" in result.message
     
     @pytest.mark.asyncio
     async def test_check_llm_providers_all_failed(self, mock_app, checker):
@@ -68,15 +66,14 @@ class TestStartupCheckerLLM:
         llm_manager = mock_app.state.llm_manager
         llm_manager.get_llm = Mock(side_effect=Exception("No providers available"))
         
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.config.settings') as mock_settings:
             mock_settings.llm_configs = {'anthropic-claude-3-sonnet': {}}
             mock_settings.environment = "development"
             
-            await checker.check_llm_providers()
+            result = await checker.service_checker.check_llm_providers()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == False
-            assert "No LLM providers available" in checker.results[0].message
+            assert result.success == False
+            assert "No LLM providers available" in result.message
     
     @pytest.mark.asyncio
     async def test_check_llm_providers_critical_provider_not_initialized(self, mock_app, checker):
@@ -84,25 +81,23 @@ class TestStartupCheckerLLM:
         llm_manager = mock_app.state.llm_manager
         llm_manager.get_llm = Mock(return_value=None)
         
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.config.settings') as mock_settings:
             mock_settings.llm_configs = {'anthropic-claude-3-opus': {}}
             mock_settings.environment = "development"
             
-            await checker.check_llm_providers()
+            result = await checker.service_checker.check_llm_providers()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == False
+            assert result.success == False
     
     @pytest.mark.asyncio
     async def test_check_llm_providers_exception(self, mock_app, checker):
         """Test LLM providers check with unexpected exception."""
         mock_app.state.llm_manager = None
         
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.config.settings') as mock_settings:
             mock_settings.environment = "production"
             
-            await checker.check_llm_providers()
+            result = await checker.service_checker.check_llm_providers()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == False
-            assert checker.results[0].critical == True
+            assert result.success == False
+            assert result.critical == True

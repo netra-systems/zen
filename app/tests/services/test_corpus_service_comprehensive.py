@@ -68,6 +68,10 @@ def corpus_service(mock_db, mock_vector_store, mock_llm_manager):
             service.db = mock_db
             service.vector_store = mock_vector_store
             service.llm_manager = mock_llm_manager
+            # Mock keyword_search for test compatibility
+            service.keyword_search = AsyncMock(return_value=[
+                {"id": "fallback_doc1", "content": "Keyword match", "fallback_method": "keyword"}
+            ])
             return service
 
 

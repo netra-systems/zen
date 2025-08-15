@@ -28,15 +28,14 @@ class TestStartupCheckerNetwork:
         with patch('socket.socket') as mock_socket_class:
             setup_socket_mock(mock_socket_class, 0)
             
-            with patch('app.startup_checks.settings') as mock_settings:
+            with patch('app.startup_checks.system_checks.settings') as mock_settings:
                 mock_settings.database_url = "postgresql://user:pass@localhost:5432/db"
                 mock_settings.redis = Mock(host="localhost", port=6379)
                 
-                await checker.check_network_connectivity()
+                result = await checker.system_checker.check_network_connectivity()
                 
-                assert len(checker.results) == 1
-                assert checker.results[0].success == True
-                assert "All network endpoints reachable" in checker.results[0].message
+                assert result.success == True
+                assert "All network endpoints reachable" in result.message
     
     @pytest.mark.asyncio
     async def test_check_network_connectivity_failure(self, checker):
@@ -44,15 +43,14 @@ class TestStartupCheckerNetwork:
         with patch('socket.socket') as mock_socket_class:
             setup_socket_mock(mock_socket_class, 1)
             
-            with patch('app.startup_checks.settings') as mock_settings:
+            with patch('app.startup_checks.system_checks.settings') as mock_settings:
                 mock_settings.database_url = "postgresql://user:pass@localhost:5432/db"
                 mock_settings.redis = Mock(host="localhost", port=6379)
                 
-                await checker.check_network_connectivity()
+                result = await checker.system_checker.check_network_connectivity()
                 
-                assert len(checker.results) == 1
-                assert checker.results[0].success == False
-                assert "Cannot reach" in checker.results[0].message
+                assert result.success == False
+                assert "Cannot reach" in result.message
     
     @pytest.mark.asyncio
     async def test_check_network_connectivity_socket_exception(self, checker):
@@ -62,15 +60,14 @@ class TestStartupCheckerNetwork:
             mock_socket.connect_ex.side_effect = Exception("Socket error")
             mock_socket_class.return_value = mock_socket
             
-            with patch('app.startup_checks.settings') as mock_settings:
+            with patch('app.startup_checks.system_checks.settings') as mock_settings:
                 mock_settings.database_url = "postgresql://localhost/db"
                 mock_settings.redis = None
                 
-                await checker.check_network_connectivity()
+                result = await checker.system_checker.check_network_connectivity()
                 
-                assert len(checker.results) == 1
-                assert checker.results[0].success == False
-                assert "Socket error" in checker.results[0].message
+                assert result.success == False
+                assert "Socket error" in result.message
     
     @pytest.mark.asyncio
     async def test_check_network_connectivity_no_port(self, checker):
@@ -78,11 +75,10 @@ class TestStartupCheckerNetwork:
         with patch('socket.socket') as mock_socket_class:
             setup_socket_mock(mock_socket_class, 0)
             
-            with patch('app.startup_checks.settings') as mock_settings:
+            with patch('app.startup_checks.system_checks.settings') as mock_settings:
                 mock_settings.database_url = "postgresql://hostname/db"
                 mock_settings.redis = None
                 
-                await checker.check_network_connectivity()
+                result = await checker.system_checker.check_network_connectivity()
                 
-                assert len(checker.results) == 1
-                assert checker.results[0].success == True
+                assert result.success == True

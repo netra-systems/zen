@@ -30,7 +30,7 @@ class TestStartupCheckerClickHouse:
         
         with patch('app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             mock_get_client.return_value = mock_client
-            with patch('app.startup_checks.settings') as mock_settings:
+            with patch('app.startup_checks.service_checks.settings') as mock_settings:
                 mock_settings.environment = "development"
                 
                 result = await checker.service_checker.check_clickhouse()
@@ -46,7 +46,7 @@ class TestStartupCheckerClickHouse:
         
         with patch('app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             mock_get_client.return_value = mock_client
-            with patch('app.startup_checks.settings') as mock_settings:
+            with patch('app.startup_checks.service_checks.settings') as mock_settings:
                 mock_settings.environment = "development"
                 
                 result = await checker.service_checker.check_clickhouse()
@@ -59,7 +59,7 @@ class TestStartupCheckerClickHouse:
         """Test ClickHouse check with connection failure."""
         with patch('app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             mock_get_client.side_effect = Exception("Connection failed")
-            with patch('app.startup_checks.settings') as mock_settings:
+            with patch('app.startup_checks.service_checks.settings') as mock_settings:
                 mock_settings.environment = "development"
                 
                 result = await checker.service_checker.check_clickhouse()
@@ -76,7 +76,7 @@ class TestStartupCheckerClickHouse:
         
         with patch('app.db.clickhouse.get_clickhouse_client') as mock_get_client:
             mock_get_client.return_value = mock_client
-            with patch('app.startup_checks.settings') as mock_settings:
+            with patch('app.startup_checks.service_checks.settings') as mock_settings:
                 mock_settings.environment = "development"
                 
                 result = await checker.service_checker.check_clickhouse()

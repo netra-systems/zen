@@ -103,6 +103,9 @@ class TestDatabaseClientCircuitBreaker:
         mock_result = MagicMock()
         mock_result.fetchall.return_value = [{"id": 1, "name": "test"}]
         mock_session.execute = AsyncMock(return_value=mock_result)
+        mock_session.commit = AsyncMock()
+        mock_session.rollback = AsyncMock()
+        mock_session.close = AsyncMock()
         mock_session_factory.return_value.__aenter__ = AsyncMock(return_value=mock_session)
         mock_session_factory.return_value.__aexit__ = AsyncMock(return_value=None)
         

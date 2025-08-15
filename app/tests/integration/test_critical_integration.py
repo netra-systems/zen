@@ -332,13 +332,13 @@ class TestCriticalIntegration:
         assert user_id not in ws_manager.active_connections
         
         # Test unauthorized access (no token)
-        unauthorized_conn_id = f"conn_unauthorized_{uuid.uuid4()}"
+        unauthorized_user_id = None  # No user_id should cause failure
         with pytest.raises(Exception):
-            # This should fail without proper user_id
-            await ws_manager.connect(mock_websocket, None, unauthorized_conn_id)
+            # This should fail without proper user_id (None)
+            await ws_manager.connect(unauthorized_user_id, mock_websocket)
         
         # Verify unauthorized connection was not added
-        assert unauthorized_conn_id not in ws_manager.active_connections
+        assert unauthorized_user_id not in ws_manager.active_connections
 
     @pytest.mark.asyncio
     async def test_3_database_state_persistence_and_recovery(

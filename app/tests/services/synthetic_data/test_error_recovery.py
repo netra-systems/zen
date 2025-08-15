@@ -25,20 +25,16 @@ class TestErrorRecovery:
             )
             
             # Since generate_with_fallback doesn't exist, test the actual generation flow
-            try:
-                # The service should handle the error internally
-                result = await recovery_service.generate_synthetic_data(
-                    db=AsyncMock(),
-                    config=config,
-                    user_id="test_user",
-                    corpus_id="missing_corpus"
-                )
-                # Job should be created even if corpus fails
-                assert result["job_id"] is not None
-                assert result["status"] == "initiated"
-            except Exception:
-                # Service should not raise unhandled exceptions
-                pytest.fail("Service should handle corpus errors gracefully")
+            # The service should handle the error internally and not raise exceptions
+            result = await recovery_service.generate_synthetic_data(
+                db=AsyncMock(),
+                config=config,
+                user_id="test_user",
+                corpus_id="missing_corpus"
+            )
+            # Job should be created even if corpus fails
+            assert result["job_id"] is not None
+            assert result["status"] == "initiated"
 
     @pytest.mark.asyncio
     async def test_clickhouse_connection_recovery(self, recovery_service):

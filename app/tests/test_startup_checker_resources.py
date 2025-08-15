@@ -25,41 +25,38 @@ class TestStartupCheckerResources:
     @pytest.mark.asyncio
     async def test_check_memory_and_resources_ok(self, checker):
         """Test system resources check with adequate resources."""
-        with patch('app.startup_checks.psutil') as mock_psutil:
+        with patch('app.startup_checks.system_checks.psutil') as mock_psutil:
             mock_psutil.virtual_memory.return_value = create_mock_memory_info(16, 8)
             mock_psutil.disk_usage.return_value = create_mock_disk_info(100)
             mock_psutil.cpu_count.return_value = 8
             
-            await checker.check_memory_and_resources()
+            result = await checker.system_checker.check_memory_and_resources()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == True
-            assert "Resources OK" in checker.results[0].message
+            assert result.success == True
+            assert "Resources OK" in result.message
     
     @pytest.mark.asyncio
     async def test_check_memory_and_resources_warnings(self, checker):
         """Test system resources check with resource warnings."""
-        with patch('app.startup_checks.psutil') as mock_psutil:
+        with patch('app.startup_checks.system_checks.psutil') as mock_psutil:
             mock_psutil.virtual_memory.return_value = create_mock_memory_info(4, 0.5)
             mock_psutil.disk_usage.return_value = create_mock_disk_info(2)
             mock_psutil.cpu_count.return_value = 1
             
-            await checker.check_memory_and_resources()
+            result = await checker.system_checker.check_memory_and_resources()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == True
-            assert "Resource warnings" in checker.results[0].message
-            assert "Low memory" in checker.results[0].message
-            assert "Low disk space" in checker.results[0].message
-            assert "Low CPU count" in checker.results[0].message
+            assert result.success == True
+            assert "Resource warnings" in result.message
+            assert "Low memory" in result.message
+            assert "Low disk space" in result.message
+            assert "Low CPU count" in result.message
     
     @pytest.mark.asyncio
     async def test_check_memory_and_resources_exception(self, checker):
         """Test system resources check with exception."""
-        with patch('app.startup_checks.psutil.virtual_memory', 
+        with patch('app.startup_checks.system_checks.psutil.virtual_memory', 
                   side_effect=Exception("Cannot read memory")):
-            await checker.check_memory_and_resources()
+            result = await checker.system_checker.check_memory_and_resources()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == True  # Non-critical failure
-            assert "Could not check resources" in checker.results[0].message
+            assert result.success == True  # Non-critical failure
+            assert "Could not check resources" in result.message

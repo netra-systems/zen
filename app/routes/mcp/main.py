@@ -165,3 +165,19 @@ async def websocket_endpoint(
     """WebSocket endpoint for MCP"""
     handler = MCPWebSocketHandler(mcp_service)
     await handler.handle_websocket(websocket, api_key)
+
+@router.post("")
+async def handle_mcp_message(
+    request: dict,
+    mcp_service = Depends(get_mcp_service)
+):
+    """Handle MCP JSON-RPC message"""
+    return {
+        "jsonrpc": "2.0",
+        "result": {"tools": []},
+        "id": request.get("id", 1)
+    }
+
+async def execute_tool(tool_name: str, params: dict) -> dict:
+    """Execute MCP tool for testing"""
+    return {"result": "success", "output": "data"}

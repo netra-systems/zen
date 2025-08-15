@@ -28,14 +28,13 @@ class TestStartupCheckerRedis:
         redis_manager = mock_app.state.redis_manager
         setup_redis_read_write_test(redis_manager)
         
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.service_checks.settings') as mock_settings:
             mock_settings.environment = "development"
             
-            await checker.check_redis()
+            result = await checker.service_checker.check_redis()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == True
-            assert "Redis connected" in checker.results[0].message
+            assert result.success == True
+            assert "Redis connected" in result.message
             verify_redis_operations(redis_manager)
     
     @pytest.mark.asyncio
@@ -44,14 +43,13 @@ class TestStartupCheckerRedis:
         redis_manager = mock_app.state.redis_manager
         redis_manager.get = AsyncMock(return_value="wrong_value")
         
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.service_checks.settings') as mock_settings:
             mock_settings.environment = "development"
             
-            await checker.check_redis()
+            result = await checker.service_checker.check_redis()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == False
-            assert "read/write test failed" in checker.results[0].message
+            assert result.success == False
+            assert "read/write test failed" in result.message
     
     @pytest.mark.asyncio
     async def test_check_redis_connection_failure_production(self, mock_app, checker):
@@ -59,15 +57,14 @@ class TestStartupCheckerRedis:
         redis_manager = mock_app.state.redis_manager
         redis_manager.connect = AsyncMock(side_effect=Exception("Connection refused"))
         
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.service_checks.settings') as mock_settings:
             mock_settings.environment = "production"
             
-            await checker.check_redis()
+            result = await checker.service_checker.check_redis()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == False
-            assert checker.results[0].critical == True
-            assert "Connection refused" in checker.results[0].message
+            assert result.success == False
+            assert result.critical == True
+            assert "Connection refused" in result.message
     
     @pytest.mark.asyncio
     async def test_check_redis_connection_failure_development(self, mock_app, checker):
@@ -75,11 +72,10 @@ class TestStartupCheckerRedis:
         redis_manager = mock_app.state.redis_manager
         redis_manager.connect = AsyncMock(side_effect=Exception("Connection refused"))
         
-        with patch('app.startup_checks.settings') as mock_settings:
+        with patch('app.startup_checks.service_checks.settings') as mock_settings:
             mock_settings.environment = "development"
             
-            await checker.check_redis()
+            result = await checker.service_checker.check_redis()
             
-            assert len(checker.results) == 1
-            assert checker.results[0].success == False
-            assert checker.results[0].critical == False
+            assert result.success == False
+            assert result.critical == False

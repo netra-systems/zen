@@ -126,23 +126,30 @@ def extract_response_content(response: Any) -> str:
 
 def create_token_usage(response: Any) -> TokenUsage:
     """Create TokenUsage from response attributes."""
+    prompt_tokens = getattr(response, 'prompt_tokens', 0)
+    completion_tokens = getattr(response, 'completion_tokens', 0)
+    total_tokens = getattr(response, 'total_tokens', 0)
+    
     return TokenUsage(
-        prompt_tokens=getattr(response, 'prompt_tokens', 0),
-        completion_tokens=getattr(response, 'completion_tokens', 0),
-        total_tokens=getattr(response, 'total_tokens', 0)
+        prompt_tokens=prompt_tokens if isinstance(prompt_tokens, int) else 0,
+        completion_tokens=completion_tokens if isinstance(completion_tokens, int) else 0,
+        total_tokens=total_tokens if isinstance(total_tokens, int) else 0
     )
 
 
 def get_response_model_name(response: Any, config: Any, 
                           llm_config_name: str) -> str:
     """Get model name from response or config."""
-    return getattr(response, 'model', 
-                  config.model_name if config else llm_config_name)
+    model_attr = getattr(response, 'model', None)
+    if isinstance(model_attr, str):
+        return model_attr
+    return config.model_name if config else llm_config_name
 
 
 def get_finish_reason(response: Any) -> str:
     """Get finish reason from response."""
-    return getattr(response, 'finish_reason', 'stop')
+    finish_reason = getattr(response, 'finish_reason', 'stop')
+    return finish_reason if isinstance(finish_reason, str) else 'stop'
 
 
 async def create_llm_response(response: Any, config: Any, llm_config_name: str,

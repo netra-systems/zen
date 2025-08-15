@@ -7,6 +7,7 @@ Targets 95% coverage of corpus generation functionality.
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 from unittest.mock import AsyncMock
 
@@ -23,7 +24,7 @@ from app.agents.tool_dispatcher import ToolDispatcher
 
 
 @pytest.fixture
-async def admin_corpus_setup():
+def admin_corpus_setup():
     """Setup admin corpus test environment"""
     mock_llm = AsyncMock(spec=LLMManager)
     mock_dispatcher = AsyncMock(spec=ToolDispatcher)

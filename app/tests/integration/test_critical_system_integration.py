@@ -305,7 +305,9 @@ class TestSystemComponentIntegration:
                     return await client.post("/process", "reliable_api", json_data={"input": "test"})
                 
                 # Mock the reliability execute_safely to actually call the operation
-                mock_reliability.execute_safely.side_effect = lambda op, name, **kwargs: op()
+                async def async_execute_safely_api(op, name, **kwargs):
+                    return await op()
+                mock_reliability.execute_safely.side_effect = async_execute_safely_api
                 
                 result = await agent.execute_with_reliability(
                     api_operation,
@@ -471,7 +473,9 @@ class TestCriticalPathIntegration:
                         return comprehensive_json_fix(raw_result)
                     
                     # Step 4: Execute with full reliability protection
-                    mock_reliability.execute_safely.side_effect = lambda op, name, **kwargs: op()
+                    async def async_execute_safely(op, name, **kwargs):
+                        return await op()
+                    mock_reliability.execute_safely.side_effect = async_execute_safely
                     
                     final_result = await agent.execute_with_reliability(
                         critical_path_operation,
@@ -591,7 +595,9 @@ class TestCriticalPathIntegration:
                         )
                     
                     # Mock reliability to actually execute and handle the error
-                    mock_reliability.execute_safely.side_effect = lambda op, name, **kwargs: op()
+                    async def async_execute_safely_recovery(op, name, **kwargs):
+                        return await op()
+                    mock_reliability.execute_safely.side_effect = async_execute_safely_recovery
                     
                     # Execute - should recover despite failures
                     result = await agent.execute_with_reliability(
