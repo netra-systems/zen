@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional, List, TYPE_CHECKING
+from typing import Dict, Optional, List, TYPE_CHECKING, TypedDict, Union, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
 from app.logging_config import central_logger
@@ -7,14 +7,15 @@ from app.db.models_postgres import Thread, Run
 if TYPE_CHECKING:
     from app.agents.supervisor import SupervisorAgent
 from app.services.thread_service import ThreadService
-from app.schemas.websocket_types import (
+from app.schemas.registry import (
     UserMessagePayload,
     CreateThreadPayload,
     SwitchThreadPayload,
     DeleteThreadPayload,
     ThreadHistoryResponse,
     AgentCompletedPayload,
-    AgentStoppedPayload
+    AgentStoppedPayload,
+    AgentResponseData
 )
 from app.ws_manager import manager
 from app.services.message_handler_utils import handle_thread_history as _handle_thread_history
@@ -36,6 +37,13 @@ import json
 
 logger = central_logger.get_logger(__name__)
 
+class StartAgentPayloadTyped(TypedDict):
+    """Strongly typed payload for start_agent messages"""
+    user_request: str
+    thread_id: Optional[str]
+    context: Optional[Dict[str, Union[str, int, float, bool]]]
+    settings: Optional[Dict[str, Union[str, int, float, bool]]]
+
 class MessageHandlerService:
     """Handles different types of WebSocket messages following conventions"""
     
@@ -46,7 +54,7 @@ class MessageHandlerService:
     async def handle_start_agent(
         self,
         user_id: str,
-        payload: Dict[str, Any],
+        payload: StartAgentPayloadTyped,
         db_session: AsyncSession
     ) -> None:
         """Handle start_agent message type"""
@@ -56,12 +64,12 @@ class MessageHandlerService:
             return
         await self._process_agent_request(user_id, user_request, thread, db_session)
     
-    def _extract_user_request(self, payload: Dict[str, Any]) -> str:
+    def _extract_user_request(self, payload: StartAgentPayloadTyped) -> str:
         """Extract user request from payload"""
         return MessageHandlerBase.extract_user_request(payload)
     
     async def _get_or_validate_thread(
-        self, user_id: str, payload: Dict[str, Any], db_session: AsyncSession
+        self, user_id: str, payload: StartAgentPayloadTyped, db_session: AsyncSession
     ) -> Optional[Thread]:
         """Get or validate thread for user"""
         thread_id = payload.get("thread_id", None)
@@ -155,6 +163,9 @@ class MessageHandlerService:
         text, references, thread_id = self._extract_message_data(payload)
         logger.info(f"Received user message from {user_id}: {text}, thread_id: {thread_id}")
         thread, run = await self._setup_thread_and_run(user_id, text, references, thread_id, db_session)
+        # Join user to thread room for WebSocket broadcasts
+        if thread and thread_id:
+            await manager.broadcasting.join_room(user_id, thread_id)
         await self._process_user_message(user_id, text, thread, run, db_session)
     
     def _extract_message_data(self, payload: UserMessagePayload) -> tuple:
@@ -210,9 +221,9 @@ class MessageHandlerService:
         return thread
     
     async def _initialize_conversation(
-        self, thread: Thread, text: str, references: list,
+        self, thread: Thread, text: str, references: List[str],
         user_id: str, db_session: AsyncSession
-    ) -> tuple:
+    ) -> tuple[Thread, Run]:
         """Initialize conversation with message and run"""
         await self._save_user_message(thread, text, references, db_session)
         run = await self._create_conversation_run(thread, db_session)
@@ -220,10 +231,10 @@ class MessageHandlerService:
         return thread, run
     
     async def _save_user_message(
-        self, thread: Thread, text: str, references: list, db_session: AsyncSession
+        self, thread: Thread, text: str, references: List[str], db_session: AsyncSession
     ) -> None:
         """Save user message to thread"""
-        metadata = {"references": references} if references else None
+        metadata: Optional[Dict[str, List[str]]] = {"references": references} if references else None
         await self.thread_service.create_message(
             thread.id, role="user", content=text, metadata=metadata, db=db_session
         )
@@ -264,3 +275,19 @@ class MessageHandlerService:
     async def handle_stop_agent(self, user_id: str) -> None:
         """Handle stop_agent message type"""
         await _handle_stop_agent(user_id)
+    
+    async def handle_switch_thread(
+        self,
+        user_id: str,
+        payload: SwitchThreadPayload,
+        db_session: Optional[AsyncSession]
+    ) -> None:
+        """Handle switch_thread message type - join user to thread room"""
+        thread_id = payload.get("thread_id")
+        if not thread_id:
+            await manager.send_error(user_id, "Thread ID required")
+            return
+        # Leave all current rooms and join new thread room
+        await manager.broadcasting.leave_all_rooms(user_id)
+        await manager.broadcasting.join_room(user_id, thread_id)
+        logger.info(f"User {user_id} switched to thread {thread_id}")

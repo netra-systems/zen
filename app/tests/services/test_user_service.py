@@ -11,7 +11,8 @@ import uuid
 
 from app.services.user_service import CRUDUser, user_service, pwd_context
 from app.db.models_postgres import User
-from app.schemas.User import UserCreate, UserUpdate
+from app.schemas.registry import UserCreate
+from app.schemas.User import UserUpdate
 
 
 class TestUserService:

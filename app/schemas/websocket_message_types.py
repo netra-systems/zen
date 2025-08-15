@@ -5,39 +5,10 @@ from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from enum import Enum
 
+# Import WebSocketMessage and WebSocketMessageType from single source of truth
+from app.schemas.registry import WebSocketMessage, WebSocketMessageType
 
-class WebSocketMessageType(str, Enum):
-    """All supported WebSocket message types."""
-    # Client to server messages
-    START_AGENT = "start_agent"
-    USER_MESSAGE = "user_message"
-    GET_THREAD_HISTORY = "get_thread_history"
-    STOP_AGENT = "stop_agent"
-    CREATE_THREAD = "create_thread"
-    SWITCH_THREAD = "switch_thread"
-    DELETE_THREAD = "delete_thread"
-    LIST_THREADS = "list_threads"
-    PING = "ping"
-    PONG = "pong"
-    
-    # Server to client messages
-    AGENT_STARTED = "agent_started"
-    AGENT_COMPLETED = "agent_completed"
-    AGENT_STOPPED = "agent_stopped"
-    AGENT_ERROR = "agent_error"
-    AGENT_UPDATE = "agent_update"
-    AGENT_LOG = "agent_log"
-    TOOL_STARTED = "tool_started"
-    TOOL_COMPLETED = "tool_completed"
-    TOOL_CALL = "tool_call"
-    TOOL_RESULT = "tool_result"
-    SUBAGENT_STARTED = "subagent_started"
-    SUBAGENT_COMPLETED = "subagent_completed"
-    THREAD_HISTORY = "thread_history"
-    ERROR = "error"
-    CONNECTION_ESTABLISHED = "connection_established"
-    STREAM_CHUNK = "stream_chunk"
-    STREAM_COMPLETE = "stream_complete"
+# WebSocketMessageType is imported from registry.py - using that as single source
 
 
 class WebSocketConnectionState(str, Enum):
@@ -49,16 +20,7 @@ class WebSocketConnectionState(str, Enum):
     ERROR = "error"
 
 
-class WebSocketMessage(BaseModel):
-    """Base WebSocket message with common fields."""
-    model_config = ConfigDict(extra="allow")
-    
-    type: WebSocketMessageType = Field(description="Message type")
-    timestamp: Optional[float] = Field(default=None, description="Message timestamp")
-    payload: Optional[Dict[str, Any]] = Field(default=None, description="Message payload")
-    system: Optional[bool] = Field(default=False, description="Whether this is a system message")
-    displayed_to_user: Optional[bool] = Field(default=None, description="Whether message should be displayed to user")
-
+# WebSocketMessage is imported from app.schemas.registry (single source of truth)
 
 class ClientMessage(WebSocketMessage):
     """Base class for client-to-server messages."""
@@ -131,107 +93,18 @@ class PongMessage(ClientMessage):
     payload: Optional[Dict[str, Any]] = Field(default=None, description="Optional pong data")
 
 
-# Server-to-client message types
-class AgentStartedMessage(ServerMessage):
-    """Message indicating agent has started."""
-    type: Literal[WebSocketMessageType.AGENT_STARTED] = WebSocketMessageType.AGENT_STARTED
-    payload: Dict[str, Any] = Field(description="Agent start confirmation data")
-
-
-class AgentCompletedMessage(ServerMessage):
-    """Message indicating agent has completed."""
-    type: Literal[WebSocketMessageType.AGENT_COMPLETED] = WebSocketMessageType.AGENT_COMPLETED
-    payload: Dict[str, Any] = Field(description="Agent completion data and results")
-
-
-class AgentStoppedMessage(ServerMessage):
-    """Message indicating agent was stopped."""
-    type: Literal[WebSocketMessageType.AGENT_STOPPED] = WebSocketMessageType.AGENT_STOPPED
-    payload: Dict[str, Any] = Field(description="Agent stop confirmation")
-
-
-class AgentErrorMessage(ServerMessage):
-    """Message indicating agent error."""
-    type: Literal[WebSocketMessageType.AGENT_ERROR] = WebSocketMessageType.AGENT_ERROR
-    payload: Dict[str, Any] = Field(description="Error details")
-
-
-class AgentUpdateMessage(ServerMessage):
-    """Real-time agent status update."""
-    type: Literal[WebSocketMessageType.AGENT_UPDATE] = WebSocketMessageType.AGENT_UPDATE
-    payload: Dict[str, Any] = Field(description="Agent status and progress data")
-
-
-class AgentLogMessage(ServerMessage):
-    """Agent log message for monitoring."""
-    type: Literal[WebSocketMessageType.AGENT_LOG] = WebSocketMessageType.AGENT_LOG
-    payload: Dict[str, Any] = Field(description="Log data with level, message, sub_agent_name")
-
-
-class ToolStartedMessage(ServerMessage):
-    """Message indicating tool execution started."""
-    type: Literal[WebSocketMessageType.TOOL_STARTED] = WebSocketMessageType.TOOL_STARTED
-    payload: Dict[str, Any] = Field(description="Tool execution start data")
-
-
-class ToolCompletedMessage(ServerMessage):
-    """Message indicating tool execution completed."""
-    type: Literal[WebSocketMessageType.TOOL_COMPLETED] = WebSocketMessageType.TOOL_COMPLETED
-    payload: Dict[str, Any] = Field(description="Tool execution completion data")
-
-
-class ToolCallMessage(ServerMessage):
-    """Message indicating tool is being called."""
-    type: Literal[WebSocketMessageType.TOOL_CALL] = WebSocketMessageType.TOOL_CALL
-    payload: Dict[str, Any] = Field(description="Tool call data with name, args, sub_agent_name")
-
-
-class ToolResultMessage(ServerMessage):
-    """Message with tool execution result."""
-    type: Literal[WebSocketMessageType.TOOL_RESULT] = WebSocketMessageType.TOOL_RESULT
-    payload: Dict[str, Any] = Field(description="Tool result data with name, result, sub_agent_name")
-
-
-class SubAgentStartedMessage(ServerMessage):
-    """Message indicating sub-agent started."""
-    type: Literal[WebSocketMessageType.SUBAGENT_STARTED] = WebSocketMessageType.SUBAGENT_STARTED
-    payload: Dict[str, Any] = Field(description="Sub-agent start data")
-
-
-class SubAgentCompletedMessage(ServerMessage):
-    """Message indicating sub-agent completed."""
-    type: Literal[WebSocketMessageType.SUBAGENT_COMPLETED] = WebSocketMessageType.SUBAGENT_COMPLETED
-    payload: Dict[str, Any] = Field(description="Sub-agent completion data")
-
-
-class ThreadHistoryMessage(ServerMessage):
-    """Message containing thread history."""
-    type: Literal[WebSocketMessageType.THREAD_HISTORY] = WebSocketMessageType.THREAD_HISTORY
-    payload: Dict[str, Any] = Field(description="Thread history data")
-
-
-class ErrorMessage(ServerMessage):
-    """Error message."""
-    type: Literal[WebSocketMessageType.ERROR] = WebSocketMessageType.ERROR
-    payload: Dict[str, Any] = Field(description="Error details with error, code, sub_agent_name")
-
-
-class ConnectionEstablishedMessage(ServerMessage):
-    """Message confirming connection establishment."""
-    type: Literal[WebSocketMessageType.CONNECTION_ESTABLISHED] = WebSocketMessageType.CONNECTION_ESTABLISHED
-    payload: Dict[str, Any] = Field(description="Connection details")
-
-
-class StreamChunkMessage(ServerMessage):
-    """Streaming response chunk."""
-    type: Literal[WebSocketMessageType.STREAM_CHUNK] = WebSocketMessageType.STREAM_CHUNK
-    payload: Dict[str, Any] = Field(description="Stream chunk data")
-
-
-class StreamCompleteMessage(ServerMessage):
-    """Stream completion message."""
-    type: Literal[WebSocketMessageType.STREAM_COMPLETE] = WebSocketMessageType.STREAM_COMPLETE
-    payload: Dict[str, Any] = Field(description="Stream completion data")
+# Import server-to-client message types from dedicated module
+from app.schemas.websocket_server_messages import (
+    AgentStartedMessage, AgentCompletedMessage, AgentStoppedMessage, AgentErrorMessage,
+    AgentUpdateMessage, AgentLogMessage, AgentThinkingMessage, ToolStartedMessage,
+    ToolCompletedMessage, ToolCallMessage, ToolResultMessage, ToolExecutingMessage,
+    SubAgentStartedMessage, SubAgentCompletedMessage, ThreadHistoryMessage,
+    ThreadCreatedMessage, ThreadUpdatedMessage, ThreadDeletedMessage,
+    ThreadLoadedMessage, ThreadRenamedMessage, StepCreatedMessage,
+    PartialResultMessage, FinalReportMessage, ErrorMessage,
+    ConnectionEstablishedMessage, StreamChunkMessage, StreamCompleteMessage,
+    ServerMessageUnion
+)
 
 
 # Union types for message validation
@@ -248,32 +121,16 @@ ClientMessageUnion = Union[
     PongMessage
 ]
 
-ServerMessageUnion = Union[
-    AgentStartedMessage,
-    AgentCompletedMessage,
-    AgentStoppedMessage,
-    AgentErrorMessage,
-    AgentUpdateMessage,
-    AgentLogMessage,
-    ToolStartedMessage,
-    ToolCompletedMessage,
-    ToolCallMessage,
-    ToolResultMessage,
-    SubAgentStartedMessage,
-    SubAgentCompletedMessage,
-    ThreadHistoryMessage,
-    ErrorMessage,
-    ConnectionEstablishedMessage,
-    StreamChunkMessage,
-    StreamCompleteMessage
-]
+# ServerMessageUnion is imported from websocket_server_messages module
 
 WebSocketMessageUnion = Union[ClientMessageUnion, ServerMessageUnion]
 
 
 class ConnectionInfo(BaseModel):
     """Typed connection information."""
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+    )
     
     user_id: str = Field(description="User ID for this connection")
     connection_id: str = Field(description="Unique connection identifier")
@@ -294,6 +151,9 @@ class RateLimitInfo(BaseModel):
     current_count: int = Field(description="Current request count")
     window_start: datetime = Field(description="Current window start time")
     is_limited: bool = Field(description="Whether currently rate limited")
+    
+    model_config = ConfigDict(
+    )
 
 
 class WebSocketStats(BaseModel):

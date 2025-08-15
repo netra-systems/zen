@@ -19,7 +19,7 @@ from app.agents.supply_researcher_sub_agent import ResearchType
 from app.background import BackgroundTaskManager
 from app.llm.llm_manager import LLMManager
 from app.redis_manager import RedisManager
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 
 
 class TestSupplyResearchSchedulerJobs:

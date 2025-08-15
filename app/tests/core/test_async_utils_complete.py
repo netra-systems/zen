@@ -25,7 +25,7 @@ from app.core.async_utils import (
     run_in_threadpool,
     shutdown_async_utils
 )
-from app.core.exceptions import ServiceTimeoutError, ServiceError
+from app.core.exceptions_service import ServiceTimeoutError, ServiceError
 from app.core.error_context import ErrorContext
 
 

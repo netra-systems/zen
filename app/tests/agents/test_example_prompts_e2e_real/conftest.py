@@ -87,9 +87,10 @@ def setup_real_infrastructure():
         # For other schemas, return a generic instance
         return schema()
     
-    llm_manager.call_llm = mock_call_llm
-    llm_manager.ask_llm = mock_ask_llm
-    llm_manager.ask_structured_llm = mock_ask_structured_llm
+    # Use AsyncMock for async methods
+    llm_manager.call_llm = AsyncMock(side_effect=mock_call_llm)
+    llm_manager.ask_llm = AsyncMock(side_effect=mock_ask_llm)
+    llm_manager.ask_structured_llm = AsyncMock(side_effect=mock_ask_structured_llm)
     llm_manager.get = Mock(return_value=Mock())  # Add get method for config access
     
     # Create real WebSocket Manager

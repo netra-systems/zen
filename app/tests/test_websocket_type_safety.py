@@ -9,11 +9,44 @@ from typing import Dict, Any, List
 from datetime import datetime
 from pydantic import ValidationError
 
-from app.schemas.websocket_unified import (
+from app.schemas.registry import (
     WebSocketMessageType,
     WebSocketConnectionState,
-    ErrorSeverity
+    StartAgentPayload,
+    UserMessagePayload,
+    CreateThreadPayload,
+    SwitchThreadPayload,
+    DeleteThreadPayload,
+    StopAgentPayload,
+    WebSocketMessage,
+    BaseWebSocketPayload
 )
+from app.schemas.websocket_payloads import (
+    RenameThreadPayload,
+    ListThreadsPayload,
+    ThreadHistoryPayload,
+    AgentStartedPayload,
+    AgentErrorPayload,
+    ToolStartedPayload,
+    ToolCompletedPayload,
+    ToolCallPayload,
+    ToolResultPayload,
+    SubAgentStartedPayload,
+    SubAgentCompletedPayload,
+    ThreadCreatedPayload,
+    ThreadSwitchedPayload,
+    ThreadDeletedPayload,
+    ThreadRenamedPayload,
+    ThreadListPayload,
+    StreamChunkPayload,
+    StreamCompletePayload,
+    ErrorPayload,
+    ConnectionEstablishedPayload,
+    BaseWebSocketMessage,
+    ClientToServerMessage,
+    ServerToClientMessage
+)
+from app.core.error_codes import ErrorSeverity
 from app.schemas.Agent import AgentStarted, AgentCompleted, AgentErrorMessage, SubAgentUpdate
 from app.schemas.Tool import ToolStarted, ToolCompleted
 

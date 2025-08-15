@@ -1,7 +1,9 @@
 """Extended health check endpoints with detailed monitoring."""
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.postgres import get_async_db, get_pool_status, async_engine
+from sqlalchemy import text
+from app.db.postgres import get_pool_status, async_engine
+from app.dependencies import get_db_dependency
 from app.logging_config import central_logger
 from typing import Dict, Any
 import psutil
@@ -12,11 +14,11 @@ logger = central_logger.get_logger(__name__)
 router = APIRouter(prefix="/health", tags=["health"])
 
 @router.get("/database")
-async def health_database(db: AsyncSession = Depends(get_async_db)) -> Dict[str, Any]:
+async def health_database(db: AsyncSession = Depends(get_db_dependency)) -> Dict[str, Any]:
     """Check database health and connection pool status."""
     try:
         # Test database connectivity
-        result = await db.execute("SELECT 1")
+        result = await db.execute(text("SELECT 1"))
         db_connected = result.scalar() == 1
         
         # Get pool status
@@ -26,13 +28,13 @@ async def health_database(db: AsyncSession = Depends(get_async_db)) -> Dict[str,
         stats = {}
         if async_engine:
             try:
-                result = await db.execute("""
+                result = await db.execute(text("""
                     SELECT 
                         count(*) as active_connections,
                         max(state_change) as last_activity
                     FROM pg_stat_activity 
                     WHERE datname = current_database()
-                """)
+                """))
                 row = result.first()
                 if row:
                     stats = {

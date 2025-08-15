@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useLayoutEffect } from 'react';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import { MessageItem } from './MessageItem';
 import { ThinkingIndicator } from './ThinkingIndicator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const MessageList: React.FC = () => {
-  const { messages, isProcessing } = useChatStore();
+  const { messages, isProcessing } = useUnifiedChatStore();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isUserScrolling = useRef(false);
@@ -53,7 +53,18 @@ export const MessageList: React.FC = () => {
     scrollToBottom();
   }, [messages]);
 
-  const displayedMessages = messages.filter((msg) => msg.displayed_to_user);
+  const displayedMessages = messages.map(msg => ({
+    id: msg.id,
+    type: msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : 'ai',
+    content: msg.content,
+    sub_agent_name: msg.metadata?.agentName || null,
+    created_at: new Date(msg.timestamp).toISOString(),
+    displayed_to_user: true,
+    tool_info: null,
+    raw_data: msg.metadata || null,
+    references: [],
+    error: null
+  }));
 
   return (
     <ScrollArea ref={scrollAreaRef} className="h-[calc(100vh-250px)] px-6 py-4 overflow-y-auto">

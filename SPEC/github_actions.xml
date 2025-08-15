@@ -4,7 +4,7 @@
         <name>GitHub Actions Configuration</name>
         <type>technical</type>
         <version>1.0</version>
-        <last_updated>2025-08-13</last_updated>
+        <last_updated>2025-08-15</last_updated>
         <description>GitHub Actions workflows configuration, permissions, and best practices</description>
     </metadata>
 
@@ -86,7 +86,70 @@ on:
             </error>
         </section>
 
-        <section id="workflow-patterns" order="3">
+        <section id="act-compatibility" order="3">
+            <title>ACT Compatibility and Environment Variables</title>
+            <description>Best practices for making workflows compatible with ACT local testing</description>
+            
+            <principle id="env-variable-rules">
+                <title>Environment Variable Self-Reference Rules</title>
+                <rule>Environment variables CANNOT reference themselves in the env section</rule>
+                <rule>Use static defaults that ACT can override at runtime</rule>
+                <examples>
+                    <incorrect>
+                        env:
+                          ACT: ${{ env.ACT || 'false' }}  # ERROR: env.ACT doesn't exist yet
+                          IS_ACT: ${{ env.ACT || 'false' }}  # ERROR: circular reference
+                    </incorrect>
+                    <correct>
+                        env:
+                          ACT: 'false'  # Will be overridden by ACT when running locally
+                          IS_ACT: 'false'  # Will be overridden by ACT when running locally
+                    </correct>
+                </examples>
+            </principle>
+            
+            <principle id="conditional-runner-selection">
+                <title>Conditional Runner Selection</title>
+                <rule>Cannot use environment variables in runs-on with complex conditionals</rule>
+                <examples>
+                    <incorrect>
+                        runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+                    </incorrect>
+                    <correct>
+                        runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
+                    </correct>
+                </examples>
+            </principle>
+            
+            <principle id="workflow-call-outputs">
+                <title>Workflow Call Output Values</title>
+                <rule>workflow_call outputs cannot reference env variables</rule>
+                <examples>
+                    <incorrect>
+                        on:
+                          workflow_call:
+                            outputs:
+                              act_mode:
+                                value: ${{ env.ACT == 'true' }}  # ERROR: env not available here
+                    </incorrect>
+                    <correct>
+                        on:
+                          workflow_call:
+                            outputs:
+                              act_mode:
+                                value: 'false'  # Static default value
+                    </correct>
+                </examples>
+            </principle>
+            
+            <validation>
+                <command>act --list --workflows workflow.yml</command>
+                <success>Shows list of jobs without errors</success>
+                <failure>Shows "Unknown Variable Access env" or similar errors</failure>
+            </validation>
+        </section>
+
+        <section id="workflow-patterns" order="4">
             <title>Workflow Patterns</title>
             
             <pattern id="concurrency-control">

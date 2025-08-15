@@ -33,8 +33,8 @@ class OperationType(str, Enum):
     BATCH_DELETE = "batch_delete"
 
 
-class ValidationError(BaseModel):
-    """Structured validation error"""
+class ServiceValidationError(BaseModel):
+    """Structured validation error for service responses"""
     field: str
     message: str
     code: str
@@ -46,7 +46,7 @@ class ServiceResponse(BaseModel, Generic[TypeVar('T')]):
     """Generic service response wrapper"""
     success: bool
     data: Optional[TypeVar('T')] = None
-    errors: List[ValidationError] = Field(default_factory=list)
+    errors: List[ServiceValidationError] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
     metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=datetime.utcnow)
@@ -99,7 +99,7 @@ class BatchOperationResult(BaseModel):
     failed_items: List[Dict[str, Any]] = Field(default_factory=list)
 
 
-class CacheConfig(BaseModel):
+class ServiceCacheConfig(BaseModel):
     """Cache configuration for services"""
     enabled: bool = Field(default=True)
     ttl_seconds: int = Field(default=300)
@@ -112,7 +112,7 @@ class ServiceConfig(BaseModel):
     """Base configuration for services"""
     name: str
     version: str = "1.0.0"
-    cache_config: Optional[CacheConfig] = None
+    cache_config: Optional[ServiceCacheConfig] = None
     rate_limit_per_minute: Optional[int] = None
     timeout_seconds: int = Field(default=30)
     retry_attempts: int = Field(default=3)

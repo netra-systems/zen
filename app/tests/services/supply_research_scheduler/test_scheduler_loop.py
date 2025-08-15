@@ -140,7 +140,7 @@ class TestManualExecution:
         """Test manually running existing schedule"""
         schedule_name = scheduler.schedules[0].name
         
-        with patch.object(scheduler, '_execute_scheduled_research') as mock_execute:
+        with patch.object(scheduler.research_executor, 'execute_scheduled_research') as mock_execute:
             mock_execute.return_value = {"status": "completed"}
             
             result = await scheduler.run_schedule_now(schedule_name)

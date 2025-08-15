@@ -19,32 +19,38 @@ def service():
 class TestTableOperations:
     """Test ClickHouse table operations"""
     
-    @patch('app.services.synthetic_data_service.get_clickhouse_client')
-    async def test_create_destination_table(self, mock_get_client, service):
-        """Test creating destination table"""
-        mock_client = AsyncMock()
-        mock_get_client.return_value.__aenter__.return_value = mock_client
+    @patch('app.services.synthetic_data.ingestion_manager.IngestionManager.create_destination_table')
+    async def test_create_destination_table(self, mock_create_table, service):
+        """Test creating destination table through service ingestion"""
+        # The service doesn't have a direct _create_destination_table method
+        # It calls the imported create_destination_table function during ingestion
+        # Test that ingest_batch creates the table when needed
+        mock_create_table.return_value = None
         
-        await service._create_destination_table("test_table")
+        # Test data
+        batch = [{"event_id": "test", "trace_id": "test", "span_id": "test"}]
         
-        mock_client.execute.assert_called_once()
-        call_args = mock_client.execute.call_args[0][0]
-        assert "CREATE TABLE IF NOT EXISTS test_table" in call_args
-        assert "MergeTree()" in call_args
+        # This should trigger table creation internally
+        result = await service.ingest_batch(batch, "test_table")
+        
+        # Verify table creation was called
+        mock_create_table.assert_called_once()
+        assert result["table_name"] == "test_table"
     
-    @patch('app.services.synthetic_data_service.get_clickhouse_client')
+    @patch('app.db.clickhouse.get_clickhouse_client')
     async def test_ingest_batch_empty(self, mock_get_client, service):
         """Test ingesting empty batch"""
-        await service._ingest_batch("test_table", [])
+        await service.ingest_batch([], "test_table")
         
         # Should not attempt ClickHouse operation
         mock_get_client.assert_not_called()
     
-    @patch('app.services.synthetic_data_service.get_clickhouse_client')
-    async def test_ingest_batch_with_data(self, mock_get_client, service):
+    @patch('app.services.synthetic_data.ingestion_manager.IngestionManager.create_destination_table')
+    @patch('app.services.synthetic_data.ingestion_manager.ingest_batch_to_clickhouse')
+    async def test_ingest_batch_with_data(self, mock_ingest_batch, mock_create_table, service):
         """Test ingesting batch with data"""
-        mock_client = AsyncMock()
-        mock_get_client.return_value.__aenter__.return_value = mock_client
+        mock_create_table.return_value = None
+        mock_ingest_batch.return_value = None
         
         batch = [
             {
@@ -63,9 +69,9 @@ class TestTableOperations:
             }
         ]
         
-        await service._ingest_batch("test_table", batch)
+        await service.ingest_batch(batch, "test_table")
         
-        mock_client.execute.assert_called_once()
-        call_args = mock_client.execute.call_args
-        assert "INSERT INTO test_table" in call_args[0][0]
+        mock_ingest_batch.assert_called_once()
+        call_args = mock_ingest_batch.call_args
+        assert call_args[0][0] == "test_table"  # table_name
         assert len(call_args[0][1]) == 1  # One record

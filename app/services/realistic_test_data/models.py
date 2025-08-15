@@ -16,7 +16,7 @@ class RealisticDataPatterns(Enum):
     WORKLOAD_PATTERNS = "workload_patterns"
 
 
-class ConfigManager:
+class RealisticTestDataConfigManager:
     """Manages configuration data for realistic test generation"""
     
     def __init__(self):

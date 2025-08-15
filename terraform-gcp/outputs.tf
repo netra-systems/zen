@@ -25,10 +25,10 @@ output "artifact_registry" {
   description = "Container registry URL"
 }
 
-output "backup_bucket" {
-  value       = google_storage_bucket.backups.name
-  description = "GCS bucket for backups"
-}
+# output "backup_bucket" {
+#   value       = google_storage_bucket.backups.name
+#   description = "GCS bucket for backups"
+# }
 
 output "service_account_email" {
   value       = google_service_account.cloudrun.email

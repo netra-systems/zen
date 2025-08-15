@@ -10,7 +10,7 @@ from datetime import datetime
 from pydantic import ValidationError
 
 # Import backend schemas
-from app.schemas.websocket_unified import (
+from app.schemas.registry import (
     WebSocketMessageType,
     StartAgentPayload,
     UserMessagePayload,
@@ -18,7 +18,7 @@ from app.schemas.websocket_unified import (
     StreamChunk,
     AgentUpdate
 )
-from app.schemas.Message import Message, MessageType
+from app.schemas.registry import Message, MessageType
 from app.schemas.Agent import AgentStarted, AgentCompleted
 from app.schemas.Tool import ToolStarted, ToolCompleted, ToolStatus
 
@@ -50,12 +50,12 @@ class TestBasicTypeSafety:
     
     def test_start_agent_payload(self):
         """Test StartAgent payload from frontend."""
-        # This is what frontend typically sends
+        # This is what frontend should send to match backend schema
         frontend_payload = {
-            "agent_id": "agent123",
-            "prompt": "Analyze system performance",
+            "query": "Analyze system performance",
+            "user_id": "user123",
             "thread_id": "thread456",
-            "metadata": {
+            "context": {
                 "session_id": "session789",
                 "source": "chat_ui"
             }
@@ -64,25 +64,24 @@ class TestBasicTypeSafety:
         # Validate it works with backend schema
         try:
             payload = StartAgentPayload(**frontend_payload)
-            assert payload.agent_id == "agent123"
-            assert payload.prompt == "Analyze system performance"
+            assert payload.query == "Analyze system performance"
+            assert payload.user_id == "user123"
             assert payload.thread_id == "thread456"
-            assert payload.metadata["session_id"] == "session789"
+            assert payload.context["session_id"] == "session789"
         except ValidationError as e:
             pytest.fail(f"Frontend StartAgent payload doesn't match backend schema: {e}")
     
     def test_user_message_payload(self):
         """Test UserMessage payload from frontend."""
         frontend_payload = {
-            "text": "What are the optimization opportunities?",
+            "content": "What are the optimization opportunities?",
             "thread_id": "thread456",
-            "references": [],
-            "attachments": None
+            "metadata": {"source": "chat_ui"}
         }
         
         try:
             payload = UserMessagePayload(**frontend_payload)
-            assert payload.text == "What are the optimization opportunities?"
+            assert payload.content == "What are the optimization opportunities?"
             assert payload.thread_id == "thread456"
         except ValidationError as e:
             pytest.fail(f"Frontend UserMessage payload doesn't match backend schema: {e}")
@@ -96,7 +95,7 @@ class TestBasicTypeSafety:
         assert started_json["run_id"] == "run123"
         
         # AgentCompleted response
-        from app.schemas.Agent import AgentResult
+        from app.schemas.registry import AgentResult
         agent_completed = AgentCompleted(
             run_id="run123",
             result=AgentResult(
@@ -113,11 +112,9 @@ class TestBasicTypeSafety:
         # AgentUpdate response
         agent_update = AgentUpdate(
             agent_id="agent123",
-            run_id="run123",
             status="processing",
             message="Processing data...",
-            progress=50.0,
-            metadata={"step": "analysis"}
+            progress=50.0
         )
         update_json = agent_update.model_dump()
         assert update_json["message"] == "Processing data..."
@@ -150,17 +147,15 @@ class TestBasicTypeSafety:
         """Test streaming chunk structure."""
         # What frontend expects to receive
         chunk_data = {
-            "stream_id": "stream123",
+            "chunk_id": "chunk123",
             "content": "Processing your request",
-            "chunk_index": 0,
-            "is_final": False,
-            "metadata": {"tokens": 4}
+            "is_final": False
         }
         
         try:
             chunk = StreamChunk(**chunk_data)
             assert chunk.content == "Processing your request"
-            assert chunk.chunk_index == 0
+            assert chunk.chunk_id == "chunk123"
             assert chunk.is_final is False
         except ValidationError as e:
             pytest.fail(f"Streaming chunk structure mismatch: {e}")
@@ -171,8 +166,8 @@ class TestBasicTypeSafety:
         message_data = {
             "type": "start_agent",
             "payload": {
-                "agent_id": "agent123",
-                "prompt": "Test query"
+                "query": "Test query",
+                "user_id": "user123"
             }
         }
         
@@ -194,7 +189,7 @@ class TestBasicTypeSafety:
             parsed = json.loads(json_str)
             
             assert parsed["type"] == "start_agent"
-            assert parsed["payload"]["prompt"] == "Test query"
+            assert parsed["payload"]["query"] == "Test query"
         except (ValueError, ValidationError) as e:
             pytest.fail(f"WebSocket envelope structure mismatch: {e}")
     
@@ -202,30 +197,30 @@ class TestBasicTypeSafety:
         """Test handling of optional fields."""
         # Minimal payload (only required fields)
         minimal = {
-            "agent_id": "agent123",
-            "prompt": "Test query"
+            "query": "Test query",
+            "user_id": "user123"
         }
         
         try:
             payload = StartAgentPayload(**minimal)
-            assert payload.prompt == "Test query"
+            assert payload.query == "Test query"
             assert payload.thread_id is None  # Optional field
-            assert payload.metadata is None  # Optional field
+            assert payload.context is None  # Optional field
         except ValidationError as e:
             pytest.fail(f"Failed to handle optional fields: {e}")
         
         # Full payload (all fields)
         full = {
-            "agent_id": "agent123",
-            "prompt": "Test query",
+            "query": "Test query",
+            "user_id": "user123",
             "thread_id": "thread456",
-            "metadata": {"session": "abc123"}
+            "context": {"session": "abc123"}
         }
         
         try:
             payload = StartAgentPayload(**full)
             assert payload.thread_id == "thread456"
-            assert payload.metadata == {"session": "abc123"}
+            assert payload.context == {"session": "abc123"}
         except ValidationError as e:
             pytest.fail(f"Failed to handle full payload: {e}")
     
@@ -238,7 +233,7 @@ class TestBasicTypeSafety:
         
         # Create a message with datetime
         message = Message(
-            id=uuid.uuid4(),
+            id=str(uuid.uuid4()),
             type=MessageType.USER,
             content="Test message",
             created_at=now
@@ -286,14 +281,14 @@ class TestBasicTypeSafety:
         """Test error message handling."""
         # Missing required field
         with pytest.raises(ValidationError) as exc_info:
-            StartAgentPayload(agent_id="agent123")  # Missing 'prompt'
+            StartAgentPayload(query="test query")  # Missing 'user_id'
         
-        assert "prompt" in str(exc_info.value).lower()
+        assert "user_id" in str(exc_info.value).lower()
         
         # Invalid type
         with pytest.raises(ValidationError) as exc_info:
             UserMessagePayload(
-                text=123,  # Should be string
+                content=123,  # Should be string
                 thread_id="thread456"
             )
         

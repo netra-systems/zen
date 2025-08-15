@@ -259,13 +259,33 @@ def format_log_entry(row, trace_context_override=None) -> dict:
             }
         }
     }
-    # Modify prompt for multi-turn
+    # Modify prompt for multi-turn conversations
     if trace_context_override and trace_context_override.get("parent_span_id"):
+        # Generate contextual previous response based on the prompt
+        context_response = _generate_contextual_response(row["user_prompt"])
         log["request"]["prompt"]["messages"] = [
             {"role": "user", "content": row["user_prompt"]},
-            {"role": "assistant", "content": "Previous turn response..."} # Placeholder
+            {"role": "assistant", "content": context_response}
         ]
     return log
+
+
+def _generate_contextual_response(user_prompt: str) -> str:
+    """Generate a contextual assistant response for multi-turn conversation simulation."""
+    # Generate appropriate response based on prompt keywords
+    prompt_lower = user_prompt.lower()
+    
+    if any(word in prompt_lower for word in ["optimize", "performance", "improve"]):
+        return "I've analyzed your system performance. Let me provide optimization recommendations based on your current metrics."
+    elif any(word in prompt_lower for word in ["error", "issue", "problem", "bug"]):
+        return "I understand you're experiencing an issue. Let me help you troubleshoot this step by step."
+    elif any(word in prompt_lower for word in ["data", "analytics", "metrics"]):
+        return "Based on your data patterns, I can provide insights into the trends and anomalies I've detected."
+    elif any(word in prompt_lower for word in ["config", "setup", "configure"]):
+        return "I'll help you configure the system properly. Let me walk you through the optimal settings."
+    else:
+        return f"I understand your request about {user_prompt[:50]}{'...' if len(user_prompt) > 50 else ''}. Let me provide a comprehensive response."
+
 
 def generate_multi_turn_tool_trace(config, content_corpus) -> list:
     """Generates a single, complex multi-turn trace with a shared trace_id."""

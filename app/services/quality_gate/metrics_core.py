@@ -93,6 +93,9 @@ class CoreMetricsCalculator:
             optimization_terms = ["quantization", "pruning", "distillation", "caching", "batching", "parallelization"]
             opt_count = sum(1 for term in optimization_terms if term in content_lower)
             score += min(opt_count * 0.1, 0.2)
+        elif content_type == ContentType.ERROR_MESSAGE:
+            # ERROR_MESSAGE content should contain specific error indicators
+            score += self._calculate_error_specificity(content, content_lower)
         
         return max(0.0, min(1.0, score))
     
@@ -138,36 +141,66 @@ class CoreMetricsCalculator:
         uncertain_count = sum(1 for term in uncertain_terms if term in content_lower)
         score -= uncertain_count * 0.05
         
+        # ERROR_MESSAGE specific actionability bonuses
+        if content_type == ContentType.ERROR_MESSAGE:
+            score += self._calculate_error_actionability(content_lower)
+        
         return max(0.0, min(1.0, score))
     
     async def calculate_quantification(self, content: str) -> float:
         """Calculate the level of quantification in the content"""
         score = 0.0
-        
-        # Count different types of numeric values
-        patterns = {
+        score += self._calculate_pattern_scores(content)
+        score += self._calculate_comparison_bonus(content)
+        score += self._calculate_metric_names_bonus(content)
+        score += self._calculate_error_quantification_bonus(content)
+        return min(1.0, score)
+    
+    def _calculate_pattern_scores(self, content: str) -> float:
+        """Calculate scores from numeric pattern matches"""
+        patterns = self._get_quantification_patterns()
+        score = 0.0
+        for pattern in patterns.values():
+            matches = re.findall(pattern, content, re.IGNORECASE)
+            score += min(len(matches) * 0.15, 0.3)
+        return score
+    
+    def _get_quantification_patterns(self) -> Dict[str, str]:
+        """Get quantification regex patterns"""
+        patterns = {}
+        patterns.update(self._get_basic_numeric_patterns())
+        patterns.update(self._get_advanced_numeric_patterns())
+        return patterns
+    
+    def _get_basic_numeric_patterns(self) -> Dict[str, str]:
+        """Get basic numeric patterns"""
+        return {
             'percentage': r'\b\d+\.?\d*\s*%',
             'time': r'\b\d+\.?\d*\s*(ms|microseconds|seconds?|minutes?|hours?)\b',
             'size': r'\b\d+\.?\d*\s*(GB|MB|KB|bytes?)\b',
-            'count': r'\b\d+\.?\d*\s*(tokens?|requests?|queries|items?|elements?)\b',
+            'count': r'\b\d+\.?\d*\s*(tokens?|requests?|queries|items?|elements?)\b'
+        }
+    
+    def _get_advanced_numeric_patterns(self) -> Dict[str, str]:
+        """Get advanced numeric patterns"""
+        return {
             'rate': r'\b\d+\.?\d*\s*(QPS|RPS|/s|per second)\b',
             'multiplier': r'\b\d+\.?\d*x\b',
             'comparison': r'(increase|decrease|improve|reduce) by \d+\.?\d*'
         }
-        
-        for pattern_type, pattern in patterns.items():
-            matches = re.findall(pattern, content, re.IGNORECASE)
-            score += min(len(matches) * 0.15, 0.3)
-        
-        # Bonus for before/after comparisons
+    
+    def _calculate_comparison_bonus(self, content: str) -> float:
+        """Calculate bonus for before/after comparisons"""
         if re.search(r'(from|before).*\d+.*to.*\d+', content, re.IGNORECASE):
-            score += 0.2
-        
-        # Bonus for specific metric names with values
-        if re.search(r'(latency|throughput|accuracy|precision|recall|f1).{0,20}\d+', content, re.IGNORECASE):
-            score += 0.1
-        
-        return min(1.0, score)
+            return 0.2
+        return 0.0
+    
+    def _calculate_metric_names_bonus(self, content: str) -> float:
+        """Calculate bonus for specific metric names with values"""
+        pattern = r'(latency|throughput|accuracy|precision|recall|f1).{0,20}\d+'
+        metric_names = re.findall(pattern, content, re.IGNORECASE)
+        unique_metrics = len(set(metric_names))
+        return min(unique_metrics * 0.1, 0.3)
     
     async def calculate_clarity(self, content: str) -> float:
         """Calculate clarity and readability of content"""
@@ -179,10 +212,10 @@ class CoreMetricsCalculator:
         
         if sentences:
             avg_sentence_length = len(words) / len(sentences)
-            if avg_sentence_length > 30:
-                score -= 0.2
-            elif avg_sentence_length > 40:
-                score -= 0.4
+            if avg_sentence_length > 40:
+                score -= 0.5  # Heavy penalty for very long sentences
+            elif avg_sentence_length > 30:
+                score -= 0.2  # Moderate penalty for long sentences
         
         # Check for excessive jargon without explanation
         jargon_pattern = r'\b[A-Z]{3,}\b'
@@ -191,7 +224,10 @@ class CoreMetricsCalculator:
             score -= 0.1
         
         # Check for nested parentheses or excessive punctuation
-        if content.count('(') > 5 or content.count(',') > len(sentences) * 3:
+        paren_count = content.count('(')
+        if paren_count > 2 and sentences:  # 3+ parentheses in a sentence is confusing
+            score -= min(paren_count * 0.02, 0.1)  # Progressive penalty
+        if content.count(',') > len(sentences) * 3:
             score -= 0.1
         
         # Check for clear structure markers
@@ -220,3 +256,32 @@ class CoreMetricsCalculator:
         
         redundancy_ratio = repeated_count / (len(sentences) * (len(sentences) - 1) / 2)
         return min(1.0, redundancy_ratio)
+    
+    def _calculate_error_specificity(self, content: str, content_lower: str) -> float:
+        """Calculate ERROR_MESSAGE specific indicators (max 8 lines)"""
+        score = 0.0
+        error_patterns = self.patterns.ERROR_SPECIFIC_PATTERNS
+        for pattern_name, pattern in error_patterns.items():
+            matches = re.findall(pattern, content, re.IGNORECASE)
+            score += min(len(matches) * 0.2, 0.3)
+        error_terms = sum(1 for term in self.patterns.ERROR_DOMAIN_TERMS if term in content_lower)
+        return min(score + min(error_terms * 0.08, 0.25), 0.8)
+    
+    def _calculate_error_actionability(self, content_lower: str) -> float:
+        """Calculate ERROR_MESSAGE specific actionability (max 8 lines)"""
+        score = 0.0
+        resolution_terms = ["killed", "increased", "reduced", "enabled", "monitor", "implement", "optimize", "schedule"]
+        resolution_count = sum(1 for term in resolution_terms if term in content_lower)
+        score += min(resolution_count * 0.1, 0.3)
+        if re.search(r'(immediate actions|prevention|resolution|rollback|monitoring)', content_lower):
+            score += 0.2
+        return min(score, 0.4)
+    
+    def _calculate_error_quantification_bonus(self, content: str) -> float:
+        """Calculate ERROR_MESSAGE specific quantification bonus (max 8 lines)"""
+        score = 0.0
+        error_metrics = re.findall(r'(connections?|timeout|pool_size|threshold)\s*[=:]\s*\d+', content, re.IGNORECASE)
+        score += min(len(error_metrics) * 0.1, 0.2)
+        time_patterns = re.findall(r'\b\d+[:-]\d+(?:[:-]\d+)?\s*(AM|PM|minutes?|seconds?)', content, re.IGNORECASE)
+        score += min(len(time_patterns) * 0.05, 0.1)
+        return min(score, 0.15)

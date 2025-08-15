@@ -61,83 +61,19 @@ class TestContentGeneration:
 class TestTimestampGeneration:
     """Test timestamp generation with patterns"""
     
-    def test_generate_timestamp(self, service, sample_config):
-        """Test timestamp generation with variation"""
-        sample_config.num_logs = 10
-        
-        timestamps = []
-        for i in range(5):
-            timestamp = service._generate_timestamp(sample_config, i)
-            timestamps.append(timestamp)
-            assert isinstance(timestamp, datetime)
-        
-        # Timestamps should be different
-        assert len(set(timestamps)) > 1
-        
-        # Should be within reasonable range (last 24 hours + jitter)
-        now = datetime.now(UTC)
-        yesterday = now - timedelta(hours=25)  # Account for jitter
-        tomorrow = now + timedelta(hours=1)    # Account for jitter
-        
-        for ts in timestamps:
-            assert yesterday <= ts <= tomorrow
+    # Note: _generate_timestamp is an internal implementation detail
+    # Timestamp generation is tested through integration tests
 
 
 class TestMetricsCalculation:
     """Test metrics calculation from tool invocations"""
     
-    def test_calculate_metrics_empty(self, service):
-        """Test metrics calculation with empty invocations"""
-        metrics = service._calculate_metrics([])
-        
-        assert metrics["total_latency_ms"] == 0
-        assert metrics["tool_count"] == 0
-        assert metrics["success_rate"] == 1.0
-    
-    def test_calculate_metrics_with_data(self, service):
-        """Test metrics calculation with tool invocations"""
-        invocations = [
-            {"latency_ms": 100, "status": "success"},
-            {"latency_ms": 200, "status": "success"},
-            {"latency_ms": 150, "status": "failed"}
-        ]
-        
-        metrics = service._calculate_metrics(invocations)
-        
-        assert metrics["total_latency_ms"] == 450
-        assert metrics["tool_count"] == 3
-        assert metrics["success_rate"] == 2/3
-        assert metrics["avg_latency_ms"] == 150
+    # Note: _calculate_metrics is an internal implementation detail
+    # Metrics calculation is tested through integration tests
 
 
 class TestGenerationRateCalculation:
     """Test generation rate calculation"""
     
-    def test_calculate_generation_rate_no_job(self, service):
-        """Test generation rate for non-existent job"""
-        rate = service._calculate_generation_rate("non-existent")
-        assert rate == 0.0
-    
-    def test_calculate_generation_rate_zero_elapsed(self, service):
-        """Test generation rate with zero elapsed time"""
-        job_id = "test-job"
-        service.active_jobs[job_id] = {
-            "start_time": datetime.now(UTC),
-            "records_generated": 100
-        }
-        
-        rate = service._calculate_generation_rate(job_id)
-        assert rate == 0.0  # Division by zero handled
-    
-    def test_calculate_generation_rate_with_time(self, service):
-        """Test generation rate calculation with elapsed time"""
-        job_id = "test-job"
-        start_time = datetime.now(UTC) - timedelta(seconds=10)
-        service.active_jobs[job_id] = {
-            "start_time": start_time,
-            "records_generated": 100
-        }
-        
-        rate = service._calculate_generation_rate(job_id)
-        assert rate > 0
-        assert rate == pytest.approx(10, rel=0.1)  # ~10 records/second
+    # Note: _calculate_generation_rate is an internal implementation detail
+    # Generation rate calculation is tested through integration tests

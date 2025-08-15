@@ -857,7 +857,7 @@ env:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     steps:
     - uses: actions/checkout@v3
     
@@ -880,7 +880,7 @@ jobs:
 
   build:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     steps:
     - uses: actions/checkout@v3
     
@@ -913,7 +913,7 @@ jobs:
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     steps:
     - uses: actions/checkout@v3
     

@@ -27,15 +27,15 @@ except ImportError:
 
 # Test categories for organized testing
 TEST_CATEGORIES = {
-    "unit": ["__tests__/unit", "components/**/*.test.tsx", "hooks/**/*.test.ts"],
-    "integration": ["__tests__/integration", "__tests__/api"],
-    "components": ["components/**/*.test.tsx", "__tests__/components"],
-    "hooks": ["hooks/**/*.test.ts", "__tests__/hooks"],
-    "store": ["store/**/*.test.ts", "__tests__/store"],
-    "websocket": ["__tests__/websocket", "providers/**/*WebSocket*.test.tsx"],
-    "auth": ["__tests__/auth", "auth/**/*.test.ts"],
+    "unit": ["__tests__/components", "__tests__/hooks", "__tests__/store", "__tests__/services", "__tests__/lib", "__tests__/utils"],
+    "integration": ["__tests__/integration"],
+    "components": ["__tests__/components"],
+    "hooks": ["__tests__/hooks"],
+    "store": ["__tests__/store"],
+    "websocket": ["__tests__/services/webSocketService.test.ts"],
+    "auth": ["__tests__/auth"],
     "e2e": ["cypress/e2e"],
-    "smoke": ["__tests__/smoke", "__tests__/critical"],
+    "smoke": ["__tests__/system/startup.test.tsx", "__tests__/integration/critical-integration.test.tsx"],
 }
 
 
@@ -110,9 +110,14 @@ def run_jest_tests(args, isolation_manager=None) -> int:
     """Run Jest tests"""
     jest_args = ["npm", "run", "test"]
     
+    # Always add force exit and detect open handles for Windows
+    if "--" not in jest_args:
+        jest_args.append("--")
+    jest_args.extend(["--forceExit", "--detectOpenHandles"])
+    
     # Add Jest-specific arguments
     if args.coverage:
-        jest_args.extend(["--", "--coverage"])
+        jest_args.extend(["--coverage"])
         if isolation_manager and isolation_manager.directories:
             coverage_dir = isolation_manager.directories.get('frontend_coverage')
             jest_args.extend([f"--coverageDirectory={coverage_dir}"])
@@ -120,16 +125,16 @@ def run_jest_tests(args, isolation_manager=None) -> int:
             jest_args.extend(["--coverageDirectory=../reports/frontend-coverage"])
     
     if args.watch:
-        jest_args.extend(["--", "--watch"])
+        jest_args.extend(["--watch"])
     
     if args.update_snapshots:
-        jest_args.extend(["--", "--updateSnapshot"])
+        jest_args.extend(["--updateSnapshot"])
     
     if args.verbose:
-        jest_args.extend(["--", "--verbose"])
+        jest_args.extend(["--verbose"])
     
     if args.keyword:
-        jest_args.extend(["--", f"--testNamePattern={args.keyword}"])
+        jest_args.extend([f"--testNamePattern={args.keyword}"])
     
     # Add isolation-specific Jest arguments
     if isolation_manager:
@@ -140,13 +145,34 @@ def run_jest_tests(args, isolation_manager=None) -> int:
                 jest_args.extend([arg])
     
     if args.tests:
-        jest_args.extend(["--"] + args.tests)
+        jest_args.extend(args.tests)
     elif args.category and args.category != "e2e":
         patterns = TEST_CATEGORIES.get(args.category, [])
         if patterns:
-            # Jest accepts multiple patterns, pass them properly
-            jest_args.append("--")
-            jest_args.extend(patterns)
+            # Build testMatch patterns for the selected category
+            test_patterns = []
+            for pattern in patterns:
+                if pattern.endswith(".test.ts") or pattern.endswith(".test.tsx"):
+                    # Specific test file - add wildcard prefix
+                    test_patterns.append(f"**/{pattern}")
+                elif "/" in pattern:
+                    # Directory pattern
+                    test_patterns.append(f"**/{pattern}/**/*.test.[jt]s?(x)")
+                else:
+                    # Generic pattern
+                    test_patterns.append(f"**/{pattern}/**/*.test.[jt]s?(x)")
+            
+            # Jest can only handle one testMatch pattern at a time
+            # So we use the first pattern for directory-based categories
+            # or pass multiple test files directly
+            if len(test_patterns) == 1:
+                jest_args.extend(["--testMatch", test_patterns[0]])
+            elif args.category == "unit":
+                # For unit tests, create a combined pattern
+                jest_args.extend(["--testMatch", "**/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)"])
+            else:
+                # Pass the first pattern
+                jest_args.extend(["--testMatch", test_patterns[0]])
     
     # Run Jest
     print(f"Running: {' '.join(jest_args)}")
@@ -430,6 +456,13 @@ Examples:
         help="Use test isolation for concurrent execution"
     )
     
+    # Cleanup options
+    parser.add_argument(
+        "--cleanup-on-exit",
+        action="store_true",
+        help="Clean up Node processes on exit (automatic on Windows)"
+    )
+    
     args = parser.parse_args()
     
     # Setup test isolation if requested
@@ -508,6 +541,17 @@ Examples:
     else:
         print(f"[FAIL] CHECKS FAILED with exit code {exit_code}")
     print("=" * 80)
+    
+    # Clean up Node processes on Windows if requested or if tests failed
+    if args.cleanup_on_exit or (exit_code != 0 and sys.platform == "win32"):
+        cleanup_script = PROJECT_ROOT / "scripts" / "cleanup_test_processes.py"
+        if cleanup_script.exists():
+            try:
+                print("\nCleaning up test processes...")
+                subprocess.run([sys.executable, str(cleanup_script), "--force"], 
+                             timeout=10, capture_output=True)
+            except:
+                pass
     
     sys.exit(exit_code)
 

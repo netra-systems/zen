@@ -17,6 +17,13 @@
             <enforcement>Split large files into focused modules</enforcement>
         </rule>
         
+        <rule id="function-line-limit" priority="CRITICAL">
+            <title>8 Line Function Limit</title>
+            <description>Every function MUST be 8 lines or less (MANDATORY)</description>
+            <enforcement>Split complex functions into smaller, focused functions</enforcement>
+            <rationale>Forces single responsibility and improves readability</rationale>
+        </rule>
+        
         <rule id="no-duplication" priority="CRITICAL">
             <title>Prevent Function Duplication</title>
             <description>NEVER create "enhanced", "v2", or duplicate versions</description>
@@ -245,4 +252,96 @@
             </examples>
         </convention>
     </file-organization>
+
+    <boundary-enforcement>
+        <enforcement id="automated-compliance">
+            <description>Automated enforcement of 300/8 limits</description>
+            <tool>scripts/check_architecture_compliance.py</tool>
+            <frequency>Every commit, every PR</frequency>
+            <threshold>0 violations allowed</threshold>
+            <integration>
+                <pre-commit>Run compliance check before commit</pre-commit>
+                <ci-cd>Block merges on violations</ci-cd>
+                <monitoring>Weekly compliance reports</monitoring>
+            </integration>
+        </enforcement>
+
+        <enforcement id="growth-pattern-reviews">
+            <description>Review growth patterns to maintain boundaries</description>
+            <triggers>
+                <trigger>File approaches 250 lines</trigger>
+                <trigger>Function approaches 6 lines</trigger>
+                <trigger>New module creation</trigger>
+                <trigger>Major refactoring</trigger>
+            </triggers>
+            <checklist>
+                <item>Does growth follow good patterns from SPEC/growth_control.xml?</item>
+                <item>Are boundaries maintained?</item>
+                <item>Is subdivision needed?</item>
+                <item>Are responsibilities clear?</item>
+            </checklist>
+        </enforcement>
+
+        <enforcement id="boundary-violation-response">
+            <description>Immediate response to boundary violations</description>
+            <response-levels>
+                <level-1>
+                    <condition>Single violation, first occurrence</condition>
+                    <action>Developer self-remediation within same day</action>
+                </level-1>
+                <level-2>
+                    <condition>Multiple violations or repeated patterns</condition>
+                    <action>Team review and pair programming within 2 days</action>
+                </level-2>
+                <level-3>
+                    <condition>Systemic violations or architectural resistance</condition>
+                    <action>Architecture review and training within 1 week</action>
+                </level-3>
+            </response-levels>
+        </enforcement>
+
+        <enforcement id="proactive-monitoring">
+            <description>Monitor system health to prevent boundary decay</description>
+            <metrics>
+                <metric>File size distribution (target: 95% under 200 lines)</metric>
+                <metric>Function complexity distribution (target: 95% under 6 lines)</metric>
+                <metric>Module cohesion metrics</metric>
+                <metric>Dependency depth tracking</metric>
+                <metric>Type duplication detection</metric>
+            </metrics>
+            <alerts>
+                <alert>File reaches 250 lines - subdivision planning required</alert>
+                <alert>Function reaches 6 lines - extraction planning required</alert>
+                <alert>Duplicate type detected - consolidation required</alert>
+            </alerts>
+        </enforcement>
+    </boundary-enforcement>
+
+    <architectural-health>
+        <health-indicator id="compliance-score">
+            <description>Overall system compliance with 300/8 limits</description>
+            <calculation>Percentage of files/functions within limits</calculation>
+            <target>100% compliance</target>
+            <monitoring>Daily automated checks</monitoring>
+        </health-indicator>
+
+        <health-indicator id="modular-cohesion">
+            <description>Measure of how well modules maintain single responsibilities</description>
+            <metrics>
+                <metric>Functions per module (target: focused, not excessive)</metric>
+                <metric>Cross-module dependencies (target: minimal)</metric>
+                <metric>Public interface size (target: minimal surface area)</metric>
+            </metrics>
+        </health-indicator>
+
+        <health-indicator id="growth-sustainability">
+            <description>Whether system growth maintains architectural quality</description>
+            <patterns>
+                <good-pattern>New modules created instead of expanding existing</good-pattern>
+                <good-pattern>Consistent subdivision when approaching limits</good-pattern>
+                <good-pattern>Type consolidation over duplication</good-pattern>
+            </patterns>
+            <reference>SPEC/growth_control.xml</reference>
+        </health-indicator>
+    </architectural-health>
 </specification>

@@ -31,14 +31,19 @@ class DatabaseConnectionError(DatabaseError):
 class RecordNotFoundError(DatabaseError):
     """Raised when a database record is not found."""
     
-    def __init__(self, message: str = None, **kwargs):
-        super().__init__(
-            message=message or "Record not found",
-            code=ErrorCode.RECORD_NOT_FOUND,
-            severity=ErrorSeverity.MEDIUM,
-            user_message="The requested item was not found",
-            **kwargs
+    def __init__(self, resource: str = None, identifier: str = None, message: str = None, **kwargs):
+        formatted_message, details = self._build_record_info(resource, identifier, message)
+        NetraException.__init__(
+            self, message=formatted_message, code=ErrorCode.RECORD_NOT_FOUND,
+            severity=ErrorSeverity.MEDIUM, user_message="The requested item was not found",
+            details=details, **kwargs
         )
+    
+    def _build_record_info(self, resource: str, identifier: str, message: str) -> tuple:
+        """Build record info for not found errors."""
+        if resource is not None and identifier is not None:
+            return f"{resource} not found (ID: {identifier})", {"resource": resource, "identifier": str(identifier)}
+        return message or "Record not found", {}
 
 
 class RecordAlreadyExistsError(DatabaseError):

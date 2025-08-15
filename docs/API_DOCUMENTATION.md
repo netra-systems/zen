@@ -276,6 +276,48 @@ Response:
 }
 ```
 
+### Unified Tools
+
+#### Access Unified Tool Interface
+```http
+GET /api/unified-tools
+Authorization: Bearer <token>
+
+Response:
+{
+  "available_tools": [
+    {
+      "id": "cost_analyzer",
+      "name": "Cost Analyzer",
+      "description": "Analyze AI workload costs",
+      "parameters": {...}
+    }
+  ]
+}
+```
+
+### Quality Validation
+
+#### Validate Quality
+```http
+POST /api/quality/validate
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "data": {...},
+  "validation_type": "data_quality",
+  "criteria": [...]
+}
+
+Response:
+{
+  "validation_result": "passed",
+  "quality_score": 0.95,
+  "recommendations": [...]
+}
+```
+
 #### Estimate Optimization
 ```http
 POST /api/supply/estimate
@@ -327,6 +369,39 @@ Response:
   "job_id": "gen-uuid",
   "status": "processing",
   "estimated_time": 30
+}
+```
+
+### System Monitoring
+
+#### Get System Metrics
+```http
+GET /api/monitoring/metrics
+Authorization: Bearer <token>
+
+Response:
+{
+  "system_health": "operational",
+  "database_metrics": {...},
+  "websocket_connections": 42,
+  "agent_executions": {...}
+}
+```
+
+#### Database Health Monitoring
+```http
+GET /api/database-monitoring
+Authorization: Bearer <token>
+
+Response:
+{
+  "postgres": {
+    "status": "healthy",
+    "connections": 8,
+    "query_performance": {...}
+  },
+  "clickhouse": {...},
+  "redis": {...}
 }
 ```
 
@@ -408,6 +483,24 @@ Response:
 }
 ```
 
+#### Synthetic Data Corpus
+```http
+GET /api/synthetic-data-corpus
+Authorization: Bearer <token>
+
+Response:
+{
+  "synthetic_items": [
+    {
+      "id": "synthetic-uuid",
+      "type": "generated_scenario",
+      "content": "...",
+      "metadata": {...}
+    }
+  ]
+}
+```
+
 #### Add Corpus Item
 ```http
 POST /api/corpus
@@ -439,6 +532,24 @@ Response:
   "status": "healthy",
   "timestamp": "2024-01-15T10:00:00Z",
   "version": "1.0.0"
+}
+```
+
+#### Extended Health Monitoring
+```http
+GET /health/extended
+
+Response:
+{
+  "status": "healthy",
+  "checks": {
+    "database": "healthy",
+    "redis": "healthy", 
+    "clickhouse": "healthy",
+    "circuit_breakers": "operational",
+    "system_metrics": {...}
+  },
+  "detailed_metrics": {...}
 }
 ```
 
@@ -754,11 +865,13 @@ X-RateLimit-Reset: 1705318800
 
 ## API Versioning
 
-The API version is included in the URL path. The current version is `v1`.
+The API uses implicit versioning. Most endpoints are available at the root level:
 
 ```http
-https://api.netrasystems.ai/v1/threads
+https://api.netrasystems.ai/api/threads
 ```
+
+Some specialized endpoints may use versioned paths when needed for backward compatibility.
 
 ### Version Support Policy
 

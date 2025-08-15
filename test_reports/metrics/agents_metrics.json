@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-08-15T08:33:24.616769",
+  "level": "agents",
+  "metrics": {
+    "total_tests": 0,
+    "passed": 0,
+    "failed": 0,
+    "coverage": null
+  },
+  "results": {
+    "backend": {
+      "status": "failed",
+      "duration": 4.893658876419067,
+      "exit_code": 4,
+      "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: 4\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests/agents/test_data_sub_agent.py tests/test_actions_sub_agent.py -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings\n================================================================================\nLoaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\n================================================================================\n[FAIL] TESTS FAILED with exit code 4 after 4.15s\n================================================================================\n\nImportError while loading conftest 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\conftest.py'.\napp\\tests\\conftest.py:52: in <module>\n    from app.main import app\napp\\main.py:32: in <module>\n    app = create_app()\n          ^^^^^^^^^^^^\napp\\core\\app_factory.py:144: in create_app\n    register_api_routes(app)\napp\\core\\app_factory.py:62: in register_api_routes\n    _import_and_register_routes(app)\napp\\core\\app_factory.py:67: in _import_and_register_routes\n    route_modules = _import_route_modules()\n                    ^^^^^^^^^^^^^^^^^^^^^^^\napp\\core\\app_factory.py:74: in _import_route_modules\n    from app.routes import (\napp\\routes\\demo.py:7: in <module>\n    from app.services.demo_service import DemoService, get_demo_service\napp\\services\\demo_service.py:6: in <module>\n    from app.services.demo import (\napp\\services\\demo\\__init__.py:3: in <module>\n    from .demo_service import DemoService, get_demo_service\napp\\services\\demo\\demo_service.py:6: in <module>\n    from app.services.agent_service import AgentService\napp\\services\\agent_service.py:16: in <module>\n    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor\napp\\agents\\supervisor_consolidated.py:27: in <module>\n    from app.agents.supervisor.execution_context import PipelineStep\napp\\agents\\supervisor\\__init__.py:4: in <module>\n    from .execution_engine import ExecutionEngine\napp\\agents\\supervisor\\execution_engine.py:24: in <module>\n    class ExecutionEngine:\napp\\agents\\supervisor\\execution_engine.py:237: in ExecutionEngine\n    def _create_fallback_config(self) -> FallbackConfig:\n                                         ^^^^^^^^^^^^^^\nE   NameError: name 'FallbackConfig' is not defined\n",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0,
+        "test_files": 0
+      },
+      "coverage": null,
+      "test_details": []
+    },
+    "frontend": {
+      "status": "skipped",
+      "duration": 0,
+      "exit_code": null,
+      "output": "",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "coverage": null
+    },
+    "e2e": {
+      "status": "pending",
+      "duration": 0,
+      "exit_code": null,
+      "output": "",
+      "test_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "coverage": null
+    },
+    "overall": {
+      "status": "failed",
+      "start_time": 1755271999.7231104,
+      "end_time": 1755272004.6167693
+    }
+  }
+}

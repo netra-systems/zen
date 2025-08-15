@@ -4,6 +4,8 @@ import asyncio
 from contextvars import ContextVar
 from typing import Dict, Any, Optional
 from uuid import uuid4
+from pydantic import BaseModel, Field
+from datetime import datetime
 
 
 # Context variables for error tracking
@@ -13,8 +15,29 @@ _user_id_context: ContextVar[Optional[str]] = ContextVar('user_id', default=None
 _error_context: ContextVar[Dict[str, Any]] = ContextVar('error_context', default={})
 
 
-class ErrorContext:
-    """Manages error context for tracking errors across async operations."""
+class ErrorContextModel(BaseModel):
+    """Error context model for consistent error handling"""
+    trace_id: str = Field(..., description="Unique trace identifier")
+    operation: str = Field(..., description="Operation being performed")
+    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Error timestamp")
+    user_id: Optional[str] = Field(default=None, description="User identifier")
+    correlation_id: Optional[str] = Field(default=None, description="Correlation identifier")
+    request_id: Optional[str] = Field(default=None, description="Request identifier")
+    session_id: Optional[str] = Field(default=None, description="Session identifier")
+    agent_name: Optional[str] = Field(default=None, description="Agent name")
+    operation_name: Optional[str] = Field(default=None, description="Operation name")
+    run_id: Optional[str] = Field(default=None, description="Run identifier")
+    retry_count: int = Field(default=0, description="Retry count")
+    max_retries: int = Field(default=3, description="Maximum retries")
+    details: Dict[str, Any] = Field(default_factory=dict, description="Error details")
+    additional_data: Dict[str, Any] = Field(default_factory=dict, description="Additional context data")
+    component: Optional[str] = Field(default=None, description="Component name")
+    severity: Optional[str] = Field(default=None, description="Error severity")
+    error_code: Optional[str] = Field(default=None, description="Error code")
+
+
+class AsyncErrorContext:
+    """Manages error context for tracking errors across async operations using context variables."""
     
     @staticmethod
     def set_trace_id(trace_id: str) -> str:
@@ -96,7 +119,7 @@ class ErrorContext:
         _error_context.set({})
 
 
-class ErrorContextManager:
+class AsyncErrorContextManager:
     """Context manager for error context."""
     
     def __init__(
@@ -120,9 +143,9 @@ class ErrorContextManager:
     def __enter__(self):
         """Enter the context manager."""
         # Store previous values
-        self.previous_trace_id = ErrorContext.get_trace_id()
-        self.previous_request_id = ErrorContext.get_request_id()
-        self.previous_user_id = ErrorContext.get_user_id()
+        self.previous_trace_id = AsyncErrorContext.get_trace_id()
+        self.previous_request_id = AsyncErrorContext.get_request_id()
+        self.previous_user_id = AsyncErrorContext.get_user_id()
         self.previous_context = _error_context.get().copy()
         
         # Set new values
@@ -141,17 +164,17 @@ class ErrorContextManager:
         """Exit the context manager."""
         # Restore previous values
         if self.previous_trace_id:
-            ErrorContext.set_trace_id(self.previous_trace_id)
+            AsyncErrorContext.set_trace_id(self.previous_trace_id)
         else:
             _trace_id_context.set(None)
             
         if self.previous_request_id:
-            ErrorContext.set_request_id(self.previous_request_id)
+            AsyncErrorContext.set_request_id(self.previous_request_id)
         else:
             _request_id_context.set(None)
             
         if self.previous_user_id:
-            ErrorContext.set_user_id(self.previous_user_id)
+            AsyncErrorContext.set_user_id(self.previous_user_id)
         else:
             _user_id_context.set(None)
         
@@ -168,12 +191,12 @@ def with_error_context(
     def decorator(func):
         if asyncio.iscoroutinefunction(func):
             async def async_wrapper(*args, **kwargs):
-                with ErrorContextManager(trace_id, request_id, user_id, **context_kwargs):
+                with AsyncErrorContextManager(trace_id, request_id, user_id, **context_kwargs):
                     return await func(*args, **kwargs)
             return async_wrapper
         else:
             def sync_wrapper(*args, **kwargs):
-                with ErrorContextManager(trace_id, request_id, user_id, **context_kwargs):
+                with AsyncErrorContextManager(trace_id, request_id, user_id, **context_kwargs):
                     return func(*args, **kwargs)
             return sync_wrapper
     return decorator
@@ -181,9 +204,13 @@ def with_error_context(
 
 def get_enriched_error_context(additional_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
     """Get enriched error context with additional information."""
-    context = ErrorContext.get_all_context()
+    context = AsyncErrorContext.get_all_context()
     
     if additional_context:
         context.update(additional_context)
     
     return context
+
+
+# Alias for backward compatibility with imports
+ErrorContext = AsyncErrorContext

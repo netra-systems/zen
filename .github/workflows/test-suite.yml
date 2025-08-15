@@ -1,45 +1,58 @@
 name: Test Suite
 description: Comprehensive test execution workflow
 
-on:
-  pull_request:
-    paths:
-      - '**.py'
-      - '**.ts'
-      - '**.tsx'
-      - 'requirements.txt'
-      - 'package.json'
-  
-  workflow_dispatch:
-    inputs:
-      test_level:
-        description: 'Test level to run'
-        required: false
-        type: choice
-        default: 'smoke'
-        options:
-          - smoke
-          - unit
-          - integration
-          - comprehensive
-          - critical
-      triggered_by:
-        description: 'Who triggered the tests'
-        required: false
-        default: 'manual'
-  
-  schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+# ACT Compatibility: This workflow is designed to work with both GitHub Actions and ACT (act)
+# Use: act --secret-file .secrets --env-file .env.act push
+
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   pull_request:
+#     paths:
+#       - '**.py'
+#       - '**.ts'
+#       - '**.tsx'
+#       - 'requirements.txt'
+#       - 'package.json'
+#   
+#   workflow_dispatch:
+#     inputs:
+#       test_level:
+#         description: 'Test level to run'
+#         required: false
+#         type: choice
+#         default: 'smoke'
+#         options:
+#           - smoke
+#           - unit
+#           - integration
+#           - comprehensive
+#           - comprehensive-backend
+#           - comprehensive-frontend
+#           - comprehensive-core
+#           - comprehensive-agents
+#           - comprehensive-websocket
+#           - comprehensive-database
+#           - comprehensive-api
+#           - critical
+#       triggered_by:
+#         description: 'Who triggered the tests'
+#         required: false
+#         default: 'manual'
+#   
+#   schedule:
+#     - cron: '0 2 * * *'  # Daily at 2 AM UTC
 
 env:
   PYTHON_VERSION: '3.11'
   NODE_VERSION: '18'
   TEST_TIMEOUT: 3600
+  # ACT compatibility: detect ACT environment
+  ACT: 'false'  # Will be overridden by ACT when running locally
 
 jobs:
   determine-tests:
     name: Determine Test Strategy
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       test_level: ${{ steps.strategy.outputs.level }}
       affected_services: ${{ steps.strategy.outputs.services }}
@@ -125,7 +138,7 @@ jobs:
     name: Backend Tests
     needs: determine-tests
     if: needs.determine-tests.outputs.skip != 'true' && contains(needs.determine-tests.outputs.affected_services, 'backend')
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     
     steps:
       - name: Checkout code
@@ -135,7 +148,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+          cache: ${{ env.ACT && '' || 'pip' }}  # ACT compatibility: disable pip cache for ACT
       
       - name: Install dependencies
         run: |
@@ -154,7 +167,7 @@ jobs:
             --html-output test-report.html
       
       - name: Upload test results
-        if: always()
+        if: ${{ !env.ACT && always() }}  # ACT compatibility: skip artifact upload for ACT
         uses: actions/upload-artifact@v4
         with:
           name: backend-test-results
@@ -163,13 +176,23 @@ jobs:
             test-report.html
             htmlcov/
       
+      - name: Store test results locally (ACT)
+        if: ${{ env.ACT && always() }}
+        run: |
+          # ACT compatibility: store results locally
+          mkdir -p act-results/backend
+          cp -f test-results.json act-results/backend/ 2>/dev/null || true
+          cp -f test-report.html act-results/backend/ 2>/dev/null || true
+          cp -r htmlcov act-results/backend/ 2>/dev/null || true
+          echo "Backend test results stored locally: act-results/backend/"
+      
       # Lark notification removed - moved to work_in_progress
 
   frontend-tests:
     name: Frontend Tests
     needs: determine-tests
     if: needs.determine-tests.outputs.skip != 'true' && contains(needs.determine-tests.outputs.affected_services, 'frontend')
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     
     steps:
       - name: Checkout code
@@ -179,8 +202,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache: ${{ env.ACT && '' || 'npm' }}  # ACT compatibility: disable npm cache for ACT
+          cache-dependency-path: ${{ env.ACT && '' || 'frontend/package-lock.json' }}
       
       - name: Install dependencies
         working-directory: ./frontend
@@ -207,23 +230,48 @@ jobs:
           esac
       
       - name: Upload test results
-        if: always()
+        if: ${{ !env.ACT && always() }}  # ACT compatibility: skip artifact upload for ACT
         uses: actions/upload-artifact@v4
         with:
           name: frontend-test-results
           path: |
             frontend/coverage/
             frontend/test-results/
+      
+      - name: Store test results locally (ACT)
+        if: ${{ env.ACT && always() }}
+        run: |
+          # ACT compatibility: store results locally
+          mkdir -p act-results/frontend
+          cp -r frontend/coverage act-results/frontend/ 2>/dev/null || true
+          cp -r frontend/test-results act-results/frontend/ 2>/dev/null || true
+          echo "Frontend test results stored locally: act-results/frontend/"
 
   test-summary:
     name: Test Summary
     needs: [determine-tests, backend-tests, frontend-tests]
     if: always() && needs.determine-tests.outputs.skip != 'true'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     
     steps:
       - name: Download all artifacts
+        if: ${{ !env.ACT }}
         uses: actions/download-artifact@v4
+      
+      - name: Gather local results (ACT)
+        if: ${{ env.ACT }}
+        run: |
+          # ACT compatibility: gather results from local storage
+          mkdir -p downloads
+          if [ -d "act-results" ]; then
+            cp -r act-results/* downloads/ 2>/dev/null || true
+            echo "Gathered local test results for summary"
+          else
+            echo "::warning::No local test results found for ACT environment"
+            mkdir -p downloads/backend downloads/frontend
+            echo '{"tests": 0, "passed": 0, "failed": 0}' > downloads/backend/test-results.json
+            echo '{"tests": 0, "passed": 0, "failed": 0}' > downloads/frontend/test-results.json
+          fi
       
       - name: Generate summary
         id: summary
@@ -255,7 +303,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
       
       - name: Post PR comment
-        if: github.event_name == 'pull_request'
+        if: ${{ !env.ACT && github.event_name == 'pull_request' }}  # ACT compatibility: skip PR comments for ACT
         uses: actions/github-script@v7
         with:
           script: |
@@ -267,5 +315,17 @@ jobs:
               issue_number: context.issue.number,
               body: summary
             });
+      
+      - name: Local test suite summary (ACT)
+        if: ${{ env.ACT && always() }}
+        run: |
+          # ACT compatibility: show local summary
+          echo "=== Test Suite Results Summary (ACT) ==="
+          echo "Test Level: ${{ needs.determine-tests.outputs.test_level }}"
+          echo "Backend Status: ${{ needs.backend-tests.result }}"
+          echo "Frontend Status: ${{ needs.frontend-tests.result }}"
+          echo "Environment: ACT (Local)"
+          echo "Results stored in: act-results/"
+          echo "============================================"
       
       # Lark summary removed - moved to work_in_progress

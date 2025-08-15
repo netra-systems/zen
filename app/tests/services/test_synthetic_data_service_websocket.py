@@ -71,8 +71,10 @@ class TestWebSocketUpdates:
         async def mock_send(data):
             notifications.append(data)
         
+        from starlette.websockets import WebSocketState
         mock_ws = MagicMock()
         mock_ws.send_json = mock_send
+        mock_ws.client_state = WebSocketState.CONNECTED
         
         await ws_service.connect(mock_ws, job_id)
         
@@ -83,8 +85,9 @@ class TestWebSocketUpdates:
                 batch_size=100
             )
         
-        assert len(notifications) == 5
-        assert all(n["type"] == "batch_complete" for n in notifications)
+        batch_complete_notifications = [n for n in notifications if n["type"] == "batch_complete"]
+        assert len(batch_complete_notifications) == 5
+        assert all(n["type"] == "batch_complete" for n in batch_complete_notifications)
 
     @pytest.mark.asyncio
     async def test_error_notification_handling(self, ws_service, mock_websocket):

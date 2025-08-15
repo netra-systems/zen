@@ -1,7 +1,10 @@
 // frontend/types/index.ts
 
-// Export backend auto-generated types (most types are here)
-export * from './backend_schema_auto_generated';
+// Export backend auto-generated types from modular files (split from original backend_schema_auto_generated)
+export * from './backend_schema_base';
+export * from './backend_schema_config';
+export * from './backend_schema_auth';
+export * from './backend_schema_tools';
 
 // Re-export specific items from chat that don't conflict with backend types
 export type { 

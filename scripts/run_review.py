@@ -392,13 +392,13 @@ class CodeReviewer:
             self.security_issues.append("Potential SQL injection vulnerability")
             self.issues["critical"].append("Possible SQL injection - using f-strings in queries")
     
-    def generate_report(self):
-        """Generate comprehensive review report"""
-        report = []
+    def _add_report_header(self, report: List[str]) -> None:
+        """Add header to the report."""
         report.append(f"# Code Review Report - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         report.append("")
-        
-        # Executive Summary
+
+    def _add_executive_summary(self, report: List[str]) -> None:
+        """Add executive summary section."""
         report.append("## Executive Summary")
         report.append(f"- Review Type: {self.mode.upper()}")
         if self.focus:
@@ -408,95 +408,132 @@ class CodeReviewer:
         report.append(f"- Medium Priority Issues: {len(self.issues['medium'])}")
         report.append(f"- Low Priority Issues: {len(self.issues['low'])}")
         report.append("")
-        
-        # System Health
+
+    def _add_system_health(self, report: List[str]) -> None:
+        """Add system health section."""
         report.append("## System Health")
         report.append("### Smoke Test Results")
         for test, passed in self.smoke_test_results.items():
             status = "✅ PASS" if passed else "❌ FAIL"
             report.append(f"- {test}: {status}")
         report.append("")
-        
-        # Recent Changes
-        if self.recent_changes:
-            report.append("## Recent Changes Analysis")
-            report.append("### Recent Commits")
-            for commit in self.recent_changes[:5]:
-                report.append(f"- {commit}")
-            report.append("")
-        
-        # Spec-Code Alignment
-        if self.spec_code_conflicts:
-            report.append("## Spec-Code Alignment Issues")
-            for conflict in self.spec_code_conflicts:
-                report.append(f"- {conflict}")
-            report.append("")
-        
-        # AI Coding Issues
-        if self.ai_issues_found:
-            report.append("## AI Coding Issues Detected")
-            for issue in self.ai_issues_found:
-                report.append(f"- {issue}")
-            report.append("")
-        
-        # Performance Concerns
-        if self.performance_concerns:
-            report.append("## Performance Concerns")
-            for concern in self.performance_concerns:
-                report.append(f"- {concern}")
-            report.append("")
-        
-        # Security Issues
-        if self.security_issues:
-            report.append("## Security Issues")
-            for issue in self.security_issues:
-                report.append(f"- [WARNING] {issue}")
-            report.append("")
-        
-        # Action Items
-        report.append("## Action Items")
-        
-        if self.issues["critical"]:
-            report.append("### Critical (Must fix immediately)")
-            for i, issue in enumerate(self.issues["critical"], 1):
-                report.append(f"{i}. {issue}")
-            report.append("")
-        
-        if self.issues["high"]:
-            report.append("### High (Fix before next release)")
-            for i, issue in enumerate(self.issues["high"], 1):
-                report.append(f"{i}. {issue}")
-            report.append("")
-        
-        if self.issues["medium"]:
-            report.append("### Medium (Fix in next sprint)")
-            for i, issue in enumerate(self.issues["medium"][:10], 1):  # Limit to 10
-                report.append(f"{i}. {issue}")
-            if len(self.issues["medium"]) > 10:
-                report.append(f"... and {len(self.issues['medium']) - 10} more")
-            report.append("")
-        
-        # Recommendations
+
+    def _add_recent_changes(self, report: List[str]) -> None:
+        """Add recent changes section if changes exist."""
+        if not self.recent_changes:
+            return
+        report.append("## Recent Changes Analysis")
+        report.append("### Recent Commits")
+        for commit in self.recent_changes[:5]:
+            report.append(f"- {commit}")
+        report.append("")
+
+    def _add_spec_conflicts(self, report: List[str]) -> None:
+        """Add spec-code alignment issues if any exist."""
+        if not self.spec_code_conflicts:
+            return
+        report.append("## Spec-Code Alignment Issues")
+        for conflict in self.spec_code_conflicts:
+            report.append(f"- {conflict}")
+        report.append("")
+
+    def _add_ai_issues(self, report: List[str]) -> None:
+        """Add AI coding issues section if any exist."""
+        if not self.ai_issues_found:
+            return
+        report.append("## AI Coding Issues Detected")
+        for issue in self.ai_issues_found:
+            report.append(f"- {issue}")
+        report.append("")
+
+    def _add_performance_concerns(self, report: List[str]) -> None:
+        """Add performance concerns section if any exist."""
+        if not self.performance_concerns:
+            return
+        report.append("## Performance Concerns")
+        for concern in self.performance_concerns:
+            report.append(f"- {concern}")
+        report.append("")
+
+    def _add_security_issues(self, report: List[str]) -> None:
+        """Add security issues section if any exist."""
+        if not self.security_issues:
+            return
+        report.append("## Security Issues")
+        for issue in self.security_issues:
+            report.append(f"- [WARNING] {issue}")
+        report.append("")
+
+    def _add_critical_action_items(self, report: List[str]) -> None:
+        """Add critical action items if any exist."""
+        if not self.issues["critical"]:
+            return
+        report.append("### Critical (Must fix immediately)")
+        for i, issue in enumerate(self.issues["critical"], 1):
+            report.append(f"{i}. {issue}")
+        report.append("")
+
+    def _add_high_action_items(self, report: List[str]) -> None:
+        """Add high priority action items if any exist."""
+        if not self.issues["high"]:
+            return
+        report.append("### High (Fix before next release)")
+        for i, issue in enumerate(self.issues["high"], 1):
+            report.append(f"{i}. {issue}")
+        report.append("")
+
+    def _add_medium_action_items(self, report: List[str]) -> None:
+        """Add medium priority action items if any exist."""
+        if not self.issues["medium"]:
+            return
+        report.append("### Medium (Fix in next sprint)")
+        for i, issue in enumerate(self.issues["medium"][:10], 1):
+            report.append(f"{i}. {issue}")
+        if len(self.issues["medium"]) > 10:
+            report.append(f"... and {len(self.issues['medium']) - 10} more")
+        report.append("")
+
+    def _add_recommendations(self, report: List[str]) -> None:
+        """Add recommendations section."""
         report.append("## Recommendations")
         
         if len(self.issues["critical"]) > 0:
             report.append("- **URGENT**: Address critical issues before any new development")
-        
         if len(self.ai_issues_found) > 5:
             report.append("- Consider manual review of recent AI-generated code")
-        
         if len(self.spec_code_conflicts) > 0:
             report.append("- Update specifications to match current implementation")
-        
         if len(self.security_issues) > 0:
             report.append("- Conduct thorough security audit immediately")
-        
         if len(self.performance_concerns) > 0:
             report.append("- Profile application performance and optimize hotspots")
-        
+
+    def _add_report_footer(self, report: List[str]) -> None:
+        """Add footer to the report."""
         report.append("")
         report.append("---")
         report.append("*Generated by run_review.py implementing SPEC/review.xml*")
+
+    def generate_report(self):
+        """Generate comprehensive review report"""
+        report = []
+        
+        self._add_report_header(report)
+        self._add_executive_summary(report)
+        self._add_system_health(report)
+        self._add_recent_changes(report)
+        self._add_spec_conflicts(report)
+        self._add_ai_issues(report)
+        self._add_performance_concerns(report)
+        self._add_security_issues(report)
+        
+        report.append("## Action Items")
+        self._add_critical_action_items(report)
+        self._add_high_action_items(report)
+        self._add_medium_action_items(report)
+        
+        self._add_recommendations(report)
+        self._add_report_footer(report)
         
         return "\n".join(report)
     

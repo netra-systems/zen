@@ -10,7 +10,7 @@ from .validation import MessageValidator
 from .broadcast import BroadcastManager
 from .room_manager import RoomManager
 from .heartbeat import HeartbeatManager
-from .error_handler import ErrorHandler
+from .error_handler import WebSocketErrorHandler
 
 __all__ = [
     'ConnectionInfo',
@@ -20,5 +20,5 @@ __all__ = [
     'BroadcastManager',
     'RoomManager',
     'HeartbeatManager',
-    'ErrorHandler'
+    'WebSocketErrorHandler'
 ]

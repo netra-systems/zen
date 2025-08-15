@@ -5,7 +5,7 @@ This module addresses gaps identified in test realism analysis and provides
 realistic patterns for LLM responses, logs, workloads, and performance scenarios.
 """
 
-from .models import RealisticDataPatterns, ConfigManager
+from .models import RealisticDataPatterns, RealisticTestDataConfigManager
 from .llm_response_generator import LLMResponseGenerator
 from .log_generator import LogGenerator
 from .workload_simulator import WorkloadSimulator
@@ -17,7 +17,7 @@ class RealisticTestDataService:
     
     def __init__(self):
         """Initialize the realistic test data service"""
-        self.config_manager = ConfigManager()
+        self.config_manager = RealisticTestDataConfigManager()
         self.llm_generator = LLMResponseGenerator(self.config_manager)
         self.log_generator = LogGenerator(self.config_manager)
         self.workload_simulator = WorkloadSimulator()
@@ -47,7 +47,7 @@ class RealisticTestDataService:
 __all__ = [
     "RealisticTestDataService",
     "RealisticDataPatterns",
-    "ConfigManager",
+    "RealisticTestDataConfigManager",
     "LLMResponseGenerator",
     "LogGenerator",
     "WorkloadSimulator",

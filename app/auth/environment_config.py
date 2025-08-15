@@ -33,7 +33,7 @@ class OAuthConfig:
 class EnvironmentAuthConfig:
     """Manages environment-specific authentication configuration."""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.environment = self._detect_environment()
         self.pr_number = os.getenv("PR_NUMBER")
         self.is_pr_environment = bool(self.pr_number and self.environment == Environment.STAGING)

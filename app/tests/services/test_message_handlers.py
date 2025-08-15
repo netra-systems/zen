@@ -2,7 +2,7 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch, Mock
 from app.services.message_handlers import MessageHandlerService
-from app.schemas.WebSocket import WebSocketMessage, UserMessage, AgentMessage
+from app.schemas.registry import WebSocketMessage, UserMessage, AgentMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
 @pytest.mark.asyncio
@@ -75,11 +75,11 @@ async def test_handle_start_agent():
 @pytest.mark.asyncio 
 async def test_websocket_schema_imports():
     """Test that WebSocket schemas can be imported."""
-    message = WebSocketMessage(type="test", payload={"data": "test"})
-    assert message.type == "test"
+    message = WebSocketMessage(type="user_message", payload={"data": "test"})
+    assert message.type == "user_message"
     
-    user_msg = UserMessage(text="Hello")
-    assert user_msg.text == "Hello"
+    user_msg = UserMessage(content="Hello")
+    assert user_msg.content == "Hello"
     
-    agent_msg = AgentMessage(text="Response")
-    assert agent_msg.text == "Response"
+    agent_msg = AgentMessage(run_id="run_123", agent_id="agent_456", status="active", message="Response")
+    assert agent_msg.message == "Response"

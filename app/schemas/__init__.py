@@ -8,6 +8,7 @@ from .Agent import (
     AgentErrorMessage,
     SubAgentUpdate,
     SubAgentStatus,
+    AgentResult,
 )
 from .Auth import (
     GoogleUser,
@@ -105,7 +106,7 @@ from .User import (
     User,
     UserInDB,
 )
-from .WebSocket import (
+from .registry import (
     WebSocketError,
     MessageToUser,
     AnalysisRequest,
@@ -135,6 +136,7 @@ __all__ = [
     "AgentErrorMessage",
     "SubAgentUpdate",
     "SubAgentStatus",
+    "AgentResult",
     "GoogleUser",
     "DevUser",
     "DevLoginRequest",

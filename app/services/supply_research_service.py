@@ -9,7 +9,7 @@ from decimal import Decimal
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc
 
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 from app.redis_manager import RedisManager
 from app.db.models_postgres import AISupplyItem, ResearchSession, SupplyUpdateLog, User
 from app.services.permission_service import PermissionService

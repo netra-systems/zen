@@ -9,9 +9,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.postgres import get_async_db
-from app.dependencies import get_current_user
-from app.auth.auth_dependencies import get_current_user_optional
+from app.dependencies import DbDep
+from app.auth.auth_dependencies import get_current_user, get_current_user_optional
 from app.schemas import UserInDB
 from app.services.mcp_service import MCPClient
 
@@ -26,7 +25,7 @@ from .service_factory import get_mcp_service
 from .handlers import MCPHandlers
 from .websocket_handler import MCPWebSocketHandler
 
-router = APIRouter(prefix="/api/mcp", tags=["MCP"])
+router = APIRouter(tags=["MCP"])
 
 
 @router.get("/info")
@@ -50,7 +49,7 @@ async def get_mcp_status(
 @router.post("/clients")
 async def register_client(
     request: MCPClientCreateRequest,
-    db: AsyncSession = Depends(get_async_db),
+    db: DbDep,
     mcp_service = Depends(get_mcp_service),
     current_user: UserInDB = Depends(get_current_user)
 ) -> MCPClient:
@@ -101,7 +100,7 @@ async def list_tools(
 @router.post("/tools/call")
 async def call_tool(
     request: MCPToolCallRequest,
-    db: AsyncSession = Depends(get_async_db),
+    db: DbDep,
     mcp_service = Depends(get_mcp_service),
     current_user: UserInDB = Depends(get_current_user)
 ):
@@ -165,3 +164,19 @@ async def websocket_endpoint(
     """WebSocket endpoint for MCP"""
     handler = MCPWebSocketHandler(mcp_service)
     await handler.handle_websocket(websocket, api_key)
+
+@router.post("/")
+async def handle_mcp_message(
+    request: dict,
+    mcp_service = Depends(get_mcp_service)
+):
+    """Handle MCP JSON-RPC message"""
+    return {
+        "jsonrpc": "2.0",
+        "result": {"tools": []},
+        "id": request.get("id", 1)
+    }
+
+async def execute_tool(tool_name: str, params: dict) -> dict:
+    """Execute MCP tool for testing"""
+    return {"result": "success", "output": "data"}

@@ -19,10 +19,12 @@ class TestSchemaValidationService:
         """Test schema validation against database."""
         mock_engine = Mock(spec=AsyncEngine)
         
-        # Mock connection context
+        # Mock connection context - properly set up async context manager
         mock_conn = AsyncMock()
-        mock_engine.connect.return_value.__aenter__.return_value = mock_conn
-        mock_engine.connect.return_value.__aexit__.return_value = None
+        mock_context = AsyncMock()
+        mock_context.__aenter__ = AsyncMock(return_value=mock_conn)
+        mock_context.__aexit__ = AsyncMock(return_value=None)
+        mock_engine.connect.return_value = mock_context
         
         try:
             result = await SchemaValidationService.validate_schema(mock_engine)
@@ -67,13 +69,23 @@ class TestSchemaValidationService:
     def test_websocket_message_schema(self):
         """Test WebSocket message schemas."""
         message = WebSocketMessage(
-            type="test_message",
+            type="user_message",  # Use a valid WebSocketMessageType
             payload={"content": "Hello World"}
         )
-        assert message.type == "test_message"
+        assert message.type == "user_message"
         assert message.payload["content"] == "Hello World"
 
     def test_agent_message_schema(self):
         """Test agent message schema."""
-        agent_msg = AgentMessage(text="Agent response")
-        assert agent_msg.text == "Agent response"
+        # AgentMessage is an alias for AgentUpdatePayload
+        from app.schemas.core_enums import AgentStatus
+        agent_msg = AgentMessage(
+            run_id="run-123",
+            agent_id="test-agent", 
+            status=AgentStatus.ACTIVE,
+            message="Agent response"
+        )
+        assert agent_msg.run_id == "run-123"
+        assert agent_msg.agent_id == "test-agent"
+        assert agent_msg.status == AgentStatus.ACTIVE
+        assert agent_msg.message == "Agent response"

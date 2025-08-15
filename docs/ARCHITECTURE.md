@@ -74,6 +74,8 @@ The Netra AI Optimization Platform is a sophisticated, production-ready system d
 6. **Observability**: Comprehensive logging and monitoring
 7. **Fault Tolerance**: Retry logic, circuit breakers, graceful degradation
 8. **Scalability**: Horizontal scaling with connection pooling
+9. **MODULE-BASED ARCHITECTURE**: **CRITICAL** - 300 lines max per file, 8 lines max per function
+10. **Ultra Deep Think**: Required 3x deep analysis before implementation
 
 ### Architectural Patterns
 
@@ -118,20 +120,30 @@ Organized API endpoints:
 
 ```
 routes/
-├── auth/               # Authentication & OAuth
-│   └── auth.py        # Login, logout, OAuth callbacks
-├── websockets.py      # WebSocket connections
-├── agent_route.py     # Agent execution endpoints
-├── threads_route.py   # Thread management
-├── generation.py      # Content generation
-├── corpus.py          # Corpus management
-├── references.py      # Reference data
-├── supply.py          # Supply catalog
-├── llm_cache.py       # Cache management
-├── synthetic_data.py  # Synthetic data generation
-├── config.py          # Configuration endpoints
-├── health.py          # Health checks
-└── admin.py           # Admin functions
+├── websockets.py          # WebSocket connections
+├── agent_route.py         # Agent execution endpoints  
+├── threads_route.py       # Thread management
+├── generation.py          # Content generation
+├── corpus.py              # Corpus management
+├── references.py          # Reference data
+├── supply.py              # Supply catalog
+├── llm_cache.py           # Cache management
+├── synthetic_data.py      # Synthetic data generation
+├── synthetic_data_corpus.py # Synthetic corpus management
+├── config.py              # Configuration endpoints
+├── health.py              # Basic health checks
+├── health_extended.py     # Extended health monitoring
+├── admin.py               # Admin functions
+├── demo.py                # Demo endpoints
+├── demo_websocket.py      # Demo WebSocket handlers
+├── monitoring.py          # System monitoring
+├── database_monitoring.py # Database health monitoring
+├── circuit_breaker_health.py # Circuit breaker monitoring
+├── quality.py             # Quality validation endpoints
+├── quality_handlers.py    # Quality processing handlers
+├── quality_validators.py  # Quality validation logic
+├── unified_tools.py       # Unified tool interfaces
+└── mcp.py                 # MCP (Model Context Protocol) endpoints
 ```
 
 #### 3. Service Layer (`app/services/`)
@@ -922,6 +934,59 @@ logger.info("Agent execution started", extra={
 2. **RPO Target**: 15 minutes
 3. **Failover Process**: Automated with manual approval
 4. **Data Validation**: Integrity checks post-recovery
+
+## Architecture Compliance Requirements
+
+### CRITICAL: 300-Line Module Limit
+
+**MANDATORY ENFORCEMENT**: Every file MUST be ≤300 lines. This is strictly enforced:
+
+```bash
+# Check architecture compliance
+python scripts/check_architecture_compliance.py
+```
+
+**Implementation Strategy**:
+1. **Plan modules during design phase** - don't code first then split
+2. **Split by responsibility** - each module has single purpose
+3. **Clear interfaces** - well-defined module boundaries
+4. **Testable units** - each module independently testable
+
+### CRITICAL: 8-Line Function Limit
+
+**MANDATORY ENFORCEMENT**: ALL functions MUST be ≤8 lines (no exceptions).
+
+**Benefits**:
+- **Composability**: Functions can be easily combined
+- **Readability**: Each function has single, clear purpose
+- **Testability**: Simple functions are easier to test
+- **Maintainability**: Easier debugging and modification
+
+**Example Compliance**:
+```python
+# GOOD: 6 lines, single responsibility
+async def validate_user_input(data: dict) -> bool:
+    if not data:
+        return False
+    required_fields = ['email', 'message']
+    return all(field in data for field in required_fields)
+
+# BAD: Too many lines, multiple responsibilities
+# This would need to be split into multiple functions
+```
+
+### Architecture Verification
+
+```bash
+# Run compliance check (should be part of CI/CD)
+python scripts/check_architecture_compliance.py --strict
+
+# Check specific directory
+python scripts/check_architecture_compliance.py --path app/agents/
+
+# Generate compliance report
+python scripts/check_architecture_compliance.py --report
+```
 
 ## Future Enhancements
 

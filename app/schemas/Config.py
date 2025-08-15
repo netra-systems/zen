@@ -1,7 +1,8 @@
 from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
 from .Auth import AuthEndpoints, AuthConfigResponse, DevUser
-from .User import User
+from .registry import User
+from .llm_types import LLMProvider
 
 class ClickHouseCredentials(BaseModel):
     host: str
@@ -111,7 +112,7 @@ class LangfuseConfig(BaseModel):
     host: str = "https://cloud.langfuse.com/"
 
 class LLMConfig(BaseModel):
-    provider: str = Field(..., description="The LLM provider (e.g., 'google', 'openai').")
+    provider: LLMProvider = Field(..., description="The LLM provider enum.")
     model_name: str = Field(..., description="The name of the model.")
     api_key: Optional[str] = Field(None, description="The API key for the LLM provider.")
     generation_config: Dict[str, Any] = Field({}, description="A dictionary of generation parameters, e.g., temperature, max_tokens.")
@@ -144,12 +145,27 @@ class AppConfig(BaseModel):
     clickhouse_url: str = None  # Added for staging/production ClickHouse URL
     log_level: str = "DEBUG"
     log_secrets: bool = False
+    log_async_checkout: bool = False  # Control async connection checkout debug logging
     frontend_url: str = "http://localhost:3010"
     redis: "RedisConfig" = Field(default_factory=lambda: RedisConfig())
     
     # LLM Cache Settings
     llm_cache_enabled: bool = True
     llm_cache_ttl: int = 3600  # 1 hour default
+    
+    # LLM Heartbeat Settings
+    llm_heartbeat_enabled: bool = True
+    llm_heartbeat_interval_seconds: float = 2.5  # Heartbeat every 2.5 seconds
+    
+    # LLM Data Logging Settings (DEBUG level)
+    llm_data_logging_enabled: bool = True
+    llm_data_truncate_length: int = 1000  # Characters to truncate prompts/responses
+    llm_data_log_format: str = "json"  # "json" or "text" format
+    llm_data_json_depth: int = 3  # Maximum depth for JSON logging
+    llm_heartbeat_log_json: bool = True  # Log heartbeat as JSON
+    
+    # SubAgent Communication Logging Settings (INFO level)
+    subagent_logging_enabled: bool = True  # Enable/disable subagent communication logging
     
     # Service configuration is now managed through dev_launcher service config
     # Services use the mode specified in the launcher (local/shared/mock)
@@ -168,32 +184,32 @@ class AppConfig(BaseModel):
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
         ),
         "analysis": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
             generation_config={"temperature": 0.5},
         ),
         "triage": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
         ),
         "data": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
         ),
         "optimizations_core": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
         ),
         "actions_to_meet_goals": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
         ),
         "reporting": LLMConfig(
-            provider="google",
+            provider=LLMProvider.GOOGLE,
             model_name="gemini-2.5-pro",
         ),
     }
@@ -230,6 +246,14 @@ class DevelopmentConfig(AppConfig):
     
     def __init__(self, **data):
         import os
+        # Load database URL from environment if not provided
+        # Note: 'database_url' is the Pydantic field name (lowercase)
+        # 'DATABASE_URL' is the environment variable name (uppercase)
+        if 'database_url' not in data:
+            env_db_url = os.environ.get('DATABASE_URL')
+            if env_db_url:
+                data['database_url'] = env_db_url
+        
         # Check service modes from environment (set by dev launcher)
         redis_mode = os.environ.get("REDIS_MODE", "shared").lower()
         clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()

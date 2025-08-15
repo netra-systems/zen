@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Master Orchestration Specification</name>
+        <type>orchestration</type>
+        <version>1.0</version>
+        <priority>CRITICAL</priority>
+        <description>
+            Master orchestration specification for system alignment, refresh, and cleanup tasks.
+            This spec guides orchestrator agents to coordinate multiple sub-agents for comprehensive
+            system maintenance and quality assurance.
+        </description>
+        <last_updated>2025-08-15</last_updated>
+    </metadata>
+
+    <principles>
+        <principle id="root-cause-analysis">
+            <title>Ultra Deep Root Cause Analysis</title>
+            <description>Every issue requires deep thinking to identify and fix root causes</description>
+            <enforcement>MANDATORY for all task sets</enforcement>
+        </principle>
+        
+        <principle id="multi-agent-coordination">
+            <title>Parallel Agent Deployment</title>
+            <description>Deploy multiple agents in parallel for maximum efficiency</description>
+            <enforcement>Use agent pools for concurrent execution</enforcement>
+        </principle>
+
+        <principle id="compliance-first">
+            <title>Architecture Compliance Priority</title>
+            <description>All changes must maintain 300/8 line limits and modular design</description>
+            <enforcement>Run compliance checks before and after all changes.</enforcement>
+            <enforcement-history>Save versions of enforcements reports in history</enforcement-history>
+        </principle>
+    </principles>
+
+    <task-sets>
+        <task-set id="TESTS" priority="CRITICAL">
+            <title>Comprehensive Test Alignment and Fixing</title>
+            <description>
+                Discover, run, and fix all test suites to ensure comprehensive coverage
+                and alignment with actual code implementation.
+            </description>
+            <orchestration>
+                <agents required="3-5">
+                    <agent type="test-discovery">
+                        <responsibility>Run test_launcher.py discovery to identify all test categories</responsibility>
+                        <output>List of test suites and their current status</output>
+                    </agent>
+                    <agent type="test-runner" count="multiple">
+                        <responsibility>Execute each discovered test suite</responsibility>
+                        <parallel>true</parallel>
+                        <output>Test results and failure reports</output>
+                    </agent>
+                    <agent type="test-fixer" count="multiple">
+                        <responsibility>Fix failing tests by aligning with actual implementation</responsibility>
+                        <rules>
+                            <rule>Fix the spirit of the test, not just make it pass</rule>
+                            <rule>Update tests to match latest code</rule>
+                            <rule>Remove tests for non-existent SUT</rule>
+                        </rules>
+                    </agent>
+                </agents>
+                <sequence>
+                    <step order="1">Run test_launcher.py discovery</step>
+                    <step order="2">Execute all discovered test suites in parallel</step>
+                    <step order="3">Analyze failures and categorize by root cause</step>
+                    <step order="4">Deploy fixers for each failure category</step>
+                    <step order="5">Re-run tests to verify fixes</step>
+                    <step order="6">Generate coverage report</step>
+                </sequence>
+                <reference>SPEC/testing.xml</reference>
+                <reference>SPEC/enhanced_testing.xml</reference>
+            </orchestration>
+        </task-set>
+
+        <task-set id="DEV-LAUNCH" priority="HIGH">
+            <title>Development Environment Launch and Validation</title>
+            <description>
+                Launch and validate the development environment with real database
+                and environment configurations.
+            </description>
+            <orchestration>
+                <agents required="2-3">
+                    <agent type="environment-validator">
+                        <responsibility>Verify environment variables and database connectivity</responsibility>
+                        <requirements>
+                            <requirement>MUST use real .env files</requirement>
+                            <requirement>MUST connect to actual databases</requirement>
+                        </requirements>
+                    </agent>
+                    <agent type="launcher">
+                        <responsibility>Execute dev_launcher.py and monitor startup</responsibility>
+                        <monitoring>
+                            <monitor>Service startup sequence</monitor>
+                            <monitor>Health check endpoints</monitor>
+                            <monitor>Log output for errors</monitor>
+                        </monitoring>
+                    </agent>
+                    <agent type="issue-resolver">
+                        <responsibility>Fix any startup issues detected</responsibility>
+                        <common-issues>
+                            <issue>Port conflicts</issue>
+                            <issue>Missing environment variables</issue>
+                            <issue>Database connection failures</issue>
+                        </common-issues>
+                    </agent>
+                </agents>
+                <sequence>
+                    <step order="1">Validate environment configuration</step>
+                    <step order="2">Check database connectivity</step>
+                    <step order="3">Run dev_launcher.py</step>
+                    <step order="4">Monitor startup health checks</step>
+                    <step order="5">Resolve any detected issues</step>
+                    <step order="6">Verify all services are healthy</step>
+                </sequence>
+                <reference>SPEC/dev_launcher.xml</reference>
+                <reference>SPEC/dev_environment.xml</reference>
+            </orchestration>
+        </task-set>
+
+        <task-set id="ARCHITECTURE" priority="CRITICAL">
+            <title>Architecture Compliance and Violation Remediation</title>
+            <description>
+                Detect and fix all architecture violations, particularly enforcing
+                the 300-line file limit and 8-line function limit.
+            </description>
+            <orchestration>
+                <agents required="4-6">
+                    <agent type="violation-detector">
+                        <responsibility>Run architecture compliance checks</responsibility>
+                        <tools>
+                            <tool>scripts/check_architecture_compliance.py</tool>
+                            <tool>scripts/function_complexity_linter.py</tool>
+                        </tools>
+                    </agent>
+                    <agent type="module-splitter" count="multiple">
+                        <responsibility>Split files exceeding 300 lines into focused modules</responsibility>
+                        <strategy>
+                            <rule>Identify logical boundaries</rule>
+                            <rule>Create single-responsibility modules</rule>
+                            <rule>Maintain clear interfaces</rule>
+                        </strategy>
+                    </agent>
+                    <agent type="function-refactorer" count="multiple">
+                        <responsibility>Refactor functions exceeding 8 lines</responsibility>
+                        <strategy>
+                            <rule>Extract helper functions</rule>
+                            <rule>Apply composition patterns</rule>
+                            <rule>Maintain single responsibility</rule>
+                        </strategy>
+                    </agent>
+                    <agent type="validation-agent">
+                        <responsibility>Verify fixes maintain functionality</responsibility>
+                        <validation>
+                            <check>Run affected tests</check>
+                            <check>Verify type safety</check>
+                            <check>Check import dependencies</check>
+                        </validation>
+                    </agent>
+                </agents>
+                <sequence>
+                    <step order="1">Run compliance detection scripts</step>
+                    <step order="2">Categorize violations by type and severity</step>
+                    <step order="3">Deploy appropriate fixers in parallel</step>
+                    <step order="4">Validate fixes maintain functionality</step>
+                    <step order="5">Re-run compliance checks</step>
+                    <step order="6">Update SYSTEM_ARCHITECTURE_VALIDATION_PLANS</step>
+                </sequence>
+                <reference>SPEC/system_boundaries.xml</reference>
+                <reference>SPEC/conventions.xml</reference>
+                <reference>SPEC/growth_control.xml</reference>
+            </orchestration>
+        </task-set>
+
+        <task-set id="CODE-REVIEW" priority="HIGH">
+            <title>Comprehensive Code Review and Quality Assurance</title>
+            <description>
+                Perform deep code review focusing on quality, patterns, and best practices.
+            </description>
+            <orchestration>
+                <agents required="3-5">
+                    <agent type="pattern-analyzer">
+                        <responsibility>Identify code patterns and anti-patterns</responsibility>
+                        <focus-areas>
+                            <area>Type safety violations</area>
+                            <area>Duplicate code detection</area>
+                            <area>Async pattern violations</area>
+                            <area>Error handling gaps</area>
+                        </focus-areas>
+                    </agent>
+                    <agent type="security-reviewer">
+                        <responsibility>Review security practices and vulnerabilities</responsibility>
+                        <checks>
+                            <check>Secret management</check>
+                            <check>Input validation</check>
+                            <check>Authentication/authorization</check>
+                            <check>SQL injection prevention</check>
+                        </checks>
+                    </agent>
+                    <agent type="performance-analyzer">
+                        <responsibility>Identify performance bottlenecks</responsibility>
+                        <areas>
+                            <area>Database query optimization</area>
+                            <area>Async operation efficiency</area>
+                            <area>Memory usage patterns</area>
+                            <area>WebSocket connection management</area>
+                        </areas>
+                    </agent>
+                    <agent type="quality-enforcer">
+                        <responsibility>Apply fixes for identified issues</responsibility>
+                        <priority>Critical security issues first</priority>
+                    </agent>
+                </agents>
+                <sequence>
+                    <step order="1">Scan codebase for patterns and anti-patterns</step>
+                    <step order="2">Perform security review</step>
+                    <step order="3">Analyze performance characteristics</step>
+                    <step order="4">Generate prioritized issue list</step>
+                    <step order="5">Deploy fixers for critical issues</step>
+                    <step order="6">Validate fixes with tests</step>
+                </sequence>
+                <reference>SPEC/code_changes.xml</reference>
+                <reference>SPEC/security.xml</reference>
+            </orchestration>
+        </task-set>
+
+        <task-set id="SPEC-ALIGNMENT" priority="HIGH">
+            <title>Specification Alignment and Reporting</title>
+            <description>
+                Analyze all XML specifications for consistency, completeness,
+                and alignment with actual implementation.
+            </description>
+            <orchestration>
+                <agents required="2-4">
+                    <agent type="spec-reader">
+                        <responsibility>Read and parse all XML specifications</responsibility>
+                        <output>Structured spec content and relationships</output>
+                    </agent>
+                    <agent type="alignment-analyzer">
+                        <responsibility>Compare specs with actual implementation</responsibility>
+                        <checks>
+                            <check>Type definitions match schemas</check>
+                            <check>API routes match spec definitions</check>
+                            <check>Test coverage matches requirements</check>
+                            <check>Architecture rules are enforced</check>
+                        </checks>
+                    </agent>
+                    <agent type="gap-fixer">
+                        <responsibility>Fix minor alignment issues</responsibility>
+                        <scope>Small, focused fixes only</scope>
+                    </agent>
+                    <agent type="report-generator">
+                        <responsibility>Generate comprehensive alignment report</responsibility>
+                        <sections>
+                            <section>Spec compliance status</section>
+                            <section>Implementation gaps</section>
+                            <section>Recommended actions</section>
+                        </sections>
+                    </agent>
+                </agents>
+                <sequence>
+                    <step order="1">Read all XML specifications</step>
+                    <step order="2">Analyze implementation alignment</step>
+                    <step order="3">Identify and categorize gaps</step>
+                    <step order="4">Fix minor issues automatically</step>
+                    <step order="5">Generate alignment report</step>
+                    <step order="6">Update learnings.xml with findings</step>
+                </sequence>
+                <reference>SPEC/learnings.xml</reference>
+            </orchestration>
+        </task-set>
+
+        <task-set id="AI-LLM-VALIDATION" priority="CRITICAL">
+            <title>AI and LLM Integration Validation</title>
+            <description>
+                Verify AI/LLM integrations are functioning correctly without
+                fake implementations or test stubs.
+            </description>
+            <orchestration>
+                <agents required="3-4">
+                    <agent type="stub-detector">
+                        <responsibility>Detect fake tests and mock implementations</responsibility>
+                        <patterns>
+                            <pattern>Mock LLM responses in production code</pattern>
+                            <pattern>Test stubs in service implementations</pattern>
+                            <pattern>Hardcoded responses instead of actual calls</pattern>
+                        </patterns>
+                    </agent>
+                    <agent type="coherence-validator">
+                        <responsibility>Verify system coherence and integration points</responsibility>
+                        <validations>
+                            <validation>Agent communication paths</validation>
+                            <validation>LLM request/response flow</validation>
+                            <validation>Error handling in LLM calls</validation>
+                            <validation>Rate limiting and retry logic</validation>
+                        </validations>
+                    </agent>
+                    <agent type="real-llm-tester">
+                        <responsibility>Execute real LLM integration tests</responsibility>
+                        <requirements>
+                            <requirement>Use --real-llm flag for testing</requirement>
+                            <requirement>Verify actual API responses</requirement>
+                            <requirement>Test error scenarios</requirement>
+                        </requirements>
+                    </agent>
+                    <agent type="issue-resolver">
+                        <responsibility>Fix detected issues and remove stubs</responsibility>
+                    </agent>
+                </agents>
+                <sequence>
+                    <step order="1">Scan for test stubs and fake implementations</step>
+                    <step order="2">Validate system coherence</step>
+                    <step order="3">Run real LLM integration tests</step>
+                    <step order="4">Remove all detected stubs</step>
+                    <step order="5">Implement real functionality where needed</step>
+                    <step order="6">Re-validate with real tests</step>
+                </sequence>
+                <reference>SPEC/no_test_stubs.xml</reference>
+                <reference>SPEC/llm.xml</reference>
+                <reference>SPEC/ai_slop_prevention_spec.xml</reference>
+            </orchestration>
+        </task-set>
+
+        <task-set id="DOCUMENTATION" priority="MEDIUM">
+            <title>Documentation Refresh and Alignment</title>
+            <description>
+                Update documentation to reflect current system state and architecture.
+            </description>
+            <orchestration>
+                <agents required="2-3">
+                    <agent type="doc-analyzer">
+                        <responsibility>Analyze existing documentation for accuracy</responsibility>
+                        <documents>
+                            <doc>docs/API_DOCUMENTATION.md</doc>
+                            <doc>docs/ARCHITECTURE.md</doc>
+                            <doc>docs/TESTING_GUIDE.md</doc>
+                            <doc>README.md</doc>
+                        </documents>
+                    </agent>
+                    <agent type="code-scanner">
+                        <responsibility>Extract current implementation details</responsibility>
+                        <extraction>
+                            <extract>API endpoints and schemas</extract>
+                            <extract>Service dependencies</extract>
+                            <extract>Test structure</extract>
+                            <extract>Architecture patterns</extract>
+                        </extraction>
+                    </agent>
+                    <agent type="doc-updater">
+                        <responsibility>Update documentation to match reality</responsibility>
+                        <guidelines>
+                            <guideline>Maintain existing structure</guideline>
+                            <guideline>Update only factual discrepancies</guideline>
+                            <guideline>Add missing critical information</guideline>
+                            <guideline>Remove obsolete sections</guideline>
+                        </guidelines>
+                    </agent>
+                </agents>
+                <sequence>
+                    <step order="1">Analyze current documentation</step>
+                    <step order="2">Scan codebase for actual implementation</step>
+                    <step order="3">Identify discrepancies</step>
+                    <step order="4">Update documentation files</step>
+                    <step order="5">Validate documentation completeness</step>
+                    <step order="6">Update doc_overall.xml spec</step>
+                </sequence>
+                <reference>SPEC/doc_overall.xml</reference>
+                <reference>SPEC/documentation_maintenance.xml</reference>
+            </orchestration>
+        </task-set>
+    </task-sets>
+
+    <execution-strategy>
+        <strategy id="parallel-execution">
+            <title>Maximize Parallel Execution</title>
+            <description>
+                Execute independent task sets in parallel using multiple agents
+                to minimize total execution time.
+            </description>
+            <implementation>
+                <rule>Identify independent task sets</rule>
+                <rule>Allocate agent pools for parallel work</rule>
+                <rule>Use message queues for coordination</rule>
+                <rule>Aggregate results for final reporting</rule>
+            </implementation>
+        </strategy>
+
+        <strategy id="incremental-fixes">
+            <title>Incremental Fix Application</title>
+            <description>
+                Apply fixes incrementally with validation between each change
+                to prevent regression and ensure stability.
+            </description>
+            <implementation>
+                <rule>Group related fixes</rule>
+                <rule>Apply fix batches</rule>
+                <rule>Run validation tests</rule>
+                <rule>Rollback on failure</rule>
+                <rule>Document successful patterns</rule>
+            </implementation>
+        </strategy>
+
+        <strategy id="continuous-validation">
+            <title>Continuous Validation Loop</title>
+            <description>
+                Maintain continuous validation throughout all operations
+                to catch issues early and prevent cascade failures.
+            </description>
+            <implementation>
+                <rule>Run compliance checks after each change</rule>
+                <rule>Execute smoke tests frequently</rule>
+                <rule>Monitor system health continuously</rule>
+                <rule>Alert on degradation</rule>
+            </implementation>
+        </strategy>
+    </execution-strategy>
+
+    <reporting>
+        <report id="master-status">
+            <title>Master Orchestration Status Report</title>
+            <frequency>After each orchestration run</frequency>
+            <sections>
+                <section>Task Set Completion Status</section>
+                <section>Issues Detected and Fixed</section>
+                <section>Remaining Issues Requiring Manual Intervention</section>
+                <section>System Health Metrics</section>
+                <section>Compliance Status (300/8 limits)</section>
+                <section>Test Coverage Report</section>
+                <section>Recommendations for Next Steps</section>
+            </sections>
+        </report>
+    </reporting>
+
+    <critical-reminders>
+        <reminder priority="CRITICAL">
+            All changes MUST maintain 300-line file and 8-line function limits
+        </reminder>
+        <reminder priority="CRITICAL">
+            ALWAYS consult learnings.xml before making changes
+        </reminder>
+        <reminder priority="CRITICAL">
+            Use REAL implementations only - no test stubs in production
+        </reminder>
+        <reminder priority="CRITICAL">
+            Maintain single source of truth - no duplicate types or functions
+        </reminder>
+        <reminder priority="CRITICAL">
+            Ultra deep thinking required for root cause analysis
+        </reminder>
+    </critical-reminders>
+</specification>

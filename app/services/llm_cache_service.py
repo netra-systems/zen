@@ -218,6 +218,102 @@ class LLMCacheService:
         except Exception as e:
             logger.error(f"Error clearing cache: {e}")
             return 0
+
+    async def clear_cache_pattern(self, pattern: str) -> int:
+        """Clear cache entries matching a specific pattern"""
+        try:
+            # Build the full pattern with cache prefix
+            full_pattern = f"{self.cache_prefix}*{pattern}*"
+            
+            redis_client = await self.redis_manager.get_client()
+            if not redis_client:
+                return 0
+            keys = await redis_client.keys(full_pattern)
+            
+            if keys:
+                deleted = await redis_client.delete(*keys)
+                logger.info(f"Cleared {deleted} cache entries matching pattern '{pattern}'")
+                return deleted
+            else:
+                logger.info(f"No cache entries found matching pattern '{pattern}'")
+                return 0
+                
+        except Exception as e:
+            logger.error(f"Error clearing cache with pattern '{pattern}': {e}")
+            return 0
+
+    async def get_cache_metrics(self) -> Dict[str, Any]:
+        """Get comprehensive cache metrics"""
+        try:
+            redis_client = await self.redis_manager.get_client()
+            if not redis_client:
+                return {
+                    "hits": 0,
+                    "misses": 0,
+                    "hit_rate": 0,
+                    "size_mb": 0,
+                    "entries": 0
+                }
+
+            # Get all cache keys
+            cache_keys = await redis_client.keys(f"{self.cache_prefix}*")
+            entries_count = len(cache_keys)
+
+            # Get all stats keys
+            stats_keys = await redis_client.keys(f"{self.stats_prefix}*")
+            
+            # Calculate totals across all LLM configs
+            total_hits = 0
+            total_misses = 0
+            total_requests = 0
+            
+            for key in stats_keys:
+                stats_data = await redis_client.get(key)
+                if stats_data:
+                    stats = json.loads(stats_data)
+                    total_hits += stats.get("hits", 0)
+                    total_misses += stats.get("misses", 0)
+                    total_requests += stats.get("total", 0)
+
+            # Calculate hit rate
+            hit_rate = total_hits / total_requests if total_requests > 0 else 0
+
+            # Estimate cache size (rough estimate)
+            size_estimate = 0
+            if cache_keys:
+                # Sample a few entries to estimate average size
+                sample_size = min(10, len(cache_keys))
+                sample_keys = cache_keys[:sample_size]
+                
+                for key in sample_keys:
+                    data = await redis_client.get(key)
+                    if data:
+                        size_estimate += len(data.encode('utf-8'))
+                
+                # Extrapolate to total size
+                avg_size = size_estimate / sample_size if sample_size > 0 else 0
+                total_size_bytes = avg_size * entries_count
+                size_mb = total_size_bytes / (1024 * 1024)
+            else:
+                size_mb = 0
+
+            return {
+                "hits": total_hits,
+                "misses": total_misses,
+                "hit_rate": round(hit_rate, 3),
+                "size_mb": round(size_mb, 2),
+                "entries": entries_count
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting cache metrics: {e}")
+            return {
+                "hits": 0,
+                "misses": 0,
+                "hit_rate": 0,
+                "size_mb": 0,
+                "entries": 0
+            }
     
     def should_cache_response(self, prompt: str, response: str) -> bool:
         """Determine if a response should be cached based on heuristics"""

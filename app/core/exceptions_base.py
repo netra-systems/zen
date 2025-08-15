@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, Optional
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from app.core.error_codes import ErrorCode, ErrorSeverity
 
 
@@ -17,8 +17,7 @@ class ErrorDetails(BaseModel):
     trace_id: Optional[str] = None
     context: Optional[Dict[str, Any]] = None
     
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class NetraException(Exception):
@@ -37,13 +36,8 @@ class NetraException(Exception):
                            trace_id: Optional[str], context: Optional[Dict[str, Any]]) -> ErrorDetails:
         """Build ErrorDetails object with default values."""
         return ErrorDetails(
-            code=code,
-            message=message or "An internal error occurred",
-            severity=severity,
-            details=details or {},
-            user_message=user_message,
-            trace_id=trace_id,
-            context=context or {}
+            code=code, message=message or "An internal error occurred", severity=severity,
+            details=details or {}, user_message=user_message, trace_id=trace_id, context=context or {}
         )
     
     def to_dict(self) -> Dict[str, Any]:
@@ -54,3 +48,15 @@ class NetraException(Exception):
         """String representation of the exception."""
         code_val = self.error_details.code if isinstance(self.error_details.code, str) else self.error_details.code.value
         return f"{code_val}: {self.error_details.message}"
+
+
+class ValidationError(NetraException):
+    """Exception raised when validation fails."""
+    
+    def __init__(self, message: str = "Validation failed", details: Optional[Dict[str, Any]] = None,
+                 user_message: Optional[str] = None, trace_id: Optional[str] = None,
+                 context: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message, code=ErrorCode.VALIDATION_ERROR, severity=ErrorSeverity.MEDIUM,
+            details=details, user_message=user_message, trace_id=trace_id, context=context
+        )

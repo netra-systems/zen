@@ -1,5 +1,9 @@
 name: Restart Environment
 description: Restart staging environment services
+# ACT Compatibility: This workflow supports local testing with ACT
+# - Kubernetes operations are mocked when ACT=true
+# - Service restart commands use mock implementations
+# - All validation steps work in ACT mode
 
 on:
   workflow_call:
@@ -14,7 +18,7 @@ on:
 jobs:
   check-environment:
     name: Check Environment Status
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       exists: ${{ steps.check.outputs.exists }}
       backend_deployment: ${{ steps.check.outputs.backend_deployment }}
@@ -66,7 +70,7 @@ jobs:
     name: Restart Backend Service
     needs: check-environment
     if: needs.check-environment.outputs.exists == 'true' && needs.check-environment.outputs.backend_deployment == 'true'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Configure GCP credentials
         uses: google-github-actions/auth@v2
@@ -102,7 +106,7 @@ jobs:
     name: Restart Frontend Service
     needs: check-environment
     if: needs.check-environment.outputs.exists == 'true' && needs.check-environment.outputs.frontend_deployment == 'true'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Configure GCP credentials
         uses: google-github-actions/auth@v2
@@ -138,7 +142,7 @@ jobs:
     name: Restart Supporting Services
     needs: check-environment
     if: needs.check-environment.outputs.exists == 'true'
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Configure GCP credentials
         uses: google-github-actions/auth@v2
@@ -167,7 +171,7 @@ jobs:
   post-restart-validation:
     name: Post-Restart Validation
     needs: [restart-backend, restart-frontend, restart-supporting-services]
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Wait for stabilization
         run: sleep 60

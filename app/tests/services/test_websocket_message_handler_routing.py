@@ -21,7 +21,7 @@ from app.services.websocket.message_queue import (
     QueuedMessage,
     MessagePriority
 )
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 
 
 class MessageType(Enum):

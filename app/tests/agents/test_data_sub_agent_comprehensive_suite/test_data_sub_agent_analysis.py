@@ -5,7 +5,7 @@ Tests for DataSubAgent analysis methods - performance metrics, anomaly detection
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime
-from app.agents.data_sub_agent import DataSubAgent
+from app.agents.data_sub_agent.agent import DataSubAgent
 
 
 class TestDataSubAgentAnalysis:

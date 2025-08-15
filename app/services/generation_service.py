@@ -32,7 +32,7 @@ from app.ws_manager import manager
 async def update_job_status(job_id: str, status: str, **kwargs):
     """Updates the status and other attributes of a generation job and sends a WebSocket message."""
     await job_store.update(job_id, status, **kwargs)
-    await manager.broadcast({"job_id": job_id, "status": status, **kwargs})
+    await manager.broadcast_to_job(job_id, {"job_id": job_id, "status": status, **kwargs})
 
 async def get_corpus_from_clickhouse(table_name: str) -> dict:
     """Fetches the content corpus from a specified ClickHouse table."""
@@ -62,7 +62,37 @@ async def get_corpus_from_clickhouse(table_name: str) -> dict:
         raise
     finally:
         if 'db' in locals() and db:
-            db.disconnect()
+            await db.disconnect()
+
+def _process_sample_record(w_type: str, sample, timestamp):
+    """Process a single sample record efficiently."""
+    actual_sample = sample
+    if isinstance(actual_sample, list) and len(actual_sample) == 1 and isinstance(actual_sample[0], tuple):
+        actual_sample = actual_sample[0]
+
+    if isinstance(actual_sample, (list, tuple)) and len(actual_sample) == 2:
+        prompt_text, response_text = actual_sample
+        return ContentCorpus(
+            workload_type=w_type,
+            prompt=prompt_text,
+            response=response_text,
+            record_id=uuid.uuid4(),
+            created_at=timestamp
+        )
+    
+    central_logger.get_logger(__name__).warning(f"Skipping malformed sample for workload '{w_type}': {sample}")
+    return None
+
+
+async def _insert_record_batch(db, table_name: str, records):
+    """Insert a batch of records efficiently."""
+    if not records:
+        return
+    
+    record_data = [list(record.model_dump().values()) for record in records]
+    field_names = list(ContentCorpus.model_fields.keys())
+    await db.insert_data(table_name, record_data, field_names)
+
 
 async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str = None):
     """Saves the generated content corpus to a specified ClickHouse table."""
@@ -87,40 +117,37 @@ async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str =
         table_schema = get_content_corpus_schema(table_name)
         await db.command(table_schema)
         
+        # Process records in optimized batches
         records = []
+        batch_timestamp = pd.Timestamp.now().to_pydatetime()
+        
+        # Pre-calculate total samples for better memory management
+        total_samples = sum(len(samples) for samples in corpus.values())
+        batch_size = min(1000, max(100, total_samples // 10))  # Adaptive batch size
+        
         for w_type, samples in corpus.items():
             for sample in samples:
-                actual_sample = sample
-                if isinstance(actual_sample, list) and len(actual_sample) == 1 and isinstance(actual_sample[0], tuple):
-                    actual_sample = actual_sample[0]
-
-                if isinstance(actual_sample, (list, tuple)) and len(actual_sample) == 2:
-                    prompt_text, response_text = actual_sample
-                    record = ContentCorpus(
-                        workload_type=w_type,
-                        prompt=prompt_text,
-                        response=response_text,
-                        record_id=uuid.uuid4(),
-                        created_at=pd.Timestamp.now().to_pydatetime()
-                    )
-                    records.append(record)
-                else:
-                    central_logger.get_logger(__name__).warning(f"Skipping malformed sample for workload '{w_type}': {sample}")
-                    continue
-
-        if not records:
-            central_logger.get_logger(__name__).info(f"No valid records to insert into ClickHouse table: {table_name}")
-            return
-
-        await db.insert_data(table_name, [list(record.model_dump().values()) for record in records], list(ContentCorpus.model_fields.keys()))
-        central_logger.get_logger(__name__).info(f"Successfully saved {len(records)} records to ClickHouse table: {table_name}")
+                processed_record = _process_sample_record(w_type, sample, batch_timestamp)
+                if processed_record:
+                    records.append(processed_record)
+                
+                # Insert in batches for better memory usage and performance
+                if len(records) >= batch_size:
+                    await _insert_record_batch(db, table_name, records)
+                    records = []  # Clear batch
+        
+        # Insert remaining records
+        if records:
+            await _insert_record_batch(db, table_name, records)
+            
+        central_logger.get_logger(__name__).info(f"Successfully saved corpus to ClickHouse table: {table_name}")
 
     except Exception as e:
         central_logger.get_logger(__name__).exception(f"Failed to save corpus to ClickHouse table {table_name}")
         raise
     finally:
         if 'db' in locals() and db:
-            db.disconnect()
+            await db.disconnect()
 
 
 # --- Content Generation Service ---
@@ -136,12 +163,19 @@ def _next_item(it):
     except StopIteration:
         return _sentinel
 
+def _process_result_batch(corpus, batch):
+    """Process a batch of results efficiently."""
+    for result in batch:
+        if result and result.get('type') in corpus:
+            corpus[result['type']].append(result['data'])
+
+
 def run_generation_in_pool(tasks, num_processes):
     with Pool(processes=num_processes, initializer=init_worker) as pool:
         for result in pool.imap_unordered(generate_content_for_worker, tasks):
             yield result
 
-async def run_content_generation_job(job_id: str, params: ContentGenParams):
+async def run_content_generation_job(job_id: str, params: dict):
     """The core worker process for generating a content corpus."""
     try:
         # Basic check to ensure the API key is available before starting the pool
@@ -151,24 +185,24 @@ async def run_content_generation_job(job_id: str, params: ContentGenParams):
         await update_job_status(job_id, "failed", error=str(e))
         return
 
-    total_tasks = len(list(META_PROMPTS.keys())) * params.samples_per_type
+    total_tasks = len(list(META_PROMPTS.keys())) * getattr(params, 'samples_per_type', 10)
     await update_job_status(job_id, "running", progress=0, total_tasks=total_tasks)
 
     # Create a serializable dictionary for generation_config
     generation_config_dict = {
-        'temperature': params.temperature,
-        'top_p': params.top_p,
-        'top_k': params.top_k
+        'temperature': getattr(params, 'temperature', 0.7),
+        'top_p': getattr(params, 'top_p', None),
+        'top_k': getattr(params, 'top_k', None)
     }
     # Filter out None values so the Google API doesn't complain
     generation_config_dict = {k: v for k, v in generation_config_dict.items() if v is not None}
 
 
     workload_types = list(META_PROMPTS.keys())
-    num_processes = min(cpu_count(), params.max_cores)
+    num_processes = min(cpu_count(), getattr(params, 'max_cores', 4))
 
     # Prepare tasks with serializable data
-    tasks = [(w_type, generation_config_dict) for w_type in workload_types for _ in range(params.samples_per_type)]
+    tasks = [(w_type, generation_config_dict) for w_type in workload_types for _ in range(getattr(params, 'samples_per_type', 10))]
 
     corpus = {key: [] for key in workload_types}
     completed_tasks = 0
@@ -177,15 +211,29 @@ async def run_content_generation_job(job_id: str, params: ContentGenParams):
         loop = asyncio.get_event_loop()
         blocking_generator = run_generation_in_pool(tasks, num_processes)
         
+        # Process results in batches for better performance
+        batch_size = min(50, num_processes * 10)  # Adaptive batch size
+        batch = []
+        
         while True:
             result = await loop.run_in_executor(None, _next_item, blocking_generator)
             if result is _sentinel:
                 break
 
             if result and result.get('type') in corpus:
-                corpus[result['type']].append(result['data'])
+                batch.append(result)
             
-            completed_tasks += 1
+            # Process batch when full or periodically update status
+            if len(batch) >= batch_size:
+                _process_result_batch(corpus, batch)
+                completed_tasks += len(batch)
+                await update_job_status(job_id, "running", progress=completed_tasks)
+                batch = []
+        
+        # Process remaining batch
+        if batch:
+            _process_result_batch(corpus, batch)
+            completed_tasks += len(batch)
             await update_job_status(job_id, "running", progress=completed_tasks)
 
     except Exception as e:
@@ -194,7 +242,7 @@ async def run_content_generation_job(job_id: str, params: ContentGenParams):
         return
 
 
-    clickhouse_table = params.get('clickhouse_table', 'content_corpus')
+    clickhouse_table = getattr(params, 'clickhouse_table', 'content_corpus')
     try:
         await save_corpus_to_clickhouse(corpus, clickhouse_table, job_id=job_id)
         summary = {
@@ -249,7 +297,7 @@ def generate_data_chunk_for_service(args):
     df['total_cost'] = df['prompt_cost'] + df['completion_cost']
     return df
 
-async def run_log_generation_job(job_id: str, params: LogGenParams):
+async def run_log_generation_job(job_id: str, params: dict):
     """The core worker process for generating a synthetic log set."""
     await update_job_status(job_id, "running", progress={'completed_logs': 0, 'total_logs': params['num_logs']})
     
@@ -317,12 +365,12 @@ async def run_data_ingestion_job(job_id: str, params: dict):
 
 from app.data.synthetic.synthetic_data import main as synthetic_data_main
 
-async def run_synthetic_data_generation_job(job_id: str, params: SyntheticDataGenParams):
+async def run_synthetic_data_generation_job(job_id: str, params: dict):
     """Generates and ingests synthetic logs in batches from a ClickHouse corpus."""
-    batch_size = params.get('batch_size', 1000)
-    total_logs_to_gen = params.get('num_traces', 10000)
-    source_table = params.get('source_table', 'content_corpus')
-    destination_table = params.get('destination_table', 'synthetic_data')
+    batch_size = getattr(params, 'batch_size', 1000)
+    total_logs_to_gen = getattr(params, 'num_traces', 10000)
+    source_table = getattr(params, 'source_table', 'content_corpus')
+    destination_table = getattr(params, 'destination_table', 'synthetic_data')
     
     await update_job_status(job_id, "running", progress=0, total_tasks=total_logs_to_gen, records_ingested=0)
 

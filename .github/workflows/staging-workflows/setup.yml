@@ -1,5 +1,9 @@
 name: Environment Setup
 description: Configure environment parameters and determine action
+# ACT Compatibility: This workflow supports local testing with ACT
+# - GitHub API calls are mocked when ACT=true
+# - Environment setup works with local testing scenarios
+# - All configuration logic remains functional in ACT mode
 
 on:
   workflow_call:
@@ -39,11 +43,13 @@ on:
 
 env:
   PROJECT_NAME: netra-staging
+  # ACT environment detection - ACT sets this automatically
+  LOCAL_DEPLOY: 'false'  # Default value
 
 jobs:
   configure:
     name: Configure Environment
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       environment_name: ${{ steps.config.outputs.environment_name }}
       action: ${{ steps.config.outputs.action }}
@@ -81,9 +87,15 @@ jobs:
                 PR_NUMBER="branch-${BRANCH_NAME//\//-}"
               fi
             elif [[ -n "$PR_NUMBER" ]]; then
-              # Fetch PR details for branch and commit
-              BRANCH_NAME=$(gh pr view $PR_NUMBER --json headRefName -q .headRefName)
-              COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid -q .headRefOid)
+              if [ "$ACT" = "true" ]; then
+                echo "ACT detected - mocking PR details fetch"
+                BRANCH_NAME="mock-branch-$PR_NUMBER"
+                COMMIT_SHA="mock-commit-$(date +%s)"
+              else
+                # Fetch PR details for branch and commit
+                BRANCH_NAME=$(gh pr view $PR_NUMBER --json headRefName -q .headRefName)
+                COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid -q .headRefOid)
+              fi
             else
               echo "Error: Either PR number or branch must be provided"
               exit 1
@@ -92,8 +104,14 @@ jobs:
             # repository_dispatch
             PR_NUMBER="${{ inputs.pr_number }}"
             ACTION="${{ inputs.dispatch_action }}"
-            BRANCH_NAME=$(gh pr view $PR_NUMBER --json headRefName -q .headRefName)
-            COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid -q .headRefOid)
+            if [ "$ACT" = "true" ]; then
+              echo "ACT detected - mocking repository dispatch PR details"
+              BRANCH_NAME="mock-dispatch-branch"
+              COMMIT_SHA="mock-commit-$(date +%s)"
+            else
+              BRANCH_NAME=$(gh pr view $PR_NUMBER --json headRefName -q .headRefName)
+              COMMIT_SHA=$(gh pr view $PR_NUMBER --json headRefOid -q .headRefOid)
+            fi
           fi
           
           # Validate PR number

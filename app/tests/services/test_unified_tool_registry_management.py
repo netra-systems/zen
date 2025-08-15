@@ -13,7 +13,7 @@ from enum import Enum
 
 from langchain_core.tools import BaseTool
 from app.services.tool_registry import ToolRegistry
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 
 
 class ToolStatus(Enum):

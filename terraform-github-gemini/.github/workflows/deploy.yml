@@ -9,7 +9,7 @@ on:
 jobs:
   terraform:
     name: 'Terraform'
-    runs-on: 'ubuntu-latest'
+    runs-on: 'warp-custom-default'
     env:
       TF_WORKING_DIR: 'terraform-gcp'
 

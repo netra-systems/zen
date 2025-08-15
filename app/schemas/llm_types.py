@@ -1,144 +1,49 @@
 """
 Strong type definitions for LLM operations following Netra conventions.
+Main types module that aggregates and extends base types.
 """
 
-from typing import Dict, Any, Optional, List, Union, Literal, TypeVar, Generic
+from typing import Dict, Any, Optional, List, Union, TypeVar, Generic
 from datetime import datetime
-from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict
+from abc import ABC, abstractmethod
+from pydantic import BaseModel, Field
 import uuid
 
+# Import base types (no circular dependencies)
+from app.schemas.llm_base_types import (
+    LLMProvider, LLMModel, LLMRole, TokenUsage, LLMMessage, 
+    LLMError, LLMHealthCheck, LLMConfigInfo, LLMManagerStats
+)
 
-class LLMProvider(str, Enum):
-    """Supported LLM providers"""
-    OPENAI = "openai"
-    ANTHROPIC = "anthropic"
-    AZURE_OPENAI = "azure_openai"
-    BEDROCK = "bedrock"
-    VERTEXAI = "vertexai"
-    GOOGLE = "google"
-    COHERE = "cohere"
-    HUGGINGFACE = "huggingface"
-    LOCAL = "local"
-
-
-class LLMModel(str, Enum):
-    """Available LLM models"""
-    GPT_4 = "gpt-4"
-    GPT_4_TURBO = "gpt-4-turbo"
-    GPT_35_TURBO = "gpt-3.5-turbo"
-    CLAUDE_3_OPUS = "claude-3-opus"
-    CLAUDE_3_SONNET = "claude-3-sonnet"
-    CLAUDE_3_HAIKU = "claude-3-haiku"
-    CLAUDE_35_SONNET = "claude-3.5-sonnet"
-    GEMINI_PRO = "gemini-pro"
-    GEMINI_ULTRA = "gemini-ultra"
-    GEMINI_25_PRO = "gemini-2.5-pro"
-    GEMINI_25_FLASH = "gemini-2.5-flash"
-    GEMINI_20_FLASH = "gemini-2.0-flash"
-    LLAMA_3_70B = "llama-3-70b"
-    LLAMA_3_8B = "llama-3-8b"
-    MISTRAL_LARGE = "mistral-large"
-    MIXTRAL_8X7B = "mixtral-8x7b"
-
-
-class LLMRole(str, Enum):
-    """Message roles in LLM conversations"""
-    SYSTEM = "system"
-    USER = "user"
-    ASSISTANT = "assistant"
-    FUNCTION = "function"
-    TOOL = "tool"
-
-
-class TokenUsage(BaseModel):
-    """Token usage statistics"""
-    prompt_tokens: int = 0
-    completion_tokens: int = 0
-    total_tokens: int = 0
-    cached_tokens: Optional[int] = None
-    
-    @property
-    def cost_estimate(self) -> Optional[float]:
-        """Estimate cost based on token usage"""
-        # This would need provider-specific pricing
-        return None
-
-
-class LLMMessage(BaseModel):
-    """Strongly typed LLM message"""
-    role: LLMRole
-    content: str
-    name: Optional[str] = None
-    function_call: Optional[Dict[str, Union[str, dict]]] = None
-    tool_calls: Optional[List[Dict[str, Union[str, dict]]]] = None
-    metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
-
-
-class LLMConfig(BaseModel):
-    """Configuration for LLM instance"""
-    provider: LLMProvider
-    model: Union[LLMModel, str]  # Allow string for custom models
-    api_key: Optional[str] = Field(default=None, exclude=True)  # Exclude from serialization
-    api_base: Optional[str] = None
-    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
-    max_tokens: Optional[int] = Field(default=None, gt=0)
-    top_p: Optional[float] = Field(default=None, ge=0.0, le=1.0)
-    frequency_penalty: Optional[float] = Field(default=0.0, ge=-2.0, le=2.0)
-    presence_penalty: Optional[float] = Field(default=0.0, ge=-2.0, le=2.0)
-    stop_sequences: Optional[List[str]] = None
-    request_timeout: int = Field(default=60, gt=0)
-    retry_attempts: int = Field(default=3, ge=0)
-    retry_delay: float = Field(default=1.0, gt=0)
-    custom_headers: Dict[str, str] = Field(default_factory=dict)
-    model_config = ConfigDict(extra='allow')  # Allow additional provider-specific configs
-
-
-class LLMRequest(BaseModel):
-    """Request to LLM"""
-    messages: List[LLMMessage]
-    config: Optional[LLMConfig] = None
-    stream: bool = Field(default=False)
-    tools: Optional[List[Dict[str, Any]]] = None
-    tool_choice: Optional[Union[str, Dict[str, str]]] = None
-    response_format: Optional[Dict[str, str]] = None  # For structured output
-    user_id: Optional[str] = None
-    session_id: Optional[str] = None
-    metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
+T = TypeVar('T', bound=BaseModel)
 
 
 class LLMResponse(BaseModel):
-    """Response from LLM"""
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    """Response from LLM generation"""
+    content: str = Field(description="Generated content")
     provider: LLMProvider
-    model: str
-    choices: List[Dict[str, Any]]  # Provider-specific format
-    usage: TokenUsage
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    response_time_ms: float
-    cached: bool = Field(default=False)
-    finish_reason: Optional[str] = None
-    metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
+    model: str = Field(description="Model used for generation")
+    usage: Optional[TokenUsage] = Field(default=None, description="Token usage information")
+    response_time_ms: float = Field(default=0.0, description="Response time in milliseconds")
+    cached: bool = Field(default=False, description="Whether response was cached")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Additional metadata")
 
 
-class LLMStreamChunk(BaseModel):
-    """Single chunk in streaming response"""
-    id: str
-    delta: Dict[str, Any]
-    index: int
-    finish_reason: Optional[str] = None
-    usage: Optional[TokenUsage] = None
+class GenerationConfig(BaseModel):
+    """Configuration for LLM generation operations"""
+    num_traces: int = Field(default=1000, ge=1, description="Number of traces to generate")
+    num_logs: Optional[int] = Field(default=None, ge=1, description="Number of logs to generate (defaults to num_traces)")
+    workload_distribution: Dict[str, float] = Field(default_factory=dict, description="Distribution of workload types")
+    time_window_hours: int = Field(default=24, ge=1, le=8760, description="Time window in hours")
+    domain_focus: str = Field(default="general", description="Domain focus for generation")
+    error_rate: float = Field(default=0.01, ge=0.0, le=1.0, description="Error rate for generation")
+    corpus_id: Optional[str] = Field(default=None, description="Corpus ID to use for generation")
+    batch_size: int = Field(default=100, ge=1, description="Batch size for processing")
 
-
-class LLMCache(BaseModel):
-    """Cache entry for LLM responses"""
-    key: str
-    request: LLMRequest
-    response: LLMResponse
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    expires_at: Optional[datetime] = None
-    hit_count: int = Field(default=0)
-    last_accessed: datetime = Field(default_factory=datetime.utcnow)
+    @property
+    def effective_num_logs(self) -> int:
+        """Get effective number of logs (num_logs or num_traces)"""
+        return self.num_logs if self.num_logs is not None else self.num_traces
 
 
 class LLMMetrics(BaseModel):
@@ -170,60 +75,37 @@ class LLMProviderStatus(BaseModel):
     rate_limit_reset: Optional[datetime] = None
 
 
-class StructuredOutputSchema(BaseModel):
-    """Schema for structured output generation"""
-    name: str
-    description: Optional[str] = None
-    parameters: Dict[str, Any]  # JSON Schema
-    strict: bool = Field(default=True)
-    examples: List[Dict[str, Any]] = Field(default_factory=list)
-
-
-class LLMFunction(BaseModel):
-    """Function definition for function calling"""
-    name: str
-    description: str
-    parameters: Dict[str, Any]  # JSON Schema
-    required: List[str] = Field(default_factory=list)
-
-
-class LLMTool(BaseModel):
-    """Tool definition for tool use"""
-    type: Literal["function"]
-    function: LLMFunction
-
-
-T = TypeVar('T', bound=BaseModel)
-
-
-class LLMInstance(Generic[T]):
+class LLMInstance(ABC, Generic[T]):
     """Generic LLM instance with strong typing"""
     
-    def __init__(self, config: LLMConfig):
+    def __init__(self, config: 'LLMConfig'):
         self.config = config
         self._client: Optional[Any] = None  # Provider-specific client
-        self._cache: Dict[str, LLMCache] = {}
+        self._cache: Dict[str, 'LLMCache'] = {}
         self._metrics: LLMMetrics = LLMMetrics(
             provider=config.provider,
             model=str(config.model)
         )
     
-    async def generate(self, request: LLMRequest) -> LLMResponse:
+    @abstractmethod
+    async def generate(self, request: 'LLMRequest') -> 'LLMResponse':
         """Generate response from LLM"""
-        raise NotImplementedError
+        pass
     
+    @abstractmethod
     async def generate_structured(
         self, 
-        request: LLMRequest, 
-        schema: StructuredOutputSchema,
+        request: 'LLMRequest', 
+        schema: 'StructuredOutputSchema',
         response_model: type[T]
     ) -> T:
         """Generate structured output matching schema"""
-        raise NotImplementedError
+        pass
     
-    async def stream(self, request: LLMRequest) -> List[LLMStreamChunk]:
+    @abstractmethod
+    async def stream(self, request: 'LLMRequest') -> List['LLMStreamChunk']:
         """Stream response from LLM"""
-        raise NotImplementedError
+        pass
     
     def get_metrics(self) -> LLMMetrics:
         """Get usage metrics"""
@@ -234,320 +116,100 @@ class LLMInstance(Generic[T]):
         self._cache.clear()
 
 
-class LLMManagerConfig(BaseModel):
-    """Configuration for LLM Manager"""
-    default_provider: LLMProvider
-    default_model: Union[LLMModel, str]
-    providers: Dict[LLMProvider, LLMConfig]
-    cache_enabled: bool = Field(default=True)
-    cache_ttl_seconds: int = Field(default=3600)
-    max_cache_size_mb: int = Field(default=100)
-    fallback_providers: List[LLMProvider] = Field(default_factory=list)
-    rate_limit_per_minute: Optional[int] = None
-    concurrent_requests: int = Field(default=10, gt=0)
-    health_check_interval_seconds: int = Field(default=300)
-
-
-class LLMError(BaseModel):
-    """Structured LLM error"""
-    error_type: Literal["api", "rate_limit", "timeout", "validation", "unknown"]
-    message: str
-    provider: Optional[LLMProvider] = None
-    model: Optional[str] = None
-    request_id: Optional[str] = None
-    retry_after: Optional[int] = None  # Seconds to wait before retry
-    details: Dict[str, Any] = Field(default_factory=dict)
-
-
-# Aliases and additional types for backward compatibility
-GenerationConfig = LLMConfig  # Alias for backward compatibility
-LLMCacheEntry = LLMCache  # Alias
-StructuredLLMResponse = LLMResponse  # Structured responses use same base
-
-
-class LLMConfigInfo(BaseModel):
-    """Information about LLM configuration"""
-    provider: str
-    model_name: str
-    api_key_configured: bool
-    generation_config: LLMConfig
-    enabled: bool = True
-
-
-class LLMManagerStats(BaseModel):
-    """Statistics for LLM Manager"""
-    total_requests: int = 0
-    cache_hits: int = 0
-    cache_misses: int = 0
-    total_errors: int = 0
-    avg_response_time_ms: float = 0.0
-
-
-class MockLLMResponse(BaseModel):
-    """Mock response for testing"""
-    content: str
-    model: str = "mock"
-    provider: str = "mock"
-
-
 class LLMValidationError(Exception):
     """Validation error for LLM operations"""
     pass
 
 
-class LLMHealthCheck(BaseModel):
-    """Health check result for LLM"""
-    healthy: bool
-    provider: str
-    model: str
+# Note: Imports from other LLM schema modules are handled in app.llm.schemas 
+# to avoid circular dependencies. This module contains only core types and interfaces.
 
+# Aliases for backward compatibility - these will be properly defined when imported
 
-# Optimization Context Types for Tests
+# Context classes for different optimization scenarios
+class BaseContext(BaseModel):
+    """Base context for optimization scenarios"""
+    timestamp: datetime = Field(default_factory=datetime.now)
+    user_id: Optional[str] = None
+    session_id: Optional[str] = None
+
+class CostOptimizationContext(BaseContext):
+    """Context for cost optimization scenarios"""
+    current_cost: float = Field(default=0.0, description="Current cost")
+    target_reduction: float = Field(default=0.3, description="Target cost reduction")
+
+class LatencyOptimizationContext(BaseContext):
+    """Context for latency optimization scenarios"""
+    current_latency_ms: float = Field(default=100.0, description="Current latency in ms")
+    target_latency_ms: float = Field(default=50.0, description="Target latency in ms")
+
+class CapacityPlanningContext(BaseContext):
+    """Context for capacity planning scenarios"""
+    current_capacity: int = Field(default=1000, description="Current capacity")
+    projected_growth: float = Field(default=1.5, description="Projected growth factor")
+
+class FunctionOptimizationContext(BaseContext):
+    """Context for function optimization scenarios"""
+    function_name: str = Field(default="", description="Function to optimize")
+    performance_target: str = Field(default="faster", description="Performance target")
+
+class ModelSelectionContext(BaseContext):
+    """Context for model selection scenarios"""
+    use_case: str = Field(default="general", description="Use case")
+    requirements: List[str] = Field(default_factory=list, description="Requirements")
+
+class AuditContext(BaseContext):
+    """Context for audit scenarios"""
+    audit_type: str = Field(default="compliance", description="Type of audit")
+    scope: str = Field(default="full", description="Audit scope")
+
+class MultiObjectiveContext(BaseContext):
+    """Context for multi-objective optimization"""
+    objectives: List[str] = Field(default_factory=list, description="Optimization objectives")
+
+class ToolMigrationContext(BaseContext):
+    """Context for tool migration scenarios"""
+    source_tool: str = Field(default="", description="Source tool")
+    target_tool: str = Field(default="", description="Target tool")
+
+class RollbackAnalysisContext(BaseContext):
+    """Context for rollback analysis"""
+    deployment_id: str = Field(default="", description="Deployment ID")
+    issues: List[str] = Field(default_factory=list, description="Issues found")
+
+class DefaultContext(BaseContext):
+    """Default context for general scenarios"""
+    scenario: str = Field(default="general", description="Scenario type")
+
+# Metrics classes
 class CostMetrics(BaseModel):
-    """Cost metrics for optimization"""
-    daily: float
-    monthly: float
-    per_request: float
-
+    """Metrics for cost tracking"""
+    total_cost: float = Field(default=0.0)
+    cost_per_request: float = Field(default=0.0)
+    cost_reduction: float = Field(default=0.0)
 
 class FeatureMetrics(BaseModel):
-    """Feature performance metrics"""
-    current_latency: float
-    acceptable_latency: Optional[float] = None
-    required_latency: Optional[float] = None
-    usage_percentage: float
-
-
-class CostOptimizationContext(BaseModel):
-    """Context for cost optimization scenarios"""
-    current_costs: CostMetrics
-    features: Dict[str, FeatureMetrics]
-    models_in_use: List[str]
-    total_requests_daily: int
-
+    """Metrics for feature tracking"""
+    feature_count: int = Field(default=0)
+    feature_quality: float = Field(default=0.0)
 
 class LatencyMetrics(BaseModel):
-    """Latency performance metrics"""
-    p50: float
-    p95: float
-    p99: float
+    """Metrics for latency tracking"""
+    avg_latency_ms: float = Field(default=0.0)
+    p95_latency_ms: float = Field(default=0.0)
+    p99_latency_ms: float = Field(default=0.0)
 
-
-class InfrastructureConfig(BaseModel):
-    """Infrastructure configuration"""
-    gpu_type: str
-    gpu_count: int
-    memory_gb: int
-
-
-class LatencyOptimizationContext(BaseModel):
-    """Context for latency optimization scenarios"""
-    current_latency: LatencyMetrics
-    target_improvement: float
-    budget_constraint: str
-    infrastructure: InfrastructureConfig
-
-
-class UsageMetrics(BaseModel):
-    """Usage metrics for capacity planning"""
-    requests_per_day: int
-    peak_rps: int
-    average_rps: int
-
-
-class RateLimitConfig(BaseModel):
-    """Rate limit configuration"""
-    rpm: int  # Requests per minute
-    tpm: int  # Tokens per minute
-
-
-class CapacityPlanningContext(BaseModel):
-    """Context for capacity planning scenarios"""
-    current_usage: UsageMetrics
-    expected_growth: float
-    rate_limits: Dict[str, RateLimitConfig]
-    cost_per_1k_tokens: Dict[str, float]
-
-
-class FunctionMetrics(BaseModel):
-    """Function performance metrics"""
-    avg_execution_time_ms: float
-    memory_usage_mb: float
-    success_rate: float
-    daily_invocations: int
-
-
-class FunctionOptimizationContext(BaseModel):
-    """Context for function optimization scenarios"""
-    function_name: str
-    current_metrics: FunctionMetrics
-    bottlenecks: List[str]
-    optimization_methods_available: List[str]
-
-
-class ModelInfo(BaseModel):
-    """Model information"""
-    primary: str
-    fallback: str
-
-
-class EvaluationMetrics(BaseModel):
-    """Model evaluation metrics"""
-    quality_threshold: float
-    latency_target_ms: float
-    cost_budget_daily: float
-
-
-class WorkloadCharacteristics(BaseModel):
-    """Workload characteristics for model selection"""
-    avg_prompt_tokens: int
-    avg_completion_tokens: int
-    complexity: Literal["low", "medium", "high"]
-
-
-class ModelSelectionContext(BaseModel):
-    """Context for model selection scenarios"""
-    current_models: ModelInfo
-    candidate_models: List[str]
-    evaluation_metrics: EvaluationMetrics
-    workload_characteristics: WorkloadCharacteristics
-
-
-class CacheConfiguration(BaseModel):
-    """Cache configuration details"""
-    name: str
-    size_mb: int
-    hit_rate: float
-    ttl_seconds: int
-
-
-class AuditContext(BaseModel):
-    """Context for audit scenarios"""
-    kv_cache_instances: int
-    cache_configurations: List[CacheConfiguration]
-    optimization_opportunities: List[str]
-
-
-class OptimizationObjectives(BaseModel):
-    """Multi-objective optimization targets"""
-    cost_reduction: float
-    latency_improvement: float
-    usage_increase: float
-
-
-class OptimizationConstraints(BaseModel):
-    """Constraints for optimization"""
-    min_quality_score: float
-    max_error_rate: float
-    budget_limit: float
-
-
-class CurrentSystemState(BaseModel):
-    """Current system state metrics"""
-    daily_cost: float
-    avg_latency_ms: float
-    daily_requests: int
-
-
-class MultiObjectiveContext(BaseModel):
-    """Context for multi-objective optimization scenarios"""
-    objectives: OptimizationObjectives
-    constraints: OptimizationConstraints
-    current_state: CurrentSystemState
-
-
-class AgentTool(BaseModel):
-    """Agent tool information"""
-    name: str
-    current_model: str
-    usage_frequency: Literal["high", "medium", "low"]
-    complexity: Literal["simple", "moderate", "complex"]
-
-
-class MigrationCriteria(BaseModel):
-    """Criteria for tool migration"""
-    min_quality_improvement: float
-    max_cost_increase: float
-    verbosity_options: List[str]
-
-
-class ToolMigrationContext(BaseModel):
-    """Context for tool migration scenarios"""
-    agent_tools: List[AgentTool]
-    new_model: str
-    migration_criteria: MigrationCriteria
-
-
-class ComparisonMetrics(BaseModel):
-    """Metrics for comparison"""
-    quality_score: float
-    cost_per_1k_tokens: float
-    avg_latency_ms: float
-
-
-class MetricsComparison(BaseModel):
-    """Before/after metrics comparison"""
-    before: ComparisonMetrics
-    after: ComparisonMetrics
-
-
-class RollbackAnalysisContext(BaseModel):
-    """Context for rollback analysis scenarios"""
-    upgrade_timestamp: str
-    upgraded_model: str
-    previous_model: str
-    metrics_comparison: MetricsComparison
-    affected_endpoints: int
-
-
-class SystemInfo(BaseModel):
-    """System information"""
-    version: str
-    environment: str
-    region: str
-
-
-class SystemMetrics(BaseModel):
-    """System performance metrics"""
-    uptime_percentage: float
-    error_rate: float
-    avg_response_time_ms: float
-
-
-class DefaultContext(BaseModel):
-    """Default context for general scenarios"""
-    system_info: SystemInfo
-    metrics: SystemMetrics
-
-
+# E2E Test Infrastructure classes
 class E2ETestInfrastructure(BaseModel):
-    """E2E test infrastructure configuration"""
-    supervisor: Any  # Agent supervisor instance
-    quality_service: Any  # Quality gate service instance
-    corpus_service: Any  # Corpus service instance
-
+    """Infrastructure for E2E testing"""
+    test_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    environment: str = Field(default="test")
+    services: List[str] = Field(default_factory=list)
 
 class E2ETestResult(BaseModel):
-    """E2E test execution result"""
-    success: bool
-    prompt: str
-    execution_time: float
-    quality_passed: bool
-    response_length: int
-    state: Optional[Any] = None
-    response: str
+    """Result of an E2E test"""
+    test_id: str
+    passed: bool = Field(default=False)
+    duration_ms: float = Field(default=0.0)
     error: Optional[str] = None
-
-
-class BatchLLMRequest(BaseModel):
-    """Batch request for multiple LLM calls"""
-    requests: List[LLMRequest]
-    parallel: bool = True
-    max_concurrent: int = 5
-
-
-class BatchLLMResponse(BaseModel):
-    """Batch response from multiple LLM calls"""
-    responses: List[LLMResponse]
-    failed_indices: List[int] = Field(default_factory=list)
-    total_time_ms: float
+# through the main llm/schemas.py module

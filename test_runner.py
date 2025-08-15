@@ -46,8 +46,140 @@ sys.path.insert(0, str(PROJECT_ROOT))
 load_dotenv()
 
 # Import test framework modules
-from test_framework import UnifiedTestRunner, TEST_LEVELS, SHARD_MAPPINGS
+from test_framework import UnifiedTestRunner, TEST_LEVELS, SHARD_MAPPINGS, TestDiscovery
 from test_framework.test_config import configure_staging_environment, configure_real_llm
+
+def handle_test_discovery(args):
+    """Handle test discovery and listing."""
+    discovery = TestDiscovery(PROJECT_ROOT)
+    
+    # Gather test data
+    all_tests = discovery.discover_tests()
+    categories = discovery.get_test_categories()
+    test_counts = discovery.get_test_count_by_category()
+    
+    # Filter by category if specified
+    if args.list_category:
+        filtered_tests = {args.list_category: all_tests.get(args.list_category, [])}
+        all_tests = filtered_tests
+    
+    # Filter by level if specified
+    if args.list_level:
+        level_config = TEST_LEVELS.get(args.list_level)
+        if not level_config:
+            print(f"[ERROR] Unknown test level: {args.list_level}")
+            return 1
+    
+    # Format output based on requested format
+    if args.list_format == "json":
+        output = {
+            "test_levels": {},
+            "test_categories": {},
+            "discovered_tests": {},
+            "statistics": {
+                "total_levels": len(TEST_LEVELS),
+                "total_categories": len(test_counts),
+                "total_tests": sum(test_counts.values())
+            }
+        }
+        
+        # Add test levels info
+        for level, config in TEST_LEVELS.items():
+            if not args.list_level or level == args.list_level:
+                output["test_levels"][level] = {
+                    "description": config["description"],
+                    "purpose": config["purpose"],
+                    "timeout": config["timeout"],
+                    "runs_coverage": config.get("run_coverage", False),
+                    "runs_both": config.get("run_both", False)
+                }
+        
+        # Add categories info
+        for cat, info in categories.items():
+            if not args.list_category or cat == args.list_category:
+                output["test_categories"][cat] = {
+                    **info,
+                    "test_count": test_counts.get(cat, 0)
+                }
+        
+        # Add discovered tests
+        for cat, tests in all_tests.items():
+            output["discovered_tests"][cat] = [str(t) for t in tests]
+        
+        print(json.dumps(output, indent=2))
+    
+    elif args.list_format == "markdown":
+        print("# Netra AI Platform Test Discovery Report\n")
+        print(f"**Total Test Levels:** {len(TEST_LEVELS)}")
+        print(f"**Total Test Categories:** {len(test_counts)}")
+        print(f"**Total Tests Found:** {sum(test_counts.values())}\n")
+        
+        print("## Available Test Levels\n")
+        for level, config in TEST_LEVELS.items():
+            if not args.list_level or level == args.list_level:
+                print(f"### `{level}`")
+                print(f"- **Description:** {config['description']}")
+                print(f"- **Purpose:** {config['purpose']}")
+                print(f"- **Timeout:** {config['timeout']}s")
+                print(f"- **Coverage:** {'Yes' if config.get('run_coverage') else 'No'}")
+                print(f"- **Runs Both:** {'Backend & Frontend' if config.get('run_both') else 'Backend Only'}")
+                print()
+        
+        print("## Test Categories\n")
+        print("| Category | Description | Priority | Timeout | Count |")
+        print("|----------|-------------|----------|---------|-------|")
+        for cat, info in categories.items():
+            if not args.list_category or cat == args.list_category:
+                count = test_counts.get(cat, 0)
+                print(f"| {cat} | {info['description']} | {info['priority']} | {info['timeout']} | {count} |")
+        
+        if args.list_category or args.list_level:
+            print(f"\n## Tests in Selected Categories\n")
+            for cat, tests in all_tests.items():
+                if tests:
+                    print(f"### {cat} ({len(tests)} tests)")
+                    for test in tests[:5]:  # Show first 5 tests
+                        print(f"- `{Path(test).relative_to(PROJECT_ROOT)}`")
+                    if len(tests) > 5:
+                        print(f"  ... and {len(tests) - 5} more")
+                    print()
+    
+    else:  # text format (default)
+        print("=" * 80)
+        print("TEST DISCOVERY REPORT")
+        print("=" * 80)
+        print(f"Total Test Levels: {len(TEST_LEVELS)}")
+        print(f"Total Test Categories: {len(test_counts)}")
+        print(f"Total Tests Found: {sum(test_counts.values())}")
+        print()
+        
+        print("AVAILABLE TEST LEVELS:")
+        print("-" * 40)
+        for level, config in TEST_LEVELS.items():
+            if not args.list_level or level == args.list_level:
+                print(f"{level:24} - {config['description']}")
+                print(f"{'':24}   Purpose: {config['purpose']}")
+                print(f"{'':24}   Timeout: {config['timeout']}s")
+        print()
+        
+        print("TEST CATEGORIES:")
+        print("-" * 40)
+        for cat, info in categories.items():
+            if not args.list_category or cat == args.list_category:
+                count = test_counts.get(cat, 0)
+                print(f"{cat:20} - {count:4} tests - {info['description']}")
+        print()
+        
+        if args.list_category:
+            print(f"TESTS IN CATEGORY '{args.list_category}':")
+            print("-" * 40)
+            tests = all_tests.get(args.list_category, [])
+            for test in tests:
+                print(f"  {Path(test).relative_to(PROJECT_ROOT)}")
+            if not tests:
+                print("  No tests found in this category")
+    
+    return 0
 
 def main():
     parser = argparse.ArgumentParser(
@@ -55,7 +187,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=f"""
 Test Levels:
-{chr(10).join([f"  {level:<12} - {config['description']}" for level, config in TEST_LEVELS.items()])}
+{chr(10).join([f"  {level:<24} - {config['description']}" for level, config in TEST_LEVELS.items()])}
 
 Usage Examples:
   # Quick smoke tests (recommended for pre-commit)
@@ -66,6 +198,11 @@ Usage Examples:
   
   # Full comprehensive testing
   python test_runner.py --level comprehensive
+  
+  # Modular comprehensive testing (faster, more focused)
+  python test_runner.py --level comprehensive-backend
+  python test_runner.py --level comprehensive-agents
+  python test_runner.py --level comprehensive-database
   
   # Backend only testing
   python test_runner.py --level unit --backend-only
@@ -222,6 +359,32 @@ Real LLM Testing:
         help="Path to save coverage XML report"
     )
     
+    # Test discovery options
+    parser.add_argument(
+        "--list", "--discover",
+        action="store_true",
+        dest="list_tests",
+        help="List all available tests with categories and information"
+    )
+    parser.add_argument(
+        "--list-format",
+        type=str,
+        choices=["text", "json", "markdown"],
+        default="text",
+        help="Format for test listing output (default: text)"
+    )
+    parser.add_argument(
+        "--list-level",
+        type=str,
+        choices=list(TEST_LEVELS.keys()),
+        help="List tests for a specific test level only"
+    )
+    parser.add_argument(
+        "--list-category",
+        type=str,
+        help="List tests for a specific category only (e.g., unit, integration, api)"
+    )
+    
     # Failing test management options
     parser.add_argument(
         "--show-failing",
@@ -251,6 +414,10 @@ Real LLM Testing:
     )
     
     args = parser.parse_args()
+    
+    # Handle test discovery/listing first
+    if args.list_tests:
+        return handle_test_discovery(args)
     
     # Handle CI/CD specific argument aliases
     if args.json_output:

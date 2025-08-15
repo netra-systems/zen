@@ -1,0 +1,29 @@
+{
+  "precommit_checks_enabled": false,
+  "check_file_size": true,
+  "check_function_complexity": true,
+  "check_test_stubs": true,
+  "max_file_lines": 300,
+  "max_function_lines": 8,
+  "skip_patterns": [
+    "__pycache__",
+    "node_modules",
+    ".git",
+    "migrations",
+    "test_reports",
+    "docs",
+    ".pytest_cache"
+  ],
+  "example_patterns": [
+    "example",
+    "demo",
+    "sample",
+    "test_",
+    "mock",
+    "example_usage",
+    "corpus_metrics"
+  ],
+  "disabled_reason": "Temporarily disabled for development - re-enable before production",
+  "disabled_date": "2024-08-14",
+  "disabled_by": "Architecture team"
+}

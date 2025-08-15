@@ -21,9 +21,28 @@ import json
 from typing import Dict, Any, List
 from datetime import datetime
 
+from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling, TestIntegration as SharedTestIntegration
+
+# Test fixtures for shared test classes
+@pytest.fixture
+def service():
+    """Service fixture for shared integration tests."""
+    mock_llm_manager = Mock()
+    mock_tool_dispatcher = Mock()
+    agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
+    return agent
+
+@pytest.fixture
+def db_session():
+    """Database session fixture for shared error handling tests."""
+    db_mock = Mock()
+    db_mock.query = Mock()
+    return db_mock
+
 # Import the module under test
 try:
-    from app.agents.data_sub_agent import DataSubAgent, QueryBuilder
+    from app.agents.data_sub_agent.agent import DataSubAgent
+    from app.agents.data_sub_agent.query_builder import QueryBuilder
 except ImportError:
     # Create mock classes if imports fail
     class DataSubAgent:
@@ -67,7 +86,7 @@ class TestDataSubAgentInitialization:
         assert agent.name == "DataSubAgent"
         assert agent.tool_dispatcher == mock_tool_dispatcher
         
-    @patch('app.agents.data_sub_agent.RedisManager')
+    @patch('app.agents.data_sub_agent.agent.RedisManager')
     def test_initialization_with_redis(self, mock_redis):
         """Test DataSubAgent initializes with components"""
         mock_llm_manager = Mock()
@@ -298,8 +317,21 @@ class TestDataEnrichment:
         assert "metadata" in enriched
 
 
-class TestErrorHandling:
-    """Test error handling and recovery"""
+class TestErrorHandling(SharedTestErrorHandling):
+    """Test error handling and recovery - extends shared error handling."""
+    
+    def test_database_connection_failure(self, service):
+        """Test graceful handling of database connection failures"""
+        # DataSubAgent-specific implementation
+        mock_clickhouse = Mock()
+        service.clickhouse_ops = mock_clickhouse
+        mock_clickhouse.fetch_data = Mock(side_effect=Exception("Database unavailable"))
+        
+        with pytest.raises(Exception) as exc_info:
+            # Test that database errors are properly handled
+            service.clickhouse_ops.fetch_data("SELECT 1")
+        
+        assert "Database unavailable" in str(exc_info.value)
     
     @pytest.mark.asyncio
     async def test_retry_on_failure(self):
@@ -351,6 +383,14 @@ class TestErrorHandling:
             {"id": 2, "valid": False},  # This will fail
             {"id": 3, "valid": True}
         ]
+        
+        # Mock process_data to fail on invalid items
+        async def mock_process_data(data):
+            if not data.get("valid", True):
+                raise Exception("Invalid data")
+            return {"status": "processed", "data": data}
+        
+        agent.process_data = mock_process_data
         
         results = await agent.process_batch_safe(data_batch)
         
@@ -411,7 +451,7 @@ class TestCaching:
         assert result2["new"] == "result"
 
 
-class TestIntegration:
+class TestIntegration(SharedTestIntegration):
     """Integration tests with other components"""
     
     @pytest.mark.asyncio
@@ -526,7 +566,7 @@ class TestStateManagement:
         agent.context["last_processed"] = "item_123"
         
         # Mock Redis for state persistence
-        with patch('app.agents.data_sub_agent.RedisManager') as MockRedis:
+        with patch('app.agents.data_sub_agent.agent.RedisManager') as MockRedis:
             mock_redis = Mock()
             MockRedis.return_value = mock_redis
             mock_redis.set = AsyncMock()
@@ -567,7 +607,7 @@ class TestStateManagement:
         agent.context["pending_items"] = list(range(51, 100))
         
         # Mock Redis for state persistence
-        with patch('app.agents.data_sub_agent.RedisManager') as MockRedis:
+        with patch('app.agents.data_sub_agent.agent.RedisManager') as MockRedis:
             mock_redis = Mock()
             MockRedis.return_value = mock_redis
             mock_redis.set = AsyncMock()

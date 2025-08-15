@@ -53,123 +53,168 @@ class QualityGateService:
             ValidationResult with metrics and pass/fail status
         """
         try:
-            # Calculate content hash for caching
-            content_hash = hashlib.md5(content.encode()).hexdigest()
-            cache_key = f"quality:{content_type.value}:{content_hash}:strict={strict_mode}"
+            cache_key = self._generate_cache_key(content, content_type, strict_mode)
+            cached_result = self._check_validation_cache(cache_key)
+            if cached_result:
+                return cached_result
             
-            # Check cache
-            if cache_key in self.validation_cache:
-                logger.debug(f"Using cached validation for {cache_key}")
-                return self.validation_cache[cache_key]
-            
-            # Calculate metrics
-            metrics = await self.metrics_calculator.calculate_metrics(content, content_type, context)
-            
-            # Calculate overall score with weighted average
-            weights = self.validator.get_weights_for_type(content_type)
-            metrics.overall_score = self.validator.calculate_weighted_score(metrics, weights)
-            
-            # Determine quality level
-            metrics.quality_level = self.validator.determine_quality_level(metrics.overall_score)
-            
-            # Generate suggestions for improvement
-            metrics.suggestions = self.validator.generate_suggestions(metrics, content_type)
-            
-            # Apply thresholds
-            passed = self.validator.check_thresholds(metrics, content_type, strict_mode)
-            
-            # Generate result
-            result = ValidationResult(
-                passed=passed,
-                metrics=metrics,
-                retry_suggested=not passed and metrics.overall_score > 0.3,
-                retry_prompt_adjustments=self.validator.generate_prompt_adjustments(metrics) if not passed else None,
-                fallback_response=None  # Will be set by fallback system
-            )
-            
-            # Cache result
-            self.validation_cache[cache_key] = result
-            
-            # Store metrics for monitoring
-            await self._store_metrics(metrics, content_type)
-            
-            # Log validation result
-            logger.info(
-                f"Content validation: {content_type.value} - "
-                f"Score: {metrics.overall_score:.2f} - "
-                f"Level: {metrics.quality_level.value} - "
-                f"Passed: {passed}"
-            )
-            
+            metrics = await self._calculate_content_metrics(content, content_type, context)
+            result = await self._build_validation_result(metrics, content_type, strict_mode)
+            await self._cache_and_store_result(cache_key, result, content_type)
+            self._log_validation_result(content_type, metrics, result.passed)
             return result
-            
         except Exception as e:
             logger.error(f"Error validating content: {str(e)}")
-            # Return a failed validation on error
-            return ValidationResult(
-                passed=False,
-                metrics=QualityMetrics(
-                    overall_score=0.0,
-                    quality_level=QualityLevel.UNACCEPTABLE,
-                    issues=[f"Validation error: {str(e)}"]
-                )
+            return self._create_error_result(e)
+
+    def _generate_cache_key(self, content: str, content_type: ContentType, strict_mode: bool) -> str:
+        """Generate cache key for content validation."""
+        content_hash = hashlib.md5(content.encode()).hexdigest()
+        return f"quality:{content_type.value}:{content_hash}:strict={strict_mode}"
+    
+    def _check_validation_cache(self, cache_key: str) -> Optional[ValidationResult]:
+        """Check if validation result exists in cache."""
+        if cache_key in self.validation_cache:
+            logger.debug(f"Using cached validation for {cache_key}")
+            return self.validation_cache[cache_key]
+        return None
+    
+    async def _calculate_content_metrics(self, content: str, content_type: ContentType, context: Optional[Dict[str, Any]]) -> QualityMetrics:
+        """Calculate comprehensive content quality metrics."""
+        metrics = await self.metrics_calculator.calculate_metrics(content, content_type, context)
+        weights = self.validator.get_weights_for_type(content_type)
+        metrics.overall_score = self.validator.calculate_weighted_score(metrics, weights)
+        metrics.quality_level = self.validator.determine_quality_level(metrics.overall_score)
+        metrics.suggestions = self.validator.generate_suggestions(metrics, content_type)
+        return metrics
+    
+    async def _build_validation_result(self, metrics: QualityMetrics, content_type: ContentType, strict_mode: bool) -> ValidationResult:
+        """Build validation result with pass/fail status and retry suggestions."""
+        passed = self.validator.check_thresholds(metrics, content_type, strict_mode)
+        retry_adjustments = self.validator.generate_prompt_adjustments(metrics) if not passed else None
+        return ValidationResult(
+            passed=passed,
+            metrics=metrics,
+            retry_suggested=not passed and retry_adjustments is not None,
+            retry_prompt_adjustments=retry_adjustments,
+            fallback_response=None
+        )
+    
+    async def _cache_and_store_result(self, cache_key: str, result: ValidationResult, content_type: ContentType) -> None:
+        """Cache validation result and store metrics for monitoring."""
+        self.validation_cache[cache_key] = result
+        await self._store_metrics(result.metrics, content_type)
+    
+    def _log_validation_result(self, content_type: ContentType, metrics: QualityMetrics, passed: bool) -> None:
+        """Log validation result for monitoring and debugging."""
+        logger.info(
+            f"Content validation: {content_type.value} - "
+            f"Score: {metrics.overall_score:.2f} - "
+            f"Level: {metrics.quality_level.value} - "
+            f"Passed: {passed}"
+        )
+    
+    def _create_error_result(self, error: Exception) -> ValidationResult:
+        """Create a failed validation result for error cases."""
+        return ValidationResult(
+            passed=False,
+            metrics=QualityMetrics(
+                overall_score=0.0,
+                quality_level=QualityLevel.UNACCEPTABLE,
+                issues=[f"Validation error: {str(error)}"]
             )
+        )
     
     async def _store_metrics(self, metrics: QualityMetrics, content_type: ContentType) -> None:
         """Store metrics for monitoring and analysis"""
         try:
-            # Store in memory for immediate access
-            self.metrics_history[content_type].append({
-                'timestamp': datetime.now(UTC).isoformat(),
-                'overall_score': metrics.overall_score,
-                'quality_level': metrics.quality_level.value,
-                'specificity': metrics.specificity_score,
-                'actionability': metrics.actionability_score,
-                'quantification': metrics.quantification_score
-            })
-            
-            # Keep only last 1000 entries per type
-            if len(self.metrics_history[content_type]) > 1000:
-                self.metrics_history[content_type] = self.metrics_history[content_type][-1000:]
-            
-            # Store in Redis for persistence
-            if self.redis_manager:
-                await self.redis_manager.store_metrics(
-                    f"quality_metrics:{content_type.value}",
-                    metrics.__dict__,
-                    ttl=86400  # 24 hours
-                )
-                
+            self._store_metrics_in_memory(metrics, content_type)
+            await self._store_metrics_in_redis(metrics, content_type)
         except Exception as e:
             logger.warning(f"Could not store metrics: {str(e)}")
     
+    def _store_metrics_in_memory(self, metrics: QualityMetrics, content_type: ContentType) -> None:
+        """Store metrics in memory for immediate access."""
+        metric_entry = self._create_metric_entry(metrics)
+        self.metrics_history[content_type].append(metric_entry)
+        self._trim_metrics_history(content_type)
+    
+    def _create_metric_entry(self, metrics: QualityMetrics) -> Dict[str, Any]:
+        """Create standardized metric entry for storage."""
+        return {
+            'timestamp': datetime.now(UTC).isoformat(),
+            'overall_score': metrics.overall_score,
+            'quality_level': metrics.quality_level.value,
+            'specificity': metrics.specificity_score,
+            'actionability': metrics.actionability_score,
+            'quantification': metrics.quantification_score
+        }
+    
+    def _trim_metrics_history(self, content_type: ContentType) -> None:
+        """Trim metrics history to maintain maximum size."""
+        if len(self.metrics_history[content_type]) > 1000:
+            self.metrics_history[content_type] = self.metrics_history[content_type][-1000:]
+    
+    async def _store_metrics_in_redis(self, metrics: QualityMetrics, content_type: ContentType) -> None:
+        """Store metrics in Redis for persistence."""
+        if self.redis_manager:
+            import json
+            metrics_dict = self._prepare_redis_metrics_dict(metrics)
+            redis_key = self._generate_redis_metrics_key(content_type)
+            await self.redis_manager.set(redis_key, json.dumps(metrics_dict), ex=86400)
+    
+    def _prepare_redis_metrics_dict(self, metrics: QualityMetrics) -> Dict[str, Any]:
+        """Prepare metrics dictionary for Redis storage."""
+        metrics_dict = metrics.__dict__.copy()
+        if 'quality_level' in metrics_dict and hasattr(metrics_dict['quality_level'], 'value'):
+            metrics_dict['quality_level'] = metrics_dict['quality_level'].value
+        return metrics_dict
+    
+    def _generate_redis_metrics_key(self, content_type: ContentType) -> str:
+        """Generate Redis key for metrics storage."""
+        timestamp = datetime.now(UTC).isoformat()
+        return f"quality_metrics:{content_type.value}:{timestamp}"
+    
     async def get_quality_stats(self, content_type: Optional[ContentType] = None) -> Dict[str, Any]:
         """Get quality statistics for monitoring"""
+        types = self._get_content_types_for_stats(content_type)
         stats = {}
         
-        if content_type:
-            types = [content_type]
-        else:
-            types = list(ContentType)
-        
         for ct in types:
-            if ct in self.metrics_history and self.metrics_history[ct]:
-                recent = self.metrics_history[ct][-100:]  # Last 100 entries
-                
-                scores = [m['overall_score'] for m in recent]
-                stats[ct.value] = {
-                    'count': len(recent),
-                    'avg_score': sum(scores) / len(scores),
-                    'min_score': min(scores),
-                    'max_score': max(scores),
-                    'failure_rate': len([s for s in scores if s < 0.5]) / len(scores),
-                    'quality_distribution': {
-                        level.value: len([m for m in recent if m['quality_level'] == level.value])
-                        for level in QualityLevel
-                    }
-                }
+            if self._has_metrics_data(ct):
+                recent = self.metrics_history[ct][-100:]
+                stats[ct.value] = self._calculate_content_type_stats(recent)
         
         return stats
+    
+    def _get_content_types_for_stats(self, content_type: Optional[ContentType]) -> List[ContentType]:
+        """Get content types to include in statistics."""
+        if content_type:
+            return [content_type]
+        return list(ContentType)
+    
+    def _has_metrics_data(self, content_type: ContentType) -> bool:
+        """Check if metrics data exists for content type."""
+        return content_type in self.metrics_history and self.metrics_history[content_type]
+    
+    def _calculate_content_type_stats(self, recent_metrics: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Calculate comprehensive statistics for a content type."""
+        scores = [m['overall_score'] for m in recent_metrics]
+        return {
+            'count': len(recent_metrics),
+            'avg_score': sum(scores) / len(scores),
+            'min_score': min(scores),
+            'max_score': max(scores),
+            'failure_rate': len([s for s in scores if s < 0.5]) / len(scores),
+            'quality_distribution': self._calculate_quality_distribution(recent_metrics)
+        }
+    
+    def _calculate_quality_distribution(self, recent_metrics: List[Dict[str, Any]]) -> Dict[str, int]:
+        """Calculate quality level distribution."""
+        return {
+            level.value: len([m for m in recent_metrics if m['quality_level'] == level.value])
+            for level in QualityLevel
+        }
     
     async def validate_batch(
         self,

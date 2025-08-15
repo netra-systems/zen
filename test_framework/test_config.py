@@ -28,6 +28,19 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "run_coverage": True,
         "run_both": True
     },
+    "agents": {
+        "description": "Agent-specific unit tests (2-3 minutes)",
+        "purpose": "Quick validation of agent functionality during development",
+        "backend_args": [
+            "app/tests/agents/test_data_sub_agent.py", 
+            "tests/test_actions_sub_agent.py",
+            "-v", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}"
+        ],
+        "frontend_args": [],
+        "timeout": 180,
+        "run_coverage": False,
+        "run_both": False
+    },
     "integration": {
         "description": "Integration tests for component interaction (3-5 minutes)",
         "purpose": "Feature validation, API testing",
@@ -40,11 +53,78 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
     "comprehensive": {
         "description": "Full test suite with coverage (30-45 minutes)",
         "purpose": "Pre-release validation, full system testing",
-        "backend_args": ["--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
+        "backend_args": ["app/tests", "tests", "integration_tests", "--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
         "frontend_args": ["--coverage"],
         "timeout": 2700,  # 45 minutes to handle real LLM tests
         "run_coverage": True,
         "run_both": True
+    },
+    "comprehensive-backend": {
+        "description": "Comprehensive backend tests only (15-20 minutes)",
+        "purpose": "Full backend validation without frontend",
+        "backend_args": ["app/tests", "tests", "integration_tests", "--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 1200,
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-frontend": {
+        "description": "Comprehensive frontend tests only (10-15 minutes)",
+        "purpose": "Full frontend validation without backend",
+        "backend_args": [],
+        "frontend_args": ["--coverage"],
+        "timeout": 900,
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-core": {
+        "description": "Core functionality comprehensive tests (10-15 minutes)",
+        "purpose": "Deep validation of core components only",
+        "backend_args": ["--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-k", "core or config or dependencies", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 900,
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-agents": {
+        "description": "Agent system comprehensive tests (10-15 minutes)",
+        "purpose": "Deep validation of multi-agent system",
+        "backend_args": [
+            "tests/test_data_sub_agent.py", 
+            "tests/test_actions_sub_agent.py",
+            "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--fail-fast"
+        ],
+        "frontend_args": [],
+        "timeout": 900,
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-websocket": {
+        "description": "WebSocket comprehensive tests (5-10 minutes)",
+        "purpose": "Deep validation of WebSocket functionality",
+        "backend_args": ["--coverage", f"--parallel={min(2, OPTIMAL_WORKERS)}", "-k", "websocket or ws_manager", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 600,
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-database": {
+        "description": "Database comprehensive tests (10-15 minutes)",
+        "purpose": "Deep validation of all database operations",
+        "backend_args": ["--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-k", "database or repository or clickhouse or postgres", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 900,
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-api": {
+        "description": "API comprehensive tests (10-15 minutes)",
+        "purpose": "Deep validation of all API endpoints",
+        "backend_args": ["--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-k", "routes or api", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 900,
+        "run_coverage": True,
+        "run_both": False
     },
     "critical": {
         "description": "Critical path tests only (1-2 minutes)",

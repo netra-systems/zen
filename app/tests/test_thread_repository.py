@@ -17,6 +17,7 @@ def mock_db():
     mock.commit = AsyncMock()
     mock.rollback = AsyncMock()
     mock.refresh = AsyncMock()
+    mock.flush = AsyncMock()
     mock.delete = AsyncMock()
     return mock
 
@@ -53,8 +54,7 @@ async def test_create_thread_success(mock_db, thread_repo):
     assert result.id == 'thread_test123'
     assert result.metadata_['title'] == 'Test Thread'
     mock_db.add.assert_called_once()
-    mock_db.commit.assert_called_once()
-    mock_db.refresh.assert_called_once()
+    mock_db.flush.assert_called_once()  # Repository uses flush, not commit
 
 
 @pytest.mark.asyncio

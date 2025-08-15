@@ -348,108 +348,117 @@ class StagingDataSeeder:
 
 
 async def main():
-    parser = argparse.ArgumentParser(description="Seed staging environment with test data")
-    parser.add_argument(
-        "--pr-number",
-        type=str,
-        help="Pull request number for this staging environment"
-    )
-    parser.add_argument(
-        "--config-file",
-        type=str,
-        help="Path to configuration file (JSON)"
-    )
-    parser.add_argument(
-        "--users",
-        type=int,
-        default=10,
-        help="Number of users to create"
-    )
-    parser.add_argument(
-        "--threads-per-user",
-        type=int,
-        default=5,
-        help="Number of threads per user"
-    )
-    parser.add_argument(
-        "--messages-per-thread",
-        type=int,
-        default=10,
-        help="Number of messages per thread"
-    )
-    parser.add_argument(
-        "--optimizations",
-        type=int,
-        default=50,
-        help="Number of optimization requests"
-    )
-    parser.add_argument(
-        "--metrics",
-        type=int,
-        default=1000,
-        help="Number of metric data points"
-    )
-    parser.add_argument(
-        "--output",
-        type=str,
-        help="Output file for seed summary (JSON)"
-    )
-    
+    """Main entry point for staging data seeding."""
+    parser = _create_seeding_parser()
     args = parser.parse_args()
-    
-    # Load configuration
+    config = await _load_or_build_config(args)
+    seeder = _initialize_seeder(args)
+    summary = await _execute_seeding(seeder, config)
+    await _handle_output_and_summary(args, summary)
+
+def _create_seeding_parser() -> argparse.ArgumentParser:
+    """Create argument parser for seeding script."""
+    parser = argparse.ArgumentParser(description="Seed staging environment with test data")
+    _add_basic_arguments(parser)
+    _add_data_count_arguments(parser)
+    _add_output_arguments(parser)
+    return parser
+
+def _add_basic_arguments(parser: argparse.ArgumentParser):
+    """Add basic configuration arguments."""
+    parser.add_argument("--pr-number", type=str, help="Pull request number for this staging environment")
+    parser.add_argument("--config-file", type=str, help="Path to configuration file (JSON)")
+
+def _add_data_count_arguments(parser: argparse.ArgumentParser):
+    """Add data count configuration arguments."""
+    parser.add_argument("--users", type=int, default=10, help="Number of users to create")
+    parser.add_argument("--threads-per-user", type=int, default=5, help="Number of threads per user")
+    parser.add_argument("--messages-per-thread", type=int, default=10, help="Number of messages per thread")
+    parser.add_argument("--optimizations", type=int, default=50, help="Number of optimization requests")
+    parser.add_argument("--metrics", type=int, default=1000, help="Number of metric data points")
+
+def _add_output_arguments(parser: argparse.ArgumentParser):
+    """Add output configuration arguments."""
+    parser.add_argument("--output", type=str, help="Output file for seed summary (JSON)")
+
+async def _load_or_build_config(args: argparse.Namespace) -> dict:
+    """Load configuration from file or build from arguments."""
     if args.config_file:
-        with open(args.config_file, 'r') as f:
-            config = json.load(f)
+        return _load_config_from_file(args.config_file)
     else:
-        # Build config from arguments
-        config = {
-            "users": {
-                "count": args.users,
-                "roles": {
-                    "admin": max(1, args.users // 10),
-                    "manager": max(2, args.users // 5),
-                    "user": args.users - max(1, args.users // 10) - max(2, args.users // 5)
-                }
-            },
-            "threads": {
-                "threads_per_user": args.threads_per_user,
-                "messages_per_thread": args.messages_per_thread
-            },
-            "optimizations": {
-                "count": args.optimizations
-            },
-            "metrics": {
-                "count": args.metrics,
-                "time_range_days": 30
-            }
-        }
-    
-    # Initialize seeder
-    seeder = StagingDataSeeder(pr_number=args.pr_number)
-    
-    # Seed data
+        return _build_config_from_args(args)
+
+def _load_config_from_file(config_file: str) -> dict:
+    """Load configuration from JSON file."""
+    with open(config_file, 'r') as f:
+        return json.load(f)
+
+def _build_config_from_args(args: argparse.Namespace) -> dict:
+    """Build configuration from command line arguments."""
+    return {
+        "users": _build_user_config(args),
+        "threads": _build_thread_config(args),
+        "optimizations": {"count": args.optimizations},
+        "metrics": {"count": args.metrics, "time_range_days": 30}
+    }
+
+def _build_user_config(args: argparse.Namespace) -> dict:
+    """Build user configuration from arguments."""
+    admin_count = max(1, args.users // 10)
+    manager_count = max(2, args.users // 5)
+    user_count = args.users - admin_count - manager_count
+    return {
+        "count": args.users,
+        "roles": {"admin": admin_count, "manager": manager_count, "user": user_count}
+    }
+
+def _build_thread_config(args: argparse.Namespace) -> dict:
+    """Build thread configuration from arguments."""
+    return {
+        "threads_per_user": args.threads_per_user,
+        "messages_per_thread": args.messages_per_thread
+    }
+
+def _initialize_seeder(args: argparse.Namespace) -> StagingDataSeeder:
+    """Initialize staging data seeder."""
+    return StagingDataSeeder(pr_number=args.pr_number)
+
+async def _execute_seeding(seeder: StagingDataSeeder, config: dict) -> dict:
+    """Execute data seeding and return summary."""
     await seeder.seed_all(config)
-    
-    # Generate summary
-    summary = seeder.generate_summary()
-    
-    # Save summary if output specified
+    return seeder.generate_summary()
+
+async def _handle_output_and_summary(args: argparse.Namespace, summary: dict):
+    """Handle output file writing and summary printing."""
+    _save_summary_if_requested(args, summary)
+    _print_comprehensive_summary(summary)
+
+def _save_summary_if_requested(args: argparse.Namespace, summary: dict):
+    """Save summary to file if output path specified."""
     if args.output:
         with open(args.output, 'w') as f:
             json.dump(summary, f, indent=2, default=str)
         print(f"Seed summary saved to: {args.output}")
-    
-    # Print summary
+
+def _print_comprehensive_summary(summary: dict):
+    """Print comprehensive summary of seeded data."""
     print("\n" + "="*60)
     print("STAGING DATA SEED SUMMARY")
     print("="*60)
+    _print_summary_header(summary)
+    _print_data_counts(summary)
+    print("="*60)
+
+def _print_summary_header(summary: dict):
+    """Print summary header information."""
     print(f"PR Number: {summary['pr_number']}")
     print(f"Timestamp: {summary['timestamp']}")
     print("\nData Created:")
+
+def _print_data_counts(summary: dict):
+    """Print individual data type counts."""
     for key, count in summary['summary'].items():
         print(f"  {key.capitalize()}: {count}")
-    print("="*60)
 
 
 if __name__ == "__main__":

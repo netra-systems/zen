@@ -9,12 +9,12 @@ class RedisManager:
         self.enabled = self._check_if_enabled()
 
     def _check_if_enabled(self):
-        """Check if Redis should be enabled based on service mode configuration."""
+        """Determine Redis service availability based on environment configuration."""
         import os
         
-        # Check for test-specific disable flag
-        if os.environ.get("TEST_DISABLE_REDIS", "").lower() == "true":
-            logger.info("Redis is disabled for testing")
+        # Check for operational disable flag
+        if os.environ.get("DISABLE_REDIS", "").lower() == "true":
+            logger.info("Redis is disabled by configuration")
             return False
         
         # Check service mode from environment (set by dev launcher)
@@ -23,9 +23,8 @@ class RedisManager:
         if redis_mode == "disabled":
             logger.info("Redis is disabled (mode: disabled)")
             return False
-        elif redis_mode == "mock":
-            logger.info("Redis is running in mock mode")
-            # Still return True but the connection will use mock
+        elif redis_mode == "standalone":
+            logger.info("Redis is running in standalone mode")
             return True
             
         if settings.environment == "development":
@@ -33,7 +32,7 @@ class RedisManager:
             if not enabled:
                 logger.info("Redis is disabled in development configuration")
             return enabled
-        # Redis is always enabled in production and testing
+        # Redis is enabled by default in production environments
         return True
 
     async def connect(self):
@@ -87,5 +86,29 @@ class RedisManager:
         if self.redis_client:
             return await self.redis_client.delete(key)
         return None
+
+    async def get_list(self, key: str, limit: int = None):
+        """Get list items from Redis"""
+        if self.redis_client:
+            try:
+                items = await self.redis_client.lrange(key, 0, limit - 1 if limit else -1)
+                return items
+            except Exception as e:
+                logger.warning(f"Failed to get list {key}: {e}")
+                return []
+        return []
+
+    async def add_to_list(self, key: str, value: str, max_size: int = None):
+        """Add item to Redis list with optional size limit"""
+        if self.redis_client:
+            try:
+                await self.redis_client.lpush(key, value)
+                if max_size:
+                    await self.redis_client.ltrim(key, 0, max_size - 1)
+                return True
+            except Exception as e:
+                logger.warning(f"Failed to add to list {key}: {e}")
+                return False
+        return False
 
 redis_manager = RedisManager()

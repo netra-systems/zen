@@ -101,6 +101,53 @@ This will launch:
 - Backend API at http://localhost:8000
 - Frontend UI at http://localhost:3000
 
+### 🐳 Terraform-Managed Development Database (Recommended)
+
+For a consistent development environment, use our Terraform configuration to automatically set up PostgreSQL, Redis, and ClickHouse:
+
+#### Quick Setup
+```bash
+# Navigate to terraform directory
+cd terraform-dev-postgres
+
+# Run quick start script
+# Windows:
+powershell -ExecutionPolicy Bypass -File quick-start.ps1
+
+# macOS/Linux:
+chmod +x quick-start.sh
+./quick-start.sh
+```
+
+This creates:
+- ✅ PostgreSQL 14 on port 5432 (with test database)
+- ✅ Redis 7 on port 6379
+- ✅ ClickHouse on ports 8123/9000
+- ✅ Auto-generated `.env.development.local` with secure passwords
+- ✅ Persistent data volumes
+
+The dev_launcher automatically uses `.env.development.local` if it exists.
+
+#### Database Management
+```bash
+cd terraform-dev-postgres
+
+# Status check
+./manage.ps1 status     # Windows
+./manage.sh status      # macOS/Linux
+
+# Connect to databases
+./manage.ps1 connect    # Interactive connection menu
+
+# Stop databases
+./manage.ps1 stop
+
+# View logs
+./manage.ps1 logs
+```
+
+See [terraform-dev-postgres/README.md](terraform-dev-postgres/README.md) for detailed documentation.
+
 ### Alternative: Manual Setup
 
 If you prefer manual control or the installer encounters issues:
@@ -408,7 +455,7 @@ ORDER BY timestamp;
 ```bash
 # BEST CONFIGURATION FOR NEW DEVELOPERS
 # Single command that handles everything optimally
-python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets
+python dev_launcher.py --dynamic --no-backend-reload --load-secrets
 
 # What this does:
 # ✅ Finds free ports automatically (no conflicts)
@@ -421,13 +468,13 @@ python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets
 ##### Other Useful Configurations:
 ```bash
 # Development with hot reload (slower but auto-refreshes)
-python scripts/dev_launcher.py --dynamic
+python dev_launcher.py --dynamic
 
 # Maximum performance (no hot reload at all)
-python scripts/dev_launcher.py --dynamic --no-reload
+python dev_launcher.py --dynamic --no-reload
 
 # Custom ports
-python scripts/dev_launcher.py --backend-port 8080 --frontend-port 3001
+python dev_launcher.py --backend-port 8080 --frontend-port 3001
 
 # Check service status
 python scripts/service_discovery.py status
@@ -562,13 +609,13 @@ interface WebSocketMessage {
 # Quick smoke tests (< 30 seconds) - Use before commits
 python test_runner.py --level smoke
 
-# Unit tests (1-2 minutes) - Development validation
+# Unit tests (1-2 minutes) - Development validation (DEFAULT)
 python test_runner.py --level unit
 
 # Integration tests (3-5 minutes) - Feature validation
 python test_runner.py --level integration
 
-# Comprehensive tests with coverage (10-15 minutes)
+# Comprehensive tests with coverage (30-45 minutes)
 python test_runner.py --level comprehensive
 
 # Critical path tests only (1-2 minutes)

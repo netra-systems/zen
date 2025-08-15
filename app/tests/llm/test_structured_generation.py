@@ -8,7 +8,8 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import json
 
-from app.llm.llm_manager import LLMManager, MockLLM, MockStructuredLLM
+from app.llm.llm_manager import LLMManager
+from app.llm.llm_mocks import MockLLM, MockStructuredLLM
 from app.schemas import AppConfig, LLMConfig
 
 
@@ -125,7 +126,7 @@ class TestLLMManagerStructuredGeneration:
         
         assert isinstance(structured_llm, MockStructuredLLM)
     
-    @patch('app.llm.llm_manager.ChatOpenAI')
+    @patch('langchain_openai.ChatOpenAI')
     def test_get_structured_llm_with_real(self, mock_openai, llm_manager):
         """Test getting structured LLM with real provider."""
         llm_manager.enabled = True
@@ -319,7 +320,8 @@ class TestIntegrationWithAgents:
     @pytest.mark.asyncio
     async def test_triage_agent_structured_response(self):
         """Test that triage agent can use structured responses."""
-        from app.agents.triage_sub_agent import TriageResult, TriageSubAgent
+        from app.agents.triage_sub_agent import TriageResult
+        from app.agents.triage_sub_agent.agent import TriageSubAgent
         
         # This is more of an integration test placeholder
         # Real test would require full agent setup
@@ -337,7 +339,7 @@ class TestIntegrationWithAgents:
     @pytest.mark.asyncio
     async def test_triage_result_with_nested_json_parameters(self, llm_manager):
         """Test TriageResult validation with nested JSON in tool_recommendations."""
-        from app.agents.triage.models import TriageResult
+        from app.agents.triage_sub_agent.models import TriageResult
         
         # Simulate the exact error case: parameters as JSON string
         raw_response = {
@@ -367,7 +369,7 @@ class TestIntegrationWithAgents:
     @pytest.mark.asyncio
     async def test_data_agent_structured_response(self):
         """Test that data agent can use structured responses."""
-        from app.agents.data_sub_agent import DataAnalysisResponse
+        from app.agents.data_sub_agent.models import DataAnalysisResponse
         
         # Verify the model is properly defined
         response = DataAnalysisResponse(

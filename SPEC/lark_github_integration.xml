@@ -1146,7 +1146,7 @@ on:
   
 jobs:
   process-command:
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     steps:
       - name: Process Lark Command
         env:

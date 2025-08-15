@@ -2,28 +2,26 @@
 
 import asyncio
 import time
-from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import Dict, List, Optional, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.ws_manager import WebSocketManager
     from app.agents.supervisor.agent_registry import AgentRegistry
-from datetime import datetime, timezone
+
 from app.logging_config import central_logger
 from app.agents.state import DeepAgentState
 from app.agents.supervisor.execution_context import (
-    AgentExecutionContext, AgentExecutionResult, 
-    ExecutionStrategy, PipelineStep
+    AgentExecutionContext, AgentExecutionResult, PipelineStep
 )
-from app.schemas import (
-    SubAgentLifecycle, WebSocketMessage, AgentStarted,
-    SubAgentUpdate, AgentCompleted, SubAgentState
-)
+from app.agents.supervisor.agent_execution_core import AgentExecutionCore
+from app.agents.supervisor.websocket_notifier import WebSocketNotifier
+from app.agents.supervisor.fallback_manager import FallbackManager
 
 logger = central_logger.get_logger(__name__)
 
 
 class ExecutionEngine:
-    """Handles agent execution logic."""
+    """Handles agent execution orchestration."""
     
     MAX_HISTORY_SIZE = 100  # Prevent memory leak
     
@@ -32,106 +30,39 @@ class ExecutionEngine:
         self.websocket_manager = websocket_manager
         self.active_runs: Dict[str, AgentExecutionContext] = {}
         self.run_history: List[AgentExecutionResult] = []
+        self._init_components()
+        
+    def _init_components(self) -> None:
+        """Initialize execution components."""
+        self.agent_core = AgentExecutionCore(self.registry)
+        self.websocket_notifier = WebSocketNotifier(self.websocket_manager)
+        self.fallback_manager = FallbackManager(self.websocket_notifier)
         
     async def execute_agent(self, context: AgentExecutionContext,
                            state: DeepAgentState) -> AgentExecutionResult:
         """Execute a single agent with retry logic."""
-        agent = self.registry.get(context.agent_name)
-        if not agent:
-            return self._create_error_result(f"Agent {context.agent_name} not found")
-        result = await self._run_agent_with_timing(agent, context, state)
+        await self.websocket_notifier.send_agent_started(context)
+        result = await self._execute_with_error_handling(context, state)
         self._update_history(result)
         return result
     
-    async def _run_agent_with_timing(self, agent, context: AgentExecutionContext,
-                                    state: DeepAgentState) -> AgentExecutionResult:
-        """Run agent and track timing."""
+    async def _execute_with_error_handling(self, context: AgentExecutionContext,
+                                          state: DeepAgentState) -> AgentExecutionResult:
+        """Execute agent with error handling and fallback."""
         start_time = time.time()
         try:
-            await self._execute_agent_lifecycle(agent, context, state)
-            return self._create_success_result(state, time.time() - start_time)
+            return await self.agent_core.execute_agent(context, state)
         except Exception as e:
             return await self._handle_execution_error(context, state, e, start_time)
     
-    async def _execute_agent_lifecycle(self, agent, context: AgentExecutionContext,
-                                      state: DeepAgentState) -> None:
-        """Execute agent with lifecycle events."""
-        await self._send_agent_started(context, state)
-        await agent.execute(state, context.run_id, True)
-    
-    async def execute_pipeline(self, steps: List[PipelineStep],
-                              context: AgentExecutionContext,
-                              state: DeepAgentState) -> List[AgentExecutionResult]:
-        """Execute a pipeline of agents."""
-        results = []
-        for step in steps:
-            if await self._process_pipeline_step(step, context, state, results):
-                break
-        return results
-    
-    async def _process_pipeline_step(self, step: PipelineStep, context: AgentExecutionContext,
-                                    state: DeepAgentState, results: List) -> bool:
-        """Process single pipeline step. Returns True to stop pipeline."""
-        if not await self._should_execute_step(step, state):
-            return False
-        result = await self._execute_and_append(step, context, state, results)
-        return self._should_stop_pipeline(result, step)
-    
-    async def _execute_and_append(self, step: PipelineStep, context: AgentExecutionContext,
-                                 state: DeepAgentState, results: List) -> AgentExecutionResult:
-        """Execute step and append to results."""
-        step_context = self._create_step_context(context, step)
-        result = await self._execute_step(step, step_context, state)
-        results.append(result)
-        return result
-    
-    def _should_stop_pipeline(self, result: AgentExecutionResult, 
-                            step: PipelineStep) -> bool:
-        """Check if pipeline should stop."""
-        return not result.success and not step.metadata.get("continue_on_error")
-    
-    async def _execute_step(self, step: PipelineStep,
-                           context: AgentExecutionContext,
-                           state: DeepAgentState) -> AgentExecutionResult:
-        """Execute a single pipeline step."""
-        if step.strategy == ExecutionStrategy.PARALLEL:
-            return await self._execute_parallel(step, context, state)
-        return await self.execute_agent(context, state)
-    
-    async def _execute_parallel(self, step: PipelineStep,
-                               context: AgentExecutionContext,
-                               state: DeepAgentState) -> AgentExecutionResult:
-        """Execute agents in parallel."""
-        tasks = []
-        for agent_name in step.metadata.get("parallel_agents", []):
-            ctx = self._create_agent_context(context, agent_name)
-            tasks.append(self.execute_agent(ctx, state))
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        return self._merge_parallel_results(results)
-    
-    def _create_error_result(self, error: str) -> AgentExecutionResult:
-        """Create error result."""
-        return AgentExecutionResult(success=False, error=error)
-    
-    def _create_success_result(self, state: DeepAgentState,
-                              duration: float) -> AgentExecutionResult:
-        """Create success result."""
-        return AgentExecutionResult(
-            success=True, state=state, duration=duration)
-    
     async def _handle_execution_error(self, context: AgentExecutionContext,
-                                     state: DeepAgentState,
-                                     error: Exception,
+                                     state: DeepAgentState, error: Exception,
                                      start_time: float) -> AgentExecutionResult:
-        """Handle execution errors with retry logic."""
-        self._log_error(context.agent_name, error)
+        """Handle execution errors with retry and fallback."""
+        logger.error(f"Agent {context.agent_name} failed: {error}")
         if self._can_retry(context):
             return await self._retry_execution(context, state)
-        return self._create_failure_result(error, time.time() - start_time)
-    
-    def _log_error(self, agent_name: str, error: Exception) -> None:
-        """Log execution error."""
-        logger.error(f"Agent {agent_name} failed: {error}")
+        return await self.fallback_manager.create_fallback_result(context, state, error, start_time)
     
     def _can_retry(self, context: AgentExecutionContext) -> bool:
         """Check if retry is allowed."""
@@ -145,39 +76,37 @@ class ExecutionEngine:
         await asyncio.sleep(2 ** context.retry_count)
         return await self.execute_agent(context, state)
     
-    def _create_failure_result(self, error: Exception, duration: float) -> AgentExecutionResult:
-        """Create failure result."""
-        return AgentExecutionResult(
-            success=False, error=str(error), duration=duration)
+    async def execute_pipeline(self, steps: List[PipelineStep],
+                              context: AgentExecutionContext,
+                              state: DeepAgentState) -> List[AgentExecutionResult]:
+        """Execute a pipeline of agents."""
+        return await self._execute_pipeline_steps(steps, context, state)
     
-    async def _send_agent_started(self, context: AgentExecutionContext,
-                                 state: DeepAgentState) -> None:
-        """Send agent started notification."""
-        if not self.websocket_manager:
-            return
-        message = self._build_started_message(context)
-        await self._send_websocket_message(context.thread_id, message)
+    async def _execute_pipeline_steps(self, steps: List[PipelineStep],
+                                     context: AgentExecutionContext,
+                                     state: DeepAgentState) -> List[AgentExecutionResult]:
+        """Execute pipeline steps sequentially."""
+        results = []
+        await self._process_steps_with_early_termination(steps, context, state, results)
+        return results
     
-    def _build_started_message(self, context: AgentExecutionContext) -> WebSocketMessage:
-        """Build agent started message."""
-        return WebSocketMessage(
-            type="agent_started",
-            payload=self._create_started_content(context).model_dump()
-        )
+    async def _process_steps_with_early_termination(self, steps: List[PipelineStep],
+                                                  context: AgentExecutionContext,
+                                                  state: DeepAgentState, results: List) -> None:
+        """Process steps with early termination on failure."""
+        for step in steps:
+            should_stop = await self._process_pipeline_step(step, context, state, results)
+            if should_stop:
+                break
     
-    def _create_started_content(self, context: AgentExecutionContext) -> AgentStarted:
-        """Create agent started content."""
-        return AgentStarted(
-            agent_name=context.agent_name,
-            run_id=context.run_id,
-            timestamp=datetime.now(timezone.utc).timestamp()
-        )
-    
-    async def _send_websocket_message(self, thread_id: str, 
-                                     message: WebSocketMessage) -> None:
-        """Send message via websocket."""
-        await self.websocket_manager.send_to_thread(
-            thread_id, message.model_dump())
+    async def _process_pipeline_step(self, step: PipelineStep, context: AgentExecutionContext,
+                                    state: DeepAgentState, results: List) -> bool:
+        """Process single pipeline step. Returns True to stop pipeline."""
+        if not await self._should_execute_step(step, state):
+            return False
+        result = await self._execute_step(step, context, state)
+        results.append(result)
+        return self._should_stop_pipeline(result, step)
     
     async def _should_execute_step(self, step: PipelineStep,
                                   state: DeepAgentState) -> bool:
@@ -194,60 +123,73 @@ class ExecutionEngine:
             logger.error(f"Error evaluating condition: {e}")
             return False
     
+    async def _execute_step(self, step: PipelineStep,
+                           context: AgentExecutionContext,
+                           state: DeepAgentState) -> AgentExecutionResult:
+        """Execute a single pipeline step."""
+        step_context = self._create_step_context(context, step)
+        return await self._execute_with_fallback(step_context, state)
+    
     def _create_step_context(self, base_context: AgentExecutionContext,
                            step: PipelineStep) -> AgentExecutionContext:
         """Create context for a pipeline step."""
-        context = self._copy_base_context(base_context)
-        context.agent_name = step.agent_name
-        context.metadata = step.metadata
-        return context
+        params = self._extract_step_context_params(base_context, step)
+        return AgentExecutionContext(**params)
     
-    def _copy_base_context(self, base: AgentExecutionContext) -> AgentExecutionContext:
-        """Copy base context fields."""
-        return AgentExecutionContext(
-            run_id=base.run_id,
-            thread_id=base.thread_id,
-            user_id=base.user_id,
-            agent_name=""
-        )
+    def _extract_step_context_params(self, base_context: AgentExecutionContext,
+                                   step: PipelineStep) -> Dict[str, Any]:
+        """Extract parameters for step context creation."""
+        return {
+            "run_id": base_context.run_id,
+            "thread_id": base_context.thread_id,
+            "user_id": base_context.user_id,
+            "agent_name": step.agent_name,
+            "metadata": step.metadata
+        }
     
-    def _create_agent_context(self, base: AgentExecutionContext,
-                            agent_name: str) -> AgentExecutionContext:
-        """Create context for an agent."""
-        return AgentExecutionContext(
-            run_id=base.run_id,
-            thread_id=base.thread_id,
-            user_id=base.user_id,
-            agent_name=agent_name
-        )
+    def _should_stop_pipeline(self, result: AgentExecutionResult, 
+                            step: PipelineStep) -> bool:
+        """Check if pipeline should stop."""
+        return not result.success and not step.metadata.get("continue_on_error")
     
-    def _merge_parallel_results(self, results: List) -> AgentExecutionResult:
-        """Merge results from parallel execution."""
-        valid_results = self._filter_valid_results(results)
-        success = all(r.success for r in valid_results)
-        errors = self._collect_errors(valid_results)
-        duration = sum(r.duration for r in valid_results)
-        return self._build_merged_result(success, errors, duration)
-    
-    def _filter_valid_results(self, results: List) -> List[AgentExecutionResult]:
-        """Filter valid execution results."""
-        return [r for r in results if isinstance(r, AgentExecutionResult)]
-    
-    def _collect_errors(self, results: List[AgentExecutionResult]) -> List[str]:
-        """Collect error messages."""
-        return [r.error for r in results if r.error]
-    
-    def _build_merged_result(self, success: bool, errors: List[str], 
-                           duration: float) -> AgentExecutionResult:
-        """Build merged execution result."""
-        return AgentExecutionResult(
-            success=success,
-            error="; ".join(errors) if errors else None,
-            duration=duration
-        )
+    async def _execute_with_fallback(self, context: AgentExecutionContext,
+                                   state: DeepAgentState) -> AgentExecutionResult:
+        """Execute agent with fallback handling."""
+        execute_func = lambda: self.agent_core.execute_agent(context, state)
+        return await self.fallback_manager.execute_with_fallback(context, state, execute_func)
     
     def _update_history(self, result: AgentExecutionResult) -> None:
         """Update run history with size limit."""
         self.run_history.append(result)
         if len(self.run_history) > self.MAX_HISTORY_SIZE:
             self.run_history = self.run_history[-self.MAX_HISTORY_SIZE:]
+    
+    # WebSocket delegation methods
+    async def send_agent_thinking(self, context: AgentExecutionContext, 
+                                 thought: str, step_number: int = None) -> None:
+        """Send agent thinking notification."""
+        await self.websocket_notifier.send_agent_thinking(context, thought, step_number)
+    
+    async def send_partial_result(self, context: AgentExecutionContext,
+                                 content: str, is_complete: bool = False) -> None:
+        """Send partial result notification."""
+        await self.websocket_notifier.send_partial_result(context, content, is_complete)
+    
+    async def send_tool_executing(self, context: AgentExecutionContext,
+                                 tool_name: str) -> None:
+        """Send tool executing notification."""
+        await self.websocket_notifier.send_tool_executing(context, tool_name)
+    
+    async def send_final_report(self, context: AgentExecutionContext,
+                               report: dict, duration_ms: float) -> None:
+        """Send final report notification."""
+        await self.websocket_notifier.send_final_report(context, report, duration_ms)
+    
+    # Fallback management delegation
+    def get_fallback_health_status(self) -> Dict[str, any]:
+        """Get health status of fallback mechanisms."""
+        return self.fallback_manager.get_fallback_health_status()
+    
+    def reset_fallback_mechanisms(self) -> None:
+        """Reset all fallback mechanisms."""
+        self.fallback_manager.reset_fallback_mechanisms()

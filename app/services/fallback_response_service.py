@@ -5,13 +5,15 @@ This service provides intelligent, context-aware fallback responses when AI gene
 fails or produces low-quality output, replacing generic error messages with helpful alternatives.
 """
 
+# Import the actual implementation
 from .fallback_response import (
-    FallbackResponseService,
+    FallbackResponseService as _OriginalFallbackResponseService,
     FailureReason,
     FallbackContext
 )
+
 # Backward compatibility - create instance of the modularized service
-_fallback_service = FallbackResponseService()
+_fallback_service = _OriginalFallbackResponseService()
 
 # Export the same interface as before
 async def generate_fallback(*args, **kwargs):
@@ -27,6 +29,6 @@ def get_fallback_for_json_error(*args, **kwargs):
     return _fallback_service.get_fallback_for_json_error(*args, **kwargs)
 
 # For backward compatibility, also provide the class directly
-class FallbackResponseService(FallbackResponseService):
-    """Backward compatibility wrapper"""
+class FallbackResponseService(_OriginalFallbackResponseService):
+    """Backward compatibility wrapper that properly exposes all methods"""
     pass

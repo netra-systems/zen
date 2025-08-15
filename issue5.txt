@@ -1,0 +1,16 @@
+[BACKEND] ❌ 2025-08-15 13:51:41.007 | WARNING  | app.core.unified_logging:_emit_log:117 | Failed to convert dict to typed result: 5 validation errors for AnomalyDetectionResponse
+[BACKEND] anomaly_details.0.metric_name
+[BACKEND]   Field required [type=missing, input_value={'type': 'latency_spike',...cident. Self-resolved.'}, input_type=dict]
+[BACKEND] ❌     For further information visit https://errors.pydantic.dev/2.11/v/missing
+[BACKEND] anomaly_details.0.actual_value
+[BACKEND]   Field required [type=missing, input_value={'type': 'latency_spike',...cident. Self-resolved.'}, input_type=dict]
+[BACKEND] ❌     For further information visit https://errors.pydantic.dev/2.11/v/missing
+[BACKEND] anomaly_details.0.expected_value
+[BACKEND]   Field required [type=missing, input_value={'type': 'latency_spike',...cident. Self-resolved.'}, input_type=dict]
+[BACKEND] ❌     For further information visit https://errors.pydantic.dev/2.11/v/missing
+[BACKEND] anomaly_details.0.deviation_percentage
+[BACKEND]   Field required [type=missing, input_value={'type': 'latency_spike',...cident. Self-resolved.'}, input_type=dict]
+[BACKEND] ❌     For further information visit https://errors.pydantic.dev/2.11/v/missing
+[BACKEND] anomaly_details.0.z_score
+[BACKEND]   Field required [type=missing, input_value={'type': 'latency_spike',...cident. Self-resolved.'}, input_type=dict]
+[BACKEND] ❌     For further information visit https://errors.pydantic.dev/2.11/v/missing

@@ -1,0 +1,86 @@
+"""Structured LLM operations module.
+
+Handles structured output generation, schema validation, and fallback parsing.
+Each function must be ≤8 lines as per architecture requirements.
+"""
+from typing import Any, Type, TypeVar, Optional
+from pydantic import BaseModel
+from app.llm.llm_response_processing import (
+    parse_nested_json_recursive, attempt_json_fallback_parse,
+    create_structured_cache_key, get_cached_structured_response,
+    cache_structured_response, should_cache_structured_response
+)
+from app.schemas.llm_config_types import LLMConfig as GenerationConfig
+from app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
+T = TypeVar('T', bound=BaseModel)
+
+
+class LLMStructuredOperations:
+    """Structured LLM operations handler."""
+    
+    def __init__(self, core_operations) -> None:
+        self.core = core_operations
+
+    def get_structured_llm(self, name: str, schema: Type[T], 
+                          generation_config: Optional[GenerationConfig] = None,
+                          **kwargs) -> Any:
+        """Get an LLM configured for structured output with a Pydantic schema."""
+        llm = self.core.get_llm(name, generation_config)
+        
+        # All LLMs (including mocks) support with_structured_output
+        return llm.with_structured_output(schema, **kwargs)
+    
+    async def ask_structured_llm(self, prompt: str, llm_config_name: str, 
+                                 schema: Type[T], use_cache: bool = True,
+                                 **kwargs) -> T:
+        """Ask an LLM and get a structured response as a Pydantic model instance."""
+        cache_key = create_structured_cache_key(prompt, llm_config_name, schema.__name__)
+        
+        if use_cache:
+            cached_result = await get_cached_structured_response(cache_key, llm_config_name, schema)
+            if cached_result:
+                return cached_result
+        
+        try:
+            return await self._generate_structured_response(prompt, llm_config_name, schema, 
+                                                          cache_key, use_cache, **kwargs)
+        except Exception as e:
+            return await self._fallback_structured_parse(prompt, llm_config_name, schema, 
+                                                       use_cache, e)
+    
+    async def _generate_structured_response(self, prompt: str, llm_config_name: str, 
+                                          schema: Type[T], cache_key: str, 
+                                          use_cache: bool, **kwargs) -> T:
+        """Generate structured response using LLM."""
+        structured_llm = self.get_structured_llm(llm_config_name, schema, **kwargs)
+        response = await structured_llm.ainvoke(prompt)
+        
+        response_data = response.model_dump()
+        parsed_data = parse_nested_json_recursive(response_data)
+        final_response = schema(**parsed_data)
+        
+        await self._cache_structured_if_needed(use_cache, prompt, final_response, 
+                                             cache_key, llm_config_name)
+        return final_response
+    
+    async def _fallback_structured_parse(self, prompt: str, llm_config_name: str, 
+                                       schema: Type[T], use_cache: bool, 
+                                       original_error: Exception) -> T:
+        """Fallback to text generation and JSON parsing."""
+        logger.error(f"Structured generation failed: {original_error}")
+        try:
+            text_response = await self.core.ask_llm(prompt, llm_config_name, use_cache)
+            return attempt_json_fallback_parse(text_response, schema)
+        except Exception as parse_error:
+            logger.error(f"Fallback parsing also failed: {parse_error}")
+            raise original_error
+    
+    async def _cache_structured_if_needed(self, use_cache: bool, prompt: str, 
+                                        response: T, cache_key: str, 
+                                        llm_config_name: str) -> None:
+        """Cache structured response if appropriate."""
+        response_json = response.model_dump_json()
+        if use_cache and should_cache_structured_response(prompt, response_json):
+            await cache_structured_response(cache_key, response_json, llm_config_name)

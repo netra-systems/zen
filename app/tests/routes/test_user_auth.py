@@ -1,4 +1,5 @@
 import pytest
+import os
 from fastapi.testclient import TestClient
 from app.main import app
 from app.config import settings
@@ -7,10 +8,21 @@ from app.db.testing import override_get_db
 
 app.dependency_overrides[get_db_session] = override_get_db
 
+
 @pytest.fixture(scope="function")
 def client() -> TestClient:
-    with TestClient(app=app, base_url="http://test") as client:
-        yield client
+    """Create test client with proper environment setup."""
+    # Set test environment variables
+    os.environ["SKIP_STARTUP_CHECKS"] = "true"
+    os.environ["SECRET_KEY"] = "test_secret_key_for_user_auth_tests_32_chars_minimum"
+    
+    try:
+        with TestClient(app=app, base_url="http://test") as client:
+            yield client
+    finally:
+        # Clean up test environment variables
+        os.environ.pop("SKIP_STARTUP_CHECKS", None)
+        os.environ.pop("SECRET_KEY", None)
 
 def test_get_auth_config_dev_mode(client: TestClient):
     settings.environment = "development"

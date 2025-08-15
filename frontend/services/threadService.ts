@@ -95,3 +95,5 @@ export class ThreadService {
     return response.data;
   }
 }
+
+export const threadService = ThreadService;

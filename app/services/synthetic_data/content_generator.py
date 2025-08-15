@@ -56,7 +56,7 @@ def generate_content(
     corpus_content: Optional[List[Dict]]
 ) -> tuple[str, str]:
     """Generate request/response content"""
-    if corpus_content and random.random() < 0.7:  # 70% chance to use corpus
+    if corpus_content:  # Always use corpus when available
         entry = random.choice(corpus_content)
         return entry.get("prompt", ""), entry.get("response", "")
     

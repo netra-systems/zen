@@ -6,7 +6,7 @@ import {
   Settings, Eye
 } from 'lucide-react';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 
 interface StatusZone {
   type: 'slow' | 'medium' | 'fast';
@@ -18,7 +18,7 @@ interface StatusZone {
 }
 
 const AgentStatusPanel: React.FC = () => {
-  const { subAgentName, isProcessing } = useChatStore();
+  const { subAgentName, isProcessing } = useUnifiedChatStore();
   const { 
     workflowProgress, 
     activeTools,

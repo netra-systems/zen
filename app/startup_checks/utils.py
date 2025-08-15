@@ -13,6 +13,22 @@ from .checker import StartupChecker
 
 async def run_startup_checks(app: FastAPI) -> Dict[str, Any]:
     """Run all startup checks with improved error handling and reporting"""
+    import os
+    
+    # Skip startup checks if explicitly disabled (for testing)
+    if os.getenv("SKIP_STARTUP_CHECKS", "").lower() in ("true", "1", "yes"):
+        logger.info("Startup checks skipped (SKIP_STARTUP_CHECKS=true)")
+        return {
+            "success": True,
+            "total_checks": 0,
+            "passed": 0,
+            "failed_critical": 0,
+            "failed_non_critical": 0,
+            "duration_ms": 0,
+            "results": [],
+            "failures": []
+        }
+    
     checker = StartupChecker(app)
     results = await checker.run_all_checks()
     

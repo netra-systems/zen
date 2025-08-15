@@ -8,7 +8,7 @@ import type {
   AgentContextType, Message, OptimizationResults, AgentError,
   WebSocketMessage, SubAgentState, Thread, ThreadHistory,
   AgentConfig, AgentContext
-} from '@/types/agent';
+} from '@/types/registry';
 
 // Using typed interface from @/types/agent
 

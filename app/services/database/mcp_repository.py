@@ -214,9 +214,15 @@ class MCPToolExecutionRepository(BaseRepository[MCPToolExecutionModel]):
     ) -> List[MCPToolExecutionModel]:
         """Get all executions for a session"""
         try:
-            # In production, this would use SQLAlchemy query
-            # For now, return empty list as placeholder
-            return []
+            # Query database for session executions
+            from sqlalchemy import select
+            from app.db.models_mcp import MCPToolExecution
+            result = await db.execute(
+                select(MCPToolExecution).where(
+                    MCPToolExecution.session_id == session_id
+                ).order_by(MCPToolExecution.created_at.desc())
+            )
+            return result.scalars().all()
             
         except Exception as e:
             logger.error(f"Error getting session executions: {e}")
@@ -230,9 +236,15 @@ class MCPToolExecutionRepository(BaseRepository[MCPToolExecutionModel]):
     ) -> List[MCPToolExecutionModel]:
         """Get recent executions for a client"""
         try:
-            # In production, this would use SQLAlchemy query
-            # For now, return empty list as placeholder
-            return []
+            # Query database for client executions
+            from sqlalchemy import select
+            from app.db.models_mcp import MCPToolExecution
+            result = await db.execute(
+                select(MCPToolExecution).where(
+                    MCPToolExecution.client_id == client_id
+                ).order_by(MCPToolExecution.created_at.desc()).limit(limit)
+            )
+            return result.scalars().all()
             
         except Exception as e:
             logger.error(f"Error getting client executions: {e}")

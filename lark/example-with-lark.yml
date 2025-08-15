@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: 'Checkout code'
@@ -92,7 +92,7 @@ jobs:
   deploy:
     needs: build-and-test
     if: ${{ success() && github.ref == 'refs/heads/main' }}
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: 'Deploy to production'

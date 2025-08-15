@@ -2,6 +2,7 @@
 Tests for tool invocation generation in SyntheticDataService
 """
 
+import asyncio
 import pytest
 from unittest.mock import MagicMock
 
@@ -19,7 +20,8 @@ class TestToolInvocations:
     
     def test_generate_tool_invocations_simple(self, service):
         """Test simple queries tool invocation"""
-        invocations = service._generate_tool_invocations("simple_queries")
+        # The method expects (count, pattern)
+        invocations = asyncio.run(service.generate_tool_invocations(1, "simple_queries"))
         
         assert len(invocations) == 1
         assert "name" in invocations[0]
@@ -30,7 +32,8 @@ class TestToolInvocations:
     
     def test_generate_tool_invocations_orchestration(self, service):
         """Test tool orchestration invocations"""
-        invocations = service._generate_tool_invocations("tool_orchestration")
+        # Generate 3 invocations for orchestration pattern
+        invocations = asyncio.run(service.generate_tool_invocations(3, "tool_orchestration"))
         
         assert 2 <= len(invocations) <= 5
         for inv in invocations:
@@ -40,7 +43,8 @@ class TestToolInvocations:
     
     def test_generate_tool_invocations_data_analysis(self, service):
         """Test data analysis tool invocations"""
-        invocations = service._generate_tool_invocations("data_analysis")
+        # Generate 2 invocations for data analysis
+        invocations = asyncio.run(service.generate_tool_invocations(2, "data_analysis"))
         
         # Should have query and analysis tools
         assert len(invocations) >= 1

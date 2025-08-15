@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional, Dict
 
 from app.services.corpus_service import corpus_service, ContentSource
-from app.dependencies import get_db_session, get_async_db
+from app.dependencies import get_db_session, get_db_dependency
 from app.auth.auth_dependencies import get_current_user
 from app.db.models_postgres import User
 from app import schemas

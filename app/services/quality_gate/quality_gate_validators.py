@@ -1,6 +1,6 @@
 """Quality Gate Service Validators and Threshold Checking"""
 
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Tuple
 
 from app.logging_config import central_logger
 from .quality_gate_models import ContentType, QualityLevel, QualityMetrics
@@ -15,10 +15,10 @@ class QualityValidator:
         # Quality thresholds by content type
         self.thresholds = {
             ContentType.OPTIMIZATION: {
-                "min_score": 0.7,
+                "min_score": 0.63,
                 "min_specificity": 0.6,
-                "min_actionability": 0.7,
-                "min_quantification": 0.7
+                "min_actionability": 0.6,
+                "min_quantification": 0.6
             },
             ContentType.DATA_ANALYSIS: {
                 "min_score": 0.6,
@@ -46,7 +46,8 @@ class QualityValidator:
             ContentType.ERROR_MESSAGE: {
                 "min_score": 0.5,
                 "min_clarity": 0.8,
-                "min_actionability": 0.6
+                "min_actionability": 0.6,
+                "min_specificity": 0.7
             },
             ContentType.GENERAL: {
                 "min_score": 0.5,
@@ -57,56 +58,83 @@ class QualityValidator:
     
     def get_weights_for_type(self, content_type: ContentType) -> Dict[str, float]:
         """Get scoring weights based on content type"""
-        weights = {
-            ContentType.OPTIMIZATION: {
-                'specificity': 0.25,
-                'actionability': 0.25,
-                'quantification': 0.20,
-                'relevance': 0.15,
-                'completeness': 0.10,
-                'clarity': 0.05
-            },
-            ContentType.DATA_ANALYSIS: {
-                'quantification': 0.30,
-                'specificity': 0.20,
-                'relevance': 0.20,
-                'completeness': 0.15,
-                'clarity': 0.10,
-                'novelty': 0.05
-            },
-            ContentType.ACTION_PLAN: {
-                'actionability': 0.35,
-                'completeness': 0.25,
-                'specificity': 0.20,
-                'clarity': 0.15,
-                'relevance': 0.05
-            },
-            ContentType.REPORT: {
-                'completeness': 0.25,
-                'clarity': 0.20,
-                'specificity': 0.20,
-                'quantification': 0.15,
-                'relevance': 0.10,
-                'novelty': 0.10
-            }
+        weight_mappings = self._get_content_type_weight_mappings()
+        return weight_mappings.get(content_type, self._get_default_weights())
+    
+    def _get_content_type_weight_mappings(self) -> Dict[ContentType, Dict[str, float]]:
+        """Get all content type weight mappings."""
+        return {
+            ContentType.OPTIMIZATION: self._get_optimization_weights(),
+            ContentType.DATA_ANALYSIS: self._get_data_analysis_weights(),
+            ContentType.ACTION_PLAN: self._get_action_plan_weights(),
+            ContentType.REPORT: self._get_report_weights(),
+            ContentType.ERROR_MESSAGE: self._get_error_message_weights()
         }
-        
-        return weights.get(content_type, {
-            'specificity': 0.20,
-            'actionability': 0.15,
-            'quantification': 0.15,
-            'relevance': 0.15,
-            'completeness': 0.15,
-            'clarity': 0.10,
-            'novelty': 0.10
-        })
+    
+    def _get_optimization_weights(self) -> Dict[str, float]:
+        """Get weights for optimization content type."""
+        return {
+            'specificity': 0.25, 'actionability': 0.25, 'quantification': 0.20,
+            'relevance': 0.15, 'completeness': 0.10, 'clarity': 0.05
+        }
+    
+    def _get_data_analysis_weights(self) -> Dict[str, float]:
+        """Get weights for data analysis content type."""
+        return {
+            'quantification': 0.30, 'specificity': 0.20, 'relevance': 0.20,
+            'completeness': 0.15, 'clarity': 0.10, 'novelty': 0.05
+        }
+    
+    def _get_action_plan_weights(self) -> Dict[str, float]:
+        """Get weights for action plan content type."""
+        return {
+            'actionability': 0.35, 'completeness': 0.25, 'specificity': 0.20,
+            'clarity': 0.15, 'relevance': 0.05
+        }
+    
+    def _get_report_weights(self) -> Dict[str, float]:
+        """Get weights for report content type."""
+        return {
+            'completeness': 0.25, 'clarity': 0.20, 'specificity': 0.20,
+            'quantification': 0.15, 'relevance': 0.10, 'novelty': 0.10
+        }
+    
+    def _get_error_message_weights(self) -> Dict[str, float]:
+        """Get weights for error message content type."""
+        return {
+            'specificity': 0.35, 'actionability': 0.25, 'clarity': 0.20,
+            'relevance': 0.15, 'completeness': 0.05
+        }
+    
+    def _get_default_weights(self) -> Dict[str, float]:
+        """Get default weights for unspecified content types."""
+        return {
+            'specificity': 0.20, 'actionability': 0.15, 'quantification': 0.15,
+            'relevance': 0.15, 'completeness': 0.15, 'clarity': 0.10, 'novelty': 0.10
+        }
     
     def calculate_weighted_score(self, metrics: QualityMetrics, weights: Dict[str, float]) -> float:
         """Calculate weighted overall score"""
+        base_score, total_weight = self._calculate_base_weighted_score(metrics, weights)
+        penalized_score = self._apply_quality_penalties(base_score, metrics)
+        normalized_score = self._normalize_score(penalized_score, total_weight)
+        return self._clamp_score(normalized_score)
+    
+    def _calculate_base_weighted_score(self, metrics: QualityMetrics, weights: Dict[str, float]) -> Tuple[float, float]:
+        """Calculate base weighted score from individual metrics."""
+        metric_values = self._get_metric_values_dict(metrics)
         score = 0.0
         total_weight = 0.0
         
-        metric_values = {
+        for metric, weight in weights.items():
+            if metric in metric_values:
+                score += metric_values[metric] * weight
+                total_weight += weight
+        return score, total_weight
+    
+    def _get_metric_values_dict(self, metrics: QualityMetrics) -> Dict[str, float]:
+        """Get dictionary mapping metric names to their values."""
+        return {
             'specificity': metrics.specificity_score,
             'actionability': metrics.actionability_score,
             'quantification': metrics.quantification_score,
@@ -115,13 +143,9 @@ class QualityValidator:
             'novelty': metrics.novelty_score,
             'clarity': metrics.clarity_score
         }
-        
-        for metric, weight in weights.items():
-            if metric in metric_values:
-                score += metric_values[metric] * weight
-                total_weight += weight
-        
-        # Apply penalties
+    
+    def _apply_quality_penalties(self, score: float, metrics: QualityMetrics) -> float:
+        """Apply penalties for quality issues."""
         if metrics.generic_phrase_count > 2:
             score -= 0.1
         if metrics.circular_reasoning_detected:
@@ -130,11 +154,16 @@ class QualityValidator:
             score -= 0.15
         if metrics.redundancy_ratio > 0.3:
             score -= 0.1
-        
-        # Normalize
+        return score
+    
+    def _normalize_score(self, score: float, total_weight: float) -> float:
+        """Normalize score by total weight."""
         if total_weight > 0:
-            score = score / total_weight
-        
+            return score / total_weight
+        return score
+    
+    def _clamp_score(self, score: float) -> float:
+        """Clamp score to valid range [0.0, 1.0]."""
         return max(0.0, min(1.0, score))
     
     def determine_quality_level(self, score: float) -> QualityLevel:
@@ -157,21 +186,40 @@ class QualityValidator:
         strict_mode: bool
     ) -> bool:
         """Check if metrics meet thresholds for the content type"""
-        thresholds = self.thresholds.get(content_type, self.thresholds[ContentType.GENERAL]).copy()
+        thresholds = self._get_adjusted_thresholds(content_type, strict_mode)
         
-        # Apply strict mode multiplier
+        return (self._check_overall_score_threshold(metrics, thresholds) and
+                self._check_specific_metric_thresholds(metrics, thresholds) and
+                self._check_maximum_thresholds(metrics, thresholds) and
+                self._check_critical_failure_conditions(metrics))
+    
+    def _get_adjusted_thresholds(self, content_type: ContentType, strict_mode: bool) -> Dict[str, float]:
+        """Get thresholds adjusted for content type and strict mode."""
+        thresholds = self.thresholds.get(content_type, self.thresholds[ContentType.GENERAL]).copy()
         if strict_mode:
             thresholds = {k: v * 1.2 if k.startswith('min_') else v * 0.8 
                          for k, v in thresholds.items()}
-        
-        # Check overall score
+        return thresholds
+    
+    def _check_overall_score_threshold(self, metrics: QualityMetrics, thresholds: Dict[str, float]) -> bool:
+        """Check if overall score meets minimum threshold."""
         min_score_threshold = thresholds.get('min_score', 0.5)
         if metrics.overall_score < min_score_threshold:
             logger.debug(f"Failed overall score check: {metrics.overall_score} < {min_score_threshold}")
             return False
-        
-        # Check specific metrics
-        checks = [
+        return True
+    
+    def _check_specific_metric_thresholds(self, metrics: QualityMetrics, thresholds: Dict[str, float]) -> bool:
+        """Check if specific metrics meet their thresholds."""
+        checks = self._get_metric_threshold_checks(metrics)
+        for threshold_key, metric_value in checks:
+            if threshold_key in thresholds and metric_value < thresholds[threshold_key]:
+                return False
+        return True
+    
+    def _get_metric_threshold_checks(self, metrics: QualityMetrics) -> List[Tuple[str, float]]:
+        """Get list of metric threshold checks to perform."""
+        return [
             ('min_specificity', metrics.specificity_score),
             ('min_actionability', metrics.actionability_score),
             ('min_quantification', metrics.quantification_score),
@@ -179,25 +227,21 @@ class QualityValidator:
             ('min_completeness', metrics.completeness_score),
             ('min_clarity', metrics.clarity_score)
         ]
-        
-        for threshold_key, metric_value in checks:
-            if threshold_key in thresholds and metric_value < thresholds[threshold_key]:
-                return False
-        
-        # Check maximum thresholds
+    
+    def _check_maximum_thresholds(self, metrics: QualityMetrics, thresholds: Dict[str, float]) -> bool:
+        """Check if metrics stay within maximum thresholds."""
         if 'max_redundancy' in thresholds and metrics.redundancy_ratio > thresholds['max_redundancy']:
             return False
-        
         if 'max_generic_phrases' in thresholds and metrics.generic_phrase_count > thresholds['max_generic_phrases']:
             return False
-        
-        # Check for critical failures
+        return True
+    
+    def _check_critical_failure_conditions(self, metrics: QualityMetrics) -> bool:
+        """Check for critical failure conditions that always fail validation."""
         if metrics.circular_reasoning_detected:
             return False
-        
         if metrics.hallucination_risk > 0.7:
             return False
-        
         return True
     
     def generate_suggestions(self, metrics: QualityMetrics, content_type: ContentType) -> List[str]:

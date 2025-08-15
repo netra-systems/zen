@@ -74,3 +74,19 @@ terraform/staging/shared-infrastructure/.terraform/providers/registry.terraform.
 .service_discovery/backend.json
 .dev_services.json
 frontend/cypress/downloads/downloads.htm
+/terraform-gcp/github-runner/.terraform/providers
+*.tfstate
+terraform-gcp/github-runner/terraform.tfstate.backup
+terraform-gcp/github-runner/terraform.tfvars
+
+# Terraform Development Database
+terraform-dev-postgres/.terraform/
+terraform-dev-postgres/.terraform.lock.hcl
+terraform-dev-postgres/terraform.tfstate*
+terraform-dev-postgres/terraform.tfvars
+terraform-dev-postgres/connection_info.txt
+terraform-dev-postgres/backups/
+
+*.exe
+/app/app/data/generated/content_corpuses
+act.zip

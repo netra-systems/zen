@@ -39,17 +39,20 @@ The Netra platform employs a comprehensive testing strategy across multiple laye
 ### Setup
 
 ```bash
-# Create virtual environment
+# RECOMMENDED: Use test runner for consistent environment setup
+python test_runner.py --level unit
+
+# Manual setup (if needed)
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# Install test dependencies
+# Install test dependencies  
 pip install -r requirements.txt
 pip install pytest pytest-asyncio pytest-cov pytest-mock httpx
 
 # Setup test database
 export TEST_DATABASE_URL="postgresql://test_user:password@localhost:5432/netra_test"
-python create_db.py --test
+python database_scripts/create_db.py --test
 ```
 
 ### Running Tests
@@ -722,13 +725,19 @@ Cypress.Commands.add('createThread', (title: string) => {
 ### Backend Coverage
 
 ```bash
-# Generate coverage report
+# RECOMMENDED: Generate coverage with test runner
+python test_runner.py --level comprehensive  # Includes coverage report
+
+# Traditional coverage generation
 pytest --cov=app --cov-report=html --cov-report=term
 
 # View HTML report
 open htmlcov/index.html  # macOS
 xdg-open htmlcov/index.html  # Linux
 start htmlcov/index.html  # Windows
+
+# Coverage reports are automatically generated in test_reports/ directory
+open test_reports/coverage/index.html  # View unified coverage report
 ```
 
 ### Frontend Coverage
@@ -768,7 +777,7 @@ on:
 
 jobs:
   backend-tests:
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     services:
       postgres:
@@ -815,7 +824,7 @@ jobs:
           file: ./coverage.xml
   
   frontend-tests:
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - uses: actions/checkout@v3
@@ -896,37 +905,70 @@ locust -f tests/performance/locustfile.py \
   --headless
 ```
 
+## Architecture Compliance Testing
+
+### CRITICAL: 300-Line and 8-Line Limits
+
+**MANDATORY**: All code must pass architecture compliance checks:
+
+```bash
+# Check architecture compliance (run before commits)
+python scripts/check_architecture_compliance.py
+
+# Include in test suite
+python test_runner.py --level comprehensive  # Includes compliance checks
+
+# Generate compliance report
+python scripts/check_architecture_compliance.py --report --output test_reports/
+```
+
+**Compliance Requirements**:
+- Every file ≤300 lines (no exceptions)
+- Every function ≤8 lines (no exceptions)  
+- Modular design with clear interfaces
+- Single responsibility per module/function
+
 ## Testing Best Practices
 
-### 1. Test Isolation
+### 1. Architecture-First Testing
+- **Always check compliance first**: Run architecture checks before functional tests
+- **Module isolation**: Each 300-line module should be independently testable
+- **Function composition**: Test 8-line functions in combination and isolation
+
+### 2. Test Isolation
 - Each test should be independent
 - Use fixtures for setup/teardown
 - Mock external dependencies
 
-### 2. Test Data Management
+### 3. Test Data Management
 - Use factories for test data creation
 - Clean up test data after tests
 - Use separate test database
 
-### 3. Async Testing
+### 4. Async Testing
 - Use pytest-asyncio for async tests
 - Properly handle event loops
 - Test timeout scenarios
 
-### 4. WebSocket Testing
+### 5. WebSocket Testing
 - Mock WebSocket connections
 - Test reconnection logic
 - Verify message ordering
 
-### 5. Error Scenarios
+### 6. Error Scenarios
 - Test error handling paths
 - Verify error messages
 - Test recovery mechanisms
 
-### 6. Performance Considerations
+### 7. Performance Considerations
 - Set appropriate timeouts
 - Test under load conditions
 - Monitor resource usage
+
+### 8. Compliance Verification
+- **Pre-commit**: Always run compliance checks
+- **CI/CD Integration**: Fail builds on compliance violations
+- **Regular Audits**: Weekly architecture compliance reviews
 
 ## Troubleshooting
 

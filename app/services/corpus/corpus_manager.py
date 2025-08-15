@@ -179,7 +179,7 @@ class CorpusManager:
             db.commit()
             
             # Send deletion notification
-            await manager.broadcast({
+            await manager.broadcasting.broadcast_to_all({
                 "type": "corpus:deleted",
                 "payload": {
                     "corpus_id": corpus_id

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 class ModelIdentifier(BaseModel):
@@ -18,9 +18,7 @@ class SupplyOptionUpdate(SupplyOptionBase):
 class SupplyOptionInDBBase(SupplyOptionBase):
     id: int
 
-    class Config:
-        from_attributes = True
-        extra = "allow"
+    model_config = ConfigDict(from_attributes=True, extra="allow")
 
 class SupplyOption(SupplyOptionInDBBase):
     pass

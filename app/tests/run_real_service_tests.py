@@ -69,91 +69,68 @@ class RealServiceTestRunner:
         
         return results
     
-    def run_category_tests(self, category: str, test_files: List[Path]) -> Dict:
-        """Run tests for a specific category."""
-        print(f"\n{'='*60}")
-        print(f"RUNNING {category.upper()} TESTS")
-        print(f"{'='*60}")
-        print(f"Found {len(test_files)} test files")
-        
-        start_time = time.time()
-        passed = 0
-        failed = 0
-        skipped = 0
+    def _setup_test_environment(self, category: str) -> Dict[str, str]:
+        """Setup environment variables for test category."""
+        env = os.environ.copy()
+        if category == "real_llm":
+            env["ENABLE_REAL_LLM_TESTING"] = "true"
+        return env
+    
+    def _build_pytest_command(self, test_file: Path, category: str) -> List[str]:
+        """Build pytest command for test execution."""
+        cmd = [sys.executable, "-m", "pytest", str(test_file)]
+        cmd.extend(["-v" if self.verbose else "-q", "--tb=short", "--no-header"])
+        cmd.extend(["-W", "ignore::DeprecationWarning"])
+        if category == "real_llm":
+            cmd.extend(["-m", "not skip"])
+        return cmd
+    
+    def _parse_test_output(self, output: str, relative_path: Path) -> tuple[int, int, int, List[str]]:
+        """Parse pytest output and extract test counts."""
+        import re
+        passed = failed = skipped = 0
         errors = []
         
-        for test_file in test_files:
-            relative_path = test_file.relative_to(self.test_dir.parent.parent)
-            print(f"\n> Running: {relative_path}")
-            
-            # Run pytest for this specific file
-            cmd = [
-                sys.executable, "-m", "pytest",
-                str(test_file),
-                "-v" if self.verbose else "-q",
-                "--tb=short",
-                "--no-header",
-                "-W", "ignore::DeprecationWarning"
-            ]
-            
-            # Add specific markers for real service tests
-            if category == "real_llm":
-                cmd.extend(["-m", "not skip"])
-                # Set environment for real LLM testing
-                env = os.environ.copy()
-                env["ENABLE_REAL_LLM_TESTING"] = "true"
-            else:
-                env = os.environ.copy()
-            
-            try:
-                result = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
-                    timeout=300,  # 5 minute timeout per file
-                    env=env
-                )
-                
-                # Parse pytest output
-                output = result.stdout + result.stderr
-                
-                # Look for test results in output
-                if "passed" in output:
-                    # Extract test counts from pytest output
-                    import re
-                    match = re.search(r'(\d+) passed', output)
-                    if match:
-                        passed += int(match.group(1))
-                
-                if "failed" in output:
-                    match = re.search(r'(\d+) failed', output)
-                    if match:
-                        failed += int(match.group(1))
-                        errors.append(f"{relative_path}: {match.group(0)}")
-                
-                if "skipped" in output:
-                    match = re.search(r'(\d+) skipped', output)
-                    if match:
-                        skipped += int(match.group(1))
-                
-                if result.returncode != 0 and "failed" not in output:
-                    errors.append(f"{relative_path}: Test execution error")
-                    failed += 1
-                
-                if self.verbose and result.returncode != 0:
-                    print(f"  Output: {output[:500]}")
-                    
-            except subprocess.TimeoutExpired:
-                print(f"  [TIMEOUT] Test took longer than 5 minutes")
-                errors.append(f"{relative_path}: Timeout")
-                failed += 1
-            except Exception as e:
-                print(f"  [ERROR] {str(e)}")
-                errors.append(f"{relative_path}: {str(e)}")
-                failed += 1
+        if match := re.search(r'(\d+) passed', output):
+            passed = int(match.group(1))
+        if match := re.search(r'(\d+) failed', output):
+            failed = int(match.group(1))
+            errors.append(f"{relative_path}: {match.group(0)}")
+        if match := re.search(r'(\d+) skipped', output):
+            skipped = int(match.group(1))
         
-        duration = time.time() - start_time
+        return passed, failed, skipped, errors
+    
+    def _execute_single_test(self, test_file: Path, category: str) -> tuple[int, int, int, List[str]]:
+        """Execute a single test file and return results."""
+        relative_path = test_file.relative_to(self.test_dir.parent.parent)
+        print(f"\n> Running: {relative_path}")
         
+        cmd = self._build_pytest_command(test_file, category)
+        env = self._setup_test_environment(category)
+        
+        try:
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, env=env)
+            output = result.stdout + result.stderr
+            passed, failed, skipped, errors = self._parse_test_output(output, relative_path)
+            
+            if result.returncode != 0 and "failed" not in output:
+                errors.append(f"{relative_path}: Test execution error")
+                failed += 1
+            
+            if self.verbose and result.returncode != 0:
+                print(f"  Output: {output[:500]}")
+            
+            return passed, failed, skipped, errors
+        except subprocess.TimeoutExpired:
+            print(f"  [TIMEOUT] Test took longer than 5 minutes")
+            return 0, 1, 0, [f"{relative_path}: Timeout"]
+        except Exception as e:
+            print(f"  [ERROR] {str(e)}")
+            return 0, 1, 0, [f"{relative_path}: {str(e)}"]
+    
+    def _aggregate_results(self, category: str, duration: float, passed: int, failed: int, skipped: int, errors: List[str]) -> Dict:
+        """Aggregate test results into final dictionary."""
         return {
             "category": category,
             "duration": duration,
@@ -164,6 +141,21 @@ class RealServiceTestRunner:
             "errors": errors,
             "status": "passed" if failed == 0 else "failed"
         }
+    
+    def run_category_tests(self, category: str, test_files: List[Path]) -> Dict:
+        """Run tests for a specific category."""
+        print(f"\n{'='*60}\nRUNNING {category.upper()} TESTS\n{'='*60}")
+        print(f"Found {len(test_files)} test files")
+        
+        start_time = time.time()
+        passed = failed = skipped = 0
+        errors = []
+        
+        for test_file in test_files:
+            p, f, s, e = self._execute_single_test(test_file, category)
+            passed += p; failed += f; skipped += s; errors.extend(e)
+        
+        return self._aggregate_results(category, time.time() - start_time, passed, failed, skipped, errors)
     
     def run_real_service_tests(self, categories: Optional[List[str]] = None):
         """Run all real service tests that have proper environment setup."""

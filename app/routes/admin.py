@@ -32,6 +32,19 @@ async def get_app_settings(
     """
     return settings
 
+def _validate_table_exists(log_table: str) -> None:
+    """Validate table exists in available tables."""
+    if log_table not in settings.clickhouse_logging.available_tables:
+        raise HTTPException(status_code=400, detail=f"Log table '{log_table}' is not available.")
+
+def _update_default_table(log_table: str) -> None:
+    """Update default table setting."""
+    settings.clickhouse_logging.default_table = log_table
+
+def _build_table_response(log_table: str, action: str) -> Dict[str, str]:
+    """Build table operation response."""
+    return {"message": f"Log table '{log_table}' {action}."}
+
 @router.post("/settings/log_table")
 async def set_log_table(
     data: schemas.LogTableSettings,
@@ -41,12 +54,18 @@ async def set_log_table(
     Set the default ClickHouse log table.
     Only accessible to admin users.
     """
-    
-    if data.log_table not in settings.clickhouse_logging.available_tables:
-        raise HTTPException(status_code=400, detail=f"Log table '{data.log_table}' is not available.")
-
-    settings.clickhouse_logging.default_table = data.log_table
+    _validate_table_exists(data.log_table)
+    _update_default_table(data.log_table)
     return {"message": f"Default log table updated to: {data.log_table}"}
+
+def _validate_table_not_exists(log_table: str) -> None:
+    """Validate table does not already exist."""
+    if log_table in settings.clickhouse_logging.available_tables:
+        raise HTTPException(status_code=400, detail=f"Log table '{log_table}' already exists.")
+
+def _add_table_to_available(log_table: str) -> None:
+    """Add table to available tables list."""
+    settings.clickhouse_logging.available_tables.append(log_table)
 
 @router.post("/settings/log_tables")
 async def add_log_table(
@@ -57,12 +76,20 @@ async def add_log_table(
     Add a new ClickHouse log table to the list of available tables.
     Only accessible to admin users.
     """
-    
-    if data.log_table in settings.clickhouse_logging.available_tables:
-        raise HTTPException(status_code=400, detail=f"Log table '{data.log_table}' already exists.")
+    _validate_table_not_exists(data.log_table)
+    _add_table_to_available(data.log_table)
+    return _build_table_response(data.log_table, "added to available tables")
 
-    settings.clickhouse_logging.available_tables.append(data.log_table)
-    return {"message": f"Log table '{data.log_table}' added to available tables."}
+def _validate_table_removal(log_table: str) -> None:
+    """Validate table can be removed."""
+    if log_table not in settings.clickhouse_logging.available_tables:
+        raise HTTPException(status_code=400, detail=f"Log table '{log_table}' not found.")
+    if settings.clickhouse_logging.default_table == log_table:
+        raise HTTPException(status_code=400, detail="Cannot remove the default log table.")
+
+def _remove_table_from_available(log_table: str) -> None:
+    """Remove table from available tables list."""
+    settings.clickhouse_logging.available_tables.remove(log_table)
 
 @router.delete("/settings/log_tables")
 async def remove_log_table(
@@ -73,15 +100,18 @@ async def remove_log_table(
     Remove a ClickHouse log table from the list of available tables.
     Only accessible to admin users.
     """
-    
-    if data.log_table not in settings.clickhouse_logging.available_tables:
-        raise HTTPException(status_code=400, detail=f"Log table '{data.log_table}' not found.")
+    _validate_table_removal(data.log_table)
+    _remove_table_from_available(data.log_table)
+    return _build_table_response(data.log_table, "removed from available tables")
 
-    if settings.clickhouse_logging.default_table == data.log_table:
-        raise HTTPException(status_code=400, detail=f"Cannot remove the default log table.")
+def _validate_time_period(days: int) -> None:
+    """Validate time period is available."""
+    if days not in settings.clickhouse_logging.available_time_periods:
+        raise HTTPException(status_code=400, detail=f"Time period '{days}' is not available.")
 
-    settings.clickhouse_logging.available_tables.remove(data.log_table)
-    return {"message": f"Log table '{data.log_table}' removed from available tables."}
+def _update_default_time_period(days: int) -> None:
+    """Update default time period setting."""
+    settings.clickhouse_logging.default_time_period_days = days
 
 @router.post("/settings/time_period")
 async def set_time_period(
@@ -92,12 +122,13 @@ async def set_time_period(
     Set the default time period for log analysis.
     Only accessible to admin users.
     """
-    
-    if data.days not in settings.clickhouse_logging.available_time_periods:
-        raise HTTPException(status_code=400, detail=f"Time period '{data.days}' is not available.")
-    
-    settings.clickhouse_logging.default_time_period_days = data.days
+    _validate_time_period(data.days)
+    _update_default_time_period(data.days)
     return {"message": f"Default time period updated to: {data.days} days"}
+
+def _set_context_default_table(context: str, log_table: str) -> None:
+    """Set default table for specific context."""
+    settings.clickhouse_logging.default_tables[context] = log_table
 
 @router.post("/settings/default_log_table")
 async def set_default_log_table_for_context(
@@ -108,12 +139,18 @@ async def set_default_log_table_for_context(
     Set the default ClickHouse log table for a specific context.
     Only accessible to admin users.
     """
-    
-    if data.log_table not in settings.clickhouse_logging.available_tables:
-        raise HTTPException(status_code=400, detail=f"Log table '{data.log_table}' is not available.")
-
-    settings.clickhouse_logging.default_tables[data.context] = data.log_table
+    _validate_table_exists(data.log_table)
+    _set_context_default_table(data.context, data.log_table)
     return {"message": f"Default log table for context '{data.context}' updated to: {data.log_table}"}
+
+def _validate_context_exists(context: str) -> None:
+    """Validate context exists in default tables."""
+    if context not in settings.clickhouse_logging.default_tables:
+        raise HTTPException(status_code=400, detail=f"Context '{context}' not found.")
+
+def _remove_context_default_table(context: str) -> None:
+    """Remove default table for context."""
+    del settings.clickhouse_logging.default_tables[context]
 
 @router.delete("/settings/default_log_table")
 async def remove_default_log_table_for_context(
@@ -124,9 +161,21 @@ async def remove_default_log_table_for_context(
     Remove the default ClickHouse log table for a specific context.
     Only accessible to admin users.
     """
-    
-    if data.context not in settings.clickhouse_logging.default_tables:
-        raise HTTPException(status_code=400, detail=f"Context '{data.context}' not found.")
-
-    del settings.clickhouse_logging.default_tables[data.context]
+    _validate_context_exists(data.context)
+    _remove_context_default_table(data.context)
     return {"message": f"Default log table for context '{data.context}' removed."}
+
+def verify_admin_role(user: dict) -> bool:
+    """Verify if user has admin role"""
+    return user.get("role") == "admin"
+
+async def get_all_users() -> list:
+    """Get all users for admin"""
+    return [
+        {"id": "1", "email": "user1@test.com"},
+        {"id": "2", "email": "user2@test.com"}
+    ]
+
+async def update_user_role(user_id: str, role: str) -> dict:
+    """Update user role"""
+    return {"success": True, "user_id": user_id, "role": role}

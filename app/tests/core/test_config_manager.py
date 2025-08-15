@@ -7,7 +7,8 @@ from pydantic import ValidationError
 
 from app.core.secret_manager import SecretManager, SecretManagerError
 from app.core.config_validator import ConfigValidator, ConfigurationValidationError
-from app.config import ConfigManager, ConfigurationError, get_config, reload_config
+from app.core.exceptions_config import ConfigurationError
+from app.config import ConfigManager, get_config, reload_config
 from app.schemas.Config import AppConfig, DevelopmentConfig
 
 

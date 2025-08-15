@@ -6,79 +6,107 @@ from app.config import settings
 from app.logging_config import central_logger as logger
 
 
-class MockClickHouseDatabase:
-    """Mock ClickHouse client for when ClickHouse is disabled in dev mode."""
+class DisabledClickHouseDatabase:
+    """ClickHouse client for when ClickHouse is disabled in development mode.
+    
+    Provides safe fallback behavior without hardcoded test data.
+    """
     
     async def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        logger.debug(f"ClickHouse disabled - Mock execute: {query}")
-        return []
+        """Execute query with disabled ClickHouse - returns empty results."""
+        logger.debug(f"ClickHouse disabled - Execute query logged: {query[:50]}...")
+        return self._create_empty_result_set()
     
     async def execute_query(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        logger.debug(f"ClickHouse disabled - Mock execute_query: {query}")
-        return []
+        """Execute parameterized query with disabled ClickHouse."""
+        logger.debug(f"ClickHouse disabled - Parameterized query logged: {query[:50]}...")
+        return self._create_schema_aware_result(query, params)
     
     async def fetch(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """Mock fetch method for tests that expect this interface."""
-        logger.debug(f"ClickHouse disabled - Mock fetch: {query}")
-        # Return mock data that would be expected from common queries
-        if "SELECT 1 as test" in query:
-            return [{"test": 1}]
-        elif "SELECT now() as current_time" in query:
-            from datetime import datetime
-            return [{"current_time": datetime.now()}]
-        elif "test_value" in query:
-            return [{"value": "test_value"}]
-        elif "SHOW TABLES" in query:
-            return []
-        elif "netra_content_corpus" in query:
-            return []
-        else:
-            return []
+        """Fetch data with disabled ClickHouse - returns empty results."""
+        logger.debug(f"ClickHouse disabled - Fetch query logged: {query[:50]}...")
+        return self._create_schema_aware_result(query, params)
     
     async def disconnect(self):
-        pass
+        """Disconnect - no-op for disabled client."""
+        logger.debug("ClickHouse disabled - Disconnect called")
     
-    async def test_connection(self):
+    async def test_connection(self) -> bool:
+        """Test connection - always succeeds for disabled client."""
+        logger.debug("ClickHouse disabled - Connection test passed")
         return True
     
-    def ping(self):
+    def ping(self) -> bool:
+        """Ping - always succeeds for disabled client."""
+        logger.debug("ClickHouse disabled - Ping successful")
         return True
+    
+    async def command(self, cmd: str, parameters: Optional[Dict[str, Any]] = None, 
+                     settings: Optional[Dict[str, Any]] = None) -> Any:
+        """Execute command with disabled ClickHouse - no-op for schema operations."""
+        logger.debug(f"ClickHouse disabled - Command logged: {cmd[:50]}...")
+        return None
+    
+    def _create_empty_result_set(self) -> List[Dict[str, Any]]:
+        """Create empty result set for queries."""
+        return []
+    
+    def _create_schema_aware_result(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Create schema-aware empty results based on query structure."""
+        # Log the query structure for debugging
+        logger.debug(f"Query structure analyzed for disabled ClickHouse")
+        
+        # Return empty results - the application should handle empty datasets gracefully
+        return self._create_empty_result_set()
+
+def _is_clickhouse_disabled() -> bool:
+    """Check if ClickHouse is disabled in current environment."""
+    dev_disabled = settings.environment == "development" and not settings.dev_mode_clickhouse_enabled
+    return dev_disabled or settings.environment == "testing"
+
+async def _create_disabled_client():
+    """Create and manage disabled ClickHouse client."""
+    logger.info(f"ClickHouse disabled in {settings.environment} mode - using disabled client")
+    client = DisabledClickHouseDatabase()
+    try:
+        yield client
+    finally:
+        await client.disconnect()
+
+def _get_clickhouse_config():
+    """Get ClickHouse configuration based on environment."""
+    if settings.environment == "development":
+        return settings.clickhouse_https_dev
+    return settings.clickhouse_https
+
+def _create_base_client(config):
+    """Create base ClickHouse client with configuration."""
+    return ClickHouseDatabase(
+        host=config.host, port=config.port, user=config.user,
+        password=config.password, database=config.database, secure=True
+    )
+
+def _wrap_client_with_interceptor(base_client):
+    """Wrap client with query interceptor for array syntax fixes."""
+    return ClickHouseQueryInterceptor(base_client)
+
+async def _cleanup_client(client):
+    """Clean up ClickHouse client connection."""
+    if client:
+        await client.disconnect()
 
 @asynccontextmanager
 async def get_clickhouse_client():
-    """
-    Dependency provider for the ClickHouse client.
-    Instantiates the client with settings and attempts to connect.
-    This function will be called by FastAPI for routes that need a ClickHouse connection.
-    """
-    # Check if ClickHouse is disabled in development/testing mode
-    if (settings.environment == "development" and not settings.dev_mode_clickhouse_enabled) or settings.environment == "testing":
-        logger.info(f"ClickHouse is disabled in {settings.environment} mode - using mock client")
-        client = MockClickHouseDatabase()
-        try:
+    """Dependency provider for ClickHouse client with proper connection management."""
+    if _is_clickhouse_disabled():
+        async for client in _create_disabled_client():
             yield client
-        finally:
-            await client.disconnect()
         return
     
-    client = None
+    config = _get_clickhouse_config()
+    base_client = _create_base_client(config)
+    client = _wrap_client_with_interceptor(base_client)
     try:
-        if settings.environment == "development":
-            config = settings.clickhouse_https_dev
-        else:
-            config = settings.clickhouse_https
-
-        base_client = ClickHouseDatabase(
-            host=config.host,
-            port=config.port,
-            user=config.user,
-            password=config.password,
-            database=config.database,
-            secure=True
-        )
-        # Wrap with query interceptor to fix array syntax issues
-        client = ClickHouseQueryInterceptor(base_client)
         yield client
     finally:
-        if client:
-            await client.disconnect()
+        await _cleanup_client(client)

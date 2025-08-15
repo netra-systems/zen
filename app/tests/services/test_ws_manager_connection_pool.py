@@ -15,7 +15,7 @@ import json
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState, WebSocketDisconnect
 from app.ws_manager import WebSocketManager, ConnectionInfo
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 
 
 class MockWebSocket:

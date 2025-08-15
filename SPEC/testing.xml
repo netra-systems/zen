@@ -35,6 +35,7 @@
             <goal>Quality gate integration for output validation</goal>
             <goal>Synthetic data generation for consistent testing</goal>
             <goal>Fast feedback loops with quick test mode</goal>
+            <goal>When fixing tests align tests with latest code. Update tests as needed to test real latest code.</goal>
         </goals>
     </overview>
     
@@ -99,12 +100,83 @@
             </level>
             
             <level name="comprehensive">
-                <description>Full test suite with coverage (10-15 minutes)</description>
+                <description>Full test suite with coverage (30-45 minutes)</description>
                 <purpose>Pre-release validation, full system testing</purpose>
                 <command>python test_runner.py --level comprehensive</command>
-                <timeout>900</timeout>
+                <timeout>2700</timeout>
                 <coverage>true</coverage>
                 <components>backend+frontend</components>
+                <note>Complete validation when thoroughness is essential. Use modular comprehensive levels for faster focused testing</note>
+            </level>
+            
+            <level name="comprehensive-backend">
+                <description>Comprehensive backend tests only (15-20 minutes)</description>
+                <purpose>Full backend validation without frontend</purpose>
+                <command>python test_runner.py --level comprehensive-backend</command>
+                <timeout>1200</timeout>
+                <coverage>true</coverage>
+                <components>backend_only</components>
+                <note>Optimal for backend-focused development cycles</note>
+            </level>
+            
+            <level name="comprehensive-frontend">
+                <description>Comprehensive frontend tests only (10-15 minutes)</description>
+                <purpose>Full frontend validation without backend</purpose>
+                <command>python test_runner.py --level comprehensive-frontend</command>
+                <timeout>900</timeout>
+                <coverage>true</coverage>
+                <components>frontend_only</components>
+                <note>Optimal for UI/UX development cycles</note>
+            </level>
+            
+            <level name="comprehensive-core">
+                <description>Core functionality comprehensive tests (10-15 minutes)</description>
+                <purpose>Deep validation of core components only</purpose>
+                <command>python test_runner.py --level comprehensive-core</command>
+                <timeout>900</timeout>
+                <coverage>true</coverage>
+                <components>backend_only</components>
+                <note>Validates fundamental system components thoroughly</note>
+            </level>
+            
+            <level name="comprehensive-agents">
+                <description>Agent system comprehensive tests (10-15 minutes)</description>
+                <purpose>Deep validation of multi-agent system</purpose>
+                <command>python test_runner.py --level comprehensive-agents</command>
+                <timeout>900</timeout>
+                <coverage>true</coverage>
+                <components>backend_only</components>
+                <note>Ensures agent coordination and responses meet quality standards</note>
+            </level>
+            
+            <level name="comprehensive-websocket">
+                <description>WebSocket comprehensive tests (5-10 minutes)</description>
+                <purpose>Deep validation of WebSocket functionality</purpose>
+                <command>python test_runner.py --level comprehensive-websocket</command>
+                <timeout>600</timeout>
+                <coverage>true</coverage>
+                <components>backend_only</components>
+                <note>Validates real-time communication thoroughly</note>
+            </level>
+            
+            <level name="comprehensive-database">
+                <description>Database comprehensive tests (10-15 minutes)</description>
+                <purpose>Deep validation of all database operations</purpose>
+                <command>python test_runner.py --level comprehensive-database</command>
+                <timeout>900</timeout>
+                <coverage>true</coverage>
+                <components>backend_only</components>
+                <note>Ensures data integrity and repository patterns work correctly</note>
+            </level>
+            
+            <level name="comprehensive-api">
+                <description>API comprehensive tests (10-15 minutes)</description>
+                <purpose>Deep validation of all API endpoints</purpose>
+                <command>python test_runner.py --level comprehensive-api</command>
+                <timeout>900</timeout>
+                <coverage>true</coverage>
+                <components>backend_only</components>
+                <note>Validates all API routes and response contracts</note>
             </level>
             
             <level name="critical">
@@ -652,6 +724,8 @@
         <practice>Test edge cases and boundary conditions</practice>
         <practice>Always implement actual test logic that validates functionality - tests must contain meaningful assertions and verification</practice>
         <practice>When creating test files, ensure they contain real test functions with proper assertions rather than placeholder print statements</practice>
+        <practice>When running comprehensive tests, stay committed to the comprehensive level - leverage modular comprehensive options for focused testing rather than falling back to simpler test levels</practice>
+        <practice>Use comprehensive-backend, comprehensive-agents, or other modular options to maintain thorough testing while reducing execution time</practice>
     </best_practices>
     
     <fake_test_detection>

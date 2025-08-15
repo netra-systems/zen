@@ -9,7 +9,7 @@ from app.auth.environment_config import auth_env_config
 from app.config import settings
 from app.dependencies import get_db_session, get_security_service
 from app.db.models_postgres import User
-from app.schemas.User import UserCreate, UserCreateOAuth, User as UserSchema
+from app.schemas.registry import UserCreate, UserCreateOAuth, User as UserSchema
 from app.schemas.Auth import AuthConfigResponse, AuthEndpoints, DevLoginRequest
 from app.schemas.Token import TokenPayload
 from app.services.user_service import user_service

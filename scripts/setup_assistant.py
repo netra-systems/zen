@@ -11,7 +11,7 @@ logger = central_logger.get_logger(__name__)
 
 async def setup_netra_assistant():
     """Create or update the Netra assistant in the database"""
-    async for db in get_async_db():
+    async with get_async_db() as db:
         try:
             # Check if assistant already exists
             result = await db.execute(
@@ -81,8 +81,6 @@ async def setup_netra_assistant():
             logger.error(f"Error setting up Netra assistant: {e}")
             await db.rollback()
             raise
-        finally:
-            await db.close()
 
 if __name__ == "__main__":
     asyncio.run(setup_netra_assistant())

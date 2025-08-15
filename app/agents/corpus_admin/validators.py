@@ -13,7 +13,7 @@ from .models import CorpusOperation, CorpusOperationRequest
 class CorpusApprovalValidator:
     """Validates and determines approval requirements for corpus operations"""
     
-    def __init__(self):
+    def __init__(self) -> None:
         self.approval_thresholds = {
             "delete_documents": 100,
             "update_documents": 500,

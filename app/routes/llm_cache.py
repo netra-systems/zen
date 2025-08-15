@@ -83,6 +83,46 @@ async def update_ttl(ttl_seconds: int) -> Dict[str, Any]:
         "message": f"TTL updated to {ttl_seconds} seconds"
     }
 
+@router.get("/metrics")
+async def get_cache_metrics() -> Dict[str, Any]:
+    """Get comprehensive cache metrics"""
+    try:
+        metrics = await llm_cache_service.get_cache_metrics()
+        return {
+            "success": True,
+            **metrics
+        }
+    except Exception as e:
+        logger.error(f"Error getting cache metrics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/")
+async def clear_api_cache() -> Dict[str, Any]:
+    """Clear all cache entries"""
+    try:
+        deleted_count = await llm_cache_service.clear_cache()
+        return {
+            "success": True,
+            "cleared": deleted_count,
+            "remaining": 0,
+            "message": f"Successfully cleared {deleted_count} cache entries"
+        }
+    except Exception as e:
+        logger.error(f"Error clearing all cache entries: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/pattern/{pattern}")
 async def clear_cache_pattern(pattern: str) -> Dict[str, Any]:
-    """Clear cache by pattern for testing."""
-    return await llm_cache_service.clear_pattern(pattern)
+    """Clear cache entries matching a specific pattern"""
+    try:
+        deleted_count = await llm_cache_service.clear_cache_pattern(pattern)
+        return {
+            "success": True,
+            "cleared": deleted_count,
+            "pattern": pattern,
+            "message": f"Successfully cleared {deleted_count} cache entries matching pattern '{pattern}'"
+        }
+    except Exception as e:
+        logger.error(f"Error clearing cache with pattern '{pattern}': {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+

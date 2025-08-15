@@ -31,6 +31,11 @@ class CircuitBreaker:
         self.last_failure_time: Optional[float] = None
         self.half_open_calls = 0
     
+    @property
+    def is_open(self) -> bool:
+        """Check if circuit breaker is in open state."""
+        return self.state == CircuitBreakerState.OPEN
+    
     def can_execute(self) -> bool:
         """Check if execution is allowed"""
         if self.state == CircuitBreakerState.CLOSED:

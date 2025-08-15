@@ -1,0 +1,271 @@
+global:
+  versions:
+    python: '3.11'
+    node: '20'
+    terraform: 1.6.0
+    kubectl: 1.28.0
+  runners:
+    default: warp-custom-test
+    custom: warp-custom-test
+    windows: windows-latest
+    macos: macos-latest
+  timeouts:
+    smoke: 5
+    unit: 10
+    integration: 20
+    comprehensive: 60
+    security_scan: 15
+    performance_test: 20
+    staging_deployment: 30
+    rollback: 5
+testing:
+  shards:
+    unit:
+    - core
+    - agents
+    - websocket
+    - database
+    - api
+    integration:
+    - backend
+    - frontend
+    - api
+    comprehensive:
+      modules:
+      - comprehensive
+      - comprehensive-backend
+      - comprehensive-frontend
+      - comprehensive-core
+      - comprehensive-database
+      - comprehensive-api
+      - comprehensive-agents
+      - comprehensive-websocket
+  coverage:
+    minimum: 80
+    target: 90
+    fail_under: 75
+  retry:
+    max_attempts: 3
+    delay_seconds: 30
+    backoff_multiplier: 2
+deployment:
+  staging:
+    gcp_region: us-central1
+    project_prefix: netra-staging
+    max_environments: 10
+    auto_cleanup_days: 7
+    resource_limits:
+      cpu: '2'
+      memory: 4Gi
+      disk: 20Gi
+  production:
+    gcp_region: us-central1
+    project_prefix: netra-prod
+    min_replicas: 2
+    max_replicas: 10
+    auto_scaling: true
+  docker:
+    registry: gcr.io
+    cache_enabled: true
+    buildkit_enabled: true
+    platforms:
+    - linux/amd64
+monitoring:
+  health:
+    failure_rate_threshold: 10
+    cost_budget_daily: 20
+    cost_budget_monthly: 500
+    metrics_retention_days: 30
+  alerts:
+    enabled: true
+    channels:
+    - github_issues
+    - discord
+    - email
+    thresholds:
+      critical_failure_rate: 25
+      high_failure_rate: 15
+      cost_overrun: 1.2
+  reporting:
+    frequency: weekly
+    include_metrics:
+    - success_rate
+    - average_duration
+    - cost_analysis
+    - failure_patterns
+ai:
+  providers:
+  - name: claude
+    models:
+    - claude-3-opus
+    - claude-3-sonnet
+    priority: 1
+  - name: gemini
+    models:
+    - gemini-2.5-flash
+    - gemini-2.5-pro
+    priority: 2
+  - name: openai
+    models:
+    - gpt-3.5-turbo
+    - gpt-4
+    priority: 3
+  autofix:
+    enabled: false
+    max_attempts: 3
+    confidence_threshold: 80
+    require_validation: true
+    test_before_commit: true
+  review:
+    enabled: false
+    auto_approve_threshold: 95
+    require_human_review: true
+caching:
+  dependencies:
+    python:
+      enabled: true
+      paths:
+      - ~/.cache/pip
+      - venv
+      key_prefix: py-deps
+    node:
+      enabled: true
+      paths:
+      - ~/.npm
+      - node_modules
+      key_prefix: node-deps
+    docker:
+      enabled: true
+      registry_cache: true
+      layer_cache: true
+  artifacts:
+    test_results: 7
+    build_artifacts: 14
+    deployment_logs: 30
+    performance_data: 90
+security:
+  secret_scanning:
+    enabled: true
+    patterns:
+    - api[_-]?key
+    - secret[_-]?key
+    - password
+    - token
+    - credential
+  dependency_scanning:
+    enabled: true
+    check_vulnerabilities: true
+    auto_fix_patches: true
+    severity_threshold: medium
+  code_scanning:
+    enabled: true
+    languages:
+    - python
+    - javascript
+    - typescript
+    tools:
+    - codeql
+    - semgrep
+workflow_control:
+  enabled_by_default: true
+  concurrency:
+    default_group: ${{ github.workflow }}-${{ github.ref }}
+    cancel_in_progress: true
+    max_parallel_jobs: 10
+  default_permissions:
+    contents: read
+    issues: write
+    pull-requests: write
+    statuses: write
+    actions: read
+    packages: read
+notifications:
+  pr_comments:
+    enabled: true
+    update_existing: true
+    include_coverage: true
+    include_performance: true
+    include_artifacts: true
+  commit_status:
+    enabled: true
+    include_details: true
+    context_prefix: netra
+  discord:
+    enabled: '{{ vars.DISCORD_WEBHOOK_URL != "" }}'
+    mention_on_failure: true
+    include_artifacts: false
+performance:
+  parallel:
+    matrix_max_parallel: 10
+    test_shards_max: 5
+    build_jobs_max: 3
+  resources:
+    large_runner_threshold: 30
+    use_custom_runners: true
+    prefer_cached_runners: true
+  build:
+    incremental: true
+    cache_dependencies: true
+    skip_unchanged: true
+    parallel_install: true
+variable_mappings:
+  ENABLE_WORKFLOW_ORCHESTRATOR: workflow_control.orchestrator.enabled
+  ENABLE_WORKFLOW_TESTS: workflow_control.testing.enabled
+  ENABLE_WORKFLOW_STAGING: workflow_control.staging.enabled
+  ENABLE_WORKFLOW_AI: workflow_control.ai.enabled
+  ENABLE_WORKFLOW_MONITORING: workflow_control.monitoring.enabled
+  ALERT_THRESHOLD_FAILURE_RATE: monitoring.health.failure_rate_threshold
+  COST_BUDGET_DAILY: monitoring.health.cost_budget_daily
+  COST_BUDGET_MONTHLY: monitoring.health.cost_budget_monthly
+  DISCORD_WEBHOOK_URL: notifications.discord.webhook_url
+  SLACK_WEBHOOK_URL: notifications.slack.webhook_url
+  RUNNER_TYPE_DEFAULT: global.runners.default
+  RUNNER_TYPE_CUSTOM: global.runners.custom
+environments:
+  development:
+    testing:
+      coverage:
+        minimum: 30
+    monitoring:
+      alerts:
+        enabled: false
+  staging:
+    deployment:
+      auto_cleanup_days: 3
+    monitoring:
+      alerts:
+        enabled: true
+  production:
+    testing:
+      coverage:
+        minimum: 90
+    deployment:
+      require_approval: true
+    monitoring:
+      alerts:
+        enabled: false
+        channels:
+        - pagerduty
+        - slack
+        - email
+features:
+  hierarchical_testing: true
+  smart_retry: true
+  ai_assistance: true
+  cost_monitoring: true
+  auto_cleanup: true
+workflows:
+  testing:
+    smoke:
+      enabled: true
+    unit:
+      enabled: true
+    integration:
+      enabled: true
+    comprehensive:
+      enabled: true
+  ai:
+    autofix:
+      enabled: true
+    pr_review:
+      enabled: true

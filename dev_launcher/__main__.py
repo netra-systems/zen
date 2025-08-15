@@ -7,8 +7,17 @@ This module can be run directly as:
 """
 
 import sys
+import os
 import argparse
 from pathlib import Path
+
+# Set UTF-8 encoding for Windows
+if sys.platform == "win32":
+    os.environ["PYTHONIOENCODING"] = "utf-8"
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -26,12 +35,12 @@ DEFAULT CONFIGURATION (Optimized for Development):
   python -m dev_launcher
   
   This provides:
-    ✅ Dynamic port allocation (no conflicts)
-    ✅ No backend hot reload (30-50% faster)
-    ✅ Automatic Google secret loading
-    ✅ Real-time log streaming with emoji indicators
-    ✅ Professional syntax highlighting
-    ✅ Better error detection and reporting
+    - Dynamic port allocation (no conflicts)
+    - No backend hot reload (30-50% faster)
+    - Automatic Google secret loading
+    - Real-time log streaming with emoji indicators
+    - Professional syntax highlighting
+    - Better error detection and reporting
 
 EXAMPLES:
   python -m dev_launcher                           # Default: dynamic ports, no backend reload
@@ -131,6 +140,11 @@ QUICK SHORTCUTS:
         action="store_true",
         help="Show verbose output and debug information"
     )
+    ui_group.add_argument(
+        "--non-interactive",
+        action="store_true",
+        help="Run in non-interactive mode (no prompts, use defaults)"
+    )
     
     # Build configuration
     build_group = parser.add_argument_group('Build Configuration')
@@ -143,6 +157,32 @@ QUICK SHORTCUTS:
         "--turbopack",
         action="store_true",
         help="Use turbopack (experimental, faster)"
+    )
+    
+    # Boundary monitoring configuration
+    boundary_group = parser.add_argument_group('Boundary Monitoring')
+    boundary_group.add_argument(
+        "--watch-boundaries",
+        dest="watch_boundaries",
+        action="store_true",
+        help="Enable real-time boundary monitoring (300-line/8-line limits)"
+    )
+    boundary_group.add_argument(
+        "--boundary-check-interval",
+        dest="boundary_check_interval",
+        type=int,
+        default=30,
+        help="Boundary check interval in seconds (default: 30)"
+    )
+    boundary_group.add_argument(
+        "--fail-on-boundary-violations",
+        action="store_true",
+        help="Stop dev server on critical boundary violations"
+    )
+    boundary_group.add_argument(
+        "--no-boundary-warnings",
+        action="store_true",
+        help="Disable boundary violation warning messages"
     )
     
     return parser

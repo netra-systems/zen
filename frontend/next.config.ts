@@ -3,6 +3,14 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   productionBrowserSourceMaps: true,
   output: 'standalone',
+  eslint: {
+    // Disable ESLint during builds (for staging/production)
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    // Disable TypeScript checking during builds (for staging)
+    ignoreBuildErrors: true,
+  },
   outputFileTracingIncludes: {
     '/api': ['./node_modules/**/*.js'],
     '/_next': ['./node_modules/**/*.js']

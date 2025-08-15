@@ -20,24 +20,24 @@ router = APIRouter()
 async def create_content_corpus(params: ContentGenParams, background_tasks: BackgroundTasks) -> Dict[str, str]:
     """Starts a background job to generate a new content corpus."""
     job_id = str(uuid.uuid4())
-    await job_store.set(job_id, {"status": "pending", "type": "content", "params": params.dict()})
-    background_tasks.add_task(run_content_generation_job, job_id, params.dict())
+    await job_store.set(job_id, {"status": "pending", "type": "content", "params": params.model_dump()})
+    background_tasks.add_task(run_content_generation_job, job_id, params.model_dump())
     return {"job_id": job_id, "message": "Content generation job started."}
 
 @router.post("/logs", status_code=status.HTTP_202_ACCEPTED, response_model=Dict[str, str])
 async def create_synthetic_logs(params: LogGenParams, background_tasks: BackgroundTasks) -> Dict[str, str]:
     """Starts a background job to generate a new set of synthetic logs."""
     job_id = str(uuid.uuid4())
-    await job_store.set(job_id, {"status": "pending", "type": "logs", "params": params.dict()})
-    background_tasks.add_task(run_log_generation_job, job_id, params.dict())
+    await job_store.set(job_id, {"status": "pending", "type": "logs", "params": params.model_dump()})
+    background_tasks.add_task(run_log_generation_job, job_id, params.model_dump())
     return {"job_id": job_id, "message": "Synthetic log generation job started."}
 
 @router.post("/content_corpus", status_code=status.HTTP_202_ACCEPTED, response_model=Dict[str, str])
 async def create_content_corpus_and_store(params: ContentCorpusGenParams, background_tasks: BackgroundTasks) -> Dict[str, str]:
     """Starts a background job to generate a new content corpus and store it in ClickHouse."""
     job_id = str(uuid.uuid4())
-    await job_store.set(job_id, {"status": "pending", "type": "content_corpus_generation", "params": params.dict()})
-    background_tasks.add_task(run_content_generation_job, job_id, params.dict())
+    await job_store.set(job_id, {"status": "pending", "type": "content_corpus_generation", "params": params.model_dump()})
+    background_tasks.add_task(run_content_generation_job, job_id, params.model_dump())
     return {"job_id": job_id, "message": "Content corpus generation job started."}
 
 
@@ -45,8 +45,8 @@ async def create_content_corpus_and_store(params: ContentCorpusGenParams, backgr
 async def ingest_data(params: DataIngestionParams, background_tasks: BackgroundTasks) -> Dict[str, str]:
     """Starts a background job to ingest data into ClickHouse."""
     job_id = str(uuid.uuid4())
-    await job_store.set(job_id, {"status": "pending", "type": "data_ingestion", "params": params.dict()})
-    background_tasks.add_task(run_data_ingestion_job, job_id, params.dict())
+    await job_store.set(job_id, {"status": "pending", "type": "data_ingestion", "params": params.model_dump()})
+    background_tasks.add_task(run_data_ingestion_job, job_id, params.model_dump())
     return {"job_id": job_id, "message": "Data ingestion job started."}
 
 
@@ -54,8 +54,8 @@ async def ingest_data(params: DataIngestionParams, background_tasks: BackgroundT
 async def create_synthetic_data(params: SyntheticDataGenParams, background_tasks: BackgroundTasks) -> Dict[str, str]:
     """Starts a background job to generate new synthetic data."""
     job_id = str(uuid.uuid4())
-    await job_store.set(job_id, {"status": "pending", "type": "synthetic_data", "params": params.dict()})
-    background_tasks.add_task(run_synthetic_data_generation_job, job_id, params.dict())
+    await job_store.set(job_id, {"status": "pending", "type": "synthetic_data", "params": params.model_dump()})
+    background_tasks.add_task(run_synthetic_data_generation_job, job_id, params.model_dump())
     return {"job_id": job_id, "message": "Synthetic data generation job started."}
 
 @router.get("/jobs/{job_id}")

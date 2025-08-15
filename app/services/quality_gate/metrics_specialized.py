@@ -18,31 +18,75 @@ class SpecializedMetricsCalculator:
         self.patterns = patterns
         self.redis_manager = redis_manager
     
+    def _get_gpu_mappings(self) -> Dict[str, set]:
+        """Get GPU-related semantic mappings"""
+        return {
+            'gpu': {'graphics', 'card', 'cards', 'memory'},
+            'gpus': {'graphics', 'card', 'cards', 'memory'},
+            'graphics': {'gpu', 'gpus'},
+            'cards': {'gpu', 'gpus'},
+            'memory': {'gpu', 'consumption', 'usage'},
+            'usage': {'consumption', 'memory'},
+            'consumption': {'usage', 'memory'}
+        }
+
+    def _get_training_mappings(self) -> Dict[str, set]:
+        """Get training-related semantic mappings"""
+        return {
+            'training': {'convergence', 'precision', 'mixed'},
+            'distributed': {'multiple', 'parallel'},
+            'neural': {'network'},
+            'speed': {'faster', 'fast'},
+            'faster': {'speed', 'fast'},
+            'reduce': {'optimize', 'minimize', 'improve'},
+            'help': {'optimize', 'improve', 'reduce'},
+            'optimize': {'reduce', 'improve', 'help', 'enabling'},
+            'enabling': {'optimize', 'improve'}
+        }
+
+    def _get_semantic_mappings(self) -> Dict[str, set]:
+        """Get all semantic term equivalence mappings"""
+        mappings = {}
+        mappings.update(self._get_gpu_mappings())
+        mappings.update(self._get_training_mappings())
+        return mappings
+
+    def _calculate_semantic_score(self, request_words: set, content_words: set) -> float:
+        """Calculate semantic relevance score"""
+        mappings = self._get_semantic_mappings()
+        semantic_matches = 0
+        for req_word in request_words:
+            if req_word in mappings:
+                if any(sem_word in content_words for sem_word in mappings[req_word]):
+                    semantic_matches += 1
+        return min(semantic_matches * 0.2, 0.6) if request_words else 0.0
+
+    def _calculate_word_overlap_score(self, request_words: set, content_words: set) -> float:
+        """Calculate direct word overlap score"""
+        if not request_words:
+            return 0.0
+        overlap = len(request_words & content_words)
+        return min(overlap / len(request_words) * 0.8, 0.4)
+
+    def _calculate_technical_terms_score(self, request_words: set, content_lower: str) -> float:
+        """Calculate technical terms matching score"""
+        technical_terms = [word for word in request_words if len(word) > 4]
+        if not technical_terms:
+            return 0.0
+        addressed_terms = sum(1 for term in technical_terms if term in content_lower)
+        return min(addressed_terms / len(technical_terms), 0.5) * 0.4
+
     async def calculate_relevance(self, content: str, context: Optional[Dict[str, Any]]) -> float:
         """Calculate relevance to the context and user request"""
         if not context or 'user_request' not in context:
             return 0.5
+        user_request, content_lower = context['user_request'].lower(), content.lower()
+        request_words, content_words = set(user_request.split()), set(content_lower.split())
         
-        score = 0.0
-        user_request = context['user_request'].lower()
-        content_lower = content.lower()
-        
-        # Extract key terms from user request
-        request_words = set(user_request.split())
-        content_words = set(content_lower.split())
-        
-        # Calculate word overlap
-        overlap = len(request_words & content_words)
-        if request_words:
-            score += min(overlap / len(request_words), 0.5)
-        
-        # Check if content addresses the main topic
-        technical_terms = [word for word in request_words if len(word) > 4]
-        addressed_terms = sum(1 for term in technical_terms if term in content_lower)
-        if technical_terms:
-            score += min(addressed_terms / len(technical_terms), 0.5) * 0.5
-        
-        return score
+        overlap_score = self._calculate_word_overlap_score(request_words, content_words)
+        semantic_score = self._calculate_semantic_score(request_words, content_words)
+        technical_score = self._calculate_technical_terms_score(request_words, content_lower)
+        return min(overlap_score + semantic_score + technical_score, 1.0)
     
     async def calculate_completeness(self, content: str, content_type: ContentType) -> float:
         """Calculate if the content is complete for its type"""

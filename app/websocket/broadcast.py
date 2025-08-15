@@ -4,14 +4,16 @@ Handles broadcasting messages to multiple connections efficiently and reliably.
 """
 
 import asyncio
+import json
 import time
 from typing import Dict, List, Any, Union
 
 from starlette.websockets import WebSocketState
 
 from app.logging_config import central_logger
-from app.schemas.websocket_unified import WebSocketMessage
+from app.schemas.registry import WebSocketMessage
 from app.schemas.websocket_message_types import ServerMessage, BroadcastResult
+from app.core.json_utils import prepare_websocket_message, safe_json_dumps
 from .connection import ConnectionInfo, ConnectionManager
 from .room_manager import RoomManager
 
@@ -21,14 +23,15 @@ logger = central_logger.get_logger(__name__)
 class BroadcastManager:
     """Manages broadcasting messages to WebSocket connections."""
     
-    def __init__(self, connection_manager: ConnectionManager):
+    def __init__(self, connection_manager: ConnectionManager, room_manager: RoomManager = None):
         """Initialize broadcast manager.
         
         Args:
             connection_manager: Connection manager instance
+            room_manager: Optional room manager instance (creates new one if None)
         """
         self.connection_manager = connection_manager
-        self.room_manager = RoomManager(connection_manager)
+        self.room_manager = room_manager if room_manager is not None else RoomManager(connection_manager)
         self._stats = {
             "total_broadcasts": 0,
             "successful_sends": 0,
@@ -206,7 +209,8 @@ class BroadcastManager:
         """
         try:
             if conn_info.websocket.client_state == WebSocketState.CONNECTED:
-                await conn_info.websocket.send_json(message)
+                prepared_message = prepare_websocket_message(message)
+                await conn_info.websocket.send_json(prepared_message)
                 return True
             else:
                 logger.debug(f"Connection {conn_info.connection_id} not in CONNECTED state")

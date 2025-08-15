@@ -15,92 +15,136 @@ class SchemaValidationService:
     """Service for validating database schema integrity"""
     
     @classmethod
-    async def validate_schema(cls, engine: AsyncEngine) -> Dict[str, Any]:
-        """Validate database schema against SQLAlchemy models"""
-        validation_results = {
+    def _initialize_validation_results(cls) -> Dict[str, Any]:
+        """Initialize validation results structure"""
+        return {
             "passed": True,
             "missing_tables": [],
             "missing_columns": {},
             "type_mismatches": {},
             "warnings": []
         }
-        
+    
+    @classmethod
+    def _get_model_tables(cls) -> set[str]:
+        """Get table names from SQLAlchemy models"""
+        return {table.name for table in Base.metadata.tables.values()}
+    
+    @classmethod
+    def _check_missing_tables(cls, model_tables: set[str], db_tables: set[str], 
+                            validation_results: Dict[str, Any]) -> None:
+        """Check for missing tables in database"""
+        missing_tables = model_tables - db_tables
+        if missing_tables:
+            validation_results["missing_tables"] = list(missing_tables)
+            validation_results["passed"] = False
+    
+    @classmethod
+    def _validate_table_columns(cls, table_name: str, validation_results: Dict[str, Any], 
+                              inspector) -> None:
+        """Validate columns for a specific table"""
+        try:
+            model_table = Base.metadata.tables[table_name]
+            model_columns = {col.name: col for col in model_table.columns}
+            cls._check_column_differences(table_name, model_columns, inspector, validation_results)
+        except Exception as e:
+            validation_results["warnings"].append(f"Could not validate table {table_name}: {str(e)}")
+    
+    @classmethod
+    def _check_column_differences(cls, table_name: str, model_columns: Dict[str, Any], 
+                                inspector, validation_results: Dict[str, Any]) -> None:
+        """Check for missing and extra columns in table"""
+        db_columns = inspector.get_columns(table_name)
+        db_column_names = {col["name"] for col in db_columns}
+        cls._check_missing_columns(table_name, model_columns, db_column_names, validation_results)
+        cls._check_extra_columns(table_name, model_columns, db_column_names, validation_results)
+    
+    @classmethod
+    def _check_missing_columns(cls, table_name: str, model_columns: Dict[str, Any], 
+                             db_column_names: set[str], validation_results: Dict[str, Any]) -> None:
+        """Check for missing columns in database table"""
+        missing_columns = set(model_columns.keys()) - db_column_names
+        if missing_columns:
+            if table_name not in validation_results["missing_columns"]:
+                validation_results["missing_columns"][table_name] = []
+            validation_results["missing_columns"][table_name] = list(missing_columns)
+            validation_results["passed"] = False
+    
+    @classmethod
+    def _check_extra_columns(cls, table_name: str, model_columns: Dict[str, Any], 
+                           db_column_names: set[str], validation_results: Dict[str, Any]) -> None:
+        """Check for extra columns in database table"""
+        extra_columns = db_column_names - set(model_columns.keys())
+        if extra_columns:
+            validation_results["warnings"].append(
+                f"Extra columns in table {table_name}: {extra_columns}"
+            )
+    
+    @classmethod
+    def _check_extra_tables(cls, db_tables: set[str], model_tables: set[str], 
+                          validation_results: Dict[str, Any]) -> None:
+        """Check for extra tables in database"""
+        extra_tables = db_tables - model_tables
+        if extra_tables:
+            validation_results["warnings"].append(
+                f"Extra tables in database not defined in models: {extra_tables}"
+            )
+    
+    @classmethod
+    def _log_validation_results(cls, validation_results: Dict[str, Any]) -> None:
+        """Log validation results with appropriate log levels"""
+        if validation_results.get("missing_tables"):
+            logger.error(f"Missing tables in database: {validation_results['missing_tables']}")
+        cls._log_missing_columns(validation_results)
+        cls._log_warnings(validation_results)
+    
+    @classmethod
+    def _log_missing_columns(cls, validation_results: Dict[str, Any]) -> None:
+        """Log missing columns for each table"""
+        for table_name, missing_cols in validation_results.get("missing_columns", {}).items():
+            logger.error(f"Missing columns in table {table_name}: {missing_cols}")
+    
+    @classmethod
+    def _log_warnings(cls, validation_results: Dict[str, Any]) -> None:
+        """Log all validation warnings"""
+        for warning in validation_results.get("warnings", []):
+            logger.warning(warning)
+    
+    @classmethod
+    async def validate_schema(cls, engine: AsyncEngine) -> Dict[str, Any]:
+        """Validate database schema against SQLAlchemy models"""
+        validation_results = cls._initialize_validation_results()
         try:
             async with engine.connect() as conn:
-                # Get all table names from models
-                model_tables = {table.name for table in Base.metadata.tables.values()}
-                
-                # Define synchronous function to perform all validation
-                def perform_validation(sync_conn):
-                    inspector = inspect(sync_conn)
-                    
-                    # Get all table names from database
-                    db_tables = set(inspector.get_table_names())
-                    
-                    # Check for missing tables
-                    missing_tables = model_tables - db_tables
-                    if missing_tables:
-                        validation_results["missing_tables"] = list(missing_tables)
-                        validation_results["passed"] = False
-                    
-                    # Check columns for each table
-                    for table_name in model_tables & db_tables:
-                        try:
-                            # Get model columns
-                            model_table = Base.metadata.tables[table_name]
-                            model_columns = {col.name: col for col in model_table.columns}
-                            
-                            # Get database columns
-                            db_columns = inspector.get_columns(table_name)
-                            db_column_names = {col["name"] for col in db_columns}
-                            
-                            # Check for missing columns
-                            missing_columns = set(model_columns.keys()) - db_column_names
-                            if missing_columns:
-                                if table_name not in validation_results["missing_columns"]:
-                                    validation_results["missing_columns"][table_name] = []
-                                validation_results["missing_columns"][table_name] = list(missing_columns)
-                                validation_results["passed"] = False
-                            
-                            # Check for extra columns
-                            extra_columns = db_column_names - set(model_columns.keys())
-                            if extra_columns:
-                                validation_results["warnings"].append(
-                                    f"Extra columns in table {table_name}: {extra_columns}"
-                                )
-                        except Exception as e:
-                            validation_results["warnings"].append(
-                                f"Could not validate table {table_name}: {str(e)}"
-                            )
-                    
-                    # Check for extra tables in database
-                    extra_tables = db_tables - model_tables
-                    if extra_tables:
-                        validation_results["warnings"].append(
-                            f"Extra tables in database not defined in models: {extra_tables}"
-                        )
-                    
-                    return validation_results
-                
-                # Run the validation in sync context
-                await conn.run_sync(perform_validation)
-                
-                # Log results
-                if validation_results.get("missing_tables"):
-                    logger.error(f"Missing tables in database: {validation_results['missing_tables']}")
-                
-                for table_name, missing_cols in validation_results.get("missing_columns", {}).items():
-                    logger.error(f"Missing columns in table {table_name}: {missing_cols}")
-                
-                for warning in validation_results.get("warnings", []):
-                    logger.warning(warning)
-        
+                await conn.run_sync(cls._perform_validation, validation_results)
+                cls._log_validation_results(validation_results)
         except Exception as e:
-            logger.error(f"Schema validation failed with error: {e}")
-            validation_results["passed"] = False
-            validation_results["error"] = str(e)
-        
+            cls._handle_validation_error(e, validation_results)
         return validation_results
+    
+    @classmethod
+    def _perform_validation(cls, sync_conn, validation_results: Dict[str, Any]) -> None:
+        """Perform synchronous validation operations"""
+        inspector = inspect(sync_conn)
+        model_tables = cls._get_model_tables()
+        db_tables = set(inspector.get_table_names())
+        cls._check_missing_tables(model_tables, db_tables, validation_results)
+        cls._validate_existing_tables(model_tables, db_tables, inspector, validation_results)
+        cls._check_extra_tables(db_tables, model_tables, validation_results)
+    
+    @classmethod
+    def _validate_existing_tables(cls, model_tables: set[str], db_tables: set[str], 
+                                inspector, validation_results: Dict[str, Any]) -> None:
+        """Validate columns for tables that exist in both model and database"""
+        for table_name in model_tables & db_tables:
+            cls._validate_table_columns(table_name, validation_results, inspector)
+    
+    @classmethod
+    def _handle_validation_error(cls, error: Exception, validation_results: Dict[str, Any]) -> None:
+        """Handle validation errors and update results"""
+        logger.error(f"Schema validation failed with error: {error}")
+        validation_results["passed"] = False
+        validation_results["error"] = str(error)
     
     
     @classmethod

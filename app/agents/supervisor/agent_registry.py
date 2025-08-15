@@ -10,8 +10,8 @@ from app.agents.base import BaseSubAgent
 from app.logging_config import central_logger
 
 # Import all sub-agents
-from app.agents.triage_sub_agent_legacy import TriageSubAgent
-from app.agents.data_sub_agent import DataSubAgent
+from app.agents.triage_sub_agent.agent import TriageSubAgent
+# DataSubAgent is imported later to avoid circular dependency
 from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from app.agents.reporting_sub_agent import ReportingSubAgent
@@ -37,6 +37,13 @@ class AgentRegistry:
     
     def _register_core_agents(self) -> None:
         """Register core workflow agents."""
+        # Import DataSubAgent here to avoid circular dependency
+        from app.agents.data_sub_agent.agent import DataSubAgent
+        
+        self._register_workflow_agents(DataSubAgent)
+    
+    def _register_workflow_agents(self, DataSubAgent) -> None:
+        """Register workflow agents with manager and dispatcher."""
         self.register("triage", TriageSubAgent(
             self.llm_manager, self.tool_dispatcher))
         self.register("data", DataSubAgent(

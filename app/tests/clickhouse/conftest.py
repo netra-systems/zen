@@ -13,12 +13,8 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create event loop for async tests"""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+# Remove event_loop fixture to prevent conflicts with pytest-asyncio auto mode
+# pytest.ini has asyncio_mode = auto which handles event loops automatically
 
 
 @pytest.fixture

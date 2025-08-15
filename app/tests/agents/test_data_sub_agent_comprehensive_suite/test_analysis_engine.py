@@ -5,7 +5,7 @@ Tests for AnalysisEngine class methods
 import pytest
 import numpy as np
 from datetime import datetime
-from app.agents.data_sub_agent import AnalysisEngine
+from app.agents.data_sub_agent.analysis_engine import AnalysisEngine
 
 
 class TestAnalysisEngine:

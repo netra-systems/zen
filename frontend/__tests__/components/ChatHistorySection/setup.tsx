@@ -10,7 +10,7 @@ import {
   createMockThreadStore,
   createMockChatStore,
   createMockAuthStore
-} from '../../utils/storeMocks';
+} from '../../utils/storeMocks.helper';
 
 // Mock next/navigation
 export const mockRouter = {

@@ -1,10 +1,10 @@
 import React from 'react';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import { Bot, Zap, Activity, Shield, Database, Cpu, Brain } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const ChatHeader: React.FC = () => {
-  const { subAgentName, subAgentStatus, isProcessing } = useChatStore();
+  const { subAgentName, subAgentStatus, isProcessing } = useUnifiedChatStore();
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {

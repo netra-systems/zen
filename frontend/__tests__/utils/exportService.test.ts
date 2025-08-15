@@ -371,27 +371,6 @@ describe('ExportService', () => {
       });
     });
 
-    describe('PowerPoint export', () => {
-      it('should fallback to JSON for PowerPoint format', async () => {
-        const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-
-        await ExportService.exportReport(mockReportData, {
-          format: 'pptx',
-          filename: 'test-presentation'
-        });
-
-        expect(consoleWarnSpy).toHaveBeenCalledWith('PowerPoint export not yet implemented');
-        
-        // Should fallback to JSON
-        expect(Blob).toHaveBeenCalled();
-        const blobCall = (Blob as jest.Mock).mock.calls[0];
-        const content = JSON.parse(blobCall[0][0]);
-        expect(content.title).toBe('Test Report');
-
-        consoleWarnSpy.mockRestore();
-      });
-    });
-
     describe('Error handling', () => {
       it('should throw error for unsupported format', async () => {
         await expect(

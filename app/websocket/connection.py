@@ -14,7 +14,7 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 from app.logging_config import central_logger
-from app.schemas.websocket_unified import WebSocketConnectionState
+from app.schemas.registry import WebSocketConnectionState
 
 logger = central_logger.get_logger(__name__)
 
@@ -51,29 +51,42 @@ class ConnectionManager:
     async def connect(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish and register a new WebSocket connection."""
         async with self._connection_lock:
-            # Initialize user's connection list if needed
-            if user_id not in self.active_connections:
-                self.active_connections[user_id] = []
-            
-            # Check connection limit
-            if len(self.active_connections[user_id]) >= self.max_connections_per_user:
-                # Close oldest connection to make room
-                oldest_conn = self.active_connections[user_id][0]
-                logger.warning(f"User {user_id} exceeded connection limit, closing oldest connection {oldest_conn.connection_id}")
-                await self._disconnect_internal(user_id, oldest_conn.websocket, code=1008, reason="Connection limit exceeded")
-            
-            conn_info = ConnectionInfo(websocket=websocket, user_id=user_id)
-            
-            # Add connection to tracking structures
-            self.active_connections[user_id].append(conn_info)
-            self.connection_registry[conn_info.connection_id] = conn_info
-            
-            # Update statistics
-            self._stats["total_connections"] += 1
-            
-            logger.info(f"WebSocket connected for user {user_id} (ID: {conn_info.connection_id})")
-            
-            return conn_info
+            return await self._perform_connection_setup(user_id, websocket)
+    
+    async def _perform_connection_setup(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
+        """Execute connection setup steps."""
+        self._ensure_user_connection_list(user_id)
+        await self._handle_connection_limit(user_id)
+        conn_info = ConnectionInfo(websocket=websocket, user_id=user_id)
+        self._register_new_connection(user_id, conn_info)
+        logger.info(f"WebSocket connected for user {user_id} (ID: {conn_info.connection_id})")
+        return conn_info
+    
+    def _register_new_connection(self, user_id: str, conn_info: ConnectionInfo) -> None:
+        """Register new connection and update stats."""
+        self._add_connection_to_registry(user_id, conn_info)
+        self._update_connection_stats()
+    
+    def _ensure_user_connection_list(self, user_id: str) -> None:
+        """Initialize user's connection list if needed."""
+        if user_id not in self.active_connections:
+            self.active_connections[user_id] = []
+    
+    async def _handle_connection_limit(self, user_id: str) -> None:
+        """Handle connection limit enforcement by closing oldest connection."""
+        if len(self.active_connections[user_id]) >= self.max_connections_per_user:
+            oldest_conn = self.active_connections[user_id][0]
+            logger.warning(f"User {user_id} exceeded connection limit, closing oldest connection {oldest_conn.connection_id}")
+            await self._disconnect_internal(user_id, oldest_conn.websocket, code=1008, reason="Connection limit exceeded")
+    
+    def _add_connection_to_registry(self, user_id: str, conn_info: ConnectionInfo) -> None:
+        """Add connection to tracking structures."""
+        self.active_connections[user_id].append(conn_info)
+        self.connection_registry[conn_info.connection_id] = conn_info
+    
+    def _update_connection_stats(self) -> None:
+        """Update connection statistics."""
+        self._stats["total_connections"] += 1
     
     async def disconnect(self, user_id: str, websocket: WebSocket, code: int = 1000, reason: str = "Normal closure"):
         """Properly disconnect and clean up a WebSocket connection."""
@@ -84,38 +97,52 @@ class ConnectionManager:
         """Internal disconnect method - requires lock to be held."""
         if user_id not in self.active_connections:
             return
-        
-        # Find and remove the connection info
-        conn_info = None
+        conn_info = self._find_connection_info(user_id, websocket)
+        if conn_info:
+            await self._execute_disconnection(user_id, conn_info, websocket, code, reason)
+    
+    async def _execute_disconnection(self, user_id: str, conn_info: ConnectionInfo, 
+                                   websocket: WebSocket, code: int, reason: str) -> None:
+        """Execute disconnection cleanup steps."""
+        self._remove_from_registry(user_id, conn_info)
+        self._cleanup_empty_user_list(user_id)
+        await self._close_websocket_safely(websocket, code, reason)
+        self._log_disconnection_stats(user_id, conn_info)
+    
+    def _find_connection_info(self, user_id: str, websocket: WebSocket) -> Optional[ConnectionInfo]:
+        """Find connection info for user and websocket."""
         for conn in self.active_connections[user_id]:
             if conn.websocket == websocket:
-                conn_info = conn
-                break
-        
-        if conn_info:
-            # Remove from tracking structures
-            self.active_connections[user_id].remove(conn_info)
-            if conn_info.connection_id in self.connection_registry:
-                del self.connection_registry[conn_info.connection_id]
-            
-            # Clean up empty user lists
-            if not self.active_connections[user_id]:
-                del self.active_connections[user_id]
-            
-            # Close connection if still open
-            if websocket.client_state == WebSocketState.CONNECTED:
-                try:
-                    await websocket.close(code=code, reason=reason)
-                except Exception as e:
-                    logger.debug(f"Error closing WebSocket: {e}")
-            
-            # Log disconnection with statistics
-            duration = (datetime.now(timezone.utc) - conn_info.connected_at).total_seconds()
-            logger.info(
-                f"WebSocket disconnected for user {user_id} "
-                f"(ID: {conn_info.connection_id}, Duration: {duration:.1f}s, "
-                f"Messages: {conn_info.message_count}, Errors: {conn_info.error_count})"
-            )
+                return conn
+        return None
+    
+    def _remove_from_registry(self, user_id: str, conn_info: ConnectionInfo) -> None:
+        """Remove connection from tracking structures."""
+        self.active_connections[user_id].remove(conn_info)
+        if conn_info.connection_id in self.connection_registry:
+            del self.connection_registry[conn_info.connection_id]
+    
+    def _cleanup_empty_user_list(self, user_id: str) -> None:
+        """Clean up empty user lists."""
+        if not self.active_connections[user_id]:
+            del self.active_connections[user_id]
+    
+    async def _close_websocket_safely(self, websocket: WebSocket, code: int, reason: str) -> None:
+        """Close websocket connection safely with error handling."""
+        if websocket.client_state == WebSocketState.CONNECTED:
+            try:
+                await websocket.close(code=code, reason=reason)
+            except Exception as e:
+                logger.debug(f"Error closing WebSocket: {e}")
+    
+    def _log_disconnection_stats(self, user_id: str, conn_info: ConnectionInfo) -> None:
+        """Log disconnection with statistics."""
+        duration = (datetime.now(timezone.utc) - conn_info.connected_at).total_seconds()
+        logger.info(
+            f"WebSocket disconnected for user {user_id} "
+            f"(ID: {conn_info.connection_id}, Duration: {duration:.1f}s, "
+            f"Messages: {conn_info.message_count}, Errors: {conn_info.error_count})"
+        )
     
     def get_user_connections(self, user_id: str) -> List[ConnectionInfo]:
         """Get all connections for a specific user."""
@@ -129,19 +156,30 @@ class ConnectionManager:
         """Get detailed information about a user's connections."""
         if user_id not in self.active_connections:
             return []
-        
-        return [
-            {
-                "connection_id": conn.connection_id,
-                "connected_at": conn.connected_at.isoformat(),
-                "last_ping": conn.last_ping.isoformat(),
-                "last_pong": conn.last_pong.isoformat() if conn.last_pong else None,
-                "message_count": conn.message_count,
-                "error_count": conn.error_count,
-                "state": conn.websocket.client_state.name
-            }
-            for conn in self.active_connections[user_id]
-        ]
+        return [self._create_connection_dict(conn) for conn in self.active_connections[user_id]]
+    
+    def _create_connection_dict(self, conn: ConnectionInfo) -> Dict[str, any]:
+        """Create connection information dictionary."""
+        basic_info = self._get_basic_connection_info(conn)
+        timing_info = self._get_connection_timing_info(conn)
+        return {**basic_info, **timing_info}
+    
+    def _get_basic_connection_info(self, conn: ConnectionInfo) -> Dict[str, any]:
+        """Get basic connection information."""
+        return {
+            "connection_id": conn.connection_id,
+            "message_count": conn.message_count,
+            "error_count": conn.error_count,
+            "state": conn.websocket.client_state.name
+        }
+    
+    def _get_connection_timing_info(self, conn: ConnectionInfo) -> Dict[str, any]:
+        """Get connection timing information."""
+        return {
+            "connected_at": conn.connected_at.isoformat(),
+            "last_ping": conn.last_ping.isoformat(),
+            "last_pong": conn.last_pong.isoformat() if conn.last_pong else None
+        }
     
     def is_connection_alive(self, conn_info: ConnectionInfo) -> bool:
         """Check if a connection is still alive."""
@@ -156,50 +194,89 @@ class ConnectionManager:
     
     async def cleanup_dead_connections(self):
         """Clean up connections that are no longer alive."""
+        connections_to_remove = await self._identify_dead_connections()
+        await self._remove_dead_connections(connections_to_remove)
+    
+    async def _identify_dead_connections(self) -> List[tuple]:
+        """Identify connections that are no longer alive."""
         connections_to_remove = []
-        
         async with self._connection_lock:
-            for user_id, connections in list(self.active_connections.items()):
-                for conn_info in connections:
-                    if not self.is_connection_alive(conn_info):
-                        connections_to_remove.append((user_id, conn_info))
-        
-        # Remove dead connections
+            self._scan_for_dead_connections(connections_to_remove)
+        return connections_to_remove
+    
+    def _scan_for_dead_connections(self, connections_to_remove: List[tuple]) -> None:
+        """Scan all connections and identify dead ones."""
+        for user_id, connections in list(self.active_connections.items()):
+            self._check_user_connections(user_id, connections, connections_to_remove)
+    
+    def _check_user_connections(self, user_id: str, connections: List[ConnectionInfo], 
+                              connections_to_remove: List[tuple]) -> None:
+        """Check all connections for a user and add dead ones to removal list."""
+        for conn_info in connections:
+            if not self.is_connection_alive(conn_info):
+                connections_to_remove.append((user_id, conn_info))
+    
+    async def _remove_dead_connections(self, connections_to_remove: List[tuple]) -> None:
+        """Remove dead connections from registry."""
         for user_id, conn_info in connections_to_remove:
             await self._disconnect_internal(user_id, conn_info.websocket, code=1001, reason="Connection lost")
     
     def get_stats(self) -> Dict[str, any]:
         """Get connection statistics."""
-        active_count = sum(len(conns) for conns in self.active_connections.values())
-        
+        basic_stats = self._get_basic_stats()
+        detailed_stats = self._get_detailed_stats()
+        return {**basic_stats, **detailed_stats}
+    
+    def _get_basic_stats(self) -> Dict[str, any]:
+        """Get basic connection statistics."""
         return {
             "total_connections": self._stats["total_connections"],
-            "active_connections": active_count,
-            "active_users": len(self.active_connections),
+            "active_connections": self._get_active_connection_count(),
+            "active_users": len(self.active_connections)
+        }
+    
+    def _get_detailed_stats(self) -> Dict[str, any]:
+        """Get detailed connection statistics."""
+        return {
             "connection_failures": self._stats["connection_failures"],
-            "connections_by_user": {
-                user_id: len(conns) 
-                for user_id, conns in self.active_connections.items()
-            }
+            "connections_by_user": self._get_connections_by_user()
+        }
+    
+    def _get_active_connection_count(self) -> int:
+        """Calculate total active connection count."""
+        return sum(len(conns) for conns in self.active_connections.values())
+    
+    def _get_connections_by_user(self) -> Dict[str, int]:
+        """Get connection count by user."""
+        return {
+            user_id: len(conns) 
+            for user_id, conns in self.active_connections.items()
         }
     
     async def shutdown(self):
         """Gracefully shutdown all connections."""
         logger.info("Starting connection manager shutdown...")
-        
-        # Close all connections
+        await self._close_all_connections()
+        self._clear_tracking_structures()
+        logger.info(f"Connection manager shutdown complete. Final stats: {self.get_stats()}")
+    
+    async def _close_all_connections(self) -> None:
+        """Close all active connections during shutdown."""
         for user_id, connections in list(self.active_connections.items()):
             for conn_info in connections:
-                try:
-                    await conn_info.websocket.close(code=1001, reason="Server shutdown")
-                except Exception as e:
-                    logger.debug(f"Error closing connection during shutdown: {e}")
-        
-        # Clear all tracking structures
+                await self._close_connection_safely(conn_info)
+    
+    async def _close_connection_safely(self, conn_info: ConnectionInfo) -> None:
+        """Close a connection safely with error handling."""
+        try:
+            await conn_info.websocket.close(code=1001, reason="Server shutdown")
+        except Exception as e:
+            logger.debug(f"Error closing connection during shutdown: {e}")
+    
+    def _clear_tracking_structures(self) -> None:
+        """Clear all connection tracking structures."""
         self.active_connections.clear()
         self.connection_registry.clear()
-        
-        logger.info(f"Connection manager shutdown complete. Final stats: {self.get_stats()}")
 
 
 # Global instance for backward compatibility

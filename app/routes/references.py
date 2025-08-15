@@ -57,7 +57,7 @@ async def create_reference(reference: ReferenceCreateRequest, db: AsyncSession =
     Creates a new @reference item.
     """
     async with db as session:
-        db_reference = Reference(**reference.dict())
+        db_reference = Reference(**reference.model_dump())
         session.add(db_reference)
         await session.commit()
         await session.refresh(db_reference)

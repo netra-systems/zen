@@ -190,7 +190,75 @@ Get current authenticated user information.
 
 ### Agent Endpoints
 
-**Note:** Agent execution is handled via WebSocket connections, not REST endpoints. See WebSocket API section for details.
+**Note:** Agent execution is primarily handled via WebSocket connections. REST endpoints are available for stateless operations and streaming.
+
+#### POST /api/agent/stream
+Stream agent responses using Server-Sent Events (SSE).
+
+**Headers:**
+- `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "query": "Your question or request",
+  "id": "optional-thread-id",
+  "user_request": "optional-user-context"
+}
+```
+
+**Response:**
+Server-Sent Events stream with structured chunks:
+```
+data: {"id":"uuid","type":"stream_start","data":{"stream_id":"uuid"},"metadata":{"protocol":"sse"},"timestamp":"2025-08-14T10:00:00.000Z"}
+
+data: {"id":"uuid","type":"data","data":"Response text chunk","metadata":{"stream_id":"uuid","chunk_index":0},"timestamp":"2025-08-14T10:00:00.100Z"}
+
+data: {"id":"uuid","type":"stream_end","data":{"stream_id":"uuid"},"metadata":{"total_chunks":10,"duration_ms":1500},"timestamp":"2025-08-14T10:00:01.500Z"}
+```
+
+**Response Headers:**
+- `Content-Type: text/event-stream`
+- `Cache-Control: no-cache`
+- `Connection: keep-alive`
+- `X-Accel-Buffering: no` (Disables nginx buffering)
+
+**Status Codes:**
+- `200`: Streaming started successfully
+- `401`: Unauthorized
+- `500`: Internal server error
+
+---
+
+#### POST /api/agent/message
+Process a message through the agent system (non-streaming).
+
+**Headers:**
+- `Authorization: Bearer <token>`
+
+**Request Body:**
+```json
+{
+  "message": "Your question or request",
+  "thread_id": "optional-thread-id"
+}
+```
+
+**Response:**
+```json
+{
+  "response": "Agent's response to your message",
+  "agent": "supervisor",
+  "status": "success"
+}
+```
+
+**Status Codes:**
+- `200`: Success
+- `401`: Unauthorized
+- `500`: Internal server error
+
+---
 
 #### POST /api/agent/run_agent
 Legacy endpoint - starts the agent to analyze a user's request.

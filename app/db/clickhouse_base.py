@@ -68,6 +68,10 @@ class ClickHouseDatabase:
             return list(result.named_results())
 
         return await asyncio.to_thread(_query)
+    
+    async def execute(self, query: str, parameters: Dict[str, Any] | None = None, settings: Dict[str, Any] | None = None) -> List[Dict[str, Any]]:
+        """Alias for execute_query to maintain compatibility with different interfaces."""
+        return await self.execute_query(query, parameters, settings)
 
     async def insert_data(self, table: str, data: List[List[Any]], column_names: Iterable[str] = '*'):
         if not self.client:

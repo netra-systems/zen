@@ -27,9 +27,16 @@ class LauncherConfig:
     # UI configuration
     no_browser: bool = False
     verbose: bool = False
+    non_interactive: bool = False  # Non-interactive mode for CI/automation
     
     # Build configuration
     use_turbopack: bool = False
+    
+    # Boundary monitoring configuration
+    watch_boundaries: bool = False  # Real-time boundary monitoring
+    boundary_check_interval: int = 30  # Check every 30 seconds
+    fail_on_boundary_violations: bool = False  # Stop dev server on violations
+    show_boundary_warnings: bool = True  # Show boundary warning messages
     
     # Paths
     project_root: Path = field(default_factory=lambda: Path.cwd())
@@ -110,6 +117,7 @@ class LauncherConfig:
             load_secrets=load_secrets,
             project_id=args.project_id if hasattr(args, 'project_id') else None,
             no_browser=args.no_browser,
+            non_interactive=args.non_interactive if hasattr(args, 'non_interactive') else False,
             use_turbopack=not args.no_turbopack if hasattr(args, 'no_turbopack') else False,
             project_root=find_project_root()
         )
@@ -126,6 +134,7 @@ class LauncherConfig:
             "project_id": self.project_id,
             "no_browser": self.no_browser,
             "verbose": self.verbose,
+            "non_interactive": self.non_interactive,
             "use_turbopack": self.use_turbopack,
             "project_root": str(self.project_root),
             "log_dir": str(self.log_dir),

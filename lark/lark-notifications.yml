@@ -41,7 +41,7 @@ on:
 
 jobs:
   send-notification:
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'skipped' }}
     
     steps:
@@ -297,7 +297,7 @@ jobs:
 
   # Optional: Send notifications for specific workflow outcomes
   notify-on-failure:
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure' }}
     
     steps:

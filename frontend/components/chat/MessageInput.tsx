@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect, KeyboardEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { Send, Paperclip, Mic, Command, ArrowUp, ArrowDown, Loader2 } from 'lucide-react';
-import { Message } from '@/types/chat';
 import { ThreadService } from '@/services/threadService';
 import { ThreadRenameService } from '@/services/threadRenameService';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,7 +18,13 @@ export const MessageInput: React.FC = () => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { sendMessage } = useWebSocket();
-  const { setProcessing, isProcessing, addMessage } = useChatStore();
+  const { 
+    addMessage, 
+    activeThreadId,
+    setActiveThread,
+    setProcessing,
+    isProcessing
+  } = useUnifiedChatStore();
   const { currentThreadId, setCurrentThread, addThread } = useThreadStore();
   const { isAuthenticated } = useAuthStore();
   
@@ -60,7 +65,7 @@ export const MessageInput: React.FC = () => {
       setMessageHistory(prev => [...prev, trimmedMessage]);
       setHistoryIndex(-1);
       
-      let threadId = currentThreadId;
+      let threadId = activeThreadId || currentThreadId;
       
       // Create a new thread if none exists
       if (!threadId) {
@@ -70,6 +75,7 @@ export const MessageInput: React.FC = () => {
           );
           addThread(newThread);
           setCurrentThread(newThread.id);
+          setActiveThread(newThread.id);
           threadId = newThread.id;
         } catch (error) {
           console.error('Failed to create thread:', error);
@@ -78,13 +84,12 @@ export const MessageInput: React.FC = () => {
         }
       }
       
-      // Add user message to chat immediately
-      const userMessage: Message = {
+      // Add user message to chat immediately - use ChatMessage format for unified store
+      const userMessage = {
         id: generateUniqueId('msg'),
-        type: 'user',
+        role: 'user' as const,
         content: trimmedMessage,
-        created_at: new Date().toISOString(),
-        displayed_to_user: true
+        timestamp: Date.now()
       };
       addMessage(userMessage);
       

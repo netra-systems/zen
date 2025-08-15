@@ -1,0 +1,24 @@
+#!/bin/bash
+# Cross-platform pre-commit hook for architecture enforcement
+
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_SCRIPT="$HOOK_DIR/pre-commit-python.py"
+
+# Try different Python executables in order of preference
+PYTHON_EXECUTABLES=(
+    "conda run python"
+    "python3"
+    "python"
+    "py"
+)
+
+for python_cmd in "${PYTHON_EXECUTABLES[@]}"; do
+    if $python_cmd --version >/dev/null 2>&1; then
+        $python_cmd "$PYTHON_SCRIPT"
+        exit $?
+    fi
+done
+
+echo "[ERROR] Python not found. Please ensure Python is installed and accessible."
+echo "Tried: conda run python, python3, python, py"
+exit 1

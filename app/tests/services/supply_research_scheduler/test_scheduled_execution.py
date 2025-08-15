@@ -39,15 +39,15 @@ class TestScheduledResearchExecution:
         """Test successful scheduled research execution"""
         schedule = scheduler.schedules[0]
         
-        with patch('app.services.supply_research_scheduler.Database') as mock_db_class:
+        with patch('app.services.supply_research.research_executor.Database') as mock_db_class:
             mock_db_session = MagicMock()
             mock_db_class.return_value = MockDatabase(mock_db_session)
             
-            with patch('app.services.supply_research_scheduler.SupplyResearchService') as mock_service_class:
+            with patch('app.services.supply_research.research_executor.SupplyResearchService') as mock_service_class:
                 mock_service = MockSupplyResearchService()
                 mock_service_class.return_value = mock_service
                 
-                with patch('app.services.supply_research_scheduler.SupplyResearcherAgent') as mock_agent_class:
+                with patch('app.services.supply_research.research_executor.SupplyResearcherAgent') as mock_agent_class:
                     mock_agent = MockAgent()
                     mock_agent_class.return_value = mock_agent
                     
@@ -70,7 +70,7 @@ class TestScheduledResearchExecution:
         """Test scheduled research execution with failure"""
         schedule = scheduler.schedules[0]
         
-        with patch('app.services.supply_research_scheduler.Database', side_effect=Exception("Database error")):
+        with patch('app.services.supply_research.research_executor.Database', side_effect=Exception("Database error")):
             result = await scheduler._execute_scheduled_research(schedule)
         
         assert result["schedule_name"] == schedule.name
@@ -85,16 +85,17 @@ class TestScheduledResearchExecution:
         # Mock Redis to verify caching
         mock_redis = MockRedisManager()
         scheduler.redis_manager = mock_redis
+        scheduler.research_executor.redis_manager = mock_redis
         
-        with patch('app.services.supply_research_scheduler.Database') as mock_db_class:
+        with patch('app.services.supply_research.research_executor.Database') as mock_db_class:
             mock_db_session = MagicMock()
             mock_db_class.return_value = MockDatabase(mock_db_session)
             
-            with patch('app.services.supply_research_scheduler.SupplyResearchService') as mock_service_class:
+            with patch('app.services.supply_research.research_executor.SupplyResearchService') as mock_service_class:
                 mock_service = MockSupplyResearchService()
                 mock_service_class.return_value = mock_service
                 
-                with patch('app.services.supply_research_scheduler.SupplyResearcherAgent') as mock_agent_class:
+                with patch('app.services.supply_research.research_executor.SupplyResearcherAgent') as mock_agent_class:
                     mock_agent = MockAgent()
                     mock_agent_class.return_value = mock_agent
                     
@@ -113,16 +114,17 @@ class TestScheduledResearchExecution:
         """Test research execution when Redis is not available"""
         schedule = scheduler.schedules[0]
         scheduler.redis_manager = None  # No Redis
+        scheduler.research_executor.redis_manager = None
         
-        with patch('app.services.supply_research_scheduler.Database') as mock_db_class:
+        with patch('app.services.supply_research.research_executor.Database') as mock_db_class:
             mock_db_session = MagicMock()
             mock_db_class.return_value = MockDatabase(mock_db_session)
             
-            with patch('app.services.supply_research_scheduler.SupplyResearchService') as mock_service_class:
+            with patch('app.services.supply_research.research_executor.SupplyResearchService') as mock_service_class:
                 mock_service = MockSupplyResearchService()
                 mock_service_class.return_value = mock_service
                 
-                with patch('app.services.supply_research_scheduler.SupplyResearcherAgent') as mock_agent_class:
+                with patch('app.services.supply_research.research_executor.SupplyResearcherAgent') as mock_agent_class:
                     mock_agent = MockAgent()
                     mock_agent_class.return_value = mock_agent
                     
@@ -156,8 +158,9 @@ class TestChangeNotifications:
         
         mock_redis = MockRedisManager()
         scheduler.redis_manager = mock_redis
+        scheduler.research_executor.redis_manager = mock_redis
         
-        await scheduler._check_and_notify_changes(result, mock_service)
+        await scheduler.research_executor._check_and_notify_changes(result, mock_service)
         
         # Should have added notification to Redis
         notifications = mock_redis.lists.get("supply_notifications", [])
@@ -191,8 +194,9 @@ class TestChangeNotifications:
         
         mock_redis = MockRedisManager()
         scheduler.redis_manager = mock_redis
+        scheduler.research_executor.redis_manager = mock_redis
         
-        await scheduler._check_and_notify_changes(result, mock_service)
+        await scheduler.research_executor._check_and_notify_changes(result, mock_service)
         
         # Should have added notification for new model
         notifications = mock_redis.lists.get("supply_notifications", [])
@@ -234,8 +238,9 @@ class TestChangeNotifications:
         
         mock_redis = MockRedisManager()
         scheduler.redis_manager = mock_redis
+        scheduler.research_executor.redis_manager = mock_redis
         
-        await scheduler._check_and_notify_changes(result, mock_service)
+        await scheduler.research_executor._check_and_notify_changes(result, mock_service)
         
         # Should not have added any notifications
         notifications = mock_redis.lists.get("supply_notifications", [])
@@ -249,4 +254,4 @@ class TestChangeNotifications:
         result = {"results": []}
         
         # Should not raise exception
-        await scheduler._check_and_notify_changes(result, mock_service)
+        await scheduler.research_executor._check_and_notify_changes(result, mock_service)

@@ -23,6 +23,8 @@ from .intent_detector import IntentDetector
 from .tool_recommender import ToolRecommender
 from .core import TriageCore
 
+# Note: TriageSubAgent is imported directly where needed to avoid circular imports
+# Use: from app.agents.triage_sub_agent.agent import TriageSubAgent
 
 __all__ = [
     "Priority",

@@ -79,7 +79,7 @@ class StartAgentHandler(BaseMessageHandler):
             self.supervisor.db_session = None  # Don't hold long-lived session
             
             # Run supervisor without holding database connection
-            response = await self.supervisor.run(user_request, run_id, stream_updates=True)
+            response = await self.supervisor.run(user_request, thread_id, user_id, run_id)
             
             # Create new session for final message storage
             async with get_unit_of_work() as uow:
@@ -160,7 +160,7 @@ class UserMessageHandler(BaseMessageHandler):
             self.supervisor.db_session = None  # Don't hold long-lived session
             
             # Run supervisor without holding database connection
-            response = await self.supervisor.run(text, run_id, stream_updates=True)
+            response = await self.supervisor.run(text, thread_id, user_id, run_id)
             
             # Create new session for final message storage
             async with get_unit_of_work() as uow:

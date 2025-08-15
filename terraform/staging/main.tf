@@ -52,7 +52,7 @@ locals {
   service_account         = try(data.terraform_remote_state.shared[0].outputs.service_account_email, "staging-sa@${var.project_id}.iam.gserviceaccount.com")
   
   # Calculate Redis DB index
-  redis_db_index = tonumber(regex("[0-9]+", var.pr_number)[0]) % 16
+  redis_db_index = tonumber(regex("[0-9]+", var.pr_number)) % 16
 }
 
 # Generate random password if not provided

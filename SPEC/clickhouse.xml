@@ -64,6 +64,34 @@
       </incorrect>
     </practice>
     
+    <practice name="CRITICAL: Array Element Access">
+      <correct>
+        <![CDATA[
+        -- ALWAYS use arrayElement for accessing array elements
+        arrayElement(metrics.value, idx) as value
+        arrayElement(metrics.name, 1) as first_name
+        
+        -- In if statements with Nested arrays
+        if(idx > 0, arrayElement(metrics.value, idx), 0.0) as metric_value
+        ]]>
+      </correct>
+      <incorrect>
+        <![CDATA[
+        -- NEVER use bracket notation with Nested arrays - causes Error 386
+        metrics.value[idx]  -- WRONG! Causes NO_COMMON_TYPE error
+        metrics.name[1]     -- WRONG! Type mismatch in if() statements
+        
+        -- This will fail with Error 386
+        if(idx > 0, metrics.value[idx], 0.0)  -- WRONG!
+        ]]>
+      </incorrect>
+      <reason>
+        ClickHouse Nested types expand to parallel arrays. Using bracket notation
+        in conditional statements causes type ambiguity between Array(T) and T.
+        Always use arrayElement() which explicitly returns the element type.
+      </reason>
+    </practice>
+    
     <practice name="Inserting data into Nested types">
       <example language="python">
         <![CDATA[
@@ -80,8 +108,21 @@
 
   <common_errors>
     <error code="386" name="NO_COMMON_TYPE">
-      <cause>Mixing Array and non-Array types in queries</cause>
-      <solution>Use arrayFirstIndex and arrayExists instead of indexOf and has</solution>
+      <cause>Using bracket notation with Nested arrays in conditional statements</cause>
+      <symptoms>
+        <symptom>Error message: "There is no supertype for types Array(Float64), Float64"</symptom>
+        <symptom>Occurs with if() statements using metrics.value[idx]</symptom>
+        <symptom>Query works in SELECT but fails with WHERE or if()</symptom>
+      </symptoms>
+      <solution>
+        <step>Replace all metrics.field[index] with arrayElement(metrics.field, index)</step>
+        <step>Use query_builder.py which generates correct syntax automatically</step>
+        <step>Enable ClickHouseQueryInterceptor to auto-fix queries</step>
+      </solution>
+      <validation>
+        <file>app/agents/data_sub_agent/query_fix_validator.py</file>
+        <file>app/agents/data_sub_agent/llm_query_detector.py</file>
+      </validation>
     </error>
     
     <error name="UNKNOWN_TABLE">

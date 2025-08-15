@@ -9,7 +9,15 @@ class InsightsGenerator:
     """Generates actionable insights from analysis data"""
     
     def __init__(self):
-        pass
+        """Initialize the InsightsGenerator with configuration."""
+        self.logger = logger.get_logger(__name__)
+        self.thresholds = {
+            "error_rate": 0.05,  # 5% error rate threshold
+            "cost_per_event": 0.01,  # 1 cent per event threshold
+            "daily_cost": 100.0,  # $100/day threshold
+            "off_hours_start": 22,  # 10 PM
+            "off_hours_end": 6  # 6 AM
+        }
     
     async def generate_insights(
         self, 
@@ -54,7 +62,7 @@ class InsightsGenerator:
             # Check for unusual usage patterns
             if "peak_usage_hour" in summary:
                 peak_hour = int(summary["peak_usage_hour"].split(":")[0])
-                if peak_hour < 6 or peak_hour > 22:  # Off hours
+                if peak_hour < self.thresholds["off_hours_end"] or peak_hour > self.thresholds["off_hours_start"]:  # Off hours
                     insights["usage_insights"].append({
                         "type": "off_hours_usage",
                         "message": f"Peak usage occurs at {summary['peak_usage_hour']} (off hours)",
@@ -83,7 +91,7 @@ class InsightsGenerator:
         # Check error rates
         if "error_rate" in performance_data:
             error_stats = performance_data["error_rate"]
-            if error_stats.get("mean", 0) > 0.05:  # 5% error rate threshold
+            if error_stats.get("mean", 0) > self.thresholds["error_rate"]:  # 5% error rate threshold
                 insights.append({
                     "type": "high_error_rate",
                     "message": f"Average error rate is {error_stats['mean']:.2%}",
@@ -116,7 +124,7 @@ class InsightsGenerator:
             
             if total_events > 0:
                 cost_per_event = total_cost / total_events
-                if cost_per_event > 0.01:  # 1 cent per event threshold
+                if cost_per_event > self.thresholds["cost_per_event"]:  # 1 cent per event threshold
                     insights.append({
                         "type": "high_cost_per_event",
                         "message": f"Cost per event is ${cost_per_event:.4f}",
@@ -129,7 +137,7 @@ class InsightsGenerator:
             usage_summary = usage_data["summary"]
             avg_daily_cost = usage_summary.get("average_daily_cost", 0)
             
-            if avg_daily_cost > 100:  # $100/day threshold
+            if avg_daily_cost > self.thresholds["daily_cost"]:  # $100/day threshold
                 insights.append({
                     "type": "high_daily_cost",
                     "message": f"Average daily cost is ${avg_daily_cost:.2f}",

@@ -19,6 +19,39 @@ class FallbackResponseService:
         """Initialize the fallback response service"""
         self.response_generator = ResponseGenerator()
     
+    @property
+    def response_templates(self):
+        """Get response templates from template manager"""
+        return self.response_generator.template_manager._templates
+    
+    @property  
+    def diagnostic_tips(self):
+        """Get diagnostic tips from diagnostics manager"""
+        return self.response_generator.diagnostics_manager._diagnostic_tips
+    
+    @property
+    def recovery_suggestions(self):
+        """Get recovery suggestions from diagnostics manager"""
+        return self.response_generator.diagnostics_manager._recovery_suggestions
+    
+    def _format_response(self, template: str, **kwargs) -> str:
+        """Format template string with keyword arguments"""
+        try:
+            return template.format(**kwargs)
+        except KeyError as e:
+            # Return original template if formatting fails
+            return template
+    
+    def _get_diagnostic_tips(self, failure_reason):
+        """Get diagnostic tips for failure reason"""
+        return self.response_generator.diagnostics_manager.get_diagnostic_tips(failure_reason)
+    
+    def _get_recovery_suggestions(self, content_type, failure_reason=None):
+        """Get recovery suggestions for content type"""
+        suggestions = self.response_generator.diagnostics_manager.get_recovery_suggestions(content_type)
+        # Return descriptions as strings for backward compatibility with tests
+        return [s["description"] for s in suggestions]
+    
     async def generate_fallback(self, *args, **kwargs):
         """Generate a context-aware fallback response"""
         return await self.response_generator.generate_fallback(*args, **kwargs)

@@ -1,29 +1,14 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional
+"""User type definitions - imports from single source of truth in registry.py"""
 
-class UserBase(BaseModel):
-    email: EmailStr
-    full_name: Optional[str] = None
-    picture: Optional[str] = None
+# Import all User types from single source of truth
+from app.schemas.registry import UserBase, UserCreate, UserCreateOAuth, User
 
-class UserCreate(UserBase):
-    password: str
-
-class UserCreateOAuth(UserBase):
-    pass
+# Additional types for compatibility
+from pydantic import BaseModel
 
 class UserUpdate(UserBase):
+    """User update model."""
     pass
-
-class User(UserBase):
-    id: str
-    is_active: bool
-    is_superuser: bool
-    hashed_password: Optional[str] = None
-
-    class Config:
-        from_attributes = True
-        extra = "allow"
 
 # Alias for backward compatibility
 UserInDB = User

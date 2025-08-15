@@ -59,9 +59,8 @@ class EnvironmentChecker:
     
     def _get_required_vars(self) -> List[str]:
         """Get required environment variables"""
-        if self.environment == "production":
-            return ["DATABASE_URL", "SECRET_KEY"]
-        return []
+        # Always require these critical variables
+        return ["DATABASE_URL", "SECRET_KEY"]
     
     def _get_optional_vars(self) -> List[str]:
         """Get optional environment variables"""
@@ -99,9 +98,8 @@ class EnvironmentChecker:
     
     def _validate_secret_key(self) -> None:
         """Validate secret key configuration"""
-        if settings.environment not in ["development", "testing", "staging"]:
-            if not settings.secret_key or len(settings.secret_key) < 32:
-                raise ValueError("SECRET_KEY must be at least 32 characters")
+        if not settings.secret_key or len(settings.secret_key) < 32:
+            raise ValueError("SECRET_KEY must be at least 32 characters")
     
     def _validate_environment(self) -> None:
         """Validate environment setting"""

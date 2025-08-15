@@ -149,6 +149,58 @@ response = await structured_llm.ainvoke(analysis_prompt)
                 <requirement>Cache invalidation on model updates</requirement>
             </requirements>
         </section>
+        
+        <section id="observability" order="7">
+            <title>Observability and Logging</title>
+            <description>Comprehensive logging for LLM calls and agent interactions to enable debugging and monitoring</description>
+            <requirements>
+                <requirement priority="critical">INFO level: Heartbeat logging every 2-3 seconds for long-running LLM calls</requirement>
+                <requirement priority="critical">DEBUG level: Log all LLM input data (prompts, parameters)</requirement>
+                <requirement priority="critical">DEBUG level: Log all LLM output data (responses, tokens used)</requirement>
+                <requirement priority="critical">INFO level: Log all input/output data between subagents</requirement>
+                <requirement priority="high">Include correlation IDs for tracing requests across agents</requirement>
+                <requirement priority="high">Track execution time for all LLM calls</requirement>
+                <requirement priority="high">Log retry attempts and fallback operations</requirement>
+            </requirements>
+            <implementation>
+                <heartbeat-logging>
+                    <description>Heartbeat mechanism for long-running operations</description>
+                    <features>
+                        <feature>Async task that logs heartbeat every 2-3 seconds while LLM call is running</feature>
+                        <feature>Include correlation ID, agent name, and elapsed time in heartbeat</feature>
+                        <feature>Stop heartbeat when LLM call completes or fails</feature>
+                        <feature>Thread-safe implementation using asyncio tasks</feature>
+                    </features>
+                    <log-format>
+                        <info-level>[INFO] LLM heartbeat: {agent_name} - {correlation_id} - elapsed: {elapsed_time}s - status: processing</info-level>
+                    </log-format>
+                </heartbeat-logging>
+                <data-logging>
+                    <description>Comprehensive data logging for debugging</description>
+                    <input-logging>
+                        <debug-level>[DEBUG] LLM input: {agent_name} - {correlation_id} - prompt_size: {size} - params: {params}</debug-level>
+                        <debug-level>[DEBUG] LLM input prompt: {truncated_prompt}</debug-level>
+                    </input-logging>
+                    <output-logging>
+                        <debug-level>[DEBUG] LLM output: {agent_name} - {correlation_id} - response_size: {size} - tokens: {tokens}</debug-level>
+                        <debug-level>[DEBUG] LLM response: {truncated_response}</debug-level>
+                    </output-logging>
+                </data-logging>
+                <subagent-communication>
+                    <description>Log all communication between agents</description>
+                    <info-level>[INFO] Agent communication: {from_agent} -> {to_agent} - {correlation_id} - type: {message_type}</info-level>
+                    <info-level>[INFO] Agent input: {from_agent} -> {to_agent} - data_size: {size}</info-level>
+                    <info-level>[INFO] Agent output: {to_agent} -> {from_agent} - data_size: {size} - status: {status}</info-level>
+                </subagent-communication>
+            </implementation>
+            <configuration>
+                <setting name="llm_heartbeat_enabled" default="true">Enable/disable heartbeat logging</setting>
+                <setting name="llm_heartbeat_interval_ms" default="2000">Heartbeat interval in milliseconds</setting>
+                <setting name="llm_data_logging_enabled" default="true">Enable/disable data logging</setting>
+                <setting name="llm_data_truncate_length" default="1000">Max characters to log for prompts/responses</setting>
+                <setting name="subagent_logging_enabled" default="true">Enable/disable subagent communication logging</setting>
+            </configuration>
+        </section>
     </sections>
     
     <best-practices>

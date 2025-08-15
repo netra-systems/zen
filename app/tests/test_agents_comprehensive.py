@@ -12,8 +12,8 @@ import json
 
 from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.agents.base import BaseSubAgent
-from app.agents.triage_sub_agent_legacy import TriageSubAgent
-from app.agents.data_sub_agent import DataSubAgent
+from app.agents.triage_sub_agent.agent import TriageSubAgent
+from app.agents.data_sub_agent.agent import DataSubAgent
 from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from app.agents.reporting_sub_agent import ReportingSubAgent
@@ -23,6 +23,7 @@ from app.schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAg
 from app.llm.llm_manager import LLMManager
 from app.services.agent_service import AgentService
 from app.services.state_persistence_service import state_persistence_service
+from app.tests.helpers.shared_test_types import TestIntegration as SharedTestIntegration
 
 
 class TestSupervisorAgent:
@@ -63,7 +64,7 @@ class TestSupervisorAgent:
         supervisor.thread_id = "test_thread"
         supervisor.user_id = "test_user"
         
-        result = await supervisor.run("Optimize my AI workload", "test_run_id", stream_updates=True)
+        result = await supervisor.run("Optimize my AI workload", "test_thread", "test_user", "test_run_id")
         
         assert isinstance(result, DeepAgentState)
         assert result.user_request == "Optimize my AI workload"
@@ -85,7 +86,7 @@ class TestSupervisorAgent:
         with patch.object(state_persistence_service, 'save_agent_state', new_callable=AsyncMock) as mock_save:
             with patch.object(state_persistence_service, 'get_thread_context', new_callable=AsyncMock) as mock_context:
                 mock_context.return_value = None
-                await supervisor.run("Test request", "test_run_id", False)
+                await supervisor.run("Test request", "test_thread", "test_user", "test_run_id")
                 mock_save.assert_called()
     
     @pytest.mark.asyncio
@@ -100,7 +101,7 @@ class TestSupervisorAgent:
         supervisor = Supervisor(mock_db, mock_llm, mock_ws, mock_dispatcher)
         
         with pytest.raises(Exception):
-            await supervisor.run("Test request", "test_run_id", False)
+            await supervisor.run("Test request", "test_thread", "test_user", "test_run_id")
     
     @pytest.mark.asyncio
     async def test_supervisor_websocket_streaming(self):
@@ -113,7 +114,7 @@ class TestSupervisorAgent:
         
         supervisor = Supervisor(mock_db, mock_llm, mock_ws, mock_dispatcher)
         
-        await supervisor.run("Analyze performance", "test_run_id", stream_updates=True)
+        await supervisor.run("Analyze performance", "test_thread", "test_user", "test_run_id")
         
         calls = mock_ws.send_message.call_args_list
         assert any("agent_started" in str(call) for call in calls)
@@ -469,7 +470,7 @@ class TestAgentLifecycle:
         assert agent.end_time >= agent.start_time
 
 
-class TestIntegration:
+class TestIntegration(SharedTestIntegration):
     """Integration test cases"""
     
     @pytest.mark.asyncio
@@ -534,7 +535,7 @@ class TestIntegration:
         
         tasks = []
         for i in range(3):
-            task = supervisor.run(f"Request {i}", f"run_{i}", False)
+            task = supervisor.run(f"Request {i}", f"thread_{i}", f"user_{i}", f"run_{i}")
             tasks.append(task)
         
         results = await asyncio.gather(*tasks)
@@ -557,11 +558,11 @@ class TestIntegration:
         mock_llm.ask_llm = AsyncMock(side_effect=[Exception("Error"), '{"result": "success"}'])
         
         with pytest.raises(Exception):
-            await supervisor.run("First request", "run_1", False)
+            await supervisor.run("First request", "thread_1", "user_1", "run_1")
         
         # Second request should still work
         mock_llm.ask_llm = AsyncMock(return_value='{"result": "success"}')
-        result = await supervisor.run("Second request", "run_2", False)
+        result = await supervisor.run("Second request", "thread_2", "user_2", "run_2")
         
         assert result.user_request == "Second request"
     
@@ -591,7 +592,7 @@ class TestIntegration:
                     mock_llm.ask_llm = AsyncMock(side_effect=Exception("Failed"))
                     
                     try:
-                        await supervisor.run("New request", "test_run", False)
+                        await supervisor.run("New request", "test_thread", "test_user", "test_run")
                     except:
                         pass
                     

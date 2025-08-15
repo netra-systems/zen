@@ -217,100 +217,130 @@ class TestCategorizer:
         
         return results
     
-    def generate_report(self, results: Dict):
-        """Generate a report of test categorization"""
-        report = []
-        report.append("=" * 80)
-        report.append("TEST CATEGORIZATION REPORT")
-        report.append("=" * 80)
-        report.append("")
-        
-        # Summary statistics
-        report.append("SUMMARY:")
-        report.append(f"Total test files analyzed: {len(results)}")
-        report.append("")
-        
-        # Category counts
-        report.append("CATEGORY COUNTS:")
+    def _create_report_header(self) -> List[str]:
+        """Create report header section"""
+        header = []
+        header.append("=" * 80)
+        header.append("TEST CATEGORIZATION REPORT")
+        header.append("=" * 80)
+        header.append("")
+        return header
+    
+    def _calculate_summary_stats(self, results: Dict) -> List[str]:
+        """Calculate summary statistics section"""
+        stats = []
+        stats.append("SUMMARY:")
+        stats.append(f"Total test files analyzed: {len(results)}")
+        stats.append("")
+        return stats
+    
+    def _format_category_counts(self) -> List[str]:
+        """Format category counts section"""
+        counts = ["CATEGORY COUNTS:"]
         for category, files in self.categories.items():
             if files:
-                report.append(f"  {category}: {len(files)} files")
-        report.append("")
-        
-        # Tests requiring real services
-        report.append("TESTS REQUIRING REAL SERVICES:")
-        report.append("-" * 40)
-        
-        real_service_tests = []
+                counts.append(f"  {category}: {len(files)} files")
+        counts.append("")
+        return counts
+    
+    def _extract_real_service_tests(self, results: Dict) -> List[str]:
+        """Extract and format real service tests"""
+        section = ["TESTS REQUIRING REAL SERVICES:", "-" * 40]
+        service_tests = self._build_service_test_list(results)
+        section.extend(service_tests if service_tests else ["  None found"])
+        section.append("")
+        return section
+    
+    def _build_service_test_list(self, results: Dict) -> List[str]:
+        """Build list of tests using real services"""
+        tests = []
         for file_path, data in results.items():
             if "real_services" in data["categories"]:
-                services = []
-                if data["analysis"]["uses_real_llm"]:
-                    services.append("LLM")
-                if data["analysis"]["uses_real_database"]:
-                    services.append("Database")
-                if data["analysis"]["uses_real_redis"]:
-                    services.append("Redis")
-                if data["analysis"]["uses_real_clickhouse"]:
-                    services.append("ClickHouse")
-                
-                real_service_tests.append(f"  {file_path}: {', '.join(services)}")
-        
-        if real_service_tests:
-            report.extend(real_service_tests)
-        else:
-            report.append("  None found")
-        report.append("")
-        
-        # Mock-only tests
-        report.append("MOCK-ONLY TESTS (Good for CI/CD):")
-        report.append("-" * 40)
-        mock_tests = [f"  {file}" for file in self.categories["mock_only"][:10]]
-        if mock_tests:
-            report.extend(mock_tests)
-            if len(self.categories["mock_only"]) > 10:
-                report.append(f"  ... and {len(self.categories['mock_only']) - 10} more")
-        else:
-            report.append("  None found")
-        report.append("")
-        
-        # E2E tests
-        report.append("END-TO-END TESTS:")
-        report.append("-" * 40)
+                services = self._extract_service_names(data["analysis"])
+                tests.append(f"  {file_path}: {', '.join(services)}")
+        return tests
+    
+    def _extract_service_names(self, analysis: Dict) -> List[str]:
+        """Extract service names from analysis"""
+        service_map = {
+            "uses_real_llm": "LLM", "uses_real_database": "Database",
+            "uses_real_redis": "Redis", "uses_real_clickhouse": "ClickHouse"
+        }
+        return [name for key, name in service_map.items() if analysis[key]]
+    
+    def _format_mock_only_tests(self) -> List[str]:
+        """Format mock-only tests section"""
+        section = ["MOCK-ONLY TESTS (Good for CI/CD):", "-" * 40]
+        mock_tests = self._get_limited_test_list("mock_only")
+        section.extend(mock_tests if mock_tests else ["  None found"])
+        section.append("")
+        return section
+    
+    def _get_limited_test_list(self, category: str, limit: int = 10) -> List[str]:
+        """Get limited list of tests with overflow indicator"""
+        tests = [f"  {file}" for file in self.categories[category][:limit]]
+        if len(self.categories[category]) > limit:
+            overflow = len(self.categories[category]) - limit
+            tests.append(f"  ... and {overflow} more")
+        return tests
+    
+    def _format_e2e_tests(self) -> List[str]:
+        """Format E2E tests section"""
+        section = ["END-TO-END TESTS:", "-" * 40]
         e2e_tests = [f"  {file}" for file in self.categories["e2e"]]
-        if e2e_tests:
-            report.extend(e2e_tests)
-        else:
-            report.append("  None found")
-        report.append("")
-        
-        # Tests with skip markers
-        report.append("SKIPPED TESTS:")
-        report.append("-" * 40)
-        skipped = []
-        for file_path, data in results.items():
-            if data["analysis"]["has_skip_marker"]:
-                skipped.append(f"  {file_path}")
-        
-        if skipped:
-            report.extend(skipped[:10])
-            if len(skipped) > 10:
-                report.append(f"  ... and {len(skipped) - 10} more")
-        else:
-            report.append("  None found")
-        report.append("")
-        
-        # Uncategorized tests
-        if self.categories["uncategorized"]:
-            report.append("UNCATEGORIZED TESTS (Need Review):")
-            report.append("-" * 40)
-            for file in self.categories["uncategorized"][:10]:
-                report.append(f"  {file}")
-            if len(self.categories["uncategorized"]) > 10:
-                report.append(f"  ... and {len(self.categories['uncategorized']) - 10} more")
-            report.append("")
-        
+        section.extend(e2e_tests if e2e_tests else ["  None found"])
+        section.append("")
+        return section
+    
+    def _extract_skipped_tests(self, results: Dict) -> List[str]:
+        """Extract and format skipped tests"""
+        section = ["SKIPPED TESTS:", "-" * 40]
+        skipped = self._find_skipped_tests(results)
+        section.extend(skipped if skipped else ["  None found"])
+        section.append("")
+        return section
+    
+    def _find_skipped_tests(self, results: Dict) -> List[str]:
+        """Find tests with skip markers"""
+        skipped = [f"  {fp}" for fp, data in results.items() 
+                  if data["analysis"]["has_skip_marker"]]
+        if len(skipped) > 10:
+            skipped = skipped[:10] + [f"  ... and {len(skipped) - 10} more"]
+        return skipped
+    
+    def _format_uncategorized_tests(self) -> List[str]:
+        """Format uncategorized tests section"""
+        if not self.categories["uncategorized"]:
+            return []
+        section = ["UNCATEGORIZED TESTS (Need Review):", "-" * 40]
+        section.extend(self._get_limited_test_list("uncategorized"))
+        section.append("")
+        return section
+    
+    def generate_report(self, results: Dict) -> str:
+        """Generate a report of test categorization"""
+        report = []
+        self._add_report_sections(report, results)
         return "\n".join(report)
+    
+    def _add_report_sections(self, report: List[str], results: Dict):
+        """Add all report sections to report list"""
+        self._add_header_and_stats(report, results)
+        self._add_category_sections(report, results)
+    
+    def _add_header_and_stats(self, report: List[str], results: Dict):
+        """Add header and statistics sections"""
+        report.extend(self._create_report_header())
+        report.extend(self._calculate_summary_stats(results))
+        report.extend(self._format_category_counts())
+    
+    def _add_category_sections(self, report: List[str], results: Dict):
+        """Add category-specific sections"""
+        report.extend(self._extract_real_service_tests(results))
+        report.extend(self._format_mock_only_tests())
+        report.extend(self._format_e2e_tests())
+        report.extend(self._extract_skipped_tests(results))
+        report.extend(self._format_uncategorized_tests())
     
     def save_categorization(self, results: Dict):
         """Save categorization to JSON file for use by test runner"""

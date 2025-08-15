@@ -1,280 +1,106 @@
-"""WebSocket message validation and sanitization.
+"""WebSocket message validation orchestrator.
 
-Provides comprehensive validation and sanitization capabilities for WebSocket messages
-to ensure security and data integrity.
+Orchestrates micro-validators for WebSocket message validation and sanitization.
+Composed of performance-optimized micro-validators (≤8 lines each).
 """
 
-import json
 from typing import Dict, Any, Union
 
-from pydantic import ValidationError
-
 from app.logging_config import central_logger
-from app.schemas.websocket_unified import (
-    WebSocketMessage,
-    WebSocketMessageType
-)
 from app.schemas.websocket_message_types import WebSocketValidationError
+
+# Import micro-validators
+from app.websocket.validation_core import (
+    DateTimeEncoder, validate_message_is_dict, validate_type_field_exists,
+    validate_message_type_enum, validate_with_pydantic_model,
+    validate_message_size, check_message_type_supported
+)
+from app.websocket.validation_security import (
+    validate_payload_security, check_text_length_limit
+)
+from app.websocket.validation_sanitization import (
+    sanitize_message_content
+)
+from app.websocket.validation_errors import (
+    handle_validation_exception, create_unknown_message_fallback,
+    create_graceful_validation_result, log_validation_warning
+)
 
 logger = central_logger.get_logger(__name__)
 
 
 class MessageValidator:
-    """Validates and sanitizes WebSocket messages."""
+    """Orchestrates micro-validators for WebSocket message validation."""
     
-    def __init__(self, max_message_size: int = 1024 * 1024, max_text_length: int = 10000):
-        """Initialize message validator.
-        
-        Args:
-            max_message_size: Maximum message size in bytes (default 1MB)
-            max_text_length: Maximum text field length in characters (default 10KB)
-        """
+    def __init__(self, max_message_size: int = 1024 * 1024, max_text_length: int = 10000, 
+                 allow_unknown_types: bool = False):
+        """Initialize validator with performance limits."""
         self.max_message_size = max_message_size
         self.max_text_length = max_text_length
+        self.allow_unknown_types = allow_unknown_types
     
     def validate_message(self, message: Dict[str, Any]) -> Union[bool, WebSocketValidationError]:
-        """Validate incoming WebSocket message using strong types.
-        
-        Args:
-            message: Message dictionary to validate
-            
-        Returns:
-            True if valid, WebSocketValidationError if invalid
-        """
+        """Orchestrate validation using micro-validators."""
         try:
-            # Basic structure validation
-            if not isinstance(message, dict):
-                return WebSocketValidationError(
-                    error_type="format_error",
-                    message=f"Message is not a dictionary: {type(message)}",
-                    received_data=message
-                )
-            
-            # Required fields
-            if "type" not in message:
-                return WebSocketValidationError(
-                    error_type="validation_error",
-                    message="Message missing 'type' field",
-                    field="type",
-                    received_data=message
-                )
-            
-            # Validate message type using enum
-            message_type = message.get("type")
-            try:
-                WebSocketMessageType(message_type)
-            except ValueError:
-                return WebSocketValidationError(
-                    error_type="type_error",
-                    message=f"Invalid message type: {message_type}",
-                    field="type",
-                    received_data=message
-                )
-            
-            # Validate using Pydantic model
-            try:
-                validated_message = WebSocketMessage(**message)
-            except ValidationError as e:
-                return WebSocketValidationError(
-                    error_type="validation_error",
-                    message=f"Message validation failed: {str(e)}",
-                    received_data=message
-                )
-            
-            # Size validation (prevent large payloads)
-            message_str = json.dumps(message)
-            if len(message_str) > self.max_message_size:
-                return WebSocketValidationError(
-                    error_type="validation_error",
-                    message=f"Message too large: {len(message_str)} bytes",
-                    received_data=message
-                )
-            
-            # Input sanitization for text fields
-            validation_error = self._validate_payload_content(message)
-            if validation_error:
-                return validation_error
-            
-            return True
-            
+            error = self._run_validation_pipeline(message)
+            return error if error else True
         except Exception as e:
-            logger.error(f"Error validating message: {e}")
-            return WebSocketValidationError(
-                error_type="validation_error",
-                message=f"Unexpected validation error: {str(e)}",
-                received_data=message
-            )
+            return handle_validation_exception(e, message)
     
-    def _validate_payload_content(self, message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
-        """Validate payload content for security and size limits.
-        
-        Args:
-            message: Message to validate
-            
-        Returns:
-            WebSocketValidationError if invalid, None if valid
-        """
-        if "payload" not in message or not isinstance(message["payload"], dict):
-            return None
-        
-        payload = message["payload"]
-        
-        # Validate text fields
-        if "text" in payload:
-            text = payload["text"]
-            if isinstance(text, str):
-                # Remove potential script injections
-                if "<script" in text.lower() or "javascript:" in text.lower():
-                    return WebSocketValidationError(
-                        error_type="security_error",
-                        message="Potential script injection detected in message",
-                        field="payload.text",
-                        received_data=message
-                    )
-                
-                # Check for common XSS patterns
-                dangerous_patterns = [
-                    "onclick=", "onerror=", "onload=", "onmouseover=",
-                    "<iframe", "<object", "<embed", "<form"
-                ]
-                text_lower = text.lower()
-                for pattern in dangerous_patterns:
-                    if pattern in text_lower:
-                        return WebSocketValidationError(
-                            error_type="security_error",
-                            message=f"Potentially dangerous content detected: {pattern}",
-                            field="payload.text",
-                            received_data=message
-                        )
-                
-                # Limit text length
-                if len(text) > self.max_text_length:
-                    return WebSocketValidationError(
-                        error_type="validation_error",
-                        message=f"Text too long: {len(text)} characters",
-                        field="payload.text",
-                        received_data=message
-                    )
-        
+    def _run_validation_pipeline(self, message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
+        """Run complete validation pipeline using micro-validators."""
+        checks = self._create_validation_checks(message)
+        return self._run_validation_checks(checks)
+    
+    def _run_validation_checks(self, checks: list) -> Union[None, WebSocketValidationError]:
+        """Run validation checks and return first error found."""
+        for check in checks:
+            error = check()
+            if error:
+                return error
         return None
     
     def sanitize_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
-        """Sanitize message content to prevent XSS and other attacks.
-        
-        Args:
-            message: Message to sanitize
-            
-        Returns:
-            Sanitized message copy
-        """
-        try:
-            # Create a copy to avoid modifying original
-            sanitized = message.copy()
-            
-            # Sanitize payload if present
-            if "payload" in sanitized and isinstance(sanitized["payload"], dict):
-                payload = sanitized["payload"].copy()
-                
-                # Sanitize text content
-                if "text" in payload and isinstance(payload["text"], str):
-                    payload["text"] = self._sanitize_text(payload["text"])
-                
-                # Sanitize other string fields recursively
-                payload = self._sanitize_dict_strings(payload)
-                
-                sanitized["payload"] = payload
-            
-            return sanitized
-            
-        except Exception as e:
-            logger.error(f"Error sanitizing message: {e}")
-            return message
-    
-    def _sanitize_text(self, text: str) -> str:
-        """Sanitize text content.
-        
-        Args:
-            text: Text to sanitize
-            
-        Returns:
-            Sanitized text
-        """
-        # Basic HTML entity encoding for safety (& must be first to avoid double encoding)
-        text = text.replace("&", "&amp;")
-        text = text.replace("<", "&lt;").replace(">", "&gt;")
-        text = text.replace('"', "&quot;").replace("'", "&#x27;")
-        
-        # Remove null bytes and other control characters
-        text = text.replace("\x00", "")
-        
-        # Remove other potentially dangerous characters
-        dangerous_chars = ["\x08", "\x0c", "\x0e", "\x0f"]  # Backspace, form feed, etc.
-        for char in dangerous_chars:
-            text = text.replace(char, "")
-        
-        return text
-    
-    def _sanitize_dict_strings(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Recursively sanitize string values in a dictionary.
-        
-        Args:
-            data: Dictionary to sanitize
-            
-        Returns:
-            Sanitized dictionary
-        """
-        sanitized = {}
-        
-        for key, value in data.items():
-            if isinstance(value, str):
-                sanitized[key] = self._sanitize_text(value)
-            elif isinstance(value, dict):
-                sanitized[key] = self._sanitize_dict_strings(value)
-            elif isinstance(value, list):
-                sanitized[key] = self._sanitize_list(value)
-            else:
-                sanitized[key] = value
-        
-        return sanitized
-    
-    def _sanitize_list(self, data: list) -> list:
-        """Recursively sanitize string values in a list.
-        
-        Args:
-            data: List to sanitize
-            
-        Returns:
-            Sanitized list
-        """
-        sanitized = []
-        
-        for item in data:
-            if isinstance(item, str):
-                sanitized.append(self._sanitize_text(item))
-            elif isinstance(item, dict):
-                sanitized.append(self._sanitize_dict_strings(item))
-            elif isinstance(item, list):
-                sanitized.append(self._sanitize_list(item))
-            else:
-                sanitized.append(item)
-        
-        return sanitized
+        """Sanitize message using micro-sanitizers."""
+        return sanitize_message_content(message)
     
     def validate_message_type(self, message_type: str) -> bool:
-        """Validate if message type is supported.
-        
-        Args:
-            message_type: Message type to validate
-            
-        Returns:
-            True if valid message type
-        """
-        try:
-            WebSocketMessageType(message_type)
-            return True
-        except ValueError:
-            return False
+        """Validate message type support using micro-validator."""
+        return check_message_type_supported(message_type)
+    
+    def handle_unknown_message_type(self, message: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle unknown message type using micro-handlers."""
+        return create_unknown_message_fallback(message)
+    
+    def _create_validation_checks(self, message: Dict[str, Any]) -> list:
+        """Create list of validation checks to run."""
+        basic_checks = self._create_basic_checks(message)
+        advanced_checks = self._create_advanced_checks(message)
+        return basic_checks + advanced_checks
+    
+    def _create_basic_checks(self, message: Dict[str, Any]) -> list:
+        """Create basic validation checks."""
+        return [
+            lambda: validate_message_is_dict(message),
+            lambda: validate_type_field_exists(message),
+            lambda: validate_payload_security(message)
+        ]
+    
+    def _create_advanced_checks(self, message: Dict[str, Any]) -> list:
+        """Create advanced validation checks."""
+        return [
+            lambda: validate_message_type_enum(message.get('type'), self.allow_unknown_types),
+            lambda: validate_with_pydantic_model(message),
+            lambda: validate_message_size(message, self.max_message_size)
+        ]
+    
+    def create_graceful_validation_result(self, message: Dict[str, Any], 
+                                        validation_error: WebSocketValidationError) -> Dict[str, Any]:
+        """Create graceful validation result using micro-handlers."""
+        return create_graceful_validation_result(message, validation_error)
+    
 
 
-# Default validator instance
+# Performance-optimized validator instances using micro-validators
 default_message_validator = MessageValidator()
+flexible_message_validator = MessageValidator(allow_unknown_types=True)

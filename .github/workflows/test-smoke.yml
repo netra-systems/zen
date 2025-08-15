@@ -1,5 +1,8 @@
 name: Smoke Tests
 
+# ACT Compatibility: This workflow is designed to work with both GitHub Actions and ACT (act)
+# Use: act --secret-file .secrets --env-file .env.act push
+
 on:
   push:
     branches-ignore:
@@ -22,6 +25,11 @@ concurrency:
   group: smoke-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CONFIG_FILE: .github/workflow-config.yml
+  # ACT compatibility: detect ACT environment
+  ACT: 'false'  # Will be overridden by ACT when running locally
+
 permissions:
   contents: read
   statuses: write
@@ -31,19 +39,65 @@ permissions:
 jobs:
   smoke-test:
     name: Quick Validation (<30s)
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
+    timeout-minutes: 5  # Adjusted for ACT compatibility
     
     outputs:
       status: ${{ steps.test.outcome }}
       duration: ${{ steps.timer.outputs.duration }}
       
     steps:
+      - name: Checkout (for config)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflow-config.yml
+          sparse-checkout-cone-mode: false
+          
+      - name: Load Configuration
+        id: config
+        run: |
+          if [ -f "${{ env.CONFIG_FILE }}" ]; then
+            echo "::notice::Loading configuration from ${{ env.CONFIG_FILE }}"
+            # Extract configuration values using yq (ACT compatibility)
+            if ! command -v yq &> /dev/null; then
+              echo "Installing yq..."
+              if [ "${{ env.ACT }}" = "true" ]; then
+                # For ACT, try to install via package manager first
+                sudo apt-get update && sudo apt-get install -y yq || {
+                  wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+                  sudo chmod +x /usr/local/bin/yq
+                }
+              else
+                wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+                chmod +x /usr/local/bin/yq
+              fi
+            fi
+            
+            PYTHON_VERSION=$(yq '.global.versions.python // "3.11"' ${{ env.CONFIG_FILE }})
+            TIMEOUT=$(yq '.timeouts.smoke // 5' ${{ env.CONFIG_FILE }})
+            RETRY_ATTEMPTS=$(yq '.testing.retry.max_attempts // 3' ${{ env.CONFIG_FILE }})
+            MIN_COVERAGE=$(yq '.testing.coverage.minimum // 80' ${{ env.CONFIG_FILE }})
+            
+            echo "python_version=$PYTHON_VERSION" >> $GITHUB_OUTPUT
+            echo "timeout=$TIMEOUT" >> $GITHUB_OUTPUT
+            echo "retry_attempts=$RETRY_ATTEMPTS" >> $GITHUB_OUTPUT
+            echo "min_coverage=$MIN_COVERAGE" >> $GITHUB_OUTPUT
+            
+            echo "Loaded config: Python=$PYTHON_VERSION, Timeout=${TIMEOUT}m"
+          else
+            echo "::warning::Config file not found at ${{ env.CONFIG_FILE }}, using defaults"
+            echo "python_version=3.11" >> $GITHUB_OUTPUT
+            echo "timeout=5" >> $GITHUB_OUTPUT
+            echo "retry_attempts=3" >> $GITHUB_OUTPUT
+            echo "min_coverage=80" >> $GITHUB_OUTPUT
+          fi
+          
       - name: Start Timer
         id: timer
         run: echo "start=$(date +%s)" >> $GITHUB_OUTPUT
         
-      - name: Checkout
+      - name: Checkout Full Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -51,10 +105,11 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-          cache: 'pip'
+          python-version: ${{ steps.config.outputs.python_version || '3.11' }}
+          cache: ${{ env.ACT && '' || 'pip' }}  # ACT compatibility: disable pip cache for ACT
           
       - name: Cache Dependencies
+        if: ${{ !env.ACT }}  # ACT compatibility: skip caching for ACT
         uses: actions/cache@v4
         with:
           path: |
@@ -94,7 +149,7 @@ jobs:
             --output smoke-report.md
             
       - name: Upload Results
-        if: always()
+        if: ${{ !env.ACT && always() }}  # ACT compatibility: skip artifact upload for ACT
         uses: actions/upload-artifact@v4
         with:
           name: smoke-test-results-${{ github.sha }}
@@ -102,9 +157,18 @@ jobs:
             test-results.json
             smoke-report.md
           retention-days: 7
+      
+      - name: Store results locally (ACT)
+        if: ${{ env.ACT && always() }}
+        run: |
+          # ACT compatibility: store results locally
+          mkdir -p act-results
+          cp -f test-results.json act-results/ 2>/dev/null || true
+          cp -f smoke-report.md act-results/ 2>/dev/null || true
+          echo "Smoke test results stored locally: act-results/"
           
       - name: Comment PR (if applicable)
-        if: github.event_name == 'pull_request' && always()
+        if: ${{ !env.ACT && github.event_name == 'pull_request' && always() }}  # ACT compatibility: skip PR comments for ACT
         uses: actions/github-script@v7
         with:
           script: |
@@ -147,7 +211,7 @@ jobs:
             }
             
       - name: Set Commit Status
-        if: always()
+        if: ${{ !env.ACT && always() }}  # ACT compatibility: skip commit status for ACT
         uses: actions/github-script@v7
         with:
           script: |
@@ -161,6 +225,21 @@ jobs:
               target_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
             });
             
+      - name: Local smoke test summary (ACT)
+        if: ${{ env.ACT && always() }}
+        run: |
+          # ACT compatibility: show local summary
+          echo "=== Smoke Test Results Summary (ACT) ==="
+          echo "Status: ${{ steps.test.outcome }}"
+          echo "Duration: ${{ steps.timer-end.outputs.duration }}"
+          echo "Environment: ACT (Local)"
+          if [ -f "smoke-report.md" ]; then
+            echo "--- Test Report ---"
+            cat smoke-report.md
+          fi
+          echo "Results stored in: act-results/"
+          echo "============================================"
+      
       - name: Fail if Tests Failed
         if: steps.test.outcome == 'failure'
         run: exit 1

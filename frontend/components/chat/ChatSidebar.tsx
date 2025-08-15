@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, MessageSquare, Clock, ChevronLeft, ChevronRight, Search, Shield, Database, Sparkles, Users, Filter } from 'lucide-react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { ThreadService, Thread } from '@/services/threadService';
@@ -18,6 +19,7 @@ export const ChatSidebar: React.FC = () => {
     resetLayers 
   } = useUnifiedChatStore();
   
+  const { sendMessage } = useWebSocket();
   const { isDeveloperOrHigher } = useAuthStore();
   const isAdmin = isDeveloperOrHigher();
   
@@ -115,6 +117,12 @@ export const ChatSidebar: React.FC = () => {
       
       // Switch to new thread
       setActiveThread?.(threadId);
+      
+      // Send switch_thread message to join thread room on backend
+      sendMessage({
+        type: 'switch_thread',
+        payload: { thread_id: threadId }
+      });
       
       // Load thread messages
       const response = await ThreadService.getThreadMessages(threadId);

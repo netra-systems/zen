@@ -5,7 +5,7 @@ import argparse
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 
 def generate_security_report(results: Dict[str, Any], format: str) -> str:
@@ -19,142 +19,223 @@ def generate_security_report(results: Dict[str, Any], format: str) -> str:
 
 def generate_markdown_security_report(results: Dict[str, Any]) -> str:
     """Generate a markdown formatted security test report."""
-    report = []
+    header = _build_security_report_header()
+    summary_section = _build_security_summary_section(results)
+    vulnerabilities_section = _build_vulnerabilities_section(results)
+    test_issues_section = _build_test_issues_section(results)
+    test_results_section = _build_test_results_section(results)
+    recommendations_section = _build_recommendations_section(results)
+    compliance_section = _build_compliance_section(results)
     
-    # Header
-    report.append("# 🔒 Security Test Report")
-    report.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    report.append("")
-    
-    # Summary
+    sections = [header, summary_section, vulnerabilities_section, test_issues_section, 
+               test_results_section, recommendations_section, compliance_section]
+    return "\n".join(sections)
+
+def _build_security_report_header() -> str:
+    """Build the security report header"""
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    return f"""# 🔒 Security Test Report
+Generated: {timestamp}
+"""
+
+def _build_security_summary_section(results: Dict[str, Any]) -> str:
+    """Build the summary section with status badge and metrics table"""
     summary = results.get("summary", {})
-    report.append("## Summary")
-    report.append("")
+    status_badge = _get_security_status_badge(summary)
+    metrics_table = _build_security_metrics_table(summary)
     
-    # Security status badge
-    if summary.get("failed", 0) == 0 and summary.get("vulnerability_count", 0) == 0:
-        report.append("### 🛡️ Security Status: **PASSED**")
+    return f"""## Summary
+
+{status_badge}
+
+{metrics_table}"""
+
+def _get_security_status_badge(summary: Dict[str, Any]) -> str:
+    """Get the security status badge based on results"""
+    failed = summary.get("failed", 0)
+    vuln_count = summary.get("vulnerability_count", 0)
+    
+    if failed == 0 and vuln_count == 0:
+        return "### 🛡️ Security Status: **PASSED**"
     else:
-        report.append("### ⚠️ Security Status: **NEEDS ATTENTION**")
-    report.append("")
-    
-    report.append("| Metric | Value |")
-    report.append("|--------|-------|")
-    report.append(f"| Total Security Tests | {summary.get('total', 0)} |")
-    report.append(f"| Passed | ✅ {summary.get('passed', 0)} |")
-    report.append(f"| Failed | ❌ {summary.get('failed', 0)} |")
-    report.append(f"| Success Rate | {summary.get('success_rate', 0):.1f}% |")
-    report.append(f"| Static Analysis Issues | {summary.get('vulnerability_count', 0)} |")
-    report.append(f"| Security Test Issues | {summary.get('security_issue_count', 0)} |")
-    report.append("")
-    
-    # Vulnerabilities from static analysis
+        return "### ⚠️ Security Status: **NEEDS ATTENTION**"
+
+def _build_security_metrics_table(summary: Dict[str, Any]) -> str:
+    """Build the security metrics table"""
+    return f"""| Metric | Value |
+|--------|---------|
+| Total Security Tests | {summary.get('total', 0)} |
+| Passed | ✅ {summary.get('passed', 0)} |
+| Failed | ❌ {summary.get('failed', 0)} |
+| Success Rate | {summary.get('success_rate', 0):.1f}% |
+| Static Analysis Issues | {summary.get('vulnerability_count', 0)} |
+| Security Test Issues | {summary.get('security_issue_count', 0)} |"""
+
+def _build_vulnerabilities_section(results: Dict[str, Any]) -> str:
+    """Build the static analysis vulnerabilities section"""
     vulnerabilities = results.get("vulnerabilities", [])
-    if vulnerabilities:
-        report.append("## 🔍 Static Analysis Findings")
-        report.append("")
-        
-        # Group by severity
-        severity_groups = {}
-        for vuln in vulnerabilities:
-            severity = vuln.get("severity", "unknown")
-            if severity not in severity_groups:
-                severity_groups[severity] = []
-            severity_groups[severity].append(vuln)
-        
-        # Sort by severity
-        severity_order = ["HIGH", "MEDIUM", "LOW", "unknown"]
-        
-        for severity in severity_order:
-            if severity in severity_groups:
-                vulns = severity_groups[severity]
-                severity_emoji = {
-                    "HIGH": "🔴",
-                    "MEDIUM": "🟠",
-                    "LOW": "🟡",
-                    "unknown": "⚪"
-                }.get(severity, "⚪")
-                
-                report.append(f"### {severity_emoji} {severity} Severity ({len(vulns)} issues)")
-                report.append("")
-                
-                for vuln in vulns[:5]:  # Show first 5 of each severity
-                    report.append(f"**File:** `{vuln.get('file', 'unknown')}`")
-                    report.append(f"**Line:** {vuln.get('line', 0)}")
-                    report.append(f"**Confidence:** {vuln.get('confidence', 'unknown')}")
-                    report.append(f"**Description:** {vuln.get('description', 'No description')}")
-                    report.append("")
-                
-                if len(vulns) > 5:
-                    report.append(f"*... and {len(vulns) - 5} more {severity} severity issues*")
-                    report.append("")
+    if not vulnerabilities:
+        return ""
     
-    # Security test issues
-    if summary.get("security_issues"):
-        report.append("## 🚨 Security Test Issues")
-        report.append("")
-        report.append("| Test | Issue Type |")
-        report.append("|------|------------|")
-        
-        for issue in summary["security_issues"]:
-            report.append(f"| {issue['test']} | {issue['issue']} |")
-        report.append("")
+    severity_groups = _group_vulnerabilities_by_severity(vulnerabilities)
+    vulnerabilities_content = _format_vulnerability_groups(severity_groups)
     
-    # Test Results
-    if results.get("tests"):
-        report.append("## Test Results")
-        report.append("")
-        report.append("| Test | Status | Duration | Security Checks |")
-        report.append("|------|--------|----------|----------------|")
-        
-        for test in results["tests"]:
-            status_icon = {
-                "passed": "✅",
-                "failed": "❌",
-                "timeout": "⏱️",
-                "error": "🔥"
-            }.get(test["status"], "❓")
-            
-            security_checks = len(test.get("security_checks", []))
-            checks_indicator = "🔒" if security_checks == 0 else f"⚠️ {security_checks}"
-            
-            report.append(
-                f"| {test['name']} | "
-                f"{status_icon} {test['status']} | "
-                f"{test['duration']:.2f}s | "
-                f"{checks_indicator} |"
-            )
-        report.append("")
+    return f"""## 🔍 Static Analysis Findings
+
+{vulnerabilities_content}"""
+
+def _group_vulnerabilities_by_severity(vulnerabilities: List[Dict]) -> Dict[str, List[Dict]]:
+    """Group vulnerabilities by severity level"""
+    severity_groups = {}
+    for vuln in vulnerabilities:
+        severity = vuln.get("severity", "unknown")
+        if severity not in severity_groups:
+            severity_groups[severity] = []
+        severity_groups[severity].append(vuln)
+    return severity_groups
+
+def _format_vulnerability_groups(severity_groups: Dict[str, List[Dict]]) -> str:
+    """Format vulnerability groups by severity"""
+    severity_order = ["HIGH", "MEDIUM", "LOW", "unknown"]
+    sections = []
     
-    # Security Recommendations
-    report.append("## 📋 Recommendations")
-    report.append("")
+    for severity in severity_order:
+        if severity in severity_groups:
+            section = _format_severity_group(severity, severity_groups[severity])
+            sections.append(section)
     
-    if summary.get("vulnerability_count", 0) > 0:
+    return "\n".join(sections)
+
+def _format_severity_group(severity: str, vulns: List[Dict]) -> str:
+    """Format a single severity group"""
+    emoji_map = {"HIGH": "🔴", "MEDIUM": "🟠", "LOW": "🟡", "unknown": "⚪"}
+    severity_emoji = emoji_map.get(severity, "⚪")
+    
+    header = f"### {severity_emoji} {severity} Severity ({len(vulns)} issues)\n"
+    vulnerabilities_list = _format_vulnerability_list(vulns)
+    overflow_text = _get_overflow_text(vulns, severity)
+    
+    return header + vulnerabilities_list + overflow_text
+
+def _format_vulnerability_list(vulns: List[Dict]) -> str:
+    """Format the vulnerability list for display"""
+    formatted_vulns = []
+    for vuln in vulns[:5]:  # Show first 5 of each severity
+        vuln_text = f"""**File:** `{vuln.get('file', 'unknown')}`
+**Line:** {vuln.get('line', 0)}
+**Confidence:** {vuln.get('confidence', 'unknown')}
+**Description:** {vuln.get('description', 'No description')}
+"""
+        formatted_vulns.append(vuln_text)
+    return "\n".join(formatted_vulns)
+
+def _get_overflow_text(vulns: List[Dict], severity: str) -> str:
+    """Get overflow text if more vulnerabilities exist"""
+    if len(vulns) > 5:
+        return f"\n*... and {len(vulns) - 5} more {severity} severity issues*\n"
+    return "\n"
+
+def _build_test_issues_section(results: Dict[str, Any]) -> str:
+    """Build the security test issues section"""
+    summary = results.get("summary", {})
+    security_issues = summary.get("security_issues")
+    
+    if not security_issues:
+        return ""
+    
+    issues_table = _build_security_issues_table(security_issues)
+    return f"""## 🚨 Security Test Issues
+
+{issues_table}"""
+
+def _build_security_issues_table(security_issues: List[Dict]) -> str:
+    """Build the security issues table"""
+    table_header = "| Test | Issue Type |\n|------|------------|\n"
+    table_rows = [f"| {issue['test']} | {issue['issue']} |" for issue in security_issues]
+    return table_header + "\n".join(table_rows)
+
+def _build_test_results_section(results: Dict[str, Any]) -> str:
+    """Build the test results section"""
+    tests = results.get("tests")
+    if not tests:
+        return ""
+    
+    results_table = _build_test_results_table(tests)
+    return f"""## Test Results
+
+{results_table}"""
+
+def _build_test_results_table(tests: List[Dict]) -> str:
+    """Build the test results table"""
+    table_header = "| Test | Status | Duration | Security Checks |\n|------|--------|----------|----------------|\n"
+    table_rows = [_format_test_result_row(test) for test in tests]
+    return table_header + "\n".join(table_rows)
+
+def _format_test_result_row(test: Dict) -> str:
+    """Format a single test result row"""
+    status_icons = {"passed": "✅", "failed": "❌", "timeout": "⏱️", "error": "🔥"}
+    status_icon = status_icons.get(test["status"], "❓")
+    
+    security_checks = len(test.get("security_checks", []))
+    checks_indicator = "🔒" if security_checks == 0 else f"⚠️ {security_checks}"
+    
+    return (f"| {test['name']} | {status_icon} {test['status']} | "
+            f"{test['duration']:.2f}s | {checks_indicator} |")
+
+def _build_recommendations_section(results: Dict[str, Any]) -> str:
+    """Build the security recommendations section"""
+    summary = results.get("summary", {})
+    vulnerabilities = results.get("vulnerabilities", [])
+    
+    recommendations = _generate_security_recommendations(summary, vulnerabilities)
+    return f"""## 📋 Recommendations
+
+{recommendations}"""
+
+def _generate_security_recommendations(summary: Dict, vulnerabilities: List[Dict]) -> str:
+    """Generate security recommendations based on results"""
+    recommendations = []
+    
+    vuln_count = summary.get("vulnerability_count", 0)
+    if vuln_count > 0:
         high_vulns = sum(1 for v in vulnerabilities if v.get("severity") == "HIGH")
         if high_vulns > 0:
-            report.append(f"- 🔴 **CRITICAL:** Address {high_vulns} high-severity vulnerabilities immediately")
-        report.append("- 🔍 Review and fix static analysis findings")
-        report.append("- 📝 Update security tests to cover identified vulnerabilities")
+            recommendations.append(f"- 🔴 **CRITICAL:** Address {high_vulns} high-severity vulnerabilities immediately")
+        recommendations.extend([
+            "- 🔍 Review and fix static analysis findings",
+            "- 📝 Update security tests to cover identified vulnerabilities"
+        ])
     
     if summary.get("security_issues"):
-        report.append("- ⚠️ Investigate security test failures")
-        report.append("- 🛡️ Strengthen security controls in affected areas")
+        recommendations.extend([
+            "- ⚠️ Investigate security test failures",
+            "- 🛡️ Strengthen security controls in affected areas"
+        ])
     
     if summary.get("failed", 0) > 0:
-        report.append("- ❌ Fix failing security tests before deployment")
+        recommendations.append("- ❌ Fix failing security tests before deployment")
     
-    if summary.get("vulnerability_count", 0) == 0 and summary.get("failed", 0) == 0:
-        report.append("- ✅ No critical security issues found")
-        report.append("- 🔄 Continue regular security testing")
-        report.append("- 📚 Keep security dependencies up to date")
+    if vuln_count == 0 and summary.get("failed", 0) == 0:
+        recommendations.extend([
+            "- ✅ No critical security issues found",
+            "- 🔄 Continue regular security testing",
+            "- 📚 Keep security dependencies up to date"
+        ])
     
-    report.append("")
+    return "\n".join(recommendations)
+
+def _build_compliance_section(results: Dict[str, Any]) -> str:
+    """Build the security compliance checklist section"""
+    summary = results.get("summary", {})
+    vulnerabilities = results.get("vulnerabilities", [])
     
-    # Compliance checklist
-    report.append("## ✔️ Security Compliance Checklist")
-    report.append("")
-    
+    compliance_checks = _generate_compliance_checks(summary, vulnerabilities)
+    return f"""## ✔️ Security Compliance Checklist
+
+{compliance_checks}"""
+
+def _generate_compliance_checks(summary: Dict, vulnerabilities: List[Dict]) -> str:
+    """Generate compliance checks based on results"""
     checks = [
         ("Authentication Tests", summary.get("passed", 0) > 0),
         ("Authorization Tests", summary.get("passed", 0) > 0),
@@ -164,13 +245,12 @@ def generate_markdown_security_report(results: Dict[str, Any]) -> str:
         ("All Security Tests Passed", summary.get("failed", 0) == 0)
     ]
     
+    check_lines = []
     for check_name, passed in checks:
         icon = "✅" if passed else "❌"
-        report.append(f"- {icon} {check_name}")
+        check_lines.append(f"- {icon} {check_name}")
     
-    report.append("")
-    
-    return "\n".join(report)
+    return "\n".join(check_lines)
 
 
 def main():

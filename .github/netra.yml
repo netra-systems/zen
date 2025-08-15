@@ -22,46 +22,46 @@ test_levels:
   smoke:
     duration: 30s
     required: true
-    runners: [ubuntu-latest]
+    runners: [warp-custom-default]
     parallel: false
     
   unit:
     duration: 120s
     required: true
-    runners: [ubuntu-latest]
+    runners: [warp-custom-default]
     parallel: true
     shards: [core, agents, websocket, database, api]
     
   integration:
     duration: 300s
     required: false
-    runners: [ubuntu-latest]
+    runners: [warp-custom-default]
     parallel: true
     shards: [backend, frontend, e2e]
     
   comprehensive:
     duration: 900s
     required: false
-    runners: [ubuntu-latest]  # Would be GCP runners in production
+    runners: [warp-custom-default]  # Would be GCP runners in production
     parallel: true
     shards: [all]
     
   critical:
     duration: 120s
     required: true
-    runners: [ubuntu-latest]
+    runners: [warp-custom-default]
     parallel: false
     
   performance:
     duration: 1800s
     required: false
-    runners: [ubuntu-latest]  # Would be high-mem runners in production
+    runners: [warp-custom-default]  # Would be high-mem runners in production
     parallel: false
     
   security:
     duration: 600s
     required: false
-    runners: [ubuntu-latest]
+    runners: [warp-custom-default]
     parallel: false
 
 # Auto-fix configuration

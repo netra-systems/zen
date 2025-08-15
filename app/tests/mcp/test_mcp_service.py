@@ -10,7 +10,7 @@ from datetime import datetime
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 from app.services.mcp_service import MCPService, MCPClient, MCPToolExecution
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 
 
 class TestMCPClient:

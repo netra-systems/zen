@@ -3,6 +3,7 @@ Secret management for development environment.
 """
 
 import os
+import sys
 import json
 import socket
 from pathlib import Path
@@ -145,16 +146,17 @@ class SecretLoader:
         }
     
     def _get_static_config(self) -> Dict[str, Tuple[str, str]]:
-        """Get static configuration values."""
+        """Get static configuration values - only non-sensitive defaults."""
         return {
-            "CLICKHOUSE_HOST": ("xedvrr4c3r.us-central1.gcp.clickhouse.cloud", "static"),
-            "CLICKHOUSE_PORT": ("8443", "static"),
-            "CLICKHOUSE_USER": ("default", "static"),
-            "CLICKHOUSE_DB": ("default", "static"),
+            # Environment setting
             "ENVIRONMENT": ("development", "static"),
+            
+            # Service hosts and ports only - no credentials
             "REDIS_HOST": ("localhost", "static"),
             "REDIS_PORT": ("6379", "static"),
-            "DATABASE_URL": ("postgresql://localhost/netra", "static"),
+            
+            # Note: DATABASE_URL should come from .env files only
+            # Removed hardcoded credentials for security
         }
     
     def _mask_value(self, value: str) -> str:
@@ -169,45 +171,151 @@ class SecretLoader:
     def load_all_secrets(self) -> bool:
         """
         Load secrets from all sources with priority.
+        Priority order:
+        1. Existing OS environment variables (highest priority)
+        2. .env.development.local (Terraform-generated)
+        3. .env.development (development overrides)
+        4. .env file (base configuration)
+        5. Google Secret Manager
+        6. Static config (fallback)
         
         Returns:
             True if secrets were loaded successfully
         """
-        logger.info("Secret Loading Process Started")
-        logger.info("=" * 60)
+        logger.info("=" * 70)
+        # Use ASCII for Windows compatibility
+        logger.info("[LOCK] SECRET AND ENVIRONMENT VARIABLE LOADING PROCESS")
+        logger.info("=" * 70)
         
-        # First, try to load from existing .env file
-        env_secrets = self.load_from_env_file()
+        # Track all environment variables and their sources
+        env_tracking = {}
         
-        # Then try Google Secret Manager
+        # 1. First capture existing OS environment variables
+        logger.info("\n[STEP 1] Checking existing OS environment variables...")
+        existing_env = {}
+        relevant_keys = set(self._get_secret_mappings().values()) | set(self._get_static_config().keys())
+        for key in os.environ:
+            if key in relevant_keys or key.startswith(("CLICKHOUSE_", "REDIS_", "GOOGLE_", "JWT_", "LANGFUSE_")):
+                existing_env[key] = (os.environ[key], "os_environment")
+                logger.info(f"  [OK] Found {key} in OS environment")
+        
+        # 2. Load from .env file (base configuration)
+        logger.info("\n[STEP 2] Loading from .env file...")
+        env_file = self.project_root / ".env"
+        env_secrets = {}
+        if env_file.exists():
+            logger.info(f"  [FILE] Reading: {env_file}")
+            env_secrets = self.load_from_env_file(env_file)
+            logger.info(f"  [OK] Loaded {len(env_secrets)} variables from .env")
+        else:
+            logger.info(f"  [WARN] No .env file found at {env_file}")
+        
+        # 3. Load from .env.development (development overrides)
+        logger.info("\n[STEP 3] Loading from .env.development...")
+        dev_env_file = self.project_root / ".env.development"
+        dev_secrets = {}
+        if dev_env_file.exists():
+            logger.info(f"  [FILE] Reading: {dev_env_file}")
+            dev_secrets = self.load_from_env_file(dev_env_file)
+            logger.info(f"  [OK] Loaded {len(dev_secrets)} variables from .env.development")
+        else:
+            logger.info(f"  [WARN] No .env.development file found")
+        
+        # 4. Load from Terraform-generated .env.development.local
+        logger.info("\n[STEP 4] Loading from .env.development.local (Terraform)...")
+        terraform_env_file = self.project_root / ".env.development.local"
+        terraform_secrets = {}
+        if terraform_env_file.exists():
+            logger.info(f"  [FILE] Reading: {terraform_env_file}")
+            terraform_secrets = self.load_from_env_file(terraform_env_file)
+            logger.info(f"  [OK] Loaded {len(terraform_secrets)} variables from Terraform config")
+        else:
+            logger.info(f"  [WARN] No Terraform-generated file found")
+        
+        # 5. Try Google Secret Manager (if no Terraform config)
+        logger.info("\n[STEP 5] Loading from Google Secret Manager...")
         google_secrets = {}
-        if self.project_id:
+        if self.project_id and not terraform_secrets:
             google_secrets = self.load_from_google_secrets()
+            logger.info(f"  [OK] Loaded {len(google_secrets)} secrets from Google")
+        elif terraform_secrets:
+            logger.info("  [SKIP] Skipping (using Terraform config instead)")
+        else:
+            logger.info("  [WARN] No project ID configured")
         
-        # Merge with Google secrets taking priority
-        all_secrets = {**env_secrets, **google_secrets}
-        
-        # Add static configuration
+        # 6. Add static configuration (fallback)
+        logger.info("\n[STEP 6] Adding static configuration defaults...")
         static_config = self._get_static_config()
+        logger.info(f"  [OK] {len(static_config)} static defaults available")
         
-        logger.info("Adding static configuration...")
-        for key, (value, source) in static_config.items():
-            if key not in all_secrets:
-                all_secrets[key] = (value, source)
-                if self.verbose:
-                    logger.debug(f"  Added {key}: {value} (static config)")
+        # Merge with proper precedence (reverse order - last wins)
+        logger.info("\n[MERGE] MERGING WITH PRECEDENCE (highest to lowest):")
+        logger.info("  1. OS Environment Variables (highest)")
+        logger.info("  2. .env.development.local (Terraform)")
+        logger.info("  3. .env.development")
+        logger.info("  4. .env")
+        logger.info("  5. Google Secret Manager")
+        logger.info("  6. Static defaults (lowest)")
         
-        # Set environment variables
-        logger.info("Setting environment variables...")
-        for key, (value, source) in all_secrets.items():
-            os.environ[key] = value
-            self.loaded_secrets[key] = source
+        # Start with static, then layer on top
+        all_secrets = {}
+        
+        # Add in reverse precedence order
+        for source, secrets, name in [
+            ("static", static_config, "Static defaults"),
+            ("google", google_secrets, "Google Secret Manager"),
+            ("env", env_secrets, ".env file"),
+            ("dev", dev_secrets, ".env.development"),
+            ("terraform", terraform_secrets, ".env.development.local"),
+            ("os", existing_env, "OS Environment")
+        ]:
+            if secrets:
+                for key, value_tuple in secrets.items():
+                    if isinstance(value_tuple, tuple):
+                        value, _ = value_tuple
+                    else:
+                        value = value_tuple
+                    
+                    if key in all_secrets:
+                        old_value, old_source = all_secrets[key]
+                        if old_value != value:
+                            logger.debug(f"  [OVERRIDE] {key}: overridden by {name}")
+                    
+                    all_secrets[key] = (value, source)
+        
+        # Set environment variables and track
+        logger.info("\n[FINAL] ENVIRONMENT VARIABLES:")
+        logger.info("-" * 60)
+        
+        categories = self._get_secret_categories()
+        for category, keys in categories.items():
+            has_vars = any(k in all_secrets for k in keys)
+            if has_vars:
+                logger.info(f"\n{category}:")
+                for key in keys:
+                    if key in all_secrets:
+                        value, source = all_secrets[key]
+                        os.environ[key] = value
+                        self.loaded_secrets[key] = source
+                        masked = self._mask_value(value)
+                        logger.info(f"  {key}: {masked} (from: {source})")
+        
+        # Log any uncategorized variables
+        categorized = set()
+        for keys in categories.values():
+            categorized.update(keys)
+        
+        uncategorized = {k: v for k, v in all_secrets.items() if k not in categorized}
+        if uncategorized:
+            logger.info("\nOther:")
+            for key, (value, source) in uncategorized.items():
+                os.environ[key] = value
+                self.loaded_secrets[key] = source
+                masked = self._mask_value(value)
+                logger.info(f"  {key}: {masked} (from: {source})")
         
         # Summary
-        self._print_summary()
-        
-        # Write updated .env file
-        self._write_env_file(all_secrets)
+        self._print_detailed_summary()
         
         return True
     
@@ -233,29 +341,89 @@ class SecretLoader:
         
         logger.info("=" * 60)
     
-    def _write_env_file(self, secrets: Dict[str, Tuple[str, str]]):
+    def _print_detailed_summary(self):
+        """Print a detailed summary of loaded environment variables."""
+        logger.info("\n" + "=" * 70)
+        logger.info("[STATS] ENVIRONMENT VARIABLE LOADING SUMMARY")
+        logger.info("=" * 70)
+        
+        # Count by source
+        sources: Dict[str, int] = {}
+        for source in self.loaded_secrets.values():
+            readable_source = {
+                "os": "OS Environment",
+                "terraform": ".env.development.local (Terraform)",
+                "dev": ".env.development",
+                "env": ".env file",
+                "env_file": ".env file",
+                "google": "Google Secret Manager",
+                "google_secret": "Google Secret Manager",
+                "static": "Static defaults"
+            }.get(source, source)
+            sources[readable_source] = sources.get(readable_source, 0) + 1
+        
+        total = len(self.loaded_secrets)
+        logger.info(f"\n[SUCCESS] Total environment variables set: {total}")
+        logger.info("\n[CHART] Variables by source:")
+        
+        # Sort by count (descending)
+        for source, count in sorted(sources.items(), key=lambda x: x[1], reverse=True):
+            percentage = (count / total * 100) if total > 0 else 0
+            bar_length = int(percentage / 2)
+            bar = "#" * bar_length + "-" * (50 - bar_length)
+            logger.info(f"  {source:35} {count:3} vars [{bar}] {percentage:.1f}%")
+        
+        if self.failed_secrets:
+            logger.warning(f"\n[WARNING] Failed to load {len(self.failed_secrets)} secrets:")
+            for secret, error in self.failed_secrets[:5]:
+                logger.warning(f"  - {secret}: {error[:80]}")
+        
+        logger.info("\n[TIP] Environment variables from OS have highest priority")
+        logger.info("[TIP] Use .env.development for local overrides")
+        logger.info("=" * 70)
+    
+    def write_env_file_if_missing(self, secrets: Dict[str, Tuple[str, str]]) -> bool:
         """
-        Write secrets to .env file for persistence.
+        Write a .env file ONLY if it doesn't exist (for initial setup).
         
         Args:
             secrets: Dictionary of secrets to write
+            
+        Returns:
+            True if file was written, False if it already exists
         """
         env_file = self.project_root / ".env"
-        logger.info(f"Writing secrets to {env_file}")
+        
+        if env_file.exists():
+            logger.info(f"[PRESERVE] Keeping existing .env file at {env_file}")
+            return False
+        
+        logger.info(f"[CREATE] Creating initial .env file at {env_file}")
         
         with open(env_file, 'w') as f:
-            f.write("# Auto-generated .env file\n")
-            f.write(f"# Generated at {datetime.now().isoformat()}\n\n")
+            f.write("# Initial .env file - created by dev_launcher\n")
+            f.write("# This file will NOT be overwritten on subsequent runs\n")
+            f.write(f"# Created at {datetime.now().isoformat()}\n")
+            f.write("#\n")
+            f.write("# Priority order (highest to lowest):\n")
+            f.write("# 1. OS Environment Variables\n")
+            f.write("# 2. .env.development.local (Terraform-generated)\n") 
+            f.write("# 3. .env.development (your local overrides)\n")
+            f.write("# 4. .env (this file - base configuration)\n")
+            f.write("# 5. Google Secret Manager\n")
+            f.write("# 6. Static defaults\n\n")
             
             # Group by category
             categories = self._get_secret_categories()
             
             for category, keys in categories.items():
-                f.write(f"\n# {category}\n")
-                for key in keys:
-                    if key in secrets:
-                        value, _ = secrets[key]
-                        f.write(f"{key}={value}\n")
+                has_values = any(k in secrets for k in keys)
+                if has_values:
+                    f.write(f"\n# {category}\n")
+                    for key in keys:
+                        if key in secrets:
+                            value, source = secrets[key]
+                            f.write(f"{key}={value}  # from: {source}\n")
             
             # Write any remaining secrets not in categories
             categorized_keys = set()
@@ -265,8 +433,11 @@ class SecretLoader:
             remaining = {k: v for k, v in secrets.items() if k not in categorized_keys}
             if remaining:
                 f.write("\n# Other\n")
-                for key, (value, _) in remaining.items():
-                    f.write(f"{key}={value}\n")
+                for key, (value, source) in remaining.items():
+                    f.write(f"{key}={value}  # from: {source}\n")
+        
+        logger.info("[SUCCESS] Initial .env file created successfully")
+        return True
     
     def _get_secret_categories(self) -> Dict[str, List[str]]:
         """Get categorized grouping of secrets."""

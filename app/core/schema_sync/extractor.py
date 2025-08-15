@@ -8,7 +8,7 @@ Maintains 8-line function limit and single responsibility.
 from typing import Any, Dict, List, Type
 from datetime import datetime, UTC
 from pydantic import BaseModel
-from app.core.exceptions import ServiceError
+from app.core.exceptions_service import ServiceError
 from app.core.error_context import ErrorContext
 from app.logging_config import central_logger as logger
 

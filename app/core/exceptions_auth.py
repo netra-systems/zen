@@ -54,3 +54,16 @@ class TokenInvalidError(NetraException):
             user_message="Invalid authentication token. Please log in again",
             **kwargs
         )
+
+
+class NetraSecurityException(NetraException):
+    """Raised when security violations occur."""
+    
+    def __init__(self, message: str = None, **kwargs):
+        super().__init__(
+            message=message or "Security violation detected",
+            code=ErrorCode.SECURITY_VIOLATION,
+            severity=ErrorSeverity.CRITICAL,
+            user_message="Security violation detected. Access denied",
+            **kwargs
+        )

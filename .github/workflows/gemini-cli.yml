@@ -1,15 +1,28 @@
 name: '💬 Gemini CLI'
 
-on:
-  pull_request_review_comment:
-    types:
-      - 'created'
-  pull_request_review:
-    types:
-      - 'submitted'
-  issue_comment:
-    types:
-      - 'created'
+# Disabled - only smoke tests and staging workflows are active
+# on:
+#   pull_request_review_comment:
+#     types:
+#       - 'created'
+#   pull_request_review:
+#     types:
+#       - 'submitted'
+#   issue_comment:
+#     types:
+#       - 'created'
+#   workflow_dispatch:
+#     inputs:
+#       dry_run:
+#         description: 'Run in dry-run mode (ACT compatible)'
+#         required: false
+#         default: false
+#         type: boolean
+
+env:
+  # ACT environment detection
+  IS_ACT: 'false'  # Will be overridden by ACT when running locally
+  DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
 
 concurrency:
   group: '${{ github.workflow }}-${{ github.event.issue.number }}'
@@ -56,9 +69,19 @@ jobs:
         contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.review.author_association)
       )
     timeout-minutes: 10
-    runs-on: 'ubuntu-latest'
+    runs-on: 'warp-custom-default'
 
     steps:
+      - name: 'Detect Environment'
+        id: 'detect_environment'
+        run: |-
+          if [ "${{ env.IS_ACT }}" = "true" ] || [ "${{ env.DRY_RUN }}" = "true" ]; then
+            echo "is_act=true" >> $GITHUB_OUTPUT
+            echo "🧪 Running in ACT/dry-run mode - using mock responses"
+          else
+            echo "is_act=false" >> $GITHUB_OUTPUT
+            echo "🚀 Running in GitHub Actions - using real API calls"
+          fi
       - name: 'Generate GitHub App Token'
         id: 'generate_token'
         if: |-
@@ -139,13 +162,19 @@ jobs:
           ISSUE_NUMBER: '${{ steps.get_context.outputs.issue_number }}'
           REPOSITORY: '${{ github.repository }}'
           REQUEST_TYPE: '${{ steps.get_context.outputs.request_type }}'
+          IS_ACT_ENV: '${{ steps.detect_environment.outputs.is_act }}'
         run: |-
           set -euo pipefail
           MESSAGE="@${GITHUB_ACTOR} I've received your request and I'm working on it now! 🤖"
-          if [[ -n "${MESSAGE}" ]]; then
-            gh issue comment "${ISSUE_NUMBER}" \
-              --body "${MESSAGE}" \
-              --repo "${REPOSITORY}"
+          if [ "${IS_ACT_ENV}" = "true" ]; then
+            echo "🧪 ACT/Dry-run mode: Would post acknowledgment comment"
+            echo "${MESSAGE}"
+          else
+            if [[ -n "${MESSAGE}" ]]; then
+              gh issue comment "${ISSUE_NUMBER}" \
+                --body "${MESSAGE}" \
+                --repo "${REPOSITORY}"
+            fi
           fi
 
       - name: 'Get description'
@@ -186,7 +215,55 @@ jobs:
             echo "EOF"
           } >> "${GITHUB_OUTPUT}"
 
-      - name: 'Run Gemini'
+      - name: 'Run Gemini Mock (ACT Mode)'
+        if: steps.detect_environment.outputs.is_act == 'true'
+        env:
+          GITHUB_TOKEN: '${{ steps.generate_token.outputs.token || secrets.GITHUB_TOKEN }}'
+          REPOSITORY: '${{ github.repository }}'
+          USER_REQUEST: '${{ steps.get_context.outputs.user_request }}'
+          ISSUE_NUMBER: '${{ steps.get_context.outputs.issue_number }}'
+          IS_PR: '${{ steps.get_context.outputs.is_pr }}'
+        run: |-
+          echo "🧪 ACT/Dry-run mode: Simulating Gemini CLI response"
+          echo "Repository: ${REPOSITORY}"
+          echo "Issue/PR: ${ISSUE_NUMBER}"
+          echo "Is PR: ${IS_PR}"
+          echo "User Request: ${USER_REQUEST}"
+          echo ""
+          echo "## Mock Gemini Response"
+          echo "I understand your request: '${USER_REQUEST}'"
+          echo ""
+          echo "This is a simulated response for ACT/dry-run mode."
+          echo "In real execution, Gemini would analyze your request and provide appropriate assistance."
+          echo ""
+          if [ "${IS_PR}" = "true" ]; then
+            echo "### Plan for PR #${ISSUE_NUMBER}"
+            echo "- [ ] Analyze the pull request changes"
+            echo "- [ ] Review code for potential improvements"  
+            echo "- [ ] Provide constructive feedback"
+            echo "- [ ] Answer any specific questions"
+            
+            # Simulate posting a mock comment
+            echo ""
+            echo "🧪 Would post mock response to PR #${ISSUE_NUMBER}:"
+            echo "Thank you for your request! In ACT mode, I would analyze your PR and provide detailed feedback."
+          else
+            echo "### Plan for Issue #${ISSUE_NUMBER}"
+            echo "- [ ] Understand the issue requirements"
+            echo "- [ ] Analyze existing codebase if needed"
+            echo "- [ ] Implement the requested changes"
+            echo "- [ ] Test the implementation"
+            
+            # Simulate posting a mock comment
+            echo ""
+            echo "🧪 Would post mock response to Issue #${ISSUE_NUMBER}:"
+            echo "Thank you for your request! In ACT mode, I would analyze your issue and provide a solution."
+          fi
+          echo ""
+          echo "✅ Mock response generated successfully"
+
+      - name: 'Run Gemini (Real Mode)'
+        if: steps.detect_environment.outputs.is_act == 'false'
         id: 'run_gemini'
         uses: 'google-github-actions/run-gemini-cli@v0'
         env:

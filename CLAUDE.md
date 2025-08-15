@@ -5,10 +5,12 @@ You are an Elite Engineer.
 ## 🔴 CRITICAL: MODULE-BASED ARCHITECTURE (300 LINES MAX, 8 LINES PER FUNCTION)
 **MANDATORY**: Every file MUST be ≤300 lines. ALL functions MUST be ≤8 lines.
 - Files exceeding 300 lines MUST be split into focused modules BEFORE implementation
-- Functions exceeding 8 lines MUST be split into smaller functions IMMEDIATELY
+- Functions exceeding 8 lines MUST be split into smaller functions IMMEDIATELY.
 - Plan module boundaries BEFORE coding - don't code first then split
 - Each module = single responsibility, clear interface, testable unit
 - Each function = single task, 8 lines maximum (no exceptions)
+- Composable - All concepts are designed for composable reuse throughout the system.
+- COMPLIANCE STATUS Run: `python scripts/check_architecture_compliance.py` to check current status
 
 ## Core Principles
 
@@ -22,19 +24,131 @@ You are an Elite Engineer.
 - Update specs BEFORE AND AFTER code changes
 - Document learnings in specs to prevent regression
 
-### 3. 300-LINE MODULE ARCHITECTURE  
+### 3. ARCHITECTURE  
+
+MANAGE SCOPE
+- Changes must stay within the overall scope and bounds of the existing system architecture unless expressly requested.
+- Keep architecture limited in complexity.
+- Spend extra thinking energy to find elegant and "simple" solutions
+- Modular code ALWAY.
+
+300-LINE MODULE 
 **CRITICAL**: No file exceeds 300 lines - enforce through modular design:
-- Split by responsibility, not arbitrary line counts
+- Split by responsibility
 - Plan modules during design phase
 - Each module must have clear interface and single purpose
+- It's okay to have many modules.
 
 ## Project Overview
 **Netra AI Optimization Platform** - Enterprise AI workload optimization with multi-agent architecture.
 
+## Project Directory Structure
+
+```
+root/
+├── app/                      # Main backend application
+│   ├── agents/              # AI agent implementations
+│   │   ├── admin_tool_dispatcher/   # Admin tool dispatch modules
+│   │   ├── corpus_admin/            # Corpus administration agents
+│   │   ├── data_sub_agent/          # Data processing sub-agents
+│   │   ├── supervisor/              # Supervisor agent modules
+│   │   ├── supply_researcher/       # Supply research agents
+│   │   └── triage_sub_agent/        # Triage sub-agent modules
+│   ├── auth/                # Authentication & authorization
+│   ├── core/                # Core utilities & exceptions
+│   │   ├── exceptions_*.py         # Categorized exception handlers
+│   │   ├── interfaces_*.py         # Interface definitions
+│   │   └── system_health_monitor.py # System monitoring
+│   ├── db/                  # Database layer
+│   │   ├── clickhouse.py           # ClickHouse connection
+│   │   ├── postgres.py             # PostgreSQL connection
+│   │   └── models_*.py             # Database models
+│   ├── llm/                 # LLM integration layer
+│   ├── middleware/          # FastAPI middleware
+│   ├── routes/              # API route definitions
+│   │   ├── admin.py               # Admin endpoints
+│   │   ├── corpus.py              # Corpus management
+│   │   ├── synthetic_data.py      # Synthetic data endpoints
+│   │   └── websockets.py          # WebSocket endpoints
+│   ├── schemas/             # Pydantic models & types
+│   │   ├── llm_*.py               # LLM-related types
+│   │   ├── admin_*.py             # Admin schemas
+│   │   └── websocket_*.py         # WebSocket message types
+│   ├── services/            # Business logic services
+│   │   ├── audit/                 # Audit service modules
+│   │   └── metrics/               # Metrics collection
+│   ├── startup_checks/      # Startup validation modules
+│   ├── tests/               # Backend test suite
+│   │   ├── e2e/                   # End-to-end tests
+│   │   └── unit/                  # Unit tests
+│   ├── websocket/           # WebSocket management
+│   │   ├── connection.py          # Connection handling
+│   │   ├── rate_limiter.py        # Rate limiting
+│   │   └── validation.py          # Message validation
+│   ├── main.py              # FastAPI app entry point
+│   └── config.py            # Application configuration
+│
+├── frontend/                 # Next.js frontend application
+│   ├── app/                 # Next.js app directory
+│   ├── components/          # React components
+│   │   └── chat/           # Chat UI components
+│   │       └── admin/      # Admin UI components
+│   ├── hooks/               # Custom React hooks
+│   ├── services/            # Frontend services
+│   ├── store/               # State management
+│   ├── types/               # TypeScript type definitions
+│   └── utils/               # Frontend utilities
+│
+├── scripts/                  # Utility & automation scripts
+│   ├── architecture_*.py    # Architecture compliance tools
+│   ├── test_runner.py       # Test execution script
+│   ├── dev_launcher.py      # Development server launcher
+│   └── check_architecture_compliance.py # Compliance checker
+│
+├── dev_launcher/            # Development launcher module
+│   ├── launcher.py          # Main launcher logic
+│   ├── process_manager.py   # Process management
+│   └── secret_manager.py    # Secret handling
+│
+├── test_framework/          # Test framework utilities
+│   ├── runner.py            # Test runner core
+│   ├── test_discovery.py    # Test discovery logic
+│   └── unified_reporter.py  # Test reporting
+│
+├── SPEC/                    # Specification documents
+│   ├── type_safety.xml      # Type safety rules
+│   ├── conventions.xml      # Coding conventions
+│   ├── learnings.xml        # Documented learnings
+│   └── *.xml                # Other spec files
+│
+├── docs/                    # Documentation
+│   ├── API_DOCUMENTATION.md
+│   ├── ARCHITECTURE.md
+│   └── TESTING_GUIDE.md
+│
+├── terraform-gcp/           # GCP infrastructure as code
+├── terraform-dev-postgres/  # PostgreSQL dev setup
+├── .github/                 # GitHub Actions workflows
+├── config/                  # Configuration files
+├── alembic/                 # Database migrations
+└── requirements.txt         # Python dependencies
+```
+
+### Key Directory Purposes
+
+- **app/**: Core backend application with FastAPI
+- **frontend/**: Next.js-based web interface
+- **agents/**: Multi-agent AI system implementations
+- **services/**: Business logic and external integrations
+- **schemas/**: Type definitions and data models
+- **scripts/**: Development and maintenance utilities
+- **SPEC/**: Living documentation and specifications
+- **test_framework/**: Custom testing infrastructure
+
 ## Quick Start
 ```bash
-python dev_launcher.py --dynamic --no-backend-reload  # Start dev
-python test_runner.py --level unit                    # DEFAULT tests
+python dev_launcher.py # Start dev
+python test_runner.py --level unit # DEFAULT tests
 ```
 
 ## 🔴 MANDATORY SPECS (Read 3x Before Coding)
@@ -42,7 +156,7 @@ python test_runner.py --level unit                    # DEFAULT tests
 ### Critical Specs - ALWAYS CONSULT FIRST
 | Spec | Purpose | When |
 |------|---------|------|
-| [`type_safety.xml`](SPEC/type_safety.xml) | **#1 PRIORITY** - Type safety, no duplicates | BEFORE any code |
+| [`type_safety.xml`](SPEC/type_safety.xml) | **#1 PRIORITY** - Type safety, duplicate-free | BEFORE any code |
 | [`conventions.xml`](SPEC/conventions.xml) | **#2 PRIORITY** - Standards, 300-line limit | BEFORE any code |
 | [`code_changes.xml`](SPEC/code_changes.xml) | **#3 PRIORITY** - Change checklist | BEFORE changes |
 | [`no_test_stubs.xml`](SPEC/no_test_stubs.xml) | **CRITICAL** - No test stubs in production | Always check |
@@ -68,8 +182,8 @@ python test_runner.py --level unit                    # DEFAULT tests
 5. UPDATE specs with POSITIVE wording only.
 
 ### AFTER Any Code Change (Automatic)
-1. **RUN** `code-quality-reviewer` agent
-2. **RUN** `test-debug-expert` agent  
+1. **RUN** `code-quality-reviewer`
+2. **RUN** `test-debug-expert`  
 3. **FIX** all identified issues before proceeding
 - **ALWAYS** double check you are updating, creating, editing: SINGLE SOURCES OF TRUTH
 - **ALWAYS** extend existing functions with options/parameters
@@ -96,38 +210,24 @@ python test_runner.py --level unit                    # DEFAULT tests
 - Database via repositories only
 - NetraException for errors
 
-### UI Standards
-- Glassmorphic design
-- `generateUniqueId()` for React keys
+## 🚧 SYSTEM BOUNDARIES (ENFORCE 300/8 LIMITS)
 
-## Testing (ALWAYS run UNIT tests for noticeable changes)
-```bash
-python test_runner.py --level unit          # DEFAULT - Always run for ANY noticeable changes
-python test_runner.py --level comprehensive # ANY MAJOR CHANGES
-```
+### Growth Control Patterns
+- **SUBDIVISION**: Split files approaching 250 lines BEFORE they hit 300
+- **EXTRACTION**: Extract functions approaching 6 lines BEFORE they hit 8
+- **Healthy GROWTH**: Subdivide concepts. Use existing modules.
+- **COMPOSITION**: Use small focused components, not monoliths
 
-## Directory Structure
-```
-app/
-├── routes/      # API endpoints
-├── schemas/     # Pydantic models (TYPE SAFETY)
-├── services/    # Business logic (300 LINES MAX)
-├── agents/      # Multi-agent system
-└── ws_manager.py
+### Critical References
+- [`SPEC/system_boundaries.xml`](SPEC/system_boundaries.xml) - Hard limits & enforcement
+- [`SPEC/growth_control.xml`](SPEC/growth_control.xml) - Good vs bad growth patterns
+- [`SPEC/conventions.xml`](SPEC/conventions.xml) - Boundary enforcement integration
 
-frontend/
-├── components/  # UI (glassmorphic, 300 LINES MAX)
-├── store/       # Zustand state
-└── lib/utils    # generateUniqueId()
-```
-
-## Common Operations
-| Task | Location |
-|------|----------|
-| API endpoint | `app/routes/` → `schemas/` → `services/` |
-| WebSocket | `app/ws_manager.py` |
-| UI | `frontend/components/` (NO blue gradients) |
-| Database | `app/services/database/` repositories |
+## Testing
+- Choose a category using test discovery
+- ALWAYS run UNIT tests for noticeable changes
+- ALWAYS run E2E real tests for agent changes
+- Think about DATA, data flow, data types, critical paths
 
 ## 📝 MODULE PLANNING (3rd Reminder: 300 Lines MAX)
 
@@ -147,11 +247,8 @@ frontend/
 - [ ] Test coverage maintained
 - [ ] Tests pass
 
-## Quick Fixes
-- **React keys**: `generateUniqueId('prefix')`
-- **WebSocket tests**: Wrap with `WebSocketProvider`
-- **ClickHouse arrays**: `arrayElement()` not direct indexing
-- **Test stubs**: Remove immediately - REAL code only
+# Tools notes
+- Use tools like read file, replace_all, etc.
 
 ## 🎯 FINAL REMINDERS (Ultra Think 3x)
 
@@ -159,7 +256,7 @@ frontend/
 2. **8-LINE FUNCTIONS** - Every function ≤8 lines (MANDATORY)
 3. **TYPE SAFETY FIRST** - Read [`type_safety.xml`](SPEC/type_safety.xml) 
 4. **EXTEND and UPDATE SINGLE SOURCES OF TRUTH.**
-5. **UNIT TESTS** - Run before ANY commit (smoke only for most trivial)
+5. **UNIT TESTS** - Run before and after all changes.
 6. **ULTRA DEEP THINK** - This is your masterpiece
 
-**Specs = Law. 300 lines = Maximum. 8 lines per function = Maximum. Ultra think = Always.**
+**Specs = Law. 300 lines = Maximum. 8 lines per function = Maximum. Modular elite quality code. Ultra think = Always.**

@@ -25,20 +25,16 @@ class TestErrorRecovery:
             )
             
             # Since generate_with_fallback doesn't exist, test the actual generation flow
-            try:
-                # The service should handle the error internally
-                result = await recovery_service.generate_synthetic_data(
-                    db=AsyncMock(),
-                    config=config,
-                    user_id="test_user",
-                    corpus_id="missing_corpus"
-                )
-                # Job should be created even if corpus fails
-                assert result["job_id"] is not None
-                assert result["status"] == "initiated"
-            except Exception:
-                # Service should not raise unhandled exceptions
-                pytest.fail("Service should handle corpus errors gracefully")
+            # The service should handle the error internally and not raise exceptions
+            result = await recovery_service.generate_synthetic_data(
+                db=AsyncMock(),
+                config=config,
+                user_id="test_user",
+                corpus_id="missing_corpus"
+            )
+            # Job should be created even if corpus fails
+            assert result["job_id"] is not None
+            assert result["status"] == "initiated"
 
     @pytest.mark.asyncio
     async def test_clickhouse_connection_recovery(self, recovery_service):
@@ -52,7 +48,16 @@ class TestErrorRecovery:
                 raise Exception("Connection failed")
             return AsyncMock()
         
-        with patch('app.services.synthetic_data_service.get_clickhouse_client', side_effect=flaky_connection):
+        # Mock ingest_batch to fail 3 times then succeed
+        call_count = 0
+        async def mock_ingest_batch(records, *args, **kwargs):
+            nonlocal call_count
+            call_count += 1
+            if call_count <= 3:
+                raise Exception("Connection failed")
+            return {"records_ingested": len(records)}
+        
+        with patch.object(recovery_service, 'ingest_batch', side_effect=mock_ingest_batch):
             result = await recovery_service.ingest_with_retry(
                 [{"id": 1}],
                 max_retries=5,
@@ -142,8 +147,8 @@ class TestErrorRecovery:
         # Circuit should open
         assert circuit_breaker.state == "open"
         
-        # Wait for timeout
-        await asyncio.sleep(circuit_breaker.timeout)
+        # Wait for timeout plus a small buffer
+        await asyncio.sleep(circuit_breaker.timeout + 0.01)
         
         # Should transition to half-open
         assert circuit_breaker.state == "half_open"

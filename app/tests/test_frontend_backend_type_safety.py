@@ -11,14 +11,13 @@ from datetime import datetime
 from pydantic import ValidationError, BaseModel
 
 # Import backend schemas
-from app.schemas.websocket_unified import (
+from app.schemas.registry import (
     WebSocketMessageType,
     StartAgentPayload,
     UserMessagePayload,
     CreateThreadPayload,
     SwitchThreadPayload,
     DeleteThreadPayload,
-    RenameThreadPayload,
     StopAgentPayload,
     AgentUpdate,
     AgentLog,
@@ -26,15 +25,11 @@ from app.schemas.websocket_unified import (
     ToolResult,
     StreamChunk,
     StreamComplete,
-    BaseWebSocketMessage,
-    BaseWebSocketPayload,
-    ThreadCreated,
-    ThreadDeleted,
-    ThreadRenamed,
-    ThreadList
+    WebSocketMessage,
+    BaseWebSocketPayload
 )
 from app.schemas.Request import RequestModel, StartAgentPayload as StartAgentPayloadPydantic
-from app.schemas.Message import Message, MessageType
+from app.schemas.registry import Message, MessageType
 from app.schemas.Agent import AgentStarted, AgentCompleted, AgentErrorMessage
 from app.schemas.Tool import ToolStarted, ToolCompleted, ToolStatus
 
@@ -176,7 +171,7 @@ class TestFrontendToBackendTypeSafety:
             assert msg_type == WebSocketMessageType.START_AGENT
             
             # Validate full message structure
-            message = BaseWebSocketMessage(
+            message = WebSocketMessage(
                 type=msg_type,
                 payload=frontend_data["payload"]
             )
@@ -441,7 +436,7 @@ class TestBackendToFrontendTypeSafety:
     
     def test_websocket_message_serialization(self):
         """Test WebSocket message serialization."""
-        message = BaseWebSocketMessage(
+        message = WebSocketMessage(
             type=WebSocketMessageType.AGENT_STARTED,
             payload={"run_id": "run123"}
         )

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 
 interface SubAgentStatusProps {
   name?: string;
@@ -10,7 +10,7 @@ interface SubAgentStatusProps {
 
 export const SubAgentStatus = ({ name, status }: SubAgentStatusProps = {}) => {
   const {
-    currentSubAgent: storeSubAgent,
+    subAgentName: storeSubAgent,
     subAgentStatus: storeStatus,
     subAgentTools,
     subAgentProgress,
@@ -18,7 +18,7 @@ export const SubAgentStatus = ({ name, status }: SubAgentStatusProps = {}) => {
     subAgentDescription,
     subAgentExecutionTime,
     queuedSubAgents
-  } = useChatStore();
+  } = useUnifiedChatStore();
   
   const currentSubAgent = name || storeSubAgent;
   const subAgentStatus = status || storeStatus;

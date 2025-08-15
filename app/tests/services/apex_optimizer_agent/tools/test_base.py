@@ -95,7 +95,7 @@ class TestToolMetadata:
             status="disabled"
         )
         
-        metadata_dict = metadata.dict()
+        metadata_dict = metadata.model_dump()
         
         assert metadata_dict == {
             "name": "dict_tool",

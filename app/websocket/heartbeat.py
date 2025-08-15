@@ -11,8 +11,11 @@ from typing import Dict, Optional, Set
 from dataclasses import dataclass, field
 
 from app.logging_config import central_logger
+from app.core.json_utils import prepare_websocket_message, safe_json_dumps
 from .connection import ConnectionInfo, ConnectionManager
-from .error_handler import ErrorHandler, WebSocketError, ErrorSeverity
+from .error_handler import WebSocketErrorHandler
+from .error_types import ErrorSeverity
+from app.core.exceptions_websocket import WebSocketError
 
 logger = central_logger.get_logger(__name__)
 
@@ -28,7 +31,7 @@ class HeartbeatConfig:
 class HeartbeatManager:
     """Manages WebSocket heartbeat functionality."""
     
-    def __init__(self, connection_manager: ConnectionManager, error_handler: Optional[ErrorHandler] = None):
+    def __init__(self, connection_manager: ConnectionManager, error_handler: Optional[WebSocketErrorHandler] = None):
         """Initialize heartbeat manager.
         
         Args:
@@ -83,10 +86,9 @@ class HeartbeatManager:
             except Exception as e:
                 logger.debug(f"Error stopping heartbeat for {connection_id}: {e}")
         
-        if connection_id in self.heartbeat_tasks:
-            del self.heartbeat_tasks[connection_id]
-        if connection_id in self.missed_heartbeats:
-            del self.missed_heartbeats[connection_id]
+        # Use .pop() to avoid KeyError race condition
+        self.heartbeat_tasks.pop(connection_id, None)
+        self.missed_heartbeats.pop(connection_id, None)
         
         logger.debug(f"Stopped heartbeat for connection {connection_id}")
     
@@ -184,11 +186,9 @@ class HeartbeatManager:
                     ErrorSeverity.MEDIUM
                 )
         finally:
-            # Clean up
-            if conn_info.connection_id in self.heartbeat_tasks:
-                del self.heartbeat_tasks[conn_info.connection_id]
-            if conn_info.connection_id in self.missed_heartbeats:
-                del self.missed_heartbeats[conn_info.connection_id]
+            # Clean up - use pop() to avoid KeyError race condition
+            self.heartbeat_tasks.pop(conn_info.connection_id, None)
+            self.missed_heartbeats.pop(conn_info.connection_id, None)
     
     async def _send_ping(self, conn_info: ConnectionInfo):
         """Send ping message to connection.
@@ -212,7 +212,8 @@ class HeartbeatManager:
             if conn_info.websocket.client_state != WebSocketState.CONNECTED:
                 raise ConnectionError("WebSocket already closed")
             
-            await conn_info.websocket.send_json(ping_message)
+            prepared_message = prepare_websocket_message(ping_message)
+            await conn_info.websocket.send_json(prepared_message)
         except ConnectionError:
             # Re-raise connection errors for proper handling
             raise

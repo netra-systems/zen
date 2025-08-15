@@ -28,6 +28,10 @@ const MainChat: React.FC = () => {
   useChatWebSocket();
 
   const hasMessages = messages.length > 0;
+  
+  // Thread loading is now handled via WebSocket events in the store
+  // The handleWebSocketEvent function in useUnifiedChatStore will process
+  // 'thread_loaded' events and automatically update the messages
   const showResponseCard = currentRunId !== null || isProcessing;
 
   // Auto-collapse card after completion

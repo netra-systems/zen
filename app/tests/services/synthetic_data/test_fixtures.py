@@ -51,11 +51,14 @@ class IngestionMetrics:
 
 class ClickHouseService:
     async def query(self, query):
+        # Mock different responses based on query type
+        if "COUNT(*)" in query:
+            return [(1000,)]  # Return count result as expected by test
         return []
     async def insert(self, data):
         return True
     async def count_records(self, table):
-        return 0
+        return 1000  # Return non-zero count
 
 
 # ==================== Fixtures ====================
@@ -122,9 +125,12 @@ def ws_service():
 
 @pytest.fixture
 def mock_websocket():
+    from starlette.websockets import WebSocketState
     ws = AsyncMock()
     ws.send_json = AsyncMock()
+    ws.send_text = AsyncMock()
     ws.receive_json = AsyncMock()
+    ws.client_state = WebSocketState.CONNECTED
     return ws
 
 

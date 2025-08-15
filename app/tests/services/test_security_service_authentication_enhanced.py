@@ -16,7 +16,7 @@ from app.services.security_service import SecurityService
 from app.services.key_manager import KeyManager
 from app.db import models_postgres
 from app import schemas
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 from app.config import settings
 
 
@@ -232,16 +232,16 @@ class TestSecurityServiceAuthenticationEnhanced:
         token_payload = schemas.TokenPayload(sub="test@example.com")
         
         # Create token with short expiry
-        short_expiry = timedelta(seconds=0.1)
+        short_expiry = timedelta(seconds=1)
         token = enhanced_security_service.create_access_token(token_payload, short_expiry)
         
         # Token should be valid initially
         email = enhanced_security_service.get_user_email_from_token(token)
         assert email == "test@example.com"
         
-        # Wait for expiry
+        # Wait for expiry - need to wait more than 5 seconds due to tolerance
         import time
-        time.sleep(0.2)
+        time.sleep(6.1)  # Wait 6.1 seconds to exceed the 5-second tolerance
         
         # Token should be expired
         expired_email = enhanced_security_service.get_user_email_from_token(token)
@@ -426,6 +426,7 @@ class TestSecurityServicePermissions:
         """Create security service with permission features"""
         key_manager = MagicMock()
         key_manager.jwt_secret_key = "test_key_for_permissions"
+        key_manager.fernet_key = Fernet.generate_key()
         return EnhancedSecurityService(key_manager)
     
     @pytest.fixture
@@ -574,17 +575,13 @@ class TestSecurityServiceOAuth:
         """Create security service for OAuth testing"""
         key_manager = MagicMock()
         key_manager.jwt_secret_key = "oauth_test_key"
+        key_manager.fernet_key = Fernet.generate_key()
         return EnhancedSecurityService(key_manager)
     
     @pytest.mark.asyncio
     async def test_create_user_from_oauth_new_user(self, oauth_security_service):
         """Test creating new user from OAuth data"""
         mock_db_session = AsyncMock()
-        
-        # Mock no existing user
-        mock_result = MagicMock()
-        mock_result.scalars.return_value.first.return_value = None
-        mock_db_session.execute.return_value = mock_result
         
         oauth_user_info = {
             "email": "oauth@example.com",
@@ -596,7 +593,14 @@ class TestSecurityServiceOAuth:
         created_user = MockUser("oauth_123", "oauth@example.com", "OAuth User")
         created_user.picture = "https://example.com/avatar.jpg"
         
-        with patch('app.db.models_postgres.User', return_value=created_user):
+        # Mock the database session operations
+        mock_db_session.add.return_value = None
+        mock_db_session.commit.return_value = None
+        mock_db_session.refresh.return_value = None
+        
+        # Mock get_user to return None (no existing user) and User constructor
+        with patch.object(oauth_security_service, 'get_user', return_value=None), \
+             patch('app.db.models_postgres.User', return_value=created_user):
             user = await oauth_security_service.get_or_create_user_from_oauth(
                 mock_db_session, oauth_user_info
             )
@@ -641,6 +645,7 @@ class TestSecurityServiceConcurrency:
         """Create security service for concurrency testing"""
         key_manager = MagicMock()
         key_manager.jwt_secret_key = "concurrent_test_key_that_is_sufficiently_long_for_security"
+        key_manager.fernet_key = Fernet.generate_key()
         return EnhancedSecurityService(key_manager)
     
     @pytest.mark.asyncio

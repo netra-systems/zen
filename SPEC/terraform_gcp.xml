@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<terraform_gcp_spec>
+  <metadata>
+    <title>Terraform GCP Configuration Specification</title>
+    <version>1.0.0</version>
+    <last_updated>2025-08-14</last_updated>
+    <description>
+      Critical specifications and learnings for Terraform deployments on Google Cloud Platform.
+      Prevents common issues with resource creation, project confusion, and authentication.
+    </description>
+  </metadata>
+
+  <critical_rules>
+    <rule id="explicit-project" priority="CRITICAL">
+      <title>Always Specify Project Explicitly</title>
+      <description>
+        Every GCP resource in Terraform MUST have an explicit project specification.
+        Never rely on provider defaults or implicit project inheritance.
+      </description>
+      <problem>
+        Resources can be created in wrong projects when relying on:
+        - gcloud CLI default project
+        - Application Default Credentials (ADC) project
+        - Environment variables (GOOGLE_PROJECT, GCP_PROJECT)
+      </problem>
+      <solution>
+        <code><![CDATA[
+# CORRECT - Explicit project specification
+resource "google_secret_manager_secret" "example" {
+  project   = var.project_id  # ALWAYS specify project
+  secret_id = "my-secret"
+}
+
+resource "google_compute_instance" "example" {
+  project      = var.project_id  # ALWAYS specify project
+  name         = "instance-1"
+  machine_type = "e2-medium"
+  zone         = var.zone
+}
+
+# INCORRECT - Relying on provider defaults
+resource "google_secret_manager_secret" "example" {
+  secret_id = "my-secret"  # MISSING project specification
+}
+        ]]></code>
+      </solution>
+    </rule>
+
+    <rule id="provider-configuration" priority="HIGH">
+      <title>Provider Configuration Best Practices</title>
+      <description>
+        Configure the Google provider with explicit project, region, and zone.
+        Use provider aliases for multi-project deployments.
+      </description>
+      <solution>
+        <code><![CDATA[
+# Main provider with explicit configuration
+provider "google" {
+  project = var.project_id
+  region  = var.region
+  zone    = var.zone
+}
+
+# For multi-project deployments, use aliases
+provider "google" {
+  alias   = "shared"
+  project = var.shared_project_id
+  region  = var.region
+}
+        ]]></code>
+      </solution>
+    </rule>
+
+    <rule id="environment-setup" priority="HIGH">
+      <title>Environment Setup Before Terraform</title>
+      <description>
+        Always set up the environment correctly before running Terraform commands
+        to prevent resource creation in wrong projects.
+      </description>
+      <setup_script>
+        <code><![CDATA[
+#!/bin/bash
+# Run this before any Terraform operations
+
+PROJECT_ID="your-project-id"
+
+# Set gcloud project
+gcloud config set project $PROJECT_ID
+
+# Set application default credentials with specific project
+gcloud auth application-default login --project=$PROJECT_ID
+
+# Set quota project
+gcloud auth application-default set-quota-project $PROJECT_ID
+
+# Export environment variables
+export GOOGLE_PROJECT=$PROJECT_ID
+export GOOGLE_CLOUD_PROJECT=$PROJECT_ID
+export GCP_PROJECT=$PROJECT_ID
+
+# Verify settings
+echo "Current project: $(gcloud config get-value project)"
+echo "ADC project: $(gcloud auth application-default print-project)"
+        ]]></code>
+      </setup_script>
+    </rule>
+
+    <rule id="secret-manager-specifics" priority="HIGH">
+      <title>Secret Manager Resource Configuration</title>
+      <description>
+        Secret Manager resources are particularly prone to project confusion.
+        Always specify project explicitly for secrets, versions, and IAM bindings.
+      </description>
+      <solution>
+        <code><![CDATA[
+# Complete Secret Manager configuration with explicit projects
+resource "google_secret_manager_secret" "github_token" {
+  project   = var.project_id  # EXPLICIT project
+  secret_id = "github-runner-token"
+  
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "github_token" {
+  project     = var.project_id  # EXPLICIT project
+  secret      = google_secret_manager_secret.github_token.id
+  secret_data = var.github_token
+}
+
+resource "google_secret_manager_secret_iam_member" "github_token_access" {
+  project   = var.project_id  # EXPLICIT project
+  secret_id = google_secret_manager_secret.github_token.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.example.email}"
+}
+        ]]></code>
+      </solution>
+    </rule>
+
+    <rule id="service-account-usage" priority="MEDIUM">
+      <title>Use Service Accounts for Terraform</title>
+      <description>
+        Use dedicated service accounts for Terraform operations instead of user credentials.
+        This provides better security and consistency across environments.
+      </description>
+      <solution>
+        <code><![CDATA[
+# Create service account for Terraform
+gcloud iam service-accounts create terraform-sa \
+  --display-name="Terraform Service Account" \
+  --project=$PROJECT_ID
+
+# Grant necessary roles
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member="serviceAccount:terraform-sa@$PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/editor"
+
+# Create and download key
+gcloud iam service-accounts keys create terraform-sa-key.json \
+  --iam-account=terraform-sa@$PROJECT_ID.iam.gserviceaccount.com
+
+# Use service account for Terraform
+export GOOGLE_APPLICATION_CREDENTIALS="terraform-sa-key.json"
+        ]]></code>
+      </solution>
+    </rule>
+
+    <rule id="state-management" priority="HIGH">
+      <title>Terraform State Management</title>
+      <description>
+        Store Terraform state in GCS bucket within the correct project.
+        Enable versioning and encryption for state files.
+      </description>
+      <solution>
+        <code><![CDATA[
+# backend.tf - Store state in correct project
+terraform {
+  backend "gcs" {
+    bucket  = "my-terraform-state-bucket"
+    prefix  = "github-runner"
+    project = "304612253870"  # Explicit project for state
+  }
+}
+        ]]></code>
+      </solution>
+    </rule>
+  </critical_rules>
+
+  <common_issues>
+    <issue id="split-resources">
+      <symptom>Resources created in different GCP projects than intended</symptom>
+      <cause>
+        - Missing explicit project specification in Terraform resources
+        - Conflicting gcloud CLI configuration
+        - Environment variables overriding Terraform settings
+        - Application Default Credentials pointing to wrong project
+      </cause>
+      <diagnosis>
+        <code><![CDATA[
+# Check where resources actually are
+gcloud secrets list --project=intended-project
+gcloud secrets list --project=your-default-project
+
+# Check current configuration
+gcloud config get-value project
+gcloud auth application-default print-project
+env | grep -E "GOOGLE|GCP"
+        ]]></code>
+      </diagnosis>
+      <fix>
+        1. Add explicit project to all resources in Terraform
+        2. Set correct project in gcloud CLI
+        3. Reset Application Default Credentials
+        4. Clear conflicting environment variables
+        5. Run terraform apply to recreate resources correctly
+      </fix>
+    </issue>
+
+    <issue id="secret-access-denied">
+      <symptom>VMs cannot access secrets from Secret Manager</symptom>
+      <cause>
+        - Secret created in wrong project
+        - Service account missing secretAccessor role
+        - IAM binding in wrong project
+      </cause>
+      <fix>
+        <code><![CDATA[
+# Create secret in correct project
+gcloud secrets create github-runner-token \
+  --replication-policy="automatic" \
+  --project=correct-project-id
+
+# Grant access in correct project
+gcloud secrets add-iam-policy-binding github-runner-token \
+  --member="serviceAccount:sa@project.iam.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor" \
+  --project=correct-project-id
+        ]]></code>
+      </fix>
+    </issue>
+
+    <issue id="terraform-state-conflict">
+      <symptom>Terraform shows resources don't exist but they do</symptom>
+      <cause>State file has resources from wrong project</cause>
+      <fix>
+        1. Import existing resources: terraform import resource.name resource-id
+        2. Or remove from state: terraform state rm resource.name
+        3. Recreate with correct project specification
+      </fix>
+    </issue>
+  </common_issues>
+
+  <preventive_measures>
+    <measure>
+      <title>Pre-deployment Checklist</title>
+      <steps>
+        - [ ] Set correct GCP project: gcloud config set project PROJECT_ID
+        - [ ] Verify ADC: gcloud auth application-default print-project
+        - [ ] Check environment variables: env | grep GOOGLE
+        - [ ] Review all Terraform resources for explicit project specification
+        - [ ] Use terraform plan to verify resources will be created in correct project
+        - [ ] Check terraform state location is in correct project
+      </steps>
+    </measure>
+
+    <measure>
+      <title>CI/CD Pipeline Configuration</title>
+      <description>
+        In CI/CD pipelines, always explicitly set the project to prevent
+        inheritance of runner's default configuration.
+      </description>
+      <github_actions_example>
+        <code><![CDATA[
+- name: Setup Terraform
+  run: |
+    export GOOGLE_PROJECT=${{ secrets.GCP_PROJECT_ID }}
+    export GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}
+    gcloud config set project ${{ secrets.GCP_PROJECT_ID }}
+    
+- name: Terraform Apply
+  run: |
+    terraform init
+    terraform apply -auto-approve \
+      -var="project_id=${{ secrets.GCP_PROJECT_ID }}"
+        ]]></code>
+      </github_actions_example>
+    </measure>
+  </preventive_measures>
+
+  <github_runner_specific>
+    <title>GitHub Runner on GCP Specifics</title>
+    <critical_resources>
+      <resource>Secret Manager secret for GitHub token</resource>
+      <resource>Service Account with appropriate roles</resource>
+      <resource>Compute instances for runners</resource>
+      <resource>Firewall rules (if SSH enabled)</resource>
+      <resource>Storage bucket for artifacts</resource>
+    </critical_resources>
+    
+    <verification_commands>
+      <code><![CDATA[
+# Verify all resources are in correct project
+PROJECT_ID="304612253870"
+
+# Check secret
+gcloud secrets describe github-runner-token --project=$PROJECT_ID
+
+# Check service account
+gcloud iam service-accounts describe github-runner-sa@$PROJECT_ID.iam.gserviceaccount.com
+
+# Check instances
+gcloud compute instances list --filter="name:gcp-runner-*" --project=$PROJECT_ID
+
+# Check if runner can access secret from VM
+gcloud compute ssh gcp-runner-1 --zone=us-central1-a --project=$PROJECT_ID \
+  --command="gcloud secrets versions access latest --secret=github-runner-token --project=$PROJECT_ID"
+      ]]></code>
+    </verification_commands>
+  </github_runner_specific>
+
+  <references>
+    <reference>
+      <title>Google Provider Configuration</title>
+      <url>https://registry.terraform.io/providers/hashicorp/google/latest/docs/guides/provider_reference</url>
+    </reference>
+    <reference>
+      <title>Application Default Credentials</title>
+      <url>https://cloud.google.com/docs/authentication/application-default-credentials</url>
+    </reference>
+    <reference>
+      <title>Terraform Backend Configuration</title>
+      <url>https://www.terraform.io/docs/language/settings/backends/gcs.html</url>
+    </reference>
+  </references>
+</terraform_gcp_spec>

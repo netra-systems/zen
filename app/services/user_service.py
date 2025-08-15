@@ -1,4 +1,4 @@
-from .base import CRUDBase
+from .base import EnhancedCRUDService
 from ..db.models_postgres import User
 from ..schemas.User import UserCreate, UserUpdate
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +9,7 @@ from typing import List, Dict, Any, Optional
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
+class CRUDUser(EnhancedCRUDService[User, UserCreate, UserUpdate]):
     async def get_by_email(self, db: AsyncSession, *, email: str) -> User:
         result = await db.execute(select(User).filter(User.email == email))
         return result.scalars().first()
@@ -38,7 +38,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         user = await db.execute(select(User).filter(User.id == user_id))
         return user.scalars().first()
 
-user_service = CRUDUser(User)
+user_service = CRUDUser("user_service", User)
 
 # Module-level wrapper functions for compatibility
 async def get_all_users(db: AsyncSession) -> List[User]:

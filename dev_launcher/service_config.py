@@ -109,9 +109,9 @@ class ServicesConfiguration:
         mode=ResourceMode.LOCAL,  # Usually local for development
         local_config={
             "host": "localhost",
-            "port": 5432,
+            "port": 5433,
             "user": "postgres",
-            "password": "postgres",
+            "password": "",
             "database": "netra_dev"
         },
         shared_config={
@@ -166,11 +166,22 @@ class ServicesConfiguration:
                 env_vars["CLICKHOUSE_URL"] = f"clickhouse://{ch_config['user']}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
         
         if self.postgres.mode != ResourceMode.DISABLED:
-            if self.postgres.mode == ResourceMode.MOCK:
+            # Check if DATABASE_URL is already set in environment
+            existing_db_url = os.environ.get("DATABASE_URL")
+            if existing_db_url:
+                # Use existing DATABASE_URL from environment
+                env_vars["DATABASE_URL"] = existing_db_url
+                logger.info(f"Using existing DATABASE_URL from environment")
+            elif self.postgres.mode == ResourceMode.MOCK:
                 env_vars["DATABASE_URL"] = "postgresql://mock:mock@localhost:5432/mock"
-            else:
+            elif self.postgres.mode == ResourceMode.LOCAL:
                 pg_config = self.postgres.get_config()
                 env_vars["DATABASE_URL"] = f"postgresql://{pg_config['user']}:{pg_config['password']}@{pg_config['host']}:{pg_config['port']}/{pg_config['database']}"
+            elif self.postgres.mode == ResourceMode.SHARED:
+                # For shared mode, require DATABASE_URL to be set in environment
+                logger.warning("PostgreSQL is in SHARED mode but DATABASE_URL not found in environment")
+                logger.warning("Please set DATABASE_URL environment variable for shared PostgreSQL")
+                # Don't set a default with example.com - this will cause connection errors
         
         # IMPORTANT: Remove all DEV_MODE_DISABLE flags - all services are enabled by default
         # Users should explicitly choose mock or disabled mode if needed
@@ -369,7 +380,11 @@ class ServiceConfigWizard:
         print("     3. MOCK   - Use mock implementation")
         print("     4. SKIP   - Disable this service (not recommended)")
         
-        choice = input("   Choice [1-4, default=1]: ").strip() or "1"
+        try:
+            choice = input("   Choice [1-4, default=1]: ").strip() or "1"
+        except EOFError:
+            logger.info("Non-interactive mode: using default choice=1")
+            choice = "1"
         
         mode_map = {
             "1": ResourceMode.SHARED,
@@ -394,7 +409,11 @@ class ServiceConfigWizard:
             if key == "password":
                 continue  # Skip password fields in interactive mode
             
-            new_value = input(f"     {key} [{value}]: ").strip()
+            try:
+                new_value = input(f"     {key} [{value}]: ").strip()
+            except EOFError:
+                logger.info(f"Non-interactive mode: keeping default {key}={value}")
+                new_value = ""
             if new_value:
                 # Convert to appropriate type
                 if isinstance(value, int):
@@ -410,7 +429,11 @@ class ServiceConfigWizard:
     def _ask_yes_no(self, question: str, default: bool = True) -> bool:
         """Ask a yes/no question."""
         default_str = "Y/n" if default else "y/N"
-        response = input(f"{question} [{default_str}]: ").strip().lower()
+        try:
+            response = input(f"{question} [{default_str}]: ").strip().lower()
+        except EOFError:
+            logger.info(f"Non-interactive mode: using default={default} for '{question}'")
+            return default
         
         if not response:
             return default
@@ -431,15 +454,9 @@ def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
             # Validate the loaded configuration
             warnings = config.validate()
             if warnings and interactive:
-                print("\n⚠️  Configuration warnings:")
+                # Log warnings but don't prompt user
                 for warning in warnings:
-                    print(f"  {warning}")
-                
-                # Ask if user wants to reconfigure
-                reconfigure = input("\nReconfigure services? [y/N]: ").strip().lower()
-                if reconfigure in ["y", "yes"]:
-                    wizard = ServiceConfigWizard()
-                    config = wizard.run()
+                    logger.debug(f"Configuration notice: {warning}")
             
             return config
         except Exception as e:
@@ -447,8 +464,13 @@ def load_or_create_config(interactive: bool = True) -> ServicesConfiguration:
     
     # Create new configuration
     if interactive:
-        wizard = ServiceConfigWizard()
-        return wizard.run()
+        try:
+            wizard = ServiceConfigWizard()
+            return wizard.run()
+        except EOFError:
+            logger.info("Non-interactive mode detected, using default configuration")
+            config = ServicesConfiguration()
+            return config
     else:
         # Use defaults in non-interactive mode
         config = ServicesConfiguration()

@@ -24,7 +24,7 @@ resource "google_project_service" "apis" {
     "compute.googleapis.com",
     "container.googleapis.com",
     "sqladmin.googleapis.com",
-    "cloudrun.googleapis.com",
+    "run.googleapis.com",
     "artifactregistry.googleapis.com",
     "secretmanager.googleapis.com"
   ])
@@ -187,13 +187,8 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
-          name = "JWT_SECRET_KEY"
-          value_from {
-            secret_key_ref {
-              name = google_secret_manager_secret.jwt_secret.secret_id
-              key  = "latest"
-            }
-          }
+          name  = "JWT_SECRET_KEY"
+          value = random_password.jwt_secret.result
         }
         
         env {
@@ -203,7 +198,72 @@ resource "google_cloud_run_service" "backend" {
         
         env {
           name  = "ENVIRONMENT"
-          value = "production"
+          value = "staging"
+        }
+        
+        env {
+          name  = "GOOGLE_OAUTH_CLIENT_ID"
+          value = "dummy-client-id"
+        }
+        
+        env {
+          name  = "GOOGLE_OAUTH_CLIENT_SECRET"
+          value = "dummy-client-secret"
+        }
+        
+        env {
+          name  = "FRONTEND_URL"
+          value = "https://netra-frontend-e7oy7k4boa-uc.a.run.app"
+        }
+        
+        env {
+          name  = "BACKEND_URL"
+          value = "https://netra-backend-e7oy7k4boa-uc.a.run.app"
+        }
+        
+        env {
+          name  = "CLICKHOUSE_URL"
+          value = "http://localhost:8123"
+        }
+        
+        env {
+          name  = "CLICKHOUSE_DATABASE"
+          value = "netra"
+        }
+        
+        env {
+          name  = "ANTHROPIC_API_KEY"
+          value = "dummy-api-key"
+        }
+        
+        env {
+          name  = "OPENAI_API_KEY"
+          value = "dummy-api-key"
+        }
+        
+        env {
+          name  = "GOOGLE_GEMINI_API_KEY"
+          value = "dummy-api-key"
+        }
+        
+        env {
+          name  = "FERNET_KEY"
+          value = "YlJvdE1BczB1eUtleUZvckVuY3J5cHRpb24xMjM0NTY3ODkwMTIzNDU2Nzg5MA=="
+        }
+        
+        env {
+          name  = "SECRET_KEY"
+          value = random_password.jwt_secret.result
+        }
+        
+        env {
+          name  = "SKIP_MIGRATIONS"
+          value = "true"
+        }
+        
+        env {
+          name  = "DISABLE_STARTUP_CHECKS"
+          value = "true"
         }
       }
       
@@ -212,10 +272,10 @@ resource "google_cloud_run_service" "backend" {
     
     metadata {
       annotations = {
-        "autoscaling.knative.dev/minScale" = "1"
-        "autoscaling.knative.dev/maxScale" = "5"
+        "autoscaling.knative.dev/minScale" = "0"
+        "autoscaling.knative.dev/maxScale" = "2"
         "run.googleapis.com/cpu-throttling" = "true"  # Only charge when processing
-        "run.googleapis.com/cloudsql-instances" = "${var.project_id}:${var.region}:${google_sql_database_instance.postgres.name}"
+        # Not using Cloud SQL proxy - using direct IP connection
       }
     }
   }
@@ -298,24 +358,24 @@ resource "google_cloud_run_service_iam_member" "backend_public" {
   member   = "allUsers"
 }
 
-# Storage bucket for backups
-resource "google_storage_bucket" "backups" {
-  name          = "${var.project_id}-netra-backups"
-  location      = var.region
-  force_destroy = true
-
-  lifecycle_rule {
-    condition {
-      age = 30  # Delete backups older than 30 days
-    }
-    action {
-      type = "Delete"
-    }
-  }
-  
-  versioning {
-    enabled = false  # Disabled to save costs
-  }
-  
-  depends_on = [google_project_service.apis]
-}
+# Storage bucket for backups - commented out due to constraints
+# resource "google_storage_bucket" "backups" {
+#   name          = "${var.project_id}-netra-backups"
+#   location      = var.region
+#   force_destroy = true
+#
+#   lifecycle_rule {
+#     condition {
+#       age = 30  # Delete backups older than 30 days
+#     }
+#     action {
+#       type = "Delete"
+#     }
+#   }
+#   
+#   versioning {
+#     enabled = false  # Disabled to save costs
+#   }
+#   
+#   depends_on = [google_project_service.apis]
+# }

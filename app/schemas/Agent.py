@@ -1,8 +1,13 @@
+"""Agent type definitions - imports from single source of truth in registry.py"""
+
 import enum
 from datetime import datetime
 from typing import List, Optional, Dict, Any, TypedDict, Union, TypeVar, Generic
 from pydantic import BaseModel, Field, ConfigDict
 from langchain_core.messages import BaseMessage
+
+# Import unified agent types from single source of truth
+from app.schemas.registry import AgentStatus, AgentResult, AgentMetadata, ToolResultData, DeepAgentState, AgentState
 
 class SubAgentLifecycle(str, enum.Enum):
     PENDING = "pending"
@@ -10,14 +15,6 @@ class SubAgentLifecycle(str, enum.Enum):
     COMPLETED = "completed"
     FAILED = "failed"
     SHUTDOWN = "shutdown"
-
-class AgentStatus(str, enum.Enum):
-    """Strongly typed agent status"""
-    IDLE = "idle"
-    ACTIVE = "active"
-    PAUSED = "paused"
-    ERROR = "error"
-    COMPLETED = "completed"
 
 class TodoStatus(str, enum.Enum):
     """Strongly typed todo status"""
@@ -27,16 +24,11 @@ class TodoStatus(str, enum.Enum):
     BLOCKED = "blocked"
     CANCELLED = "cancelled"
 
-class ToolResultData(BaseModel):
-    """Structured tool result data"""
-    tool_name: str
-    status: str
-    output: Optional[Union[str, dict, list]] = None
-    error: Optional[str] = None
-    execution_time_ms: Optional[float] = None
-    metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
+# ToolResultData and AgentState imported from registry.py
 
-class AgentState(BaseModel):
+# Local AgentState compatible with LangChain
+class LangChainAgentState(BaseModel):
+    """LangChain-compatible agent state."""
     messages: List[BaseMessage]
     next_node: str
     tool_results: Optional[List[ToolResultData]] = None
@@ -90,13 +82,7 @@ class AgentStarted(BaseModel):
     agent_name: str = "Supervisor"
     timestamp: float = Field(default_factory=lambda: datetime.now().timestamp())
 
-class AgentResult(BaseModel):
-    """Structured agent result"""
-    success: bool
-    output: Optional[Union[str, dict, list]] = None
-    error: Optional[str] = None
-    metrics: Dict[str, Union[int, float]] = Field(default_factory=dict)
-    artifacts: List[str] = Field(default_factory=list)
+# AgentResult imported from registry.py
 
 class AgentCompleted(BaseModel):
     run_id: str

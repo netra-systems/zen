@@ -7,7 +7,7 @@ modules under 300 lines each.
 """
 
 # Import from modular implementation  
-from .mcp import router
+from .mcp.main import router
 from .mcp.models import (
     MCPClientCreateRequest,
     MCPSessionCreateRequest,

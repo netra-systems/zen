@@ -11,7 +11,7 @@ from unittest.mock import Mock, AsyncMock, patch
 # Skip tests if RequestHandler module doesn't exist yet
 pytest.skip("MCP Request Handler not yet implemented", allow_module_level=True)
 
-from app.core.exceptions import NetraException
+from app.core.exceptions_base import NetraException
 
 
 class TestRequestHandler:

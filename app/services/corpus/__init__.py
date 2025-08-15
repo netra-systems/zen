@@ -12,7 +12,7 @@ split across logical components:
 """
 
 from .base import CorpusStatus, ContentSource
-from .core import CorpusService
+from .core_unified import CorpusService
 from .document_manager import DocumentManager
 from .search_operations import SearchOperations
 from .validation import ValidationManager

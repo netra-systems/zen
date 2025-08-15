@@ -1,0 +1,8 @@
+{
+  "action": "workflow_dispatch",
+  "inputs": {
+    "action": "deploy",
+    "branch": "anthony-aug-13-2",
+    "force": false
+  }
+}

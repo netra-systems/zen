@@ -6,6 +6,7 @@ psutil>=5.9.0
 faker>=18.0.0
 pyyaml>=6.0.0
 python-dotenv>=1.0.0
+beartype>=0.18.0
 langchain-openai
 fastapi
 redis

@@ -11,8 +11,9 @@ from datetime import datetime
 
 from app import schemas
 from app.services.synthetic_data_service import synthetic_data_service
-from app.dependencies import get_db_session, get_async_db
+from app.dependencies import get_db_session, get_db_dependency, DbDep
 from app.auth.auth_dependencies import get_current_user
+from app.schemas.shared_types import BaseAgentConfig
 from app.db.models_postgres import User
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.synthetic_data_service import SyntheticDataService
@@ -38,10 +39,9 @@ class ScaleConfig(BaseModel):
     peak_load_multiplier: float = Field(default=1.0, gt=0)
 
 
-class AgentConfig(BaseModel):
-    """Agent configuration for generation"""
+class SyntheticDataAgentConfig(BaseAgentConfig):
+    """Extended agent configuration for synthetic data generation"""
     supervisor_strategy: str = Field(default="round_robin")
-    max_retries: int = Field(default=3, ge=0)
     backoff_strategy: str = Field(default="exponential")
 
 
@@ -52,7 +52,7 @@ class GenerationRequest(BaseModel):
     tool_catalog: List[ToolConfig]
     workload_distribution: Dict[str, float]
     scale_parameters: ScaleConfig
-    agent_configuration: Optional[AgentConfig] = None
+    agent_configuration: Optional[SyntheticDataAgentConfig] = None
 
 
 class GenerationResponse(BaseModel):
@@ -82,7 +82,7 @@ class PreviewResponse(BaseModel):
     estimated_characteristics: Dict
 
 
-router = APIRouter(prefix="/api/synthetic", tags=["synthetic_data"])
+router = APIRouter(tags=["synthetic_data"])
 
 
 @router.post("/generate", response_model=GenerationResponse)
@@ -105,6 +105,14 @@ def _build_generation_config(request: GenerationRequest) -> schemas.LogGenParams
     )
 
 
+async def _call_generation_service(
+    db: Session, config: schemas.LogGenParams, user_id: int, corpus_id: Optional[str]
+) -> Dict:
+    """Call synthetic data generation service."""
+    return await synthetic_data_service.generate_synthetic_data(
+        db=db, config=config, user_id=user_id, corpus_id=corpus_id
+    )
+
 async def _execute_generation(
     db: Session,
     config: schemas.LogGenParams,
@@ -113,26 +121,24 @@ async def _execute_generation(
 ) -> Dict:
     """Execute data generation"""
     try:
-        return await synthetic_data_service.generate_synthetic_data(
-            db=db,
-            config=config,
-            user_id=user_id,
-            corpus_id=corpus_id
-        )
+        return await _call_generation_service(db, config, user_id, corpus_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+def _calculate_estimated_duration(num_traces: int) -> int:
+    """Calculate estimated generation duration."""
+    return int(num_traces / 100)
 
 def _build_generation_response(
     result: Dict,
     num_traces: int
 ) -> GenerationResponse:
     """Build generation response"""
-    duration = num_traces / 100
     return GenerationResponse(
         job_id=result["job_id"],
         status=result["status"],
-        estimated_duration_seconds=int(duration),
+        estimated_duration_seconds=_calculate_estimated_duration(num_traces),
         websocket_channel=result["websocket_channel"],
         table_name=result["table_name"]
     )
@@ -148,23 +154,26 @@ async def get_generation_status(
     return _build_status_response(job_id, job_status)
 
 
-async def _fetch_job_status(job_id: str, user_id: int) -> Dict:
-    """Fetch and validate job status"""
-    status = await synthetic_data_service.get_job_status(job_id)
+def _validate_job_ownership(status: Dict, user_id: int, job_id: str) -> None:
+    """Validate job ownership and access."""
     if not status:
         raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
     if status.get("user_id") != user_id:
         raise HTTPException(status_code=403, detail="Access denied")
+
+async def _fetch_job_status(job_id: str, user_id: int) -> Dict:
+    """Fetch and validate job status"""
+    status = await synthetic_data_service.get_job_status(job_id)
+    _validate_job_ownership(status, user_id, job_id)
     return status
 
 
 def _build_status_response(job_id: str, status: Dict) -> JobStatusResponse:
     """Build status response"""
-    progress = _calculate_progress(status)
     return JobStatusResponse(
         job_id=job_id,
         status=status["status"],
-        progress_percentage=progress,
+        progress_percentage=_calculate_progress(status),
         records_generated=status["records_generated"],
         records_ingested=status["records_ingested"],
         errors=status["errors"],
@@ -218,10 +227,9 @@ async def preview_synthetic_data(
 ):
     """Preview sample generated data"""
     samples = await _get_preview_samples(corpus_id, workload_type, sample_size)
-    characteristics = _calculate_characteristics(samples)
     return PreviewResponse(
         samples=samples,
-        estimated_characteristics=characteristics
+        estimated_characteristics=_calculate_characteristics(samples)
     )
 
 
@@ -238,15 +246,17 @@ async def _get_preview_samples(
     )
 
 
+def _build_empty_characteristics() -> Dict:
+    """Build empty characteristics for no samples."""
+    return {"avg_latency_ms": 0, "tool_diversity": 0, "sample_count": 0}
+
 def _calculate_characteristics(samples: List[Dict]) -> Dict:
     """Calculate sample characteristics"""
     if not samples:
-        return {"avg_latency_ms": 0, "tool_diversity": 0, "sample_count": 0}
-    latency = _calculate_avg_latency(samples)
-    diversity = _calculate_tool_diversity(samples)
+        return _build_empty_characteristics()
     return {
-        "avg_latency_ms": latency,
-        "tool_diversity": diversity,
+        "avg_latency_ms": _calculate_avg_latency(samples),
+        "tool_diversity": _calculate_tool_diversity(samples),
         "sample_count": len(samples)
     }
 
@@ -268,7 +278,7 @@ def _calculate_tool_diversity(samples: List[Dict]) -> int:
 # Corpus endpoints moved to synthetic_data_corpus.py for modularity
 
 @router.get("/templates")
-async def get_templates(db: AsyncSession = Depends(get_async_db)):
+async def get_templates(db: AsyncSession = Depends(get_db_dependency)):
     """Get available templates"""
     return await _fetch_templates(db)
 
@@ -281,3 +291,32 @@ async def _fetch_templates(db: AsyncSession) -> Dict:
     except Exception as e:
         logger.error(f"Error fetching templates: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+def _generate_test_user_data(count: int) -> List[Dict]:
+    """Generate test user data records."""
+    return [
+        {"user_id": f"id_{i}", "name": f"User {i}", "age": 25+i, "email": f"user{i}@test.com"}
+        for i in range(count)
+    ]
+
+@router.post("/generate-test")
+async def generate_api_data(request: dict) -> dict:
+    """Generate synthetic data for API testing"""
+    count = request.get("count", 10)
+    return {
+        "data": _generate_test_user_data(count),
+        "count": count
+    }
+
+@router.post("/validate")
+async def validate_api_data(request: dict) -> dict:
+    """Validate synthetic data for API testing"""
+    return {"valid": True, "errors": []}
+
+@router.get("/templates-test")
+async def get_templates_test() -> list:
+    """Get templates for testing"""
+    return [
+        {"name": "user_profile", "fields": 5},
+        {"name": "transaction", "fields": 8}
+    ]

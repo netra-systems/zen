@@ -1,0 +1,39 @@
+# Example Terraform Variables for Development Database
+# Copy this file to terraform.tfvars and customize as needed
+
+# Docker Configuration
+# For Windows (default):
+docker_host = "npipe:////./pipe/docker_engine"
+# For Linux/Mac:
+# docker_host = "unix:///var/run/docker.sock"
+
+# PostgreSQL Configuration
+postgres_version = "14-alpine"
+postgres_port    = 5432
+postgres_db      = "netra_dev"
+postgres_user    = "postgres"
+app_user         = "netra_app"
+
+# Redis Configuration
+redis_version = "7-alpine"
+redis_port    = 6379
+
+# ClickHouse Configuration
+clickhouse_version     = "latest"
+clickhouse_http_port   = 8123
+clickhouse_native_port = 9000
+clickhouse_db          = "netra_dev"
+clickhouse_user        = "default"
+clickhouse_password    = "netra_dev_password"
+
+# Environment
+environment = "development"
+
+# Performance Tuning
+max_connections = 100
+shared_buffers  = "256MB"
+work_mem        = "4MB"
+
+# Backup Settings (disabled for dev)
+enable_backups  = false
+backup_schedule = "0 2 * * *"

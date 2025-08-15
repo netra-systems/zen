@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, ConfigDict
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
@@ -50,12 +50,11 @@ class ErrorResponse(BaseModel):
     timestamp: str
     request_id: Optional[str] = None
     
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
-class ErrorHandler:
-    """Centralized error handling and logging utility."""
+class ApiErrorHandler:
+    """Centralized API error handling and logging utility for FastAPI."""
     
     def __init__(self):
         self._logger = central_logger.get_logger(__name__)
@@ -289,7 +288,7 @@ class ErrorHandler:
 
 
 # Global error handler instance
-_error_handler = ErrorHandler()
+_error_handler = ApiErrorHandler()
 
 
 def handle_exception(
@@ -325,7 +324,7 @@ async def netra_exception_handler(request: Request, exc: NetraException) -> JSON
     
     return JSONResponse(
         status_code=status_code,
-        content=error_response.dict()
+        content=error_response.model_dump()
     )
 
 
@@ -335,7 +334,7 @@ async def validation_exception_handler(request: Request, exc: ValidationError) -
     
     return JSONResponse(
         status_code=HTTP_422_UNPROCESSABLE_ENTITY,
-        content=error_response.dict()
+        content=error_response.model_dump()
     )
 
 
@@ -345,7 +344,7 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     
     return JSONResponse(
         status_code=exc.status_code,
-        content=error_response.dict()
+        content=error_response.model_dump()
     )
 
 
@@ -355,5 +354,5 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
     
     return JSONResponse(
         status_code=HTTP_500_INTERNAL_SERVER_ERROR,
-        content=error_response.dict()
+        content=error_response.model_dump()
     )
