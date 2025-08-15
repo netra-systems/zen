@@ -28,6 +28,35 @@
                 <command>gcloud auth application-default set-quota-project netra-staging</command>
             </commands>
         </learning>
+        
+        <learning id="staging-secrets-zero-load">
+            <title>Staging Environment Loading Zero Secrets Fix</title>
+            <date>2025-08-15</date>
+            <category>Infrastructure</category>
+            <description>
+                Staging environment was loading zero secrets due to missing IAM permissions and secret configuration.
+                The staging service account lacked Secret Manager access permissions.
+            </description>
+            <root-causes>
+                <cause>Missing roles/secretmanager.secretAccessor IAM permission for staging service account</cause>
+                <cause>Staging secrets with -staging suffix not created in Secret Manager</cause>
+                <cause>Project ID configuration mismatch in secret loading</cause>
+            </root-causes>
+            <solution>
+                <step>Add roles/secretmanager.secretAccessor to staging service account IAM permissions</step>
+                <step>Create staging-specific secrets with -staging suffix in Secret Manager</step>
+                <step>Ensure GCP_PROJECT_ID_NUMERICAL_STAGING is set correctly in deployment</step>
+            </solution>
+            <files-modified>
+                <file>terraform/staging/shared-infrastructure/main.tf - Added secretmanager.secretAccessor role</file>
+                <file>scripts/create_staging_secrets.py - Script to create staging secrets</file>
+            </files-modified>
+            <commands>
+                <command>cd terraform/staging/shared-infrastructure && terraform apply</command>
+                <command>python scripts/create_staging_secrets.py netra-staging</command>
+                <command>gcloud run services update backend-pr-XXX --region us-central1</command>
+            </commands>
+        </learning>
     </gcp-project-configuration>
 
     <specification-alignment-analysis>

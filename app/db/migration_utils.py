@@ -54,7 +54,8 @@ def needs_migration(current: Optional[str], head: str) -> bool:
 def execute_migration(logger: logging.Logger) -> None:
     """Execute database migration to head."""
     logger.info("Executing database migration...")
-    alembic.config.main(argv=["--raiseerr", "upgrade", "head"])
+    alembic_ini_path = _get_alembic_ini_path()
+    alembic.config.main(argv=["-c", alembic_ini_path, "--raiseerr", "upgrade", "head"])
     logger.info("Migration completed successfully")
 
 

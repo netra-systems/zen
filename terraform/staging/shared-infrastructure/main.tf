@@ -151,6 +151,7 @@ resource "google_project_iam_member" "staging_permissions" {
     "roles/redis.editor",
     "roles/run.developer",
     "roles/compute.networkUser",
+    "roles/secretmanager.secretAccessor",
   ])
   
   project = var.project_id
