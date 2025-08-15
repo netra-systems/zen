@@ -41,7 +41,7 @@ fi
 echo ""
 echo "Starting installation..."
 echo ""
-python3 install_dev_env.py
+python3 scripts/install_dev_env.py
 
 if [ $? -eq 0 ]; then
     echo ""
@@ -53,7 +53,7 @@ if [ $? -eq 0 ]; then
     echo "   ./start_dev.sh"
     echo ""
     echo "Or manually:"
-    echo "   python3 dev_launcher.py --dynamic"
+    echo "   python3 scripts/dev_launcher.py --dynamic"
     echo ""
 else
     echo ""
