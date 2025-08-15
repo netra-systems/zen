@@ -1,8 +1,22 @@
 """
-Agent lifecycle management tests.
+Agent service lifecycle management tests.
 
-Tests agent creation, assignment, state transitions, pool management,
-and concurrent execution limits.
+MODULE PURPOSE:
+Tests agent lifecycle management including creation, assignment, pooling, 
+state transitions, and resource cleanup. Focuses on multi-agent coordination
+and concurrent execution patterns.
+
+TEST CATEGORIES:
+- Agent creation and user assignment
+- Agent pooling and reuse
+- Concurrent agent limits enforcement  
+- Task execution tracking and metrics
+- Agent state transitions during execution
+- Resource cleanup and pool management
+
+PERFORMANCE REQUIREMENTS:
+- Unit tests: < 100ms each
+- Concurrent tests: < 1s for multiple parallel operations
 """
 
 import pytest
@@ -10,29 +24,29 @@ import asyncio
 from unittest.mock import MagicMock
 
 from app.core.exceptions_base import NetraException
-from app.tests.helpers.test_agent_orchestration_fixtures import AgentState
-from app.tests.helpers.test_agent_orchestration_pytest_fixtures import orchestrator
-from app.tests.helpers.test_agent_orchestration_assertions import (
-    assert_agent_assignment_correct, assert_agent_pool_size,
-    assert_agent_state_correct, assert_orchestration_metrics_valid,
-    assert_success_rate_calculation, assert_concurrent_peak_tracked,
-    assert_execution_time_positive, assert_failure_metrics_updated,
-    setup_orchestrator_limits, setup_failing_agent,
-    verify_cleanup_completed
+
+from .test_agent_service_fixtures import (
+    orchestrator,
+    verify_orchestration_metrics
 )
+from .test_agent_service_mock_classes import AgentState
 
 
 class TestAgentLifecycleManagement:
-    """Test agent lifecycle management."""
+    """Test agent lifecycle management functionality."""
     
     @pytest.mark.asyncio
     async def test_agent_creation_and_assignment(self, orchestrator):
         """Test agent creation and user assignment."""
         agent = await orchestrator.get_or_create_agent("user1")
         
-        assert agent is not None
-        assert_agent_assignment_correct(agent, "user1")
-        assert_agent_pool_size(orchestrator, 0, 1)
+        assert agent != None
+        assert agent.user_id == "user1"
+        self._verify_agent_creation_metrics(orchestrator)
+    
+    def _verify_agent_creation_metrics(self, orchestrator):
+        """Verify agent creation updates metrics correctly."""
+        assert orchestrator.active_agents == 1
         assert orchestrator.orchestration_metrics['agents_created'] == 1
     
     @pytest.mark.asyncio
@@ -42,119 +56,161 @@ class TestAgentLifecycleManagement:
         agent2 = await orchestrator.get_or_create_agent("user1")
         
         assert agent1 is agent2
-        assert_agent_pool_size(orchestrator, 0, 1)
+        assert orchestrator.active_agents == 1
     
     @pytest.mark.asyncio
     async def test_agent_pool_management(self, orchestrator):
-        """Test agent pool management."""
+        """Test agent pool management and reuse."""
         agent = await orchestrator.get_or_create_agent("user1")
         await orchestrator.release_agent("user1")
         
-        assert_agent_pool_size(orchestrator, 1, 0)
+        self._verify_agent_pooled(orchestrator)
         
         agent2 = await orchestrator.get_or_create_agent("user2")
-        assert agent2 is agent
-        assert_agent_assignment_correct(agent2, "user2")
-        assert_agent_pool_size(orchestrator, 0, 1)
+        self._verify_agent_reused_from_pool(orchestrator, agent, agent2)
+    
+    def _verify_agent_pooled(self, orchestrator):
+        """Verify agent was properly pooled."""
+        assert len(orchestrator.agent_pool) == 1
+        assert orchestrator.active_agents == 0
+    
+    def _verify_agent_reused_from_pool(self, orchestrator, original_agent, reused_agent):
+        """Verify agent was reused from pool correctly."""
+        assert reused_agent is original_agent
+        assert reused_agent.user_id == "user2"
+        assert len(orchestrator.agent_pool) == 0
+        assert orchestrator.active_agents == 1
     
     @pytest.mark.asyncio
     async def test_concurrent_agent_limit_enforcement(self, orchestrator):
         """Test enforcement of concurrent agent limits."""
-        setup_orchestrator_limits(orchestrator, 3)
+        orchestrator.max_concurrent_agents = 3
         
-        agents = []
-        for i in range(3):
-            agent = await orchestrator.get_or_create_agent(f"user_{i}")
-            agents.append(agent)
-        
-        assert_agent_pool_size(orchestrator, 0, 3)
+        agents = await self._create_agents_up_to_limit(orchestrator, 3)
+        assert orchestrator.active_agents == 3
         
         with pytest.raises(NetraException) as exc_info:
             await orchestrator.get_or_create_agent("user_overflow")
         
         assert "Maximum concurrent agents reached" in str(exc_info.value)
     
+    async def _create_agents_up_to_limit(self, orchestrator, limit):
+        """Create agents up to the specified limit."""
+        agents = []
+        for i in range(limit):
+            agent = await orchestrator.get_or_create_agent(f"user_{i}")
+            agents.append(agent)
+        return agents
+    
     @pytest.mark.asyncio
     async def test_agent_task_execution_tracking(self, orchestrator):
-        """Test agent task execution tracking."""
-        result = await orchestrator.execute_agent_task(
-            "user1", "test request", "run_123", True
-        )
+        """Test agent task execution tracking and metrics."""
+        result = await orchestrator.execute_agent_task("user1", "test request", "run_123", True)
         
+        self._verify_task_execution_result(result)
+        metrics = orchestrator.get_orchestration_metrics()
+        self._verify_execution_metrics(metrics)
+    
+    def _verify_task_execution_result(self, result):
+        """Verify task execution result structure."""
         assert result['status'] == 'completed'
         assert result['run_id'] == "run_123"
-        
-        metrics = orchestrator.get_orchestration_metrics()
-        assert_orchestration_metrics_valid(metrics, 1)
-        assert_success_rate_calculation(metrics, 100.0)
-        assert_execution_time_positive(metrics)
+    
+    def _verify_execution_metrics(self, metrics):
+        """Verify execution tracking metrics."""
+        assert metrics['total_executions'] == 1
+        assert metrics['failed_executions'] == 0
+        assert metrics['success_rate'] == 100.0
+        assert metrics['average_execution_time'] > 0
     
     @pytest.mark.asyncio
     async def test_agent_task_failure_handling(self, orchestrator):
-        """Test agent task failure handling."""
-        agent = await orchestrator.get_or_create_agent("user1")
-        setup_failing_agent(agent)
+        """Test agent task failure handling and metrics."""
+        agent = await self._setup_failing_agent(orchestrator, "user1")
         
         with pytest.raises(NetraException):
             await orchestrator.execute_agent_task("user1", "failing request", "run_fail")
         
         metrics = orchestrator.get_orchestration_metrics()
-        assert_failure_metrics_updated(metrics, 1)
-        assert_success_rate_calculation(metrics, 0.0)
+        self._verify_failure_metrics(metrics)
+    
+    async def _setup_failing_agent(self, orchestrator, user_id):
+        """Setup agent to fail for testing."""
+        agent = await orchestrator.get_or_create_agent(user_id)
+        agent.should_fail = True
+        return agent
+    
+    def _verify_failure_metrics(self, metrics):
+        """Verify failure tracking metrics."""
+        assert metrics['failed_executions'] == 1
+        assert metrics['success_rate'] == 0.0
     
     @pytest.mark.asyncio
     async def test_concurrent_agent_orchestration(self, orchestrator):
-        """Test concurrent agent orchestration."""
+        """Test concurrent agent orchestration with multiple tasks."""
         num_tasks = 5
-        tasks = []
+        tasks = self._create_concurrent_orchestration_tasks(orchestrator, num_tasks)
         
+        results = await asyncio.gather(*tasks)
+        
+        self._verify_concurrent_orchestration_results(results, num_tasks)
+        self._verify_concurrent_orchestration_metrics(orchestrator, num_tasks)
+    
+    def _create_concurrent_orchestration_tasks(self, orchestrator, num_tasks):
+        """Create concurrent orchestration tasks."""
+        tasks = []
         for i in range(num_tasks):
             task = orchestrator.execute_agent_task(
                 f"user_{i}", f"concurrent request {i}", f"run_{i}"
             )
             tasks.append(task)
-        
-        results = await asyncio.gather(*tasks)
-        
+        return tasks
+    
+    def _verify_concurrent_orchestration_results(self, results, num_tasks):
+        """Verify concurrent orchestration results."""
         assert len(results) == num_tasks
         assert all(result['status'] == 'completed' for result in results)
-        
+    
+    def _verify_concurrent_orchestration_metrics(self, orchestrator, num_tasks):
+        """Verify concurrent orchestration metrics."""
         metrics = orchestrator.get_orchestration_metrics()
-        assert_orchestration_metrics_valid(metrics, num_tasks)
-        assert_concurrent_peak_tracked(metrics, num_tasks)
+        assert metrics['total_executions'] == num_tasks
+        assert metrics['failed_executions'] == 0
+        assert metrics['concurrent_peak'] == num_tasks
     
     @pytest.mark.asyncio
     async def test_agent_state_transitions(self, orchestrator):
         """Test agent state transitions during lifecycle."""
         agent = await orchestrator.get_or_create_agent("user1")
         
-        assert_agent_state_correct(agent, AgentState.IDLE)
+        # Initial state
+        assert agent.state == AgentState.IDLE
         
+        # Start execution and verify running state
         task = asyncio.create_task(
-            agent.run("test request", "run_state", False)
+            agent.run("test request", "run_state", "user1", "run_state")
         )
+        await self._verify_agent_running_state(agent)
         
-        await asyncio.sleep(0.02)
-        assert_agent_state_correct(agent, AgentState.RUNNING)
-        
+        # Wait for completion and verify idle state
         await task
-        assert_agent_state_correct(agent, AgentState.IDLE)
+        assert agent.state == AgentState.IDLE
+    
+    async def _verify_agent_running_state(self, agent):
+        """Verify agent transitions to running state."""
+        await asyncio.sleep(0.02)  # Wait for state change
+        assert agent.state == AgentState.RUNNING
     
     def test_orchestration_metrics_calculation(self, orchestrator):
         """Test orchestration metrics calculation."""
-        self._simulate_orchestration_activity(orchestrator)
+        self._setup_orchestrator_metrics(orchestrator)
         
         metrics = orchestrator.get_orchestration_metrics()
         
-        assert metrics['total_executions'] == 10
-        assert metrics['failed_executions'] == 2
-        assert_success_rate_calculation(metrics, 80.0)
-        assert metrics['active_agents'] == 2
-        assert metrics['pooled_agents'] == 2
-        assert metrics['concurrent_peak'] == 3
+        self._verify_calculated_metrics(metrics)
     
-    def _simulate_orchestration_activity(self, orchestrator):
-        """Simulate orchestration activity for testing."""
+    def _setup_orchestrator_metrics(self, orchestrator):
+        """Setup orchestrator with test metrics data."""
         orchestrator.orchestration_metrics.update({
             'total_executions': 10,
             'failed_executions': 2,
@@ -164,4 +220,90 @@ class TestAgentLifecycleManagement:
             'concurrent_peak': 3
         })
         orchestrator.active_agents = 2
-        orchestrator.agent_pool = [MagicMock(), MagicMock()]
+        orchestrator.agent_pool = [MagicMock(), MagicMock()]  # 2 in pool
+    
+    def _verify_calculated_metrics(self, metrics):
+        """Verify calculated metrics are correct."""
+        assert metrics['total_executions'] == 10
+        assert metrics['failed_executions'] == 2
+        assert metrics['success_rate'] == 80.0  # (10-2)/10 * 100
+        assert metrics['active_agents'] == 2
+        assert metrics['pooled_agents'] == 2
+        assert metrics['concurrent_peak'] == 3
+
+
+class TestAgentPoolOptimization:
+    """Test agent pool optimization and resource management."""
+    
+    @pytest.mark.asyncio
+    async def test_agent_pool_size_limits(self, orchestrator):
+        """Test agent pool maintains size limits."""
+        # Create and release agents beyond pool limit
+        for i in range(7):  # Pool limit is 5
+            await orchestrator.get_or_create_agent(f"user_{i}")
+            await orchestrator.release_agent(f"user_{i}")
+        
+        # Pool should not exceed limit
+        assert len(orchestrator.agent_pool) <= 5
+        # Verify agents were properly created and managed
+        assert orchestrator.orchestration_metrics['agents_created'] >= 5
+    
+    @pytest.mark.asyncio
+    async def test_agent_state_reset_on_release(self, orchestrator):
+        """Test agent state is properly reset when released."""
+        agent = await orchestrator.get_or_create_agent("user1")
+        agent.thread_id = "test_thread"
+        agent.db_session = "test_session"
+        
+        await orchestrator.release_agent("user1")
+        
+        self._verify_agent_state_reset(agent)
+    
+    def _verify_agent_state_reset(self, agent):
+        """Verify agent state was properly reset."""
+        assert agent.user_id is None
+        assert agent.thread_id is None
+        assert agent.db_session is None
+        assert agent.state == AgentState.IDLE
+    
+    @pytest.mark.asyncio
+    async def test_agent_cleanup_on_error(self, orchestrator):
+        """Test proper cleanup when agent assignment fails."""
+        orchestrator.max_concurrent_agents = 1
+        
+        # First agent succeeds
+        agent1 = await orchestrator.get_or_create_agent("user1")
+        initial_active = orchestrator.active_agents
+        
+        # Second agent should fail
+        try:
+            await orchestrator.get_or_create_agent("user2")
+            assert False, "Should have raised NetraException"
+        except NetraException:
+            pass
+        
+        # Active count should remain unchanged
+        assert orchestrator.active_agents == initial_active
+    
+    @pytest.mark.asyncio 
+    async def test_concurrent_pool_access(self, orchestrator):
+        """Test concurrent access to agent pool is thread-safe."""
+        num_concurrent = 10
+        
+        # Create tasks that get and release agents concurrently
+        tasks = []
+        for i in range(num_concurrent):
+            task = self._agent_get_release_cycle(orchestrator, f"user_{i}")
+            tasks.append(task)
+        
+        await asyncio.gather(*tasks)
+        
+        # Pool should be in consistent state
+        assert orchestrator.active_agents == 0
+        assert len(orchestrator.agent_pool) <= 5  # Pool limit
+    
+    async def _agent_get_release_cycle(self, orchestrator, user_id):
+        """Get agent, use briefly, then release."""
+        agent = await orchestrator.get_or_create_agent(user_id)
+        await asyncio.sleep(0.01)  # Brief usage
+        await orchestrator.release_agent(user_id)

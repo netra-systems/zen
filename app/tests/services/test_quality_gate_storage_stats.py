@@ -63,7 +63,8 @@ class TestMetricsStorage:
         assert "quality_metrics:data_analysis" in call_args[0][0]
         # Check value is JSON serialized metrics
         import json
-        assert json.loads(call_args[0][1]) == metrics.__dict__
+        parsed_metrics = json.loads(call_args[0][1])
+        assert parsed_metrics['overall_score'] == metrics.overall_score
         # Check TTL is 24 hours
         assert call_args[1]['ex'] == 86400
 

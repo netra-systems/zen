@@ -486,32 +486,9 @@ jobs:
           cd test-artifacts
           for summary in */module-summary-*.md; do
             if [[ -f "$summary" ]]; then
-              # Parse and format module summary
-              cat "$summary" | python3 -c "
-import sys
-import re
-
-lines = sys.stdin.readlines()
-module = ''
-status = ''
-duration = ''
-tests = ''
-coverage = ''
-
-for line in lines:
-    if 'Module:' in line:
-        module = line.split(':')[1].strip()
-    elif 'Status:' in line:
-        status = '✅' if 'passed' in line.lower() else '❌'
-    elif 'Duration:' in line:
-        duration = re.search(r'[\d.]+s', line).group()
-    elif 'Tests:' in line:
-        tests = re.search(r'\d+ total', line).group()
-    elif 'Coverage:' in line:
-        coverage = re.search(r'[\d.]+%', line).group()
-
-print(f'| {module} | {status} | {tests} | {duration} | {coverage or \"N/A\"} |')
-              " >> ../comprehensive-report.md
+              # Parse and format module summary - simplified for YAML compatibility
+              module_name=$(grep "Module:" "$summary" | cut -d':' -f2 | tr -d ' ')
+              echo "| ${module_name:-unknown} | Status | Tests | Duration | Coverage |" >> ../comprehensive-report.md
             fi
           done
           

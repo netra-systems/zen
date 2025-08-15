@@ -15,10 +15,9 @@ permissions:
   checks: write        # For check status
 
 env:
-  # ACT compatibility flags
-  ACT_DETECTED: ${{ env.ACT || 'false' }}
-  ACT_LOCAL_MODE: ${{ env.ACT_LOCAL_MODE || 'true' }}
-  ACT_VERBOSE: ${{ env.ACT_VERBOSE || 'true' }}
+  PYTHON_VERSION: '3.9'
+  NODE_VERSION: '20'
+  VIOLATION_THRESHOLD: 0
 
 jobs:
   boundary-enforcement:
@@ -35,17 +34,17 @@ jobs:
       - name: ACT Detection and Environment Setup
         run: |
           echo "=== Boundary Enforcement ACT Compatibility ==="
-          if [[ "${{ env.ACT_DETECTED }}" == "true" ]]; then
+          if [[ "${ACT:-false}" == "true" ]]; then
             echo "🧪 Running in ACT (local) mode"
-            echo "- Local file system mode: ${{ env.ACT_LOCAL_MODE }}"
-            echo "- Verbose logging: ${{ env.ACT_VERBOSE }}"
+            echo "- Local file system mode: ${ACT_LOCAL_MODE:-true}"
+            echo "- Verbose logging: ${ACT_VERBOSE:-true}"
             echo "ACT_MODE=true" >> $GITHUB_ENV
             
             # Set local paths for file operations
             echo "WORKSPACE_PATH=${GITHUB_WORKSPACE}" >> $GITHUB_ENV
             echo "SCRIPTS_PATH=${GITHUB_WORKSPACE}/scripts" >> $GITHUB_ENV
             
-            if [[ "${{ env.ACT_VERBOSE }}" == "true" ]]; then
+            if [[ "${ACT_VERBOSE:-true}" == "true" ]]; then
               echo "📂 Workspace directory: ${GITHUB_WORKSPACE}"
               echo "📂 Scripts directory: ${GITHUB_WORKSPACE}/scripts"
               ls -la ${GITHUB_WORKSPACE}/scripts/ || echo "Scripts directory not found"
@@ -84,7 +83,7 @@ jobs:
             echo "Working directory: $(pwd)"
             echo "Python path: $(which python)"
             
-            if [[ "${{ env.ACT_VERBOSE }}" == "true" ]]; then
+            if [[ "${ACT_VERBOSE:-true}" == "true" ]]; then
               echo "📂 Current directory contents:"
               ls -la .
               echo "📂 Scripts directory check:"
@@ -445,7 +444,7 @@ jobs:
       
       - name: ACT Detection for Pre-commit
         run: |
-          if [[ "${{ env.ACT_DETECTED }}" == "true" ]]; then
+          if [[ "${ACT:-false}" == "true" ]]; then
             echo "🧪 Pre-commit validation in ACT mode"
             echo "ACT_MODE=true" >> $GITHUB_ENV
           else

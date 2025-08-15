@@ -17,91 +17,135 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.logger = central_logger.get_logger(__name__)
     
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        """Process each request with logging context."""
-        # Generate request ID and trace ID
+    def _generate_request_ids(self, request: Request) -> tuple[str, str]:
+        """Generate request and trace IDs."""
         request_id = str(uuid.uuid4())
         trace_id = request.headers.get("X-Trace-ID", str(uuid.uuid4()))
-        
-        # Store in request state for access by other components
-        request.state.request_id = request_id
-        request.state.trace_id = trace_id
-        
-        # Set context for logging
+        return request_id, trace_id
+
+    def _set_context_ids(self, request_id: str, trace_id: str) -> None:
+        """Set logging context IDs."""
         request_id_context.set(request_id)
         trace_id_context.set(trace_id)
-        
-        # Extract user ID if available (from JWT or session)
-        user_id = None
-        if hasattr(request.state, "user") and request.state.user:
-            user_id = str(request.state.user.id)
-            user_id_context.set(user_id)
-        
-        # Track timing
-        start_time = time.time()
-        
-        # Log incoming request
-        self.logger.info(
-            f"Request started: {request.method} {request.url.path}",
-            method=request.method,
-            path=request.url.path,
-            query_params=dict(request.query_params),
-            client_host=request.client.host if request.client else None,
-        )
-        
+
+    def _setup_request_context(self, request: Request) -> tuple[str, str, float]:
+        """Setup request IDs, context and timing."""
+        request_id, trace_id = self._generate_request_ids(request)
+        request.state.request_id = request_id
+        request.state.trace_id = trace_id
+        self._set_context_ids(request_id, trace_id)
+        return request_id, trace_id, time.time()
+
+    def _setup_user_context(self, request: Request) -> None:
+        """Extract and set user context if available."""
+        if not hasattr(request.state, "user") or not request.state.user:
+            return
+        user_id = str(request.state.user.id)
+        user_id_context.set(user_id)
+
+    def _get_client_host(self, request: Request) -> str:
+        """Extract client host from request."""
+        return request.client.host if request.client else None
+
+    def _build_start_log_data(self, request: Request) -> dict:
+        """Build start log data dict."""
+        return {
+            "method": request.method,
+            "path": request.url.path,
+            "query_params": dict(request.query_params),
+            "client_host": self._get_client_host(request),
+        }
+
+    def _log_request_start(self, request: Request) -> None:
+        """Log incoming request details."""
+        log_data = self._build_start_log_data(request)
+        message = f"Request started: {request.method} {request.url.path}"
+        self.logger.info(message, **log_data)
+
+    def _build_success_log_data(self, request: Request, response: Response, duration: float) -> dict:
+        """Build success log data dict."""
+        return {
+            "method": request.method,
+            "path": request.url.path,
+            "status_code": response.status_code,
+            "duration_ms": round(duration * 1000, 2),
+        }
+
+    def _log_request_success(self, request: Request, response: Response, duration: float) -> None:
+        """Log successful request completion."""
+        log_data = self._build_success_log_data(request, response, duration)
+        message = f"Request completed: {request.method} {request.url.path} -> {response.status_code}"
+        self.logger.info(message, **log_data)
+
+    def _add_response_headers(self, response: Response, request_id: str, trace_id: str) -> Response:
+        """Add tracking headers to response."""
+        response.headers["X-Request-ID"] = request_id
+        response.headers["X-Trace-ID"] = trace_id
+        return response
+
+    def _build_error_log_basic(self, request: Request, duration: float) -> dict:
+        """Build basic error log data."""
+        return {
+            "method": request.method,
+            "path": request.url.path,
+            "duration_ms": round(duration * 1000, 2),
+        }
+
+    def _build_error_details(self, error: Exception) -> dict:
+        """Build error-specific details."""
+        return {
+            "error_type": type(error).__name__,
+            "error_message": str(error),
+            "exc_info": True
+        }
+
+    def _build_error_log_data(self, request: Request, error: Exception, duration: float) -> dict:
+        """Build error log data dict."""
+        basic_data = self._build_error_log_basic(request, duration)
+        error_details = self._build_error_details(error)
+        basic_data.update(error_details)
+        return basic_data
+
+    def _log_request_error(self, request: Request, error: Exception, duration: float) -> None:
+        """Log request error with context."""
+        log_data = self._build_error_log_data(request, error, duration)
+        message = f"Request failed: {request.method} {request.url.path}"
+        self.logger.error(message, **log_data)
+
+    def _create_error_content(self, request_id: str, trace_id: str) -> dict:
+        """Create error response content."""
+        return {
+            "error": True,
+            "message": "Internal server error",
+            "request_id": request_id,
+            "trace_id": trace_id,
+        }
+
+    def _create_error_headers(self, request_id: str, trace_id: str) -> dict:
+        """Create error response headers."""
+        return {"X-Request-ID": request_id, "X-Trace-ID": trace_id}
+
+    def _create_error_response(self, request_id: str, trace_id: str) -> JSONResponse:
+        """Create standardized error response."""
+        content = self._create_error_content(request_id, trace_id)
+        headers = self._create_error_headers(request_id, trace_id)
+        return JSONResponse(status_code=500, content=content, headers=headers)
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        """Process each request with logging context."""
+        request_id, trace_id, start_time = self._setup_request_context(request)
+        self._setup_user_context(request)
+        self._log_request_start(request)
         try:
-            # Process the request
             response = await call_next(request)
-            
-            # Calculate duration
             duration = time.time() - start_time
-            
-            # Log successful response
-            self.logger.info(
-                f"Request completed: {request.method} {request.url.path} -> {response.status_code}",
-                method=request.method,
-                path=request.url.path,
-                status_code=response.status_code,
-                duration_ms=round(duration * 1000, 2),
-            )
-            
-            # Add headers to response
-            response.headers["X-Request-ID"] = request_id
-            response.headers["X-Trace-ID"] = trace_id
-            
-            return response
-            
+            self._log_request_success(request, response, duration)
+            return self._add_response_headers(response, request_id, trace_id)
         except Exception as e:
-            # Calculate duration even for errors
             duration = time.time() - start_time
-            
-            # Log the error with full context
-            self.logger.error(
-                f"Request failed: {request.method} {request.url.path}",
-                method=request.method,
-                path=request.url.path,
-                duration_ms=round(duration * 1000, 2),
-                error_type=type(e).__name__,
-                error_message=str(e),
-                exc_info=True
-            )
-            
-            # Return error response
-            return JSONResponse(
-                status_code=500,
-                content={
-                    "error": True,
-                    "message": "Internal server error",
-                    "request_id": request_id,
-                    "trace_id": trace_id,
-                },
-                headers={
-                    "X-Request-ID": request_id,
-                    "X-Trace-ID": trace_id,
-                }
-            )
+            self._log_request_error(request, e, duration)
+            return self._create_error_response(request_id, trace_id)
         finally:
-            # Clear context after request
             central_logger.clear_context()
 
 
@@ -114,28 +158,42 @@ class PerformanceLoggingMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.logger = central_logger.get_logger(__name__)
     
+    def _is_slow_request(self, duration: float) -> bool:
+        """Check if request exceeds slow threshold."""
+        return duration > self.SLOW_REQUEST_THRESHOLD
+
+    def _build_slow_log_base(self, request: Request, duration: float) -> dict:
+        """Build base slow log data."""
+        return {
+            "method": request.method,
+            "path": request.url.path,
+            "duration_ms": round(duration * 1000, 2),
+            "threshold_ms": self.SLOW_REQUEST_THRESHOLD * 1000,
+        }
+
+    def _build_slow_log_data(self, request: Request, response: Response, duration: float) -> dict:
+        """Build slow request log data dict."""
+        base_data = self._build_slow_log_base(request, duration)
+        base_data["status_code"] = response.status_code
+        return base_data
+
+    def _log_slow_request(self, request: Request, response: Response, duration: float) -> None:
+        """Log slow request warning."""
+        if not self._is_slow_request(duration):
+            return
+        log_data = self._build_slow_log_data(request, response, duration)
+        message = f"Slow request detected: {request.method} {request.url.path}"
+        self.logger.warning(message, **log_data)
+
+    def _add_performance_header(self, response: Response, duration: float) -> Response:
+        """Add performance timing header to response."""
+        response.headers["X-Response-Time"] = f"{round(duration * 1000, 2)}ms"
+        return response
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Monitor request performance and log slow requests."""
         start_time = time.time()
-        
-        # Process request
         response = await call_next(request)
-        
-        # Calculate duration
         duration = time.time() - start_time
-        
-        # Log slow requests
-        if duration > self.SLOW_REQUEST_THRESHOLD:
-            self.logger.warning(
-                f"Slow request detected: {request.method} {request.url.path}",
-                method=request.method,
-                path=request.url.path,
-                duration_ms=round(duration * 1000, 2),
-                threshold_ms=self.SLOW_REQUEST_THRESHOLD * 1000,
-                status_code=response.status_code,
-            )
-        
-        # Add performance header
-        response.headers["X-Response-Time"] = f"{round(duration * 1000, 2)}ms"
-        
-        return response
+        self._log_slow_request(request, response, duration)
+        return self._add_performance_header(response, duration)

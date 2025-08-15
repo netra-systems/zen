@@ -84,7 +84,10 @@ class AgentMetricsCollectorCore:
         record = self._get_and_remove_operation(operation_id)
         if not record:
             return None
-        completion_data = self._build_completion_data(success, failure_type, error_message, memory_usage_mb, cpu_usage_percent, metadata)
+        
+        completion_data = self._build_completion_data(
+            success, failure_type, error_message, memory_usage_mb, cpu_usage_percent, metadata
+        )
         return await self._finalize_and_process_operation(record, completion_data)
     
     def _get_and_remove_operation(self, operation_id: str) -> Optional[AgentOperationRecord]:

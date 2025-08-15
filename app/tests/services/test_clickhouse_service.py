@@ -311,64 +311,64 @@ class TestWorkloadEventsOperations:
     @pytest.mark.asyncio
     async def test_workload_events_operations(self, real_clickhouse_client, ensure_workload_table):
         """Test operations on workload_events table."""
-        # Insert test event
+        # Insert test event using correct workload_events schema
+        test_event_id = str(uuid.uuid4())
         test_event = {
-            'trace_id': str(uuid.uuid4()),
-            'span_id': str(uuid.uuid4()),
-            'user_id': 'test_user_service',
-            'session_id': 'test_session_service',
+            'event_id': test_event_id,
             'timestamp': datetime.utcnow(),
-            'workload_type': 'service_test',
-            'status': 'completed',
-            'duration_ms': 150,
-            'metrics_name': ['latency_ms', 'tokens_used'],
-            'metrics_value': [150.0, 500.0],
-            'metrics_unit': ['ms', 'tokens'],
-            'input_text': 'Service test input',
-            'output_text': 'Service test output',
-            'metadata': json.dumps({'test_type': 'service'})
+            'user_id': 12345,  # UInt32 as per schema
+            'workload_id': 'test_workload_service',
+            'event_type': 'service_test',
+            'event_category': 'completed',
+            'metadata': json.dumps({
+                'test_type': 'service',
+                'input_text': 'Service test input',
+                'output_text': 'Service test output'
+            })
         }
         
-        insert_query = """
+        insert_query = f"""
         INSERT INTO workload_events (
-            trace_id, span_id, user_id, session_id, timestamp,
-            workload_type, status, duration_ms,
-            `metrics.name`, `metrics.value`, `metrics.unit`,
-            input_text, output_text, metadata
+            event_id, timestamp, user_id, workload_id,
+            event_type, event_category,
+            dimensions, metadata
         ) VALUES (
-            {trace_id:String}, {span_id:String}, {user_id:String}, 
-            {session_id:String}, {timestamp:DateTime64(3)},
-            {workload_type:String}, {status:String}, {duration_ms:Int32},
-            {metrics_name:Array(String)}, {metrics_value:Array(Float64)}, 
-            {metrics_unit:Array(String)},
-            {input_text:String}, {output_text:String}, {metadata:String}
+            '{test_event_id}', '{test_event['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}', 12345,
+            'test_workload_service', 'service_test', 'completed',
+            {{'session_id': 'test_session_service', 'duration_ms': '150'}}, '{test_event['metadata']}'
         )
         """
         
-        await real_clickhouse_client.execute_query(insert_query, test_event)
+        await real_clickhouse_client.execute_query(insert_query)
         
         # Query the inserted event
         select_query = f"""
         SELECT * FROM workload_events 
-        WHERE trace_id = '{test_event['trace_id']}'
+        WHERE event_id = '{test_event_id}'
         """
         
         result = await real_clickhouse_client.execute_query(select_query)
         assert len(result) == 1
-        assert result[0]['user_id'] == 'test_user_service'
-        assert result[0]['workload_type'] == 'service_test'
+        assert result[0]['user_id'] == 12345
+        assert result[0]['event_type'] == 'service_test'
+        assert result[0]['event_category'] == 'completed'
         
-        # Test array syntax fixing
-        array_query = f"""
+        # Test dimensions and metadata access
+        detail_query = f"""
         SELECT 
-            metrics.name[1] as first_metric_name,
-            metrics.value[1] as first_metric_value
+            dimensions['session_id'] as session_id,
+            dimensions['duration_ms'] as duration_ms,
+            metadata
         FROM workload_events
-        WHERE trace_id = '{test_event['trace_id']}'
+        WHERE event_id = '{test_event_id}'
         """
         
-        # This should be automatically fixed by the interceptor
-        array_result = await real_clickhouse_client.execute_query(array_query)
-        assert len(array_result) == 1
-        assert array_result[0]['first_metric_name'] == 'latency_ms'
-        assert array_result[0]['first_metric_value'] == 150.0
+        detail_result = await real_clickhouse_client.execute_query(detail_query)
+        assert len(detail_result) == 1
+        assert detail_result[0]['session_id'] == 'test_session_service'
+        assert detail_result[0]['duration_ms'] == '150'
+        
+        # Verify metadata contains expected JSON
+        metadata_json = json.loads(detail_result[0]['metadata'])
+        assert metadata_json['test_type'] == 'service'
+        assert metadata_json['input_text'] == 'Service test input'

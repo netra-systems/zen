@@ -83,6 +83,7 @@ def get_critical_vars_mapping() -> Dict[str, str]:
         "DATABASE_URL": "database_url",
         "REDIS_URL": "redis_url",
         "CLICKHOUSE_URL": "clickhouse_url",
+        "SECRET_KEY": "secret_key",
         "JWT_SECRET_KEY": "jwt_secret_key",
         "FERNET_KEY": "fernet_key",
         "LOG_LEVEL": "log_level",

@@ -31,7 +31,6 @@ description: Monitor architecture compliance with ACT compatibility
 env:
   REPORTS_DIR: reports/architecture-health
   DASHBOARD_URL: https://netra-ai.github.io/architecture-health
-  ACT_DETECTION: ${{ github.event.inputs.act_local_run || env.ACT || 'false' }}
 
 jobs:
   architecture-health-scan:
@@ -71,7 +70,7 @@ jobs:
         echo "🔍 Running comprehensive architecture health scan..."
         
         # ACT Detection and Debug Output
-        if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+        if [[ "${ACT:-false}" == "true" ]] || [[ "${{ github.event.inputs.act_local_run }}" == "true" ]]; then
           echo "🧪 ACT LOCAL RUN DETECTED - Using mock architecture scan"
           echo "Debug: ACT environment variables:"
           env | grep -E "^(ACT|GITHUB_|CI)" | sort || true
@@ -85,7 +84,7 @@ jobs:
           FAIL_FLAG=""
         fi
         
-        if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+        if [[ "${ACT:-false}" == "true" ]] || [[ "${{ github.event.inputs.act_local_run }}" == "true" ]]; then
           # Create mock health report for ACT
           echo "🧪 ACT LOCAL RUN - Generating mock architecture health data"
           
@@ -351,22 +350,22 @@ jobs:
           }
 
     - name: Setup Pages for Dashboard
-      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false' && env.ACT_DETECTION != 'true'
+      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false' && !env.ACT
       uses: actions/configure-pages@v4
 
     - name: Upload Dashboard to Pages
-      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false' && env.ACT_DETECTION != 'true'
+      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false' && !env.ACT
       uses: actions/upload-pages-artifact@v3
       with:
         path: ${{ env.REPORTS_DIR }}
 
     - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false' && env.ACT_DETECTION != 'true'
+      if: github.ref == 'refs/heads/main' && inputs.generate_reports != 'false' && !env.ACT
       id: deployment
       uses: actions/deploy-pages@v4
       
     - name: ACT Local Dashboard Info
-      if: env.ACT_DETECTION == 'true'
+      if: env.ACT == 'true' || github.event.inputs.act_local_run == 'true'
       run: |
         echo "🧪 ACT LOCAL RUN - Dashboard deployment skipped"
         echo "📄 Mock dashboard created at: ${{ env.REPORTS_DIR }}/dashboard.html"
@@ -404,7 +403,7 @@ jobs:
         fi
 
     - name: Notify Team on Slack
-      if: (failure() || steps.health_scan.outputs.status == 'needs_improvement') && env.ACT_DETECTION != 'true'
+      if: (failure() || steps.health_scan.outputs.status == 'needs_improvement') && !env.ACT
       uses: 8398a7/action-slack@v3
       with:
         status: custom
@@ -466,7 +465,7 @@ jobs:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         
     - name: ACT Local Notification Log
-      if: (failure() || steps.health_scan.outputs.status == 'needs_improvement') && env.ACT_DETECTION == 'true'
+      if: (failure() || steps.health_scan.outputs.status == 'needs_improvement') && env.ACT == 'true'
       run: |
         echo "🧪 ACT LOCAL RUN - Slack notification skipped"
         echo "Would send Slack alert for status: ${{ steps.health_scan.outputs.status }}"
@@ -506,7 +505,7 @@ jobs:
       run: |
         echo "⏱️ Benchmarking architecture health scan performance..."
         
-        if [[ "${{ env.ACT_DETECTION }}" == "true" ]]; then
+        if [[ "${ACT:-false}" == "true" ]] || [[ "${{ github.event.inputs.act_local_run }}" == "true" ]]; then
           echo "🧪 ACT LOCAL RUN - Using mock benchmark results"
           
           echo "Mock Benchmark Results:" | tee -a $GITHUB_STEP_SUMMARY

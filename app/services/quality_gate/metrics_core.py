@@ -93,6 +93,9 @@ class CoreMetricsCalculator:
             optimization_terms = ["quantization", "pruning", "distillation", "caching", "batching", "parallelization"]
             opt_count = sum(1 for term in optimization_terms if term in content_lower)
             score += min(opt_count * 0.1, 0.2)
+        elif content_type == ContentType.ERROR_MESSAGE:
+            # ERROR_MESSAGE content should contain specific error indicators
+            score += self._calculate_error_specificity(content, content_lower)
         
         return max(0.0, min(1.0, score))
     
@@ -138,6 +141,10 @@ class CoreMetricsCalculator:
         uncertain_count = sum(1 for term in uncertain_terms if term in content_lower)
         score -= uncertain_count * 0.05
         
+        # ERROR_MESSAGE specific actionability bonuses
+        if content_type == ContentType.ERROR_MESSAGE:
+            score += self._calculate_error_actionability(content_lower)
+        
         return max(0.0, min(1.0, score))
     
     async def calculate_quantification(self, content: str) -> float:
@@ -146,6 +153,7 @@ class CoreMetricsCalculator:
         score += self._calculate_pattern_scores(content)
         score += self._calculate_comparison_bonus(content)
         score += self._calculate_metric_names_bonus(content)
+        score += self._calculate_error_quantification_bonus(content)
         return min(1.0, score)
     
     def _calculate_pattern_scores(self, content: str) -> float:
@@ -248,3 +256,32 @@ class CoreMetricsCalculator:
         
         redundancy_ratio = repeated_count / (len(sentences) * (len(sentences) - 1) / 2)
         return min(1.0, redundancy_ratio)
+    
+    def _calculate_error_specificity(self, content: str, content_lower: str) -> float:
+        """Calculate ERROR_MESSAGE specific indicators (max 8 lines)"""
+        score = 0.0
+        error_patterns = self.patterns.ERROR_SPECIFIC_PATTERNS
+        for pattern_name, pattern in error_patterns.items():
+            matches = re.findall(pattern, content, re.IGNORECASE)
+            score += min(len(matches) * 0.2, 0.3)
+        error_terms = sum(1 for term in self.patterns.ERROR_DOMAIN_TERMS if term in content_lower)
+        return min(score + min(error_terms * 0.08, 0.25), 0.8)
+    
+    def _calculate_error_actionability(self, content_lower: str) -> float:
+        """Calculate ERROR_MESSAGE specific actionability (max 8 lines)"""
+        score = 0.0
+        resolution_terms = ["killed", "increased", "reduced", "enabled", "monitor", "implement", "optimize", "schedule"]
+        resolution_count = sum(1 for term in resolution_terms if term in content_lower)
+        score += min(resolution_count * 0.1, 0.3)
+        if re.search(r'(immediate actions|prevention|resolution|rollback|monitoring)', content_lower):
+            score += 0.2
+        return min(score, 0.4)
+    
+    def _calculate_error_quantification_bonus(self, content: str) -> float:
+        """Calculate ERROR_MESSAGE specific quantification bonus (max 8 lines)"""
+        score = 0.0
+        error_metrics = re.findall(r'(connections?|timeout|pool_size|threshold)\s*[=:]\s*\d+', content, re.IGNORECASE)
+        score += min(len(error_metrics) * 0.1, 0.2)
+        time_patterns = re.findall(r'\b\d+[:-]\d+(?:[:-]\d+)?\s*(AM|PM|minutes?|seconds?)', content, re.IGNORECASE)
+        score += min(len(time_patterns) * 0.05, 0.1)
+        return min(score, 0.15)

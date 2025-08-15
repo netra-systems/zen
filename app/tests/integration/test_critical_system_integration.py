@@ -46,11 +46,9 @@ class TestAgentReliabilityIntegration:
             agent.reliability = mock_reliability
             return agent
     
-    @pytest.mark.asyncio
-    async def test_agent_reliability_with_json_parsing(self, reliable_agent):
-        """Test agent reliability with JSON parsing integration."""
-        # Setup complex JSON data that needs parsing
-        complex_response = {
+    def _create_complex_json_test_data(self):
+        """Create complex JSON response for testing."""
+        return {
             "tool_recommendations": [
                 {
                     "tool": "data_analyzer",
@@ -62,30 +60,87 @@ class TestAgentReliabilityIntegration:
                 "analysis": '{"findings": ["bottleneck1", "bottleneck2"]}'
             }
         }
-        
-        # Mock successful operation that returns complex JSON
+    
+    def _verify_json_parsing_integration(self, fixed_result):
+        """Verify JSON parsing integration results."""
+        assert fixed_result["tool_recommendations"][0]["parameters"] == {
+            "query": "SELECT * FROM metrics", 
+            "format": "json"
+        }
+        assert fixed_result["recommendations"] == ["Optimize query performance", "Add caching layer"]
+    
+    def _verify_reliability_tracking(self, reliable_agent):
+        """Verify reliability metrics were updated correctly."""
+        assert len(reliable_agent.operation_times) == 1
+        assert len(reliable_agent.error_history) == 0
+    
+    @pytest.mark.asyncio
+    async def test_agent_reliability_with_json_parsing(self, reliable_agent):
+        """Test agent reliability with JSON parsing integration."""
+        complex_response = self._create_complex_json_test_data()
         reliable_agent.reliability.execute_safely.return_value = complex_response
         
-        # Execute operation with reliability protection
         result = await reliable_agent.execute_with_reliability(
             lambda: reliable_agent.mock_operation(response_data=complex_response),
             "json_processing_operation",
             timeout=10.0
         )
         
-        # Apply JSON fixes to the result
         fixed_result = comprehensive_json_fix(result)
+        self._verify_json_parsing_integration(fixed_result)
+        self._verify_reliability_tracking(reliable_agent)
+    
+    def _create_mock_health_instance(self):
+        """Create mock health monitor instance."""
+        mock_health_instance = Mock()
+        mock_health_instance.is_emergency_mode_active = AsyncMock(return_value=False)
+        mock_health_instance.should_prevent_cascade = AsyncMock(return_value=False)
+        mock_health_instance.record_success = AsyncMock()
+        mock_health_instance.record_failure = AsyncMock()
+        mock_health_instance.update_circuit_breaker_status = AsyncMock()
+        mock_health_instance.update_system_health = AsyncMock()
+        return mock_health_instance
+    
+    def _setup_fallback_coordinator_mocks(self, mock_health_monitor, mock_emergency_manager):
+        """Setup fallback coordinator with mocks."""
+        mock_health_instance = self._create_mock_health_instance()
+        mock_emergency_instance = Mock()
+        mock_health_monitor.return_value = mock_health_instance
+        mock_emergency_manager.return_value = mock_emergency_instance
         
-        # Verify the integration worked correctly
-        assert fixed_result["tool_recommendations"][0]["parameters"] == {
-            "query": "SELECT * FROM metrics", 
-            "format": "json"
-        }
-        assert fixed_result["recommendations"] == ["Optimize query performance", "Add caching layer"]
-        
-        # Verify reliability tracking
+        coordinator = FallbackCoordinator()
+        coordinator.health_monitor = mock_health_instance
+        coordinator.emergency_manager = mock_emergency_instance
+        return coordinator, mock_health_instance
+    
+    def _setup_coordination_handler_mocks(self, mock_handler_class):
+        """Setup coordination handler mocks."""
+        mock_handler = AsyncMock()
+        mock_handler.execute_with_fallback.return_value = {"coordinated": True, "agent": "TestAgent"}
+        mock_handler_class.return_value = mock_handler
+        return mock_handler
+    
+    def _verify_coordination_integration(self, result, mock_handler, mock_health_instance, reliable_agent):
+        """Verify coordination integration results."""
+        assert result == {"coordinated": True, "agent": "TestAgent"}
+        mock_handler.execute_with_fallback.assert_called_once()
+        mock_health_instance.record_success.assert_called_once_with("TestAgent")
         assert len(reliable_agent.operation_times) == 1
-        assert len(reliable_agent.error_history) == 0
+    
+    async def _execute_coordinated_operation(self, coordinator, reliable_agent):
+        """Execute coordinated operation through reliability and coordination."""
+        async def coordinated_operation():
+            return await coordinator.execute_with_coordination(
+                "TestAgent",
+                lambda: reliable_agent.mock_operation(response_data={"agent_result": "success"}),
+                "integrated_operation"
+            )
+        
+        return await reliable_agent.execute_with_reliability(
+            coordinated_operation,
+            "coordination_operation",
+            timeout=15.0
+        )
     
     @pytest.mark.asyncio
     async def test_agent_reliability_with_fallback_coordinator(self, reliable_agent):
@@ -93,56 +148,17 @@ class TestAgentReliabilityIntegration:
         with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
              patch('app.core.fallback_coordinator.EmergencyFallbackManager') as mock_emergency_manager:
             
-            # Setup mocks
-            mock_health_instance = Mock()
-            mock_health_instance.is_emergency_mode_active = AsyncMock(return_value=False)
-            mock_health_instance.should_prevent_cascade = AsyncMock(return_value=False)
-            mock_health_instance.record_success = AsyncMock()
-            mock_health_instance.record_failure = AsyncMock()
-            mock_health_instance.update_circuit_breaker_status = AsyncMock()
-            mock_health_instance.update_system_health = AsyncMock()
+            coordinator, mock_health_instance = self._setup_fallback_coordinator_mocks(mock_health_monitor, mock_emergency_manager)
             
-            mock_emergency_instance = Mock()
-            mock_health_monitor.return_value = mock_health_instance
-            mock_emergency_manager.return_value = mock_emergency_instance
-            
-            # Create fallback coordinator
-            coordinator = FallbackCoordinator()
-            coordinator.health_monitor = mock_health_instance
-            coordinator.emergency_manager = mock_emergency_instance
-            
-            # Register agent with coordinator
             with patch('app.core.fallback_coordinator.LLMFallbackHandler') as mock_handler_class, \
                  patch('app.core.fallback_coordinator.CircuitBreaker'), \
                  patch('app.core.fallback_coordinator.AgentFallbackStatus'):
                 
-                mock_handler = AsyncMock()
-                mock_handler.execute_with_fallback.return_value = {"coordinated": True, "agent": "TestAgent"}
-                mock_handler_class.return_value = mock_handler
-                
+                mock_handler = self._setup_coordination_handler_mocks(mock_handler_class)
                 coordinator.register_agent("TestAgent")
                 
-                # Execute operation through both reliability and coordination
-                async def coordinated_operation():
-                    return await coordinator.execute_with_coordination(
-                        "TestAgent",
-                        lambda: reliable_agent.mock_operation(response_data={"agent_result": "success"}),
-                        "integrated_operation"
-                    )
-                
-                result = await reliable_agent.execute_with_reliability(
-                    coordinated_operation,
-                    "coordination_operation",
-                    timeout=15.0
-                )
-                
-                # Verify integration
-                assert result == {"coordinated": True, "agent": "TestAgent"}
-                mock_handler.execute_with_fallback.assert_called_once()
-                mock_health_instance.record_success.assert_called_once_with("TestAgent")
-                
-                # Verify reliability metrics were updated
-                assert len(reliable_agent.operation_times) == 1
+                result = await self._execute_coordinated_operation(coordinator, reliable_agent)
+                self._verify_coordination_integration(result, mock_handler, mock_health_instance, reliable_agent)
     
     @pytest.mark.asyncio
     async def test_agent_failure_propagation_through_system(self, reliable_agent):
@@ -207,6 +223,31 @@ class TestAgentReliabilityIntegration:
 
 class TestSystemComponentIntegration:
     """Test integration between different system components."""
+    
+    def _create_malformed_json_response(self):
+        """Create malformed JSON response for error handling test."""
+        return {
+            "tool_recommendations": [
+                {
+                    "tool": "parser",
+                    "parameters": '{"invalid": json malformed}'  # Invalid JSON
+                }
+            ],
+            "recommendations": '["invalid json array"'  # Invalid JSON
+        }
+    
+    def _setup_json_error_agent(self, mock_wrapper, malformed_response):
+        """Setup agent for JSON error handling test."""
+        mock_reliability = Mock()
+        mock_reliability.execute_safely = AsyncMock()
+        mock_reliability.circuit_breaker = Mock()
+        mock_reliability.circuit_breaker.get_status = Mock(return_value={"state": "closed"})
+        mock_wrapper.return_value = mock_reliability
+        
+        agent = MockReliableAgent("JSONAgent")
+        agent.reliability = mock_reliability
+        mock_reliability.execute_safely.return_value = malformed_response
+        return agent
     
     @pytest.mark.asyncio
     async def test_http_client_with_json_parsing_integration(self):

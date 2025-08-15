@@ -82,16 +82,21 @@ async def _validate_user_active(user) -> str:
         raise ValueError("User not active")
     return str(user.id)
 
+async def _get_and_validate_user(
+    security_service, db_session, user_id: str, payload: dict
+) -> str:
+    """Get user and validate with legacy lookup support."""
+    user = await _fetch_user_with_retry(security_service, db_session, user_id)
+    user = await _handle_legacy_email_lookup(security_service, db_session, user_id, user)
+    await _check_user_exists_and_debug(db_session, user_id, payload, user)
+    return await _validate_user_active(user)
+
 async def _authenticate_websocket_user(websocket: WebSocket, token: str, security_service) -> str:
     """Authenticate WebSocket user and return user ID string."""
     payload = await _decode_token_payload(security_service, token)
     user_id = await _extract_user_id(payload)
-    
     async with get_async_db() as db_session:
-        user = await _fetch_user_with_retry(security_service, db_session, user_id)
-        user = await _handle_legacy_email_lookup(security_service, db_session, user_id, user)
-        await _check_user_exists_and_debug(db_session, user_id, payload, user)
-        return await _validate_user_active(user)
+        return await _get_and_validate_user(security_service, db_session, user_id, payload)
 
 async def _receive_message_with_timeout(websocket: WebSocket) -> str:
     """Receive WebSocket message with timeout."""
@@ -135,19 +140,24 @@ async def _handle_connection_timeout(conn_info, user_id_str: str) -> bool:
         return False
     return True
 
+async def _handle_parsed_message(
+    user_id_str: str, websocket: WebSocket, message, data: str, agent_service
+) -> bool:
+    """Handle parsed message validation and processing."""
+    if message is None:
+        return True
+    if not await _validate_and_handle_message(user_id_str, websocket, message):
+        return True
+    await _process_agent_message(user_id_str, data, agent_service)
+    return True
+
 async def _process_single_message(user_id_str: str, websocket: WebSocket, agent_service):
     """Process a single WebSocket message."""
     data = await _receive_message_with_timeout(websocket)
-    
     if await _handle_pong_message(data, user_id_str, websocket):
         return True
-    
     message = await _parse_json_message(data, user_id_str)
-    if message is None or not await _validate_and_handle_message(user_id_str, websocket, message):
-        return True
-    
-    await _process_agent_message(user_id_str, data, agent_service)
-    return True
+    return await _handle_parsed_message(user_id_str, websocket, message, data, agent_service)
 
 async def _handle_message_loop(user_id_str: str, websocket: WebSocket, conn_info, agent_service):
     """Handle the main message processing loop."""
@@ -186,26 +196,38 @@ async def _establish_websocket_connection(websocket: WebSocket):
     logger.info(f"WebSocket connection established for user {user_id_str}")
     return user_id_str, conn_info, agent_service
 
+async def _handle_disconnect_exception(e: WebSocketDisconnect, user_id_str: str, websocket: WebSocket):
+    """Handle WebSocket disconnect exception."""
+    if user_id_str:
+        await _handle_websocket_disconnect(e, user_id_str, websocket)
+
+async def _handle_general_exception(e: Exception, user_id_str: str, websocket: WebSocket):
+    """Handle general WebSocket exception."""
+    logger.error(f"Error in WebSocket connection: {e}", exc_info=True)
+    if user_id_str:
+        await _handle_websocket_error(e, user_id_str, websocket)
+
 async def _handle_websocket_exceptions(e: Exception, user_id_str: str, websocket: WebSocket):
     """Handle various WebSocket exceptions."""
     if isinstance(e, WebSocketDisconnect):
-        if user_id_str:
-            await _handle_websocket_disconnect(e, user_id_str, websocket)
+        await _handle_disconnect_exception(e, user_id_str, websocket)
     elif isinstance(e, ValueError):
-        # Authentication or validation errors - connection already closed
-        return
+        return  # Authentication errors - connection already closed
     else:
-        logger.error(f"Error in WebSocket connection: {e}", exc_info=True)
-        if user_id_str:
-            await _handle_websocket_error(e, user_id_str, websocket)
+        await _handle_general_exception(e, user_id_str, websocket)
+
+async def _run_websocket_session(websocket: WebSocket):
+    """Run WebSocket session with connection and message handling."""
+    user_id_str, conn_info, agent_service = await _establish_websocket_connection(websocket)
+    await _handle_message_loop(user_id_str, websocket, conn_info, agent_service)
+    return user_id_str
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """Main WebSocket endpoint handler."""
     user_id_str = None
     try:
-        user_id_str, conn_info, agent_service = await _establish_websocket_connection(websocket)
-        await _handle_message_loop(user_id_str, websocket, conn_info, agent_service)
+        user_id_str = await _run_websocket_session(websocket)
     except Exception as e:
         await _handle_websocket_exceptions(e, user_id_str, websocket)
     finally:

@@ -172,18 +172,20 @@ class TestMultiObjectiveOptimizationTool:
     @pytest.mark.asyncio
     async def test_async_behavior_timing(self, optimization_tool, mock_context):
         """Test that the tool properly handles async operations"""
+        import time
+        
         async def slow_define_goals(context, **kwargs):
-            await asyncio.sleep(0.01)
+            await asyncio.sleep(0.05)  # Increased sleep for reliable timing
             return "Goals defined slowly"
         
         optimization_tool.define_optimization_goals = slow_define_goals
         
-        start_time = asyncio.get_event_loop().time()
+        start_time = time.perf_counter()  # More precise timing
         result = await optimization_tool.run(mock_context)
-        elapsed = asyncio.get_event_loop().time() - start_time
+        elapsed = time.perf_counter() - start_time
         
         assert result == "Multi-objective optimization complete."
-        assert elapsed >= 0.009  # Allow for timing variations
+        assert elapsed >= 0.04  # Reasonable threshold for 0.05 sleep
 
     @pytest.mark.asyncio
     async def test_execute_wrapper_integration(self, optimization_tool, mock_context):

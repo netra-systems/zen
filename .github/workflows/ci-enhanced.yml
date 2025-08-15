@@ -32,10 +32,6 @@ env:
   SECURITY_SCAN_TIMEOUT: 15
   PERFORMANCE_TEST_TIMEOUT: 20
   ROLLBACK_TIMEOUT: 5
-  # ACT local testing environment variables
-  ACT_RUNNER_NAME: ${{ env.ACT && 'act-runner' || 'github-runner' }}
-  ACT_TEST_MODE: ${{ env.ACT || 'false' }}
-  GITHUB_API_AVAILABLE: ${{ !env.ACT || 'false' }}
 
 permissions:
   contents: read
@@ -88,7 +84,7 @@ jobs:
           fi
           
           # Analyze changed files (skip in ACT environment)
-          if [[ "${{ github.event_name }}" == "pull_request" ]] && [[ "${{ env.ACT_TEST_MODE }}" != "true" ]]; then
+          if [[ "${{ github.event_name }}" == "pull_request" ]] && [[ "${ACT:-false}" != "true" ]]; then
             CHANGED_FILES=$(gh pr diff ${{ github.event.pull_request.number }} --name-only || echo "")
             
             # Check for security-sensitive changes
@@ -217,7 +213,7 @@ jobs:
     needs: [preflight-checks, architecture-compliance]
     if: needs.preflight-checks.outputs.security_required == 'true'
     runs-on: warp-custom-default
-    timeout-minutes: ${{ fromJson(env.SECURITY_SCAN_TIMEOUT) }}
+    timeout-minutes: 15
     
     steps:
       - name: Checkout code
@@ -489,7 +485,7 @@ jobs:
     needs: [preflight-checks, run-tests]
     if: needs.preflight-checks.outputs.performance_required == 'true'
     runs-on: warp-custom-default
-    timeout-minutes: ${{ fromJson(env.PERFORMANCE_TEST_TIMEOUT) }}
+    timeout-minutes: 20
     
     steps:
       - name: Checkout code
@@ -721,7 +717,7 @@ jobs:
       contains(needs.*.result, 'failure') &&
       needs.preflight-checks.outputs.should_run == 'true'
     runs-on: warp-custom-default
-    timeout-minutes: ${{ fromJson(env.ROLLBACK_TIMEOUT) }}
+    timeout-minutes: 5
     
     steps:
       - name: Analyze failure point
@@ -847,7 +843,7 @@ jobs:
           
           # Test production endpoints (read-only)
           # ACT compatibility: Use localhost for local testing
-          if [[ "${{ env.ACT_TEST_MODE }}" == "true" ]]; then
+          if [[ "${ACT:-false}" == "true" ]]; then
             PROD_URL="http://localhost:8000"
           else
             PROD_URL="https://api.netra.ai"  # Replace with actual production URL

@@ -40,7 +40,7 @@ class TestThresholdChecking:
         )
         
         # Should fail for optimization type
-        passed = quality_service._check_thresholds(
+        passed = quality_service.validator.check_thresholds(
             metrics,
             ContentType.OPTIMIZATION,
             strict_mode=False
@@ -54,7 +54,7 @@ class TestThresholdChecking:
             hallucination_risk=0.8  # Above 0.7 threshold
         )
         
-        passed = quality_service._check_thresholds(
+        passed = quality_service.validator.check_thresholds(
             metrics,
             ContentType.GENERAL,
             strict_mode=False
@@ -81,7 +81,7 @@ class TestSuggestionGeneration:
             completeness_score=0.3
         )
         
-        suggestions = quality_service._generate_suggestions(
+        suggestions = quality_service.validator.generate_suggestions(
             metrics,
             ContentType.OPTIMIZATION
         )
@@ -102,7 +102,7 @@ class TestSuggestionGeneration:
             completeness_score=0.8
         )
         
-        suggestions = quality_service._generate_suggestions(
+        suggestions = quality_service.validator.generate_suggestions(
             metrics,
             ContentType.OPTIMIZATION
         )
@@ -116,7 +116,7 @@ class TestSuggestionGeneration:
             actionability_score=0.8
         )
         
-        suggestions = quality_service._generate_suggestions(
+        suggestions = quality_service.validator.generate_suggestions(
             metrics,
             ContentType.ACTION_PLAN
         )
@@ -141,7 +141,7 @@ class TestPromptAdjustments:
             circular_reasoning_detected=True
         )
         
-        adjustments = quality_service._generate_prompt_adjustments(metrics)
+        adjustments = quality_service.validator.generate_prompt_adjustments(metrics)
         
         assert adjustments['temperature'] == 0.3
         assert len(adjustments['additional_instructions']) == 5

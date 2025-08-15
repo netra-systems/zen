@@ -54,14 +54,23 @@ class RateLimitTracker:
         """Check if identifier is rate limited."""
         now = time.time()
         
-        # Check if IP is temporarily blocked
+        if self._is_blocked(identifier, now):
+            return True
+        
+        self._clean_old_requests(identifier, now, window)
+        return self._check_and_apply_limit(identifier, limit, now)
+    
+    def _is_blocked(self, identifier: str, now: float) -> bool:
+        """Check if identifier is temporarily blocked."""
         if identifier in self._blocked_ips:
             if now < self._blocked_ips[identifier].timestamp():
                 return True
             else:
                 del self._blocked_ips[identifier]
-        
-        # Clean old requests
+        return False
+    
+    def _clean_old_requests(self, identifier: str, now: float, window: int) -> None:
+        """Clean old requests outside the time window."""
         if identifier not in self._requests:
             self._requests[identifier] = []
         
@@ -69,10 +78,10 @@ class RateLimitTracker:
             req_time for req_time in self._requests[identifier] 
             if now - req_time < window
         ]
-        
-        # Check limit
+    
+    def _check_and_apply_limit(self, identifier: str, limit: int, now: float) -> bool:
+        """Check limit and apply blocking if exceeded."""
         if len(self._requests[identifier]) >= limit:
-            # Block IP for 5 minutes on excessive requests
             self._blocked_ips[identifier] = datetime.now() + timedelta(minutes=5)
             logger.warning(f"Rate limit exceeded for {identifier}, blocking for 5 minutes")
             return True
@@ -144,28 +153,37 @@ class InputValidator:
         if not data:
             return
         
-        # Check for SQL injection
+        self._check_sql_injection(data, field_name)
+        self._check_xss_attack(data, field_name)
+        self._check_command_injection(data, field_name)
+        self._check_path_traversal(data, field_name)
+    
+    def _check_sql_injection(self, data: str, field_name: str) -> None:
+        """Check for SQL injection patterns."""
         if self.sql_regex.search(data):
             logger.error(f"SQL injection attempt detected in {field_name}: {data[:100]}")
             raise NetraSecurityException(
                 message=f"SQL injection attempt detected in {field_name}"
             )
-        
-        # Check for XSS
+    
+    def _check_xss_attack(self, data: str, field_name: str) -> None:
+        """Check for XSS attack patterns."""
         if self.xss_regex.search(data):
             logger.error(f"XSS attempt detected in {field_name}: {data[:100]}")
             raise NetraSecurityException(
                 message=f"XSS attempt detected in {field_name}"
             )
-        
-        # Check for command injection
+    
+    def _check_command_injection(self, data: str, field_name: str) -> None:
+        """Check for command injection patterns."""
         if self.command_regex.search(data):
             logger.error(f"Command injection attempt detected in {field_name}: {data[:100]}")
             raise NetraSecurityException(
                 message=f"Command injection attempt detected in {field_name}"
             )
-        
-        # Check for path traversal
+    
+    def _check_path_traversal(self, data: str, field_name: str) -> None:
+        """Check for path traversal patterns."""
         if self.path_regex.search(data):
             logger.error(f"Path traversal attempt detected in {field_name}: {data[:100]}")
             raise NetraSecurityException(
@@ -175,18 +193,26 @@ class InputValidator:
     def sanitize_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
         """Sanitize HTTP headers."""
         sanitized = {}
-        allowed_headers = {
+        allowed_headers = self._get_allowed_headers()
+        
+        for key, value in headers.items():
+            if self._is_header_allowed(key, value, allowed_headers):
+                sanitized[key] = value[:SecurityConfig.MAX_HEADER_SIZE]
+        
+        return sanitized
+    
+    def _get_allowed_headers(self) -> set:
+        """Get set of allowed headers."""
+        return {
             'content-type', 'authorization', 'user-agent', 'accept',
             'accept-encoding', 'accept-language', 'cache-control',
             'connection', 'host', 'origin', 'referer', 'x-request-id',
             'x-trace-id', 'x-forwarded-for', 'x-real-ip'
         }
-        
-        for key, value in headers.items():
-            if key.lower() in allowed_headers and len(value) <= SecurityConfig.MAX_HEADER_SIZE:
-                sanitized[key] = value[:SecurityConfig.MAX_HEADER_SIZE]
-        
-        return sanitized
+    
+    def _is_header_allowed(self, key: str, value: str, allowed_headers: set) -> bool:
+        """Check if header is allowed."""
+        return key.lower() in allowed_headers and len(value) <= SecurityConfig.MAX_HEADER_SIZE
 
 
 class SecurityMiddleware(BaseHTTPMiddleware):
@@ -215,34 +241,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         start_time = time.time()
         
         try:
-            # 1. Request size validation
-            self._validate_request_size(request)
-            
-            # 2. URL validation
-            self._validate_url(request)
-            
-            # 3. Header validation
-            self._validate_headers(request)
-            
-            # 4. Rate limiting
-            await self._check_rate_limits(request)
-            
-            # 5. Input validation for POST/PUT requests
-            if request.method in ["POST", "PUT", "PATCH"]:
-                await self._validate_request_body(request)
-            
-            # 6. Process request
-            response = await call_next(request)
-            
-            # 7. Add security headers
-            self._add_security_headers(response)
-            
-            # 8. Log security metrics
-            processing_time = time.time() - start_time
-            logger.info(f"Security middleware processed {request.method} {request.url.path} in {processing_time:.3f}s")
-            
+            await self._perform_security_validations(request)
+            response = await self._process_secure_request(request, call_next)
+            self._log_security_processing(request, start_time)
             return response
-            
         except NetraSecurityException:
             raise
         except Exception as e:
@@ -251,6 +253,26 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Security validation failed"
             )
+    
+    async def _perform_security_validations(self, request: Request) -> None:
+        """Perform all security validations on request."""
+        self._validate_request_size(request)
+        self._validate_url(request)
+        self._validate_headers(request)
+        await self._check_rate_limits(request)
+        if request.method in ["POST", "PUT", "PATCH"]:
+            await self._validate_request_body(request)
+    
+    async def _process_secure_request(self, request: Request, call_next: Callable) -> Response:
+        """Process request with security headers."""
+        response = await call_next(request)
+        self._add_security_headers(response)
+        return response
+    
+    def _log_security_processing(self, request: Request, start_time: float) -> None:
+        """Log security processing metrics."""
+        processing_time = time.time() - start_time
+        logger.info(f"Security middleware processed {request.method} {request.url.path} in {processing_time:.3f}s")
     
     def _validate_request_size(self, request: Request) -> None:
         """Validate request size."""
@@ -292,67 +314,87 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         """Check rate limits."""
         client_ip = self._get_client_ip(request)
         user_id = await self._get_user_id(request)
+        limit = self._determine_rate_limit(request)
         
-        # Determine rate limit based on endpoint
-        limit = SecurityConfig.STRICT_RATE_LIMIT if any(
+        await self._check_ip_rate_limit(client_ip, limit)
+        if user_id:
+            await self._check_user_rate_limit(user_id, limit)
+    
+    def _determine_rate_limit(self, request: Request) -> int:
+        """Determine rate limit based on endpoint sensitivity."""
+        return SecurityConfig.STRICT_RATE_LIMIT if any(
             endpoint in str(request.url.path) for endpoint in self.sensitive_endpoints
         ) else SecurityConfig.DEFAULT_RATE_LIMIT
-        
-        # Check IP-based rate limit
+    
+    async def _check_ip_rate_limit(self, client_ip: str, limit: int) -> None:
+        """Check IP-based rate limit."""
         identifier = f"ip:{client_ip}"
         if self.rate_limiter.is_rate_limited(identifier, limit):
             logger.warning(f"Rate limit exceeded for IP: {client_ip}")
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail="Rate limit exceeded",
-                headers={"Retry-After": "300"}  # 5 minutes
+                headers={"Retry-After": "300"}
             )
-        
-        # Check user-based rate limit if authenticated
-        if user_id:
-            user_identifier = f"user:{user_id}"
-            if self.rate_limiter.is_rate_limited(user_identifier, limit * 2):  # Higher limit for authenticated users
-                logger.warning(f"Rate limit exceeded for user: {user_id}")
-                raise HTTPException(
-                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    detail="Rate limit exceeded for user",
-                    headers={"Retry-After": "300"}
-                )
+    
+    async def _check_user_rate_limit(self, user_id: str, limit: int) -> None:
+        """Check user-based rate limit."""
+        user_identifier = f"user:{user_id}"
+        if self.rate_limiter.is_rate_limited(user_identifier, limit * 2):
+            logger.warning(f"Rate limit exceeded for user: {user_id}")
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Rate limit exceeded for user",
+                headers={"Retry-After": "300"}
+            )
     
     async def _validate_request_body(self, request: Request) -> None:
         """Validate request body content."""
         try:
-            # Create a copy of the request body to validate
             body = await request.body()
             if body:
-                body_str = body.decode('utf-8', errors='ignore')
+                body_str = self._decode_request_body(body)
                 self.input_validator.validate_input(body_str, "request_body")
         except UnicodeDecodeError:
-            logger.warning("Request body contains invalid UTF-8")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid request encoding"
-            )
+            self._handle_encoding_error()
+    
+    def _decode_request_body(self, body: bytes) -> str:
+        """Decode request body to string."""
+        return body.decode('utf-8', errors='ignore')
+    
+    def _handle_encoding_error(self) -> None:
+        """Handle request body encoding errors."""
+        logger.warning("Request body contains invalid UTF-8")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid request encoding"
+        )
     
     def _get_client_ip(self, request: Request) -> str:
         """Get client IP address."""
-        # Check for forwarded headers (in order of trust)
-        forwarded_headers = [
+        forwarded_headers = self._get_forwarded_headers()
+        
+        for header in forwarded_headers:
+            ip = self._extract_ip_from_header(request, header)
+            if ip and self._is_valid_ip(ip):
+                return ip
+        
+        return request.client.host if request.client else "unknown"
+    
+    def _get_forwarded_headers(self) -> list:
+        """Get list of trusted forwarded headers."""
+        return [
             "x-forwarded-for",
             "x-real-ip", 
             "x-client-ip",
-            "cf-connecting-ip"  # Cloudflare
+            "cf-connecting-ip"
         ]
-        
-        for header in forwarded_headers:
-            if header in request.headers:
-                # Take the first IP in case of comma-separated list
-                ip = request.headers[header].split(',')[0].strip()
-                if self._is_valid_ip(ip):
-                    return ip
-        
-        # Fallback to client host
-        return request.client.host if request.client else "unknown"
+    
+    def _extract_ip_from_header(self, request: Request, header: str) -> Optional[str]:
+        """Extract IP from forwarded header."""
+        if header in request.headers:
+            return request.headers[header].split(',')[0].strip()
+        return None
     
     async def _get_user_id(self, request: Request) -> Optional[str]:
         """Extract user ID from request if authenticated."""

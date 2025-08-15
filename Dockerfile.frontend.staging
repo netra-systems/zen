@@ -23,15 +23,33 @@ WORKDIR /app
 # Copy dependencies from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy frontend source code
-COPY frontend/ ./
+# Copy only necessary config files first (better caching)
+COPY frontend/package*.json ./
+COPY frontend/tsconfig.json ./
+COPY frontend/next.config.ts ./
+COPY frontend/tailwind.config.ts ./
+COPY frontend/postcss.config.mjs ./
+COPY frontend/eslint.config.mjs ./
+COPY frontend/components.json ./
 
 # Accept build args for API URL
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
-# Build the application
-RUN npm run build
+# Copy source code last (most frequently changed)
+COPY frontend/app ./app
+COPY frontend/components ./components
+COPY frontend/hooks ./hooks
+COPY frontend/lib ./lib
+COPY frontend/public ./public
+COPY frontend/services ./services
+COPY frontend/store ./store
+COPY frontend/types ./types
+COPY frontend/utils ./utils
+
+# Build the application with cache mount
+RUN --mount=type=cache,target=/app/.next/cache \
+    npm run build
 
 # Production stage
 FROM node:20-alpine AS runner
@@ -44,10 +62,13 @@ ENV PORT=3000
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nextjs -u 1001
 
-# Copy built application
+# Copy standalone output (Next.js creates server.js at root)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# Ensure server.js exists
+RUN test -f server.js || (echo "Error: server.js not found in standalone output" && exit 1)
 
 USER nextjs
 

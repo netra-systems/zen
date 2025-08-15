@@ -23,8 +23,7 @@ name: AI Auto-Fix
 #         type: boolean
 
 env:
-  # ACT environment detection
-  IS_ACT: ${{ env.ACT || 'false' }}
+  # Workflow configuration
   DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
 
 permissions:
@@ -47,7 +46,7 @@ jobs:
       - name: Detect Environment
         id: environment
         run: |
-          if [ "${{ env.IS_ACT }}" = "true" ] || [ "${{ env.DRY_RUN }}" = "true" ]; then
+          if [ "${ACT:-false}" = "true" ] || [ "${{ env.DRY_RUN }}" = "true" ]; then
             echo "is_act=true" >> $GITHUB_OUTPUT
             echo "🧪 Running in ACT/dry-run mode - using mock responses"
           else

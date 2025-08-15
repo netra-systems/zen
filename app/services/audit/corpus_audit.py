@@ -41,15 +41,31 @@ class CorpusAuditLogger:
     ) -> CorpusAuditRecord:
         """Log a corpus operation with comprehensive audit trail."""
         try:
-            audit_data = self._prepare_audit_data(
-                action, resource_type, status, user_id, corpus_id,
+            return await self._execute_audit_logging(
+                db, action, resource_type, status, user_id, corpus_id,
                 resource_id, operation_duration_ms, result_data, metadata
             )
-            audit_log = await self.repository.create(db, **audit_data)
-            return self._convert_to_record(audit_log)
         except Exception as e:
-            logger.error(f"Failed to log audit operation: {e}")
-            raise NetraException(f"Audit logging failed: {str(e)}")
+            return self._handle_audit_logging_error(e)
+    
+    async def _execute_audit_logging(
+        self, db: AsyncSession, action: CorpusAuditAction, resource_type: str,
+        status: CorpusAuditStatus, user_id: Optional[str], corpus_id: Optional[str],
+        resource_id: Optional[str], operation_duration_ms: Optional[float],
+        result_data: Optional[Dict[str, Any]], metadata: Optional[CorpusAuditMetadata]
+    ) -> CorpusAuditRecord:
+        """Execute the audit logging operation."""
+        audit_data = self._prepare_audit_data(
+            action, resource_type, status, user_id, corpus_id,
+            resource_id, operation_duration_ms, result_data, metadata
+        )
+        audit_log = await self.repository.create(db, **audit_data)
+        return self._convert_to_record(audit_log)
+    
+    def _handle_audit_logging_error(self, error: Exception) -> None:
+        """Handle audit logging errors with proper exception propagation."""
+        logger.error(f"Failed to log audit operation: {error}")
+        raise NetraException(f"Audit logging failed: {str(error)}")
 
     def _prepare_audit_data(
         self, action: CorpusAuditAction, resource_type: str, status: CorpusAuditStatus,
@@ -88,7 +104,12 @@ class CorpusAuditLogger:
 
     def _convert_to_record(self, audit_log: CorpusAuditLog) -> CorpusAuditRecord:
         """Convert database model to audit record."""
-        metadata = CorpusAuditMetadata(
+        metadata = self._create_audit_metadata_from_log(audit_log)
+        return self._create_audit_record_from_log(audit_log, metadata)
+    
+    def _create_audit_metadata_from_log(self, audit_log: CorpusAuditLog) -> CorpusAuditMetadata:
+        """Create audit metadata object from database log."""
+        return CorpusAuditMetadata(
             user_agent=audit_log.user_agent,
             ip_address=audit_log.ip_address,
             request_id=audit_log.request_id,
@@ -98,7 +119,9 @@ class CorpusAuditLogger:
             error_details=audit_log.error_details,
             compliance_flags=audit_log.compliance_flags or []
         )
-        
+    
+    def _create_audit_record_from_log(self, audit_log: CorpusAuditLog, metadata: CorpusAuditMetadata) -> CorpusAuditRecord:
+        """Create audit record object from database log and metadata."""
         return CorpusAuditRecord(
             id=audit_log.id,
             timestamp=audit_log.timestamp,

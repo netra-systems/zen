@@ -34,11 +34,6 @@ env:
   CONFIG_FILE: .github/workflow-config.yml
   PYTHON_VERSION: '3.11'
   NODE_VERSION: '20'
-  # ACT compatibility flags
-  ACT_DETECTED: ${{ env.ACT || 'false' }}
-  ACT_MOCK_SERVICES: ${{ env.ACT_MOCK_SERVICES || 'true' }}
-  ACT_SKIP_EXTERNAL: ${{ env.ACT_SKIP_EXTERNAL || 'true' }}
-  ACT_VERBOSE: ${{ env.ACT_VERBOSE || 'true' }}
 
 permissions:
   contents: read
@@ -78,11 +73,11 @@ jobs:
         id: act-setup
         run: |
           echo "=== Orchestrator ACT Compatibility ==="
-          if [[ "${{ env.ACT_DETECTED }}" == "true" ]]; then
+          if [[ "${ACT:-false}" == "true" ]]; then
             echo "🧪 Running in ACT (local) mode"
-            echo "- Mock services: ${{ env.ACT_MOCK_SERVICES }}"
-            echo "- Skip external: ${{ env.ACT_SKIP_EXTERNAL }}"
-            echo "- Verbose logging: ${{ env.ACT_VERBOSE }}"
+            echo "- Mock services: ${ACT_MOCK_SERVICES:-true}"
+            echo "- Skip external: ${ACT_SKIP_EXTERNAL:-true}"
+            echo "- Verbose logging: ${ACT_VERBOSE:-true}"
             echo "ACT_MODE=true" >> $GITHUB_ENV
             echo "act_mode=true" >> $GITHUB_OUTPUT
             
@@ -220,7 +215,7 @@ jobs:
           fi
           
           # Check if only docs changed (skip in ACT mode)
-          if [[ "${{ github.event_name }}" == "pull_request" ]] && [[ "${{ env.ACT_SKIP_EXTERNAL }}" != "true" ]]; then
+          if [[ "${{ github.event_name }}" == "pull_request" ]] && [[ "${ACT_SKIP_EXTERNAL:-false}" != "true" ]]; then
             # Only run gh command if not in ACT mode
             CHANGED_FILES=$(gh pr diff ${{ github.event.pull_request.number }} --name-only 2>/dev/null || echo "")
             if [ -n "$CHANGED_FILES" ]; then

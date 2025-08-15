@@ -49,12 +49,21 @@ class DataSubAgent(BaseSubAgent):
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher) -> None:
         self._init_base_agent(llm_manager)
         self.tool_dispatcher = tool_dispatcher
+        self._init_all_components()
+        self._setup_cache_wrapper()
+    
+    def _init_all_components(self) -> None:
+        """Initialize all agent components."""
         self._init_components()
         self._init_redis()
         self._init_reliability()
+    
+    def _setup_cache_wrapper(self) -> None:
+        """Setup cache wrapper for test compatibility."""
         # Wrap _get_cached_schema for test compatibility - disabled temporarily
         # original_method = self._get_cached_schema
         # self._get_cached_schema = CachedMethodWrapper(original_method, self.cache_clear)
+        pass
         
     def _init_base_agent(self, llm_manager: LLMManager) -> None:
         """Initialize base agent with core parameters."""
@@ -107,10 +116,8 @@ class DataSubAgent(BaseSubAgent):
         """Get cached schema information with TTL and cache invalidation."""
         self._ensure_cache_initialized()
         current_time = time.time()
-        
         if not force_refresh and self._is_cache_valid(table_name, current_time):
             return self._schema_cache[table_name]
-        
         return await self._fetch_and_cache_schema(table_name, current_time)
     
     
@@ -212,12 +219,15 @@ class DataSubAgent(BaseSubAgent):
                      stream_updates: bool = False) -> TypedAgentResult:
         """Execute advanced data analysis with ClickHouse integration."""
         start_time = time.time()
-        
         try:
             return await self._execute_with_error_handling(state, run_id, stream_updates, start_time)
         except Exception as e:
-            logger.error(f"Data analysis execution failed for run_id {run_id}: {e}")
-            return self._create_failure_result(f"Data analysis failed: {e}", start_time)
+            return self._handle_execution_failure(e, run_id, start_time)
+    
+    def _handle_execution_failure(self, error: Exception, run_id: str, start_time: float) -> TypedAgentResult:
+        """Handle execution failure and create error result."""
+        logger.error(f"Data analysis execution failed for run_id {run_id}: {error}")
+        return self._create_failure_result(f"Data analysis failed: {error}", start_time)
     
     async def _execute_with_error_handling(
         self, state: DeepAgentState, run_id: str, stream_updates: bool, start_time: float
@@ -225,11 +235,18 @@ class DataSubAgent(BaseSubAgent):
         """Execute data analysis with comprehensive error handling."""
         execution_engine = self._create_execution_engine()
         data_ops, metrics_analyzer = self._create_operation_modules()
-        
+        await self._run_analysis_execution(execution_engine, state, run_id, stream_updates, data_ops, metrics_analyzer)
+        return self._finalize_analysis_result(state, start_time)
+    
+    async def _run_analysis_execution(self, execution_engine, state: DeepAgentState, 
+                                    run_id: str, stream_updates: bool, data_ops, metrics_analyzer) -> None:
+        """Run the analysis execution process."""
         await execution_engine.execute_analysis(
             state, run_id, stream_updates, self._send_update, data_ops, metrics_analyzer
         )
-        
+    
+    def _finalize_analysis_result(self, state: DeepAgentState, start_time: float) -> TypedAgentResult:
+        """Finalize and return analysis result."""
         data_result = self._ensure_data_result(state.data_result)
         state.data_result = data_result
         return self._create_success_result(start_time, data_result)
@@ -243,13 +260,21 @@ class DataSubAgent(BaseSubAgent):
     
     def _create_operation_modules(self) -> tuple:
         """Create data operations and metrics analyzer modules."""
-        data_ops = DataOperations(
+        data_ops = self._create_data_operations()
+        metrics_analyzer = self._create_metrics_analyzer()
+        return data_ops, metrics_analyzer
+    
+    def _create_data_operations(self) -> DataOperations:
+        """Create data operations module."""
+        return DataOperations(
             self.query_builder, self.analysis_engine, self.clickhouse_ops, self.redis_manager
         )
-        metrics_analyzer = MetricsAnalyzer(
+    
+    def _create_metrics_analyzer(self) -> MetricsAnalyzer:
+        """Create metrics analyzer module."""
+        return MetricsAnalyzer(
             self.query_builder, self.analysis_engine, self.clickhouse_ops
         )
-        return data_ops, metrics_analyzer
     
     def _ensure_data_result(self, result) -> Union[DataAnalysisResponse, AnomalyDetectionResponse]:
         """Ensure result is a proper data analysis result object."""
@@ -430,11 +455,15 @@ class DataSubAgent(BaseSubAgent):
     
     def _generate_corpus_summary(self, analysis, patterns, anomalies) -> str:
         """Generate summary text for corpus insights."""
+        components = self._collect_summary_components(analysis, patterns, anomalies)
+        if not components:
+            return "No significant insights found"
+        return f"Found: {', '.join(components)}"
+    
+    def _collect_summary_components(self, analysis, patterns, anomalies) -> list:
+        """Collect components for corpus summary."""
         components = []
         if analysis: components.append("performance analysis")
         if patterns: components.append(f"{len(patterns)} usage patterns")
         if anomalies and anomalies.anomalies_detected: components.append("anomalies detected")
-        
-        if not components:
-            return "No significant insights found"
-        return f"Found: {', '.join(components)}"
+        return components

@@ -35,43 +35,39 @@ class ToolPermissionMiddleware:
         start_time = time.time()
         
         try:
-            # Check if this is a tool execution endpoint
-            if await self._is_tool_endpoint(request):
-                # Extract tool information from request
-                tool_info = await self._extract_tool_info(request)
-                
-                if tool_info:
-                    # Get user from request
-                    user = await self._get_user_from_request(request)
-                    
-                    if user:
-                        # Check tool permissions
-                        permission_result = await self._check_tool_permissions(
-                            tool_info, user, request
-                        )
-                        
-                        if not permission_result.allowed:
-                            return self._permission_denied_response(permission_result)
-                        
-                        # Add permission context to request
-                        request.state.permission_check = permission_result
-                        request.state.tool_info = tool_info
-            
-            # Process request
+            await self._handle_tool_permission_check(request)
             response = await call_next(request)
-            
-            # Log tool execution if it was a tool endpoint
-            if hasattr(request.state, 'tool_info'):
-                await self._log_tool_execution(
-                    request, response, time.time() - start_time
-                )
-            
+            await self._handle_tool_execution_logging(request, response, start_time)
             return response
-            
         except Exception as e:
             logger.error(f"Tool permission middleware error: {e}", exc_info=True)
-            # Don't block requests due to middleware errors
             return await call_next(request)
+    
+    async def _handle_tool_permission_check(self, request: Request) -> None:
+        """Handle tool permission checking for tool endpoints."""
+        if await self._is_tool_endpoint(request):
+            tool_info = await self._extract_tool_info(request)
+            if tool_info:
+                user = await self._get_user_from_request(request)
+                if user:
+                    await self._verify_tool_permissions(request, tool_info, user)
+    
+    async def _verify_tool_permissions(self, request: Request, tool_info: dict, user) -> None:
+        """Verify tool permissions and set request state."""
+        permission_result = await self._check_tool_permissions(tool_info, user, request)
+        
+        if not permission_result.allowed:
+            raise HTTPException(status_code=403, detail=self._permission_denied_response(permission_result))
+        
+        request.state.permission_check = permission_result
+        request.state.tool_info = tool_info
+    
+    async def _handle_tool_execution_logging(self, request: Request, response, start_time: float) -> None:
+        """Handle tool execution logging if needed."""
+        if hasattr(request.state, 'tool_info'):
+            await self._log_tool_execution(
+                request, response, time.time() - start_time
+            )
     
     async def _is_tool_endpoint(self, request: Request) -> bool:
         """Check if request is for a tool execution endpoint"""
@@ -88,44 +84,53 @@ class ToolPermissionMiddleware:
     async def _extract_tool_info(self, request: Request) -> Optional[dict]:
         """Extract tool information from request"""
         try:
-            # For POST requests, check body for tool name
-            if request.method == "POST":
-                if hasattr(request, "_body"):
-                    body = await request.body()
-                    if body:
-                        data = json.loads(body)
-                        if "tool_name" in data:
-                            return {
-                                "name": data["tool_name"],
-                                "arguments": data.get("arguments", {}),
-                                "action": data.get("action", "execute")
-                            }
+            # Try different extraction methods
+            tool_info = await self._extract_from_post_body(request)
+            if tool_info:
+                return tool_info
             
-            # Extract from URL path
-            path_parts = request.url.path.split("/")
-            if len(path_parts) >= 4 and path_parts[2] == "tools":
-                return {
-                    "name": path_parts[3],
-                    "action": path_parts[4] if len(path_parts) > 4 else "execute",
-                    "arguments": dict(request.query_params)
-                }
-            
-            # For MCP endpoints
-            if "/mcp/call" in request.url.path:
-                body = await request.body()
-                if body:
-                    data = json.loads(body)
-                    return {
-                        "name": data.get("method", "unknown"),
-                        "arguments": data.get("params", {}),
-                        "action": "execute"
-                    }
-            
-            return None
-            
+            return self._extract_from_url_path(request) or await self._extract_from_mcp_endpoint(request)
         except Exception as e:
             logger.error(f"Error extracting tool info: {e}")
             return None
+    
+    async def _extract_from_post_body(self, request: Request) -> Optional[dict]:
+        """Extract tool info from POST request body."""
+        if request.method == "POST" and hasattr(request, "_body"):
+            body = await request.body()
+            if body:
+                data = json.loads(body)
+                if "tool_name" in data:
+                    return {
+                        "name": data["tool_name"],
+                        "arguments": data.get("arguments", {}),
+                        "action": data.get("action", "execute")
+                    }
+        return None
+    
+    def _extract_from_url_path(self, request: Request) -> Optional[dict]:
+        """Extract tool info from URL path."""
+        path_parts = request.url.path.split("/")
+        if len(path_parts) >= 4 and path_parts[2] == "tools":
+            return {
+                "name": path_parts[3],
+                "action": path_parts[4] if len(path_parts) > 4 else "execute",
+                "arguments": dict(request.query_params)
+            }
+        return None
+    
+    async def _extract_from_mcp_endpoint(self, request: Request) -> Optional[dict]:
+        """Extract tool info from MCP endpoint."""
+        if "/mcp/call" in request.url.path:
+            body = await request.body()
+            if body:
+                data = json.loads(body)
+                return {
+                    "name": data.get("method", "unknown"),
+                    "arguments": data.get("params", {}),
+                    "action": "execute"
+                }
+        return None
     
     async def _get_user_from_request(self, request: Request) -> Optional[User]:
         """Get user from request context"""
@@ -155,27 +160,31 @@ class ToolPermissionMiddleware:
     ) -> PermissionCheckResult:
         """Check if user has permission to use the tool"""
         try:
-            # Create execution context
-            context = ToolExecutionContext(
-                user_id=str(user.id),
-                tool_name=tool_info["name"],
-                requested_action=tool_info.get("action", "execute"),
-                user_plan=getattr(user, 'plan_tier', 'free'),
-                user_roles=getattr(user, 'roles', []),
-                feature_flags=getattr(user, 'feature_flags', {}),
-                is_developer=getattr(user, 'is_developer', False),
-                environment=self._get_environment()
-            )
-            
-            # Check permissions
+            context = self._create_execution_context(tool_info, user)
             return await self.permission_service.check_tool_permission(context)
-            
         except Exception as e:
             logger.error(f"Error checking tool permissions: {e}")
-            return PermissionCheckResult(
-                allowed=False,
-                reason=f"Permission check failed: {str(e)}"
-            )
+            return self._create_failed_permission_result(e)
+    
+    def _create_execution_context(self, tool_info: dict, user: User) -> ToolExecutionContext:
+        """Create tool execution context from tool info and user."""
+        return ToolExecutionContext(
+            user_id=str(user.id),
+            tool_name=tool_info["name"],
+            requested_action=tool_info.get("action", "execute"),
+            user_plan=getattr(user, 'plan_tier', 'free'),
+            user_roles=getattr(user, 'roles', []),
+            feature_flags=getattr(user, 'feature_flags', {}),
+            is_developer=getattr(user, 'is_developer', False),
+            environment=self._get_environment()
+        )
+    
+    def _create_failed_permission_result(self, error: Exception) -> PermissionCheckResult:
+        """Create failed permission result for errors."""
+        return PermissionCheckResult(
+            allowed=False,
+            reason=f"Permission check failed: {str(error)}"
+        )
     
     def _get_environment(self) -> str:
         """Get current environment"""

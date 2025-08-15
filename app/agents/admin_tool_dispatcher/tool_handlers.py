@@ -27,14 +27,20 @@ async def execute_corpus_manager(action: str,
                                 db: Session, 
                                 **kwargs) -> Dict[str, Any]:
     """Execute corpus manager actions via corpus service"""
-    if action == 'create':
-        return await handle_corpus_create(user, db, **kwargs)
-    elif action == 'list':
-        return await handle_corpus_list(db)
-    elif action == 'validate':
-        return await handle_corpus_validate(**kwargs)
-    else:
-        return {"error": f"Unknown corpus action: {action}"}
+    action_handlers = get_corpus_action_handlers()
+    handler = action_handlers.get(action)
+    if handler:
+        return await handler(user, db, **kwargs)
+    return {"error": f"Unknown corpus action: {action}"}
+
+
+def get_corpus_action_handlers() -> Dict[str, Callable]:
+    """Get mapping of corpus actions to handlers."""
+    return {
+        'create': handle_corpus_create,
+        'list': lambda user, db, **kwargs: handle_corpus_list(db),
+        'validate': lambda user, db, **kwargs: handle_corpus_validate(**kwargs)
+    }
 
 
 async def handle_corpus_create(user: User, 
@@ -42,16 +48,20 @@ async def handle_corpus_create(user: User,
                               **kwargs) -> Dict[str, Any]:
     """Handle corpus creation"""
     from app.services import corpus_service
-    
-    domain = kwargs.get('domain', 'general')
-    name = kwargs.get('name', f'corpus_{domain}')
-    description = kwargs.get('description', f'Corpus for {domain} domain')
-    
-    result = await corpus_service.create_corpus(
-        name=name, domain=domain, description=description,
-        user_id=user.id, db=db
-    )
+    params = extract_corpus_create_params(kwargs, user)
+    result = await corpus_service.create_corpus(**params, db=db)
     return {"status": "success", "corpus": result}
+
+
+def extract_corpus_create_params(kwargs: Dict[str, Any], user: User) -> Dict[str, Any]:
+    """Extract parameters for corpus creation."""
+    domain = kwargs.get('domain', 'general')
+    return {
+        "name": kwargs.get('name', f'corpus_{domain}'),
+        "domain": domain,
+        "description": kwargs.get('description', f'Corpus for {domain} domain'),
+        "user_id": user.id
+    }
 
 
 async def handle_corpus_list(db: Session) -> Dict[str, Any]:
@@ -80,12 +90,19 @@ async def execute_synthetic_generator(action: str,
                                      db: Session, 
                                      **kwargs) -> Dict[str, Any]:
     """Execute synthetic data generator actions"""
-    if action == 'generate':
-        return await handle_synthetic_generate(user, db, **kwargs)
-    elif action == 'list_presets':
-        return await handle_synthetic_list_presets(db)
-    else:
-        return {"error": f"Unknown synthetic generator action: {action}"}
+    action_handlers = get_synthetic_action_handlers()
+    handler = action_handlers.get(action)
+    if handler:
+        return await handler(user, db, **kwargs)
+    return {"error": f"Unknown synthetic generator action: {action}"}
+
+
+def get_synthetic_action_handlers() -> Dict[str, Callable]:
+    """Get mapping of synthetic actions to handlers."""
+    return {
+        'generate': handle_synthetic_generate,
+        'list_presets': lambda user, db, **kwargs: handle_synthetic_list_presets(db)
+    }
 
 
 async def handle_synthetic_generate(user: User, 
@@ -93,16 +110,20 @@ async def handle_synthetic_generate(user: User,
                                    **kwargs) -> Dict[str, Any]:
     """Handle synthetic data generation"""
     from app.services.synthetic_data_service import SyntheticDataService
-    
     synthetic_service = SyntheticDataService(db)
-    preset = kwargs.get('preset')
-    corpus_id = kwargs.get('corpus_id')
-    count = kwargs.get('count', 10)
-    
-    result = await synthetic_service.generate_synthetic_data(
-        preset=preset, corpus_id=corpus_id, count=count, user_id=user.id
-    )
+    params = extract_synthetic_params(kwargs, user)
+    result = await synthetic_service.generate_synthetic_data(**params)
     return {"status": "success", "data": result}
+
+
+def extract_synthetic_params(kwargs: Dict[str, Any], user: User) -> Dict[str, Any]:
+    """Extract parameters for synthetic data generation."""
+    return {
+        "preset": kwargs.get('preset'),
+        "corpus_id": kwargs.get('corpus_id'),
+        "count": kwargs.get('count', 10),
+        "user_id": user.id
+    }
 
 
 async def handle_synthetic_list_presets(db: Session) -> Dict[str, Any]:
@@ -119,41 +140,40 @@ async def execute_user_admin(action: str,
                             db: Session, 
                             **kwargs) -> Dict[str, Any]:
     """Execute user admin actions via user service"""
-    if action == 'create_user':
-        return await handle_user_create(db, **kwargs)
-    elif action == 'grant_permission':
-        return await handle_user_grant_permission(db, **kwargs)
-    else:
-        return {"error": f"Unknown user admin action: {action}"}
+    action_handlers = get_user_admin_handlers()
+    handler = action_handlers.get(action)
+    if handler:
+        return await handler(db, **kwargs)
+    return {"error": f"Unknown user admin action: {action}"}
+
+
+def get_user_admin_handlers() -> Dict[str, Callable]:
+    """Get mapping of user admin actions to handlers."""
+    return {
+        'create_user': lambda user, db, **kwargs: handle_user_create(db, **kwargs),
+        'grant_permission': lambda user, db, **kwargs: handle_user_grant_permission(db, **kwargs)
+    }
 
 
 async def handle_user_create(db: Session, **kwargs) -> Dict[str, Any]:
     """Handle user creation"""
     from app.services import user_service
-    
     email = kwargs.get('email')
-    role = kwargs.get('role', 'standard_user')
     if not email:
         return {"error": "email required for user creation"}
-    
-    result = await user_service.create_user(
-        email=email, role=role, db=db
-    )
+    params = {"email": email, "role": kwargs.get('role', 'standard_user'), "db": db}
+    result = await user_service.create_user(**params)
     return {"status": "success", "user": result}
 
 
 async def handle_user_grant_permission(db: Session, **kwargs) -> Dict[str, Any]:
     """Handle granting user permissions"""
     from app.services.permission_service import PermissionService
-    
     user_email = kwargs.get('user_email')
     permission = kwargs.get('permission')
     if not user_email or not permission:
         return {"error": "user_email and permission required"}
-    
-    success = await PermissionService.grant_permission(
-        user_email, permission, db
-    )
+    success = await PermissionService.grant_permission(user_email, permission, db)
     return {"status": "success" if success else "error", "granted": success}
 
 
@@ -199,21 +219,24 @@ async def handle_log_analyze(user: User,
                             **kwargs) -> Dict[str, Any]:
     """Handle log analysis"""
     from app.services.debug_service import DebugService
-    
-    query = kwargs.get('query', '')
-    time_range = kwargs.get('time_range', '1h')
-    
+    query, time_range = extract_log_params(kwargs)
     debug_service = DebugService(db)
     result = await debug_service.get_debug_info(
         component='logs', include_logs=True, user_id=user.id
     )
-    
+    return build_log_analysis_response(query, time_range, result)
+
+
+def extract_log_params(kwargs: Dict[str, Any]) -> tuple:
+    """Extract log analysis parameters."""
+    return kwargs.get('query', ''), kwargs.get('time_range', '1h')
+
+
+def build_log_analysis_response(query: str, time_range: str, result: dict) -> Dict[str, Any]:
+    """Build log analysis response."""
     return {
-        "status": "success", 
-        "query": query, 
-        "time_range": time_range,
-        "logs": result.get('logs', []),
-        "summary": f"Log analysis for query: {query}"
+        "status": "success", "query": query, "time_range": time_range,
+        "logs": result.get('logs', []), "summary": f"Log analysis for query: {query}"
     }
 
 

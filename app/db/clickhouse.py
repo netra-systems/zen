@@ -59,41 +59,54 @@ class DisabledClickHouseDatabase:
         # Return empty results - the application should handle empty datasets gracefully
         return self._create_empty_result_set()
 
-@asynccontextmanager
-async def get_clickhouse_client():
-    """
-    Dependency provider for the ClickHouse client.
-    Instantiates the client with settings and attempts to connect.
-    This function will be called by FastAPI for routes that need a ClickHouse connection.
-    """
-    # Check if ClickHouse is disabled in development/testing mode
-    if (settings.environment == "development" and not settings.dev_mode_clickhouse_enabled) or settings.environment == "testing":
-        logger.info(f"ClickHouse is disabled in {settings.environment} mode - using disabled client")
-        client = DisabledClickHouseDatabase()
-        try:
-            yield client
-        finally:
-            await client.disconnect()
-        return
-    
-    client = None
-    try:
-        if settings.environment == "development":
-            config = settings.clickhouse_https_dev
-        else:
-            config = settings.clickhouse_https
+def _is_clickhouse_disabled() -> bool:
+    """Check if ClickHouse is disabled in current environment."""
+    dev_disabled = settings.environment == "development" and not settings.dev_mode_clickhouse_enabled
+    return dev_disabled or settings.environment == "testing"
 
-        base_client = ClickHouseDatabase(
-            host=config.host,
-            port=config.port,
-            user=config.user,
-            password=config.password,
-            database=config.database,
-            secure=True
-        )
-        # Wrap with query interceptor to fix array syntax issues
-        client = ClickHouseQueryInterceptor(base_client)
+async def _create_disabled_client():
+    """Create and manage disabled ClickHouse client."""
+    logger.info(f"ClickHouse disabled in {settings.environment} mode - using disabled client")
+    client = DisabledClickHouseDatabase()
+    try:
         yield client
     finally:
-        if client:
-            await client.disconnect()
+        await client.disconnect()
+
+def _get_clickhouse_config():
+    """Get ClickHouse configuration based on environment."""
+    if settings.environment == "development":
+        return settings.clickhouse_https_dev
+    return settings.clickhouse_https
+
+def _create_base_client(config):
+    """Create base ClickHouse client with configuration."""
+    return ClickHouseDatabase(
+        host=config.host, port=config.port, user=config.user,
+        password=config.password, database=config.database, secure=True
+    )
+
+def _wrap_client_with_interceptor(base_client):
+    """Wrap client with query interceptor for array syntax fixes."""
+    return ClickHouseQueryInterceptor(base_client)
+
+async def _cleanup_client(client):
+    """Clean up ClickHouse client connection."""
+    if client:
+        await client.disconnect()
+
+@asynccontextmanager
+async def get_clickhouse_client():
+    """Dependency provider for ClickHouse client with proper connection management."""
+    if _is_clickhouse_disabled():
+        async for client in _create_disabled_client():
+            yield client
+        return
+    
+    config = _get_clickhouse_config()
+    base_client = _create_base_client(config)
+    client = _wrap_client_with_interceptor(base_client)
+    try:
+        yield client
+    finally:
+        await _cleanup_client(client)

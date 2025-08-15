@@ -14,7 +14,7 @@ Admin Tool Execution Module
 This module handles the admin tool execution logic split from the massive
 _dispatch_admin_tool function to comply with 8-line function limits.
 """
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from app.schemas import ToolInput
 from app.schemas.admin_tool_types import (
     ToolResponse, ToolSuccessResponse, ToolFailureResponse,
@@ -35,17 +35,20 @@ async def dispatch_admin_tool(dispatcher: "AdminToolDispatcher",
                              **kwargs) -> ToolResponse:
     """Main admin tool dispatch function split into smaller functions"""
     start_time = datetime.utcnow()
-    
-    # Check permissions
+    validation_result = await validate_tool_permissions(dispatcher, tool_name, start_time)
+    if validation_result:
+        return validation_result
+    return await execute_admin_tool_safely(dispatcher, tool_name, start_time, **kwargs)
+
+
+async def validate_tool_permissions(dispatcher: "AdminToolDispatcher", 
+                                   tool_name: str, start_time: datetime) -> Optional[ToolResponse]:
+    """Validate tool permissions and access."""
     if not check_admin_tools_enabled(dispatcher):
         return create_permission_denied_response(tool_name, start_time)
-    
-    # Validate access
     if not validate_tool_access(dispatcher, tool_name):
         return create_access_denied_response(tool_name, start_time)
-    
-    # Execute tool
-    return await execute_admin_tool_safely(dispatcher, tool_name, start_time, **kwargs)
+    return None
 
 
 def check_admin_tools_enabled(dispatcher: "AdminToolDispatcher") -> bool:
@@ -62,26 +65,18 @@ def validate_tool_access(dispatcher: "AdminToolDispatcher", tool_name: str) -> b
 def create_permission_denied_response(tool_name: str, start_time: datetime) -> ToolFailureResponse:
     """Create response for permission denied"""
     return ToolFailureResponse(
-        tool_name=tool_name,
-        status=ToolStatus.FAILED,
-        execution_time_ms=0.0,
-        started_at=start_time,
-        completed_at=datetime.utcnow(),
-        user_id="unknown",
+        tool_name=tool_name, status=ToolStatus.FAILED, execution_time_ms=0.0,
+        started_at=start_time, completed_at=datetime.utcnow(), user_id="unknown",
         error="Admin tools not available - insufficient permissions"
     )
 
 
 def create_access_denied_response(tool_name: str, start_time: datetime) -> ToolFailureResponse:
     """Create response for access denied"""
-    execution_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+    execution_time = calculate_execution_time(start_time)
     return ToolFailureResponse(
-        tool_name=tool_name,
-        status=ToolStatus.FAILED,
-        execution_time_ms=execution_time,
-        started_at=start_time,
-        completed_at=datetime.utcnow(),
-        user_id="unknown",
+        tool_name=tool_name, status=ToolStatus.FAILED, execution_time_ms=execution_time,
+        started_at=start_time, completed_at=datetime.utcnow(), user_id="unknown",
         error=f"Admin tool {tool_name} not found or not accessible"
     )
 
@@ -116,20 +111,26 @@ def create_successful_response(dispatcher: "AdminToolDispatcher",
                               result: dict,
                               **kwargs) -> ToolSuccessResponse:
     """Create successful tool response"""
+    timing = calculate_response_timing(start_time)
+    log_successful_execution(dispatcher, tool_name, kwargs.get('action', 'default'))
+    return build_success_response(dispatcher, tool_name, timing, result, kwargs)
+
+
+def calculate_response_timing(start_time: datetime) -> dict:
+    """Calculate response timing information."""
     completed_time = datetime.utcnow()
     execution_time_ms = (completed_time - start_time).total_seconds() * 1000
-    
-    log_successful_execution(dispatcher, tool_name, kwargs.get('action', 'default'))
-    
+    return {"completed_time": completed_time, "execution_time_ms": execution_time_ms}
+
+
+def build_success_response(dispatcher: "AdminToolDispatcher", tool_name: str,
+                          timing: dict, result: dict, kwargs: dict) -> ToolSuccessResponse:
+    """Build the actual success response object."""
     return ToolSuccessResponse(
-        tool_name=tool_name,
-        status=ToolStatus.COMPLETED,
-        execution_time_ms=execution_time_ms,
-        started_at=start_time,
-        completed_at=completed_time,
-        user_id=dispatcher.user.id,
-        result=result,
-        metadata=create_success_metadata(dispatcher, tool_name, kwargs)
+        tool_name=tool_name, status=ToolStatus.COMPLETED,
+        execution_time_ms=timing["execution_time_ms"], started_at=timing.get("start_time"),
+        completed_at=timing["completed_time"], user_id=dispatcher.user.id,
+        result=result, metadata=create_success_metadata(dispatcher, tool_name, kwargs)
     )
 
 
@@ -157,20 +158,19 @@ def create_error_response(dispatcher: "AdminToolDispatcher",
                          start_time: datetime,
                          error: Exception) -> ToolFailureResponse:
     """Create error response for failed execution"""
-    completed_time = datetime.utcnow()
-    execution_time_ms = (completed_time - start_time).total_seconds() * 1000
-    
+    timing = calculate_response_timing(start_time)
     log_failed_execution(tool_name, error)
-    
+    return build_error_response(dispatcher, tool_name, timing, error, start_time)
+
+
+def build_error_response(dispatcher: "AdminToolDispatcher", tool_name: str,
+                        timing: dict, error: Exception, start_time: datetime) -> ToolFailureResponse:
+    """Build the actual error response object."""
     return ToolFailureResponse(
-        tool_name=tool_name,
-        status=ToolStatus.FAILED,
-        execution_time_ms=execution_time_ms,
-        started_at=start_time,
-        completed_at=completed_time,
-        user_id=dispatcher.user.id if dispatcher.user else "unknown",
-        error=str(error),
-        is_recoverable=False
+        tool_name=tool_name, status=ToolStatus.FAILED,
+        execution_time_ms=timing["execution_time_ms"], started_at=start_time,
+        completed_at=timing["completed_time"], error=str(error),
+        user_id=get_user_id_safe(dispatcher), is_recoverable=False
     )
 
 

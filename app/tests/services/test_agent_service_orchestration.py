@@ -479,44 +479,62 @@ class TestAgentServiceOrchestration:
         
         # Should handle disconnect gracefully
     
-    @pytest.mark.asyncio
-    async def test_concurrent_agent_execution(self, agent_service, mock_supervisor):
-        """Test concurrent agent execution"""
-        # Setup multiple concurrent requests
-        num_concurrent = 5
-        mock_supervisor.run = AsyncMock(return_value={'status': 'completed'})
-        
-        # Create concurrent tasks
-        tasks = []
+    def _create_concurrent_request_models(self, num_concurrent):
+        """Create multiple request models for concurrent testing."""
+        models = []
         for i in range(num_concurrent):
             request_model = MagicMock()
             request_model.user_request = f"Concurrent request {i}"
+            models.append(request_model)
+        return models
+    
+    def _create_concurrent_tasks(self, agent_service, request_models):
+        """Create concurrent tasks for agent execution."""
+        tasks = []
+        for i, request_model in enumerate(request_models):
             task = agent_service.run(request_model, f"run_{i}")
             tasks.append(task)
-        
-        # Execute all tasks concurrently
-        results = await asyncio.gather(*tasks)
-        
-        # Assert all completed successfully
+        return tasks
+    
+    def _verify_concurrent_execution_results(self, results, num_concurrent, mock_supervisor):
+        """Verify concurrent execution results."""
         assert len(results) == num_concurrent
         assert all(result['status'] == 'completed' for result in results)
         assert mock_supervisor.run.call_count == num_concurrent
     
     @pytest.mark.asyncio
+    async def test_concurrent_agent_execution(self, agent_service, mock_supervisor):
+        """Test concurrent agent execution"""
+        num_concurrent = 5
+        mock_supervisor.run = AsyncMock(return_value={'status': 'completed'})
+        
+        request_models = self._create_concurrent_request_models(num_concurrent)
+        tasks = self._create_concurrent_tasks(agent_service, request_models)
+        results = await asyncio.gather(*tasks)
+        
+        self._verify_concurrent_execution_results(results, num_concurrent, mock_supervisor)
+    
+    def _create_test_json_string(self):
+        """Create test JSON string for parsing."""
+        return '{"type": "start_agent", "payload": {"query": "test"}}'
+    
+    @pytest.mark.asyncio
     async def test_message_parsing_string_input(self, agent_service):
         """Test message parsing with string input"""
-        # Test valid JSON string
-        json_string = '{"type": "start_agent", "payload": {"query": "test"}}'
+        json_string = self._create_test_json_string()
         parsed = agent_service._parse_message(json_string)
         
         assert parsed["type"] == "start_agent"
         assert parsed["payload"]["query"] == "test"
     
+    def _create_test_dict_message(self):
+        """Create test dict message for parsing."""
+        return {"type": "user_message", "payload": {"content": "hello"}}
+    
     @pytest.mark.asyncio
     async def test_message_parsing_dict_input(self, agent_service):
         """Test message parsing with dict input"""
-        # Test dict input
-        dict_message = {"type": "user_message", "payload": {"content": "hello"}}
+        dict_message = self._create_test_dict_message()
         parsed = agent_service._parse_message(dict_message)
         
         assert parsed["type"] == "user_message"
@@ -570,60 +588,71 @@ class TestAgentLifecycleManagement:
         assert len(orchestrator.agent_pool) == 0
         assert orchestrator.active_agents == 1
     
+    async def _create_agents_up_to_limit(self, orchestrator, limit):
+        """Create agents up to the specified limit."""
+        agents = []
+        for i in range(limit):
+            agent = await orchestrator.get_or_create_agent(f"user_{i}")
+            agents.append(agent)
+        return agents
+    
     @pytest.mark.asyncio
     async def test_concurrent_agent_limit_enforcement(self, orchestrator):
         """Test enforcement of concurrent agent limits"""
-        # Set low limit for testing
         orchestrator.max_concurrent_agents = 3
-        
-        # Create agents up to limit
-        agents = []
-        for i in range(3):
-            agent = await orchestrator.get_or_create_agent(f"user_{i}")
-            agents.append(agent)
+        agents = await self._create_agents_up_to_limit(orchestrator, 3)
         
         assert orchestrator.active_agents == 3
         
-        # Try to create one more (should fail)
         with pytest.raises(NetraException) as exc_info:
             await orchestrator.get_or_create_agent("user_overflow")
         
         assert "Maximum concurrent agents reached" in str(exc_info.value)
     
-    @pytest.mark.asyncio
-    async def test_agent_task_execution_tracking(self, orchestrator):
-        """Test agent task execution tracking"""
-        # Execute task
-        result = await orchestrator.execute_agent_task(
-            "user1", "test request", "run_123", True
-        )
-        
-        # Verify result
+    def _verify_task_execution_result(self, result):
+        """Verify task execution result."""
         assert result['status'] == 'completed'
         assert result['run_id'] == "run_123"
-        
-        # Verify metrics
-        metrics = orchestrator.get_orchestration_metrics()
+    
+    def _verify_execution_metrics(self, metrics):
+        """Verify execution tracking metrics."""
         assert metrics['total_executions'] == 1
         assert metrics['failed_executions'] == 0
         assert metrics['success_rate'] == 100.0
         assert metrics['average_execution_time'] > 0
     
     @pytest.mark.asyncio
+    async def test_agent_task_execution_tracking(self, orchestrator):
+        """Test agent task execution tracking"""
+        result = await orchestrator.execute_agent_task(
+            "user1", "test request", "run_123", True
+        )
+        
+        self._verify_task_execution_result(result)
+        metrics = orchestrator.get_orchestration_metrics()
+        self._verify_execution_metrics(metrics)
+    
+    async def _setup_failing_agent(self, orchestrator, user_id):
+        """Setup agent to fail for testing."""
+        agent = await orchestrator.get_or_create_agent(user_id)
+        agent.should_fail = True
+        return agent
+    
+    def _verify_failure_metrics(self, metrics):
+        """Verify failure tracking metrics."""
+        assert metrics['failed_executions'] == 1
+        assert metrics['success_rate'] == 0.0
+    
+    @pytest.mark.asyncio
     async def test_agent_task_failure_handling(self, orchestrator):
         """Test agent task failure handling"""
-        # Force agent failure
-        agent = await orchestrator.get_or_create_agent("user1")
-        agent.should_fail = True
+        await self._setup_failing_agent(orchestrator, "user1")
         
-        # Execute task (should fail)
         with pytest.raises(NetraException):
             await orchestrator.execute_agent_task("user1", "failing request", "run_fail")
         
-        # Verify failure metrics
         metrics = orchestrator.get_orchestration_metrics()
-        assert metrics['failed_executions'] == 1
-        assert metrics['success_rate'] == 0.0
+        self._verify_failure_metrics(metrics)
     
     @pytest.mark.asyncio
     async def test_concurrent_agent_orchestration(self, orchestrator):
