@@ -9,6 +9,7 @@ from app.schemas.llm_base_types import LLMProvider
 from app.schemas.llm_config_types import LLMConfig as GenerationConfig
 from app.schemas.llm_response_types import LLMResponse
 from app.llm.llm_mocks import MockLLM
+from app.core.exceptions_service import ServiceUnavailableError
 from app.llm.llm_provider_handlers import create_llm_for_provider, validate_provider_key
 from app.llm.llm_response_processing import create_cached_llm_response, create_llm_response, stream_llm_response
 from app.services.llm_cache_service import llm_cache_service
@@ -48,11 +49,23 @@ class LLMCoreOperations:
             logger.info("LLMs are disabled in development configuration")
         return enabled
 
+    def _handle_disabled_llm(self, name: str) -> Any:
+        """Handle disabled LLM based on environment - dev gets mock, production gets error."""
+        if self.settings.environment == "development":
+            logger.debug(f"Returning mock LLM for '{name}' - LLMs disabled in dev mode")
+            return MockLLM(name)
+        
+        error_msg = f"LLM '{name}' is not available - LLM service is disabled in production"
+        logger.error(error_msg)
+        raise ServiceUnavailableError(
+            message=error_msg,
+            user_message="AI features are currently unavailable. Please try again later."
+        )
+
     def get_llm(self, name: str, generation_config: Optional[GenerationConfig] = None) -> Any:
         """Get LLM instance with caching."""
         if not self.enabled:
-            logger.debug(f"Returning mock LLM for '{name}' - LLMs disabled")
-            return MockLLM(name)
+            return self._handle_disabled_llm(name)
         
         cache_key = self._create_cache_key(name, generation_config)
         if cache_key in self._llm_cache:

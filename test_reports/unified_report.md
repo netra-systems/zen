@@ -1,12 +1,12 @@
 # Unified Test Report
-**Level**: agents | **Time**: 2025-08-15 10:41:02
+**Level**: smoke | **Time**: 2025-08-15 10:43:21
 
 ## ✅ All Tests Passing
 
 ## Current Run Summary
 | Component | Status | Tests | Passed | Failed | Duration |
 |-----------|--------|-------|--------|--------|----------|
-| Backend | ✅ | 56 | 54 | 0 | 17.4s |
+| Backend | ✅ | 7 | 7 | 0 | 5.5s |
 | Frontend | ⏭️ | 0 | 0 | 0 | 0.0s |
 | E2E | ⏸️ | 0 | 0 | 0 | 0.0s |
 

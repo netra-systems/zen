@@ -9,90 +9,146 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 
-def generate_markdown_report(results: Dict[str, Any], coverage_data: Optional[Dict[str, Any]] = None) -> str:
-    """Generate a markdown formatted test report."""
+def _format_header() -> list[str]:
+    """Format report header section."""
     report = []
-    
-    # Header
     report.append("# Test Report")
     report.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     report.append("")
-    
-    # Summary
+    return report
+
+
+def _format_summary_table(results: Dict[str, Any], coverage_data: Optional[Dict[str, Any]]) -> list[str]:
+    """Format summary metrics table."""
+    report = []
     report.append("## Summary")
     report.append("")
     report.append("| Metric | Value |")
     report.append("|--------|-------|")
-    report.append(f"| Total Tests | {results.get('total_tests', 0)} |")
-    report.append(f"| Passed | ✅ {results.get('passed', 0)} |")
-    report.append(f"| Failed | ❌ {results.get('failed', 0)} |")
-    report.append(f"| Skipped | ⏭️ {results.get('skipped', 0)} |")
-    report.append(f"| Errors | 🔥 {results.get('errors', 0)} |")
-    report.append(f"| Success Rate | {results.get('success_rate', 0):.1f}% |")
-    report.append(f"| Duration | {results.get('duration', 0):.2f}s |")
-    
-    if coverage_data:
-        report.append(f"| Coverage | {coverage_data.get('coverage_percent', 0):.1f}% |")
-    
+    report.extend(_get_summary_rows(results, coverage_data))
     report.append("")
-    
-    # Shard results if available
-    if "shards" in results and results["shards"]:
-        report.append("## Shard Results")
-        report.append("")
-        report.append("| Shard | Tests | Passed | Failed | Duration |")
-        report.append("|-------|-------|--------|--------|----------|")
-        
-        for shard in results["shards"]:
-            shard_name = shard.get("shard", "unknown")
-            report.append(
-                f"| {shard_name} | "
-                f"{shard.get('total_tests', 0)} | "
-                f"{shard.get('passed', 0)} | "
-                f"{shard.get('failed', 0)} | "
-                f"{shard.get('duration', 0):.2f}s |"
-            )
-        report.append("")
-    
-    # Failures
-    if results.get("failures"):
-        report.append("## Failed Tests")
-        report.append("")
-        
-        for failure in results["failures"][:10]:  # Show first 10 failures
-            report.append(f"### ❌ {failure.get('test_name', 'Unknown Test')}")
-            if "shard" in failure:
-                report.append(f"**Shard:** {failure['shard']}")
-            if "error_message" in failure:
-                report.append("```")
-                report.append(failure["error_message"][:500])  # Truncate long messages
-                report.append("```")
-            report.append("")
-        
-        if len(results["failures"]) > 10:
-            report.append(f"*... and {len(results['failures']) - 10} more failures*")
-            report.append("")
-    
-    # Errors
-    if results.get("errors_list"):
-        report.append("## Test Errors")
-        report.append("")
-        
-        for error in results["errors_list"][:5]:  # Show first 5 errors
-            report.append(f"### 🔥 {error.get('test_name', 'Unknown Test')}")
-            if "shard" in error:
-                report.append(f"**Shard:** {error['shard']}")
-            if "error_message" in error:
-                report.append("```")
-                report.append(error["error_message"][:500])  # Truncate long messages
-                report.append("```")
-            report.append("")
-        
-        if len(results["errors_list"]) > 5:
-            report.append(f"*... and {len(results['errors_list']) - 5} more errors*")
-            report.append("")
-    
-    return "\n".join(report)
+    return report
+
+
+def _get_summary_rows(results: Dict[str, Any], coverage_data: Optional[Dict[str, Any]]) -> list[str]:
+    """Generate summary table rows."""
+    rows = _get_base_summary_rows(results)
+    if coverage_data:
+        rows.append(f"| Coverage | {coverage_data.get('coverage_percent', 0):.1f}% |")
+    return rows
+
+
+def _get_base_summary_rows(results: Dict[str, Any]) -> list[str]:
+    """Generate base summary table rows."""
+    test_rows = _get_test_count_rows(results)
+    metric_rows = _get_metric_rows(results)
+    return test_rows + metric_rows
+
+
+def _get_test_count_rows(results: Dict[str, Any]) -> list[str]:
+    """Generate test count summary rows."""
+    return [
+        f"| Total Tests | {results.get('total_tests', 0)} |",
+        f"| Passed | ✅ {results.get('passed', 0)} |",
+        f"| Failed | ❌ {results.get('failed', 0)} |",
+        f"| Skipped | ⏭️ {results.get('skipped', 0)} |",
+        f"| Errors | 🔥 {results.get('errors', 0)} |"
+    ]
+
+
+def _get_metric_rows(results: Dict[str, Any]) -> list[str]:
+    """Generate metric summary rows."""
+    return [
+        f"| Success Rate | {results.get('success_rate', 0):.1f}% |",
+        f"| Duration | {results.get('duration', 0):.2f}s |"
+    ]
+
+
+def _format_shard_results(results: Dict[str, Any]) -> list[str]:
+    """Format shard results section."""
+    if not ("shards" in results and results["shards"]):
+        return []
+    report = ["## Shard Results", "", "| Shard | Tests | Passed | Failed | Duration |", "|-------|-------|--------|--------|----------|"]  
+    for shard in results["shards"]:
+        report.append(_format_shard_row(shard))
+    report.append("")
+    return report
+
+
+def _format_shard_row(shard: Dict[str, Any]) -> str:
+    """Format single shard table row."""
+    shard_name = shard.get("shard", "unknown")
+    return (
+        f"| {shard_name} | "
+        f"{shard.get('total_tests', 0)} | "
+        f"{shard.get('passed', 0)} | "
+        f"{shard.get('failed', 0)} | "
+        f"{shard.get('duration', 0):.2f}s |"
+    )
+
+
+def _format_failures(results: Dict[str, Any]) -> list[str]:
+    """Format failed tests section."""
+    if not results.get("failures"):
+        return []
+    report = ["## Failed Tests", ""]
+    for failure in results["failures"][:10]:  # Show first 10 failures
+        report.extend(_format_single_failure(failure))
+    if len(results["failures"]) > 10:
+        report.extend([f"*... and {len(results['failures']) - 10} more failures*", ""])
+    return report
+
+
+def _format_single_failure(failure: Dict[str, Any]) -> list[str]:
+    """Format single failure entry."""
+    lines = [f"### ❌ {failure.get('test_name', 'Unknown Test')}"]
+    if "shard" in failure:
+        lines.append(f"**Shard:** {failure['shard']}")
+    if "error_message" in failure:
+        lines.extend([""", failure["error_message"][:500], """])
+    lines.append("")
+    return lines
+
+
+def _format_errors(results: Dict[str, Any]) -> list[str]:
+    """Format test errors section."""
+    if not results.get("errors_list"):
+        return []
+    report = ["## Test Errors", ""]
+    for error in results["errors_list"][:5]:  # Show first 5 errors
+        report.extend(_format_single_error(error))
+    if len(results["errors_list"]) > 5:
+        report.extend([f"*... and {len(results['errors_list']) - 5} more errors*", ""])
+    return report
+
+
+def _format_single_error(error: Dict[str, Any]) -> list[str]:
+    """Format single error entry."""
+    lines = [f"### 🔥 {error.get('test_name', 'Unknown Test')}"]
+    if "shard" in error:
+        lines.append(f"**Shard:** {error['shard']}")
+    if "error_message" in error:
+        lines.extend([""", error["error_message"][:500], """])
+    lines.append("")
+    return lines
+
+
+def generate_markdown_report(results: Dict[str, Any], coverage_data: Optional[Dict[str, Any]] = None) -> str:
+    """Generate a markdown formatted test report."""
+    report_sections = _collect_report_sections(results, coverage_data)
+    all_lines = [line for section in report_sections for line in section]
+    return "\n".join(all_lines)
+
+
+def _collect_report_sections(results: Dict[str, Any], coverage_data: Optional[Dict[str, Any]]) -> list[list[str]]:
+    """Collect all report sections."""
+    return [
+        _format_header(),
+        _format_summary_table(results, coverage_data),
+        _format_shard_results(results),
+        _format_failures(results),
+        _format_errors(results)
+    ]
 
 
 def parse_coverage_xml(coverage_file: Path) -> Dict[str, Any]:
