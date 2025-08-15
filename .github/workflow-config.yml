@@ -5,8 +5,8 @@ global:
     terraform: 1.6.0
     kubectl: 1.28.0
   runners:
-    default: ubuntu-latest
-    custom: warp-custom-default
+    default: warp-custom-test
+    custom: warp-custom-test
     windows: windows-latest
     macos: macos-latest
   timeouts:
