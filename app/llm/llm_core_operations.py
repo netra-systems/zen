@@ -14,6 +14,7 @@ from app.llm.llm_provider_handlers import create_llm_for_provider, validate_prov
 from app.llm.llm_response_processing import create_cached_llm_response, create_llm_response, stream_llm_response
 from app.services.llm_cache_service import llm_cache_service
 from app.logging_config import central_logger
+from app.llm.observability import generate_llm_correlation_id, start_llm_heartbeat, stop_llm_heartbeat
 import time
 
 logger = central_logger.get_logger(__name__)
@@ -125,17 +126,25 @@ class LLMCoreOperations:
         return await self._execute_llm_request(prompt, llm_config_name, use_cache)
     
     async def _execute_llm_request(self, prompt: str, llm_config_name: str, use_cache: bool) -> LLMResponse:
-        """Execute the actual LLM request."""
-        start_time = time.time()
-        llm = self.get_llm(llm_config_name)
-        response = await llm.ainvoke(prompt)
-        execution_time_ms = (time.time() - start_time) * 1000
+        """Execute the actual LLM request with heartbeat logging."""
+        correlation_id = generate_llm_correlation_id()
+        if self.settings.llm_heartbeat_enabled:
+            start_llm_heartbeat(correlation_id, llm_config_name)
         
-        config = self.settings.llm_configs.get(llm_config_name)
-        llm_response = await create_llm_response(response, config, llm_config_name, execution_time_ms)
-        
-        await self._cache_response_if_needed(use_cache, prompt, response.content, llm_config_name)
-        return llm_response
+        try:
+            start_time = time.time()
+            llm = self.get_llm(llm_config_name)
+            response = await llm.ainvoke(prompt)
+            execution_time_ms = (time.time() - start_time) * 1000
+            
+            config = self.settings.llm_configs.get(llm_config_name)
+            llm_response = await create_llm_response(response, config, llm_config_name, execution_time_ms)
+            
+            await self._cache_response_if_needed(use_cache, prompt, response.content, llm_config_name)
+            return llm_response
+        finally:
+            if self.settings.llm_heartbeat_enabled:
+                stop_llm_heartbeat(correlation_id)
     
     async def _cache_response_if_needed(self, use_cache: bool, prompt: str, 
                                       content: str, llm_config_name: str) -> None:

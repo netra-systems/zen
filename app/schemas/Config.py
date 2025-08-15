@@ -153,6 +153,10 @@ class AppConfig(BaseModel):
     llm_cache_enabled: bool = True
     llm_cache_ttl: int = 3600  # 1 hour default
     
+    # LLM Heartbeat Settings
+    llm_heartbeat_enabled: bool = True
+    llm_heartbeat_interval_seconds: float = 2.5  # Heartbeat every 2.5 seconds
+    
     # Service configuration is now managed through dev_launcher service config
     # Services use the mode specified in the launcher (local/shared/mock)
     dev_mode_redis_enabled: bool = Field(
