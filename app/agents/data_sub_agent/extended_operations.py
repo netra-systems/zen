@@ -152,12 +152,21 @@ class ExtendedOperations:
                 "agent_id": getattr(self.agent, 'id', 'unknown')
             }
             logger.info(f"Saving agent state: {state_data}")
-            # TODO: Implement actual persistence to database or file system
+            # State persistence handled by state_persistence_service
+            await self.agent.state_persistence.save_agent_state(
+                self.agent.name, state_data
+            )
             
     async def load_state(self) -> None:
         """Load agent state from persistent storage."""
-        # TODO: Implement actual state loading from database or file system
-        logger.info("Loading agent state from persistent storage")
+        # Load state using state_persistence_service
+        state_data = await self.agent.state_persistence.load_agent_state(
+            self.agent.name
+        )
+        if state_data:
+            logger.info(f"Loaded agent state: {state_data}")
+        else:
+            logger.info("No saved state found for agent")
         
     async def recover(self) -> None:
         """Recover agent from saved state."""

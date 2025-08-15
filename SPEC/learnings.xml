@@ -2048,5 +2048,60 @@
                 </testing>
             </fix>
         </section>
+        <section id="observability-logging">
+            <title>Observability and Logging Improvements</title>
+            
+            <fix date="2025-08-15">
+                <title>Comprehensive LLM and Subagent Observability Implementation</title>
+                <problem>Lack of visibility into long-running LLM calls and subagent communication making debugging difficult</problem>
+                <symptoms>
+                    <symptom>Unable to track progress of long-running LLM operations</symptom>
+                    <symptom>No visibility into LLM input/output data for debugging</symptom>
+                    <symptom>Cannot trace requests across multiple subagents</symptom>
+                    <symptom>Difficult to identify bottlenecks in agent communication</symptom>
+                </symptoms>
+                <root-cause>Missing comprehensive logging infrastructure for LLM and agent operations</root-cause>
+                <details>
+                    <detail>No heartbeat mechanism for long-running operations</detail>
+                    <detail>No DEBUG level logging for LLM prompts and responses</detail>
+                    <detail>No INFO level logging for agent-to-agent communication</detail>
+                    <detail>No correlation IDs for tracing requests across system</detail>
+                </details>
+                <solution>Implemented three-tier observability system with heartbeat, data, and communication logging</solution>
+                <implementation>
+                    <step>Created app/llm/observability.py module with HeartbeatLogger, DataLogger, and SubAgentLogger classes</step>
+                    <step>Integrated heartbeat logging into LLMCoreOperations for async heartbeat every 2-3 seconds</step>
+                    <step>Added DEBUG level logging for all LLM input/output with truncation support</step>
+                    <step>Added INFO level logging for all subagent communication with correlation IDs</step>
+                    <step>Added configuration settings for all logging features in AppConfig</step>
+                    <step>Integrated correlation IDs across entire request lifecycle</step>
+                </implementation>
+                <files-changed>
+                    <file>app/llm/observability.py - New module with HeartbeatLogger, DataLogger, SubAgentLogger</file>
+                    <file>app/llm/llm_core_operations.py - Integrated heartbeat and data logging</file>
+                    <file>app/agents/base.py - Integrated subagent communication logging</file>
+                    <file>app/schemas/Config.py - Added configuration settings for all logging features</file>
+                    <file>SPEC/llm.xml - Added observability section to specification</file>
+                </files-changed>
+                <prevention>
+                    <item>Always include heartbeat logging for operations that may take more than 5 seconds</item>
+                    <item>Use correlation IDs consistently across all async operations</item>
+                    <item>Log at appropriate levels: INFO for operational visibility, DEBUG for detailed data</item>
+                    <item>Implement truncation for large data to prevent log flooding</item>
+                    <item>Make logging configurable to allow different verbosity in different environments</item>
+                </prevention>
+                <key-insights>
+                    <insight>Heartbeat logging requires careful async task management to avoid resource leaks</insight>
+                    <insight>Correlation IDs are essential for tracing requests across distributed async operations</insight>
+                    <insight>JSON logging format provides better structure for log analysis tools</insight>
+                    <insight>Configuration-driven logging allows flexibility without code changes</insight>
+                </key-insights>
+                <testing>
+                    <test>test_llm_heartbeat_logging.py - Tests heartbeat functionality and cleanup</test>
+                    <test>test_llm_data_logging.py - Tests DEBUG level data logging and truncation</test>
+                    <test>test_subagent_logging.py - Tests INFO level agent communication logging</test>
+                </testing>
+            </fix>
+        </section>
     </sections>
 </specification>

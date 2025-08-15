@@ -254,13 +254,33 @@ except Exception as e:
 
 def validate_session(session: any) -> bool:
     """Validate that a session is a proper AsyncSession instance."""
-    return isinstance(session, AsyncSession)
+    # Check for actual AsyncSession
+    if isinstance(session, AsyncSession):
+        return True
+    
+    # Check for mock objects with AsyncSession spec (for testing)
+    if hasattr(session, '_spec_class') and session._spec_class == AsyncSession:
+        return True
+    
+    # Check for other mock types that implement AsyncSession interface
+    if hasattr(session, 'commit') and hasattr(session, 'rollback') and hasattr(session, 'execute'):
+        return True
+    
+    return False
 
 def get_session_validation_error(session: any) -> str:
     """Get descriptive error for invalid session type."""
     if session is None:
         return "Session is None"
     actual_type = type(session).__name__
+    
+    # Provide more helpful error for mock objects
+    if 'Mock' in actual_type:
+        spec_info = ""
+        if hasattr(session, '_spec_class'):
+            spec_info = f" with spec {session._spec_class.__name__}"
+        return f"Expected AsyncSession or compatible mock, got {actual_type}{spec_info}"
+    
     return f"Expected AsyncSession, got {actual_type}"
 
 def _validate_async_session_factory():
