@@ -1,0 +1,42 @@
+name: Simple ACT Test
+
+on:
+  push:
+    branches:
+      - test-act
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Basic ACT Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print environment
+        run: |
+          echo "Running on ACT: $ACT"
+          echo "GitHub Event: ${{ github.event_name }}"
+          echo "Current directory: $(pwd)"
+          
+      - name: Check tools
+        run: |
+          echo "Python version:"
+          python3 --version
+          echo "Docker version:"
+          docker --version || echo "Docker not available"
+          
+      - name: Test secret access
+        run: |
+          if [ -n "${{ secrets.GITHUB_TOKEN }}" ]; then
+            echo "GitHub token is available"
+          else
+            echo "GitHub token is not available"
+          fi
+          
+      - name: Create test file
+        run: |
+          echo "Test content" > test.txt
+          cat test.txt
+          
+      - name: Run simple Python script
+        run: |
+          python3 -c "import sys; import os; print(f'Python {sys.version}'); print(f'Working directory: {os.getcwd()}'); print('ACT test successful!')"
