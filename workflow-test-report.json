@@ -1,0 +1,390 @@
+{
+  "summary": {
+    "total": 30,
+    "passed": 30,
+    "failed": 0,
+    "timestamp": "2025-08-15T11:26:37.416449"
+  },
+  "issues": [
+    {
+      "workflow": "ai-autofix.yml",
+      "issue": "Line 38: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "ai-autofix.yml",
+      "issue": "Line 96: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "ai-autofix.yml",
+      "issue": "Line 148: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "ai-autofix.yml",
+      "issue": "Line 369: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "architecture-health.yml",
+      "issue": "Line 38: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "architecture-health.yml",
+      "issue": "Line 491: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "boundary-enforcement.yml",
+      "issue": "Line 25: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "boundary-enforcement.yml",
+      "issue": "Line 440: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "ci-enhanced.yml",
+      "issue": "Line 57: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "ci-enhanced.yml",
+      "issue": "Line 137: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "ci-enhanced.yml",
+      "issue": "Line 215: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "ci-enhanced.yml",
+      "issue": "Line 366: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "ci-enhanced.yml",
+      "issue": "Line 487: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "ci-enhanced.yml",
+      "issue": "Line 643: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "ci-enhanced.yml",
+      "issue": "Line 719: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "ci-enhanced.yml",
+      "issue": "Line 833: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "ci-enhanced.yml",
+      "issue": "Line 878: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "gemini-cli.yml",
+      "issue": "Line 72: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "gemini-issue-automated-triage.yml",
+      "issue": "Line 54: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "gemini-pr-review.yml",
+      "issue": "Line 75: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "health-monitoring.yml",
+      "issue": "Line 49: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "health-monitoring.yml",
+      "issue": "Line 248: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "health-monitoring.yml",
+      "issue": "Line 323: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "health-monitoring.yml",
+      "issue": "Line 538: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "orchestrator.yml",
+      "issue": "Line 52: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "orchestrator.yml",
+      "issue": "Line 245: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "orchestrator.yml",
+      "issue": "Line 412: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "orchestrator.yml",
+      "issue": "Line 485: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "orchestrator.yml",
+      "issue": "Line 595: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "pipeline-optimization.yml",
+      "issue": "Line 48: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "pipeline-optimization.yml",
+      "issue": "Line 289: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "pipeline-optimization.yml",
+      "issue": "Line 427: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "pipeline-optimization.yml",
+      "issue": "Line 561: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "pipeline-optimization.yml",
+      "issue": "Line 749: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "pipeline-optimization.yml",
+      "issue": "Line 753: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "pipeline-optimization.yml",
+      "issue": "Line 791: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "terraform-lock-cleanup.yml",
+      "issue": "Line 32: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "terraform-lock-cleanup.yml",
+      "issue": "Line 283: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "workflow-health-monitor.yml",
+      "issue": "Line 56: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "workflow-health-monitor.yml",
+      "issue": "Line 305: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "workflow-health-monitor.yml",
+      "issue": "Line 413: Custom runner without ACT comment"
+    },
+    {
+      "workflow": "workflow-health-monitor.yml",
+      "issue": "Line 552: Custom runner without ACT comment"
+    }
+  ],
+  "results": [
+    {
+      "workflow": "ai-autofix.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\ai-autofix.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:26.709510"
+    },
+    {
+      "workflow": "architecture-health.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\architecture-health.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:27.147522"
+    },
+    {
+      "workflow": "boundary-enforcement.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\boundary-enforcement.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:27.443805"
+    },
+    {
+      "workflow": "ci-enhanced.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\ci-enhanced.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:27.765800"
+    },
+    {
+      "workflow": "gemini-cli.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\gemini-cli.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:28.088935"
+    },
+    {
+      "workflow": "gemini-issue-automated-triage.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\gemini-issue-automated-triage.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:28.465904"
+    },
+    {
+      "workflow": "gemini-pr-review.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\gemini-pr-review.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:28.906762"
+    },
+    {
+      "workflow": "health-monitoring.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\health-monitoring.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:29.224085"
+    },
+    {
+      "workflow": "orchestrator.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\orchestrator.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:29.545975"
+    },
+    {
+      "workflow": "pipeline-optimization.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\pipeline-optimization.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:29.928524"
+    },
+    {
+      "workflow": "staging-cleanup.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\staging-cleanup.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:30.277884"
+    },
+    {
+      "workflow": "staging-environment.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\staging-environment.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:30.610800"
+    },
+    {
+      "workflow": "terraform-lock-cleanup.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\terraform-lock-cleanup.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:30.987184"
+    },
+    {
+      "workflow": "test-comprehensive.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\test-comprehensive.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:31.315379"
+    },
+    {
+      "workflow": "test-on-demand.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\test-on-demand.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:31.626092"
+    },
+    {
+      "workflow": "test-smoke.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\test-smoke.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:31.964906"
+    },
+    {
+      "workflow": "test-stub-detection.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\test-stub-detection.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:32.291406"
+    },
+    {
+      "workflow": "test-suite.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\test-suite.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:32.605792"
+    },
+    {
+      "workflow": "test-unit.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\test-unit.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:33.026270"
+    },
+    {
+      "workflow": "workflow-health-monitor.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\workflow-health-monitor.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:33.389742"
+    },
+    {
+      "workflow": "build-backend.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\staging-workflows\\build-backend.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:33.908067"
+    },
+    {
+      "workflow": "build-frontend.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\staging-workflows\\build-frontend.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:34.249125"
+    },
+    {
+      "workflow": "config.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\staging-workflows\\config.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:34.576991"
+    },
+    {
+      "workflow": "deploy.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\staging-workflows\\deploy.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:34.949858"
+    },
+    {
+      "workflow": "destroy.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\staging-workflows\\destroy.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:35.311184"
+    },
+    {
+      "workflow": "notify.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\staging-workflows\\notify.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:35.644359"
+    },
+    {
+      "workflow": "restart.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\staging-workflows\\restart.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:35.964122"
+    },
+    {
+      "workflow": "setup.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\staging-workflows\\setup.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:36.688365"
+    },
+    {
+      "workflow": "status.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\staging-workflows\\status.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:37.069218"
+    },
+    {
+      "workflow": "terraform.yml",
+      "path": "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.github\\workflows\\staging-workflows\\terraform.yml",
+      "syntax_valid": true,
+      "error": "",
+      "timestamp": "2025-08-15T11:26:37.415184"
+    }
+  ]
+}

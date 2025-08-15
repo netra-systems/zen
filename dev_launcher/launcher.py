@@ -56,9 +56,9 @@ class DevLauncher:
         self.services_config = load_or_create_config(interactive=interactive)
         
         # Managers
-        self.process_manager = ProcessManager()
-        self.log_manager = LogManager()
         self.health_monitor = HealthMonitor(check_interval=30)
+        self.process_manager = ProcessManager(health_monitor=self.health_monitor)
+        self.log_manager = LogManager()
         self.service_discovery = ServiceDiscovery(config.project_root)
         self.secret_loader = SecretLoader(
             project_id=config.project_id,

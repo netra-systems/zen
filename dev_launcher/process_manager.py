@@ -27,10 +27,11 @@ class ProcessManager:
     reload capabilities instead.
     """
     
-    def __init__(self):
+    def __init__(self, health_monitor=None):
         """Initialize the process manager."""
         self.processes: Dict[str, subprocess.Popen] = {}
         self._lock = threading.Lock()
+        self.health_monitor = health_monitor
     
     def add_process(self, name: str, process: subprocess.Popen):
         """
@@ -144,6 +145,10 @@ class ProcessManager:
                             logger.info(f"  → {name} was terminated by signal {-exit_code}")
                     else:
                         logger.info(f"Process {name} exited normally")
+                    
+                    # Unregister from health monitoring
+                    if self.health_monitor:
+                        self.health_monitor.unregister_service(name)
                     
                     with self._lock:
                         if name in self.processes:

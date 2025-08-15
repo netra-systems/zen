@@ -318,8 +318,7 @@ def _extract_pool_metrics(pool):
 
 def _get_sync_pool_status():
     """Get synchronous pool status if available."""
-    if hasattr(Database, 'engine') and Database.engine:
-        return _extract_pool_metrics(Database.engine.pool)
+    # Currently we only use async engine, no sync instance
     return None
 
 def _get_async_pool_status():

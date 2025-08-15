@@ -142,8 +142,8 @@ def _build_health_statistics(quality_gate_service, monitoring_service) -> Dict[s
     """Build health statistics dictionary."""
     return {
         "total_validations": len(quality_gate_service.validation_cache) if quality_gate_service else 0,
-        "active_alerts": len(monitoring_service.active_alerts) if monitoring_service else 0,
-        "monitored_agents": len(monitoring_service.agent_profiles) if monitoring_service else 0
+        "active_alerts": len(monitoring_service.alert_manager.active_alerts) if monitoring_service else 0,
+        "monitored_agents": len(monitoring_service.trend_analyzer.agent_profiles) if monitoring_service else 0
     }
 
 

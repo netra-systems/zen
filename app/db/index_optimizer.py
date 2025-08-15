@@ -120,36 +120,41 @@ class PostgreSQLIndexOptimizer:
     
     async def _create_index(self, session, table_name: str, columns: List[str], 
                            index_name: str, index_type: str = "btree") -> bool:
-        """Create a database index."""
+        """Create a database index using raw connection to avoid transaction."""
         try:
             # Build column list
             column_list = ", ".join(columns)
             
-            # Create index query
-            create_query = f"""
-                CREATE INDEX CONCURRENTLY {index_name} 
-                ON {table_name} USING {index_type} ({column_list})
-            """
+            # Use raw connection for CREATE INDEX CONCURRENTLY
+            # This avoids transaction block issue
+            conn = await async_engine.raw_connection()
+            try:
+                # Get the underlying asyncpg connection
+                async_conn = conn.driver_connection
+                
+                # Create index query
+                create_query = f"""
+                    CREATE INDEX CONCURRENTLY IF NOT EXISTS {index_name} 
+                    ON {table_name} USING {index_type} ({column_list})
+                """
+                
+                # Execute without transaction
+                await async_conn.execute(create_query)
+                
+                self.existing_indexes.add(index_name)
+                return True
+                
+            finally:
+                await conn.close()
             
-            await session.execute(text(create_query))
-            await session.commit()
-            
-            self.existing_indexes.add(index_name)
-            return True
-            
-        except ProgrammingError as e:
+        except Exception as e:
             if "already exists" in str(e):
                 logger.debug(f"Index {index_name} already exists")
                 self.existing_indexes.add(index_name)
                 return True
             else:
                 logger.error(f"Error creating index {index_name}: {e}")
-                await session.rollback()
                 return False
-        except Exception as e:
-            logger.error(f"Unexpected error creating index {index_name}: {e}")
-            await session.rollback()
-            return False
     
     async def analyze_query_performance(self) -> List[IndexRecommendation]:
         """Analyze query performance and recommend indexes."""
@@ -340,48 +345,66 @@ class ClickHouseIndexOptimizer:
     
     async def create_materialized_views(self) -> Dict[str, bool]:
         """Create materialized views for common aggregations."""
-        views = {
-            "user_daily_activity": """
-                CREATE MATERIALIZED VIEW IF NOT EXISTS user_daily_activity
-                ENGINE = SummingMergeTree()
-                PARTITION BY toYYYYMM(date)
-                ORDER BY (user_id, date)
-                AS SELECT
-                    user_id,
-                    toDate(timestamp) as date,
-                    count() as activity_count,
-                    uniq(session_id) as unique_sessions
-                FROM netra_audit_events
-                WHERE user_id != ''
-                GROUP BY user_id, toDate(timestamp)
-            """,
-            
-            "hourly_performance_metrics": """
-                CREATE MATERIALIZED VIEW IF NOT EXISTS hourly_performance_metrics
-                ENGINE = SummingMergeTree()
-                PARTITION BY toYYYYMM(hour)
-                ORDER BY (metric_type, hour)
-                AS SELECT
-                    metric_type,
-                    toStartOfHour(timestamp) as hour,
-                    avg(value) as avg_value,
-                    max(value) as max_value,
-                    min(value) as min_value,
-                    count() as sample_count
-                FROM netra_performance_metrics
-                GROUP BY metric_type, toStartOfHour(timestamp)
-            """
-        }
-        
         results = {}
+        
         async with get_clickhouse_client() as client:
-            for view_name, view_sql in views.items():
+            # Check if required tables exist first
+            required_tables = {
+                "user_daily_activity": "netra_audit_events",
+                "hourly_performance_metrics": "netra_performance_metrics"
+            }
+            
+            for view_name, base_table in required_tables.items():
                 try:
+                    # Check if base table exists
+                    table_check = await client.execute_query(
+                        f"SELECT name FROM system.tables WHERE name = '{base_table}'"
+                    )
+                    
+                    if not table_check:
+                        logger.debug(f"Base table {base_table} does not exist, skipping view {view_name}")
+                        results[view_name] = False
+                        continue
+                    
+                    # Create view based on which one it is
+                    if view_name == "user_daily_activity":
+                        view_sql = """
+                            CREATE MATERIALIZED VIEW IF NOT EXISTS user_daily_activity
+                            ENGINE = SummingMergeTree()
+                            PARTITION BY toYYYYMM(date)
+                            ORDER BY (user_id, date)
+                            AS SELECT
+                                user_id,
+                                toDate(timestamp) as date,
+                                count() as activity_count,
+                                uniq(session_id) as unique_sessions
+                            FROM netra_audit_events
+                            WHERE user_id != ''
+                            GROUP BY user_id, toDate(timestamp)
+                        """
+                    else:  # hourly_performance_metrics
+                        view_sql = """
+                            CREATE MATERIALIZED VIEW IF NOT EXISTS hourly_performance_metrics
+                            ENGINE = SummingMergeTree()
+                            PARTITION BY toYYYYMM(hour)
+                            ORDER BY (metric_type, hour)
+                            AS SELECT
+                                metric_type,
+                                toStartOfHour(timestamp) as hour,
+                                avg(value) as avg_value,
+                                max(value) as max_value,
+                                min(value) as min_value,
+                                count() as sample_count
+                            FROM netra_performance_metrics
+                            GROUP BY metric_type, toStartOfHour(timestamp)
+                        """
+                    
                     await client.execute_query(view_sql)
                     results[view_name] = True
                     logger.info(f"Created materialized view: {view_name}")
+                    
                 except Exception as e:
-                    logger.error(f"Error creating materialized view {view_name}: {e}")
+                    logger.debug(f"Could not create view {view_name}: {e}")
                     results[view_name] = False
         
         return results

@@ -26,7 +26,7 @@ function Write-Error { Write-Host $args -ForegroundColor Red }
 
 # Main deployment function
 function Deploy-Staging {
-    Write-Info "🚀 Starting Remote Staging Deployment"
+    Write-Info "Starting Remote Staging Deployment"
     Write-Info "========================================"
     Write-Info "Action: $Action"
     Write-Info "PR Number: $PrNumber"
@@ -68,7 +68,7 @@ function Deploy-Staging {
         Restart-Services -Config $envConfig
     }
     
-    Write-Success "✅ Deployment Complete!"
+    Write-Success "Deployment Complete!"
 }
 
 function Setup-Environment {
@@ -125,14 +125,14 @@ function Test-GcpAuth {
     try {
         $account = gcloud auth list --filter=status:ACTIVE --format="value(account)" 2>$null
         if ($account) {
-            Write-Success "✓ Authenticated as: $account"
+            Write-Success "Authenticated as: $account"
             
             # Set project
             $projectId = $env:GCP_STAGING_PROJECT_ID
             if (-not $projectId) { $projectId = $env:GCP_PROJECT_ID }
             if ($projectId) {
                 gcloud config set project $projectId 2>$null
-                Write-Success "✓ Project set to: $projectId"
+                Write-Success "Project set to: $projectId"
             }
             
             # Configure Docker for GCR
@@ -141,7 +141,8 @@ function Test-GcpAuth {
             
             return $true
         }
-    } catch {
+    }
+    catch {
         Write-Warning "GCP authentication check failed: $_"
     }
     return $false
@@ -150,7 +151,7 @@ function Test-GcpAuth {
 function Build-DockerImages {
     param($Config)
     
-    Write-Info "🔨 Building Docker Images..."
+    Write-Info "Building Docker Images..."
     $startTime = Get-Date
     
     $images = @{}
@@ -177,11 +178,12 @@ function Build-DockerImages {
     }
     
     if (-not $imageExists) {
+        $buildDate = Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ"
         $buildArgs = @(
             "build",
             "--platform", "linux/amd64",
             "--build-arg", "COMMIT_SHA=$($Config.CommitSha)",
-            "--build-arg", "BUILD_DATE=$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ')",
+            "--build-arg", "BUILD_DATE=$buildDate",
             "-t", $backendImage,
             "-t", $backendLatest,
             "-f", "Dockerfile.backend",
@@ -218,11 +220,12 @@ function Build-DockerImages {
     }
     
     if (-not $imageExists) {
+        $buildDate = Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ"
         $buildArgs = @(
             "build",
             "--platform", "linux/amd64",
             "--build-arg", "COMMIT_SHA=$($Config.CommitSha)",
-            "--build-arg", "BUILD_DATE=$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ')",
+            "--build-arg", "BUILD_DATE=$buildDate",
             "-t", $frontendImage,
             "-t", $frontendLatest,
             "-f", "Dockerfile.frontend.staging",
@@ -244,7 +247,7 @@ function Build-DockerImages {
     $images.Frontend = $frontendImage
     
     $duration = (Get-Date) - $startTime
-    Write-Success "✓ Images built and pushed in $([int]$duration.TotalSeconds) seconds"
+    Write-Success "Images built and pushed in $([int]$duration.TotalSeconds) seconds"
     
     return $images
 }
@@ -252,7 +255,7 @@ function Build-DockerImages {
 function Deploy-Infrastructure {
     param($Config)
     
-    Write-Info "🏗️ Deploying Infrastructure with Terraform..."
+    Write-Info "Deploying Infrastructure with Terraform..."
     $startTime = Get-Date
     
     # Change to terraform directory
@@ -295,11 +298,11 @@ commit_sha = "$($Config.CommitSha)"
 project_id = "$($Config.ProjectId)"
 backend_image = "$($Config.BackendImage)"
 frontend_image = "$($Config.FrontendImage)"
-postgres_password = "$($env:POSTGRES_PASSWORD_STAGING ?? 'staging-password')"
-clickhouse_password = "$($env:CLICKHOUSE_PASSWORD_STAGING ?? 'staging-clickhouse')"
-jwt_secret_key = "$($env:JWT_SECRET_KEY_STAGING ?? '')"
-fernet_key = "$($env:FERNET_KEY_STAGING ?? '')"
-gemini_api_key = "$($env:GEMINI_API_KEY_STAGING ?? '')"
+postgres_password = "$(if ($env:POSTGRES_PASSWORD_STAGING) { $env:POSTGRES_PASSWORD_STAGING } else { 'staging-password' })"
+clickhouse_password = "$(if ($env:CLICKHOUSE_PASSWORD_STAGING) { $env:CLICKHOUSE_PASSWORD_STAGING } else { 'staging-clickhouse' })"
+jwt_secret_key = "$(if ($env:JWT_SECRET_KEY_STAGING) { $env:JWT_SECRET_KEY_STAGING } else { '' })"
+fernet_key = "$(if ($env:FERNET_KEY_STAGING) { $env:FERNET_KEY_STAGING } else { '' })"
+gemini_api_key = "$(if ($env:GEMINI_API_KEY_STAGING) { $env:GEMINI_API_KEY_STAGING } else { '' })"
 "@
         $tfvars | Out-File -FilePath "terraform.tfvars" -Encoding utf8
         
@@ -326,7 +329,7 @@ gemini_api_key = "$($env:GEMINI_API_KEY_STAGING ?? '')"
         $Config.FrontendUrl = terraform output -raw frontend_url 2>$null
         
         $duration = (Get-Date) - $startTime
-        Write-Success "✓ Infrastructure deployed in $([int]$duration.TotalSeconds) seconds"
+        Write-Success "Infrastructure deployed in $([int]$duration.TotalSeconds) seconds"
         Write-Success "Frontend URL: $($Config.FrontendUrl)"
         Write-Success "Backend URL: $($Config.BackendUrl)"
     }
@@ -338,7 +341,7 @@ gemini_api_key = "$($env:GEMINI_API_KEY_STAGING ?? '')"
 function Destroy-Infrastructure {
     param($Config)
     
-    Write-Warning "🗑️ Destroying Infrastructure..."
+    Write-Warning "Destroying Infrastructure..."
     
     Push-Location "terraform/staging"
     try {
@@ -362,7 +365,7 @@ function Destroy-Infrastructure {
             -var="pr_number=$($Config.PrNumber)" `
             -var="project_id=$($Config.ProjectId)"
         
-        Write-Success "✓ Infrastructure destroyed"
+        Write-Success "Infrastructure destroyed"
     }
     finally {
         Pop-Location
@@ -372,7 +375,7 @@ function Destroy-Infrastructure {
 function Test-Deployment {
     param($Config)
     
-    Write-Info "🧪 Running Smoke Tests..."
+    Write-Info "Running Smoke Tests..."
     
     # Wait for services to stabilize
     Start-Sleep -Seconds 15
@@ -386,7 +389,7 @@ function Test-Deployment {
         try {
             $response = Invoke-WebRequest -Uri "$($Config.BackendUrl)/health" -TimeoutSec 10
             if ($response.StatusCode -eq 200) {
-                Write-Success "✓ Backend is healthy"
+                Write-Success "Backend is healthy"
                 break
             }
         } catch {
@@ -406,7 +409,7 @@ function Test-Deployment {
     try {
         $response = Invoke-WebRequest -Uri $Config.FrontendUrl -TimeoutSec 10
         if ($response.StatusCode -eq 200) {
-            Write-Success "✓ Frontend is accessible"
+            Write-Success "Frontend is accessible"
         }
     } catch {
         Write-Warning "Frontend may not be fully ready yet"
@@ -416,7 +419,7 @@ function Test-Deployment {
 function Get-DeploymentStatus {
     param($Config)
     
-    Write-Info "📊 Getting Deployment Status..."
+    Write-Info "Getting Deployment Status..."
     
     Push-Location "terraform/staging"
     try {
@@ -468,26 +471,27 @@ function Get-DeploymentStatus {
 function Restart-Services {
     param($Config)
     
-    Write-Info "🔄 Restarting Services..."
+    Write-Info "Restarting Services..."
     
     # In GCP Cloud Run, we restart by updating the service
     $projectId = $Config.ProjectId
     
     # Restart backend
     Write-Info "Restarting backend service..."
+    $restartTime = Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ"
     gcloud run services update "backend-$($Config.PrNumber)" `
         --region=$GcpRegion `
         --project=$projectId `
-        --update-env-vars="RESTART_TIME=$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ')"
+        --update-env-vars="RESTART_TIME=$restartTime"
     
     # Restart frontend
     Write-Info "Restarting frontend service..."
     gcloud run services update "frontend-$($Config.PrNumber)" `
         --region=$GcpRegion `
         --project=$projectId `
-        --update-env-vars="RESTART_TIME=$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ')"
+        --update-env-vars="RESTART_TIME=$restartTime"
     
-    Write-Success "✓ Services restarted"
+    Write-Success "Services restarted"
 }
 
 # Check prerequisites
@@ -522,12 +526,13 @@ function Test-Prerequisites {
     }
     
     if ($missing.Count -gt 0) {
-        Write-Error "Missing prerequisites: $($missing -join ', ')"
+        $missingList = $missing -join ", "
+        Write-Error "Missing prerequisites: $missingList"
         Write-Info "Please install the missing tools and try again."
         exit 1
     }
     
-    Write-Success "✓ All prerequisites met"
+    Write-Success "All prerequisites met"
 }
 
 # Main execution

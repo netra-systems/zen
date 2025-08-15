@@ -41,13 +41,8 @@ class ConnectionPoolMetrics:
     
     def _collect_sync_pool_status(self, status: Dict[str, Any]) -> None:
         """Collect sync pool metrics"""
-        try:
-            if hasattr(Database, 'engine') and Database.engine:
-                sync_pool = Database.engine.pool
-                status["sync_pool"] = self._extract_pool_metrics(sync_pool, "sync")
-        except Exception as e:
-            logger.error(f"Error getting sync pool status: {e}")
-            status["sync_pool"] = {"error": str(e)}
+        # Currently we only use async engine, no sync instance
+        status["sync_pool"] = None
     
     def _collect_async_pool_status(self, status: Dict[str, Any]) -> None:
         """Collect async pool metrics"""
@@ -138,7 +133,10 @@ class ConnectionPoolMetrics:
                           warnings: List[str], critical_issues: List[str]) -> None:
         """Check health of a specific pool"""
         pool_status = status.get(pool_type)
-        if not pool_status or "error" in pool_status:
+        if pool_status is None:
+            # Pool not configured (e.g., sync pool when only async is used)
+            return
+        if "error" in pool_status:
             critical_issues.append(f"{pool_type} error")
             return
         self._check_utilization(pool_status, pool_type, warnings, critical_issues)

@@ -364,7 +364,8 @@ class PerformanceAlertManager:
                 "threshold": 0.5,
                 "operator": "<",
                 "duration": 300,
-                "severity": "warning"
+                "severity": "warning",
+                "min_samples": 10  # Require minimum samples before alerting
             }
         }
     
@@ -414,6 +415,11 @@ class PerformanceAlertManager:
         )
         
         if not metrics:
+            return False
+        
+        # Check minimum samples requirement
+        min_samples = rule.get("min_samples", 0)
+        if len(metrics) < min_samples:
             return False
         
         # Check if threshold is exceeded for the duration

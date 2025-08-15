@@ -193,7 +193,7 @@ jobs:
   stub-metrics:
     name: 📈 Track Stub Metrics
     runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
-    if: ${{ !env.ACT && github.event_name == 'push' && github.ref == 'refs/heads/main' }}  # ACT compatibility: skip for ACT
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}  # Skip metrics on PRs
     needs: detect-test-stubs
     continue-on-error: true  # Don't fail build for metrics
     
