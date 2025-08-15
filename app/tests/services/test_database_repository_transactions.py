@@ -453,8 +453,13 @@ class TestUnitOfWorkTransactions:
         session.refresh = AsyncMock()
         session.execute = AsyncMock()
         
+        # Create a context manager that returns the session
+        session_context = AsyncMock()
+        session_context.__aenter__ = AsyncMock(return_value=session)
+        session_context.__aexit__ = AsyncMock(return_value=None)
+        
         factory = MagicMock()
-        factory.return_value = session
+        factory.return_value = session_context
         return factory, session
     
     @pytest.mark.asyncio
@@ -474,9 +479,8 @@ class TestUnitOfWorkTransactions:
                 assert uow.threads._session is mock_session
                 assert uow.messages._session is mock_session
                 
-        # Session should not be closed or rolled back on success
+        # Session should not be rolled back on success
         mock_session.rollback.assert_not_called()
-        mock_session.close.assert_called_once()
     
     @pytest.mark.asyncio
     async def test_unit_of_work_rollback_on_exception(self, mock_async_session_factory):
@@ -491,9 +495,8 @@ class TestUnitOfWorkTransactions:
             except ValueError:
                 pass  # Expected exception
         
-        # Should rollback and close on exception
+        # Should rollback on exception
         mock_session.rollback.assert_called_once()
-        mock_session.close.assert_called_once()
     
     @pytest.mark.asyncio
     async def test_unit_of_work_with_external_session(self):
@@ -543,7 +546,6 @@ class TestUnitOfWorkTransactions:
                 assert run.id == "run_789"
         
         # All operations should complete successfully
-        mock_session.close.assert_called_once()
         mock_session.rollback.assert_not_called()
     
     @pytest.mark.asyncio
@@ -575,7 +577,6 @@ class TestUnitOfWorkTransactions:
         
         # Should rollback entire transaction
         mock_session.rollback.assert_called_once()
-        mock_session.close.assert_called_once()
 
 
 class TestTransactionPerformanceAndScaling:

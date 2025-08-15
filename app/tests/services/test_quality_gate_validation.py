@@ -156,6 +156,11 @@ class TestErrorHandling(SharedTestErrorHandling):
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
+    
+    @pytest.fixture
+    def service(self):
+        """Provide service fixture for shared test methods"""
+        return QualityGateService(redis_manager=None)
         
     @pytest.mark.asyncio
     async def test_validate_content_calculation_error(self, quality_service):

@@ -1,4 +1,4 @@
-import { WebSocketMessage } from '../types/backend_schema_auto_generated';
+import { WebSocketMessage, AuthMessage, PingMessage, PongMessage } from '../types/backend_schema_auto_generated';
 import { UnifiedWebSocketEvent } from '../types/unified-chat';
 import { config } from '@/config';
 import { logger } from '@/lib/logger';
@@ -36,7 +36,7 @@ class WebSocketService {
   private status: WebSocketStatus = 'CLOSED';
   private state: WebSocketState = 'disconnected';
   private options: WebSocketOptions = {};
-  private messageQueue: (WebSocketMessage | UnifiedWebSocketEvent)[] = [];
+  private messageQueue: (WebSocketMessage | UnifiedWebSocketEvent | AuthMessage | PingMessage | PongMessage)[] = [];
   private reconnectTimer: NodeJS.Timeout | null = null;
   private heartbeatTimer: NodeJS.Timeout | null = null;
   private url: string = '';
@@ -68,7 +68,7 @@ class WebSocketService {
         // Send auth token
         const token = localStorage.getItem('authToken');
         if (token) {
-          this.send({ type: 'auth', token });
+          this.send({ type: 'auth', token } as AuthMessage);
         }
         
         // Send queued messages
@@ -163,7 +163,7 @@ class WebSocketService {
     this.stopHeartbeat();
     this.heartbeatTimer = setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        this.send({ type: 'ping' });
+        this.send({ type: 'ping', timestamp: Date.now() } as PingMessage);
       }
     }, interval);
   }
@@ -186,7 +186,7 @@ class WebSocketService {
     }, 5000);
   }
 
-  public send(message: WebSocketMessage | UnifiedWebSocketEvent | { type: string; [key: string]: unknown }) {
+  public send(message: WebSocketMessage | UnifiedWebSocketEvent | AuthMessage | PingMessage | PongMessage) {
     // Check rate limit if configured
     if (this.options.rateLimit) {
       const now = Date.now();

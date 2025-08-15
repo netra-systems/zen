@@ -19,10 +19,12 @@ class TestSchemaValidationService:
         """Test schema validation against database."""
         mock_engine = Mock(spec=AsyncEngine)
         
-        # Mock connection context
+        # Mock connection context - properly set up async context manager
         mock_conn = AsyncMock()
-        mock_engine.connect.return_value.__aenter__.return_value = mock_conn
-        mock_engine.connect.return_value.__aexit__.return_value = None
+        mock_context = AsyncMock()
+        mock_context.__aenter__ = AsyncMock(return_value=mock_conn)
+        mock_context.__aexit__ = AsyncMock(return_value=None)
+        mock_engine.connect.return_value = mock_context
         
         try:
             result = await SchemaValidationService.validate_schema(mock_engine)
