@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 from app.logging_config import central_logger
 from .error_types import ClickHouseQueryError
 from app.agents.error_handler import ErrorContext
+from .query_fix_validator import validate_and_fix_query
 
 logger = central_logger.get_logger(__name__)
 
@@ -80,9 +81,11 @@ class ClickHouseRecoveryManager:
             simplified_query = self._simplify_query(original_query, query_type)
             
             if simplified_query and self.clickhouse_client:
-                result = await self.clickhouse_client.execute(simplified_query)
+                # Ensure the query has correct syntax before execution
+                fixed_query = validate_and_fix_query(simplified_query)
+                result = await self.clickhouse_client.execute(fixed_query)
                 logger.info(f"Query recovered with simplification")
-                return {'data': result, 'query': simplified_query}
+                return {'data': result, 'query': fixed_query}
                 
         except Exception as e:
             logger.debug(f"Simplified query failed: {e}")
@@ -91,7 +94,9 @@ class ClickHouseRecoveryManager:
     
     def _simplify_query(self, query: str, query_type: str) -> str:
         """Create simplified version of query."""
-        simplified = query.lower()
+        # IMPORTANT: Do NOT lowercase the query as it breaks ClickHouse functions
+        # First fix any array syntax issues
+        simplified = validate_and_fix_query(query)
         
         # Remove complex aggregations
         if 'group by' in simplified:
