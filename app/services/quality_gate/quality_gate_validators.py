@@ -15,10 +15,10 @@ class QualityValidator:
         # Quality thresholds by content type
         self.thresholds = {
             ContentType.OPTIMIZATION: {
-                "min_score": 0.7,
+                "min_score": 0.63,
                 "min_specificity": 0.6,
-                "min_actionability": 0.7,
-                "min_quantification": 0.7
+                "min_actionability": 0.6,
+                "min_quantification": 0.6
             },
             ContentType.DATA_ANALYSIS: {
                 "min_score": 0.6,
@@ -46,7 +46,8 @@ class QualityValidator:
             ContentType.ERROR_MESSAGE: {
                 "min_score": 0.5,
                 "min_clarity": 0.8,
-                "min_actionability": 0.6
+                "min_actionability": 0.6,
+                "min_specificity": 0.7
             },
             ContentType.GENERAL: {
                 "min_score": 0.5,

@@ -278,3 +278,5 @@ class TestPermissionLogic:
         # Test that power_user has all standard_user permissions
         standard_perms = ROLE_PERMISSIONS["standard_user"]
         assert standard_perms.issubset(power_perms)
+
+

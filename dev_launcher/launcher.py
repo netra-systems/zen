@@ -482,6 +482,7 @@ class DevLauncher:
         
         # Wait for backend to be ready
         backend_info = self.service_discovery.read_backend_info()
+        backend_healthy = False
         if backend_info:
             self._print("⏳", "WAIT", "Waiting for backend to be ready...")
             # Check /health/ready instead of /health/live for full readiness
@@ -494,10 +495,24 @@ class DevLauncher:
                 self._print("⏳", "WAIT", "Verifying auth system...")
                 if wait_for_service(auth_config_url, timeout=10):
                     self._print("✅", "OK", "Auth system is ready")
+                    backend_healthy = True
                 else:
                     self._print("⚠️", "WARN", "Auth config check timed out")
             else:
-                self._print("⚠️", "WARN", "Backend readiness check timed out, continuing anyway")
+                self._print("❌", "ERROR", "Backend failed to start - check database connection")
+                self._print("ℹ️", "INFO", "Common issues:")
+                self._print("", "", "  • DATABASE_URL may have special characters that need encoding")
+                self._print("", "", "  • PostgreSQL container may not be running (check: docker ps)")
+                self._print("", "", "  • Database credentials may be incorrect")
+                self._print("", "", "  • Run: cd terraform-dev-postgres && terraform apply")
+                self.process_manager.cleanup_all()
+                return 1
+        
+        # Only start frontend if backend is healthy
+        if not backend_healthy:
+            self._print("❌", "ERROR", "Cannot start frontend - backend is not healthy")
+            self.process_manager.cleanup_all()
+            return 1
         
         # Start frontend with native reload support (Next.js)
         frontend_process, frontend_streamer = self.start_frontend()

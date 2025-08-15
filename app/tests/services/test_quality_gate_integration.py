@@ -184,36 +184,60 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         content = """
         Database Migration Action Plan
         
+        System Requirements and Timeline:
+        - CPU utilization: maintain below 80% during migration
+        - Memory allocation: reserve 8 GB for migration process
+        - Network bandwidth: ensure 1000 QPS capacity available
+        - Expected duration: 120 minutes timeline for complete migration
+        - Backup verification requirement: checksum validation mandatory
+        
         Prerequisites:
-        - Backup current database: pg_dump production_db > backup_$(date +%Y%m%d).sql
-        - Test migration on staging environment
-        - Schedule maintenance window (2-hour duration)
+        - Configure backup retention: set backup_retention_days=30
+        - Install migration tools: pip install psycopg2-binary==2.9.7
+        - Backup current database: pg_dump production_db > /data/backups/backup_$(date +%Y%m%d).sql
+        - Execute test migration on staging environment
+        - Schedule maintenance window: 2 hours timeline allocation
         
-        Step-by-Step Instructions:
-        1. Enable read-only mode: UPDATE system_config SET read_only = true;
-        2. Stop application services: systemctl stop netra-api netra-worker
-        3. Run migration script: python migrate_schema.py --from v2.1 --to v2.2
-        4. Verify data integrity: python verify_migration.py --check-counts --validate-indexes
-        5. Update application configuration: sed -i 's/v2.1/v2.2/' config/database.yaml
-        6. Restart services: systemctl start netra-api netra-worker
-        7. Disable read-only mode: UPDATE system_config SET read_only = false;
-        8. Monitor for 30 minutes: tail -f /var/log/netra/*.log
+        Step-by-Step Migration Instructions:
+        1. Set connection parameters: max_connections=200, shared_buffers=2 GB
+        2. Enable read-only mode: UPDATE system_config SET read_only = true;
+        3. Stop application services: systemctl stop netra-api netra-worker
+        4. Optimize database settings: ALTER SYSTEM SET max_tokens=4096;
+        5. Run migration script: python /opt/scripts/migrate_schema.py --from v2.1 --to v2.2
+        6. Execute verification procedures: python /opt/scripts/verify_migration.py --check-counts --validate-indexes
+        7. Update application configuration: sed -i 's/v2.1/v2.2/' /etc/netra/config/database.yaml
+        8. Configure monitoring thresholds: set alert_threshold=95%
+        9. Restart services: systemctl start netra-api netra-worker
+        10. Disable read-only mode: UPDATE system_config SET read_only = false;
+        11. Monitor system performance: tail -f /var/log/netra/*.log for 30 minutes
         
-        Success Criteria:
-        - All tables migrated successfully (zero data loss)
-        - Application starts without errors
-        - API response time < 200ms p95
-        - No error spikes in monitoring dashboard
+        Expected Outcome and Success Criteria:
+        - All tables migrated successfully with zero data loss
+        - Application starts without errors within 60 seconds
+        - API response time maintains below 200 ms average
+        - Database throughput sustains 1500 requests/second
+        - No error spikes detected in monitoring dashboard
+        - Memory usage remains under 6 GB post-migration
         
-        Rollback Procedure:
-        - If errors detected: immediately restore from backup
-        - Command: psql production_db < backup_$(date +%Y%m%d).sql
-        - Estimated rollback time: 15 minutes
+        Verification Process:
+        - Execute data integrity verification: SELECT COUNT(*) validation on all tables
+        - Run performance benchmark: measure latency under 150 ms p95
+        - Validate schema version: confirm v2.2 deployment successful
+        - Test application endpoints: verify 100% functional requirements
         
-        Risk Mitigation:
-        - Database backup completed and verified
-        - Staging environment tested successfully
-        - Rollback plan ready and tested
+        Rollback Procedure and Recovery:
+        - Monitor error threshold: rollback if error_rate > 5%
+        - Execute immediate restoration: psql production_db < /data/backups/backup_$(date +%Y%m%d).sql
+        - Estimated rollback timeline: 15 minutes maximum duration
+        - Implement circuit breaker: max_retry_attempts=3
+        - Configure rollback verification: ensure data consistency check
+        
+        Risk Mitigation Strategy:
+        - Database backup completed and verification checksums validated
+        - Staging environment tested successfully with identical dataset
+        - Rollback plan tested and verification procedures confirmed
+        - Monitoring alerts configured: batch_size=100 for real-time tracking
+        - Team notification system: alert response time < 5 minutes
         """
         
         context = {

@@ -52,92 +52,15 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request with error recovery capabilities."""
-        # Create operation context
-        operation_id = f"{request.method}:{request.url.path}:{int(time.time())}"
-        operation_type = self._determine_operation_type(request)
+        operation_id, operation_type = self._create_operation_context(request)
         
-        # Check circuit breaker before processing
-        circuit_breaker = self.recovery_manager.get_circuit_breaker(
-            f"{request.method}:{request.url.path}"
+        circuit_check_response = self._check_circuit_breaker(request)
+        if circuit_check_response:
+            return circuit_check_response
+        
+        return await self._execute_request_with_retry(
+            request, call_next, operation_id, operation_type
         )
-        
-        if not circuit_breaker.should_allow_request():
-            logger.warning(f"Circuit breaker open for {request.url.path}")
-            return JSONResponse(
-                status_code=503,
-                content={
-                    "error": "SERVICE_UNAVAILABLE",
-                    "message": "Service temporarily unavailable",
-                    "retry_after": 60
-                }
-            )
-        
-        # Process request with recovery
-        max_attempts = 3
-        last_error = None
-        
-        for attempt in range(max_attempts):
-            try:
-                # Store request context for recovery
-                request.state.operation_id = operation_id
-                request.state.attempt = attempt
-                
-                # Process the request
-                response = await call_next(request)
-                
-                # Record success for circuit breaker
-                circuit_breaker.record_success()
-                
-                # Add recovery headers
-                response.headers["X-Operation-ID"] = operation_id
-                response.headers["X-Attempt"] = str(attempt + 1)
-                
-                return response
-                
-            except Exception as error:
-                last_error = error
-                
-                # Create recovery context
-                context = RecoveryContext(
-                    operation_id=operation_id,
-                    operation_type=operation_type,
-                    error=error,
-                    severity=self._determine_severity(error),
-                    retry_count=attempt,
-                    max_retries=max_attempts - 1,
-                    metadata=self._extract_request_metadata(request)
-                )
-                
-                # Log error with full context
-                await self._log_error_with_context(error, context, request)
-                
-                # Attempt recovery if not the last attempt
-                if attempt < max_attempts - 1:
-                    recovery_result = await self.recovery_executor.attempt_recovery(
-                        context
-                    )
-                    
-                    if recovery_result.success:
-                        if recovery_result.action_taken.value == "retry":
-                            # Continue to next attempt
-                            continue
-                        elif recovery_result.action_taken.value == "compensate":
-                            # Return success with compensation info
-                            return self._create_recovery_response(
-                                request, context, recovery_result
-                            )
-                    
-                    # Record failure for circuit breaker
-                    circuit_breaker.record_failure()
-                
-                # If last attempt or recovery failed, break
-                break
-        
-        # All attempts failed, record circuit breaker failure
-        circuit_breaker.record_failure()
-        
-        # Return final error response
-        return await self._create_error_response(request, last_error, operation_id)
     
     def _determine_operation_type(self, request: Request) -> OperationType:
         """Determine operation type from request."""
@@ -203,6 +126,168 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
             metadata['request_id'] = request.state.request_id
         
         return metadata
+    
+    def _create_operation_context(self, request: Request) -> tuple[str, OperationType]:
+        """Create operation context for request processing."""
+        operation_id = f"{request.method}:{request.url.path}:{int(time.time())}"
+        operation_type = self._determine_operation_type(request)
+        return operation_id, operation_type
+    
+    def _check_circuit_breaker(self, request: Request) -> Optional[JSONResponse]:
+        """Check circuit breaker and return early response if needed."""
+        circuit_breaker = self.recovery_manager.get_circuit_breaker(
+            f"{request.method}:{request.url.path}"
+        )
+        
+        if not circuit_breaker.should_allow_request():
+            logger.warning(f"Circuit breaker open for {request.url.path}")
+            return self._create_circuit_breaker_response()
+        return None
+    
+    def _create_circuit_breaker_response(self) -> JSONResponse:
+        """Create service unavailable response for circuit breaker."""
+        return JSONResponse(
+            status_code=503,
+            content={
+                "error": "SERVICE_UNAVAILABLE",
+                "message": "Service temporarily unavailable",
+                "retry_after": 60
+            }
+        )
+    
+    async def _execute_request_with_retry(
+        self,
+        request: Request,
+        call_next: Callable,
+        operation_id: str,
+        operation_type: OperationType
+    ) -> Response:
+        """Execute request with retry logic and recovery."""
+        circuit_breaker = self.recovery_manager.get_circuit_breaker(
+            f"{request.method}:{request.url.path}"
+        )
+        max_attempts = 3
+        last_error = None
+        
+        for attempt in range(max_attempts):
+            try:
+                response = await self._handle_request_attempt(
+                    request, call_next, operation_id, attempt, circuit_breaker
+                )
+                return response
+            except Exception as error:
+                last_error = error
+                recovery_response = await self._handle_request_error(
+                    request, error, operation_id, operation_type, 
+                    attempt, max_attempts, circuit_breaker
+                )
+                if recovery_response:
+                    return recovery_response
+                if attempt >= max_attempts - 1:
+                    break
+        
+        return await self._handle_final_failure(
+            request, last_error, operation_id, circuit_breaker
+        )
+    
+    async def _handle_request_attempt(
+        self,
+        request: Request,
+        call_next: Callable,
+        operation_id: str,
+        attempt: int,
+        circuit_breaker
+    ) -> Response:
+        """Handle a single request attempt."""
+        request.state.operation_id = operation_id
+        request.state.attempt = attempt
+        
+        response = await call_next(request)
+        circuit_breaker.record_success()
+        
+        return self._add_success_headers(response, operation_id, attempt)
+    
+    def _add_success_headers(self, response: Response, operation_id: str, attempt: int) -> Response:
+        """Add success headers to response."""
+        response.headers["X-Operation-ID"] = operation_id
+        response.headers["X-Attempt"] = str(attempt + 1)
+        return response
+    
+    async def _handle_request_error(
+        self,
+        request: Request,
+        error: Exception,
+        operation_id: str,
+        operation_type: OperationType,
+        attempt: int,
+        max_attempts: int,
+        circuit_breaker
+    ) -> Optional[JSONResponse]:
+        """Handle request error and return recovery response if needed."""
+        context = self._create_recovery_context(
+            operation_id, operation_type, error, attempt, max_attempts, request
+        )
+        
+        await self._log_error_with_context(error, context, request)
+        
+        return await self._attempt_error_recovery(
+            request, context, attempt, max_attempts, circuit_breaker
+        )
+    
+    def _create_recovery_context(
+        self,
+        operation_id: str,
+        operation_type: OperationType,
+        error: Exception,
+        attempt: int,
+        max_attempts: int,
+        request: Request
+    ) -> RecoveryContext:
+        """Create recovery context for error handling."""
+        return RecoveryContext(
+            operation_id=operation_id,
+            operation_type=operation_type,
+            error=error,
+            severity=self._determine_severity(error),
+            retry_count=attempt,
+            max_retries=max_attempts - 1,
+            metadata=self._extract_request_metadata(request)
+        )
+    
+    async def _attempt_error_recovery(
+        self,
+        request: Request,
+        context: RecoveryContext,
+        attempt: int,
+        max_attempts: int,
+        circuit_breaker
+    ) -> Optional[JSONResponse]:
+        """Attempt error recovery and return response if needed."""
+        if attempt >= max_attempts - 1:
+            return None
+        
+        recovery_result = await self.recovery_executor.attempt_recovery(context)
+        
+        if recovery_result.success:
+            if recovery_result.action_taken.value == "compensate":
+                return self._create_recovery_response(
+                    request, context, recovery_result
+                )
+        else:
+            circuit_breaker.record_failure()
+        
+        return None
+    
+    async def _handle_final_failure(
+        self,
+        request: Request,
+        error: Exception,
+        operation_id: str,
+        circuit_breaker
+    ) -> JSONResponse:
+        """Handle final failure after all attempts exhausted."""
+        circuit_breaker.record_failure()
+        return await self._create_error_response(request, error, operation_id)
     
     async def _log_error_with_context(
         self,

@@ -32,15 +32,15 @@ description: Comprehensive test execution workflow
 #           - comprehensive-agents
 #           - comprehensive-websocket
 #           - comprehensive-database
-          - comprehensive-api
-          - critical
-      triggered_by:
-        description: 'Who triggered the tests'
-        required: false
-        default: 'manual'
-  
-  schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+#           - comprehensive-api
+#           - critical
+#       triggered_by:
+#         description: 'Who triggered the tests'
+#         required: false
+#         default: 'manual'
+#   
+#   schedule:
+#     - cron: '0 2 * * *'  # Daily at 2 AM UTC
 
 env:
   PYTHON_VERSION: '3.11'

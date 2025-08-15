@@ -96,48 +96,46 @@ jobs:
               else
                 echo "❌ boundary_enforcer.py not found, creating mock version"
                 mkdir -p scripts
-                cat > scripts/boundary_enforcer.py << 'EOF'
-#!/usr/bin/env python3
-import sys
-import json
-import argparse
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--enforce', action='store_true')
-    parser.add_argument('--json-output')
-    parser.add_argument('--pr-comment', action='store_true')
-    parser.add_argument('--fail-on-emergency', action='store_true')
-    args = parser.parse_args()
-    
-    if args.json_output:
-        # Mock boundary report
-        report = {
-            "total_violations": 2,
-            "file_violations": {"large_files": ["mock_file.py"]},
-            "function_violations": {"large_functions": ["mock_function"]},
-            "emergency_violations": [],
-            "act_mode": True
-        }
-        with open(args.json_output, 'w') as f:
-            json.dump(report, f, indent=2)
-    
-    if args.pr_comment:
-        print("🧪 ACT MODE: Mock boundary enforcement summary")
-        print("- Found 2 minor violations (mocked)")
-        print("- No emergency violations")
-        
-    if args.fail_on_emergency:
-        print("🧪 ACT MODE: No emergency violations (mocked)")
-        sys.exit(0)
-        
-    if args.enforce:
-        print("🧪 ACT MODE: Mock enforcement completed")
-        sys.exit(0)
-
-if __name__ == "__main__":
-    main()
-EOF
+                printf '%s\n' '#!/usr/bin/env python3' > scripts/boundary_enforcer.py
+                printf '%s\n' 'import sys' >> scripts/boundary_enforcer.py
+                printf '%s\n' 'import json' >> scripts/boundary_enforcer.py
+                printf '%s\n' 'import argparse' >> scripts/boundary_enforcer.py
+                printf '%s\n' '' >> scripts/boundary_enforcer.py
+                printf '%s\n' 'def main():' >> scripts/boundary_enforcer.py
+                printf '%s\n' '    parser = argparse.ArgumentParser()' >> scripts/boundary_enforcer.py
+                printf '%s\n' "    parser.add_argument('--enforce', action='store_true')" >> scripts/boundary_enforcer.py
+                printf '%s\n' "    parser.add_argument('--json-output')" >> scripts/boundary_enforcer.py
+                printf '%s\n' "    parser.add_argument('--pr-comment', action='store_true')" >> scripts/boundary_enforcer.py
+                printf '%s\n' "    parser.add_argument('--fail-on-emergency', action='store_true')" >> scripts/boundary_enforcer.py
+                printf '%s\n' '    args = parser.parse_args()' >> scripts/boundary_enforcer.py
+                printf '%s\n' '    ' >> scripts/boundary_enforcer.py
+                printf '%s\n' '    if args.json_output:' >> scripts/boundary_enforcer.py
+                printf '%s\n' '        # Mock boundary report' >> scripts/boundary_enforcer.py
+                printf '%s\n' '        report = {' >> scripts/boundary_enforcer.py
+                printf '%s\n' '            "total_violations": 2,' >> scripts/boundary_enforcer.py
+                printf '%s\n' '            "file_violations": {"large_files": ["mock_file.py"]},' >> scripts/boundary_enforcer.py
+                printf '%s\n' '            "function_violations": {"large_functions": ["mock_function"]},' >> scripts/boundary_enforcer.py
+                printf '%s\n' '            "emergency_violations": [],' >> scripts/boundary_enforcer.py
+                printf '%s\n' '            "act_mode": True' >> scripts/boundary_enforcer.py
+                printf '%s\n' '        }' >> scripts/boundary_enforcer.py
+                printf '%s\n' "        with open(args.json_output, 'w') as f:" >> scripts/boundary_enforcer.py
+                printf '%s\n' '            json.dump(report, f, indent=2)' >> scripts/boundary_enforcer.py
+                printf '%s\n' '    ' >> scripts/boundary_enforcer.py
+                printf '%s\n' '    if args.pr_comment:' >> scripts/boundary_enforcer.py
+                printf '%s\n' '        print("🧪 ACT MODE: Mock boundary enforcement summary")' >> scripts/boundary_enforcer.py
+                printf '%s\n' '        print("- Found 2 minor violations (mocked)")' >> scripts/boundary_enforcer.py
+                printf '%s\n' '        print("- No emergency violations")' >> scripts/boundary_enforcer.py
+                printf '%s\n' '        ' >> scripts/boundary_enforcer.py
+                printf '%s\n' '    if args.fail_on_emergency:' >> scripts/boundary_enforcer.py
+                printf '%s\n' '        print("🧪 ACT MODE: No emergency violations (mocked)")' >> scripts/boundary_enforcer.py
+                printf '%s\n' '        sys.exit(0)' >> scripts/boundary_enforcer.py
+                printf '%s\n' '        ' >> scripts/boundary_enforcer.py
+                printf '%s\n' '    if args.enforce:' >> scripts/boundary_enforcer.py
+                printf '%s\n' '        print("🧪 ACT MODE: Mock enforcement completed")' >> scripts/boundary_enforcer.py
+                printf '%s\n' '        sys.exit(0)' >> scripts/boundary_enforcer.py
+                printf '%s\n' '' >> scripts/boundary_enforcer.py
+                printf '%s\n' 'if __name__ == "__main__":' >> scripts/boundary_enforcer.py
+                printf '%s\n' '    main()' >> scripts/boundary_enforcer.py
                 chmod +x scripts/boundary_enforcer.py
               fi
             fi
@@ -195,35 +193,33 @@ EOF
             # Check if compliance checker exists, create mock if not
             if [ ! -f "scripts/check_architecture_compliance.py" ]; then
               echo "Creating mock compliance checker for ACT"
-              cat > scripts/check_architecture_compliance.py << 'EOF'
-#!/usr/bin/env python3
-import sys
-import json
-import argparse
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--json-output')
-    args = parser.parse_args()
-    
-    if args.json_output:
-        # Mock compliance report
-        report = {
-            "total_violations": 5,
-            "compliance_score": 85,
-            "file_count": 150,
-            "average_file_size": 180,
-            "largest_files": ["mock_large_file.py"],
-            "act_mode": True
-        }
-        with open(args.json_output, 'w') as f:
-            json.dump(report, f, indent=2)
-    
-    print("🧪 ACT MODE: Mock compliance check completed")
-
-if __name__ == "__main__":
-    main()
-EOF
+              printf '%s\n' '#!/usr/bin/env python3' > scripts/check_architecture_compliance.py
+              printf '%s\n' 'import sys' >> scripts/check_architecture_compliance.py
+              printf '%s\n' 'import json' >> scripts/check_architecture_compliance.py
+              printf '%s\n' 'import argparse' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '' >> scripts/check_architecture_compliance.py
+              printf '%s\n' 'def main():' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '    parser = argparse.ArgumentParser()' >> scripts/check_architecture_compliance.py
+              printf '%s\n' "    parser.add_argument('--json-output')" >> scripts/check_architecture_compliance.py
+              printf '%s\n' '    args = parser.parse_args()' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '    ' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '    if args.json_output:' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '        # Mock compliance report' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '        report = {' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '            "total_violations": 5,' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '            "compliance_score": 85,' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '            "file_count": 150,' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '            "average_file_size": 180,' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '            "largest_files": ["mock_large_file.py"],' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '            "act_mode": True' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '        }' >> scripts/check_architecture_compliance.py
+              printf '%s\n' "        with open(args.json_output, 'w') as f:" >> scripts/check_architecture_compliance.py
+              printf '%s\n' '            json.dump(report, f, indent=2)' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '    ' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '    print("🧪 ACT MODE: Mock compliance check completed")' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '' >> scripts/check_architecture_compliance.py
+              printf '%s\n' 'if __name__ == "__main__":' >> scripts/check_architecture_compliance.py
+              printf '%s\n' '    main()' >> scripts/check_architecture_compliance.py
               chmod +x scripts/check_architecture_compliance.py
             fi
           fi
@@ -475,16 +471,14 @@ EOF
           # Create minimal config if missing in ACT mode
           if [[ "${{ env.ACT_MODE }}" == "true" ]] && [[ ! -f ".pre-commit-config.yaml" ]]; then
             echo "🧪 Creating mock pre-commit config for ACT"
-            cat > .pre-commit-config.yaml << 'EOF'
-repos:
-- repo: local
-  hooks:
-  - id: boundary-enforcer
-    name: Boundary Enforcer
-    entry: python scripts/boundary_enforcer.py
-    language: system
-    files: '\.py$'
-EOF
+            printf '%s\n' 'repos:' > .pre-commit-config.yaml
+            printf '%s\n' '- repo: local' >> .pre-commit-config.yaml
+            printf '%s\n' '  hooks:' >> .pre-commit-config.yaml
+            printf '%s\n' '  - id: boundary-enforcer' >> .pre-commit-config.yaml
+            printf '%s\n' '    name: Boundary Enforcer' >> .pre-commit-config.yaml
+            printf '%s\n' '    entry: python scripts/boundary_enforcer.py' >> .pre-commit-config.yaml
+            printf '%s\n' '    language: system' >> .pre-commit-config.yaml
+            printf '%s\n' "    files: '\\.py$'" >> .pre-commit-config.yaml
           fi
           
           # Validate configuration

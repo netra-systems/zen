@@ -62,11 +62,15 @@ class TestCompleteMetricsCalculation:
             "data_source": "production metrics"
         }
         
-        metrics = await quality_service._calculate_metrics(
+        # Use the public API which calculates overall score and quality level
+        result = await quality_service.validate_content(
             content,
             ContentType.OPTIMIZATION,
             context
         )
+        
+        # Extract metrics from validation result
+        metrics = result.metrics
         
         # Verify all metrics were calculated
         assert metrics.word_count > 100
@@ -104,7 +108,7 @@ class TestSpecificityCalculationEdgeCases:
         Set context_window=4096, max_tokens=2048, num_beams=4.
         """
         
-        score = await quality_service._calculate_specificity(
+        score = await quality_service.metrics_calculator.calculate_specificity(
             content,
             ContentType.OPTIMIZATION
         )
@@ -116,7 +120,7 @@ class TestSpecificityCalculationEdgeCases:
         """Test specificity penalty for vague language"""
         content = "You might want to consider optimizing your model perhaps."
         
-        score = await quality_service._calculate_specificity(
+        score = await quality_service.metrics_calculator.calculate_specificity(
             content,
             ContentType.OPTIMIZATION
         )
@@ -140,7 +144,7 @@ class TestActionabilityEdgeCases:
         3. Run the script at C:\\Users\\model\\optimize.py
         """
         
-        score = await quality_service._calculate_actionability(
+        score = await quality_service.metrics_calculator.calculate_actionability(
             content,
             ContentType.ACTION_PLAN
         )
@@ -159,7 +163,7 @@ class TestActionabilityEdgeCases:
         Then run: `python train.py --epochs 10`
         """
         
-        score = await quality_service._calculate_actionability(
+        score = await quality_service.metrics_calculator.calculate_actionability(
             content,
             ContentType.ACTION_PLAN
         )
@@ -187,7 +191,7 @@ class TestQuantificationPatterns:
         Cost decreased by 40% monthly.
         """
         
-        score = await quality_service._calculate_quantification(content)
+        score = await quality_service.metrics_calculator.calculate_quantification(content)
         assert score > 0.9  # Should match all patterns
         
     @pytest.mark.asyncio
@@ -195,7 +199,7 @@ class TestQuantificationPatterns:
         """Test before/after comparison bonus"""
         content = "Latency improved from 500ms before optimization to 150ms after."
         
-        score = await quality_service._calculate_quantification(content)
+        score = await quality_service.metrics_calculator.calculate_quantification(content)
         assert score > 0.3  # Should get bonus for before/after
         
     @pytest.mark.asyncio
@@ -203,7 +207,7 @@ class TestQuantificationPatterns:
         """Test metric names with values bonus"""
         content = "Achieved throughput of 5000 QPS with latency under 50ms and precision at 0.95."
         
-        score = await quality_service._calculate_quantification(content)
+        score = await quality_service.metrics_calculator.calculate_quantification(content)
         assert score > 0.4  # Should get bonus for named metrics
 
 
@@ -253,7 +257,7 @@ class TestCompletenessCalculation:
         Metrics: Latency 200ms, throughput 1000 QPS.
         """
         
-        score = await quality_service._calculate_completeness(
+        score = await quality_service.metrics_calculator.calculate_completeness(
             content,
             ContentType.REPORT
         )
@@ -274,8 +278,8 @@ class TestCompletenessCalculation:
         metrics.sentence_count = len(re.split(r'[.!?]+', content))
         
         # Mock the metrics temporarily
-        with patch.object(quality_service, '_calculate_metrics', return_value=metrics):
-            score = await quality_service._calculate_completeness(
+        with patch.object(quality_service.metrics_calculator, 'calculate_metrics', return_value=metrics):
+            score = await quality_service.metrics_calculator.calculate_completeness(
                 content,
                 ContentType.GENERAL
             )

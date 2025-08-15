@@ -89,28 +89,26 @@ jobs:
             # Mock yq installation for ACT
             echo "🧪 Setting up mock yq for ACT"
             mkdir -p ~/bin
-            cat > ~/bin/yq << 'EOF'
-#!/bin/bash
-echo "[ACT-MOCK-YQ] yq $@"
-# Return default values for common queries
-case "$2" in
-  ".global.runners.custom")
-    echo "warp-custom-default"
-    ;;
-  ".timeouts.smoke")
-    echo "5"
-    ;;
-  ".timeouts.unit")
-    echo "10"
-    ;;
-  ".timeouts.integration")
-    echo "20"
-    ;;
-  *)
-    echo "null"
-    ;;
-esac
-EOF
+            printf '%s\n' '#!/bin/bash' > ~/bin/yq
+            printf '%s\n' 'echo "[ACT-MOCK-YQ] yq $@"' >> ~/bin/yq
+            printf '%s\n' '# Return default values for common queries' >> ~/bin/yq
+            printf '%s\n' 'case "$2" in' >> ~/bin/yq
+            printf '%s\n' '  ".global.runners.custom")' >> ~/bin/yq
+            printf '%s\n' '    echo "warp-custom-default"' >> ~/bin/yq
+            printf '%s\n' '    ;;' >> ~/bin/yq
+            printf '%s\n' '  ".timeouts.smoke")' >> ~/bin/yq
+            printf '%s\n' '    echo "5"' >> ~/bin/yq
+            printf '%s\n' '    ;;' >> ~/bin/yq
+            printf '%s\n' '  ".timeouts.unit")' >> ~/bin/yq
+            printf '%s\n' '    echo "10"' >> ~/bin/yq
+            printf '%s\n' '    ;;' >> ~/bin/yq
+            printf '%s\n' '  ".timeouts.integration")' >> ~/bin/yq
+            printf '%s\n' '    echo "20"' >> ~/bin/yq
+            printf '%s\n' '    ;;' >> ~/bin/yq
+            printf '%s\n' '  *)' >> ~/bin/yq
+            printf '%s\n' '    echo "null"' >> ~/bin/yq
+            printf '%s\n' '    ;;' >> ~/bin/yq
+            printf '%s\n' 'esac' >> ~/bin/yq
             chmod +x ~/bin/yq
             export PATH="$HOME/bin:$PATH"
             echo "PATH=$HOME/bin:$PATH" >> $GITHUB_ENV
@@ -139,25 +137,23 @@ EOF
             if [ ! -f "${{ env.CONFIG_FILE }}" ]; then
               echo "Creating mock workflow config for ACT"
               mkdir -p .github
-              cat > ${{ env.CONFIG_FILE }} << 'EOF'
-global:
-  runners:
-    custom: warp-custom-default
-  python_version: "3.11"
-  node_version: "20"
-
-timeouts:
-  smoke: 5
-  unit: 10
-  integration: 20
-  comprehensive: 45
-
-test_shards:
-  smoke: ["basic", "health"]
-  unit: ["backend", "frontend"]
-  integration: ["api", "services"]
-  comprehensive: ["e2e", "performance"]
-EOF
+              printf '%s\n' 'global:' > ${{ env.CONFIG_FILE }}
+              printf '%s\n' '  runners:' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '    custom: warp-custom-default' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '  python_version: "3.11"' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '  node_version: "20"' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' 'timeouts:' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '  smoke: 5' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '  unit: 10' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '  integration: 20' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '  comprehensive: 45' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' 'test_shards:' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '  smoke: ["basic", "health"]' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '  unit: ["backend", "frontend"]' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '  integration: ["api", "services"]' >> ${{ env.CONFIG_FILE }}
+              printf '%s\n' '  comprehensive: ["e2e", "performance"]' >> ${{ env.CONFIG_FILE }}
             fi
           fi
           
@@ -289,10 +285,7 @@ EOF
           # ACT mode: create mock changes for testing
           if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
             echo "🧪 ACT MODE: Using mock change analysis"
-            CHANGED_FILES="app/main.py
-app/agents/supervisor.py
-frontend/components/chat.tsx
-.github/workflows/test.yml"
+            CHANGED_FILES="app/main.py app/agents/supervisor.py frontend/components/chat.tsx .github/workflows/test.yml"
             FILE_COUNT=4
             echo "Mock changed files:"
             echo "$CHANGED_FILES"

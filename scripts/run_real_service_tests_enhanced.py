@@ -352,7 +352,13 @@ class EnhancedRealServiceTestRunner:
                   parallel: int = 1,
                   timeout: int = 300) -> int:
         """Run real service tests with specified configuration"""
-        
+        self._print_test_header(model, parallel, timeout, categories)
+        env = self._setup_test_environment(model, timeout)
+        cmd, json_report = self._build_pytest_command(categories, parallel, timeout)
+        return self._execute_tests_with_handling(cmd, env, json_report, timeout)
+    
+    def _print_test_header(self, model: str, parallel: int, timeout: int, categories: Optional[List[str]]):
+        """Print test execution header"""
         print("\n" + "="*60)
         print("ENHANCED REAL SERVICE TEST RUNNER")
         print("="*60)
@@ -361,8 +367,9 @@ class EnhancedRealServiceTestRunner:
         print(f"Timeout: {timeout}s")
         print(f"Categories: {categories or 'all'}")
         print("="*60)
-        
-        # Set environment variables
+    
+    def _setup_test_environment(self, model: str, timeout: int) -> Dict[str, str]:
+        """Setup environment variables for test execution"""
         env = os.environ.copy()
         env["ENABLE_REAL_LLM_TESTING"] = "true"
         env["ENABLE_REAL_DB_TESTING"] = "true"
@@ -370,77 +377,90 @@ class EnhancedRealServiceTestRunner:
         env["ENABLE_REAL_CLICKHOUSE_TESTING"] = "true"
         env["TEST_LLM_MODEL"] = model
         env["TEST_LLM_TIMEOUT"] = str(timeout)
-        
-        # Build pytest command
-        cmd = [
+        return env
+    
+    def _build_pytest_command(self, categories: Optional[List[str]], parallel: int, timeout: int) -> Tuple[List[str], Path]:
+        """Build pytest command with all options"""
+        cmd = self._create_base_pytest_command(timeout)
+        cmd = self._add_test_markers(cmd, categories)
+        cmd = self._add_parallelization(cmd, parallel)
+        json_report = self._add_json_reporting(cmd)
+        return cmd, json_report
+    
+    def _create_base_pytest_command(self, timeout: int) -> List[str]:
+        """Create base pytest command"""
+        return [
             sys.executable, "-m", "pytest",
             str(self.test_dir),
-            "-v",
-            "--tb=short",
+            "-v", "--tb=short",
             f"--timeout={timeout}",
             "-W", "ignore::DeprecationWarning"
         ]
-        
-        # Add markers
+    
+    def _add_test_markers(self, cmd: List[str], categories: Optional[List[str]]) -> List[str]:
+        """Add test markers to command"""
         if categories:
             markers = " or ".join(categories)
             cmd.extend(["-m", markers])
         else:
             cmd.extend(["-m", "real_services"])
-        
-        # Add parallelization
+        return cmd
+    
+    def _add_parallelization(self, cmd: List[str], parallel: int) -> List[str]:
+        """Add parallelization options to command"""
         if parallel > 1:
             cmd.extend(["-n", str(parallel)])
-        
-        # Add JSON report for parsing
+        return cmd
+    
+    def _add_json_reporting(self, cmd: List[str]) -> Path:
+        """Add JSON reporting to command and return report path"""
         json_report = self.reports_dir / f"pytest_report_{int(time.time())}.json"
         cmd.extend(["--json-report", "--json-report-file", str(json_report)])
-        
-        # Run tests
+        return json_report
+    
+    def _execute_tests_with_handling(self, cmd: List[str], env: Dict[str, str], json_report: Path, timeout: int) -> int:
+        """Execute tests with comprehensive error handling"""
         print("\nRunning tests...")
-        start_time = time.time()
-        
         try:
-            result = subprocess.run(
-                cmd,
-                env=env,
-                capture_output=True,
-                text=True,
-                timeout=timeout * 10  # Give extra time for all tests
-            )
-            
-            duration = time.time() - start_time
-            
-            # Parse output for metrics
-            self._parse_test_output(result.stdout + result.stderr)
-            
-            # Parse JSON report if available
-            if json_report.exists():
-                self._parse_json_report(json_report)
-            
-            # Finalize metrics
-            self.metrics.finalize()
-            
-            # Generate reports
-            self._generate_reports()
-            
-            # Print summary
-            self._print_summary()
-            
-            return result.returncode
-            
+            result = self._run_subprocess(cmd, env, timeout)
+            return self._process_successful_execution(result, json_report)
         except subprocess.TimeoutExpired:
-            print(f"\n[TIMEOUT] Tests exceeded timeout of {timeout * 10}s")
-            self.metrics.metrics["errors"].append(f"Test execution timeout after {timeout * 10}s")
-            self.metrics.finalize()
-            self._generate_reports()
-            return -1
+            return self._handle_test_timeout(timeout)
         except Exception as e:
-            print(f"\n[ERROR] Test execution failed: {e}")
-            self.metrics.metrics["errors"].append(str(e))
-            self.metrics.finalize()
-            self._generate_reports()
-            return -1
+            return self._handle_test_error(e)
+    
+    def _run_subprocess(self, cmd: List[str], env: Dict[str, str], timeout: int) -> subprocess.CompletedProcess:
+        """Run subprocess with specified configuration"""
+        return subprocess.run(
+            cmd, env=env, capture_output=True, text=True,
+            timeout=timeout * 10  # Give extra time for all tests
+        )
+    
+    def _process_successful_execution(self, result: subprocess.CompletedProcess, json_report: Path) -> int:
+        """Process successful test execution results"""
+        self._parse_test_output(result.stdout + result.stderr)
+        if json_report.exists():
+            self._parse_json_report(json_report)
+        self.metrics.finalize()
+        self._generate_reports()
+        self._print_summary()
+        return result.returncode
+    
+    def _handle_test_timeout(self, timeout: int) -> int:
+        """Handle test execution timeout"""
+        print(f"\n[TIMEOUT] Tests exceeded timeout of {timeout * 10}s")
+        self.metrics.metrics["errors"].append(f"Test execution timeout after {timeout * 10}s")
+        self.metrics.finalize()
+        self._generate_reports()
+        return -1
+    
+    def _handle_test_error(self, error: Exception) -> int:
+        """Handle general test execution error"""
+        print(f"\n[ERROR] Test execution failed: {error}")
+        self.metrics.metrics["errors"].append(str(error))
+        self.metrics.finalize()
+        self._generate_reports()
+        return -1
     
     def _parse_test_output(self, output: str):
         """Parse test output for metrics"""

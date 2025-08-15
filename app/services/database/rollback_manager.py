@@ -548,92 +548,155 @@ class RollbackManager:
     
     async def execute_rollback_session(self, session_id: str) -> bool:
         """Execute all rollback operations in session."""
+        try:
+            session = await self._validate_and_prepare_session(session_id)
+            execution_batches = await self._resolve_execution_plan(session)
+            execution_result = await self._execute_operation_batches(session_id, execution_batches)
+            return await self._finalize_session_execution(session_id, session, execution_result)
+        except Exception as e:
+            return await self._handle_execution_failure_with_cleanup(session_id, e)
+
+    async def _validate_and_prepare_session(self, session_id: str) -> RollbackSession:
+        """Validate session exists and prepare for execution."""
         session = self.active_sessions.get(session_id)
         if not session:
             raise ValueError(f"Rollback session not found: {session_id}")
-        
         session.state = RollbackState.IN_PROGRESS
-        
-        try:
-            # Resolve execution order
-            execution_batches = self.dependency_resolver.resolve_execution_order(
-                session.operations
-            )
-            
-            logger.info(
-                f"Executing rollback session {session_id}",
-                total_operations=len(session.operations),
-                batches=len(execution_batches)
-            )
-            
-            # Execute operations in batches
-            success_count = 0
-            failed_operations = []
-            
-            for batch_idx, batch in enumerate(execution_batches):
-                batch_tasks = []
-                
-                for operation in batch:
-                    if operation.table_name.startswith('clickhouse_'):
-                        task = self.clickhouse_executor.execute_rollback(
-                            operation, session_id
-                        )
-                    else:
-                        task = self.postgres_executor.execute_rollback(
-                            operation, session_id
-                        )
-                    
-                    batch_tasks.append(task)
-                
-                # Execute batch concurrently
-                batch_results = await asyncio.gather(*batch_tasks, return_exceptions=True)
-                
-                for i, result in enumerate(batch_results):
-                    if isinstance(result, Exception):
-                        batch[i].state = RollbackState.FAILED
-                        batch[i].error = str(result)
-                        failed_operations.append(batch[i])
-                    elif result:
-                        success_count += 1
-                    else:
-                        failed_operations.append(batch[i])
-                
-                logger.info(
-                    f"Completed rollback batch {batch_idx + 1}/{len(execution_batches)}",
-                    batch_size=len(batch),
-                    successes=sum(1 for r in batch_results if r is True),
-                    failures=len(batch) - sum(1 for r in batch_results if r is True)
-                )
-            
-            # Determine final session state
-            if not failed_operations:
-                session.state = RollbackState.COMPLETED
-                await self.postgres_executor.commit_session(session_id)
-                logger.info(f"Rollback session completed successfully: {session_id}")
-                return True
-            elif success_count > 0:
-                session.state = RollbackState.PARTIAL
-                await self.postgres_executor.commit_session(session_id)
-                logger.warning(
-                    f"Rollback session completed with partial success: {session_id}",
-                    successes=success_count,
-                    failures=len(failed_operations)
-                )
-                return False
+        return session
+
+    async def _resolve_execution_plan(self, session: RollbackSession) -> List[List[RollbackOperation]]:
+        """Resolve execution order and log execution plan."""
+        execution_batches = self.dependency_resolver.resolve_execution_order(session.operations)
+        logger.info(
+            f"Executing rollback session {session.session_id}",
+            total_operations=len(session.operations),
+            batches=len(execution_batches)
+        )
+        return execution_batches
+
+    async def _execute_operation_batches(
+        self, 
+        session_id: str, 
+        execution_batches: List[List[RollbackOperation]]
+    ) -> Dict[str, Any]:
+        """Execute all operation batches and track results."""
+        success_count = 0
+        failed_operations = []
+        for batch_idx, batch in enumerate(execution_batches):
+            batch_result = await self._execute_single_batch(session_id, batch, batch_idx, len(execution_batches))
+            success_count += batch_result['successes']
+            failed_operations.extend(batch_result['failures'])
+        return {'success_count': success_count, 'failed_operations': failed_operations}
+
+    async def _execute_single_batch(
+        self, 
+        session_id: str, 
+        batch: List[RollbackOperation], 
+        batch_idx: int, 
+        total_batches: int
+    ) -> Dict[str, Any]:
+        """Execute a single batch of operations concurrently."""
+        batch_tasks = [self._create_execution_task(operation, session_id) for operation in batch]
+        batch_results = await asyncio.gather(*batch_tasks, return_exceptions=True)
+        result = self._process_batch_results(batch, batch_results)
+        self._log_batch_completion(batch_idx, total_batches, len(batch), result)
+        return result
+
+    def _create_execution_task(self, operation: RollbackOperation, session_id: str):
+        """Create execution task for operation based on table type."""
+        if operation.table_name.startswith('clickhouse_'):
+            return self.clickhouse_executor.execute_rollback(operation, session_id)
+        return self.postgres_executor.execute_rollback(operation, session_id)
+
+    def _process_batch_results(
+        self, 
+        batch: List[RollbackOperation], 
+        batch_results: List[Any]
+    ) -> Dict[str, Any]:
+        """Process batch execution results and update operation states."""
+        successes = 0
+        failures = []
+        for i, result in enumerate(batch_results):
+            if isinstance(result, Exception):
+                batch[i].state = RollbackState.FAILED
+                batch[i].error = str(result)
+                failures.append(batch[i])
+            elif result:
+                successes += 1
             else:
-                session.state = RollbackState.FAILED
-                await self.postgres_executor.rollback_session(session_id)
-                logger.error(f"Rollback session failed completely: {session_id}")
-                return False
-                
-        except Exception as e:
-            session.state = RollbackState.FAILED
-            await self.postgres_executor.rollback_session(session_id)
-            logger.error(f"Rollback session execution failed: {session_id}: {e}")
-            return False
-        finally:
-            # Clean up session
-            await self._cleanup_session(session_id)
+                failures.append(batch[i])
+        return {'successes': successes, 'failures': failures}
+
+    def _log_batch_completion(
+        self, 
+        batch_idx: int, 
+        total_batches: int, 
+        batch_size: int, 
+        result: Dict[str, Any]
+    ) -> None:
+        """Log batch completion statistics."""
+        logger.info(
+            f"Completed rollback batch {batch_idx + 1}/{total_batches}",
+            batch_size=batch_size,
+            successes=result['successes'],
+            failures=len(result['failures'])
+        )
+
+    async def _determine_final_state(
+        self, 
+        session_id: str, 
+        session: RollbackSession, 
+        execution_result: Dict[str, Any]
+    ) -> bool:
+        """Determine final session state based on execution results."""
+        success_count = execution_result['success_count']
+        failed_operations = execution_result['failed_operations']
+        
+        if not failed_operations:
+            return await self._handle_complete_success(session_id, session)
+        elif success_count > 0:
+            return await self._handle_partial_success(session_id, session, success_count, failed_operations)
+        else:
+            return await self._handle_complete_failure(session_id, session)
+
+    async def _handle_complete_success(self, session_id: str, session: RollbackSession) -> bool:
+        """Handle complete success scenario."""
+        session.state = RollbackState.COMPLETED
+        await self.postgres_executor.commit_session(session_id)
+        logger.info(f"Rollback session completed successfully: {session_id}")
+        return True
+
+    async def _handle_partial_success(
+        self, 
+        session_id: str, 
+        session: RollbackSession, 
+        success_count: int, 
+        failed_operations: List[RollbackOperation]
+    ) -> bool:
+        """Handle partial success scenario."""
+        session.state = RollbackState.PARTIAL
+        await self.postgres_executor.commit_session(session_id)
+        logger.warning(
+            f"Rollback session completed with partial success: {session_id}",
+            successes=success_count,
+            failures=len(failed_operations)
+        )
+        return False
+
+    async def _handle_complete_failure(self, session_id: str, session: RollbackSession) -> bool:
+        """Handle complete failure scenario."""
+        session.state = RollbackState.FAILED
+        await self.postgres_executor.rollback_session(session_id)
+        logger.error(f"Rollback session failed completely: {session_id}")
+        return False
+
+    async def _handle_execution_failure(self, session_id: str, error: Exception) -> bool:
+        """Handle execution failure with proper state management."""
+        if session_id in self.active_sessions:
+            self.active_sessions[session_id].state = RollbackState.FAILED
+        await self.postgres_executor.rollback_session(session_id)
+        logger.error(f"Rollback session execution failed: {session_id}: {error}")
+        return False
     
     async def _cleanup_session(self, session_id: str) -> None:
         """Clean up rollback session."""

@@ -53,67 +53,19 @@ class QualityGateService:
             ValidationResult with metrics and pass/fail status
         """
         try:
-            # Calculate content hash for caching
-            content_hash = hashlib.md5(content.encode()).hexdigest()
-            cache_key = f"quality:{content_type.value}:{content_hash}:strict={strict_mode}"
+            cache_key = self._generate_cache_key(content, content_type, strict_mode)
+            cached_result = self._check_validation_cache(cache_key)
+            if cached_result:
+                return cached_result
             
-            # Check cache
-            if cache_key in self.validation_cache:
-                logger.debug(f"Using cached validation for {cache_key}")
-                return self.validation_cache[cache_key]
-            
-            # Calculate metrics
-            metrics = await self.metrics_calculator.calculate_metrics(content, content_type, context)
-            
-            # Calculate overall score with weighted average
-            weights = self.validator.get_weights_for_type(content_type)
-            metrics.overall_score = self.validator.calculate_weighted_score(metrics, weights)
-            
-            # Determine quality level
-            metrics.quality_level = self.validator.determine_quality_level(metrics.overall_score)
-            
-            # Generate suggestions for improvement
-            metrics.suggestions = self.validator.generate_suggestions(metrics, content_type)
-            
-            # Apply thresholds
-            passed = self.validator.check_thresholds(metrics, content_type, strict_mode)
-            
-            # Generate result
-            result = ValidationResult(
-                passed=passed,
-                metrics=metrics,
-                retry_suggested=not passed and metrics.overall_score > 0.3,
-                retry_prompt_adjustments=self.validator.generate_prompt_adjustments(metrics) if not passed else None,
-                fallback_response=None  # Will be set by fallback system
-            )
-            
-            # Cache result
-            self.validation_cache[cache_key] = result
-            
-            # Store metrics for monitoring
-            await self._store_metrics(metrics, content_type)
-            
-            # Log validation result
-            logger.info(
-                f"Content validation: {content_type.value} - "
-                f"Score: {metrics.overall_score:.2f} - "
-                f"Level: {metrics.quality_level.value} - "
-                f"Passed: {passed}"
-            )
-            
+            metrics = await self._calculate_content_metrics(content, content_type, context)
+            result = await self._build_validation_result(metrics, content_type, strict_mode)
+            await self._cache_and_store_result(cache_key, result, content_type)
+            self._log_validation_result(content_type, metrics, result.passed)
             return result
-            
         except Exception as e:
             logger.error(f"Error validating content: {str(e)}")
-            # Return a failed validation on error
-            return ValidationResult(
-                passed=False,
-                metrics=QualityMetrics(
-                    overall_score=0.0,
-                    quality_level=QualityLevel.UNACCEPTABLE,
-                    issues=[f"Validation error: {str(e)}"]
-                )
-            )
+            return self._create_error_result(e)
     
     async def _store_metrics(self, metrics: QualityMetrics, content_type: ContentType) -> None:
         """Store metrics for monitoring and analysis"""
@@ -134,10 +86,11 @@ class QualityGateService:
             
             # Store in Redis for persistence
             if self.redis_manager:
-                await self.redis_manager.store_metrics(
-                    f"quality_metrics:{content_type.value}",
-                    metrics.__dict__,
-                    ttl=86400  # 24 hours
+                import json
+                await self.redis_manager.set(
+                    f"quality_metrics:{content_type.value}:{datetime.now(UTC).isoformat()}",
+                    json.dumps(metrics.__dict__),
+                    ex=86400  # 24 hours
                 )
                 
         except Exception as e:

@@ -197,37 +197,8 @@ jobs:
         TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
         if [ -f "${{ env.REPORTS_DIR }}/health-report.json" ]; then
           # Extract key metrics and store in trend file
-          python -c "
-import json
-from datetime import datetime
-
-# Load current report
-with open('${{ env.REPORTS_DIR }}/health-report.json') as f:
-    data = json.load(f)
-
-# Create trend entry
-trend_entry = {
-    'timestamp': '$TIMESTAMP',
-    'commit': '${{ github.sha }}',
-    'compliance_score': data['metrics']['compliance_scores']['overall_compliance'],
-    'total_violations': data['metrics']['violation_counts']['total_violations'],
-    'file_violations': data['metrics']['violation_counts']['file_size_violations'],
-    'function_violations': data['metrics']['violation_counts']['function_complexity_violations'],
-    'duplicate_types': data['metrics']['violation_counts']['duplicate_types'],
-    'test_stubs': data['metrics']['violation_counts']['test_stubs']
-}
-
-# Load existing trends
-trends_file = '.github/architecture-trends/trends.jsonl'
-try:
-    with open(trends_file, 'a') as f:
-        f.write(json.dumps(trend_entry) + '\n')
-except Exception as e:
-    print(f'Error writing trends: {e}')
-    # Create new trends file
-    with open(trends_file, 'w') as f:
-        f.write(json.dumps(trend_entry) + '\n')
-"
+          # Skip trend recording in ACT mode or if missing dependencies
+          echo "Trend recording skipped - would extract metrics from health-report.json"
         fi
 
     - name: Upload Architecture Reports

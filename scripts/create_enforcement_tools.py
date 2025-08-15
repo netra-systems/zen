@@ -362,9 +362,9 @@ class EnforcementEngine:
         return report
 
 
-def main():
-    """Main entry point for enforcement tools"""
-    parser = argparse.ArgumentParser(
+def create_argument_parser():
+    """Create and configure argument parser"""
+    return argparse.ArgumentParser(
         description="Comprehensive enforcement tools for Netra codebase",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
@@ -373,84 +373,118 @@ Examples:
   python create_enforcement_tools.py --max-file-lines 250 --max-function-lines 6
   python create_enforcement_tools.py --fail-on-violation --threshold 95
         """)
-    
-    parser.add_argument('--path', default='.', 
-                       help='Root path to check (default: current directory)')
-    parser.add_argument('--output', '-o', 
-                       help='Output JSON report to file')
-    parser.add_argument('--max-file-lines', type=int, default=300,
-                       help='Maximum lines per file (default: 300)')
-    parser.add_argument('--max-function-lines', type=int, default=8,
-                       help='Maximum lines per function (default: 8)')
-    parser.add_argument('--fail-on-violation', action='store_true',
-                       help='Exit with non-zero code on violations')
-    parser.add_argument('--threshold', type=float, default=0.0,
-                       help='Minimum compliance score (0-100) to pass')
-    parser.add_argument('--include-pattern', action='append',
-                       help='Include files matching pattern (can be used multiple times)')
-    parser.add_argument('--exclude-pattern', action='append', 
-                       help='Exclude files matching pattern (can be used multiple times)')
-    parser.add_argument('--json-only', action='store_true',
-                       help='Output only JSON, no human-readable report')
-    
-    args = parser.parse_args()
-    
-    # Create enforcement engine with custom configuration
-    engine = EnforcementEngine(
+
+
+def add_basic_arguments(parser):
+    """Add basic command line arguments"""
+    parser.add_argument('--path', default='.', help='Root path to check (default: current directory)')
+    parser.add_argument('--output', '-o', help='Output JSON report to file')
+    parser.add_argument('--max-file-lines', type=int, default=300, help='Maximum lines per file (default: 300)')
+    parser.add_argument('--max-function-lines', type=int, default=8, help='Maximum lines per function (default: 8)')
+
+
+def add_advanced_arguments(parser):
+    """Add advanced command line arguments"""
+    parser.add_argument('--fail-on-violation', action='store_true', help='Exit with non-zero code on violations')
+    parser.add_argument('--threshold', type=float, default=0.0, help='Minimum compliance score (0-100) to pass')
+    parser.add_argument('--include-pattern', action='append', help='Include files matching pattern (can be used multiple times)')
+    parser.add_argument('--exclude-pattern', action='append', help='Exclude files matching pattern (can be used multiple times)')
+    parser.add_argument('--json-only', action='store_true', help='Output only JSON, no human-readable report')
+
+
+def setup_parser_arguments(parser):
+    """Add all command line arguments to parser"""
+    add_basic_arguments(parser)
+    add_advanced_arguments(parser)
+
+
+def create_enforcement_engine(args):
+    """Create enforcement engine from parsed arguments"""
+    return EnforcementEngine(
         root_path=args.path,
         max_file_lines=args.max_file_lines,
         max_function_lines=args.max_function_lines,
         include_patterns=args.include_pattern,
         exclude_patterns=args.exclude_pattern
     )
-    
-    # Run all checks
-    report = engine.run_all_checks()
-    
-    # Generate output
-    if args.json_only:
+
+
+def print_report_header(report):
+    """Print report header information"""
+    print("\n" + "="*80)
+    print("COMPREHENSIVE ENFORCEMENT REPORT")
+    print("="*80)
+    print(f"Timestamp: {report.timestamp}")
+    print(f"Compliance Score: {report.compliance_score:.1f}%")
+    print(f"Total Violations: {report.total_violations}")
+    print(f"Files Checked: {report.summary['total_files_checked']}")
+    print(f"Files with Violations: {report.summary['files_with_violations']}")
+
+
+def print_violations_by_type(report):
+    """Print violations grouped by type"""
+    print("\nVIOLATIONS BY TYPE:")
+    print("-" * 40)
+    for violation_type, count in report.violations_by_type.items():
+        print(f"  {violation_type.replace('_', ' ').title()}: {count}")
+
+
+def print_violation_details(violation):
+    """Print details for a single violation"""
+    print(f"  {violation.file_path}")
+    print(f"    {violation.description}")
+    print(f"    Fix: {violation.fix_suggestion}")
+    print()
+
+
+def print_high_severity_violations(report):
+    """Print top high severity violations"""
+    high_severity = [v for v in report.violations if v.severity == "high"]
+    if high_severity:
+        print(f"\nTOP HIGH SEVERITY VIOLATIONS (showing first 10):")
+        print("-" * 40)
+        for violation in high_severity[:10]:
+            print_violation_details(violation)
+
+
+def generate_console_output(report, json_only):
+    """Generate appropriate console output"""
+    if json_only:
         print(json.dumps(asdict(report), indent=2))
     else:
-        # Human-readable report
-        print("\n" + "="*80)
-        print("COMPREHENSIVE ENFORCEMENT REPORT")
-        print("="*80)
-        print(f"Timestamp: {report.timestamp}")
-        print(f"Compliance Score: {report.compliance_score:.1f}%")
-        print(f"Total Violations: {report.total_violations}")
-        print(f"Files Checked: {report.summary['total_files_checked']}")
-        print(f"Files with Violations: {report.summary['files_with_violations']}")
-        
-        print("\nVIOLATIONS BY TYPE:")
-        print("-" * 40)
-        for violation_type, count in report.violations_by_type.items():
-            print(f"  {violation_type.replace('_', ' ').title()}: {count}")
-        
-        # Show top violations by severity
-        high_severity = [v for v in report.violations if v.severity == "high"]
-        if high_severity:
-            print(f"\nTOP HIGH SEVERITY VIOLATIONS (showing first 10):")
-            print("-" * 40)
-            for violation in high_severity[:10]:
-                print(f"  {violation.file_path}")
-                print(f"    {violation.description}")
-                print(f"    Fix: {violation.fix_suggestion}")
-                print()
-    
-    # Save JSON report if requested
-    if args.output:
-        with open(args.output, 'w') as f:
+        print_report_header(report)
+        print_violations_by_type(report)
+        print_high_severity_violations(report)
+
+
+def save_json_report(report, output_path):
+    """Save JSON report to specified file"""
+    if output_path:
+        with open(output_path, 'w') as f:
             json.dump(asdict(report), f, indent=2)
-        print(f"\nJSON report saved to: {args.output}")
-    
-    # Exit with appropriate code
+        print(f"\nJSON report saved to: {output_path}")
+
+
+def handle_exit_logic(args, report):
+    """Handle exit code based on violations and thresholds"""
     if args.fail_on_violation and (
         report.total_violations > 0 or 
         report.compliance_score < args.threshold
     ):
         sys.exit(1)
-    
     sys.exit(0)
+
+
+def main():
+    """Main entry point for enforcement tools"""
+    parser = create_argument_parser()
+    setup_parser_arguments(parser)
+    args = parser.parse_args()
+    engine = create_enforcement_engine(args)
+    report = engine.run_all_checks()
+    generate_console_output(report, args.json_only)
+    save_json_report(report, args.output)
+    handle_exit_logic(args, report)
 
 
 if __name__ == "__main__":

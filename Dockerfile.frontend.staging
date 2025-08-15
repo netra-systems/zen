@@ -6,13 +6,15 @@ WORKDIR /app
 # Copy package files from frontend directory
 COPY frontend/package*.json ./
 
-# Clean install with better caching
-RUN npm cache clean --force && \
-    npm config set fetch-retries 5 && \
-    npm config set fetch-retry-mintimeout 20000 && \
-    npm config set fetch-retry-maxtimeout 120000 && \
-    npm ci --legacy-peer-deps --no-audit --no-fund || \
-    npm install --legacy-peer-deps --no-audit --no-fund
+# Install with optimized caching
+RUN npm config set fetch-retries 10 && \
+    npm config set fetch-retry-mintimeout 30000 && \
+    npm config set fetch-retry-maxtimeout 180000 && \
+    npm config set prefer-offline true && \
+    npm config set audit false && \
+    npm config set fund false && \
+    npm ci --legacy-peer-deps --verbose || \
+    (npm cache verify && npm ci --legacy-peer-deps --verbose)
 
 # Builder stage
 FROM node:20-alpine AS builder

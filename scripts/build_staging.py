@@ -58,7 +58,6 @@ class StagingBuilder:
             "-t", f"netra-backend:{tag}",
             "-f", str(dockerfile),
             "--build-arg", "BUILDKIT_INLINE_CACHE=1",
-            "--cache-from", f"netra-backend:{tag}",
             "--progress", "plain",
             "."
         ]
@@ -111,7 +110,6 @@ class StagingBuilder:
             "-f", str(dockerfile),
             "--build-arg", f"NEXT_PUBLIC_API_URL={api_url}",
             "--build-arg", "BUILDKIT_INLINE_CACHE=1",
-            "--cache-from", f"netra-frontend:{tag}",
             "--progress", "plain",
             context
         ]

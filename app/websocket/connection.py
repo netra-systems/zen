@@ -51,13 +51,21 @@ class ConnectionManager:
     async def connect(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish and register a new WebSocket connection."""
         async with self._connection_lock:
-            self._ensure_user_connection_list(user_id)
-            await self._handle_connection_limit(user_id)
-            conn_info = ConnectionInfo(websocket=websocket, user_id=user_id)
-            self._add_connection_to_registry(user_id, conn_info)
-            self._update_connection_stats()
-            logger.info(f"WebSocket connected for user {user_id} (ID: {conn_info.connection_id})")
-            return conn_info
+            return await self._perform_connection_setup(user_id, websocket)
+    
+    async def _perform_connection_setup(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
+        """Execute connection setup steps."""
+        self._ensure_user_connection_list(user_id)
+        await self._handle_connection_limit(user_id)
+        conn_info = ConnectionInfo(websocket=websocket, user_id=user_id)
+        self._register_new_connection(user_id, conn_info)
+        logger.info(f"WebSocket connected for user {user_id} (ID: {conn_info.connection_id})")
+        return conn_info
+    
+    def _register_new_connection(self, user_id: str, conn_info: ConnectionInfo) -> None:
+        """Register new connection and update stats."""
+        self._add_connection_to_registry(user_id, conn_info)
+        self._update_connection_stats()
     
     def _ensure_user_connection_list(self, user_id: str) -> None:
         """Initialize user's connection list if needed."""
@@ -91,10 +99,15 @@ class ConnectionManager:
             return
         conn_info = self._find_connection_info(user_id, websocket)
         if conn_info:
-            self._remove_from_registry(user_id, conn_info)
-            self._cleanup_empty_user_list(user_id)
-            await self._close_websocket_safely(websocket, code, reason)
-            self._log_disconnection_stats(user_id, conn_info)
+            await self._execute_disconnection(user_id, conn_info, websocket, code, reason)
+    
+    async def _execute_disconnection(self, user_id: str, conn_info: ConnectionInfo, 
+                                   websocket: WebSocket, code: int, reason: str) -> None:
+        """Execute disconnection cleanup steps."""
+        self._remove_from_registry(user_id, conn_info)
+        self._cleanup_empty_user_list(user_id)
+        await self._close_websocket_safely(websocket, code, reason)
+        self._log_disconnection_stats(user_id, conn_info)
     
     def _find_connection_info(self, user_id: str, websocket: WebSocket) -> Optional[ConnectionInfo]:
         """Find connection info for user and websocket."""
@@ -147,14 +160,25 @@ class ConnectionManager:
     
     def _create_connection_dict(self, conn: ConnectionInfo) -> Dict[str, any]:
         """Create connection information dictionary."""
+        basic_info = self._get_basic_connection_info(conn)
+        timing_info = self._get_connection_timing_info(conn)
+        return {**basic_info, **timing_info}
+    
+    def _get_basic_connection_info(self, conn: ConnectionInfo) -> Dict[str, any]:
+        """Get basic connection information."""
         return {
             "connection_id": conn.connection_id,
-            "connected_at": conn.connected_at.isoformat(),
-            "last_ping": conn.last_ping.isoformat(),
-            "last_pong": conn.last_pong.isoformat() if conn.last_pong else None,
             "message_count": conn.message_count,
             "error_count": conn.error_count,
             "state": conn.websocket.client_state.name
+        }
+    
+    def _get_connection_timing_info(self, conn: ConnectionInfo) -> Dict[str, any]:
+        """Get connection timing information."""
+        return {
+            "connected_at": conn.connected_at.isoformat(),
+            "last_ping": conn.last_ping.isoformat(),
+            "last_pong": conn.last_pong.isoformat() if conn.last_pong else None
         }
     
     def is_connection_alive(self, conn_info: ConnectionInfo) -> bool:
@@ -177,11 +201,20 @@ class ConnectionManager:
         """Identify connections that are no longer alive."""
         connections_to_remove = []
         async with self._connection_lock:
-            for user_id, connections in list(self.active_connections.items()):
-                for conn_info in connections:
-                    if not self.is_connection_alive(conn_info):
-                        connections_to_remove.append((user_id, conn_info))
+            self._scan_for_dead_connections(connections_to_remove)
         return connections_to_remove
+    
+    def _scan_for_dead_connections(self, connections_to_remove: List[tuple]) -> None:
+        """Scan all connections and identify dead ones."""
+        for user_id, connections in list(self.active_connections.items()):
+            self._check_user_connections(user_id, connections, connections_to_remove)
+    
+    def _check_user_connections(self, user_id: str, connections: List[ConnectionInfo], 
+                              connections_to_remove: List[tuple]) -> None:
+        """Check all connections for a user and add dead ones to removal list."""
+        for conn_info in connections:
+            if not self.is_connection_alive(conn_info):
+                connections_to_remove.append((user_id, conn_info))
     
     async def _remove_dead_connections(self, connections_to_remove: List[tuple]) -> None:
         """Remove dead connections from registry."""
@@ -190,11 +223,21 @@ class ConnectionManager:
     
     def get_stats(self) -> Dict[str, any]:
         """Get connection statistics."""
-        active_count = self._get_active_connection_count()
+        basic_stats = self._get_basic_stats()
+        detailed_stats = self._get_detailed_stats()
+        return {**basic_stats, **detailed_stats}
+    
+    def _get_basic_stats(self) -> Dict[str, any]:
+        """Get basic connection statistics."""
         return {
             "total_connections": self._stats["total_connections"],
-            "active_connections": active_count,
-            "active_users": len(self.active_connections),
+            "active_connections": self._get_active_connection_count(),
+            "active_users": len(self.active_connections)
+        }
+    
+    def _get_detailed_stats(self) -> Dict[str, any]:
+        """Get detailed connection statistics."""
+        return {
             "connection_failures": self._stats["connection_failures"],
             "connections_by_user": self._get_connections_by_user()
         }

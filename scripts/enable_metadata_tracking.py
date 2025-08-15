@@ -391,8 +391,27 @@ if __name__ == "__main__":
     def create_archiver_script(self) -> bool:
         """Create metadata archiver script"""
         try:
-            archiver_path = self.scripts_dir / "metadata_archiver.py"
-            archiver_content = '''#!/usr/bin/env python3
+            archiver_path = self._get_archiver_path()
+            archiver_content = self._generate_archiver_content()
+            return self._write_archiver_script(archiver_path, archiver_content)
+        except Exception as e:
+            print(f"[ERROR] Failed to create archiver script: {e}")
+            return False
+    
+    def _get_archiver_path(self) -> Path:
+        """Get archiver script path"""
+        return self.scripts_dir / "metadata_archiver.py"
+    
+    def _generate_archiver_content(self) -> str:
+        """Generate archiver script content"""
+        imports = self._get_archiver_imports()
+        class_def = self._get_archiver_class()
+        main_def = self._get_archiver_main()
+        return f"{imports}\n\n{class_def}\n\n{main_def}"
+    
+    def _get_archiver_imports(self) -> str:
+        """Get archiver script imports"""
+        return '''#!/usr/bin/env python3
 """
 Metadata Archiver - Archives AI agent metadata to audit log
 """
@@ -402,15 +421,31 @@ import json
 import sqlite3
 import subprocess
 from pathlib import Path
-from datetime import datetime
-
-class MetadataArchiver:
+from datetime import datetime'''
+    
+    def _get_archiver_class(self) -> str:
+        """Get archiver class definition"""
+        class_header = self._get_archiver_class_header()
+        methods = self._get_archiver_class_methods()
+        return f"{class_header}\n\n{methods}"
+    
+    def _get_archiver_class_header(self) -> str:
+        """Get archiver class header"""
+        return '''class MetadataArchiver:
     """Archives metadata to audit log"""
     
     def __init__(self):
-        self.db_path = Path.cwd() / "metadata_tracking.db"
+        self.db_path = Path.cwd() / "metadata_tracking.db"'''
     
-    def get_current_commit(self) -> str:
+    def _get_archiver_class_methods(self) -> str:
+        """Get archiver class methods"""
+        get_commit = self._get_commit_method()
+        archive_method = self._get_archive_method()
+        return f"{get_commit}\n\n{archive_method}"
+    
+    def _get_commit_method(self) -> str:
+        """Get commit hash method"""
+        return '''    def get_current_commit(self) -> str:
         """Get current git commit hash"""
         try:
             result = subprocess.run(
@@ -421,9 +456,11 @@ class MetadataArchiver:
             )
             return result.stdout.strip()[:8]
         except subprocess.CalledProcessError:
-            return "unknown"
+            return "unknown"'''
     
-    def archive_metadata(self) -> bool:
+    def _get_archive_method(self) -> str:
+        """Get archive metadata method"""
+        return '''    def archive_metadata(self) -> bool:
         """Archive current metadata to database"""
         try:
             conn = sqlite3.connect(self.db_path)
@@ -446,9 +483,11 @@ class MetadataArchiver:
             
         except Exception as e:
             print(f"[ERROR] Failed to archive metadata: {e}")
-            return False
-
-def main():
+            return False'''
+    
+    def _get_archiver_main(self) -> str:
+        """Get archiver main function"""
+        return '''def main():
     import argparse
     parser = argparse.ArgumentParser(description="Archive AI agent metadata")
     parser.add_argument("--archive", action="store_true", help="Archive current metadata")
@@ -463,21 +502,15 @@ def main():
         parser.print_help()
 
 if __name__ == "__main__":
-    main()
-'''
-            
-            with open(archiver_path, 'w') as f:
-                f.write(archiver_content)
-            
-            # Make script executable
-            os.chmod(archiver_path, 0o755)
-            
-            print(f"[SUCCESS] Archiver script created at {archiver_path}")
-            return True
-            
-        except Exception as e:
-            print(f"[ERROR] Failed to create archiver script: {e}")
-            return False
+    main()'''
+    
+    def _write_archiver_script(self, archiver_path: Path, content: str) -> bool:
+        """Write archiver script to file"""
+        with open(archiver_path, 'w') as f:
+            f.write(content)
+        os.chmod(archiver_path, 0o755)
+        print(f"[SUCCESS] Archiver script created at {archiver_path}")
+        return True
     
     def enable_all(self) -> bool:
         """Enable all metadata tracking components"""

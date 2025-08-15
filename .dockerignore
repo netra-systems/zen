@@ -1,0 +1,110 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info
+dist
+eggs
+.eggs
+lib
+lib64
+parts
+sdist
+var
+wheels
+*.egg-info
+.installed.cfg
+*.egg
+
+# Virtual environments
+env
+venv
+.venv
+ENV
+env.bak
+venv.bak
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache
+.coverage
+htmlcov
+.tox
+.hypothesis
+test_reports
+
+# Node modules (for frontend)
+node_modules
+.next
+out
+build
+dist
+npm-debug.log
+yarn-error.log
+.npm
+.yarn
+
+# Documentation
+docs
+*.md
+README.md
+CLAUDE.md
+LICENSE
+
+# Scripts and development files
+scripts
+dev_launcher
+test_framework
+terraform-*
+.github
+act-cli
+act.zip
+
+# Logs
+logs
+*.log
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Build artifacts
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+
+# ACT tool
+act.zip
+ACT_*
+nul
+
+# SPEC files (not needed in container)
+SPEC

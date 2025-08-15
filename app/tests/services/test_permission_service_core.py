@@ -1,15 +1,12 @@
 """
-Comprehensive tests for Permission Service - Core Functionality
-Critical security component - 100% coverage target
+Permission Service Core Tests - Constants, Detection, Role Updates, Permissions
 Split from test_permission_service.py to maintain 300-line limit
 """
 
 import pytest
 import os
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from sqlalchemy.orm import Session
-
-# Import the module under test
 from app.services.permission_service import PermissionService, ROLE_HIERARCHY, ROLE_PERMISSIONS
 from app.db.models_postgres import User
 
@@ -31,27 +28,17 @@ class TestPermissionServiceConstants:
         dev_perms = ROLE_PERMISSIONS["developer"]
         admin_perms = ROLE_PERMISSIONS["admin"]
         
-        # Power users should have all standard permissions
         assert standard_perms.issubset(power_perms)
-        
-        # Developers should have all power user permissions  
         assert power_perms.issubset(dev_perms)
-        
-        # Admins should have all developer permissions
         assert dev_perms.issubset(admin_perms)
-        
-        # Super admin should have wildcard
         assert ROLE_PERMISSIONS["super_admin"] == {"*"}
     
     def test_critical_permissions_restricted(self):
         """Test that critical permissions are restricted to appropriate roles"""
         critical_perms = {"user_management", "system_config", "security_settings", "audit_logs"}
         
-        # Standard and power users should not have critical permissions
         assert critical_perms.isdisjoint(ROLE_PERMISSIONS["standard_user"])
         assert critical_perms.isdisjoint(ROLE_PERMISSIONS["power_user"])
-        
-        # Only admin and above should have critical permissions
         assert critical_perms.issubset(ROLE_PERMISSIONS["admin"])
 
 
@@ -79,17 +66,14 @@ class TestDetectDeveloperStatus:
         """Test developer detection with @netra.ai email"""
         user = Mock(spec=User)
         
-        # Test with netra.ai domain
         user.email = "developer@netra.ai"
         result = PermissionService.detect_developer_status(user)
         assert result == True
         
-        # Test case insensitive
         user.email = "Developer@NETRA.AI"
         result = PermissionService.detect_developer_status(user)
         assert result == True
         
-        # Test non-netra email
         user.email = "user@example.com"
         result = PermissionService.detect_developer_status(user)
         assert result == False
@@ -105,7 +89,6 @@ class TestDetectDeveloperStatus:
                 result = PermissionService.detect_developer_status(user)
                 assert result == True, f"Failed for environment: {env}"
         
-        # Test production environment
         with patch.dict(os.environ, {"ENVIRONMENT": "production"}, clear=True):
             result = PermissionService.detect_developer_status(user)
             assert result == False
@@ -115,7 +98,6 @@ class TestDetectDeveloperStatus:
         user = Mock(spec=User)
         user.email = "test@example.com"
         
-        # DEV_MODE should take precedence over everything
         with patch.dict(os.environ, {"DEV_MODE": "true", "ENVIRONMENT": "production"}):
             result = PermissionService.detect_developer_status(user)
             assert result == True
@@ -125,12 +107,10 @@ class TestDetectDeveloperStatus:
         user = Mock(spec=User)
         user.email = None
         
-        # Should not crash and should return False
         with patch.dict(os.environ, {}, clear=True):
             result = PermissionService.detect_developer_status(user)
             assert result == False
         
-        # Unless DEV_MODE is set
         with patch.dict(os.environ, {"DEV_MODE": "true"}):
             result = PermissionService.detect_developer_status(user)
             assert result == True
