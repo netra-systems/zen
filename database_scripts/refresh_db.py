@@ -1,10 +1,16 @@
 import psycopg2
+import os
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 DATABASE_NAME = "netra"
 
+# SECURITY: Get password from environment variable - never hardcode passwords
+password = os.getenv('POSTGRES_PASSWORD')
+if not password:
+    raise ValueError("POSTGRES_PASSWORD environment variable must be set")
+
 # 1. Drop and recreate the database
-conn = psycopg2.connect(dbname="postgres", user="postgres", host="localhost", password="123")
+conn = psycopg2.connect(dbname="postgres", user="postgres", host="localhost", password=password)
 conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
 cur = conn.cursor()
 
