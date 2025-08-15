@@ -18,7 +18,7 @@ on:
 jobs:
   check-infrastructure:
     name: Check Infrastructure
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       cluster_exists: ${{ steps.check.outputs.cluster_exists }}
       cluster_status: ${{ steps.check.outputs.cluster_status }}
@@ -63,7 +63,7 @@ jobs:
     name: Check Services
     needs: check-infrastructure
     if: needs.check-infrastructure.outputs.cluster_exists == 'true'
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       backend_status: ${{ steps.services.outputs.backend_status }}
       frontend_status: ${{ steps.services.outputs.frontend_status }}
@@ -125,7 +125,7 @@ jobs:
     name: Check Endpoints
     needs: check-infrastructure
     if: needs.check-infrastructure.outputs.cluster_exists == 'true'
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       backend_url: ${{ steps.endpoints.outputs.backend_url }}
       frontend_url: ${{ steps.endpoints.outputs.frontend_url }}
@@ -185,7 +185,7 @@ jobs:
     name: Generate Status Report
     needs: [check-infrastructure, check-services, check-endpoints]
     if: always()
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Generate status report
         uses: actions/github-script@v7

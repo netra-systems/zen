@@ -36,13 +36,13 @@ env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GCP_REGION: us-central1
   # ACT environment detection
-  ACT: ${{ env.ACT }}
-  LOCAL_DEPLOY: ${{ env.LOCAL_DEPLOY || 'false' }}
+  ACT: 'false'  # Will be overridden by ACT when running locally
+  LOCAL_DEPLOY: 'false'  # Default value
 
 jobs:
   cleanup-staging:
     name: Clean Up Stale Staging Environments
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     
     steps:
       - name: Checkout code
@@ -212,7 +212,7 @@ jobs:
 
   monitor-costs:
     name: Monitor Staging Costs
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     needs: cleanup-staging
     
     steps:
@@ -324,7 +324,7 @@ jobs:
   # NEW JOB FOR V4: Analyze historical cleanup patterns
   analyze-cleanup-history:
     name: Analyze Cleanup History
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     needs: cleanup-staging
     if: github.event.schedule == '0 2 * * 0'  # Run weekly on Sundays
     
@@ -396,7 +396,7 @@ jobs:
   # NEW JOB FOR V4: Emergency cleanup with artifact tracking
   emergency-cleanup:
     name: Emergency Cleanup
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.max_age_days == '0'
     
     steps:

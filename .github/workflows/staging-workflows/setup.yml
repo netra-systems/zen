@@ -45,12 +45,12 @@ env:
   PROJECT_NAME: netra-staging
   # ACT environment detection
   ACT: ${{ env.ACT }}
-  LOCAL_DEPLOY: ${{ env.LOCAL_DEPLOY || 'false' }}
+  LOCAL_DEPLOY: 'false'  # Default value
 
 jobs:
   configure:
     name: Configure Environment
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       environment_name: ${{ steps.config.outputs.environment_name }}
       action: ${{ steps.config.outputs.action }}

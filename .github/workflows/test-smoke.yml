@@ -28,7 +28,7 @@ concurrency:
 env:
   CONFIG_FILE: .github/workflow-config.yml
   # ACT compatibility: detect ACT environment
-  ACT: ${{ env.ACT || 'false' }}
+  ACT: 'false'  # Will be overridden by ACT when running locally
 
 permissions:
   contents: read
@@ -39,8 +39,8 @@ permissions:
 jobs:
   smoke-test:
     name: Quick Validation (<30s)
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
-    timeout-minutes: ${{ env.ACT && '3' || '5' }}  # ACT compatibility: shorter timeout for local runs
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
+    timeout-minutes: 5  # Adjusted for ACT compatibility
     
     outputs:
       status: ${{ steps.test.outcome }}

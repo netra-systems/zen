@@ -47,12 +47,12 @@ env:
   NODE_VERSION: '18'
   TEST_TIMEOUT: 3600
   # ACT compatibility: detect ACT environment
-  ACT: ${{ env.ACT || 'false' }}
+  ACT: 'false'  # Will be overridden by ACT when running locally
 
 jobs:
   determine-tests:
     name: Determine Test Strategy
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       test_level: ${{ steps.strategy.outputs.level }}
       affected_services: ${{ steps.strategy.outputs.services }}
@@ -138,7 +138,7 @@ jobs:
     name: Backend Tests
     needs: determine-tests
     if: needs.determine-tests.outputs.skip != 'true' && contains(needs.determine-tests.outputs.affected_services, 'backend')
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     
     steps:
       - name: Checkout code
@@ -192,7 +192,7 @@ jobs:
     name: Frontend Tests
     needs: determine-tests
     if: needs.determine-tests.outputs.skip != 'true' && contains(needs.determine-tests.outputs.affected_services, 'frontend')
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     
     steps:
       - name: Checkout code
@@ -251,7 +251,7 @@ jobs:
     name: Test Summary
     needs: [determine-tests, backend-tests, frontend-tests]
     if: always() && needs.determine-tests.outputs.skip != 'true'
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     
     steps:
       - name: Download all artifacts

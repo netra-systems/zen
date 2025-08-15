@@ -32,7 +32,7 @@ on:
 jobs:
   notify:
     name: Send Notifications
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Prepare notification data
         id: prepare

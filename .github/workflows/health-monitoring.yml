@@ -32,7 +32,7 @@ env:
   HEALTH_CHECK_TIMEOUT: 30
   ALERT_THRESHOLD_RESPONSE_TIME: 2000  # 2 seconds
   ALERT_THRESHOLD_ERROR_RATE: 5        # 5% error rate
-  ACT_DETECTION: ${{ github.event.inputs.act_local_run || env.ACT || 'false' }}
+  ACT_DETECTION: ${{ github.event.inputs.act_local_run || 'false' }}  # Will be overridden by ACT when running locally
 
 permissions:
   contents: read

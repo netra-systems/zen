@@ -28,9 +28,9 @@ env:
   ANALYZE_PERIOD: ${{ github.event.inputs.analyze_period_days || '30' }}
   PYTHON_VERSION: '3.11'
   # ACT local testing environment variables
-  ACT_RUNNER_NAME: ${{ env.ACT && 'act-runner' || 'github-runner' }}
-  ACT_TEST_MODE: ${{ env.ACT || 'false' }}
-  GITHUB_API_AVAILABLE: ${{ !env.ACT || 'false' }}
+  ACT_RUNNER_NAME: 'github-runner'  # Will be overridden by ACT when running locally
+  ACT_TEST_MODE: 'false'  # Will be overridden by ACT when running locally
+  GITHUB_API_AVAILABLE: 'true'  # Will be set to false if running in ACT
 
 permissions:
   contents: read

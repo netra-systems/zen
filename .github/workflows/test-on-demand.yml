@@ -35,7 +35,7 @@ permissions:
 
 env:
   # ACT compatibility: detect ACT environment
-  ACT: ${{ env.ACT || 'false' }}
+  ACT: 'false'  # Will be overridden by ACT when running locally
 
 jobs:
   parse-command:
@@ -43,7 +43,7 @@ jobs:
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@test')) ||
       github.event_name == 'workflow_dispatch'
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       should_run: ${{ steps.parse.outputs.should_run }}
       test_level: ${{ steps.parse.outputs.test_level }}
@@ -150,7 +150,7 @@ jobs:
     name: Notify Test Start
     needs: parse-command
     if: needs.parse-command.outputs.should_run == 'true'
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     
     steps:
       - name: Comment PR

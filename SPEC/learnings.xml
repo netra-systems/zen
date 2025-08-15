@@ -286,6 +286,62 @@
                 <prevention>Always use concurrency groups for PR-based workflows to prevent redundant runs</prevention>
             </fix>
             
+            <fix date="2025-08-15">
+                <title>Database Table Creation Required Before dev_launcher</title>
+                <problem>Backend startup fails with "Startup failed: 1 critical checks failed" when database tables don't exist</problem>
+                <symptoms>
+                    <symptom>RuntimeError: Application startup failed: Startup failed: 1 critical checks failed</symptom>
+                    <symptom>Database connectivity test passes but schema validation fails</symptom>
+                    <symptom>Critical tables (assistants, threads, messages, userbase) not found in database</symptom>
+                    <symptom>PostgreSQL container running but database is empty</symptom>
+                </symptoms>
+                <root-causes>
+                    <cause>Terraform creates PostgreSQL container but doesn't create application tables</cause>
+                    <cause>No automatic table creation on first startup</cause>
+                    <cause>Startup checks verify table existence as critical requirement</cause>
+                    <cause>DATABASE_URL environment variable not always loaded correctly in scripts</cause>
+                </root-causes>
+                <solution>
+                    <step>Create init_database.py script to initialize all tables</step>
+                    <step>Load environment variables from .env files using python-dotenv</step>
+                    <step>Use SQLAlchemy Base.metadata.create_all() to create tables</step>
+                    <step>Run initialization before starting dev_launcher.py</step>
+                </solution>
+                <implementation>
+                    <code>
+                        # init_database.py
+                        from dotenv import load_dotenv
+                        load_dotenv('.env')
+                        load_dotenv('.env.development')
+                        load_dotenv('.env.development.local')
+                        
+                        from sqlalchemy.ext.asyncio import create_async_engine
+                        from app.db.base import Base
+                        from app.db.models_postgres import *
+                        
+                        async def create_tables():
+                            database_url = os.getenv("DATABASE_URL")
+                            engine = create_async_engine(database_url)
+                            async with engine.begin() as conn:
+                                await conn.run_sync(Base.metadata.create_all)
+                    </code>
+                </implementation>
+                <files-created>
+                    <file>init_database.py - Database initialization script</file>
+                </files-created>
+                <prevention>
+                    <action>Always verify database tables exist before running application</action>
+                    <action>Include table creation in development setup documentation</action>
+                    <action>Consider adding automatic table creation to startup process with flag</action>
+                    <action>Ensure DATABASE_URL is properly loaded in all database scripts</action>
+                </prevention>
+                <key-insight>
+                    Development database setup requires explicit table creation after container initialization.
+                    Environment variables must be loaded from .env files when running standalone scripts.
+                    The startup health checks correctly enforce schema requirements but don't auto-create tables.
+                </key-insight>
+            </fix>
+            
             <fix date="2025-08-14">
                 <title>Cloud Run Not Suitable for GitHub Runners</title>
                 <problem>GitHub Runners deployed to Cloud Run fail with "container failed to start and listen on PORT=8080"</problem>

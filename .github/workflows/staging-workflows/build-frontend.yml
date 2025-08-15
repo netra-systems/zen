@@ -32,7 +32,7 @@ on:
 jobs:
   build:
     name: Build Frontend Image
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     timeout-minutes: 30
     outputs:
       image_tag: ${{ steps.build.outputs.image_tag }}

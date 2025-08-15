@@ -29,12 +29,12 @@ on:
 
 env:
   # ACT compatibility: detect ACT environment
-  ACT: ${{ env.ACT || 'false' }}
+  ACT: 'false'  # Will be overridden by ACT when running locally
 
 jobs:
   detect-test-stubs:
     name: 🔍 Detect Test Stubs in Production Code
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     timeout-minutes: 10
     
     permissions:
@@ -192,7 +192,7 @@ jobs:
   # Separate job for monitoring stub trends
   stub-metrics:
     name: 📈 Track Stub Metrics
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     if: ${{ !env.ACT && github.event_name == 'push' && github.ref == 'refs/heads/main' }}  # ACT compatibility: skip for ACT
     needs: detect-test-stubs
     continue-on-error: true  # Don't fail build for metrics

@@ -66,7 +66,7 @@ jobs:
   deploy-backend:
     name: Deploy Backend to GKE
     needs: [infrastructure, build-backend]
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -146,7 +146,7 @@ jobs:
   deploy-frontend:
     name: Deploy Frontend to GKE
     needs: [infrastructure, build-frontend]
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -226,7 +226,7 @@ jobs:
   smoke-test:
     name: Run Smoke Tests
     needs: [deploy-backend, deploy-frontend, infrastructure]
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -262,7 +262,7 @@ jobs:
   verify:
     name: Verify Deployment
     needs: [infrastructure, smoke-test]
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       status: ${{ steps.verify.outputs.status }}
     steps:
@@ -281,7 +281,7 @@ jobs:
     name: Post Deployment Comment
     needs: [infrastructure, smoke-test, verify]
     if: success()
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Post deployment comment
         if: env.ACT != 'true'

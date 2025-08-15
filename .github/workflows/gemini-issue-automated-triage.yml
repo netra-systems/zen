@@ -23,7 +23,7 @@ name: '🏷️ Gemini Automated Issue Triage'
 
 env:
   # ACT environment detection
-  IS_ACT: ${{ env.ACT || 'false' }}
+  IS_ACT: 'false'  # Will be overridden by ACT when running locally
   DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
 
 concurrency:

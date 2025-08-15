@@ -70,8 +70,8 @@ env:
   DOCKER_BUILDKIT: 1
   BUILDKIT_PROGRESS: plain
   # ACT environment detection
-  ACT: ${{ env.ACT }}
-  LOCAL_DEPLOY: ${{ env.LOCAL_DEPLOY || 'false' }}
+  ACT: 'false'  # Will be overridden by ACT when running locally
+  LOCAL_DEPLOY: 'false'  # Default value
 
 concurrency:
   group: staging-${{ github.event.pull_request.number || github.ref }}
@@ -80,7 +80,7 @@ concurrency:
 jobs:
   setup:
     name: Environment Setup
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       environment_name: ${{ steps.config.outputs.environment_name }}
       action: ${{ steps.config.outputs.action }}
@@ -170,7 +170,7 @@ jobs:
     name: Build Backend
     needs: [setup]
     if: needs.setup.outputs.should_deploy == 'true'
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       image_url: ${{ steps.build.outputs.image_url }}
       build_time: ${{ steps.build.outputs.build_time }}
@@ -293,7 +293,7 @@ jobs:
     name: Build Frontend
     needs: [setup]
     if: needs.setup.outputs.should_deploy == 'true'
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       image_url: ${{ steps.build.outputs.image_url }}
       build_time: ${{ steps.build.outputs.build_time }}
@@ -414,7 +414,7 @@ jobs:
       needs.setup.result == 'success' &&
       (needs.build-backend.result == 'success' || needs.build-backend.result == 'skipped') &&
       (needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped')
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       backend_url: ${{ steps.outputs.outputs.backend_url }}
       frontend_url: ${{ steps.outputs.outputs.frontend_url }}
@@ -609,7 +609,7 @@ jobs:
     if: |
       needs.setup.outputs.action == 'deploy' && 
       needs.terraform.result == 'success'
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     
     steps:
       - name: Wait for services
@@ -670,7 +670,7 @@ jobs:
     name: Finalize Deployment
     needs: [setup, terraform, smoke-test, build-backend, build-frontend]
     if: always()
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     
     steps:
       - name: Calculate total time

@@ -19,7 +19,7 @@ on:
 jobs:
   backup:
     name: Backup Environment Data
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Configure GCP credentials
         uses: google-github-actions/auth@v2
@@ -62,7 +62,7 @@ jobs:
   
   cleanup-kubernetes:
     name: Cleanup Kubernetes Resources
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Configure GCP credentials
         uses: google-github-actions/auth@v2
@@ -92,7 +92,7 @@ jobs:
   
   cleanup-images:
     name: Cleanup Docker Images
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Configure GCP credentials
         uses: google-github-actions/auth@v2
@@ -128,7 +128,7 @@ jobs:
   cleanup-dns:
     name: Cleanup DNS Records
     needs: destroy-infrastructure
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Configure GCP credentials
         uses: google-github-actions/auth@v2
@@ -151,7 +151,7 @@ jobs:
   final-cleanup:
     name: Final Cleanup
     needs: [destroy-infrastructure, cleanup-images, cleanup-dns]
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     steps:
       - name: Remove state locks
         continue-on-error: true

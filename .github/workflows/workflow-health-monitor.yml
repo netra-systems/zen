@@ -38,7 +38,7 @@ env:
   ALERT_THRESHOLD_DURATION: 200     # Alert if >200% of baseline
   COST_BUDGET_DAILY: 20
   COST_BUDGET_MONTHLY: 500
-  ACT_DETECTION: ${{ github.event.inputs.act_local_run || env.ACT || 'false' }}
+  ACT_DETECTION: ${{ github.event.inputs.act_local_run || 'false' }}  # Will be overridden by ACT when running locally
 
 permissions:
   contents: read

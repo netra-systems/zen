@@ -1,18 +1,22 @@
+# syntax=docker/dockerfile:1
 # Optimized Frontend Dockerfile for Staging
 # Designed to work from root directory with frontend context
+# Requires Docker BuildKit: DOCKER_BUILDKIT=1
 FROM node:20-alpine AS deps
 WORKDIR /app
 
 # Copy package files from frontend directory
 COPY frontend/package*.json ./
 
-# Install with optimized caching
-RUN npm config set fetch-retries 10 && \
+# Install with optimized caching and cache mount
+RUN --mount=type=cache,target=/root/.npm \
+    npm config set fetch-retries 10 && \
     npm config set fetch-retry-mintimeout 30000 && \
     npm config set fetch-retry-maxtimeout 180000 && \
     npm config set prefer-offline true && \
     npm config set audit false && \
     npm config set fund false && \
+    npm config set cache /root/.npm && \
     npm ci --legacy-peer-deps --verbose || \
     (npm cache verify && npm ci --legacy-peer-deps --verbose)
 
@@ -36,20 +40,37 @@ COPY frontend/components.json ./
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
-# Copy source code last (most frequently changed)
-COPY frontend/app ./app
-COPY frontend/components ./components
-COPY frontend/hooks ./hooks
-COPY frontend/lib ./lib
+# Copy source files in order of change frequency (least to most)
+# Static assets and configs change less frequently
 COPY frontend/public ./public
-COPY frontend/services ./services
-COPY frontend/store ./store
+COPY frontend/lib ./lib
+
+# Type definitions and utilities
 COPY frontend/types ./types
 COPY frontend/utils ./utils
 
+# Services and state management
+COPY frontend/services ./services
+COPY frontend/store ./store
+COPY frontend/hooks ./hooks
+COPY frontend/auth ./auth
+
+# Additional required directories
+COPY frontend/config ./config
+COPY frontend/providers ./providers
+COPY frontend/styles ./styles
+COPY frontend/chat ./chat
+COPY frontend/contexts ./contexts
+
+# UI components and pages (most frequently changed)
+COPY frontend/components ./components
+COPY frontend/app ./app
+
 # Build the application with cache mount
 RUN --mount=type=cache,target=/app/.next/cache \
-    npm run build
+    --mount=type=cache,target=/root/.npm \
+    npm run build && \
+    echo "Build cache size: $(du -sh /app/.next/cache 2>/dev/null || echo 'N/A')"
 
 # Production stage
 FROM node:20-alpine AS runner

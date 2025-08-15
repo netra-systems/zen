@@ -22,9 +22,9 @@ env:
   GCP_REGION: us-central1
   STALE_LOCK_MINUTES: 15  # Consider locks stale after 15 minutes for GitHub Actions
   # ACT compatibility flags
-  ACT_DETECTED: ${{ env.ACT || 'false' }}
-  ACT_DRY_RUN: ${{ env.ACT_DRY_RUN || 'true' }}
-  ACT_MOCK_GCP: ${{ env.ACT_MOCK_GCP || 'true' }}
+  ACT_DETECTED: 'false'  # Will be overridden by ACT when running locally
+  ACT_DRY_RUN: 'true'  # Default value
+  ACT_MOCK_GCP: 'true'  # Default value
 
 jobs:
   cleanup-terraform-locks:

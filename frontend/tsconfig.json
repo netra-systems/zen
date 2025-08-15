@@ -20,6 +20,8 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@/auth": ["./auth"],
+      "@/auth/*": ["./auth/*"],
       "@/chat/*": ["./chat/*"],
       "@/components/ui/*": ["./components/ui/*"],
       "@/components/*": ["./components/*"],

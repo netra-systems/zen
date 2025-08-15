@@ -35,7 +35,7 @@ concurrency:
 env:
   CONFIG_FILE: .github/workflow-config.yml
   # ACT compatibility: detect ACT environment
-  ACT: ${{ env.ACT || 'false' }}
+  ACT: 'false'  # Will be overridden by ACT when running locally
 
 permissions:
   contents: read
@@ -46,7 +46,7 @@ permissions:
 jobs:
   determine-shards:
     name: Determine Test Shards
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       shards: ${{ steps.shards.outputs.matrix }}
       
@@ -106,7 +106,7 @@ jobs:
   unit-test:
     name: Unit Tests - ${{ matrix.shard }}
     needs: determine-shards
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     timeout-minutes: 10  # TODO: Load from config
     
     strategy:
@@ -235,7 +235,7 @@ jobs:
   unit-test-summary:
     name: Unit Test Summary
     needs: unit-test
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     if: always()
     
     steps:

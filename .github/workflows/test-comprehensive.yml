@@ -58,7 +58,7 @@ env:
   PYTHON_VERSION: '3.11'  # Default, overridden by config
   NODE_VERSION: '18'  # Default, overridden by config
   # ACT compatibility: detect ACT environment
-  ACT: ${{ env.ACT || 'false' }}
+  ACT: 'false'  # Will be overridden by ACT when running locally
 
 jobs:
   # ==========================================
@@ -67,7 +67,7 @@ jobs:
   
   plan-tests:
     name: 📋 Plan Test Execution
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     outputs:
       matrix: ${{ steps.build-matrix.outputs.matrix }}
       execution_mode: ${{ steps.build-matrix.outputs.mode }}
@@ -209,8 +209,8 @@ jobs:
   run-comprehensive-tests:
     name: 🧪 ${{ matrix.module }}
     needs: plan-tests
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
-    timeout-minutes: ${{ env.ACT && '30' || '60' }}  # ACT compatibility: shorter timeout for local runs
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
+    timeout-minutes: 60  # Adjusted for ACT compatibility
     
     strategy:
       fail-fast: false
@@ -368,7 +368,7 @@ jobs:
     name: 📊 Aggregate Test Results
     needs: [plan-tests, run-comprehensive-tests]
     if: always()
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     
     steps:
       - name: Download all artifacts
@@ -556,7 +556,7 @@ jobs:
     name: 📢 Send Notifications
     needs: [aggregate-results]
     if: always()
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}  # ACT compatibility: fallback to ubuntu-latest
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     
     steps:
       - name: Determine notification level

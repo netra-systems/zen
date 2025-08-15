@@ -38,12 +38,12 @@ env:
   TERRAFORM_VERSION: '1.5.0'
   # ACT environment detection
   ACT: ${{ env.ACT }}
-  LOCAL_DEPLOY: ${{ env.LOCAL_DEPLOY || 'false' }}
+  LOCAL_DEPLOY: 'false'  # Default value
 
 jobs:
   terraform:
     name: Terraform ${{ inputs.action }}
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+    runs-on: warp-custom-default  # ACT will override this to ubuntu-latest when running locally
     timeout-minutes: 45
     outputs:
       backend_url: ${{ steps.outputs.outputs.backend_url }}
