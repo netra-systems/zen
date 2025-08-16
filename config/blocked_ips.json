@@ -1,0 +1,7 @@
+{
+  "blocked_ips": [
+    "138.197.191.87"
+  ],
+  "blocked_networks": [],
+  "comment": "Add IPs or CIDR blocks to block. Format: IPs as strings, networks as 'x.x.x.x/xx'"
+}

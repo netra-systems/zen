@@ -45,6 +45,10 @@ def register_error_handlers(app: FastAPI) -> None:
 
 def setup_middleware(app: FastAPI) -> None:
     """Setup all middleware for the application."""
+    # IP blocking should be first to reject bad IPs early
+    from app.middleware.ip_blocking import ip_blocking_middleware
+    app.middleware("http")(ip_blocking_middleware)
+    
     setup_cors_middleware(app)
     app.middleware("http")(create_cors_redirect_middleware())
     app.middleware("http")(create_error_context_middleware())

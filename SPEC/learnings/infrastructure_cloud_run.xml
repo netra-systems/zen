@@ -95,5 +95,43 @@
                     </issues>
                 </learning>
 
+        <learning id="cloud-run-ip-blocking">
+            <title>IP Blocking on Cloud Run</title>
+            <date>2025-08-16</date>
+            <category>Infrastructure/Cloud Run</category>
+            <description>
+                Cloud Run doesn't have native IP blocking. Two approaches available:
+                1. Cloud Armor with Load Balancer (production-ready, costs more)
+                2. Application-level middleware (quick, no extra costs)
+            </description>
+            <symptoms>
+                <symptom>Unwanted traffic from specific IPs (e.g., 138.197.191.87)</symptom>
+                <symptom>Need to block malicious or abusive IPs</symptom>
+                <symptom>Cloud Run service receiving unwanted requests</symptom>
+            </symptoms>
+            <root-causes>
+                <cause>Cloud Run has no built-in IP blocking at service level</cause>
+                <cause>Direct Cloud Run URLs are publicly accessible by default</cause>
+            </root-causes>
+            <solution>
+                <step>Option 1: Deploy Cloud Armor with Load Balancer (see terraform-gcp/cloud-armor-ip-blocking.tf)</step>
+                <step>Option 2: Add application middleware (app/middleware/ip_blocking.py)</step>
+                <step>Manage blocked IPs in config/blocked_ips.json</step>
+                <step>Middleware reads X-Forwarded-For header for real client IP</step>
+            </solution>
+            <files-modified>
+                <file>app/middleware/ip_blocking.py - IP blocking middleware</file>
+                <file>app/core/app_factory.py - Register IP blocking middleware</file>
+                <file>config/blocked_ips.json - Configuration for blocked IPs</file>
+                <file>terraform-gcp/cloud-armor-ip-blocking.tf - Cloud Armor setup</file>
+            </files-modified>
+            <prevention>
+                <item>Monitor access logs for suspicious IPs</item>
+                <item>Keep blocked_ips.json updated with malicious IPs</item>
+                <item>Consider rate limiting in addition to IP blocking</item>
+                <item>Use Cloud Armor for production environments</item>
+            </prevention>
+        </learning>
+
     </learnings>
 </specification>
