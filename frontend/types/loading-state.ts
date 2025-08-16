@@ -8,7 +8,7 @@
  * @compliance conventions.xml - Under 300 lines, strongly typed
  */
 
-import { WebSocketStatus } from '@/services/webSocketService';
+import { WebSocketStatus } from '../services/webSocketService';
 
 /**
  * Comprehensive loading state enum covering all possible UI states

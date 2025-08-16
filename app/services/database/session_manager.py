@@ -9,7 +9,7 @@ from app.core.exceptions import DatabaseError
 
 
 class SessionManager:
-    """Handles database session validation and management"""
+    """Handles database session validation for repository operations"""
     
     def __init__(self, model_name: str):
         self.model_name = model_name
@@ -33,3 +33,6 @@ class SessionManager:
                 context={"repository": self.model_name, "entity_id": entity_id}
             )
         return validated_session
+
+# Alias for backward compatibility
+RepositorySessionValidator = SessionManager

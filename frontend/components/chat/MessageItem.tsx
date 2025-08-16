@@ -7,6 +7,110 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { RawJsonView } from './RawJsonView';
 import { motion } from 'framer-motion';
 import { AlertCircle, Bot, ChevronDown, ChevronRight, Clock, Code, FileText, User, Wrench } from 'lucide-react';
+import { getMessageDisplayName, shouldShowSubtitle, getMessageSubtitle } from '@/utils/message-display';
+
+// ============================================
+// Helper Functions (8 lines max each)
+// ============================================
+
+const createDefaultTimeString = (): string => {
+  return new Date().toLocaleTimeString('en-US', { 
+    hour: '2-digit', 
+    minute: '2-digit',
+    second: '2-digit'
+  });
+};
+
+const parseCreatedAtDate = (created_at: string | number | undefined): Date | null => {
+  if (!created_at) return null;
+  const date = new Date(created_at);
+  return isNaN(date.getTime()) ? null : date;
+};
+
+const formatMessageTimestamp = (created_at: string | number | undefined): string => {
+  const date = parseCreatedAtDate(created_at);
+  if (!date) return createDefaultTimeString();
+  return date.toLocaleTimeString('en-US', { 
+    hour: '2-digit', 
+    minute: '2-digit',
+    second: '2-digit'
+  });
+};
+
+const renderErrorContent = (error: string) => (
+  <div className="flex items-start space-x-2 p-3 bg-red-50 rounded-lg border border-red-200">
+    <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+    <p className="text-red-700 text-sm">{error}</p>
+  </div>
+);
+
+const renderToolContent = (
+  tool_info: any,
+  isToolExpanded: boolean,
+  toggleToolExpanded: () => void
+) => (
+  <div className="space-y-3">
+    <Collapsible open={isToolExpanded} onOpenChange={toggleToolExpanded}>
+      {renderToolTrigger(isToolExpanded)}
+      {renderToolCollapsibleContent(tool_info)}
+    </Collapsible>
+  </div>
+);
+
+const renderToolTrigger = (isToolExpanded: boolean) => (
+  <CollapsibleTrigger className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium text-sm">
+    {isToolExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+    <Code className="w-4 h-4" />
+    <span>Tool Information</span>
+  </CollapsibleTrigger>
+);
+
+const renderToolCollapsibleContent = (tool_info: any) => (
+  <CollapsibleContent className="mt-3">
+    <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+      <RawJsonView data={tool_info} />
+    </div>
+  </CollapsibleContent>
+);
+
+const renderRegularContent = (
+  content: string,
+  type: string,
+  references: string[] | undefined,
+  id: string | undefined
+) => (
+  <div className="space-y-3">
+    <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{content}</p>
+    {type === 'user' && references && references.length > 0 && 
+      renderUserReferences(references, id)
+    }
+  </div>
+);
+
+const renderUserReferences = (references: string[], id: string | undefined) => (
+  <div className="mt-4 p-3 glass-light rounded-lg border border-emerald-200">
+    {renderReferencesHeader()}
+    {renderReferencesList(references, id)}
+  </div>
+);
+
+const renderReferencesHeader = () => (
+  <div className="flex items-center space-x-2 mb-2">
+    <FileText className="w-4 h-4 text-emerald-600" />
+    <span className="font-semibold text-sm text-emerald-800">References</span>
+  </div>
+);
+
+const renderReferencesList = (references: string[], id: string | undefined) => (
+  <ul className="space-y-1">
+    {references.map((ref, index) => (
+      <li key={`${id}-ref-${index}-${ref.substring(0, 20)}`} className="text-sm text-emerald-700 flex items-start">
+        <span className="mr-2 text-blue-500">•</span>
+        <span>{ref}</span>
+      </li>
+    ))}
+  </ul>
+);
 
 interface MessageProps {
   message: MessageType;
@@ -18,26 +122,7 @@ export const MessageItem: React.FC<MessageProps> = React.memo(({ message }) => {
   const [isRawExpanded, setIsRawExpanded] = React.useState(false);
 
   const formattedTimestamp = useMemo(() => {
-    if (!created_at) {
-      return new Date().toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        second: '2-digit'
-      });
-    }
-    const date = new Date(created_at);
-    if (isNaN(date.getTime())) {
-      return new Date().toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        second: '2-digit'
-      });
-    }
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      second: '2-digit'
-    });
+    return formatMessageTimestamp(created_at);
   }, [created_at]);
 
   const toggleToolExpanded = useCallback(() => {
@@ -62,56 +147,9 @@ export const MessageItem: React.FC<MessageProps> = React.memo(({ message }) => {
   }, [type]);
 
   const renderContent = () => {
-    if (error) {
-      return (
-        <div className="flex items-start space-x-2 p-3 bg-red-50 rounded-lg border border-red-200">
-          <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
-          <p className="text-red-700 text-sm">{error}</p>
-        </div>
-      );
-    }
-    
-    if (tool_info) {
-      return (
-        <div className="space-y-3">
-          <Collapsible open={isToolExpanded} onOpenChange={toggleToolExpanded}>
-            <CollapsibleTrigger className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium text-sm">
-              {isToolExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-              <Code className="w-4 h-4" />
-              <span>Tool Information</span>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3">
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <RawJsonView data={tool_info} />
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
-      );
-    }
-    
-    return (
-      <div className="space-y-3">
-        <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{content}</p>
-        
-        {type === 'user' && references && references.length > 0 && (
-          <div className="mt-4 p-3 glass-light rounded-lg border border-emerald-200">
-            <div className="flex items-center space-x-2 mb-2">
-              <FileText className="w-4 h-4 text-emerald-600" />
-              <span className="font-semibold text-sm text-emerald-800">References</span>
-            </div>
-            <ul className="space-y-1">
-              {references.map((ref, index) => (
-                <li key={`${id}-ref-${index}-${ref.substring(0, 20)}`} className="text-sm text-emerald-700 flex items-start">
-                  <span className="mr-2 text-blue-500">•</span>
-                  <span>{ref}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-    );
+    if (error) return renderErrorContent(error);
+    if (tool_info) return renderToolContent(tool_info, isToolExpanded, toggleToolExpanded);
+    return renderRegularContent(content, type, references, id);
   };
 
   return (
@@ -141,12 +179,12 @@ export const MessageItem: React.FC<MessageProps> = React.memo(({ message }) => {
                 <div className="flex items-center space-x-2">
                   {messageIcon}
                   <CardTitle className="text-base font-semibold text-gray-900">
-                    {(sub_agent_name && sub_agent_name !== 'undefined' && sub_agent_name.trim() !== '') ? sub_agent_name : (type === 'user' ? 'You' : 'Netra Agent')}
+                    {getMessageDisplayName(type, sub_agent_name)}
                   </CardTitle>
                 </div>
-                {type !== 'user' && sub_agent_name && sub_agent_name !== 'undefined' && sub_agent_name.trim() !== '' && (
+                {shouldShowSubtitle(type, sub_agent_name) && (
                   <p className="text-xs text-gray-500 mt-0.5">
-                    {type === 'tool' ? 'Tool Execution' : 'Agent Response'}
+                    {getMessageSubtitle(type, sub_agent_name)}
                   </p>
                 )}
               </div>

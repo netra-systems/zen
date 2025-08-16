@@ -5,6 +5,23 @@ import { useThreadStore } from '@/store/threadStore';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
 import { ThreadService } from '@/services/threadService';
+import { useThreadSwitching } from '@/hooks/useThreadSwitching';
+import { useThreadCreation } from '@/hooks/useThreadCreation';
+import { ThreadErrorBoundary } from './ThreadErrorBoundary';
+import { ThreadLoadingIndicator } from './ThreadLoadingIndicator';
+import { defaultRecoveryManager } from '@/lib/thread-error-recovery';
+import type { ThreadError, ThreadErrorCategory } from '@/types/thread-error-types';
+import {
+  executeThreadLoad,
+  executeThreadCreation,
+  executeThreadSelection,
+  executeTitleUpdate,
+  executeThreadDeletion,
+  shouldSkipThreadSelection,
+  shouldSkipTitleUpdate,
+  calculateDateDifference,
+  formatDateDisplay
+} from '@/hooks/thread-sidebar-utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -12,8 +29,11 @@ import {
   Trash2,
   Pencil,
   X,
-  Check
+  Check,
+  Loader2
 } from 'lucide-react';
+
+// Helper functions imported from thread-sidebar-utils module
 
 export const ThreadSidebar: React.FC = () => {
   const { 
@@ -28,11 +48,12 @@ export const ThreadSidebar: React.FC = () => {
     setError
   } = useThreadStore();
   
-  const { clearMessages, loadMessages, setActiveThread } = useUnifiedChatStore();
+  const { clearMessages } = useUnifiedChatStore();
   const { isAuthenticated } = useAuthStore();
+  const { state: switchingState, switchToThread } = useThreadSwitching();
+  const { state: creationState, createAndNavigate } = useThreadCreation();
   const [editingThreadId, setEditingThreadId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
-  const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   useEffect(() => {
     // Only load threads if user is authenticated
@@ -43,107 +64,61 @@ export const ThreadSidebar: React.FC = () => {
   }, [isAuthenticated]);
 
   const loadThreads = async () => {
-    try {
-      setLoading(true);
-      const fetchedThreads = await ThreadService.listThreads();
-      setThreads(fetchedThreads);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load conversation history';
-      console.error('Failed to load threads:', errorMessage);
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    await executeThreadLoad(setLoading, setThreads, setError);
   };
 
   const handleCreateThread = async () => {
-    try {
-      setIsCreatingNew(true);
-      const newThread = await ThreadService.createThread('New Conversation');
-      addThread(newThread);
-      await handleSelectThread(newThread.id);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create new conversation';
-      console.error('Failed to create thread:', errorMessage);
-      setError(errorMessage);
-    } finally {
-      setIsCreatingNew(false);
-    }
+    await executeThreadCreation(createAndNavigate, loadThreads, creationState, setError);
   };
 
   const handleSelectThread = async (threadId: string) => {
-    if (threadId === currentThreadId) return;
+    if (shouldSkipThreadSelection(threadId, currentThreadId, switchingState.isLoading)) return;
     
     try {
-      setCurrentThread(threadId);
-      setActiveThread(threadId);
-      clearMessages();
-      
-      // Load messages for the selected thread
-      const response = await ThreadService.getThreadMessages(threadId);
-      if (response.messages.length > 0) {
-        // Convert messages to ChatMessage format for unified store
-        const chatMessages = response.messages.map((msg: any) => ({
-          id: msg.id,
-          role: msg.type === 'user' ? 'user' : msg.type === 'system' ? 'system' : 'assistant',
-          content: msg.content,
-          timestamp: msg.created_at ? new Date(msg.created_at).getTime() : Date.now(),
-          threadId: threadId
-        }));
-        loadMessages(chatMessages);
-      }
+      await executeThreadSelection(threadId, switchToThread, setCurrentThread, switchingState, setError);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load conversation';
-      console.error('Failed to load thread messages:', errorMessage);
-      setError(errorMessage);
+      await handleThreadError(error, threadId);
     }
   };
 
   const handleUpdateTitle = async (threadId: string) => {
-    if (!editingTitle.trim()) {
-      setEditingThreadId(null);
-      return;
-    }
+    if (shouldSkipTitleUpdate(editingTitle, setEditingThreadId)) return;
 
-    try {
-      const updated = await ThreadService.updateThread(threadId, editingTitle);
-      updateThread(threadId, { title: updated.title });
-      setEditingThreadId(null);
-      setEditingTitle('');
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update thread title';
-      console.error('Failed to update thread title:', errorMessage);
-      setError(errorMessage);
-    }
+    await executeTitleUpdate(threadId, editingTitle, updateThread, setEditingThreadId, setEditingTitle, setError);
   };
 
   const handleDeleteThread = async (threadId: string) => {
     if (!confirm('Delete this conversation? This cannot be undone.')) return;
     
-    try {
-      await ThreadService.deleteThread(threadId);
-      deleteThread(threadId);
-      
-      if (currentThreadId === threadId) {
-        clearMessages();
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to delete conversation';
-      console.error('Failed to delete thread:', errorMessage);
-      setError(errorMessage);
-    }
+    await executeThreadDeletion(threadId, deleteThread, currentThreadId, clearMessages, setError);
   };
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp * 1000);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const days = calculateDateDifference(timestamp);
+    return formatDateDisplay(days, date);
+  };
 
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    if (days < 7) return `${days} days ago`;
-    return date.toLocaleDateString();
+  const handleThreadError = async (error: unknown, threadId: string) => {
+    const threadError = createThreadErrorFromError(threadId, error);
+    const recoveryResult = await defaultRecoveryManager.recover(threadError);
+    
+    if (recoveryResult.shouldRetry && recoveryResult.success) {
+      // Auto-retry if recovery suggests it
+      setTimeout(() => handleSelectThread(threadId), recoveryResult.nextRetryDelay || 2000);
+    }
+  };
+
+  const handleErrorBoundaryError = (error: Error, errorInfo: any, threadId?: string) => {
+    console.error('Thread error boundary caught error:', { error, errorInfo, threadId });
+  };
+
+  const handleErrorBoundaryRetry = (threadId?: string) => {
+    if (threadId) {
+      handleSelectThread(threadId);
+    } else {
+      loadThreads();
+    }
   };
 
   // Show authentication message if not authenticated
@@ -162,120 +137,189 @@ export const ThreadSidebar: React.FC = () => {
   }
 
   return (
-    <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col h-full">
-      <div className="p-4 border-b border-gray-200">
-        <button
-          onClick={handleCreateThread}
-          disabled={isCreatingNew || !isAuthenticated}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 glass-button-primary rounded-lg transition-all disabled:glass-disabled"
-        >
-          <Plus className="w-5 h-5" />
-          <span>New Conversation</span>
-        </button>
-      </div>
+    <ThreadErrorBoundary
+      onError={handleErrorBoundaryError}
+      onRetry={handleErrorBoundaryRetry}
+    >
+      <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col h-full">
+        <div className="p-4 border-b border-gray-200">
+          <button
+            onClick={handleCreateThread}
+            disabled={creationState.isCreating || switchingState.isLoading || !isAuthenticated}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 glass-button-primary rounded-lg transition-all disabled:glass-disabled"
+          >
+            {creationState.isCreating ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <Plus className="w-5 h-5" />
+            )}
+            <span>New Conversation</span>
+          </button>
+        </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        <AnimatePresence>
-          {threads.map((thread) => (
-            <motion.div
-              key={thread.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className={`
-                group relative p-3 rounded-lg cursor-pointer transition-all
-                ${currentThreadId === thread.id 
-                  ? 'bg-white shadow-md border border-blue-200' 
-                  : 'hover:bg-white hover:shadow-sm'
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {/* Loading indicator for current operation */}
+          {switchingState.isLoading && (
+            <ThreadLoadingIndicator
+              state={switchingState.error ? 'error' : 'loading'}
+              threadId={switchingState.loadingThreadId || undefined}
+              error={switchingState.error}
+              retryCount={switchingState.retryCount}
+              onRetry={() => {
+                if (switchingState.loadingThreadId) {
+                  handleSelectThread(switchingState.loadingThreadId);
                 }
-              `}
-              onClick={() => handleSelectThread(thread.id)}
-            >
-              <div className="flex items-start gap-3">
-                <MessageSquare className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
-                
-                <div className="flex-1 min-w-0">
-                  {editingThreadId === thread.id ? (
-                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                      <input
-                        type="text"
-                        value={editingTitle}
-                        onChange={(e) => setEditingTitle(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleUpdateTitle(thread.id);
-                          if (e.key === 'Escape') setEditingThreadId(null);
+              }}
+              showDetails={true}
+            />
+          )}
+          
+          <AnimatePresence>
+            {threads.map((thread) => (
+              <motion.div
+                key={thread.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className={`
+                  group relative p-3 rounded-lg cursor-pointer transition-all
+                  ${currentThreadId === thread.id 
+                    ? 'bg-white shadow-md border border-blue-200' 
+                    : 'hover:bg-white hover:shadow-sm'
+                  }
+                  ${switchingState.loadingThreadId === thread.id ? 'opacity-75' : ''}
+                  ${switchingState.isLoading && thread.id !== switchingState.loadingThreadId ? 'pointer-events-none opacity-50' : ''}
+                `}
+                onClick={() => handleSelectThread(thread.id)}
+              >
+                <div className="flex items-start gap-3">
+                  {switchingState.loadingThreadId === thread.id ? (
+                    <Loader2 className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0 animate-spin" />
+                  ) : (
+                    <MessageSquare className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                  )}
+                  
+                  <div className="flex-1 min-w-0">
+                    {editingThreadId === thread.id ? (
+                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="text"
+                          value={editingTitle}
+                          onChange={(e) => setEditingTitle(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleUpdateTitle(thread.id);
+                            if (e.key === 'Escape') setEditingThreadId(null);
+                          }}
+                          className="flex-1 px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => handleUpdateTitle(thread.id)}
+                          className="p-1 text-green-600 hover:bg-green-50 rounded"
+                        >
+                          <Check className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setEditingThreadId(null)}
+                          className="p-1 text-gray-600 hover:bg-gray-100 rounded"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <h3 className="text-sm font-medium text-gray-900 truncate">
+                          {thread.title || 'Untitled Conversation'}
+                        </h3>
+                        <div className="flex items-center gap-1 mt-1">
+                          <span className="text-xs text-gray-500">
+                            {formatDate(thread.created_at)}
+                          </span>
+                          {thread.message_count && thread.message_count > 0 && (
+                            <span className="text-xs text-gray-400">
+                              · {thread.message_count} messages
+                            </span>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {editingThreadId !== thread.id && (
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingThreadId(thread.id);
+                          setEditingTitle(thread.title || 'Untitled Conversation');
                         }}
-                        className="flex-1 px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => handleUpdateTitle(thread.id)}
-                        className="p-1 text-green-600 hover:bg-green-50 rounded"
-                      >
-                        <Check className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => setEditingThreadId(null)}
                         className="p-1 text-gray-600 hover:bg-gray-100 rounded"
                       >
-                        <X className="w-4 h-4" />
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteThread(thread.id);
+                        }}
+                        className="p-1 text-red-600 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                  ) : (
-                    <>
-                      <h3 className="text-sm font-medium text-gray-900 truncate">
-                        {thread.title || 'Untitled Conversation'}
-                      </h3>
-                      <div className="flex items-center gap-1 mt-1">
-                        <span className="text-xs text-gray-500">
-                          {formatDate(thread.created_at)}
-                        </span>
-                        {thread.message_count && thread.message_count > 0 && (
-                          <span className="text-xs text-gray-400">
-                            · {thread.message_count} messages
-                          </span>
-                        )}
-                      </div>
-                    </>
                   )}
                 </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
 
-                {editingThreadId !== thread.id && (
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingThreadId(thread.id);
-                        setEditingTitle(thread.title || 'Untitled Conversation');
-                      }}
-                      className="p-1 text-gray-600 hover:bg-gray-100 rounded"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteThread(thread.id);
-                      }}
-                      className="p-1 text-red-600 hover:bg-red-50 rounded"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {threads.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p className="text-sm">No conversations yet</p>
-            <p className="text-xs mt-1">Start a new conversation to begin</p>
-          </div>
-        )}
+          {threads.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <MessageSquare className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <p className="text-sm">No conversations yet</p>
+              <p className="text-xs mt-1">Start a new conversation to begin</p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </ThreadErrorBoundary>
   );
+};
+
+/**
+ * Creates thread error from generic error
+ */
+const createThreadErrorFromError = (threadId: string, error: unknown): ThreadError => {
+  const message = error instanceof Error ? error.message : String(error);
+  
+  return {
+    id: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    threadId,
+    message,
+    category: categorizeErrorMessage(message),
+    severity: 'medium',
+    timestamp: Date.now(),
+    retryable: isErrorRetryable(message)
+  };
+};
+
+/**
+ * Categorizes error message
+ */
+const categorizeErrorMessage = (message: string): ThreadErrorCategory => {
+  const lowerMessage = message.toLowerCase();
+  
+  if (lowerMessage.includes('timeout')) return 'timeout';
+  if (lowerMessage.includes('network') || lowerMessage.includes('fetch')) return 'network';
+  if (lowerMessage.includes('abort')) return 'abort';
+  
+  return 'unknown';
+};
+
+/**
+ * Checks if error is retryable
+ */
+const isErrorRetryable = (message: string): boolean => {
+  const lowerMessage = message.toLowerCase();
+  return !lowerMessage.includes('abort') && !lowerMessage.includes('permission');
 };

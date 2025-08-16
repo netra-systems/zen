@@ -1,14 +1,14 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-15T23:52:10.097356  
+**Generated:** 2025-08-16T08:14:39.787637  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
 ## Test Summary
 
-**Total Tests:** 2  
-**Passed:** 1  
-**Failed:** 1  
+**Total Tests:** 0  
+**Passed:** 0  
+**Failed:** 0  
 **Skipped:** 0  
 **Errors:** 0  
 **Overall Status:** [FAILED]
@@ -17,7 +17,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 2 | 1 | 1 | 0 | 0 | 7.51s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 4.76s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -27,8 +27,8 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 7.51s
-- **Exit Code:** 1
+- **Total Duration:** 4.76s
+- **Exit Code:** 4
 
 ### Backend Configuration
 ```
@@ -58,150 +58,85 @@ Test Configuration:
 Running command:
   pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
-[1m============================= test session starts =============================[0m
-platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
-cachedir: .pytest_cache
-metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
-configfile: pytest.ini
-plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
-asyncio: mode=Mode.AUTO
-[1mcollecting ... [0mcollected 7 items
+Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
+Loaded .env.development file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development
+Loaded .env.development.local file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development.local
+================================================================================
+[FAIL] TESTS FAILED with exit code 4 after 4.12s
+================================================================================
 
-app/tests/routes/test_health_route.py::test_basic_import [32mPASSED[0m[32m          [ 14%][0m
-app/tests/routes/test_health_route.py::test_health_endpoint_direct [31mFAILED[0m[31m [ 28%][0m
+2025-08-16 08:14:37.440 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
+2025-08-16 08:14:37.441 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
+2025-08-16 08:14:37.441 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
+2025-08-16 08:14:37.442 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
+2025-08-16 08:14:37.442 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
+2025-08-16 08:14:37.442 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
+2025-08-16 08:14:37.442 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
+2025-08-16 08:14:37.442 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set log_level from LOG_LEVEL
+2025-08-16 08:14:37.442 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set environment from ENVIRONMENT
+2025-08-16 08:14:37.442 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse host: localhost
+2025-08-16 08:14:37.443 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse port: 9000
+2025-08-16 08:14:37.443 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse password
+2025-08-16 08:14:37.443 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse user: default
+2025-08-16 08:14:37.443 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set Gemini API key for LLM configs
+2025-08-16 08:14:37.443 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 13 env vars
+2025-08-16 08:14:37.443 | INFO     | app.core.unified_logging:_emit_log:117 | Loading secrets...
+2025-08-16 08:14:37.445 | INFO     | app.core.unified_logging:_emit_log:117 | Starting secret=REDACTED process for environment: development
+2025-08-16 08:14:37.445 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 9 secrets from environment variables
+2025-08-16 08:14:37.445 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: gemini-api-key, jwt-secret-key, fernet-key
+2025-08-16 08:14:37.445 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 9 secrets loaded
+2025-08-16 08:14:37.445 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 9 secrets
+2025-08-16 08:14:37.445 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
+2025-08-16 08:14:37.445 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
+2025-08-16 08:14:37.445 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
+2025-08-16 08:14:37.461 | DEBUG    | logging:handle:1028 | loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
+2025-08-16 08:14:37.461 | DEBUG    | logging:handle:1028 | loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
+2025-08-16 08:14:37.461 | DEBUG    | logging:handle:1028 | loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
+2025-08-16 08:14:37.474 | DEBUG    | logging:handle:1028 | registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
+2025-08-16 08:14:37.703 | INFO     | app.db.postgres_core:_create_and_setup_engine:258 | PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling
+2025-08-16 08:14:37.810 | DEBUG    | app.services.metrics.agent_metrics:__init__:24 | Initialized AgentMetricsCollector with buffer size 5000
+2025-08-16 08:14:38.204 | DEBUG    | logging:handle:1028 | Using orjson library for writing JSON byte strings
+2025-08-16 08:14:38.258 | DEBUG    | logging:handle:1028 | Looking up time zone info from registry
+2025-08-16 08:14:38.582 | INFO     | app.core.unified_logging:_emit_log:117 | SyntheticDataService initialized successfully
+2025-08-16 08:14:38.923 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
+2025-08-16 08:14:38.931 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
+2025-08-16 08:14:38.947 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
+2025-08-16 08:14:38.966 | INFO     | app.services.quality_gate.quality_gate_core:__init__:34 | Quality Gate Service initialized
+2025-08-16 08:14:38.967 | INFO     | app.services.quality_monitoring.service:__init__:48 | Quality Monitoring Service initialized
+2025-08-16 08:14:38.967 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
+ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py'.
+app\tests\conftest.py:52: in <module>
+    from app.main import app
+app\main.py:48: in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+app\core\app_factory.py:165: in create_app
+    register_api_routes(app)
+app\core\app_factory.py:77: in register_api_routes
+    _import_and_register_routes(app)
+app\core\app_factory.py:82: in _import_and_register_routes
+    route_modules = _import_route_modules()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+app\core\app_factory.py:101: in _import_route_modules
+    from app.routes.github_analyzer import router as github_analyzer_router
+app\routes\github_analyzer.py:18: in <module>
+    from app.schemas.auth import User
+E   ModuleNotFoundError: No module named 'app.schemas.auth'
+--- Logging error in Loguru Handler #1 ---
+Record was: {'elapsed': datetime.timedelta(seconds=2, microseconds=598323), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=38168, name='MainProcess'), 'thread': (id=14580, name='MainThread'), 'time': datetime(2025, 8, 16, 8, 14, 39, 358331, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
+Traceback (most recent call last):
+  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
+    self._sink.write(message)
+  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_simple_sinks.py", line 16, in write
+    self._stream.write(message)
+ValueError: I/O operation on closed file.
+--- End of logging error ---
 
-================================== FAILURES ===================================
-[31m[1m_________________________ test_health_endpoint_direct _________________________[0m
-  + Exception Group Traceback (most recent call last):
-  |   File "C:\Users\antho\miniconda3\Lib\site-packages\starlette\_utils.py", line 77, in collapse_excgroups
-  |     yield
-  |   File "C:\Users\antho\miniconda3\Lib\site-packages\starlette\middleware\base.py", line 183, in __call__
-  |     async with anyio.create_task_group() as task_group:
-  |   File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\anyio\_backends\_asyncio.py", line 772, in __aexit__
-  |     raise BaseExceptionGroup(
-  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
-  +-+---------------- 1 ----------------
-    | Traceback (most recent call last):
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\runner.py", line 344, in from_call
-    |     result: TResult | None = func()
-    |                              ^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\runner.py", line 246, in <lambda>
-    |     lambda: runtest_hook(item=item, **kwds), when=when, reraise=reraise
-    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
-    |     return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
-    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
-    |     return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
-    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 167, in _multicall
-    |     raise exception
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 139, in _multicall
-    |     teardown.throw(exception)
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\logging.py", line 850, in pytest_runtest_call
-    |     yield
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 139, in _multicall
-    |     teardown.throw(exception)
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\capture.py", line 900, in pytest_runtest_call
-    |     return (yield)
-    |             ^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 139, in _multicall
-    |     teardown.throw(exception)
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 53, in run_old_style_hookwrapper
-    |     return result.get_result()
-    |            ^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_result.py", line 103, in get_result
-    |     raise exc.with_traceback(tb)
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 38, in run_old_style_hookwrapper
-    |     res = yield
-    |           ^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 139, in _multicall
-    |     teardown.throw(exception)
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 53, in run_old_style_hookwrapper
-    |     return result.get_result()
-    |            ^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_result.py", line 103, in get_result
-    |     raise exc.with_traceback(tb)
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 38, in run_old_style_hookwrapper
-    |     res = yield
-    |           ^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 139, in _multicall
-    |     teardown.throw(exception)
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\skipping.py", line 263, in pytest_runtest_call
-    |     return (yield)
-    |             ^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
-    |     res = hook_impl.function(*args)
-    |           ^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\runner.py", line 178, in pytest_runtest_call
-    |     item.runtest()
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\python.py", line 1671, in runtest
-    |     self.ihook.pytest_pyfunc_call(pyfuncitem=self)
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
-    |     return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
-    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
-    |     return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
-    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 167, in _multicall
-    |     raise exception
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 139, in _multicall
-    |     teardown.throw(exception)
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 53, in run_old_style_hookwrapper
-    |     return result.get_result()
-    |            ^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_result.py", line 103, in get_result
-    |     raise exc.with_traceback(tb)
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 38, in run_old_style_hookwrapper
-    |     res = yield
-    |           ^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
-    |     res = hook_impl.function(*args)
-    |           ^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\_pytest\python.py", line 157, in pytest_pyfunc_call
-    |     result = testfunction(**testargs)
-    |              ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\routes\test_health_route.py", line 40, in test_health_endpoint_direct
-    |     response = client.get("/health/live")
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\starlette\testclient.py", line 479, in get
-    |     return super().get(
-    |            ^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\httpx\_client.py", line 1053, in get
-    |     return self.request(
-    |            ^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\starlette\testclient.py", line 451, in request
-    |     return super().request(
-    |            ^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\httpx\_client.py", line 825, in request
-    |     return self.send(request, auth=auth, follow_redirects=follow_redirects)
-    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\httpx\_client.py", line 914, in send
-    |     response = self._send_handling_auth(
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\httpx\_client.py", line 942, in _send_handling_auth
-    |     response = self._send_handling_redirects(
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\Users\antho\miniconda3\Lib\site-packages\httpx\_client.py", line 979, in _send_handling_redirects
-    |     response = self._send_single_request(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "C:\U...(truncated)
 ```
 
 ### Frontend Output
 ```
 
 ```
-
-## Error Summary
-
-### Backend Errors
-- app/tests/routes/test_health_route.py::test_health_endpoint_direct [31mFAILED[0m[31m [ 28%][0m
-- 2025-08-15 23:52:08.448 | ERROR    | app.core.error_handlers:_handle_unknown_exception:222 | Unhandled exception: 'NoneType' object has no attribute 'encode'
-- [31mFAILED[0m app/tests/routes/test_health_route.py::[1mtest_health_endpoint_direct[0m - AttributeError: 'NoneType' object has no attribute 'encode'
-- [FAIL] TESTS FAILED with exit code 1 after 6.72s
-
-
 ---
 *Generated by Netra AI Unified Test Runner v3.0*

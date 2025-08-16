@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
-import type { MediumLayerProps } from '@/types/unified-chat';
+import type { MediumLayerProps } from '@/types/component-props';
 
 export const MediumLayer: React.FC<MediumLayerProps> = ({ data }) => {
   const [displayedContent, setDisplayedContent] = useState('');
@@ -12,65 +12,15 @@ export const MediumLayer: React.FC<MediumLayerProps> = ({ data }) => {
   const animationFrameRef = useRef<number>(0);
   const lastUpdateRef = useRef<number>(Date.now());
   
-  // Stream content character by character using requestAnimationFrame
+  // Optimized streaming with 30 chars/sec performance
   useEffect(() => {
-    if (!data?.partialContent) {
-      setDisplayedContent('');
-      contentRef.current = '';
-      return;
-    }
-
-    // If content hasn't changed, don't restart streaming
-    if (contentRef.current === data.partialContent) {
-      return;
-    }
-
-    // New content to stream
-    const targetContent = data.partialContent;
-    let currentIndex = contentRef.current.length;
-    
-    // If new content is shorter, reset (shouldn't happen but handle it)
-    if (targetContent.length < currentIndex) {
-      currentIndex = 0;
-      contentRef.current = '';
-      setDisplayedContent('');
-    }
-    
-    setIsStreaming(true);
-    const charactersPerSecond = 30;
-    const msPerCharacter = 1000 / charactersPerSecond;
-    
-    const streamContent = () => {
-      const now = Date.now();
-      const elapsed = now - lastUpdateRef.current;
-      
-      if (elapsed >= msPerCharacter && currentIndex < targetContent.length) {
-        // Calculate how many characters to add based on elapsed time
-        const charactersToAdd = Math.floor(elapsed / msPerCharacter);
-        const endIndex = Math.min(currentIndex + charactersToAdd, targetContent.length);
-        
-        const newContent = targetContent.substring(0, endIndex);
-        contentRef.current = newContent;
-        setDisplayedContent(newContent);
-        
-        currentIndex = endIndex;
-        lastUpdateRef.current = now;
-      }
-      
-      if (currentIndex < targetContent.length) {
-        animationFrameRef.current = requestAnimationFrame(streamContent);
-      } else {
-        setIsStreaming(false);
-      }
-    };
-    
-    animationFrameRef.current = requestAnimationFrame(streamContent);
-    
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
+    return handleContentStreaming(data?.partialContent, {
+      setDisplayedContent,
+      setIsStreaming,
+      contentRef,
+      animationFrameRef,
+      lastUpdateRef
+    });
   }, [data?.partialContent]);
 
   if (!data) {
@@ -239,4 +189,172 @@ export const MediumLayer: React.FC<MediumLayerProps> = ({ data }) => {
       </div>
     </motion.div>
   );
+};
+
+// ============================================
+// Optimized Streaming Functions (30 chars/sec)
+// ============================================
+
+interface StreamingRefs {
+  setDisplayedContent: (content: string) => void;
+  setIsStreaming: (streaming: boolean) => void;
+  contentRef: React.MutableRefObject<string>;
+  animationFrameRef: React.MutableRefObject<number>;
+  lastUpdateRef: React.MutableRefObject<number>;
+}
+
+const handleContentStreaming = (
+  targetContent: string | undefined,
+  refs: StreamingRefs
+): (() => void) => {
+  if (!targetContent) {
+    resetStreamingState(refs);
+    return () => {};
+  }
+  
+  return initializeStreaming(targetContent, refs);
+};
+
+const resetStreamingState = (refs: StreamingRefs): void => {
+  refs.setDisplayedContent('');
+  refs.contentRef.current = '';
+};
+
+const initializeStreaming = (
+  targetContent: string,
+  refs: StreamingRefs
+): (() => void) => {
+  if (shouldSkipStreaming(targetContent, refs.contentRef)) {
+    return () => {};
+  }
+  
+  const cleanup = startStreamingProcess(targetContent, refs);
+  return cleanup;
+};
+
+const shouldSkipStreaming = (
+  targetContent: string,
+  contentRef: React.MutableRefObject<string>
+): boolean => {
+  // Skip if content hasn't changed
+  if (contentRef.current === targetContent) {
+    return true;
+  }
+  
+  // Reset if content is completely different
+  if (!targetContent.startsWith(contentRef.current) && contentRef.current.length > 0) {
+    contentRef.current = '';
+  }
+  
+  return false;
+};
+
+const startStreamingProcess = (
+  targetContent: string,
+  refs: StreamingRefs
+): (() => void) => {
+  let currentIndex = refs.contentRef.current.length;
+  refs.setIsStreaming(true);
+  
+  const config = getStreamingConfig();
+  refs.lastUpdateRef.current = Date.now();
+  
+  const streamContent = createStreamingFunction(
+    targetContent,
+    refs,
+    config,
+    () => currentIndex,
+    (newIndex) => { currentIndex = newIndex; }
+  );
+  
+  refs.animationFrameRef.current = requestAnimationFrame(streamContent);
+  
+  return createCleanupFunction(refs);
+};
+
+const getStreamingConfig = () => ({
+  charactersPerSecond: 30, // Spec requirement: 30 chars/sec
+  msPerCharacter: 1000 / 30
+});
+
+const createStreamingFunction = (
+  targetContent: string,
+  refs: StreamingRefs,
+  config: { msPerCharacter: number },
+  getCurrentIndex: () => number,
+  setCurrentIndex: (index: number) => void
+) => {
+  const streamContent = (): void => {
+    const { shouldContinue, newIndex } = processStreamingFrame(
+      targetContent,
+      refs,
+      config,
+      getCurrentIndex()
+    );
+    
+    setCurrentIndex(newIndex);
+    
+    if (shouldContinue) {
+      refs.animationFrameRef.current = requestAnimationFrame(streamContent);
+    } else {
+      refs.setIsStreaming(false);
+    }
+  };
+  
+  return streamContent;
+};
+
+const processStreamingFrame = (
+  targetContent: string,
+  refs: StreamingRefs,
+  config: { msPerCharacter: number },
+  currentIndex: number
+): { shouldContinue: boolean; newIndex: number } => {
+  const now = Date.now();
+  const elapsed = now - refs.lastUpdateRef.current;
+  
+  if (elapsed >= config.msPerCharacter && currentIndex < targetContent.length) {
+    const { newContent, endIndex } = calculateStreamingUpdate(
+      targetContent,
+      currentIndex,
+      elapsed,
+      config.msPerCharacter
+    );
+    
+    updateStreamingState(refs, newContent, now);
+    return { shouldContinue: endIndex < targetContent.length, newIndex: endIndex };
+  }
+  
+  return { shouldContinue: currentIndex < targetContent.length, newIndex: currentIndex };
+};
+
+const calculateStreamingUpdate = (
+  targetContent: string,
+  currentIndex: number,
+  elapsed: number,
+  msPerCharacter: number
+): { newContent: string; endIndex: number } => {
+  const charactersToAdd = Math.max(1, Math.floor(elapsed / msPerCharacter));
+  const endIndex = Math.min(currentIndex + charactersToAdd, targetContent.length);
+  const newContent = targetContent.substring(0, endIndex);
+  
+  return { newContent, endIndex };
+};
+
+const updateStreamingState = (
+  refs: StreamingRefs,
+  newContent: string,
+  timestamp: number
+): void => {
+  refs.contentRef.current = newContent;
+  refs.setDisplayedContent(newContent);
+  refs.lastUpdateRef.current = timestamp;
+};
+
+const createCleanupFunction = (refs: StreamingRefs): (() => void) => {
+  return () => {
+    if (refs.animationFrameRef.current) {
+      cancelAnimationFrame(refs.animationFrameRef.current);
+    }
+  };
 };

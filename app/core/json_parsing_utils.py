@@ -15,21 +15,38 @@ def safe_json_parse(value: Any, fallback: Any = None) -> Any:
     if not isinstance(value, str):
         return value
     if not value.strip():
-        return fallback if fallback is not None else {}
+        return fallback if fallback is not None else value
     return _try_json_parse(value, fallback)
 
 
 def _try_json_parse(value: str, fallback: Any) -> Any:
     """Helper to attempt JSON parsing with error handling."""
-    # Check if the string looks like complex descriptive text (contains commas but not JSON-like)
     stripped = value.strip()
+    
+    # Check for command-line style arguments (like --full-scan, --batch-size, etc.)
+    if (stripped.startswith('--') or 
+        ' --' in stripped or 
+        '-' in stripped.split()[0] if stripped.split() else False):
+        logger.debug(f"String appears to be command-line arguments, not JSON: {value[:100]}...")
+        return fallback if fallback is not None else value
+    
+    # Check for key-value pair strings like "workload_type=batch" or "optimization_focus=cost"
+    if ('=' in stripped and 
+        not stripped.startswith(('{', '[', '"')) and 
+        not stripped.endswith(('}', ']', '"')) and
+        not ',' in stripped):
+        # This looks like a single key-value pair, not JSON
+        logger.debug(f"String appears to be key-value pair, not JSON: {value[:100]}...")
+        return fallback if fallback is not None else value
+    
+    # Check if the string looks like complex descriptive text (contains commas but not JSON-like)
     if (',' in stripped and 
         not stripped.startswith(('{', '[', '"')) and 
         not stripped.endswith(('}', ']', '"')) and
         len(stripped.split(',')) > 1):
         # This looks like comma-separated descriptive text, not JSON
         logger.debug(f"String appears to be descriptive text, not JSON: {value[:100]}...")
-        return fallback if fallback is not None else {}
+        return fallback if fallback is not None else value
     
     try:
         parsed = json.loads(value)
@@ -37,7 +54,7 @@ def _try_json_parse(value: str, fallback: Any) -> Any:
         return parsed
     except (json.JSONDecodeError, TypeError) as e:
         logger.warning(f"Failed to parse JSON string: {value[:100]}... Error: {e}")
-        return fallback if fallback is not None else {}
+        return fallback if fallback is not None else value
 
 
 def parse_dict_field(value: Any) -> Dict[str, Any]:
@@ -143,6 +160,8 @@ def comprehensive_json_fix(data: Any) -> Any:
         return _fix_dict_data(data)
     elif isinstance(data, list):
         return [comprehensive_json_fix(item) for item in data]
+    elif isinstance(data, str):
+        return _fix_string_response_to_json(data)
     return data
 
 
@@ -165,4 +184,56 @@ def _handle_json_error(value: str, error: Exception, fallback: Any) -> Any:
     """Helper to handle JSON parsing errors."""
     logger.warning(f"Failed to parse JSON string: {value[:100]}... Error: {error}")
     return fallback if fallback is not None else {}
+
+
+def _fix_string_response_to_json(data: str) -> Dict[str, Any]:
+    """Fix string responses that should be JSON objects."""
+    stripped = data.strip()
+    
+    # If it's command-line arguments, wrap in a result object
+    if stripped.startswith('--') or ' --' in stripped:
+        return {
+            "type": "command_result",
+            "raw_response": stripped,
+            "parsed": False,
+            "message": "Response contains command-line arguments instead of JSON"
+        }
+    
+    # If it's a simple descriptive string, wrap it
+    if not stripped.startswith(('{', '[')):
+        return {
+            "type": "text_response", 
+            "content": stripped,
+            "parsed": False,
+            "message": "Response is plain text instead of JSON"
+        }
+    
+    # Try to parse as JSON, return wrapped version if it fails
+    try:
+        parsed = json.loads(stripped)
+        return parsed if isinstance(parsed, dict) else {"content": parsed}
+    except (json.JSONDecodeError, TypeError):
+        return {
+            "type": "malformed_json",
+            "raw_response": stripped,
+            "parsed": False,
+            "message": "Response contains malformed JSON"
+        }
+
+
+def ensure_agent_response_is_json(response: Any) -> Dict[str, Any]:
+    """Ensure agent response is a proper JSON object."""
+    if isinstance(response, dict):
+        return response
+    elif isinstance(response, str):
+        return _fix_string_response_to_json(response)
+    elif isinstance(response, list):
+        return {"items": response, "type": "list_response"}
+    else:
+        return {
+            "type": "unknown_response",
+            "content": str(response),
+            "parsed": False,
+            "message": f"Response type {type(response)} is not JSON serializable"
+        }
 

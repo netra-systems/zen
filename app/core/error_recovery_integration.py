@@ -20,7 +20,7 @@ from app.core.database_recovery_strategies import database_recovery_registry
 from app.core.error_aggregation_service import error_aggregation_system
 
 # Legacy components for compatibility
-from app.core.agent_recovery_strategies import agent_recovery_registry, AgentType
+from app.core.agent_recovery_strategies_main import agent_recovery_registry, AgentType
 from app.core.error_logging import error_logger
 
 from app.logging_config import central_logger

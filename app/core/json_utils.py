@@ -5,7 +5,7 @@ and other non-JSON-serializable types consistently across the application.
 """
 
 import json
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Union
 from datetime import datetime, date
 from decimal import Decimal
 from uuid import UUID
@@ -43,8 +43,12 @@ def serialize_for_websocket(data: Union[Dict[str, Any], Any]) -> str:
     try:
         return json.dumps(data, cls=DateTimeJSONEncoder, ensure_ascii=False)
     except Exception as e:
-        logger.error(f"Failed to serialize data for WebSocket: {e}")
+        _handle_serialization_error(e)
         raise
+
+def _handle_serialization_error(error: Exception) -> None:
+    """Handle serialization error logging."""
+    logger.error(f"Failed to serialize data for WebSocket: {error}")
 
 
 def prepare_websocket_message(message: Union[Dict[str, Any], Any]) -> Dict[str, Any]:
@@ -58,27 +62,35 @@ def prepare_websocket_message(message: Union[Dict[str, Any], Any]) -> Dict[str, 
     """
     if not isinstance(message, dict):
         return message
-    
+    return _prepare_dict_message(message)
+
+def _prepare_dict_message(message: Dict[str, Any]) -> Dict[str, Any]:
+    """Prepare dictionary message for WebSocket transmission."""
     prepared = {}
     for key, value in message.items():
         prepared[key] = _convert_datetime_fields(value)
-    
     return prepared
 
 
 def _convert_datetime_fields(value: Any) -> Any:
     """Recursively convert datetime fields to ISO strings."""
-    if isinstance(value, datetime):
-        return value.isoformat()
-    elif isinstance(value, date):
+    if isinstance(value, (datetime, date)):
         return value.isoformat()
     elif isinstance(value, dict):
-        return {k: _convert_datetime_fields(v) for k, v in value.items()}
+        return _convert_dict_fields(value)
     elif isinstance(value, list):
-        return [_convert_datetime_fields(item) for item in value]
+        return _convert_list_fields(value)
     elif isinstance(value, (Decimal, UUID)):
         return str(value)
     return value
+
+def _convert_dict_fields(value: Dict[str, Any]) -> Dict[str, Any]:
+    """Convert datetime fields in dictionary."""
+    return {k: _convert_datetime_fields(v) for k, v in value.items()}
+
+def _convert_list_fields(value: List[Any]) -> List[Any]:
+    """Convert datetime fields in list."""
+    return [_convert_datetime_fields(item) for item in value]
 
 
 def safe_json_dumps(data: Any, **kwargs) -> str:
@@ -91,9 +103,13 @@ def safe_json_dumps(data: Any, **kwargs) -> str:
     Returns:
         JSON string
     """
+    _set_default_kwargs(kwargs)
+    return json.dumps(data, **kwargs)
+
+def _set_default_kwargs(kwargs: Dict[str, Any]) -> None:
+    """Set default kwargs for JSON dumps."""
     kwargs.setdefault('cls', DateTimeJSONEncoder)
     kwargs.setdefault('ensure_ascii', False)
-    return json.dumps(data, **kwargs)
 
 
 def validate_json_serializable(data: Any) -> bool:

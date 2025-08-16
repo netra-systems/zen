@@ -7,6 +7,7 @@ Keeps functions under 8 lines and module under 300 lines.
 from typing import Any, Dict
 from app.logging_config import central_logger
 from .models import TriageResult, ExtractedEntities
+from app.core.json_parsing_utils import ensure_agent_response_is_json, comprehensive_json_fix
 
 logger = central_logger.get_logger(__name__)
 
@@ -31,21 +32,27 @@ class TriageResultProcessor:
         elif isinstance(result, dict):
             return self._convert_dict_to_triage_result(result)
         else:
-            return self._create_fallback_triage_result()
+            # Fix non-JSON responses before processing
+            fixed_result = ensure_agent_response_is_json(result)
+            return self._convert_dict_to_triage_result(fixed_result)
     
     def _convert_dict_to_triage_result(self, result_dict: dict) -> TriageResult:
         """Convert dictionary to TriageResult with error handling."""
         try:
-            return TriageResult(**result_dict)
+            # Apply comprehensive JSON fixes first
+            fixed_dict = comprehensive_json_fix(result_dict)
+            return TriageResult(**fixed_dict)
         except Exception as e:
             logger.warning(f"Failed to convert dict to TriageResult: {e}")
             return self._create_fallback_triage_result()
     
     def _create_fallback_triage_result(self) -> TriageResult:
         """Create fallback TriageResult with default values."""
+        from .models import TriageMetadata
         return TriageResult(
             category="unknown",
-            confidence_score=0.5
+            confidence_score=0.5,
+            metadata=TriageMetadata(triage_duration_ms=0, fallback_used=True)
         )
     
     def enrich_triage_result(self, triage_result: Any, user_request: str) -> TriageResult:
@@ -170,14 +177,16 @@ class TriageResultProcessor:
     
     def create_error_result(self, error_message: str, error_type: str = "processing_error") -> TriageResult:
         """Create standardized error result."""
+        from .models import TriageMetadata
         return TriageResult(
             category="Error",
             confidence_score=0.0,
             error_message=error_message,
-            metadata={
-                "error_type": error_type,
-                "fallback_used": True
-            }
+            metadata=TriageMetadata(
+                triage_duration_ms=0,
+                fallback_used=True,
+                error_details=error_type
+            )
         )
     
     def merge_results(self, primary: TriageResult, fallback: TriageResult) -> TriageResult:

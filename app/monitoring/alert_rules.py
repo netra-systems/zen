@@ -16,7 +16,12 @@ logger = central_logger.get_logger(__name__)
 
 def create_default_alert_rules() -> Dict[str, AlertRule]:
     """Create default alert rules for common scenarios."""
-    default_rules = [
+    default_rules = _get_all_default_rules()
+    return {rule.rule_id: rule for rule in default_rules}
+
+def _get_all_default_rules() -> List[AlertRule]:
+    """Get list of all default alert rules."""
+    return [
         _create_high_error_rate_rule(),
         _create_critical_error_rate_rule(),
         _create_timeout_spike_rule(),
@@ -24,8 +29,6 @@ def create_default_alert_rules() -> Dict[str, AlertRule]:
         _create_validation_error_spike_rule(),
         _create_system_failure_rate_rule()
     ]
-    
-    return {rule.rule_id: rule for rule in default_rules}
 
 
 def _create_high_error_rate_rule() -> AlertRule:
@@ -36,7 +39,7 @@ def _create_high_error_rate_rule() -> AlertRule:
         description="Agent error rate exceeds threshold",
         condition="error_rate > threshold_value",
         level=AlertLevel.ERROR,
-        threshold_value=0.2,  # 20% error rate
+        threshold_value=0.2,
         time_window_minutes=5,
         channels=[NotificationChannel.LOG, NotificationChannel.SLACK]
     )
@@ -44,16 +47,35 @@ def _create_high_error_rate_rule() -> AlertRule:
 
 def _create_critical_error_rate_rule() -> AlertRule:
     """Create critical error rate alert rule."""
+    channels = _get_critical_channels()
     return AlertRule(
         rule_id="agent_critical_error_rate",
         name="Critical Agent Error Rate",
         description="Agent error rate critically high",
         condition="error_rate > threshold_value",
         level=AlertLevel.CRITICAL,
-        threshold_value=0.5,  # 50% error rate
+        threshold_value=0.5,
         time_window_minutes=3,
-        channels=[NotificationChannel.LOG, NotificationChannel.EMAIL, NotificationChannel.SLACK]
+        channels=channels
     )
+
+def _get_critical_channels() -> List[NotificationChannel]:
+    """Get notification channels for critical alerts."""
+    return [NotificationChannel.LOG, NotificationChannel.EMAIL, NotificationChannel.SLACK]
+
+def _create_base_rule_config() -> Dict[str, Any]:
+    """Create base rule configuration."""
+    return {
+        "time_window_minutes": 5,
+        "channels": [NotificationChannel.LOG]
+    }
+
+def _create_error_rule_config() -> Dict[str, Any]:
+    """Create error-level rule configuration."""
+    return {
+        "time_window_minutes": 5,
+        "channels": [NotificationChannel.LOG, NotificationChannel.SLACK]
+    }
 
 
 def _create_timeout_spike_rule() -> AlertRule:
@@ -64,7 +86,7 @@ def _create_timeout_spike_rule() -> AlertRule:
         description="High number of agent timeouts",
         condition="timeout_count > threshold_value",
         level=AlertLevel.WARNING,
-        threshold_value=5,  # 5 timeouts in window
+        threshold_value=5,
         time_window_minutes=5,
         channels=[NotificationChannel.LOG]
     )
@@ -78,7 +100,7 @@ def _create_high_execution_time_rule() -> AlertRule:
         description="Average execution time exceeds threshold",
         condition="avg_execution_time_ms > threshold_value",
         level=AlertLevel.WARNING,
-        threshold_value=30000,  # 30 seconds
+        threshold_value=30000,
         time_window_minutes=10,
         channels=[NotificationChannel.LOG]
     )
@@ -92,7 +114,7 @@ def _create_validation_error_spike_rule() -> AlertRule:
         description="High number of validation errors",
         condition="validation_error_count > threshold_value",
         level=AlertLevel.ERROR,
-        threshold_value=10,  # 10 validation errors
+        threshold_value=10,
         time_window_minutes=5,
         channels=[NotificationChannel.LOG, NotificationChannel.SLACK]
     )
@@ -100,15 +122,16 @@ def _create_validation_error_spike_rule() -> AlertRule:
 
 def _create_system_failure_rate_rule() -> AlertRule:
     """Create system-wide failure rate alert rule."""
+    channels = _get_critical_channels()
     return AlertRule(
         rule_id="system_wide_failure_rate",
         name="System-wide High Failure Rate",
         description="Overall system failure rate is high",
         condition="system_error_rate > threshold_value",
         level=AlertLevel.CRITICAL,
-        threshold_value=0.3,  # 30% system-wide error rate
+        threshold_value=0.3,
         time_window_minutes=5,
-        channels=[NotificationChannel.LOG, NotificationChannel.EMAIL, NotificationChannel.SLACK]
+        channels=channels
     )
 
 
@@ -117,48 +140,54 @@ class RuleEvaluator:
     
     def evaluate_system_condition(self, rule: AlertRule, metrics_data: Dict[str, Any]) -> bool:
         """Evaluate system-wide condition."""
-        threshold_value = rule.threshold_value
-        
         if rule.rule_id == "system_wide_failure_rate":
-            system_error_rate = metrics_data.get("system_error_rate", 0.0)
-            return system_error_rate > threshold_value
-        
+            return self._check_system_failure_rate(rule, metrics_data)
         return False
+
+    def _check_system_failure_rate(self, rule: AlertRule, metrics_data: Dict[str, Any]) -> bool:
+        """Check system failure rate against threshold."""
+        system_error_rate = metrics_data.get("system_error_rate", 0.0)
+        return system_error_rate > rule.threshold_value
     
     def evaluate_agent_condition(self, rule: AlertRule, metrics_data: Dict[str, Any]) -> bool:
         """Evaluate agent-specific condition."""
         agent_metrics = metrics_data.get("agent_metrics", {})
-        threshold_value = rule.threshold_value
         
-        # Check each agent
         for agent_name, metrics in agent_metrics.items():
-            if self._check_agent_against_rule(rule, metrics, threshold_value):
+            if self._check_agent_against_rule(rule, metrics, rule.threshold_value):
                 return True
         
         return False
     
     def _check_agent_against_rule(self, rule: AlertRule, metrics: AgentMetrics, threshold: float) -> bool:
         """Check if individual agent metrics trigger the rule."""
-        rule_mapping = {
+        rule_mapping = self._get_rule_mapping(metrics, threshold)
+        return rule_mapping.get(rule.rule_id, False)
+
+    def _get_rule_mapping(self, metrics: AgentMetrics, threshold: float) -> Dict[str, bool]:
+        """Get rule mapping for agent metrics."""
+        return {
             "agent_high_error_rate": metrics.error_rate > threshold,
             "agent_critical_error_rate": metrics.error_rate > threshold,
             "agent_timeout_spike": metrics.timeout_count > threshold,
             "agent_avg_execution_time_high": metrics.avg_execution_time_ms > threshold,
             "agent_validation_error_spike": metrics.validation_error_count > threshold
         }
-        
-        return rule_mapping.get(rule.rule_id, False)
     
     def get_metric_value_for_rule(self, rule_id: str, metrics: AgentMetrics) -> float:
         """Get specific metric value for rule."""
-        mapping = {
+        mapping = self._get_metric_value_mapping(metrics)
+        return mapping.get(rule_id, 0.0)
+
+    def _get_metric_value_mapping(self, metrics: AgentMetrics) -> Dict[str, float]:
+        """Get metric value mapping for agent metrics."""
+        return {
             "agent_high_error_rate": metrics.error_rate,
             "agent_critical_error_rate": metrics.error_rate,
             "agent_timeout_spike": float(metrics.timeout_count),
             "agent_avg_execution_time_high": metrics.avg_execution_time_ms,
             "agent_validation_error_spike": float(metrics.validation_error_count)
         }
-        return mapping.get(rule_id, 0.0)
 
 
 class CooldownManager:
@@ -173,9 +202,12 @@ class CooldownManager:
         if rule_id not in self.cooldown_tracker:
             return False
         
+        return self._check_cooldown_duration(rule_id, rule)
+
+    def _check_cooldown_duration(self, rule_id: str, rule: AlertRule) -> bool:
+        """Check if cooldown duration has elapsed."""
         last_triggered = self.cooldown_tracker[rule_id]
         cooldown_duration = timedelta(minutes=rule.cooldown_minutes)
-        
         return datetime.now(UTC) - last_triggered < cooldown_duration
     
     def set_cooldown(self, rule_id: str) -> None:

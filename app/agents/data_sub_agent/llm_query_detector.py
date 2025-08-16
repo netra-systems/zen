@@ -172,11 +172,8 @@ class LLMQueryDetector:
             
             # Only fix metrics table arrays
             if table == 'metrics':
-                # For metrics.value, cast to Float64 to ensure type consistency
-                if field == 'value':
-                    return f"toFloat64OrZero(arrayElement({table}.{field}, {index}))"
-                else:
-                    return f"arrayElement({table}.{field}, {index})"
+                # metrics.value is already Float64 in ClickHouse Nested structure
+                return f"arrayElement({table}.{field}, {index})"
             return match.group(0)
         
         return re.sub(pattern, replace_func, query)

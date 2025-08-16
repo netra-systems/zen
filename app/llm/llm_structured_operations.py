@@ -10,6 +10,7 @@ from app.llm.llm_response_processing import (
     create_structured_cache_key, get_cached_structured_response,
     cache_structured_response, should_cache_structured_response
 )
+from app.core.json_parsing_utils import ensure_agent_response_is_json
 from app.schemas.llm_config_types import LLMConfig as GenerationConfig
 from app.logging_config import central_logger
 
@@ -85,7 +86,9 @@ class LLMStructuredOperations:
         logger.error(f"Structured generation failed: {original_error}")
         try:
             text_response = await self.core.ask_llm(prompt, llm_config_name, use_cache)
-            return attempt_json_fallback_parse(text_response, schema)
+            # Ensure response is proper JSON before parsing
+            json_response = ensure_agent_response_is_json(text_response)
+            return schema(**json_response)
         except Exception as parse_error:
             logger.error(f"Fallback parsing also failed: {parse_error}")
             raise original_error

@@ -8,7 +8,7 @@
  * @compliance type_safety.xml - Strongly typed state machine
  */
 
-import { WebSocketStatus } from '@/services/webSocketService';
+import { WebSocketStatus } from '../services/webSocketService';
 import {
   ChatLoadingState,
   WebSocketConnectionState,
@@ -17,7 +17,7 @@ import {
   ChatStateContext,
   LoadingStateResult,
   StateTransitionResult
-} from '@/types/loading-state';
+} from '../types/loading-state';
 
 /**
  * Creates WebSocket connection state from status

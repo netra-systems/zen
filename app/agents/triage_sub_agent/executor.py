@@ -103,8 +103,12 @@ class TriageExecutor:
     
     def _create_default_triage_result(self):
         """Create default TriageResult for error cases."""
-        from .models import TriageResult
-        return TriageResult(category="unknown", confidence_score=0.5)
+        from .models import TriageResult, TriageMetadata
+        return TriageResult(
+            category="unknown", 
+            confidence_score=0.5,
+            metadata=TriageMetadata(triage_duration_ms=0, fallback_used=True)
+        )
     
     async def _handle_fallback_result(
         self, state: DeepAgentState, run_id: str, stream_updates: bool
@@ -227,9 +231,10 @@ class TriageExecutor:
     
     def _create_validation_error_result(self, validation):
         """Create validation error result."""
-        from .models import TriageResult
+        from .models import TriageResult, TriageMetadata
         return TriageResult(
             category="Validation Error",
             confidence_score=0.0,
-            validation_status=validation
+            validation_status=validation,
+            metadata=TriageMetadata(triage_duration_ms=0, fallback_used=True)
         )

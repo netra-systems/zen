@@ -11,7 +11,10 @@ from app.logging_config import central_logger as logger
 
 def _create_array_replacement(field_path: str, index_expr: str) -> str:
     """Create appropriate replacement for array access."""
-    if field_path.startswith(('metrics.', 'data.')):
+    if field_path == 'metrics.value':
+        # metrics.value is already Float64 in ClickHouse Nested structure
+        return f"arrayElement({field_path}, {index_expr})"
+    elif field_path.startswith(('metrics.', 'data.')):
         return f"toFloat64OrZero(arrayElement({field_path}, {index_expr}))"
     return f"arrayElement({field_path}, {index_expr})"
 
@@ -35,8 +38,14 @@ def _log_query_fix(query: str, fixed_query: str):
 
 def fix_clickhouse_array_syntax(query: str) -> str:
     """Fix ClickHouse queries with incorrect array indexing syntax."""
+    # First fix the special case of toFloat64OrZero(metrics.value[idx])
+    special_pattern = r'toFloat64OrZero\(\s*metrics\.value\[([^\]]+)\]\s*\)'
+    fixed_query = re.sub(special_pattern, r'arrayElement(metrics.value, \1)', query)
+    
+    # Then fix regular array access patterns
     pattern = _get_array_pattern()
-    fixed_query = re.sub(pattern, _replace_array_access, query)
+    fixed_query = re.sub(pattern, _replace_array_access, fixed_query)
+    
     if fixed_query != query:
         _log_query_fix(query, fixed_query)
     return fixed_query

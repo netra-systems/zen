@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <name>AI Factory Status Report</name>
+    <version>1.0.0</version>
+    <description>Automated productivity tracking and reporting system based on git commit history</description>
+    <category>monitoring</category>
+    <priority>high</priority>
+    <created>2025-08-16</created>
+  </metadata>
+
+  <purpose>
+    <primary>Track AI development productivity through git commit analysis</primary>
+    <goals>
+      <goal>Measure development velocity and trends</goal>
+      <goal>Identify feature additions and modifications</goal>
+      <goal>Track code quality metrics from commits</goal>
+      <goal>Provide actionable insights for team productivity</goal>
+      <goal>Automate reporting with hourly updates</goal>
+    </goals>
+  </purpose>
+
+  <architecture>
+    <modules>
+      <module name="git_analyzer" max_lines="300">
+        <responsibility>Extract and parse git commit history</responsibility>
+        <submodules>
+          <submodule name="commit_parser" max_lines="300">
+            <function>Parse commit messages for semantic meaning</function>
+          </submodule>
+          <submodule name="diff_analyzer" max_lines="300">
+            <function>Analyze code changes and calculate metrics</function>
+          </submodule>
+          <submodule name="branch_tracker" max_lines="300">
+            <function>Track branch activity and merge patterns</function>
+          </submodule>
+        </submodules>
+      </module>
+      
+      <module name="metrics_calculator" max_lines="300">
+        <responsibility>Calculate productivity metrics from git data</responsibility>
+        <submodules>
+          <submodule name="velocity_metrics" max_lines="300">
+            <function>Calculate commit velocity and trends</function>
+          </submodule>
+          <submodule name="impact_metrics" max_lines="300">
+            <function>Measure code impact and complexity</function>
+          </submodule>
+          <submodule name="quality_metrics" max_lines="300">
+            <function>Assess code quality indicators</function>
+          </submodule>
+        </submodules>
+      </module>
+      
+      <module name="report_generator" max_lines="300">
+        <responsibility>Generate formatted status reports</responsibility>
+        <submodules>
+          <submodule name="report_formatter" max_lines="300">
+            <function>Format metrics into readable reports</function>
+          </submodule>
+          <submodule name="trend_analyzer" max_lines="300">
+            <function>Identify and highlight trends</function>
+          </submodule>
+          <submodule name="alert_generator" max_lines="300">
+            <function>Generate alerts for anomalies</function>
+          </submodule>
+        </submodules>
+      </module>
+      
+      <module name="storage_manager" max_lines="300">
+        <responsibility>Store and retrieve historical report data</responsibility>
+        <submodules>
+          <submodule name="report_cache" max_lines="300">
+            <function>Cache recent reports for quick access</function>
+          </submodule>
+          <submodule name="history_storage" max_lines="300">
+            <function>Store long-term historical data</function>
+          </submodule>
+        </submodules>
+      </module>
+    </modules>
+  </architecture>
+
+  <metrics>
+    <metric_category name="velocity">
+      <metric name="commits_per_hour">
+        <description>Number of commits in the last hour</description>
+        <calculation>Count commits with timestamp within last 60 minutes</calculation>
+      </metric>
+      <metric name="commits_per_day">
+        <description>Daily commit average over last 7 days</description>
+        <calculation>Sum commits last 7 days / 7</calculation>
+      </metric>
+      <metric name="commit_frequency_trend">
+        <description>Trend direction of commit frequency</description>
+        <calculation>Linear regression on hourly commit counts</calculation>
+      </metric>
+    </metric_category>
+    
+    <metric_category name="impact">
+      <metric name="lines_changed">
+        <description>Total lines added/removed</description>
+        <calculation>Sum of additions and deletions from diffs</calculation>
+      </metric>
+      <metric name="files_modified">
+        <description>Number of unique files changed</description>
+        <calculation>Count distinct file paths in commits</calculation>
+      </metric>
+      <metric name="modules_affected">
+        <description>Number of modules with changes</description>
+        <calculation>Count distinct top-level directories</calculation>
+      </metric>
+    </metric_category>
+    
+    <metric_category name="features">
+      <metric name="features_added">
+        <description>New features identified from commits</description>
+        <detection>Pattern match: "feat:", "feature:", "add:", "new:"</detection>
+      </metric>
+      <metric name="bugs_fixed">
+        <description>Bug fixes identified from commits</description>
+        <detection>Pattern match: "fix:", "bugfix:", "fixed:"</detection>
+      </metric>
+      <metric name="refactoring_count">
+        <description>Refactoring activities</description>
+        <detection>Pattern match: "refactor:", "cleanup:", "reorganize:"</detection>
+      </metric>
+    </metric_category>
+    
+    <metric_category name="quality">
+      <metric name="test_coverage_commits">
+        <description>Commits affecting test files</description>
+        <calculation>Count commits modifying test_*.py or *.test.ts files</calculation>
+      </metric>
+      <metric name="documentation_updates">
+        <description>Documentation improvements</description>
+        <calculation>Count commits modifying *.md or SPEC/*.xml files</calculation>
+      </metric>
+      <metric name="compliance_violations">
+        <description>Files exceeding 300 lines or functions exceeding 8 lines</description>
+        <calculation>Run architecture compliance check on changed files</calculation>
+      </metric>
+    </metric_category>
+  </metrics>
+
+  <report_format>
+    <section name="executive_summary">
+      <content>High-level productivity snapshot</content>
+      <fields>
+        <field>Report timestamp</field>
+        <field>Overall productivity score (0-100)</field>
+        <field>Key highlights (top 3 achievements)</field>
+        <field>Action items (if any)</field>
+      </fields>
+    </section>
+    
+    <section name="velocity_metrics">
+      <content>Development speed and trends</content>
+      <visualization>Time series chart of commits</visualization>
+      <fields>
+        <field>Current velocity vs average</field>
+        <field>Trend direction with percentage</field>
+        <field>Peak activity periods</field>
+      </fields>
+    </section>
+    
+    <section name="feature_progress">
+      <content>Features and improvements delivered</content>
+      <visualization>Stacked bar chart by category</visualization>
+      <fields>
+        <field>Features added (count and list)</field>
+        <field>Bugs fixed (count and list)</field>
+        <field>Refactoring completed</field>
+      </fields>
+    </section>
+    
+    <section name="code_impact">
+      <content>Scope and scale of changes</content>
+      <visualization>Heatmap of module changes</visualization>
+      <fields>
+        <field>Lines of code changed</field>
+        <field>Files modified</field>
+        <field>Modules affected</field>
+      </fields>
+    </section>
+    
+    <section name="quality_indicators">
+      <content>Code quality and maintenance</content>
+      <fields>
+        <field>Test coverage changes</field>
+        <field>Documentation updates</field>
+        <field>Architecture compliance status</field>
+      </fields>
+    </section>
+  </report_format>
+
+  <automation>
+    <github_action>
+      <name>ai-factory-status-report</name>
+      <schedule>
+        <cron>0 * * * *</cron>
+        <description>Run every hour</description>
+      </schedule>
+      <triggers>
+        <trigger>schedule</trigger>
+        <trigger>workflow_dispatch</trigger>
+        <trigger>push to main branch</trigger>
+      </triggers>
+      <steps>
+        <step>Checkout repository with full history</step>
+        <step>Run git analyzer</step>
+        <step>Calculate metrics</step>
+        <step>Generate report</step>
+        <step>Store in database</step>
+        <step>Send notifications if needed</step>
+        <step>Update dashboard</step>
+      </steps>
+    </github_action>
+  </automation>
+
+  <api_endpoints>
+    <endpoint method="GET" path="/api/factory-status/latest">
+      <description>Get the latest status report</description>
+      <response>Complete report in JSON format</response>
+    </endpoint>
+    
+    <endpoint method="GET" path="/api/factory-status/history">
+      <description>Get historical reports</description>
+      <parameters>
+        <param name="start_date">Start date for history</param>
+        <param name="end_date">End date for history</param>
+        <param name="interval">hourly|daily|weekly</param>
+      </parameters>
+      <response>Array of reports</response>
+    </endpoint>
+    
+    <endpoint method="GET" path="/api/factory-status/metrics/{metric_name}">
+      <description>Get specific metric time series</description>
+      <response>Time series data for the metric</response>
+    </endpoint>
+    
+    <endpoint method="POST" path="/api/factory-status/generate">
+      <description>Trigger manual report generation</description>
+      <response>New report or status</response>
+    </endpoint>
+  </api_endpoints>
+
+  <data_storage>
+    <cache>
+      <type>Redis</type>
+      <ttl>3600</ttl>
+      <keys>
+        <key>factory_status:latest</key>
+        <key>factory_status:metrics:{metric_name}</key>
+        <key>factory_status:history:{date}</key>
+      </keys>
+    </cache>
+    
+    <database>
+      <table name="factory_status_reports">
+        <columns>
+          <column name="id" type="UUID" primary="true"/>
+          <column name="timestamp" type="TIMESTAMP"/>
+          <column name="report_data" type="JSONB"/>
+          <column name="metrics_summary" type="JSONB"/>
+          <column name="created_at" type="TIMESTAMP"/>
+        </columns>
+      </table>
+      
+      <table name="factory_status_metrics">
+        <columns>
+          <column name="id" type="UUID" primary="true"/>
+          <column name="metric_name" type="VARCHAR(100)"/>
+          <column name="metric_value" type="FLOAT"/>
+          <column name="timestamp" type="TIMESTAMP"/>
+          <column name="metadata" type="JSONB"/>
+        </columns>
+      </table>
+    </database>
+  </data_storage>
+
+  <notifications>
+    <alert_conditions>
+      <condition name="low_velocity">
+        <trigger>commits_per_day less than 5</trigger>
+        <severity>warning</severity>
+      </condition>
+      <condition name="no_activity">
+        <trigger>commits_per_hour equals 0 for 3 consecutive hours</trigger>
+        <severity>info</severity>
+      </condition>
+      <condition name="compliance_violation">
+        <trigger>compliance_violations greater than 0</trigger>
+        <severity>error</severity>
+      </condition>
+      <condition name="high_bug_rate">
+        <trigger>bugs_fixed greater than features_added</trigger>
+        <severity>warning</severity>
+      </condition>
+    </alert_conditions>
+  </notifications>
+
+  <testing_requirements>
+    <unit_tests>
+      <test>Test commit parsing with various formats</test>
+      <test>Test metric calculations with edge cases</test>
+      <test>Test report generation with different data sets</test>
+      <test>Test cache operations</test>
+      <test>Test database operations</test>
+    </unit_tests>
+    
+    <integration_tests>
+      <test>Test full workflow from git analysis to report</test>
+      <test>Test API endpoints with real data</test>
+      <test>Test GitHub Action workflow</test>
+      <test>Test notification system</test>
+    </integration_tests>
+    
+    <performance_tests>
+      <test>Test with large repository (10000+ commits)</test>
+      <test>Test concurrent report generation</test>
+      <test>Test cache performance under load</test>
+    </performance_tests>
+  </testing_requirements>
+
+  <security_considerations>
+    <consideration>Sanitize git commit messages before display</consideration>
+    <consideration>Rate limit API endpoints</consideration>
+    <consideration>Validate user permissions for sensitive metrics</consideration>
+    <consideration>Encrypt stored report data if contains sensitive info</consideration>
+  </security_considerations>
+
+  <compliance>
+    <rule>All modules must be under 300 lines</rule>
+    <rule>All functions must be under 8 lines</rule>
+    <rule>Use strong typing throughout</rule>
+    <rule>Follow existing patterns in codebase</rule>
+    <rule>Update specs after implementation</rule>
+  </compliance>
+</spec>

@@ -7,8 +7,8 @@
     "warnings": 3,
     "skipped": 0,
     "critical_failures": 0,
-    "total_validation_time_ms": 5988.19,
-    "timestamp": "2025-08-15T23:21:42.932566"
+    "total_validation_time_ms": 5974.39,
+    "timestamp": "2025-08-16T06:39:52.409544"
   },
   "environment_status": {
     "env_files_found": 16,
@@ -47,7 +47,7 @@
         ]
       },
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:38.457857"
+      "timestamp": "2025-08-16T06:39:47.932961"
     },
     {
       "check": "required_env_vars",
@@ -55,7 +55,7 @@
       "message": "All required environment variables present",
       "details": {},
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:38.457857"
+      "timestamp": "2025-08-16T06:39:47.933962"
     },
     {
       "check": "secret_strength",
@@ -63,7 +63,7 @@
       "message": "All secrets meet minimum length requirements",
       "details": {},
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:38.457857"
+      "timestamp": "2025-08-16T06:39:47.933962"
     },
     {
       "check": "postgres_connection",
@@ -72,8 +72,8 @@
       "details": {
         "error_type": "MissingGreenlet"
       },
-      "response_time_ms": 52.544355392456055,
-      "timestamp": "2025-08-15T23:21:38.510402"
+      "response_time_ms": 41.93854331970215,
+      "timestamp": "2025-08-16T06:39:47.975901"
     },
     {
       "check": "clickhouse_connection",
@@ -82,8 +82,8 @@
       "details": {
         "error_type": "UnexpectedPacketFromServerError"
       },
-      "response_time_ms": 400.87223052978516,
-      "timestamp": "2025-08-15T23:21:38.911274"
+      "response_time_ms": 395.9171772003174,
+      "timestamp": "2025-08-16T06:39:48.371818"
     },
     {
       "check": "redis_connection",
@@ -92,8 +92,8 @@
       "details": {
         "error_type": "AuthenticationError"
       },
-      "response_time_ms": 2.5069713592529297,
-      "timestamp": "2025-08-15T23:21:38.913781"
+      "response_time_ms": 6.524562835693359,
+      "timestamp": "2025-08-16T06:39:48.378342"
     },
     {
       "check": "google_oauth",
@@ -103,7 +103,7 @@
         "client_id_prefix": "8405600937..."
       },
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:38.914787"
+      "timestamp": "2025-08-16T06:39:48.378342"
     },
     {
       "check": "gemini_api",
@@ -113,7 +113,7 @@
         "key_prefix": "AIzaSyCb8C..."
       },
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:38.914787"
+      "timestamp": "2025-08-16T06:39:48.378342"
     },
     {
       "check": "langfuse_keys",
@@ -121,7 +121,7 @@
       "message": "Langfuse keys configured",
       "details": {},
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:38.914787"
+      "timestamp": "2025-08-16T06:39:48.378342"
     },
     {
       "check": "port_5433",
@@ -129,7 +129,7 @@
       "message": "PostgreSQL port 5433 is available",
       "details": {},
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:38.916012"
+      "timestamp": "2025-08-16T06:39:48.396149"
     },
     {
       "check": "port_6379",
@@ -137,7 +137,7 @@
       "message": "Redis port 6379 is available",
       "details": {},
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:38.916767"
+      "timestamp": "2025-08-16T06:39:48.396780"
     },
     {
       "check": "port_8000",
@@ -145,7 +145,7 @@
       "message": "Backend API port 8000 is not responding",
       "details": {},
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:40.919385"
+      "timestamp": "2025-08-16T06:39:50.402393"
     },
     {
       "check": "port_3000",
@@ -153,7 +153,7 @@
       "message": "Frontend port 3000 is not responding",
       "details": {},
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:42.931842"
+      "timestamp": "2025-08-16T06:39:52.409544"
     },
     {
       "check": "env_file_security",
@@ -164,7 +164,7 @@
         "risk_level": "HIGH"
       },
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:42.932566"
+      "timestamp": "2025-08-16T06:39:52.409544"
     },
     {
       "check": "fernet_key",
@@ -172,7 +172,7 @@
       "message": "Fernet encryption key properly configured",
       "details": {},
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:42.932566"
+      "timestamp": "2025-08-16T06:39:52.409544"
     },
     {
       "check": "development_security",
@@ -180,7 +180,7 @@
       "message": "Running in development environment",
       "details": {},
       "response_time_ms": 0,
-      "timestamp": "2025-08-15T23:21:42.932566"
+      "timestamp": "2025-08-16T06:39:52.409544"
     }
   ],
   "critical_failures": [],

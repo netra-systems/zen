@@ -9,50 +9,25 @@ This module provides robust fallback mechanisms for LLM failures including:
 """
 
 import asyncio
-import time
-from typing import Optional, Dict, Any, List, TypeVar, Type
-from enum import Enum
-from dataclasses import dataclass
+from typing import Optional, Dict, Any, TypeVar, Type
 from pydantic import BaseModel
 
 from app.logging_config import central_logger
 from app.core.reliability import CircuitBreaker, CircuitBreakerConfig
+from .fallback_strategies import CircuitFallbackStrategy, RetryExecutionStrategy, RetryExecutor
+from .error_classification import ErrorClassificationChain, FailureType
+from .fallback_config import FallbackConfig, RetryHistoryManager
+from .fallback_responses import FallbackResponseFactory, StructuredFallbackBuilder
+from .retry_helpers import (
+    execute_retry_template, create_health_status_base, 
+    add_circuit_breaker_status, add_failure_type_breakdown
+)
 
 logger = central_logger.get_logger(__name__)
 
 T = TypeVar('T', bound=BaseModel)
 
 
-class FailureType(Enum):
-    """Types of LLM failures"""
-    TIMEOUT = "timeout"
-    RATE_LIMIT = "rate_limit" 
-    API_ERROR = "api_error"
-    VALIDATION_ERROR = "validation_error"
-    NETWORK_ERROR = "network_error"
-    AUTHENTICATION_ERROR = "auth_error"
-    UNKNOWN = "unknown"
-
-
-@dataclass
-class FallbackConfig:
-    """Configuration for fallback behavior"""
-    max_retries: int = 3
-    base_delay: float = 1.0
-    max_delay: float = 30.0
-    exponential_base: float = 2.0
-    timeout: float = 60.0
-    use_circuit_breaker: bool = True
-    log_circuit_breaker_warnings: bool = False
-
-
-@dataclass
-class RetryAttempt:
-    """Information about a retry attempt"""
-    attempt_number: int
-    failure_type: FailureType
-    error_message: str
-    timestamp: float
 
 
 class LLMFallbackHandler:
@@ -61,36 +36,10 @@ class LLMFallbackHandler:
     def __init__(self, config: Optional[FallbackConfig] = None):
         self.config = config or FallbackConfig()
         self.circuit_breakers: Dict[str, CircuitBreaker] = {}
-        self.retry_history: List[RetryAttempt] = []
-        self._init_default_responses()
+        self.retry_manager = RetryHistoryManager()
+        self.error_classifier = ErrorClassificationChain()
+        self.response_factory = FallbackResponseFactory()
     
-    def _init_default_responses(self) -> None:
-        """Initialize default response templates"""
-        self.default_responses = {
-            "triage": self._create_triage_response(),
-            "data_analysis": self._create_data_analysis_response(),
-            "general": "I apologize, but I'm experiencing technical difficulties. Please try again in a few moments."
-        }
-    
-    def _create_triage_response(self) -> Dict[str, Any]:
-        """Create default triage response template."""
-        return {
-            "category": "General Inquiry",
-            "confidence_score": 0.5,
-            "priority": "medium",
-            "extracted_entities": {},
-            "tool_recommendations": [],
-            "metadata": {"fallback_used": True}
-        }
-    
-    def _create_data_analysis_response(self) -> Dict[str, Any]:
-        """Create default data analysis response template."""
-        return {
-            "insights": ["Analysis unavailable due to system limitations"],
-            "recommendations": ["Please try again later"],
-            "confidence": 0.3,
-            "metadata": {"fallback_used": True}
-        }
     
     def _get_circuit_breaker(self, provider: str) -> CircuitBreaker:
         """Get or create circuit breaker for provider"""
@@ -115,11 +64,15 @@ class LLMFallbackHandler:
         fallback_type: str = "general"
     ) -> Any:
         """Execute LLM operation with fallback handling"""
+        execution_strategy = self._create_execution_strategy(llm_operation, operation_name, provider, fallback_type)
+        return await execution_strategy.execute()
+    
+    def _create_execution_strategy(self, llm_operation, operation_name: str, provider: str, fallback_type: str):
+        """Create execution strategy based on circuit breaker status."""
         circuit_breaker = self._get_circuit_breaker(provider)
         if self._should_use_circuit_fallback(circuit_breaker, provider, fallback_type):
-            return self._create_fallback_response(fallback_type)
-        return await self._execute_with_retry(llm_operation, operation_name, 
-                                             circuit_breaker, provider, fallback_type)
+            return CircuitFallbackStrategy(self, fallback_type)
+        return RetryExecutionStrategy(self, llm_operation, operation_name, circuit_breaker, provider, fallback_type)
     
     def _should_use_circuit_fallback(self, circuit_breaker: CircuitBreaker, provider: str, fallback_type: str) -> bool:
         """Check if should use circuit fallback with logging."""
@@ -154,25 +107,12 @@ class LLMFallbackHandler:
     async def _execute_with_retry(self, llm_operation, operation_name: str,
                                  circuit_breaker: CircuitBreaker, provider: str, 
                                  fallback_type: str) -> Any:
-        """Execute operation with retry logic."""
-        attempt = 0
-        last_error = None
-        
-        while attempt < self.config.max_retries:
-            try:
-                result = await self._try_operation(llm_operation, circuit_breaker, provider)
-                return result
-            except Exception as e:
-                attempt += 1
-                last_error = e
-                await self._handle_operation_failure(e, attempt, operation_name, circuit_breaker)
-                
-                if attempt < self.config.max_retries:
-                    await self._wait_before_retry(attempt, e, operation_name)
-                else:
-                    logger.error(f"LLM operation {operation_name} failed after {attempt} attempts: {e}")
-        
-        return self._create_fallback_response(fallback_type, last_error)
+        """Execute operation with retry logic using Template Method pattern."""
+        retry_executor = RetryExecutor(self)
+        return await execute_retry_template(
+            self, retry_executor, llm_operation, operation_name, 
+            circuit_breaker, provider, fallback_type
+        )
     
     async def _try_operation(self, llm_operation, circuit_breaker: CircuitBreaker, provider: str) -> Any:
         """Try executing the LLM operation with timeout."""
@@ -215,55 +155,14 @@ class LLMFallbackHandler:
         provider: str = "default"
     ) -> T:
         """Execute structured LLM operation with typed fallback"""
-        async def _operation():
-            return await llm_operation()
-        
-        result = await self.execute_with_fallback(
-            _operation,
-            operation_name,
-            provider,
-            "structured"
-        )
-        
-        if isinstance(result, schema):
-            return result
-        
-        # Create fallback instance with default values
-        return self._create_structured_fallback(schema)
+        result = await self._execute_operation_wrapper(llm_operation, operation_name, provider)
+        return self._validate_or_create_fallback(result, schema)
     
     def _classify_error(self, error: Exception) -> FailureType:
-        """Classify error type for appropriate handling"""
-        if isinstance(error, asyncio.TimeoutError) or "timeout" in str(error).lower():
-            return FailureType.TIMEOUT
-        
-        error_str = str(error).lower()
-        return self._classify_by_error_string(error_str)
+        """Classify error type using Chain of Responsibility pattern."""
+        return self.error_classifier.classify_error(error)
     
-    def _classify_by_error_string(self, error_str: str) -> FailureType:
-        """Classify error by string content."""
-        if "rate limit" in error_str or "429" in error_str:
-            return FailureType.RATE_LIMIT
-        elif self._is_auth_error(error_str):
-            return FailureType.AUTHENTICATION_ERROR
-        elif self._is_network_error(error_str):
-            return FailureType.NETWORK_ERROR
-        elif "validation" in error_str:
-            return FailureType.VALIDATION_ERROR
-        elif self._is_api_error(error_str):
-            return FailureType.API_ERROR
-        return FailureType.UNKNOWN
-    
-    def _is_auth_error(self, error_str: str) -> bool:
-        """Check if error is authentication-related."""
-        return "auth" in error_str or "401" in error_str or "403" in error_str
-    
-    def _is_network_error(self, error_str: str) -> bool:
-        """Check if error is network-related."""
-        return "network" in error_str or "connection" in error_str
-    
-    def _is_api_error(self, error_str: str) -> bool:
-        """Check if error is API-related."""
-        return "api" in error_str or "500" in error_str
+    # Error classification methods removed - now handled by ErrorClassificationChain
     
     def _calculate_delay(self, attempt: int, failure_type: FailureType) -> float:
         """Calculate exponential backoff delay with jitter"""
@@ -293,83 +192,37 @@ class LLMFallbackHandler:
     
     def _record_retry_attempt(self, attempt: int, failure_type: FailureType, error_msg: str) -> None:
         """Record retry attempt for monitoring"""
-        retry_attempt = RetryAttempt(
-            attempt_number=attempt,
-            failure_type=failure_type,
-            error_message=error_msg,
-            timestamp=time.time()
-        )
-        self.retry_history.append(retry_attempt)
-        
-        # Keep only recent history to prevent memory leaks
-        if len(self.retry_history) > 100:
-            self.retry_history = self.retry_history[-50:]
+        self.retry_manager.add_attempt(attempt, failure_type, error_msg)
     
     def _create_fallback_response(self, fallback_type: str, error: Optional[Exception] = None) -> Any:
         """Create appropriate fallback response"""
-        if fallback_type in self.default_responses:
-            response = self.default_responses[fallback_type].copy()
-            if isinstance(response, dict) and "metadata" in response:
-                response["metadata"]["error"] = str(error) if error else "Unknown error"
-                response["metadata"]["timestamp"] = time.time()
-            return response
-        
-        return self.default_responses["general"]
+        return self.response_factory.create_response(fallback_type, error)
     
     def _create_structured_fallback(self, schema: Type[T]) -> T:
-        """Create fallback instance of Pydantic model with safe defaults"""
-        try:
-            # Get model fields and create minimal valid instance
-            field_defaults = {}
-            
-            for field_name, field_info in schema.model_fields.items():
-                if field_info.default is not None:
-                    field_defaults[field_name] = field_info.default
-                elif field_info.annotation == str:
-                    field_defaults[field_name] = "Unavailable due to system error"
-                elif field_info.annotation == int:
-                    field_defaults[field_name] = 0
-                elif field_info.annotation == float:
-                    field_defaults[field_name] = 0.0
-                elif field_info.annotation == bool:
-                    field_defaults[field_name] = False
-                elif hasattr(field_info.annotation, '__origin__') and field_info.annotation.__origin__ == list:
-                    field_defaults[field_name] = []
-                elif hasattr(field_info.annotation, '__origin__') and field_info.annotation.__origin__ == dict:
-                    field_defaults[field_name] = {}
-            
-            return schema(**field_defaults)
-            
-        except Exception as e:
-            logger.error(f"Failed to create structured fallback for {schema.__name__}: {e}")
-            # Last resort: try to create empty instance
-            try:
-                return schema()
-            except Exception:
-                raise ValueError(f"Cannot create fallback instance for {schema.__name__}")
+        """Create fallback instance using Builder pattern."""
+        builder = StructuredFallbackBuilder(schema)
+        return builder.build_field_defaults().build()
+    
+    async def _execute_operation_wrapper(self, llm_operation, operation_name: str, provider: str) -> Any:
+        """Execute operation wrapper for structured fallback."""
+        async def _operation():
+            return await llm_operation()
+        
+        return await self.execute_with_fallback(
+            _operation, operation_name, provider, "structured"
+        )
+    
+    def _validate_or_create_fallback(self, result: Any, schema: Type[T]) -> T:
+        """Validate result or create structured fallback."""
+        if isinstance(result, schema):
+            return result
+        return self._create_structured_fallback(schema)
     
     def get_health_status(self) -> Dict[str, Any]:
-        """Get fallback handler health status"""
-        recent_failures = [
-            attempt for attempt in self.retry_history
-            if time.time() - attempt.timestamp < 300  # Last 5 minutes
-        ]
-        
-        return {
-            "total_retries": len(self.retry_history),
-            "recent_failures": len(recent_failures),
-            "circuit_breakers": {
-                provider: cb.get_status()
-                for provider, cb in self.circuit_breakers.items()
-            },
-            "failure_types": {
-                failure_type.value: len([
-                    a for a in recent_failures 
-                    if a.failure_type == failure_type
-                ])
-                for failure_type in FailureType
-            }
-        }
+        """Get fallback handler health status using composite pattern."""
+        health_status = create_health_status_base(self.retry_manager.retry_history)
+        health_status = add_circuit_breaker_status(health_status, self.circuit_breakers)
+        return add_failure_type_breakdown(health_status, health_status["recent_failure_list"])
     
     def reset_circuit_breakers(self) -> None:
         """Reset all circuit breakers"""

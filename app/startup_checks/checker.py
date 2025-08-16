@@ -22,10 +22,17 @@ class StartupChecker:
     
     def __init__(self, app: FastAPI):
         self.app = app
+        self._initialize_state()
+        self._initialize_checkers(app)
+    
+    def _initialize_state(self) -> None:
+        """Initialize checker state"""
         self.results: List[StartupCheckResult] = []
         self.start_time = time.time()
         self.is_staging = self._is_staging_environment()
-        
+    
+    def _initialize_checkers(self, app: FastAPI) -> None:
+        """Initialize all checker instances"""
         self.env_checker = EnvironmentChecker()
         self.db_checker = DatabaseChecker(app)
         self.service_checker = ServiceChecker(app)
@@ -33,23 +40,51 @@ class StartupChecker:
         
     async def run_all_checks(self) -> Dict[str, Any]:
         """Run all startup checks and return results"""
-        checks = [
+        checks = self._get_check_functions()
+        await self._execute_all_checks(checks)
+        return self._create_final_report()
+    
+    def _get_check_functions(self) -> list:
+        """Get list of all check functions to execute"""
+        core_checks = self._get_core_check_functions()
+        service_checks = self._get_service_check_functions()
+        return core_checks + service_checks
+    
+    def _get_core_check_functions(self) -> list:
+        """Get core environment and system check functions"""
+        return [
             self.env_checker.check_environment_variables,
             self.env_checker.check_configuration,
             self.system_checker.check_file_permissions,
             self.db_checker.check_database_connection,
+        ]
+    
+    def _get_service_check_functions(self) -> list:
+        """Get service and resource check functions"""
+        service_checks = self._get_external_service_checks()
+        system_checks = self._get_system_resource_checks()
+        return service_checks + system_checks
+    
+    def _get_external_service_checks(self) -> list:
+        """Get external service check functions"""
+        return [
             self.service_checker.check_redis,
             self.service_checker.check_clickhouse,
             self.service_checker.check_llm_providers,
+        ]
+    
+    def _get_system_resource_checks(self) -> list:
+        """Get system resource check functions"""
+        return [
             self.system_checker.check_memory_and_resources,
             self.system_checker.check_network_connectivity,
             self.db_checker.check_or_create_assistant,
         ]
-        
+    
+    async def _execute_all_checks(self, checks: list) -> None:
+        """Execute all check functions"""
         for check in checks:
             await self._execute_check(check)
-        
-        return self._create_final_report()
     
     async def _execute_check(self, check_func) -> None:
         """Execute individual check with timing"""

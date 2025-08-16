@@ -45,6 +45,13 @@ from .models_content import (
     Corpus
 )
 
+# Import MCP client models
+from .models_mcp_client import (
+    MCPExternalServer,
+    MCPToolExecution,
+    MCPResourceAccess
+)
+
 # Re-export all models for backward compatibility
 __all__ = [
     # Base class
@@ -78,5 +85,10 @@ __all__ = [
     'Analysis',
     'AnalysisResult',
     'Reference',
-    'Corpus'
+    'Corpus',
+    
+    # MCP Client models
+    'MCPExternalServer',
+    'MCPToolExecution',
+    'MCPResourceAccess'
 ]

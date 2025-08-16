@@ -39,32 +39,53 @@ def _create_email_config() -> NotificationConfig:
     """Create email notification configuration."""
     return NotificationConfig(
         channel=NotificationChannel.EMAIL,
-        enabled=False,  # Disabled by default, needs configuration
+        enabled=False,
         rate_limit_per_hour=20,
         min_level=AlertLevel.ERROR,
-        config={"smtp_server": "", "recipients": []}
+        config=_get_email_default_config()
     )
+
+def _get_email_default_config() -> Dict[str, Any]:
+    """Get default email configuration."""
+    return {"smtp_server": "", "recipients": []}
 
 
 def _create_slack_config() -> NotificationConfig:
     """Create Slack notification configuration."""
     return NotificationConfig(
         channel=NotificationChannel.SLACK,
-        enabled=False,  # Disabled by default, needs configuration
+        enabled=False,
         rate_limit_per_hour=50,
         min_level=AlertLevel.WARNING,
-        config={"webhook_url": "", "channel": "#alerts"}
+        config=_get_slack_default_config()
     )
+
+def _get_slack_default_config() -> Dict[str, Any]:
+    """Get default Slack configuration."""
+    return {"webhook_url": "", "channel": "#alerts"}
 
 
 def _create_webhook_config() -> NotificationConfig:
     """Create webhook notification configuration."""
     return NotificationConfig(
         channel=NotificationChannel.WEBHOOK,
-        enabled=False,  # Disabled by default, needs configuration
+        enabled=False,
         rate_limit_per_hour=100,
         min_level=AlertLevel.WARNING,
-        config={"url": "", "headers": {}}
+        config=_get_webhook_default_config()
+    )
+
+def _get_webhook_default_config() -> Dict[str, Any]:
+    """Get default webhook configuration."""
+    return {"url": "", "headers": {}}
+
+def _create_simple_config(channel: NotificationChannel, enabled: bool, rate_limit: int, level: AlertLevel) -> NotificationConfig:
+    """Create simple notification config."""
+    return NotificationConfig(
+        channel=channel,
+        enabled=enabled,
+        rate_limit_per_hour=rate_limit,
+        min_level=level
     )
 
 
@@ -90,19 +111,18 @@ class RateLimitManager:
         now = datetime.now(UTC)
         hour_ago = now - timedelta(hours=1)
         
+        self._ensure_channel_exists(channel)
+        self._clean_old_entries(channel, hour_ago)
+        return self._check_and_update_limit(channel, config, now)
+
+    def _ensure_channel_exists(self, channel: NotificationChannel) -> None:
+        """Ensure channel exists in rate limits."""
         if channel not in self.notification_rate_limits:
             self.notification_rate_limits[channel] = []
-        
-        # Clean old entries
-        self._clean_old_entries(channel, hour_ago)
-        
-        # Check limit
-        if len(self.notification_rate_limits[channel]) >= config.rate_limit_per_hour:
-            return False
-        
-        # Add current notification
-        self.notification_rate_limits[channel].append(now)
-        return True
+
+    def _is_over_limit(self, channel: NotificationChannel, config: NotificationConfig) -> bool:
+        """Check if channel is over rate limit."""
+        return len(self.notification_rate_limits[channel]) >= config.rate_limit_per_hour
     
     def _clean_old_entries(self, channel: NotificationChannel, cutoff_time: datetime) -> None:
         """Clean old rate limit entries."""
@@ -149,38 +169,59 @@ class NotificationSender:
     
     async def _send_log_notification(self, alert: Alert) -> None:
         """Send notification to log."""
-        log_level_map = {
+        log_level_map = self._get_log_level_mapping()
+        log_func = log_level_map.get(alert.level, logger.info)
+        message = self._format_log_message(alert)
+        log_func(message)
+
+    def _get_log_level_mapping(self) -> Dict[AlertLevel, Callable]:
+        """Get mapping of alert levels to log functions."""
+        return {
             AlertLevel.INFO: logger.info,
             AlertLevel.WARNING: logger.warning,
             AlertLevel.ERROR: logger.error,
             AlertLevel.CRITICAL: logger.critical
         }
-        
-        log_func = log_level_map.get(alert.level, logger.info)
-        log_func(f"ALERT [{alert.level.value.upper()}] {alert.title}: {alert.message}")
+
+    def _format_log_message(self, alert: Alert) -> str:
+        """Format alert message for logging."""
+        return f"ALERT [{alert.level.value.upper()}] {alert.title}: {alert.message}"
     
     async def _send_database_notification(self, alert: Alert) -> None:
         """Store alert in database for audit and analysis."""
         try:
-            from app.db.postgres import get_db_session
-            async with get_db_session() as session:
-                await self._store_alert_in_db(session, alert)
-                await session.commit()
+            await self._store_alert_safely(alert)
             logger.debug(f"Stored alert {alert.alert_id} in database")
         except Exception as e:
             logger.error(f"Failed to store alert {alert.alert_id}: {e}")
+
+    async def _store_alert_safely(self, alert: Alert) -> None:
+        """Store alert in database with session management."""
+        from app.db.postgres import get_db_session
+        async with get_db_session() as session:
+            await self._store_alert_in_db(session, alert)
+            await session.commit()
     
     async def _store_alert_in_db(self, session, alert: Alert) -> None:
         """Store alert record in database."""
         from sqlalchemy import text
-        insert_query = text("""
+        insert_query = self._get_insert_query()
+        alert_data = self._prepare_alert_data(alert)
+        await session.execute(insert_query, alert_data)
+
+    def _get_insert_query(self) -> Any:
+        """Get database insert query for alerts."""
+        from sqlalchemy import text
+        return text("""
             INSERT INTO system_alerts (alert_id, level, title, message, component, 
                                      timestamp, metadata, resolved)
             VALUES (:alert_id, :level, :title, :message, :component, 
                    :timestamp, :metadata, :resolved)
         """)
-        
-        await session.execute(insert_query, {
+
+    def _prepare_alert_data(self, alert: Alert) -> Dict[str, Any]:
+        """Prepare alert data for database insertion."""
+        return {
             'alert_id': alert.alert_id,
             'level': alert.level.value,
             'title': alert.title,
@@ -189,18 +230,25 @@ class NotificationSender:
             'timestamp': alert.timestamp,
             'metadata': str(alert.metadata) if alert.metadata else None,
             'resolved': alert.resolved
-        })
+        }
     
     def track_notification(self, alert: Alert, channel: NotificationChannel) -> None:
         """Track sent notification for audit purposes."""
-        self.notification_history.append({
+        notification_record = self._create_notification_record(alert, channel)
+        self.notification_history.append(notification_record)
+        self._trim_notification_history()
+
+    def _create_notification_record(self, alert: Alert, channel: NotificationChannel) -> Dict[str, Any]:
+        """Create notification record for tracking."""
+        return {
             "alert_id": alert.alert_id,
             "channel": channel.value,
             "timestamp": datetime.now(UTC),
             "level": alert.level.value
-        })
-        
-        # Keep only recent history
+        }
+
+    def _trim_notification_history(self) -> None:
+        """Trim notification history to max size."""
         if len(self.notification_history) > self.max_history_size:
             self.notification_history = self.notification_history[-self.max_history_size:]
 
@@ -221,34 +269,73 @@ class NotificationDeliveryManager:
     ) -> None:
         """Deliver notifications through configured channels."""
         for channel in channels:
-            config = configs.get(channel)
-            
-            if not config or not config.enabled:
-                continue
-            
-            # Check minimum level
-            if self._is_below_min_level(alert.level, config.min_level):
-                continue
-            
-            # Check rate limits
-            if not self.rate_limit_manager.check_rate_limit(channel, config):
-                continue
-            
-            try:
-                await self.notification_sender.send_notification(alert, channel, config)
-                self.notification_sender.track_notification(alert, channel)
-            except Exception as e:
-                logger.error(f"Failed to send notification via {channel.value}: {e}")
+            await self._process_channel_notification(alert, channel, configs)
+
+    def _should_deliver_notification(
+        self, 
+        alert: Alert, 
+        channel: NotificationChannel, 
+        config: Optional[NotificationConfig]
+    ) -> bool:
+        """Check if notification should be delivered."""
+        if not config or not config.enabled:
+            return False
+        
+        if self._is_below_min_level(alert.level, config.min_level):
+            return False
+        
+        return self.rate_limit_manager.check_rate_limit(channel, config)
+
+    async def _send_single_notification(
+        self, 
+        alert: Alert, 
+        channel: NotificationChannel, 
+        config: NotificationConfig
+    ) -> None:
+        """Send single notification with error handling."""
+        try:
+            await self.notification_sender.send_notification(alert, channel, config)
+            self.notification_sender.track_notification(alert, channel)
+        except Exception as e:
+            logger.error(f"Failed to send notification via {channel.value}: {e}")
     
     def _is_below_min_level(self, alert_level: AlertLevel, min_level: AlertLevel) -> bool:
         """Check if alert level is below minimum level."""
-        level_order = {
+        level_order = self._get_alert_level_order()
+        alert_priority = level_order.get(alert_level, 0)
+        min_priority = level_order.get(min_level, 0)
+        return alert_priority < min_priority
+
+    def _get_alert_level_order(self) -> Dict[AlertLevel, int]:
+        """Get alert level priority order."""
+        return {
             AlertLevel.INFO: 0,
             AlertLevel.WARNING: 1,
             AlertLevel.ERROR: 2,
             AlertLevel.CRITICAL: 3
         }
-        return level_order.get(alert_level, 0) < level_order.get(min_level, 0)
+
+    def _check_and_update_limit(self, channel: NotificationChannel, config: NotificationConfig, now: datetime) -> bool:
+        """Check rate limit and update if within bounds."""
+        if self._is_over_limit(channel, config):
+            return False
+        
+        self.notification_rate_limits[channel].append(now)
+        return True
+
+    async def _process_channel_notification(
+        self, 
+        alert: Alert, 
+        channel: NotificationChannel, 
+        configs: Dict[NotificationChannel, NotificationConfig]
+    ) -> None:
+        """Process notification for a single channel."""
+        config = configs.get(channel)
+        
+        if not self._should_deliver_notification(alert, channel, config):
+            return
+        
+        await self._send_single_notification(alert, channel, config)
     
     def register_notification_handler(
         self, 

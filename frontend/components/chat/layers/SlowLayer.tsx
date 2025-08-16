@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, Clock, Cpu, TrendingUp, AlertCircle } from 'lucide-react';
-import type { SlowLayerProps } from '@/types/unified-chat';
+import type { SlowLayerProps } from '@/types/component-props';
 
 export const SlowLayer: React.FC<SlowLayerProps> = ({ data, isCollapsed }) => {
   if (!data) {

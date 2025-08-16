@@ -9,19 +9,19 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useUnifiedChatStore } from '@/store/unified-chat';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useUnifiedChatStore } from '../store/unified-chat';
+import { useWebSocket } from './useWebSocket';
 import {
   ChatLoadingState,
   LoadingStateResult,
   ChatStateContext
-} from '@/types/loading-state';
+} from '../types/loading-state';
 import {
   createChatStateContext,
   determineLoadingState,
   createLoadingResult,
   validateStateTransition
-} from '@/utils/loading-state-machine';
+} from '../utils/loading-state-machine';
 
 /**
  * Loading state hook return interface
@@ -125,7 +125,12 @@ const useInitializationEffect = (
 ) => {
   useEffect(() => {
     if (wsStatus === 'OPEN' && !isInitialized) {
-      setIsInitialized(true);
+      // Add delay to ensure store is ready
+      const timer = setTimeout(() => {
+        setIsInitialized(true);
+      }, 100);
+      
+      return () => clearTimeout(timer);
     }
   }, [wsStatus, isInitialized, setIsInitialized]);
 };

@@ -30,78 +30,86 @@ os.environ["SKIP_STARTUP_CHECKS"] = "true"
 def get_openapi_spec():
     """Extract OpenAPI specification from FastAPI app."""
     try:
-        # Import the FastAPI app
-        from app.main import app
-        
-        # Get the OpenAPI schema
-        openapi_schema = app.openapi()
-        
-        # Add additional metadata if needed
-        openapi_schema["info"]["title"] = "Netra AI Optimization Platform API"
-        openapi_schema["info"]["description"] = (
-            "Enterprise-grade system for optimizing AI workloads. "
-            "This API provides endpoints for agent orchestration, workflow management, "
-            "and AI optimization tools."
-        )
-        openapi_schema["info"]["version"] = os.getenv("API_VERSION", "1.0.0")
-        openapi_schema["info"]["contact"] = {
-            "name": "Netra Support",
-            "email": "support@netra.ai",
-            "url": "https://netra.ai/support"
-        }
-        openapi_schema["info"]["license"] = {
-            "name": "Proprietary",
-            "url": "https://netra.ai/license"
-        }
-        
-        # Add servers
-        openapi_schema["servers"] = [
-            {
-                "url": "http://localhost:8000",
-                "description": "Local development server"
-            },
-            {
-                "url": "https://api.netra.ai",
-                "description": "Production server"
-            },
-            {
-                "url": "https://staging-api.netra.ai",
-                "description": "Staging server"
-            }
-        ]
-        
-        # Add security schemes if not already present
-        if "components" not in openapi_schema:
-            openapi_schema["components"] = {}
-        
-        if "securitySchemes" not in openapi_schema["components"]:
-            openapi_schema["components"]["securitySchemes"] = {
-                "bearerAuth": {
-                    "type": "http",
-                    "scheme": "bearer",
-                    "bearerFormat": "JWT",
-                    "description": "JWT authentication token"
-                },
-                "apiKey": {
-                    "type": "apiKey",
-                    "in": "header",
-                    "name": "X-API-Key",
-                    "description": "API key for service-to-service authentication"
-                }
-            }
-        
-        # Add global security requirement
-        if "security" not in openapi_schema:
-            openapi_schema["security"] = [
-                {"bearerAuth": []},
-                {"apiKey": []}
-            ]
-        
-        return openapi_schema
-        
+        schema = _extract_base_schema()
+        schema = _add_metadata(schema)
+        schema = _add_servers(schema)
+        schema = _add_security_schemes(schema)
+        return _add_security_requirements(schema)
     except Exception as e:
         print(f"Error generating OpenAPI spec: {e}")
         sys.exit(1)
+
+
+def _extract_base_schema() -> dict:
+    """Extract base OpenAPI schema from FastAPI app."""
+    from app.main import app
+    return app.openapi()
+
+
+def _add_metadata(schema: dict) -> dict:
+    """Add metadata to OpenAPI schema."""
+    schema["info"]["title"] = "Netra AI Optimization Platform API"
+    schema["info"]["description"] = (
+        "Enterprise-grade system for optimizing AI workloads. "
+        "This API provides endpoints for agent orchestration, workflow management, "
+        "and AI optimization tools."
+    )
+    schema["info"]["version"] = os.getenv("API_VERSION", "1.0.0")
+    return _add_contact_info(schema)
+
+
+def _add_contact_info(schema: dict) -> dict:
+    """Add contact and license information."""
+    schema["info"]["contact"] = {
+        "name": "Netra Support",
+        "email": "support@netra.ai",
+        "url": "https://netra.ai/support"
+    }
+    schema["info"]["license"] = {
+        "name": "Proprietary",
+        "url": "https://netra.ai/license"
+    }
+    return schema
+
+
+def _add_servers(schema: dict) -> dict:
+    """Add server configurations to schema."""
+    schema["servers"] = [
+        {"url": "http://localhost:8000", "description": "Local development server"},
+        {"url": "https://api.netra.ai", "description": "Production server"},
+        {"url": "https://staging-api.netra.ai", "description": "Staging server"}
+    ]
+    return schema
+
+
+def _add_security_schemes(schema: dict) -> dict:
+    """Add security schemes to schema."""
+    if "components" not in schema:
+        schema["components"] = {}
+    if "securitySchemes" not in schema["components"]:
+        schema["components"]["securitySchemes"] = _get_security_schemes()
+    return schema
+
+
+def _get_security_schemes() -> dict:
+    """Get security scheme definitions."""
+    return {
+        "bearerAuth": {
+            "type": "http", "scheme": "bearer", "bearerFormat": "JWT",
+            "description": "JWT authentication token"
+        },
+        "apiKey": {
+            "type": "apiKey", "in": "header", "name": "X-API-Key",
+            "description": "API key for service-to-service authentication"
+        }
+    }
+
+
+def _add_security_requirements(schema: dict) -> dict:
+    """Add global security requirements."""
+    if "security" not in schema:
+        schema["security"] = [{"bearerAuth": []}, {"apiKey": []}]
+    return schema
 
 
 def save_spec_to_file(spec: dict, output_path: str = "openapi.json") -> str:
@@ -250,18 +258,43 @@ def validate_spec(spec: dict) -> bool:
 
 
 def main():
+    """Main function to generate and optionally sync OpenAPI spec."""
+    args = _parse_arguments()
+    spec = _generate_and_validate_spec()
+    if args.validate_only:
+        _handle_validate_only()
+    spec_file = save_spec_to_file(spec, args.output)
+    if args.sync_readme:
+        _handle_readme_sync(args, spec_file)
+    print("\nDone!")
+
+
+def _parse_arguments() -> argparse.Namespace:
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description="Generate OpenAPI spec from FastAPI app and optionally sync to ReadMe"
     )
+    _add_output_args(parser)
+    _add_readme_args(parser)
+    return parser.parse_args()
+
+
+def _add_output_args(parser: argparse.ArgumentParser) -> None:
+    """Add output-related arguments to parser."""
     parser.add_argument(
-        "--output",
-        "-o",
-        default="openapi.json",
+        "--output", "-o", default="openapi.json",
         help="Output file path for the OpenAPI spec (default: openapi.json)"
     )
     parser.add_argument(
-        "--sync-readme",
-        action="store_true",
+        "--validate-only", action="store_true",
+        help="Only validate the spec without saving or syncing"
+    )
+
+
+def _add_readme_args(parser: argparse.ArgumentParser) -> None:
+    """Add ReadMe-related arguments to parser."""
+    parser.add_argument(
+        "--sync-readme", action="store_true",
         help="Sync the generated spec to ReadMe documentation platform"
     )
     parser.add_argument(
@@ -269,58 +302,45 @@ def main():
         help="ReadMe API key (can also be set via README_API_KEY env var)"
     )
     parser.add_argument(
-        "--readme-version",
-        default="v1.0",
+        "--readme-version", default="v1.0",
         help="API version for ReadMe (default: v1.0)"
     )
     parser.add_argument(
         "--readme-url",
         help="Custom ReadMe API URL (optional)"
     )
-    parser.add_argument(
-        "--validate-only",
-        action="store_true",
-        help="Only validate the spec without saving or syncing"
-    )
-    
-    args = parser.parse_args()
-    
-    # Generate the OpenAPI spec
+
+
+def _generate_and_validate_spec() -> dict:
+    """Generate and validate OpenAPI specification."""
     print("Generating OpenAPI specification from FastAPI app...")
     spec = get_openapi_spec()
-    
-    # Validate the spec
     if not validate_spec(spec):
         sys.exit(1)
-    
-    if args.validate_only:
-        print("Validation complete (--validate-only flag set)")
-        sys.exit(0)
-    
-    # Save to file
-    spec_file = save_spec_to_file(spec, args.output)
-    
-    # Sync to ReadMe if requested
-    if args.sync_readme:
-        # Get API key from args or environment
-        api_key = args.readme_api_key or os.getenv("README_API_KEY")
-        
-        if not api_key:
-            print("Error: ReadMe API key is required for syncing")
-            print("   Provide it via --readme-api-key or set README_API_KEY environment variable")
-            sys.exit(1)
-        
-        success = sync_to_readme(
-            spec_file,
-            api_key,
-            args.readme_version,
-            args.readme_url
-        )
-        
-        if not success:
-            sys.exit(1)
-    
-    print("\nDone!")
+    return spec
+
+
+def _handle_validate_only() -> None:
+    """Handle validate-only mode."""
+    print("Validation complete (--validate-only flag set)")
+    sys.exit(0)
+
+
+def _handle_readme_sync(args: argparse.Namespace, spec_file: str) -> None:
+    """Handle ReadMe synchronization."""
+    api_key = args.readme_api_key or os.getenv("README_API_KEY")
+    if not api_key:
+        _handle_missing_api_key()
+    success = sync_to_readme(spec_file, api_key, args.readme_version, args.readme_url)
+    if not success:
+        sys.exit(1)
+
+
+def _handle_missing_api_key() -> None:
+    """Handle missing ReadMe API key."""
+    print("Error: ReadMe API key is required for syncing")
+    print("   Provide it via --readme-api-key or set README_API_KEY environment variable")
+    sys.exit(1)
 
 
 if __name__ == "__main__":

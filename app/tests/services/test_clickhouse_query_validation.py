@@ -16,7 +16,7 @@ class TestClickHouseQueryValidator:
     def _get_valid_queries(self):
         """Get list of valid queries for testing"""
         return [
-            "SELECT toFloat64OrZero(arrayElement(metrics.value, 1)) FROM table",
+            "SELECT arrayElement(metrics.value, 1) FROM table",
             "SELECT * FROM table WHERE id = 123",
             "SELECT count(*) FROM table GROUP BY category"
         ]

@@ -97,12 +97,18 @@ def _import_route_modules() -> dict:
     from app.routes.health_extended import router as health_extended_router
     from app.routes.monitoring import router as monitoring_router
     from app.routes.websockets import router as websockets_router
+    from app.routes.factory_status import router as factory_status_router
+    from app.routes.factory_status_simple import router as factory_status_simple_router
+    from app.routes.github_analyzer import router as github_analyzer_router
     # from app.routes.mcp.main import router as mcp_router  # Temporarily disabled due to import issues
     return {
         "auth_router": auth_router, "agent_router": agent_router,
         "llm_cache_router": llm_cache_router, "threads_router": threads_router,
         "health_extended_router": health_extended_router, "monitoring_router": monitoring_router,
-        "websockets_router": websockets_router, "supply": supply, "generation": generation,
+        "websockets_router": websockets_router, "factory_status_router": factory_status_router,
+        "factory_status_simple_router": factory_status_simple_router,
+        "github_analyzer_router": github_analyzer_router,
+        "supply": supply, "generation": generation,
         "admin": admin, "references": references, "health": health, "corpus": corpus,
         "synthetic_data": synthetic_data, "config": config, "demo": demo, "unified_tools": unified_tools, "quality": quality
     }
@@ -130,6 +136,9 @@ def _get_route_configurations(modules: dict) -> dict:
         "config": (modules["config"].router, "/api", ["config"]),
         "demo": (modules["demo"].router, "", ["demo"]),
         "unified_tools": (modules["unified_tools"].router, "/api/tools", ["unified-tools"]),
+        "factory_status": (modules["factory_status_router"], "", ["factory-status"]),
+        "factory_status_simple": (modules["factory_status_simple_router"], "", ["factory-status-simple"]),
+        "github_analyzer": (modules["github_analyzer_router"], "", ["github-analyzer"]),
     }
 
 

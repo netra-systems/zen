@@ -2,6 +2,7 @@ import React from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { Bot, Zap, Activity, Shield, Database, Cpu, Brain } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ConnectionStatusIndicator } from './ConnectionStatusIndicator';
 
 export const ChatHeader: React.FC = () => {
   const { subAgentName, subAgentStatus, isProcessing } = useUnifiedChatStore();
@@ -85,32 +86,36 @@ export const ChatHeader: React.FC = () => {
             </div>
           </div>
           
-          <AnimatePresence>
-            {subAgentStatus && (
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ duration: 0.3 }}
-                className="flex items-center space-x-6"
-              >
-                <div className="flex items-center space-x-2 px-3 py-1.5 bg-white rounded-lg border border-gray-200">
-                  <div className={`${getStatusColor(typeof subAgentStatus === 'object' && subAgentStatus !== null && 'lifecycle' in subAgentStatus ? subAgentStatus.lifecycle : 'IDLE')}`}>
-                    {getStatusIcon(typeof subAgentStatus === 'object' && subAgentStatus !== null && 'lifecycle' in subAgentStatus ? subAgentStatus.lifecycle : 'IDLE')}
+          <div className="flex items-center space-x-4">
+            {/* Connection Status Indicator */}
+            <ConnectionStatusIndicator className="shrink-0" />
+            
+            <AnimatePresence>
+              {subAgentStatus && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex items-center space-x-6"
+                >
+                  <div className="flex items-center space-x-2 px-3 py-1.5 bg-white rounded-lg border border-gray-200">
+                    <div className={`${getStatusColor(typeof subAgentStatus === 'object' && subAgentStatus !== null && 'lifecycle' in subAgentStatus ? subAgentStatus.lifecycle : 'IDLE')}`}>
+                      {getStatusIcon(typeof subAgentStatus === 'object' && subAgentStatus !== null && 'lifecycle' in subAgentStatus ? subAgentStatus.lifecycle : 'IDLE')}
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 capitalize">
+                      {(typeof subAgentStatus === 'object' && subAgentStatus !== null && 'lifecycle' in subAgentStatus ? subAgentStatus.lifecycle : subAgentStatus) || 'Ready'}
+                    </span>
+                    {isProcessing && (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-3 h-3"
+                      >
+                        <Activity className="w-3 h-3 text-blue-500" />
+                      </motion.div>
+                    )}
                   </div>
-                  <span className="text-sm font-medium text-gray-700 capitalize">
-                    {(typeof subAgentStatus === 'object' && subAgentStatus !== null && 'lifecycle' in subAgentStatus ? subAgentStatus.lifecycle : subAgentStatus) || 'Ready'}
-                  </span>
-                  {isProcessing && (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="w-3 h-3"
-                    >
-                      <Activity className="w-3 h-3 text-blue-500" />
-                    </motion.div>
-                  )}
-                </div>
                 
                 {/* Tools display commented out - SubAgentState doesn't have tools property
                 {subAgentStatus.tools && subAgentStatus.tools.length > 0 && (
@@ -136,9 +141,10 @@ export const ChatHeader: React.FC = () => {
                     </div>
                   </div>
                 )} */}
-              </motion.div>
-            )}
-          </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>

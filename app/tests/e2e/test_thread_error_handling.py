@@ -6,7 +6,7 @@ import pytest
 import asyncio
 import uuid
 from typing import Dict, Any, List, Optional, Callable
-from unittest.mock import AsyncMock, Mock, patch, side_effect
+from unittest.mock import AsyncMock, Mock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
