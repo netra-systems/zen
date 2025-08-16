@@ -72,8 +72,6 @@ class TestAgentReliabilityIntegration:
         """Verify reliability metrics were updated correctly."""
         assert len(reliable_agent.operation_times) == 1
         assert len(reliable_agent.error_history) == 0
-    
-    @pytest.mark.asyncio
     async def test_agent_reliability_with_json_parsing(self, reliable_agent):
         """Test agent reliability with JSON parsing integration."""
         complex_response = self._create_complex_json_test_data()
@@ -140,8 +138,6 @@ class TestAgentReliabilityIntegration:
             "coordination_operation",
             timeout=15.0
         )
-    
-    @pytest.mark.asyncio
     async def test_agent_reliability_with_fallback_coordinator(self, reliable_agent):
         """Test agent reliability integration with fallback coordinator."""
         with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \
@@ -158,8 +154,6 @@ class TestAgentReliabilityIntegration:
                 
                 result = await self._execute_coordinated_operation(coordinator, reliable_agent)
                 self._verify_coordination_integration(result, mock_handler, mock_health_instance, reliable_agent)
-    
-    @pytest.mark.asyncio
     async def test_agent_failure_propagation_through_system(self, reliable_agent):
         """Test how agent failures propagate through the integrated system."""
         with patch('app.core.fallback_coordinator.HealthMonitor') as mock_health_monitor, \

@@ -64,14 +64,19 @@ def build_dispatcher_stats_base() -> Dict[str, Any]:
 
 def calculate_enabled_tools_count(user: Optional[User]) -> int:
     """Calculate count of enabled tools for user"""
-    from .validation import validate_admin_tool_access
     if not user:
         return 0
-    enabled_tools = [
+    enabled_tools = _get_enabled_tools_for_user(user)
+    return len(enabled_tools)
+
+
+def _get_enabled_tools_for_user(user: User) -> List[AdminToolType]:
+    """Get list of enabled tools for user"""
+    from .validation import validate_admin_tool_access
+    return [
         tool for tool in AdminToolType 
         if validate_admin_tool_access(user, tool.value)
     ]
-    return len(enabled_tools)
 
 
 def add_system_health_to_stats(stats: Dict[str, Any]) -> None:
@@ -106,13 +111,24 @@ def create_admin_tool_info(tool_name: str,
                           user: Optional[User],
                           admin_tools_enabled: bool) -> AdminToolInfo:
     """Create admin tool info object"""
+    tool_data = _build_admin_tool_data(tool_name, user, admin_tools_enabled)
+    return _create_admin_tool_info_object(tool_name, admin_tool_type, tool_data)
+
+
+def _build_admin_tool_data(tool_name: str, user: Optional[User], admin_tools_enabled: bool) -> Dict[str, Any]:
+    """Build admin tool data dictionary"""
     from .validation import validate_admin_tool_access, get_required_permissions
     available = admin_tools_enabled and validate_admin_tool_access(user, tool_name)
     description = f"Admin tool for {tool_name.replace('_', ' ')}"
     required_permissions = get_required_permissions(tool_name)
+    return {"available": available, "description": description, "required_permissions": required_permissions}
+
+
+def _create_admin_tool_info_object(tool_name: str, admin_tool_type: AdminToolType, tool_data: Dict[str, Any]) -> AdminToolInfo:
+    """Create AdminToolInfo object from data"""
     return AdminToolInfo(
-        name=tool_name, tool_type=admin_tool_type, description=description,
-        required_permissions=required_permissions, available=available, enabled=True
+        name=tool_name, tool_type=admin_tool_type, description=tool_data["description"],
+        required_permissions=tool_data["required_permissions"], available=tool_data["available"], enabled=True
     )
 
 

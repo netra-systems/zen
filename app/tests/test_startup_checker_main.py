@@ -24,8 +24,6 @@ class TestStartupCheckerMain:
     def checker(self, mock_app):
         """Create a StartupChecker instance."""
         return StartupChecker(mock_app)
-    
-    @pytest.mark.asyncio
     async def test_run_all_checks_success(self, checker):
         """Test running all checks successfully."""
         async def mock_check():
@@ -42,8 +40,6 @@ class TestStartupCheckerMain:
         
         assert results["success"] == True
         verify_check_results(results, 10, 10, 0, 0)
-    
-    @pytest.mark.asyncio
     async def test_run_all_checks_with_failures(self, checker):
         """Test running checks with critical and non-critical failures."""
         async def mock_critical_failure():
@@ -73,8 +69,6 @@ class TestStartupCheckerMain:
         assert results["success"] == False
         assert results["failed_critical"] == 1
         assert results["failed_non_critical"] == 1
-    
-    @pytest.mark.asyncio
     async def test_run_all_checks_with_exception(self, checker):
         """Test handling of unexpected exceptions during checks."""
         checker.env_checker.check_environment_variables = AsyncMock(side_effect=mock_exception_check)

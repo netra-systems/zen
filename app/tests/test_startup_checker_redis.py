@@ -21,8 +21,6 @@ class TestStartupCheckerRedis:
     def checker(self, mock_app):
         """Create a StartupChecker instance."""
         return StartupChecker(mock_app)
-    
-    @pytest.mark.asyncio
     async def test_check_redis_success(self, mock_app, checker):
         """Test Redis check success."""
         redis_manager = mock_app.state.redis_manager
@@ -36,8 +34,6 @@ class TestStartupCheckerRedis:
             assert result.success == True
             assert "Redis connected" in result.message
             verify_redis_operations(redis_manager)
-    
-    @pytest.mark.asyncio
     async def test_check_redis_read_write_failure(self, mock_app, checker):
         """Test Redis check with read/write test failure."""
         redis_manager = mock_app.state.redis_manager
@@ -50,8 +46,6 @@ class TestStartupCheckerRedis:
             
             assert result.success == False
             assert "read/write test failed" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_redis_connection_failure_production(self, mock_app, monkeypatch):
         """Test Redis check with connection failure in production (critical)."""
         monkeypatch.setenv("ENVIRONMENT", "production")
@@ -67,8 +61,6 @@ class TestStartupCheckerRedis:
         assert result.success == False
         assert result.critical == True
         assert "Connection refused" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_redis_connection_failure_development(self, mock_app, checker):
         """Test Redis check with connection failure in development (non-critical)."""
         redis_manager = mock_app.state.redis_manager

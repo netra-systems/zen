@@ -64,12 +64,20 @@ class LLMManagementUtilities:
         """Perform health check on an LLM configuration."""
         start_time = time.time()
         try:
-            test_response = await self.core.ask_llm("Hello", config_name, use_cache=False)
-            response_time_ms = (time.time() - start_time) * 1000
-            return self._create_healthy_check_result(config_name, test_response, response_time_ms)
+            return await self._execute_health_test(config_name, start_time)
         except Exception as e:
-            response_time_ms = (time.time() - start_time) * 1000
-            return self._create_unhealthy_check_result(config_name, response_time_ms, str(e))
+            return self._handle_health_check_error(config_name, start_time, e)
+    
+    async def _execute_health_test(self, config_name: str, start_time: float) -> LLMHealthCheck:
+        """Execute health test and create result."""
+        test_response = await self.core.ask_llm("Hello", config_name, use_cache=False)
+        response_time_ms = (time.time() - start_time) * 1000
+        return self._create_healthy_check_result(config_name, test_response, response_time_ms)
+    
+    def _handle_health_check_error(self, config_name: str, start_time: float, error: Exception) -> LLMHealthCheck:
+        """Handle health check error and create result."""
+        response_time_ms = (time.time() - start_time) * 1000
+        return self._create_unhealthy_check_result(config_name, response_time_ms, str(error))
     
     def _create_healthy_check_result(self, config_name: str, test_response: Any, response_time_ms: float) -> LLMHealthCheck:
         """Create healthy health check result."""

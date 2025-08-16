@@ -21,8 +21,6 @@ class TestStartupCheckerAssistant:
     def checker(self, mock_app):
         """Create a StartupChecker instance."""
         return StartupChecker(mock_app)
-    
-    @pytest.mark.asyncio
     async def test_check_or_create_assistant_exists(self, mock_app, checker):
         """Test assistant check when assistant already exists."""
         db_session = create_mock_database_session(mock_app)
@@ -35,8 +33,6 @@ class TestStartupCheckerAssistant:
         
         assert result.success == True
         assert "already exists" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_or_create_assistant_create_new(self, mock_app, checker):
         """Test assistant check when creating new assistant."""
         db_session = create_mock_database_session(mock_app)
@@ -54,8 +50,6 @@ class TestStartupCheckerAssistant:
         # Verify assistant was added
         db_session.add.assert_called_once()
         db_session.commit.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_check_or_create_assistant_failure(self, mock_app, checker):
         """Test assistant check with database error."""
         db_session = create_mock_database_session(mock_app)

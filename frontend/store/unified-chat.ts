@@ -54,6 +54,7 @@ const initialState = {
   
   // WebSocket event debugging
   wsEventBuffer: new WebSocketEventBuffer(1000),
+  wsEventBufferVersion: 0,
   
   // Performance metrics
   performanceMetrics: {
@@ -150,6 +151,11 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
           agentName: (event.payload as any)?.agent_id || (event.payload as any)?.agent_type
         };
         state.wsEventBuffer.push(wsEvent);
+        
+        // Increment version to trigger reactive updates
+        set((state) => ({
+          wsEventBufferVersion: state.wsEventBufferVersion + 1
+        }), false, 'websocket_event_buffer_update');
         
         // Debug logging to track layer updates
         logger.debug('WebSocket Event received', {

@@ -127,8 +127,6 @@ class TestMCPService:
         
         assert "netra://optimization/history" in manager.resources
         assert "netra://config/models" in manager.resources
-        
-    @pytest.mark.asyncio
     async def test_execute_agent(self, mcp_service, mock_services):
         """Test agent execution"""
         mock_services["thread_service"].create_thread.return_value = "thread123"
@@ -157,8 +155,6 @@ class TestMCPService:
             input_data={"test": "data"},
             config={"option": "value"}
         )
-        
-    @pytest.mark.asyncio
     async def test_execute_agent_error(self, mcp_service, mock_services):
         """Test agent execution error handling"""
         mock_services["thread_service"].create_thread.side_effect = Exception("Thread error")
@@ -171,8 +167,6 @@ class TestMCPService:
         assert result["type"] == "text"
         assert "Error executing agent" in result["text"]
         assert "Thread error" in result["text"]
-        
-    @pytest.mark.asyncio
     async def test_get_agent_status(self, mcp_service, mock_services):
         """Test getting agent status"""
         mock_services["agent_service"].get_run_status.return_value = {
@@ -187,8 +181,6 @@ class TestMCPService:
         assert result["type"] == "text"
         status = json.loads(result["text"])
         assert status["status"] == "completed"
-        
-    @pytest.mark.asyncio
     async def test_list_available_agents(self, mcp_service, mock_services):
         """Test listing agents"""
         mock_services["agent_service"].list_agents.return_value = [
@@ -204,8 +196,6 @@ class TestMCPService:
         agents = json.loads(result["text"])
         assert len(agents) == 2
         assert agents[0]["name"] == "Agent1"
-        
-    @pytest.mark.asyncio
     async def test_analyze_workload(self, mcp_service, mock_services):
         """Test workload analysis"""
         mock_services["agent_service"].analyze_workload.return_value = {
@@ -222,8 +212,6 @@ class TestMCPService:
         analysis = json.loads(result["text"])
         assert analysis["cost"] == 100
         assert analysis["latency"] == 250
-        
-    @pytest.mark.asyncio
     async def test_optimize_prompt(self, mcp_service, mock_services):
         """Test prompt optimization"""
         mock_services["agent_service"].optimize_prompt.return_value = {
@@ -240,8 +228,6 @@ class TestMCPService:
         assert result["type"] == "text"
         optimization = json.loads(result["text"])
         assert optimization["optimized"] == "Better prompt"
-        
-    @pytest.mark.asyncio
     async def test_query_corpus(self, mcp_service, mock_services):
         """Test corpus querying"""
         mock_services["corpus_service"].search.return_value = [
@@ -259,8 +245,6 @@ class TestMCPService:
         results = json.loads(result["text"])
         assert len(results) == 2
         assert results[0]["id"] == "doc1"
-        
-    @pytest.mark.asyncio
     async def test_generate_synthetic_data(self, mcp_service, mock_services):
         """Test synthetic data generation"""
         mock_services["synthetic_data_service"].generate.return_value = [
@@ -279,8 +263,6 @@ class TestMCPService:
             {"id": 1, "name": "Test1"},
             {"id": 2, "name": "Test2"}
         ]
-        
-    @pytest.mark.asyncio
     async def test_create_thread(self, mcp_service, mock_services):
         """Test thread creation"""
         mock_services["thread_service"].create_thread.return_value = "thread123"
@@ -299,8 +281,6 @@ class TestMCPService:
         # Check metadata includes session
         call_args = mock_services["thread_service"].create_thread.call_args
         assert call_args[1]["metadata"]["mcp_session"] == "session456"
-        
-    @pytest.mark.asyncio
     async def test_get_thread_history(self, mcp_service, mock_services):
         """Test getting thread history"""
         mock_services["thread_service"].get_thread_messages.return_value = [
@@ -317,8 +297,6 @@ class TestMCPService:
         messages = json.loads(result["text"])
         assert len(messages) == 2
         assert messages[0]["id"] == "msg1"
-        
-    @pytest.mark.asyncio
     async def test_get_supply_catalog(self, mcp_service, mock_services):
         """Test getting supply catalog"""
         mock_services["supply_catalog_service"].get_catalog.return_value = {
@@ -334,8 +312,6 @@ class TestMCPService:
         catalog = json.loads(result["text"])
         assert "models" in catalog
         assert "providers" in catalog
-        
-    @pytest.mark.asyncio
     async def test_execute_optimization_pipeline(self, mcp_service, mock_services):
         """Test optimization pipeline execution"""
         mock_services["thread_service"].create_thread.return_value = "thread789"
@@ -360,8 +336,6 @@ class TestMCPService:
         call_args = mock_services["agent_service"].execute_agent.call_args
         assert call_args[1]["agent_name"] == "SupervisorAgent"
         assert call_args[1]["config"]["pipeline_mode"] == True
-        
-    @pytest.mark.asyncio
     async def test_register_client(self, mcp_service, mock_services):
         """Test client registration"""
         mock_services["security_service"].hash_password.return_value = "hashed_key"
@@ -383,8 +357,6 @@ class TestMCPService:
         assert client.metadata == {"version": "1.0"}
         
         mock_services["security_service"].hash_password.assert_called_once_with("secret_key")
-        
-    @pytest.mark.asyncio
     async def test_register_client_error(self, mcp_service, mock_services):
         """Test client registration error"""
         mock_services["security_service"].hash_password.side_effect = Exception("Hash error")
@@ -399,8 +371,6 @@ class TestMCPService:
             )
             
         assert "Failed to register MCP client" in str(exc_info.value)
-        
-    @pytest.mark.asyncio
     async def test_validate_client_access(self, mcp_service):
         """Test client access validation"""
         db_session = AsyncMock()
@@ -413,8 +383,6 @@ class TestMCPService:
         )
         
         assert result == True
-        
-    @pytest.mark.asyncio
     async def test_record_tool_execution(self, mcp_service):
         """Test recording tool execution"""
         db_session = AsyncMock()

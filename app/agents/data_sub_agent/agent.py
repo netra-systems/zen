@@ -319,16 +319,17 @@ class DataSubAgent(BaseSubAgent):
     def _build_anomaly_detail(self, timestamp, fields: dict, severity) -> 'AnomalyDetail':
         """Build AnomalyDetail object from components."""
         from app.schemas.shared_types import AnomalyDetail
-        return AnomalyDetail(
-            timestamp=timestamp,
-            metric_name=fields['metric_name'],
-            actual_value=fields['actual_value'],
-            expected_value=fields['expected_value'],
-            deviation_percentage=fields['deviation_percentage'],
-            z_score=fields['z_score'],
-            severity=severity,
-            description=fields['description']
-        )
+        core_params = self._create_anomaly_core_params(timestamp, fields, severity)
+        return AnomalyDetail(**core_params)
+    
+    def _create_anomaly_core_params(self, timestamp, fields: dict, severity) -> dict:
+        """Create core parameters for AnomalyDetail creation."""
+        return {
+            'timestamp': timestamp, 'metric_name': fields['metric_name'],
+            'actual_value': fields['actual_value'], 'expected_value': fields['expected_value'],
+            'deviation_percentage': fields['deviation_percentage'], 'z_score': fields['z_score'],
+            'severity': severity, 'description': fields['description']
+        }
     
     def _try_anomaly_detection_conversion(
         self, result_dict: dict
@@ -548,13 +549,24 @@ class DataSubAgent(BaseSubAgent):
     
     def _extract_anomaly_fields(self, item: dict) -> Dict[str, Any]:
         """Extract all anomaly fields from item."""
+        basic_fields = self._extract_basic_anomaly_fields(item)
+        metric_fields = self._extract_metric_anomaly_fields(item)
+        return {**basic_fields, **metric_fields}
+    
+    def _extract_basic_anomaly_fields(self, item: dict) -> Dict[str, Any]:
+        """Extract basic anomaly fields."""
         return {
             'metric_name': item.get('type', 'unknown_metric'),
+            'description': item.get('description', '')
+        }
+    
+    def _extract_metric_anomaly_fields(self, item: dict) -> Dict[str, Any]:
+        """Extract metric-specific anomaly fields."""
+        return {
             'actual_value': item.get('actual_value', 0.0),
             'expected_value': item.get('expected_value', 0.0),
             'deviation_percentage': item.get('deviation_percentage', 0.0),
-            'z_score': item.get('z_score', 0.0),
-            'description': item.get('description', '')
+            'z_score': item.get('z_score', 0.0)
         }
     
     def _map_severity(self, item: dict, severity_map: Dict) -> Any:

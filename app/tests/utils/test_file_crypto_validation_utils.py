@@ -16,7 +16,6 @@ from app.tests.helpers.validation_formatting_test_helpers import ValidationTestH
 
 
 # Test 89: File utils operations
-@pytest.mark.asyncio
 class TestFileUtilsOperations:
     """test_file_utils_operations - Test file operations and cleanup on error"""
     
@@ -80,7 +79,6 @@ class TestFileUtilsOperations:
 
 
 # Test 90: Crypto utils hashing
-@pytest.mark.asyncio
 class TestCryptoUtilsHashing:
     """test_crypto_utils_hashing - Test hashing algorithms and salt generation"""
     
@@ -134,7 +132,6 @@ class TestCryptoUtilsHashing:
 
 
 # Test 91: Validation utils schemas
-@pytest.mark.asyncio
 class TestValidationUtilsSchemas:
     """test_validation_utils_schemas - Test schema validation and error messages"""
     

@@ -53,8 +53,6 @@ class TestLLMManagerProviderSwitching:
         """Assert all providers are initially healthy"""
         for provider_key in manager.provider_health:
             assert_health_status(manager, provider_key, True)
-    
-    @pytest.mark.asyncio
     async def test_provider_health_check_success(self, enhanced_llm_manager, mock_providers):
         """Test successful provider health check"""
         provider_key = 'openai_gpt-4'
@@ -63,8 +61,6 @@ class TestLLMManagerProviderSwitching:
         assert is_healthy == True
         assert_health_status(enhanced_llm_manager, provider_key, True)
         assert_failure_count(enhanced_llm_manager, provider_key, 0)
-    
-    @pytest.mark.asyncio
     async def test_provider_health_check_failure(self, enhanced_llm_manager, mock_providers):
         """Test provider health check failure"""
         provider_key = 'openai_gpt-4'
@@ -81,8 +77,6 @@ class TestLLMManagerProviderSwitching:
         health_info = manager.provider_health[provider_key]
         assert health_info['failure_count'] >= 1
         assert health_info['last_failure'] != None
-    
-    @pytest.mark.asyncio
     async def test_round_robin_provider_selection(self, enhanced_llm_manager, mock_providers):
         """Test round-robin provider selection"""
         enhanced_llm_manager.load_balancing['strategy'] = 'round_robin'
@@ -105,8 +99,6 @@ class TestLLMManagerProviderSwitching:
         assert providers[0] == providers[3]
         assert providers[1] == providers[4]
         assert providers[2] == providers[5]
-    
-    @pytest.mark.asyncio
     async def test_failover_invoke_success(self, enhanced_llm_manager, mock_providers):
         """Test successful LLM invocation with failover"""
         prompt = "Test prompt for failover"
@@ -115,8 +107,6 @@ class TestLLMManagerProviderSwitching:
         
         assert result != None
         assert "Response to: Test prompt" in result.content
-    
-    @pytest.mark.asyncio
     async def test_failover_invoke_preferred_provider(self, enhanced_llm_manager, mock_providers):
         """Test LLM invocation with preferred provider"""
         prompt = "Test prompt with preferred provider"
@@ -126,8 +116,6 @@ class TestLLMManagerProviderSwitching:
         
         assert result != None
         assert "[google]" in result.content.lower()
-    
-    @pytest.mark.asyncio
     async def test_failover_invoke_provider_failure(self, enhanced_llm_manager, mock_providers):
         """Test LLM invocation with provider failure and failover"""
         prompt = "Test prompt with failover"
@@ -144,8 +132,6 @@ class TestLLMManagerProviderSwitching:
         """Assert failure was recorded for provider"""
         health_info = manager.provider_health[provider_key]
         assert health_info['failure_count'] > 0
-    
-    @pytest.mark.asyncio
     async def test_failover_all_providers_fail(self, enhanced_llm_manager, mock_providers):
         """Test behavior when all providers fail"""
         prompt = "Test prompt with all failures"
@@ -155,8 +141,6 @@ class TestLLMManagerProviderSwitching:
             await enhanced_llm_manager.invoke_with_failover(prompt)
         
         assert "all llm providers failed" in str(exc_info.value).lower()
-    
-    @pytest.mark.asyncio
     async def test_provider_cooldown_period(self, enhanced_llm_manager, mock_providers):
         """Test provider cooldown period after failures"""
         provider_key = 'openai_gpt-4'
@@ -188,8 +172,6 @@ class TestLLMManagerProviderSwitching:
         
         is_healthy = await manager.check_provider_health(provider_key)
         assert is_healthy == True  # Should be healthy after cooldown
-    
-    @pytest.mark.asyncio
     async def test_concurrent_provider_switching(self, enhanced_llm_manager, mock_providers):
         """Test concurrent requests with provider switching"""
         self._setup_provider_response_times(mock_providers)

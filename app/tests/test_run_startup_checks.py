@@ -8,8 +8,6 @@ from app.startup_checks import run_startup_checks, StartupCheckResult
 
 class TestRunStartupChecks:
     """Test the main run_startup_checks function."""
-    
-    @pytest.mark.asyncio
     async def test_run_startup_checks_success(self):
         """Test successful startup checks."""
         mock_app = Mock()
@@ -27,8 +25,6 @@ class TestRunStartupChecks:
             
             assert results['success'] == True
             assert results['passed'] == 10
-    
-    @pytest.mark.asyncio
     async def test_run_startup_checks_critical_failure(self):
         """Test startup checks with critical failures."""
         mock_app = Mock()
@@ -49,8 +45,6 @@ class TestRunStartupChecks:
             
             with pytest.raises(RuntimeError, match="Startup failed: 1 critical checks failed"):
                 await run_startup_checks(mock_app)
-    
-    @pytest.mark.asyncio
     async def test_run_startup_checks_non_critical_failure(self):
         """Test startup checks with only non-critical failures."""
         mock_app = Mock()

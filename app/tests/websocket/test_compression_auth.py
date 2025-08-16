@@ -12,9 +12,6 @@ import zlib
 import random
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock
-
-
-@pytest.mark.asyncio
 async def test_websocket_compression():
     """Test WebSocket compression with permessage-deflate extension"""
     
@@ -189,9 +186,6 @@ class GracePeriodWebSocket(AuthenticatedWebSocket):
             'warning': 'in_grace_period',
             'expires_in': int(self.grace_expires_at - time.time())
         }
-
-
-@pytest.mark.asyncio
 async def test_authentication_expiry_during_connection():
     """Test handling of authentication expiry while connection is active"""
     await _test_immediate_expiry()

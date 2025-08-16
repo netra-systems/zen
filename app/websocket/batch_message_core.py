@@ -48,16 +48,27 @@ class MessageBatcher:
         """Queue a message for batched delivery."""
         if self._shutdown:
             return False
-        
+        return await self._process_message_queue(user_id, message, priority, connection_id)
+
+
+    async def _process_message_queue(self, user_id: str, message: Union[Dict[str, Any], ServerMessage],
+                                   priority: int, connection_id: Optional[str]) -> bool:
+        """Process message queueing with lock."""
         async with self._lock:
-            connections = self.connection_manager.get_user_connections(user_id)
-            if not connections:
-                self._log_no_connections(user_id)
-                return False
-            
-            target_connections = self._get_target_connections(connection_id, connections)
-            await self._queue_to_connections(message, user_id, priority, target_connections)
-            return True
+            return await self._queue_message_to_connections(user_id, message, priority, connection_id)
+
+
+    async def _queue_message_to_connections(self, user_id: str, message: Union[Dict[str, Any], ServerMessage],
+                                          priority: int, connection_id: Optional[str]) -> bool:
+        """Queue message to target connections."""
+        connections = self.connection_manager.get_user_connections(user_id)
+        if not connections:
+            self._log_no_connections(user_id)
+            return False
+        
+        target_connections = self._get_target_connections(connection_id, connections)
+        await self._queue_to_connections(message, user_id, priority, target_connections)
+        return True
     
     def _log_no_connections(self, user_id: str) -> None:
         """Log when no connections exist for user."""
@@ -97,7 +108,11 @@ class MessageBatcher:
         """Check if batch should be flushed based on strategy."""
         if connection_id not in self._pending_messages:
             return
-        
+        await self._evaluate_and_flush_batch(connection_id)
+
+
+    async def _evaluate_and_flush_batch(self, connection_id: str) -> None:
+        """Evaluate batch and decide whether to flush."""
         pending = self._pending_messages[connection_id]
         should_flush = self._strategy_manager.should_flush_batch(pending)
         
@@ -139,7 +154,11 @@ class MessageBatcher:
         """Send a batch of messages to a connection."""
         if not batch:
             return
-        
+        await self._execute_batch_send(connection_id, batch)
+
+
+    async def _execute_batch_send(self, connection_id: str, batch: List[PendingMessage]) -> None:
+        """Execute batch send to connection."""
         connection_info = self.connection_manager.get_connection_by_id(connection_id)
         if not connection_info:
             self._log_connection_not_found(connection_id)
@@ -202,6 +221,11 @@ class MessageBatcher:
     async def flush_all_pending(self) -> None:
         """Flush all pending messages immediately."""
         connection_ids = list(self._pending_messages.keys())
+        await self._flush_all_connection_batches(connection_ids)
+
+
+    async def _flush_all_connection_batches(self, connection_ids: List[str]) -> None:
+        """Flush batches for all connection IDs."""
         for connection_id in connection_ids:
             await self._flush_batch(connection_id)
     
@@ -218,12 +242,25 @@ class MessageBatcher:
     
     def get_metrics(self) -> Dict[str, Any]:
         """Get batching metrics."""
+        core_metrics = self._get_core_metrics()
+        queue_metrics = self._get_queue_metrics()
+        return {**core_metrics, **queue_metrics}
+
+
+    def _get_core_metrics(self) -> Dict[str, Any]:
+        """Get core batching metrics."""
         return {
             "total_batches": self._metrics.total_batches,
             "total_messages": self._metrics.total_messages,
             "avg_batch_size": self._metrics.avg_batch_size,
             "avg_wait_time": self._metrics.avg_wait_time,
-            "throughput_per_second": self._metrics.throughput_per_second,
+            "throughput_per_second": self._metrics.throughput_per_second
+        }
+
+
+    def _get_queue_metrics(self) -> Dict[str, Any]:
+        """Get queue and timer metrics."""
+        return {
             "pending_queues": len(self._pending_messages),
             "pending_messages": sum(len(msgs) for msgs in self._pending_messages.values()),
             "active_timers": self._timer_manager.get_active_timer_count()

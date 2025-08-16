@@ -13,7 +13,6 @@ import hashlib
 import json
 
 # Test 76: Thread repository operations
-@pytest.mark.asyncio
 class TestThreadRepositoryOperations:
     """test_thread_repository_operations - Test thread CRUD operations and soft delete"""
     
@@ -97,7 +96,6 @@ class TestThreadRepositoryOperations:
 
 
 # Test 77: Message repository queries
-@pytest.mark.asyncio
 class TestMessageRepositoryQueries:
     """test_message_repository_queries - Test message queries and pagination"""
     
@@ -175,7 +173,6 @@ class TestMessageRepositoryQueries:
 
 
 # Test 78: User repository authentication
-@pytest.mark.asyncio
 class TestUserRepositoryAuth:
     """test_user_repository_auth - Test user authentication and password hashing"""
     
@@ -241,7 +238,6 @@ class TestUserRepositoryAuth:
 
 
 # Test 79: Optimization repository storage
-@pytest.mark.asyncio
 class TestOptimizationRepositoryStorage:
     """test_optimization_repository_storage - Test optimization storage and versioning"""
     
@@ -306,7 +302,6 @@ class TestOptimizationRepositoryStorage:
 
 
 # Test 80: Metric repository aggregation
-@pytest.mark.asyncio
 class TestMetricRepositoryAggregation:
     """test_metric_repository_aggregation - Test metric aggregation and time-series queries"""
     
@@ -369,7 +364,6 @@ class TestMetricRepositoryAggregation:
 
 
 # Test 81: ClickHouse connection pool
-@pytest.mark.asyncio
 class TestClickHouseConnectionPool:
     """test_clickhouse_connection_pool - Test connection pooling and query timeout"""
     
@@ -430,7 +424,6 @@ class TestClickHouseConnectionPool:
 
 
 # Test 82: Migration runner safety
-@pytest.mark.asyncio
 class TestMigrationRunnerSafety:
     """test_migration_runner_safety - Test migration safety and rollback capability"""
     
@@ -478,7 +471,6 @@ class TestMigrationRunnerSafety:
 
 
 # Test 83: Database health checks
-@pytest.mark.asyncio
 class TestDatabaseHealthChecks:
     """test_database_health_checks - Test health monitoring and alert thresholds"""
     

@@ -154,17 +154,25 @@ class TriagePromptBuilder:
     def _build_context_enhancements(self, context: Dict[str, Any]) -> str:
         """Build context enhancement string."""
         enhancements = []
-        
+        self._add_user_history_context(context, enhancements)
+        self._add_session_context(context, enhancements)
+        self._add_system_state_context(context, enhancements)
+        return "\n".join(enhancements)
+    
+    def _add_user_history_context(self, context: Dict[str, Any], enhancements: list) -> None:
+        """Add user history context if available."""
         if context.get('user_history'):
             enhancements.append(f"User history: {context['user_history']}")
-        
+    
+    def _add_session_context(self, context: Dict[str, Any], enhancements: list) -> None:
+        """Add session context if available."""
         if context.get('current_session'):
             enhancements.append(f"Session context: {context['current_session']}")
-        
+    
+    def _add_system_state_context(self, context: Dict[str, Any], enhancements: list) -> None:
+        """Add system state context if available."""
         if context.get('system_state'):
             enhancements.append(f"System state: {context['system_state']}")
-        
-        return "\n".join(enhancements)
     
     def build_structured_prompt(self, user_request: str, schema_hint: str = None) -> str:
         """Build prompt with structured output requirements."""
@@ -228,11 +236,18 @@ class TriagePromptBuilder:
         """Format conversation history for prompt."""
         if not history:
             return ""
-        
+        formatted_entries = self._format_recent_entries(history)
+        return "\n".join(formatted_entries)
+    
+    def _format_recent_entries(self, history: List[Dict]) -> List[str]:
+        """Format recent conversation entries."""
         formatted_entries = []
         for entry in history[-3:]:  # Last 3 entries
             role = entry.get('role', 'unknown')
-            content = entry.get('content', '')[:100] + '...' if len(entry.get('content', '')) > 100 else entry.get('content', '')
+            content = self._truncate_content(entry.get('content', ''))
             formatted_entries.append(f"{role}: {content}")
-        
-        return "\n".join(formatted_entries)
+        return formatted_entries
+    
+    def _truncate_content(self, content: str) -> str:
+        """Truncate content if too long."""
+        return content[:100] + '...' if len(content) > 100 else content

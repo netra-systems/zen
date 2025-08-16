@@ -29,6 +29,7 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
     currentRunId, 
     messages, 
     wsEventBuffer,
+    wsEventBufferVersion,
     executedAgents,
     performanceMetrics,
     activeThreadId
@@ -38,6 +39,8 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
   const [searchQuery, setSearchQuery] = useState('');
   const [isMaximized, setIsMaximized] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [events, setEvents] = useState<WSEventData[]>([]);
+  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get events from WebSocket buffer
   interface WSEventData {
@@ -47,7 +50,38 @@ export const OverflowPanel: React.FC<OverflowPanelProps> = ({ isOpen, onClose })
     [key: string]: unknown;
   }
   
-  const events: WSEventData[] = wsEventBuffer?.getAll?.() || [];
+  // Helper functions for event updates
+  const updateEventsFromBuffer = () => {
+    if (wsEventBuffer?.getAll) {
+      setEvents(wsEventBuffer.getAll());
+    }
+  };
+
+  const clearUpdateTimeout = () => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
+    }
+  };
+
+  // Update events reactively when buffer version changes (debounced for performance)
+  useEffect(() => {
+    clearUpdateTimeout();
+    updateTimeoutRef.current = setTimeout(updateEventsFromBuffer, 100);
+    
+    return () => clearUpdateTimeout();
+  }, [wsEventBuffer, wsEventBufferVersion]);
+
+  // Helper for auto-scroll
+  const scrollEventsToBottom = () => {
+    if (scrollAreaRef.current && activeTab === 'events') {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  };
+
+  // Auto-scroll to bottom when new events arrive (if events tab is active)
+  useEffect(() => {
+    scrollEventsToBottom();
+  }, [events.length, activeTab]);
   
   // Filter events based on search and filter
   const filteredEvents = events.filter((event: WSEventData) => {

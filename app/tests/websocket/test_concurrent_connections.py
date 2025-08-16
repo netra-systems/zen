@@ -86,9 +86,6 @@ async def _test_broadcasting(connections: List):
     await asyncio.gather(*broadcast_tasks)
     broadcast_duration = time.time() - broadcast_start
     assert broadcast_duration < 5, f"Broadcast to {len(connections)} connections should complete in <5s"
-
-
-@pytest.mark.asyncio
 @pytest.mark.stress
 async def test_concurrent_connection_limit_1000_users():
     """Test handling of 1000+ concurrent WebSocket connections with proper limits"""
@@ -125,9 +122,6 @@ async def _create_all_connections(connections: List, connection_metrics: Dict, t
 async def _cleanup_connections(connections: List):
     cleanup_tasks = [conn.close() for conn in connections]
     await asyncio.gather(*cleanup_tasks, return_exceptions=True)
-
-
-@pytest.mark.asyncio
 async def test_rapid_connect_disconnect_cycles():
     """Test rapid connection and disconnection cycles with realistic expectations"""
     
@@ -168,9 +162,6 @@ async def test_rapid_connect_disconnect_cycles():
     # Fixed: More realistic timing expectations
     assert avg_connect < 0.02, f"Average connection time too high: {avg_connect*1000:.2f}ms"
     assert avg_disconnect < 0.01, f"Average disconnection time too high: {avg_disconnect*1000:.2f}ms"
-
-
-@pytest.mark.asyncio
 async def test_connection_pool_exhaustion_recovery():
     """Test recovery from connection pool exhaustion"""
     

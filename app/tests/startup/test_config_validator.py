@@ -126,16 +126,12 @@ class TestServiceConfigValidatorInit:
 
 class TestConfigFileChecking:
     """Test configuration file existence and age checking."""
-    
-    @pytest.mark.asyncio
     async def test_check_config_file_missing(self, mock_validation_context: ValidationContext) -> None:
         """Test config file check when file is missing."""
         validator = ServiceConfigValidator(mock_validation_context)
         
         result = await validator._check_config_file()
         assert result.status == ConfigStatus.MISSING
-
-    @pytest.mark.asyncio
     async def test_check_config_file_exists_recent(self, mock_validation_context: ValidationContext,
                                                   temp_config_path: Path) -> None:
         """Test config file check with recent file."""
@@ -234,8 +230,6 @@ class TestEndpointValidation:
         
         endpoints = validator._get_service_endpoints(config)
         assert "https://ch.example.com:8443" in endpoints
-
-    @pytest.mark.asyncio
     async def test_check_endpoints_all_reachable(self, mock_validation_context: ValidationContext) -> None:
         """Test endpoint checking when all are reachable."""
         validator = ServiceConfigValidator(mock_validation_context)
@@ -245,8 +239,6 @@ class TestEndpointValidation:
             reachable, unreachable = await validator._check_endpoints(endpoints)
             assert len(reachable) == 2
             assert len(unreachable) == 0
-
-    @pytest.mark.asyncio
     async def test_check_endpoints_some_unreachable(self, mock_validation_context: ValidationContext) -> None:
         """Test endpoint checking with some unreachable."""
         validator = ServiceConfigValidator(mock_validation_context)
@@ -256,8 +248,6 @@ class TestEndpointValidation:
             reachable, unreachable = await validator._check_endpoints(endpoints)
             assert len(reachable) == 1
             assert len(unreachable) == 1
-
-    @pytest.mark.asyncio
     async def test_check_single_endpoint_http_success(self, mock_validation_context: ValidationContext) -> None:
         """Test single HTTP endpoint check success."""
         validator = ServiceConfigValidator(mock_validation_context)
@@ -269,8 +259,6 @@ class TestEndpointValidation:
         
         result = await validator._check_single_endpoint(mock_session, "http://api.example.com")
         assert result is True
-
-    @pytest.mark.asyncio
     async def test_check_single_endpoint_http_server_error(self, mock_validation_context: ValidationContext) -> None:
         """Test single HTTP endpoint check with server error."""
         validator = ServiceConfigValidator(mock_validation_context)
@@ -282,8 +270,6 @@ class TestEndpointValidation:
         
         result = await validator._check_single_endpoint(mock_session, "http://api.example.com")
         assert result is False
-
-    @pytest.mark.asyncio
     async def test_check_single_endpoint_redis_success(self, mock_validation_context: ValidationContext) -> None:
         """Test single Redis endpoint check."""
         validator = ServiceConfigValidator(mock_validation_context)
@@ -291,8 +277,6 @@ class TestEndpointValidation:
         with patch.object(validator, '_check_redis_endpoint', return_value=True):
             result = await validator._check_single_endpoint(None, "redis://redis.example.com:6379")
             assert result is True
-
-    @pytest.mark.asyncio
     async def test_check_redis_endpoint_no_library(self, mock_validation_context: ValidationContext) -> None:
         """Test Redis endpoint check without redis library."""
         validator = ServiceConfigValidator(mock_validation_context)
@@ -304,16 +288,12 @@ class TestEndpointValidation:
 
 class TestValidationWorkflow:
     """Test complete validation workflow."""
-    
-    @pytest.mark.asyncio
     async def test_validate_config_missing_file(self, mock_validation_context: ValidationContext) -> None:
         """Test validation with missing config file."""
         validator = ServiceConfigValidator(mock_validation_context)
         
         result = await validator.validate_config()
         assert result.status == ConfigStatus.MISSING
-
-    @pytest.mark.asyncio
     async def test_validate_config_load_failure(self, mock_validation_context: ValidationContext,
                                                temp_config_path: Path) -> None:
         """Test validation with config load failure."""
@@ -324,8 +304,6 @@ class TestValidationWorkflow:
             result = await validator.validate_config()
             assert result.status == ConfigStatus.INVALID
             assert "failed to load" in result.errors[0].lower()
-
-    @pytest.mark.asyncio
     async def test_validate_config_with_endpoints(self, mock_validation_context: ValidationContext,
                                                  temp_config_path: Path,
                                                  mock_services_config: ServicesConfiguration) -> None:
@@ -338,8 +316,6 @@ class TestValidationWorkflow:
                 result = await validator.validate_config()
                 assert result.status == ConfigStatus.VALID
                 assert len(result.reachable_endpoints) == 1
-
-    @pytest.mark.asyncio
     async def test_validate_endpoints_updates_status(self, mock_validation_context: ValidationContext,
                                                     mock_services_config: ServicesConfiguration) -> None:
         """Test that endpoint validation updates base result."""
@@ -448,8 +424,6 @@ class TestUtilityFunctions:
         assert 'REDIS_HOST' in overrides
         assert 'CLICKHOUSE_PORT' in overrides
         assert 'OTHER_VAR' not in overrides
-
-    @pytest.mark.asyncio
     async def test_handle_fallback_action_use_defaults(self, mock_validation_context: ValidationContext) -> None:
         """Test fallback action handling for use_defaults."""
         result = ConfigValidationResult(status=ConfigStatus.INVALID)
@@ -457,8 +431,6 @@ class TestUtilityFunctions:
         config, returned_result = await _handle_fallback_action("use_defaults", mock_validation_context, result)
         assert isinstance(config, ServicesConfiguration)
         assert returned_result == result
-
-    @pytest.mark.asyncio
     async def test_handle_fallback_action_prompt_user(self, mock_validation_context: ValidationContext) -> None:
         """Test fallback action handling for prompt_user."""
         result = ConfigValidationResult(status=ConfigStatus.STALE)
@@ -474,8 +446,6 @@ class TestUtilityFunctions:
 
 class TestMainValidationFunction:
     """Test main validation entry point."""
-    
-    @pytest.mark.asyncio
     async def test_validate_service_config_defaults(self) -> None:
         """Test service config validation with defaults."""
         with patch('dev_launcher.config_validator.ServiceConfigValidator') as mock_validator_class:
@@ -491,8 +461,6 @@ class TestMainValidationFunction:
                 
                 config, result = await validate_service_config()
                 assert isinstance(result, ConfigValidationResult)
-
-    @pytest.mark.asyncio
     async def test_validate_service_config_with_overrides(self, temp_config_path: Path) -> None:
         """Test service config validation with CLI overrides."""
         cli_overrides = {"REDIS_HOST": "custom"}

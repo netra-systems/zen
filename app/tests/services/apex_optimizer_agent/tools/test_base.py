@@ -185,8 +185,6 @@ class TestBaseTool:
             "version": "1.0.0",
             "status": "production"
         }
-    
-    @pytest.mark.asyncio
     async def test_base_tool_execute_wrapper(self, mock_context, sample_metadata):
         """Test the execute wrapper method with logging"""
         tool = ConcreteTool(sample_metadata)
@@ -203,8 +201,6 @@ class TestBaseTool:
             
             # Verify result
             assert "Tool sample_tool executed" in result
-    
-    @pytest.mark.asyncio
     async def test_base_tool_execute_failure(self, mock_context, sample_metadata):
         """Test the execute wrapper method when tool fails"""
         tool = FailingTool(sample_metadata)
@@ -217,8 +213,6 @@ class TestBaseTool:
             mock_logger.error.assert_called_once()
             assert "sample_tool failed" in str(mock_logger.error.call_args)
             assert str(exc_info.value) == "Tool execution failed"
-    
-    @pytest.mark.asyncio
     async def test_concrete_tool_run_method(self, mock_context, sample_metadata):
         """Test the concrete implementation of run method"""
         tool = ConcreteTool(sample_metadata)
@@ -234,8 +228,6 @@ class TestBaseTool:
         
         assert tool.llm_name == "gpt-4"
         assert tool.metadata.name == "sample_tool"
-    
-    @pytest.mark.asyncio
     async def test_base_tool_multiple_executions(self, mock_context, sample_metadata):
         """Test multiple executions of the same tool"""
         tool = ConcreteTool(sample_metadata)
@@ -248,8 +240,6 @@ class TestBaseTool:
         assert len(results) == 5
         for i, result in enumerate(results):
             assert f"iteration': {i}" in result
-    
-    @pytest.mark.asyncio
     async def test_base_tool_concurrent_execution(self, mock_context, sample_metadata):
         """Test concurrent execution of tool instances"""
         tool1 = ConcreteTool(sample_metadata)
@@ -267,8 +257,6 @@ class TestBaseTool:
         assert len(results) == 2
         assert "sample_tool" in results[0]
         assert "concurrent_tool" in results[1]
-    
-    @pytest.mark.asyncio
     async def test_base_tool_execute_without_metadata_attribute(self, mock_context):
         """Test execute method when metadata attribute is not properly set"""
         class BrokenTool(BaseTool):
@@ -294,8 +282,6 @@ class TestBaseTool:
         assert isinstance(tool, BaseTool)
         assert isinstance(tool, ConcreteTool)
         assert isinstance(tool, SpecializedTool)
-    
-    @pytest.mark.asyncio
     async def test_base_tool_with_complex_kwargs(self, mock_context, sample_metadata):
         """Test tool execution with complex keyword arguments"""
         tool = ConcreteTool(sample_metadata)
@@ -313,8 +299,6 @@ class TestBaseTool:
         assert "nested_dict" in result
         assert "list_param" in result
         assert "tuple_param" in result
-    
-    @pytest.mark.asyncio
     async def test_base_tool_exception_types(self, mock_context, sample_metadata):
         """Test different exception types in tool execution"""
         class CustomExceptionTool(BaseTool):
@@ -335,8 +319,6 @@ class TestBaseTool:
                 
                 # The exception message may include quotes
                 assert "Custom error" in str(exc_info.value)
-    
-    @pytest.mark.asyncio
     async def test_base_tool_async_delay(self, mock_context, sample_metadata):
         """Test tool with async delay to ensure proper async handling"""
         class SlowTool(BaseTool):

@@ -79,8 +79,32 @@ class TriageExecutor:
     
     def _update_state_with_result(self, state: DeepAgentState, result) -> None:
         """Update state with triage result."""
-        state.triage_result = result
+        state.triage_result = self._ensure_triage_result_type(result)
         state.step_count += 1
+    
+    def _ensure_triage_result_type(self, result):
+        """Ensure result is proper TriageResult object."""
+        from .models import TriageResult
+        if isinstance(result, TriageResult):
+            return result
+        elif isinstance(result, dict):
+            return self._convert_dict_to_triage_result(result)
+        else:
+            return self._create_default_triage_result()
+    
+    def _convert_dict_to_triage_result(self, result_dict: dict):
+        """Convert dictionary to TriageResult with error handling."""
+        from .models import TriageResult
+        try:
+            return TriageResult(**result_dict)
+        except Exception as e:
+            logger.warning(f"Failed to convert dict to TriageResult: {e}")
+            return self._create_default_triage_result()
+    
+    def _create_default_triage_result(self):
+        """Create default TriageResult for error cases."""
+        from .models import TriageResult
+        return TriageResult(category="unknown", confidence_score=0.5)
     
     async def _handle_fallback_result(
         self, state: DeepAgentState, run_id: str, stream_updates: bool
@@ -92,29 +116,29 @@ class TriageExecutor:
         if stream_updates:
             await self._send_emergency_update(run_id, fallback_result)
     
-    async def _create_emergency_fallback(self, state: DeepAgentState, run_id: str) -> dict:
+    async def _create_emergency_fallback(self, state: DeepAgentState, run_id: str):
         """Create emergency fallback when all else fails."""
         logger.error(f"Emergency fallback activated for triage {run_id}")
         
         try:
             fallback_result = self.agent.triage_core.create_fallback_result(state.user_request)
-            return fallback_result.model_dump()
+            return fallback_result
         except Exception:
             return self._create_basic_emergency_fallback()
     
-    def _create_basic_emergency_fallback(self) -> dict:
+    def _create_basic_emergency_fallback(self):
         """Create basic emergency fallback response."""
-        return {
-            "category": "General Inquiry",
-            "confidence_score": 0.3,
-            "priority": "medium",
-            "extracted_entities": {},
-            "tool_recommendations": [],
-            "metadata": {
-                "fallback_used": True,
-                "fallback_type": "emergency"
-            }
-        }
+        from .models import TriageResult, Priority, TriageMetadata
+        return TriageResult(
+            category="General Inquiry",
+            confidence_score=0.3,
+            priority=Priority.MEDIUM,
+            metadata=TriageMetadata(
+                triage_duration_ms=0,
+                fallback_used=True,
+                error_details="emergency fallback"
+            )
+        )
     
     async def _send_completion_update(self, run_id: str, result) -> None:
         """Send completion update with result details."""
@@ -143,12 +167,13 @@ class TriageExecutor:
         fallback_used = metadata.get("fallback_used", False)
         return "completed_with_fallback" if fallback_used else "completed"
     
-    async def _send_emergency_update(self, run_id: str, result: dict) -> None:
+    async def _send_emergency_update(self, run_id: str, result) -> None:
         """Send emergency fallback update."""
+        result_dict = result.model_dump() if hasattr(result, 'model_dump') else result
         await self.agent._send_update(run_id, {
             "status": "completed_with_emergency_fallback",
             "message": "Triage completed using emergency fallback",
-            "result": result
+            "result": result_dict
         })
     
     async def _handle_execution_error(
@@ -160,17 +185,18 @@ class TriageExecutor:
         error_result = self._create_error_result(str(error))
         self._update_state_with_result(state, error_result)
     
-    def _create_error_result(self, error_message: str) -> dict:
+    def _create_error_result(self, error_message: str):
         """Create result object for error cases."""
-        return {
-            "category": "Error",
-            "confidence_score": 0.0,
-            "error": error_message,
-            "metadata": {
-                "error_occurred": True,
-                "fallback_used": True
-            }
-        }
+        from .models import TriageResult, TriageMetadata
+        return TriageResult(
+            category="Error",
+            confidence_score=0.0,
+            metadata=TriageMetadata(
+                triage_duration_ms=0,
+                error_details=error_message,
+                fallback_used=True
+            )
+        )
     
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Check if we have a user request to triage."""
@@ -199,11 +225,11 @@ class TriageExecutor:
         state.triage_result = error_result
         state.step_count += 1
     
-    def _create_validation_error_result(self, validation) -> dict:
+    def _create_validation_error_result(self, validation):
         """Create validation error result."""
         from .models import TriageResult
         return TriageResult(
             category="Validation Error",
             confidence_score=0.0,
             validation_status=validation
-        ).model_dump()
+        )

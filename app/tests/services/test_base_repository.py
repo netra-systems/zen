@@ -16,9 +16,6 @@ from app.tests.helpers.database_repository_helpers import (
 
 # Import fixtures from helpers
 pytest_plugins = ["app.tests.helpers.database_repository_fixtures"]
-
-
-@pytest.mark.asyncio
 class TestBaseRepository:
     """Test base repository functionality."""
 

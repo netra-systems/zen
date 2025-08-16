@@ -143,8 +143,6 @@ class TestCriticalIntegration:
             })
         else:
             return json.dumps({"response": "Test response"})
-
-    @pytest.mark.asyncio
     async def test_1_full_agent_workflow_with_database_and_websocket(
         self, setup_real_database, setup_integration_infrastructure
     ):
@@ -230,8 +228,6 @@ class TestCriticalIntegration:
         """Verify supervisor was configured correctly"""
         assert supervisor.thread_id == test_entities["thread"].id
         assert supervisor.user_id == test_entities["user_id"]
-
-    @pytest.mark.asyncio
     async def test_2_websocket_authentication_and_message_flow(
         self, setup_integration_infrastructure
     ):
@@ -288,8 +284,6 @@ class TestCriticalIntegration:
         with pytest.raises(Exception):
             await ws_manager.connect(None, mock_websocket)
         assert None not in ws_manager.active_connections
-
-    @pytest.mark.asyncio
     async def test_3_database_state_persistence_and_recovery(
         self, setup_real_database, setup_integration_infrastructure
     ):

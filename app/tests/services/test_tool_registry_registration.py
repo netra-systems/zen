@@ -510,8 +510,6 @@ class TestToolRegistryValidation:
 
 class TestToolRegistryPerformance:
     """Test performance aspects of tool registry"""
-    
-    @pytest.mark.asyncio
     async def test_large_scale_tool_registration(self, tool_registry):
         """Test registration performance with large number of tools"""
         import time

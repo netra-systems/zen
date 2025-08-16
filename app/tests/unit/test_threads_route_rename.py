@@ -38,8 +38,6 @@ def mock_user():
 
 class TestAutoRenameThread:
     """Test cases for POST /{thread_id}/auto-rename endpoint"""
-    
-    @pytest.mark.asyncio
     @patch('app.routes.threads_route.time.time')
     async def test_auto_rename_success(self, mock_time, mock_db, mock_user):
         """Test successful auto-rename with LLM"""
@@ -64,8 +62,6 @@ class TestAutoRenameThread:
         assert mock_thread.metadata_["updated_at"] == 1234567900
         mock_db.commit.assert_called_once()
         assert_ws_notification(mock_ws, "test_user_123", "thread_abc123", "Generated Title")
-    
-    @pytest.mark.asyncio
     @patch('app.routes.threads_route.time.time')
     async def test_auto_rename_llm_failure_fallback(self, mock_time, mock_db, mock_user):
         """Test auto-rename with LLM failure, using fallback"""
@@ -90,8 +86,6 @@ class TestAutoRenameThread:
         assert result.title == "Chat 1234567900"
         assert mock_thread.metadata_["title"] == "Chat 1234567900"
         mock_logger.warning.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_auto_rename_no_user_message(self, mock_db, mock_user):
         """Test auto-rename when no user message exists"""
         mock_thread = create_mock_thread()
@@ -105,8 +99,6 @@ class TestAutoRenameThread:
                 await auto_rename_thread("thread_abc123", mock_db, mock_user)
             
         assert_http_exception(exc_info, 400, "No user message found to generate title from")
-    
-    @pytest.mark.asyncio
     async def test_auto_rename_thread_not_found(self, mock_db, mock_user):
         """Test auto-rename for non-existent thread"""
         with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo:
@@ -117,8 +109,6 @@ class TestAutoRenameThread:
                 await auto_rename_thread("nonexistent", mock_db, mock_user)
             
             assert_http_exception(exc_info, 404, "Thread not found")
-    
-    @pytest.mark.asyncio
     async def test_auto_rename_access_denied(self, mock_db, mock_user):
         """Test auto-rename for thread owned by another user"""
         mock_thread = create_access_denied_thread()
@@ -131,8 +121,6 @@ class TestAutoRenameThread:
                 await auto_rename_thread("thread_abc123", mock_db, mock_user)
             
             assert_http_exception(exc_info, 403, "Access denied")
-    
-    @pytest.mark.asyncio
     @patch('app.routes.threads_route.time.time')
     async def test_auto_rename_empty_metadata(self, mock_time, mock_db, mock_user):
         """Test auto-rename when thread has no metadata"""
@@ -164,8 +152,6 @@ class TestAutoRenameThread:
         assert mock_thread.metadata_["title"] == "New Title"
         assert mock_thread.metadata_["auto_renamed"] == True
         assert mock_thread.metadata_["updated_at"] == 1234567900
-    
-    @pytest.mark.asyncio
     async def test_auto_rename_title_cleanup(self, mock_db, mock_user):
         """Test that generated title is cleaned up properly"""
         mock_thread = create_mock_thread()
@@ -191,8 +177,6 @@ class TestAutoRenameThread:
         expected_title = clean_llm_title(raw_title)
         assert result.title == expected_title
         assert len(result.title) == 50
-    
-    @pytest.mark.asyncio
     async def test_auto_rename_exception(self, mock_db, mock_user):
         """Test general exception in auto_rename_thread"""
         with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \

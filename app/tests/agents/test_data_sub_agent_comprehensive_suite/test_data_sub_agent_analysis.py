@@ -10,8 +10,6 @@ from app.agents.data_sub_agent.agent import DataSubAgent
 
 class TestDataSubAgentAnalysis:
     """Test DataSubAgent analysis methods"""
-    
-    @pytest.mark.asyncio
     async def test_analyze_performance_metrics_no_data(self, agent):
         """Test analyzing performance metrics with no data"""
         with patch.object(agent, '_fetch_clickhouse_data', new_callable=AsyncMock) as mock_fetch:
@@ -25,8 +23,6 @@ class TestDataSubAgentAnalysis:
             
         assert result["status"] == "no_data"
         assert "message" in result
-        
-    @pytest.mark.asyncio
     async def test_analyze_performance_metrics_minute_aggregation(self, agent, sample_performance_data):
         """Test analyzing performance metrics with minute aggregation"""
         with patch.object(agent, '_fetch_clickhouse_data', new_callable=AsyncMock) as mock_fetch:
@@ -45,8 +41,6 @@ class TestDataSubAgentAnalysis:
         assert result["summary"]["total_events"] == 100
         assert "latency" in result
         assert "throughput" in result
-        
-    @pytest.mark.asyncio
     async def test_analyze_performance_metrics_hour_aggregation(self, agent):
         """Test analyzing performance metrics with hour aggregation"""
         mock_data = [
@@ -68,8 +62,6 @@ class TestDataSubAgentAnalysis:
             
         assert result["time_range"]["aggregation_level"] == "hour"
         assert "trends" in result  # Should have trend analysis with 12 data points
-        
-    @pytest.mark.asyncio
     async def test_analyze_performance_metrics_day_aggregation(self, agent):
         """Test analyzing performance metrics with day aggregation"""
         mock_data = [
@@ -90,8 +82,6 @@ class TestDataSubAgentAnalysis:
             )
             
         assert result["time_range"]["aggregation_level"] == "day"
-        
-    @pytest.mark.asyncio
     async def test_analyze_performance_metrics_with_seasonality(self, agent):
         """Test analyzing performance metrics with seasonality detection"""
         # Create 24+ data points for seasonality detection
@@ -112,8 +102,6 @@ class TestDataSubAgentAnalysis:
             )
             
         assert "seasonality" in result
-        
-    @pytest.mark.asyncio
     async def test_analyze_performance_metrics_with_outliers(self, agent):
         """Test analyzing performance metrics with outlier detection"""
         mock_data = [
@@ -135,8 +123,6 @@ class TestDataSubAgentAnalysis:
             
         assert "outliers" in result
         assert "latency_outliers" in result["outliers"]
-        
-    @pytest.mark.asyncio
     async def test_detect_anomalies_no_data(self, agent):
         """Test anomaly detection with no data"""
         with patch.object(agent, '_fetch_clickhouse_data', new_callable=AsyncMock) as mock_fetch:
@@ -149,8 +135,6 @@ class TestDataSubAgentAnalysis:
             )
             
         assert result["status"] == "no_data"
-        
-    @pytest.mark.asyncio
     async def test_detect_anomalies_with_anomalies(self, agent, sample_anomaly_data):
         """Test anomaly detection with anomalies present"""
         with patch.object(agent, '_fetch_clickhouse_data', new_callable=AsyncMock) as mock_fetch:
@@ -166,8 +150,6 @@ class TestDataSubAgentAnalysis:
         assert "anomalies" in result
         assert result["anomalies_detected"] == 1
         assert result["anomaly_percentage"] == 50.0
-        
-    @pytest.mark.asyncio
     async def test_detect_anomalies_no_anomalies(self, agent):
         """Test anomaly detection with no anomalies"""
         mock_data = [
@@ -187,8 +169,6 @@ class TestDataSubAgentAnalysis:
             
         assert result["anomalies_detected"] == 0
         assert result["anomaly_percentage"] == 0.0
-        
-    @pytest.mark.asyncio
     async def test_analyze_usage_patterns_no_data(self, agent):
         """Test usage pattern analysis with no data"""
         with patch.object(agent, '_fetch_clickhouse_data', new_callable=AsyncMock) as mock_fetch:
@@ -197,8 +177,6 @@ class TestDataSubAgentAnalysis:
             result = await agent._analyze_usage_patterns(user_id=1, days_back=7)
             
         assert result["status"] == "no_data"
-        
-    @pytest.mark.asyncio
     async def test_analyze_usage_patterns_with_data(self, agent, sample_usage_patterns):
         """Test usage pattern analysis with data"""
         with patch.object(agent, '_fetch_clickhouse_data', new_callable=AsyncMock) as mock_fetch:
@@ -211,8 +189,6 @@ class TestDataSubAgentAnalysis:
         assert result["peak_hour"] == 11
         assert "low_hour" in result
         assert result["low_hour"] == 9
-        
-    @pytest.mark.asyncio
     async def test_analyze_correlations_insufficient_data(self, agent):
         """Test correlation analysis with insufficient data"""
         mock_data = [
@@ -230,8 +206,6 @@ class TestDataSubAgentAnalysis:
             )
             
         assert result["status"] == "insufficient_data"
-        
-    @pytest.mark.asyncio
     async def test_analyze_correlations_with_correlation(self, agent):
         """Test correlation analysis with strong correlation"""
         mock_data = [

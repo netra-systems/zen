@@ -13,8 +13,6 @@ from .conftest import EXAMPLE_PROMPTS
 @pytest.mark.e2e
 class TestAuditPrompts(BaseExamplePromptsTest):
     """Test class for audit prompts (Prompt 6)"""
-
-    @pytest.mark.asyncio
     async def test_prompt_6_variation_0(self, setup_real_infrastructure):
         """Test audit - original prompt"""
         infra = setup_real_infrastructure
@@ -23,8 +21,6 @@ class TestAuditPrompts(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_6_variation_1(self, setup_real_infrastructure):
         """Test audit - with budget"""
         infra = setup_real_infrastructure
@@ -33,8 +29,6 @@ class TestAuditPrompts(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_6_variation_2(self, setup_real_infrastructure):
         """Test audit - urgent"""
         infra = setup_real_infrastructure
@@ -43,8 +37,6 @@ class TestAuditPrompts(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_6_variation_3(self, setup_real_infrastructure):
         """Test audit - with GPU info"""
         infra = setup_real_infrastructure
@@ -53,8 +45,6 @@ class TestAuditPrompts(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_6_variation_4(self, setup_real_infrastructure):
         """Test audit - team perspective"""
         infra = setup_real_infrastructure
@@ -63,8 +53,6 @@ class TestAuditPrompts(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_6_variation_5(self, setup_real_infrastructure):
         """Test audit - with region"""
         infra = setup_real_infrastructure
@@ -73,8 +61,6 @@ class TestAuditPrompts(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_6_variation_6(self, setup_real_infrastructure):
         """Test audit - with error constraint"""
         infra = setup_real_infrastructure
@@ -83,8 +69,6 @@ class TestAuditPrompts(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_6_variation_7(self, setup_real_infrastructure):
         """Test audit - caps"""
         infra = setup_real_infrastructure
@@ -93,8 +77,6 @@ class TestAuditPrompts(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_6_variation_8(self, setup_real_infrastructure):
         """Test audit - follow-up"""
         infra = setup_real_infrastructure
@@ -103,8 +85,6 @@ class TestAuditPrompts(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_6_variation_9(self, setup_real_infrastructure):
         """Test audit - GPU count"""
         infra = setup_real_infrastructure
@@ -120,8 +100,6 @@ class TestAuditPrompts(BaseExamplePromptsTest):
 @pytest.mark.e2e
 class TestMultiObjectiveOptimization(BaseExamplePromptsTest):
     """Test class for multi-objective optimization prompts (Prompt 7)"""
-
-    @pytest.mark.asyncio
     async def test_prompt_7_variation_0(self, setup_real_infrastructure):
         """Test multi-objective - original prompt"""
         infra = setup_real_infrastructure
@@ -130,8 +108,6 @@ class TestMultiObjectiveOptimization(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_7_variation_1(self, setup_real_infrastructure):
         """Test multi-objective - with budget"""
         infra = setup_real_infrastructure
@@ -140,8 +116,6 @@ class TestMultiObjectiveOptimization(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_7_variation_2(self, setup_real_infrastructure):
         """Test multi-objective - urgent"""
         infra = setup_real_infrastructure
@@ -150,8 +124,6 @@ class TestMultiObjectiveOptimization(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_7_variation_3(self, setup_real_infrastructure):
         """Test multi-objective - with GPU info"""
         infra = setup_real_infrastructure
@@ -160,8 +132,6 @@ class TestMultiObjectiveOptimization(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_7_variation_4(self, setup_real_infrastructure):
         """Test multi-objective - team perspective"""
         infra = setup_real_infrastructure
@@ -170,8 +140,6 @@ class TestMultiObjectiveOptimization(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_7_variation_5(self, setup_real_infrastructure):
         """Test multi-objective - with region"""
         infra = setup_real_infrastructure
@@ -180,8 +148,6 @@ class TestMultiObjectiveOptimization(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_7_variation_6(self, setup_real_infrastructure):
         """Test multi-objective - with error constraint"""
         infra = setup_real_infrastructure
@@ -190,8 +156,6 @@ class TestMultiObjectiveOptimization(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_7_variation_7(self, setup_real_infrastructure):
         """Test multi-objective - caps"""
         infra = setup_real_infrastructure
@@ -200,8 +164,6 @@ class TestMultiObjectiveOptimization(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_7_variation_8(self, setup_real_infrastructure):
         """Test multi-objective - follow-up"""
         infra = setup_real_infrastructure
@@ -210,8 +172,6 @@ class TestMultiObjectiveOptimization(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_7_variation_9(self, setup_real_infrastructure):
         """Test multi-objective - GPU count"""
         infra = setup_real_infrastructure
@@ -227,8 +187,6 @@ class TestMultiObjectiveOptimization(BaseExamplePromptsTest):
 @pytest.mark.e2e
 class TestToolMigration(BaseExamplePromptsTest):
     """Test class for tool migration prompts (Prompt 8)"""
-
-    @pytest.mark.asyncio
     async def test_prompt_8_variation_0(self, setup_real_infrastructure):
         """Test tool migration - original prompt"""
         infra = setup_real_infrastructure
@@ -237,8 +195,6 @@ class TestToolMigration(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_8_variation_1(self, setup_real_infrastructure):
         """Test tool migration - with budget"""
         infra = setup_real_infrastructure
@@ -247,8 +203,6 @@ class TestToolMigration(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_8_variation_2(self, setup_real_infrastructure):
         """Test tool migration - urgent"""
         infra = setup_real_infrastructure
@@ -257,8 +211,6 @@ class TestToolMigration(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_8_variation_3(self, setup_real_infrastructure):
         """Test tool migration - with GPU info"""
         infra = setup_real_infrastructure
@@ -267,8 +219,6 @@ class TestToolMigration(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_8_variation_4(self, setup_real_infrastructure):
         """Test tool migration - team perspective"""
         infra = setup_real_infrastructure
@@ -277,8 +227,6 @@ class TestToolMigration(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_8_variation_5(self, setup_real_infrastructure):
         """Test tool migration - with region"""
         infra = setup_real_infrastructure
@@ -287,8 +235,6 @@ class TestToolMigration(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_8_variation_6(self, setup_real_infrastructure):
         """Test tool migration - with error constraint"""
         infra = setup_real_infrastructure
@@ -297,8 +243,6 @@ class TestToolMigration(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_8_variation_7(self, setup_real_infrastructure):
         """Test tool migration - caps"""
         infra = setup_real_infrastructure
@@ -307,8 +251,6 @@ class TestToolMigration(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_8_variation_8(self, setup_real_infrastructure):
         """Test tool migration - follow-up"""
         infra = setup_real_infrastructure
@@ -317,8 +259,6 @@ class TestToolMigration(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_8_variation_9(self, setup_real_infrastructure):
         """Test tool migration - GPU count"""
         infra = setup_real_infrastructure
@@ -334,8 +274,6 @@ class TestToolMigration(BaseExamplePromptsTest):
 @pytest.mark.e2e
 class TestRollbackAnalysis(BaseExamplePromptsTest):
     """Test class for rollback analysis prompts (Prompt 9)"""
-
-    @pytest.mark.asyncio
     async def test_prompt_9_variation_0(self, setup_real_infrastructure):
         """Test rollback analysis - original prompt"""
         infra = setup_real_infrastructure
@@ -344,8 +282,6 @@ class TestRollbackAnalysis(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_9_variation_1(self, setup_real_infrastructure):
         """Test rollback analysis - with budget"""
         infra = setup_real_infrastructure
@@ -354,8 +290,6 @@ class TestRollbackAnalysis(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_9_variation_2(self, setup_real_infrastructure):
         """Test rollback analysis - urgent"""
         infra = setup_real_infrastructure
@@ -364,8 +298,6 @@ class TestRollbackAnalysis(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_9_variation_3(self, setup_real_infrastructure):
         """Test rollback analysis - with GPU info"""
         infra = setup_real_infrastructure
@@ -374,8 +306,6 @@ class TestRollbackAnalysis(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_9_variation_4(self, setup_real_infrastructure):
         """Test rollback analysis - team perspective"""
         infra = setup_real_infrastructure
@@ -384,8 +314,6 @@ class TestRollbackAnalysis(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_9_variation_5(self, setup_real_infrastructure):
         """Test rollback analysis - with region"""
         infra = setup_real_infrastructure
@@ -394,8 +322,6 @@ class TestRollbackAnalysis(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_9_variation_6(self, setup_real_infrastructure):
         """Test rollback analysis - with error constraint"""
         infra = setup_real_infrastructure
@@ -404,8 +330,6 @@ class TestRollbackAnalysis(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_9_variation_7(self, setup_real_infrastructure):
         """Test rollback analysis - caps"""
         infra = setup_real_infrastructure
@@ -414,8 +338,6 @@ class TestRollbackAnalysis(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_9_variation_8(self, setup_real_infrastructure):
         """Test rollback analysis - follow-up"""
         infra = setup_real_infrastructure
@@ -424,8 +346,6 @@ class TestRollbackAnalysis(BaseExamplePromptsTest):
         result = await self.run_single_test(prompt, context, infra)
         assert result.success, f"Test failed: {result.error}"
         assert result.quality_passed, "Response quality check failed"
-    
-    @pytest.mark.asyncio
     async def test_prompt_9_variation_9(self, setup_real_infrastructure):
         """Test rollback analysis - GPU count"""
         infra = setup_real_infrastructure

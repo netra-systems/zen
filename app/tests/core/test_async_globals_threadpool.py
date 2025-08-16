@@ -38,8 +38,6 @@ class TestGlobalInstances:
 
 class TestRunInThreadpool:
     """Test thread pool execution"""
-    
-    @pytest.mark.asyncio
     async def test_run_sync_function_in_threadpool(self):
         """Test running synchronous function in thread pool"""
         def sync_function(x, y):
@@ -47,16 +45,12 @@ class TestRunInThreadpool:
             return x + y
         result = await run_in_threadpool(sync_function, 2, 3)
         assert result == 5
-    
-    @pytest.mark.asyncio
     async def test_run_sync_function_with_kwargs(self):
         """Test running sync function with keyword arguments"""
         def sync_function_with_kwargs(x, y=10, z=20):
             return x + y + z
         result = await run_in_threadpool(sync_function_with_kwargs, 5, y=15, z=25)
         assert result == 45
-    
-    @pytest.mark.asyncio
     async def test_threadpool_reuses_executor(self):
         """Test that thread pool executor is reused"""
         def get_thread_id():
@@ -71,8 +65,6 @@ class TestRunInThreadpool:
 
 class TestShutdownAsyncUtils:
     """Test shutdown functionality"""
-    
-    @pytest.mark.asyncio
     async def test_shutdown_async_utils(self):
         """Test shutting down async utilities"""
         resource_manager = get_global_resource_manager()
@@ -82,8 +74,6 @@ class TestShutdownAsyncUtils:
         await shutdown_async_utils()
         assert resource_manager._shutting_down == True
         assert task_pool._shutting_down == True
-    
-    @pytest.mark.asyncio
     async def test_shutdown_with_thread_pool_executor(self):
         """Test shutdown including thread pool executor"""
         def sync_func():

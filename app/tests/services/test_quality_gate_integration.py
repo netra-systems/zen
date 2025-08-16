@@ -29,8 +29,6 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         mock_redis.add_to_list = AsyncMock()
         mock_redis.store_metrics = AsyncMock()
         return QualityGateService(redis_manager=mock_redis)
-        
-    @pytest.mark.asyncio
     async def test_complete_optimization_workflow(self, service):
         """Test complete workflow for optimization content"""
         content = self._get_optimization_content()
@@ -168,8 +166,6 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         """Assert no retry is needed"""
         assert result.retry_suggested == False
         assert result.retry_prompt_adjustments == None
-        
-    @pytest.mark.asyncio
     async def test_poor_content_improvement_cycle(self, service):
         """Test improvement cycle for poor content"""
         # Start with poor content
@@ -209,8 +205,6 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         assert result2.passed == True
         assert result2.metrics.overall_score > result1.metrics.overall_score
         assert result2.metrics.generic_phrase_count < result1.metrics.generic_phrase_count
-
-    @pytest.mark.asyncio
     async def test_action_plan_validation_workflow(self, service):
         """Test validation workflow for action plan content"""
         content = self._get_action_plan_content()
@@ -333,8 +327,6 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     def _assert_action_plan_quality(self, result) -> None:
         """Assert action plan quality is high"""
         assert result.retry_suggested == False
-
-    @pytest.mark.asyncio
     async def test_error_message_validation_workflow(self, service):
         """Test validation workflow for error message content"""
         content = """

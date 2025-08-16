@@ -355,9 +355,6 @@ class TestCircuitBreakerIntegration:
         failure_types = circuit.metrics.failure_types
         assert failure_types["ValueError"] == 2
         assert failure_types["TypeError"] == 1
-
-
-@pytest.mark.asyncio
 class TestCircuitBreakerEdgeCases:
     """Test edge cases and error conditions."""
     

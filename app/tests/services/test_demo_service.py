@@ -7,9 +7,6 @@ import json
 import numpy as np
 
 from app.services.demo_service import DemoService
-
-
-@pytest.mark.asyncio
 class TestDemoService:
     """Test suite for DemoService."""
     
@@ -69,8 +66,6 @@ class TestDemoService:
         service.analytics_tracker.redis_client = mock_redis_client
         service.report_generator.redis_client = mock_redis_client
         return service
-    
-    @pytest.mark.asyncio
     async def test_process_demo_chat_new_session(self, demo_service, mock_redis_client):
         """Test processing demo chat for a new session."""
         # Execute
@@ -104,8 +99,6 @@ class TestDemoService:
         call_args = mock_redis_client.setex.call_args
         assert call_args[0][0] == "demo:session:test-session-123"
         assert call_args[0][1] == 3600 * 24  # 24 hour expiry
-    
-    @pytest.mark.asyncio
     async def test_process_demo_chat_existing_session(self, demo_service, mock_redis_client):
         """Test processing demo chat for an existing session."""
         # Setup existing session data
@@ -137,8 +130,6 @@ class TestDemoService:
         call_args = mock_redis_client.setex.call_args
         session_data = json.loads(call_args[0][2])
         assert len(session_data["messages"]) == 2  # user + assistant (original gets replaced)
-    
-    @pytest.mark.asyncio
     async def test_get_industry_templates_valid(self, demo_service):
         """Test getting templates for a valid industry."""
         # Execute
@@ -155,16 +146,12 @@ class TestDemoService:
             assert len(template["optimization_scenarios"]) == 3
             assert "baseline" in template["typical_metrics"]
             assert "optimized" in template["typical_metrics"]
-    
-    @pytest.mark.asyncio
     async def test_get_industry_templates_invalid(self, demo_service):
         """Test getting templates for an invalid industry."""
         with pytest.raises(ValueError) as exc_info:
             await demo_service.get_industry_templates("invalid_industry")
         
         assert "Unknown industry: invalid_industry" in str(exc_info.value)
-    
-    @pytest.mark.asyncio
     async def test_calculate_roi_financial(self, demo_service):
         """Test ROI calculation for financial industry."""
         # Execute
@@ -189,8 +176,6 @@ class TestDemoService:
         assert perf["throughput_increase_factor"] == 2.5
         assert perf["accuracy_improvement_percentage"] == 8.0
         assert perf["error_rate_reduction_percentage"] == 50.0
-    
-    @pytest.mark.asyncio
     async def test_calculate_roi_different_industries(self, demo_service):
         """Test ROI calculation varies by industry."""
         # Test multiple industries
@@ -215,8 +200,6 @@ class TestDemoService:
             assert result["annual_savings"] > 0
             assert 0 < result["savings_percentage"] <= 100
             assert result["roi_months"] > 0
-    
-    @pytest.mark.asyncio
     async def test_generate_synthetic_metrics(self, demo_service):
         """Test synthetic metrics generation."""
         # Execute
@@ -245,8 +228,6 @@ class TestDemoService:
         baseline_lat = metrics["values"]["baseline_latency"]
         optimized_lat = metrics["values"]["optimized_latency"]
         assert optimized_lat[0] > optimized_lat[-1]  # Latency should decrease
-    
-    @pytest.mark.asyncio
     async def test_generate_report(self, demo_service, mock_redis_client):
         """Test report generation."""
         # Setup session data
@@ -276,8 +257,6 @@ class TestDemoService:
         call_args = mock_redis_client.setex.call_args_list[-1]
         assert "demo:report:" in call_args[0][0]
         assert call_args[0][1] == 3600 * 24  # 24 hour expiry
-    
-    @pytest.mark.asyncio
     async def test_generate_report_session_not_found(self, demo_service, mock_redis_client):
         """Test report generation with invalid session."""
         mock_redis_client.get.return_value = None
@@ -289,8 +268,6 @@ class TestDemoService:
             )
         
         assert "Session not found: invalid-session" in str(exc_info.value)
-    
-    @pytest.mark.asyncio
     async def test_get_session_status(self, demo_service, mock_redis_client):
         """Test getting session status."""
         # Setup session data
@@ -317,8 +294,6 @@ class TestDemoService:
         assert status["progress_percentage"] == 50.0  # 3 messages / 6 expected steps
         assert status["status"] == "active"
         assert status["last_interaction"] != None
-    
-    @pytest.mark.asyncio
     async def test_get_session_status_not_found(self, demo_service, mock_redis_client):
         """Test getting status for non-existent session."""
         mock_redis_client.get.return_value = None
@@ -327,8 +302,6 @@ class TestDemoService:
             await demo_service.get_session_status("invalid-session")
         
         assert "Session not found: invalid-session" in str(exc_info.value)
-    
-    @pytest.mark.asyncio
     async def test_submit_feedback(self, demo_service, mock_redis_client):
         """Test submitting demo feedback."""
         # Execute
@@ -349,8 +322,6 @@ class TestDemoService:
         feedback_data = json.loads(call_args[0][2])
         assert feedback_data["session_id"] == "test-session"
         assert feedback_data["feedback"] == feedback
-    
-    @pytest.mark.asyncio
     async def test_track_demo_interaction(self, demo_service, mock_redis_client):
         """Test tracking demo interactions."""
         # Execute
@@ -374,8 +345,6 @@ class TestDemoService:
         assert interaction_data["session_id"] == "test-session"
         assert interaction_data["type"] == "chat"
         assert interaction_data["data"]["industry"] == "financial"
-    
-    @pytest.mark.asyncio
     async def test_get_analytics_summary(self, demo_service, mock_redis_client):
         """Test getting analytics summary."""
         # Setup mock analytics data
@@ -418,8 +387,6 @@ class TestDemoService:
         assert "healthcare" in summary["industries"]
         assert summary["avg_interactions_per_session"] > 0
         assert summary["report_exports"] >= 1
-    
-    @pytest.mark.asyncio
     async def test_generate_demo_response(self, demo_service):
         """Test demo response generation."""
         # Import the function directly for testing
@@ -450,8 +417,6 @@ class TestDemoService:
         assert "4 weeks" in response
         assert "92.00%" in response or "0.92" in response
         assert "Recommendation Engine" in response or "Search Optimization" in response or "Inventory Prediction" in response
-    
-    @pytest.mark.asyncio
     async def test_error_handling_redis_failure(self, demo_service):
         """Test error handling when Redis operations fail."""
         # Make Redis operations fail

@@ -3,8 +3,6 @@ import json
 from unittest.mock import AsyncMock, patch, MagicMock
 from fastapi.testclient import TestClient
 from app.main import app
-
-@pytest.mark.asyncio
 class TestWebSocketConnection:
     
     def test_websocket_connection_success(self):

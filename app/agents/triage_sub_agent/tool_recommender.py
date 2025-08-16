@@ -51,20 +51,24 @@ class ToolRecommender:
         entities: ExtractedEntities
     ) -> List[ToolRecommendation]:
         """Recommend tools based on category and extracted entities"""
-        recommendations = []
-        
         if category not in self.tool_mapping:
-            return recommendations
-        
+            return []
+        recommendations = self._build_tool_recommendations(category, entities)
+        return self._sort_and_limit_recommendations(recommendations)
+    
+    def _build_tool_recommendations(self, category: str, entities: ExtractedEntities) -> List[ToolRecommendation]:
+        """Build recommendations for all tools in category."""
+        recommendations = []
         for tool_name in self.tool_mapping[category]:
             relevance = self._calculate_relevance(tool_name, entities)
-            
             recommendations.append(ToolRecommendation(
                 tool_name=tool_name,
                 relevance_score=min(1.0, relevance)
             ))
-        
-        # Sort by relevance and return top 5
+        return recommendations
+    
+    def _sort_and_limit_recommendations(self, recommendations: List[ToolRecommendation]) -> List[ToolRecommendation]:
+        """Sort by relevance and return top 5."""
         recommendations.sort(key=lambda x: x.relevance_score, reverse=True)
         return recommendations[:5]
     
@@ -75,15 +79,17 @@ class ToolRecommender:
     ) -> float:
         """Calculate relevance score for a tool"""
         relevance = 0.8  # Base relevance
-        
-        # Increase relevance based on entities
-        if entities.models_mentioned and "model" in tool_name:
-            relevance += 0.1
-        
-        if entities.metrics_mentioned and self._has_metric_keywords(tool_name):
-            relevance += 0.1
-        
+        relevance += self._get_model_bonus(tool_name, entities)
+        relevance += self._get_metrics_bonus(tool_name, entities)
         return relevance
+    
+    def _get_model_bonus(self, tool_name: str, entities: ExtractedEntities) -> float:
+        """Get relevance bonus for model-related tools."""
+        return 0.1 if entities.models_mentioned and "model" in tool_name else 0.0
+    
+    def _get_metrics_bonus(self, tool_name: str, entities: ExtractedEntities) -> float:
+        """Get relevance bonus for metrics-related tools."""
+        return 0.1 if entities.metrics_mentioned and self._has_metric_keywords(tool_name) else 0.0
     
     def _has_metric_keywords(self, tool_name: str) -> bool:
         """Check if tool name contains metric-related keywords"""

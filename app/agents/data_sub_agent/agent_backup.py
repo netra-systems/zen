@@ -25,19 +25,29 @@ class DataSubAgent(BaseSubAgent):
     """Advanced data gathering and analysis agent with ClickHouse integration."""
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
+        self._init_base_agent(llm_manager)
+        self.tool_dispatcher = tool_dispatcher
+        self._init_core_components()
+        self._init_redis_manager()
+    
+    def _init_base_agent(self, llm_manager: LLMManager) -> None:
+        """Initialize base agent with core parameters."""
         super().__init__(
             llm_manager, 
             name="DataSubAgent", 
             description="Advanced data gathering and analysis agent with ClickHouse integration."
         )
-        self.tool_dispatcher = tool_dispatcher
+    
+    def _init_core_components(self) -> None:
+        """Initialize core agent components."""
         self.query_builder = QueryBuilder()
         self.analysis_engine = AnalysisEngine()
         self.clickhouse_ops = ClickHouseOperations()
         self.redis_manager = None
         self.cache_ttl = 300  # 5 minutes cache TTL
-        
-        # Initialize Redis for caching if available
+    
+    def _init_redis_manager(self) -> None:
+        """Initialize Redis manager with error handling."""
         try:
             self.redis_manager = RedisManager()
         except Exception as e:

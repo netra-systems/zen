@@ -520,8 +520,6 @@ class TestClickHouseQueryInterceptor:
     def interceptor(self, mock_client):
         """Create query interceptor with mock client"""
         return ClickHouseQueryInterceptor(mock_client)
-    
-    @pytest.mark.asyncio
     async def test_interceptor_fixes_and_executes_query(self, interceptor, mock_client):
         """Test that interceptor fixes query and executes it"""
         original_query = "SELECT metrics.value[1] FROM test_table"
@@ -538,8 +536,6 @@ class TestClickHouseQueryInterceptor:
         # Should track statistics
         assert interceptor.queries_executed == 1
         assert interceptor.queries_fixed == 1
-    
-    @pytest.mark.asyncio
     async def test_interceptor_passes_through_correct_queries(self, interceptor, mock_client):
         """Test that correct queries pass through unchanged"""
         correct_query = "SELECT toFloat64OrZero(arrayElement(metrics.value, 1)) FROM test_table"
@@ -555,8 +551,6 @@ class TestClickHouseQueryInterceptor:
         # Should track execution but not fixing
         assert interceptor.queries_executed == 1
         assert interceptor.queries_fixed == 0
-    
-    @pytest.mark.asyncio
     async def test_interceptor_handles_client_errors(self, interceptor, mock_client):
         """Test interceptor handling of client execution errors"""
         # Setup client to fail
@@ -573,8 +567,6 @@ class TestClickHouseQueryInterceptor:
         
         # Should still track execution attempt
         assert interceptor.queries_executed == 1
-    
-    @pytest.mark.asyncio
     async def test_interceptor_statistics_tracking(self, interceptor, mock_client):
         """Test interceptor statistics tracking"""
         queries = [
@@ -595,8 +587,6 @@ class TestClickHouseQueryInterceptor:
         # Check all queries were executed
         executed_queries = mock_client.get_executed_queries()
         assert len(executed_queries) == 4
-    
-    @pytest.mark.asyncio
     async def test_interceptor_can_be_disabled(self, interceptor, mock_client):
         """Test that interceptor fixing can be disabled"""
         # Disable fixing
@@ -615,8 +605,6 @@ class TestClickHouseQueryInterceptor:
         # Should track execution but not fixing
         assert interceptor.queries_executed == 1
         assert interceptor.queries_fixed == 0
-    
-    @pytest.mark.asyncio
     async def test_interceptor_with_query_parameters(self, interceptor, mock_client):
         """Test interceptor with parameterized queries"""
         parameterized_query = "SELECT metrics.value[?] FROM table WHERE id = ?"
@@ -629,8 +617,6 @@ class TestClickHouseQueryInterceptor:
         executed_queries = mock_client.get_executed_queries()
         assert len(executed_queries) == 1
         assert 'toFloat64OrZero(arrayElement(metrics.value, ?))' in executed_queries[0]
-    
-    @pytest.mark.asyncio
     async def test_concurrent_interceptor_usage(self, interceptor, mock_client):
         """Test interceptor under concurrent usage"""
         queries = [
@@ -690,8 +676,6 @@ class TestClickHouseQueryInterceptor:
 
 class TestClickHouseQueryFixerIntegration:
     """Test integration scenarios for query fixer"""
-    
-    @pytest.mark.asyncio
     async def test_end_to_end_query_processing(self):
         """Test complete query processing pipeline"""
         # Setup
@@ -715,8 +699,6 @@ class TestClickHouseQueryFixerIntegration:
         executed = mock_client.get_executed_queries()
         assert len(executed) == 1
         assert "toFloat64OrZero(arrayElement(metrics.value, 1))" in executed[0]
-    
-    @pytest.mark.asyncio
     async def test_batch_query_processing(self):
         """Test processing batch of queries with mixed syntax"""
         mock_client = MockClickHouseClient()

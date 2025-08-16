@@ -28,8 +28,6 @@ from app.tests.helpers.shared_test_types import TestIntegration as SharedTestInt
 
 class TestSupervisorAgent:
     """Test cases for the Supervisor agent orchestration"""
-    
-    @pytest.mark.asyncio
     async def test_supervisor_initialization(self):
         """Test 1: Verify Supervisor initializes with all required sub-agents"""
         mock_db = AsyncMock()
@@ -50,8 +48,6 @@ class TestSupervisorAgent:
         assert "ReportingSubAgent" in agent_types
         assert "SyntheticDataSubAgent" in agent_types
         assert "CorpusAdminSubAgent" in agent_types
-    
-    @pytest.mark.asyncio
     async def test_supervisor_run_workflow(self):
         """Test 2: Verify Supervisor executes complete workflow in correct order"""
         mock_db = AsyncMock()
@@ -69,8 +65,6 @@ class TestSupervisorAgent:
         assert isinstance(result, DeepAgentState)
         assert result.user_request == "Optimize my AI workload"
         assert mock_ws.send_message.called
-    
-    @pytest.mark.asyncio
     async def test_supervisor_state_persistence(self):
         """Test 3: Verify Supervisor saves and loads state correctly"""
         mock_db = AsyncMock()
@@ -88,8 +82,6 @@ class TestSupervisorAgent:
                 mock_context.return_value = None
                 await supervisor.run("Test request", "test_thread", "test_user", "test_run_id")
                 mock_save.assert_called()
-    
-    @pytest.mark.asyncio
     async def test_supervisor_error_handling(self):
         """Test 4: Verify Supervisor handles sub-agent failures gracefully"""
         mock_db = AsyncMock()
@@ -102,8 +94,6 @@ class TestSupervisorAgent:
         
         with pytest.raises(Exception):
             await supervisor.run("Test request", "test_thread", "test_user", "test_run_id")
-    
-    @pytest.mark.asyncio
     async def test_supervisor_websocket_streaming(self):
         """Test 5: Verify Supervisor streams updates via WebSocket correctly"""
         mock_db = AsyncMock()
@@ -123,8 +113,6 @@ class TestSupervisorAgent:
 
 class TestTriageSubAgent:
     """Test cases for the Triage sub-agent"""
-    
-    @pytest.mark.asyncio
     async def test_triage_categorization(self):
         """Test 6: Verify Triage agent correctly categorizes user requests"""
         mock_llm = Mock(spec=LLMManager)
@@ -139,8 +127,6 @@ class TestTriageSubAgent:
         assert state.triage_result != None
         assert state.triage_result["category"] == "cost_optimization"
         assert state.triage_result["priority"] == "high"
-    
-    @pytest.mark.asyncio
     async def test_triage_invalid_response_handling(self):
         """Test 7: Verify Triage handles invalid LLM responses gracefully"""
         mock_llm = Mock(spec=LLMManager)
@@ -154,8 +140,6 @@ class TestTriageSubAgent:
         
         assert state.triage_result != None
         assert state.triage_result["category"] == "General Inquiry"
-    
-    @pytest.mark.asyncio
     async def test_triage_entry_conditions(self):
         """Test 8: Verify Triage checks entry conditions properly"""
         mock_llm = Mock(spec=LLMManager)
@@ -172,8 +156,6 @@ class TestTriageSubAgent:
 
 class TestDataSubAgent:
     """Test cases for the Data Analysis sub-agent"""
-    
-    @pytest.mark.asyncio
     async def test_data_agent_analysis(self):
         """Test 9: Verify Data agent performs data analysis correctly"""
         mock_llm = Mock(spec=LLMManager)
@@ -191,8 +173,6 @@ class TestDataSubAgent:
         
         assert state.data_result != None
         assert "metrics" in state.data_result
-    
-    @pytest.mark.asyncio
     async def test_data_agent_tool_usage(self):
         """Test 10: Verify Data agent uses tools correctly"""
         mock_llm = Mock(spec=LLMManager)
@@ -213,8 +193,6 @@ class TestDataSubAgent:
 
 class TestOptimizationSubAgent:
     """Test cases for the Optimization Core sub-agent"""
-    
-    @pytest.mark.asyncio
     async def test_optimization_recommendations(self):
         """Test 11: Verify Optimization agent generates valid recommendations"""
         mock_llm = Mock(spec=LLMManager)
@@ -237,8 +215,6 @@ class TestOptimizationSubAgent:
         assert state.optimizations_result != None
         assert "optimizations" in state.optimizations_result
         assert len(state.optimizations_result["optimizations"]) == 2
-    
-    @pytest.mark.asyncio
     async def test_optimization_cost_calculation(self):
         """Test 12: Verify Optimization calculates cost savings correctly"""
         mock_llm = Mock(spec=LLMManager)
@@ -258,8 +234,6 @@ class TestOptimizationSubAgent:
 
 class TestActionsSubAgent:
     """Test cases for the Actions to Meet Goals sub-agent"""
-    
-    @pytest.mark.asyncio
     async def test_action_plan_generation(self):
         """Test 13: Verify Actions agent creates actionable plans"""
         mock_llm = Mock(spec=LLMManager)
@@ -282,8 +256,6 @@ class TestActionsSubAgent:
         
         assert state.action_plan_result != None
         assert len(state.action_plan_result["action_plan"]) == 3
-    
-    @pytest.mark.asyncio
     async def test_action_priority_ordering(self):
         """Test 14: Verify Actions are prioritized correctly"""
         mock_llm = Mock(spec=LLMManager)
@@ -305,8 +277,6 @@ class TestActionsSubAgent:
 
 class TestReportingSubAgent:
     """Test cases for the Reporting sub-agent"""
-    
-    @pytest.mark.asyncio
     async def test_report_generation(self):
         """Test 15: Verify Reporting agent generates comprehensive reports"""
         mock_llm = Mock(spec=LLMManager)
@@ -325,8 +295,6 @@ class TestReportingSubAgent:
         await reporting_agent.execute(state, "test_run_id", False)
         
         assert state.report_result != None or state.final_report != None
-    
-    @pytest.mark.asyncio
     async def test_report_formatting(self):
         """Test 16: Verify reports are properly formatted with markdown"""
         mock_llm = Mock(spec=LLMManager)
@@ -346,8 +314,6 @@ class TestReportingSubAgent:
 
 class TestToolDispatcher:
     """Test cases for the Tool Dispatcher"""
-    
-    @pytest.mark.asyncio
     async def test_tool_selection(self):
         """Test 17: Verify Tool Dispatcher selects appropriate tools"""
         mock_db = AsyncMock()
@@ -355,8 +321,6 @@ class TestToolDispatcher:
         
         # Test that dispatcher can be initialized
         assert dispatcher != None
-    
-    @pytest.mark.asyncio
     async def test_tool_error_handling(self):
         """Test 18: Verify Tool Dispatcher handles tool failures"""
         mock_db = AsyncMock()
@@ -364,8 +328,6 @@ class TestToolDispatcher:
         
         # Test error handling by checking dispatcher exists
         assert dispatcher != None
-    
-    @pytest.mark.asyncio
     async def test_tool_parameter_validation(self):
         """Test 19: Verify Tool Dispatcher validates parameters"""
         mock_db = AsyncMock()
@@ -377,8 +339,6 @@ class TestToolDispatcher:
 
 class TestStateManagement:
     """Test cases for State Management"""
-    
-    @pytest.mark.asyncio
     async def test_state_initialization(self):
         """Test 20: Verify DeepAgentState initializes correctly"""
         state = DeepAgentState(user_request="Test request")
@@ -390,8 +350,6 @@ class TestStateManagement:
         assert state.action_plan_result == None
         assert state.report_result == None
         assert state.final_report == None
-    
-    @pytest.mark.asyncio
     async def test_state_persistence_save(self):
         """Test 21: Verify state saves to database correctly"""
         mock_db = AsyncMock()
@@ -406,8 +364,6 @@ class TestStateManagement:
                 db_session=mock_db
             )
             mock_save.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_state_persistence_load(self):
         """Test 22: Verify state loads from database correctly"""
         mock_db = AsyncMock()
@@ -419,8 +375,6 @@ class TestStateManagement:
             loaded_state = await state_persistence_service.load_agent_state("test_run", mock_db)
             
             assert loaded_state.user_request == "Loaded request"
-    
-    @pytest.mark.asyncio
     async def test_state_updates_across_agents(self):
         """Test 23: Verify state updates propagate correctly across agents"""
         state = DeepAgentState(user_request="Test")
@@ -435,8 +389,6 @@ class TestStateManagement:
 
 class TestAgentLifecycle:
     """Test cases for Agent Lifecycle Management"""
-    
-    @pytest.mark.asyncio
     async def test_agent_lifecycle_transitions(self):
         """Test 24: Verify agents transition through lifecycle states correctly"""
         mock_llm = Mock(spec=LLMManager)
@@ -451,8 +403,6 @@ class TestAgentLifecycle:
         
         agent.set_state(SubAgentLifecycle.COMPLETED)
         assert agent.state == SubAgentLifecycle.COMPLETED
-    
-    @pytest.mark.asyncio
     async def test_agent_execution_timing(self):
         """Test 25: Verify agent execution time is tracked correctly"""
         mock_llm = Mock(spec=LLMManager)
@@ -472,8 +422,6 @@ class TestAgentLifecycle:
 
 class TestIntegration(SharedTestIntegration):
     """Integration test cases"""
-    
-    @pytest.mark.asyncio
     async def test_end_to_end_workflow(self):
         """Test 26: Verify complete end-to-end agent workflow"""
         mock_db = AsyncMock()
@@ -498,8 +446,6 @@ class TestIntegration(SharedTestIntegration):
         
         assert isinstance(result, DeepAgentState)
         assert result.user_request == "Optimize my system"
-    
-    @pytest.mark.asyncio
     async def test_websocket_message_handling(self):
         """Test 27: Verify WebSocket messages are handled correctly"""
         mock_db = AsyncMock()
@@ -521,8 +467,6 @@ class TestIntegration(SharedTestIntegration):
         # Verify message was processed successfully
         # The handle_websocket_message should not raise an exception for valid input
         assert result is None or result is not None  # Handler typically returns None or a result object
-    
-    @pytest.mark.asyncio
     async def test_concurrent_agent_execution(self):
         """Test 28: Verify multiple agents can run concurrently"""
         mock_db = AsyncMock()
@@ -543,8 +487,6 @@ class TestIntegration(SharedTestIntegration):
         assert len(results) == 3
         for i, result in enumerate(results):
             assert result.user_request == f"Request {i}"
-    
-    @pytest.mark.asyncio
     async def test_error_recovery(self):
         """Test 29: Verify system recovers from errors gracefully"""
         mock_db = AsyncMock()
@@ -565,8 +507,6 @@ class TestIntegration(SharedTestIntegration):
         result = await supervisor.run("Second request", "thread_2", "user_2", "run_2")
         
         assert result.user_request == "Second request"
-    
-    @pytest.mark.asyncio
     async def test_state_consistency_across_failures(self):
         """Test 30: Verify state remains consistent even after failures"""
         mock_db = AsyncMock()

@@ -53,7 +53,6 @@ __all__ = [
 
 
 # Optional: Add integration test that uses multiple modules
-@pytest.mark.asyncio
 @pytest.mark.integration
 async def test_websocket_full_integration():
     """Integration test combining multiple WebSocket features"""

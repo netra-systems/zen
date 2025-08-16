@@ -36,8 +36,6 @@ class TestAdminRoute:
         # Mock user without admin role
         regular_user = {"id": "user1", "role": "user"}
         assert verify_admin_role(regular_user) == False
-    
-    @pytest.mark.asyncio
     async def test_admin_user_management(self):
         """Test admin user management operations."""
         from app.routes.admin import get_all_users, update_user_role
@@ -115,8 +113,6 @@ class TestAgentRoute:
             # Clean up this specific override
             if get_agent_service in app.dependency_overrides:
                 del app.dependency_overrides[get_agent_service]
-    
-    @pytest.mark.asyncio
     async def test_agent_streaming_response(self):
         """Test agent streaming response capability."""
         from app.routes.agent_route import stream_agent_response
@@ -193,8 +189,6 @@ class TestConfigRoute:
         
         response = client.put("/api/config", json=invalid_config)
         assert response.status_code in [422, 400, 404]  # Validation error or not found
-    
-    @pytest.mark.asyncio
     async def test_config_persistence(self):
         """Test configuration persistence."""
         from app.routes.config import update_config
@@ -257,8 +251,6 @@ class TestCorpusRoute:
                 results = response.json()
                 if isinstance(results, list):
                     assert len(results) <= 10  # Reasonable result limit
-    
-    @pytest.mark.asyncio
     async def test_corpus_bulk_operations(self):
         """Test bulk corpus operations."""
         from app.routes.corpus import bulk_index_documents
@@ -312,8 +304,6 @@ class TestLLMCacheRoute:
             if response.status_code == 200:
                 result = response.json()
                 assert "cleared" in result or "message" in result
-    
-    @pytest.mark.asyncio
     async def test_selective_cache_invalidation(self):
         """Test selective cache invalidation."""
         from app.routes.llm_cache import clear_cache_pattern
@@ -365,8 +355,6 @@ class TestMCPRoute:
         
         response = client.post("/api/mcp", json=invalid_request)
         assert response.status_code in [422, 400, 404]
-    
-    @pytest.mark.asyncio
     async def test_mcp_tool_execution(self):
         """Test MCP tool execution."""
         from app.routes.mcp import execute_tool
@@ -419,8 +407,6 @@ class TestQualityRoute:
             if response.status_code == 200:
                 data = response.json()
                 assert "period" in data or "error" in data
-    
-    @pytest.mark.asyncio
     async def test_quality_alerts(self):
         """Test quality threshold alerts."""
         from app.routes.quality import check_quality_alerts
@@ -490,8 +476,6 @@ class TestSupplyRoute:
             if response.status_code == 200:
                 data = response.json()
                 assert "enriched_data" in data or "supplier_id" in data
-    
-    @pytest.mark.asyncio
     async def test_supply_validation(self):
         """Test supply chain validation."""
         from app.routes.supply import validate_supply_chain
@@ -573,8 +557,6 @@ class TestSyntheticDataRoute:
             if response.status_code == 200:
                 result = response.json()
                 assert "valid" in result
-    
-    @pytest.mark.asyncio
     async def test_synthetic_data_templates(self):
         """Test synthetic data template management."""
         from app.routes.synthetic_data import get_templates
@@ -635,8 +617,6 @@ class TestThreadsRoute:
                 data = response.json()
                 if "threads" in data:
                     assert len(data["threads"]) <= 10
-    
-    @pytest.mark.asyncio
     async def test_thread_archival(self):
         """Test thread archival functionality."""
         from app.routes.threads_route import archive_thread

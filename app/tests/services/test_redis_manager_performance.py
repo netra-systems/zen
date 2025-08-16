@@ -19,8 +19,6 @@ from app.tests.helpers.redis_test_helpers import (
 
 class TestRedisManagerPerformance:
     """Test Redis manager performance characteristics"""
-    
-    @pytest.mark.asyncio
     async def test_high_throughput_operations(self, performance_redis_manager):
         """Test high throughput Redis operations"""
         num_operations = 1000
@@ -39,8 +37,6 @@ class TestRedisManagerPerformance:
         
         verify_performance_metrics(execution_time, throughput)
         assert verify_no_exceptions(results)
-    
-    @pytest.mark.asyncio
     async def test_memory_usage_under_load(self, performance_redis_manager):
         """Test memory usage under high load"""
         tracemalloc.start()
@@ -55,8 +51,6 @@ class TestRedisManagerPerformance:
         tracemalloc.stop()
         
         verify_memory_usage(peak, 50)
-    
-    @pytest.mark.asyncio
     async def test_operation_latency_measurement(self, performance_redis_manager):
         """Test operation latency measurement"""
         latencies = []
@@ -83,8 +77,6 @@ class TestRedisManagerPerformance:
         
         expected_hit_rate = calculate_hit_rate(1, 2)
         assert abs(metrics['cache_hit_rate'] - expected_hit_rate) < 0.01
-    
-    @pytest.mark.asyncio
     async def test_concurrent_connection_safety(self, performance_redis_manager):
         """Test thread safety of concurrent connections"""
         connection_pool = RedisConnectionPool(max_connections=3)

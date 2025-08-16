@@ -26,8 +26,6 @@ class TestHeartbeatLogger:
         logger = HeartbeatLogger(interval_seconds=3.0)
         assert logger.interval_seconds == 3.0
         assert len(logger._active_tasks) == 0
-
-    @pytest.mark.asyncio
     async def test_start_heartbeat_creates_task(self):
         """Test that starting heartbeat creates an async task."""
         logger = HeartbeatLogger()
@@ -36,8 +34,6 @@ class TestHeartbeatLogger:
         assert correlation_id in logger._active_tasks
         assert correlation_id in logger._start_times
         assert correlation_id in logger._agent_names
-
-    @pytest.mark.asyncio
     async def test_stop_heartbeat_cleans_up(self):
         """Test that stopping heartbeat cleans up resources."""
         logger = HeartbeatLogger()
@@ -46,8 +42,6 @@ class TestHeartbeatLogger:
         logger.stop_heartbeat(correlation_id)
         assert correlation_id not in logger._active_tasks
         assert correlation_id not in logger._start_times
-
-    @pytest.mark.asyncio
     async def test_heartbeat_logging_flow(self):
         """Test complete heartbeat logging flow."""
         with patch('app.llm.observability.logger') as mock_logger:
@@ -59,8 +53,6 @@ class TestHeartbeatLogger:
             logger.stop_heartbeat(correlation_id)
             
             assert mock_logger.info.called
-
-    @pytest.mark.asyncio
     async def test_get_active_operations(self):
         """Test getting active operations information."""
         logger = HeartbeatLogger()
@@ -100,8 +92,6 @@ class TestHeartbeatLogger:
 
 class TestHeartbeatIntegration:
     """Test cases for heartbeat integration with LLM operations."""
-    
-    @pytest.mark.asyncio
     async def test_heartbeat_with_app_config(self):
         """Test heartbeat logger with app configuration."""
         from app.config import get_config
@@ -118,8 +108,6 @@ class TestHeartbeatIntegration:
         correlation_id = generate_llm_correlation_id()
         assert isinstance(correlation_id, str)
         assert len(correlation_id) > 0
-
-    @pytest.mark.asyncio 
     async def test_heartbeat_task_cancellation(self):
         """Test that heartbeat tasks are properly cancelled."""
         logger = HeartbeatLogger(interval_seconds=0.1)

@@ -15,8 +15,6 @@ from app.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
 class TestAgentE2ECriticalTools(AgentE2ETestBase):
     """Critical tests for tool integration and state management"""
-
-    @pytest.mark.asyncio
     async def test_4_tool_dispatcher_integration(self, setup_agent_infrastructure):
         """
         Test Case 4: Tool Dispatcher Integration
@@ -68,8 +66,6 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         assert state.data_result != None
         assert "tool_outputs" in state.data_result
         assert len(state.data_result["tool_outputs"]) == 2
-
-    @pytest.mark.asyncio
     async def test_5_state_persistence_and_recovery(self, setup_agent_infrastructure):
         """
         Test Case 5: State Persistence and Recovery
@@ -125,8 +121,6 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
                     
                     # Verify state continuity
                     assert state2.user_request == "Follow-up request"
-
-    @pytest.mark.asyncio
     async def test_6_error_handling_and_recovery(self, setup_agent_infrastructure):
         """
         Test Case 6: Error Handling and Recovery

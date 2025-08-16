@@ -38,8 +38,6 @@ class TestMultiObjectiveOptimizationTool:
         assert metadata["description"] == "Performs multi-objective optimization."
         assert metadata["version"] == "1.0.0"
         assert metadata["status"] == "in_review"
-
-    @pytest.mark.asyncio
     async def test_run_complete_workflow(self, optimization_tool, mock_context):
         """Test the complete multi-objective optimization workflow"""
         with patch.object(optimization_tool, 'define_optimization_goals', return_value="Goals defined") as mock_goals, \
@@ -56,32 +54,22 @@ class TestMultiObjectiveOptimizationTool:
             mock_tradeoffs.assert_called_once_with(mock_context, test_param="test_value")
             mock_optimizations.assert_called_once_with(mock_context, test_param="test_value")
             mock_impact.assert_called_once_with(mock_context, test_param="test_value")
-
-    @pytest.mark.asyncio
     async def test_define_optimization_goals(self, optimization_tool, mock_context):
         """Test define_optimization_goals method"""
         result = await optimization_tool.define_optimization_goals(mock_context)
         assert result == "Defined optimization goals."
-
-    @pytest.mark.asyncio
     async def test_analyze_trade_offs(self, optimization_tool, mock_context):
         """Test analyze_trade_offs method"""
         result = await optimization_tool.analyze_trade_offs(mock_context)
         assert result == "Analyzed trade-offs."
-
-    @pytest.mark.asyncio
     async def test_propose_balanced_optimizations(self, optimization_tool, mock_context):
         """Test propose_balanced_optimizations method"""
         result = await optimization_tool.propose_balanced_optimizations(mock_context)
         assert result == "Proposed balanced optimizations."
-
-    @pytest.mark.asyncio
     async def test_simulate_multi_objective_impact(self, optimization_tool, mock_context):
         """Test simulate_multi_objective_impact method"""
         result = await optimization_tool.simulate_multi_objective_impact(mock_context)
         assert result == "Simulated multi-objective impact."
-
-    @pytest.mark.asyncio
     async def test_run_with_various_kwargs(self, optimization_tool, mock_context):
         """Test run method with various keyword arguments"""
         kwargs = {
@@ -94,8 +82,6 @@ class TestMultiObjectiveOptimizationTool:
         
         result = await optimization_tool.run(mock_context, **kwargs)
         assert result == "Multi-objective optimization complete."
-
-    @pytest.mark.asyncio
     async def test_method_execution_order(self, optimization_tool, mock_context):
         """Test that methods are executed in the correct order"""
         call_order = []
@@ -126,8 +112,6 @@ class TestMultiObjectiveOptimizationTool:
         
         assert result == "Multi-objective optimization complete."
         assert call_order == ["define_goals", "analyze_tradeoffs", "propose_optimizations", "simulate_impact"]
-
-    @pytest.mark.asyncio
     async def test_run_method_failure_propagation(self, optimization_tool, mock_context):
         """Test that failures in individual methods are propagated"""
         # Test failure in define_optimization_goals
@@ -153,8 +137,6 @@ class TestMultiObjectiveOptimizationTool:
             with pytest.raises(Exception) as exc_info:
                 await optimization_tool.run(mock_context)
             assert "Impact simulation failed" in str(exc_info.value)
-
-    @pytest.mark.asyncio
     async def test_concurrent_execution(self, mock_context):
         """Test concurrent execution of multiple tool instances"""
         tool1 = MultiObjectiveOptimizationTool()
@@ -168,8 +150,6 @@ class TestMultiObjectiveOptimizationTool:
         
         assert len(results) == 2
         assert all(result == "Multi-objective optimization complete." for result in results)
-
-    @pytest.mark.asyncio
     async def test_async_behavior_timing(self, optimization_tool, mock_context):
         """Test that the tool properly handles async operations"""
         import time
@@ -186,8 +166,6 @@ class TestMultiObjectiveOptimizationTool:
         
         assert result == "Multi-objective optimization complete."
         assert elapsed >= 0.04  # Reasonable threshold for 0.05 sleep
-
-    @pytest.mark.asyncio
     async def test_execute_wrapper_integration(self, optimization_tool, mock_context):
         """Test that the BaseTool execute wrapper works with this tool"""
         with patch('app.services.apex_optimizer_agent.tools.base.logger') as mock_logger:
@@ -209,8 +187,6 @@ class TestMultiObjectiveOptimizationTool:
         assert hasattr(optimization_tool, 'get_metadata')
         assert hasattr(optimization_tool, 'execute')
         assert hasattr(optimization_tool, 'run')
-
-    @pytest.mark.asyncio
     async def test_context_parameter_passing(self, optimization_tool, mock_context):
         """Test that context and parameters are properly passed to sub-methods"""
         test_kwargs = {

@@ -74,8 +74,6 @@ class TestSingletonPattern(WebSocketTestBase):
 
 class TestConnectionManagement(WebSocketTestBase):
     """Test connection lifecycle and management"""
-    
-    @pytest.mark.asyncio
     async def test_connect_new_connection(self, fresh_manager, mock_websocket):
         """Test connecting a new WebSocket"""
         connection_id = "test-connection-123"
@@ -100,8 +98,6 @@ class TestConnectionManagement(WebSocketTestBase):
         assert info.role == role
         assert info.metadata == metadata
         assert isinstance(info.connected_at, datetime)
-    
-    @pytest.mark.asyncio
     async def test_connect_duplicate_connection(self, fresh_manager, mock_websocket):
         """Test connecting with duplicate connection ID"""
         connection_id = "duplicate-123"
@@ -115,8 +111,6 @@ class TestConnectionManagement(WebSocketTestBase):
         
         # Should replace the old connection
         assert fresh_manager.connections[connection_id] is new_websocket
-    
-    @pytest.mark.asyncio
     async def test_disconnect_existing_connection(self, fresh_manager, mock_websocket):
         """Test disconnecting an existing connection"""
         connection_id = "test-disconnect-123"
@@ -128,14 +122,10 @@ class TestConnectionManagement(WebSocketTestBase):
         
         assert connection_id not in fresh_manager.connections
         assert connection_id not in fresh_manager.connection_info
-    
-    @pytest.mark.asyncio
     async def test_disconnect_nonexistent_connection(self, fresh_manager):
         """Test disconnecting a non-existent connection"""
         # Should not raise an error
         await fresh_manager.disconnect("nonexistent-123")
-    
-    @pytest.mark.asyncio
     async def test_disconnect_with_reason(self, fresh_manager, mock_websocket):
         """Test disconnecting with close code and reason"""
         connection_id = "test-close-123"
@@ -145,8 +135,6 @@ class TestConnectionManagement(WebSocketTestBase):
         
         mock_websocket.close.assert_called_once_with(code=1001, reason="Going away")
         assert connection_id not in fresh_manager.connections
-    
-    @pytest.mark.asyncio
     async def test_disconnect_already_disconnected(self, fresh_manager):
         """Test disconnecting an already disconnected WebSocket"""
         connection_id = "test-already-disconnected"
@@ -159,8 +147,6 @@ class TestConnectionManagement(WebSocketTestBase):
         
         # close should not be called on already disconnected websocket
         ws.close.assert_not_called()
-    
-    @pytest.mark.asyncio
     async def test_disconnect_with_error(self, fresh_manager, mock_websocket):
         """Test disconnect handles close errors gracefully"""
         connection_id = "test-error-123"
@@ -173,8 +159,6 @@ class TestConnectionManagement(WebSocketTestBase):
         
         # Connection should still be removed
         assert connection_id not in fresh_manager.connections
-    
-    @pytest.mark.asyncio
     async def test_get_connection_exists(self, fresh_manager, mock_websocket):
         """Test getting an existing connection"""
         connection_id = "test-get-123"
@@ -188,8 +172,6 @@ class TestConnectionManagement(WebSocketTestBase):
         """Test getting a non-existent connection"""
         retrieved_ws = fresh_manager.get_connection("nonexistent-123")
         assert retrieved_ws is None
-    
-    @pytest.mark.asyncio
     async def test_is_connected_true(self, fresh_manager, connected_websocket):
         """Test is_connected returns True for connected WebSocket"""
         connection_id = "test-connected-123"
@@ -197,8 +179,6 @@ class TestConnectionManagement(WebSocketTestBase):
         await fresh_manager.connect(connected_websocket, connection_id)
         
         assert fresh_manager.is_connected(connection_id) is True
-    
-    @pytest.mark.asyncio
     async def test_is_connected_false_disconnected(self, fresh_manager, disconnected_websocket):
         """Test is_connected returns False for disconnected WebSocket"""
         connection_id = "test-disconnected-123"
@@ -215,8 +195,6 @@ class TestConnectionManagement(WebSocketTestBase):
         """Test getting all connections when empty"""
         connections = fresh_manager.get_all_connections()
         assert connections == {}
-    
-    @pytest.mark.asyncio
     async def test_get_all_connections_multiple(self, fresh_manager):
         """Test getting all connections with multiple connections"""
         ws1 = MockWebSocket()

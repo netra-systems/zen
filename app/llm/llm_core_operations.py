@@ -87,11 +87,17 @@ class LLMCoreOperations:
         """Get LLM instance with caching."""
         if not self.enabled:
             return self._handle_disabled_llm(name)
-        
+        return self._get_cached_or_create_llm(name, generation_config)
+    
+    def _get_cached_or_create_llm(self, name: str, generation_config: Optional[GenerationConfig]) -> Any:
+        """Get cached LLM or create new one."""
         cache_key = self._create_cache_key(name, generation_config)
         if cache_key in self._llm_cache:
             return self._llm_cache[cache_key]
-        
+        return self._create_and_cache_llm(name, generation_config, cache_key)
+    
+    def _create_and_cache_llm(self, name: str, generation_config: Optional[GenerationConfig], cache_key: str) -> Any:
+        """Create new LLM and cache if successful."""
         llm = self._create_new_llm(name, generation_config)
         if llm:
             self._llm_cache[cache_key] = llm

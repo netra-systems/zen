@@ -359,8 +359,6 @@ class TestUnifiedToolRegistryManagement:
         assert len(all_tools['primary']) == 2
         assert len(all_tools['secondary']) == 2
         assert len(all_tools['specialized']) == 1
-    
-    @pytest.mark.asyncio
     async def test_tool_orchestration_simple_chain(self, unified_registry, sample_tools):
         """Test simple tool chain orchestration"""
         analyzer = sample_tools[0]
@@ -380,8 +378,6 @@ class TestUnifiedToolRegistryManagement:
         assert "analyzer" in result
         assert analyzer.call_count == 1
         assert transformer.call_count == 1
-    
-    @pytest.mark.asyncio
     async def test_tool_orchestration_complex_chain(self, unified_registry, sample_tools):
         """Test complex tool chain with conditional logic"""
         analyzer = sample_tools[0]
@@ -409,8 +405,6 @@ class TestUnifiedToolRegistryManagement:
         # All tools should have been called
         assert all(tool.call_count == 1 for tool in [analyzer, validator, optimizer, reporter])
         assert "reporter" in result
-    
-    @pytest.mark.asyncio
     async def test_parallel_tool_orchestration(self, unified_registry, sample_tools):
         """Test parallel execution of multiple tools"""
         tools = sample_tools[:3]
@@ -589,8 +583,6 @@ class TestUnifiedToolRegistryOrchestration:
     def orchestrator(self):
         """Create tool orchestrator for testing"""
         return ToolOrchestrator()
-    
-    @pytest.mark.asyncio
     async def test_conditional_tool_execution(self, orchestrator):
         """Test conditional tool execution based on results"""
         # Create tools with specific behaviors
@@ -622,8 +614,6 @@ class TestUnifiedToolRegistryOrchestration:
         assert condition_tool.call_count == 1
         assert success_tool.call_count == 1
         assert failure_tool.call_count == 1  # Simplified - in real implementation would be conditional
-    
-    @pytest.mark.asyncio
     async def test_tool_chain_error_handling(self, orchestrator):
         """Test error handling in tool chains"""
         working_tool = MockAdvancedTool("working_tool", "Working tool")
@@ -652,8 +642,6 @@ class TestUnifiedToolRegistryOrchestration:
         assert chain_status['status'] == 'failed'
         assert 'error' in chain_status
         assert working_tool.call_count == 1  # First tool should have run
-    
-    @pytest.mark.asyncio
     async def test_tool_chain_timeout_handling(self, orchestrator):
         """Test timeout handling in tool chains"""
         slow_tool = MockAdvancedTool("slow_tool", "Slow executing tool")
@@ -677,8 +665,6 @@ class TestUnifiedToolRegistryOrchestration:
                 orchestrator.execute_chain(chain_config),
                 timeout=1.0
             )
-    
-    @pytest.mark.asyncio
     async def test_concurrent_chain_execution(self, orchestrator):
         """Test concurrent execution of multiple tool chains"""
         tools = [MockAdvancedTool(f"tool_{i}", f"Tool {i}") for i in range(5)]

@@ -20,8 +20,6 @@ from app.services.generation_service import (
 
 class TestDatabasePerformance:
     """Test database performance under load"""
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_clickhouse_bulk_insert_performance(self):
         """Test bulk insert performance"""
@@ -53,8 +51,6 @@ class TestDatabasePerformance:
             corpus['analysis'].append((f'analysis_prompt_{i}', f'analysis_response_{i}'))
             
         return corpus
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_concurrent_database_operations(self):
         """Test concurrent database read/write operations"""
@@ -83,8 +79,6 @@ class TestDatabasePerformance:
                 
                 assert len(results) == 5
                 assert duration < 30  # Should handle concurrent ops efficiently
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_batch_processing_optimization(self):
         """Test optimized batch processing patterns"""
@@ -113,8 +107,6 @@ class TestDatabasePerformance:
             time_ratio = processing_times[i] / processing_times[i-1]
             size_ratio = batch_sizes[i] / batch_sizes[i-1]
             assert time_ratio < size_ratio * 1.3  # Allow 30% overhead
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_connection_pool_utilization(self):
         """Test database connection pool efficiency"""
@@ -141,8 +133,6 @@ class TestDatabasePerformance:
             
             # Should reuse connections efficiently
             assert connection_count <= 20  # Should not exceed reasonable limit
-
-    @pytest.mark.asyncio
     @pytest.mark.performance  
     async def test_query_optimization_patterns(self):
         """Test query optimization for large datasets"""

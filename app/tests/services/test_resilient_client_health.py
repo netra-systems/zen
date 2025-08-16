@@ -17,8 +17,6 @@ class TestResilientHTTPClientHealth:
     def client(self):
         """Create a ResilientHTTPClient for testing."""
         return ResilientHTTPClient(base_url="https://api.example.com")
-    
-    @pytest.mark.asyncio
     async def test_health_check_success(self, client):
         """Test successful health check."""
         mock_circuit = create_healthy_circuit_mock()
@@ -27,24 +25,18 @@ class TestResilientHTTPClientHealth:
              patch.object(client, '_test_connectivity', return_value={"status": "healthy"}):
             result = await client.health_check("test_api")
             verify_successful_health_check(result)
-    
-    @pytest.mark.asyncio
     async def test_health_check_error(self, client):
         """Test health check with error."""
         with patch.object(client, '_get_circuit', side_effect=Exception("Circuit error")), \
              patch('app.services.external_api_client.logger') as mock_logger:
             result = await client.health_check("test_api")
             verify_error_health_check(result, mock_logger)
-    
-    @pytest.mark.asyncio
     async def test_test_connectivity_no_base_url(self):
         """Test connectivity test without base URL."""
         client = ResilientHTTPClient()
         result = await client._test_connectivity()
         
         assert result == {"status": "skipped", "reason": "no_base_url"}
-    
-    @pytest.mark.asyncio
     async def test_test_connectivity_success(self, client):
         """Test successful connectivity test."""
         mock_session = self._setup_successful_connectivity_test()
@@ -70,8 +62,6 @@ class TestResilientHTTPClientHealth:
         """Verify successful connectivity test results."""
         assert result["status"] == "healthy"
         assert result["response_code"] == 200
-    
-    @pytest.mark.asyncio
     async def test_test_connectivity_failure(self, client):
         """Test failed connectivity test."""
         mock_session = Mock()

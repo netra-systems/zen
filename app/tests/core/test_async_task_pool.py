@@ -28,15 +28,11 @@ class TestAsyncTaskPool:
         """Test task pool initialization"""
         assert_task_pool_state(task_pool, 3)
         assert task_pool._semaphore._value == 3
-    
-    @pytest.mark.asyncio
     async def test_submit_task_success(self, task_pool):
         """Test successful task submission and execution"""
         result = await task_pool.submit_task(create_quick_operation())
         assert result == "success"
         assert len(task_pool._active_tasks) == 0
-    
-    @pytest.mark.asyncio
     async def test_submit_task_exception(self, task_pool):
         """Test task submission with exception"""
         async def failing_task():
@@ -44,16 +40,12 @@ class TestAsyncTaskPool:
         with pytest.raises(ValueError, match="Task failed"):
             await task_pool.submit_task(failing_task())
         assert len(task_pool._active_tasks) == 0
-    
-    @pytest.mark.asyncio
     async def test_submit_task_during_shutdown(self, task_pool):
         """Test task submission during shutdown"""
         task_pool._shutting_down = True
         with patch('app.core.async_utils.ErrorContext.get_all_context', return_value={}):
             with pytest.raises(ServiceError, match="Task pool is shutting down"):
                 await task_pool.submit_task(create_quick_operation())
-    
-    @pytest.mark.asyncio
     async def test_submit_background_task(self, task_pool):
         """Test background task submission"""
         task = task_pool.submit_background_task(create_quick_operation())
@@ -62,8 +54,6 @@ class TestAsyncTaskPool:
         assert result == "success"
         await asyncio.sleep(0.01)
         assert task not in task_pool._active_tasks
-    
-    @pytest.mark.asyncio
     async def test_submit_background_task_during_shutdown(self, task_pool):
         """Test background task submission during shutdown"""
         task_pool._shutting_down = True
@@ -77,8 +67,6 @@ class TestAsyncTaskPool:
         task_pool._active_tasks.add(task1)
         task_pool._active_tasks.add(task2)
         assert task_pool.active_task_count == 2
-    
-    @pytest.mark.asyncio
     async def test_concurrent_task_limit(self):
         """Test that task pool respects concurrent task limits"""
         pool = AsyncTaskPool(max_concurrent_tasks=2)
@@ -99,8 +87,6 @@ class TestAsyncTaskPool:
         assert len(results) == 4
         assert results[2][1] > results[0][1]
         assert results[3][1] > results[1][1]
-    
-    @pytest.mark.asyncio
     async def test_shutdown(self, task_pool):
         """Test graceful shutdown of task pool"""
         task = task_pool.submit_background_task(self._create_long_task())
@@ -117,16 +103,12 @@ class TestAsyncTaskPool:
             return "completed"
         except asyncio.CancelledError:
             return "cancelled"
-    
-    @pytest.mark.asyncio
     async def test_shutdown_idempotent(self, task_pool):
         """Test that shutdown is idempotent"""
         await task_pool.shutdown()
         assert task_pool._shutting_down == True
         await task_pool.shutdown()
         assert task_pool._shutting_down == True
-    
-    @pytest.mark.asyncio
     async def test_shutdown_no_tasks(self, task_pool):
         """Test shutdown with no active tasks"""
         await task_pool.shutdown()

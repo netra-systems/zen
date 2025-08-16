@@ -3,8 +3,6 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 from app.services.state_persistence_service import StatePersistenceService
 from datetime import datetime
-
-@pytest.mark.asyncio
 class TestStatePersistence:
     
     async def test_save_agent_state(self):

@@ -116,24 +116,40 @@ class LLMFallbackHandler:
     ) -> Any:
         """Execute LLM operation with fallback handling"""
         circuit_breaker = self._get_circuit_breaker(provider)
-        
-        if self._is_circuit_open(circuit_breaker, provider):
-            logger.warning(f"Circuit breaker open for {provider}, using fallback")
+        if self._should_use_circuit_fallback(circuit_breaker, provider, fallback_type):
             return self._create_fallback_response(fallback_type)
-        
         return await self._execute_with_retry(llm_operation, operation_name, 
                                              circuit_breaker, provider, fallback_type)
     
+    def _should_use_circuit_fallback(self, circuit_breaker: CircuitBreaker, provider: str, fallback_type: str) -> bool:
+        """Check if should use circuit fallback with logging."""
+        if self._is_circuit_open(circuit_breaker, provider):
+            logger.warning(f"Circuit breaker open for {provider}, using fallback")
+            return True
+        return False
+    
     def _is_circuit_open(self, circuit_breaker: CircuitBreaker, provider: str) -> bool:
         """Check if circuit breaker is open with error handling."""
-        if not self.config.use_circuit_breaker or not hasattr(circuit_breaker, 'is_open'):
+        if not self._should_check_circuit_breaker(circuit_breaker):
             return False
+        return self._check_circuit_breaker_status(circuit_breaker, provider)
+    
+    def _should_check_circuit_breaker(self, circuit_breaker: CircuitBreaker) -> bool:
+        """Check if circuit breaker should be checked."""
+        return self.config.use_circuit_breaker and hasattr(circuit_breaker, 'is_open')
+    
+    def _check_circuit_breaker_status(self, circuit_breaker: CircuitBreaker, provider: str) -> bool:
+        """Check actual circuit breaker status with error handling."""
         try:
             return circuit_breaker.is_open()
         except (TypeError, AttributeError):
-            if self.config.log_circuit_breaker_warnings:
-                logger.warning(f"Circuit breaker for {provider} not properly initialized")
+            self._log_circuit_breaker_warning(provider)
             return False
+    
+    def _log_circuit_breaker_warning(self, provider: str) -> None:
+        """Log circuit breaker warning if enabled."""
+        if self.config.log_circuit_breaker_warnings:
+            logger.warning(f"Circuit breaker for {provider} not properly initialized")
     
     async def _execute_with_retry(self, llm_operation, operation_name: str,
                                  circuit_breaker: CircuitBreaker, provider: str, 
@@ -179,7 +195,7 @@ class LLMFallbackHandler:
         self._record_retry_attempt(attempt, failure_type, str(error))
         
         if self.config.use_circuit_breaker:
-            circuit_breaker.record_failure()
+            circuit_breaker.record_failure(failure_type)
     
     async def _wait_before_retry(self, attempt: int, error: Exception, operation_name: str) -> None:
         """Wait before retry with exponential backoff."""

@@ -254,8 +254,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Request-Start"] = str(int(time.time() * 1000))
         
         # Add request ID if available
-        if hasattr(request.state, "request_id"):
-            response.headers["X-Request-ID"] = request.state.request_id
+        if hasattr(request.state, "request_id") and request.state.request_id is not None:
+            response.headers["X-Request-ID"] = str(request.state.request_id)
         
         # Add environment indicator (for non-production)
         if self.environment != "production":

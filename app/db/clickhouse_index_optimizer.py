@@ -28,21 +28,29 @@ class ClickHouseTableChecker:
             return False
     
     @staticmethod
+    async def _build_engine_info_query(table_name: str) -> str:
+        """Build query for engine information."""
+        return f"""
+            SELECT engine, order_by_expression
+            FROM system.tables 
+            WHERE name = '{table_name}'
+        """
+    
+    async def _parse_engine_result(result: List[Dict]) -> Dict[str, str]:
+        """Parse engine information result."""
+        if result:
+            return {
+                'engine': result[0].get('engine', ''),
+                'order_by_expression': result[0].get('order_by_expression', '')
+            }
+        return {}
+    
     async def get_table_engine_info(client, table_name: str) -> Dict[str, str]:
         """Get table engine information."""
         try:
-            query = f"""
-                SELECT engine, order_by_expression
-                FROM system.tables 
-                WHERE name = '{table_name}'
-            """
+            query = await ClickHouseTableChecker._build_engine_info_query(table_name)
             result = await client.execute_query(query)
-            if result:
-                return {
-                    'engine': result[0].get('engine', ''),
-                    'order_by_expression': result[0].get('order_by_expression', '')
-                }
-            return {}
+            return await ClickHouseTableChecker._parse_engine_result(result)
         except Exception as e:
             logger.error(f"Error getting engine info for {table_name}: {e}")
             return {}
@@ -70,25 +78,36 @@ class ClickHouseEngineOptimizer:
         expected_order_by = ', '.join(expected_columns)
         return expected_order_by.lower() in current_order_by.lower()
     
-    async def _evaluate_table_optimization(self, client, table_name: str, 
-                                         order_by_cols: List[str], reason: str) -> bool:
-        """Evaluate if table needs optimization."""
+    async def _check_table_exists_for_optimization(self, client, table_name: str) -> bool:
+        """Check if table exists for optimization."""
         if not await self.table_checker.table_exists(client, table_name):
             logger.debug(f"Table {table_name} does not exist, skipping optimization")
             return False
+        return True
+    
+    async def _evaluate_merge_tree_optimization(self, engine_info: Dict[str, str], 
+                                              order_by_cols: List[str], 
+                                              table_name: str, reason: str) -> bool:
+        """Evaluate MergeTree table optimization."""
+        if engine_info.get('engine') != 'MergeTree':
+            return False
+        
+        current_order_by = engine_info.get('order_by_expression', '')
+        is_optimized = await self._check_order_by_optimization(current_order_by, order_by_cols)
+        
+        if not is_optimized:
+            logger.info(f"Table {table_name} could benefit from ORDER BY optimization: {reason}")
+            return False
+        return True
+    
+    async def _evaluate_table_optimization(self, client, table_name: str, 
+                                         order_by_cols: List[str], reason: str) -> bool:
+        """Evaluate if table needs optimization."""
+        if not await self._check_table_exists_for_optimization(client, table_name):
+            return False
         
         engine_info = await self.table_checker.get_table_engine_info(client, table_name)
-        
-        if engine_info.get('engine') == 'MergeTree':
-            current_order_by = engine_info.get('order_by_expression', '')
-            is_optimized = await self._check_order_by_optimization(current_order_by, order_by_cols)
-            
-            if not is_optimized:
-                logger.info(f"Table {table_name} could benefit from ORDER BY optimization: {reason}")
-                return False
-            return True
-        
-        return False
+        return await self._evaluate_merge_tree_optimization(engine_info, order_by_cols, table_name, reason)
     
     async def optimize_table_engines(self) -> Dict[str, bool]:
         """Optimize ClickHouse table engines for performance."""
@@ -123,9 +142,9 @@ class ClickHouseMaterializedViewCreator:
             "hourly_performance_metrics": "netra_performance_metrics"
         }
     
-    async def _create_user_activity_view(self, client) -> None:
-        """Create user daily activity materialized view."""
-        view_sql = """
+    def _get_user_activity_view_sql(self) -> str:
+        """Get SQL for user daily activity materialized view."""
+        return """
             CREATE MATERIALIZED VIEW IF NOT EXISTS user_daily_activity
             ENGINE = SummingMergeTree()
             PARTITION BY toYYYYMM(date)
@@ -139,11 +158,15 @@ class ClickHouseMaterializedViewCreator:
             WHERE user_id != ''
             GROUP BY user_id, toDate(timestamp)
         """
+    
+    async def _create_user_activity_view(self, client) -> None:
+        """Create user daily activity materialized view."""
+        view_sql = self._get_user_activity_view_sql()
         await client.execute_query(view_sql)
     
-    async def _create_performance_metrics_view(self, client) -> None:
-        """Create hourly performance metrics materialized view."""
-        view_sql = """
+    def _get_performance_metrics_view_sql(self) -> str:
+        """Get SQL for hourly performance metrics materialized view."""
+        return """
             CREATE MATERIALIZED VIEW IF NOT EXISTS hourly_performance_metrics
             ENGINE = SummingMergeTree()
             PARTITION BY toYYYYMM(hour)
@@ -158,6 +181,10 @@ class ClickHouseMaterializedViewCreator:
             FROM netra_performance_metrics
             GROUP BY metric_type, toStartOfHour(timestamp)
         """
+    
+    async def _create_performance_metrics_view(self, client) -> None:
+        """Create hourly performance metrics materialized view."""
+        view_sql = self._get_performance_metrics_view_sql()
         await client.execute_query(view_sql)
     
     async def _create_view_by_name(self, client, view_name: str) -> None:
@@ -169,17 +196,22 @@ class ClickHouseMaterializedViewCreator:
         else:
             raise ValueError(f"Unknown view name: {view_name}")
     
+    async def _check_base_table_exists(self, client, base_table: str, view_name: str) -> bool:
+        """Check if base table exists for view creation."""
+        if not await self.table_checker.table_exists(client, base_table):
+            logger.debug(f"Base table {base_table} does not exist, skipping view {view_name}")
+            return False
+        return True
+    
     async def create_single_view(self, client, view_name: str, base_table: str) -> bool:
         """Create a single materialized view."""
         try:
-            if not await self.table_checker.table_exists(client, base_table):
-                logger.debug(f"Base table {base_table} does not exist, skipping view {view_name}")
+            if not await self._check_base_table_exists(client, base_table, view_name):
                 return False
             
             await self._create_view_by_name(client, view_name)
             logger.info(f"Created materialized view: {view_name}")
             return True
-            
         except Exception as e:
             logger.debug(f"Could not create view {view_name}: {e}")
             return False
@@ -211,20 +243,24 @@ class ClickHouseIndexOptimizer:
         """Create materialized views for common aggregations."""
         return await self.view_creator.create_materialized_views()
     
+    async def _calculate_optimization_stats(self, table_optimizations: Dict[str, bool], 
+                                           materialized_views: Dict[str, bool]) -> Dict[str, Any]:
+        """Calculate optimization statistics."""
+        return {
+            "table_optimizations": table_optimizations,
+            "materialized_views": materialized_views,
+            "total_tables": len(table_optimizations),
+            "optimized_tables": sum(table_optimizations.values()),
+            "total_views": len(materialized_views),
+            "created_views": sum(materialized_views.values())
+        }
+    
     async def get_optimization_summary(self) -> Dict[str, Any]:
         """Get optimization summary."""
         try:
             table_optimizations = await self.optimize_table_engines()
             materialized_views = await self.create_materialized_views()
-            
-            return {
-                "table_optimizations": table_optimizations,
-                "materialized_views": materialized_views,
-                "total_tables": len(table_optimizations),
-                "optimized_tables": sum(table_optimizations.values()),
-                "total_views": len(materialized_views),
-                "created_views": sum(materialized_views.values())
-            }
+            return await self._calculate_optimization_stats(table_optimizations, materialized_views)
         except Exception as e:
             logger.error(f"Error getting ClickHouse optimization summary: {e}")
             return {"error": str(e)}

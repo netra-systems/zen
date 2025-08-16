@@ -194,7 +194,6 @@ class TestRealServicesComprehensive:
             await self.clickhouse_context.__aexit__(None, None, None)
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     async def test_full_agent_orchestration_with_real_llm(self):
         """Test complete agent orchestration with real LLM calls"""
         # Create test thread
@@ -255,7 +254,6 @@ class TestRealServicesComprehensive:
             self.metrics["cache_misses"] += 1
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     async def test_multi_agent_coordination_real(self):
         """Test multi-agent coordination with real services"""
         prompts = [
@@ -305,7 +303,6 @@ class TestRealServicesComprehensive:
         assert all(r["quality_score"] >= 0.6 for r in results)
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     async def test_corpus_generation_with_real_data(self):
         """Test corpus generation with real ClickHouse data"""
         # Generate test metrics data
@@ -335,7 +332,6 @@ class TestRealServicesComprehensive:
             assert quality["score"] >= 0.5
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     async def test_mcp_tool_execution_real(self):
         """Test MCP tool execution with real services"""
         # Register MCP client
@@ -372,7 +368,6 @@ class TestRealServicesComprehensive:
         await self.mcp_client_repo.delete(client.id)
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     async def test_quality_monitoring_real_metrics(self):
         """Test quality monitoring with real metrics collection"""
         # Generate multiple responses
@@ -400,7 +395,6 @@ class TestRealServicesComprehensive:
         assert len(quality_metrics["issues"]) < 5
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     async def test_supply_chain_analysis_real(self):
         """Test AI supply chain analysis with real data"""
         # Setup supply chain data
@@ -427,7 +421,6 @@ class TestRealServicesComprehensive:
         assert len(catalog["models"]) >= 3
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     async def test_cache_effectiveness_real(self):
         """Test LLM cache effectiveness with real requests"""
         prompt = "What are the best practices for AI cost optimization?"
@@ -449,7 +442,6 @@ class TestRealServicesComprehensive:
         self.metrics["cache_hits"] += 1
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     async def test_database_transaction_integrity(self):
         """Test database transaction integrity with real operations"""
         # Start transaction
@@ -484,7 +476,6 @@ class TestRealServicesComprehensive:
         assert thread_check is None
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     async def test_redis_pubsub_real(self):
         """Test Redis pub/sub with real messages"""
         channel = "test_channel"
@@ -511,7 +502,6 @@ class TestRealServicesComprehensive:
         await self.redis.unsubscribe(channel)
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio  
     async def test_clickhouse_aggregations_real(self):
         """Test ClickHouse aggregations with real data"""
         # Insert test metrics
@@ -576,7 +566,6 @@ class TestRealLLMProviders:
     """Test suite for different LLM providers with real API calls"""
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     @pytest.mark.parametrize("provider,model", [
         ("openai", "gpt-3.5-turbo"),
         ("anthropic", "claude-3-sonnet"),
@@ -622,7 +611,6 @@ class TestRealDatabaseOperations:
     """Test suite for real database operations"""
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     async def test_postgresql_operations(self):
         """Test PostgreSQL operations with real database"""
         db_instance = Database()
@@ -660,7 +648,6 @@ class TestRealDatabaseOperations:
             db.close()
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     async def test_redis_operations(self):
         """Test Redis operations with real instance"""
         redis = RedisManager()
@@ -693,7 +680,6 @@ class TestRealDatabaseOperations:
             await redis.close()
     
     @skip_if_no_real_services
-    @pytest.mark.asyncio
     async def test_clickhouse_operations(self):
         """Test ClickHouse operations with real database"""
         # Get ClickHouse client using async context manager

@@ -19,8 +19,6 @@ class TestStartupCheckerLLM:
     def checker(self, mock_app):
         """Create a StartupChecker instance."""
         return StartupChecker(mock_app)
-    
-    @pytest.mark.asyncio
     async def test_check_llm_providers_all_success(self, mock_app, checker):
         """Test LLM providers check with all providers available."""
         llm_manager = mock_app.state.llm_manager
@@ -36,8 +34,6 @@ class TestStartupCheckerLLM:
             
             assert result.success == True
             assert "2 LLM providers configured" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_llm_providers_partial_failure(self, mock_app, checker):
         """Test LLM providers check with some providers failing."""
         from app.schemas.llm_types import LLMProvider
@@ -65,8 +61,6 @@ class TestStartupCheckerLLM:
             
             assert result.success == True
             assert "1 available, 1 failed" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_llm_providers_all_failed(self, mock_app, checker):
         """Test LLM providers check with all providers failing."""
         llm_manager = mock_app.state.llm_manager
@@ -80,8 +74,6 @@ class TestStartupCheckerLLM:
             
             assert result.success == False
             assert "No LLM providers available" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_llm_providers_critical_provider_not_initialized(self, mock_app, checker):
         """Test LLM providers check with critical provider returning None."""
         llm_manager = mock_app.state.llm_manager
@@ -94,8 +86,6 @@ class TestStartupCheckerLLM:
             result = await checker.service_checker.check_llm_providers()
             
             assert result.success == False
-    
-    @pytest.mark.asyncio
     async def test_check_llm_providers_exception(self, mock_app, checker):
         """Test LLM providers check with unexpected exception."""
         mock_app.state.llm_manager = None

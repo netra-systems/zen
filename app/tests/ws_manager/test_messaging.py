@@ -15,8 +15,6 @@ from app.tests.ws_manager.test_base import WebSocketTestBase, MockWebSocket
 
 class TestMessageSending(WebSocketTestBase):
     """Test message sending functionality"""
-    
-    @pytest.mark.asyncio
     async def test_send_message_to_connected(self, fresh_manager, connected_websocket):
         """Test sending message to connected WebSocket"""
         connection_id = "test-send-123"
@@ -26,8 +24,6 @@ class TestMessageSending(WebSocketTestBase):
         await fresh_manager.send_message(connection_id, message)
         
         connected_websocket.send_json.assert_called_once_with(message)
-    
-    @pytest.mark.asyncio
     async def test_send_message_to_disconnected(self, fresh_manager, disconnected_websocket):
         """Test sending message to disconnected WebSocket"""
         connection_id = "test-disconnected-send"
@@ -40,14 +36,10 @@ class TestMessageSending(WebSocketTestBase):
         disconnected_websocket.send_json.assert_not_called()
         # Connection should be cleaned up
         assert connection_id not in fresh_manager.connections
-    
-    @pytest.mark.asyncio
     async def test_send_message_to_nonexistent(self, fresh_manager):
         """Test sending message to non-existent connection"""
         # Should not raise an error
         await fresh_manager.send_message("nonexistent-123", {"type": "test"})
-    
-    @pytest.mark.asyncio
     async def test_send_message_with_error(self, fresh_manager, connected_websocket):
         """Test send_message handles send errors gracefully"""
         connection_id = "test-error-send"
@@ -60,8 +52,6 @@ class TestMessageSending(WebSocketTestBase):
         
         # Connection should be removed on error
         assert connection_id not in fresh_manager.connections
-    
-    @pytest.mark.asyncio
     async def test_send_message_complex_data(self, fresh_manager, connected_websocket):
         """Test sending complex message data"""
         connection_id = "test-complex"
@@ -82,8 +72,6 @@ class TestMessageSending(WebSocketTestBase):
 
 class TestConnectionSending(WebSocketTestBase):
     """Test connection-based sending methods"""
-    
-    @pytest.mark.asyncio
     async def test_send_to_connection_success(self, fresh_manager, connected_websocket):
         """Test send_to_connection with valid connection"""
         connection_id = "test-send-conn"
@@ -101,8 +89,6 @@ class TestConnectionSending(WebSocketTestBase):
         assert actual_call["type"] == expected_message["type"]
         assert actual_call["data"] == expected_message["data"]
         assert "timestamp" in actual_call
-    
-    @pytest.mark.asyncio
     async def test_send_to_user_single_connection(self, fresh_manager, connected_websocket):
         """Test send_to_user with single connection"""
         user_id = "user-789"
@@ -115,8 +101,6 @@ class TestConnectionSending(WebSocketTestBase):
         message = connected_websocket.send_json.call_args[0][0]
         assert message["type"] == "user_message"
         assert message["data"] == {"msg": "hello"}
-    
-    @pytest.mark.asyncio
     async def test_send_to_user_multiple_connections(self, fresh_manager):
         """Test send_to_user with multiple connections from same user"""
         user_id = "multi-user"
@@ -136,14 +120,10 @@ class TestConnectionSending(WebSocketTestBase):
         assert ws2.send_json.called
         # Should not send to other user
         assert not ws3.send_json.called
-    
-    @pytest.mark.asyncio
     async def test_send_to_user_no_connections(self, fresh_manager):
         """Test send_to_user with no connections for user"""
         # Should not raise an error
         await fresh_manager.send_to_user("nonexistent-user", "test", {})
-    
-    @pytest.mark.asyncio
     async def test_send_to_role_single_role(self, fresh_manager):
         """Test send_to_role with single role"""
         ws_admin = MockWebSocket()
@@ -156,8 +136,6 @@ class TestConnectionSending(WebSocketTestBase):
         
         assert ws_admin.send_json.called
         assert not ws_user.send_json.called
-    
-    @pytest.mark.asyncio
     async def test_send_to_role_multiple_same_role(self, fresh_manager):
         """Test send_to_role with multiple connections of same role"""
         ws1 = MockWebSocket()
@@ -173,8 +151,6 @@ class TestConnectionSending(WebSocketTestBase):
         assert ws1.send_json.called
         assert ws2.send_json.called
         assert not ws3.send_json.called
-    
-    @pytest.mark.asyncio
     async def test_send_to_role_no_connections(self, fresh_manager):
         """Test send_to_role with no connections for role"""
         # Should not raise an error
@@ -183,8 +159,6 @@ class TestConnectionSending(WebSocketTestBase):
 
 class TestSpecializedMessages(WebSocketTestBase):
     """Test specialized message types"""
-    
-    @pytest.mark.asyncio
     async def test_send_error(self, fresh_manager, connected_websocket):
         """Test sending error message"""
         connection_id = "test-error"
@@ -195,8 +169,6 @@ class TestSpecializedMessages(WebSocketTestBase):
         message = self.assert_message_sent(connected_websocket, "error")
         assert message["error"] == "Something went wrong"
         assert message["code"] == "ERROR_CODE"
-    
-    @pytest.mark.asyncio
     async def test_send_success(self, fresh_manager, connected_websocket):
         """Test sending success message"""
         connection_id = "test-success"
@@ -207,8 +179,6 @@ class TestSpecializedMessages(WebSocketTestBase):
         message = self.assert_message_sent(connected_websocket, "success")
         assert message["message"] == "Operation completed"
         assert message["data"] == {"result": "data"}
-    
-    @pytest.mark.asyncio
     async def test_send_notification(self, fresh_manager, connected_websocket):
         """Test sending notification message"""
         connection_id = "test-notification"
@@ -225,8 +195,6 @@ class TestSpecializedMessages(WebSocketTestBase):
         assert message["title"] == "New message"
         assert message["level"] == "info"
         assert message["metadata"] == {"extra": "metadata"}
-    
-    @pytest.mark.asyncio
     async def test_send_status_update(self, fresh_manager, connected_websocket):
         """Test sending status update"""
         connection_id = "test-status"
@@ -245,8 +213,6 @@ class TestSpecializedMessages(WebSocketTestBase):
 
 class TestBroadcasting(WebSocketTestBase):
     """Test broadcasting functionality"""
-    
-    @pytest.mark.asyncio
     async def test_broadcast_to_all(self, fresh_manager):
         """Test broadcasting to all connections"""
         ws1 = MockWebSocket()
@@ -265,8 +231,6 @@ class TestBroadcasting(WebSocketTestBase):
             message = ws.send_json.call_args[0][0]
             assert message["type"] == "announcement"
             assert message["data"] == "Hello all"
-    
-    @pytest.mark.asyncio
     async def test_broadcast_with_exclusion(self, fresh_manager):
         """Test broadcasting with connection exclusion"""
         ws1 = MockWebSocket()
@@ -285,14 +249,10 @@ class TestBroadcasting(WebSocketTestBase):
         assert ws1.send_json.called
         assert not ws2.send_json.called  # Excluded
         assert ws3.send_json.called
-    
-    @pytest.mark.asyncio
     async def test_broadcast_to_empty(self, fresh_manager):
         """Test broadcasting when no connections exist"""
         # Should not raise an error
         await fresh_manager.broadcast({"type": "test", "data": "empty"})
-    
-    @pytest.mark.asyncio
     async def test_broadcast_handles_errors(self, fresh_manager):
         """Test broadcast continues despite individual send errors"""
         ws1 = MockWebSocket()

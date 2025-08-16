@@ -18,7 +18,6 @@ from app.tests.helpers.json_file_crypto_test_helpers import JsonTestHelpers
 
 
 # Test 86: Datetime utils timezone
-@pytest.mark.asyncio
 class TestDatetimeUtilsTimezone:
     """test_datetime_utils_timezone - Test timezone conversions and DST handling"""
     
@@ -68,7 +67,6 @@ class TestDatetimeUtilsTimezone:
 
 
 # Test 87: String utils sanitization
-@pytest.mark.asyncio
 class TestStringUtilsSanitization:
     """test_string_utils_sanitization - Test string sanitization and XSS prevention"""
     
@@ -133,7 +131,6 @@ class TestStringUtilsSanitization:
 
 
 # Test 88: JSON utils serialization
-@pytest.mark.asyncio
 class TestJsonUtilsSerialization:
     """test_json_utils_serialization - Test custom serialization and circular reference handling"""
     

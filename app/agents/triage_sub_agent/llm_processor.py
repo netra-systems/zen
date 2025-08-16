@@ -145,14 +145,21 @@ class TriageLLMProcessor:
     async def _attempt_structured_llm_call(self, enhanced_prompt: str, correlation_id: str) -> dict:
         """Attempt a single structured LLM call."""
         from .models import TriageResult
-        validated_result = await self.agent.llm_manager.ask_structured_llm(
+        validated_result = await self._call_structured_llm(enhanced_prompt)
+        self._log_llm_success(validated_result, correlation_id)
+        return validated_result.model_dump()
+    
+    async def _call_structured_llm(self, enhanced_prompt: str):
+        """Call structured LLM with triage schema."""
+        from .models import TriageResult
+        return await self.agent.llm_manager.ask_structured_llm(
             enhanced_prompt, llm_config_name='triage', schema=TriageResult, use_cache=False
         )
-        
+    
+    def _log_llm_success(self, validated_result, correlation_id: str) -> None:
+        """Log successful LLM output."""
         log_agent_output("LLM", "TriageSubAgent", 
                        len(str(validated_result)), "success", correlation_id)
-        
-        return validated_result.model_dump()
     
     def _should_retry_validation_error(self, attempt: int, max_retries: int, ve: ValidationError) -> bool:
         """Determine if validation error should be retried."""
@@ -203,14 +210,17 @@ class TriageLLMProcessor:
     def _process_extracted_json(self, extracted_json: Optional[dict]) -> dict:
         """Process extracted JSON with validation attempt."""
         if extracted_json:
-            try:
-                from .models import TriageResult
-                validated_result = TriageResult(**extracted_json)
-                return validated_result.model_dump()
-            except ValidationError:
-                return extracted_json
-        
+            return self._validate_or_return_raw(extracted_json)
         return self._create_basic_triage_fallback()
+    
+    def _validate_or_return_raw(self, extracted_json: dict) -> dict:
+        """Validate JSON or return raw data."""
+        try:
+            from .models import TriageResult
+            validated_result = TriageResult(**extracted_json)
+            return validated_result.model_dump()
+        except ValidationError:
+            return extracted_json
     
     def _create_basic_triage_fallback(self) -> dict:
         """Create basic triage fallback response."""

@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-16T00:02:42.206547  
+**Generated:** 2025-08-16T06:25:46.512627  
 **Test Level:** real_e2e - [REAL E2E] Tests with actual LLM calls and services (15-20 minutes)  
 **Purpose:** End-to-end validation with real LLM and service integrations
 
@@ -17,7 +17,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 0.23s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 0.17s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -25,9 +25,9 @@
 - **Test Level:** real_e2e
 - **Description:** [REAL E2E] Tests with actual LLM calls and services (15-20 minutes)
 - **Purpose:** End-to-end validation with real LLM and service integrations
-- **Timeout:** 3600s
+- **Timeout:** 1200s
 - **Coverage Enabled:** No
-- **Total Duration:** 0.23s
+- **Total Duration:** 0.17s
 - **Exit Code:** 2
 
 ### Backend Configuration

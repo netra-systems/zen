@@ -182,24 +182,35 @@ class SearchOperations:
             result = await client.execute(query)
             return self._process_search_results(result)
     
+    def _build_complete_search_query(self, db_corpus, search_params: Dict) -> str:
+        """Build complete search query with all conditions"""
+        query = self._build_base_query(db_corpus.table_name)
+        conditions = self._build_where_conditions(search_params)
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        query += self._build_order_clause(search_params)
+        query += self._build_pagination_clause(search_params)
+        return query
+
+    def _handle_search_error(self, db_corpus, error: Exception) -> None:
+        """Handle search operation errors"""
+        central_logger.error(f"Failed to search corpus {db_corpus.id}: {str(error)}")
+        raise ClickHouseOperationError(f"Search failed: {str(error)}")
+
+    async def _execute_search_operation(self, db_corpus, search_params: Dict) -> List[Dict]:
+        """Execute the complete search operation"""
+        query = self._build_complete_search_query(db_corpus, search_params)
+        return await self._execute_search_query(query, db_corpus)
+
     async def search_corpus_content(
-        self,
-        db_corpus,
-        search_params: Dict
+        self, db_corpus, search_params: Dict
     ) -> Optional[List[Dict]]:
         """Search corpus content with advanced filtering"""
         self._validate_corpus_availability(db_corpus)
         try:
-            query = self._build_base_query(db_corpus.table_name)
-            conditions = self._build_where_conditions(search_params)
-            if conditions:
-                query += " WHERE " + " AND ".join(conditions)
-            query += self._build_order_clause(search_params)
-            query += self._build_pagination_clause(search_params)
-            return await self._execute_search_query(query, db_corpus)
+            return await self._execute_search_operation(db_corpus, search_params)
         except Exception as e:
-            central_logger.error(f"Failed to search corpus {db_corpus.id}: {str(e)}")
-            raise ClickHouseOperationError(f"Search failed: {str(e)}")
+            self._handle_search_error(db_corpus, e)
     
     async def get_corpus_sample(
         self, db_corpus, sample_size: int = 10, workload_type: Optional[str] = None

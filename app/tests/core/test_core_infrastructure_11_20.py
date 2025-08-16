@@ -102,8 +102,6 @@ class TestErrorHandlers:
         assert response.error == True
         assert response.error_code == "TEST_ERROR"
         assert response.trace_id == "trace-123"
-    
-    @pytest.mark.asyncio
     async def test_http_exception_handler(self):
         """Test HTTP exception handling."""
         from app.core.error_handlers import http_exception_handler
@@ -179,8 +177,6 @@ class TestLoggingManager:
 # Test 16: resource_manager_limits
 class TestResourceManager:
     """Test resource allocation - app/core/resource_manager.py"""
-    
-    @pytest.mark.asyncio
     async def test_resource_tracking(self):
         """Test basic resource tracking."""
         from app.core.resource_manager import ResourceTracker
@@ -197,8 +193,6 @@ class TestResourceManager:
         result = tracker.unregister("connection_conn_1")
         assert result == True
         assert tracker.get_resource("connection_conn_1") is None
-    
-    @pytest.mark.asyncio
     async def test_resource_limits(self):
         """Test resource limit enforcement with register/unregister."""
         from app.core.resource_manager import ResourceTracker
@@ -221,8 +215,6 @@ class TestResourceManager:
 # Test 17: schema_sync_database_migration
 class TestSchemaSync:
     """Test schema synchronization - app/core/schema_sync.py"""
-    
-    @pytest.mark.asyncio
     async def test_schema_validation(self):
         """Test basic schema validation."""
         from app.core.schema_sync import validate_schema
@@ -321,8 +313,6 @@ class TestStartupChecks:
         app.state.db_session_factory = AsyncMock()
         app.state.redis_manager = AsyncMock()
         return app
-    
-    @pytest.mark.asyncio
     async def test_database_check(self, mock_app):
         """Test database connectivity check."""
         from app.startup_checks.database_checks import DatabaseChecker
@@ -344,8 +334,6 @@ class TestStartupChecks:
             result = await checker.check_database_connection()
             assert result.success == True
             assert result.name == "database_connection"
-    
-    @pytest.mark.asyncio
     async def test_service_health_checks(self, mock_app):
         """Test external service health checks."""
         from app.startup_checks.service_checks import ServiceChecker
@@ -374,8 +362,6 @@ class TestStartupChecks:
             result = await checker.check_clickhouse()
             assert result.success == True
             assert result.name == "clickhouse_connection"
-    
-    @pytest.mark.asyncio
     async def test_graceful_degradation(self, mock_app):
         """Test graceful degradation when optional services fail."""
         from app.startup_checks import run_startup_checks

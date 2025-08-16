@@ -21,8 +21,6 @@ class TestStartupCheckerNetwork:
     def checker(self, mock_app):
         """Create a StartupChecker instance."""
         return StartupChecker(mock_app)
-    
-    @pytest.mark.asyncio
     async def test_check_network_connectivity_success(self, checker):
         """Test network connectivity check success."""
         with patch('socket.socket') as mock_socket_class:
@@ -36,8 +34,6 @@ class TestStartupCheckerNetwork:
                 
                 assert result.success == True
                 assert "All network endpoints reachable" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_network_connectivity_failure(self, checker):
         """Test network connectivity check with unreachable endpoints."""
         with patch('socket.socket') as mock_socket_class:
@@ -51,8 +47,6 @@ class TestStartupCheckerNetwork:
                 
                 assert result.success == False
                 assert "Cannot reach" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_network_connectivity_socket_exception(self, checker):
         """Test network connectivity check with socket exception."""
         with patch('socket.socket') as mock_socket_class:
@@ -68,8 +62,6 @@ class TestStartupCheckerNetwork:
                 
                 assert result.success == False
                 assert "Socket error" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_network_connectivity_no_port(self, checker):
         """Test network connectivity check with endpoint without port."""
         with patch('socket.socket') as mock_socket_class:

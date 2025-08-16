@@ -24,9 +24,6 @@ def scheduler():
     with patch('app.services.supply_research_scheduler.RedisManager') as mock_redis_class:
         mock_redis_class.return_value = MockRedisManager()
         return SupplyResearchScheduler(mock_background_manager, mock_llm_manager)
-
-
-@pytest.mark.asyncio
 class TestResultRetrieval:
     """Test result retrieval from cache"""
     

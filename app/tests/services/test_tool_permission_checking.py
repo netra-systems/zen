@@ -37,9 +37,6 @@ def service():
 def service_with_redis(mock_redis):
     """Create ToolPermissionService with Redis"""
     return ToolPermissionService(mock_redis)
-
-
-@pytest.mark.asyncio
 class TestCheckToolPermission:
     """Test main tool permission checking"""
     

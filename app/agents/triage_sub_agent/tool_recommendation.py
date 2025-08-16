@@ -52,11 +52,20 @@ def recommend_tools(category: str, entities: ExtractedEntities) -> List[ToolReco
     tool_mapping = get_tool_mapping()
     if category not in tool_mapping:
         return []
-    
+    recommendations = _build_recommendations(tool_mapping[category], entities)
+    return _sort_and_limit_recommendations(recommendations)
+
+
+def _build_recommendations(tool_names: List[str], entities: ExtractedEntities) -> List[ToolRecommendation]:
+    """Build recommendations for tool names."""
     recommendations = []
-    for tool_name in tool_mapping[category]:
+    for tool_name in tool_names:
         relevance = calculate_relevance(tool_name, entities)
         recommendations.append(create_recommendation(tool_name, relevance))
-    
+    return recommendations
+
+
+def _sort_and_limit_recommendations(recommendations: List[ToolRecommendation]) -> List[ToolRecommendation]:
+    """Sort by relevance and limit to top 5."""
     recommendations.sort(key=lambda x: x.relevance_score, reverse=True)
-    return recommendations[:5]  # Top 5
+    return recommendations[:5]

@@ -63,8 +63,6 @@ def resource_monitor():
 
 class TestLargeScaleGeneration:
     """Test large corpus generation (100k+ records)"""
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_large_corpus_generation_100k(self, large_corpus_params, resource_monitor):
         """Test generation of 100k+ records with performance monitoring"""
@@ -100,8 +98,6 @@ class TestLargeScaleGeneration:
             }
             results.append(result)
         return iter(results)
-
-    @pytest.mark.asyncio
     @pytest.mark.performance  
     async def test_memory_efficient_generation(self):
         """Test memory-efficient generation patterns"""
@@ -138,8 +134,6 @@ class TestLargeScaleGeneration:
             'type': workload_type,
             'data': (f'prompt_{workload_type}', f'response_{workload_type}')
         }
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_scalability_patterns(self, large_corpus_params):
         """Test generation scalability patterns"""

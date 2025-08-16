@@ -96,40 +96,70 @@ class ResilientDatabaseClient:
             raise RuntimeError("Database not configured")
         return async_session_factory()
     
+    async def _commit_session(self, session: AsyncSession) -> None:
+        """Commit session transaction."""
+        await session.commit()
+    
+    async def _rollback_session(self, session: AsyncSession, error: Exception) -> None:
+        """Rollback session on error."""
+        await session.rollback()
+        logger.error(f"Database session error: {error}")
+        raise
+    
+    async def _close_session(self, session: AsyncSession) -> None:
+        """Close session safely."""
+        await session.close()
+    
     async def _handle_session_transaction(self, session: AsyncSession):
         """Handle session transaction with commit/rollback."""
         try:
             yield session
-            await session.commit()
+            await self._commit_session(session)
         except Exception as e:
-            await session.rollback()
-            logger.error(f"Database session error: {e}")
-            raise
+            await self._rollback_session(session, e)
         finally:
-            await session.close()
+            await self._close_session(session)
+    
+    async def _create_protected_session(self) -> AsyncSession:
+        """Create session through circuit breaker."""
+        postgres_circuit = await self._get_postgres_circuit()
+        return await postgres_circuit.call(self._create_session_factory)
+    
+    async def _handle_circuit_breaker_error(self) -> None:
+        """Handle circuit breaker open error."""
+        logger.error("Database session blocked - circuit breaker open")
+        raise CircuitBreakerOpenError("Database circuit breaker is open")
     
     @asynccontextmanager
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
         """Get database session with circuit breaker protection."""
-        postgres_circuit = await self._get_postgres_circuit()
         try:
-            session = await postgres_circuit.call(self._create_session_factory)
+            session = await self._create_protected_session()
             async for s in self._handle_session_transaction(session):
                 yield s
         except CircuitBreakerOpenError:
-            logger.error("Database session blocked - circuit breaker open")
-            raise
+            await self._handle_circuit_breaker_error()
+    
+    async def _execute_query_on_session(self, session: AsyncSession, query: str, params: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Execute query on session and return results."""
+        result = await session.execute(text(query), params)
+        return [dict(row._mapping) for row in result.fetchall()]
     
     async def _execute_read_operation(self, query: str, params: Optional[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Execute read operation on database session."""
         async with self.get_session() as session:
-            result = await session.execute(text(query), params or {})
-            return [dict(row._mapping) for row in result.fetchall()]
+            return await self._execute_query_on_session(session, query, params or {})
     
     async def _handle_read_circuit_open(self) -> List[Dict[str, Any]]:
         """Handle circuit breaker open for read queries."""
         logger.warning("Read query blocked - circuit breaker open")
         return []
+    
+    async def _create_read_operation(self, query: str, params: Optional[Dict[str, Any]]):
+        """Create read operation function for circuit breaker."""
+        async def _read_operation():
+            return await self._execute_read_operation(query, params)
+        return _read_operation
     
     async def execute_read_query(self, 
                                 query: str, 
@@ -137,22 +167,31 @@ class ResilientDatabaseClient:
         """Execute read query with circuit breaker protection."""
         read_circuit = await self._get_read_circuit()
         try:
-            async def _read_operation():
-                return await self._execute_read_operation(query, params)
-            return await read_circuit.call(_read_operation)
+            read_operation = await self._create_read_operation(query, params)
+            return await read_circuit.call(read_operation)
         except CircuitBreakerOpenError:
             return await self._handle_read_circuit_open()
+    
+    async def _execute_write_on_session(self, session: AsyncSession, query: str, params: Dict[str, Any]) -> int:
+        """Execute write query on session."""
+        result = await session.execute(text(query), params)
+        return result.rowcount or 0
     
     async def _execute_write_operation(self, query: str, params: Optional[Dict[str, Any]]) -> int:
         """Execute write operation on database session."""
         async with self.get_session() as session:
-            result = await session.execute(text(query), params or {})
-            return result.rowcount or 0
+            return await self._execute_write_on_session(session, query, params or {})
     
     async def _handle_write_circuit_open(self):
         """Handle circuit breaker open for write queries."""
         logger.error("Write query blocked - circuit breaker open")
         raise CircuitBreakerOpenError("Write circuit breaker is open")
+    
+    async def _create_write_operation(self, query: str, params: Optional[Dict[str, Any]]):
+        """Create write operation function for circuit breaker."""
+        async def _write_operation():
+            return await self._execute_write_operation(query, params)
+        return _write_operation
     
     async def execute_write_query(self, 
                                  query: str, 
@@ -160,17 +199,20 @@ class ResilientDatabaseClient:
         """Execute write query with circuit breaker protection."""
         write_circuit = await self._get_write_circuit()
         try:
-            async def _write_operation():
-                return await self._execute_write_operation(query, params)
-            return await write_circuit.call(_write_operation)
+            write_operation = await self._create_write_operation(query, params)
+            return await write_circuit.call(write_operation)
         except CircuitBreakerOpenError:
             await self._handle_write_circuit_open()
+    
+    async def _execute_single_query_in_transaction(self, session: AsyncSession, query: str, params: Optional[Dict[str, Any]]) -> None:
+        """Execute single query in transaction."""
+        await session.execute(text(query), params or {})
     
     async def _execute_transaction_queries(self, queries: List[tuple]) -> bool:
         """Execute transaction queries on database session."""
         async with self.get_session() as session:
             for query, params in queries:
-                await session.execute(text(query), params or {})
+                await self._execute_single_query_in_transaction(session, query, params)
             return True
     
     async def _handle_transaction_circuit_open(self) -> bool:
@@ -178,63 +220,85 @@ class ResilientDatabaseClient:
         logger.error("Transaction blocked - circuit breaker open")
         return False
     
+    async def _create_transaction_operation(self, queries: List[tuple]):
+        """Create transaction operation function for circuit breaker."""
+        async def _transaction_operation():
+            return await self._execute_transaction_queries(queries)
+        return _transaction_operation
+    
     async def execute_transaction(self, queries: List[tuple]) -> bool:
         """Execute multiple queries in transaction with protection."""
         write_circuit = await self._get_write_circuit()
         try:
-            async def _transaction_operation():
-                return await self._execute_transaction_queries(queries)
-            return await write_circuit.call(_transaction_operation)
+            transaction_operation = await self._create_transaction_operation(queries)
+            return await write_circuit.call(transaction_operation)
         except CircuitBreakerOpenError:
             return await self._handle_transaction_circuit_open()
+    
+    async def _perform_health_checks(self) -> tuple:
+        """Perform connection and circuit health checks."""
+        connection_status = await self._test_connection()
+        circuits_status = await self._get_circuits_status()
+        return connection_status, circuits_status
+    
+    async def _build_health_response(self, connection_status: Dict[str, Any], circuits_status: Dict[str, Any]) -> Dict[str, Any]:
+        """Build health check response."""
+        return {
+            "connection": connection_status,
+            "circuits": circuits_status,
+            "overall_health": self._assess_health(connection_status, circuits_status)
+        }
     
     async def health_check(self) -> Dict[str, Any]:
         """Comprehensive database health check."""
         try:
-            # Test basic connectivity
-            connection_status = await self._test_connection()
-            
-            # Get circuit statuses
-            circuits_status = await self._get_circuits_status()
-            
-            return {
-                "connection": connection_status,
-                "circuits": circuits_status,
-                "overall_health": self._assess_health(connection_status, circuits_status)
-            }
+            connection_status, circuits_status = await self._perform_health_checks()
+            return await self._build_health_response(connection_status, circuits_status)
         except Exception as e:
             logger.error(f"Database health check failed: {e}")
-            return {
-                "error": str(e),
-                "overall_health": "unhealthy"
-            }
+            return {"error": str(e), "overall_health": "unhealthy"}
+    
+    async def _execute_connection_test(self) -> Dict[str, Any]:
+        """Execute connection test query."""
+        result = await self.execute_read_query("SELECT 1 as test")
+        return {"status": "healthy", "test_query": len(result) == 1}
+    
+    async def _handle_connection_error(self, error: Exception) -> Dict[str, Any]:
+        """Handle connection test error."""
+        return {"status": "unhealthy", "error": str(error)}
     
     async def _test_connection(self) -> Dict[str, Any]:
         """Test database connection."""
         try:
-            result = await self.execute_read_query("SELECT 1 as test")
-            return {
-                "status": "healthy",
-                "test_query": len(result) == 1
-            }
+            return await self._execute_connection_test()
         except Exception as e:
-            return {
-                "status": "unhealthy",
-                "error": str(e)
-            }
+            return await self._handle_connection_error(e)
+    
+    def _add_circuit_status(self, status: Dict[str, Dict[str, Any]], name: str, circuit) -> None:
+        """Add circuit status to status dict."""
+        if circuit:
+            status[name] = circuit.get_status()
     
     async def _get_circuits_status(self) -> Dict[str, Dict[str, Any]]:
         """Get status of all database circuits."""
         status = {}
-        
-        if self._postgres_circuit:
-            status["postgres"] = self._postgres_circuit.get_status()
-        if self._read_circuit:
-            status["read"] = self._read_circuit.get_status()
-        if self._write_circuit:
-            status["write"] = self._write_circuit.get_status()
-        
+        self._add_circuit_status(status, "postgres", self._postgres_circuit)
+        self._add_circuit_status(status, "read", self._read_circuit)
+        self._add_circuit_status(status, "write", self._write_circuit)
         return status
+    
+    def _get_circuit_health_states(self, circuits_status: Dict[str, Dict[str, Any]]) -> List[str]:
+        """Extract health states from circuits status."""
+        return [c.get("health", "unknown") for c in circuits_status.values()]
+    
+    def _evaluate_circuit_health(self, circuit_states: List[str]) -> str:
+        """Evaluate overall health from circuit states."""
+        if "unhealthy" in circuit_states:
+            return "degraded"
+        elif "recovering" in circuit_states:
+            return "recovering"
+        else:
+            return "healthy"
     
     def _assess_health(self, 
                       connection_status: Dict[str, Any], 
@@ -243,14 +307,8 @@ class ResilientDatabaseClient:
         if connection_status.get("status") != "healthy":
             return "unhealthy"
         
-        circuit_states = [c.get("health", "unknown") for c in circuits_status.values()]
-        
-        if "unhealthy" in circuit_states:
-            return "degraded"
-        elif "recovering" in circuit_states:
-            return "recovering"
-        else:
-            return "healthy"
+        circuit_states = self._get_circuit_health_states(circuits_status)
+        return self._evaluate_circuit_health(circuit_states)
 
 
 class ClickHouseDatabaseClient:
@@ -267,43 +325,51 @@ class ClickHouseDatabaseClient:
             )
         return self._circuit
     
+    async def _create_clickhouse_query_executor(self, query: str, params: Optional[Dict[str, Any]]):
+        """Create ClickHouse query executor function."""
+        async def _execute_ch_query() -> List[Dict[str, Any]]:
+            from app.db.clickhouse import get_clickhouse_client
+            async with get_clickhouse_client() as ch_client:
+                return await ch_client.execute_query(query, params)
+        return _execute_ch_query
+    
+    async def _handle_clickhouse_circuit_open(self) -> List[Dict[str, Any]]:
+        """Handle ClickHouse circuit breaker open."""
+        logger.warning("ClickHouse query blocked - circuit breaker open")
+        return []
+    
     async def execute_query(self, 
                            query: str, 
                            params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Execute ClickHouse query with circuit breaker."""
         circuit = await self._get_circuit()
-        
-        async def _execute_ch_query() -> List[Dict[str, Any]]:
-            """Execute ClickHouse query using configured client."""
-            from app.db.clickhouse import get_clickhouse_client
-            
-            async with get_clickhouse_client() as ch_client:
-                return await ch_client.execute_query(query, params)
-        
         try:
-            return await circuit.call(_execute_ch_query)
+            query_executor = await self._create_clickhouse_query_executor(query, params)
+            return await circuit.call(query_executor)
         except CircuitBreakerOpenError:
-            logger.warning("ClickHouse query blocked - circuit breaker open")
-            return []
+            return await self._handle_clickhouse_circuit_open()
+    
+    async def _test_clickhouse_connectivity(self) -> None:
+        """Test basic ClickHouse connectivity."""
+        await self.execute_query("SELECT 1")
+    
+    async def _build_healthy_response(self, circuit_status: Dict[str, Any]) -> Dict[str, Any]:
+        """Build healthy health check response."""
+        return {"status": "healthy", "circuit": circuit_status}
+    
+    async def _build_unhealthy_response(self, error: Exception) -> Dict[str, Any]:
+        """Build unhealthy health check response."""
+        return {"status": "unhealthy", "error": str(error)}
     
     async def health_check(self) -> Dict[str, Any]:
         """ClickHouse health check."""
         try:
             circuit = await self._get_circuit()
             circuit_status = circuit.get_status()
-            
-            # Test basic connectivity
-            await self.execute_query("SELECT 1")
-            
-            return {
-                "status": "healthy",
-                "circuit": circuit_status
-            }
+            await self._test_clickhouse_connectivity()
+            return await self._build_healthy_response(circuit_status)
         except Exception as e:
-            return {
-                "status": "unhealthy",
-                "error": str(e)
-            }
+            return await self._build_unhealthy_response(e)
 
 
 class DatabaseClientManager:

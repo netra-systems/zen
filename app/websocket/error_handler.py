@@ -35,43 +35,46 @@ class WebSocketErrorHandler:
         }
     
     async def handle_error(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None) -> bool:
-        """Handle a WebSocket error with appropriate logging and recovery.
+        """Handle a WebSocket error with appropriate logging and recovery."""
+        self._store_and_track_error(error, conn_info)
+        self._log_error(error, conn_info)
         
-        Args:
-            error: Error to handle
-            conn_info: Connection info if available
-            
-        Returns:
-            True if error was handled and recovered from
-        """
-        # Store error in history
+        return await self._attempt_error_recovery(error, conn_info)
+
+    def _store_and_track_error(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo]) -> None:
+        """Store error and update tracking information."""
         self.error_history[error.error_id] = error
-        
-        # Update statistics
+        self._update_error_statistics(error)
+        self._update_connection_tracking(error, conn_info)
+        self._track_error_patterns(error)
+
+    def _update_error_statistics(self, error: WebSocketErrorInfo) -> None:
+        """Update error statistics."""
         self._stats["total_errors"] += 1
         if error.severity == ErrorSeverity.CRITICAL:
             self._stats["critical_errors"] += 1
-        
-        # Update connection-specific error tracking
+
+    def _update_connection_tracking(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo]) -> None:
+        """Update connection-specific error tracking."""
         if conn_info:
             error.connection_id = conn_info.connection_id
             error.user_id = conn_info.user_id
             conn_info.error_count += 1
             self.connection_errors[conn_info.connection_id] = self.connection_errors.get(conn_info.connection_id, 0) + 1
-        
-        # Track error patterns
+
+    def _track_error_patterns(self, error: WebSocketErrorInfo) -> None:
+        """Track error patterns for analysis."""
         error_pattern = f"{error.error_type}:{error.message[:50]}"
         self.error_patterns[error_pattern] = self.error_patterns.get(error_pattern, 0) + 1
+
+    async def _attempt_error_recovery(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo]) -> bool:
+        """Attempt error recovery if conditions are met."""
+        if not (error.recoverable and error.retry_count < error.max_retries):
+            return False
         
-        # Log error with appropriate level
-        self._log_error(error, conn_info)
-        
-        # Attempt recovery if error is recoverable
-        recovered = False
-        if error.recoverable and error.retry_count < error.max_retries:
-            recovered = await self._attempt_recovery(error, conn_info)
-            if recovered:
-                self._stats["recovered_errors"] += 1
+        recovered = await self._attempt_recovery(error, conn_info)
+        if recovered:
+            self._stats["recovered_errors"] += 1
         
         return recovered
     

@@ -46,7 +46,6 @@ class TestWebSocketSerializationCritical:
         ws.close = AsyncMock()
         return ws
 
-    @pytest.mark.asyncio
     async def test_datetime_serialization_error_exact_reproduction(self):
         """Reproduce exact datetime serialization error from production"""
         problematic_data = {
@@ -58,7 +57,6 @@ class TestWebSocketSerializationCritical:
             json.dumps(problematic_data)
         assert "Object of type datetime is not JSON serializable" in str(exc_info.value)
 
-    @pytest.mark.asyncio
     async def test_datetime_encoder_fix_comprehensive(self, datetime_encoder):
         """Test DateTimeEncoder fixes all datetime serialization issues"""
         test_data = {
@@ -73,7 +71,6 @@ class TestWebSocketSerializationCritical:
         assert isinstance(deserialized["direct_datetime"], str)
         assert isinstance(deserialized["nested"]["deep_datetime"], str)
 
-    @pytest.mark.asyncio
     async def test_invalid_thread_created_message_type(self):
         """Test invalid 'thread_created' message type validation failure"""
         invalid_message = {
@@ -84,7 +81,6 @@ class TestWebSocketSerializationCritical:
         with pytest.raises(ValueError):
             WebSocketMessageType(invalid_message["type"])
 
-    @pytest.mark.asyncio
     async def test_all_websocket_message_types_serialization(self, datetime_encoder):
         """Test serialization of ALL WebSocket message types"""
         test_messages = self._create_all_message_types()
@@ -104,7 +100,6 @@ class TestWebSocketSerializationCritical:
             "agent_completed": {"type": "agent_completed", "payload": {"timestamp": base_timestamp}}
         }
 
-    @pytest.mark.asyncio
     async def test_complex_nested_object_serialization(self, datetime_encoder):
         """Test complex nested structures with datetime serialization"""
         complex_payload = {
@@ -118,7 +113,6 @@ class TestWebSocketSerializationCritical:
         serialized = json.dumps(message, cls=DateTimeEncoder)
         assert json.loads(serialized)
 
-    @pytest.mark.asyncio
     async def test_broadcast_with_datetime_recovery(self, mock_websocket):
         """Test broadcast error recovery with datetime serialization"""
         manager = BroadcastManager(Mock())
@@ -138,7 +132,6 @@ class TestWebSocketSerializationCritical:
             )
             assert mock_dumps.call_count >= 1
 
-    @pytest.mark.asyncio
     async def test_binary_data_handling(self):
         """Test binary data in WebSocket messages"""
         binary_payload = {
@@ -153,7 +146,6 @@ class TestWebSocketSerializationCritical:
         serialized = json.dumps(validated.model_dump(), cls=DateTimeEncoder)
         assert json.loads(serialized)
 
-    @pytest.mark.asyncio
     async def test_large_message_validation(self, message_validator):
         """Test large message size validation"""
         large_payload = {
@@ -165,7 +157,6 @@ class TestWebSocketSerializationCritical:
         assert hasattr(result, 'error_type')
         assert result.error_type == "validation_error"
 
-    @pytest.mark.asyncio
     async def test_connection_state_transitions_serialization(self):
         """Test connection state changes with datetime fields"""
         connection_info = ConnectionInfo(
@@ -180,7 +171,6 @@ class TestWebSocketSerializationCritical:
         serialized = json.dumps(connection_info.model_dump(), cls=DateTimeEncoder)
         assert json.loads(serialized)
 
-    @pytest.mark.asyncio
     async def test_concurrent_datetime_serialization(self):
         """Test concurrent serialization doesn't cause conflicts"""
         async def serialize_message(i: int):
@@ -191,7 +181,6 @@ class TestWebSocketSerializationCritical:
         results = await asyncio.gather(*tasks)
         assert len(results) == 10
 
-    @pytest.mark.asyncio
     async def test_message_type_enum_validation_comprehensive(self):
         """Test all message type enum values validate correctly"""
         valid_types = [t.value for t in WebSocketMessageType]
@@ -201,7 +190,6 @@ class TestWebSocketSerializationCritical:
             validated = WebSocketMessage(**message)
             assert validated.type == msg_type
 
-    @pytest.mark.asyncio
     async def test_broadcast_result_serialization(self):
         """Test BroadcastResult with datetime metadata"""
         result = BroadcastResult(
@@ -214,7 +202,6 @@ class TestWebSocketSerializationCritical:
         serialized = json.dumps(result.model_dump())
         assert json.loads(serialized)
 
-    @pytest.mark.asyncio
     async def test_message_validation_security_patterns(self, message_validator):
         """Test security validation in message content"""
         malicious_message = {
@@ -226,7 +213,6 @@ class TestWebSocketSerializationCritical:
         assert hasattr(result, 'error_type')
         assert result.error_type == "security_error"
 
-    @pytest.mark.asyncio
     async def test_datetime_in_all_payload_positions(self, datetime_encoder):
         """Test datetime serialization in various payload positions"""
         payload_variations = [
@@ -241,7 +227,6 @@ class TestWebSocketSerializationCritical:
             serialized = json.dumps(message, cls=DateTimeEncoder)
             assert json.loads(serialized)
 
-    @pytest.mark.asyncio
     async def test_serialization_edge_cases(self):
         """Test edge cases in serialization"""
         edge_cases = [

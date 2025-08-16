@@ -8,9 +8,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from enum import Enum
 
 from app.services.job_store import JobStore, job_store
-
-
-@pytest.mark.asyncio
 class TestJobStore:
     """Test basic job store functionality."""
 

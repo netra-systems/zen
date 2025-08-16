@@ -57,8 +57,6 @@ def real_clickhouse_client():
 
 class TestRealClickHouseConnection:
     """Test real ClickHouse connection and basic operations"""
-    
-    @pytest.mark.asyncio
     async def test_real_connection(self, real_clickhouse_client):
         """Test actual connection to ClickHouse Cloud"""
         # Test basic connection
@@ -71,8 +69,6 @@ class TestRealClickHouseConnection:
         assert len(version_result) == 1
         assert 'version' in version_result[0]
         logger.info(f"Connected to ClickHouse version: {version_result[0]['version']}")
-    
-    @pytest.mark.asyncio
     async def test_real_database_operations(self, real_clickhouse_client):
         """Test real database operations"""
         # Get current database
@@ -85,8 +81,6 @@ class TestRealClickHouseConnection:
         tables_result = await real_clickhouse_client.execute_query("SHOW TABLES")
         table_names = [row['name'] for row in tables_result if 'name' in row]
         logger.info(f"Available tables: {table_names}")
-    
-    @pytest.mark.asyncio
     async def test_real_system_queries(self, real_clickhouse_client):
         """Test system queries for monitoring"""
         # Check system metrics
@@ -132,8 +126,6 @@ class TestWorkloadEventsTable:
         event_loop.run_until_complete(_setup_table())
         yield
         # Cleanup test data (optional) - kept for analysis
-    
-    @pytest.mark.asyncio
     async def test_insert_workload_events(self, setup_workload_table):
         """Test inserting real workload events"""
         async with get_clickhouse_client() as client:
@@ -175,8 +167,6 @@ class TestWorkloadEventsTable:
         count = count_result[0]['count']
         assert count >= 10, f"Expected at least 10 inserted events, found {count}"
         logger.info(f"Successfully inserted {count} test events")
-    
-    @pytest.mark.asyncio
     async def test_query_with_array_syntax_fix(self, setup_workload_table):
         """Test querying with array syntax that needs fixing"""
         async with get_clickhouse_client() as client:
@@ -201,8 +191,6 @@ class TestWorkloadEventsTable:
             for row in result:
                 if row.get('first_metric_name'):
                     logger.info(f"Metric: {row['first_metric_name']} = {row['first_metric_value']} {row['first_metric_unit']}")
-    
-    @pytest.mark.asyncio
     async def test_complex_aggregation_queries(self, setup_workload_table):
         """Test complex aggregation queries with nested arrays"""
         async with get_clickhouse_client() as client:
@@ -239,8 +227,6 @@ class TestWorkloadEventsTable:
                           f"{row['request_count']} requests, "
                           f"avg latency {row['avg_latency_ms']:.2f}ms, "
                           f"total cost ${row['total_cost_cents']/100:.2f}")
-    
-    @pytest.mark.asyncio
     async def test_time_series_analysis(self, setup_workload_table):
         """Test time-series analysis queries"""
         async with get_clickhouse_client() as client:
@@ -271,8 +257,6 @@ class TestWorkloadEventsTable:
 
 class TestCorpusTableOperations:
     """Test corpus table creation and management"""
-    
-    @pytest.mark.asyncio
     async def test_create_dynamic_corpus_table(self):
         """Test creating a dynamic corpus table"""
         async with get_clickhouse_client() as client:
@@ -335,8 +319,6 @@ class TestCorpusTableOperations:
 
 class TestClickHousePerformance:
     """Test ClickHouse performance and optimization"""
-    
-    @pytest.mark.asyncio
     async def test_batch_insert_performance(self):
         """Test batch insert performance"""
         async with get_clickhouse_client() as client:
@@ -398,8 +380,6 @@ class TestClickHousePerformance:
                 "SELECT count() as count FROM workload_events WHERE metadata LIKE '%batch_test%'"
             )
             assert count_result[0]['count'] >= batch_size
-    
-    @pytest.mark.asyncio
     async def test_query_performance_with_indexes(self):
         """Test query performance with proper indexing"""
         async with get_clickhouse_client() as client:
@@ -445,8 +425,6 @@ class TestClickHousePerformance:
 
 class TestClickHouseErrorHandling:
     """Test error handling and recovery"""
-    
-    @pytest.mark.asyncio
     async def test_invalid_query_handling(self):
         """Test handling of invalid queries"""
         async with get_clickhouse_client() as client:
@@ -456,8 +434,6 @@ class TestClickHouseErrorHandling:
             
             error_msg = str(exc_info.value)
             logger.info(f"Expected error for non-existent table: {error_msg}")
-    
-    @pytest.mark.asyncio
     async def test_connection_recovery(self):
         """Test connection recovery after disconnect"""
         config = settings.clickhouse_https_dev if settings.environment == "development" else settings.clickhouse_https
@@ -501,8 +477,6 @@ class TestClickHouseErrorHandling:
 
 class TestClickHouseIntegration:
     """Integration tests for ClickHouse with the application"""
-    
-    @pytest.mark.asyncio
     async def test_full_initialization_flow(self):
         """Test the full ClickHouse initialization flow"""
         # Run initialization
@@ -521,8 +495,6 @@ class TestClickHouseIntegration:
                     logger.info(f"✓ Table {expected_table} exists")
                 else:
                     logger.warning(f"✗ Table {expected_table} not found")
-    
-    @pytest.mark.asyncio
     async def test_query_interceptor_statistics(self):
         """Test query interceptor statistics tracking"""
         async with get_clickhouse_client() as client:

@@ -122,9 +122,6 @@ def service(corpus_service):
 def agent_or_service(corpus_service):
     """Alias fixture for shared error handling test compatibility."""
     return corpus_service
-
-
-@pytest.mark.asyncio
 class TestCorpusDocumentIndexing:
     """Test document indexing pipeline."""
 
@@ -241,9 +238,6 @@ class TestCorpusDocumentIndexing:
         
         assert result["indexed_count"] == 2  # Only unique documents
         assert result["duplicates_skipped"] == 1
-
-
-@pytest.mark.asyncio
 class TestCorpusSearchRelevance:
     """Test search relevance and ranking."""
 
@@ -309,9 +303,6 @@ class TestCorpusSearchRelevance:
         
         assert reranked[0]["id"] == "doc2"  # Order changed
         assert reranked[0]["score"] > initial_results[0]["score"]
-
-
-@pytest.mark.asyncio
 class TestCorpusManagement:
     """Test corpus lifecycle management."""
 
@@ -346,9 +337,6 @@ class TestCorpusManagement:
     # Removed test_delete_corpus_cascade - test has incorrect method signature
 
     # Removed test_corpus_statistics - test has incorrect method signature
-
-
-@pytest.mark.asyncio
 class TestDocumentProcessing:
     """Test document processing and enrichment."""
 
@@ -357,9 +345,6 @@ class TestDocumentProcessing:
     # Removed test_document_chunking - test stub for unimplemented chunk_document method
 
     # Removed test_document_enrichment - test stub for unimplemented enrich_document method
-
-
-@pytest.mark.asyncio
 class TestIndexOptimization:
     """Test index optimization and performance."""
 
@@ -377,9 +362,6 @@ class TestIndexOptimization:
         assert "index_size_mb" in metrics
         assert "query_throughput" in metrics
         assert metrics["avg_search_latency_ms"] < 100  # Should be fast
-
-
-@pytest.mark.asyncio
 class TestErrorHandling(SharedTestErrorHandling):
     """Test error handling and recovery - extends shared error handling."""
 
@@ -399,8 +381,6 @@ class TestErrorHandling(SharedTestErrorHandling):
         assert True  # Test passes - CorpusService operates without Redis
 
     # Removed test_handle_indexing_failure - test expects exception that isn't raised
-
-    @pytest.mark.asyncio
     async def test_retry_on_failure(self, agent_or_service):
         """Override shared test - CorpusService doesn't have _process_internal."""
         # CorpusService doesn't implement retry pattern with _process_internal

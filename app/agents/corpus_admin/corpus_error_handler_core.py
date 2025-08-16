@@ -19,8 +19,10 @@ class CorpusAdminErrorHandler:
         self.file_manager = file_manager
         self.db_manager = db_manager
         self.search_engine = search_engine
-        
-        # Initialize specialized handlers
+        self._init_specialized_handlers(file_manager, search_engine)
+    
+    def _init_specialized_handlers(self, file_manager, search_engine):
+        """Initialize specialized error handlers."""
         self.upload_handler = create_upload_handler(file_manager)
         self.validation_handler = create_validation_handler()
         self.indexing_handler = create_indexing_handler(search_engine)

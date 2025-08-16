@@ -111,18 +111,26 @@ class CorpusAdminSubAgent(BaseSubAgent):
         """Check if user request contains corpus keywords"""
         if not state.user_request:
             return False
-        
-        corpus_keywords = ["corpus", "knowledge base", "documentation", "reference data", "embeddings"]
+        corpus_keywords = self._get_corpus_keywords()
         return any(keyword in state.user_request.lower() for keyword in corpus_keywords)
+    
+    def _get_corpus_keywords(self) -> list:
+        """Get list of corpus-related keywords."""
+        return ["corpus", "knowledge base", "documentation", "reference data", "embeddings"]
     
     async def _send_initial_update(self, run_id: str, stream_updates: bool) -> None:
         """Send initial processing update"""
         if stream_updates:
-            await self._send_update(run_id, {
-                "status": "starting",
-                "message": "📚 Initializing corpus administration...",
-                "agent": "CorpusAdminSubAgent"
-            })
+            update_data = self._build_initial_update_data()
+            await self._send_update(run_id, update_data)
+    
+    def _build_initial_update_data(self) -> dict:
+        """Build initial update data."""
+        return {
+            "status": "starting",
+            "message": "📚 Initializing corpus administration...",
+            "agent": "CorpusAdminSubAgent"
+        }
     
     async def _handle_approval_check(
         self, 
@@ -133,11 +141,9 @@ class CorpusAdminSubAgent(BaseSubAgent):
     ) -> bool:
         """Handle approval requirements check"""
         requires_approval = await self.validator.check_approval_requirements(operation_request, state)
-        
         if requires_approval:
             await self._process_approval_requirement(operation_request, state, run_id, stream_updates)
-            return True
-        return False
+        return requires_approval
     
     async def _process_approval_requirement(
         self, operation_request, state: DeepAgentState, run_id: str, stream_updates: bool
@@ -173,7 +179,14 @@ class CorpusAdminSubAgent(BaseSubAgent):
         duration = int((time.time() - start_time) * 1000)
         status_emoji = "✅" if result.success else "❌"
         statistics = await self.operations.get_corpus_statistics()
-        
+        return self._create_completion_update_dict(
+            result, duration, status_emoji, statistics
+        )
+    
+    def _create_completion_update_dict(
+        self, result, duration: int, status_emoji: str, statistics
+    ) -> dict:
+        """Create completion update dictionary."""
         return {
             "status": "completed" if result.success else "failed",
             "message": f"{status_emoji} Corpus operation completed in {duration}ms",
@@ -190,10 +203,8 @@ class CorpusAdminSubAgent(BaseSubAgent):
     ) -> None:
         """Handle execution errors"""
         logger.error(f"Corpus operation failed for run_id {run_id}: {error}")
-        
         error_result = self._create_error_result(error)
         state.corpus_admin_result = error_result.model_dump()
-        
         if stream_updates:
             await self._send_error_update(run_id, error)
     
@@ -267,10 +278,15 @@ class CorpusAdminSubAgent(BaseSubAgent):
         """Log final metrics"""
         if state.corpus_admin_result and isinstance(state.corpus_admin_result, dict):
             result = state.corpus_admin_result
-            logger.info(f"Corpus operation completed: "
-                       f"operation={result.get('operation')}, "
-                       f"corpus={result.get('corpus_metadata', {}).get('corpus_name')}, "
-                       f"affected={result.get('affected_documents')}")
+            metrics_message = self._build_metrics_message(result)
+            logger.info(metrics_message)
+    
+    def _build_metrics_message(self, result: dict) -> str:
+        """Build metrics message for logging."""
+        operation = result.get('operation')
+        corpus_name = result.get('corpus_metadata', {}).get('corpus_name')
+        affected = result.get('affected_documents')
+        return f"Corpus operation completed: operation={operation}, corpus={corpus_name}, affected={affected}"
     
     async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:
         """Send update via WebSocket manager"""

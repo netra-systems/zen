@@ -82,9 +82,6 @@ class MemoryMonitoredWebSocket:
         checkpoint = self.get_memory_usage()
         checkpoint['timestamp'] = time.time()
         self.memory_checkpoints.append(checkpoint)
-
-
-@pytest.mark.asyncio
 @pytest.mark.slow
 async def test_memory_leak_detection_long_connections():
     """Test for memory leaks in long-running WebSocket connections (<=8 lines)"""

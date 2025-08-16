@@ -56,8 +56,6 @@ class TestErrorHandling:
             except Exception as e:
                 # Should not fail due to Redis unavailability
                 assert "redis" not in str(e).lower()
-    
-    @pytest.mark.asyncio
     async def test_retry_on_failure(self, agent_or_service):
         """Test retry mechanism on processing failure"""
         from unittest.mock import patch, AsyncMock
@@ -85,8 +83,6 @@ class TestIntegrationScenarios:
     Provides common integration test patterns that can be used across
     different service and component test modules.
     """
-    
-    @pytest.mark.asyncio
     async def test_full_workflow_integration(self, service):
         """Test complete workflow integration across components"""
         # Generic workflow test that can be customized
@@ -117,8 +113,6 @@ class TestIntegrationScenarios:
                 assert component is not None
                 if hasattr(component, 'status'):
                     assert component.status in ['ready', 'active', 'initialized']
-    
-    @pytest.mark.asyncio 
     async def test_end_to_end_data_flow(self, service):
         """Test end-to-end data flow through the system"""
         test_data = {"input": "test", "expected": "processed"}
@@ -159,8 +153,6 @@ class TestIntegration:
         
         # Should have at least one operation
         assert len(available_ops) > 0
-    
-    @pytest.mark.asyncio
     async def test_async_operations(self, service):
         """Test async operations work correctly"""
         # Test async methods if they exist

@@ -11,8 +11,6 @@ class UserDataSchema(BaseModel):
     email: str
     age: Optional[int] = None
     tags: List[str] = []
-
-@pytest.mark.asyncio
 class TestSchemaValidationService:
     
     async def test_validate_schema(self):

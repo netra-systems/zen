@@ -74,8 +74,6 @@ class TestBaseServiceMixin:
         
         mixin._update_metrics(success=True, response_time=3.0)
         assert mixin.metrics.average_response_time == 2.0  # (1.0 + 3.0) / 2
-    
-    @pytest.mark.asyncio
     async def test_create_background_task(self):
         """Test creating background tasks."""
         mixin = BaseServiceMixin()
@@ -90,8 +88,6 @@ class TestBaseServiceMixin:
         # Task should be removed when done
         result = await task
         assert result == "done"
-    
-    @pytest.mark.asyncio
     async def test_cancel_background_tasks(self):
         """Test cancelling background tasks."""
         mixin = BaseServiceMixin()
@@ -122,8 +118,6 @@ class TestBaseService:
         
         assert service.service_name == "test-service"
         assert not service.is_initialized
-    
-    @pytest.mark.asyncio
     async def test_initialize_success(self):
         """Test successful service initialization."""
         service = BaseService("test-service")
@@ -131,8 +125,6 @@ class TestBaseService:
         await service.initialize()
         
         assert service.is_initialized
-    
-    @pytest.mark.asyncio
     async def test_initialize_failure(self):
         """Test service initialization failure."""
         service = BaseService("test-service")
@@ -147,8 +139,6 @@ class TestBaseService:
                     await service.initialize()
                 
                 assert not service.is_initialized
-    
-    @pytest.mark.asyncio
     async def test_initialize_idempotent(self):
         """Test that initialize is idempotent."""
         service = BaseService("test-service")
@@ -159,8 +149,6 @@ class TestBaseService:
             await service.initialize()  # Second call
             
             mock_init.assert_called_once()  # Should only be called once
-    
-    @pytest.mark.asyncio
     async def test_shutdown(self):
         """Test service shutdown."""
         service = BaseService("test-service")
@@ -169,8 +157,6 @@ class TestBaseService:
         await service.shutdown()
         
         assert not service.is_initialized
-    
-    @pytest.mark.asyncio
     async def test_health_check_healthy(self):
         """Test health check when service is healthy."""
         service = BaseService("test-service")
@@ -182,8 +168,6 @@ class TestBaseService:
         assert health.service_name == "test-service"
         assert health.status == "healthy"
         assert isinstance(health.timestamp, datetime)
-    
-    @pytest.mark.asyncio
     async def test_health_check_with_dependencies(self):
         """Test health check with dependencies."""
         service = BaseService("test-service")
@@ -194,8 +178,6 @@ class TestBaseService:
             
             assert health.status == "degraded"  # Should be degraded due to unhealthy dependency
             assert health.dependencies == {"db": "healthy", "cache": "unhealthy"}
-    
-    @pytest.mark.asyncio
     async def test_health_check_exception(self):
         """Test health check when an exception occurs."""
         service = BaseService("test-service")
@@ -226,8 +208,6 @@ class TestDatabaseService:
         service.set_session_factory(mock_factory)
         
         assert service._session_factory == mock_factory
-    
-    @pytest.mark.asyncio
     async def test_get_db_session_no_factory(self):
         """Test getting DB session without factory configured."""
         service = DatabaseService("db-service")
@@ -237,8 +217,6 @@ class TestDatabaseService:
                 pass
         
         assert "Database session factory not configured" in str(exc_info.value)
-    
-    @pytest.mark.asyncio
     async def test_get_db_session_success(self):
         """Test successful DB session acquisition."""
         service = DatabaseService("db-service")
@@ -268,8 +246,6 @@ class TestDatabaseService:
         
         # The service calls close in the finally block
         mock_session.close.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_get_db_session_exception(self):
         """Test DB session with exception handling."""
         service = DatabaseService("db-service")
@@ -321,8 +297,6 @@ class TestCRUDService:
         
         service.set_session_factory(mock_factory)
         return service
-    
-    @pytest.mark.asyncio
     async def test_create_entity(self, crud_service):
         """Test creating an entity."""
         mock_data = {"name": "test", "value": 123}
@@ -345,8 +319,6 @@ class TestCRUDService:
                 mock_session.add.assert_called_once()
                 mock_session.commit.assert_called_once()
                 mock_session.refresh.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_get_by_id_found(self, crud_service):
         """Test getting entity by ID when found."""
         entity_id = 1
@@ -364,8 +336,6 @@ class TestCRUDService:
                 
                 assert result == mock_entity
                 mock_session.get.assert_called_once_with(MockModel, entity_id)
-    
-    @pytest.mark.asyncio
     async def test_get_by_id_not_found(self, crud_service):
         """Test getting entity by ID when not found."""
         entity_id = 999
@@ -380,8 +350,6 @@ class TestCRUDService:
             result = await crud_service.get_by_id(entity_id)
             
             assert result == None
-    
-    @pytest.mark.asyncio
     async def test_update_entity_success(self, crud_service):
         """Test updating an existing entity."""
         entity_id = 1
@@ -402,8 +370,6 @@ class TestCRUDService:
                 
                 assert result == mock_entity
                 assert mock_entity.name == "updated"  # Field should be updated
-    
-    @pytest.mark.asyncio
     async def test_update_entity_not_found(self, crud_service):
         """Test updating non-existent entity."""
         entity_id = 999
@@ -418,8 +384,6 @@ class TestCRUDService:
             
             with pytest.raises(RecordNotFoundError):
                 await crud_service.update(entity_id, update_data)
-    
-    @pytest.mark.asyncio
     async def test_delete_entity_success(self, crud_service):
         """Test deleting an existing entity."""
         entity_id = 1
@@ -439,8 +403,6 @@ class TestCRUDService:
             assert result == True
             mock_session.delete.assert_called_once_with(mock_entity)
             mock_session.commit.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_delete_entity_not_found(self, crud_service):
         """Test deleting non-existent entity."""
         entity_id = 999
@@ -455,8 +417,6 @@ class TestCRUDService:
             result = await crud_service.delete(entity_id)
             
             assert result == False
-    
-    @pytest.mark.asyncio
     async def test_exists_true(self, crud_service):
         """Test entity exists check when entity exists."""
         entity_id = 1
@@ -472,8 +432,6 @@ class TestCRUDService:
             result = await crud_service.exists(entity_id)
             
             assert result == True
-    
-    @pytest.mark.asyncio
     async def test_exists_false(self, crud_service):
         """Test entity exists check when entity doesn't exist."""
         entity_id = 999
@@ -503,8 +461,6 @@ class TestAsyncTaskService:
             assert not service._background_running
         if hasattr(service, '_monitor_task'):
             assert service._monitor_task == None
-    
-    @pytest.mark.asyncio
     async def test_start_background_tasks(self):
         """Test starting background tasks."""
         service = AsyncTaskService("task-service")
@@ -515,8 +471,6 @@ class TestAsyncTaskService:
             
             assert service._background_running
             mock_start.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_start_background_tasks_idempotent(self):
         """Test that starting background tasks is idempotent."""
         service = AsyncTaskService("task-service")
@@ -526,8 +480,6 @@ class TestAsyncTaskService:
             await service.start_background_tasks()  # Second call
             
             mock_start.assert_called_once()  # Should only be called once
-    
-    @pytest.mark.asyncio
     async def test_stop_background_tasks(self):
         """Test stopping background tasks."""
         service = AsyncTaskService("task-service")
@@ -587,8 +539,6 @@ class TestServiceRegistry:
         assert len(all_services) == 2
         assert all_services["service1"] == service1
         assert all_services["service2"] == service2
-    
-    @pytest.mark.asyncio
     async def test_initialize_all(self):
         """Test initializing all services."""
         registry = ServiceRegistry()
@@ -602,8 +552,6 @@ class TestServiceRegistry:
         
         assert service1.is_initialized
         assert service2.is_initialized
-    
-    @pytest.mark.asyncio
     async def test_shutdown_all(self):
         """Test shutting down all services."""
         registry = ServiceRegistry()
@@ -618,8 +566,6 @@ class TestServiceRegistry:
         
         assert not service1.is_initialized
         assert not service2.is_initialized
-    
-    @pytest.mark.asyncio
     async def test_health_check_all(self):
         """Test health check for all services."""
         registry = ServiceRegistry()
@@ -636,8 +582,6 @@ class TestServiceRegistry:
         assert len(health_results) == 2
         assert health_results["service1"].service_name == "service1"
         assert health_results["service2"].service_name == "service2"
-    
-    @pytest.mark.asyncio
     async def test_health_check_all_with_exception(self):
         """Test health check when service raises exception."""
         registry = ServiceRegistry()

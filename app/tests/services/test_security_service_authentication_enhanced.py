@@ -267,8 +267,6 @@ class TestSecurityServiceAuthenticationEnhanced:
         valid_payload = {"sub": "test@example.com", "exp": datetime.now(UTC).timestamp() + 3600}
         wrong_signature_token = jwt.encode(valid_payload, "wrong_secret", algorithm="HS256")
         assert enhanced_security_service.get_user_email_from_token(wrong_signature_token) == None
-    
-    @pytest.mark.asyncio
     async def test_user_authentication_success(self, enhanced_security_service, mock_db_session, sample_users):
         """Test successful user authentication"""
         user = sample_users[1]  # Regular user
@@ -286,8 +284,6 @@ class TestSecurityServiceAuthenticationEnhanced:
         assert authenticated_user != None
         assert authenticated_user.email == "user@test.com"
         assert authenticated_user.failed_login_attempts == 0
-    
-    @pytest.mark.asyncio
     async def test_user_authentication_wrong_password(self, enhanced_security_service, mock_db_session, sample_users):
         """Test authentication with wrong password"""
         user = sample_users[1]  # Regular user
@@ -303,8 +299,6 @@ class TestSecurityServiceAuthenticationEnhanced:
         )
         
         assert authenticated_user == None
-    
-    @pytest.mark.asyncio
     async def test_user_authentication_nonexistent_user(self, enhanced_security_service, mock_db_session):
         """Test authentication with nonexistent user"""
         # Mock empty query result
@@ -577,8 +571,6 @@ class TestSecurityServiceOAuth:
         key_manager.jwt_secret_key = "oauth_test_key"
         key_manager.fernet_key = Fernet.generate_key()
         return EnhancedSecurityService(key_manager)
-    
-    @pytest.mark.asyncio
     async def test_create_user_from_oauth_new_user(self, oauth_security_service):
         """Test creating new user from OAuth data"""
         mock_db_session = AsyncMock()
@@ -609,8 +601,6 @@ class TestSecurityServiceOAuth:
         mock_db_session.add.assert_called_once()
         mock_db_session.commit.assert_called_once()
         mock_db_session.refresh.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_get_existing_user_from_oauth(self, oauth_security_service):
         """Test getting existing user from OAuth data"""
         mock_db_session = AsyncMock()
@@ -647,8 +637,6 @@ class TestSecurityServiceConcurrency:
         key_manager.jwt_secret_key = "concurrent_test_key_that_is_sufficiently_long_for_security"
         key_manager.fernet_key = Fernet.generate_key()
         return EnhancedSecurityService(key_manager)
-    
-    @pytest.mark.asyncio
     async def test_concurrent_token_validation(self, concurrent_security_service):
         """Test concurrent token validation"""
         # Create multiple tokens
@@ -669,8 +657,6 @@ class TestSecurityServiceConcurrency:
         assert len(results) == 10
         assert all(result != None for result in results)
         assert all(f"user_{i}@example.com" in results for i in range(10))
-    
-    @pytest.mark.asyncio
     async def test_concurrent_session_management(self, concurrent_security_service):
         """Test concurrent session creation and validation"""
         # Create sessions concurrently

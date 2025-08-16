@@ -350,8 +350,6 @@ class TestBusinessValueCritical:
             "tool_dispatcher": tool_dispatcher,
             "workload_data": workload_data
         }
-
-    @pytest.mark.asyncio
     async def test_1_cost_optimization_request(self, setup_test_infrastructure):
         """
         Business Value Test 1: Cost Optimization Analysis
@@ -391,8 +389,6 @@ class TestBusinessValueCritical:
             cost_analysis_calls = [call for call in tool_calls 
                                   if "cost" in str(call).lower()]
             assert len(cost_analysis_calls) >= 0  # May or may not be called
-
-    @pytest.mark.asyncio
     async def test_2_performance_bottleneck_identification(self, setup_test_infrastructure):
         """
         Business Value Test 2: Performance Bottleneck Analysis
@@ -418,8 +414,6 @@ class TestBusinessValueCritical:
             bottleneck_calls = [call for call in tool_dispatcher.dispatch_tool.call_args_list
                               if "bottleneck" in str(call).lower()]
             assert len(bottleneck_calls) >= 0
-
-    @pytest.mark.asyncio
     async def test_3_model_comparison_and_selection(self, setup_test_infrastructure):
         """
         Business Value Test 3: Model Comparison for Use Case
@@ -441,8 +435,6 @@ class TestBusinessValueCritical:
         # Verify comparison analysis was performed
         llm_manager = infra["llm_manager"]
         assert llm_manager.ask_llm.call_count > 0
-
-    @pytest.mark.asyncio
     async def test_4_real_time_streaming_updates(self, setup_test_infrastructure):
         """
         Business Value Test 4: Real-time Progress Updates
@@ -469,8 +461,6 @@ class TestBusinessValueCritical:
         assert len(streamed_messages) > 0
         message_types = [msg.get("type") for msg in streamed_messages]
         assert "agent_started" in message_types
-
-    @pytest.mark.asyncio
     async def test_5_batch_processing_optimization(self, setup_test_infrastructure):
         """
         Business Value Test 5: Batch Processing Recommendations
@@ -494,8 +484,6 @@ class TestBusinessValueCritical:
         optimization_prompts = [call for call in llm_manager.ask_llm.call_args_list
                               if "batch" in str(call).lower() or "optimiz" in str(call).lower()]
         assert len(optimization_prompts) >= 0
-
-    @pytest.mark.asyncio
     async def test_6_cache_effectiveness_analysis(self, setup_test_infrastructure):
         """
         Business Value Test 6: Cache Effectiveness
@@ -516,8 +504,6 @@ class TestBusinessValueCritical:
         assert cache_metrics["hit_rate"] > 0.3
         assert cache_metrics["avg_response_time_cached"] < 100
         assert cache_metrics["cost_savings_percentage"] > 30
-
-    @pytest.mark.asyncio
     async def test_7_error_recovery_resilience(self, setup_test_infrastructure):
         """
         Business Value Test 7: System Resilience
@@ -565,8 +551,6 @@ class TestBusinessValueCritical:
         
         # System should have attempted retries
         assert call_count >= 1
-
-    @pytest.mark.asyncio
     async def test_8_report_generation_with_insights(self, setup_test_infrastructure):
         """
         Business Value Test 8: Executive Report Generation
@@ -590,8 +574,6 @@ class TestBusinessValueCritical:
         report_calls = [call for call in llm_manager.ask_llm.call_args_list
                        if "report" in str(call).lower() or "summary" in str(call).lower()]
         assert len(report_calls) >= 0
-
-    @pytest.mark.asyncio
     async def test_9_concurrent_user_isolation(self, setup_test_infrastructure):
         """
         Business Value Test 9: Multi-tenant Isolation
@@ -631,8 +613,6 @@ class TestBusinessValueCritical:
         assert len(user_contexts) == 2
         assert user_contexts[user1_id]["request"] == user1_request["request"]
         assert user_contexts[user2_id]["request"] == user2_request["request"]
-
-    @pytest.mark.asyncio
     async def test_10_end_to_end_optimization_workflow(self, setup_test_infrastructure):
         """
         Business Value Test 10: Complete Optimization Workflow

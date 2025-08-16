@@ -106,6 +106,10 @@ def create_llm_for_provider(provider: LLMProvider, model_name: str,
     """Create LLM instance for specified provider."""
     handler = get_provider_handler(provider)
     if not handler:
-        logger.warning(f"Unsupported provider: {provider}")
-        return None
+        return _handle_unsupported_provider(provider)
     return handler(model_name, api_key, generation_config)
+
+def _handle_unsupported_provider(provider: LLMProvider) -> None:
+    """Handle unsupported provider error."""
+    logger.warning(f"Unsupported provider: {provider}")
+    return None

@@ -16,8 +16,6 @@ from app.tests.e2e.thread_test_fixtures import ThreadPerformanceTestUtils
 
 class ThreadLoadTests:
     """Tests for thread operations under load."""
-    
-    @pytest.mark.asyncio
     async def test_concurrent_thread_creation_load(
         self, thread_service: ThreadService, mock_db_session: AsyncSession
     ):
@@ -82,8 +80,6 @@ class ThreadLoadTests:
         
         # Validate success count
         assert performance_data["success_count"] >= expected_count * 0.95
-    
-    @pytest.mark.asyncio
     async def test_message_creation_throughput(
         self, thread_service: ThreadService, mock_db_session: AsyncSession
     ):
@@ -137,8 +133,6 @@ class ThreadLoadTests:
 
 class ThreadStressTests:
     """Stress tests for thread operations."""
-    
-    @pytest.mark.asyncio
     async def test_thread_memory_usage_stress(
         self, thread_service: ThreadService, mock_db_session: AsyncSession
     ):
@@ -209,8 +203,6 @@ class ThreadStressTests:
         # Verify reasonable performance under stress
         assert results["thread_throughput"] > 5.0  # At least 5 threads/second
         assert results["message_throughput"] > 50.0  # At least 50 messages/second
-    
-    @pytest.mark.asyncio
     async def test_concurrent_read_write_stress(
         self, thread_service: ThreadService, mock_db_session: AsyncSession
     ):
@@ -280,8 +272,6 @@ class ThreadStressTests:
 
 class ThreadScalabilityTests:
     """Tests for thread operation scalability."""
-    
-    @pytest.mark.asyncio
     async def test_thread_count_scalability(
         self, thread_service: ThreadService, mock_db_session: AsyncSession
     ):
@@ -355,8 +345,6 @@ class ThreadScalabilityTests:
 
 class ThreadLatencyTests:
     """Tests for thread operation latency characteristics."""
-    
-    @pytest.mark.asyncio
     async def test_thread_operation_latency_distribution(
         self, thread_service: ThreadService, mock_db_session: AsyncSession
     ):

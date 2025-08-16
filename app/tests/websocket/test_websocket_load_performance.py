@@ -185,7 +185,6 @@ class WebSocketLoadTester:
         }
 
 
-@pytest.mark.asyncio
 class TestWebSocketPerformanceComponents:
     """Test individual performance components under load."""
     
@@ -410,7 +409,6 @@ class TestWebSocketPerformanceComponents:
             await synchronizer.stop_monitoring()
 
 
-@pytest.mark.asyncio
 class TestWebSocketLoadScenarios:
     """Test realistic load scenarios."""
     
@@ -541,7 +539,6 @@ async def _cleanup_services(memory_manager, performance_monitor, batcher):
     await batcher.stop()
 
 
-@pytest.mark.asyncio
 async def test_integrated_performance_improvements():
     """Integration test of all performance improvements working together."""
     memory_manager, performance_monitor, batcher, compressor, mock_send_callback, sent_messages = await _initialize_test_components()

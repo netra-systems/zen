@@ -33,8 +33,6 @@ def mock_user():
 
 class TestCreateThread:
     """Test cases for POST / endpoint"""
-    
-    @pytest.mark.asyncio
     @patch('app.routes.threads_route.uuid.uuid4')
     @patch('app.routes.threads_route.time.time')
     async def test_create_thread_success(self, mock_time, mock_uuid, mock_db, mock_user):
@@ -54,8 +52,6 @@ class TestCreateThread:
             assert result.title == "New Thread"
             assert result.message_count == 0
             assert_thread_creation_call(thread_repo, mock_db, "test_user_123", "New Thread")
-    
-    @pytest.mark.asyncio
     async def test_create_thread_no_title(self, mock_db, mock_user):
         """Test thread creation without title"""
         mock_thread = create_mock_thread()
@@ -71,8 +67,6 @@ class TestCreateThread:
             assert result.title == None
             call_args = thread_repo.create.call_args
             assert "title" not in call_args[1]["metadata_"] or call_args[1]["metadata_"].get("title") == None
-    
-    @pytest.mark.asyncio
     async def test_create_thread_exception(self, mock_db, mock_user):
         """Test error handling in create_thread"""
         with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \

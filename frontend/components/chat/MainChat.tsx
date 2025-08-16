@@ -9,6 +9,7 @@ import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { OverflowPanel } from '@/components/chat/OverflowPanel';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { useLoadingState } from '@/hooks/useLoadingState';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
@@ -21,14 +22,20 @@ const MainChat: React.FC = () => {
     slowLayerData,
     currentRunId,
     activeThreadId,
-    isThreadLoading,
     handleWebSocketEvent
   } = useUnifiedChatStore();
   
-  const { status: wsStatus, messages: wsMessages } = useWebSocket();
+  const { messages: wsMessages } = useWebSocket();
   const [isCardCollapsed, setIsCardCollapsed] = useState(false);
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Use new loading state hook for clean state management
+  const {
+    shouldShowLoading,
+    shouldShowEmptyState,
+    shouldShowExamplePrompts,
+    loadingMessage
+  } = useLoadingState();
   
   // Process WebSocket messages and feed them to the unified store
   const lastProcessedIndexRef = useRef(0);
@@ -47,22 +54,13 @@ const MainChat: React.FC = () => {
   }, [wsMessages, handleWebSocketEvent]);
 
   const hasMessages = messages.length > 0;
-  const isWebSocketConnected = wsStatus === 'OPEN';
-  const isLoading = !isInitialized || !isWebSocketConnected || isThreadLoading;
-  const isEmptyState = !activeThreadId && !hasMessages && !isLoading;
-  const hasThreadButNoMessages = activeThreadId && !hasMessages && !isLoading && !isProcessing;
   
   // Thread loading is now handled via WebSocket events in the store
   // The handleWebSocketEvent function in useUnifiedChatStore will process
   // 'thread_loaded' events and automatically update the messages
   const showResponseCard = currentRunId !== null || isProcessing;
 
-  // Initialize component when WebSocket is connected
-  useEffect(() => {
-    if (isWebSocketConnected && !isInitialized) {
-      setIsInitialized(true);
-    }
-  }, [isWebSocketConnected, isInitialized]);
+  // Initialization is now handled by useLoadingState hook
 
   // Thread loading is now managed through the unified store via WebSocket events
   // The store handles 'thread_loading' and 'thread_loaded' events automatically
@@ -99,14 +97,13 @@ const MainChat: React.FC = () => {
   }, []);
 
   // Show loading state while initializing
-  if (isLoading) {
+  if (shouldShowLoading) {
     return (
       <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           <div className="text-sm text-gray-600">
-            {!isWebSocketConnected ? 'Connecting to chat service...' : 
-             isThreadLoading ? 'Loading thread messages...' : 'Loading chat...'}
+            {loadingMessage}
           </div>
         </div>
       </div>
@@ -126,7 +123,7 @@ const MainChat: React.FC = () => {
           <div className="h-full overflow-y-auto">
             {/* Empty State - shown when no thread is selected */}
             <AnimatePresence mode="wait">
-              {isEmptyState && (
+              {shouldShowEmptyState && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -153,7 +150,7 @@ const MainChat: React.FC = () => {
             
             {/* Example Prompts - shown when thread selected but no messages */}
             <AnimatePresence mode="wait">
-              {hasThreadButNoMessages && (
+              {shouldShowExamplePrompts && (
                 <motion.div
                   initial={{ opacity: 1 }}
                   exit={{ opacity: 0, y: -20 }}
@@ -165,7 +162,7 @@ const MainChat: React.FC = () => {
             </AnimatePresence>
             
             {/* Message History */}
-            {!isEmptyState && <MessageList />}
+            {!shouldShowEmptyState && <MessageList />}
             
             {/* Persistent Response Card - Shows current processing */}
             <AnimatePresence>

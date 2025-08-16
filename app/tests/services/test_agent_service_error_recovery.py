@@ -31,8 +31,6 @@ from .test_agent_service_mock_classes import AgentState
 
 class TestAgentErrorRecovery:
     """Test agent error recovery and resilience mechanisms."""
-    
-    @pytest.mark.asyncio
     async def test_agent_failure_recovery(self, resilient_orchestrator):
         """Test recovery from agent failures with retry mechanism."""
         agent = await resilient_orchestrator.get_or_create_agent("user1")
@@ -62,8 +60,6 @@ class TestAgentErrorRecovery:
         if attempt == 1:  # Second attempt succeeds
             agent.should_fail = False
         await asyncio.sleep(resilient_orchestrator.retry_delay)
-    
-    @pytest.mark.asyncio
     async def test_agent_timeout_handling(self, resilient_orchestrator):
         """Test handling of agent timeouts."""
         agent = await resilient_orchestrator.get_or_create_agent("user1")
@@ -74,8 +70,6 @@ class TestAgentErrorRecovery:
                 resilient_orchestrator.execute_agent_task("user1", "slow request", "run_slow"),
                 timeout=0.1  # 100ms timeout
             )
-    
-    @pytest.mark.asyncio
     async def test_agent_resource_cleanup_on_error(self, resilient_orchestrator):
         """Test resource cleanup when agent encounters errors."""
         agent = await resilient_orchestrator.get_or_create_agent("user1")
@@ -93,8 +87,6 @@ class TestAgentErrorRecovery:
         """Verify proper resource cleanup after error."""
         assert resilient_orchestrator.active_agents == initial_active - 1
         assert "user1" not in resilient_orchestrator.agents
-    
-    @pytest.mark.asyncio
     async def test_circuit_breaker_pattern(self, resilient_orchestrator):
         """Test circuit breaker pattern for failing agents."""
         circuit_breaker = self._create_circuit_breaker()
@@ -150,8 +142,6 @@ class TestAgentErrorRecovery:
 
 class TestAgentResiliencePatterns:
     """Test advanced resilience patterns for agent management."""
-    
-    @pytest.mark.asyncio
     async def test_graceful_degradation_on_partial_failure(self, resilient_orchestrator):
         """Test graceful degradation when some agents fail."""
         # Create multiple agents, make some fail
@@ -194,8 +184,6 @@ class TestAgentResiliencePatterns:
         assert success_count > 0  # Some should succeed
         assert failure_count > 0  # Some should fail
         assert success_count + failure_count == len(results)
-    
-    @pytest.mark.asyncio
     async def test_agent_recovery_after_transient_failure(self, resilient_orchestrator):
         """Test agent recovery after transient failures."""
         agent = await resilient_orchestrator.get_or_create_agent("user1")
@@ -217,8 +205,6 @@ class TestAgentResiliencePatterns:
             assert False, "Expected NetraException"
         except NetraException:
             pass  # Expected
-    
-    @pytest.mark.asyncio
     async def test_concurrent_failure_isolation(self, resilient_orchestrator):
         """Test that concurrent failures don't cascade."""
         num_agents = 5
@@ -256,8 +242,6 @@ class TestAgentResiliencePatterns:
         
         assert len(failed_results) == 2  # Only first 2 should fail
         assert len(success_results) == 3  # Last 3 should succeed
-    
-    @pytest.mark.asyncio
     async def test_error_propagation_containment(self, resilient_orchestrator):
         """Test that errors don't propagate beyond their scope."""
         # Create parent and child agent relationships

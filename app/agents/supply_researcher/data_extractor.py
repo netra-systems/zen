@@ -24,21 +24,8 @@ class SupplyDataExtractor:
         parsed_request: Dict[str, Any]
     ) -> List[Dict[str, Any]]:
         """Extract structured supply data from research results"""
-        supply_items = []
-        
-        for qa in research_result.get("questions_answered", []):
-            answer = qa.get("answer", "")
-            
-            pricing_matches = self._extract_pricing(answer)
-            context_matches = self._extract_context(answer)
-            
-            if pricing_matches or context_matches:
-                item = self._build_supply_item(
-                    parsed_request, pricing_matches, context_matches
-                )
-                supply_items.append(item)
-        
-        return supply_items
+        questions_answered = research_result.get("questions_answered", [])
+        return self._process_qa_answers(questions_answered, parsed_request)
     
     def calculate_confidence_score(
         self,
@@ -61,6 +48,41 @@ class SupplyDataExtractor:
         """Extract context window information from answer"""
         return re.findall(self.context_pattern, answer)
     
+    def _process_qa_answers(
+        self,
+        questions_answered: List[Dict[str, Any]],
+        parsed_request: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
+        """Process Q&A answers to extract supply items"""
+        supply_items = []
+        for qa in questions_answered:
+            item = self._extract_from_single_answer(qa, parsed_request)
+            if item:
+                supply_items.append(item)
+        return supply_items
+    
+    def _extract_from_single_answer(
+        self,
+        qa: Dict[str, Any],
+        parsed_request: Dict[str, Any]
+    ) -> Dict[str, Any] | None:
+        """Extract supply item from single Q&A answer"""
+        answer = qa.get("answer", "")
+        pricing_matches = self._extract_pricing(answer)
+        context_matches = self._extract_context(answer)
+        return self._build_item_if_matches(parsed_request, pricing_matches, context_matches)
+    
+    def _build_item_if_matches(
+        self,
+        parsed_request: Dict[str, Any],
+        pricing_matches: List[str],
+        context_matches: List[str]
+    ) -> Dict[str, Any] | None:
+        """Build supply item if matches found"""
+        if not (pricing_matches or context_matches):
+            return None
+        return self._build_supply_item(parsed_request, pricing_matches, context_matches)
+    
     def _build_supply_item(
         self,
         parsed_request: Dict[str, Any],
@@ -68,7 +90,13 @@ class SupplyDataExtractor:
         context_matches: List[str]
     ) -> Dict[str, Any]:
         """Build supply item from extracted data"""
-        item = {
+        base_item = self._create_base_item(parsed_request)
+        self._enrich_with_extracted_data(base_item, pricing_matches, context_matches)
+        return base_item
+    
+    def _create_base_item(self, parsed_request: Dict[str, Any]) -> Dict[str, Any]:
+        """Create base supply item structure"""
+        return {
             "provider": parsed_request.get("provider", "unknown"),
             "model_name": parsed_request.get("model_name", "unknown"),
             "pricing_input": None,
@@ -78,11 +106,16 @@ class SupplyDataExtractor:
             "research_source": "Google Deep Research",
             "confidence_score": 0.8
         }
-        
+    
+    def _enrich_with_extracted_data(
+        self,
+        item: Dict[str, Any],
+        pricing_matches: List[str],
+        context_matches: List[str]
+    ) -> None:
+        """Enrich item with extracted pricing and context data"""
         item.update(self._parse_pricing_data(pricing_matches))
         item.update(self._parse_context_data(context_matches))
-        
-        return item
     
     def _parse_pricing_data(self, pricing_matches: List[str]) -> Dict[str, Any]:
         """Parse pricing data from matches"""

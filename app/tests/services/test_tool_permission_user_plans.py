@@ -30,9 +30,6 @@ def sample_context():
 def developer_context():
     """Create developer execution context"""
     return create_developer_context()
-
-
-@pytest.mark.asyncio
 class TestGetUserPlan:
     """Test user plan retrieval"""
     

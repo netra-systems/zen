@@ -60,9 +60,6 @@ def sample_run():
         file_ids=[],
         metadata_={}
     )
-
-
-@pytest.mark.asyncio
 class TestThreadService:
     """Test suite for ThreadService covering all methods with comprehensive scenarios"""
 

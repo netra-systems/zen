@@ -43,8 +43,6 @@ from app.tests.helpers.quality_gate_fixtures import (
 
 class TestQualityGateMetrics:
     """Test suite for QualityGateService metrics calculation"""
-
-    @pytest.mark.asyncio
     async def test_calculate_specificity_scores(self, quality_service):
         """Test specificity calculation for various content types"""
         high_spec_content = get_high_specificity_content()
@@ -55,8 +53,6 @@ class TestQualityGateMetrics:
         
         assert_specificity_score_range(high_score, high_quality=True)
         assert_specificity_score_range(low_score, high_quality=False)
-
-    @pytest.mark.asyncio
     async def test_calculate_actionability_scores(self, quality_service):
         """Test actionability calculation"""
         high_action_content = get_high_actionability_content()
@@ -67,8 +63,6 @@ class TestQualityGateMetrics:
         
         assert_actionability_score_range(high_score, high_quality=True)
         assert_actionability_score_range(low_score, high_quality=False)
-
-    @pytest.mark.asyncio
     async def test_calculate_quantification_scores(self, quality_service):
         """Test quantification calculation"""
         high_quant_content = get_high_quantification_content()
@@ -79,8 +73,6 @@ class TestQualityGateMetrics:
         
         assert_quantification_score_range(high_score, high_quality=True)
         assert_quantification_score_range(low_score, high_quality=False)
-
-    @pytest.mark.asyncio
     async def test_calculate_relevance_with_context(self, quality_service):
         """Test relevance calculation with user context"""
         content = get_optimization_context()
@@ -94,8 +86,6 @@ class TestQualityGateMetrics:
         assert_relevance_with_context(relevant_score, has_context=True)
         assert irrelevant_score == 0.0
         assert no_context_score == 0.5
-
-    @pytest.mark.asyncio
     async def test_calculate_completeness_by_content_type(self, quality_service):
         """Test completeness calculation for different content types"""
         opt_content = get_complete_optimization_content()
@@ -106,8 +96,6 @@ class TestQualityGateMetrics:
         
         assert_completeness_by_content_type(opt_score, ContentType.OPTIMIZATION)
         assert_completeness_by_content_type(action_score, ContentType.ACTION_PLAN)
-
-    @pytest.mark.asyncio
     async def test_calculate_novelty_with_redis(self, quality_service):
         """Test novelty calculation with Redis caching"""
         content = "Unique content for novelty testing"
@@ -119,8 +107,6 @@ class TestQualityGateMetrics:
         setup_novelty_mocks_duplicate(quality_service, content)
         duplicate_score = await quality_service.metrics_calculator.calculate_novelty(content)
         assert duplicate_score == 0.0
-
-    @pytest.mark.asyncio
     async def test_calculate_clarity_scores(self, quality_service):
         """Test clarity calculation"""
         clear_content = get_clear_content()
@@ -133,8 +119,6 @@ class TestQualityGateMetrics:
         # Unclear content has very long sentences and complex structure
         # Should score low (around 0.3) due to clarity penalties
         assert_clarity_score_approximation(unclear_score, 0.3)
-
-    @pytest.mark.asyncio
     async def test_calculate_redundancy_detection(self, quality_service):
         """Test redundancy detection"""
         redundant_content = get_high_redundancy_content()
@@ -145,8 +129,6 @@ class TestQualityGateMetrics:
         
         assert_redundancy_algorithm_behavior(redundant_score)
         assert_redundancy_algorithm_behavior(diverse_score)
-
-    @pytest.mark.asyncio
     async def test_calculate_hallucination_risk(self, quality_service):
         """Test hallucination risk detection"""
         risky_content = get_high_hallucination_risk_content()
@@ -157,8 +139,6 @@ class TestQualityGateMetrics:
         
         assert_hallucination_risk_range(risky_score, high_risk=True)
         assert_hallucination_risk_range(safe_score, high_risk=False)
-
-    @pytest.mark.asyncio
     async def test_novelty_without_redis(self, quality_service):
         """Test novelty calculation when Redis is not available"""
         quality_service.redis_manager = None

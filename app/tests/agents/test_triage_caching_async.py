@@ -40,8 +40,6 @@ def complex_state():
 
 class TestCachingMechanisms:
     """Test comprehensive caching mechanisms"""
-    
-    @pytest.mark.asyncio
     async def test_cache_key_generation(self, triage_agent):
         """Test cache key generation consistency"""
         request1 = "Optimize my costs"
@@ -60,8 +58,6 @@ class TestCachingMechanisms:
         assert key1 != key3  # Different content
         assert len(key1) == 64  # SHA-256 hex length
         assert all(c in '0123456789abcdef' for c in key1)
-    
-    @pytest.mark.asyncio
     async def test_cache_hit_performance(self, triage_agent, complex_state):
         """Test cache hit improves performance"""
         cached_result = self._create_cached_result()
@@ -87,8 +83,6 @@ class TestCachingMechanisms:
         """Setup cache hit scenario"""
         cache_key = agent.triage_core.generate_request_hash(state.user_request)
         agent.triage_core.redis_manager.cache[cache_key] = json.dumps(cached_result)
-    
-    @pytest.mark.asyncio
     async def test_cache_invalidation_scenarios(self, triage_agent, complex_state):
         """Test cache invalidation scenarios"""
         self._setup_corrupted_cache(triage_agent, complex_state)
@@ -130,8 +124,6 @@ class TestCachingMechanisms:
         # When cache is corrupted, agent falls back to default behavior
         assert state.triage_result.category in ["Cost Optimization", "unknown", "General Inquiry"]
         assert state.triage_result.metadata.cache_hit == False
-    
-    @pytest.mark.asyncio
     async def test_cache_warming_strategy(self, triage_agent):
         """Test cache warming with common requests"""
         common_requests = self._get_common_requests()
@@ -172,9 +164,6 @@ class TestCachingMechanisms:
         # Check if it's a TriageResult object with metadata
         if hasattr(state.triage_result, 'metadata') and state.triage_result.metadata:
             assert state.triage_result.metadata.cache_hit == True
-
-
-@pytest.mark.asyncio
 class TestErrorHandlingAndRecovery:
     """Test comprehensive error handling and recovery"""
     
@@ -242,8 +231,6 @@ class TestErrorHandlingAndRecovery:
 
 class TestAsyncOperations:
     """Test async operation handling"""
-    
-    @pytest.mark.asyncio
     async def test_concurrent_executions(self):
         """Test concurrent triage executions"""
         agent = self._create_agent_for_concurrency()
@@ -275,8 +262,6 @@ class TestAsyncOperations:
             assert state.triage_result != None
             assert hasattr(state.triage_result, 'category')
             assert state.triage_result.category is not None
-    
-    @pytest.mark.asyncio
     async def test_websocket_streaming_updates(self, triage_agent, complex_state):
         """Test WebSocket streaming updates during execution"""
         mock_ws_manager = AsyncMock()

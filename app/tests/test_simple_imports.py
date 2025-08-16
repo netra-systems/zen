@@ -55,8 +55,6 @@ class TestHealthEndpoints:
 
 class TestDatabaseOperations:
     """Database connectivity and operations"""
-    
-    @pytest.mark.asyncio
     async def test_database_session_creation(self):
         """Test database session can be created"""
         try:
@@ -194,8 +192,6 @@ class TestLLMIntegration:
         except ImportError:
             # Skip if schemas not available
             pytest.skip("LLM schemas not available")
-    
-    @pytest.mark.asyncio
     async def test_llm_service_mock(self):
         """Test LLM service with mocked responses"""
         try:

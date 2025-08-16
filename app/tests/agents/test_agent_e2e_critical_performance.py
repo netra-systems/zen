@@ -15,8 +15,6 @@ from app.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
 class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
     """Performance and concurrency critical tests"""
-
-    @pytest.mark.asyncio
     async def test_9_concurrent_request_handling(self, setup_agent_infrastructure):
         """
         Test Case 9: Concurrent Request Handling
@@ -160,8 +158,6 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         assert len(performance_metrics["execution_times"]) >= 0
         total_time = (performance_metrics["end_time"] - performance_metrics["start_time"]).total_seconds()
         assert total_time < 5.0  # Should complete within 5 seconds
-
-    @pytest.mark.asyncio
     async def test_10_performance_and_timeout_handling(self, setup_agent_infrastructure):
         """
         Test Case 10: Performance and Timeout Scenarios

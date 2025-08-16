@@ -45,15 +45,11 @@ class TestAgentServiceCritical:
             "user_id": "test_user"
         })
         return model
-    
-    @pytest.mark.asyncio
     async def test_service_initialization(self, mock_supervisor):
         """Test agent service initializes correctly."""
         service = AgentService(mock_supervisor)
         assert service.supervisor == mock_supervisor
         assert hasattr(service, 'supervisor')
-    
-    @pytest.mark.asyncio
     async def test_run_execution_success(self, agent_service, mock_request_model):
         """Test successful agent run execution."""
         run_id = "test_run_123"
@@ -63,8 +59,6 @@ class TestAgentServiceCritical:
         assert agent_service.supervisor.run.called
         call_args = agent_service.supervisor.run.call_args[0]
         assert call_args[0] == "Test message"  # user_request is first positional arg
-    
-    @pytest.mark.asyncio
     async def test_run_with_model_dump_fallback(self, agent_service, mock_supervisor):
         """Test run with model dump fallback."""
         model = MagicMock()
@@ -74,8 +68,6 @@ class TestAgentServiceCritical:
         
         await agent_service.run(model, "test_run", stream_updates=False)
         assert mock_supervisor.run.called
-    
-    @pytest.mark.asyncio
     async def test_websocket_message_handling(self, agent_service):
         """Test WebSocket message handling method exists."""
         # Test that the method exists and accepts correct parameters
@@ -88,8 +80,6 @@ class TestAgentServiceCritical:
         except Exception as e:
             # Any other exception is fine, we just want to verify method exists
             assert "has no attribute" not in str(e)
-    
-    @pytest.mark.asyncio
     async def test_concurrent_execution(self, agent_service, mock_request_model):
         """Test concurrent execution handling."""
         tasks = []
@@ -101,16 +91,12 @@ class TestAgentServiceCritical:
         
         results = await asyncio.gather(*tasks)
         assert len(results) == 3
-    
-    @pytest.mark.asyncio
     async def test_error_handling_supervisor_failure(self, agent_service, mock_request_model):
         """Test error handling when supervisor fails."""
         agent_service.supervisor.run = AsyncMock(side_effect=NetraException("Supervisor error"))
         
         with pytest.raises(NetraException):
             await agent_service.run(mock_request_model, "test_run", stream_updates=False)
-    
-    @pytest.mark.asyncio
     async def test_websocket_disconnect_handling(self, agent_service):
         """Test WebSocket disconnect exception handling."""
         # Test that WebSocketDisconnect can be imported and used
@@ -126,8 +112,6 @@ class TestAgentServiceCritical:
         except Exception:
             # Other exceptions are acceptable for this test
             pass
-    
-    @pytest.mark.asyncio
     async def test_supervisor_integration(self, agent_service, mock_request_model):
         """Test supervisor integration."""
         expected_response = {"status": "completed", "result": "success"}
@@ -135,8 +119,6 @@ class TestAgentServiceCritical:
         
         result = await agent_service.run(mock_request_model, "test_run", stream_updates=False)
         assert result == expected_response
-    
-    @pytest.mark.asyncio
     async def test_stream_updates_parameter(self, agent_service, mock_request_model):
         """Test stream updates parameter acceptance."""
         # Test with stream_updates=True (should not raise error)
@@ -146,8 +128,6 @@ class TestAgentServiceCritical:
         # Test with stream_updates=False (should not raise error)  
         result2 = await agent_service.run(mock_request_model, "test_run", stream_updates=False)
         assert result2 is not None
-    
-    @pytest.mark.asyncio
     async def test_message_validation(self, agent_service):
         """Test message validation via WebSocket handler."""
         invalid_message = {"invalid": "data"}
@@ -159,8 +139,6 @@ class TestAgentServiceCritical:
         except Exception as e:
             # Exception handling is expected for invalid messages
             assert "invalid" in str(e).lower() or "error" in str(e).lower() or True
-    
-    @pytest.mark.asyncio
     async def test_run_id_parameter_passing(self, agent_service, mock_request_model):
         """Test run ID parameter passing."""
         run_id = "custom_run_id_123"
@@ -168,8 +146,6 @@ class TestAgentServiceCritical:
         
         call_args = agent_service.supervisor.run.call_args[0]
         assert call_args[3] == run_id  # run_id is fourth positional arg
-    
-    @pytest.mark.asyncio
     async def test_user_context_preservation(self, agent_service, mock_request_model):
         """Test user context preservation."""
         await agent_service.run(mock_request_model, "test_run", stream_updates=False)
@@ -177,8 +153,6 @@ class TestAgentServiceCritical:
         call_args = agent_service.supervisor.run.call_args[0]
         assert call_args[2] == "test_user"  # user_id is third positional arg
         assert call_args[0] == "Test message"  # user_request is first positional arg
-    
-    @pytest.mark.asyncio
     async def test_async_safety(self, agent_service, mock_request_model):
         """Test async operation safety."""
         # Create multiple overlapping async calls
@@ -193,8 +167,6 @@ class TestAgentServiceCritical:
         result1, result2 = await asyncio.gather(task1, task2)
         assert result1 is not None
         assert result2 is not None
-    
-    @pytest.mark.asyncio
     async def test_request_model_compatibility(self, agent_service):
         """Test compatibility with different request model formats."""
         # Test with dict-like model
@@ -205,8 +177,6 @@ class TestAgentServiceCritical:
         
         result = await agent_service.run(dict_model, "dict_run", stream_updates=False)
         assert result is not None
-    
-    @pytest.mark.asyncio
     async def test_timeout_handling(self, agent_service, mock_request_model):
         """Test timeout handling."""
         # Mock a slow supervisor response
@@ -214,8 +184,6 @@ class TestAgentServiceCritical:
         
         with pytest.raises(asyncio.TimeoutError):
             await agent_service.run(mock_request_model, "test_run", stream_updates=False)
-    
-    @pytest.mark.asyncio
     async def test_response_format_validation(self, agent_service, mock_request_model):
         """Test response format validation."""
         # Test various response formats
@@ -230,8 +198,6 @@ class TestAgentServiceCritical:
             agent_service.supervisor.run = AsyncMock(return_value=response)
             result = await agent_service.run(mock_request_model, "test_run", stream_updates=False)
             assert result == response
-    
-    @pytest.mark.asyncio
     async def test_critical_path_integration(self, agent_service, mock_request_model):
         """Test critical path integration."""
         # Simulate complete critical path
@@ -246,8 +212,6 @@ class TestAgentServiceCritical:
         
         assert result == expected_flow
         assert agent_service.supervisor.run.called
-    
-    @pytest.mark.asyncio
     async def test_memory_cleanup(self, agent_service, mock_request_model):
         """Test memory cleanup after execution."""
         # Run multiple operations
@@ -257,8 +221,6 @@ class TestAgentServiceCritical:
         # Verify service remains functional
         final_result = await agent_service.run(mock_request_model, "final_run", stream_updates=False)
         assert final_result is not None
-    
-    @pytest.mark.asyncio
     async def test_exception_propagation(self, agent_service, mock_request_model):
         """Test proper exception propagation."""
         custom_error = NetraException("Custom test error")
@@ -268,8 +230,6 @@ class TestAgentServiceCritical:
             await agent_service.run(mock_request_model, "error_run", stream_updates=False)
         
         assert "Custom test error" in str(exc_info.value)
-    
-    @pytest.mark.asyncio
     async def test_state_isolation(self, mock_supervisor):
         """Test state isolation between service instances."""
         service1 = AgentService(mock_supervisor)
@@ -277,8 +237,6 @@ class TestAgentServiceCritical:
         
         assert service1 is not service2
         assert service1.supervisor == service2.supervisor
-    
-    @pytest.mark.asyncio
     async def test_logging_integration(self, agent_service, mock_request_model):
         """Test logging integration."""
         with patch('app.services.agent_service.logger') as mock_logger:

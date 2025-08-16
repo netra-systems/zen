@@ -22,8 +22,6 @@ from app.core.exceptions_agent import AgentError
 
 class ThreadAgentWorkflowTests:
     """Tests for thread management with real agent workflows."""
-    
-    @pytest.mark.asyncio
     async def test_thread_agent_workflow_integration(self, db_session: AsyncSession):
         """Test complete thread workflow with agent execution."""
         thread_service = ThreadService()
@@ -110,8 +108,6 @@ class ThreadAgentWorkflowTests:
         )
         assert success
         assert snapshot_id is not None
-    
-    @pytest.mark.asyncio
     async def test_multi_agent_thread_coordination(self, db_session: AsyncSession):
         """Test multiple agents coordinating within same thread."""
         thread_service = ThreadService()
@@ -192,8 +188,6 @@ class ThreadAgentWorkflowTests:
 
 class ThreadDataIntegrityTests:
     """Tests for data integrity validation in thread operations."""
-    
-    @pytest.mark.asyncio
     async def test_thread_data_integrity_validation(self, db_session: AsyncSession):
         """Test comprehensive data integrity validation."""
         thread_service = ThreadService()
@@ -243,8 +237,6 @@ class ThreadDataIntegrityTests:
         
         # Verify temporal consistency
         assert user_msg.created_at <= agent_msg.created_at
-    
-    @pytest.mark.asyncio
     async def test_thread_state_consistency(self, db_session: AsyncSession):
         """Test thread state remains consistent across operations."""
         thread_service = ThreadService()
@@ -292,8 +284,6 @@ class ThreadDataIntegrityTests:
 
 class ThreadErrorHandlingTests:
     """Tests for comprehensive error handling in thread operations."""
-    
-    @pytest.mark.asyncio
     async def test_thread_agent_error_recovery(self, db_session: AsyncSession):
         """Test thread operations recover gracefully from agent errors."""
         thread_service = ThreadService()
@@ -349,8 +339,6 @@ class ThreadErrorHandlingTests:
         )
         assert recovery_message is not None
         assert recovery_message.thread_id == thread.id
-    
-    @pytest.mark.asyncio
     async def test_concurrent_error_isolation(self, db_session: AsyncSession):
         """Test errors in one thread don't affect others."""
         thread_service = ThreadService()

@@ -4,7 +4,7 @@ Corpus management operations - CRUD operations for corpus metadata
 
 import json
 from datetime import datetime, UTC
-from typing import List, Optional
+from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from ...db import models_postgres as models
@@ -45,32 +45,47 @@ class CorpusManager:
         
         return query.offset(skip).limit(limit).all()
     
+    def _validate_corpus_exists(self, db_corpus, corpus_id: str) -> None:
+        """Validate that corpus exists for update"""
+        if not db_corpus:
+            raise CorpusNotFoundError(f"Corpus {corpus_id} not found")
+
+    def _apply_update_fields(self, db_corpus, update_data: schemas.CorpusUpdate) -> None:
+        """Apply update fields to corpus model"""
+        for key, value in update_data.model_dump(exclude_unset=True).items():
+            setattr(db_corpus, key, value)
+
+    def _load_existing_metadata(self, db_corpus) -> Dict:
+        """Load existing metadata from corpus"""
+        return json.loads(db_corpus.metadata_ or "{}")
+
+    def _update_metadata_version(self, metadata: Dict) -> Dict:
+        """Update metadata with new timestamp and version"""
+        metadata["updated_at"] = datetime.now(UTC).isoformat()
+        metadata["version"] = metadata.get("version", 1) + 1
+        return metadata
+
+    def _save_updated_metadata(self, db_corpus, metadata: Dict) -> None:
+        """Save updated metadata to corpus model"""
+        db_corpus.metadata_ = json.dumps(metadata)
+
+    def _commit_corpus_update(self, db: Session, db_corpus) -> models.Corpus:
+        """Commit corpus update and refresh model"""
+        db.commit()
+        db.refresh(db_corpus)
+        return db_corpus
+
     async def update_corpus(
-        self,
-        db: Session,
-        corpus_id: str,
-        update_data: schemas.CorpusUpdate
+        self, db: Session, corpus_id: str, update_data: schemas.CorpusUpdate
     ) -> Optional[models.Corpus]:
         """Update corpus metadata"""
         db_corpus = await self.get_corpus(db, corpus_id)
-        
-        if not db_corpus:
-            raise CorpusNotFoundError(f"Corpus {corpus_id} not found")
-        
-        # Update fields
-        for key, value in update_data.model_dump(exclude_unset=True).items():
-            setattr(db_corpus, key, value)
-        
-        # Update metadata
-        metadata = json.loads(db_corpus.metadata_ or "{}")
-        metadata["updated_at"] = datetime.now(UTC).isoformat()
-        metadata["version"] = metadata.get("version", 1) + 1
-        db_corpus.metadata_ = json.dumps(metadata)
-        
-        db.commit()
-        db.refresh(db_corpus)
-        
-        return db_corpus
+        self._validate_corpus_exists(db_corpus, corpus_id)
+        self._apply_update_fields(db_corpus, update_data)
+        metadata = self._load_existing_metadata(db_corpus)
+        updated_metadata = self._update_metadata_version(metadata)
+        self._save_updated_metadata(db_corpus, updated_metadata)
+        return self._commit_corpus_update(db, db_corpus)
     
     async def clone_corpus(
         self,

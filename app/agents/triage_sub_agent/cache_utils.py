@@ -39,13 +39,24 @@ async def get_cached_result(redis_manager: Optional[RedisManager], request_hash:
     """Retrieve cached triage result if available."""
     if not redis_manager:
         return None
+    return await _safe_cache_retrieval(redis_manager, request_hash)
+
+
+async def _safe_cache_retrieval(redis_manager: RedisManager, request_hash: str) -> Optional[Dict[str, Any]]:
+    """Safely retrieve from cache with error handling."""
     try:
         cached = await redis_manager.get(build_cache_key(request_hash))
-        if cached:
-            logger.info(f"Cache hit for request hash: {request_hash}")
-            return json.loads(cached)
+        return _process_cached_data(cached, request_hash)
     except Exception as e:
         logger.warning(f"Failed to retrieve from cache: {e}")
+        return None
+
+
+def _process_cached_data(cached: str, request_hash: str) -> Optional[Dict[str, Any]]:
+    """Process cached data if available."""
+    if cached:
+        logger.info(f"Cache hit for request hash: {request_hash}")
+        return json.loads(cached)
     return None
 
 

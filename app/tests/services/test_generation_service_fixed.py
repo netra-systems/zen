@@ -11,8 +11,6 @@ from app.services.generation_service import update_job_status
 
 class TestJobStatusManagement:
     """Test job status update functionality"""
-    
-    @pytest.mark.asyncio
     async def test_update_job_status_running(self):
         """Test updating job status to running"""
         with patch('app.services.generation_service.job_store') as mock_store:
@@ -29,8 +27,6 @@ class TestJobStatusManagement:
                 assert mock_store.update.call_args[1]["progress"] == 50
                 
                 mock_manager.broadcast_to_job.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_update_job_status_completed(self):
         """Test updating job status to completed"""
         with patch('app.services.generation_service.job_store') as mock_store:
@@ -51,8 +47,6 @@ class TestJobStatusManagement:
                 # Check keyword arguments
                 assert mock_store.update.call_args[1]["progress"] == 100
                 assert mock_store.update.call_args[1]["result"] == {"data": "test"}
-    
-    @pytest.mark.asyncio
     async def test_update_job_status_failed(self):
         """Test updating job status to failed"""
         with patch('app.services.generation_service.job_store') as mock_store:
@@ -71,8 +65,6 @@ class TestJobStatusManagement:
                 assert mock_store.update.call_args[0][1] == "failed"  # status
                 # Check keyword arguments
                 assert mock_store.update.call_args[1]["error"] == "Test error message"
-    
-    @pytest.mark.asyncio
     async def test_update_job_status_broadcasts_update(self):
         """Test that job status updates are broadcast via WebSocket"""
         with patch('app.services.generation_service.job_store') as mock_store:
@@ -91,8 +83,6 @@ class TestJobStatusManagement:
 
 class TestClickHouseOperationsMocked:
     """Test ClickHouse operations with full mocking"""
-    
-    @pytest.mark.asyncio
     async def test_get_corpus_from_clickhouse_mocked(self):
         """Test retrieving corpus with mocked ClickHouse"""
         from app.services.generation_service import get_corpus_from_clickhouse
@@ -115,8 +105,6 @@ class TestClickHouseOperationsMocked:
                 assert "generation" in result
                 assert len(result["qa"]) == 2
                 assert len(result["generation"]) == 1
-    
-    @pytest.mark.asyncio
     async def test_save_corpus_to_clickhouse_mocked(self):
         """Test saving corpus with mocked ClickHouse"""
         from app.services.generation_service import save_corpus_to_clickhouse

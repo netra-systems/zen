@@ -120,8 +120,6 @@ class AgentLoadSimulator:
 
 class TestAgentLoadScenarios:
     """Load test scenarios for agent system."""
-    
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_gradual_load_ramp_up(self):
         """Test gradual increase in concurrent users."""
@@ -138,8 +136,6 @@ class TestAgentLoadScenarios:
         percentiles = metrics.get_percentiles()
         assert percentiles['p95'] < 1000  # 95th percentile under 1 second
         assert len(metrics.error_counts) == 0  # No errors during ramp-up
-    
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_sustained_peak_load(self):
         """Test system under sustained peak load."""
@@ -156,8 +152,6 @@ class TestAgentLoadScenarios:
             avg_throughput = statistics.mean(metrics.throughput_samples)
             assert avg_throughput > 10  # Minimum 10 requests/second
         assert len(metrics.response_times) >= params['requests_per_user'] * 10
-    
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_burst_traffic_patterns(self):
         """Test handling of sudden traffic bursts."""
@@ -176,8 +170,6 @@ class TestAgentLoadScenarios:
         if metrics.response_times:
             error_rate = sum(metrics.error_counts.values()) / len(metrics.response_times)
             assert error_rate < 0.2  # Less than 20% error rate (more lenient)
-    
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_mixed_workload_types(self):
         """Test mixed agent types under concurrent load."""
@@ -301,8 +293,6 @@ class TestAgentLoadScenarios:
 
 class TestAgentStressScenarios:
     """Stress test scenarios pushing system beyond limits."""
-    
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_beyond_capacity_limits(self):
         """Test system behavior beyond designed capacity."""

@@ -22,8 +22,6 @@ from app.schemas.websocket_server_messages import (
 
 class ThreadWebSocketConnectionTests:
     """Tests for thread-specific WebSocket connections."""
-    
-    @pytest.mark.asyncio
     async def test_thread_specific_websocket_connections(self, mock_websocket_manager):
         """Test WebSocket connections are thread-specific."""
         service = ThreadService()
@@ -67,8 +65,6 @@ class ThreadWebSocketConnectionTests:
         # In real implementation, this would be called automatically
         await ws_manager.send_message(user_id, expected_message)
         ws_manager.send_message.assert_called_with(user_id, expected_message)
-    
-    @pytest.mark.asyncio
     async def test_websocket_connection_isolation(self, mock_websocket_manager):
         """Test WebSocket connections maintain thread isolation."""
         user1, user2 = "ws_user1", "ws_user2"
@@ -99,8 +95,6 @@ class ThreadWebSocketConnectionTests:
 
 class ThreadMessageRoutingTests:
     """Tests for message routing to correct threads."""
-    
-    @pytest.mark.asyncio
     async def test_message_routing_to_correct_thread(self, mock_websocket_manager):
         """Test messages are routed to correct thread."""
         agent_service = Mock(spec=AgentService)
@@ -151,8 +145,6 @@ class ThreadMessageRoutingTests:
         # Verify routing
         agent_service.handle_websocket_message.assert_called_once_with(message)
         assert response["thread_id"] == thread_id
-    
-    @pytest.mark.asyncio
     async def test_concurrent_message_routing(self, mock_websocket_manager):
         """Test concurrent messages route to correct threads."""
         agent_service = Mock(spec=AgentService)
@@ -193,8 +185,6 @@ class ThreadMessageRoutingTests:
 
 class ThreadNotificationTests:
     """Tests for thread notification mechanisms."""
-    
-    @pytest.mark.asyncio
     async def test_thread_lifecycle_notifications(self, mock_websocket_manager):
         """Test thread lifecycle events trigger notifications."""
         service = ThreadService()
@@ -254,8 +244,6 @@ class ThreadNotificationTests:
         }
         # Verify deletion notification was sent
         ws_manager.send_message.assert_called_with(user_id, expected_message)
-    
-    @pytest.mark.asyncio
     async def test_agent_status_notifications(self, mock_websocket_manager):
         """Test agent status notifications through WebSocket."""
         service = ThreadService()
@@ -302,8 +290,6 @@ class ThreadNotificationTests:
 
 class RealTimeThreadStatusTests:
     """Tests for real-time thread status updates."""
-    
-    @pytest.mark.asyncio
     async def test_real_time_status_updates(self, mock_websocket_manager):
         """Test real-time thread status updates."""
         service = ThreadService()

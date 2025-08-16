@@ -27,8 +27,6 @@ from app.tests.helpers.supervisor_test_helpers import (
 
 class TestQualitySupervisorValidation:
     """Test quality checks on agent responses"""
-    
-    @pytest.mark.asyncio
     async def test_validates_response_quality_score(self):
         """Test validation of response quality scores"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -54,8 +52,6 @@ class TestQualitySupervisorValidation:
         assert result["approved"]
         assert result["quality_score"] == 0.85
         assert len(result["issues"]) == 0
-    
-    @pytest.mark.asyncio
     async def test_rejects_low_quality_outputs(self):
         """Test rejection of low-quality outputs"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -91,8 +87,6 @@ class TestQualitySupervisorValidation:
 
 class TestAdminToolDispatcherRouting:
     """Test tool selection logic for admin operations"""
-    
-    @pytest.mark.asyncio
     async def test_routes_to_correct_admin_tool(self):
         """Test routing to correct admin tool based on operation"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -118,8 +112,6 @@ class TestAdminToolDispatcherRouting:
         )
         assert result["success"]
         assert result["result"] == "User created"
-    
-    @pytest.mark.asyncio
     async def test_validates_admin_permissions(self):
         """Test security checks for privileged operations"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -138,8 +130,6 @@ class TestAdminToolDispatcherRouting:
             await admin_dispatcher.dispatch_admin_operation(operation)
         
         assert "Insufficient permissions" in str(exc.value)
-    
-    @pytest.mark.asyncio
     async def test_admin_tool_audit_logging(self):
         """Test audit logging for admin operations"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -169,8 +159,6 @@ class TestAdminToolDispatcherRouting:
 
 class TestCorpusAdminDocumentManagement:
     """Test document indexing and retrieval"""
-    
-    @pytest.mark.asyncio
     async def test_document_indexing_workflow(self):
         """Test document indexing workflow"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -199,8 +187,6 @@ class TestCorpusAdminDocumentManagement:
         assert result["indexed"] == 5
         assert result["failed"] == 0
         corpus_admin.vector_store.add_documents.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_document_retrieval_with_similarity_search(self):
         """Test document retrieval using similarity search"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -226,8 +212,6 @@ class TestCorpusAdminDocumentManagement:
 
 class TestSupplyResearcherDataCollection:
     """Test supply chain data research capabilities"""
-    
-    @pytest.mark.asyncio
     async def test_supply_chain_data_collection(self):
         """Test supply chain data collection workflow"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -250,8 +234,6 @@ class TestSupplyResearcherDataCollection:
         
         assert len(result["suppliers"]) == 2
         assert result["inventory"]["gpu"] == 1000
-    
-    @pytest.mark.asyncio
     async def test_data_validation_and_enrichment(self):
         """Test data validation and enrichment process"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -284,8 +266,6 @@ class TestSupplyResearcherDataCollection:
 
 class TestAgentUtilsHelperFunctions:
     """Test utility helper functions"""
-    
-    @pytest.mark.asyncio
     async def test_retry_with_backoff(self):
         """Test retry utility with exponential backoff"""
         utils = AgentUtils()
@@ -307,8 +287,6 @@ class TestAgentUtilsHelperFunctions:
         
         assert result == "Success"
         assert call_count == 3
-    
-    @pytest.mark.asyncio
     async def test_parallel_execution_helper(self):
         """Test parallel execution of multiple tasks"""
         utils = AgentUtils()
@@ -321,8 +299,6 @@ class TestAgentUtilsHelperFunctions:
         results = await utils.execute_parallel(tasks)
         
         assert results == [0, 2, 4, 6, 8]
-    
-    @pytest.mark.asyncio
     async def test_timeout_wrapper(self):
         """Test timeout wrapper for long-running operations"""
         utils = AgentUtils()
@@ -333,8 +309,6 @@ class TestAgentUtilsHelperFunctions:
         
         with pytest.raises(asyncio.TimeoutError):
             await utils.with_timeout(slow_operation(), timeout=0.1)
-    
-    @pytest.mark.asyncio
     async def test_state_merging_utility(self):
         """Test utility for merging agent states"""
         utils = AgentUtils()

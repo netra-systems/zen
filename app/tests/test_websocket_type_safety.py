@@ -484,8 +484,6 @@ class TestBidirectionalTypeConsistency:
 
 class TestWebSocketSendToThread:
     """Test WebSocket send_to_thread functionality."""
-    
-    @pytest.mark.asyncio
     async def test_send_to_thread_exists(self):
         """Test that send_to_thread method exists and works."""
         from app.ws_manager import WebSocketManager
@@ -505,8 +503,6 @@ class TestWebSocketSendToThread:
         
         ws_manager.send_message.assert_called_once_with(thread_id, message)
         assert result == True
-    
-    @pytest.mark.asyncio
     async def test_supervisor_send_completion(self):
         """Test supervisor can send completion messages."""
         from unittest.mock import AsyncMock, MagicMock, patch

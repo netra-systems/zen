@@ -5,8 +5,6 @@ from app.agents.tool_dispatcher import ToolDispatcher
 from app.services.context import ToolContext
 from langchain_core.tools import StructuredTool
 from app.schemas import ToolStatus
-
-@pytest.mark.asyncio
 async def test_tool_builder_and_dispatcher():
     # Create a mock context
     mock_context = MagicMock(spec=ToolContext)

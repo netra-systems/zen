@@ -75,7 +75,6 @@ class TestSupplyResearcherAgentV2:
         return agent
     
     # Test 1: LLM Prompt Template Integration
-    @pytest.mark.asyncio
     async def test_llm_prompt_template_usage(self, agent, mock_llm_manager):
         """Test that agent uses LLM prompt templates correctly"""
         request = "What are the latest prices for Claude-3 Opus?"
@@ -96,7 +95,6 @@ class TestSupplyResearcherAgentV2:
         assert "claude" in parsed["model_name"].lower()
     
     # Test 2: WebSocket Event Streaming
-    @pytest.mark.asyncio
     async def test_websocket_event_streaming(self, agent):
         """Test WebSocket event streaming during research"""
         state = DeepAgentState(
@@ -133,7 +131,6 @@ class TestSupplyResearcherAgentV2:
             assert agent.websocket_manager.send_agent_update.called, "WebSocket updates should have been sent"
     
     # Test 3: State Persistence with Redis
-    @pytest.mark.asyncio
     async def test_state_persistence_redis(self, agent):
         """Test agent state persistence in Redis - v2 feature check"""
         with patch('app.redis_manager.RedisManager') as mock_redis_class:
@@ -166,7 +163,6 @@ class TestSupplyResearcherAgentV2:
             assert hasattr(agent, 'redis_manager')
     
     # Test 4: Multi-Provider Parallel Research
-    @pytest.mark.asyncio
     async def test_multi_provider_parallel_research(self, agent):
         """Test parallel research execution for multiple providers"""
         providers = ["openai", "anthropic", "google"]
@@ -247,7 +243,6 @@ class TestSupplyResearcherAgentV2:
             assert "research_type" in parsed
     
     # Test 7: Rate Limiting and Backoff
-    @pytest.mark.asyncio
     async def test_rate_limiting_backoff(self, agent):
         """Test exponential backoff on rate limit errors"""
         state = DeepAgentState(
@@ -286,7 +281,6 @@ class TestSupplyResearcherAgentV2:
                         assert delays[i] >= delays[i-1]
     
     # Test 8: Database Transaction Management
-    @pytest.mark.asyncio
     async def test_database_transaction_rollback(self, agent, mock_db):
         """Test database transaction rollback on failure"""
         state = DeepAgentState(
@@ -418,7 +412,6 @@ class TestSupplyResearcherAgentV2:
                 assert keyword in query_lower, f"Expected '{keyword}' in query for {test_case['parsed']['research_type']}"
     
     # Test 12: Change Notification System
-    @pytest.mark.asyncio
     async def test_change_notification_triggers(self, agent, mock_supply_service):
         """Test notification triggers for significant changes"""
         mock_supply_service.calculate_price_changes.return_value = {
@@ -451,7 +444,6 @@ class TestSupplyResearcherAgentV2:
                 assert mock_notify.call_count > 0
     
     # Test 13: Error Recovery Mechanisms
-    @pytest.mark.asyncio
     async def test_error_recovery_fallback(self, agent):
         """Test error recovery with fallback to cached data"""
         state = DeepAgentState(
@@ -481,7 +473,6 @@ class TestSupplyResearcherAgentV2:
                     assert mock_redis.get.called
     
     # Test 14: Audit Trail Generation
-    @pytest.mark.asyncio
     async def test_audit_trail_generation(self, agent, mock_db):
         """Test comprehensive audit trail generation"""
         state = DeepAgentState(
@@ -515,7 +506,6 @@ class TestSupplyResearcherAgentV2:
             assert mock_db.add.called
     
     # Test 15: Performance Monitoring Metrics
-    @pytest.mark.asyncio
     async def test_performance_metrics_collection(self, agent):
         """Test collection of performance metrics"""
         state = DeepAgentState(
@@ -551,8 +541,6 @@ class TestSupplyResearcherAgentV2:
 
 class TestSupplyResearcherIntegrationV2:
     """Integration tests for v2 specification compliance"""
-    
-    @pytest.mark.asyncio
     async def test_end_to_end_workflow_with_notifications(self):
         """Test complete workflow with all components integrated"""
         # This test would verify the full flow from request to notification
@@ -616,8 +604,6 @@ class TestSupplyResearcherIntegrationV2:
                         break
                 else:
                     assert False, "No supply update notification found in broadcasts"
-    
-    @pytest.mark.asyncio
     async def test_scheduled_research_with_aggregation(self):
         """Test scheduled research with result aggregation"""
         from app.services.supply_research_scheduler import SupplyResearchScheduler

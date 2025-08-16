@@ -62,8 +62,6 @@ class TestCostAnalyzer:
         context.cost_estimator.execute = AsyncMock()
         
         return context
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_basic_functionality(self, mock_context):
         """Test basic cost analysis with multiple logs"""
         # Setup mock responses
@@ -85,8 +83,6 @@ class TestCostAnalyzer:
         assert calls[0][0][0] == "Test prompt 1"
         assert calls[1][0][0] == "Test prompt 2"
         assert calls[2][0][0] == "Test prompt 3"
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_empty_logs(self, mock_context):
         """Test cost analyzer with empty logs"""
         mock_context.logs = []
@@ -95,8 +91,6 @@ class TestCostAnalyzer:
         
         assert result == "Analyzed current costs. Total estimated cost: $0.00"
         assert mock_context.cost_estimator.execute.call_count == 0
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_single_log(self, mock_context):
         """Test cost analyzer with single log entry"""
         mock_context.logs = [mock_context.logs[0]]
@@ -106,8 +100,6 @@ class TestCostAnalyzer:
         
         assert result == "Analyzed current costs. Total estimated cost: $0.12"
         assert mock_context.cost_estimator.execute.call_count == 1
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_large_costs(self, mock_context):
         """Test cost analyzer with large cost values"""
         mock_context.cost_estimator.execute.side_effect = [
@@ -119,8 +111,6 @@ class TestCostAnalyzer:
         result = await cost_analyzer(mock_context)
         
         assert result == "Analyzed current costs. Total estimated cost: $851.50"
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_zero_costs(self, mock_context):
         """Test cost analyzer when all costs are zero"""
         mock_context.cost_estimator.execute.return_value = {"estimated_cost_usd": 0.0}
@@ -128,8 +118,6 @@ class TestCostAnalyzer:
         result = await cost_analyzer(mock_context)
         
         assert result == "Analyzed current costs. Total estimated cost: $0.00"
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_fractional_cents(self, mock_context):
         """Test cost analyzer with fractional cent values"""
         mock_context.cost_estimator.execute.side_effect = [
@@ -141,8 +129,6 @@ class TestCostAnalyzer:
         result = await cost_analyzer(mock_context)
         
         assert result == "Analyzed current costs. Total estimated cost: $0.01"
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_exception_handling(self, mock_context):
         """Test cost analyzer handles exceptions from cost_estimator"""
         mock_context.cost_estimator.execute.side_effect = Exception("API Error")
@@ -151,8 +137,6 @@ class TestCostAnalyzer:
             await cost_analyzer(mock_context)
         
         assert str(exc_info.value) == "API Error"
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_async_execution(self, mock_context):
         """Test that cost analyzer properly awaits async operations"""
         call_order = []
@@ -168,8 +152,6 @@ class TestCostAnalyzer:
         
         assert len(call_order) == 3
         assert "$0.03" in result  # Total cost for 3 logs at 0.01 each
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_concurrent_logs(self, mock_context):
         """Test cost analyzer with many logs to verify performance"""
         # Create 100 mock logs
@@ -187,8 +169,6 @@ class TestCostAnalyzer:
         
         assert result == "Analyzed current costs. Total estimated cost: $1.00"
         assert mock_context.cost_estimator.execute.call_count == 100
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_negative_costs(self, mock_context):
         """Test cost analyzer with negative costs (credits/refunds)"""
         mock_context.cost_estimator.execute.side_effect = [
@@ -200,8 +180,6 @@ class TestCostAnalyzer:
         result = await cost_analyzer(mock_context)
         
         assert result == "Analyzed current costs. Total estimated cost: $0.20"
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_mixed_model_types(self, mock_context):
         """Test cost analyzer with different model types and configurations"""
         # Setup logs with different model configurations
@@ -231,8 +209,6 @@ class TestCostAnalyzer:
         
         assert result == "Analyzed current costs. Total estimated cost: $0.22"
         assert mock_context.cost_estimator.execute.call_count == 5
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_partial_failure(self, mock_context):
         """Test cost analyzer when some cost estimations fail"""
         mock_context.cost_estimator.execute.side_effect = [
@@ -248,8 +224,6 @@ class TestCostAnalyzer:
         assert "API temporarily unavailable" in str(exc_info.value)
         # Verify it attempted to process the first log
         assert mock_context.cost_estimator.execute.call_count == 2
-
-    @pytest.mark.asyncio
     async def test_cost_analyzer_rounding_edge_cases(self, mock_context):
         """Test cost analyzer rounding behavior at boundaries"""
         test_cases = [

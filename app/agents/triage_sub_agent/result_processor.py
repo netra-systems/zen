@@ -50,18 +50,23 @@ class TriageResultProcessor:
     
     def enrich_triage_result(self, triage_result: Any, user_request: str) -> TriageResult:
         """Enrich triage result with additional analysis."""
-        # Convert to dict for processing if needed
+        result_dict = self._convert_to_dict(triage_result)
+        self._apply_enrichments(result_dict, user_request)
+        return self._convert_dict_to_triage_result(result_dict)
+    
+    def _convert_to_dict(self, triage_result: Any) -> dict:
+        """Convert triage result to dictionary for processing."""
         if isinstance(triage_result, TriageResult):
-            result_dict = triage_result.model_dump()
+            return triage_result.model_dump()
         else:
-            result_dict = triage_result if isinstance(triage_result, dict) else {}
-        
+            return triage_result if isinstance(triage_result, dict) else {}
+    
+    def _apply_enrichments(self, result_dict: dict, user_request: str) -> None:
+        """Apply all enrichments to result dictionary."""
         self._ensure_entities_extracted(result_dict, user_request)
         self._ensure_intent_detected(result_dict, user_request)
         self._handle_admin_mode_detection(result_dict, user_request)
         self._ensure_tool_recommendations(result_dict)
-        
-        return self._convert_dict_to_triage_result(result_dict)
     
     def _ensure_entities_extracted(self, triage_result: dict, user_request: str) -> None:
         """Ensure entities are extracted from request."""
@@ -146,17 +151,22 @@ class TriageResultProcessor:
     
     def _format_metadata(self, result_dict: dict) -> dict:
         """Format metadata section."""
-        if 'metadata' not in result_dict:
-            result_dict['metadata'] = {}
-        
+        self._ensure_metadata_exists(result_dict)
         metadata = result_dict['metadata']
         if isinstance(metadata, dict):
-            # Ensure numeric fields are properly formatted
-            for key in ['triage_duration_ms', 'retry_count']:
-                if key in metadata and metadata[key] is not None:
-                    metadata[key] = int(metadata[key])
-        
+            self._format_numeric_metadata_fields(metadata)
         return result_dict
+    
+    def _ensure_metadata_exists(self, result_dict: dict) -> None:
+        """Ensure metadata section exists."""
+        if 'metadata' not in result_dict:
+            result_dict['metadata'] = {}
+    
+    def _format_numeric_metadata_fields(self, metadata: dict) -> None:
+        """Format numeric fields in metadata."""
+        for key in ['triage_duration_ms', 'retry_count']:
+            if key in metadata and metadata[key] is not None:
+                metadata[key] = int(metadata[key])
     
     def create_error_result(self, error_message: str, error_type: str = "processing_error") -> TriageResult:
         """Create standardized error result."""
@@ -174,28 +184,30 @@ class TriageResultProcessor:
         """Merge primary result with fallback when needed."""
         merged_dict = primary.model_dump()
         fallback_dict = fallback.model_dump()
-        
-        # Fill in missing fields from fallback
+        self._fill_missing_fields(merged_dict, fallback_dict)
+        return TriageResult(**merged_dict)
+    
+    def _fill_missing_fields(self, merged_dict: dict, fallback_dict: dict) -> None:
+        """Fill missing fields from fallback."""
         for key, value in fallback_dict.items():
             if key not in merged_dict or merged_dict[key] is None:
                 merged_dict[key] = value
-        
-        return TriageResult(**merged_dict)
     
     def add_enrichment_metadata(self, result: TriageResult, enrichment_info: Dict[str, Any]) -> TriageResult:
         """Add enrichment metadata to result."""
         result_dict = result.model_dump()
-        
-        if 'metadata' not in result_dict:
-            result_dict['metadata'] = {}
-        
-        result_dict['metadata'].update({
+        self._ensure_metadata_exists(result_dict)
+        enrichment_data = self._build_enrichment_metadata(enrichment_info)
+        result_dict['metadata'].update(enrichment_data)
+        return TriageResult(**result_dict)
+    
+    def _build_enrichment_metadata(self, enrichment_info: Dict[str, Any]) -> dict:
+        """Build enrichment metadata dictionary."""
+        return {
             'enrichment_applied': True,
             'enrichment_timestamp': enrichment_info.get('timestamp'),
             'enrichment_version': enrichment_info.get('version', '1.0')
-        })
-        
-        return TriageResult(**result_dict)
+        }
     
     def validate_and_sanitize(self, result: Any) -> TriageResult:
         """Validate and sanitize result data."""

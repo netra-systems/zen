@@ -63,8 +63,12 @@ class FallbackManager:
         try:
             return await self._execute_and_record_result(context, execute_func, circuit_breaker)
         except Exception as e:
-            circuit_breaker.record_failure()
-            raise e
+            return self._handle_execution_error(circuit_breaker, e)
+    
+    def _handle_execution_error(self, circuit_breaker, error: Exception):
+        """Handle execution error by recording failure and re-raising."""
+        circuit_breaker.record_failure(type(error).__name__)
+        raise error
     
     async def _execute_and_record_result(self, context: AgentExecutionContext,
                                        execute_func, circuit_breaker):
@@ -86,7 +90,7 @@ class FallbackManager:
         if hasattr(result, 'success') and result.success:
             circuit_breaker.record_success()
         else:
-            circuit_breaker.record_failure()
+            circuit_breaker.record_failure("execution_failure")
     
     def _process_fallback_result(self, result, context: AgentExecutionContext):
         """Process fallback execution result."""

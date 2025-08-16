@@ -62,8 +62,6 @@ class TestStartupChecker:
     def checker(self, mock_app):
         """Create a StartupChecker instance"""
         return StartupChecker(mock_app)
-    
-    @pytest.mark.asyncio
     async def test_check_environment_variables_all_present(self, checker, monkeypatch):
         """Test environment variable check when all required vars are present"""
         monkeypatch.setenv("DATABASE_URL", "postgresql://test")
@@ -77,8 +75,6 @@ class TestStartupChecker:
         assert result.name == "environment_variables"
         assert result.success == True
         assert "All required environment variables are set" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_environment_variables_missing_required(self, checker, monkeypatch):
         """Test environment variable check when required vars are missing"""
         monkeypatch.delenv("DATABASE_URL", raising=False)
@@ -93,8 +89,6 @@ class TestStartupChecker:
         assert result.success == False
         assert "DATABASE_URL" in result.message
         assert result.critical == True
-    
-    @pytest.mark.asyncio
     async def test_check_configuration_valid(self, checker):
         """Test configuration check with valid settings"""
         with patch('app.startup_checks.environment_checks.settings') as mock_settings:
@@ -109,8 +103,6 @@ class TestStartupChecker:
         result = checker.results[0]
         assert result.name == "configuration"
         assert result.success == True
-    
-    @pytest.mark.asyncio
     async def test_check_configuration_invalid_secret(self, checker):
         """Test configuration check with invalid secret key"""
         with patch('app.startup_checks.environment_checks.settings') as mock_settings:
@@ -126,8 +118,6 @@ class TestStartupChecker:
             assert result.name == "configuration"
             assert result.success == False
             assert "SECRET_KEY" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_file_permissions(self, checker):
         """Test file permissions check"""
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -150,8 +140,6 @@ class TestStartupChecker:
                 assert Path("temp").exists()
             finally:
                 os.chdir(original_cwd)
-    
-    @pytest.mark.asyncio
     async def test_check_database_connection_success(self, checker):
         """Test successful database connection check"""
         mock_db = AsyncMock()
@@ -187,8 +175,6 @@ class TestStartupChecker:
         assert result.name == "database_connection"
         assert result.success == True
         assert "PostgreSQL connected" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_database_connection_failure(self, checker):
         """Test database connection failure"""
         checker.app.state.db_session_factory.side_effect = Exception("Connection failed")
@@ -201,8 +187,6 @@ class TestStartupChecker:
         assert result.name == "database_connection"
         assert result.success == False
         assert result.critical == True
-    
-    @pytest.mark.asyncio
     async def test_check_redis_success(self, checker):
         """Test successful Redis connection check"""
         mock_redis = checker.app.state.redis_manager
@@ -219,8 +203,6 @@ class TestStartupChecker:
         result = checker.results[0]
         assert result.name == "redis_connection"
         assert result.success == True
-    
-    @pytest.mark.asyncio
     async def test_check_redis_failure_non_production(self, checker):
         """Test Redis failure in non-production environment"""
         checker.app.state.redis_manager.connect.side_effect = Exception("Connection refused")
@@ -236,8 +218,6 @@ class TestStartupChecker:
             assert result.name == "redis_connection"
             assert result.success == False
             assert result.critical == False  # Not critical in development
-    
-    @pytest.mark.asyncio
     async def test_check_clickhouse_success(self, checker):
         """Test successful ClickHouse connection check"""
         mock_client = Mock()
@@ -255,8 +235,6 @@ class TestStartupChecker:
         assert result.name == "clickhouse_connection"
         assert result.success == True
         assert "2 tables" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_llm_providers_all_available(self, checker):
         """Test LLM providers check when all are available"""
         mock_llm_manager = checker.app.state.llm_manager
@@ -273,8 +251,6 @@ class TestStartupChecker:
         assert result.name == "llm_providers"
         assert result.success == True
         assert "2 LLM providers configured" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_llm_providers_partial_failure(self, checker):
         """Test LLM providers check with partial failures"""
         mock_llm_manager = checker.app.state.llm_manager
@@ -291,8 +267,6 @@ class TestStartupChecker:
         assert result.name == "llm_providers"
         assert result.success == True  # Partial success
         assert "1 available, 1 failed" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_memory_and_resources(self, checker):
         """Test system resources check"""
         with patch('psutil.virtual_memory') as mock_memory, \
@@ -316,8 +290,6 @@ class TestStartupChecker:
             assert result.name == "system_resources"
             assert result.success == True
             assert "Resources OK" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_memory_and_resources_warnings(self, checker):
         """Test system resources check with warnings"""
         with patch('psutil.virtual_memory') as mock_memory, \
@@ -344,8 +316,6 @@ class TestStartupChecker:
             assert "Low memory" in result.message
             assert "Low disk space" in result.message
             assert "Low CPU count" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_or_create_assistant_exists(self, checker):
         """Test assistant check when it already exists"""
         mock_db = AsyncMock()
@@ -367,8 +337,6 @@ class TestStartupChecker:
         assert result.name == "netra_assistant"
         assert result.success == True
         assert "already exists" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_or_create_assistant_creates(self, checker):
         """Test assistant creation when it doesn't exist"""
         mock_db = AsyncMock()
@@ -457,8 +425,6 @@ class TestStartupChecker:
         assert results["passed"] == 10
         assert results["failed_critical"] == 0
         assert results["failed_non_critical"] == 0
-
-    @pytest.mark.asyncio
     async def test_run_all_checks_success(self, checker):
         """Test running all checks successfully"""
         self._mock_all_check_methods(checker)
@@ -514,8 +480,6 @@ class TestStartupChecker:
         assert results["success"] == False
         assert results["failed_critical"] == 1
         assert len(results["failures"]) == 1
-
-    @pytest.mark.asyncio
     async def test_run_all_checks_with_critical_failure(self, checker):
         """Test running checks with a critical failure"""
         self._setup_critical_failure_env_checks(checker)
@@ -528,8 +492,6 @@ class TestStartupChecker:
 
 class TestRunStartupChecks:
     """Test the main run_startup_checks function"""
-    
-    @pytest.mark.asyncio
     async def test_run_startup_checks_success(self):
         """Test successful startup checks"""
         mock_app = Mock()
@@ -552,8 +514,6 @@ class TestRunStartupChecks:
             
             assert results["success"] == True
             mock_checker.run_all_checks.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_run_startup_checks_critical_failure(self):
         """Test startup checks with critical failure"""
         mock_app = Mock()
@@ -585,8 +545,6 @@ class TestRunStartupChecks:
             
             assert "Startup failed" in str(exc_info.value)
             assert "1 critical checks failed" in str(exc_info.value)
-    
-    @pytest.mark.asyncio
     async def test_run_startup_checks_non_critical_failures(self):
         """Test startup checks with only non-critical failures"""
         mock_app = Mock()

@@ -6,8 +6,6 @@ from app.main import app
 from app.schemas import RequestModel, Workload, DataSource, TimeRange
 from app.llm.llm_manager import LLMManager
 from app.config import settings
-
-@pytest.mark.asyncio
 @pytest.mark.parametrize("prompt", [
     "I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.",
 ])

@@ -85,8 +85,6 @@ def real_clickhouse_client(event_loop):
 
 class TestClickHouseConnection:
     """Test ClickHouse connection management."""
-
-    @pytest.mark.asyncio
     async def test_client_initialization(self, clickhouse_client):
         """Test ClickHouse client initialization with real connection."""
         client = await clickhouse_client()
@@ -96,8 +94,6 @@ class TestClickHouseConnection:
         result = await client.fetch("SELECT 1 as test")
         assert len(result) == 1
         assert result[0]['test'] == 1
-
-    @pytest.mark.asyncio
     async def test_list_corpus_tables(self, real_clickhouse_client):
         """Test listing corpus tables with real ClickHouse."""
         # First create a test corpus table
@@ -160,8 +156,6 @@ class TestClickHouseConnection:
     #     )
     #     assert len(string_result) == 1
     #     assert string_result[0]['greeting'] == 'Hello ClickHouse'
-
-    @pytest.mark.asyncio
     async def test_query_with_parameters(self, clickhouse_client):
         """Test query execution with parameters using real ClickHouse."""
         # Get the actual client
@@ -184,13 +178,8 @@ class TestClickHouseConnection:
             )
             assert result[0]['str_value'] == 'hello_clickhouse'
             assert result[0]['num_value'] == 42
-
-
-@pytest.mark.asyncio
 class TestBasicOperations:
     """Test basic ClickHouse operations with real database."""
-
-    @pytest.mark.asyncio
     async def test_show_tables(self, real_clickhouse_client):
         """Test showing database tables in real ClickHouse."""
         # Show all tables
@@ -203,8 +192,6 @@ class TestBasicOperations:
         # Check for expected system tables or our custom tables
         if table_names:
             logger.info(f"Sample tables: {table_names[:5]}")
-    
-    @pytest.mark.asyncio
     async def test_database_info(self, real_clickhouse_client):
         """Test getting database information."""
         # Get current database
@@ -236,8 +223,6 @@ class TestBasicOperations:
                           f"Rows: {total_rows}, Tables with data: {table_count}")
         except Exception as e:
             logger.warning(f"Could not get database stats: {e}")
-    
-    @pytest.mark.asyncio
     async def test_create_and_drop_table(self, real_clickhouse_client):
         """Test creating and dropping a table."""
         test_table = f"test_table_{uuid.uuid4().hex[:8]}"
@@ -302,13 +287,8 @@ def ensure_workload_table(event_loop):
             pytest.skip("workload_events table not accessible")
     
     event_loop.run_until_complete(_ensure_table())
-
-
-@pytest.mark.asyncio
 class TestWorkloadEventsOperations:
     """Test operations on workload_events table."""
-    
-    @pytest.mark.asyncio
     async def test_workload_events_operations(self, real_clickhouse_client, ensure_workload_table):
         """Test operations on workload_events table."""
         # Insert test event using correct workload_events schema

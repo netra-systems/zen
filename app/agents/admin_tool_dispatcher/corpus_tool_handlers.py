@@ -85,13 +85,16 @@ class CorpusToolHandlers:
     def _collect_optimizations(self, params: Dict) -> List[str]:
         """Collect optimization types to apply"""
         optimizations = []
-        if params.get("index_optimization"):
-            optimizations.append("index_rebuilt")
-        if params.get("compression"):
-            optimizations.append("compression_applied")
-        if params.get("partitioning"):
-            optimizations.append("partitioning_optimized")
+        self._add_optimization_if_enabled(optimizations, params, "index_optimization", "index_rebuilt")
+        self._add_optimization_if_enabled(optimizations, params, "compression", "compression_applied")
+        self._add_optimization_if_enabled(optimizations, params, "partitioning", "partitioning_optimized")
         return optimizations
+    
+    def _add_optimization_if_enabled(self, optimizations: List[str], params: Dict, 
+                                   param_key: str, optimization_name: str) -> None:
+        """Add optimization to list if parameter is enabled"""
+        if params.get(param_key):
+            optimizations.append(optimization_name)
     
     async def export_corpus_tool(self, request: CorpusToolRequest) -> CorpusToolResponse:
         """Tool for exporting corpus data"""

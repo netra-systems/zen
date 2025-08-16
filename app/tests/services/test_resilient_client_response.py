@@ -16,8 +16,6 @@ class TestResilientHTTPClientResponse:
     def client(self):
         """Create a ResilientHTTPClient for testing."""
         return ResilientHTTPClient(base_url="https://api.example.com")
-    
-    @pytest.mark.asyncio
     async def test_extract_error_data_json(self, client):
         """Test extracting JSON error data."""
         from unittest.mock import AsyncMock
@@ -26,15 +24,11 @@ class TestResilientHTTPClientResponse:
         
         error_data = await client._extract_error_data(mock_response)
         assert error_data == {"error": "Bad Request"}
-    
-    @pytest.mark.asyncio
     async def test_extract_error_data_text(self, client):
         """Test extracting text error data when JSON fails."""
         mock_response = create_text_error_response_mock()
         error_data = await client._extract_error_data(mock_response)
         assert error_data == {"error": "Error message", "status": 400}
-    
-    @pytest.mark.asyncio
     async def test_process_response_success_json(self, client):
         """Test processing successful JSON response."""
         from unittest.mock import AsyncMock
@@ -44,15 +38,11 @@ class TestResilientHTTPClientResponse:
         
         result = await client._process_response(mock_response, "test_api")
         assert result == {"data": "success"}
-    
-    @pytest.mark.asyncio
     async def test_process_response_success_text(self, client):
         """Test processing successful text response."""
         mock_response = create_text_success_response_mock()
         result = await client._process_response(mock_response, "test_api")
         assert result == {"text": "Plain text response", "status": 200}
-    
-    @pytest.mark.asyncio
     async def test_process_response_error(self, client):
         """Test processing error response."""
         mock_response = self._create_error_response_mock()

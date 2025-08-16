@@ -15,9 +15,6 @@ from app.services.synthetic_data.validators import validate_schema, validate_dis
 def service():
     """Create fresh SyntheticDataService instance"""
     return SyntheticDataService()
-
-
-@pytest.mark.asyncio
 class TestValidationMethods:
     """Test data validation methods"""
     
@@ -112,9 +109,6 @@ class TestValidationMethods:
         assert hasattr(result, 'all_required_fields_present')
         assert hasattr(result, 'null_value_percentage')
         assert result.null_value_percentage == 2/6  # 2 null values out of 6 total field checks
-
-
-@pytest.mark.asyncio
 class TestQualityAndDiversityMetrics:
     """Test quality and diversity metrics calculation"""
     

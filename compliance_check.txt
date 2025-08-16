@@ -1,5 +1,3 @@
-C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\scripts\check_architecture_compliance.py:254: DeprecationWarning: ast.Str is deprecated and will be removed in Python 3.14; use ast.Constant instead
-  isinstance(node.body[0].value, (ast.Constant, ast.Str))):
 
 ================================================================================
 ARCHITECTURE COMPLIANCE REPORT
@@ -7,94 +5,94 @@ ARCHITECTURE COMPLIANCE REPORT
 
 [FILE SIZE VIOLATIONS] (>300 lines)
 ----------------------------------------
-   743 lines: app\tests\services\test_database_repository_transactions.py
-   740 lines: app\tests\services\test_clickhouse_query_fixer.py
-   739 lines: app\tests\test_real_services_comprehensive.py
-   734 lines: app\tests\agents\test_error_handler_unit.py
-   725 lines: app\tests\services\test_unified_tool_registry_management.py
-   718 lines: app\tests\core\test_async_utils_complete.py
-   718 lines: app\tests\core\test_service_interfaces.py
-   716 lines: app\tests\services\test_security_service_authentication_enhanced.py
-   691 lines: app\tests\services\test_websocket_message_handler_routing.py
-   687 lines: app\tests\test_business_value_critical.py
-  ... and 333 more files
+   898 lines: scripts\check_architecture_compliance.py
+   788 lines: app\tests\services\test_clickhouse_query_fixer_backup.py
+   732 lines: app\tests\services\test_database_repository_transactions_backup.py
+   725 lines: app\tests\test_real_services_comprehensive_backup.py
+   711 lines: app\tests\services\test_unified_tool_registry_management_backup.py
+   710 lines: app\tests\agents\test_error_handler_unit_backup.py
+   702 lines: app\tests\services\test_security_service_authentication_enhanced.py
+   684 lines: app\tests\core\test_json_parsing_utils.py
+   680 lines: scripts\run_real_service_tests_enhanced.py
+   676 lines: scripts\enable_metadata_tracking.py
+  ... and 344 more files
 
-  Total violations: 343
+  Total violations: 354
 
 [FUNCTION COMPLEXITY VIOLATIONS] (>8 lines)
 ----------------------------------------
   VIOLATIONS (must fix):
-     74 lines: sync_to_readme() in scripts\generate_openapi_spec.py
-     73 lines: create_metadata_database() in scripts\enable_metadata_tracking.py
      73 lines: get_openapi_spec() in scripts\generate_openapi_spec.py
-     72 lines: _analyze_performance_metrics() in app\agents\data_sub_agent\agent_backup.py
      72 lines: run() in scripts\run_review.py
-    ... and 2658 more violations
+     72 lines: main() in scripts\validate_workflow_config.py
+     71 lines: main() in scripts\generate_openapi_spec.py
+     70 lines: _register_optimization_tools() in app\netra_mcp\modules\netra_mcp_tools.py
+    ... and 2619 more violations
 
   WARNINGS (example/demo files):
-    219 lines: main() in scripts\test_frontend.py
-    150 lines: main() in scripts\test_backend.py
-    126 lines: test_agent_coordination_with_external_api_call() in app\tests\integration\test_critical_path_integration.py
-    125 lines: test_authentication_expiry_during_connection() in app\tests\websocket\test_compression_auth.py
-    114 lines: test_critical_path_failure_recovery() in app\tests\integration\test_critical_path_integration.py
-    ... and 2940 more warnings
+     75 lines: test_websocket_compression() in app\tests\websocket\test_compression_auth.py
+     74 lines: run_tests() in scripts\test_backend.py
+     74 lines: setup_environment() in scripts\test_isolation.py
+     73 lines: test_end_to_end_optimization_flow() in app\tests\agents\test_llm_agent_e2e_real.py
+     73 lines: run_performance_tests() in scripts\test_system_startup.py
+    ... and 3268 more warnings
 
-  Total: 2663 violations, 2945 warnings
+  Total: 2624 violations, 3273 warnings
 
 [DUPLICATE TYPE DEFINITIONS]
 ----------------------------------------
-  Type 'ProductionTool' defined in 2 files
-    Files: app\agents\production_tool.py, app\agents\tool_dispatcher_old.py
   Type 'QualityValidator' defined in 2 files
     Files: app\agents\quality_checks.py, app\services\quality_gate\quality_gate_validators.py
-  Type 'SyntheticDataResult' defined in 2 files
-    Files: app\agents\state.py, app\agents\synthetic_data_generator.py
-  Type 'DeepAgentState' defined in 2 files
-    Files: app\agents\state.py, app\schemas\agent_models.py
   Type 'GenerationStatus' defined in 2 files
     Files: app\agents\synthetic_data_generator.py, app\services\synthetic_data\enums.py
-  Type 'WorkloadProfile' defined in 2 files
-    Files: app\agents\synthetic_data_presets.py, frontend\components\demo\WorkloadSelector.tsx
-  Type 'ToolDispatcher' defined in 3 files
-    Files: app\agents\tool_dispatcher_core.py, app\agents\tool_dispatcher_old.py, app\tests\services\test_tool_dispatcher.py
   Type 'ToolExecutionEngine' defined in 2 files
     Files: app\agents\tool_dispatcher_execution.py, app\services\unified_tool_registry\execution_engine.py
   Type 'ToolRegistry' defined in 2 files
     Files: app\agents\tool_dispatcher_registry.py, app\services\tool_registry.py
-  Type 'TriageSubAgent' defined in 2 files
-    Files: app\agents\triage_sub_agent.py, app\agents\triage_sub_agent\agent.py
+  Type 'DataSubAgent' defined in 2 files
+    Files: app\agents\data_sub_agent\agent.py, app\agents\data_sub_agent\agent_core.py
+  Type 'ClickHouseOperations' defined in 2 files
+    Files: app\agents\data_sub_agent\clickhouse_operations.py, app\services\corpus\clickhouse_operations.py
+  Type 'StateManager' defined in 2 files
+    Files: app\agents\supervisor\state_manager.py, app\services\state\state_manager.py
+  Type 'SessionManager' defined in 3 files
+    Files: app\auth\enhanced_auth_sessions.py, app\db\session.py, app\services\database\session_manager.py
+  Type 'DatabaseHealthChecker' defined in 3 files
+    Files: app\core\adaptive_circuit_breakers.py, app\core\database_recovery_strategies.py, app\db\health_checks.py
+  Type 'CircuitBreakerRegistry' defined in 2 files
+    Files: app\core\adaptive_circuit_breakers.py, app\core\circuit_breaker_registry.py
 
-  ... and 398 more duplicate types
+  ... and 151 more duplicate types
 
-  Total duplicate types: 408
+  Total duplicate types: 161
 
 [TEST STUBS IN PRODUCTION]
 ----------------------------------------
-  app\core\async_retry_logic.py (line 32): Test stub detected: Args/kwargs with static return
-  app\core\config_validator.py (line 1): Test stub detected: For testing docstring
-  app\db\query_cache.py (line 1): Test stub detected: Placeholder docstring
-  app\middleware\metrics_middleware.py (line 65): Test stub detected: Args/kwargs with static return
-  app\middleware\metrics_middleware_compact.py (line 34): Test stub detected: Args/kwargs with static return
-  app\routes\quality.py (line 1): Test stub detected: For testing docstring
-  app\services\service_locator.py (line 1): Test stub detected: For testing docstring
-  app\services\supply_research_scheduler.py (line 1): Test stub detected: Placeholder docstring
-  app\services\apex_optimizer_agent\dev_utils.py (line 10): Test stub detected: For testing docstring
-  app\services\database\rollback_manager_postgres.py (line 1): Test stub detected: Placeholder docstring
-  ... and 150 more files
+  app\agents\data_sub_agent\agent.py (line 38): Test stub detected: Args kwargs test stub
+  app\services\corpus_service.py (line 22): Test stub detected: Args kwargs test stub
+  app\tests\test_real_agent_services.py (line 50): Test stub detected: Args kwargs test stub
+  app\tests\test_real_data_services.py (line 52): Test stub detected: Args kwargs test stub
+  app\tests\test_real_quality_services.py (line 52): Test stub detected: Args kwargs test stub
+  app\tests\helpers\network_pagination_test_helpers.py (line 15): Test stub detected: Args kwargs test stub
+  app\tests\helpers\quality_gate_comprehensive_helpers.py (line 8): Test stub detected: Args kwargs test stub
+  app\tests\helpers\tool_permission_helpers.py (line 17): Test stub detected: Args kwargs test stub
+  app\tests\helpers\triage_test_helpers.py (line 24): Test stub detected: Args kwargs test stub
+  app\tests\services\test_clickhouse_query_fixer_backup.py (line 20): Test stub detected: Args kwargs test stub
+  ... and 1 more files
 
-  Total suspicious files: 160
+  Total suspicious files: 11
 
 ================================================================================
 SUMMARY
 ================================================================================
-[FAIL] VIOLATIONS FOUND: 3574 issues requiring fixes
-       WARNINGS: 2945 issues in example/demo files
-Compliance Score: 25.0%
+[FAIL] VIOLATIONS FOUND: 3150 issues requiring fixes
+       WARNINGS: 3273 issues in example/demo files
+Compliance Score: 38.0%
 
 Required Actions:
-  - Split 343 oversized files
-  - Refactor 2663 complex functions
-  - Deduplicate 408 type definitions
-  - Remove 160 test stubs from production
+  - Split 354 oversized files
+  - Refactor 2624 complex functions
+  - Deduplicate 161 type definitions
+  - Remove 11 test stubs from production
 
 Refer to ALIGNMENT_ACTION_PLAN.md for remediation steps

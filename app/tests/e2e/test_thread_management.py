@@ -22,8 +22,6 @@ from app.tests.helpers.thread_test_helpers import (
 
 class TestThreadCreation:
     """Tests for thread creation with unique IDs."""
-    
-    @pytest.mark.asyncio
     async def test_create_unique_thread_ids(self, db_session: AsyncSession):
         """Test that each new thread gets a unique ID."""
         service = ThreadService()
@@ -47,8 +45,6 @@ class TestThreadCreation:
         """Assert all thread IDs are unique."""
         thread_ids = [t.id for t in threads]
         assert len(thread_ids) == len(set(thread_ids))
-    
-    @pytest.mark.asyncio
     async def test_thread_metadata_validation(self, db_session: AsyncSession):
         """Test thread creation with proper metadata."""
         service = ThreadService()
@@ -68,8 +64,6 @@ class TestThreadCreation:
 
 class TestThreadSwitching:
     """Tests for thread switching and context maintenance."""
-    
-    @pytest.mark.asyncio
     async def test_thread_switching_maintains_context(self, db_session: AsyncSession):
         """Test switching threads maintains separate contexts."""
         service = ThreadService()
@@ -124,8 +118,6 @@ class TestThreadSwitching:
 
 class TestThreadPersistence:
     """Tests for thread persistence to database."""
-    
-    @pytest.mark.asyncio
     async def test_thread_database_persistence(self, db_session: AsyncSession):
         """Test thread persists correctly to database."""
         service = ThreadService()
@@ -145,8 +137,6 @@ class TestThreadPersistence:
         retrieved_thread = await service.get_thread(thread_id, db_session)
         assert retrieved_thread is not None
         assert retrieved_thread.id == thread_id
-    
-    @pytest.mark.asyncio
     async def test_thread_state_persistence_integration(self, db_session: AsyncSession):
         """Test integration with state persistence service."""
         service = ThreadService()
@@ -178,8 +168,6 @@ class TestThreadPersistence:
 
 class TestThreadExpiration:
     """Tests for thread expiration and cleanup."""
-    
-    @pytest.mark.asyncio
     async def test_thread_expiration_after_timeout(self, db_session: AsyncSession):
         """Test thread expiration mechanism."""
         service = ThreadService()
@@ -210,8 +198,6 @@ class TestThreadExpiration:
 
 class TestConcurrentThread:
     """Tests for concurrent thread operations."""
-    
-    @pytest.mark.asyncio
     async def test_concurrent_thread_creation(self, db_session: AsyncSession):
         """Test concurrent thread creation for race conditions."""
         service = ThreadService()
@@ -235,8 +221,6 @@ class TestConcurrentThread:
         # Check for unique IDs
         thread_ids = {t.id for t in successful_threads}
         assert len(thread_ids) == len(successful_threads)
-    
-    @pytest.mark.asyncio
     async def test_concurrent_message_creation(self, db_session: AsyncSession):
         """Test concurrent message creation in same thread."""
         service = ThreadService()
@@ -265,8 +249,6 @@ class TestConcurrentThread:
 
 class TestThreadIsolation:
     """Tests for thread isolation and cross-contamination prevention."""
-    
-    @pytest.mark.asyncio
     async def test_thread_data_isolation(self, db_session: AsyncSession):
         """Test threads don't share data inappropriately."""
         service = ThreadService()

@@ -331,6 +331,7 @@ export interface UnifiedChatState {
   
   // WebSocket event debugging
   wsEventBuffer: WebSocketEventBuffer;
+  wsEventBufferVersion: number;
   
   // Performance metrics
   performanceMetrics: {

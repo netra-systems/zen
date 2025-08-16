@@ -220,9 +220,6 @@ class TestBusinessRequirements:
         result = service._check_business_requirements(requirements, developer_context, user_plan)
         
         assert result == True
-
-
-@pytest.mark.asyncio
 class TestRateLimiting:
     """Test rate limiting functionality"""
     
@@ -286,9 +283,6 @@ class TestRateLimiting:
         sample_context.user_id = "different_user"
         result2 = await service_with_redis._check_rate_limits(sample_context, rate_limits)
         assert result2.allowed == True
-
-
-@pytest.mark.asyncio
 class TestRecordToolUsage:
     """Test tool usage recording functionality"""
     

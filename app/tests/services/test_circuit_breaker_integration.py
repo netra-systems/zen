@@ -310,9 +310,6 @@ class TestCircuitBreakerEndpoints:
                 assert "recent_events" in dashboard
                 assert "recent_alerts" in dashboard
                 assert "metrics" in dashboard
-
-
-@pytest.mark.asyncio
 class TestCircuitBreakerPerformance:
     """Test circuit breaker performance characteristics."""
     

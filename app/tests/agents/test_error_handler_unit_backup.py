@@ -259,8 +259,6 @@ class TestErrorHandler:
         assert len(handler.error_history) == 0
         assert isinstance(handler.recovery_strategy, ErrorRecoveryStrategy)
         assert handler.max_history == 100
-    
-    @pytest.mark.asyncio
     async def test_handle_error_with_agent_error(self):
         """Test handle_error with AgentError input."""
         handler = ErrorHandler()
@@ -281,8 +279,6 @@ class TestErrorHandler:
         
         assert exc_info.value.message == "Test error"
         assert len(handler.error_history) == 1
-    
-    @pytest.mark.asyncio
     async def test_handle_error_with_generic_exception(self):
         """Test handle_error with generic Exception."""
         handler = ErrorHandler()
@@ -304,8 +300,6 @@ class TestErrorHandler:
         assert isinstance(exc_info.value, AgentError)
         assert exc_info.value.message == "Generic error"
         assert len(handler.error_history) == 1
-    
-    @pytest.mark.asyncio
     async def test_handle_error_with_fallback(self):
         """Test handle_error with fallback operation."""
         handler = ErrorHandler()
@@ -328,8 +322,6 @@ class TestErrorHandler:
         
         assert result == "fallback_result"
         assert len(handler.error_history) == 1
-    
-    @pytest.mark.asyncio
     async def test_handle_error_fallback_fails(self):
         """Test handle_error when fallback operation fails."""
         handler = ErrorHandler()
@@ -521,8 +513,6 @@ class TestErrorHandler:
         should_retry = handler._should_retry_operation(error, context)
         
         assert should_retry == True
-    
-    @pytest.mark.asyncio
     async def test_retry_with_delay(self):
         """Test _retry_with_delay method."""
         handler = ErrorHandler()
@@ -590,8 +580,6 @@ class TestGlobalErrorHandler:
 
 class TestHandleAgentErrorDecorator:
     """Test handle_agent_error decorator."""
-    
-    @pytest.mark.asyncio
     async def test_decorator_successful_execution(self):
         """Test decorator with successful method execution."""
         
@@ -607,8 +595,6 @@ class TestHandleAgentErrorDecorator:
         result = await agent.successful_method("test_value")
         
         assert result == "Success: test_value"
-    
-    @pytest.mark.asyncio
     async def test_decorator_with_retries(self):
         """Test decorator with transient failures and retries."""
         
@@ -629,8 +615,6 @@ class TestHandleAgentErrorDecorator:
         
         assert result == "Success after retries"
         assert agent.attempt_count == 3
-    
-    @pytest.mark.asyncio
     async def test_decorator_non_retryable_error(self):
         """Test decorator with non-retryable error."""
         
@@ -646,8 +630,6 @@ class TestHandleAgentErrorDecorator:
         
         with pytest.raises(AgentError):
             await agent.validation_method()
-    
-    @pytest.mark.asyncio
     async def test_decorator_with_fallback(self):
         """Test decorator with fallback method."""
         
@@ -666,8 +648,6 @@ class TestHandleAgentErrorDecorator:
         result = await agent.failing_method()
         
         assert result == "Fallback result"
-    
-    @pytest.mark.asyncio
     async def test_decorator_max_retries_exceeded(self):
         """Test decorator when max retries are exceeded."""
         
@@ -687,8 +667,6 @@ class TestHandleAgentErrorDecorator:
             await agent.always_failing_method()
         
         assert agent.attempt_count == 3  # Should have tried 3 times
-    
-    @pytest.mark.asyncio
     async def test_decorator_with_delay_verification(self):
         """Test decorator applies appropriate delays between retries."""
         
@@ -715,8 +693,6 @@ class TestHandleAgentErrorDecorator:
         assert len(agent.call_times) == 3
         # Should have taken some time due to delays
         assert total_time > 0.1  # At least some delay
-    
-    @pytest.mark.asyncio
     async def test_decorator_without_agent_name(self):
         """Test decorator with object without name attribute."""
         

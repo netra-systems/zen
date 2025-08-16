@@ -3,8 +3,6 @@ import time
 from unittest.mock import MagicMock, AsyncMock, patch
 from app.services.generation_service import update_job_status, get_corpus_from_clickhouse, save_corpus_to_clickhouse
 from app.services.job_store import job_store
-
-@pytest.mark.asyncio
 async def test_update_job_status():
     # Arrange
     job_id = "test_job"
@@ -19,8 +17,6 @@ async def test_update_job_status():
     job = await job_store.get(job_id)
     assert job['status'] == status
     assert job['progress'] == 50
-
-@pytest.mark.asyncio
 async def test_get_corpus_from_clickhouse():
     # Arrange
     table_name = "test_corpus"
@@ -45,8 +41,6 @@ async def test_get_corpus_from_clickhouse():
         assert corpus["test_type"][0] == ('p1', 'r1')
         mock_db_instance.execute_query.assert_called_once_with(f"SELECT workload_type, prompt, response FROM {table_name}")
         mock_db_instance.disconnect.assert_called_once()
-
-@pytest.mark.asyncio
 async def test_save_corpus_to_clickhouse():
     # Arrange
     table_name = "test_corpus"

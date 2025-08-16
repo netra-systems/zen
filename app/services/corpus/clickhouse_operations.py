@@ -138,60 +138,92 @@ class ClickHouseOperations:
             central_logger.error(f"Failed to delete ClickHouse table {table_name}: {str(e)}")
             raise ClickHouseOperationError(f"Failed to delete table: {str(e)}")
     
-    async def check_table_exists(
-        self,
-        table_name: str
-    ) -> bool:
+    def _build_table_exists_query(self, table_name: str) -> str:
+        """Build query to check table existence"""
+        return f"""
+            SELECT COUNT(*) FROM system.tables 
+            WHERE name = '{table_name}'
+        """
+
+    def _process_table_exists_result(self, result) -> bool:
+        """Process table existence query result"""
+        return result[0][0] > 0 if result else False
+
+    async def _execute_table_exists_query(self, table_name: str) -> bool:
+        """Execute table existence query"""
+        async with get_clickhouse_client() as client:
+            query = self._build_table_exists_query(table_name)
+            result = await client.execute(query)
+            return self._process_table_exists_result(result)
+
+    def _handle_table_exists_error(self, table_name: str, error: Exception) -> None:
+        """Handle table existence check errors"""
+        central_logger.error(f"Failed to check table existence {table_name}: {str(error)}")
+        raise ClickHouseOperationError(f"Failed to check table existence: {str(error)}")
+
+    async def check_table_exists(self, table_name: str) -> bool:
         """Check if ClickHouse table exists"""
         try:
-            async with get_clickhouse_client() as client:
-                query = f"""
-                    SELECT COUNT(*) FROM system.tables 
-                    WHERE name = '{table_name}'
-                """
-                result = await client.execute(query)
-                return result[0][0] > 0 if result else False
-                
+            return await self._execute_table_exists_query(table_name)
         except Exception as e:
-            central_logger.error(f"Failed to check table existence {table_name}: {str(e)}")
-            raise ClickHouseOperationError(f"Failed to check table existence: {str(e)}")
+            self._handle_table_exists_error(table_name, e)
     
-    async def get_table_schema(
-        self,
-        table_name: str
-    ) -> Dict:
+    def _build_schema_query(self, table_name: str) -> str:
+        """Build schema query for table columns"""
+        return f"""
+            SELECT column, type, is_in_primary_key
+            FROM system.columns 
+            WHERE table = '{table_name}'
+            ORDER BY position
+        """
+
+    def _initialize_schema_dict(self) -> Dict:
+        """Initialize empty schema dictionary structure"""
+        return {
+            "columns": [],
+            "primary_key_columns": []
+        }
+
+    def _build_column_info(self, row) -> Dict:
+        """Build column information from result row"""
+        return {
+            "name": row[0],
+            "type": row[1],
+            "is_primary_key": bool(row[2])
+        }
+
+    def _process_schema_row(self, schema: Dict, row) -> None:
+        """Process single schema row and update schema dict"""
+        column_info = self._build_column_info(row)
+        schema["columns"].append(column_info)
+        if column_info["is_primary_key"]:
+            schema["primary_key_columns"].append(column_info["name"])
+
+    def _process_schema_results(self, result) -> Dict:
+        """Process all schema query results into schema dictionary"""
+        schema = self._initialize_schema_dict()
+        for row in result:
+            self._process_schema_row(schema, row)
+        return schema
+
+    async def _execute_schema_query(self, table_name: str) -> Dict:
+        """Execute schema query and return processed results"""
+        async with get_clickhouse_client() as client:
+            query = self._build_schema_query(table_name)
+            result = await client.execute(query)
+            return self._process_schema_results(result)
+
+    def _handle_schema_error(self, table_name: str, error: Exception) -> None:
+        """Handle and log schema retrieval errors"""
+        central_logger.error(f"Failed to get schema for table {table_name}: {str(error)}")
+        raise ClickHouseOperationError(f"Failed to get table schema: {str(error)}")
+
+    async def get_table_schema(self, table_name: str) -> Dict:
         """Get ClickHouse table schema information"""
         try:
-            async with get_clickhouse_client() as client:
-                query = f"""
-                    SELECT column, type, is_in_primary_key
-                    FROM system.columns 
-                    WHERE table = '{table_name}'
-                    ORDER BY position
-                """
-                result = await client.execute(query)
-                
-                schema = {
-                    "columns": [],
-                    "primary_key_columns": []
-                }
-                
-                for row in result:
-                    column_info = {
-                        "name": row[0],
-                        "type": row[1],
-                        "is_primary_key": bool(row[2])
-                    }
-                    schema["columns"].append(column_info)
-                    
-                    if column_info["is_primary_key"]:
-                        schema["primary_key_columns"].append(column_info["name"])
-                
-                return schema
-                
+            return await self._execute_schema_query(table_name)
         except Exception as e:
-            central_logger.error(f"Failed to get schema for table {table_name}: {str(e)}")
-            raise ClickHouseOperationError(f"Failed to get table schema: {str(e)}")
+            self._handle_schema_error(table_name, e)
     
     async def optimize_table(
         self,

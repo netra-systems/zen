@@ -19,8 +19,6 @@ from app.schemas.Generation import ContentGenParams
 
 class TestConcurrentProcessing:
     """Test concurrent generation requests and resource sharing"""
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_concurrent_generation_requests(self):
         """Test multiple concurrent generation jobs"""
@@ -52,8 +50,6 @@ class TestConcurrentProcessing:
             # Should complete concurrent jobs efficiently
             assert duration < 300  # Under 5 minutes for 5 concurrent jobs
             assert mock_pool.call_count == concurrent_jobs
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_resource_contention_handling(self):
         """Test handling of resource contention"""
@@ -79,8 +75,6 @@ class TestConcurrentProcessing:
                     processes=4,
                     initializer=mock_pool_class.call_args[1]['initializer']
                 )
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_thread_pool_efficiency(self):
         """Test thread pool utilization efficiency"""
@@ -108,8 +102,6 @@ class TestConcurrentProcessing:
         
         assert len(results) == task_count
         assert throughput > 100  # Should process >100 tasks/second
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_load_balancing_efficiency(self):
         """Test load balancing across multiple workers"""
@@ -139,8 +131,6 @@ class TestConcurrentProcessing:
         # Load should be distributed across workers
         unique_workers = len(set(worker_loads))
         assert unique_workers >= min(8, len(worker_loads))
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_queue_management_under_load(self):
         """Test queue management under high load"""

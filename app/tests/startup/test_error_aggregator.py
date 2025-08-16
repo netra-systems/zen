@@ -81,15 +81,11 @@ class TestErrorAggregatorInit:
 
 class TestDatabaseSetup:
     """Test database creation and setup."""
-    
-    @pytest.mark.asyncio
     async def test_ensure_database_exists(self, error_aggregator: ErrorAggregator,
                                          temp_db_path: Path) -> None:
         """Test database and directory creation."""
         await error_aggregator._ensure_database_exists()
         assert temp_db_path.parent.exists()
-
-    @pytest.mark.asyncio
     async def test_create_tables(self, error_aggregator: ErrorAggregator) -> None:
         """Test database table creation."""
         await error_aggregator._ensure_database_exists()
@@ -104,15 +100,11 @@ class TestDatabaseSetup:
 
 class TestErrorRecording:
     """Test error recording functionality."""
-    
-    @pytest.mark.asyncio
     async def test_record_error_basic(self, error_aggregator: ErrorAggregator) -> None:
         """Test basic error recording."""
         error_id = await error_aggregator.record_error("backend", "Test error")
         assert isinstance(error_id, int)
         assert error_id > 0
-
-    @pytest.mark.asyncio
     async def test_record_error_with_all_fields(self, error_aggregator: ErrorAggregator) -> None:
         """Test error recording with all optional fields."""
         error_id = await error_aggregator.record_error(
@@ -125,8 +117,6 @@ class TestErrorRecording:
             context={"version": "1.0"}
         )
         assert isinstance(error_id, int)
-
-    @pytest.mark.asyncio
     async def test_insert_error_database_operation(self, error_aggregator: ErrorAggregator,
                                                    sample_error: StartupError) -> None:
         """Test insert error database operation."""
@@ -142,8 +132,6 @@ class TestErrorRecording:
 
 class TestErrorRetrieval:
     """Test error retrieval functionality."""
-    
-    @pytest.mark.asyncio
     async def test_get_recent_errors(self, error_aggregator: ErrorAggregator,
                                     sample_errors: List[StartupError]) -> None:
         """Test recent error retrieval."""
@@ -156,8 +144,6 @@ class TestErrorRetrieval:
         cutoff = datetime.now(timezone.utc) - timedelta(hours=1)
         recent_errors = await error_aggregator._get_recent_errors(cutoff)
         assert len(recent_errors) == 3
-
-    @pytest.mark.asyncio
     async def test_get_recent_errors_with_cutoff(self, error_aggregator: ErrorAggregator,
                                                 sample_errors: List[StartupError]) -> None:
         """Test recent error retrieval with time cutoff."""
@@ -183,14 +169,10 @@ class TestErrorRetrieval:
 
 class TestPatternDetection:
     """Test error pattern detection."""
-    
-    @pytest.mark.asyncio
     async def test_find_patterns_empty_errors(self, error_aggregator: ErrorAggregator) -> None:
         """Test pattern detection with no errors."""
         patterns = await error_aggregator.find_patterns()
         assert len(patterns) == 0
-
-    @pytest.mark.asyncio
     async def test_detect_similar_errors_empty(self, error_aggregator: ErrorAggregator) -> None:
         """Test similar error detection with empty list."""
         patterns = await error_aggregator._detect_similar_errors([])
@@ -215,8 +197,6 @@ class TestPatternDetection:
 
 class TestTrendAnalysis:
     """Test error trend analysis."""
-    
-    @pytest.mark.asyncio
     async def test_get_trends_empty(self, error_aggregator: ErrorAggregator) -> None:
         """Test trend analysis with no errors."""
         trends = await error_aggregator.get_trends()
@@ -270,8 +250,6 @@ class TestFixSuggestions:
 
 class TestPatternFrequencyTracking:
     """Test pattern frequency tracking."""
-    
-    @pytest.mark.asyncio
     async def test_update_pattern_frequency(self, error_aggregator: ErrorAggregator) -> None:
         """Test pattern frequency update in database."""
         await error_aggregator._ensure_database_exists()
@@ -294,8 +272,6 @@ class TestPatternFrequencyTracking:
 
 class TestReportGeneration:
     """Test report generation functionality."""
-    
-    @pytest.mark.asyncio
     async def test_generate_report_daily(self, error_aggregator: ErrorAggregator) -> None:
         """Test daily report generation."""
         with patch.object(error_aggregator, 'get_trends') as mock_trends:
@@ -307,8 +283,6 @@ class TestReportGeneration:
                 assert report["report_type"] == "daily"
                 assert "trends" in report
                 assert "recommendations" in report
-
-    @pytest.mark.asyncio
     async def test_generate_report_weekly(self, error_aggregator: ErrorAggregator) -> None:
         """Test weekly report generation."""
         with patch.object(error_aggregator, 'get_trends') as mock_trends:
@@ -359,8 +333,6 @@ class TestRecommendations:
 
 class TestIntegrationScenarios:
     """Test integration scenarios combining multiple features."""
-    
-    @pytest.mark.asyncio
     async def test_full_workflow_record_analyze_report(self, error_aggregator: ErrorAggregator) -> None:
         """Test complete workflow from recording to reporting."""
         # Record some errors
@@ -375,8 +347,6 @@ class TestIntegrationScenarios:
         # Generate report
         report = await error_aggregator.generate_report()
         assert report["trends"]["total_errors"] == 3
-
-    @pytest.mark.asyncio
     async def test_pattern_frequency_updates(self, error_aggregator: ErrorAggregator) -> None:
         """Test that pattern frequencies are properly updated."""
         # Record similar errors
@@ -386,8 +356,6 @@ class TestIntegrationScenarios:
         patterns = await error_aggregator.find_patterns(lookback_hours=1)
         if patterns:
             assert any(p.frequency >= 2 for p in patterns)
-
-    @pytest.mark.asyncio
     async def test_time_based_analysis(self, error_aggregator: ErrorAggregator) -> None:
         """Test time-based error analysis."""
         # Record error now

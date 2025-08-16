@@ -92,9 +92,6 @@ def admin_context():
         is_developer=False,
         environment="production"
     )
-
-
-@pytest.mark.asyncio
 class TestCheckToolPermission:
     """Test main tool permission checking"""
     
@@ -197,9 +194,6 @@ class TestCheckToolPermission:
             
             assert isinstance(result, PermissionCheckResult)
             # Should include rate limit information
-
-
-@pytest.mark.asyncio
 class TestGetUserToolAvailability:
     """Test user tool availability functionality"""
     

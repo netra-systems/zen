@@ -6,7 +6,7 @@ Maintains 8-line function limit and single responsibility.
 """
 
 import re
-from typing import Dict, Any
+from typing import Dict, Any, List
 from .models import ResearchType, ProviderPatterns
 
 
@@ -49,19 +49,28 @@ class SupplyRequestParser:
     
     def _extract_provider_info(self, request: str, request_lower: str) -> tuple:
         """Extract provider and model information"""
-        provider = None
-        model_name = None
-        
-        for prov, patterns in self.provider_patterns.items():
-            for pattern in patterns:
-                if pattern in request_lower:
-                    provider = prov
-                    model_name = self._extract_model_name(request, pattern)
-                    break
-            if provider:
-                break
-        
+        provider, model_name = self._find_provider_match(request, request_lower)
         return provider, model_name
+    
+    def _find_provider_match(self, request: str, request_lower: str) -> tuple:
+        """Find first matching provider in request"""
+        for provider, patterns in self.provider_patterns.items():
+            model_name = self._check_provider_patterns(request, request_lower, patterns)
+            if model_name is not None:
+                return provider, model_name
+        return None, None
+    
+    def _check_provider_patterns(
+        self, 
+        request: str, 
+        request_lower: str, 
+        patterns: List[str]
+    ) -> str | None:
+        """Check if any pattern matches and extract model name"""
+        for pattern in patterns:
+            if pattern in request_lower:
+                return self._extract_model_name(request, pattern)
+        return None
     
     def _extract_model_name(self, request: str, pattern: str) -> str:
         """Extract full model name from request"""

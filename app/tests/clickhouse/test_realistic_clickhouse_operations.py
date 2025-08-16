@@ -58,8 +58,6 @@ class TestClickHouseArrayOperations:
         is_valid, error = validate_clickhouse_query(good_query)
         assert is_valid
         assert error == ""
-    
-    @pytest.mark.asyncio
     async def test_query_interceptor_fixes_queries(self):
         """Test the query interceptor automatically fixes queries"""
         # Create mock client
@@ -113,8 +111,6 @@ class TestRealisticLogIngestion:
                 })
             return logs
         return _generate
-    
-    @pytest.mark.asyncio
     async def test_streaming_log_ingestion(self, generate_realistic_logs):
         """Test streaming ingestion of logs"""
         logs = generate_realistic_logs(1000)
@@ -139,8 +135,6 @@ class TestRealisticLogIngestion:
             
             # Verify batches were inserted
             assert mock_instance.execute.call_count == 10  # 1000 logs / 100 batch size
-    
-    @pytest.mark.asyncio
     async def test_log_pattern_recognition(self):
         """Test pattern recognition across large log volumes"""
         # Simulate pattern detection query
@@ -239,8 +233,6 @@ class TestLLMMetricsAggregation:
         # This complex query should be valid
         is_valid, error = validate_clickhouse_query(query)
         assert is_valid, f"LLM optimization query failed: {error}"
-    
-    @pytest.mark.asyncio
     async def test_llm_usage_patterns(self):
         """Test LLM usage pattern analysis"""
         query = """
@@ -526,9 +518,6 @@ class TestMultiSourceAggregation:
         fixed_query = fix_clickhouse_array_syntax(query)
         is_valid, error = validate_clickhouse_query(fixed_query)
         assert is_valid, f"Multi-source aggregation failed: {error}"
-
-
-@pytest.mark.asyncio
 class TestRealisticDataVolumes:
     """Test with realistic data volumes"""
     
