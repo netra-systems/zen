@@ -12,8 +12,7 @@ from app.services.factory_status.spec_compliance_scorer import (
     SpecViolation,
     ViolationSeverity
 )
-from app.core.interfaces_monitoring import MetricsCollector
-from app.core.exceptions_validation import ValidationException
+from app.core.exceptions_base import ValidationError as ValidationException
 
 
 class FactoryStatusReporter:

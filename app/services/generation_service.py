@@ -258,29 +258,35 @@ async def _handle_generation_error(job_id: str, error: Exception, context: str):
     error_msg = f"A worker process failed: {error}" if "generation" in context else f"Failed to save to ClickHouse: {error}"
     await update_job_status(job_id, "failed", error=error_msg)
 
+async def _execute_content_generation_workflow(job_id: str, params: dict):
+    """Execute the core content generation workflow."""
+    generation_config, total_tasks = await _prepare_generation_config(job_id, params)
+    tasks, corpus, num_processes = await _create_generation_tasks(params, generation_config)
+    await _execute_generation_pool(job_id, tasks, num_processes, corpus)
+    await _save_generation_results(job_id, params, corpus)
+
 async def run_content_generation_job(job_id: str, params: dict):
     """The core worker process for generating a content corpus."""
     if not await _validate_job_params(job_id, params):
         return
-    
     try:
-        generation_config, total_tasks = await _prepare_generation_config(job_id, params)
-        tasks, corpus, num_processes = await _create_generation_tasks(params, generation_config)
-        await _execute_generation_pool(job_id, tasks, num_processes, corpus)
-        await _save_generation_results(job_id, params, corpus)
+        await _execute_content_generation_workflow(job_id, params)
     except Exception as e:
         await _handle_generation_error(job_id, e, "content generation")
 
 
 # --- Synthetic Log Generation Service ---
 
-def generate_data_chunk_for_service(args):
-    """Slightly modified version for service-based execution."""
-    num_logs, config, content_corpus = args
+def _extract_generation_config(config, num_logs):
+    """Extract configuration and generate random choices."""
     apps = config['realism']['applications']
     models = config['realism']['models']
     app_choices = np.random.choice(len(apps), num_logs)
     model_choices = np.random.choice(len(models), num_logs)
+    return apps, models, app_choices, model_choices
+
+def _generate_trace_types_and_content(config, content_corpus, num_logs):
+    """Generate trace types and extract prompts/responses."""
     trace_types = list(config['generation_settings']['trace_distribution'].keys())
     weights = list(config['generation_settings']['trace_distribution'].values())
     chosen_trace_types = np.random.choice(trace_types, num_logs, p=weights)
@@ -291,8 +297,11 @@ def generate_data_chunk_for_service(args):
         prompt, response = random.choice(corpus_to_use.get(trace_type, []))
         prompts.append(prompt)
         responses.append(response)
+    return prompts, responses
 
-    df = pd.DataFrame({
+def _create_base_dataframe(num_logs, apps, models, app_choices, model_choices, prompts, responses):
+    """Create base DataFrame with core columns."""
+    return pd.DataFrame({
         'trace_id': [str(uuid.uuid4()) for _ in range(num_logs)],
         'span_id': [str(uuid.uuid4()) for _ in range(num_logs)],
         'app_name': [apps[i]['app_name'] for i in app_choices],
@@ -300,20 +309,30 @@ def generate_data_chunk_for_service(args):
         'model_provider': [models[i]['provider'] for i in model_choices],
         'model_name': [models[i]['name'] for i in model_choices],
         'model_pricing': [models[i]['pricing'] for i in model_choices],
-        'user_prompt': prompts,
-        'assistant_response': responses,
+        'user_prompt': prompts, 'assistant_response': responses,
         'prompt_tokens': [len(p.split()) * 2 for p in prompts],
         'completion_tokens': [len(r.split()) * 2 for r in responses],
         'total_e2e_ms': np.random.randint(200, 2000, size=num_logs),
         'ttft_ms': np.random.randint(150, 800, size=num_logs),
         'user_id': [str(uuid.uuid4()) for _ in range(num_logs)],
-        'organization_id': [f"org_{hashlib.sha256(Faker().company().encode()).hexdigest()[:12]}" for _ in range(num_logs)],
+        'organization_id': [f"org_{hashlib.sha256(Faker().company().encode()).hexdigest()[:12]}" for _ in range(num_logs)]
     })
+
+def _calculate_costs_and_totals(df):
+    """Calculate token totals and costs."""
     df['total_tokens'] = df['prompt_tokens'] + df['completion_tokens']
     df['prompt_cost'] = (df['prompt_tokens'] / 1_000_000) * df['model_pricing'].apply(lambda x: x[0])
     df['completion_cost'] = (df['completion_tokens'] / 1_000_000) * df['model_pricing'].apply(lambda x: x[1])
     df['total_cost'] = df['prompt_cost'] + df['completion_cost']
     return df
+
+def generate_data_chunk_for_service(args):
+    """Slightly modified version for service-based execution."""
+    num_logs, config, content_corpus = args
+    apps, models, app_choices, model_choices = _extract_generation_config(config, num_logs)
+    prompts, responses = _generate_trace_types_and_content(config, content_corpus, num_logs)
+    df = _create_base_dataframe(num_logs, apps, models, app_choices, model_choices, prompts, responses)
+    return _calculate_costs_and_totals(df)
 
 async def run_log_generation_job(job_id: str, params: dict):
     """The core worker process for generating a synthetic log set."""

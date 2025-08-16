@@ -69,15 +69,18 @@ class LLMCoreOperations:
             logger.info("LLMs are disabled in development configuration")
         return enabled
 
+    def _raise_llm_unavailable_error(self, name: str) -> None:
+        """Raise service unavailable error for disabled LLM."""
+        error_msg = f"LLM '{name}' is not available - LLM service is disabled"
+        logger.error(error_msg)
+        raise ServiceUnavailableError(error_msg)
+    
     def _handle_disabled_llm(self, name: str) -> Any:
         """Handle disabled LLM based on environment - dev gets mock, production gets error."""
         if self._should_use_mock_llm():
             logger.debug(f"Returning mock LLM for '{name}' - LLMs disabled in dev mode")
             return MockLLM(name)
-        
-        error_msg = f"LLM '{name}' is not available - LLM service is disabled"
-        logger.error(error_msg)
-        raise ServiceUnavailableError(error_msg)
+        self._raise_llm_unavailable_error(name)
     
     def _should_use_mock_llm(self) -> bool:
         """Check if mock LLM should be used."""
@@ -139,14 +142,18 @@ class LLMCoreOperations:
             if config.provider in ["google", "vertexai"]:
                 raise ValueError(f"LLM '{name}': API key required for {config.provider}")
     
+    def _apply_config_override(self, final_config: Dict[str, Any], override: GenerationConfig) -> None:
+        """Apply generation config override to final config."""
+        if isinstance(override, GenerationConfig):
+            final_config.update(override.model_dump(exclude_unset=True))
+        else:
+            final_config.update(override)
+    
     def _merge_generation_config(self, config: Any, override: Optional[GenerationConfig]) -> Dict[str, Any]:
         """Merge default and override generation configurations."""
         final_config = config.generation_config.copy()
         if override:
-            if isinstance(override, GenerationConfig):
-                final_config.update(override.model_dump(exclude_unset=True))
-            else:
-                final_config.update(override)
+            self._apply_config_override(final_config, override)
         return final_config
 
     async def ask_llm(self, prompt: str, llm_config_name: str, use_cache: bool = True) -> str:
@@ -154,27 +161,37 @@ class LLMCoreOperations:
         response = await self.ask_llm_full(prompt, llm_config_name, use_cache)
         return response.choices[0]["message"]["content"] if isinstance(response, LLMResponse) else response
     
+    async def _try_get_cached_response(self, prompt: str, llm_config_name: str) -> Optional[LLMResponse]:
+        """Try to get cached response if available."""
+        cached_response = await llm_cache_service.get_cached_response(prompt, llm_config_name)
+        if cached_response:
+            config = self.settings.llm_configs.get(llm_config_name)
+            return await create_cached_llm_response(cached_response, config, llm_config_name)
+        return None
+    
     async def ask_llm_full(self, prompt: str, llm_config_name: str, use_cache: bool = True) -> LLMResponse:
         """Ask LLM and return full LLMResponse object with metadata."""
         if use_cache:
-            cached_response = await llm_cache_service.get_cached_response(prompt, llm_config_name)
-            if cached_response:
-                config = self.settings.llm_configs.get(llm_config_name)
-                return await create_cached_llm_response(cached_response, config, llm_config_name)
-        
+            cached_result = await self._try_get_cached_response(prompt, llm_config_name)
+            if cached_result:
+                return cached_result
         return await self._execute_llm_request(prompt, llm_config_name, use_cache)
+    
+    async def _process_llm_execution(self, prompt: str, llm_config_name: str, 
+                                   correlation_id: str, use_cache: bool) -> LLMResponse:
+        """Process LLM execution with timing and response creation."""
+        start_time, llm = await self._prepare_llm_execution(llm_config_name, correlation_id, prompt)
+        response, execution_time_ms = await self._execute_llm_call(llm, prompt, start_time)
+        llm_response = await self._create_response_object(response, llm_config_name, execution_time_ms)
+        await self._log_output_and_cache(llm_config_name, correlation_id, response, llm_response, use_cache, prompt)
+        return llm_response
     
     async def _execute_llm_request(self, prompt: str, llm_config_name: str, use_cache: bool) -> LLMResponse:
         """Execute the actual LLM request with heartbeat and data logging."""
         correlation_id = generate_llm_correlation_id()
         self._start_heartbeat_if_enabled(correlation_id, llm_config_name)
-        
         try:
-            start_time, llm = await self._prepare_llm_execution(llm_config_name, correlation_id, prompt)
-            response, execution_time_ms = await self._execute_llm_call(llm, prompt, start_time)
-            llm_response = await self._create_response_object(response, llm_config_name, execution_time_ms)
-            await self._log_output_and_cache(llm_config_name, correlation_id, response, llm_response, use_cache, prompt)
-            return llm_response
+            return await self._process_llm_execution(prompt, llm_config_name, correlation_id, use_cache)
         finally:
             self._stop_heartbeat_if_enabled(correlation_id)
     
@@ -256,18 +273,29 @@ class LLMCoreOperations:
         if use_cache and llm_cache_service.should_cache_response(prompt, content):
             await llm_cache_service.cache_response(prompt, content, llm_config_name)
 
+    async def _stream_and_collect_chunks(self, llm: Any, prompt: str) -> AsyncIterator[str]:
+        """Stream LLM response and collect chunks for logging."""
+        response_chunks = []
+        async for chunk in stream_llm_response(llm, prompt):
+            response_chunks.append(chunk)
+            yield chunk
+        # Store chunks for later logging access
+        self._last_response_chunks = response_chunks
+    
+    async def _execute_streaming_process(self, prompt: str, llm_config_name: str, correlation_id: str) -> AsyncIterator[str]:
+        """Execute the streaming process with LLM preparation and chunk collection."""
+        llm = await self._prepare_streaming_llm(llm_config_name, correlation_id, prompt)
+        async for chunk in self._stream_and_collect_chunks(llm, prompt):
+            yield chunk
+        await self._log_streaming_output_if_enabled(llm_config_name, correlation_id, self._last_response_chunks)
+    
     async def stream_llm(self, prompt: str, llm_config_name: str) -> AsyncIterator[str]:
         """Stream LLM response content with heartbeat and data logging."""
         correlation_id = generate_llm_correlation_id()
         self._start_heartbeat_if_enabled(correlation_id, llm_config_name)
-        
         try:
-            llm = await self._prepare_streaming_llm(llm_config_name, correlation_id, prompt)
-            response_chunks = []
-            async for chunk in stream_llm_response(llm, prompt):
-                response_chunks.append(chunk)
+            async for chunk in self._execute_streaming_process(prompt, llm_config_name, correlation_id):
                 yield chunk
-            await self._log_streaming_output_if_enabled(llm_config_name, correlation_id, response_chunks)
         finally:
             self._stop_heartbeat_if_enabled(correlation_id)
     

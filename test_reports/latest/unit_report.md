@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-16T10:43:06.268093  
+**Generated:** 2025-08-16T10:43:13.677870  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 10.62s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.36s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 10.29s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.46s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,8 +27,8 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 10.98s
-- **Exit Code:** 15
+- **Total Duration:** 10.75s
+- **Exit Code:** 255
 
 ### Backend Configuration
 ```
@@ -62,49 +62,49 @@ Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generatio
 Loaded .env.development file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development
 Loaded .env.development.local file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development.local
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 9.68s
+[FAIL] TESTS FAILED with exit code 4 after 9.42s
 [Coverage] Coverage Report: reports/coverage/html/index.html
 ================================================================================
 
-2025-08-16 10:42:59.559 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set log_level from LOG_LEVEL
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set environment from ENVIRONMENT
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse host: localhost
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse port: 9000
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse password
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse user: default
-2025-08-16 10:42:59.560 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set Gemini API key for LLM configs
-2025-08-16 10:42:59.560 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 13 env vars
-2025-08-16 10:42:59.565 | INFO     | app.core.unified_logging:_emit_log:117 | Loading secrets...
-2025-08-16 10:42:59.565 | INFO     | app.core.unified_logging:_emit_log:117 | Starting secret=REDACTED process for environment: development
-2025-08-16 10:42:59.565 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 9 secrets from environment variables
-2025-08-16 10:42:59.565 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: gemini-api-key, jwt-secret-key, fernet-key
-2025-08-16 10:42:59.565 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 9 secrets loaded
-2025-08-16 10:42:59.565 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 9 secrets
-2025-08-16 10:42:59.565 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
-2025-08-16 10:42:59.565 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
-2025-08-16 10:42:59.565 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
-2025-08-16 10:42:59.599 | DEBUG    | logging:handle:1028 | loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
-2025-08-16 10:42:59.599 | DEBUG    | logging:handle:1028 | loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
-2025-08-16 10:42:59.599 | DEBUG    | logging:handle:1028 | loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
-2025-08-16 10:42:59.643 | DEBUG    | logging:handle:1028 | registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
-2025-08-16 10:43:00.205 | INFO     | app.db.postgres_core:_create_and_setup_engine:258 | PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling
-2025-08-16 10:43:00.445 | DEBUG    | app.services.metrics.agent_metrics:__init__:24 | Initialized AgentMetricsCollector with buffer size 5000
-2025-08-16 10:43:01.721 | DEBUG    | logging:handle:1028 | Using orjson library for writing JSON byte strings
-2025-08-16 10:43:01.805 | DEBUG    | logging:handle:1028 | Looking up time zone info from registry
-2025-08-16 10:43:02.930 | INFO     | app.core.unified_logging:_emit_log:117 | SyntheticDataService initialized successfully
-2025-08-16 10:43:03.983 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
-2025-08-16 10:43:04.002 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
-2025-08-16 10:43:04.055 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
-2025-08-16 10:43:04.178 | INFO     | app.services.quality_gate.quality_gate_core:__init__:34 | Quality Gate Service initialized
-2025-08-16 10:43:04.178 | INFO     | app.services.quality_monitoring.service:__init__:48 | Quality Monitoring Service initialized
-2025-08-16 10:43:04.178 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
+2025-08-16 10:43:07.568 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
+2025-08-16 10:43:07.569 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
+2025-08-16 10:43:07.569 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
+2025-08-16 10:43:07.569 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
+2025-08-16 10:43:07.569 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
+2025-08-16 10:43:07.569 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
+2025-08-16 10:43:07.569 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
+2025-08-16 10:43:07.571 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set log_level from LOG_LEVEL
+2025-08-16 10:43:07.571 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set environment from ENVIRONMENT
+2025-08-16 10:43:07.571 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse host: localhost
+2025-08-16 10:43:07.571 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse port: 9000
+2025-08-16 10:43:07.571 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse password
+2025-08-16 10:43:07.571 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse user: default
+2025-08-16 10:43:07.571 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set Gemini API key for LLM configs
+2025-08-16 10:43:07.571 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 13 env vars
+2025-08-16 10:43:07.571 | INFO     | app.core.unified_logging:_emit_log:117 | Loading secrets...
+2025-08-16 10:43:07.571 | INFO     | app.core.unified_logging:_emit_log:117 | Starting secret=REDACTED process for environment: development
+2025-08-16 10:43:07.571 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 9 secrets from environment variables
+2025-08-16 10:43:07.571 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: gemini-api-key, jwt-secret-key, fernet-key
+2025-08-16 10:43:07.571 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 9 secrets loaded
+2025-08-16 10:43:07.571 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 9 secrets
+2025-08-16 10:43:07.571 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
+2025-08-16 10:43:07.576 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
+2025-08-16 10:43:07.576 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
+2025-08-16 10:43:07.610 | DEBUG    | logging:handle:1028 | loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
+2025-08-16 10:43:07.611 | DEBUG    | logging:handle:1028 | loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
+2025-08-16 10:43:07.611 | DEBUG    | logging:handle:1028 | loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
+2025-08-16 10:43:07.665 | DEBUG    | logging:handle:1028 | registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
+2025-08-16 10:43:08.295 | INFO     | app.db.postgres_core:_create_and_setup_engine:258 | PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling
+2025-08-16 10:43:08.744 | DEBUG    | app.services.metrics.agent_metrics:__init__:24 | Initialized AgentMetricsCollector with buffer size 5000
+2025-08-16 10:43:09.921 | DEBUG    | logging:handle:1028 | Using orjson library for writing JSON byte strings
+2025-08-16 10:43:09.986 | DEBUG    | logging:handle:1028 | Looking up time zone info from registry
+2025-08-16 10:43:10.899 | INFO     | app.core.unified_logging:_emit_log:117 | SyntheticDataService initialized successfully
+2025-08-16 10:43:11.863 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
+2025-08-16 10:43:11.888 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
+2025-08-16 10:43:11.936 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
+2025-08-16 10:43:12.030 | INFO     | app.services.quality_gate.quality_gate_core:__init__:34 | Quality Gate Service initialized
+2025-08-16 10:43:12.031 | INFO     | app.services.quality_monitoring.service:__init__:48 | Quality Monitoring Service initialized
+2025-08-16 10:43:12.031 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
 ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py'.
 app\tests\conftest.py:52: in <module>
     from app.main import app
@@ -128,7 +128,7 @@ app\services\factory_status\spec_compliance_scorer.py:15: in <module>
     from app.core.interfaces_monitoring import ComplianceMetrics
 E   ModuleNotFoundError: No module named 'app.core.interfaces_monitoring'
 --- Logging error in Loguru Handler #1 ---
-Record was: {'elapsed': datetime.timedelta(seconds=7, microseconds=378544), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=512, name='MainProcess'), 'thread': (id=11160, name='MainThread'), 'time': datetime(2025, 8, 16, 10, 43, 5, 183765, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
+Record was: {'elapsed': datetime.timedelta(seconds=6, microseconds=990604), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=40744, name='MainProcess'), 'thread': (id=9872, name='MainThread'), 'time': datetime(2025, 8, 16, 10, 43, 12, 578578, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
 Traceback (most recent call last):
   File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
     self._sink.write(message)
@@ -141,6 +141,21 @@ ValueError: I/O operation on closed file.
 
 ### Frontend Output
 ```
+================================================================================
+NETRA AI PLATFORM - FRONTEND TEST RUNNER
+================================================================================
+
+================================================================================
+Running Jest Tests
+--------------------------------------------------------------------------------
+Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)
+--------------------------------------------------------------------------------
+
+================================================================================
+[FAIL] CHECKS FAILED with exit code 255
+================================================================================
+
+Cleaning up test processes...
 
 'hooks' is not recognized as an internal or external command,
 operable program or batch file.

@@ -133,16 +133,28 @@ class TriageExecutor:
     def _create_basic_emergency_fallback(self):
         """Create basic emergency fallback response."""
         from .models import TriageResult, Priority, TriageMetadata
-        return TriageResult(
-            category="General Inquiry",
-            confidence_score=0.3,
-            priority=Priority.MEDIUM,
-            metadata=TriageMetadata(
-                triage_duration_ms=0,
-                fallback_used=True,
-                error_details="emergency fallback"
-            )
+        metadata = self._create_emergency_metadata()
+        params = self._build_emergency_fallback_params(metadata)
+        return TriageResult(**params)
+    
+    def _create_emergency_metadata(self):
+        """Create metadata for emergency fallback."""
+        from .models import TriageMetadata
+        return TriageMetadata(
+            triage_duration_ms=0,
+            fallback_used=True,
+            error_details="emergency fallback"
         )
+    
+    def _build_emergency_fallback_params(self, metadata) -> dict:
+        """Build parameters for emergency fallback result."""
+        from .models import Priority
+        return {
+            "category": "General Inquiry",
+            "confidence_score": 0.3,
+            "priority": Priority.MEDIUM,
+            "metadata": metadata
+        }
     
     async def _send_completion_update(self, run_id: str, result) -> None:
         """Send completion update with result details."""
@@ -192,15 +204,26 @@ class TriageExecutor:
     def _create_error_result(self, error_message: str):
         """Create result object for error cases."""
         from .models import TriageResult, TriageMetadata
-        return TriageResult(
-            category="Error",
-            confidence_score=0.0,
-            metadata=TriageMetadata(
-                triage_duration_ms=0,
-                error_details=error_message,
-                fallback_used=True
-            )
+        error_metadata = self._create_error_metadata(error_message)
+        params = self._build_error_result_params(error_metadata)
+        return TriageResult(**params)
+    
+    def _create_error_metadata(self, error_message: str):
+        """Create metadata for error result."""
+        from .models import TriageMetadata
+        return TriageMetadata(
+            triage_duration_ms=0,
+            error_details=error_message,
+            fallback_used=True
         )
+    
+    def _build_error_result_params(self, metadata) -> dict:
+        """Build parameters for error result."""
+        return {
+            "category": "Error",
+            "confidence_score": 0.0,
+            "metadata": metadata
+        }
     
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Check if we have a user request to triage."""
@@ -232,9 +255,15 @@ class TriageExecutor:
     def _create_validation_error_result(self, validation):
         """Create validation error result."""
         from .models import TriageResult, TriageMetadata
-        return TriageResult(
-            category="Validation Error",
-            confidence_score=0.0,
-            validation_status=validation,
-            metadata=TriageMetadata(triage_duration_ms=0, fallback_used=True)
-        )
+        validation_metadata = TriageMetadata(triage_duration_ms=0, fallback_used=True)
+        params = self._build_validation_error_params(validation, validation_metadata)
+        return TriageResult(**params)
+    
+    def _build_validation_error_params(self, validation, metadata) -> dict:
+        """Build parameters for validation error result."""
+        return {
+            "category": "Validation Error",
+            "confidence_score": 0.0,
+            "validation_status": validation,
+            "metadata": metadata
+        }

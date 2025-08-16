@@ -43,18 +43,18 @@ class CoreMetricsCollector:
         logger.debug(f"Started tracking operation {operation_id} for corpus {corpus_id}")
         return operation_id
     
-    async def end_operation(
-        self, 
-        operation_id: str, 
-        success: bool = True,
-        records_processed: Optional[int] = None,
-        error_message: Optional[str] = None
-    ) -> Optional[OperationMetrics]:
-        """End operation tracking and record metrics"""
+    async def _validate_and_process_operation(self, operation_id: str, success: bool, 
+                                            records_processed: Optional[int], error_message: Optional[str]) -> Optional[OperationMetrics]:
+        """Validate operation data and process completion if valid."""
         operation_data = self._get_and_remove_operation_data(operation_id)
         if not operation_data:
             return None
         return await self._process_operation_completion(operation_data, success, records_processed, error_message)
+
+    async def end_operation(self, operation_id: str, success: bool = True,
+                          records_processed: Optional[int] = None, error_message: Optional[str] = None) -> Optional[OperationMetrics]:
+        """End operation tracking and record metrics"""
+        return await self._validate_and_process_operation(operation_id, success, records_processed, error_message)
     
     async def _process_operation_completion(self, operation_data: Dict[str, Any], success: bool, 
                                           records_processed: Optional[int], error_message: Optional[str]) -> OperationMetrics:
@@ -165,12 +165,7 @@ class CoreMetricsCollector:
                 times.extend(list(data))
         return times
     
-    def get_time_series_data(
-        self, 
-        corpus_id: str, 
-        metric_type: str,
-        time_range_minutes: int = 60
-    ) -> List[TimeSeriesPoint]:
+    def get_time_series_data(self, corpus_id: str, metric_type: str, time_range_minutes: int = 60) -> List[TimeSeriesPoint]:
         """Get time series data for visualization"""
         cutoff_time = self._calculate_cutoff_time(time_range_minutes)
         points = self._extract_time_series_points(corpus_id, metric_type, cutoff_time)

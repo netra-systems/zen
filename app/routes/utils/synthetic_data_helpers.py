@@ -57,17 +57,28 @@ def calculate_progress(status: Dict) -> float:
     return (generated / total * 100) if total > 0 else 0
 
 
-def extract_status_fields(status: Dict) -> Dict:
-    """Extract status fields for response building."""
+def _extract_basic_status_fields(status: Dict) -> Dict:
+    """Extract basic status fields."""
     return {
         "status": status["status"],
         "progress_percentage": calculate_progress(status),
         "records_generated": status["records_generated"],
-        "records_ingested": status["records_ingested"],
+        "records_ingested": status["records_ingested"]
+    }
+
+def _extract_timing_and_error_fields(status: Dict) -> Dict:
+    """Extract timing and error fields."""
+    return {
         "errors": status["errors"],
         "started_at": status["start_time"],
         "completed_at": status.get("end_time")
     }
+
+def extract_status_fields(status: Dict) -> Dict:
+    """Extract status fields for response building."""
+    basic_fields = _extract_basic_status_fields(status)
+    timing_fields = _extract_timing_and_error_fields(status)
+    return {**basic_fields, **timing_fields}
 
 
 async def cancel_job_safely(job_id: str) -> None:
@@ -124,24 +135,51 @@ def _calculate_tool_diversity(samples: List[Dict]) -> int:
     return len(tools)
 
 
-def generate_test_user_data(count: int) -> List[Dict]:
-    """Generate realistic test user data records using production-quality patterns."""
-    import uuid
-    import random
-    from datetime import datetime, UTC, timedelta
-    
+def _get_test_data_constants() -> tuple:
+    """Get constant data for test user generation."""
     first_names = ["Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry"]
     last_names = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis"]
     domains = ["example.com", "test.org", "demo.net", "sample.co"]
-    
+    statuses = ["active", "inactive", "pending"]
+    return first_names, last_names, domains, statuses
+
+def _generate_random_user_id() -> str:
+    """Generate random user ID."""
+    import uuid
+    return f"usr_{uuid.uuid4().hex[:8]}"
+
+def _generate_random_name(first_names: List[str], last_names: List[str]) -> str:
+    """Generate random full name."""
+    import random
+    return f"{random.choice(first_names)} {random.choice(last_names)}"
+
+def _generate_random_email(i: int, domains: List[str]) -> str:
+    """Generate random email address."""
+    import random
+    return f"user{i}@{random.choice(domains)}"
+
+def _generate_random_created_date() -> str:
+    """Generate random creation date."""
+    import random
+    from datetime import datetime, UTC, timedelta
+    return (datetime.now(UTC) - timedelta(days=random.randint(1, 365))).isoformat()
+
+def _create_single_user_record(i: int, first_names: List[str], last_names: List[str], domains: List[str], statuses: List[str]) -> Dict:
+    """Create single user record."""
+    import random
+    return {
+        "user_id": _generate_random_user_id(),
+        "name": _generate_random_name(first_names, last_names),
+        "age": random.randint(18, 75),
+        "email": _generate_random_email(i, domains),
+        "created_at": _generate_random_created_date(),
+        "status": random.choice(statuses)
+    }
+
+def generate_test_user_data(count: int) -> List[Dict]:
+    """Generate realistic test user data records using production-quality patterns."""
+    first_names, last_names, domains, statuses = _get_test_data_constants()
     return [
-        {
-            "user_id": f"usr_{uuid.uuid4().hex[:8]}",
-            "name": f"{random.choice(first_names)} {random.choice(last_names)}",
-            "age": random.randint(18, 75),
-            "email": f"user{i}@{random.choice(domains)}",
-            "created_at": (datetime.now(UTC) - timedelta(days=random.randint(1, 365))).isoformat(),
-            "status": random.choice(["active", "inactive", "pending"])
-        }
+        _create_single_user_record(i, first_names, last_names, domains, statuses)
         for i in range(count)
     ]

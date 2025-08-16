@@ -67,14 +67,20 @@ class SessionCleanupManager:
     
     def cleanup_old_sessions(self, max_age_hours: int = 24) -> int:
         """Clean up sessions older than specified hours."""
-        cutoff_time = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-        cutoff_time = cutoff_time.replace(hour=cutoff_time.hour - max_age_hours)
-        
+        cutoff_time = self._calculate_age_cutoff(max_age_hours)
         old_sessions = self._find_old_sessions(cutoff_time)
+        self._remove_old_sessions(old_sessions)
+        return len(old_sessions)
+    
+    def _calculate_age_cutoff(self, max_age_hours: int) -> datetime:
+        """Calculate cutoff time for old sessions."""
+        cutoff_time = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+        return cutoff_time.replace(hour=cutoff_time.hour - max_age_hours)
+    
+    def _remove_old_sessions(self, old_sessions: List[str]) -> None:
+        """Remove all old sessions from the list."""
         for session_id in old_sessions:
             self._remove_old_session(session_id)
-        
-        return len(old_sessions)
     
     def _find_old_sessions(self, cutoff_time: datetime) -> List[str]:
         """Find sessions older than cutoff time."""

@@ -191,16 +191,24 @@ class SupplyResearcherAgent(BaseSubAgent):
     ) -> Dict[str, Any]:
         """Conduct the actual research"""
         research_query = self.research_engine.generate_research_query(parsed_request)
-        
+        return await self._execute_research_workflow(research_query, research_session)
+    
+    async def _execute_research_workflow(self, research_query: str, research_session: ResearchSession) -> Dict[str, Any]:
+        """Execute the research workflow"""
         research_session.status = "researching"
-        init_result = await self.research_engine.call_deep_research_api(research_query)
-        session_id = init_result.get("session_id")
+        session_id = await self._initialize_research_session(research_query)
         research_session.session_id = session_id
-        
+        return await self._complete_research_execution(research_session, session_id)
+    
+    async def _initialize_research_session(self, research_query: str) -> str:
+        """Initialize research session and get session ID"""
+        init_result = await self.research_engine.call_deep_research_api(research_query)
+        return init_result.get("session_id")
+    
+    async def _complete_research_execution(self, research_session: ResearchSession, session_id: str) -> Dict[str, Any]:
+        """Complete research execution and update session"""
         research_result = await self.research_engine.call_deep_research_api("Start Research", session_id)
-        
         self._update_research_session(research_session, research_result)
-        
         return research_result
     
     async def _send_processing_update(self, run_id: str, stream_updates: bool) -> None:
@@ -220,18 +228,34 @@ class SupplyResearcherAgent(BaseSubAgent):
         stream_updates: bool
     ) -> Dict[str, Any]:
         """Process research results and update database"""
+        supply_items, confidence = self._extract_and_score_data(research_result, parsed_request)
+        update_result = await self._update_database_if_confident(supply_items, confidence, research_session)
+        self._finalize_research_session(research_session)
+        return self._build_final_result(parsed_request, confidence, update_result, research_result)
+    
+    def _extract_and_score_data(self, research_result: Dict[str, Any], parsed_request: Dict[str, Any]) -> tuple:
+        """Extract supply data and calculate confidence score"""
         supply_items = self.data_extractor.extract_supply_data(research_result, parsed_request)
         confidence = self.data_extractor.calculate_confidence_score(research_result, supply_items)
-        
+        return supply_items, confidence
+    
+    async def _update_database_if_confident(self, supply_items, confidence: float, research_session: ResearchSession) -> Dict[str, Any]:
+        """Update database if confidence threshold is met"""
         update_result = {"updates_count": 0, "updates": []}
         if confidence >= self.confidence_threshold and supply_items:
             update_result = await self.db_manager.update_database(supply_items, research_session.id)
             research_session.processed_data = json.dumps(supply_items, default=str)
-        
+        return update_result
+    
+    def _finalize_research_session(self, research_session: ResearchSession) -> None:
+        """Finalize research session status"""
         research_session.status = "completed"
         research_session.completed_at = datetime.now(UTC)
         self.db.commit()
-        
+    
+    def _build_final_result(self, parsed_request: Dict[str, Any], confidence: float, 
+                           update_result: Dict[str, Any], research_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Build final result dictionary"""
         return {
             "research_type": parsed_request["research_type"].value,
             "confidence_score": confidence,
@@ -263,17 +287,26 @@ class SupplyResearcherAgent(BaseSubAgent):
     ) -> None:
         """Handle execution errors"""
         logger.error(f"SupplyResearcherAgent execution failed: {error}")
-        
+        await self._update_failed_session_if_exists(error)
+        self._store_error_result(error, state)
+        await self._send_error_notification(run_id, error, stream_updates)
+    
+    async def _update_failed_session_if_exists(self, error: Exception) -> None:
+        """Update research session if it exists"""
         if 'research_session' in locals():
             research_session.status = "failed"
             research_session.error_message = str(error)
             self.db.commit()
-        
+    
+    def _store_error_result(self, error: Exception, state: DeepAgentState) -> None:
+        """Store error result in state"""
         state.supply_research_result = {
             "status": "error",
             "error": str(error)
         }
-        
+    
+    async def _send_error_notification(self, run_id: str, error: Exception, stream_updates: bool) -> None:
+        """Send error notification if streaming enabled"""
         if stream_updates and self.websocket_manager:
             await self._send_update(run_id, {
                 "status": "failed",
@@ -286,9 +319,17 @@ class SupplyResearcherAgent(BaseSubAgent):
         research_result: Dict[str, Any]
     ) -> None:
         """Update research session with results"""
+        self._set_research_session_data(research_session, research_result)
+        self._set_research_session_json_fields(research_session, research_result)
+    
+    def _set_research_session_data(self, research_session: ResearchSession, research_result: Dict[str, Any]) -> None:
+        """Set basic research session data"""
         research_session.research_plan = research_result.get("research_plan")
-        research_session.questions_answered = json.dumps(research_result.get("questions_answered", []))
         research_session.raw_results = json.dumps(research_result)
+    
+    def _set_research_session_json_fields(self, research_session: ResearchSession, research_result: Dict[str, Any]) -> None:
+        """Set JSON fields for research session"""
+        research_session.questions_answered = json.dumps(research_result.get("questions_answered", []))
         research_session.citations = json.dumps(research_result.get("citations", []))
     
     def _create_scheduled_state(self, research_type: ResearchType, provider: str) -> DeepAgentState:
@@ -303,10 +344,14 @@ class SupplyResearcherAgent(BaseSubAgent):
         """Send update via WebSocket manager"""
         if self.websocket_manager:
             try:
-                await self.websocket_manager.send_agent_update(
-                    run_id,
-                    "supply_researcher",
-                    update
-                )
+                await self._send_websocket_update(run_id, update)
             except Exception as e:
                 logger.error(f"Failed to send WebSocket update: {e}")
+    
+    async def _send_websocket_update(self, run_id: str, update: Dict[str, Any]) -> None:
+        """Send WebSocket update with proper parameters"""
+        await self.websocket_manager.send_agent_update(
+            run_id,
+            "supply_researcher",
+            update
+        )

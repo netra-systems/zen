@@ -99,6 +99,7 @@ def _import_route_modules() -> dict:
     from app.routes.websockets import router as websockets_router
     from app.routes.factory_status import router as factory_status_router
     from app.routes.factory_status_simple import router as factory_status_simple_router
+    from app.routes.factory_compliance import router as factory_compliance_router
     from app.routes.github_analyzer import router as github_analyzer_router
     # from app.routes.mcp.main import router as mcp_router  # Temporarily disabled due to import issues
     return {
@@ -107,6 +108,7 @@ def _import_route_modules() -> dict:
         "health_extended_router": health_extended_router, "monitoring_router": monitoring_router,
         "websockets_router": websockets_router, "factory_status_router": factory_status_router,
         "factory_status_simple_router": factory_status_simple_router,
+        "factory_compliance_router": factory_compliance_router,
         "github_analyzer_router": github_analyzer_router,
         "supply": supply, "generation": generation,
         "admin": admin, "references": references, "health": health, "corpus": corpus,
@@ -138,6 +140,7 @@ def _get_route_configurations(modules: dict) -> dict:
         "unified_tools": (modules["unified_tools"].router, "/api/tools", ["unified-tools"]),
         "factory_status": (modules["factory_status_router"], "", ["factory-status"]),
         "factory_status_simple": (modules["factory_status_simple_router"], "", ["factory-status-simple"]),
+        "factory_compliance": (modules["factory_compliance_router"], "", ["factory-compliance"]),
         "github_analyzer": (modules["github_analyzer_router"], "", ["github-analyzer"]),
     }
 

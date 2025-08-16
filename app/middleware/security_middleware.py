@@ -137,12 +137,25 @@ class SecurityMiddleware(BaseHTTPMiddleware):
     
     def _initialize_sensitive_endpoints(self) -> None:
         """Initialize sensitive endpoints requiring stricter limits."""
-        self.sensitive_endpoints = {
+        auth_endpoints = self._get_auth_endpoints()
+        admin_endpoints = self._get_admin_endpoints()
+        user_endpoints = self._get_user_endpoints()
+        self.sensitive_endpoints = auth_endpoints | admin_endpoints | user_endpoints
+    
+    def _get_auth_endpoints(self) -> set:
+        """Get authentication-related endpoints."""
+        return {
             "/api/auth/login", "/api/auth/logout", "/api/auth/token",
-            "/api/auth/callback", "/api/auth/refresh",
-            "/api/admin", "/api/tools", "/api/synthetic-data",
-            "/api/users/create", "/api/users/password"
+            "/api/auth/callback", "/api/auth/refresh"
         }
+    
+    def _get_admin_endpoints(self) -> set:
+        """Get admin-related endpoints."""
+        return {"/api/admin", "/api/tools", "/api/synthetic-data"}
+    
+    def _get_user_endpoints(self) -> set:
+        """Get user management endpoints."""
+        return {"/api/users/create", "/api/users/password"}
     
     def _initialize_auth_tracking(self) -> None:
         """Initialize authentication attempt tracking."""
@@ -153,14 +166,18 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         """Process request through security layers."""
         start_time = time.time()
         try:
-            await self._perform_security_validations(request)
-            response = await self._process_secure_request(request, call_next)
-            self._log_security_processing(request, start_time)
-            return response
+            return await self._execute_secure_request(request, call_next, start_time)
         except NetraSecurityException:
             raise
         except Exception as e:
             self._handle_security_middleware_error(e)
+    
+    async def _execute_secure_request(self, request: Request, call_next: Callable, start_time: float) -> Response:
+        """Execute request with security validation and logging."""
+        await self._perform_security_validations(request)
+        response = await self._process_secure_request(request, call_next)
+        self._log_security_processing(request, start_time)
+        return response
     
     def _handle_security_middleware_error(self, error: Exception) -> None:
         """Handle security middleware errors."""
