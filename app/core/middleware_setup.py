@@ -133,7 +133,8 @@ def is_origin_allowed(origin: str, allowed_origins: List[str]) -> bool:
             return True
         
         # Allow Google Cloud Run URLs (backend services)
-        cloud_run_pattern = r'^https://[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-]+\.a\.run\.app$'
+        # Pattern matches: https://service-name-hash-region.a.run.app
+        cloud_run_pattern = r'^https://[a-zA-Z0-9\-]+(-[a-zA-Z0-9]+)*-[a-z]{2}\.a\.run\.app$'
         if re.match(cloud_run_pattern, origin):
             return True
         
