@@ -132,5 +132,72 @@ export const useLoadingState = () => {
                 <reference>useSyncExternalStore getSnapshot caching requirements</reference>
             </references>
         </learning>
+        
+        <learning>
+            <id>zustand-selector-memoization</id>
+            <date>2025-01-16</date>
+            <category>State Management</category>
+            <severity>critical</severity>
+            <title>Zustand Selector Must Be Memoized for useSyncExternalStore</title>
+            
+            <problem>
+                <description>Selectors passed to Zustand stores must have stable references to avoid getSnapshot infinite loops</description>
+                <error_message>Error: The result of getSnapshot should be cached to avoid an infinite loop</error_message>
+                <impact>Infinite re-render loop crashes application</impact>
+            </problem>
+            
+            <solution>
+                <description>Memoize selectors using useMemo to ensure stable references</description>
+                <implementation>
+                    <step>Define selector function outside component with proper typing</step>
+                    <step>Use useMemo to memoize selector inside hook if needed</step>
+                    <step>Always use shallow comparison for object selectors</step>
+                    <step>Type selector parameter as UnifiedChatState not any</step>
+                </implementation>
+                <code_example>
+// WRONG - Selector without proper typing
+const storeSelector = (state: any) => ({
+  activeThreadId: state.activeThreadId,
+  isThreadLoading: state.isThreadLoading
+});
+
+export const useLoadingState = () => {
+  const storeData = useUnifiedChatStore(storeSelector, shallow);
+  // ...
+};
+
+// CORRECT - Properly typed and memoized selector
+import type { UnifiedChatState } from '../types/store-types';
+
+const storeSelector = (state: UnifiedChatState) => ({
+  activeThreadId: state.activeThreadId,
+  isThreadLoading: state.isThreadLoading
+});
+
+export const useLoadingState = () => {
+  const memoizedSelector = useMemo(() => storeSelector, []);
+  const storeData = useUnifiedChatStore(memoizedSelector, shallow);
+  // ...
+};
+                </code_example>
+            </solution>
+            
+            <prevention>
+                <rule>Always type selectors with proper store state type, never use any</rule>
+                <rule>Memoize selectors with useMemo when passing to store hooks</rule>
+                <rule>Use shallow comparison for all object-returning selectors</rule>
+                <rule>Define selector functions outside components when possible</rule>
+            </prevention>
+            
+            <affected_files>
+                <file>frontend/hooks/useLoadingState.ts</file>
+                <file>frontend/hooks/useThreadSwitching.ts</file>
+            </affected_files>
+            
+            <references>
+                <reference>React 18 useSyncExternalStore requirements</reference>
+                <reference>Zustand getSnapshot caching documentation</reference>
+            </references>
+        </learning>
     </learnings>
 </specification>

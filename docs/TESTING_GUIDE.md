@@ -20,7 +20,7 @@ The Netra platform employs a comprehensive testing strategy across multiple laye
 ### Testing Stack
 
 - **Backend**: Pytest, pytest-asyncio, pytest-cov, httpx
-- **Frontend**: Jest, React Testing Library, Cypress
+- **Frontend**: Jest, React Testing Library (see SPEC/frontend_testing_guide.xml)
 - **WebSocket**: Jest WebSocket Mock, pytest-asyncio
 - **Performance**: Locust, k6
 - **Coverage**: 80%+ target coverage
@@ -29,7 +29,7 @@ The Netra platform employs a comprehensive testing strategy across multiple laye
 
 | Category | Purpose | Tools | Location |
 |----------|---------|-------|----------|
-| Unit Tests | Individual component testing | Pytest, Jest | `tests/`, `__tests__/` |
+| Unit Tests | Individual component testing | Pytest, Jest | `tests/`, `frontend/__tests__/` |
 | Integration Tests | Service interaction testing | Pytest, RTL | `tests/integration/` |
 | E2E Tests | Full workflow testing | Cypress | `cypress/e2e/` |
 | Performance Tests | Load and stress testing | Locust | `tests/performance/` |
@@ -308,226 +308,16 @@ def create_test_message(thread_id, role="user"):
 
 ## Frontend Testing
 
-### Setup
+For complete frontend testing documentation including Windows-specific instructions, see `SPEC/frontend_testing_guide.xml`.
+
+### Quick Start
 
 ```bash
-cd frontend
+# Using unified test runner (recommended)
+python test_runner.py --frontend-only
 
-# Install dependencies
-npm install
-
-# Install additional test dependencies
-npm install --save-dev @testing-library/react-hooks
-npm install --save-dev @testing-library/user-event
-npm install --save-dev jest-websocket-mock
-npm install --save-dev msw
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run in watch mode
-npm test -- --watch
-
-# Run with coverage
-npm test -- --coverage
-
-# Run specific test file
-npm test ChatInterface
-
-# Update snapshots
-npm test -- -u
-
-# Debug mode
-npm test -- --detectOpenHandles
-```
-
-### Test Structure
-
-```
-frontend/__tests__/
-├── components/               # Component tests
-│   ├── chat/
-│   │   ├── ChatHeader.test.tsx
-│   │   ├── MessageItem.test.tsx
-│   │   ├── MessageInput.test.tsx
-│   │   └── MainChat.test.tsx
-│   ├── ui/
-│   │   └── select.test.tsx
-│   ├── ChatInterface.test.tsx
-│   ├── SubAgentStatus.test.tsx
-│   └── ThreadList.test.tsx
-├── hooks/                   # Hook tests
-│   ├── useWebSocket.test.ts
-│   ├── useAgent.test.ts
-│   └── useChatWebSocket.test.ts
-├── store/                   # Store tests
-│   ├── chatStore.test.ts
-│   ├── authStore.test.ts
-│   └── threadStore.test.ts
-├── services/               # Service tests
-│   ├── webSocketService.test.ts
-│   └── messageService.test.ts
-├── critical/               # Critical path tests
-│   ├── AuthenticationFlow.test.tsx
-│   ├── AgentInteraction.test.tsx
-│   ├── WebSocketResilience.test.tsx
-│   └── ErrorHandling.test.tsx
-└── test-utils/            # Test utilities
-    └── mockProviders.tsx
-```
-
-### Key Test Examples
-
-#### Component Tests
-
-```typescript
-// __tests__/components/chat/MessageItem.test.tsx
-import { render, screen } from '@testing-library/react';
-import { MessageItem } from '@/components/chat/MessageItem';
-
-describe('MessageItem', () => {
-  it('renders user message correctly', () => {
-    const message = {
-      id: '1',
-      role: 'user',
-      content: 'Test message',
-      timestamp: new Date().toISOString()
-    };
-    
-    render(<MessageItem message={message} />);
-    
-    expect(screen.getByText('Test message')).toBeInTheDocument();
-    expect(screen.getByText('You')).toBeInTheDocument();
-  });
-  
-  it('renders agent message with thinking indicator', () => {
-    const message = {
-      id: '2',
-      role: 'assistant',
-      content: 'Processing...',
-      metadata: { thinking: true }
-    };
-    
-    render(<MessageItem message={message} />);
-    
-    expect(screen.getByTestId('thinking-indicator')).toBeInTheDocument();
-  });
-});
-```
-
-#### Hook Tests
-
-```typescript
-// __tests__/hooks/useWebSocket.test.ts
-import { renderHook, act } from '@testing-library/react';
-import WS from 'jest-websocket-mock';
-import { useWebSocket } from '@/hooks/useWebSocket';
-
-describe('useWebSocket', () => {
-  let server: WS;
-  
-  beforeEach(() => {
-    server = new WS('ws://localhost:8000/ws');
-  });
-  
-  afterEach(() => {
-    WS.clean();
-  });
-  
-  it('connects to WebSocket server', async () => {
-    const { result } = renderHook(() => useWebSocket());
-    
-    await server.connected;
-    
-    expect(result.current.connected).toBe(true);
-  });
-  
-  it('handles reconnection on disconnect', async () => {
-    const { result } = renderHook(() => useWebSocket());
-    
-    await server.connected;
-    
-    // Simulate disconnect
-    server.close();
-    
-    // Wait for reconnection attempt
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    });
-    
-    expect(result.current.reconnectAttempts).toBeGreaterThan(0);
-  });
-});
-```
-
-#### Store Tests
-
-```typescript
-// __tests__/store/chatStore.test.ts
-import { act } from '@testing-library/react';
-import { useChatStore } from '@/store/chat';
-
-describe('ChatStore', () => {
-  beforeEach(() => {
-    useChatStore.setState({ messages: [], currentThread: null });
-  });
-  
-  it('adds message to store', () => {
-    const message = {
-      id: '1',
-      content: 'Test',
-      role: 'user',
-      timestamp: new Date().toISOString()
-    };
-    
-    act(() => {
-      useChatStore.getState().addMessage(message);
-    });
-    
-    expect(useChatStore.getState().messages).toHaveLength(1);
-    expect(useChatStore.getState().messages[0]).toEqual(message);
-  });
-  
-  it('clears messages', () => {
-    act(() => {
-      useChatStore.getState().addMessage({ id: '1', content: 'Test' });
-      useChatStore.getState().clearMessages();
-    });
-    
-    expect(useChatStore.getState().messages).toHaveLength(0);
-  });
-});
-```
-
-### Mock Providers
-
-```typescript
-// __tests__/test-utils/mockProviders.tsx
-import { ReactNode } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-
-export const createMockProviders = () => {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false }
-    }
-  });
-  
-  return ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
-};
-
-// Usage in tests
-const wrapper = createMockProviders();
-const { result } = renderHook(() => useCustomHook(), { wrapper });
+# Or directly with npm
+cd frontend && npm test
 ```
 
 ## Integration Testing
@@ -742,13 +532,7 @@ open test_reports/coverage/index.html  # View unified coverage report
 
 ### Frontend Coverage
 
-```bash
-# Generate coverage report
-npm test -- --coverage --watchAll=false
-
-# View coverage
-open coverage/lcov-report/index.html
-```
+See `SPEC/frontend_testing_guide.xml` for frontend coverage configuration.
 
 ### Coverage Requirements
 

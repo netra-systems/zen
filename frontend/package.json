@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node run-jest.js",
+    "test": "node run-jest.js --config jest.config.simple.cjs",
     "test:fast": "node run-jest.js --config jest.config.performance.cjs --silent",
     "test:parallel": "node run-jest.js --config jest.config.performance.cjs --maxWorkers=auto --silent",
     "test:watch:fast": "node run-jest.js --config jest.config.performance.cjs --watch --changedSince=main",

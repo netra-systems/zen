@@ -8,7 +8,7 @@
  * @compliance type_safety.xml - Strongly typed hook with clear interfaces
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { shallow } from 'zustand/shallow';
 import type { UnifiedChatState } from '@/types/store-types';
@@ -73,7 +73,8 @@ export const useThreadSwitching = (): UseThreadSwitchingResult => {
   const timeoutManagerRef = useRef(createTimeoutManager());
   const currentOperationRef = useRef<string | null>(null);
   
-  const storeActions = extractStoreActions();
+  // Use shallow comparison for actions selector to prevent re-renders
+  const storeActions = useUnifiedChatStore(storeActionsSelector, shallow);
   
   // Cleanup on unmount
   useEffect(() => {
@@ -145,19 +146,17 @@ const createTimeoutManager = () => {
 };
 
 /**
- * Extracts store actions for thread management
+ * Selector for store actions with stable reference
  */
-const extractStoreActions = () => {
-  return useUnifiedChatStore((state) => ({
-    setActiveThread: state.setActiveThread,
-    setThreadLoading: state.setThreadLoading,
-    startThreadLoading: state.startThreadLoading,
-    completeThreadLoading: state.completeThreadLoading,
-    clearMessages: state.clearMessages,
-    loadMessages: state.loadMessages,
-    handleWebSocketEvent: state.handleWebSocketEvent
-  }));
-};
+const storeActionsSelector = (state: UnifiedChatState) => ({
+  setActiveThread: state.setActiveThread,
+  setThreadLoading: state.setThreadLoading,
+  startThreadLoading: state.startThreadLoading,
+  completeThreadLoading: state.completeThreadLoading,
+  clearMessages: state.clearMessages,
+  loadMessages: state.loadMessages,
+  handleWebSocketEvent: state.handleWebSocketEvent
+});
 
 /**
  * Performs thread switch operation

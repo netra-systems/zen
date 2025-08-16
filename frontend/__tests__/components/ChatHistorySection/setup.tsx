@@ -136,25 +136,23 @@ export class ChatHistoryTestSetup {
     currentThreadId?: string | null;
     isAuthenticated?: boolean;
   }) {
-    if (config.threads !== undefined) {
-      (useThreadStore as unknown as jest.Mock).mockReturnValue({
+    // Update mockThreadStore reference if needed
+    if (config.threads !== undefined || config.currentThreadId !== undefined) {
+      mockThreadStore = {
         ...mockThreadStore,
-        threads: config.threads,
-      });
+        ...(config.threads !== undefined && { threads: config.threads }),
+        ...(config.currentThreadId !== undefined && { currentThreadId: config.currentThreadId }),
+      };
+      (useThreadStore as unknown as jest.Mock).mockReturnValue(mockThreadStore);
     }
 
-    if (config.currentThreadId !== undefined) {
-      (useThreadStore as unknown as jest.Mock).mockReturnValue({
-        ...mockThreadStore,
-        currentThreadId: config.currentThreadId,
-      });
-    }
-
+    // Update mockAuthStore reference if needed
     if (config.isAuthenticated !== undefined) {
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      mockAuthStore = {
         ...mockAuthStore,
         isAuthenticated: config.isAuthenticated,
-      });
+      };
+      (useAuthStore as unknown as jest.Mock).mockReturnValue(mockAuthStore);
     }
   }
 
