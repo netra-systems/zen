@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>WebSocket Error Handling Learnings</name>
+        <type>learnings</type>
+        <version>1.0</version>
+        <last_updated>2025-08-16</last_updated>
+    </metadata>
+    
+    <learnings>
+        <learning>
+            <id>websocket-connection-state-error</id>
+            <date>2025-08-16</date>
+            <category>WebSocket/Error Handling</category>
+            <severity>high</severity>
+            <title>WebSocket Connection State Error: "Need to call accept first"</title>
+            
+            <problem>
+                <description>Error occurs when trying to disconnect or perform operations on unaccepted WebSocket</description>
+                <error_message>WebSocket is not connected. Need to call "accept" first</error_message>
+                <symptoms>
+                    <symptom>Error logged in _handle_general_exception at line 115</symptom>
+                    <symptom>Occurs during authentication failures before WebSocket accept</symptom>
+                    <symptom>Happens when error handler tries to disconnect non-connected WebSocket</symptom>
+                </symptoms>
+                <root_cause>Error handling code attempts to disconnect WebSocket that was never properly connected or accepted</root_cause>
+                <impact>Error logging becomes noisy with secondary errors masking the real issue</impact>
+            </problem>
+            
+            <solution>
+                <description>Check WebSocket state before attempting disconnect operations</description>
+                <implementation>
+                    <step>Modified _close_websocket_safely in connection.py to check both client_state and application_state</step>
+                    <step>Updated _handle_websocket_error to only disconnect if WebSocket is CONNECTED</step>
+                    <step>Added comprehensive state checking with hasattr for safety</step>
+                </implementation>
+                <code_changes>
+                    <file>app/websocket/connection.py</file>
+                    <change>Added state checks in _close_websocket_safely method</change>
+                    <file>app/routes/websockets.py</file>
+                    <change>Added WebSocketState.CONNECTED check before disconnect_user call</change>
+                </code_changes>
+            </solution>
+            
+            <prevention>
+                <recommendation>Always check WebSocket state before operations</recommendation>
+                <recommendation>Use hasattr to safely check for state attributes</recommendation>
+                <recommendation>Only attempt close/disconnect on CONNECTED WebSockets</recommendation>
+                <pattern>
+                    <name>Safe WebSocket Disconnect Pattern</name>
+                    <code><![CDATA[
+if (hasattr(websocket, 'application_state') and 
+    websocket.application_state == WebSocketState.CONNECTED):
+    await manager.disconnect_user(user_id, websocket, code=1011, reason="Error")
+                    ]]></code>
+                </pattern>
+            </prevention>
+            
+            <testing>
+                <test_file>app/tests/unit/test_websocket_error_handling.py</test_file>
+                <test_cases>
+                    <test>test_close_websocket_safely_with_unconnected_socket</test>
+                    <test>test_close_websocket_safely_with_connected_socket</test>
+                    <test>test_handle_websocket_error_with_unconnected_socket</test>
+                    <test>test_websocket_state_transitions</test>
+                </test_cases>
+            </testing>
+            
+            <affected_files>
+                <file>app/websocket/connection.py</file>
+                <file>app/routes/websockets.py</file>
+            </affected_files>
+            
+            <related_patterns>
+                <pattern>WebSocket lifecycle management</pattern>
+                <pattern>Error handling in async contexts</pattern>
+                <pattern>State machine transitions for WebSockets</pattern>
+            </related_patterns>
+            
+            <business_impact>
+                <impact>Improves system reliability during connection failures</impact>
+                <impact>Reduces noise in error logs for better debugging</impact>
+                <impact>Prevents cascading errors during authentication failures</impact>
+            </business_impact>
+        </learning>
+        
+        <learning>
+            <id>websocket-state-attributes</id>
+            <date>2025-08-16</date>
+            <category>WebSocket/Implementation Details</category>
+            <severity>medium</severity>
+            <title>WebSocket State Attributes in Starlette</title>
+            
+            <discovery>
+                <description>WebSocket objects have client_state and application_state attributes</description>
+                <details>
+                    <detail>client_state tracks the client-side connection state</detail>
+                    <detail>application_state tracks the server-side application state</detail>
+                    <detail>Both initialized to CONNECTING in WebSocket.__init__</detail>
+                    <detail>States: CONNECTING, CONNECTED, DISCONNECTED, RESPONSE</detail>
+                </details>
+            </discovery>
+            
+            <best_practices>
+                <practice>Check both client_state and application_state for comprehensive state validation</practice>
+                <practice>Use WebSocketState enum from starlette.websockets for comparisons</practice>
+                <practice>Handle missing attributes gracefully with hasattr checks</practice>
+            </best_practices>
+        </learning>
+        
+        <learning>
+            <id>websocket-send-after-close-error</id>
+            <date>2025-08-16</date>
+            <category>WebSocket/Race Conditions</category>
+            <severity>high</severity>
+            <title>WebSocket Send After Close: "Cannot call send once a close message has been sent"</title>
+            
+            <problem>
+                <description>Race condition where broadcast attempts to send to a WebSocket that has begun closing</description>
+                <error_message>Cannot call "send" once a close message has been sent</error_message>
+                <symptoms>
+                    <symptom>DEBUG error logged in broadcast_core at line 268</symptom>
+                    <symptom>Occurs during concurrent broadcast and disconnect operations</symptom>
+                    <symptom>Happens when WebSocket starts closing while broadcast is in progress</symptom>
+                </symptoms>
+                <root_cause>No mechanism to prevent sends to connections that have started their closing handshake</root_cause>
+                <impact>Failed message delivery and error noise in logs during normal disconnection</impact>
+            </problem>
+            
+            <solution>
+                <description>Implement is_closing flag and comprehensive state checking</description>
+                <implementation>
+                    <step>Added is_closing flag to ConnectionInfo dataclass</step>
+                    <step>Enhanced _is_connection_ready to check is_closing flag and both WebSocket states</step>
+                    <step>Set is_closing flag immediately when disconnection starts</step>
+                    <step>Updated error handling to treat send-after-close as DEBUG not ERROR</step>
+                </implementation>
+                <code_changes>
+                    <file>app/websocket/connection.py</file>
+                    <change>Added is_closing flag to ConnectionInfo</change>
+                    <change>Set is_closing in _execute_disconnection</change>
+                    <file>app/websocket/broadcast_core.py</file>
+                    <change>Check is_closing flag in _is_connection_ready</change>
+                    <change>Check both client_state and application_state</change>
+                    <change>Mark connections as closing during cleanup</change>
+                </code_changes>
+            </solution>
+            
+            <prevention>
+                <recommendation>Always set is_closing flag before starting disconnection</recommendation>
+                <recommendation>Check multiple state indicators before sending</recommendation>
+                <recommendation>Handle send-after-close gracefully as expected behavior</recommendation>
+                <pattern>
+                    <name>Safe WebSocket Send Pattern</name>
+                    <code><![CDATA[
+if (not conn_info.is_closing and
+    conn_info.websocket.client_state == WebSocketState.CONNECTED and
+    conn_info.websocket.application_state == WebSocketState.CONNECTED):
+    await conn_info.websocket.send_json(message)
+                    ]]></code>
+                </pattern>
+            </prevention>
+            
+            <testing>
+                <test_file>app/tests/unit/websocket/test_websocket_closing_state.py</test_file>
+                <test_cases>
+                    <test>test_is_closing_flag_prevents_send</test>
+                    <test>test_disconnect_sets_is_closing_flag</test>
+                    <test>test_error_handling_for_send_after_close</test>
+                    <test>test_concurrent_send_and_close_race_condition</test>
+                    <test>test_broadcast_to_closing_connection_skipped</test>
+                </test_cases>
+            </testing>
+            
+            <affected_files>
+                <file>app/websocket/connection.py</file>
+                <file>app/websocket/broadcast_core.py</file>
+            </affected_files>
+            
+            <related_patterns>
+                <pattern>Race condition prevention</pattern>
+                <pattern>State machine with transitional flags</pattern>
+                <pattern>Concurrent operation coordination</pattern>
+            </related_patterns>
+            
+            <business_impact>
+                <impact>Prevents interruption of real-time agent communications</impact>
+                <impact>Improves reliability for all customer segments</impact>
+                <impact>Reduces support tickets from connection errors</impact>
+            </business_impact>
+        </learning>
+    </learnings>
+    
+    <summary>
+        <total_learnings>3</total_learnings>
+        <categories>
+            <category>WebSocket/Error Handling</category>
+            <category>WebSocket/Implementation Details</category>
+            <category>WebSocket/Race Conditions</category>
+        </categories>
+        <key_takeaway>Always validate WebSocket connection state before performing operations to prevent secondary errors and handle race conditions with proper state flags</key_takeaway>
+    </summary>
+</specification>

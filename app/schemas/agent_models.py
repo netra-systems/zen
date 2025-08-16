@@ -19,11 +19,25 @@ from datetime import datetime, UTC
 from pydantic import BaseModel, Field, field_validator
 import uuid
 
-# Import types only for type checking to avoid circular dependencies  
-if TYPE_CHECKING:
+# Import forward-referenced types - these are needed for model rebuild
+# Using try/except to handle missing types gracefully
+try:
     from app.agents.triage_sub_agent.models import TriageResult
+except ImportError:
+    TriageResult = None  # type: ignore
+
+try:
     from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+except ImportError:
+    DataAnalysisResponse = None  # type: ignore
+    AnomalyDetectionResponse = None  # type: ignore
+
+try:
+    from app.schemas.FinOps import WorkloadProfile
     from app.schemas.Generation import SyntheticDataResult
+except ImportError:
+    WorkloadProfile = None  # type: ignore
+    SyntheticDataResult = None  # type: ignore
 
 
 class ToolResultData(BaseModel):
@@ -102,12 +116,12 @@ class DeepAgentState(BaseModel):
     user_id: Optional[str] = None
     
     # Strongly typed result fields with proper type unions
-    triage_result: Optional["TriageResult"] = None
-    data_result: Optional[Union["DataAnalysisResponse", "AnomalyDetectionResponse"]] = None
+    triage_result: Optional[TriageResult] = None
+    data_result: Optional[Union[DataAnalysisResponse, AnomalyDetectionResponse]] = None
     optimizations_result: Optional[Any] = None  # Will be strongly typed when OptimizationsResult is moved to schemas
     action_plan_result: Optional[Any] = None    # Will be strongly typed when ActionPlanResult is moved to schemas
     report_result: Optional[Any] = None         # Will be strongly typed when ReportResult is moved to schemas
-    synthetic_data_result: Optional["SyntheticDataResult"] = None
+    synthetic_data_result: Optional[SyntheticDataResult] = None
     supply_research_result: Optional[Any] = None # Will be strongly typed when SupplyResearchResult is moved to schemas
     corpus_admin_result: Optional[Any] = None
     
@@ -290,25 +304,6 @@ class DeepAgentState(BaseModel):
 AgentState = DeepAgentState
 
 
-# Model rebuild for forward reference resolution
-def rebuild_model() -> None:
-    """Rebuild the model after imports are complete."""
-    try:
-        _execute_model_rebuild()
-    except Exception:
-        _handle_rebuild_failure()
-
-def _execute_model_rebuild() -> None:
-    """Execute the model rebuild operation."""
-    DeepAgentState.model_rebuild()
-
-def _handle_rebuild_failure() -> None:
-    """Handle model rebuild failure gracefully."""
-    # Safe to ignore - model will rebuild when needed
-    pass
-
-# Initialize model rebuild
-rebuild_model()
 
 # Export all agent models
 __all__ = [

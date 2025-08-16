@@ -4,7 +4,7 @@
         <name>Learnings Index</name>
         <type>index</type>
         <version>1.0</version>
-        <last_updated>2025-01-16</last_updated>
+        <last_updated>2025-08-16</last_updated>
         <description>Index of all learning modules organized by category</description>
     </metadata>
     
@@ -124,10 +124,21 @@
             <name>Type Safety</name>
             <file>learnings/type_safety.xml</file>
             <path>SPEC/learnings/type_safety.xml</path>
-            <learning_count>2</learning_count>
+            <learning_count>4</learning_count>
             <learning_ids>
                 <id>circuit-breaker-consolidation</id>
                 <id>research-type-circular-import-fix</id>
+                <id>fallback-response-type-assumption-fix</id>
+                <id>pydantic-forward-reference-resolution</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Pydantic Forward References</name>
+            <file>learnings/pydantic_forward_references.xml</file>
+            <path>SPEC/learnings/pydantic_forward_references.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>agent-completed-forward-references</id>
             </learning_ids>
         </category>
         <category>
@@ -184,6 +195,17 @@
                 <id>react-child-object-error</id>
             </learning_ids>
         </category>
+        <category>
+            <name>WebSocket Errors</name>
+            <file>learnings/websocket_errors.xml</file>
+            <path>SPEC/learnings/websocket_errors.xml</path>
+            <learning_count>3</learning_count>
+            <learning_ids>
+                <id>websocket-connection-state-error</id>
+                <id>websocket-state-attributes</id>
+                <id>websocket-send-after-close-error</id>
+            </learning_ids>
+        </category>
     </categories>
     
     <usage>
@@ -194,7 +216,7 @@
     </usage>
     
     <statistics>
-        <total_categories>15</total_categories>
-        <total_learnings>53</total_learnings>
+        <total_categories>17</total_categories>
+        <total_learnings>58</total_learnings>
     </statistics>
 </specification>

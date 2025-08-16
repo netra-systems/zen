@@ -1,9 +1,8 @@
-from typing import List, Optional, Dict, Any, TYPE_CHECKING
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
-# Import types only for type checking to avoid circular dependencies  
-if TYPE_CHECKING:
-    from app.schemas.FinOps import WorkloadProfile
+# Import WorkloadProfile directly to avoid forward reference issues
+from app.schemas.FinOps import WorkloadProfile
 
 class ContentGenParams(BaseModel):
     samples_per_type: int = Field(10, gt=0, le=100, description="Number of samples to generate for each workload type.")
@@ -53,7 +52,7 @@ class GenerationStatus(BaseModel):
 class SyntheticDataResult(BaseModel):
     """Result of synthetic data generation - consolidated from duplicate definitions"""
     success: bool
-    workload_profile: "WorkloadProfile"
+    workload_profile: WorkloadProfile
     generation_status: GenerationStatus
     metadata: Dict[str, Any] = Field(default_factory=dict)
     sample_data: Optional[List[Dict[str, Any]]] = None

@@ -5,9 +5,11 @@ instantiated with all their forward references resolved.
 """
 
 import pytest
+
+# Import all required types
+from app.agents.triage_sub_agent.models import TriageResult, TriageMetadata
 from app.schemas import AgentCompleted, AgentResult, AgentState
 from app.schemas.agent_models import DeepAgentState, AgentMetadata
-from app.agents.triage_sub_agent.models import TriageResult, TriageMetadata
 
 
 def test_agent_completed_model_rebuild():
@@ -105,16 +107,9 @@ def test_agent_completed_with_final_state():
     assert completed.final_state.step_count == 5
 
 
-def test_model_rebuild_handles_circular_dependencies():
-    """Test that model rebuild properly handles circular dependencies."""
-    # This should not raise any errors
-    from app.schemas.Agent import rebuild_models
-    
-    # Call rebuild_models multiple times should be safe
-    rebuild_models()
-    rebuild_models()
-    
-    # Models should still work after multiple rebuilds
+def test_model_handles_circular_dependencies():
+    """Test that models properly handle circular dependencies."""
+    # Models should work without explicit rebuilds
     result = AgentResult(success=True, output="test")
     completed = AgentCompleted(
         run_id="rebuild-test",
