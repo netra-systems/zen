@@ -114,6 +114,14 @@ class SupplyResearchScheduler:
         logger.info(f"Manually triggering schedule: {name}")
         return await self.research_executor.execute_scheduled_research(schedule)
     
+    async def schedule_job(self, schedule: ResearchSchedule) -> str:
+        """Schedule a job for background execution"""
+        task_id = self.background_manager.add_task(
+            self.research_executor.execute_scheduled_research(schedule)
+        )
+        logger.info(f"Scheduled job: {schedule.name} with task_id: {task_id}")
+        return task_id
+    
     async def get_recent_results(
         self,
         schedule_name: Optional[str] = None,
