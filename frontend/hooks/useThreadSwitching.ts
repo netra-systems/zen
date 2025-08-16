@@ -10,6 +10,8 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { shallow } from 'zustand/shallow';
+import type { UnifiedChatState } from '@/types/store-types';
 import { threadLoadingService } from '@/services/threadLoadingService';
 import { 
   threadEventHandler,
