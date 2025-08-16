@@ -43,18 +43,31 @@ class NetraMCPTools:
     async def _execute_agent(self, server, agent_name: str, input_data: Dict[str, Any], 
                             config: Optional[Dict[str, Any]]) -> str:
         """Execute agent with error handling"""
+        self._validate_agent_service(server)
+        try:
+            return await self._perform_agent_execution(server, agent_name, input_data, config)
+        except Exception as e:
+            return self._handle_agent_error(e)
+    
+    def _validate_agent_service(self, server) -> None:
+        """Validate agent service availability"""
         if not server.agent_service:
             raise NetraException("Agent service not available")
-        try:
-            thread_id = await self._create_agent_thread(server, agent_name)
-            result = await server.agent_service.execute_agent(
-                agent_name=agent_name, thread_id=thread_id,
-                input_data=input_data, config=config or {}
-            )
-            return self._format_agent_result(thread_id, result)
-        except Exception as e:
-            logger.error(f"Agent execution failed: {e}", exc_info=True)
-            return json.dumps({"status": "error", "error": str(e)}, indent=2)
+    
+    async def _perform_agent_execution(self, server, agent_name: str, input_data: Dict[str, Any], 
+                                      config: Optional[Dict[str, Any]]) -> str:
+        """Perform the actual agent execution"""
+        thread_id = await self._create_agent_thread(server, agent_name)
+        result = await server.agent_service.execute_agent(
+            agent_name=agent_name, thread_id=thread_id,
+            input_data=input_data, config=config or {}
+        )
+        return self._format_agent_result(thread_id, result)
+    
+    def _handle_agent_error(self, error: Exception) -> str:
+        """Handle agent execution errors"""
+        logger.error(f"Agent execution failed: {error}", exc_info=True)
+        return json.dumps({"status": "error", "error": str(error)}, indent=2)
     
     async def _create_agent_thread(self, server, agent_name: str) -> Optional[str]:
         """Create thread for agent execution"""
@@ -99,13 +112,23 @@ class NetraMCPTools:
     
     def _get_available_agents(self) -> List[Dict[str, str]]:
         """Get list of available agents"""
-        orchestration_agents = self._get_orchestration_agents()
-        analysis_agents = self._get_analysis_agents() 
-        data_agents = self._get_data_agents()
-        optimization_agents = self._get_optimization_agents()
-        planning_agents = self._get_planning_agents()
-        reporting_agents = self._get_reporting_agents()
-        return orchestration_agents + analysis_agents + data_agents + optimization_agents + planning_agents + reporting_agents
+        agent_groups = self._collect_agent_groups()
+        return self._flatten_agent_groups(agent_groups)
+    
+    def _collect_agent_groups(self) -> List[List[Dict[str, str]]]:
+        """Collect all agent groups"""
+        return [
+            self._get_orchestration_agents(), self._get_analysis_agents(),
+            self._get_data_agents(), self._get_optimization_agents(),
+            self._get_planning_agents(), self._get_reporting_agents()
+        ]
+    
+    def _flatten_agent_groups(self, groups: List[List[Dict[str, str]]]) -> List[Dict[str, str]]:
+        """Flatten grouped agents into single list"""
+        result = []
+        for group in groups:
+            result.extend(group)
+        return result
     
     def _get_orchestration_agents(self) -> List[Dict[str, str]]:
         """Get orchestration category agents"""
@@ -157,15 +180,24 @@ class NetraMCPTools:
                                        metrics: Optional[List[str]]) -> str:
         """Execute workload analysis with error handling"""
         if not server.agent_service:
-            return json.dumps({"error": "Agent service not available"})
+            return self._format_service_error("Agent service not available")
         try:
-            metrics = metrics or ["cost", "latency", "throughput", "token_usage"]
-            analysis = await server.agent_service.analyze_workload(
-                workload_data=workload_data, metrics=metrics
-            )
-            return json.dumps(analysis, indent=2)
+            return await self._perform_workload_analysis(server, workload_data, metrics)
         except Exception as e:
-            return json.dumps({"error": str(e)})
+            return self._format_service_error(str(e))
+    
+    async def _perform_workload_analysis(self, server, workload_data: Dict[str, Any], 
+                                        metrics: Optional[List[str]]) -> str:
+        """Perform workload analysis with default metrics"""
+        metrics = metrics or ["cost", "latency", "throughput", "token_usage"]
+        analysis = await server.agent_service.analyze_workload(
+            workload_data=workload_data, metrics=metrics
+        )
+        return json.dumps(analysis, indent=2)
+    
+    def _format_service_error(self, error_message: str) -> str:
+        """Format service error response"""
+        return json.dumps({"error": error_message})
     
     def _register_prompt_optimizer(self, server):
         """Register prompt optimization tool"""
@@ -182,14 +214,19 @@ class NetraMCPTools:
                                          target: str, model: Optional[str]) -> str:
         """Execute prompt optimization with error handling"""
         if not server.agent_service:
-            return json.dumps({"error": "Agent service not available"})
+            return self._format_service_error("Agent service not available")
         try:
-            optimized = await server.agent_service.optimize_prompt(
-                prompt=prompt, target=target, model=model
-            )
-            return json.dumps(optimized, indent=2)
+            return await self._perform_prompt_optimization(server, prompt, target, model)
         except Exception as e:
-            return json.dumps({"error": str(e)})
+            return self._format_service_error(str(e))
+    
+    async def _perform_prompt_optimization(self, server, prompt: str, 
+                                          target: str, model: Optional[str]) -> str:
+        """Perform prompt optimization operation"""
+        optimized = await server.agent_service.optimize_prompt(
+            prompt=prompt, target=target, model=model
+        )
+        return json.dumps(optimized, indent=2)
     
     def _register_pipeline_executor(self, server):
         """Register optimization pipeline executor"""
@@ -205,14 +242,19 @@ class NetraMCPTools:
                                                  optimization_goals: Optional[List[str]]) -> str:
         """Execute optimization pipeline implementation"""
         if not server.agent_service:
-            return json.dumps({"error": "Agent service not available"})
+            return self._format_service_error("Agent service not available")
         try:
-            goals = optimization_goals or ["cost", "performance", "quality"]
-            thread_id = await self._create_pipeline_thread(server, goals)
-            result = await self._execute_pipeline_agent(server, input_data, goals, thread_id)
-            return self._format_pipeline_result(thread_id, result, goals)
+            return await self._perform_pipeline_execution(server, input_data, optimization_goals)
         except Exception as e:
-            return json.dumps({"error": str(e)})
+            return self._format_service_error(str(e))
+    
+    async def _perform_pipeline_execution(self, server, input_data: Dict[str, Any],
+                                         optimization_goals: Optional[List[str]]) -> str:
+        """Perform pipeline execution with default goals"""
+        goals = optimization_goals or ["cost", "performance", "quality"]
+        thread_id = await self._create_pipeline_thread(server, goals)
+        result = await self._execute_pipeline_agent(server, input_data, goals, thread_id)
+        return self._format_pipeline_result(thread_id, result, goals)
     
     async def _create_pipeline_thread(self, server, goals: List[str]) -> Optional[str]:
         """Create thread for optimization pipeline"""
@@ -263,14 +305,19 @@ class NetraMCPTools:
                                    filters: Optional[Dict[str, Any]]) -> str:
         """Execute corpus query with error handling"""
         if not server.corpus_service:
-            return json.dumps({"error": "Corpus service not available"})
+            return self._format_service_error("Corpus service not available")
         try:
-            results = await server.corpus_service.search(
-                query=query, limit=limit, filters=filters or {}
-            )
-            return json.dumps(results, indent=2)
+            return await self._perform_corpus_search(server, query, limit, filters)
         except Exception as e:
-            return json.dumps({"error": str(e)})
+            return self._format_service_error(str(e))
+    
+    async def _perform_corpus_search(self, server, query: str, limit: int, 
+                                    filters: Optional[Dict[str, Any]]) -> str:
+        """Perform corpus search operation"""
+        results = await server.corpus_service.search(
+            query=query, limit=limit, filters=filters or {}
+        )
+        return json.dumps(results, indent=2)
     
     def _register_synthetic_data_tool(self, server):
         """Register synthetic data generation tool"""
@@ -287,14 +334,19 @@ class NetraMCPTools:
                                                count: int, format: str) -> str:
         """Execute synthetic data generation with error handling"""
         if not server.synthetic_data_service:
-            return json.dumps({"error": "Synthetic data service not available"})
+            return self._format_service_error("Synthetic data service not available")
         try:
-            data = await server.synthetic_data_service.generate(
-                schema=schema, count=count, format_type=format
-            )
-            return self._format_synthetic_data_result(data, count, format)
+            return await self._perform_synthetic_generation(server, schema, count, format)
         except Exception as e:
-            return json.dumps({"error": str(e)})
+            return self._format_service_error(str(e))
+    
+    async def _perform_synthetic_generation(self, server, schema: Dict[str, Any], 
+                                           count: int, format: str) -> str:
+        """Perform synthetic data generation"""
+        data = await server.synthetic_data_service.generate(
+            schema=schema, count=count, format_type=format
+        )
+        return self._format_synthetic_data_result(data, count, format)
     
     def _format_synthetic_data_result(self, data: Any, count: int, format: str) -> str:
         """Format synthetic data generation result"""
@@ -327,18 +379,32 @@ class NetraMCPTools:
                                       metadata: Optional[Dict[str, Any]]) -> str:
         """Execute thread creation with error handling"""
         if not server.thread_service:
-            return json.dumps({"error": "Thread service not available"})
+            return self._format_service_error("Thread service not available")
         try:
-            metadata = metadata or {}
-            metadata["source"] = "mcp"
-            thread_id = await server.thread_service.create_thread(
-                title=title, metadata=metadata
-            )
-            return json.dumps({
-                "thread_id": thread_id, "title": title, "created": True
-            }, indent=2)
+            return await self._perform_thread_creation(server, title, metadata)
         except Exception as e:
-            return json.dumps({"error": str(e)})
+            return self._format_service_error(str(e))
+    
+    async def _perform_thread_creation(self, server, title: str, 
+                                      metadata: Optional[Dict[str, Any]]) -> str:
+        """Perform thread creation operation"""
+        metadata = self._prepare_thread_metadata(metadata)
+        thread_id = await server.thread_service.create_thread(
+            title=title, metadata=metadata
+        )
+        return self._format_thread_result(thread_id, title)
+    
+    def _prepare_thread_metadata(self, metadata: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        """Prepare metadata for thread creation"""
+        result = metadata or {}
+        result["source"] = "mcp"
+        return result
+    
+    def _format_thread_result(self, thread_id: str, title: str) -> str:
+        """Format thread creation result"""
+        return json.dumps({
+            "thread_id": thread_id, "title": title, "created": True
+        }, indent=2)
     
     def _register_thread_history_tool(self, server):
         """Register thread history tool"""

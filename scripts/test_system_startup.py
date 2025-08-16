@@ -315,66 +315,15 @@ class SystemStartupTestRunner:
 
     def run_e2e_tests(self):
         """Run complete E2E tests"""
-        print("\n" + "-"*40)
-        print("Running End-to-End Tests")
-        print("-"*40)
-        
-        test_file = "tests/test_super_e2e.py"
-        
-        if not os.path.exists(test_file):
-            print(f"[WARNING] Test file not found: {test_file}")
-            return None
-        
-        # Check if services are available
-        print("Checking service availability...")
-        
-        # For E2E tests, we need actual services running
-        if self.args.mode == "full":
-            print("Starting services for E2E tests...")
-            # Services will be started by the E2E test itself
-        
-        cmd = [
-            "python", "-m", "pytest",
-            test_file,
-            "-v" if self.args.verbose else "-q",
-            "--tb=short",
-            "-s",  # Show print statements
-            "--disable-warnings"
-        ]
-        
-        if self.args.coverage:
-            cmd.extend(["--cov=app", "--cov-report=term-missing"])
-        
-        # Select specific tests based on mode
-        if self.args.mode == "minimal":
-            cmd.extend(["-k", "not concurrent and not performance"])
-        elif self.args.mode == "quick":
-            cmd.extend(["-k", "startup or login or websocket"])
-        
-        print(f"Running: {' '.join(cmd)}")
-        
-        start_time = time.time()
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        duration = time.time() - start_time
-        
-        # Parse results
-        test_result = {
-            "name": "End-to-End Tests",
-            "duration": duration,
-            "passed": result.returncode == 0,
-            "output": result.stdout if self.args.verbose else "",
-            "errors": result.stderr if result.returncode != 0 else ""
-        }
-        
-        self.results["tests"].append(test_result)
-        
-        if test_result["passed"]:
-            print(f"[OK] E2E tests passed ({duration:.2f}s)")
-        else:
-            print(f"[FAIL] E2E tests failed")
-            if not self.args.verbose:
-                print("  Run with --verbose to see details")
-        
+        test_file = self._setup_e2e_test_header()
+        if not test_file: return None
+        self._prepare_e2e_services()
+        cmd = self._build_e2e_command(test_file)
+        cmd = self._add_e2e_coverage_options(cmd)
+        cmd = self._add_e2e_mode_filters(cmd)
+        result, duration = self._execute_e2e_tests(cmd)
+        test_result = self._process_e2e_results(result, duration)
+        self._display_e2e_status(test_result)
         return test_result
     
     def _should_skip_performance_tests(self):

@@ -13,7 +13,7 @@ The 10x strategy demands that we build the "Brain" (the Middleware logic) but de
 
 The fundamental difference lies in where the optimization is executed and who controls the data path.
 
-*   **API Proxy Gateway (The Engine):** Apex executes. The customer changes their Base URL (e.g., `api.openai.com` → `api.apex.netra.ai`). Apex intercepts, decides, optimizes, and returns the result.
+*   **API Proxy Gateway (The Engine):** Apex executes. The customer changes their Base URL (e.g., `api.openai.com` → `api.netrasystems.ai`). Apex intercepts, decides, optimizes, and returns the result.
 *   **Co-Optimization Middleware (The Brain):** The Customer executes. The customer application calls the Apex `/decide` endpoint, receives a recommendation, and then the customer executes the final call to the provider.
 
 ## 10x Business Goal Alignment
@@ -75,7 +75,7 @@ The sophisticated concepts detailed in the Middleware documentation are excellen
 
 **The Unified Execution Flow:**
 
-1.  **Interception:** The customer application sends an LLM request to `api.apex.netra.ai`.
+1.  **Interception:** The customer application sends an LLM request to `api.netrasystems.ai`.
 2.  **Co-Optimization Logic (The Brain):** The Gateway internally executes the Middleware logic:
     *   **Workload Analysis:** Analyzes the `raw_prompt` and `metadata` (e.g., `app_id`).
     *   **Supply Evaluation:** Consults the detailed `Supply Configuration` catalog (Section 5 of the docs).

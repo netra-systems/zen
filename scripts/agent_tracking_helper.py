@@ -119,12 +119,10 @@ class AgentTrackingHelper:
         ext = file_path.suffix.lower()
         return self.LANGUAGE_MAP.get(ext)
     
-    def _format_header(self, language: str, metadata: Dict[str, str]) -> str:
-        """Format the tracking header based on language."""
+    def _create_header_lines(self, metadata):
+        """Create base metadata lines for header"""
         timestamp = datetime.now().astimezone().isoformat()
-        
-        # Base metadata
-        header_lines = [
+        return [
             f"Last Modified: {timestamp}",
             f"Agent: {metadata['agent']} ({metadata['model']})",
             f"Task ID: {metadata['task_id']}",
@@ -133,56 +131,47 @@ class AgentTrackingHelper:
             f"Prompt Summary: {metadata['prompt_summary'][:200]}",
             f"Changes: {metadata['changes'][:200]}"
         ]
-        
-        # Format based on language
-        if language == 'python':
-            header = "# Agent Modification Tracking\n"
-            header += "# " + "=" * 27 + "\n"
-            for line in header_lines:
-                header += f"# {line}\n"
-            header += "# " + "=" * 27 + "\n"
-        
-        elif language in ['javascript', 'typescript', 'java', 'c', 'cpp', 'csharp', 'go', 'rust', 'swift', 'kotlin', 'php']:
-            header = "/**\n"
-            header += " * Agent Modification Tracking\n"
-            header += " * " + "=" * 27 + "\n"
-            for line in header_lines:
-                header += f" * {line}\n"
-            header += " * " + "=" * 27 + "\n"
-            header += " */\n"
-        
-        elif language in ['jsx', 'tsx', 'html', 'vue']:
-            header = "{/* \n"
-            header += "  Agent Modification Tracking\n"
-            header += "  " + "=" * 27 + "\n"
-            for line in header_lines:
-                header += f"  {line}\n"
-            header += "  " + "=" * 27 + "\n"
-            header += "*/}\n"
-        
-        elif language == 'ruby':
-            header = "# Agent Modification Tracking\n"
-            header += "# " + "=" * 27 + "\n"
-            for line in header_lines:
-                header += f"# {line}\n"
-            header += "# " + "=" * 27 + "\n"
-        
-        elif language in ['bash', 'yaml', 'sql']:
-            header = "# Agent Modification Tracking\n"
-            header += "# " + "=" * 27 + "\n"
-            for line in header_lines:
-                header += f"# {line}\n"
-            header += "# " + "=" * 27 + "\n"
-        
-        else:
-            # Default to hash comment style
-            header = "# Agent Modification Tracking\n"
-            header += "# " + "=" * 27 + "\n"
-            for line in header_lines:
-                header += f"# {line}\n"
-            header += "# " + "=" * 27 + "\n"
-        
+
+    def _format_hash_comment_header(self, header_lines):
+        """Format header with hash comments for Python/Ruby/Bash/YAML/SQL"""
+        header = "# Agent Modification Tracking\n"
+        header += "# " + "=" * 27 + "\n"
+        for line in header_lines:
+            header += f"# {line}\n"
+        header += "# " + "=" * 27 + "\n"
         return header
+
+    def _format_block_comment_header(self, header_lines):
+        """Format header with block comments for JS/TS/Java/C/etc"""
+        header = "/**\n"
+        header += " * Agent Modification Tracking\n"
+        header += " * " + "=" * 27 + "\n"
+        for line in header_lines:
+            header += f" * {line}\n"
+        header += " * " + "=" * 27 + "\n"
+        header += " */\n"
+        return header
+
+    def _format_jsx_comment_header(self, header_lines):
+        """Format header with JSX comments for JSX/TSX/HTML/Vue"""
+        header = "{/* \n"
+        header += "  Agent Modification Tracking\n"
+        header += "  " + "=" * 27 + "\n"
+        for line in header_lines:
+            header += f"  {line}\n"
+        header += "  " + "=" * 27 + "\n"
+        header += "*/}\n"
+        return header
+
+    def _format_header(self, language: str, metadata: Dict[str, str]) -> str:
+        """Format the tracking header based on language."""
+        header_lines = self._create_header_lines(metadata)
+        if language in ['javascript', 'typescript', 'java', 'c', 'cpp', 'csharp', 'go', 'rust', 'swift', 'kotlin', 'php']:
+            return self._format_block_comment_header(header_lines)
+        elif language in ['jsx', 'tsx', 'html', 'vue']:
+            return self._format_jsx_comment_header(header_lines)
+        else:
+            return self._format_hash_comment_header(header_lines)
     
     def _extract_existing_header(self, content: str, language: str) -> Tuple[Optional[str], str]:
         """Extract existing agent tracking header if present."""
@@ -369,68 +358,43 @@ class AgentTrackingHelper:
         }
 
 
-def main():
-    """Main entry point for the script."""
+def _create_argument_parser():
+    """Create and configure argument parser"""
     parser = argparse.ArgumentParser(
         description='Add or update agent tracking headers in modified files'
     )
-    
-    parser.add_argument(
-        'file_path',
-        help='Path to the file to update'
-    )
-    
-    parser.add_argument(
-        '--agent',
-        required=True,
-        help='Name of the AI agent (e.g., "Claude Code")'
-    )
-    
-    parser.add_argument(
-        '--model',
-        required=True,
-        help='Model version (e.g., "claude-opus-4-1-20250805")'
-    )
-    
-    parser.add_argument(
-        '--task-id',
-        required=True,
-        help='Task or conversation ID'
-    )
-    
-    parser.add_argument(
-        '--prompt',
-        required=True,
-        dest='prompt_summary',
-        help='Brief summary of the prompt (max 200 chars)'
-    )
-    
-    parser.add_argument(
-        '--changes',
-        required=True,
-        help='Brief description of changes (max 200 chars)'
-    )
-    
-    parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Show what would be changed without modifying files'
-    )
-    
-    args = parser.parse_args()
-    
-    # Create helper and process file
+    parser.add_argument('file_path', help='Path to the file to update')
+    return parser
+
+def _add_required_arguments(parser):
+    """Add required arguments to parser"""
+    parser.add_argument('--agent', required=True, help='Name of the AI agent (e.g., "Claude Code")')
+    parser.add_argument('--model', required=True, help='Model version (e.g., "claude-opus-4-1-20250805")')
+    parser.add_argument('--task-id', required=True, help='Task or conversation ID')
+    parser.add_argument('--prompt', required=True, dest='prompt_summary', help='Brief summary of the prompt (max 200 chars)')
+    parser.add_argument('--changes', required=True, help='Brief description of changes (max 200 chars)')
+
+def _add_optional_arguments(parser):
+    """Add optional arguments to parser"""
+    parser.add_argument('--dry-run', action='store_true', help='Show what would be changed without modifying files')
+
+def _process_tracking_header(args):
+    """Process tracking header with parsed arguments"""
     helper = AgentTrackingHelper()
     success = helper.add_tracking_header(
-        file_path=args.file_path,
-        agent=args.agent,
-        model=args.model,
-        task_id=args.task_id,
-        prompt_summary=args.prompt_summary[:200],
-        changes=args.changes[:200],
-        dry_run=args.dry_run
+        file_path=args.file_path, agent=args.agent, model=args.model,
+        task_id=args.task_id, prompt_summary=args.prompt_summary[:200],
+        changes=args.changes[:200], dry_run=args.dry_run
     )
-    
+    return success
+
+def main():
+    """Main entry point for the script."""
+    parser = _create_argument_parser()
+    _add_required_arguments(parser)
+    _add_optional_arguments(parser)
+    args = parser.parse_args()
+    success = _process_tracking_header(args)
     return 0 if success else 1
 
 

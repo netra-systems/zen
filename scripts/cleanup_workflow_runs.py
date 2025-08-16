@@ -234,11 +234,8 @@ def get_repo_from_git() -> Optional[str]:
     return None
 
 
-def main():
-    """Main cleanup function."""
-    args = parse_args()
-    
-    # Auto-detect repository if not provided
+def _setup_repository_detection(args):
+    """Setup and detect repository if needed"""
     repo = args.repo
     if not repo and not args.local_only:
         repo = get_repo_from_git()
@@ -246,57 +243,71 @@ def main():
             print("Could not auto-detect repository. Use --repo flag.")
             sys.exit(1)
         print(f"Auto-detected repository: {repo}")
-    
+    return repo
+
+def _clean_workflow_runs(repo, args):
+    """Clean old workflow runs and return deletion count"""
+    old_runs = get_workflow_runs(repo, args.days, args.workflow_id)
+    print(f"Found {len(old_runs)} old workflow runs")
+    deleted_count = 0
+    for run in old_runs:
+        if args.keep_failed and run["conclusion"] == "failure":
+            print(f"Keeping failed run: {run['id']}")
+            continue
+        if args.dry_run:
+            print(f"Would delete run {run['id']} from {run['created_at']}")
+        elif delete_workflow_run(repo, run["id"]):
+            print(f"Deleted run {run['id']}")
+            deleted_count += 1
+    return deleted_count
+
+def _clean_artifacts(repo, args):
+    """Clean old artifacts and return deletion count"""
+    print(f"\nCleaning artifacts older than {args.days} days...")
+    old_artifacts = get_artifacts(repo, args.days)
+    print(f"Found {len(old_artifacts)} old artifacts")
+    deleted_count = 0
+    for artifact in old_artifacts:
+        if args.dry_run:
+            print(f"Would delete artifact: {artifact['name']}")
+        elif delete_artifact(repo, artifact["id"]):
+            print(f"Deleted artifact: {artifact['name']}")
+            deleted_count += 1
+    return deleted_count
+
+def _clean_remote_items(args, repo):
+    """Clean remote GitHub runs and artifacts"""
     total_deleted = 0
-    
-    # Clean remote GitHub runs and artifacts
     if not args.local_only and repo:
         print(f"\nCleaning GitHub runs older than {args.days} days...")
-        
-        # Get and delete old workflow runs
-        old_runs = get_workflow_runs(repo, args.days, args.workflow_id)
-        print(f"Found {len(old_runs)} old workflow runs")
-        
-        for run in old_runs:
-            if args.keep_failed and run["conclusion"] == "failure":
-                print(f"Keeping failed run: {run['id']}")
-                continue
-            
-            if args.dry_run:
-                print(f"Would delete run {run['id']} from {run['created_at']}")
-            else:
-                if delete_workflow_run(repo, run["id"]):
-                    print(f"Deleted run {run['id']}")
-                    total_deleted += 1
-        
-        # Get and delete old artifacts
-        print(f"\nCleaning artifacts older than {args.days} days...")
-        old_artifacts = get_artifacts(repo, args.days)
-        print(f"Found {len(old_artifacts)} old artifacts")
-        
-        for artifact in old_artifacts:
-            if args.dry_run:
-                print(f"Would delete artifact: {artifact['name']}")
-            else:
-                if delete_artifact(repo, artifact["id"]):
-                    print(f"Deleted artifact: {artifact['name']}")
-                    total_deleted += 1
-    
-    # Clean local directories
-    if not args.remote_only:
-        print(f"\nCleaning local directories older than {args.days} days...")
-        root_path = Path.cwd()
-        local_deleted = clean_local_directories(
-            root_path, args.days, args.dry_run
-        )
-        total_deleted += local_deleted
-        print(f"Cleaned {local_deleted} local items")
-    
-    # Summary
-    if args.dry_run:
+        total_deleted += _clean_workflow_runs(repo, args)
+        total_deleted += _clean_artifacts(repo, args)
+    return total_deleted
+
+def _clean_local_items(args):
+    """Clean local directories and return deletion count"""
+    if args.remote_only: return 0
+    print(f"\nCleaning local directories older than {args.days} days...")
+    root_path = Path.cwd()
+    local_deleted = clean_local_directories(root_path, args.days, args.dry_run)
+    print(f"Cleaned {local_deleted} local items")
+    return local_deleted
+
+def _display_cleanup_summary(total_deleted, dry_run):
+    """Display cleanup completion summary"""
+    if dry_run:
         print(f"\nDry run complete. Would delete {total_deleted} items.")
     else:
         print(f"\nCleanup complete. Deleted {total_deleted} items.")
+
+def main():
+    """Main cleanup function."""
+    args = parse_args()
+    repo = _setup_repository_detection(args)
+    total_deleted = 0
+    total_deleted += _clean_remote_items(args, repo)
+    total_deleted += _clean_local_items(args)
+    _display_cleanup_summary(total_deleted, args.dry_run)
 
 
 if __name__ == "__main__":

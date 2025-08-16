@@ -50,31 +50,30 @@ def test_ready_endpoint_success(client: TestClient):
     assert response.json() == {"status": "ready", "service": "netra-ai-platform"}
 
 def test_ready_endpoint_db_failure(client: TestClient):
-    from contextlib import asynccontextmanager
     import os
+    from unittest.mock import AsyncMock
     
     # Ensure DATABASE_URL doesn't contain "mock" which would skip the check
     original_db_url = os.environ.get("DATABASE_URL")
     os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/test_db"
     
     try:
-        mock_session = MagicMock()
+        mock_session = AsyncMock()
         mock_session.execute.side_effect = Exception("DB connection failed")
 
-        @asynccontextmanager
         async def mock_get_db_failure():
-            yield mock_session
+            return mock_session
 
-        # Patch the get_db function directly in the health module
-        with patch("app.routes.health.get_db", mock_get_db_failure):
-            response = client.get("/health/ready")
-            assert response.status_code == 503
-            
-            # Check that the response contains error information
-            response_data = response.json()
-            assert response_data["error"] == True
-            assert response_data["error_code"] == "SERVICE_UNAVAILABLE"
-            assert response_data["message"] == "Service Unavailable"
+        app.dependency_overrides[get_async_db] = mock_get_db_failure
+        
+        response = client.get("/health/ready")
+        assert response.status_code == 503
+        
+        # Check that the response contains expected error fields
+        response_data = response.json()
+        assert response_data["error"] == True
+        assert response_data["error_code"] == "SERVICE_UNAVAILABLE"
+        assert response_data["message"] == "Service Unavailable"
     finally:
         # Restore original value
         if original_db_url is not None:

@@ -97,7 +97,7 @@ class ServiceConfigValidator:
         stat = self.context.config_path.stat()
         modified_time = datetime.fromtimestamp(stat.st_mtime)
         age = datetime.now() - modified_time
-        age_days = age.days
+        age_days = max(0, age.days)  # Ensure non-negative age
         
         if age_days > self.stale_threshold_days:
             return ConfigValidationResult(

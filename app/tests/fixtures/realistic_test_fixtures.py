@@ -83,36 +83,51 @@ class RealisticTestFixtures:
         """Generate realistic user data"""
         users = []
         roles = ["admin", "developer", "analyst", "viewer"]
-        
         for i in range(count):
-            org_id = i % org_count  # Distribute users across orgs
-            
-            user = {
-                "id": f"user_{i:04d}",
-                "email": f"user{i}@example.com",
-                "name": f"Test User {i}",
-                "organization_id": f"org_{org_id:03d}",
-                "role": roles[i % len(roles)],
-                "created_at": (datetime.now(timezone.utc) - timedelta(days=i)).isoformat(),
-                "last_login": (datetime.now(timezone.utc) - timedelta(hours=i % 48)).isoformat(),
-                "api_keys": [
-                    {
-                        "key": f"sk-test-{i:04d}-{j:02d}",
-                        "name": f"Key {j}",
-                        "created_at": datetime.now(timezone.utc).isoformat(),
-                        "last_used": (datetime.now(timezone.utc) - timedelta(hours=j * 24)).isoformat()
-                    }
-                    for j in range(2)
-                ],
-                "preferences": {
-                    "theme": "dark" if i % 2 else "light",
-                    "notifications": True,
-                    "timezone": "UTC"
-                }
-            }
+            user = {**self._build_user_base_info(i, org_count, roles), 
+                   **self._build_user_timestamps(i), 
+                   "api_keys": self._build_user_api_keys(i), 
+                   "preferences": self._build_user_preferences(i)}
             users.append(user)
-        
         return users
+    
+    def _build_user_base_info(self, index: int, org_count: int, roles: List[str]) -> Dict[str, Any]:
+        """Build basic user information"""
+        org_id = index % org_count
+        return {
+            "id": f"user_{index:04d}",
+            "email": f"user{index}@example.com",
+            "name": f"Test User {index}",
+            "organization_id": f"org_{org_id:03d}",
+            "role": roles[index % len(roles)]
+        }
+    
+    def _build_user_timestamps(self, index: int) -> Dict[str, str]:
+        """Build user timestamp data"""
+        return {
+            "created_at": (datetime.now(timezone.utc) - timedelta(days=index)).isoformat(),
+            "last_login": (datetime.now(timezone.utc) - timedelta(hours=index % 48)).isoformat()
+        }
+    
+    def _build_user_api_keys(self, user_index: int) -> List[Dict[str, Any]]:
+        """Build user API keys"""
+        return [
+            {
+                "key": f"sk-test-{user_index:04d}-{j:02d}",
+                "name": f"Key {j}",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "last_used": (datetime.now(timezone.utc) - timedelta(hours=j * 24)).isoformat()
+            }
+            for j in range(2)
+        ]
+    
+    def _build_user_preferences(self, index: int) -> Dict[str, Any]:
+        """Build user preferences"""
+        return {
+            "theme": "dark" if index % 2 else "light",
+            "notifications": True,
+            "timezone": "UTC"
+        }
     
     def _generate_organizations(self, count: int) -> List[Dict[str, Any]]:
         """Generate realistic organization data"""
@@ -172,38 +187,51 @@ class RealisticTestFixtures:
         """Generate realistic training job data"""
         jobs = []
         statuses = ["completed", "running", "failed", "queued"]
-        
         for i in range(count):
             start_time = datetime.now(timezone.utc) - timedelta(days=i)
             duration_hours = random.randint(1, 72)
-            
-            job = {
-                "id": f"train_{i:04d}",
-                "model_name": f"model_v{i % 10}",
-                "status": statuses[i % len(statuses)],
-                "started_at": start_time.isoformat(),
-                "completed_at": (start_time + timedelta(hours=duration_hours)).isoformat() if i % 4 != 1 else None,
-                "duration_hours": duration_hours,
-                "epochs": random.randint(10, 100),
-                "batch_size": 2 ** random.randint(5, 10),
-                "learning_rate": 10 ** random.uniform(-5, -2),
-                "metrics": {
-                    "loss": random.uniform(0.1, 2.0),
-                    "accuracy": random.uniform(0.7, 0.99),
-                    "val_loss": random.uniform(0.15, 2.5),
-                    "val_accuracy": random.uniform(0.65, 0.95)
-                },
-                "resource_usage": {
-                    "gpu_hours": duration_hours * random.randint(1, 8),
-                    "cpu_hours": duration_hours * random.randint(4, 32),
-                    "memory_gb_hours": duration_hours * random.randint(16, 256),
-                    "storage_gb": random.randint(10, 1000)
-                },
-                "cost_usd": random.uniform(10, 10000)
-            }
+            job = {**self._build_training_job_base(i, start_time, duration_hours, statuses), 
+                   **self._build_training_hyperparams(), "metrics": self._build_training_metrics(), 
+                   "resource_usage": self._build_training_resource_usage(duration_hours), "cost_usd": random.uniform(10, 10000)}
             jobs.append(job)
-        
         return jobs
+    
+    def _build_training_job_base(self, index: int, start_time: datetime, duration_hours: int, statuses: List[str]) -> Dict[str, Any]:
+        """Build basic training job information"""
+        return {
+            "id": f"train_{index:04d}",
+            "model_name": f"model_v{index % 10}",
+            "status": statuses[index % len(statuses)],
+            "started_at": start_time.isoformat(),
+            "completed_at": (start_time + timedelta(hours=duration_hours)).isoformat() if index % 4 != 1 else None,
+            "duration_hours": duration_hours
+        }
+    
+    def _build_training_hyperparams(self) -> Dict[str, Any]:
+        """Build training hyperparameters"""
+        return {
+            "epochs": random.randint(10, 100),
+            "batch_size": 2 ** random.randint(5, 10),
+            "learning_rate": 10 ** random.uniform(-5, -2)
+        }
+    
+    def _build_training_metrics(self) -> Dict[str, float]:
+        """Build training metrics"""
+        return {
+            "loss": random.uniform(0.1, 2.0),
+            "accuracy": random.uniform(0.7, 0.99),
+            "val_loss": random.uniform(0.15, 2.5),
+            "val_accuracy": random.uniform(0.65, 0.95)
+        }
+    
+    def _build_training_resource_usage(self, duration_hours: int) -> Dict[str, int]:
+        """Build resource usage data"""
+        return {
+            "gpu_hours": duration_hours * random.randint(1, 8),
+            "cpu_hours": duration_hours * random.randint(4, 32),
+            "memory_gb_hours": duration_hours * random.randint(16, 256),
+            "storage_gb": random.randint(10, 1000)
+        }
     
     def _generate_inference_endpoints(self, count: int) -> List[Dict[str, Any]]:
         """Generate realistic inference endpoint data"""
@@ -279,72 +307,100 @@ class RealisticTestFixtures:
     
     def _generate_metrics_data(self, days: int) -> Dict[str, Any]:
         """Generate realistic metrics data"""
-        metrics = {
+        metrics = self._init_metrics_structure()
+        for day in range(days):
+            for hour in range(24):
+                timestamp = self._create_timestamp(day, hour)
+                self._add_all_metrics(metrics, timestamp, day, hour)
+        return metrics
+    
+    def _init_metrics_structure(self) -> Dict[str, List]:
+        """Initialize empty metrics structure"""
+        return {
             "gpu_utilization": [],
             "memory_usage": [],
             "request_latency": [],
             "cost_data": [],
             "error_rates": []
         }
-        
-        # Generate hourly metrics
-        for day in range(days):
-            for hour in range(24):
-                timestamp = datetime.now(timezone.utc) - timedelta(days=day, hours=hour)
-                
-                # GPU utilization with daily patterns
-                base_gpu = 40 if 8 <= hour <= 20 else 20
-                gpu_util = base_gpu + random.gauss(0, 10)
-                
-                metrics["gpu_utilization"].append({
-                    "timestamp": timestamp.isoformat(),
-                    "value": max(0, min(100, gpu_util)),
-                    "gpu_id": "gpu_0"
-                })
-                
-                # Memory usage with gradual increase
-                base_memory = 50 + (day * 0.5)  # Gradual increase
-                memory = base_memory + random.gauss(0, 5)
-                
-                metrics["memory_usage"].append({
-                    "timestamp": timestamp.isoformat(),
-                    "value_gb": max(0, memory),
-                    "total_gb": 100
-                })
-                
-                # Request latency
-                base_latency = 100 if 9 <= hour <= 17 else 50
-                latency = base_latency + random.gauss(0, 20)
-                
-                metrics["request_latency"].append({
-                    "timestamp": timestamp.isoformat(),
-                    "p50_ms": max(10, latency),
-                    "p95_ms": max(20, latency * 2),
-                    "p99_ms": max(30, latency * 3)
-                })
-                
-                # Cost data
-                hourly_cost = random.uniform(10, 100)
-                metrics["cost_data"].append({
-                    "timestamp": timestamp.isoformat(),
-                    "compute_cost": hourly_cost * 0.6,
-                    "storage_cost": hourly_cost * 0.2,
-                    "network_cost": hourly_cost * 0.1,
-                    "other_cost": hourly_cost * 0.1,
-                    "total_cost": hourly_cost
-                })
-                
-                # Error rates
-                base_error_rate = 0.01
-                error_spike = 0.1 if hour == 14 and day % 7 == 3 else 0  # Weekly spike
-                
-                metrics["error_rates"].append({
-                    "timestamp": timestamp.isoformat(),
-                    "rate": min(1.0, base_error_rate + error_spike + random.gauss(0, 0.002)),
-                    "total_requests": random.randint(1000, 10000)
-                })
-        
-        return metrics
+    
+    def _create_timestamp(self, day: int, hour: int) -> datetime:
+        """Create timestamp for metrics data point"""
+        return datetime.now(timezone.utc) - timedelta(days=day, hours=hour)
+    
+    def _add_all_metrics(self, metrics: Dict, timestamp: datetime, day: int, hour: int) -> None:
+        """Add all metric types for a given timestamp"""
+        metrics["gpu_utilization"].append(self._generate_gpu_metric(timestamp, hour))
+        metrics["memory_usage"].append(self._generate_memory_metric(timestamp, day))
+        metrics["request_latency"].append(self._generate_latency_metric(timestamp, hour))
+        metrics["cost_data"].append(self._generate_cost_metric(timestamp))
+        metrics["error_rates"].append(self._generate_error_rate_metric(timestamp, day, hour))
+    
+    def _generate_gpu_metric(self, timestamp: datetime, hour: int) -> Dict[str, Any]:
+        """Generate GPU utilization metric"""
+        base_gpu = self._calculate_gpu_base(hour)
+        gpu_util = base_gpu + random.gauss(0, 10)
+        return {
+            "timestamp": timestamp.isoformat(),
+            "value": max(0, min(100, gpu_util)),
+            "gpu_id": "gpu_0"
+        }
+    
+    def _calculate_gpu_base(self, hour: int) -> int:
+        """Calculate base GPU utilization by hour"""
+        return 40 if 8 <= hour <= 20 else 20
+    
+    def _generate_memory_metric(self, timestamp: datetime, day: int) -> Dict[str, Any]:
+        """Generate memory usage metric"""
+        base_memory = 50 + (day * 0.5)
+        memory = base_memory + random.gauss(0, 5)
+        return {
+            "timestamp": timestamp.isoformat(),
+            "value_gb": max(0, memory),
+            "total_gb": 100
+        }
+    
+    def _generate_latency_metric(self, timestamp: datetime, hour: int) -> Dict[str, Any]:
+        """Generate request latency metric"""
+        base_latency = self._calculate_latency_base(hour)
+        latency = base_latency + random.gauss(0, 20)
+        return {
+            "timestamp": timestamp.isoformat(),
+            "p50_ms": max(10, latency),
+            "p95_ms": max(20, latency * 2),
+            "p99_ms": max(30, latency * 3)
+        }
+    
+    def _calculate_latency_base(self, hour: int) -> int:
+        """Calculate base latency by hour"""
+        return 100 if 9 <= hour <= 17 else 50
+    
+    def _generate_cost_metric(self, timestamp: datetime) -> Dict[str, Any]:
+        """Generate cost breakdown metric"""
+        hourly_cost = random.uniform(10, 100)
+        return {
+            "timestamp": timestamp.isoformat(),
+            "compute_cost": hourly_cost * 0.6,
+            "storage_cost": hourly_cost * 0.2,
+            "network_cost": hourly_cost * 0.1,
+            "other_cost": hourly_cost * 0.1,
+            "total_cost": hourly_cost
+        }
+    
+    def _generate_error_rate_metric(self, timestamp: datetime, day: int, hour: int) -> Dict[str, Any]:
+        """Generate error rate metric"""
+        base_error_rate = 0.01
+        error_spike = self._calculate_error_spike(day, hour)
+        final_rate = min(1.0, base_error_rate + error_spike + random.gauss(0, 0.002))
+        return {
+            "timestamp": timestamp.isoformat(),
+            "rate": final_rate,
+            "total_requests": random.randint(1000, 10000)
+        }
+    
+    def _calculate_error_spike(self, day: int, hour: int) -> float:
+        """Calculate error spike for weekly pattern"""
+        return 0.1 if hour == 14 and day % 7 == 3 else 0
     
     def _generate_corpus_data(self) -> Dict[str, Any]:
         """Generate realistic corpus data"""
