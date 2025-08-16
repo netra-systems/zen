@@ -37,6 +37,7 @@ const initialState = {
   // Thread management
   activeThreadId: null,
   threads: new Map(),
+  isThreadLoading: false,
   
   // Message history
   messages: [],
@@ -144,7 +145,7 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
           timestamp: Date.now(),
           threadId: state.activeThreadId || undefined,
           runId: (event.payload as any)?.run_id,
-          agentName: (event.payload as any)?.agent_name
+          agentName: (event.payload as any)?.agent_id || (event.payload as any)?.agent_type
         };
         state.wsEventBuffer.push(wsEvent);
         
@@ -162,8 +163,15 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
         });
         
         switch (event.type) {
+          case 'thread_loading':
+            // Handle thread loading start event
+            set({
+              isThreadLoading: true
+            }, false, 'thread_loading');
+            break;
+            
           case 'agent_started': {
-            const agentName = event.payload.agent_name || 'Unknown Agent';
+            const agentName = event.payload.agent_id || event.payload.agent_type || 'Unknown Agent';
             const executedAgents = new Map(state.executedAgents);
             const agentIterations = new Map(state.agentIterations);
             
@@ -240,10 +248,10 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             const thinkingMessage: ChatMessage = {
               id: generateUniqueId('thinking'),
               role: 'assistant',
-              content: `🤔 ${event.payload.agent_name}: ${event.payload.thought}`,
+              content: `🤔 ${event.payload.agent_id || event.payload.agent_type || 'Agent'}: ${event.payload.thought}`,
               timestamp: Date.now(),
               metadata: {
-                agentName: event.payload.agent_name
+                agentName: event.payload.agent_id || event.payload.agent_type || 'Agent'
               }
             };
             get().addMessage(thinkingMessage);
@@ -254,7 +262,7 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
                 partialContent: state.mediumLayerData?.partialContent || '',
                 stepNumber: event.payload.step_number,
                 totalSteps: event.payload.total_steps,
-                agentName: event.payload.agent_name
+                agentName: event.payload.agent_id || event.payload.agent_type || 'Agent'
               }
             }, false, 'agent_thinking');
             break;
@@ -271,7 +279,7 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
                 content: event.payload.content,
                 timestamp: Date.now(),
                 metadata: {
-                  agentName: event.payload.agent_name
+                  agentName: event.payload.agent_id || event.payload.agent_type || 'Agent'
                 }
               };
               get().addMessage(partialMessage);
@@ -285,14 +293,14 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
                   : (currentMedium?.partialContent || '') + event.payload.content,
                 stepNumber: currentMedium?.stepNumber || 0,
                 totalSteps: currentMedium?.totalSteps || 0,
-                agentName: event.payload.agent_name
+                agentName: event.payload.agent_id || event.payload.agent_type || 'Agent'
               }
             }, false, 'partial_result');
             break;
           }
             
           case 'agent_completed': {
-            const agentName = event.payload.agent_name || 'Unknown Agent';
+            const agentName = event.payload.agent_id || event.payload.agent_type || 'Unknown Agent';
             const durationMs = event.payload.duration_ms || 0;
             const executedAgents = new Map(state.executedAgents);
             const execution = executedAgents.get(agentName);
@@ -403,7 +411,8 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
               
               set({
                 messages: formattedMessages,
-                activeThreadId: event.payload.thread_id
+                activeThreadId: event.payload.thread_id,
+                isThreadLoading: false
               }, false, 'thread_loaded');
             }
             break;
@@ -476,7 +485,7 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
               content: event.payload.error_message,
               timestamp: Date.now(),
               metadata: {
-                agentName: event.payload.agent_name
+                agentName: event.payload.agent_id || event.payload.agent_type || 'Agent'
               }
             };
             get().addMessage(errorMessage);
@@ -522,12 +531,17 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
         activeThreadId: threadId 
       }, false, 'setActiveThread'),
       
+      setThreadLoading: (isLoading) => set({
+        isThreadLoading: isLoading
+      }, false, 'setThreadLoading'),
+      
       clearMessages: () => set({ 
         messages: [] 
       }, false, 'clearMessages'),
       
       loadMessages: (messages) => set({ 
-        messages 
+        messages,
+        isThreadLoading: false
       }, false, 'loadMessages'),
       
       // Sub-agent actions (for compatibility with old chatStore)

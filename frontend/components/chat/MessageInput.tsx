@@ -97,7 +97,7 @@ export const MessageInput: React.FC = () => {
       sendMessage({ 
         type: 'user_message', 
         payload: { 
-          text: trimmedMessage, 
+          content: trimmedMessage, 
           references: [],
           thread_id: threadId 
         } 

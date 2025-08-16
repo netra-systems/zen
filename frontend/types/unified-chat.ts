@@ -8,9 +8,12 @@
 export interface AgentStartedEvent {
   type: 'agent_started';
   payload: {
-    agent_name: string;
-    timestamp: number;
+    agent_id: string;
+    agent_type: string;
     run_id: string;
+    timestamp?: string;
+    status?: string;
+    message?: string;
   };
 }
 
@@ -18,7 +21,8 @@ export interface ToolExecutingEvent {
   type: 'tool_executing';
   payload: {
     tool_name: string;
-    agent_name: string;
+    agent_id?: string;
+    agent_type?: string;
     timestamp: number;
   };
 }
@@ -38,7 +42,8 @@ export interface AgentThinkingEvent {
   type: 'agent_thinking';
   payload: {
     thought: string;
-    agent_name: string;
+    agent_id?: string;
+    agent_type?: string;
     step_number: number;
     total_steps: number;
   };
@@ -48,7 +53,8 @@ export interface PartialResultEvent {
   type: 'partial_result';
   payload: {
     content: string;
-    agent_name: string;
+    agent_id?: string;
+    agent_type?: string;
     is_complete: boolean;
   };
 }
@@ -68,7 +74,8 @@ export interface MediumLayerData {
 export interface AgentCompletedEvent {
   type: 'agent_completed';
   payload: {
-    agent_name: string;
+    agent_id?: string;
+    agent_type?: string;
     duration_ms: number;
     result: Record<string, unknown>;  // Agent-specific result data
     metrics: Record<string, unknown>; // Performance metrics
@@ -107,7 +114,8 @@ export interface ErrorEvent {
   payload: {
     error_message: string;
     error_code: string;
-    agent_name?: string;
+    agent_id?: string;
+    agent_type?: string;
     recoverable: boolean;
   };
 }
@@ -161,7 +169,8 @@ export interface ActionStep {
 }
 
 export interface AgentMetric {
-  agent_name: string;
+  agent_id: string;
+  agent_type?: string;
   duration_ms: number;
   tokens_used?: number;
   tools_executed?: number;
@@ -188,6 +197,13 @@ export interface ThreadCreatedEvent {
     thread_id: string;
     user_id: string;
     created_at: number;
+  };
+}
+
+export interface ThreadLoadingEvent {
+  type: 'thread_loading';
+  payload: {
+    thread_id: string;
   };
 }
 
@@ -245,6 +261,7 @@ export type UnifiedWebSocketEvent =
   | FinalReportEvent
   | ErrorEvent
   | ThreadCreatedEvent
+  | ThreadLoadingEvent
   | ThreadLoadedEvent
   | ThreadRenamedEvent
   | RunStartedEvent
@@ -299,6 +316,7 @@ export interface UnifiedChatState {
   // Thread management
   activeThreadId: string | null;
   threads: Map<string, unknown>;
+  isThreadLoading: boolean;
   
   // Message history
   messages: ChatMessage[];
@@ -342,6 +360,7 @@ export interface UnifiedChatState {
   setProcessing: (isProcessing: boolean) => void;
   setConnectionStatus: (isConnected: boolean, error?: string) => void;
   setActiveThread: (threadId: string | null) => void;
+  setThreadLoading: (isLoading: boolean) => void;
   clearMessages: () => void;
   loadMessages: (messages: ChatMessage[]) => void;
   

@@ -34,7 +34,7 @@ describe('Agent Provider Integration', () => {
         const sendMessage = () => {
           setIsProcessing(true);
           if (wsContext?.sendMessage) {
-            wsContext.sendMessage({ type: 'user_message', payload: { text: 'test message' } } as any);
+            wsContext.sendMessage({ type: 'user_message', payload: { content: 'test message' } } as any);
           }
         };
         
