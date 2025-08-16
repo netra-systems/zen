@@ -70,7 +70,7 @@ class TestRealDatabaseServices:
             @retry(
                 stop=stop_after_attempt(max_attempts),
                 wait=wait_exponential(multiplier=1, min=1, max=10),
-                retry_if=retry_if_exception_type((ConnectionError, TimeoutError, asyncio.TimeoutError))
+                retry=retry_if_exception_type((ConnectionError, TimeoutError, asyncio.TimeoutError))
             )
             @functools.wraps(func)
             async def wrapper(*args, **kwargs):

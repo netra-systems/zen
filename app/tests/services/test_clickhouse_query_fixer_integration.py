@@ -71,7 +71,7 @@ def _setup_integration_test() -> tuple:
 
 def _setup_expected_result(mock_client, expected_result: list) -> None:
     """Setup expected query result"""
-    fixed_query = "SELECT arrayElement(metrics.value, 1) as metric_value, timestamp FROM performance_data"
+    fixed_query = "SELECT toFloat64OrZero(arrayElement(metrics.value, 1)) as metric_value, timestamp FROM performance_data"
     mock_client.set_query_result(fixed_query, expected_result)
 
 
@@ -88,7 +88,7 @@ def _verify_end_to_end_processing(result, expected_result, interceptor, mock_cli
     
     executed = mock_client.get_executed_queries()
     assert len(executed) == 1
-    assert "arrayElement(metrics.value, 1)" in executed[0]
+    assert "toFloat64OrZero(arrayElement(metrics.value, 1))" in executed[0]
 
 
 def _get_batch_queries() -> list:

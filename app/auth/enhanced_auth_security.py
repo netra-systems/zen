@@ -12,7 +12,7 @@ from .enhanced_auth_core import (
     AuthenticationResult, AuthenticationAttempt, SecurityMetrics, SecurityConfiguration
 )
 from .enhanced_auth_validator import AuthenticationValidator
-from .enhanced_auth_sessions import AuthSessionManager
+from .enhanced_auth_sessions_modular import AuthSessionManager
 
 logger = central_logger.get_logger(__name__)
 

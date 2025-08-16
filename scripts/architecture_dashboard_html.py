@@ -135,73 +135,48 @@ class DashboardHTMLComponents:
             return 'critical'
     
     @staticmethod
+    def _generate_basic_css() -> str:
+        """Generate basic CSS reset and body styles."""
+        return "* { margin: 0; padding: 0; box-sizing: border-box; } body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }"
+
+    @staticmethod
+    def _generate_layout_css() -> str:
+        """Generate layout CSS for dashboard and header."""
+        return ".dashboard { max-width: 1400px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; } .header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 30px; text-align: center; } .header h1 { font-size: 2.5rem; margin-bottom: 10px; } .header p { opacity: 0.9; font-size: 1.1rem; } .main-content { padding: 30px; }"
+
+    @staticmethod
+    def _generate_metrics_css() -> str:
+        """Generate CSS for metrics cards and grid."""
+        return ".metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; } .metric-card { background: #f8f9fa; border-radius: 12px; padding: 20px; text-align: center; border-left: 4px solid #007bff; } .metric-card.critical { border-left-color: #dc3545; } .metric-card.warning { border-left-color: #ffc107; } .metric-card.success { border-left-color: #28a745; } .metric-value { font-size: 2rem; font-weight: bold; color: #333; } .metric-label { font-size: 0.9rem; color: #666; margin-top: 5px; }"
+
+    @staticmethod
+    def _generate_charts_css() -> str:
+        """Generate CSS for charts section."""
+        return ".charts-section { margin: 30px 0; } .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; } .chart-container { background: #f8f9fa; border-radius: 12px; padding: 20px; height: 400px; }"
+
+    @staticmethod
+    def _generate_table_css() -> str:
+        """Generate CSS for violations table."""
+        return ".violations-section { margin-top: 30px; } .violations-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); } .violations-table th { background: #e9ecef; padding: 15px; text-align: left; font-weight: 600; } .violations-table td { padding: 12px 15px; border-bottom: 1px solid #eee; } .severity-critical { color: #dc3545; font-weight: bold; } .severity-high { color: #fd7e14; font-weight: bold; } .severity-medium { color: #ffc107; font-weight: bold; }"
+
+    @staticmethod
+    def _generate_recommendations_css() -> str:
+        """Generate CSS for recommendations section."""
+        return ".recommendations { background: #e7f3ff; border-radius: 8px; padding: 20px; margin-top: 30px; } .recommendations h3 { color: #0066cc; margin-bottom: 15px; } .recommendations ul { list-style: none; } .recommendations li { padding: 8px 0; border-bottom: 1px solid #ddd; position: relative; padding-left: 20px; } .recommendations li:before { content: '✓'; position: absolute; left: 0; color: #28a745; font-weight: bold; }"
+
+    @staticmethod
+    def _generate_tabs_css() -> str:
+        """Generate CSS for tabs and footer."""
+        return ".tab-container { margin: 20px 0; } .tabs { display: flex; border-bottom: 2px solid #eee; } .tab { padding: 12px 24px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.3s; } .tab.active { border-bottom-color: #007bff; color: #007bff; font-weight: bold; } .tab-content { display: none; padding: 20px 0; } .tab-content.active { display: block; } .footer { text-align: center; padding: 20px; color: #666; border-top: 1px solid #eee; }"
+
+    @staticmethod
     def _generate_css_styles() -> str:
-        """Generate comprehensive CSS styles"""
-        return """
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh; padding: 20px;
-        }
-        .dashboard { 
-            max-width: 1400px; margin: 0 auto; background: white; 
-            border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden;
-        }
-        .header { 
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white; padding: 30px; text-align: center; 
-        }
-        .header h1 { font-size: 2.5rem; margin-bottom: 10px; }
-        .header p { opacity: 0.9; font-size: 1.1rem; }
-        .main-content { padding: 30px; }
-        .metrics-grid { 
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
-            gap: 20px; margin-bottom: 30px; 
-        }
-        .metric-card { 
-            background: #f8f9fa; border-radius: 12px; padding: 20px; text-align: center;
-            border-left: 4px solid #007bff;
-        }
-        .metric-card.critical { border-left-color: #dc3545; }
-        .metric-card.warning { border-left-color: #ffc107; }
-        .metric-card.success { border-left-color: #28a745; }
-        .metric-value { font-size: 2rem; font-weight: bold; color: #333; }
-        .metric-label { font-size: 0.9rem; color: #666; margin-top: 5px; }
-        .charts-section { margin: 30px 0; }
-        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
-        .chart-container { background: #f8f9fa; border-radius: 12px; padding: 20px; height: 400px; }
-        .violations-section { margin-top: 30px; }
-        .violations-table { 
-            width: 100%; border-collapse: collapse; background: white; 
-            border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .violations-table th { background: #e9ecef; padding: 15px; text-align: left; font-weight: 600; }
-        .violations-table td { padding: 12px 15px; border-bottom: 1px solid #eee; }
-        .severity-critical { color: #dc3545; font-weight: bold; }
-        .severity-high { color: #fd7e14; font-weight: bold; }
-        .severity-medium { color: #ffc107; font-weight: bold; }
-        .recommendations { 
-            background: #e7f3ff; border-radius: 8px; padding: 20px; margin-top: 30px;
-        }
-        .recommendations h3 { color: #0066cc; margin-bottom: 15px; }
-        .recommendations ul { list-style: none; }
-        .recommendations li { 
-            padding: 8px 0; border-bottom: 1px solid #ddd; 
-            position: relative; padding-left: 20px;
-        }
-        .recommendations li:before { 
-            content: "✓"; position: absolute; left: 0; color: #28a745; font-weight: bold;
-        }
-        .tab-container { margin: 20px 0; }
-        .tabs { display: flex; border-bottom: 2px solid #eee; }
-        .tab { 
-            padding: 12px 24px; cursor: pointer; border-bottom: 2px solid transparent;
-            transition: all 0.3s;
-        }
-        .tab.active { border-bottom-color: #007bff; color: #007bff; font-weight: bold; }
-        .tab-content { display: none; padding: 20px 0; }
-        .tab-content.active { display: block; }
-        .footer { text-align: center; padding: 20px; color: #666; border-top: 1px solid #eee; }
-    </style>"""
+        """Generate comprehensive CSS styles."""
+        basic = DashboardHTMLComponents._generate_basic_css()
+        layout = DashboardHTMLComponents._generate_layout_css()
+        metrics = DashboardHTMLComponents._generate_metrics_css()
+        charts = DashboardHTMLComponents._generate_charts_css()
+        table = DashboardHTMLComponents._generate_table_css()
+        recommendations = DashboardHTMLComponents._generate_recommendations_css()
+        tabs = DashboardHTMLComponents._generate_tabs_css()
+        return f"<style>{basic}{layout}{metrics}{charts}{table}{recommendations}{tabs}</style>"

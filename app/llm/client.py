@@ -5,18 +5,22 @@ retry logic, and comprehensive error handling for production environments.
 """
 
 import asyncio
+import random
 from typing import Any, Dict, Optional, Type, TypeVar, AsyncIterator
 from contextlib import asynccontextmanager
 
 from app.core.circuit_breaker import (
-    CircuitBreaker, CircuitConfig, CircuitBreakerOpenError, circuit_registry
+    CircuitBreaker, CircuitBreakerOpenError, circuit_registry
 )
+from app.schemas.core_models import CircuitBreakerConfig
 from app.core.async_retry_logic import with_retry
 from app.llm.llm_manager import LLMManager
+from app.llm.resource_manager import resource_monitor
 from app.schemas.llm_config_types import LLMConfig as GenerationConfig
 from app.schemas.llm_response_types import LLMResponse
 from app.logging_config import central_logger
 from pydantic import BaseModel
+import random
 
 logger = central_logger.get_logger(__name__)
 
@@ -27,32 +31,36 @@ class LLMClientConfig:
     """Configuration for LLM client circuit breakers."""
     
     # Circuit breaker configurations for different LLM types
-    FAST_LLM_CONFIG = CircuitConfig(
+    FAST_LLM_CONFIG = CircuitBreakerConfig(
         name="fast_llm",
-        failure_threshold=3,
-        recovery_timeout=15.0,
-        timeout_seconds=5.0
+        failure_threshold=5,  # Increased from 3
+        recovery_timeout=20.0,  # Increased from 15
+        timeout_seconds=10,  # Increased from 5
+        slow_call_threshold=3.0  # Increased from 2
     )
     
-    STANDARD_LLM_CONFIG = CircuitConfig(
+    STANDARD_LLM_CONFIG = CircuitBreakerConfig(
         name="standard_llm", 
-        failure_threshold=5,
-        recovery_timeout=30.0,
-        timeout_seconds=15.0
+        failure_threshold=7,  # Increased from 5
+        recovery_timeout=45.0,  # Increased from 30
+        timeout_seconds=20,  # Increased from 15
+        slow_call_threshold=15.0  # Increased from 10
     )
     
-    SLOW_LLM_CONFIG = CircuitConfig(
+    SLOW_LLM_CONFIG = CircuitBreakerConfig(
         name="slow_llm",
         failure_threshold=3,
         recovery_timeout=60.0,
-        timeout_seconds=30.0
+        timeout_seconds=30,
+        slow_call_threshold=20.0
     )
     
-    STRUCTURED_LLM_CONFIG = CircuitConfig(
+    STRUCTURED_LLM_CONFIG = CircuitBreakerConfig(
         name="structured_llm",
         failure_threshold=3,
         recovery_timeout=20.0,
-        timeout_seconds=10.0
+        timeout_seconds=10,
+        slow_call_threshold=5.0
     )
 
 
@@ -62,6 +70,7 @@ class ResilientLLMClient:
     def __init__(self, llm_manager: LLMManager) -> None:
         self.llm_manager = llm_manager
         self._circuits: Dict[str, CircuitBreaker] = {}
+        self.resource_monitor = resource_monitor
     
     async def _get_circuit(self, config_name: str) -> CircuitBreaker:
         """Get circuit breaker for LLM configuration."""
@@ -72,11 +81,11 @@ class ResilientLLMClient:
     async def _create_circuit(self, config_name: str) -> CircuitBreaker:
         """Create new circuit breaker for configuration."""
         circuit_config = self._select_circuit_config(config_name)
-        return await circuit_registry.get_circuit(
+        return circuit_registry.get_breaker(
             f"llm_{config_name}", circuit_config
         )
     
-    def _select_circuit_config(self, config_name: str) -> CircuitConfig:
+    def _select_circuit_config(self, config_name: str) -> CircuitBreakerConfig:
         """Select appropriate circuit config based on LLM type."""
         if self._is_fast_llm(config_name):
             return LLMClientConfig.FAST_LLM_CONFIG
@@ -95,9 +104,11 @@ class ResilientLLMClient:
         return "gpt-4" in name_lower or "claude" in name_lower
     
     async def _create_simple_request(self, prompt: str, config_name: str, use_cache: bool) -> callable:
-        """Create simple LLM request function."""
+        """Create simple LLM request function with resource pooling."""
         async def _make_request() -> str:
-            return await self.llm_manager.ask_llm(prompt, config_name, use_cache)
+            pool = self.resource_monitor.get_request_pool(config_name)
+            async with pool:
+                return await self.llm_manager.ask_llm(prompt, config_name, use_cache)
         return _make_request
     
     async def _handle_circuit_open_simple(self, prompt: str, config_name: str) -> str:
@@ -128,9 +139,11 @@ class ResilientLLMClient:
         return circuit, request_fn
     
     async def _create_full_request(self, prompt: str, config_name: str, use_cache: bool) -> callable:
-        """Create full LLM request function."""
+        """Create full LLM request function with resource pooling."""
         async def _make_request() -> LLMResponse:
-            return await self.llm_manager.ask_llm_full(prompt, config_name, use_cache)
+            pool = self.resource_monitor.get_request_pool(config_name)
+            async with pool:
+                return await self.llm_manager.ask_llm_full(prompt, config_name, use_cache)
         return _make_request
     
     async def _handle_circuit_open_full(self, config_name: str) -> None:
@@ -163,7 +176,7 @@ class ResilientLLMClient:
     async def _get_structured_circuit(self, config_name: str) -> CircuitBreaker:
         """Get circuit breaker for structured LLM requests."""
         circuit_name = f"{config_name}_structured"
-        return await circuit_registry.get_circuit(
+        return circuit_registry.get_breaker(
             circuit_name, LLMClientConfig.STRUCTURED_LLM_CONFIG
         )
     
@@ -269,7 +282,7 @@ class ResilientLLMClient:
         """Get health check components for LLM and circuit."""
         llm_health = await self.llm_manager.health_check(config_name)
         circuit = await self._get_circuit(config_name)
-        circuit_status = circuit.get_status()
+        circuit_status = circuit.get_metrics()
         return llm_health, circuit_status
     
     def _build_health_response(self, llm_health: Any, circuit_status: Dict[str, Any]) -> Dict[str, Any]:
@@ -304,10 +317,10 @@ class ResilientLLMClient:
     
     def _check_circuit_health_status(self, circuit_status: Dict[str, Any]) -> str:
         """Check circuit health status and return appropriate state."""
-        circuit_health = circuit_status["health"]
-        if circuit_health == "unhealthy":
+        circuit_state = circuit_status["state"]
+        if circuit_state == "open":
             return "degraded"
-        elif circuit_health == "recovering":
+        elif circuit_state == "half_open":
             return "recovering"
         return "healthy"
     
@@ -320,7 +333,7 @@ class ResilientLLMClient:
     
     async def get_all_circuit_status(self) -> Dict[str, Dict[str, Any]]:
         """Get status of all LLM circuits."""
-        return {name: circuit.get_status() 
+        return {name: circuit.get_metrics() 
                 for name, circuit in self._circuits.items()}
 
 
@@ -336,7 +349,9 @@ class RetryableLLMClient(ResilientLLMClient):
                                 prompt: str, 
                                 llm_config_name: str, 
                                 use_cache: bool = True) -> str:
-        """Ask LLM with retry logic and circuit breaker."""
+        """Ask LLM with retry logic, jitter, and circuit breaker."""
+        # Add jitter to prevent thundering herd
+        await asyncio.sleep(random.uniform(0, 0.5))
         return await self.ask_llm(prompt, llm_config_name, use_cache)
     
     async def _call_structured_llm(self, prompt: str, config_name: str, 
@@ -349,7 +364,9 @@ class RetryableLLMClient(ResilientLLMClient):
     @with_retry(max_attempts=3, delay=1.0, backoff_factor=2.0)
     async def ask_structured_llm_with_retry(self, prompt: str, llm_config_name: str, 
                                            schema: Type[T], use_cache: bool = True, **kwargs) -> T:
-        """Ask structured LLM with retry logic."""
+        """Ask structured LLM with retry logic and jitter."""
+        # Add jitter to prevent thundering herd
+        await asyncio.sleep(random.uniform(0, 0.5))
         return await self._call_structured_llm(
             prompt, llm_config_name, schema, use_cache, **kwargs
         )

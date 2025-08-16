@@ -12,7 +12,6 @@ import asyncio
 from enum import Enum
 
 from app.core.exceptions_base import ValidationError as ValidationException
-from app.core.interfaces_monitoring import ComplianceMetrics
 
 
 class ViolationSeverity(Enum):

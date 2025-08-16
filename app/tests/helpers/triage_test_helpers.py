@@ -55,7 +55,7 @@ class MockLLMManager:
     
     def _create_side_effect(self):
         """Create side effect function for mock"""
-        async def side_effect(*args, **kwargs):
+        async def side_effect(prompt, model=None, **llm_kwargs):
             return await self._get_next_response()
         return side_effect
     
@@ -84,7 +84,7 @@ class MockLLMManager:
     
     def _create_structured_side_effect(self):
         """Create side effect for structured LLM calls"""
-        async def side_effect(*args, **kwargs):
+        async def side_effect(prompt, response_model=None, **llm_kwargs):
             return await self._get_structured_response()
         return side_effect
     
@@ -286,13 +286,13 @@ class AsyncTestHelpers:
     """Helpers for async testing"""
     
     @staticmethod
-    async def create_timeout_llm(*args, **kwargs):
+    async def create_timeout_llm(prompt, model=None, **llm_kwargs):
         """Create LLM that times out"""
         await asyncio.sleep(0.1)
         raise asyncio.TimeoutError("LLM request timed out")
     
     @staticmethod
-    def create_rate_limit_error(*args, **kwargs):
+    def create_rate_limit_error(prompt, model=None, **llm_kwargs):
         """Create rate limit error"""
         raise Exception("Rate limit exceeded. Please try again later.")
     

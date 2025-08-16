@@ -8,6 +8,8 @@ from app.agents.supervisor.execution_context import (
 from app.agents.supervisor.execution_engine import ExecutionEngine
 from app.services.state_persistence_service import state_persistence_service
 from app.logging_config import central_logger
+from app.llm.observability import generate_llm_correlation_id
+from app.agents.supervisor.observability_flow import get_supervisor_flow_logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import TYPE_CHECKING
 
@@ -27,13 +29,19 @@ class PipelineExecutor:
         self.websocket_manager = websocket_manager
         self.db_session = db_session
         self.state_persistence = state_persistence_service
+        self.flow_logger = get_supervisor_flow_logger()
     
     async def execute_pipeline(self, pipeline: List[PipelineStep],
                               state: DeepAgentState, run_id: str,
                               context: Dict[str, str]) -> None:
         """Execute the agent pipeline."""
+        correlation_id = generate_llm_correlation_id()
+        flow_id = self.flow_logger.generate_flow_id()
+        self.flow_logger.start_flow(flow_id, correlation_id, len(pipeline))
+        
         exec_context = self._build_execution_context(run_id, context)
-        await self._run_pipeline_with_hooks(pipeline, state, exec_context)
+        await self._run_pipeline_with_hooks(pipeline, state, exec_context, flow_id)
+        self.flow_logger.complete_flow(flow_id)
     
     def _build_execution_context(self, run_id: str, 
                                 context: Dict[str, str]) -> AgentExecutionContext:
@@ -57,18 +65,21 @@ class PipelineExecutor:
     
     async def _run_pipeline_with_hooks(self, pipeline: List[PipelineStep],
                                       state: DeepAgentState,
-                                      context: AgentExecutionContext) -> None:
+                                      context: AgentExecutionContext,
+                                      flow_id: str) -> None:
         """Run pipeline with error handling."""
         try:
-            await self._execute_and_process(pipeline, state, context)
+            await self._execute_and_process(pipeline, state, context, flow_id)
         except Exception as e:
             await self._handle_pipeline_error(state, e)
     
     async def _execute_and_process(self, pipeline: List[PipelineStep],
                                   state: DeepAgentState,
-                                  context: AgentExecutionContext) -> None:
+                                  context: AgentExecutionContext,
+                                  flow_id: str) -> None:
         """Execute pipeline and process results."""
-        results = await self.engine.execute_pipeline(pipeline, context, state)
+        self._log_pipeline_execution_type(flow_id, pipeline)
+        results = await self._execute_with_step_logging(pipeline, context, state, flow_id)
         self._process_results(results, state)
     
     async def _handle_pipeline_error(self, state: DeepAgentState, 
@@ -83,6 +94,35 @@ class PipelineExecutor:
         for result in results:
             if result.success and result.state:
                 state.merge_from(result.state)
+
+    def _log_pipeline_execution_type(self, flow_id: str, pipeline: List[PipelineStep]) -> None:
+        """Log pipeline execution type (parallel vs sequential)."""
+        agent_names = self._extract_agent_names(pipeline)
+        if len(agent_names) > 1:
+            self.flow_logger.log_parallel_execution(flow_id, agent_names)
+        else:
+            self.flow_logger.log_sequential_execution(flow_id, agent_names)
+
+    def _extract_agent_names(self, pipeline: List[PipelineStep]) -> List[str]:
+        """Extract agent names from pipeline steps."""
+        return [step.agent_name for step in pipeline if hasattr(step, 'agent_name')]
+
+    async def _execute_with_step_logging(self, pipeline: List[PipelineStep],
+                                        context: AgentExecutionContext,
+                                        state: DeepAgentState, 
+                                        flow_id: str) -> List[AgentExecutionResult]:
+        """Execute pipeline with step transition logging."""
+        for i, step in enumerate(pipeline):
+            step_name = getattr(step, 'agent_name', f'step_{i}')
+            self.flow_logger.step_started(flow_id, step_name, "agent")
+        
+        results = await self.engine.execute_pipeline(pipeline, context, state)
+        
+        for i, step in enumerate(pipeline):
+            step_name = getattr(step, 'agent_name', f'step_{i}')
+            self.flow_logger.step_completed(flow_id, step_name, "agent")
+        
+        return results
     
     async def finalize_state(self, state: DeepAgentState, 
                             context: Dict[str, str]) -> None:

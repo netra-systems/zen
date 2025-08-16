@@ -17,8 +17,9 @@ from app.logging_config import central_logger
 from app.schemas.core_enums import CircuitBreakerState
 from app.schemas.core_models import CircuitBreakerConfig, HealthCheckResult
 
-# Import DatabaseHealthChecker from consolidated location
+# Import consolidated health checkers from single sources of truth
 from .shared_health_types import DatabaseHealthChecker
+from .circuit_breaker_health_checkers import ApiHealthChecker
 
 logger = central_logger.get_logger(__name__)
 
@@ -46,51 +47,7 @@ class HealthChecker(ABC):
 # DatabaseHealthChecker imported from shared_health_types.py
 
 
-class ApiHealthChecker(HealthChecker):
-    """Health checker for external APIs."""
-    
-    def __init__(self, endpoint: str, timeout: float = 5.0):
-        """Initialize with API endpoint."""
-        self.endpoint = endpoint
-        self.timeout = timeout
-    
-    async def check_health(self) -> HealthCheckResult:
-        """Check API endpoint health."""
-        start_time = datetime.now()
-        
-        try:
-            import aiohttp
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=self.timeout)) as session:
-                async with session.get(f"{self.endpoint}/health") as response:
-                    response_time = (datetime.now() - start_time).total_seconds()
-                    
-                    if response.status == 200:
-                        status = HealthStatus.HEALTHY
-                    elif response.status in [503, 429]:
-                        status = HealthStatus.DEGRADED
-                    else:
-                        status = HealthStatus.UNHEALTHY
-                    
-                    return HealthCheckResult(
-                        status=status,
-                        response_time=response_time,
-                        details={'status_code': response.status}
-                    )
-                    
-        except asyncio.TimeoutError:
-            response_time = (datetime.now() - start_time).total_seconds()
-            return HealthCheckResult(
-                status=HealthStatus.UNHEALTHY,
-                response_time=response_time,
-                details={'error': 'timeout'}
-            )
-        except Exception as e:
-            response_time = (datetime.now() - start_time).total_seconds()
-            return HealthCheckResult(
-                status=HealthStatus.UNHEALTHY,
-                response_time=response_time,
-                details={'error': str(e)}
-            )
+# ApiHealthChecker imported from circuit_breaker_health_checkers.py
 
 
 class AdaptiveCircuitBreaker:
@@ -343,71 +300,5 @@ class CircuitBreakerOpenError(Exception):
     pass
 
 
-class CircuitBreakerRegistry:
-    """Registry for managing circuit breakers."""
-    
-    def __init__(self):
-        """Initialize circuit breaker registry."""
-        self.breakers: Dict[str, AdaptiveCircuitBreaker] = {}
-        self.default_config = CircuitBreakerConfig()
-    
-    def get_breaker(
-        self,
-        name: str,
-        config: Optional[CircuitBreakerConfig] = None,
-        health_checker: Optional[HealthChecker] = None
-    ) -> AdaptiveCircuitBreaker:
-        """Get or create circuit breaker."""
-        if name not in self.breakers:
-            breaker_config = config or self.default_config
-            self.breakers[name] = AdaptiveCircuitBreaker(
-                name, breaker_config, health_checker
-            )
-        
-        return self.breakers[name]
-    
-    def get_all_metrics(self) -> Dict[str, Any]:
-        """Get metrics for all circuit breakers."""
-        return {
-            name: breaker.get_metrics()
-            for name, breaker in self.breakers.items()
-        }
-    
-    def cleanup_all(self) -> None:
-        """Cleanup all circuit breakers."""
-        for breaker in self.breakers.values():
-            breaker.cleanup()
-
-
-# Global circuit breaker registry
-circuit_breaker_registry = CircuitBreakerRegistry()
-
-
-# Convenience decorators
-def circuit_breaker(
-    name: str,
-    config: Optional[CircuitBreakerConfig] = None
-):
-    """Decorator to apply circuit breaker to function."""
-    def decorator(func):
-        async def wrapper(*args, **kwargs):
-            breaker = circuit_breaker_registry.get_breaker(name, config)
-            return await breaker.call(func, *args, **kwargs)
-        return wrapper
-    return decorator
-
-
-def with_health_check(
-    name: str,
-    health_checker: HealthChecker,
-    config: Optional[CircuitBreakerConfig] = None
-):
-    """Decorator to apply circuit breaker with health checking."""
-    def decorator(func):
-        async def wrapper(*args, **kwargs):
-            breaker = circuit_breaker_registry.get_breaker(
-                name, config, health_checker
-            )
-            return await breaker.call(func, *args, **kwargs)
-        return wrapper
-    return decorator
+# CircuitBreakerRegistry moved to circuit_breaker_registry_adaptive.py
+# Import from there for consolidated single source of truth

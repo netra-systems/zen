@@ -58,8 +58,8 @@ class TestRealServicesComprehensive:
             
             @retry_decorator
             @functools.wraps(func)
-            async def wrapper(*args, **kwargs):
-                return await asyncio.wait_for(func(*args, **kwargs), timeout=timeout)
+            async def wrapper(*wrapped_args, **wrapped_kwargs):
+                return await asyncio.wait_for(func(*wrapped_args, **wrapped_kwargs), timeout=timeout)
             return wrapper
         return decorator
     

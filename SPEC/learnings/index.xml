@@ -4,7 +4,7 @@
         <name>Learnings Index</name>
         <type>index</type>
         <version>1.0</version>
-        <last_updated>2025-08-16</last_updated>
+        <last_updated>2025-01-16</last_updated>
         <description>Index of all learning modules organized by category</description>
     </metadata>
     
@@ -107,6 +107,17 @@
             </learning_ids>
         </category>
         <category>
+            <name>Observability</name>
+            <file>learnings/observability.xml</file>
+            <path>SPEC/learnings/observability.xml</path>
+            <learning_count>3</learning_count>
+            <learning_ids>
+                <id>supervisor-observability-implementation</id>
+                <id>modular-observability-architecture</id>
+                <id>correlation-id-tracking</id>
+            </learning_ids>
+        </category>
+        <category>
             <name>Type Safety</name>
             <file>learnings/type_safety.xml</file>
             <path>SPEC/learnings/type_safety.xml</path>
@@ -157,7 +168,7 @@
     </usage>
     
     <statistics>
-        <total_categories>12</total_categories>
-        <total_learnings>42</total_learnings>
+        <total_categories>13</total_categories>
+        <total_learnings>45</total_learnings>
     </statistics>
 </specification>

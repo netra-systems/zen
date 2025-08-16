@@ -153,28 +153,52 @@ def _get_request_response_columns() -> str:
     return f"{request_cols},\n{response_cols}"
 
 
-def _get_metrics_governance_columns() -> str:
-    """Returns performance metrics and governance column definitions."""
+def _get_performance_finops_columns() -> str:
+    """Returns performance and finops column definitions."""
     return """        performance_latency_ms JSON,
         finops_attribution JSON,
         finops_cost JSON,
-        finops_pricing_info JSON,
-        governance_audit_context JSON,
+        finops_pricing_info JSON"""
+
+
+def _get_governance_columns() -> str:
+    """Returns governance column definitions."""
+    return """        governance_audit_context JSON,
         governance_safety JSON,
         governance_security JSON"""
 
 
-def _combine_llm_columns() -> str:
-    """Combines all LLM event table column definitions."""
-    sections = [
+def _get_metrics_governance_columns() -> str:
+    """Returns performance metrics and governance column definitions."""
+    perf_cols = _get_performance_finops_columns()
+    gov_cols = _get_governance_columns()
+    return f"{perf_cols},\n{gov_cols}"
+
+
+def _get_primary_sections() -> list:
+    """Returns primary column section functions."""
+    return [
         _get_event_metadata_columns(),
         _get_trace_context_columns(),
-        _get_identity_context_columns(),
+        _get_identity_context_columns()
+    ]
+
+
+def _get_secondary_sections() -> list:
+    """Returns secondary column section functions."""
+    return [
         _get_application_context_columns(),
         _get_request_response_columns(),
         _get_metrics_governance_columns()
     ]
-    return ",\n\n".join(sections)
+
+
+def _combine_llm_columns() -> str:
+    """Combines all LLM event table column definitions."""
+    primary = _get_primary_sections()
+    secondary = _get_secondary_sections()
+    all_sections = primary + secondary
+    return ",\n\n".join(all_sections)
 
 
 def _get_llm_events_engine_settings() -> str:

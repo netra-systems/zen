@@ -16,6 +16,7 @@ from app.agents.supervisor.execution_context import (
 from app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from app.agents.supervisor.websocket_notifier import WebSocketNotifier
 from app.agents.supervisor.fallback_manager import FallbackManager
+from app.agents.supervisor.observability_flow import get_supervisor_flow_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -37,6 +38,7 @@ class ExecutionEngine:
         self.agent_core = AgentExecutionCore(self.registry)
         self.websocket_notifier = WebSocketNotifier(self.websocket_manager)
         self.fallback_manager = FallbackManager(self.websocket_notifier)
+        self.flow_logger = get_supervisor_flow_logger()
         
     async def execute_agent(self, context: AgentExecutionContext,
                            state: DeepAgentState) -> AgentExecutionResult:
@@ -62,6 +64,12 @@ class ExecutionEngine:
         logger.error(f"Agent {context.agent_name} failed: {error}")
         if self._can_retry(context):
             return await self._retry_execution(context, state)
+        
+        # Log fallback trigger if flow_id is available
+        flow_id = getattr(context, 'flow_id', None)
+        if flow_id:
+            self.flow_logger.log_fallback_triggered(flow_id, context.agent_name, "fallback_agent")
+        
         return await self.fallback_manager.create_fallback_result(context, state, error, start_time)
     
     def _can_retry(self, context: AgentExecutionContext) -> bool:
@@ -73,6 +81,12 @@ class ExecutionEngine:
         """Retry agent execution."""
         context.retry_count += 1
         logger.info(f"Retrying {context.agent_name} ({context.retry_count}/{context.max_retries})")
+        
+        # Log retry attempt if flow_id is available
+        flow_id = getattr(context, 'flow_id', None)
+        if flow_id:
+            self.flow_logger.log_retry_attempt(flow_id, context.agent_name, context.retry_count)
+        
         await asyncio.sleep(2 ** context.retry_count)
         return await self.execute_agent(context, state)
     

@@ -93,79 +93,77 @@ class TestIsolationManager:
         
         return self.directories
     
-    def setup_environment(self) -> Dict[str, str]:
-        """Set up isolated environment variables."""
+    def _allocate_test_resources(self) -> Tuple[Dict[str, int], Dict[str, Path], int]:
+        """Allocate ports, directories, and database indexes."""
         ports = self.allocate_ports()
         dirs = self.setup_directories()
         redis_db = self.get_redis_db_index()
-        
-        # Clickhouse test database with unique name
+        return ports, dirs, redis_db
+
+    def _build_database_environment(self, ports: Dict, dirs: Dict, redis_db: int) -> Dict[str, str]:
+        """Build database-related environment variables."""
         clickhouse_db = f"test_{self.test_id}"
-        
-        # PostgreSQL test database with unique name
         postgres_db = f"netra_test_{self.test_id}"
         
-        self.environment = {
-            # Testing flags
-            'TESTING': '1',
-            'TEST_ISOLATION': '1',
-            'TEST_RUN_ID': self.test_id,
-            
-            # Ports
-            'BACKEND_PORT': str(ports.get('backend', 8000)),
-            'FRONTEND_PORT': str(ports.get('frontend', 3000)),
-            'WS_PORT': str(ports.get('ws', 8001)),
-            
-            # Backend API URL for frontend
-            'NEXT_PUBLIC_API_URL': f"http://localhost:{ports.get('backend', 8000)}",
-            
-            # Database URLs
+        return {
             'DATABASE_URL': f"sqlite+aiosqlite:///{dirs['temp']}/test.db",
             'POSTGRES_TEST_DB': postgres_db,
             'REDIS_URL': f"redis://localhost:6379/{redis_db}",
             'REDIS_DB_INDEX': str(redis_db),
             'CLICKHOUSE_URL': f"clickhouse://localhost:9000/{clickhouse_db}",
             'CLICKHOUSE_TEST_DB': clickhouse_db,
-            
-            # Directories
-            'REPORTS_DIR': str(dirs['reports']),
-            'COVERAGE_DIR': str(dirs['coverage']),
-            'FRONTEND_COVERAGE_DIR': str(dirs['frontend_coverage']),
-            'TEST_RESULTS_DIR': str(dirs['test_results']),
-            'PYTEST_CACHE_DIR': str(dirs['pytest_cache']),
-            'JEST_CACHE_DIR': str(dirs['jest_cache']),
-            'NEXT_CACHE_DIR': str(dirs['next_cache']),
-            'LOG_DIR': str(dirs['logs']),
-            'TEMP_DIR': str(dirs['temp']),
-            
-            # Logging
-            'LOG_LEVEL': 'WARNING',  # Reduce noise in tests
-            'LOG_FILE': str(dirs['logs'] / f"test_{self.test_id}.log"),
-            
-            # Node.js specific
-            'NODE_ENV': 'test',
+        }
+
+    def _build_port_environment(self, ports: Dict[str, int]) -> Dict[str, str]:
+        """Build port-related environment variables."""
+        return {
+            'BACKEND_PORT': str(ports.get('backend', 8000)),
+            'FRONTEND_PORT': str(ports.get('frontend', 3000)),
+            'WS_PORT': str(ports.get('ws', 8001)),
+            'NEXT_PUBLIC_API_URL': f"http://localhost:{ports.get('backend', 8000)}",
             'PORT': str(ports.get('frontend', 3000)),
-            
-            # Disable telemetry and analytics in tests
-            'NEXT_TELEMETRY_DISABLED': '1',
-            'DO_NOT_TRACK': '1',
-            
-            # CI environment simulation
-            'CI': 'true',
-            
-            # Secret keys for testing
+        }
+
+    def _build_directory_environment(self, dirs: Dict[str, Path]) -> Dict[str, str]:
+        """Build directory-related environment variables."""
+        return {
+            'REPORTS_DIR': str(dirs['reports']), 'COVERAGE_DIR': str(dirs['coverage']),
+            'FRONTEND_COVERAGE_DIR': str(dirs['frontend_coverage']), 'TEST_RESULTS_DIR': str(dirs['test_results']),
+            'PYTEST_CACHE_DIR': str(dirs['pytest_cache']), 'JEST_CACHE_DIR': str(dirs['jest_cache']),
+            'NEXT_CACHE_DIR': str(dirs['next_cache']), 'LOG_DIR': str(dirs['logs']),
+            'TEMP_DIR': str(dirs['temp']), 'LOG_FILE': str(dirs['logs'] / f"test_{self.test_id}.log"),
+        }
+
+    def _build_security_environment(self) -> Dict[str, str]:
+        """Build security and API key environment variables."""
+        return {
             'SECRET_KEY': f"test-secret-key-{self.test_id}",
             'JWT_SECRET': f"test-jwt-secret-{self.test_id}",
             'JWT_SECRET_KEY': f"test-jwt-secret-key-for-testing-only-must-be-32-chars-{self.test_id[:8]}",
             'FERNET_KEY': "iZAG-Kz661gRuJXEGzxgghUFnFRamgDrjDXZE6HdJkw=",
-            
-            # API keys for testing (use existing if available)
             'ANTHROPIC_API_KEY': os.getenv("ANTHROPIC_API_KEY", "test-api-key"),
             'OPENAI_API_KEY': os.getenv("OPENAI_API_KEY", "test-api-key"),
-            
-            # OAuth configuration for testing
-            'GOOGLE_CLIENT_ID': "test-google-client",
-            'GOOGLE_CLIENT_SECRET': "test-google-secret",
+            'GOOGLE_CLIENT_ID': "test-google-client", 'GOOGLE_CLIENT_SECRET': "test-google-secret",
+        }
+
+    def _build_base_environment(self) -> Dict[str, str]:
+        """Build base testing environment variables."""
+        return {
+            'TESTING': '1', 'TEST_ISOLATION': '1', 'TEST_RUN_ID': self.test_id,
+            'LOG_LEVEL': 'WARNING', 'NODE_ENV': 'test', 'NEXT_TELEMETRY_DISABLED': '1',
+            'DO_NOT_TRACK': '1', 'CI': 'true'
+        }
+
+    def setup_environment(self) -> Dict[str, str]:
+        """Set up isolated environment variables."""
+        ports, dirs, redis_db = self._allocate_test_resources()
+        
+        self.environment = {
+            **self._build_base_environment(),
+            **self._build_port_environment(ports),
+            **self._build_database_environment(ports, dirs, redis_db),
+            **self._build_directory_environment(dirs),
+            **self._build_security_environment()
         }
         
         return self.environment

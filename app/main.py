@@ -44,9 +44,7 @@ def _setup_environment_files() -> None:
         _load_base_env_file(root_path)
         _load_development_env_file(root_path)
         _load_local_development_env_file(root_path)
-    except ImportError:
-        # dotenv not installed, skip
-        pass
+    except ImportError: pass
 
 
 # Load environment files in the correct order
@@ -67,11 +65,8 @@ def _run_development_server() -> None:
     """Run the FastAPI development server with uvicorn."""
     import uvicorn
     uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        reload_dirs=["app"],
+        "main:app", host="0.0.0.0", port=8000,
+        reload=True, reload_dirs=["app"],
         reload_excludes=["*/tests/*", "*/.pytest_cache/*"]
     )
 

@@ -395,7 +395,7 @@ class TestLogClusteringAlgorithms:
                 count() as occurrence_count,
                 min(timestamp) as first_seen,
                 max(timestamp) as last_seen,
-                groupArray(JSONExtractString(metadata, 'request_id'))[1:10] as sample_requests
+                arraySlice(groupArray(JSONExtractString(metadata, 'request_id')), 1, 10) as sample_requests
             FROM netra_app_internal_logs
             WHERE timestamp >= now() - INTERVAL 1 HOUR
             GROUP BY message, template
@@ -408,7 +408,7 @@ class TestLogClusteringAlgorithms:
                 count() as unique_messages,
                 min(first_seen) as cluster_first_seen,
                 max(last_seen) as cluster_last_seen,
-                groupArray(sample_requests[1])[1:5] as cluster_samples
+                arraySlice(groupArray(arrayElement(sample_requests, 1)), 1, 5) as cluster_samples
             FROM log_signatures
             GROUP BY template
             HAVING total_occurrences > 10

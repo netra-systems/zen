@@ -30,6 +30,7 @@ from app.agents.supervisor.execution_engine import ExecutionEngine
 from app.agents.supervisor.pipeline_executor import PipelineExecutor
 from app.agents.supervisor.state_manager import StateManager
 from app.agents.supervisor.pipeline_builder import PipelineBuilder
+from app.agents.supervisor.observability_flow import get_supervisor_flow_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -80,6 +81,7 @@ class SupervisorAgent(BaseSubAgent):
         db_session_factory = lambda: self.db_session
         self.state_manager = StateManager(db_session_factory)
         self.pipeline_builder = PipelineBuilder()
+        self.flow_logger = get_supervisor_flow_logger()
     
     def _init_hooks(self) -> Dict[str, List]:
         """Initialize event hooks."""
@@ -119,30 +121,52 @@ class SupervisorAgent(BaseSubAgent):
     async def execute(self, state: DeepAgentState, 
                      run_id: str, stream_updates: bool) -> None:
         """Execute method for BaseSubAgent compatibility."""
+        flow_id = self.flow_logger.generate_flow_id()
+        self.flow_logger.start_flow(flow_id, run_id, 3)
+        
         # Delegate to run() method with extracted context from state
         thread_id = state.chat_thread_id or run_id
         user_id = state.user_id or "default_user"
         user_prompt = state.user_request or ""
         
         # Execute the main run method
+        self.flow_logger.step_started(flow_id, "execute_run", "supervisor")
         updated_state = await self.run(user_prompt, thread_id, user_id, run_id)
+        self.flow_logger.step_completed(flow_id, "execute_run", "supervisor")
         
         # Merge results back into the original state
         if updated_state:
             state = state.merge_from(updated_state)
+        self.flow_logger.complete_flow(flow_id)
     
     async def run(self, user_prompt: str, thread_id: str, 
                   user_id: str, run_id: str) -> DeepAgentState:
         """Run the supervisor agent workflow."""
+        flow_id = self.flow_logger.generate_flow_id()
+        self.flow_logger.start_flow(flow_id, run_id, 4)
+        
         async with self._execution_lock:
+            self.flow_logger.step_started(flow_id, "create_context", "initialization")
             context = self._create_run_context(thread_id, user_id, run_id)
+            self.flow_logger.step_completed(flow_id, "create_context", "initialization")
+            
+            self.flow_logger.step_started(flow_id, "initialize_state", "state_management")
             state = await self.state_manager.initialize_state(
                 user_prompt, thread_id, user_id, run_id
             )
+            self.flow_logger.step_completed(flow_id, "initialize_state", "state_management")
+            
+            self.flow_logger.step_started(flow_id, "build_pipeline", "planning")
             pipeline = self.pipeline_builder.get_execution_pipeline(
                 user_prompt, state
             )
+            self.flow_logger.step_completed(flow_id, "build_pipeline", "planning")
+            
+            self.flow_logger.step_started(flow_id, "execute_pipeline", "execution")
             await self._execute_with_context(pipeline, state, context)
+            self.flow_logger.step_completed(flow_id, "execute_pipeline", "execution")
+            
+            self.flow_logger.complete_flow(flow_id)
             return state
     
     def _create_run_context(self, thread_id: str, 

@@ -25,7 +25,7 @@ class MockClickHouseClient:
         self.should_fail = False
         self.failure_message = "Mock ClickHouse error"
         
-    async def execute(self, query: str, *args, **kwargs):
+    async def execute(self, query: str, parameters=None, **execution_options):
         """Mock query execution"""
         self.executed_queries.append(query)
         

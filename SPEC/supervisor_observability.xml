@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec name="supervisor_observability" version="1.0">
+    <metadata>
+        <description>Supervisor and DeepAgent observability specifications</description>
+        <created>2025-01-16</created>
+        <updated>2025-01-16</updated>
+        <tags>observability, supervisor, deep-agent, logging, monitoring</tags>
+    </metadata>
+
+    <overview>
+        <purpose>
+            Define comprehensive observability standards for Supervisor and DeepAgent operations,
+            including LLM call tracking, inter-agent communication, and execution flow monitoring.
+        </purpose>
+        <scope>
+            - LLM call heartbeat and data logging
+            - Inter-subagent communication tracking
+            - Supervisor TODO list and flow state monitoring
+            - Pipeline execution observability
+        </scope>
+    </overview>
+
+    <requirements>
+        <llm_observability>
+            <heartbeat_logging>
+                <level>INFO</level>
+                <interval_seconds>2.5</interval_seconds>
+                <implementation>
+                    - Use existing HeartbeatLogger from app/llm/observability.py
+                    - Log heartbeat every few seconds while LLM calls are running
+                    - Include correlation_id, agent_name, elapsed_time
+                    - Track active operations across the system
+                </implementation>
+            </heartbeat_logging>
+            
+            <input_output_logging>
+                <input_level>DEBUG</input_level>
+                <output_level>DEBUG</output_level>
+                <implementation>
+                    - Use existing DataLogger from app/llm/observability.py
+                    - Log all LLM input data with prompt preview
+                    - Log all LLM output data with response preview
+                    - Include correlation_id for tracking
+                    - Truncate long data for readability
+                </implementation>
+            </input_output_logging>
+        </llm_observability>
+
+        <inter_agent_observability>
+            <communication_logging>
+                <level>INFO</level>
+                <implementation>
+                    - Use existing SubAgentLogger from app/llm/observability.py
+                    - Log all data transfers between subagents
+                    - Track from_agent, to_agent, data_size, correlation_id
+                    - Log agent_start and agent_completion events
+                </implementation>
+            </communication_logging>
+        </inter_agent_observability>
+
+        <supervisor_flow_observability>
+            <todo_list_tracking>
+                <level>INFO</level>
+                <implementation>
+                    - Create SupervisorFlowLogger class
+                    - Track TODO list state changes
+                    - Log task additions, completions, failures
+                    - Include task priority, dependencies, status
+                    - Emit events for task transitions
+                </implementation>
+                <log_format>
+                    {
+                        "type": "supervisor_todo",
+                        "action": "task_added|task_started|task_completed|task_failed",
+                        "task_id": "string",
+                        "task_description": "string",
+                        "priority": "high|medium|low",
+                        "dependencies": ["task_id"],
+                        "status": "pending|in_progress|completed|failed",
+                        "correlation_id": "string",
+                        "timestamp": "float"
+                    }
+                </log_format>
+            </todo_list_tracking>
+
+            <flow_state_tracking>
+                <level>INFO</level>
+                <implementation>
+                    - Track overall supervisor execution flow
+                    - Log pipeline step transitions
+                    - Monitor state changes during execution
+                    - Track decision points and branches
+                    - Include flow visualization data
+                </implementation>
+                <log_format>
+                    {
+                        "type": "supervisor_flow",
+                        "event": "flow_started|step_started|step_completed|decision_made|flow_completed",
+                        "flow_id": "string",
+                        "step_name": "string",
+                        "step_type": "agent|decision|parallel|sequential",
+                        "state_summary": {
+                            "total_steps": "int",
+                            "completed_steps": "int",
+                            "current_phase": "string",
+                            "active_agents": ["agent_names"]
+                        },
+                        "correlation_id": "string",
+                        "timestamp": "float"
+                    }
+                </log_format>
+            </flow_state_tracking>
+
+            <pipeline_execution_tracking>
+                <level>INFO</level>
+                <implementation>
+                    - Log pipeline creation and initialization
+                    - Track parallel vs sequential execution
+                    - Monitor pipeline step results
+                    - Log retry attempts and fallbacks
+                    - Include timing metrics for each step
+                </implementation>
+            </pipeline_execution_tracking>
+        </supervisor_flow_observability>
+    </requirements>
+
+    <implementation_guidelines>
+        <existing_infrastructure>
+            - Leverage existing observability classes in app/llm/observability.py
+            - Use AgentObservabilityMixin from app/agents/agent_observability.py
+            - Extend rather than replace existing functionality
+            - Maintain backward compatibility
+        </existing_infrastructure>
+
+        <module_structure>
+            <file path="app/agents/supervisor/observability_flow.py">
+                - SupervisorFlowLogger class (≤100 lines)
+                - TODO list tracking methods
+                - Flow state tracking methods
+            </file>
+            <file path="app/agents/supervisor/observability_integration.py">
+                - Integration with existing supervisor components
+                - Hook registration for flow events
+                - Pipeline execution tracking
+            </file>
+            <file path="app/agents/supervisor/observability_metrics.py">
+                - Metrics collection for supervisor operations
+                - Performance tracking
+                - Resource usage monitoring
+            </file>
+        </module_structure>
+
+        <integration_points>
+            <supervisor_consolidated>
+                - Add flow logger initialization in __init__
+                - Integrate flow logging in execute() method
+                - Add TODO tracking in pipeline execution
+            </supervisor_consolidated>
+            <pipeline_executor>
+                - Add step transition logging
+                - Track parallel execution branches
+                - Log retry and fallback events
+            </pipeline_executor>
+            <state_manager>
+                - Log state transitions
+                - Track checkpoint operations
+                - Monitor recovery events
+            </state_manager>
+        </integration_points>
+    </implementation_guidelines>
+
+    <testing_requirements>
+        <unit_tests>
+            - Test all logging methods individually
+            - Verify log format compliance
+            - Test correlation ID tracking
+            - Validate truncation and sanitization
+        </unit_tests>
+        <integration_tests>
+            - Test end-to-end flow logging
+            - Verify inter-agent communication tracking
+            - Test supervisor TODO list updates
+            - Validate pipeline execution logging
+        </integration_tests>
+    </testing_requirements>
+
+    <configuration>
+        <environment_variables>
+            SUPERVISOR_FLOW_LOGGING_ENABLED=true
+            SUPERVISOR_TODO_TRACKING_ENABLED=true
+            LLM_HEARTBEAT_INTERVAL=2.5
+            SUBAGENT_COMMUNICATION_LOGGING=true
+            DEBUG_LOG_TRUNCATE_LENGTH=1000
+        </environment_variables>
+        <log_levels>
+            - Production: INFO for flow/TODO, suppress DEBUG
+            - Development: All levels enabled
+            - Testing: Configurable per test
+        </log_levels>
+    </configuration>
+
+    <monitoring_dashboards>
+        <metrics>
+            - Active LLM operations count
+            - Average LLM call duration
+            - Inter-agent communication volume
+            - Supervisor TODO completion rate
+            - Pipeline execution success rate
+            - Flow state transition frequency
+        </metrics>
+        <alerts>
+            - LLM call timeout (>30s)
+            - TODO task stuck in progress (>5min)
+            - Pipeline execution failure rate >10%
+            - Agent communication errors
+        </alerts>
+    </monitoring_dashboards>
+
+    <best_practices>
+        - Use structured JSON logging for machine parsing
+        - Include correlation IDs in all log entries
+        - Maintain 8-line function limit
+        - Keep modules under 300 lines
+        - Use async/await for all I/O operations
+        - Minimize performance impact of logging
+        - Sanitize sensitive data before logging
+        - Use appropriate log levels consistently
+    </best_practices>
+</spec>

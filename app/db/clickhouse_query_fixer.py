@@ -11,10 +11,7 @@ from app.logging_config import central_logger as logger
 
 def _create_array_replacement(field_path: str, index_expr: str) -> str:
     """Create appropriate replacement for array access."""
-    if field_path == 'metrics.value':
-        # metrics.value is already Float64 in ClickHouse Nested structure
-        return f"arrayElement({field_path}, {index_expr})"
-    elif field_path.startswith(('metrics.', 'data.')):
+    if field_path.startswith(('metrics.', 'data.')):
         return f"toFloat64OrZero(arrayElement({field_path}, {index_expr}))"
     return f"arrayElement({field_path}, {index_expr})"
 
@@ -68,8 +65,47 @@ def _validate_metrics_access(query: str):
     if _has_metrics_access(query) and not _has_array_functions(query):
         logger.warning("Query accesses nested fields without proper array functions")
 
+def _is_empty_or_whitespace(query: str) -> bool:
+    """Check if query is empty or contains only whitespace."""
+    return not query or not query.strip()
+
+def _has_nested_field_access(query: str) -> bool:
+    """Check if query has deeply nested field access patterns."""
+    return bool(re.search(r'\w+\.\w+\.\w+\.\w+', query))
+
+def _has_sql_injection_patterns(query: str) -> bool:
+    """Check for common SQL injection patterns."""
+    injection_patterns = [r';\s*DROP\s+TABLE', r';\s*DELETE\s+FROM', r';\s*INSERT\s+INTO']
+    return any(re.search(pattern, query, re.IGNORECASE) for pattern in injection_patterns)
+
+def _has_malformed_syntax(query: str) -> bool:
+    """Check for basic SQL syntax errors."""
+    query_normalized = ' '.join(query.split())  # Normalize whitespace
+    malformed_patterns = [
+        r'^\s*SELECT\s+FROM\s+',  # Missing field(s) - starts with SELECT FROM
+        r'^\s*SELECT\s+\*\s+\w+\s*$',  # Missing FROM keyword - SELECT * table
+        r'\bFROM\s*$',  # Missing table name after FROM
+        r'\bWHERE\s*$'  # Incomplete WHERE clause
+    ]
+    return any(re.search(pattern, query_normalized, re.IGNORECASE) for pattern in malformed_patterns)
+
+def _validate_query_content(query: str) -> tuple[bool, str]:
+    """Validate query content for various issues."""
+    if _is_empty_or_whitespace(query):
+        return False, "Query cannot be empty"
+    if _has_malformed_syntax(query):
+        return False, "Query contains malformed SQL syntax"
+    if _has_nested_field_access(query) and _has_invalid_array_syntax(query):
+        return False, "Query contains deeply nested field access with incorrect array syntax"
+    if _has_sql_injection_patterns(query):
+        return False, "Query contains potential SQL injection patterns"
+    return True, ""
+
 def validate_clickhouse_query(query: str) -> tuple[bool, str]:
     """Validate a ClickHouse query for common syntax errors."""
+    content_valid, content_error = _validate_query_content(query)
+    if not content_valid:
+        return False, content_error
     if _has_invalid_array_syntax(query):
         return False, "Query uses incorrect array syntax. Use arrayElement() instead of []"
     _validate_metrics_access(query)

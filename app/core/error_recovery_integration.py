@@ -12,7 +12,7 @@ from datetime import datetime
 # Core recovery components
 from app.core.error_recovery import RecoveryContext, OperationType
 from app.core.enhanced_retry_strategies import retry_manager
-from app.core.adaptive_circuit_breakers import circuit_breaker_registry
+from app.core.circuit_breaker_registry_adaptive import circuit_breaker_registry
 from app.core.graceful_degradation import degradation_manager
 from app.core.memory_recovery_strategies import memory_monitor
 from app.core.websocket_recovery_strategies import websocket_recovery_manager

@@ -249,35 +249,49 @@ class DevelopmentConfig(AppConfig):
     
     def __init__(self, **data):
         import os
-        # Load database URL from environment if not provided
-        # Note: 'database_url' is the Pydantic field name (lowercase)
-        # 'DATABASE_URL' is the environment variable name (uppercase)
+        self._load_database_url(data, os)
+        service_modes = self._get_service_modes(os)
+        self._configure_service_flags(data, service_modes)
+        self._log_service_configuration(service_modes)
+        super().__init__(**data)
+    
+    def _load_database_url(self, data: dict, os_module) -> None:
+        """Load database URL from environment if not provided."""
         if 'database_url' not in data:
-            env_db_url = os.environ.get('DATABASE_URL')
+            env_db_url = os_module.environ.get('DATABASE_URL')
             if env_db_url:
                 data['database_url'] = env_db_url
-        
-        # Check service modes from environment (set by dev launcher)
-        redis_mode = os.environ.get("REDIS_MODE", "shared").lower()
-        clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()
-        llm_mode = os.environ.get("LLM_MODE", "shared").lower()
-        
-        # Services are only disabled if explicitly set to 'disabled' mode
-        data["dev_mode_redis_enabled"] = redis_mode != "disabled"
-        data["dev_mode_clickhouse_enabled"] = clickhouse_mode != "disabled"
-        data["dev_mode_llm_enabled"] = llm_mode != "disabled"
-        
-        # Log service configuration for transparency
+    
+    def _get_service_modes(self, os_module) -> dict:
+        """Get service modes from environment variables."""
+        return {
+            'redis': os_module.environ.get("REDIS_MODE", "shared").lower(),
+            'clickhouse': os_module.environ.get("CLICKHOUSE_MODE", "shared").lower(),
+            'llm': os_module.environ.get("LLM_MODE", "shared").lower()
+        }
+    
+    def _configure_service_flags(self, data: dict, service_modes: dict) -> None:
+        """Configure service enabled flags based on modes."""
+        data["dev_mode_redis_enabled"] = service_modes['redis'] != "disabled"
+        data["dev_mode_clickhouse_enabled"] = service_modes['clickhouse'] != "disabled"
+        data["dev_mode_llm_enabled"] = service_modes['llm'] != "disabled"
+    
+    def _log_service_configuration(self, service_modes: dict) -> None:
+        """Log service configuration for transparency."""
         import logging
         logger = logging.getLogger(__name__)
-        if redis_mode == "mock":
-            logger.info("Redis running in MOCK mode")
-        if clickhouse_mode == "mock":
-            logger.info("ClickHouse running in MOCK mode")
-        if llm_mode == "mock":
-            logger.info("LLM running in MOCK mode")
-        
-        super().__init__(**data)
+        self._log_mock_services(logger, service_modes)
+    
+    def _log_mock_services(self, logger, service_modes: dict) -> None:
+        """Log which services are running in mock mode."""
+        mock_messages = {
+            'redis': "Redis running in MOCK mode",
+            'clickhouse': "ClickHouse running in MOCK mode",
+            'llm': "LLM running in MOCK mode"
+        }
+        for service, mode in service_modes.items():
+            if mode == "mock":
+                logger.info(mock_messages[service])
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""

@@ -410,76 +410,60 @@ class TestBusinessValueCritical:
         result_state = await self._execute_with_mocked_state(infra["supervisor"], user_request, run_id)
         assert result_state != None
         self._verify_performance_analysis_tools(infra["tool_dispatcher"])
+    def _verify_comparison_analysis(self, llm_manager):
+        """Verify model comparison analysis was performed"""
+        assert llm_manager.ask_llm.call_count > 0
+
     async def test_3_model_comparison_and_selection(self, setup_test_infrastructure):
         """
         Business Value Test 3: Model Comparison for Use Case
         User Story: As a Product Manager, I need to choose between GPT-4 and Claude for my chatbot
         """
         infra = setup_test_infrastructure
-        supervisor = infra["supervisor"]
-        
-        run_id = str(uuid.uuid4())
-        user_request = "Compare GPT-4 vs Claude-3 for customer support chatbot. Budget: $10k/month"
-        
-        with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
-            with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
-                with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
-                    result_state = await supervisor.run(user_request, "test_thread", "test_user", run_id)
-        
+        run_id, user_request = self._setup_test_run("Compare GPT-4 vs Claude-3 for customer support chatbot. Budget: $10k/month")
+        result_state = await self._execute_with_mocked_state(infra["supervisor"], user_request, run_id)
         assert result_state != None
-        
-        # Verify comparison analysis was performed
-        llm_manager = infra["llm_manager"]
-        assert llm_manager.ask_llm.call_count > 0
+        self._verify_comparison_analysis(infra["llm_manager"])
+    def _setup_streaming_capture(self, websocket_manager) -> List[Dict]:
+        """Setup streaming message capture"""
+        streamed_messages = []
+        async def capture_stream(rid, message):
+            streamed_messages.append(message)
+        websocket_manager.send_message = AsyncMock(side_effect=capture_stream)
+        return streamed_messages
+
+    def _verify_streaming_occurred(self, streamed_messages: List[Dict]):
+        """Verify streaming messages were sent"""
+        assert len(streamed_messages) > 0
+        message_types = [msg.get("type") for msg in streamed_messages]
+        assert "agent_started" in message_types
+
     async def test_4_real_time_streaming_updates(self, setup_test_infrastructure):
         """
         Business Value Test 4: Real-time Progress Updates
         User Story: As a user, I want to see progress during long-running analyses
         """
         infra = setup_test_infrastructure
-        websocket_manager = infra["websocket_manager"]
-        supervisor = infra["supervisor"]
-        
-        run_id = str(uuid.uuid4())
-        streamed_messages = []
-        
-        async def capture_stream(rid, message):
-            streamed_messages.append(message)
-        
-        websocket_manager.send_message = AsyncMock(side_effect=capture_stream)
-        
-        with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
-            with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
-                with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
-                    await supervisor.run("Analyze my workload", "test_thread", "test_user", run_id)
-        
-        # Verify streaming occurred
-        assert len(streamed_messages) > 0
-        message_types = [msg.get("type") for msg in streamed_messages]
-        assert "agent_started" in message_types
+        streamed_messages = self._setup_streaming_capture(infra["websocket_manager"])
+        run_id, user_request = self._setup_test_run("Analyze my workload")
+        await self._execute_with_mocked_state(infra["supervisor"], user_request, run_id)
+        self._verify_streaming_occurred(streamed_messages)
+    def _verify_batch_optimization(self, llm_manager):
+        """Verify batch optimization was considered"""
+        optimization_prompts = [call for call in llm_manager.ask_llm.call_args_list
+                              if "batch" in str(call).lower() or "optimiz" in str(call).lower()]
+        assert len(optimization_prompts) >= 0
+
     async def test_5_batch_processing_optimization(self, setup_test_infrastructure):
         """
         Business Value Test 5: Batch Processing Recommendations
         User Story: As a Data Scientist, I need to optimize batch inference costs
         """
         infra = setup_test_infrastructure
-        supervisor = infra["supervisor"]
-        
-        run_id = str(uuid.uuid4())
-        user_request = "I have 10,000 similar classification requests daily. How to optimize?"
-        
-        with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
-            with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
-                with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
-                    result_state = await supervisor.run(user_request, "test_thread", "test_user", run_id)
-        
+        run_id, user_request = self._setup_test_run("I have 10,000 similar classification requests daily. How to optimize?")
+        result_state = await self._execute_with_mocked_state(infra["supervisor"], user_request, run_id)
         assert result_state != None
-        
-        # Verify batch optimization was considered
-        llm_manager = infra["llm_manager"]
-        optimization_prompts = [call for call in llm_manager.ask_llm.call_args_list
-                              if "batch" in str(call).lower() or "optimiz" in str(call).lower()]
-        assert len(optimization_prompts) >= 0
+        self._verify_batch_optimization(infra["llm_manager"])
     async def test_6_cache_effectiveness_analysis(self, setup_test_infrastructure):
         """
         Business Value Test 6: Cache Effectiveness
@@ -500,76 +484,67 @@ class TestBusinessValueCritical:
         assert cache_metrics["hit_rate"] > 0.3
         assert cache_metrics["avg_response_time_cached"] < 100
         assert cache_metrics["cost_savings_percentage"] > 30
-    async def test_7_error_recovery_resilience(self, setup_test_infrastructure):
-        """
-        Business Value Test 7: System Resilience
-        User Story: As a user, I want the system to handle failures gracefully
-        """
-        infra = setup_test_infrastructure
-        supervisor = infra["supervisor"]
-        
-        run_id = str(uuid.uuid4())
-        
-        # Simulate intermittent failures
+    def _create_flaky_execute(self) -> tuple:
+        """Create flaky execute function for resilience testing"""
         call_count = 0
-        
         async def flaky_execute(state, rid, stream):
             nonlocal call_count
             call_count += 1
             if call_count < 3:
                 raise Exception("Temporary API failure")
             return state
-        
-        # Make one agent flaky
-        # Handle both consolidated and legacy implementations
+        return flaky_execute, lambda: call_count
+
+    def _setup_flaky_agent(self, supervisor, flaky_execute):
+        """Setup one agent to be flaky for testing"""
         sub_agents = []
         if hasattr(supervisor, '_impl') and supervisor._impl:
-            # Consolidated implementation uses agents dictionary
             if hasattr(supervisor._impl, 'agents'):
-                # Convert dictionary values to list for consistent handling
                 sub_agents = list(supervisor._impl.agents.values())
             elif hasattr(supervisor._impl, 'sub_agents'):
                 sub_agents = supervisor._impl.sub_agents
         elif hasattr(supervisor, 'sub_agents'):
-            # Legacy implementation
             sub_agents = supervisor.sub_agents
-            
         if len(sub_agents) > 2:
             sub_agents[2].execute = flaky_execute
-        
+
+    async def _execute_resilience_test(self, supervisor, run_id: str):
+        """Execute resilience test with error handling"""
         with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
             with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
                 with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
                     try:
                         await supervisor.run("Test resilience", "test_thread", "test_user", run_id)
                     except Exception:
-                        pass  # Expected to handle or fail gracefully
-        
-        # System should have attempted retries
-        assert call_count >= 1
+                        pass
+
+    async def test_7_error_recovery_resilience(self, setup_test_infrastructure):
+        """
+        Business Value Test 7: System Resilience
+        User Story: As a user, I want the system to handle failures gracefully
+        """
+        infra = setup_test_infrastructure
+        run_id = str(uuid.uuid4())
+        flaky_execute, get_call_count = self._create_flaky_execute()
+        self._setup_flaky_agent(infra["supervisor"], flaky_execute)
+        await self._execute_resilience_test(infra["supervisor"], run_id)
+        assert get_call_count() >= 1
+    def _verify_report_generation(self, llm_manager):
+        """Verify report generation was involved"""
+        report_calls = [call for call in llm_manager.ask_llm.call_args_list
+                       if "report" in str(call).lower() or "summary" in str(call).lower()]
+        assert len(report_calls) >= 0
+
     async def test_8_report_generation_with_insights(self, setup_test_infrastructure):
         """
         Business Value Test 8: Executive Report Generation
         User Story: As an executive, I need clear reports with actionable insights
         """
         infra = setup_test_infrastructure
-        supervisor = infra["supervisor"]
-        
-        run_id = str(uuid.uuid4())
-        user_request = "Generate executive report on AI optimization opportunities"
-        
-        with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
-            with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
-                with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
-                    result_state = await supervisor.run(user_request, "test_thread", "test_user", run_id)
-        
+        run_id, user_request = self._setup_test_run("Generate executive report on AI optimization opportunities")
+        result_state = await self._execute_with_mocked_state(infra["supervisor"], user_request, run_id)
         assert result_state != None
-        
-        # Verify reporting agent was involved
-        llm_manager = infra["llm_manager"]
-        report_calls = [call for call in llm_manager.ask_llm.call_args_list
-                       if "report" in str(call).lower() or "summary" in str(call).lower()]
-        assert len(report_calls) >= 0
+        self._verify_report_generation(infra["llm_manager"])
     async def test_9_concurrent_user_isolation(self, setup_test_infrastructure):
         """
         Business Value Test 9: Multi-tenant Isolation

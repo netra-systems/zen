@@ -17,6 +17,9 @@ jobs:
     timeout-minutes: 5
     
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
       - name: Environment Check
         run: |
           echo "=== Environment Check ==="

@@ -22,6 +22,16 @@ class MessageCreate(BaseModel):
     role: str = "user"
 
 
+def _has_any_real_services_enabled() -> bool:
+    """Check if any real services are enabled"""
+    return any([
+        os.environ.get("ENABLE_REAL_LLM_TESTING") == "true",
+        os.environ.get("ENABLE_REAL_DB_TESTING") == "true",
+        os.environ.get("ENABLE_REAL_REDIS_TESTING") == "true",
+        os.environ.get("ENABLE_REAL_CLICKHOUSE_TESTING") == "true"
+    ])
+
+
 # Test markers for different service types
 pytestmark = [
     pytest.mark.real_services,
@@ -34,8 +44,24 @@ pytestmark = [
 
 # Skip tests if real services not enabled
 skip_if_no_real_services = pytest.mark.skipif(
-    os.environ.get("ENABLE_REAL_LLM_TESTING") != "true",
-    reason="Real service tests disabled. Set ENABLE_REAL_LLM_TESTING=true to run"
+    not _has_any_real_services_enabled(),
+    reason="Real service tests disabled. Set ENABLE_REAL_LLM_TESTING=true or database/redis/clickhouse env vars"
+)
+
+# Database-specific skip conditions
+skip_if_no_database = pytest.mark.skipif(
+    os.environ.get("ENABLE_REAL_DB_TESTING") != "true",
+    reason="Real database tests disabled. Set ENABLE_REAL_DB_TESTING=true to run"
+)
+
+skip_if_no_redis = pytest.mark.skipif(
+    os.environ.get("ENABLE_REAL_REDIS_TESTING") != "true",
+    reason="Real Redis tests disabled. Set ENABLE_REAL_REDIS_TESTING=true to run"
+)
+
+skip_if_no_clickhouse = pytest.mark.skipif(
+    os.environ.get("ENABLE_REAL_CLICKHOUSE_TESTING") != "true",
+    reason="Real ClickHouse tests disabled. Set ENABLE_REAL_CLICKHOUSE_TESTING=true to run"
 )
 
 

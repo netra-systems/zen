@@ -8,13 +8,17 @@ from app.db.postgres import Database
 from app.redis_manager import RedisManager
 from app.db.clickhouse import get_clickhouse_client
 from app.db.models_postgres import User
-from .real_services_test_fixtures import skip_if_no_real_services
+from .real_services_test_fixtures import (
+    skip_if_no_database,
+    skip_if_no_redis, 
+    skip_if_no_clickhouse
+)
 
 
 class TestRealDatabaseOperations:
     """Test suite for real database operations"""
     
-    @skip_if_no_real_services
+    @skip_if_no_database
     async def test_postgresql_operations(self):
         """Test PostgreSQL operations with real database"""
         db_instance = Database()
@@ -26,7 +30,7 @@ class TestRealDatabaseOperations:
         finally:
             db.close()
     
-    @skip_if_no_real_services
+    @skip_if_no_redis
     async def test_redis_operations(self):
         """Test Redis operations with real instance"""
         redis = RedisManager()
@@ -39,7 +43,7 @@ class TestRealDatabaseOperations:
         finally:
             await redis.close()
     
-    @skip_if_no_real_services
+    @skip_if_no_clickhouse
     async def test_clickhouse_operations(self):
         """Test ClickHouse operations with real database"""
         async with get_clickhouse_client() as clickhouse:
@@ -50,7 +54,7 @@ class TestRealDatabaseOperations:
             finally:
                 await _cleanup_clickhouse_test_table(clickhouse)
     
-    @skip_if_no_real_services
+    @skip_if_no_database
     async def test_database_transactions(self):
         """Test database transaction handling"""
         db_instance = Database()
@@ -62,7 +66,7 @@ class TestRealDatabaseOperations:
         finally:
             db.close()
     
-    @skip_if_no_real_services
+    @skip_if_no_redis
     async def test_redis_expiration(self):
         """Test Redis key expiration"""
         redis = RedisManager()
@@ -72,7 +76,7 @@ class TestRealDatabaseOperations:
         finally:
             await redis.close()
     
-    @skip_if_no_real_services
+    @skip_if_no_clickhouse
     async def test_clickhouse_aggregations(self):
         """Test ClickHouse aggregation queries"""
         async with get_clickhouse_client() as clickhouse:

@@ -256,74 +256,67 @@ class StagingDataSeeder:
         
         print(f"  Created {request_count} optimization requests")
     
+    def _get_metric_types(self) -> List[str]:
+        """Get list of supported metric types."""
+        return [
+            "api_latency", "model_inference_time", "token_usage", "error_rate",
+            "throughput", "cost_per_request", "memory_usage", "gpu_utilization",
+            "cache_hit_rate", "queue_depth"
+        ]
+
+    def _generate_metric_timestamp(self, time_range_days: int) -> datetime:
+        """Generate a random timestamp within the specified range."""
+        return datetime.utcnow() - timedelta(
+            days=random.randint(0, time_range_days),
+            hours=random.randint(0, 23),
+            minutes=random.randint(0, 59)
+        )
+
+    def _generate_metric_value(self, metric_type: str) -> float:
+        """Generate realistic value based on metric type."""
+        value_generators = {
+            "api_latency": lambda: random.gauss(150, 50),
+            "model_inference_time": lambda: random.gauss(500, 150),
+            "token_usage": lambda: random.randint(100, 10000),
+            "error_rate": lambda: random.uniform(0, 0.05),
+            "throughput": lambda: random.gauss(1000, 300),
+            "cost_per_request": lambda: random.uniform(0.001, 0.1),
+            "memory_usage": lambda: random.uniform(60, 95),
+            "gpu_utilization": lambda: random.uniform(40, 100),
+            "cache_hit_rate": lambda: random.uniform(0.7, 0.99),
+            "queue_depth": lambda: random.randint(0, 1000)
+        }
+        return value_generators.get(metric_type, lambda: 0)()
+
+    def _create_metric_entry(self, metric_type: str, value: float, timestamp: datetime) -> Dict:
+        """Create a single metric entry with metadata."""
+        return {
+            "metric_type": metric_type,
+            "value": value,
+            "timestamp": timestamp,
+            "tags": {
+                "environment": "staging", "pr_number": self.pr_number,
+                "region": random.choice(["us-east-1", "us-west-2", "eu-west-1"]),
+                "model": random.choice(["gpt-4", "claude-3", "gemini-pro"]),
+                "user_tier": random.choice(["free", "pro", "enterprise"])
+            }
+        }
+
     async def seed_metrics(self, db: AsyncSession, config: Dict):
         """Create metrics and telemetry data"""
         metric_count = config.get("count", 1000)
         time_range_days = config.get("time_range_days", 30)
-        
         print(f"Creating {metric_count} metric data points...")
         
-        metric_types = [
-            "api_latency",
-            "model_inference_time",
-            "token_usage",
-            "error_rate",
-            "throughput",
-            "cost_per_request",
-            "memory_usage",
-            "gpu_utilization",
-            "cache_hit_rate",
-            "queue_depth"
-        ]
-        
-        # Generate time series data
+        metric_types = self._get_metric_types()
         metrics = []
-        for i in range(metric_count):
-            timestamp = datetime.utcnow() - timedelta(
-                days=random.randint(0, time_range_days),
-                hours=random.randint(0, 23),
-                minutes=random.randint(0, 59)
-            )
-            
-            metric_type = random.choice(metric_types)
-            
-            # Generate realistic values based on metric type
-            if metric_type == "api_latency":
-                value = random.gauss(150, 50)  # ms
-            elif metric_type == "model_inference_time":
-                value = random.gauss(500, 150)  # ms
-            elif metric_type == "token_usage":
-                value = random.randint(100, 10000)
-            elif metric_type == "error_rate":
-                value = random.uniform(0, 0.05)  # 0-5%
-            elif metric_type == "throughput":
-                value = random.gauss(1000, 300)  # requests/min
-            elif metric_type == "cost_per_request":
-                value = random.uniform(0.001, 0.1)  # dollars
-            elif metric_type == "memory_usage":
-                value = random.uniform(60, 95)  # percentage
-            elif metric_type == "gpu_utilization":
-                value = random.uniform(40, 100)  # percentage
-            elif metric_type == "cache_hit_rate":
-                value = random.uniform(0.7, 0.99)  # ratio
-            else:  # queue_depth
-                value = random.randint(0, 1000)
-            
-            metrics.append({
-                "metric_type": metric_type,
-                "value": value,
-                "timestamp": timestamp,
-                "tags": {
-                    "environment": "staging",
-                    "pr_number": self.pr_number,
-                    "region": random.choice(["us-east-1", "us-west-2", "eu-west-1"]),
-                    "model": random.choice(["gpt-4", "claude-3", "gemini-pro"]),
-                    "user_tier": random.choice(["free", "pro", "enterprise"])
-                }
-            })
         
-        # In a real implementation, you would insert these into your metrics database
-        # For now, we'll just track that we created them
+        for i in range(metric_count):
+            metric_type = random.choice(metric_types)
+            timestamp = self._generate_metric_timestamp(time_range_days)
+            value = self._generate_metric_value(metric_type)
+            metrics.append(self._create_metric_entry(metric_type, value, timestamp))
+        
         self.created_data["metrics"] = metrics
         print(f"  Created {metric_count} metric data points")
     
