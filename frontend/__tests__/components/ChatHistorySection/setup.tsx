@@ -12,6 +12,24 @@ import {
   createMockAuthStore
 } from '../../utils/storeMocks.helper';
 
+// Create mock instances at module level
+export let mockThreadStore: ReturnType<typeof createMockThreadStore>;
+export let mockChatStore: ReturnType<typeof createMockChatStore>;
+export let mockAuthStore: ReturnType<typeof createMockAuthStore>;
+
+// Initialize mocks at module level
+mockThreadStore = createMockThreadStore({
+  threads: mockThreads,
+  currentThread: mockThreads[0],
+  currentThreadId: 'thread-1'
+});
+
+mockChatStore = createMockChatStore();
+
+mockAuthStore = createMockAuthStore({
+  isAuthenticated: true
+});
+
 // Mock next/navigation
 export const mockRouter = {
   push: jest.fn(),
@@ -23,21 +41,17 @@ jest.mock('next/navigation', () => ({
   usePathname: () => mockPathname,
 }));
 
-// Create mock instances
-export let mockThreadStore: ReturnType<typeof createMockThreadStore>;
-export let mockChatStore: ReturnType<typeof createMockChatStore>;
-export let mockAuthStore: ReturnType<typeof createMockAuthStore>;
-
+// Mock stores with pre-initialized values
 jest.mock('@/store/threadStore', () => ({
-  useThreadStore: jest.fn(),
+  useThreadStore: jest.fn(() => mockThreadStore),
 }));
 
 jest.mock('@/store/chat', () => ({
-  useChatStore: jest.fn(),
+  useChatStore: jest.fn(() => mockChatStore),
 }));
 
 jest.mock('@/store/authStore', () => ({
-  useAuthStore: jest.fn(),
+  useAuthStore: jest.fn(() => mockAuthStore),
 }));
 
 jest.mock('@/services/threadService', () => ({
@@ -147,7 +161,7 @@ export class ChatHistoryTestSetup {
         ...(config.threads !== undefined && { threads: config.threads }),
         ...(config.currentThreadId !== undefined && { currentThreadId: config.currentThreadId }),
       };
-      (useThreadStore as unknown as jest.Mock).mockReturnValue(mockThreadStore);
+      (useThreadStore as unknown as jest.Mock).mockImplementation(() => mockThreadStore);
     }
 
     // Update mockAuthStore reference if needed
@@ -156,7 +170,7 @@ export class ChatHistoryTestSetup {
         ...mockAuthStore,
         isAuthenticated: config.isAuthenticated,
       };
-      (useAuthStore as unknown as jest.Mock).mockReturnValue(mockAuthStore);
+      (useAuthStore as unknown as jest.Mock).mockImplementation(() => mockAuthStore);
     }
   }
 
