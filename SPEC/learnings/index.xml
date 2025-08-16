@@ -13,10 +13,11 @@
             <name>Configuration/Secrets</name>
             <file>learnings/configuration_secrets.xml</file>
             <path>SPEC/learnings/configuration_secrets.xml</path>
-            <learning_count>2</learning_count>
+            <learning_count>3</learning_count>
             <learning_ids>
                 <id>staging-env-var-suffix-handling</id>
                 <id>cors-devlauncher-middleware-configuration</id>
+                <id>staging-cors-missing-env-var</id>
             </learning_ids>
         </category>
         <category>
@@ -160,6 +161,15 @@
                 <id>hook-integration-testing</id>
             </learning_ids>
         </category>
+        <category>
+            <name>Frontend</name>
+            <file>learnings/frontend.xml</file>
+            <path>SPEC/learnings/frontend.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>zustand-selector-infinite-loop</id>
+            </learning_ids>
+        </category>
     </categories>
     
     <usage>
@@ -170,7 +180,7 @@
     </usage>
     
     <statistics>
-        <total_categories>13</total_categories>
-        <total_learnings>47</total_learnings>
+        <total_categories>14</total_categories>
+        <total_learnings>49</total_learnings>
     </statistics>
 </specification>
