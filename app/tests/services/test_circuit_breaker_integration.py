@@ -45,6 +45,7 @@ class TestLLMClientCircuitBreaker:
         # Configure circuit with low threshold for testing
         circuit = await self.llm_client._get_circuit("test_config")
         circuit.config.failure_threshold = 2
+        circuit.adaptive_failure_threshold = 2
         
         # First failure
         with pytest.raises(Exception, match="LLM error"):

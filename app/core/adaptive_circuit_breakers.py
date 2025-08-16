@@ -92,24 +92,31 @@ class AdaptiveCircuitBreaker:
     async def call(self, operation: Callable, *args, **kwargs) -> Any:
         """Execute operation with circuit breaker protection."""
         self.total_requests += 1
-        
-        # Check if circuit should allow request
+        self._validate_request_allowed()
+        start_time = datetime.now()
+        try:
+            result = await self._execute_operation(operation, start_time, *args, **kwargs)
+            return result
+        except Exception as e:
+            self._handle_operation_failure(start_time)
+            raise e
+    
+    def _validate_request_allowed(self) -> None:
+        """Validate if request should be allowed through circuit breaker"""
         if not self.should_allow_request():
             raise CircuitBreakerOpenError(f"Circuit breaker {self.name} is open")
-        
-        start_time = datetime.now()
-        
-        try:
-            result = await operation(*args, **kwargs)
-            response_time = (datetime.now() - start_time).total_seconds()
-            
-            self._record_success(response_time)
-            return result
-            
-        except Exception as e:
-            response_time = (datetime.now() - start_time).total_seconds()
-            self._record_failure(response_time)
-            raise e
+    
+    async def _execute_operation(self, operation: Callable, start_time: datetime, *args, **kwargs) -> Any:
+        """Execute operation and record success"""
+        result = await operation(*args, **kwargs)
+        response_time = (datetime.now() - start_time).total_seconds()
+        self._record_success(response_time)
+        return result
+    
+    def _handle_operation_failure(self, start_time: datetime) -> None:
+        """Handle operation failure and record metrics"""
+        response_time = (datetime.now() - start_time).total_seconds()
+        self._record_failure(response_time)
     
     def should_allow_request(self) -> bool:
         """Check if request should be allowed through circuit."""
@@ -130,22 +137,28 @@ class AdaptiveCircuitBreaker:
     def _record_success(self, response_time: float) -> None:
         """Record successful operation."""
         self.successful_requests += 1
+        self._track_response_time(response_time)
+        self._check_slow_request(response_time)
+        self._handle_success_state_transition()
+    
+    def _track_response_time(self, response_time: float) -> None:
+        """Track response time and maintain recent history"""
         self.recent_response_times.append(response_time)
-        
-        # Keep only recent response times
         if len(self.recent_response_times) > 100:
             self.recent_response_times = self.recent_response_times[-50:]
-        
-        # Track slow requests
+    
+    def _check_slow_request(self, response_time: float) -> None:
+        """Check if request is slow and update metrics"""
         if response_time > self.config.slow_call_threshold:
             self.slow_requests += 1
-        
+    
+    def _handle_success_state_transition(self) -> None:
+        """Handle circuit breaker state transitions on success"""
         if self.state == CircuitState.HALF_OPEN:
             self.success_count += 1
             if self.success_count >= self.config.success_threshold:
                 self._transition_to_closed()
         elif self.state == CircuitState.CLOSED:
-            # Reset failure count on success
             self.failure_count = 0
     
     def _record_failure(self, response_time: float) -> None:
@@ -153,11 +166,16 @@ class AdaptiveCircuitBreaker:
         self.failed_requests += 1
         self.failure_count += 1
         self.last_failure_time = datetime.now()
-        
-        # Adapt threshold based on failure patterns
+        self._handle_adaptive_threshold()
+        self._handle_failure_state_transition()
+    
+    def _handle_adaptive_threshold(self) -> None:
+        """Handle adaptive threshold adjustment on failure"""
         if self.config.adaptive_threshold:
             self._adapt_failure_threshold()
-        
+    
+    def _handle_failure_state_transition(self) -> None:
+        """Handle circuit breaker state transitions on failure"""
         if self.state == CircuitState.CLOSED:
             if self.failure_count >= self.adaptive_failure_threshold:
                 self._transition_to_open()

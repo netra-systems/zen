@@ -65,8 +65,11 @@ class UnitOfWork:
             await self.commit()
             logger.debug("UnitOfWork committed successfully")
         
-        if not self._external_session and hasattr(self, '_session_context'):
-            await self._session_context.__aexit__(exc_type, exc_val, exc_tb)
+        if not self._external_session:
+            if self._session:
+                await self._session.close()
+            if hasattr(self, '_session_context'):
+                await self._session_context.__aexit__(exc_type, exc_val, exc_tb)
     
     async def commit(self):
         """Commit the transaction"""

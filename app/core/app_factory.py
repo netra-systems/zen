@@ -89,6 +89,13 @@ def _import_basic_route_modules() -> dict:
     """Import basic route modules."""
     from app.routes import (supply, generation, admin, references, health, 
         corpus, synthetic_data, config, demo, unified_tools, quality)
+    return _create_basic_modules_dict(
+        supply, generation, admin, references, health, corpus,
+        synthetic_data, config, demo, unified_tools, quality
+    )
+
+def _create_basic_modules_dict(supply, generation, admin, references, health, corpus, synthetic_data, config, demo, unified_tools, quality) -> dict:
+    """Create basic modules dictionary mapping"""
     return {"supply": supply, "generation": generation, "admin": admin,
         "references": references, "health": health, "corpus": corpus,
         "synthetic_data": synthetic_data, "config": config, "demo": demo,
@@ -97,12 +104,30 @@ def _import_basic_route_modules() -> dict:
 
 def _import_named_routers() -> dict:
     """Import named router modules."""
-    from app.routes.auth import router as auth_router; from app.routes.agent_route import router as agent_router
-    from app.routes.llm_cache import router as llm_cache_router; from app.routes.threads_route import router as threads_router
-    from app.routes.health_extended import router as health_extended_router; from app.routes.monitoring import router as monitoring_router; from app.routes.websockets import router as websockets_router
-    return {"auth_router": auth_router, "agent_router": agent_router,
-        "llm_cache_router": llm_cache_router, "threads_router": threads_router,
-        "health_extended_router": health_extended_router, "monitoring_router": monitoring_router, "websockets_router": websockets_router}
+    auth_routers = _import_auth_routers()
+    core_routers = _import_core_routers()
+    extended_routers = _import_extended_routers()
+    return {**auth_routers, **core_routers, **extended_routers}
+
+def _import_auth_routers() -> dict:
+    """Import authentication-related routers"""
+    from app.routes.auth import router as auth_router
+    from app.routes.agent_route import router as agent_router
+    return {"auth_router": auth_router, "agent_router": agent_router}
+
+def _import_core_routers() -> dict:
+    """Import core functionality routers"""
+    from app.routes.llm_cache import router as llm_cache_router
+    from app.routes.threads_route import router as threads_router
+    return {"llm_cache_router": llm_cache_router, "threads_router": threads_router}
+
+def _import_extended_routers() -> dict:
+    """Import extended functionality routers"""
+    from app.routes.health_extended import router as health_extended_router
+    from app.routes.monitoring import router as monitoring_router
+    from app.routes.websockets import router as websockets_router
+    return {"health_extended_router": health_extended_router,
+        "monitoring_router": monitoring_router, "websockets_router": websockets_router}
 
 
 def _import_factory_routers() -> dict:
