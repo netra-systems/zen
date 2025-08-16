@@ -235,7 +235,7 @@ jobs:
     if: |
       needs.determine-strategy.outputs.should_run == 'true' &&
       needs.determine-strategy.outputs.skip_tests != 'true'
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.act && 'ubuntu-latest' || 'warp-custom-default' }}
     
     steps:
       - name: Checkout Repository
@@ -262,7 +262,7 @@ jobs:
     name: Send Notifications (ACT)
     needs: [determine-strategy, run-simple-tests]
     if: always() && needs.determine-strategy.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.act && 'ubuntu-latest' || 'warp-custom-default' }}
     
     steps:
       - name: Mock Notification
@@ -281,7 +281,7 @@ jobs:
     name: Generate ACT Summary
     needs: [determine-strategy, run-simple-tests, send-notifications]
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.act && 'ubuntu-latest' || 'warp-custom-default' }}
     
     steps:
       - name: Generate Final ACT Summary

@@ -14,7 +14,25 @@ from typing import List, Optional, Dict, Any
 
 def run_gh_command(args: List[str]) -> Dict[str, Any]:
     """Execute GitHub CLI command and return JSON output."""
-    cmd = ["gh", "api"] + args
+    # Try to find gh in PATH first, then try common Windows locations
+    gh_path = shutil.which("gh")
+    if not gh_path and os.name == 'nt':
+        # Check common Windows install locations
+        possible_paths = [
+            r"C:\Program Files\GitHub CLI\gh.exe",
+            r"C:\Program Files (x86)\GitHub CLI\gh.exe"
+        ]
+        for path in possible_paths:
+            if os.path.exists(path):
+                gh_path = path
+                break
+    
+    if not gh_path:
+        print("GitHub CLI (gh) not found. Please install it first.")
+        print("Install with: winget install --id GitHub.cli")
+        sys.exit(1)
+    
+    cmd = [gh_path, "api"] + args
     try:
         result = subprocess.run(
             cmd, capture_output=True, text=True, check=True
