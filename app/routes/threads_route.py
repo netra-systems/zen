@@ -10,11 +10,9 @@ from app.dependencies import DbDep
 from app.logging_config import central_logger
 from app.auth.auth_dependencies import get_current_active_user
 from app.routes.utils.thread_helpers import (
-    get_user_threads, convert_threads_to_responses, generate_thread_id,
-    prepare_thread_metadata, create_thread_record, build_thread_response,
-    get_thread_with_validation, update_thread_metadata_fields, archive_thread_safely,
-    build_thread_messages_response, get_first_user_message_safely, generate_title_with_llm,
-    update_thread_with_title, send_thread_rename_notification, create_final_thread_response
+    handle_list_threads_request, handle_create_thread_request, handle_get_thread_request,
+    handle_update_thread_request, handle_delete_thread_request, handle_get_messages_request,
+    handle_auto_rename_request
 )
 from pydantic import BaseModel
 import time
@@ -51,8 +49,7 @@ async def list_threads(
 ):
     """List all threads for the current user"""
     try:
-        threads = await get_user_threads(db, current_user.id)
-        return await convert_threads_to_responses(db, threads, offset, limit)
+        return await handle_list_threads_request(db, current_user.id, offset, limit)
     except Exception as e:
         logger.error(f"Error listing threads: {e}")
         raise HTTPException(status_code=500, detail="Failed to list threads")
@@ -64,12 +61,7 @@ async def create_thread(
 ):
     """Create a new thread"""
     try:
-        thread_id = generate_thread_id()
-        metadata = prepare_thread_metadata(thread_data, current_user.id)
-        thread = await create_thread_record(db, thread_id, metadata)
-        if not thread:
-            raise HTTPException(status_code=500, detail="Failed to create thread in database")
-        return await build_thread_response(thread, 0, metadata.get("title"))
+        return await handle_create_thread_request(db, thread_data, current_user.id)
     except HTTPException:
         raise
     except Exception as e:
@@ -83,10 +75,7 @@ async def get_thread(
 ):
     """Get a specific thread"""
     try:
-        thread = await get_thread_with_validation(db, thread_id, current_user.id)
-        from app.services.database.message_repository import MessageRepository
-        message_count = await MessageRepository().count_by_thread(db, thread_id)
-        return await build_thread_response(thread, message_count)
+        return await handle_get_thread_request(db, thread_id, current_user.id)
     except HTTPException:
         raise
     except Exception as e:
@@ -100,12 +89,7 @@ async def update_thread(
 ):
     """Update a thread"""
     try:
-        thread = await get_thread_with_validation(db, thread_id, current_user.id)
-        await update_thread_metadata_fields(thread, thread_update)
-        await db.commit()
-        from app.services.database.message_repository import MessageRepository
-        message_count = await MessageRepository().count_by_thread(db, thread_id)
-        return await build_thread_response(thread, message_count)
+        return await handle_update_thread_request(db, thread_id, thread_update, current_user.id)
     except HTTPException:
         raise
     except Exception as e:
@@ -119,9 +103,7 @@ async def delete_thread(
 ):
     """Delete (archive) a thread"""
     try:
-        await get_thread_with_validation(db, thread_id, current_user.id)
-        await archive_thread_safely(db, thread_id)
-        return {"message": "Thread archived successfully"}
+        return await handle_delete_thread_request(db, thread_id, current_user.id)
     except HTTPException:
         raise
     except Exception as e:
@@ -135,8 +117,7 @@ async def get_thread_messages(
 ):
     """Get messages for a specific thread"""
     try:
-        await get_thread_with_validation(db, thread_id, current_user.id)
-        return await build_thread_messages_response(db, thread_id, limit, offset)
+        return await handle_get_messages_request(db, thread_id, current_user.id, limit, offset)
     except HTTPException:
         raise
     except Exception as e:
@@ -150,12 +131,7 @@ async def auto_rename_thread(
 ):
     """Automatically generate a title for thread based on first message"""
     try:
-        thread = await get_thread_with_validation(db, thread_id, current_user.id)
-        first_message = await get_first_user_message_safely(db, thread_id)
-        title = await generate_title_with_llm(first_message.content)
-        await update_thread_with_title(db, thread, title)
-        await send_thread_rename_notification(current_user.id, thread_id, title)
-        return await create_final_thread_response(db, thread, title)
+        return await handle_auto_rename_request(db, thread_id, current_user.id)
     except HTTPException:
         raise
     except Exception as e:
