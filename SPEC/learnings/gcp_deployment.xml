@@ -127,6 +127,37 @@
     </solution>
   </learning>
 
+  <learning id="gcp-009" priority="critical">
+    <title>Cloud Run Public Access Organization Policy</title>
+    <problem>
+      Cloud Run services return 403 Forbidden after deployment.
+      Error: "FAILED_PRECONDITION: One or more users named in the policy do not belong to a permitted customer"
+      Organization policy blocks allUsers access.
+    </problem>
+    <solution>
+      1. Check organization policies: 
+         gcloud resource-manager org-policies list --project=PROJECT_ID
+      2. If blocked by org policy, options:
+         a. Use authenticated access with service accounts
+         b. Deploy with --no-allow-unauthenticated flag in cloudbuild.yaml
+         c. Request organization policy exception for staging environment
+         d. Use Identity-Aware Proxy (IAP) for controlled access
+      3. For staging/dev, consider using authentication tokens or service accounts
+    </solution>
+    <terraform-default>
+      In Terraform, set allow_unauthenticated based on environment:
+      ```hcl
+      resource "google_cloud_run_service_iam_member" "public_access" {
+        count    = var.allow_public_access ? 1 : 0
+        service  = google_cloud_run_service.app.name
+        location = google_cloud_run_service.app.location
+        role     = "roles/run.invoker"
+        member   = "allUsers"
+      }
+      ```
+    </terraform-default>
+  </learning>
+
   <best-practices>
     <practice>Always check existing Cloud Run services before deployment</practice>
     <practice>Create .gcloudignore early to optimize build uploads</practice>
