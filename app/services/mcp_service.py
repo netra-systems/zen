@@ -16,6 +16,7 @@ from fastmcp import FastMCP
 
 from app.logging_config import CentralLogger
 from app.core.exceptions_base import NetraException
+from app.services.service_locator import IMCPService
 from app.services.agent_service import AgentService
 from app.services.thread_service import ThreadService
 from app.services.corpus_service import CorpusService
@@ -55,7 +56,7 @@ class MCPToolExecution(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class MCPService:
+class MCPService(IMCPService):
     """
     Main service for MCP server operations using FastMCP 2
     
@@ -313,3 +314,39 @@ class MCPService:
                 "model_selection"
             ]
         }
+
+    # Interface implementation methods
+    async def initialize(self, config: Dict[str, Any] = None):
+        """Initialize the MCP service with optional configuration."""
+        # Basic initialization - could extend with config parameters
+        await self.cleanup_inactive_sessions()
+        logger.info("MCP Service initialized")
+
+    async def execute_tool(self, tool_name: str, parameters: Dict[str, Any], user_context: Dict[str, Any] = None):
+        """Execute an MCP tool with the given parameters and user context."""
+        # Implementation for tool execution
+        session_id = user_context.get("session_id") if user_context else None
+        client_id = user_context.get("client_id") if user_context else None
+        
+        # Record the tool execution
+        execution = MCPToolExecution(
+            session_id=session_id or "default",
+            client_id=client_id,
+            tool_name=tool_name,
+            input_params=parameters,
+            status="executing"
+        )
+        
+        try:
+            # This would integrate with the actual MCP server tool execution
+            # For now, return a basic response
+            result = {"tool": tool_name, "status": "executed", "parameters": parameters}
+            execution.status = "completed"
+            execution.result = result
+            await self.record_tool_execution(execution)
+            return result
+        except Exception as e:
+            execution.status = "failed"
+            execution.error = str(e)
+            await self.record_tool_execution(execution)
+            raise NetraException(f"Tool execution failed: {e}")

@@ -175,83 +175,101 @@ def run_generation_in_pool(tasks, num_processes):
         for result in pool.imap_unordered(generate_content_for_worker, tasks):
             yield result
 
-async def run_content_generation_job(job_id: str, params: dict):
-    """The core worker process for generating a content corpus."""
-    try:
-        # Basic check to ensure the API key is available before starting the pool
-        if not settings.llm_configs['default'].api_key:
-            raise ValueError("GEMINI_API_KEY not set")
-    except ValueError as e:
-        await update_job_status(job_id, "failed", error=str(e))
-        return
+async def _validate_job_params(job_id: str, params: dict):
+    """Validates job parameters and API availability."""
+    if not settings.llm_configs['default'].api_key:
+        await update_job_status(job_id, "failed", error="GEMINI_API_KEY not set")
+        return False
+    return True
 
+async def _prepare_generation_config(job_id: str, params: dict):
+    """Prepares generation configuration and task setup."""
     total_tasks = len(list(META_PROMPTS.keys())) * getattr(params, 'samples_per_type', 10)
     await update_job_status(job_id, "running", progress=0, total_tasks=total_tasks)
-
-    # Create a serializable dictionary for generation_config
-    generation_config_dict = {
+    
+    generation_config = {
         'temperature': getattr(params, 'temperature', 0.7),
         'top_p': getattr(params, 'top_p', None),
         'top_k': getattr(params, 'top_k', None)
     }
-    # Filter out None values so the Google API doesn't complain
-    generation_config_dict = {k: v for k, v in generation_config_dict.items() if v is not None}
+    return {k: v for k, v in generation_config.items() if v is not None}, total_tasks
 
-
+async def _create_generation_tasks(params: dict, generation_config: dict):
+    """Creates tasks for content generation pool."""
     workload_types = list(META_PROMPTS.keys())
     num_processes = min(cpu_count(), getattr(params, 'max_cores', 4))
-
-    # Prepare tasks with serializable data
-    tasks = [(w_type, generation_config_dict) for w_type in workload_types for _ in range(getattr(params, 'samples_per_type', 10))]
-
+    samples_per_type = getattr(params, 'samples_per_type', 10)
+    
+    tasks = [(w_type, generation_config) for w_type in workload_types for _ in range(samples_per_type)]
     corpus = {key: [] for key in workload_types}
+    return tasks, corpus, num_processes
+
+async def _execute_generation_pool(job_id: str, tasks: list, num_processes: int, corpus: dict):
+    """Executes the generation pool and processes results."""
+    loop = asyncio.get_event_loop()
+    blocking_generator = run_generation_in_pool(tasks, num_processes)
+    batch_size = min(50, num_processes * 10)
+    
+    return await _process_generation_results(job_id, loop, blocking_generator, batch_size, corpus)
+
+async def _process_batch_results(job_id: str, corpus: dict, batch: list, completed_tasks: int):
+    """Processes a single batch of results and updates status."""
+    if not batch:
+        return completed_tasks
+    
+    _process_result_batch(corpus, batch)
+    completed_tasks += len(batch)
+    await update_job_status(job_id, "running", progress=completed_tasks)
+    return completed_tasks
+
+async def _process_generation_results(job_id: str, loop, generator, batch_size: int, corpus: dict):
+    """Processes generation results in batches."""
+    batch = []
     completed_tasks = 0
-
-    try:
-        loop = asyncio.get_event_loop()
-        blocking_generator = run_generation_in_pool(tasks, num_processes)
+    
+    while True:
+        result = await loop.run_in_executor(None, _next_item, generator)
+        if result is _sentinel:
+            break
+        if result and result.get('type') in corpus:
+            batch.append(result)
         
-        # Process results in batches for better performance
-        batch_size = min(50, num_processes * 10)  # Adaptive batch size
-        batch = []
-        
-        while True:
-            result = await loop.run_in_executor(None, _next_item, blocking_generator)
-            if result is _sentinel:
-                break
+        if len(batch) >= batch_size:
+            completed_tasks = await _process_batch_results(job_id, corpus, batch, completed_tasks)
+            batch = []
+    
+    return await _process_batch_results(job_id, corpus, batch, completed_tasks)
 
-            if result and result.get('type') in corpus:
-                batch.append(result)
-            
-            # Process batch when full or periodically update status
-            if len(batch) >= batch_size:
-                _process_result_batch(corpus, batch)
-                completed_tasks += len(batch)
-                await update_job_status(job_id, "running", progress=completed_tasks)
-                batch = []
-        
-        # Process remaining batch
-        if batch:
-            _process_result_batch(corpus, batch)
-            completed_tasks += len(batch)
-            await update_job_status(job_id, "running", progress=completed_tasks)
-
-    except Exception as e:
-        central_logger.get_logger(__name__).exception("An error occurred during content generation.")
-        await update_job_status(job_id, "failed", error=f"A worker process failed: {e}")
-        return
-
-
+async def _save_generation_results(job_id: str, params: dict, corpus: dict):
+    """Saves generation results to ClickHouse and updates job status."""
     clickhouse_table = getattr(params, 'clickhouse_table', 'content_corpus')
+    await save_corpus_to_clickhouse(corpus, clickhouse_table, job_id=job_id)
+    
+    summary = {
+        "message": f"Corpus generated and saved to {clickhouse_table}",
+        "counts": {w_type: len(samples) for w_type, samples in corpus.items()}
+    }
+    result_path = os.path.join("app", "data", "generated", "content_corpuses", job_id, "content_corpus.json")
+    await update_job_status(job_id, "completed", summary=summary, result_path=result_path)
+
+async def _handle_generation_error(job_id: str, error: Exception, context: str):
+    """Handles errors during content generation."""
+    central_logger.get_logger(__name__).exception(f"Error in {context}")
+    error_msg = f"A worker process failed: {error}" if "generation" in context else f"Failed to save to ClickHouse: {error}"
+    await update_job_status(job_id, "failed", error=error_msg)
+
+async def run_content_generation_job(job_id: str, params: dict):
+    """The core worker process for generating a content corpus."""
+    if not await _validate_job_params(job_id, params):
+        return
+    
     try:
-        await save_corpus_to_clickhouse(corpus, clickhouse_table, job_id=job_id)
-        summary = {
-            "message": f"Corpus generated and saved to {clickhouse_table}",
-            "counts": {w_type: len(samples) for w_type, samples in corpus.items()}
-        }
-        await update_job_status(job_id, "completed", summary=summary, result_path=os.path.join("app", "data", "generated", "content_corpuses", job_id, "content_corpus.json"))
+        generation_config, total_tasks = await _prepare_generation_config(job_id, params)
+        tasks, corpus, num_processes = await _create_generation_tasks(params, generation_config)
+        await _execute_generation_pool(job_id, tasks, num_processes, corpus)
+        await _save_generation_results(job_id, params, corpus)
     except Exception as e:
-        await update_job_status(job_id, "failed", error=f"Failed to save to ClickHouse: {e}")
+        await _handle_generation_error(job_id, e, "content generation")
 
 
 # --- Synthetic Log Generation Service ---

@@ -127,7 +127,7 @@ class SyntheticDataExecutionInput(AgentExecutionInput):
 # ValidationResult now imported from shared_types.py
 
 
-class InputValidator:
+class AgentInputValidator:
     """Central input validator for all agents."""
     
     # Mapping of agent names to their validation schemas
@@ -243,13 +243,17 @@ class InputValidator:
         return result.validated_input
 
 
+# Keep backward compatibility with InputValidator alias
+InputValidator = AgentInputValidator
+
+
 def validate_agent_input(agent_name: str):
     """Decorator to validate agent execute method inputs."""
     def decorator(execute_method):
         async def wrapper(self, state: DeepAgentState, run_id: str, stream_updates: bool = False):
             # Validate inputs before execution
             try:
-                InputValidator.validate_and_raise(agent_name, state, run_id, stream_updates)
+                AgentInputValidator.validate_and_raise(agent_name, state, run_id, stream_updates)
             except ValueError as e:
                 # Log validation failure and raise
                 logger.error(f"Input validation failed for {agent_name}: {e}")

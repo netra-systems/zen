@@ -16,6 +16,10 @@ class ResearchType(Enum):
     MARKET_OVERVIEW = "market_overview"
     NEW_MODEL = "new_model"
     DEPRECATION = "deprecation"
+    MODEL_UPDATES = "model_updates"
+    PROVIDER_COMPARISON = "provider_comparison"
+    COST_ANALYSIS = "cost_analysis"
+    PERFORMANCE_BENCHMARKS = "performance_benchmarks"
 
 
 class ProviderPatterns:

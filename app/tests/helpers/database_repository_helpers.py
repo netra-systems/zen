@@ -151,6 +151,10 @@ def _setup_thread_get_mocks(mock_repo, created_threads, soft_deleted_threads, de
             archived_at=datetime.now()
         )
     mock_repo.archive.side_effect = archive_thread
+    
+    async def get_many_threads(thread_ids):
+        return [created_threads.get(tid) for tid in thread_ids if tid in created_threads]
+    mock_repo.get_many.side_effect = get_many_threads
 
 
 # Message test helpers

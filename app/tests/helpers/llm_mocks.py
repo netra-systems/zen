@@ -5,7 +5,7 @@ are disabled. Each function must be ≤8 lines as per architecture requirements.
 """
 from typing import Any, Type, TypeVar, AsyncIterator
 from pydantic import BaseModel
-from app.llm.llm_response_processing import create_mock_structured_response
+from app.tests.utils.mock_helpers import create_mock_structured_response
 
 T = TypeVar('T', bound=BaseModel)
 

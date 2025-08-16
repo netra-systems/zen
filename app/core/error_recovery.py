@@ -163,57 +163,62 @@ class RetryStrategy:
         return min(self.base_delay * (2 ** retry_count), 30.0)
 
 
-class CircuitBreaker:
-    """Circuit breaker for preventing cascading failures."""
+# Import CircuitBreaker from canonical location - CONSOLIDATED
+from app.core.circuit_breaker import CircuitBreaker as CoreCircuitBreaker, CircuitConfig
+
+class CircuitBreaker(CoreCircuitBreaker):
+    """Compatibility wrapper for error recovery CircuitBreaker - delegates to canonical implementation."""
     
     def __init__(self, failure_threshold: int = 5, timeout: int = 60):
-        """Initialize circuit breaker."""
-        self.failure_threshold = failure_threshold
-        self.timeout = timeout
-        self.failure_count = 0
-        self.last_failure_time: Optional[datetime] = None
-        self.state = "closed"  # closed, open, half_open
-    
-    @property
-    def is_open(self) -> bool:
-        """Check if circuit breaker is in open state."""
-        return self.state == "open"
-    
+        """Initialize circuit breaker with legacy interface."""
+        config = CircuitConfig(
+            name="error_recovery_circuit",
+            failure_threshold=failure_threshold,
+            recovery_timeout=float(timeout),
+            timeout_seconds=float(timeout)
+        )
+        super().__init__(config)
+        
     def should_allow_request(self) -> bool:
         """Check if request should be allowed through."""
-        if self.state == "closed":
-            return True
-        
-        if self.state == "open":
-            if self._should_attempt_reset():
-                self.state = "half_open"
-                return True
-            return False
-        
-        # half_open state - allow single request to test
-        return True
+        # Convert async to sync for compatibility
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # If in async context, use direct property
+                return not self.is_open
+            else:
+                # If not in async context, check synchronously
+                return not self.is_open
+        except RuntimeError:
+            # No event loop - use synchronous check
+            return not self.is_open
     
     def record_success(self) -> None:
         """Record successful operation."""
-        self.failure_count = 0
-        self.state = "closed"
-        self.last_failure_time = None
+        # Convert to async call when possible
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.create_task(self._record_success())
+            else:
+                asyncio.run(self._record_success())
+        except RuntimeError:
+            # Best effort - set state manually for compatibility
+            self.state = self.config.name
     
     def record_failure(self) -> None:
         """Record failed operation."""
-        self.failure_count += 1
-        self.last_failure_time = datetime.now()
-        
-        if self.failure_count >= self.failure_threshold:
-            self.state = "open"
-    
-    def _should_attempt_reset(self) -> bool:
-        """Check if circuit should attempt reset."""
-        if not self.last_failure_time:
-            return False
-        
-        time_since_failure = datetime.now() - self.last_failure_time
-        return time_since_failure.total_seconds() >= self.timeout
+        # Convert to async call when possible
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.create_task(self._record_failure("ErrorRecoveryFailure"))
+            else:
+                asyncio.run(self._record_failure("ErrorRecoveryFailure"))
+        except RuntimeError:
+            # Best effort - increment failure tracking for compatibility
+            self._failure_count += 1
 
 
 class ErrorRecoveryManager:

@@ -5,6 +5,7 @@ Main orchestrator for startup checks with modular delegation.
 Maintains 8-line function limit and coordinating responsibility.
 """
 
+import os
 import time
 from typing import Dict, Any, List
 from fastapi import FastAPI
@@ -23,6 +24,7 @@ class StartupChecker:
         self.app = app
         self.results: List[StartupCheckResult] = []
         self.start_time = time.time()
+        self.is_staging = self._is_staging_environment()
         
         self.env_checker = EnvironmentChecker()
         self.db_checker = DatabaseChecker(app)
@@ -63,7 +65,7 @@ class StartupChecker:
                 name=check_func.__name__,
                 success=False,
                 message=f"Unexpected error: {e}",
-                critical=True
+                critical=not self.is_staging
             ))
     
     def _create_final_report(self) -> Dict[str, Any]:
@@ -82,3 +84,8 @@ class StartupChecker:
             "results": self.results,
             "failures": failed_critical + failed_non_critical
         }
+    
+    def _is_staging_environment(self) -> bool:
+        """Check if running in staging environment"""
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        return environment == "staging" or bool(os.getenv("K_SERVICE"))

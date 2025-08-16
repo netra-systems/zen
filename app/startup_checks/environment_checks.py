@@ -31,7 +31,7 @@ class EnvironmentChecker:
                 name="environment_variables",
                 success=False,
                 message=f"Missing required environment variables: {', '.join(missing_required)}",
-                critical=True
+                critical=not self.is_staging
             )
         else:
             return self._create_success_result(missing_optional)

@@ -41,12 +41,20 @@ class StateCheckpointManager:
     async def _save_checkpoint_request(self, request: StatePersistenceRequest):
         """Save checkpoint request to database."""
         async with self.db_session_factory() as session:
-            # Convert StatePersistenceRequest to individual parameters
-            from app.agents.state import DeepAgentState
-            state = DeepAgentState(**request.state_data)
-            success = await self.state_persistence.save_agent_state(
-                request.run_id, request.thread_id, request.user_id, state, session)
-            return success, request.run_id  # Return tuple as expected
+            state = self._convert_request_to_state(request)
+            success = await self._persist_state_data(request, state, session)
+            return success, request.run_id
+    
+    def _convert_request_to_state(self, request: StatePersistenceRequest):
+        """Convert StatePersistenceRequest to DeepAgentState."""
+        from app.agents.state import DeepAgentState
+        return DeepAgentState(**request.state_data)
+    
+    async def _persist_state_data(self, request: StatePersistenceRequest, 
+                                state, session):
+        """Persist state data to database."""
+        return await self.state_persistence.save_agent_state(
+            request.run_id, request.thread_id, request.user_id, state, session)
     
     def _handle_checkpoint_save_result(self, success: bool, checkpoint_id: str) -> None:
         """Handle checkpoint save result."""

@@ -10,6 +10,11 @@ from enum import Enum
 from pydantic import BaseModel, Field
 from app.logging_config import central_logger
 from app.schemas.corpus import WorkloadType, GenerationParameters
+from .suggestion_profiles import (
+    get_optimization_rules, get_domain_profiles, get_workload_optimizations,
+    get_parameter_dependencies, get_category_options, apply_domain_rules,
+    merge_domain_settings
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -46,85 +51,14 @@ class ConfigurationSuggestionEngine:
     
     def __init__(self):
         """Initialize suggestion engine with optimization rules"""
-        self.optimization_rules = self._initialize_optimization_rules()
-        self.domain_profiles = self._initialize_domain_profiles()
-        self.workload_optimizations = self._initialize_workload_optimizations()
-        self.parameter_dependencies = self._initialize_parameter_dependencies()
+        self.optimization_rules = get_optimization_rules()
+        self.domain_profiles = get_domain_profiles()
+        self.workload_optimizations = get_workload_optimizations()
+        self.parameter_dependencies = get_parameter_dependencies()
     
-    def _initialize_optimization_rules(self) -> Dict[str, Dict[str, Any]]:
-        """Initialize optimization rules for different focuses"""
-        return {
-            "performance": {
-                "batch_size": {"value": 256, "impact": "Higher throughput"},
-                "concurrency": {"value": 20, "impact": "Parallel processing"},
-                "compression": {"value": "lz4", "impact": "Fast compression"}
-            },
-            "quality": {
-                "error_rate": {"value": 0.001, "impact": "High accuracy"},
-                "validation": {"value": True, "impact": "Data integrity"},
-                "sampling_rate": {"value": 1.0, "impact": "Complete data"}
-            },
-            "balanced": {
-                "batch_size": {"value": 128, "impact": "Balanced load"},
-                "error_rate": {"value": 0.01, "impact": "Acceptable accuracy"},
-                "concurrency": {"value": 10, "impact": "Moderate parallelism"}
-            }
-        }
     
-    def _initialize_domain_profiles(self) -> Dict[str, Dict[str, Any]]:
-        """Initialize domain-specific configuration profiles"""
-        return {
-            "fintech": {
-                "precision": "high",
-                "audit_logging": True,
-                "encryption": "AES-256",
-                "compliance": ["PCI-DSS", "SOX"]
-            },
-            "healthcare": {
-                "privacy": "HIPAA",
-                "anonymization": True,
-                "retention": "7y",
-                "validation": "strict"
-            },
-            "ecommerce": {
-                "scalability": "elastic",
-                "cache_ttl": 300,
-                "real_time": True,
-                "analytics": "enabled"
-            }
-        }
     
-    def _initialize_workload_optimizations(self) -> Dict[str, Dict[str, Any]]:
-        """Initialize workload-specific optimizations"""
-        return {
-            "machine_learning": {
-                "gpu_enabled": True,
-                "tensor_format": True,
-                "shuffle": True,
-                "augmentation": "auto"
-            },
-            "web_services": {
-                "rate_limiting": True,
-                "circuit_breaker": True,
-                "timeout": 30,
-                "retry_policy": "exponential"
-            },
-            "data_processing": {
-                "streaming": True,
-                "checkpointing": True,
-                "exactly_once": True,
-                "windowing": "sliding"
-            }
-        }
     
-    def _initialize_parameter_dependencies(self) -> Dict[str, List[str]]:
-        """Initialize parameter dependencies"""
-        return {
-            "batch_size": ["memory_limit", "concurrency"],
-            "concurrency": ["cpu_cores", "memory_limit"],
-            "compression": ["storage_type", "performance_mode"],
-            "encryption": ["compliance", "performance_mode"]
-        }
     
     async def analyze_user_intent(self, query: str, context: Dict[str, Any]) -> OptimizationProfile:
         """Analyze user intent to determine optimization profile"""
@@ -261,38 +195,22 @@ class ConfigurationSuggestionEngine:
         """Optimize configuration for specific domain"""
         optimized = config.copy()
         if domain in self.domain_profiles:
-            optimized = self._merge_domain_settings(optimized, self.domain_profiles[domain])
+            optimized = merge_domain_settings(optimized, self.domain_profiles[domain])
         optimized = await self._apply_domain_rules(optimized, domain)
         return optimized
     
-    def _merge_domain_settings(self, config: Dict, domain_settings: Dict) -> Dict[str, Any]:
-        """Merge domain-specific settings into configuration"""
-        for key, value in domain_settings.items():
-            if key not in config: config[key] = value
-        return config
     
     async def _apply_domain_rules(self, config: Dict, domain: str) -> Dict[str, Any]:
         """Apply domain-specific business rules"""
-        if domain == "fintech":
-            config["audit_logging"] = True
-            config["encryption"] = config.get("encryption", "AES-256")
-        elif domain == "healthcare":
-            config["anonymization"] = True
-            config["retention"] = config.get("retention", "7y")
-        return config
+        return apply_domain_rules(config, domain)
     
     def get_auto_complete_options(self, partial: str, category: str) -> List[str]:
         """Get auto-complete options for partial input"""
-        return [opt for opt in self._get_category_options(category) if opt.startswith(partial.lower())]
+        return [opt for opt in get_category_options(category) if opt.startswith(partial.lower())]
     
     def _get_category_options(self, category: str) -> List[str]:
         """Get available options for a category"""
-        category_map = {
-            "workload": list(self.workload_optimizations.keys()),
-            "domain": list(self.domain_profiles.keys()),
-            "parameter": ["batch_size", "concurrency", "error_rate", "compression"]
-        }
-        return category_map.get(category, [])
+        return get_category_options(category)
     
     async def generate_config_preview(self, suggestions: List[ConfigurationSuggestion]) -> Dict[str, Any]:
         """Generate configuration preview from suggestions"""

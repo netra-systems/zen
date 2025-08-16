@@ -213,24 +213,4 @@ async def _fetch_templates(db: AsyncSession) -> Dict:
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/generate-test")
-async def generate_api_data(request: dict) -> dict:
-    """Generate synthetic data for API testing"""
-    count = request.get("count", 10)
-    return {
-        "data": generate_test_user_data(count),
-        "count": count
-    }
 
-@router.post("/validate")
-async def validate_api_data(request: dict) -> dict:
-    """Validate synthetic data for API testing"""
-    return {"valid": True, "errors": []}
-
-@router.get("/templates-test")
-async def get_templates_test() -> list:
-    """Get templates for testing"""
-    return [
-        {"name": "user_profile", "fields": 5},
-        {"name": "transaction", "fields": 8}
-    ]

@@ -30,6 +30,10 @@ class CorpusAdminSubAgent(BaseSubAgent):
             name="CorpusAdminSubAgent",
             description="Agent specialized in corpus management and administration"
         )
+        self._initialize_components(tool_dispatcher, llm_manager)
+    
+    def _initialize_components(self, tool_dispatcher: ToolDispatcher, llm_manager: LLMManager) -> None:
+        """Initialize agent components"""
         self.tool_dispatcher = tool_dispatcher
         self.parser = CorpusRequestParser(llm_manager)
         self.validator = CorpusApprovalValidator()
@@ -37,9 +41,7 @@ class CorpusAdminSubAgent(BaseSubAgent):
     
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Check if conditions are met for corpus administration"""
-        if self._is_admin_mode_request(state):
-            return True
-        if self._has_corpus_keywords(state):
+        if self._is_admin_mode_request(state) or self._has_corpus_keywords(state):
             return True
         
         logger.info(f"Corpus administration not required for run_id: {run_id}")
@@ -47,9 +49,7 @@ class CorpusAdminSubAgent(BaseSubAgent):
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute corpus administration operation"""
-        # Log agent communication start
         log_agent_communication("Supervisor", "CorpusAdminSubAgent", run_id, "execute_request")
-        
         start_time = time.time()
         
         try:
@@ -69,8 +69,6 @@ class CorpusAdminSubAgent(BaseSubAgent):
             return
         
         await self._complete_corpus_operation(operation_request, state, run_id, stream_updates, start_time)
-        
-        # Log agent communication completion
         log_agent_communication("CorpusAdminSubAgent", "Supervisor", run_id, "execute_response")
     
     async def _complete_corpus_operation(
@@ -80,6 +78,12 @@ class CorpusAdminSubAgent(BaseSubAgent):
         await self._send_processing_update(operation_request, run_id, stream_updates)
         result = await self.operations.execute_operation(operation_request, run_id, stream_updates)
         
+        await self._finalize_operation_result(result, state, run_id, stream_updates, start_time)
+    
+    async def _finalize_operation_result(
+        self, result, state: DeepAgentState, run_id: str, stream_updates: bool, start_time: float
+    ) -> None:
+        """Finalize operation result and send updates"""
         state.corpus_admin_result = result.model_dump()
         await self._send_completion_update(result, run_id, stream_updates, start_time)
         self._log_completion(result, run_id)
@@ -94,10 +98,14 @@ class CorpusAdminSubAgent(BaseSubAgent):
         triage_result = state.triage_result or {}
         
         if isinstance(triage_result, dict):
-            category = triage_result.get("category", "")
-            is_admin = triage_result.get("is_admin_mode", False)
-            return "corpus" in category.lower() or "admin" in category.lower() or is_admin
+            return self._check_admin_indicators(triage_result)
         return False
+    
+    def _check_admin_indicators(self, triage_result: dict) -> bool:
+        """Check if triage result indicates admin or corpus operation"""
+        category = triage_result.get("category", "")
+        is_admin = triage_result.get("is_admin_mode", False)
+        return "corpus" in category.lower() or "admin" in category.lower() or is_admin
     
     def _has_corpus_keywords(self, state: DeepAgentState) -> bool:
         """Check if user request contains corpus keywords"""
@@ -268,10 +276,6 @@ class CorpusAdminSubAgent(BaseSubAgent):
         """Send update via WebSocket manager"""
         if self.websocket_manager:
             try:
-                await self.websocket_manager.send_agent_update(
-                    run_id,
-                    "corpus_admin",
-                    update
-                )
+                await self.websocket_manager.send_agent_update(run_id, "corpus_admin", update)
             except Exception as e:
                 logger.error(f"Failed to send WebSocket update: {e}")

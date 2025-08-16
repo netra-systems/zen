@@ -14,6 +14,9 @@ from app.websocket.connection import ConnectionInfo, ConnectionManager
 from .batch_message_types import BatchConfig, PendingMessage, BatchMetrics
 from .batch_message_strategies import BatchingStrategyManager
 from .batch_load_monitor import LoadMonitor
+from .batch_message_operations import (
+    send_batch_to_connection, BatchTimerManager, create_batched_message
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -30,7 +33,7 @@ class MessageBatcher:
     def _init_batcher_state(self) -> None:
         """Initialize batcher state variables."""
         self._pending_messages: Dict[str, List[PendingMessage]] = {}
-        self._batch_timers: Dict[str, asyncio.Handle] = {}
+        self._timer_manager = BatchTimerManager()
         self._metrics = BatchMetrics()
         self._lock = asyncio.Lock()
         self._shutdown = False
@@ -105,21 +108,9 @@ class MessageBatcher:
     
     async def _set_flush_timer(self, connection_id: str) -> None:
         """Set a timer to flush the batch after max wait time."""
-        self._cancel_existing_timer(connection_id)
-        self._create_new_timer(connection_id)
+        self._timer_manager.set_flush_timer(connection_id, self.config.max_wait_time, self._flush_batch)
     
-    def _cancel_existing_timer(self, connection_id: str) -> None:
-        """Cancel existing timer for connection."""
-        if connection_id in self._batch_timers:
-            self._batch_timers[connection_id].cancel()
     
-    def _create_new_timer(self, connection_id: str) -> None:
-        """Create new flush timer for connection."""
-        loop = asyncio.get_event_loop()
-        self._batch_timers[connection_id] = loop.call_later(
-            self.config.max_wait_time,
-            lambda: asyncio.create_task(self._flush_batch(connection_id))
-        )
     
     async def _flush_batch(self, connection_id: str) -> None:
         """Flush pending messages for a connection."""
@@ -142,9 +133,7 @@ class MessageBatcher:
     
     def _cleanup_timer(self, connection_id: str) -> None:
         """Clean up batch timer for connection."""
-        if connection_id in self._batch_timers:
-            self._batch_timers[connection_id].cancel()
-            del self._batch_timers[connection_id]
+        self._timer_manager.cleanup_timer(connection_id)
     
     async def _send_batch(self, connection_id: str, batch: List[PendingMessage]) -> None:
         """Send a batch of messages to a connection."""
@@ -156,80 +145,24 @@ class MessageBatcher:
             self._log_connection_not_found(connection_id)
             return
         
-        await self._execute_batch_send(connection_info, batch, connection_id)
+        await send_batch_to_connection(connection_info, batch, connection_id, self.config)
+        self._update_send_metrics(batch)
     
     def _log_connection_not_found(self, connection_id: str) -> None:
         """Log when connection is not found."""
         logger.debug(f"Connection {connection_id} no longer exists")
     
-    async def _execute_batch_send(self, connection_info: ConnectionInfo, 
-                                 batch: List[PendingMessage], connection_id: str) -> None:
-        """Execute the actual batch send operation."""
-        start_time = time.time()
-        
-        try:
-            await self._send_batched_message(connection_info, batch)
-            self._update_send_metrics(batch, start_time, connection_info)
-            self._log_successful_send(batch, connection_id)
-        except Exception as e:
-            logger.error(f"Error sending batch to {connection_id}: {e}")
-            await self._handle_send_error(batch)
     
-    async def _send_batched_message(self, connection_info: ConnectionInfo, batch: List[PendingMessage]) -> None:
-        """Send the batched message via websocket."""
-        batched_msg = self._create_batched_message(batch)
-        await connection_info.websocket.send_json(batched_msg)
     
-    def _update_send_metrics(self, batch: List[PendingMessage], start_time: float, 
-                           connection_info: ConnectionInfo) -> None:
+    def _update_send_metrics(self, batch: List[PendingMessage]) -> None:
         """Update metrics after successful send."""
-        wait_time = start_time - min(msg.timestamp for msg in batch)
-        self._update_metrics(len(batch), wait_time)
-        connection_info.message_count += len(batch)
+        self._update_metrics(len(batch), 0.0)
     
-    def _log_successful_send(self, batch: List[PendingMessage], connection_id: str) -> None:
-        """Log successful batch send."""
-        logger.debug(f"Sent batch of {len(batch)} messages to {connection_id}")
     
-    async def _handle_send_error(self, batch: List[PendingMessage]) -> None:
-        """Handle error during batch send."""
-        high_priority_messages = [msg for msg in batch if msg.priority >= self.config.priority_threshold]
-        if high_priority_messages:
-            await self._requeue_messages(high_priority_messages)
     
-    def _create_batched_message(self, batch: List[PendingMessage]) -> Dict[str, Any]:
-        """Create a batched message structure."""
-        sorted_batch = sorted(batch, key=lambda m: m.priority, reverse=True)
-        return self._build_batch_structure(batch, sorted_batch)
     
-    def _build_batch_structure(self, original_batch: List[PendingMessage], 
-                              sorted_batch: List[PendingMessage]) -> Dict[str, Any]:
-        """Build the batch message structure."""
-        return {
-            "type": "batch",
-            "batch_id": f"batch_{int(time.time() * 1000)}",
-            "messages": [msg.content for msg in sorted_batch],
-            "message_count": len(original_batch),
-            "timestamp": time.time(),
-            "compression": "none",
-            "metadata": self._create_batch_metadata(original_batch)
-        }
     
-    def _create_batch_metadata(self, batch: List[PendingMessage]) -> Dict[str, Any]:
-        """Create metadata for batch message."""
-        return {
-            "batch_size": len(batch),
-            "priority_distribution": self._get_priority_distribution(batch),
-            "total_size_bytes": sum(msg.size_bytes for msg in batch)
-        }
     
-    def _get_priority_distribution(self, batch: List[PendingMessage]) -> Dict[str, int]:
-        """Get priority distribution for batch metadata."""
-        distribution = {}
-        for msg in batch:
-            priority_key = f"priority_{msg.priority}"
-            distribution[priority_key] = distribution.get(priority_key, 0) + 1
-        return distribution
     
     async def _requeue_messages(self, messages: List[PendingMessage]) -> None:
         """Re-queue messages that failed to send."""
@@ -281,9 +214,7 @@ class MessageBatcher:
     
     def _cancel_all_timers(self) -> None:
         """Cancel all active batch timers."""
-        for timer in self._batch_timers.values():
-            timer.cancel()
-        self._batch_timers.clear()
+        self._timer_manager.cancel_all_timers()
     
     def get_metrics(self) -> Dict[str, Any]:
         """Get batching metrics."""
@@ -295,7 +226,7 @@ class MessageBatcher:
             "throughput_per_second": self._metrics.throughput_per_second,
             "pending_queues": len(self._pending_messages),
             "pending_messages": sum(len(msgs) for msgs in self._pending_messages.values()),
-            "active_timers": len(self._batch_timers)
+            "active_timers": self._timer_manager.get_active_timer_count()
         }
     
     def reset_metrics(self) -> None:

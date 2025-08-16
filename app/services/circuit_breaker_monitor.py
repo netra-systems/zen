@@ -226,6 +226,8 @@ class CircuitBreakerMonitor:
         for state in self._last_states.values():
             category = categorize_circuit_state(state)
             summary[f"{category}_circuits"] += 1
+        
+        return summary
 
 
 class CircuitBreakerMetricsCollector:

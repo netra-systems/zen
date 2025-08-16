@@ -60,25 +60,33 @@ class FallbackManager:
                                    state: DeepAgentState, execute_func):
         """Execute through fallback handler."""
         circuit_breaker = self._get_agent_circuit_breaker(context.agent_name)
-        
         try:
-            fallback_type = self._get_agent_fallback_type(context.agent_name)
-            result = await self.fallback_handler.execute_with_fallback(
-                execute_func, f"execute_{context.agent_name}",
-                context.agent_name, fallback_type
-            )
-            
-            # Record success if the result indicates success
-            if hasattr(result, 'success') and result.success:
-                circuit_breaker.record_success()
-            else:
-                circuit_breaker.record_failure()
-                
-            return result
-            
+            return await self._execute_and_record_result(context, execute_func, circuit_breaker)
         except Exception as e:
             circuit_breaker.record_failure()
             raise e
+    
+    async def _execute_and_record_result(self, context: AgentExecutionContext,
+                                       execute_func, circuit_breaker):
+        """Execute with fallback and record circuit breaker result."""
+        fallback_type = self._get_agent_fallback_type(context.agent_name)
+        result = await self._call_fallback_handler(execute_func, context, fallback_type)
+        self._record_circuit_breaker_result(result, circuit_breaker)
+        return result
+    
+    async def _call_fallback_handler(self, execute_func, context: AgentExecutionContext,
+                                   fallback_type: str):
+        """Call fallback handler with execution parameters."""
+        return await self.fallback_handler.execute_with_fallback(
+            execute_func, f"execute_{context.agent_name}",
+            context.agent_name, fallback_type)
+    
+    def _record_circuit_breaker_result(self, result, circuit_breaker) -> None:
+        """Record success or failure on circuit breaker based on result."""
+        if hasattr(result, 'success') and result.success:
+            circuit_breaker.record_success()
+        else:
+            circuit_breaker.record_failure()
     
     def _process_fallback_result(self, result, context: AgentExecutionContext):
         """Process fallback execution result."""
@@ -203,7 +211,7 @@ class FallbackManager:
         """Initialize fallback mechanisms for graceful degradation."""
         fallback_config = self._create_fallback_config()
         self.fallback_handler = LLMFallbackHandler(fallback_config)
-        self.agent_circuit_breakers: Dict[str, CircuitBreaker] = {}
+        # Circuit breakers are now managed by the global registry
     
     def _create_fallback_config(self) -> FallbackConfig:
         """Create fallback configuration."""
@@ -212,26 +220,30 @@ class FallbackManager:
             max_delay=10.0, timeout=30.0
         )
     
-    def _get_agent_circuit_breaker(self, agent_name: str) -> CircuitBreaker:
+    async def _get_agent_circuit_breaker(self, agent_name: str):
         """Get or create circuit breaker for agent."""
-        if agent_name not in self.agent_circuit_breakers:
-            self._create_agent_circuit_breaker(agent_name)
-        return self.agent_circuit_breakers[agent_name]
+        timeout = self._get_circuit_breaker_timeout()
+        threshold = self._get_circuit_breaker_threshold()
+        config = self._build_circuit_breaker_config(agent_name, threshold, timeout)
+        return await circuit_registry.get_circuit(f"agent_{agent_name}", config)
     
-    def _create_agent_circuit_breaker(self, agent_name: str) -> None:
-        """Create circuit breaker for agent."""
-        # Use shorter timeout for testing environments
+    
+    def _get_circuit_breaker_timeout(self) -> float:
+        """Get circuit breaker timeout based on environment."""
         import os
-        timeout = 0.1 if os.getenv('PYTEST_CURRENT_TEST') else 60.0
-        
-        # Use threshold of 2 for testing to match test expectations
-        threshold = 2 if os.getenv('PYTEST_CURRENT_TEST') else 3
-        
-        config = CircuitBreakerConfig(
+        return 0.1 if os.getenv('PYTEST_CURRENT_TEST') else 60.0
+    
+    def _get_circuit_breaker_threshold(self) -> int:
+        """Get circuit breaker threshold based on environment."""
+        import os
+        return 2 if os.getenv('PYTEST_CURRENT_TEST') else 3
+    
+    def _build_circuit_breaker_config(self, agent_name: str, threshold: int, 
+                                     timeout: float) -> CircuitBreakerConfig:
+        """Build circuit breaker configuration."""
+        return CircuitBreakerConfig(
             failure_threshold=threshold, recovery_timeout=timeout,
-            name=f"agent_{agent_name}"
-        )
-        self.agent_circuit_breakers[agent_name] = CircuitBreaker(config)
+            name=f"agent_{agent_name}")
     
     def get_fallback_health_status(self) -> Dict[str, any]:
         """Get health status of fallback mechanisms."""

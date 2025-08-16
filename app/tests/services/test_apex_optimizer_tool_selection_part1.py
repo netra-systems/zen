@@ -148,7 +148,9 @@ class MockLLMConnector:
         
         # Check for specific patterns in the USER QUERY, not the whole prompt
         # Check multi-objective patterns first (most specific combinations)
-        if 'multi' in user_query or ('both' in user_query and 'cost' in user_query and 'latency' in user_query) or ('cost' in user_query and 'latency' in user_query):
+        if ('multi' in user_query or 
+            ('both' in user_query and 'cost' in user_query and 'latency' in user_query) or 
+            ('cost' in user_query and 'latency' in user_query and 'optimize' in user_query)):
             return json.dumps(self.response_templates['multi'])
         elif 'reduce costs' in user_query or 'cost reduction' in user_query or ('cost' in user_query and 'reduce' in user_query):
             return json.dumps(self.response_templates['cost'])

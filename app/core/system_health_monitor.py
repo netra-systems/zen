@@ -17,6 +17,9 @@ from .health_checkers import (
     check_websocket_health, check_system_resources
 )
 from .alert_manager import AlertManager
+from .agent_health_checker import (
+    register_agent_checker, convert_legacy_result, determine_system_status
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -199,20 +202,7 @@ class SystemHealthMonitor:
     
     def _convert_legacy_result(self, component_name: str, legacy_result: Any) -> HealthCheckResult:
         """Convert legacy health check result to new format."""
-        if isinstance(legacy_result, dict):
-            health_score = legacy_result.get("health_score", 1.0)
-            metadata = legacy_result.get("metadata", {})
-        elif isinstance(legacy_result, (int, float)):
-            health_score = float(legacy_result)
-            metadata = {}
-        else:
-            health_score = 1.0 if legacy_result else 0.0
-            metadata = {}
-        
-        return HealthCheckResult(
-            component_name=component_name, success=health_score > 0,
-            health_score=health_score, response_time_ms=0.0, metadata=metadata
-        )
+        return convert_legacy_result(component_name, legacy_result)
     
     def _register_default_checkers(self) -> None:
         """Register default health checkers for core components."""
@@ -226,42 +216,8 @@ class SystemHealthMonitor:
     
     def _register_agent_checker(self) -> None:
         """Register agent health checker if available."""
-        try:
-            from app.services.metrics.agent_metrics import agent_metrics_collector
-            self.register_component_checker("agents", self._create_agent_checker())
-        except ImportError:
-            logger.debug("Agent metrics not available, skipping agent health checker")
+        register_agent_checker(self.register_component_checker)
     
-    def _create_agent_checker(self) -> Callable:
-        """Create agent health checker function."""
-        async def check_agent_health() -> HealthCheckResult:
-            start_time = time.time()
-            try:
-                from app.services.metrics.agent_metrics import agent_metrics_collector
-                system_overview = await agent_metrics_collector.get_system_overview()
-                error_rate = system_overview.get("system_error_rate", 0.0)
-                active_agents = system_overview.get("active_agents", 0)
-                unhealthy_agents = system_overview.get("unhealthy_agents", 0)
-                
-                if active_agents == 0:
-                    health_score = 1.0
-                else:
-                    error_penalty = min(0.5, error_rate * 2)
-                    unhealthy_penalty = min(0.3, (unhealthy_agents / active_agents) * 0.5)
-                    health_score = max(0.0, 1.0 - error_penalty - unhealthy_penalty)
-                
-                response_time = (time.time() - start_time) * 1000
-                return HealthCheckResult(
-                    component_name="agents", success=True, health_score=health_score,
-                    response_time_ms=response_time, metadata=system_overview
-                )
-            except Exception as e:
-                response_time = (time.time() - start_time) * 1000
-                return HealthCheckResult(
-                    component_name="agents", success=False, health_score=0.0,
-                    response_time_ms=response_time, error_message=str(e)
-                )
-        return check_agent_health
     
     def get_system_overview(self) -> Dict[str, Any]:
         """Get comprehensive system health overview."""
@@ -287,14 +243,7 @@ class SystemHealthMonitor:
     
     def _determine_system_status(self, health_pct: float, critical_count: int) -> str:
         """Determine overall system status."""
-        if critical_count > 0:
-            return "critical"
-        elif health_pct < 0.5:
-            return "unhealthy"
-        elif health_pct < 0.8:
-            return "degraded"
-        else:
-            return "healthy"
+        return determine_system_status(health_pct, critical_count)
 
 
 # Global system health monitor instance

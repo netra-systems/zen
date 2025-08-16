@@ -70,11 +70,4 @@ async def enrich_supplier(request: EnrichRequest) -> Dict[str, Any]:
         }
     }
 
-async def validate_supply_chain(chain_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Validate supply chain data for testing"""
-    return {
-        "valid": True,
-        "issues": [],
-        "score": 0.88
-    }
 

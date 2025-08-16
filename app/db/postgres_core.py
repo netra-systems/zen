@@ -93,14 +93,26 @@ async_engine: Optional[AsyncEngine] = None
 async_session_factory: Optional[async_sessionmaker] = None
 
 
+def _convert_postgresql_url(db_url: str) -> str:
+    """Convert postgresql:// URL to async format."""
+    return db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+def _convert_postgres_url(db_url: str) -> str:
+    """Convert postgres:// URL to async format."""
+    return db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+
+def _convert_sqlite_url(db_url: str) -> str:
+    """Convert sqlite:// URL to async format."""
+    return db_url.replace("sqlite://", "sqlite+aiosqlite://", 1)
+
 def _get_async_db_url(db_url: str) -> str:
     """Convert sync database URL to async format."""
     if db_url.startswith("postgresql://"):
-        return db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return _convert_postgresql_url(db_url)
     elif db_url.startswith("postgres://"):
-        return db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+        return _convert_postgres_url(db_url)
     elif db_url.startswith("sqlite://"):
-        return db_url.replace("sqlite://", "sqlite+aiosqlite://", 1)
+        return _convert_sqlite_url(db_url)
     return db_url
 
 
@@ -117,15 +129,26 @@ def _get_base_engine_args(pool_class):
         "poolclass": pool_class,
     }
 
-def _get_pool_specific_args():
-    """Get pool-specific arguments for non-NullPool."""
+def _get_pool_sizing_args():
+    """Get pool sizing arguments."""
     return {
         "pool_size": DatabaseConfig.POOL_SIZE,
         "max_overflow": DatabaseConfig.MAX_OVERFLOW,
+    }
+
+def _get_pool_timing_args():
+    """Get pool timing arguments."""
+    return {
         "pool_timeout": DatabaseConfig.POOL_TIMEOUT,
         "pool_recycle": DatabaseConfig.POOL_RECYCLE,
         "pool_pre_ping": DatabaseConfig.POOL_PRE_PING,
     }
+
+def _get_pool_specific_args():
+    """Get pool-specific arguments for non-NullPool."""
+    args = _get_pool_sizing_args()
+    args.update(_get_pool_timing_args())
+    return args
 
 def _build_engine_args(pool_class):
     """Build engine arguments based on pool class."""
@@ -172,6 +195,12 @@ def _handle_engine_creation_error(e):
     async_engine = None
     async_session_factory = None
 
+def _create_and_setup_engine(async_db_url: str, engine_args: dict):
+    """Create engine and setup global objects."""
+    engine = create_async_engine(async_db_url, **engine_args)
+    _setup_global_engine_objects(engine)
+    logger.info("PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling")
+
 def _initialize_async_engine():
     """Initialize the async PostgreSQL engine."""
     try:
@@ -179,9 +208,7 @@ def _initialize_async_engine():
         if not db_url:
             return
         async_db_url, engine_args = _create_engine_components(db_url)
-        engine = create_async_engine(async_db_url, **engine_args)
-        _setup_global_engine_objects(engine)
-        logger.info("PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling")
+        _create_and_setup_engine(async_db_url, engine_args)
     except Exception as e:
         _handle_engine_creation_error(e)
 

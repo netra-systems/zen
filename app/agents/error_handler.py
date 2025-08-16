@@ -49,17 +49,8 @@ class NetworkError(AgentError):
         )
 
 
-class DatabaseError(AgentError):
-    """Error for database-related failures."""
-    
-    def __init__(self, message: str, context: Optional[ErrorContext] = None):
-        super().__init__(
-            message,
-            severity=ErrorSeverity.HIGH,
-            category=ErrorCategory.DATABASE,
-            context=context,
-            recoverable=True
-        )
+# Import DatabaseError from canonical location
+from app.core.exceptions_database import DatabaseError
 
 
 # Import WebSocketError from canonical location
