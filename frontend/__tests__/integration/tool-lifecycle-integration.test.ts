@@ -48,15 +48,23 @@ describe('Tool Lifecycle Integration', () => {
       handleToolExecutingEnhanced(
         toolExecutingEvent,
         store,
-        (partial) => store.updateFastLayer(partial.fastLayerData)
+        (partial) => {
+          if (partial.fastLayerData) {
+            store.updateFastLayer(partial.fastLayerData);
+          }
+        }
       );
     });
 
+    // Re-fetch store state after update
+    const { result: updatedResult } = renderHook(() => useUnifiedChatStore());
+    const updatedStore = updatedResult.current;
+
     // Verify tool was added
-    expect(store.fastLayerData?.activeTools).toContain('data_analyzer');
-    expect(store.fastLayerData?.toolStatuses).toHaveLength(1);
-    expect(store.fastLayerData?.toolStatuses?.[0].name).toBe('data_analyzer');
-    expect(store.fastLayerData?.toolStatuses?.[0].isActive).toBe(true);
+    expect(updatedStore.fastLayerData?.activeTools).toContain('data_analyzer');
+    expect(updatedStore.fastLayerData?.toolStatuses).toHaveLength(1);
+    expect(updatedStore.fastLayerData?.toolStatuses?.[0].name).toBe('data_analyzer');
+    expect(updatedStore.fastLayerData?.toolStatuses?.[0].isActive).toBe(true);
 
     // Simulate tool_completed event
     const toolCompletedEvent: UnifiedWebSocketEvent = {

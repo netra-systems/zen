@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <metadata>
+    <title>MCP Chat Integration Learnings</title>
+    <category>integration</category>
+    <subcategory>mcp</subcategory>
+    <created>2025-08-16</created>
+    <tags>mcp, agents, websocket, frontend, integration</tags>
+  </metadata>
+
+  <learning id="mcp-001">
+    <title>Agent-MCP Context Management Pattern</title>
+    <problem>
+      Agents need to maintain MCP context across multiple tool executions while preserving
+      their existing execution flow and state management.
+    </problem>
+    <solution>
+      Created a context manager pattern that injects MCP capabilities into agents without
+      modifying their core logic. The MCPContextManager maintains tool discovery cache,
+      connection pools, and permission checks separately from agent state.
+    </solution>
+    <implementation>
+      <file>app/agents/mcp_integration/context_manager.py</file>
+      <pattern>Dependency injection with async context managers</pattern>
+    </implementation>
+    <benefits>
+      - Zero modification to existing agent logic
+      - Reusable across all agent types
+      - Clean separation of concerns
+      - Easy to test in isolation
+    </benefits>
+  </learning>
+
+  <learning id="mcp-002">
+    <title>Intent Detection for MCP Tool Selection</title>
+    <problem>
+      Need to automatically detect when user queries require MCP tools without explicit
+      commands, while avoiding false positives that would slow down normal queries.
+    </problem>
+    <solution>
+      Implemented a multi-level intent detector with keyword matching, pattern recognition,
+      and confidence scoring. Uses category-based routing to appropriate MCP servers.
+    </solution>
+    <implementation>
+      <file>app/agents/mcp_integration/mcp_intent_detector.py</file>
+      <key_insight>
+        Confidence thresholds prevent over-eager MCP routing:
+        - High confidence (>0.8): Direct MCP execution
+        - Medium (0.5-0.8): MCP with fallback
+        - Low (<0.5): Standard agent execution
+      </key_insight>
+    </implementation>
+  </learning>
+
+  <learning id="mcp-003">
+    <title>WebSocket Message Type Extension Pattern</title>
+    <problem>
+      Adding new MCP message types to existing WebSocket protocol without breaking
+      backward compatibility or duplicating message handling logic.
+    </problem>
+    <solution>
+      Extended existing enums and message classes rather than creating parallel systems.
+      Used composition to add MCP-specific handlers alongside existing handlers.
+    </solution>
+    <implementation>
+      <files>
+        <file>app/schemas/core_enums.py</file>
+        <file>app/schemas/websocket_server_messages.py</file>
+        <file>frontend/store/websocket-mcp-handlers.ts</file>
+      </files>
+      <pattern>Enum extension with backward compatibility</pattern>
+    </implementation>
+    <critical>
+      Always extend existing types rather than creating new parallel type systems
+    </critical>
+  </learning>
+
+  <learning id="mcp-004">
+    <title>Frontend State Management for External Tools</title>
+    <problem>
+      Managing state for external MCP tools that have different lifecycles and error
+      patterns than internal agent operations.
+    </problem>
+    <solution>
+      Created separate state slices for MCP operations that integrate with existing
+      unified chat store. Used React hooks to encapsulate MCP-specific logic.
+    </solution>
+    <implementation>
+      <file>frontend/hooks/useMCPTools.ts</file>
+      <pattern>Hook composition with store integration</pattern>
+      <key_insight>
+        Separate MCP state from agent state but unify at presentation layer
+      </key_insight>
+    </implementation>
+  </learning>
+
+  <learning id="mcp-005">
+    <title>Permission-Based Tool Access Control</title>
+    <problem>
+      Different agents need different levels of MCP tool access, and permissions must
+      be enforced at multiple layers (agent, service, UI).
+    </problem>
+    <solution>
+      Implemented agent-based permissions that flow through all layers. Each agent has
+      intrinsic permission levels that determine available MCP tools.
+    </solution>
+    <implementation>
+      <pattern>
+        Agent permissions cascade:
+        - supervisor: admin (all tools)
+        - data_sub_agent: read/write data tools
+        - triage_sub_agent: diagnostic tools
+        - corpus_admin: corpus management tools
+      </pattern>
+    </implementation>
+    <security>
+      Permissions checked at context creation, not execution, for performance
+    </security>
+  </learning>
+
+  <learning id="mcp-006">
+    <title>Tool Discovery Caching Strategy</title>
+    <problem>
+      Tool discovery is expensive but tools rarely change. Need efficient caching
+      without stale data issues.
+    </problem>
+    <solution>
+      Implemented TTL-based caching with manual invalidation triggers. Cache keyed
+      by server+agent combination for permission-aware caching.
+    </solution>
+    <implementation>
+      <ttl>30 minutes default, configurable per server</ttl>
+      <invalidation_triggers>
+        - Server reconnection
+        - Manual cache clear
+        - Permission changes
+      </invalidation_triggers>
+    </implementation>
+  </learning>
+
+  <learning id="mcp-007">
+    <title>Modular Component Design for 300-Line Limit</title>
+    <problem>
+      Complex MCP components could easily exceed 300-line limit if designed monolithically.
+    </problem>
+    <solution>
+      Proactively split components into focused modules during design phase. Each module
+      handles one aspect: display, state, actions, formatting.
+    </solution>
+    <implementation>
+      <example>
+        MCPResultCard split into:
+        - Main component (display logic)
+        - Formatting utilities (separate file)
+        - Type definitions (shared types file)
+        - Test utilities (test file)
+      </example>
+    </implementation>
+    <best_practice>
+      Plan module boundaries before coding, not after hitting line limits
+    </best_practice>
+  </learning>
+
+  <learning id="mcp-008">
+    <title>8-Line Function Constraint Patterns</title>
+    <problem>
+      Complex MCP operations naturally want to be longer than 8 lines.
+    </problem>
+    <solution>
+      Developed patterns for breaking down complex operations:
+      1. Extract validation to separate function
+      2. Extract transformation to separate function
+      3. Use async composition for sequential operations
+      4. Return early for error cases
+    </solution>
+    <implementation>
+      <pattern>
+        Instead of one 15-line function:
+        - 3-line main coordinator
+        - 4-line validator
+        - 4-line transformer
+        - 4-line executor
+      </pattern>
+    </implementation>
+  </learning>
+
+  <learning id="mcp-009">
+    <title>Error Handling in Multi-Layer Architecture</title>
+    <problem>
+      MCP errors can occur at multiple layers: connection, discovery, execution, transformation.
+      Need consistent error handling without code duplication.
+    </problem>
+    <solution>
+      Created error transformation pipeline that converts MCP errors to agent-friendly
+      errors at service boundary, then to user-friendly messages at UI boundary.
+    </solution>
+    <implementation>
+      <layers>
+        1. MCP Client: Raw protocol errors
+        2. Service: Business logic errors
+        3. Agent: Execution errors
+        4. WebSocket: Transmission errors
+        5. UI: User-friendly messages
+      </layers>
+    </implementation>
+  </learning>
+
+  <learning id="mcp-010">
+    <title>Testing Strategy for External Integrations</title>
+    <problem>
+      Testing MCP integration requires mocking external servers while maintaining
+      realistic behavior for integration tests.
+    </problem>
+    <solution>
+      Three-tier testing approach:
+      1. Unit tests with complete mocks
+      2. Integration tests with mock MCP servers
+      3. E2E tests with real test servers (optional)
+    </solution>
+    <implementation>
+      <file>app/tests/agents/test_mcp_integration.py</file>
+      <pattern>Mock at service boundary, not protocol level</pattern>
+    </implementation>
+  </learning>
+
+  <anti_patterns>
+    <anti_pattern id="ap-001">
+      <title>Creating Parallel Type Systems</title>
+      <description>
+        Don't create separate type hierarchies for MCP operations. 
+        Extend existing types to maintain single source of truth.
+      </description>
+    </anti_pattern>
+    
+    <anti_pattern id="ap-002">
+      <title>Synchronous Tool Discovery</title>
+      <description>
+        Never do tool discovery synchronously in request path.
+        Always use cached discovery or async background refresh.
+      </description>
+    </anti_pattern>
+    
+    <anti_pattern id="ap-003">
+      <title>Monolithic MCP Handlers</title>
+      <description>
+        Don't create single large MCP handler class.
+        Split by responsibility: discovery, execution, transformation.
+      </description>
+    </anti_pattern>
+  </anti_patterns>
+
+  <best_practices>
+    <practice>Always extend existing schemas rather than creating new ones</practice>
+    <practice>Cache aggressively but provide manual invalidation</practice>
+    <practice>Layer permissions from agent to UI for defense in depth</practice>
+    <practice>Plan module boundaries before implementation</practice>
+    <practice>Compose small functions rather than writing large ones</practice>
+    <practice>Test at service boundaries, not protocol level</practice>
+    <practice>Provide graceful fallbacks for MCP failures</practice>
+    <practice>Use TypeScript discriminated unions for message types</practice>
+  </best_practices>
+
+  <future_improvements>
+    <improvement priority="high">
+      Add streaming support for long-running MCP tools
+    </improvement>
+    <improvement priority="medium">
+      Implement MCP tool composition for complex workflows
+    </improvement>
+    <improvement priority="low">
+      Add MCP server auto-discovery via mDNS
+    </improvement>
+  </future_improvements>
+</learnings>

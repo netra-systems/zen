@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { RawJsonView } from './RawJsonView';
+import { MCPToolIndicator } from './MCPToolIndicator';
 import { motion } from 'framer-motion';
 import { AlertCircle, Bot, ChevronDown, ChevronRight, Clock, Code, FileText, User, Wrench } from 'lucide-react';
 import { getMessageDisplayName, shouldShowSubtitle, getMessageSubtitle } from '@/utils/message-display';
@@ -112,6 +113,19 @@ const renderReferencesList = (references: string[], id: string | undefined) => (
   </ul>
 );
 
+const renderMCPIndicator = (mcpExecutions: any[] | undefined) => {
+  if (!mcpExecutions || mcpExecutions.length === 0) return null;
+  return (
+    <div className="mt-3 pt-3 border-t border-gray-100">
+      <MCPToolIndicator 
+        tool_executions={mcpExecutions}
+        server_status="CONNECTED"
+        show_details={true}
+      />
+    </div>
+  );
+};
+
 interface MessageProps {
   message: MessageType;
 }
@@ -213,6 +227,8 @@ export const MessageItem: React.FC<MessageProps> = React.memo(({ message }) => {
               </CollapsibleContent>
             </Collapsible>
           )}
+          
+          {renderMCPIndicator(message.metadata?.mcpExecutions)}
           
           {id && (
             <div className="mt-3 pt-3 border-t border-gray-100">
