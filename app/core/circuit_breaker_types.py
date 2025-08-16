@@ -28,6 +28,7 @@ class CircuitConfig:
     half_open_max_calls: int = 3
     timeout_seconds: float = 10.0
     adaptive_threshold: bool = True
+    slow_call_threshold: float = 5.0
     
     def __post_init__(self) -> None:
         """Validate configuration parameters."""
