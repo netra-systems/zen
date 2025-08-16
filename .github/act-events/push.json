@@ -1,0 +1,80 @@
+{
+  "ref": "refs/heads/main",
+  "before": "abc123",
+  "after": "def456",
+  "created": false,
+  "deleted": false,
+  "forced": false,
+  "base_ref": null,
+  "compare": "https://github.com/test-org/netra-core-generation-1/compare/abc123...def456",
+  "commits": [
+    {
+      "id": "def456",
+      "tree_id": "tree456",
+      "distinct": true,
+      "message": "Add new feature for testing",
+      "timestamp": "2025-08-15T20:00:00Z",
+      "url": "https://github.com/test-org/netra-core-generation-1/commit/def456",
+      "author": {
+        "name": "Test User",
+        "email": "test@example.com",
+        "username": "test-user"
+      },
+      "committer": {
+        "name": "Test User",
+        "email": "test@example.com",
+        "username": "test-user"
+      },
+      "added": [
+        "app/new_feature.py"
+      ],
+      "removed": [],
+      "modified": [
+        "app/main.py"
+      ]
+    }
+  ],
+  "head_commit": {
+    "id": "def456",
+    "tree_id": "tree456",
+    "distinct": true,
+    "message": "Add new feature for testing",
+    "timestamp": "2025-08-15T20:00:00Z",
+    "url": "https://github.com/test-org/netra-core-generation-1/commit/def456",
+    "author": {
+      "name": "Test User",
+      "email": "test@example.com",
+      "username": "test-user"
+    },
+    "committer": {
+      "name": "Test User",
+      "email": "test@example.com",
+      "username": "test-user"
+    },
+    "added": [
+      "app/new_feature.py"
+    ],
+    "removed": [],
+    "modified": [
+      "app/main.py"
+    ]
+  },
+  "repository": {
+    "name": "netra-core-generation-1",
+    "full_name": "test-org/netra-core-generation-1",
+    "owner": {
+      "login": "test-org",
+      "type": "Organization"
+    },
+    "private": false,
+    "default_branch": "main"
+  },
+  "pusher": {
+    "name": "test-user",
+    "email": "test@example.com"
+  },
+  "sender": {
+    "login": "test-user",
+    "type": "User"
+  }
+}

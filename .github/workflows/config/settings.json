@@ -1,0 +1,37 @@
+{
+  "test_runner": {
+    "default_level": "unit",
+    "timeout_minutes": 30,
+    "retry_failed": true,
+    "max_retries": 2,
+    "parallel_execution": false,
+    "real_llm": false
+  },
+  "deployment": {
+    "auto_deploy_branches": ["main", "develop"],
+    "require_approval": ["production"],
+    "cleanup_on_pr_close": true,
+    "staging_timeout_minutes": 45,
+    "production_timeout_minutes": 60
+  },
+  "notifications": {
+    "channels": ["pr_comment"],
+    "on_failure": "always",
+    "on_success": "pr_only",
+    "include_logs": true,
+    "mention_on_failure": false
+  },
+  "security": {
+    "enable_dependency_scan": true,
+    "enable_code_scan": true,
+    "enable_secret_scan": true,
+    "fail_on_high_severity": true
+  },
+  "quality": {
+    "enable_linting": true,
+    "enable_type_checking": true,
+    "enable_complexity_check": true,
+    "max_line_length": 300,
+    "max_function_length": 8
+  }
+}

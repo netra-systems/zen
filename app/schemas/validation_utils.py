@@ -217,7 +217,12 @@ def deduplicate_list(items: List[Any]) -> List[Any]:
     seen = set()
     result = []
     for item in items:
-        if item not in seen:
-            seen.add(item)
-            result.append(item)
+        _add_unique_item(item, seen, result)
     return result
+
+
+def _add_unique_item(item: Any, seen: set, result: List[Any]) -> None:
+    """Add item to result if not already seen."""
+    if item not in seen:
+        seen.add(item)
+        result.append(item)

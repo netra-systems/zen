@@ -33,7 +33,6 @@ class ToolPermissionMiddleware:
     async def __call__(self, request: Request, call_next: Callable):
         """Process request with tool permission checking"""
         start_time = time.time()
-        
         try:
             await self._handle_tool_permission_check(request)
             response = await call_next(request)
@@ -96,17 +95,23 @@ class ToolPermissionMiddleware:
     
     async def _extract_from_post_body(self, request: Request) -> Optional[dict]:
         """Extract tool info from POST request body."""
-        if request.method == "POST" and hasattr(request, "_body"):
-            body = await request.body()
-            if body:
-                data = json.loads(body)
-                if "tool_name" in data:
-                    return {
-                        "name": data["tool_name"],
-                        "arguments": data.get("arguments", {}),
-                        "action": data.get("action", "execute")
-                    }
-        return None
+        if not (request.method == "POST" and hasattr(request, "_body")):
+            return None
+        body = await request.body()
+        if not body:
+            return None
+        data = json.loads(body)
+        return self._create_tool_info_from_data(data)
+    
+    def _create_tool_info_from_data(self, data: dict) -> Optional[dict]:
+        """Create tool info from parsed data."""
+        if "tool_name" not in data:
+            return None
+        return {
+            "name": data["tool_name"],
+            "arguments": data.get("arguments", {}),
+            "action": data.get("action", "execute")
+        }
     
     def _extract_from_url_path(self, request: Request) -> Optional[dict]:
         """Extract tool info from URL path."""
@@ -135,22 +140,21 @@ class ToolPermissionMiddleware:
     async def _get_user_from_request(self, request: Request) -> Optional[User]:
         """Get user from request context"""
         try:
-            # Try to get user from dependency injection context
             if hasattr(request.state, 'user'):
                 return request.state.user
-            
-            # Fallback: extract from Authorization header
-            auth_header = request.headers.get("Authorization")
-            if auth_header and auth_header.startswith("Bearer "):
-                # This would typically validate the JWT token and get user
-                # For now, return None to skip permission checking
-                pass
-            
-            return None
-            
+            return self._extract_user_from_auth_header(request)
         except Exception as e:
             logger.error(f"Error getting user from request: {e}")
             return None
+    
+    def _extract_user_from_auth_header(self, request: Request) -> Optional[User]:
+        """Extract user from authorization header."""
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            # This would typically validate the JWT token and get user
+            # For now, return None to skip permission checking
+            pass
+        return None
     
     async def _check_tool_permissions(
         self, 

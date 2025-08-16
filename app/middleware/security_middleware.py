@@ -109,10 +109,14 @@ class InputValidator:
         """Sanitize HTTP headers."""
         sanitized = {}
         allowed_headers = HeaderSanitizer.get_allowed_headers()
+        self._process_header_sanitization(headers, sanitized, allowed_headers)
+        return sanitized
+    
+    def _process_header_sanitization(self, headers: Dict[str, str], sanitized: Dict[str, str], allowed_headers) -> None:
+        """Process header sanitization for all headers."""
         for key, value in headers.items():
             if HeaderSanitizer.is_header_allowed(key, value, SecurityConfig.MAX_HEADER_SIZE, allowed_headers):
                 sanitized[key] = HeaderSanitizer.sanitize_header_value(value, SecurityConfig.MAX_HEADER_SIZE)
-        return sanitized
     
 
 
@@ -168,6 +172,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         self._validate_url(request)
         self._validate_headers(request)
         await self._check_rate_limits(request)
+        await self._validate_body_if_needed(request)
+    
+    async def _validate_body_if_needed(self, request: Request) -> None:
+        """Validate request body for POST, PUT, PATCH methods."""
         if request.method in ["POST", "PUT", "PATCH"]:
             await self._validate_request_body(request)
     
@@ -256,11 +264,16 @@ class SecurityMiddleware(BaseHTTPMiddleware):
     def _get_client_ip(self, request: Request) -> str:
         """Get client IP address."""
         forwarded_headers = IPValidators.get_forwarded_headers()
+        extracted_ip = self._extract_valid_ip(request, forwarded_headers)
+        return extracted_ip if extracted_ip else IPValidators.get_fallback_ip(request)
+    
+    def _extract_valid_ip(self, request: Request, forwarded_headers) -> Optional[str]:
+        """Extract valid IP from forwarded headers."""
         for header in forwarded_headers:
             ip = IPValidators.extract_ip_from_header(request, header)
             if ip and IPValidators.is_valid_ip(ip):
                 return ip
-        return IPValidators.get_fallback_ip(request)
+        return None
     
     async def _get_user_id(self, request: Request) -> Optional[str]:
         """Extract user ID from request if authenticated."""
@@ -304,8 +317,16 @@ class SecurityMiddleware(BaseHTTPMiddleware):
     
     def _track_attempt_time(self, ip_address: str, current_time: float) -> None:
         """Track authentication attempt time."""
+        self._initialize_ip_tracker(ip_address)
+        self._clean_and_append_attempt(ip_address, current_time)
+    
+    def _initialize_ip_tracker(self, ip_address: str) -> None:
+        """Initialize IP tracker if not exists."""
         if ip_address not in self.auth_attempt_tracker:
             self.auth_attempt_tracker[ip_address] = []
+    
+    def _clean_and_append_attempt(self, ip_address: str, current_time: float) -> None:
+        """Clean old attempts and append new one."""
         self.auth_attempt_tracker[ip_address] = AuthAttemptTracker.clean_old_attempts(
             self.auth_attempt_tracker[ip_address], current_time, 1
         )

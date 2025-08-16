@@ -300,8 +300,8 @@ If you need to redeploy the staging environment, you can:
         except Exception as e:
             print(f"  Error posting comment: {e}")
     
-    def run_cleanup(self, config: Dict) -> Dict:
-        """Run the cleanup process based on configuration"""
+    def _print_cleanup_header(self) -> None:
+        """Print cleanup process header information"""
         print("=" * 60)
         print("STAGING ENVIRONMENT CLEANUP")
         print("=" * 60)
@@ -309,73 +309,82 @@ If you need to redeploy the staging environment, you can:
         print(f"Region: {self.region}")
         print(f"Dry Run: {self.dry_run}")
         print("=" * 60)
-        
-        # Get all staging environments
-        environments = self.get_all_staging_environments()
-        
-        # Check each environment against cleanup criteria
+    
+    def _check_pr_cleanup_criteria(self, pr_number: str) -> Tuple[bool, str]:
+        """Check if environment should be cleaned up based on PR status"""
+        pr_state, pr_closed = self.check_pr_status(pr_number)
+        if pr_closed:
+            return True, f"PR is {pr_state}"
+        return False, ""
+    
+    def _check_age_and_activity_criteria(self, env: Dict, config: Dict) -> Tuple[bool, str]:
+        """Check if environment should be cleaned up based on age and activity"""
+        if config.get("max_age_days") and self.check_environment_age(env["created_at"], config["max_age_days"]):
+            return True, f"Environment older than {config['max_age_days']} days"
+        if config.get("inactive_hours") and self.check_environment_activity(env["updated_at"], config["inactive_hours"]):
+            return True, f"Inactive for {config['inactive_hours']} hours"
+        return False, ""
+    
+    def _check_cost_criteria(self, pr_number: str, config: Dict) -> Tuple[bool, str]:
+        """Check if environment should be cleaned up based on cost"""
+        if not config.get("max_cost_per_pr"):
+            return False, ""
+        usage = self.get_resource_usage(pr_number)
+        if usage["estimated_cost"] > config["max_cost_per_pr"]:
+            self.cleanup_report["resources_freed"][pr_number] = usage
+            return True, f"Exceeded cost limit (${usage['estimated_cost']:.2f})"
+        return False, ""
+    
+    def _should_cleanup_environment(self, env: Dict, config: Dict) -> Tuple[bool, str]:
+        """Determine if environment should be cleaned up and why"""
+        pr_number = env["pr_number"]
+        should_cleanup, reason = self._check_pr_cleanup_criteria(pr_number)
+        if should_cleanup:
+            return should_cleanup, reason
+        should_cleanup, reason = self._check_age_and_activity_criteria(env, config)
+        if should_cleanup:
+            return should_cleanup, reason
+        return self._check_cost_criteria(pr_number, config)
+    
+    def _process_environments(self, environments: List[Dict], config: Dict) -> None:
+        """Process all environments for potential cleanup"""
         for env in environments:
             pr_number = env["pr_number"]
-            should_cleanup = False
-            cleanup_reason = ""
-            
-            # Check PR status
-            pr_state, pr_closed = self.check_pr_status(pr_number)
-            if pr_closed:
-                should_cleanup = True
-                cleanup_reason = f"PR is {pr_state}"
-            
-            # Check age
-            elif config.get("max_age_days") and self.check_environment_age(
-                env["created_at"],
-                config["max_age_days"]
-            ):
-                should_cleanup = True
-                cleanup_reason = f"Environment older than {config['max_age_days']} days"
-            
-            # Check inactivity
-            elif config.get("inactive_hours") and self.check_environment_activity(
-                env["updated_at"],
-                config["inactive_hours"]
-            ):
-                should_cleanup = True
-                cleanup_reason = f"Inactive for {config['inactive_hours']} hours"
-            
-            # Check resource usage/cost
-            if config.get("max_cost_per_pr"):
-                usage = self.get_resource_usage(pr_number)
-                if usage["estimated_cost"] > config["max_cost_per_pr"]:
-                    should_cleanup = True
-                    cleanup_reason = f"Exceeded cost limit (${usage['estimated_cost']:.2f})"
-                    self.cleanup_report["resources_freed"][pr_number] = usage
-            
-            # Perform cleanup if needed
+            should_cleanup, cleanup_reason = self._should_cleanup_environment(env, config)
             if should_cleanup:
                 self.cleanup_environment(env, cleanup_reason)
             else:
                 print(f"PR #{pr_number}: Active, keeping environment")
-        
-        # Generate summary
+    
+    def _calculate_total_cost_saved(self) -> float:
+        """Calculate total cost saved from cleanup"""
+        return sum(
+            usage["estimated_cost"] 
+            for usage in self.cleanup_report["resources_freed"].values()
+        )
+    
+    def _print_cleanup_summary(self) -> None:
+        """Print cleanup process summary"""
         print("\n" + "=" * 60)
         print("CLEANUP SUMMARY")
         print("=" * 60)
         print(f"Environments Checked: {self.cleanup_report['environments_checked']}")
         print(f"Environments Cleaned: {self.cleanup_report['environments_cleaned']}")
-        
         if self.cleanup_report["resources_freed"]:
-            total_cost_saved = sum(
-                usage["estimated_cost"] 
-                for usage in self.cleanup_report["resources_freed"].values()
-            )
+            total_cost_saved = self._calculate_total_cost_saved()
             print(f"Estimated Cost Saved: ${total_cost_saved:.2f}")
-        
         if self.cleanup_report["errors"]:
             print(f"Errors: {len(self.cleanup_report['errors'])}")
             for error in self.cleanup_report["errors"][:5]:
                 print(f"  - {error}")
-        
         print("=" * 60)
-        
+    
+    def run_cleanup(self, config: Dict) -> Dict:
+        """Run the cleanup process based on configuration"""
+        self._print_cleanup_header()
+        environments = self.get_all_staging_environments()
+        self._process_environments(environments, config)
+        self._print_cleanup_summary()
         return self.cleanup_report
 
 

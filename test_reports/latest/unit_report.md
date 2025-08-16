@@ -1,24 +1,24 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-15T20:41:48.477684  
+**Generated:** 2025-08-15T20:59:52.416725  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
 ## Test Summary
 
-**Total Tests:** 1125  
-**Passed:** 1100  
+**Total Tests:** 613  
+**Passed:** 591  
 **Failed:** 1  
-**Skipped:** 23  
-**Errors:** 1  
+**Skipped:** 21  
+**Errors:** 0  
 **Overall Status:** [FAILED]
 
 ### Component Breakdown
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 1125 | 1100 | 1 | 23 | 1 | 83.33s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.43s | [FAILED] |
+| Backend   | 613 | 591 | 1 | 21 | 0 | 71.37s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.32s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,8 +27,8 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 83.76s
-- **Exit Code:** 255
+- **Total Duration:** 71.69s
+- **Exit Code:** 15
 
 ### Backend Configuration
 ```
@@ -75,87 +75,72 @@ app\tests\services\agents\test_tools.py::test_tool_dispatcher
 app\tests\services\synthetic_data\test_admin_visibility.py::TestAdminVisibility::test_performance_profiling 
 app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_circuit_breaker_pattern <- tests\services\test_agent_service_orchestration_workflows.py 
 app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_log_operation_with_duration 
-[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_admin_visibility.py::TestAdminVisibility::test_performance_profiling 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_admin_visibility.py::TestAdminVisibility::test_performance_profiling 
 app\tests\services\synthetic_data\test_admin_visibility.py::TestAdminVisibility::test_alert_configuration 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_circuit_breaker_pattern <- tests\services\test_agent_service_orchestration_workflows.py 
-app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_graceful_degradation_under_load <- tests\services\test_agent_service_orchestration_workflows.py 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_graceful_degradation_under_load <- tests\services\test_agent_service_orchestration_workflows.py 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher 
-app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_error_propagation_and_isolation <- tests\services\test_agent_service_orchestration_workflows.py 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher 
 app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_circuit_breaker_pattern <- tests\services\test_agent_service_orchestration_workflows.py 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
 app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_graceful_degradation_under_load <- tests\services\test_agent_service_orchestration_workflows.py 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_graceful_degradation_under_load <- tests\services\test_agent_service_orchestration_workflows.py 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_error_propagation_and_isolation <- tests\services\test_agent_service_orchestration_workflows.py 
 app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
 [gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_log_operation_with_duration 
 app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_log_operation_failure 
 [gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_log_operation_failure 
 app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_search_audit_logs_success 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_search_audit_logs_success 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
-app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_search_audit_logs_failure 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
 app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_search_audit_logs_success 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
+app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_search_audit_logs_failure 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_search_audit_logs_failure 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full 
-app\tests\services\test_corpus_audit.py::TestAuditTimer::test_timer_measures_duration 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_search_audit_logs_failure 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required 
+app\tests\services\test_corpus_audit.py::TestAuditTimer::test_timer_measures_duration 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditTimer::test_timer_measures_duration 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
-app\tests\services\test_corpus_audit.py::TestAuditTimer::test_timer_without_context 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditTimer::test_timer_measures_duration 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
+app\tests\services\test_corpus_audit.py::TestAuditTimer::test_timer_without_context 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
 [gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditTimer::test_timer_without_context 
 app\tests\services\test_corpus_audit.py::TestAuditIntegration::test_create_audit_logger_factory 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
 [gw3][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditIntegration::test_create_audit_logger_factory 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
 app\tests\services\test_corpus_audit.py::TestAuditIntegration::test_end_to_end_audit_workflow 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
-[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditIntegration::test_end_to_end_audit_workflow 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditIntegration::test_end_to_end_audit_workflow 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
 app\tests\services\test_corpus_audit.py::TestAuditPerformance::test_large_result_data_handling 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
-[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditPerformance::test_large_result_data_handling 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_method 
-app\tests\services\test_corpus_audit.py::TestAuditPerformance::test_metadata_edge_cases 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_method 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_method 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditPerformance::test_large_result_data_handling 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_with_llm_name 
-[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditPerformance::test_metadata_edge_cases 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_with_llm_name 
+app\tests\services\test_corpus_audit.py::TestAuditPerformance::test_metadata_edge_cases 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_with_llm_name 
 app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_multiple_executions 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditPerformance::test_metadata_edge_cases 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_multiple_executions 
 app\tests\services\test_corpus_metrics.py::TestCorpusMetricsCollector::test_collector_initialization 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_multiple_executions 
-[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\...(truncated)
+app\tests\services\apex_optimizer_agent\tools\te...(truncated)
 ```
 
 ### Frontend Output
 ```
-================================================================================
-NETRA AI PLATFORM - FRONTEND TEST RUNNER
-================================================================================
-
-================================================================================
-Running Jest Tests
---------------------------------------------------------------------------------
-Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)
---------------------------------------------------------------------------------
-
-================================================================================
-[FAIL] CHECKS FAILED with exit code 255
-================================================================================
-
-Cleaning up test processes...
 
 'hooks' is not recognized as an internal or external command,
 operable program or batch file.
@@ -165,13 +150,9 @@ operable program or batch file.
 ## Error Summary
 
 ### Backend Errors
-- [gw2][36m [ 38%] [0m[31mERROR[0m app\tests\services\test_supply_research_service_error_handling.py::TestErrorHandling::test_retry_on_failure <- tests\helpers\shared_test_types.py
-- [gw1][36m [ 40%] [0m[31mFAILED[0m app\tests\services\test_supply_research_scheduler_jobs.py::TestSupplyResearchSchedulerJobs::test_schedule_job_execution_with_retry
-- =================================== ERRORS ====================================
-- [31m[1m__________ ERROR at setup of TestErrorHandling.test_retry_on_failure __________[0m
-- [31mFAILED[0m app\tests\services\test_supply_research_scheduler_jobs.py::[1mTestSupplyResearchSchedulerJobs::test_schedule_job_execution_with_retry[0m - AttributeError: 'SupplyResearchScheduler' object has no attribute '_execute_with_retry'
-- [31mERROR[0m app\tests\services\test_supply_research_service_error_handling.py::[1mTestErrorHandling::test_retry_on_failure[0m
-- [FAIL] TESTS FAILED with exit code 2 after 82.34s
+- [gw2][36m [  7%] [0m[31mFAILED[0m app\tests\services\apex_optimizer_agent\tools\test_policy_simulator.py::TestPolicySimulator::test_policy_simulator_async_behavior
+- [31mFAILED[0m app\tests\services\apex_optimizer_agent\tools\test_policy_simulator.py::[1mTestPolicySimulator::test_policy_simulator_async_behavior[0m - assert 0.0 >= 0.009
+- [FAIL] TESTS FAILED with exit code 2 after 70.50s
 
 
 ---

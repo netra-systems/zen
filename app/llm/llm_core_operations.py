@@ -71,13 +71,17 @@ class LLMCoreOperations:
 
     def _handle_disabled_llm(self, name: str) -> Any:
         """Handle disabled LLM based on environment - dev gets mock, production gets error."""
-        if self.settings.environment == "development" and MockLLM is not None:
+        if self._should_use_mock_llm():
             logger.debug(f"Returning mock LLM for '{name}' - LLMs disabled in dev mode")
             return MockLLM(name)
         
         error_msg = f"LLM '{name}' is not available - LLM service is disabled"
         logger.error(error_msg)
         raise ServiceUnavailableError(error_msg)
+    
+    def _should_use_mock_llm(self) -> bool:
+        """Check if mock LLM should be used."""
+        return self.settings.environment == "development" and MockLLM is not None
 
     def get_llm(self, name: str, generation_config: Optional[GenerationConfig] = None) -> Any:
         """Get LLM instance with caching."""
@@ -102,14 +106,8 @@ class LLMCoreOperations:
     
     def _create_new_llm(self, name: str, generation_config: Optional[GenerationConfig]) -> Optional[Any]:
         """Create new LLM instance for given configuration."""
-        config = self.settings.llm_configs.get(name)
-        if not config:
-            raise ValueError(f"LLM configuration for '{name}' not found.")
-        
-        if not validate_provider_key(LLMProvider(config.provider), config.api_key):
-            if config.provider in ["google", "vertexai"]:
-                raise ValueError(f"LLM '{name}': API key required for {config.provider}")
-            return None
+        config = self._get_and_validate_config(name)
+        self._validate_provider_requirements(config, name)
         
         final_config = self._merge_generation_config(config, generation_config)
         return create_llm_for_provider(
@@ -118,6 +116,19 @@ class LLMCoreOperations:
             config.api_key, 
             final_config
         )
+    
+    def _get_and_validate_config(self, name: str) -> Any:
+        """Get and validate LLM configuration."""
+        config = self.settings.llm_configs.get(name)
+        if not config:
+            raise ValueError(f"LLM configuration for '{name}' not found.")
+        return config
+    
+    def _validate_provider_requirements(self, config: Any, name: str) -> None:
+        """Validate provider API key requirements."""
+        if not validate_provider_key(LLMProvider(config.provider), config.api_key):
+            if config.provider in ["google", "vertexai"]:
+                raise ValueError(f"LLM '{name}': API key required for {config.provider}")
     
     def _merge_generation_config(self, config: Any, override: Optional[GenerationConfig]) -> Dict[str, Any]:
         """Merge default and override generation configurations."""

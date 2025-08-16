@@ -71,47 +71,55 @@ class DataSubAgent(BaseSubAgent):
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> None:
         """Execute advanced data analysis with ClickHouse integration."""
-        
-        # Initialize execution engine with required dependencies
-        execution_engine = ExecutionEngine(
+        execution_engine = self._create_execution_engine()
+        data_ops = self._create_data_operations()
+        metrics_analyzer = self._create_metrics_analyzer()
+        await execution_engine.execute_analysis(
+            state, run_id, stream_updates, self._send_update, data_ops, metrics_analyzer
+        )
+    
+    def _create_execution_engine(self) -> ExecutionEngine:
+        """Create execution engine with required dependencies."""
+        return ExecutionEngine(
             self.clickhouse_ops,
             self.query_builder, 
             self.analysis_engine,
             self.redis_manager,
             self.llm_manager
         )
-        
-        # Initialize operations modules
-        data_ops = DataOperations(
+    
+    def _create_data_operations(self) -> DataOperations:
+        """Create data operations module."""
+        return DataOperations(
             self.query_builder,
             self.analysis_engine,
             self.clickhouse_ops,
             self.redis_manager
         )
-        
-        metrics_analyzer = MetricsAnalyzer(
+    
+    def _create_metrics_analyzer(self) -> MetricsAnalyzer:
+        """Create metrics analyzer module."""
+        return MetricsAnalyzer(
             self.query_builder,
             self.analysis_engine,
             self.clickhouse_ops
         )
-        
-        # Delegate execution to engine
-        await execution_engine.execute_analysis(
-            state, run_id, stream_updates, self._send_update, data_ops, metrics_analyzer
-        )
     
     def _validate_data(self, data: Dict[str, Any]) -> bool:
         """Validate data structure."""
-        if not isinstance(data, dict):
+        if not self._is_valid_dict_with_min_fields(data):
             return False
-        
-        if len(data) < 2:
-            return False
-        
+        return self._has_required_structure(data)
+    
+    def _is_valid_dict_with_min_fields(self, data: Dict[str, Any]) -> bool:
+        """Check if data is valid dict with minimum fields."""
+        return isinstance(data, dict) and len(data) >= 2
+    
+    def _has_required_structure(self, data: Dict[str, Any]) -> bool:
+        """Check if data has required field structure."""
         common_fields = ['id', 'data', 'input', 'content', 'type', 'timestamp']
         has_common_field = any(field in data for field in common_fields)
         has_multiple_fields = len(data) >= 2
-        
         return has_common_field and has_multiple_fields
     
     async def process_data(self, data: Dict[str, Any]) -> Dict[str, Any]:

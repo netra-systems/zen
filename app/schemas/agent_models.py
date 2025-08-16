@@ -111,16 +111,10 @@ class DeepAgentState(BaseModel):
     
     def _get_cleared_data_fields(self) -> Dict[str, Any]:
         """Get dictionary of fields to clear for sensitive data removal."""
-        return {
-            'triage_result': None,
-            'data_result': None,
-            'optimizations_result': None,
-            'action_plan_result': None,
-            'report_result': None,
-            'synthetic_data_result': None,
-            'supply_research_result': None,
-            'final_report': None
-        }
+        result_fields = ['triage_result', 'data_result', 'optimizations_result', 'action_plan_result']
+        data_fields = ['report_result', 'synthetic_data_result', 'supply_research_result', 'final_report']
+        all_fields = result_fields + data_fields
+        return {field: None for field in all_fields}
     
     def clear_sensitive_data(self) -> 'DeepAgentState':
         """Create a new instance with sensitive data cleared."""
@@ -160,11 +154,22 @@ class DeepAgentState(BaseModel):
     
     def _merge_agent_results(self, other_state: 'DeepAgentState') -> Dict[str, Any]:
         """Merge all agent result fields."""
+        result_fields = self._get_result_field_mappings(other_state)
+        data_fields = self._get_data_field_mappings(other_state)
+        return {**result_fields, **data_fields}
+    
+    def _get_result_field_mappings(self, other_state: 'DeepAgentState') -> Dict[str, Any]:
+        """Get result field mappings for merge operation."""
         return {
             'triage_result': other_state.triage_result or self.triage_result,
             'data_result': other_state.data_result or self.data_result,
             'optimizations_result': other_state.optimizations_result or self.optimizations_result,
-            'action_plan_result': other_state.action_plan_result or self.action_plan_result,
+            'action_plan_result': other_state.action_plan_result or self.action_plan_result
+        }
+    
+    def _get_data_field_mappings(self, other_state: 'DeepAgentState') -> Dict[str, Any]:
+        """Get data field mappings for merge operation."""
+        return {
             'report_result': other_state.report_result or self.report_result,
             'synthetic_data_result': other_state.synthetic_data_result or self.synthetic_data_result,
             'supply_research_result': other_state.supply_research_result or self.supply_research_result,

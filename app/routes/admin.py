@@ -50,10 +50,7 @@ async def set_log_table(
     data: schemas.LogTableSettings,
     current_user: schemas.User = AdminDep
 ) -> Dict[str, str]:
-    """
-    Set the default ClickHouse log table.
-    Only accessible to admin users.
-    """
+    """Set the default ClickHouse log table."""
     _validate_table_exists(data.log_table)
     _update_default_table(data.log_table)
     return {"message": f"Default log table updated to: {data.log_table}"}
@@ -72,10 +69,7 @@ async def add_log_table(
     data: schemas.LogTableSettings,
     current_user: schemas.User = AdminDep
 ) -> Dict[str, str]:
-    """
-    Add a new ClickHouse log table to the list of available tables.
-    Only accessible to admin users.
-    """
+    """Add a new ClickHouse log table to the list of available tables."""
     _validate_table_not_exists(data.log_table)
     _add_table_to_available(data.log_table)
     return _build_table_response(data.log_table, "added to available tables")
@@ -96,10 +90,7 @@ async def remove_log_table(
     data: schemas.LogTableSettings,
     current_user: schemas.User = AdminDep
 ) -> Dict[str, str]:
-    """
-    Remove a ClickHouse log table from the list of available tables.
-    Only accessible to admin users.
-    """
+    """Remove a ClickHouse log table from the list of available tables."""
     _validate_table_removal(data.log_table)
     _remove_table_from_available(data.log_table)
     return _build_table_response(data.log_table, "removed from available tables")
@@ -118,10 +109,7 @@ async def set_time_period(
     data: schemas.TimePeriodSettings,
     current_user: schemas.User = AdminDep
 ) -> Dict[str, str]:
-    """
-    Set the default time period for log analysis.
-    Only accessible to admin users.
-    """
+    """Set the default time period for log analysis."""
     _validate_time_period(data.days)
     _update_default_time_period(data.days)
     return {"message": f"Default time period updated to: {data.days} days"}
@@ -135,10 +123,7 @@ async def set_default_log_table_for_context(
     data: schemas.DefaultLogTableSettings,
     current_user: schemas.User = AdminDep
 ) -> Dict[str, str]:
-    """
-    Set the default ClickHouse log table for a specific context.
-    Only accessible to admin users.
-    """
+    """Set the default ClickHouse log table for a specific context."""
     _validate_table_exists(data.log_table)
     _set_context_default_table(data.context, data.log_table)
     return {"message": f"Default log table for context '{data.context}' updated to: {data.log_table}"}
@@ -157,10 +142,7 @@ async def remove_default_log_table_for_context(
     data: schemas.DefaultLogTableSettings,
     current_user: schemas.User = AdminDep
 ) -> Dict[str, str]:
-    """
-    Remove the default ClickHouse log table for a specific context.
-    Only accessible to admin users.
-    """
+    """Remove the default ClickHouse log table for a specific context."""
     _validate_context_exists(data.context)
     _remove_context_default_table(data.context)
     return {"message": f"Default log table for context '{data.context}' removed."}

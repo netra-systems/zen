@@ -70,58 +70,61 @@ class AgentMetricsMiddleware(MetricsMiddlewareCore):
         **kwargs
     ) -> Dict[str, Any]:
         """Track a batch operation with multiple items."""
-        batch_operation_id = await self.metrics_collector.start_operation(
-            agent_name=agent_name,
-            operation_type=f"batch_{operation_type}",
-            metadata={
-                "batch_size": batch_size,
-                "start_time": datetime.now(UTC)
-            }
-        )
-        
+        batch_operation_id = await self._start_batch_tracking(agent_name, operation_type, batch_size)
         start_time = time.time()
-        successful_items = 0
-        failed_items = 0
-        
         try:
-            # Execute batch operation
             result = await operation_func(*args, **kwargs)
-            
-            # Assume result is a list or dict with success indicators
-            if isinstance(result, list):
-                successful_items = len([r for r in result if r])
-                failed_items = len(result) - successful_items
-            elif isinstance(result, dict):
-                successful_items = result.get('successful', 0)
-                failed_items = result.get('failed', 0)
-            else:
-                successful_items = 1 if result else 0
-                failed_items = 1 if not result else 0
-            
-            execution_time = (time.time() - start_time) * 1000
-            
-            await self.metrics_collector.end_operation(
-                operation_id=batch_operation_id,
-                success=failed_items == 0,
-                metadata={
-                    "batch_size": batch_size,
-                    "successful_items": successful_items,
-                    "failed_items": failed_items,
-                    "execution_time_ms": execution_time,
-                    "throughput_items_per_second": batch_size / (execution_time / 1000) if execution_time > 0 else 0
-                }
-            )
-            
-            return {
-                "result": result,
-                "successful_items": successful_items,
-                "failed_items": failed_items,
-                "execution_time_ms": execution_time
-            }
-            
+            return await self._finalize_batch_tracking(batch_operation_id, batch_size, result, start_time)
         except Exception as e:
             await self._handle_operation_error(batch_operation_id, e, operation_func, args, kwargs)
             raise
+    
+    async def _start_batch_tracking(self, agent_name: str, operation_type: str, batch_size: int) -> str:
+        """Start batch operation tracking."""
+        return await self.metrics_collector.start_operation(
+            agent_name=agent_name,
+            operation_type=f"batch_{operation_type}",
+            metadata={"batch_size": batch_size, "start_time": datetime.now(UTC)}
+        )
+    
+    async def _finalize_batch_tracking(self, batch_operation_id: str, batch_size: int, result: Any, start_time: float) -> Dict[str, Any]:
+        """Finalize batch operation tracking."""
+        successful_items, failed_items = self._count_batch_results(result)
+        execution_time = (time.time() - start_time) * 1000
+        await self._record_batch_metrics(batch_operation_id, batch_size, successful_items, failed_items, execution_time)
+        return self._create_batch_result(result, successful_items, failed_items, execution_time)
+    
+    def _count_batch_results(self, result: Any) -> tuple[int, int]:
+        """Count successful and failed items from batch result."""
+        if isinstance(result, list):
+            successful_items = len([r for r in result if r])
+            return successful_items, len(result) - successful_items
+        elif isinstance(result, dict):
+            return result.get('successful', 0), result.get('failed', 0)
+        return (1, 0) if result else (0, 1)
+    
+    async def _record_batch_metrics(self, batch_operation_id: str, batch_size: int, successful_items: int, failed_items: int, execution_time: float) -> None:
+        """Record batch operation metrics."""
+        await self.metrics_collector.end_operation(
+            operation_id=batch_operation_id, success=failed_items == 0,
+            metadata=self._create_batch_metadata(batch_size, successful_items, failed_items, execution_time)
+        )
+    
+    def _create_batch_metadata(self, batch_size: int, successful_items: int, failed_items: int, execution_time: float) -> dict:
+        """Create batch operation metadata."""
+        throughput = batch_size / (execution_time / 1000) if execution_time > 0 else 0
+        return {
+            "batch_size": batch_size, "successful_items": successful_items,
+            "failed_items": failed_items, "execution_time_ms": execution_time,
+            "throughput_items_per_second": throughput
+        }
+    
+    def _create_batch_result(self, result: Any, successful_items: int, failed_items: int, execution_time: float) -> Dict[str, Any]:
+        """Create batch operation result."""
+        return {
+            "result": result, "successful_items": successful_items,
+            "failed_items": failed_items, "execution_time_ms": execution_time
+        }
 
 
 class AgentMetricsContextManager:

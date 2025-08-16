@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-15T20:39:31.271497  
+**Generated:** 2025-08-15T20:49:05.569367  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -17,7 +17,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 7 | 7 | 0 | 0 | 0 | 6.85s | [PASSED] |
+| Backend   | 7 | 7 | 0 | 0 | 0 | 6.88s | [PASSED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -27,7 +27,7 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 6.85s
+- **Total Duration:** 6.88s
 - **Exit Code:** 0
 
 ### Backend Configuration
@@ -78,13 +78,11 @@ tests/test_system_startup.py::TestSystemStartup::test_configuration_loading [32
 
 [32m============================== [32m[1m7 passed[0m[32m in 0.29s[0m[32m ==============================[0m
 ================================================================================
-[PASS] ALL TESTS PASSED in 5.95s
+[PASS] ALL TESTS PASSED in 6.04s
 ================================================================================
 
-2025-08-15 20:39:30.194 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
-2025-08-15 20:39:30.194 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
 --- Logging error in Loguru Handler #1 ---
-Record was: {'elapsed': datetime.timedelta(seconds=4, microseconds=71995), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=28796, name='MainProcess'), 'thread': (id=17600, name='MainThread'), 'time': datetime(2025, 8, 15, 20, 39, 30, 641970, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
+Record was: {'elapsed': datetime.timedelta(seconds=4, microseconds=249160), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=16224, name='MainProcess'), 'thread': (id=1656, name='MainThread'), 'time': datetime(2025, 8, 15, 20, 49, 4, 881246, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
 Traceback (most recent call last):
   File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
     self._sink.write(message)

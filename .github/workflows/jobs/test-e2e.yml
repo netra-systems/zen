@@ -1,0 +1,218 @@
+name: End-to-End Test Execution
+
+on:
+  workflow_call:
+    inputs:
+      test_environment:
+        description: 'Environment to run E2E tests against'
+        required: false
+        type: string
+        default: 'staging'
+      test_path:
+        description: 'Path to E2E test directory or specific test files'
+        required: false
+        type: string
+        default: 'app/tests/e2e'
+      browser:
+        description: 'Browser for E2E tests (chrome, firefox, safari)'
+        required: false
+        type: string
+        default: 'chrome'
+      headless:
+        description: 'Run browser in headless mode'
+        required: false
+        type: boolean
+        default: true
+      timeout_minutes:
+        description: 'Test execution timeout in minutes'
+        required: false
+        type: number
+        default: 60
+      skip_condition:
+        description: 'Skip condition for conditional execution'
+        required: false
+        type: string
+        default: 'false'
+    outputs:
+      test_results:
+        description: 'E2E test execution results summary'
+        value: ${{ jobs.e2e-tests.outputs.test_results }}
+      screenshots_available:
+        description: 'Whether failure screenshots are available'
+        value: ${{ jobs.e2e-tests.outputs.screenshots_available }}
+      status:
+        description: 'Job completion status'
+        value: ${{ jobs.e2e-tests.outputs.status }}
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  e2e-tests:
+    runs-on: warp-custom-default
+    if: ${{ inputs.skip_condition != 'true' }}
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    outputs:
+      test_results: ${{ steps.results.outputs.summary }}
+      screenshots_available: ${{ steps.screenshots.outputs.available }}
+      status: ${{ steps.final.outputs.status }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest playwright pytest-html pytest-xdist
+
+      - name: Install browser dependencies
+        run: |
+          playwright install ${{ inputs.browser }}
+          playwright install-deps
+
+      - name: Setup E2E environment
+        run: |
+          echo "E2E_TESTING=true" >> $GITHUB_ENV
+          echo "BROWSER=${{ inputs.browser }}" >> $GITHUB_ENV
+          echo "HEADLESS=${{ inputs.headless }}" >> $GITHUB_ENV
+          echo "TEST_ENVIRONMENT=${{ inputs.test_environment }}" >> $GITHUB_ENV
+
+      - name: Wait for application availability
+        id: health-check
+        run: |
+          echo "Checking application health..."
+          
+          # Determine base URL based on environment
+          if [ "${{ inputs.test_environment }}" = "staging" ]; then
+            BASE_URL="${{ secrets.STAGING_BASE_URL }}"
+          else
+            BASE_URL="http://localhost:3000"
+          fi
+          
+          echo "BASE_URL=$BASE_URL" >> $GITHUB_ENV
+          
+          # Wait for application to be ready
+          max_attempts=30
+          attempt=0
+          
+          while [ $attempt -lt $max_attempts ]; do
+            if curl -f -s "$BASE_URL/health" > /dev/null 2>&1; then
+              echo "Application is ready!"
+              break
+            fi
+            
+            echo "Waiting for application... (attempt $((attempt + 1))/$max_attempts)"
+            sleep 10
+            attempt=$((attempt + 1))
+          done
+          
+          if [ $attempt -eq $max_attempts ]; then
+            echo "Application failed to become ready within timeout"
+            exit 1
+          fi
+
+      - name: Run E2E tests
+        id: test
+        run: |
+          pytest ${{ inputs.test_path }} \
+            --browser=${{ inputs.browser }} \
+            --headless=${{ inputs.headless }} \
+            --base-url="$BASE_URL" \
+            --junit-xml=e2e-results.xml \
+            --html=e2e-report.html \
+            --self-contained-html \
+            --screenshot=only-on-failure \
+            --video=retain-on-failure \
+            -v \
+            --tb=short \
+            --maxfail=5
+
+      - name: Generate test results summary
+        id: results
+        if: always()
+        run: |
+          if [ -f e2e-results.xml ]; then
+            summary=$(python -c "
+            import xml.etree.ElementTree as ET
+            tree = ET.parse('e2e-results.xml')
+            root = tree.getroot()
+            tests = root.attrib.get('tests', '0')
+            failures = root.attrib.get('failures', '0')
+            errors = root.attrib.get('errors', '0')
+            skipped = root.attrib.get('skipped', '0')
+            passed = int(tests) - int(failures) - int(errors) - int(skipped)
+            print(f'E2E Tests: {tests}, Passed: {passed}, Failed: {failures}, Errors: {errors}, Skipped: {skipped}')
+            ")
+            echo "summary=$summary" >> $GITHUB_OUTPUT
+          else
+            echo "summary=E2E test results not available" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for screenshots and videos
+        id: screenshots
+        if: always()
+        run: |
+          if [ -d "test-results" ] && [ "$(ls -A test-results)" ]; then
+            echo "available=true" >> $GITHUB_OUTPUT
+            echo "Failure screenshots and videos available"
+          else
+            echo "available=false" >> $GITHUB_OUTPUT
+            echo "No failure artifacts found"
+          fi
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            e2e-results.xml
+            e2e-report.html
+            test-results/
+          retention-days: 30
+
+      - name: Upload failure screenshots
+        if: failure() && steps.screenshots.outputs.available == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-failure-artifacts
+          path: test-results/
+          retention-days: 7
+
+      - name: Handle test failures
+        if: failure()
+        run: |
+          echo "E2E tests failed"
+          echo "Test environment: ${{ inputs.test_environment }}"
+          echo "Browser: ${{ inputs.browser }}"
+          echo "Test path: ${{ inputs.test_path }}"
+          echo "Base URL: $BASE_URL"
+          
+          if [ "${{ steps.screenshots.outputs.available }}" = "true" ]; then
+            echo "Failure screenshots and videos are available in artifacts"
+          fi
+          
+          exit 1
+
+      - name: Final status
+        id: final
+        if: always()
+        run: |
+          echo "status=${{ job.status }}" >> $GITHUB_OUTPUT

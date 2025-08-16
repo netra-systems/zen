@@ -1,0 +1,442 @@
+name: Notification Handler
+
+on:
+  workflow_call:
+    inputs:
+      workflow_status:
+        description: 'Overall workflow status'
+        required: true
+        type: string
+      execution_path:
+        description: 'Execution path from master orchestrator'
+        required: false
+        type: string
+        default: 'unknown'
+      test_result:
+        description: 'Test execution result'
+        required: false
+        type: string
+        default: 'skipped'
+      deploy_result:
+        description: 'Deployment result'
+        required: false
+        type: string
+        default: 'skipped'
+      security_result:
+        description: 'Security scan result'
+        required: false
+        type: string
+        default: 'skipped'
+      quality_result:
+        description: 'Code quality result'
+        required: false
+        type: string
+        default: 'skipped'
+      act_mode:
+        description: 'Whether running in ACT mode'
+        required: false
+        type: string
+        default: 'false'
+    outputs:
+      notification_status:
+        description: 'Notification delivery status'
+        value: ${{ jobs.send-notifications.outputs.notification_status }}
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+env:
+  ACT: 'false'
+
+jobs:
+  send-notifications:
+    runs-on: warp-custom-default
+    timeout-minutes: 5
+    outputs:
+      notification_status: ${{ steps.final-status.outputs.status }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: ACT Mode Detection
+        id: act-detect
+        run: |
+          if [[ "${{ inputs.act_mode }}" == "true" ]]; then
+            echo "🧪 Notifications in ACT mode"
+            echo "ACT_MODE=true" >> $GITHUB_ENV
+          else
+            echo "☁️ Notifications in GitHub Actions"
+            echo "ACT_MODE=false" >> $GITHUB_ENV
+          fi
+          
+      - name: Load Configuration
+        id: load-config
+        run: |
+          echo "🔧 Loading notification configuration..."
+          
+          # Set defaults
+          NOTIFY_ON_SUCCESS="pr_only"
+          NOTIFY_ON_FAILURE="always"
+          ENABLE_PR_COMMENTS="true"
+          ENABLE_SLACK="false"
+          ENABLE_EMAIL="false"
+          
+          # Load from config if exists
+          if [ -f .github/workflows/config/settings.json ]; then
+            NOTIFY_ON_SUCCESS=$(jq -r '.notifications.on_success // "pr_only"' .github/workflows/config/settings.json)
+            NOTIFY_ON_FAILURE=$(jq -r '.notifications.on_failure // "always"' .github/workflows/config/settings.json)
+          fi
+          
+          if [ -f .github/workflows/config/features.json ]; then
+            ENABLE_PR_COMMENTS=$(jq -r '.enable_notifications.pr_comments // true' .github/workflows/config/features.json)
+            ENABLE_SLACK=$(jq -r '.enable_notifications.slack // false' .github/workflows/config/features.json)
+            ENABLE_EMAIL=$(jq -r '.enable_notifications.email // false' .github/workflows/config/features.json)
+          fi
+          
+          echo "notify_on_success=$NOTIFY_ON_SUCCESS" >> $GITHUB_OUTPUT
+          echo "notify_on_failure=$NOTIFY_ON_FAILURE" >> $GITHUB_OUTPUT
+          echo "enable_pr_comments=$ENABLE_PR_COMMENTS" >> $GITHUB_OUTPUT
+          echo "enable_slack=$ENABLE_SLACK" >> $GITHUB_OUTPUT
+          echo "enable_email=$ENABLE_EMAIL" >> $GITHUB_OUTPUT
+          
+          echo "Notification configuration loaded"
+          
+      - name: Determine Notification Scope
+        id: scope
+        run: |
+          echo "🎯 Determining notification scope..."
+          
+          WORKFLOW_STATUS="${{ inputs.workflow_status }}"
+          EXECUTION_PATH="${{ inputs.execution_path }}"
+          EVENT_NAME="${{ github.event_name }}"
+          
+          SHOULD_NOTIFY="false"
+          NOTIFICATION_LEVEL="info"
+          
+          # Determine if we should notify based on status and configuration
+          if [[ "$WORKFLOW_STATUS" == "failure" ]]; then
+            NOTIFICATION_LEVEL="error"
+            if [[ "${{ steps.load-config.outputs.notify_on_failure }}" == "always" ]]; then
+              SHOULD_NOTIFY="true"
+            elif [[ "${{ steps.load-config.outputs.notify_on_failure }}" == "pr_only" && "$EVENT_NAME" == "pull_request" ]]; then
+              SHOULD_NOTIFY="true"
+            fi
+          elif [[ "$WORKFLOW_STATUS" == "success" ]]; then
+            NOTIFICATION_LEVEL="success"
+            if [[ "${{ steps.load-config.outputs.notify_on_success }}" == "always" ]]; then
+              SHOULD_NOTIFY="true"
+            elif [[ "${{ steps.load-config.outputs.notify_on_success }}" == "pr_only" && "$EVENT_NAME" == "pull_request" ]]; then
+              SHOULD_NOTIFY="true"
+            fi
+          fi
+          
+          echo "should_notify=$SHOULD_NOTIFY" >> $GITHUB_OUTPUT
+          echo "notification_level=$NOTIFICATION_LEVEL" >> $GITHUB_OUTPUT
+          
+          echo "Notification scope: $SHOULD_NOTIFY (level: $NOTIFICATION_LEVEL)"
+          
+      - name: Build Notification Content
+        id: content
+        if: steps.scope.outputs.should_notify == 'true'
+        run: |
+          echo "📝 Building notification content..."
+          
+          WORKFLOW_STATUS="${{ inputs.workflow_status }}"
+          EXECUTION_PATH="${{ inputs.execution_path }}"
+          TEST_RESULT="${{ inputs.test_result }}"
+          DEPLOY_RESULT="${{ inputs.deploy_result }}"
+          SECURITY_RESULT="${{ inputs.security_result }}"
+          QUALITY_RESULT="${{ inputs.quality_result }}"
+          
+          # Status emoji mapping
+          case "$WORKFLOW_STATUS" in
+            "success") STATUS_EMOJI="✅" ;;
+            "failure") STATUS_EMOJI="❌" ;;
+            "cancelled") STATUS_EMOJI="⏹️" ;;
+            *) STATUS_EMOJI="ℹ️" ;;
+          esac
+          
+          # Build summary message
+          if [[ "$WORKFLOW_STATUS" == "success" ]]; then
+            SUMMARY="Workflow completed successfully"
+            DESCRIPTION="All phases of the workflow executed without issues."
+          else
+            SUMMARY="Workflow encountered issues"
+            DESCRIPTION="One or more workflow phases failed or were cancelled."
+          fi
+          
+          # Create detailed content
+          cat > notification-content.md << EOF
+          ## $STATUS_EMOJI Workflow: $SUMMARY
+          
+          **Event:** ${{ github.event_name }}
+          **Execution Path:** $EXECUTION_PATH
+          **Branch:** ${{ github.ref_name }}
+          **Commit:** [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+          **Run:** [#${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          ### Phase Results
+          | Phase | Result | Status |
+          |-------|--------|--------|
+          | 🧪 Tests | $TEST_RESULT | $([ "$TEST_RESULT" == "success" ] && echo "✅" || [ "$TEST_RESULT" == "failure" ] && echo "❌" || echo "⏭️") |
+          | 🚀 Deploy | $DEPLOY_RESULT | $([ "$DEPLOY_RESULT" == "success" ] && echo "✅" || [ "$DEPLOY_RESULT" == "failure" ] && echo "❌" || echo "⏭️") |
+          | 🔒 Security | $SECURITY_RESULT | $([ "$SECURITY_RESULT" == "success" ] && echo "✅" || [ "$SECURITY_RESULT" == "failure" ] && echo "❌" || echo "⏭️") |
+          | 📊 Quality | $QUALITY_RESULT | $([ "$QUALITY_RESULT" == "success" ] && echo "✅" || [ "$QUALITY_RESULT" == "failure" ] && echo "❌" || echo "⏭️") |
+          
+          $DESCRIPTION
+          EOF
+          
+          echo "Notification content built"
+          
+      - name: Send PR Comment
+        if: |
+          steps.scope.outputs.should_notify == 'true' &&
+          steps.load-config.outputs.enable_pr_comments == 'true' &&
+          github.event_name == 'pull_request' &&
+          env.ACT_MODE != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const content = fs.readFileSync('notification-content.md', 'utf8');
+            const identifier = '<!-- netra-workflow-status -->';
+            const commentBody = `${identifier}\n${content}`;
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            const botComment = comments.find(c => 
+              c.user.type === 'Bot' && c.body.includes(identifier)
+            );
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+              console.log('Updated existing PR comment');
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+              console.log('Created new PR comment');
+            }
+            
+      - name: Mock PR Comment (ACT)
+        if: |
+          steps.scope.outputs.should_notify == 'true' &&
+          steps.load-config.outputs.enable_pr_comments == 'true' &&
+          github.event_name == 'pull_request' &&
+          env.ACT_MODE == 'true'
+        run: |
+          echo "🧪 ACT: Mock PR comment notification"
+          echo "## Workflow Status Update (Mock)"
+          echo ""
+          echo "**Status:** ${{ inputs.workflow_status }}"
+          echo "**Event:** ${{ github.event_name }}"
+          echo "**Path:** ${{ inputs.execution_path }}"
+          echo ""
+          echo "### Results"
+          echo "- Tests: ${{ inputs.test_result }}"
+          echo "- Deploy: ${{ inputs.deploy_result }}"
+          echo "- Security: ${{ inputs.security_result }}"
+          echo "- Quality: ${{ inputs.quality_result }}"
+          echo ""
+          echo "✅ PR comment simulation completed"
+          
+      - name: Send Slack Notification
+        if: |
+          steps.scope.outputs.should_notify == 'true' &&
+          steps.load-config.outputs.enable_slack == 'true' &&
+          env.ACT_MODE != 'true'
+        run: |
+          echo "📱 Sending Slack notification..."
+          
+          WEBHOOK_URL="${{ secrets.SLACK_WEBHOOK_URL }}"
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "⚠️ Slack webhook URL not configured"
+            exit 0
+          fi
+          
+          WORKFLOW_STATUS="${{ inputs.workflow_status }}"
+          case "$WORKFLOW_STATUS" in
+            "success") COLOR="good" ;;
+            "failure") COLOR="danger" ;;
+            *) COLOR="warning" ;;
+          esac
+          
+          # Build Slack payload
+          cat > slack-payload.json << EOF
+          {
+            "attachments": [
+              {
+                "color": "$COLOR",
+                "title": "Workflow ${{ inputs.workflow_status }}",
+                "title_link": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                "fields": [
+                  {
+                    "title": "Repository",
+                    "value": "${{ github.repository }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Branch",
+                    "value": "${{ github.ref_name }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Event",
+                    "value": "${{ github.event_name }}",
+                    "short": true
+                  },
+                  {
+                    "title": "Execution Path",
+                    "value": "${{ inputs.execution_path }}",
+                    "short": true
+                  }
+                ],
+                "footer": "GitHub Actions",
+                "ts": $(date +%s)
+              }
+            ]
+          }
+          EOF
+          
+          # Send to Slack
+          curl -X POST -H 'Content-type: application/json' \
+            --data @slack-payload.json \
+            "$WEBHOOK_URL" || echo "Failed to send Slack notification"
+          
+          echo "✅ Slack notification sent"
+          
+      - name: Mock Slack Notification (ACT)
+        if: |
+          steps.scope.outputs.should_notify == 'true' &&
+          steps.load-config.outputs.enable_slack == 'true' &&
+          env.ACT_MODE == 'true'
+        run: |
+          echo "🧪 ACT: Mock Slack notification"
+          echo "📱 Slack Message:"
+          echo "- Status: ${{ inputs.workflow_status }}"
+          echo "- Repository: ${{ github.repository }}"
+          echo "- Branch: ${{ github.ref_name }}"
+          echo "- Event: ${{ github.event_name }}"
+          echo "- Path: ${{ inputs.execution_path }}"
+          echo "✅ Slack notification simulation completed"
+          
+      - name: Send Email Notification
+        if: |
+          steps.scope.outputs.should_notify == 'true' &&
+          steps.load-config.outputs.enable_email == 'true' &&
+          env.ACT_MODE != 'true'
+        run: |
+          echo "📧 Email notifications not implemented yet"
+          echo "Would send email about workflow ${{ inputs.workflow_status }}"
+          # Future: Integrate with email service
+          
+      - name: Mock Email Notification (ACT)
+        if: |
+          steps.scope.outputs.should_notify == 'true' &&
+          steps.load-config.outputs.enable_email == 'true' &&
+          env.ACT_MODE == 'true'
+        run: |
+          echo "🧪 ACT: Mock email notification"
+          echo "📧 Email Message:"
+          echo "- To: dev-team@example.com"
+          echo "- Subject: Workflow ${{ inputs.workflow_status }} - ${{ github.repository }}"
+          echo "- Status: ${{ inputs.workflow_status }}"
+          echo "✅ Email notification simulation completed"
+          
+      - name: Log Notification Activity
+        if: always()
+        run: |
+          echo "📝 Logging notification activity..."
+          
+          cat > notification-log.json << EOF
+          {
+            "timestamp": "$(date -u -Iseconds)",
+            "workflow_status": "${{ inputs.workflow_status }}",
+            "execution_path": "${{ inputs.execution_path }}",
+            "event_name": "${{ github.event_name }}",
+            "should_notify": "${{ steps.scope.outputs.should_notify }}",
+            "notification_level": "${{ steps.scope.outputs.notification_level }}",
+            "channels": {
+              "pr_comments": "${{ steps.load-config.outputs.enable_pr_comments }}",
+              "slack": "${{ steps.load-config.outputs.enable_slack }}",
+              "email": "${{ steps.load-config.outputs.enable_email }}"
+            },
+            "results": {
+              "test": "${{ inputs.test_result }}",
+              "deploy": "${{ inputs.deploy_result }}",
+              "security": "${{ inputs.security_result }}",
+              "quality": "${{ inputs.quality_result }}"
+            },
+            "act_mode": "${{ env.ACT_MODE }}"
+          }
+          EOF
+          
+          echo "Notification activity logged"
+          
+      - name: Upload Notification Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notification-logs-${{ github.run_id }}
+          path: |
+            notification-log.json
+            notification-content.md
+            slack-payload.json
+          retention-days: 7
+          
+      - name: Final Status
+        id: final-status
+        if: always()
+        run: |
+          # Determine notification status
+          if [[ "${{ steps.scope.outputs.should_notify }}" == "true" ]]; then
+            if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+              STATUS="success"  # ACT mode always succeeds
+            else
+              # Check if any notification steps failed
+              STATUS="success"  # Assume success unless we detect failures
+            fi
+          else
+            STATUS="skipped"  # Notifications were not needed
+          fi
+          
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "Final notification status: $STATUS"
+          
+      - name: Summary Report
+        if: always()
+        run: |
+          echo "## 📢 Notification Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Should Notify:** ${{ steps.scope.outputs.should_notify }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Notification Level:** ${{ steps.scope.outputs.notification_level }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Final Status:** ${{ steps.final-status.outputs.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR Comments:** ${{ steps.load-config.outputs.enable_pr_comments }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Slack:** ${{ steps.load-config.outputs.enable_slack }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Email:** ${{ steps.load-config.outputs.enable_email }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Workflow Results" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tests:** ${{ inputs.test_result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deploy:** ${{ inputs.deploy_result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Security:** ${{ inputs.security_result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Quality:** ${{ inputs.quality_result }}" >> $GITHUB_STEP_SUMMARY

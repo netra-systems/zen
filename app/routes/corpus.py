@@ -33,10 +33,9 @@ def _schedule_corpus_generation(request: Request, corpus_id: str, db: Session) -
 
 @router.post("/", response_model=schemas.Corpus)
 def create_corpus(
-    corpus: schemas.CorpusCreate,
-    request: Request,
+    corpus: schemas.CorpusCreate, request: Request,
     db: Session = Depends(get_db_session),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user)
 ) -> schemas.Corpus:
     db_corpus = _create_corpus_record(db, corpus, current_user.id)
     _schedule_corpus_generation(request, db_corpus.id, db)
@@ -102,8 +101,7 @@ def delete_corpus(
 
 @router.post("/{corpus_id}/generate", response_model=schemas.Corpus)
 def regenerate_corpus(
-    corpus_id: str,
-    request: Request,
+    corpus_id: str, request: Request,
     db: Session = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ) -> schemas.Corpus:

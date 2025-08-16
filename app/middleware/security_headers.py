@@ -201,49 +201,48 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Add security headers to all responses."""
         start_time = time.time()
-        
         try:
-            # Generate nonce for this request
             nonce = self.nonce_generator.generate_nonce()
-            
-            # Store nonce in request state for use in templates
             request.state.csp_nonce = nonce
-            
-            # Process the request
             response = await call_next(request)
-            
-            # Add base security headers
-            self._add_base_headers(response)
-            
-            # Add dynamic headers based on request/response
-            self._add_dynamic_headers(request, response, nonce)
-            
-            # Add custom headers for API responses
-            if request.url.path.startswith("/api/"):
-                self._add_api_headers(response)
-            
-            # Add WebSocket specific headers
-            if request.url.path.startswith("/ws"):
-                self._add_websocket_headers(response)
-            
-            # Update metrics
-            self.metrics["requests_processed"] += 1
-            self.metrics["security_headers_added"] += 1
-            if nonce:
-                self.metrics["nonces_generated"] += 1
-            
-            # Log security header application
-            processing_time = time.time() - start_time
-            logger.debug(f"Applied security headers to {request.method} {request.url.path} in {processing_time:.3f}s")
-            
-            return response
-            
+            return self._process_response_headers(request, response, nonce, start_time)
         except Exception as e:
             logger.error(f"Error in security headers middleware: {e}")
-            # Still try to add basic headers even if there's an error
-            response = await call_next(request)
-            self._add_base_headers(response)
-            return response
+            return await self._handle_dispatch_error(call_next, request)
+    
+    async def _handle_dispatch_error(self, call_next: Callable, request: Request) -> Response:
+        """Handle dispatch errors by adding basic headers."""
+        response = await call_next(request)
+        self._add_base_headers(response)
+        return response
+    
+    def _process_response_headers(self, request: Request, response: Response, nonce: str, start_time: float) -> Response:
+        """Process and add all security headers to response."""
+        self._add_base_headers(response)
+        self._add_dynamic_headers(request, response, nonce)
+        self._add_path_specific_headers(request, response)
+        self._update_metrics(nonce)
+        self._log_header_processing(request, start_time)
+        return response
+    
+    def _add_path_specific_headers(self, request: Request, response: Response) -> None:
+        """Add path-specific headers."""
+        if request.url.path.startswith("/api/"):
+            self._add_api_headers(response)
+        if request.url.path.startswith("/ws"):
+            self._add_websocket_headers(response)
+    
+    def _update_metrics(self, nonce: str) -> None:
+        """Update middleware metrics."""
+        self.metrics["requests_processed"] += 1
+        self.metrics["security_headers_added"] += 1
+        if nonce:
+            self.metrics["nonces_generated"] += 1
+    
+    def _log_header_processing(self, request: Request, start_time: float) -> None:
+        """Log security header processing time."""
+        processing_time = time.time() - start_time
+        logger.debug(f"Applied security headers to {request.method} {request.url.path} in {processing_time:.3f}s")
     
     def _add_base_headers(self, response: Response) -> None:
         """Add base security headers to response."""
@@ -309,20 +308,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     def handle_csp_violation(self, violation_report: Dict[str, Any]) -> None:
         """Handle CSP violation reports."""
         self.metrics["csp_violations"] += 1
-        
         logger.warning(f"CSP Violation: {violation_report}")
-        
-        # In production, you might want to:
-        # 1. Send violation reports to a security monitoring service
-        # 2. Alert security team for repeated violations
-        # 3. Block IPs with too many violations
-        
-        # Extract key information
+        self._log_violation_details(violation_report)
+    
+    def _log_violation_details(self, violation_report: Dict[str, Any]) -> None:
+        """Log detailed CSP violation information."""
         blocked_uri = violation_report.get("blocked-uri", "unknown")
         violated_directive = violation_report.get("violated-directive", "unknown")
         source_file = violation_report.get("source-file", "unknown")
-        
-        # Log structured violation data
         logger.error(f"CSP Violation - Directive: {violated_directive}, URI: {blocked_uri}, Source: {source_file}")
     
     def get_metrics(self) -> Dict[str, Any]:

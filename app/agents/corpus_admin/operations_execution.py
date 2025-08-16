@@ -29,14 +29,17 @@ class CorpusExecutionHelper:
         result_key: str
     ) -> CorpusOperationResult:
         """Execute operation via tool dispatcher"""
-        tool_result = await self.tool_dispatcher.dispatch_tool(
+        tool_result = await self._dispatch_tool_with_params(tool_name, request, run_id)
+        return self._build_tool_result(tool_result, request, result_key)
+    
+    async def _dispatch_tool_with_params(self, tool_name: str, request: CorpusOperationRequest, run_id: str):
+        """Dispatch tool with built parameters."""
+        return await self.tool_dispatcher.dispatch_tool(
             tool_name=tool_name,
             parameters=self._build_tool_parameters(request),
             state=DeepAgentState(),
             run_id=run_id
         )
-        
-        return self._build_tool_result(tool_result, request, result_key)
     
     async def execute_search_via_tool(
         self, 
@@ -45,15 +48,18 @@ class CorpusExecutionHelper:
         run_id: str
     ) -> CorpusOperationResult:
         """Execute search via tool dispatcher"""
+        tool_result = await self._dispatch_search_tool(tool_name, request, run_id)
+        return self._build_search_result(tool_result, request)
+    
+    async def _dispatch_search_tool(self, tool_name: str, request: CorpusOperationRequest, run_id: str):
+        """Dispatch search tool with parameters."""
         parameters = self._build_search_parameters(request)
-        tool_result = await self.tool_dispatcher.dispatch_tool(
+        return await self.tool_dispatcher.dispatch_tool(
             tool_name=tool_name,
             parameters=parameters,
             state=DeepAgentState(),
             run_id=run_id
         )
-        
-        return self._build_search_result(tool_result, request)
     
     async def execute_corpus_search(
         self, 
@@ -64,6 +70,10 @@ class CorpusExecutionHelper:
     ) -> Dict[str, Any]:
         """Execute real corpus search against database"""
         logger.warning(f"Real corpus search implementation needed for: {corpus_name}")
+        return self._create_empty_search_result(query, filters, limit)
+    
+    def _create_empty_search_result(self, query: str, filters: Dict[str, Any], limit: int) -> Dict[str, Any]:
+        """Create empty search result structure."""
         return {
             "results": [],
             "total_count": 0,
@@ -75,6 +85,10 @@ class CorpusExecutionHelper:
     async def execute_corpus_analysis(self, corpus_name: str) -> Dict[str, Any]:
         """Execute real corpus analysis against database"""
         logger.warning(f"Real corpus analysis implementation needed for: {corpus_name}")
+        return self._create_empty_analysis_result()
+    
+    def _create_empty_analysis_result(self) -> Dict[str, Any]:
+        """Create empty analysis result structure."""
         return {
             "total_documents": 0,
             "total_size_mb": 0.0,
@@ -121,14 +135,21 @@ class CorpusExecutionHelper:
         result_key: str
     ) -> CorpusOperationResult:
         """Build result from tool execution"""
-        return CorpusOperationResult(
-            success=tool_result.get("success", False),
-            operation=request.operation,
-            corpus_metadata=request.corpus_metadata,
-            affected_documents=0,
-            result_data=tool_result.get(result_key),
-            metadata={result_key: tool_result.get(result_key)}
-        )
+        return CorpusOperationResult(**self._create_tool_result_params(
+            tool_result, request, result_key
+        ))
+    
+    def _create_tool_result_params(self, tool_result: Dict[str, Any], 
+                                  request: CorpusOperationRequest, result_key: str) -> Dict[str, Any]:
+        """Create parameters for tool result."""
+        return {
+            "success": tool_result.get("success", False),
+            "operation": request.operation,
+            "corpus_metadata": request.corpus_metadata,
+            "affected_documents": 0,
+            "result_data": tool_result.get(result_key),
+            "metadata": {result_key: tool_result.get(result_key)}
+        }
     
     def _build_search_result(
         self, 
@@ -137,11 +158,18 @@ class CorpusExecutionHelper:
     ) -> CorpusOperationResult:
         """Build search result from tool execution"""
         results = tool_result.get("results", [])
-        return CorpusOperationResult(
-            success=True,
-            operation=request.operation,
-            corpus_metadata=request.corpus_metadata,
-            affected_documents=len(results),
-            result_data=results,
-            metadata={"total_matches": tool_result.get("total_matches", 0)}
-        )
+        return CorpusOperationResult(**self._create_search_result_params(
+            request, results, tool_result
+        ))
+    
+    def _create_search_result_params(self, request: CorpusOperationRequest, 
+                                    results: list, tool_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Create parameters for search result."""
+        return {
+            "success": True,
+            "operation": request.operation,
+            "corpus_metadata": request.corpus_metadata,
+            "affected_documents": len(results),
+            "result_data": results,
+            "metadata": {"total_matches": tool_result.get("total_matches", 0)}
+        }

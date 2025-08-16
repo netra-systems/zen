@@ -137,6 +137,13 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         self._setup_user_context(request)
         self._log_request_start(request)
         try:
+            return await self._process_request_with_logging(request, call_next, request_id, trace_id, start_time)
+        finally:
+            central_logger.clear_context()
+    
+    async def _process_request_with_logging(self, request: Request, call_next: Callable, request_id: str, trace_id: str, start_time: float) -> Response:
+        """Process request and handle success/error logging."""
+        try:
             response = await call_next(request)
             duration = time.time() - start_time
             self._log_request_success(request, response, duration)
@@ -145,8 +152,6 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             duration = time.time() - start_time
             self._log_request_error(request, e, duration)
             return self._create_error_response(request_id, trace_id)
-        finally:
-            central_logger.clear_context()
 
 
 class PerformanceLoggingMiddleware(BaseHTTPMiddleware):

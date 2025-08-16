@@ -103,16 +103,18 @@ class HeartbeatLogger:
 
     def _log_heartbeat_text(self, data: Dict[str, Any]) -> None:
         """Log heartbeat in text format."""
-        msg = f"LLM heartbeat: {data['agent_name']} - {data['correlation_id']} - "
-        msg += f"elapsed: {data['elapsed_time_seconds']}s - status: {data['status']}"
+        msg = self._build_heartbeat_text_message(data)
         logger.info(msg)
+    
+    def _build_heartbeat_text_message(self, data: Dict[str, Any]) -> str:
+        """Build heartbeat text message from data."""
+        return (f"LLM heartbeat: {data['agent_name']} - {data['correlation_id']} - "
+                f"elapsed: {data['elapsed_time_seconds']}s - status: {data['status']}")
 
     def get_active_operations(self) -> Dict[str, Dict[str, Any]]:
         """Get information about currently active operations."""
-        active_ops = {}
-        for correlation_id in self._active_tasks:
-            active_ops[correlation_id] = self._get_operation_info(correlation_id)
-        return active_ops
+        return {correlation_id: self._get_operation_info(correlation_id)
+                for correlation_id in self._active_tasks}
 
     def _get_operation_info(self, correlation_id: str) -> Dict[str, Any]:
         """Get operation information for a correlation ID."""
@@ -262,7 +264,15 @@ class DataLogger:
     def _limit_depth(self, obj: Any, max_depth: int, current_depth: int = 0) -> Any:
         """Limit JSON depth for logging."""
         if current_depth >= max_depth:
-            return str(obj)[:100] if isinstance(obj, (dict, list)) else obj
+            return self._truncate_deep_object(obj)
+        return self._process_object_by_type(obj, max_depth, current_depth)
+    
+    def _truncate_deep_object(self, obj: Any) -> Any:
+        """Truncate objects that exceed max depth."""
+        return str(obj)[:100] if isinstance(obj, (dict, list)) else obj
+    
+    def _process_object_by_type(self, obj: Any, max_depth: int, current_depth: int) -> Any:
+        """Process object based on its type for depth limiting."""
         if isinstance(obj, dict):
             return {k: self._limit_depth(v, max_depth, current_depth + 1) for k, v in obj.items()}
         if isinstance(obj, list):

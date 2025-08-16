@@ -104,6 +104,11 @@ class ExecutionEngine:
         """Process single pipeline step. Returns True to stop pipeline."""
         if not await self._should_execute_step(step, state):
             return False
+        return await self._execute_and_check_result(step, context, state, results)
+    
+    async def _execute_and_check_result(self, step: PipelineStep, context: AgentExecutionContext,
+                                       state: DeepAgentState, results: List) -> bool:
+        """Execute step and check if pipeline should stop."""
         result = await self._execute_step(step, context, state)
         results.append(result)
         return self._should_stop_pipeline(result, step)

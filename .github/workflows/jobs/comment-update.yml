@@ -1,0 +1,267 @@
+name: PR Comment Update with Deduplication
+
+on:
+  workflow_call:
+    inputs:
+      comment_type:
+        description: 'Type of comment (deployment, test-results, general)'
+        required: true
+        type: string
+      comment_content:
+        description: 'Comment content (markdown supported)'
+        required: true
+        type: string
+      pr_number:
+        description: 'Pull request number (optional, auto-detected if not provided)'
+        required: false
+        type: string
+      update_mode:
+        description: 'Update mode (replace, append, create-new)'
+        required: false
+        type: string
+        default: 'replace'
+      skip_condition:
+        description: 'Skip condition for conditional execution'
+        required: false
+        type: string
+        default: 'false'
+    outputs:
+      comment_id:
+        description: 'ID of the created or updated comment'
+        value: ${{ jobs.comment-update.outputs.comment_id }}
+      comment_url:
+        description: 'URL of the created or updated comment'
+        value: ${{ jobs.comment-update.outputs.comment_url }}
+      status:
+        description: 'Job completion status'
+        value: ${{ jobs.comment-update.outputs.status }}
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  comment-update:
+    runs-on: warp-custom-default
+    if: ${{ inputs.skip_condition != 'true' }}
+    outputs:
+      comment_id: ${{ steps.update.outputs.comment_id }}
+      comment_url: ${{ steps.update.outputs.comment_url }}
+      status: ${{ steps.final.outputs.status }}
+    
+    steps:
+      - name: Validate inputs
+        run: |
+          # Validate comment type
+          valid_types=("deployment" "test-results" "general")
+          if [[ ! " ${valid_types[@]} " =~ " ${{ inputs.comment_type }} " ]]; then
+            echo "Error: Invalid comment_type '${{ inputs.comment_type }}'"
+            echo "Valid types: ${valid_types[*]}"
+            exit 1
+          fi
+          
+          # Validate update mode
+          valid_modes=("replace" "append" "create-new")
+          if [[ ! " ${valid_modes[@]} " =~ " ${{ inputs.update_mode }} " ]]; then
+            echo "Error: Invalid update_mode '${{ inputs.update_mode }}'"
+            echo "Valid modes: ${valid_modes[*]}"
+            exit 1
+          fi
+
+      - name: Determine PR context
+        id: context
+        run: |
+          # Determine PR number
+          if [ -n "${{ inputs.pr_number }}" ]; then
+            pr_number="${{ inputs.pr_number }}"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            pr_number="${{ github.event.pull_request.number }}"
+          else
+            echo "Error: Could not determine PR number"
+            exit 1
+          fi
+          
+          echo "pr_number=$pr_number" >> $GITHUB_OUTPUT
+          echo "Using PR number: $pr_number"
+
+      - name: Generate comment identifier
+        id: identifier
+        run: |
+          # Generate unique identifier based on comment type
+          case "${{ inputs.comment_type }}" in
+            "deployment")
+              identifier="<!-- netra-deployment-status -->"
+              ;;
+            "test-results")
+              identifier="<!-- netra-test-results -->"
+              ;;
+            "general")
+              identifier="<!-- netra-general-comment -->"
+              ;;
+            *)
+              identifier="<!-- netra-${{ inputs.comment_type }}-comment -->"
+              ;;
+          esac
+          
+          echo "identifier=$identifier" >> $GITHUB_OUTPUT
+          echo "Using identifier: $identifier"
+
+      - name: Prepare comment content
+        id: content
+        run: |
+          # Prepare final comment content with identifier and timestamp
+          timestamp=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          cat > comment_body.md << 'EOF'
+          ${{ steps.identifier.outputs.identifier }}
+          ${{ inputs.comment_content }}
+          
+          ---
+          *Last updated: $timestamp*
+          EOF
+          
+          echo "Comment content prepared"
+
+      - name: Find existing comment
+        id: find
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const identifier = '${{ steps.identifier.outputs.identifier }}';
+            const prNumber = ${{ steps.context.outputs.pr_number }};
+            
+            try {
+              // Get all comments on the PR
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber
+              });
+              
+              // Find existing comment with matching identifier
+              const existingComment = comments.find(comment => 
+                comment.user.type === 'Bot' && 
+                comment.body.includes(identifier)
+              );
+              
+              if (existingComment) {
+                core.setOutput('found', 'true');
+                core.setOutput('comment_id', existingComment.id.toString());
+                core.setOutput('existing_body', existingComment.body);
+                console.log(`Found existing comment: ${existingComment.id}`);
+              } else {
+                core.setOutput('found', 'false');
+                console.log('No existing comment found');
+              }
+            } catch (error) {
+              core.setFailed(`Error finding existing comment: ${error.message}`);
+            }
+
+      - name: Update or create comment
+        id: update
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const identifier = '${{ steps.identifier.outputs.identifier }}';
+            const prNumber = ${{ steps.context.outputs.pr_number }};
+            const updateMode = '${{ inputs.update_mode }}';
+            const found = '${{ steps.find.outputs.found }}' === 'true';
+            const existingCommentId = '${{ steps.find.outputs.comment_id }}';
+            
+            // Read prepared comment content
+            const newContent = fs.readFileSync('comment_body.md', 'utf8');
+            
+            let finalContent = newContent;
+            
+            // Handle append mode
+            if (updateMode === 'append' && found) {
+              const existingBody = '${{ steps.find.outputs.existing_body }}';
+              // Remove the identifier line and timestamp from existing content
+              const existingContentClean = existingBody
+                .replace(identifier, '')
+                .replace(/---\n\*Last updated:.*?\*\n?$/, '')
+                .trim();
+              
+              finalContent = `${identifier}\n${existingContentClean}\n\n---\n\n${newContent.replace(identifier, '').trim()}`;
+            }
+            
+            try {
+              let result;
+              
+              if (found && updateMode !== 'create-new') {
+                // Update existing comment
+                result = await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: parseInt(existingCommentId),
+                  body: finalContent
+                });
+                
+                console.log(`Updated existing comment: ${existingCommentId}`);
+              } else {
+                // Create new comment
+                result = await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  body: finalContent
+                });
+                
+                console.log(`Created new comment: ${result.data.id}`);
+              }
+              
+              core.setOutput('comment_id', result.data.id.toString());
+              core.setOutput('comment_url', result.data.html_url);
+              
+            } catch (error) {
+              core.setFailed(`Error updating/creating comment: ${error.message}`);
+            }
+
+      - name: Verify comment creation
+        id: verify
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const commentId = '${{ steps.update.outputs.comment_id }}';
+            
+            try {
+              // Verify the comment was created/updated successfully
+              const { data: comment } = await github.rest.issues.getComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: parseInt(commentId)
+              });
+              
+              console.log(`Comment verified: ${comment.html_url}`);
+              console.log(`Comment preview: ${comment.body.substring(0, 100)}...`);
+              
+            } catch (error) {
+              core.setFailed(`Error verifying comment: ${error.message}`);
+            }
+
+      - name: Handle errors
+        if: failure()
+        run: |
+          echo "Comment update failed"
+          echo "Comment type: ${{ inputs.comment_type }}"
+          echo "Update mode: ${{ inputs.update_mode }}"
+          echo "PR number: ${{ steps.context.outputs.pr_number }}"
+          echo "Identifier: ${{ steps.identifier.outputs.identifier }}"
+          
+          # Clean up temporary files
+          rm -f comment_body.md
+          exit 1
+
+      - name: Cleanup
+        if: always()
+        run: |
+          # Clean up temporary files
+          rm -f comment_body.md
+
+      - name: Final status
+        id: final
+        if: always()
+        run: |
+          echo "status=${{ job.status }}" >> $GITHUB_OUTPUT

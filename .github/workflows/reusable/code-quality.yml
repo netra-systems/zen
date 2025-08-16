@@ -1,0 +1,379 @@
+name: Code Quality Check
+
+on:
+  workflow_call:
+    inputs:
+      changed_areas:
+        description: 'JSON string of changed areas from determine-strategy'
+        required: false
+        type: string
+        default: '{}'
+      act_mode:
+        description: 'Whether running in ACT mode'
+        required: false
+        type: string
+        default: 'false'
+      timeout_minutes:
+        description: 'Quality check timeout in minutes'
+        required: false
+        type: number
+        default: 15
+    outputs:
+      quality_status:
+        description: 'Overall code quality status'
+        value: ${{ jobs.code-quality.outputs.quality_status }}
+      quality_score:
+        description: 'Quality score from 0-10'
+        value: ${{ jobs.code-quality.outputs.quality_score }}
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+env:
+  ACT: 'false'
+
+jobs:
+  code-quality:
+    runs-on: warp-custom-default
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    outputs:
+      quality_status: ${{ steps.final-status.outputs.status }}
+      quality_score: ${{ steps.aggregate.outputs.quality_score }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need history for quality analysis
+        
+      - name: ACT Mode Detection
+        id: act-detect
+        run: |
+          if [[ "${{ inputs.act_mode }}" == "true" ]]; then
+            echo "🧪 Code quality check in ACT mode"
+            echo "ACT_MODE=true" >> $GITHUB_ENV
+          else
+            echo "☁️ Code quality check in GitHub Actions"
+            echo "ACT_MODE=false" >> $GITHUB_ENV
+          fi
+          
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Install Quality Tools
+        run: |
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT: Mock quality tool installation"
+            echo "- flake8: installed (mock)"
+            echo "- mypy: installed (mock)"
+            echo "- black: installed (mock)"
+            echo "- isort: installed (mock)"
+          else
+            pip install flake8 mypy black isort radon
+            echo "✅ Quality tools installed"
+          fi
+          
+      - name: Architecture Compliance Check
+        id: architecture-check
+        run: |
+          echo "🏗️ Checking architecture compliance..."
+          
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT: Mock architecture compliance check"
+            echo "- 300-line limit: 2 violations (mock)"
+            echo "- 8-line function limit: 1 violation (mock)"
+            echo "arch_violations=3" >> $GITHUB_OUTPUT
+            echo "arch_score=7" >> $GITHUB_OUTPUT
+          else
+            # Run actual architecture compliance check
+            VIOLATIONS=0
+            
+            # Check for 300-line files
+            echo "Checking for files exceeding 300 lines..."
+            LONG_FILES=$(find app/ -name "*.py" -exec wc -l {} + | awk '$1 > 300 {print $2}' | wc -l)
+            VIOLATIONS=$((VIOLATIONS + LONG_FILES))
+            
+            if [ $LONG_FILES -gt 0 ]; then
+              echo "⚠️ Found $LONG_FILES files exceeding 300 lines"
+              find app/ -name "*.py" -exec wc -l {} + | awk '$1 > 300 {print "  " $2 " (" $1 " lines)"}'
+            fi
+            
+            # Check for functions exceeding 8 lines (simplified check)
+            echo "Checking for functions exceeding 8 lines..."
+            LONG_FUNCS=$(python scripts/check_architecture_compliance.py --count-only 2>/dev/null || echo "0")
+            VIOLATIONS=$((VIOLATIONS + LONG_FUNCS))
+            
+            # Calculate score based on violations
+            if [ $VIOLATIONS -eq 0 ]; then
+              SCORE=10
+            elif [ $VIOLATIONS -le 3 ]; then
+              SCORE=7
+            elif [ $VIOLATIONS -le 10 ]; then
+              SCORE=4
+            else
+              SCORE=1
+            fi
+            
+            echo "arch_violations=$VIOLATIONS" >> $GITHUB_OUTPUT
+            echo "arch_score=$SCORE" >> $GITHUB_OUTPUT
+            echo "✅ Architecture check completed: $VIOLATIONS violations"
+          fi
+          
+      - name: Code Style Check
+        id: style-check
+        run: |
+          echo "✨ Checking code style..."
+          
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT: Mock code style check"
+            echo "- Black formatting: 5 issues (mock)"
+            echo "- Import sorting: 2 issues (mock)"
+            echo "style_issues=7" >> $GITHUB_OUTPUT
+            echo "style_score=6" >> $GITHUB_OUTPUT
+          else
+            STYLE_ISSUES=0
+            
+            # Check Black formatting
+            echo "Checking Black formatting..."
+            BLACK_ISSUES=$(black --check --diff app/ 2>&1 | grep -c "would reformat" || echo "0")
+            STYLE_ISSUES=$((STYLE_ISSUES + BLACK_ISSUES))
+            
+            # Check import sorting
+            echo "Checking import sorting..."
+            ISORT_ISSUES=$(isort --check-only --diff app/ 2>&1 | grep -c "ERROR" || echo "0")
+            STYLE_ISSUES=$((STYLE_ISSUES + ISORT_ISSUES))
+            
+            # Calculate score
+            if [ $STYLE_ISSUES -eq 0 ]; then
+              SCORE=10
+            elif [ $STYLE_ISSUES -le 5 ]; then
+              SCORE=7
+            elif [ $STYLE_ISSUES -le 15 ]; then
+              SCORE=4
+            else
+              SCORE=1
+            fi
+            
+            echo "style_issues=$STYLE_ISSUES" >> $GITHUB_OUTPUT
+            echo "style_score=$SCORE" >> $GITHUB_OUTPUT
+            echo "✅ Style check completed: $STYLE_ISSUES issues"
+          fi
+          
+      - name: Linting Check
+        id: lint-check
+        run: |
+          echo "🔍 Running linting checks..."
+          
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT: Mock linting check"
+            echo "- Flake8: 3 issues (mock)"
+            echo "- PyLint: 1 issue (mock)"
+            echo "lint_issues=4" >> $GITHUB_OUTPUT
+            echo "lint_score=8" >> $GITHUB_OUTPUT
+          else
+            LINT_ISSUES=0
+            
+            # Run flake8
+            echo "Running flake8..."
+            FLAKE8_ISSUES=$(flake8 app/ --count --select=E9,F63,F7,F82 --show-source --statistics 2>/dev/null || echo "0")
+            LINT_ISSUES=$((LINT_ISSUES + FLAKE8_ISSUES))
+            
+            # Calculate score
+            if [ $LINT_ISSUES -eq 0 ]; then
+              SCORE=10
+            elif [ $LINT_ISSUES -le 3 ]; then
+              SCORE=8
+            elif [ $LINT_ISSUES -le 10 ]; then
+              SCORE=5
+            else
+              SCORE=2
+            fi
+            
+            echo "lint_issues=$LINT_ISSUES" >> $GITHUB_OUTPUT
+            echo "lint_score=$SCORE" >> $GITHUB_OUTPUT
+            echo "✅ Linting completed: $LINT_ISSUES issues"
+          fi
+          
+      - name: Type Checking
+        id: type-check
+        run: |
+          echo "🔬 Running type checking..."
+          
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT: Mock type checking"
+            echo "- MyPy: 2 type errors (mock)"
+            echo "type_errors=2" >> $GITHUB_OUTPUT
+            echo "type_score=8" >> $GITHUB_OUTPUT
+          else
+            # Run mypy type checking
+            echo "Running mypy..."
+            TYPE_ERRORS=$(mypy app/ --ignore-missing-imports --show-error-codes 2>&1 | grep -c "error:" || echo "0")
+            
+            # Calculate score
+            if [ $TYPE_ERRORS -eq 0 ]; then
+              SCORE=10
+            elif [ $TYPE_ERRORS -le 2 ]; then
+              SCORE=8
+            elif [ $TYPE_ERRORS -le 5 ]; then
+              SCORE=5
+            else
+              SCORE=2
+            fi
+            
+            echo "type_errors=$TYPE_ERRORS" >> $GITHUB_OUTPUT
+            echo "type_score=$SCORE" >> $GITHUB_OUTPUT
+            echo "✅ Type checking completed: $TYPE_ERRORS errors"
+          fi
+          
+      - name: Complexity Analysis
+        id: complexity-check
+        run: |
+          echo "📊 Analyzing code complexity..."
+          
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT: Mock complexity analysis"
+            echo "- Cyclomatic complexity: average 3.2 (mock)"
+            echo "- High complexity functions: 1 (mock)"
+            echo "complexity_issues=1" >> $GITHUB_OUTPUT
+            echo "complexity_score=9" >> $GITHUB_OUTPUT
+          else
+            # Use radon for complexity analysis
+            echo "Running complexity analysis..."
+            COMPLEX_FUNCS=$(radon cc app/ -s | grep -E "([D-F])" | wc -l || echo "0")
+            
+            # Calculate score
+            if [ $COMPLEX_FUNCS -eq 0 ]; then
+              SCORE=10
+            elif [ $COMPLEX_FUNCS -le 2 ]; then
+              SCORE=8
+            elif [ $COMPLEX_FUNCS -le 5 ]; then
+              SCORE=5
+            else
+              SCORE=2
+            fi
+            
+            echo "complexity_issues=$COMPLEX_FUNCS" >> $GITHUB_OUTPUT
+            echo "complexity_score=$SCORE" >> $GITHUB_OUTPUT
+            echo "✅ Complexity analysis completed: $COMPLEX_FUNCS high-complexity functions"
+          fi
+          
+      - name: Aggregate Quality Results
+        id: aggregate
+        run: |
+          echo "📊 Aggregating code quality results..."
+          
+          ARCH_SCORE="${{ steps.architecture-check.outputs.arch_score || '10' }}"
+          STYLE_SCORE="${{ steps.style-check.outputs.style_score || '10' }}"
+          LINT_SCORE="${{ steps.lint-check.outputs.lint_score || '10' }}"
+          TYPE_SCORE="${{ steps.type-check.outputs.type_score || '10' }}"
+          COMPLEXITY_SCORE="${{ steps.complexity-check.outputs.complexity_score || '10' }}"
+          
+          # Calculate weighted average (architecture has higher weight)
+          TOTAL=$((ARCH_SCORE * 3 + STYLE_SCORE + LINT_SCORE + TYPE_SCORE + COMPLEXITY_SCORE))
+          QUALITY_SCORE=$((TOTAL / 7))
+          
+          echo "quality_score=$QUALITY_SCORE" >> $GITHUB_OUTPUT
+          
+          echo "=== Code Quality Summary ==="
+          echo "Architecture compliance: $ARCH_SCORE/10"
+          echo "Code style: $STYLE_SCORE/10"
+          echo "Linting: $LINT_SCORE/10"
+          echo "Type checking: $TYPE_SCORE/10"
+          echo "Complexity: $COMPLEXITY_SCORE/10"
+          echo "Overall quality: $QUALITY_SCORE/10"
+          
+      - name: Generate Quality Report
+        run: |
+          echo "📋 Generating code quality report..."
+          
+          cat > quality-report.md << 'EOF'
+          # Code Quality Report
+          
+          **Timestamp:** $(date -u)
+          **Overall Score:** ${{ steps.aggregate.outputs.quality_score }}/10
+          
+          ## Summary
+          
+          | Category | Score | Issues |
+          |----------|-------|--------|
+          | Architecture | ${{ steps.architecture-check.outputs.arch_score }}/10 | ${{ steps.architecture-check.outputs.arch_violations }} |
+          | Code Style | ${{ steps.style-check.outputs.style_score }}/10 | ${{ steps.style-check.outputs.style_issues }} |
+          | Linting | ${{ steps.lint-check.outputs.lint_score }}/10 | ${{ steps.lint-check.outputs.lint_issues }} |
+          | Type Safety | ${{ steps.type-check.outputs.type_score }}/10 | ${{ steps.type-check.outputs.type_errors }} |
+          | Complexity | ${{ steps.complexity-check.outputs.complexity_score }}/10 | ${{ steps.complexity-check.outputs.complexity_issues }} |
+          
+          ## Recommendations
+          
+          - Ensure all files are under 300 lines
+          - Keep functions under 8 lines
+          - Fix formatting and import issues
+          - Resolve type annotation errors
+          - Simplify complex functions
+          EOF
+          
+          echo "Quality report generated"
+          
+      - name: Upload Quality Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-check-results-${{ github.run_id }}
+          path: |
+            quality-report.md
+          retention-days: 30
+          
+      - name: Final Status
+        id: final-status
+        if: always()
+        run: |
+          QUALITY_SCORE="${{ steps.aggregate.outputs.quality_score }}"
+          
+          # Determine overall status based on quality score
+          if [ "$QUALITY_SCORE" -ge 8 ]; then
+            STATUS="success"
+          elif [ "$QUALITY_SCORE" -ge 6 ]; then
+            STATUS="warning"
+          else
+            STATUS="failure"
+          fi
+          
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "Final quality status: $STATUS (Score: $QUALITY_SCORE/10)"
+          
+      - name: Update Commit Status
+        if: always() && env.ACT_MODE != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.final-status.outputs.status }}';
+            const qualityScore = '${{ steps.aggregate.outputs.quality_score }}';
+            
+            const state = status === 'success' ? 'success' : 
+                         status === 'warning' ? 'pending' : 'failure';
+            
+            const description = `Code quality: ${qualityScore}/10`;
+            
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: state,
+              description: description,
+              context: 'quality/check'
+            });
+            
+      - name: Mock Commit Status (ACT)
+        if: always() && env.ACT_MODE == 'true'
+        run: |
+          STATUS="${{ steps.final-status.outputs.status }}"
+          SCORE="${{ steps.aggregate.outputs.quality_score }}"
+          
+          echo "🧪 ACT: Mock commit status update"
+          echo "- Status: $STATUS"
+          echo "- Description: Code quality: $SCORE/10"
+          echo "- Context: quality/check"

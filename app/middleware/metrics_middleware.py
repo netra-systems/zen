@@ -86,12 +86,16 @@ class AgentMetricsMiddleware:
             result = await self._execute_tracked_function(func, timeout_seconds, args, kwargs)
             await self._record_successful_operation(operation_id, result, start_time, memory_before, include_performance)
             return result
-        except asyncio.TimeoutError as e:
-            await self._handle_timeout(operation_id, timeout_seconds or 0, e)
-            raise
         except Exception as e:
-            await self._handle_operation_error(operation_id, e, func, args, kwargs)
+            await self._handle_tracked_exception(operation_id, e, func, args, kwargs, timeout_seconds)
             raise
+    
+    async def _handle_tracked_exception(self, operation_id: str, e: Exception, func: Callable, args: tuple, kwargs: dict, timeout_seconds: Optional[float]) -> None:
+        """Handle tracked operation exceptions."""
+        if isinstance(e, asyncio.TimeoutError):
+            await self._handle_timeout(operation_id, timeout_seconds or 0, e)
+        else:
+            await self._handle_operation_error(operation_id, e, func, args, kwargs)
     
     def _extract_agent_name(self, func: Callable, args: tuple, kwargs: dict) -> str:
         """Extract agent name from function context."""
@@ -350,8 +354,7 @@ class AgentMetricsMiddleware:
             return BatchResultProcessor.count_list_results(result)
         elif isinstance(result, dict):
             return BatchResultProcessor.count_dict_results(result)
-        else:
-            return BatchResultProcessor.count_single_result(result)
+        return BatchResultProcessor.count_single_result(result)
 
 
 class AgentMetricsContextManager:

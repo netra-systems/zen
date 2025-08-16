@@ -183,42 +183,54 @@ class CircuitBreaker(CoreCircuitBreaker):
         """Check if request should be allowed through."""
         # Convert async to sync for compatibility
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # If in async context, use direct property
-                return not self.is_open
-            else:
-                # If not in async context, check synchronously
-                return not self.is_open
+            return self._check_with_event_loop()
         except RuntimeError:
             # No event loop - use synchronous check
+            return not self.is_open
+    
+    def _check_with_event_loop(self) -> bool:
+        """Check circuit state with event loop handling."""
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # If in async context, use direct property
+            return not self.is_open
+        else:
+            # If not in async context, check synchronously
             return not self.is_open
     
     def record_success(self) -> None:
         """Record successful operation."""
         # Convert to async call when possible
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                loop.create_task(self._record_success())
-            else:
-                asyncio.run(self._record_success())
+            self._execute_success_recording()
         except RuntimeError:
             # Best effort - set state manually for compatibility
             self.state = self.config.name
+    
+    def _execute_success_recording(self) -> None:
+        """Execute success recording with proper event loop handling."""
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            loop.create_task(self._record_success())
+        else:
+            asyncio.run(self._record_success())
     
     def record_failure(self) -> None:
         """Record failed operation."""
         # Convert to async call when possible
         try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                loop.create_task(self._record_failure("ErrorRecoveryFailure"))
-            else:
-                asyncio.run(self._record_failure("ErrorRecoveryFailure"))
+            self._execute_failure_recording()
         except RuntimeError:
             # Best effort - increment failure tracking for compatibility
             self._failure_count += 1
+    
+    def _execute_failure_recording(self) -> None:
+        """Execute failure recording with proper event loop handling."""
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            loop.create_task(self._record_failure("ErrorRecoveryFailure"))
+        else:
+            asyncio.run(self._record_failure("ErrorRecoveryFailure"))
 
 
 class ErrorRecoveryManager:
@@ -268,42 +280,52 @@ class RecoveryExecutor:
     async def attempt_recovery(self, context: RecoveryContext) -> RecoveryResult:
         """Attempt to recover from an error."""
         try:
-            # Check circuit breaker
-            circuit_breaker = self._get_circuit_breaker(context)
-            if not circuit_breaker.should_allow_request():
-                return RecoveryResult(
-                    success=False,
-                    action_taken=RecoveryAction.CIRCUIT_BREAK,
-                    circuit_broken=True
-                )
+            # Check circuit breaker first
+            circuit_breaker_result = self._check_circuit_breaker(context)
+            if circuit_breaker_result:
+                return circuit_breaker_result
             
-            # Try retry first
-            if self._should_retry(context):
-                return await self._execute_retry(context)
-            
-            # Try compensation
-            compensation_result = await self._execute_compensation(context)
-            if compensation_result:
-                return RecoveryResult(
-                    success=True,
-                    action_taken=RecoveryAction.COMPENSATE,
-                    compensation_required=True
-                )
-            
-            # Fallback to abort
-            return RecoveryResult(
-                success=False,
-                action_taken=RecoveryAction.ABORT,
-                error_message=f"No recovery possible for {context.operation_id}"
-            )
-            
+            return await self._execute_recovery_strategy(context)
         except Exception as e:
             logger.error(f"Recovery attempt failed: {e}")
+            return self._create_abort_result(str(e))
+    
+    def _check_circuit_breaker(self, context: RecoveryContext) -> Optional[RecoveryResult]:
+        """Check circuit breaker state and return result if blocked."""
+        circuit_breaker = self._get_circuit_breaker(context)
+        if not circuit_breaker.should_allow_request():
             return RecoveryResult(
                 success=False,
-                action_taken=RecoveryAction.ABORT,
-                error_message=str(e)
+                action_taken=RecoveryAction.CIRCUIT_BREAK,
+                circuit_broken=True
             )
+        return None
+    
+    async def _execute_recovery_strategy(self, context: RecoveryContext) -> RecoveryResult:
+        """Execute recovery strategy (retry, compensation, or abort)."""
+        # Try retry first
+        if self._should_retry(context):
+            return await self._execute_retry(context)
+        
+        # Try compensation
+        compensation_result = await self._execute_compensation(context)
+        if compensation_result:
+            return RecoveryResult(
+                success=True,
+                action_taken=RecoveryAction.COMPENSATE,
+                compensation_required=True
+            )
+        
+        # Fallback to abort
+        return self._create_abort_result(f"No recovery possible for {context.operation_id}")
+    
+    def _create_abort_result(self, error_message: str) -> RecoveryResult:
+        """Create abort recovery result."""
+        return RecoveryResult(
+            success=False,
+            action_taken=RecoveryAction.ABORT,
+            error_message=error_message
+        )
     
     def _get_circuit_breaker(self, context: RecoveryContext) -> CircuitBreaker:
         """Get circuit breaker for operation."""

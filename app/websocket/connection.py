@@ -43,10 +43,11 @@ class ConnectionManager:
         self.connection_registry: Dict[str, ConnectionInfo] = {}
         self._connection_lock = asyncio.Lock()
         self.max_connections_per_user = 5
-        self._stats = {
-            "total_connections": 0,
-            "connection_failures": 0
-        }
+        self._stats = self._initialize_stats()
+
+    def _initialize_stats(self) -> Dict[str, int]:
+        """Initialize connection statistics."""
+        return {"total_connections": 0, "connection_failures": 0}
     
     async def connect(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish and register a new WebSocket connection."""

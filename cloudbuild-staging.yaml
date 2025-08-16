@@ -1,0 +1,108 @@
+# Cloud Build configuration for staging deployment
+steps:
+  # Build backend image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-backend'
+    args:
+      - 'build'
+      - '-f'
+      - 'Dockerfile.backend'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/backend:${_BRANCH_NAME}-${SHORT_SHA}'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/backend:latest'
+      - '.'
+
+  # Build frontend image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-frontend'
+    args:
+      - 'build'
+      - '-f'
+      - 'Dockerfile.frontend.staging'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/frontend:${_BRANCH_NAME}-${SHORT_SHA}'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/frontend:latest'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_API_URL=https://backend-staging-${SHORT_SHA}-uc.a.run.app'
+      - '.'
+
+  # Push backend image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-backend'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/backend'
+    waitFor: ['build-backend']
+
+  # Push frontend image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-frontend'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/frontend'
+    waitFor: ['build-frontend']
+
+  # Deploy backend to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'deploy-backend'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'netra-backend-staging'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/backend:${_BRANCH_NAME}-${SHORT_SHA}'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'ENVIRONMENT=staging'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '2'
+      - '--cpu'
+      - '0.5'
+      - '--memory'
+      - '1Gi'
+    waitFor: ['push-backend']
+
+  # Deploy frontend to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'deploy-frontend'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'netra-frontend-staging'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/frontend:${_BRANCH_NAME}-${SHORT_SHA}'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'NEXT_PUBLIC_API_URL=https://backend-staging-${SHORT_SHA}-uc.a.run.app'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '2'
+      - '--cpu'
+      - '0.25'
+      - '--memory'
+      - '512Mi'
+    waitFor: ['push-frontend']
+
+substitutions:
+  _BRANCH_NAME: ${BRANCH_NAME}
+
+options:
+  machineType: 'N1_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: '1800s'

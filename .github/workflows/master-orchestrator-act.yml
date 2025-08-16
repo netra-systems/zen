@@ -1,0 +1,306 @@
+name: Master Orchestrator (ACT Compatible)
+description: ACT-compatible version of master orchestrator for local testing
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: false
+        type: choice
+        options:
+          - test
+          - deploy
+          - cleanup
+          - rebuild
+          - destroy
+        default: test
+      test_level:
+        description: 'Test level for test action'
+        required: false
+        type: choice
+        options:
+          - smoke
+          - unit
+          - integration
+          - comprehensive
+        default: unit
+      environment:
+        description: 'Target environment'
+        required: false
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+      force_execution:
+        description: 'Force execution ignoring skip conditions'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  # ACT compatible environment
+  ACT: 'true'
+  IS_ACT_ENV: 'true'
+  RUNNER_TYPE: 'ubuntu-latest'
+  DEFAULT_TIMEOUT: '30'
+  CONFIG_PATH: '.github/workflows/config'
+
+# Standard permissions
+permissions:
+  contents: read
+  deployments: write
+  pull-requests: write
+  issues: write
+  statuses: write
+  checks: write
+  packages: read
+
+# Prevent redundant runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================
+  # PHASE 1: DETERMINE EXECUTION STRATEGY
+  # ==========================================
+  
+  determine-strategy:
+    name: Determine Execution Strategy
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+      skip_tests: ${{ steps.check.outputs.skip_tests }}
+      skip_deploy: ${{ steps.check.outputs.skip_deploy }}
+      test_scope: ${{ steps.check.outputs.test_scope }}
+      execution_path: ${{ steps.check.outputs.execution_path }}
+      changed_areas: ${{ steps.analyze.outputs.changed_areas }}
+      risk_level: ${{ steps.analyze.outputs.risk_level }}
+      target_environment: ${{ steps.check.outputs.target_environment }}
+      act_mode: ${{ steps.env-setup.outputs.act_mode }}
+      runner_type: ${{ steps.env-setup.outputs.runner_type }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          sparse-checkout: |
+            .github/workflows/config
+            .github/workflows
+            SPEC
+
+      - name: Environment Detection and Setup
+        id: env-setup
+        run: |
+          echo "=== Master Orchestrator Environment Setup ==="
+          echo "🧪 ACT Mode: Local testing environment"
+          echo "act_mode=true" >> $GITHUB_OUTPUT
+          echo "runner_type=ubuntu-latest" >> $GITHUB_OUTPUT
+          echo "ACT_MODE=true" >> $GITHUB_ENV
+          echo "Environment setup completed"
+
+      - name: Load Configuration
+        id: load-config
+        run: |
+          echo "🔧 Loading workflow configuration..."
+          
+          # Create default config structure if not exists
+          mkdir -p ${{ env.CONFIG_PATH }}
+          
+          # Load or create settings.json
+          SETTINGS_FILE="${{ env.CONFIG_PATH }}/settings.json"
+          if [ ! -f "$SETTINGS_FILE" ]; then
+            echo "Creating default settings.json"
+            cat > "$SETTINGS_FILE" << 'EOF'
+          {
+            "test_runner": {
+              "default_level": "unit",
+              "timeout_minutes": 30,
+              "retry_failed": true,
+              "max_retries": 2
+            },
+            "deployment": {
+              "auto_deploy_branches": ["main", "develop"],
+              "require_approval": ["production"],
+              "cleanup_on_pr_close": true
+            },
+            "notifications": {
+              "channels": ["pr_comment"],
+              "on_failure": "always",
+              "on_success": "pr_only"
+            }
+          }
+          EOF
+          fi
+          
+          echo "Configuration loaded successfully"
+
+      - name: Analyze Changes
+        id: analyze
+        run: |
+          echo "📊 Analyzing repository changes..."
+          
+          # For ACT mode, use mock changes
+          CHANGED_FILES="app/main.py frontend/components/test.tsx"
+          echo "🧪 ACT: Using mock changed files: $CHANGED_FILES"
+          
+          # Initialize change tracking
+          BACKEND_CHANGED=true
+          FRONTEND_CHANGED=true
+          INFRASTRUCTURE_CHANGED=false
+          WORKFLOW_CHANGED=false
+          DOCS_ONLY=false
+          CRITICAL_CHANGED=false
+          
+          RISK_LEVEL="medium"
+          FILE_COUNT=2
+          
+          # Create areas JSON
+          AREAS='{"backend":true,"frontend":true,"infrastructure":false,"workflows":false,"docs_only":false,"critical":false}'
+          
+          echo "changed_areas=$AREAS" >> $GITHUB_OUTPUT
+          echo "risk_level=$RISK_LEVEL" >> $GITHUB_OUTPUT
+          echo "file_count=$FILE_COUNT" >> $GITHUB_OUTPUT
+          
+          echo "Change analysis completed:"
+          echo "- Files changed: $FILE_COUNT"
+          echo "- Risk level: $RISK_LEVEL" 
+          echo "- Areas: $AREAS"
+
+      - name: Determine Execution Path
+        id: check
+        run: |
+          echo "🎯 Determining execution strategy..."
+          
+          SHOULD_RUN=true
+          SKIP_TESTS=false
+          SKIP_DEPLOY=true  # Always skip deploy in ACT
+          EXECUTION_PATH="act-local"
+          TARGET_ENV="staging"
+          
+          # Determine test scope based on inputs
+          if [[ -n "${{ inputs.test_level }}" ]]; then
+            TEST_SCOPE="${{ inputs.test_level }}"
+          else
+            TEST_SCOPE="unit"
+          fi
+          
+          # Handle different event types
+          case "${{ github.event_name }}" in
+            "pull_request")
+              EXECUTION_PATH="act-pr-validation"
+              ;;
+            "push")
+              EXECUTION_PATH="act-push-test"
+              ;;
+            "workflow_dispatch")
+              EXECUTION_PATH="act-${{ inputs.action || 'test' }}"
+              TARGET_ENV="${{ inputs.environment || 'staging' }}"
+              ;;
+          esac
+          
+          # Output results
+          echo "should_run=$SHOULD_RUN" >> $GITHUB_OUTPUT
+          echo "skip_tests=$SKIP_TESTS" >> $GITHUB_OUTPUT  
+          echo "skip_deploy=$SKIP_DEPLOY" >> $GITHUB_OUTPUT
+          echo "test_scope=$TEST_SCOPE" >> $GITHUB_OUTPUT
+          echo "execution_path=$EXECUTION_PATH" >> $GITHUB_OUTPUT
+          echo "target_environment=$TARGET_ENV" >> $GITHUB_OUTPUT
+          
+          # Generate summary
+          echo "## 🎯 ACT Execution Strategy" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Execution Path:** $EXECUTION_PATH" >> $GITHUB_STEP_SUMMARY
+          echo "**Should Run:** $SHOULD_RUN" >> $GITHUB_STEP_SUMMARY
+          echo "**Test Scope:** $TEST_SCOPE" >> $GITHUB_STEP_SUMMARY
+          echo "**Skip Tests:** $SKIP_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "**Skip Deploy:** $SKIP_DEPLOY" >> $GITHUB_STEP_SUMMARY
+          echo "**Target Environment:** $TARGET_ENV" >> $GITHUB_STEP_SUMMARY
+
+  # ==========================================
+  # PHASE 2: SIMPLE TEST EXECUTION
+  # ==========================================
+
+  run-simple-tests:
+    name: Run Simple Tests (ACT)
+    needs: determine-strategy
+    if: |
+      needs.determine-strategy.outputs.should_run == 'true' &&
+      needs.determine-strategy.outputs.skip_tests != 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        
+      - name: Mock Test Execution
+        run: |
+          echo "🧪 ACT: Running mock tests..."
+          echo "Test level: ${{ needs.determine-strategy.outputs.test_scope }}"
+          echo "Changed areas: ${{ needs.determine-strategy.outputs.changed_areas }}"
+          
+          # Simulate test execution
+          echo "Running unit tests..."
+          sleep 2
+          echo "✅ Mock tests passed"
+          
+          echo "test_result=success" >> $GITHUB_OUTPUT
+          
+  # ==========================================
+  # PHASE 3: NOTIFICATIONS (SIMPLIFIED)
+  # ==========================================
+
+  send-notifications:
+    name: Send Notifications (ACT)
+    needs: [determine-strategy, run-simple-tests]
+    if: always() && needs.determine-strategy.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Mock Notification
+        run: |
+          echo "📢 ACT: Mock notification system"
+          echo "Workflow status: success"
+          echo "Execution path: ${{ needs.determine-strategy.outputs.execution_path }}"
+          echo "Test result: ${{ needs.run-simple-tests.result || 'skipped' }}"
+          echo "✅ Notifications simulated"
+
+  # ==========================================
+  # PHASE 4: FINAL REPORTING
+  # ==========================================
+
+  generate-summary:
+    name: Generate ACT Summary
+    needs: [determine-strategy, run-simple-tests, send-notifications]
+    if: always()
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Generate Final ACT Summary
+        run: |
+          echo "## 🏁 ACT Master Orchestrator Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Execution Path:** ${{ needs.determine-strategy.outputs.execution_path }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Risk Level:** ${{ needs.determine-strategy.outputs.risk_level }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ACT (Local Testing)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Phase | Job | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Strategy | Determine Strategy | ${{ needs.determine-strategy.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Testing | Run Simple Tests | ${{ needs.run-simple-tests.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Notify | Notifications | ${{ needs.send-notifications.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Overall Status:** ✅ **ACT TEST COMPLETED**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Generated by ACT-Compatible Master Orchestrator*" >> $GITHUB_STEP_SUMMARY

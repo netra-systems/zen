@@ -66,20 +66,33 @@ class ResilientLLMClient:
     async def _get_circuit(self, config_name: str) -> CircuitBreaker:
         """Get circuit breaker for LLM configuration."""
         if config_name not in self._circuits:
-            circuit_config = self._select_circuit_config(config_name)
-            self._circuits[config_name] = await circuit_registry.get_circuit(
-                f"llm_{config_name}", circuit_config
-            )
+            self._circuits[config_name] = await self._create_circuit(config_name)
         return self._circuits[config_name]
+    
+    async def _create_circuit(self, config_name: str) -> CircuitBreaker:
+        """Create new circuit breaker for configuration."""
+        circuit_config = self._select_circuit_config(config_name)
+        return await circuit_registry.get_circuit(
+            f"llm_{config_name}", circuit_config
+        )
     
     def _select_circuit_config(self, config_name: str) -> CircuitConfig:
         """Select appropriate circuit config based on LLM type."""
-        if "fast" in config_name.lower() or "gpt-3.5" in config_name.lower():
+        if self._is_fast_llm(config_name):
             return LLMClientConfig.FAST_LLM_CONFIG
-        elif "gpt-4" in config_name.lower() or "claude" in config_name.lower():
+        elif self._is_slow_llm(config_name):
             return LLMClientConfig.SLOW_LLM_CONFIG
-        else:
-            return LLMClientConfig.STANDARD_LLM_CONFIG
+        return LLMClientConfig.STANDARD_LLM_CONFIG
+    
+    def _is_fast_llm(self, config_name: str) -> bool:
+        """Check if LLM configuration is for fast models."""
+        name_lower = config_name.lower()
+        return "fast" in name_lower or "gpt-3.5" in name_lower
+    
+    def _is_slow_llm(self, config_name: str) -> bool:
+        """Check if LLM configuration is for slow models."""
+        name_lower = config_name.lower()
+        return "gpt-4" in name_lower or "claude" in name_lower
     
     async def _create_simple_request(self, prompt: str, config_name: str, use_cache: bool) -> callable:
         """Create simple LLM request function."""
@@ -105,9 +118,14 @@ class ResilientLLMClient:
                      llm_config_name: str, 
                      use_cache: bool = True) -> str:
         """Ask LLM with circuit breaker protection."""
-        circuit = await self._get_circuit(llm_config_name)
-        request_fn = await self._create_simple_request(prompt, llm_config_name, use_cache)
-        return await self._execute_simple_request(circuit, request_fn, prompt, llm_config_name)
+        components = await self._prepare_simple_request(prompt, llm_config_name, use_cache)
+        return await self._execute_simple_request(*components, prompt, llm_config_name)
+    
+    async def _prepare_simple_request(self, prompt: str, config_name: str, use_cache: bool) -> tuple:
+        """Prepare circuit and request function for simple LLM call."""
+        circuit = await self._get_circuit(config_name)
+        request_fn = await self._create_simple_request(prompt, config_name, use_cache)
+        return circuit, request_fn
     
     async def _create_full_request(self, prompt: str, config_name: str, use_cache: bool) -> callable:
         """Create full LLM request function."""
@@ -133,9 +151,14 @@ class ResilientLLMClient:
                           llm_config_name: str, 
                           use_cache: bool = True) -> LLMResponse:
         """Ask LLM for full response with circuit breaker."""
-        circuit = await self._get_circuit(llm_config_name)
-        request_fn = await self._create_full_request(prompt, llm_config_name, use_cache)
-        return await self._execute_full_request(circuit, request_fn, llm_config_name)
+        components = await self._prepare_full_request(prompt, llm_config_name, use_cache)
+        return await self._execute_full_request(*components, llm_config_name)
+    
+    async def _prepare_full_request(self, prompt: str, config_name: str, use_cache: bool) -> tuple:
+        """Prepare circuit and request function for full LLM call."""
+        circuit = await self._get_circuit(config_name)
+        request_fn = await self._create_full_request(prompt, config_name, use_cache)
+        return circuit, request_fn
     
     async def _get_structured_circuit(self, config_name: str) -> CircuitBreaker:
         """Get circuit breaker for structured LLM requests."""
@@ -199,11 +222,16 @@ class ResilientLLMClient:
     async def _execute_streaming(self, circuit: CircuitBreaker, prompt: str, config_name: str) -> AsyncIterator[str]:
         """Execute streaming with circuit breaker recording."""
         try:
-            async for chunk in self.llm_manager.stream_llm(prompt, config_name):
+            async for chunk in self._stream_with_manager(prompt, config_name):
                 yield chunk
             await circuit._record_success()
         except Exception as e:
             await self._handle_streaming_error(circuit, e)
+    
+    async def _stream_with_manager(self, prompt: str, config_name: str) -> AsyncIterator[str]:
+        """Stream using LLM manager."""
+        async for chunk in self.llm_manager.stream_llm(prompt, config_name):
+            yield chunk
     
     async def _yield_unavailable_message(self) -> AsyncIterator[str]:
         """Yield circuit breaker unavailable message."""
@@ -221,12 +249,16 @@ class ResilientLLMClient:
     
     async def _get_fallback_response(self, prompt: str, config_name: str) -> str:
         """Provide fallback response when circuit is open."""
-        fallback_msg = (
+        fallback_msg = self._build_fallback_message(prompt, config_name)
+        logger.info(f"Providing fallback response for {config_name}")
+        return fallback_msg
+    
+    def _build_fallback_message(self, prompt: str, config_name: str) -> str:
+        """Build fallback message from prompt and config."""
+        return (
             f"[Service temporarily unavailable - {config_name}] "
             f"Request: {prompt[:50]}..."
         )
-        logger.info(f"Providing fallback response for {config_name}")
-        return fallback_msg
     
     async def _get_health_components(self, config_name: str) -> tuple:
         """Get health check components for LLM and circuit."""

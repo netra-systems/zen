@@ -61,21 +61,26 @@ class TokenUsage(BaseModel):
     @property
     def cost_estimate(self) -> Optional[float]:
         """Estimate cost based on token usage"""
-        # Import here to avoid circular dependencies
         try:
-            from app.services.cost_calculator import create_cost_calculator
-            calculator = create_cost_calculator()
-            # Use GPT-3.5-turbo as default for estimation
-            cost = calculator.calculate_cost(self, LLMProvider.OPENAI, "gpt-3.5-turbo")
+            calculator = self._create_cost_calculator()
+            cost = self._calculate_default_cost(calculator)
             return float(cost)
         except ImportError:
             return None
     
+    def _create_cost_calculator(self):
+        """Create cost calculator instance."""
+        from app.services.cost_calculator import create_cost_calculator
+        return create_cost_calculator()
+    
+    def _calculate_default_cost(self, calculator) -> float:
+        """Calculate cost using default provider and model."""
+        return calculator.calculate_cost(self, LLMProvider.OPENAI, "gpt-3.5-turbo")
+    
     def calculate_precise_cost(self, provider: "LLMProvider", model: str) -> Optional[float]:
         """Calculate precise cost for specific provider and model"""
         try:
-            from app.services.cost_calculator import create_cost_calculator
-            calculator = create_cost_calculator()
+            calculator = self._create_cost_calculator()
             cost = calculator.calculate_cost(self, provider, model)
             return float(cost)
         except ImportError:

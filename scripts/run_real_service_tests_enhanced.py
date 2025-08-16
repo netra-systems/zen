@@ -132,85 +132,119 @@ class RealServiceTestMetrics:
         else:
             return str(self.metrics)
     
-    def _generate_markdown_report(self) -> str:
-        """Generate markdown report"""
-        report = []
-        report.append("# Real Service Test Report")
-        report.append(f"\n**Generated:** {self.metrics['end_time']}")
-        report.append(f"**Duration:** {self.metrics['duration']:.2f} seconds\n")
-        
-        # Test Results Summary
-        report.append("## Test Results Summary\n")
+    def _build_report_header(self) -> List[str]:
+        """Build report header with title and timing info"""
+        return [
+            "# Real Service Test Report",
+            f"\n**Generated:** {self.metrics['end_time']}",
+            f"**Duration:** {self.metrics['duration']:.2f} seconds\n"
+        ]
+    
+    def _build_test_summary_section(self) -> List[str]:
+        """Build test results summary section"""
         total_tests = sum(len(tests) for tests in self.metrics["test_results"].values())
         passed_tests = sum(1 for tests in self.metrics["test_results"].values() 
                           for test in tests if test["passed"])
-        report.append(f"- **Total Tests:** {total_tests}")
-        report.append(f"- **Passed:** {passed_tests}")
-        report.append(f"- **Failed:** {total_tests - passed_tests}")
-        report.append(f"- **Pass Rate:** {(passed_tests/total_tests*100):.1f}%\n")
-        
-        # LLM Usage
-        if self.metrics["llm_calls"]:
-            report.append("## LLM API Usage\n")
-            report.append("| Model | Calls | Estimated Cost |")
-            report.append("|-------|-------|----------------|")
-            for model in sorted(self.metrics["llm_calls"].keys()):
-                calls = self.metrics["llm_calls"][model]
-                cost = self.metrics["llm_costs"].get(model, 0)
-                report.append(f"| {model} | {calls} | ${cost:.4f} |")
-            report.append(f"\n**Total LLM Cost:** ${self.metrics['total_llm_cost']:.4f}\n")
-        
-        # Database Performance
-        if self.metrics["db_queries"]:
-            report.append("## Database Performance\n")
-            report.append("| Database | Queries | Avg Latency (ms) |")
-            report.append("|----------|---------|------------------|")
-            for db in sorted(self.metrics["db_queries"].keys()):
-                queries = self.metrics["db_queries"][db]
-                avg_latency = self.metrics.get(f"{db}_latency_avg", 0) * 1000
-                report.append(f"| {db} | {queries} | {avg_latency:.2f} |")
-            report.append("")
-        
-        # Cache Performance
-        if self.metrics["cache_stats"]["hits"] + self.metrics["cache_stats"]["misses"] > 0:
-            report.append("## Cache Performance\n")
-            report.append(f"- **Hits:** {self.metrics['cache_stats']['hits']}")
-            report.append(f"- **Misses:** {self.metrics['cache_stats']['misses']}")
-            report.append(f"- **Hit Rate:** {self.metrics['cache_stats']['hit_rate']:.1%}\n")
-        
-        # Quality Scores
-        if "quality_summary" in self.metrics:
-            report.append("## Quality Gate Scores\n")
-            report.append(f"- **Average Score:** {self.metrics['quality_summary']['average']:.3f}")
-            report.append(f"- **Min Score:** {self.metrics['quality_summary']['min']:.3f}")
-            report.append(f"- **Max Score:** {self.metrics['quality_summary']['max']:.3f}")
-            report.append(f"- **Total Validations:** {self.metrics['quality_summary']['count']}\n")
-        
-        # Test Details by Category
-        report.append("## Test Details by Category\n")
+        pass_rate = (passed_tests/total_tests*100) if total_tests > 0 else 0
+        return [
+            "## Test Results Summary\n",
+            f"- **Total Tests:** {total_tests}",
+            f"- **Passed:** {passed_tests}",
+            f"- **Failed:** {total_tests - passed_tests}",
+            f"- **Pass Rate:** {pass_rate:.1f}%\n"
+        ]
+    
+    def _build_llm_section(self) -> List[str]:
+        """Build LLM API usage section"""
+        if not self.metrics["llm_calls"]:
+            return []
+        section = ["## LLM API Usage\n", "| Model | Calls | Estimated Cost |", "|-------|-------|----------------|"]
+        for model in sorted(self.metrics["llm_calls"].keys()):
+            calls = self.metrics["llm_calls"][model]
+            cost = self.metrics["llm_costs"].get(model, 0)
+            section.append(f"| {model} | {calls} | ${cost:.4f} |")
+        section.append(f"\n**Total LLM Cost:** ${self.metrics['total_llm_cost']:.4f}\n")
+        return section
+    
+    def _build_database_section(self) -> List[str]:
+        """Build database performance section"""
+        if not self.metrics["db_queries"]:
+            return []
+        section = ["## Database Performance\n", "| Database | Queries | Avg Latency (ms) |", "|----------|---------|------------------|"]
+        for db in sorted(self.metrics["db_queries"].keys()):
+            queries = self.metrics["db_queries"][db]
+            avg_latency = self.metrics.get(f"{db}_latency_avg", 0) * 1000
+            section.append(f"| {db} | {queries} | {avg_latency:.2f} |")
+        section.append("")
+        return section
+    
+    def _build_cache_section(self) -> List[str]:
+        """Build cache performance section"""
+        cache_total = self.metrics["cache_stats"]["hits"] + self.metrics["cache_stats"]["misses"]
+        if cache_total == 0:
+            return []
+        return [
+            "## Cache Performance\n",
+            f"- **Hits:** {self.metrics['cache_stats']['hits']}",
+            f"- **Misses:** {self.metrics['cache_stats']['misses']}",
+            f"- **Hit Rate:** {self.metrics['cache_stats']['hit_rate']:.1%}\n"
+        ]
+    
+    def _build_quality_section(self) -> List[str]:
+        """Build quality gate scores section"""
+        if "quality_summary" not in self.metrics:
+            return []
+        qs = self.metrics['quality_summary']
+        return [
+            "## Quality Gate Scores\n",
+            f"- **Average Score:** {qs['average']:.3f}",
+            f"- **Min Score:** {qs['min']:.3f}",
+            f"- **Max Score:** {qs['max']:.3f}",
+            f"- **Total Validations:** {qs['count']}\n"
+        ]
+    
+    def _build_test_details_section(self) -> List[str]:
+        """Build test details by category section"""
+        section = ["## Test Details by Category\n"]
         for category, tests in self.metrics["test_results"].items():
             if tests:
                 passed = sum(1 for t in tests if t["passed"])
-                report.append(f"### {category.upper()}")
-                report.append(f"- Tests: {len(tests)}")
-                report.append(f"- Passed: {passed}")
-                report.append(f"- Failed: {len(tests) - passed}")
-                report.append("")
-        
-        # Errors and Warnings
-        if self.metrics["errors"]:
-            report.append("## Errors\n")
-            for error in self.metrics["errors"]:
-                report.append(f"- {error}")
-            report.append("")
-        
-        if self.metrics["warnings"]:
-            report.append("## Warnings\n")
-            for warning in self.metrics["warnings"]:
-                report.append(f"- {warning}")
-            report.append("")
-        
-        return "\n".join(report)
+                section.extend([
+                    f"### {category.upper()}", f"- Tests: {len(tests)}",
+                    f"- Passed: {passed}", f"- Failed: {len(tests) - passed}", ""
+                ])
+        return section
+    
+    def _build_errors_section(self) -> List[str]:
+        """Build errors section"""
+        if not self.metrics["errors"]:
+            return []
+        section = ["## Errors\n"]
+        for error in self.metrics["errors"]:
+            section.append(f"- {error}")
+        section.append("")
+        return section
+    
+    def _build_warnings_section(self) -> List[str]:
+        """Build warnings section"""
+        if not self.metrics["warnings"]:
+            return []
+        section = ["## Warnings\n"]
+        for warning in self.metrics["warnings"]:
+            section.append(f"- {warning}")
+        section.append("")
+        return section
+    
+    def _generate_markdown_report(self) -> str:
+        """Generate markdown report by assembling all sections"""
+        sections = [
+            self._build_report_header(), self._build_test_summary_section(),
+            self._build_llm_section(), self._build_database_section(),
+            self._build_cache_section(), self._build_quality_section(),
+            self._build_test_details_section(), self._build_errors_section(),
+            self._build_warnings_section()
+        ]
+        return "\n".join(line for section in sections for line in section)
     
     def _build_html_header(self) -> str:
         """Build HTML header with styling"""

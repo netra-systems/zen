@@ -1,0 +1,407 @@
+name: Security Scan
+
+on:
+  workflow_call:
+    inputs:
+      scan_level:
+        description: 'Scan level: basic, standard, comprehensive'
+        required: false
+        type: string
+        default: 'standard'
+      act_mode:
+        description: 'Whether running in ACT mode'
+        required: false
+        type: string
+        default: 'false'
+      timeout_minutes:
+        description: 'Scan timeout in minutes'
+        required: false
+        type: number
+        default: 20
+    outputs:
+      scan_status:
+        description: 'Overall security scan status'
+        value: ${{ jobs.security-scan.outputs.scan_status }}
+      vulnerabilities_found:
+        description: 'Number of vulnerabilities found'
+        value: ${{ jobs.security-scan.outputs.vulnerabilities_found }}
+      risk_score:
+        description: 'Risk score from 0-10'
+        value: ${{ jobs.security-scan.outputs.risk_score }}
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+  pull-requests: write
+
+env:
+  ACT: 'false'
+  SCAN_LEVEL: ${{ inputs.scan_level }}
+
+jobs:
+  security-scan:
+    runs-on: warp-custom-default
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    outputs:
+      scan_status: ${{ steps.final-status.outputs.status }}
+      vulnerabilities_found: ${{ steps.aggregate.outputs.total_vulns }}
+      risk_score: ${{ steps.aggregate.outputs.risk_score }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for security analysis
+        
+      - name: ACT Mode Detection
+        id: act-detect
+        run: |
+          if [[ "${{ inputs.act_mode }}" == "true" ]]; then
+            echo "🧪 Security scan in ACT mode"
+            echo "ACT_MODE=true" >> $GITHUB_ENV
+          else
+            echo "☁️ Security scan in GitHub Actions"
+            echo "ACT_MODE=false" >> $GITHUB_ENV
+          fi
+          
+      - name: Setup Python for Security Tools
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Install Security Dependencies
+        run: |
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT: Mock security tool installation"
+            echo "- bandit: installed (mock)"
+            echo "- safety: installed (mock)"
+            echo "- semgrep: installed (mock)"
+          else
+            pip install bandit safety semgrep
+            echo "✅ Security tools installed"
+          fi
+          
+      - name: Dependency Vulnerability Scan
+        id: dependency-scan
+        run: |
+          echo "🔍 Scanning dependencies for vulnerabilities..."
+          
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT: Mock dependency vulnerability scan"
+            echo "- Requirements.txt: 2 vulnerabilities (mock)"
+            echo "- Package.json: 0 vulnerabilities (mock)"
+            echo "dep_vulns=2" >> $GITHUB_OUTPUT
+            echo "dep_score=6" >> $GITHUB_OUTPUT
+          else
+            # Real dependency scan using safety
+            VULNS=0
+            
+            # Python dependencies
+            if [ -f requirements.txt ]; then
+              echo "Scanning Python dependencies..."
+              safety check --json > safety-report.json || true
+              PYTHON_VULNS=$(jq '.vulnerabilities | length' safety-report.json 2>/dev/null || echo "0")
+              VULNS=$((VULNS + PYTHON_VULNS))
+            fi
+            
+            # Node.js dependencies (if frontend exists)
+            if [ -f frontend/package.json ]; then
+              echo "Scanning Node.js dependencies..."
+              cd frontend
+              npm audit --audit-level=moderate --json > ../npm-audit.json || true
+              cd ..
+              NODE_VULNS=$(jq '.metadata.vulnerabilities.total' npm-audit.json 2>/dev/null || echo "0")
+              VULNS=$((VULNS + NODE_VULNS))
+            fi
+            
+            # Calculate risk score based on vulnerabilities
+            if [ $VULNS -eq 0 ]; then
+              SCORE=0
+            elif [ $VULNS -le 3 ]; then
+              SCORE=3
+            elif [ $VULNS -le 10 ]; then
+              SCORE=6
+            else
+              SCORE=9
+            fi
+            
+            echo "dep_vulns=$VULNS" >> $GITHUB_OUTPUT
+            echo "dep_score=$SCORE" >> $GITHUB_OUTPUT
+            echo "✅ Dependency scan completed: $VULNS vulnerabilities"
+          fi
+          
+      - name: Static Code Security Analysis
+        id: static-scan
+        run: |
+          echo "🔍 Running static code security analysis..."
+          
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT: Mock static code analysis"
+            echo "- Bandit: 1 issue (mock)"
+            echo "- Semgrep: 0 issues (mock)"
+            echo "static_issues=1" >> $GITHUB_OUTPUT
+            echo "static_score=2" >> $GITHUB_OUTPUT
+          else
+            ISSUES=0
+            
+            # Bandit for Python security issues
+            echo "Running Bandit scan..."
+            bandit -r app/ -f json -o bandit-report.json || true
+            if [ -f bandit-report.json ]; then
+              BANDIT_ISSUES=$(jq '.results | length' bandit-report.json 2>/dev/null || echo "0")
+              ISSUES=$((ISSUES + BANDIT_ISSUES))
+            fi
+            
+            # Semgrep for additional security patterns
+            if [[ "${{ inputs.scan_level }}" == "comprehensive" ]]; then
+              echo "Running Semgrep scan..."
+              semgrep --config=auto --json --output=semgrep-report.json app/ || true
+              if [ -f semgrep-report.json ]; then
+                SEMGREP_ISSUES=$(jq '.results | length' semgrep-report.json 2>/dev/null || echo "0")
+                ISSUES=$((ISSUES + SEMGREP_ISSUES))
+              fi
+            fi
+            
+            # Calculate risk score
+            if [ $ISSUES -eq 0 ]; then
+              SCORE=0
+            elif [ $ISSUES -le 2 ]; then
+              SCORE=2
+            elif [ $ISSUES -le 5 ]; then
+              SCORE=5
+            else
+              SCORE=8
+            fi
+            
+            echo "static_issues=$ISSUES" >> $GITHUB_OUTPUT
+            echo "static_score=$SCORE" >> $GITHUB_OUTPUT
+            echo "✅ Static analysis completed: $ISSUES issues"
+          fi
+          
+      - name: Secrets Detection
+        id: secrets-scan
+        run: |
+          echo "🔍 Scanning for exposed secrets..."
+          
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT: Mock secrets detection"
+            echo "- API Keys: 0 exposed (mock)"
+            echo "- Passwords: 0 exposed (mock)"
+            echo "secrets_found=0" >> $GITHUB_OUTPUT
+            echo "secrets_score=0" >> $GITHUB_OUTPUT
+          else
+            # Simple pattern-based secret detection
+            SECRETS=0
+            
+            # Look for common secret patterns
+            echo "Scanning for hardcoded secrets..."
+            
+            # API key patterns
+            API_KEYS=$(grep -r -E "(api_key|apikey|api-key)\s*=\s*['\"][^'\"]{20,}" . --exclude-dir=.git --exclude-dir=node_modules || echo "")
+            if [ -n "$API_KEYS" ]; then
+              SECRETS=$((SECRETS + $(echo "$API_KEYS" | wc -l)))
+            fi
+            
+            # Password patterns
+            PASSWORDS=$(grep -r -E "(password|passwd|pwd)\s*=\s*['\"][^'\"]{8,}" . --exclude-dir=.git --exclude-dir=node_modules || echo "")
+            if [ -n "$PASSWORDS" ]; then
+              SECRETS=$((SECRETS + $(echo "$PASSWORDS" | wc -l)))
+            fi
+            
+            # Calculate risk score
+            if [ $SECRETS -eq 0 ]; then
+              SCORE=0
+            else
+              SCORE=10  # Any exposed secrets are critical
+            fi
+            
+            echo "secrets_found=$SECRETS" >> $GITHUB_OUTPUT
+            echo "secrets_score=$SCORE" >> $GITHUB_OUTPUT
+            echo "✅ Secret scan completed: $SECRETS potential secrets"
+          fi
+          
+      - name: Docker Security Scan
+        id: docker-scan
+        if: inputs.scan_level == 'comprehensive'
+        run: |
+          echo "🐳 Scanning Docker images for vulnerabilities..."
+          
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT: Mock Docker security scan"
+            echo "- Base image: 1 vulnerability (mock)"
+            echo "- Layer analysis: clean (mock)"
+            echo "docker_vulns=1" >> $GITHUB_OUTPUT
+            echo "docker_score=3" >> $GITHUB_OUTPUT
+          else
+            # Simple Docker security checks
+            DOCKER_ISSUES=0
+            
+            if [ -f Dockerfile ]; then
+              echo "Analyzing Dockerfile..."
+              
+              # Check for root user
+              if grep -q "USER root" Dockerfile; then
+                DOCKER_ISSUES=$((DOCKER_ISSUES + 1))
+                echo "⚠️ Running as root user detected"
+              fi
+              
+              # Check for latest tag
+              if grep -q ":latest" Dockerfile; then
+                DOCKER_ISSUES=$((DOCKER_ISSUES + 1))
+                echo "⚠️ Using :latest tag detected"
+              fi
+              
+              # Calculate score
+              if [ $DOCKER_ISSUES -eq 0 ]; then
+                SCORE=0
+              elif [ $DOCKER_ISSUES -le 2 ]; then
+                SCORE=3
+              else
+                SCORE=6
+              fi
+              
+              echo "docker_vulns=$DOCKER_ISSUES" >> $GITHUB_OUTPUT
+              echo "docker_score=$SCORE" >> $GITHUB_OUTPUT
+            else
+              echo "docker_vulns=0" >> $GITHUB_OUTPUT
+              echo "docker_score=0" >> $GITHUB_OUTPUT
+            fi
+            
+            echo "✅ Docker scan completed: $DOCKER_ISSUES issues"
+          fi
+          
+      - name: Aggregate Security Results
+        id: aggregate
+        run: |
+          echo "📊 Aggregating security scan results..."
+          
+          DEP_VULNS="${{ steps.dependency-scan.outputs.dep_vulns || '0' }}"
+          STATIC_ISSUES="${{ steps.static-scan.outputs.static_issues || '0' }}"
+          SECRETS_FOUND="${{ steps.secrets-scan.outputs.secrets_found || '0' }}"
+          DOCKER_VULNS="${{ steps.docker-scan.outputs.docker_vulns || '0' }}"
+          
+          DEP_SCORE="${{ steps.dependency-scan.outputs.dep_score || '0' }}"
+          STATIC_SCORE="${{ steps.static-scan.outputs.static_score || '0' }}"
+          SECRETS_SCORE="${{ steps.secrets-scan.outputs.secrets_score || '0' }}"
+          DOCKER_SCORE="${{ steps.docker-scan.outputs.docker_score || '0' }}"
+          
+          TOTAL_VULNS=$((DEP_VULNS + STATIC_ISSUES + SECRETS_FOUND + DOCKER_VULNS))
+          
+          # Calculate overall risk score (max of individual scores)
+          RISK_SCORE=$DEP_SCORE
+          [ $STATIC_SCORE -gt $RISK_SCORE ] && RISK_SCORE=$STATIC_SCORE
+          [ $SECRETS_SCORE -gt $RISK_SCORE ] && RISK_SCORE=$SECRETS_SCORE
+          [ $DOCKER_SCORE -gt $RISK_SCORE ] && RISK_SCORE=$DOCKER_SCORE
+          
+          echo "total_vulns=$TOTAL_VULNS" >> $GITHUB_OUTPUT
+          echo "risk_score=$RISK_SCORE" >> $GITHUB_OUTPUT
+          
+          echo "=== Security Scan Summary ==="
+          echo "Dependency vulnerabilities: $DEP_VULNS"
+          echo "Static analysis issues: $STATIC_ISSUES"
+          echo "Potential secrets: $SECRETS_FOUND"
+          echo "Docker issues: $DOCKER_VULNS"
+          echo "Total issues: $TOTAL_VULNS"
+          echo "Risk score: $RISK_SCORE/10"
+          
+      - name: Generate Security Report
+        run: |
+          echo "📋 Generating security report..."
+          
+          cat > security-report.md << 'EOF'
+          # Security Scan Report
+          
+          **Scan Level:** ${{ inputs.scan_level }}
+          **Timestamp:** $(date -u)
+          **Total Issues:** ${{ steps.aggregate.outputs.total_vulns }}
+          **Risk Score:** ${{ steps.aggregate.outputs.risk_score }}/10
+          
+          ## Summary
+          
+          | Category | Issues | Score |
+          |----------|--------|-------|
+          | Dependencies | ${{ steps.dependency-scan.outputs.dep_vulns }} | ${{ steps.dependency-scan.outputs.dep_score }}/10 |
+          | Static Analysis | ${{ steps.static-scan.outputs.static_issues }} | ${{ steps.static-scan.outputs.static_score }}/10 |
+          | Secrets | ${{ steps.secrets-scan.outputs.secrets_found }} | ${{ steps.secrets-scan.outputs.secrets_score }}/10 |
+          | Docker | ${{ steps.docker-scan.outputs.docker_vulns }} | ${{ steps.docker-scan.outputs.docker_score }}/10 |
+          
+          ## Recommendations
+          
+          - Update vulnerable dependencies
+          - Review and fix static analysis issues
+          - Remove any hardcoded secrets
+          - Improve Docker security practices
+          EOF
+          
+          echo "Security report generated"
+          
+      - name: Upload Security Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-results-${{ github.run_id }}
+          path: |
+            security-report.md
+            safety-report.json
+            bandit-report.json
+            semgrep-report.json
+            npm-audit.json
+          retention-days: 30
+          
+      - name: Final Status
+        id: final-status
+        if: always()
+        run: |
+          RISK_SCORE="${{ steps.aggregate.outputs.risk_score }}"
+          SECRETS="${{ steps.secrets-scan.outputs.secrets_found }}"
+          
+          # Determine overall status
+          if [ "$SECRETS" -gt 0 ]; then
+            STATUS="failure"  # Any secrets are critical
+          elif [ "$RISK_SCORE" -ge 8 ]; then
+            STATUS="failure"  # High risk
+          elif [ "$RISK_SCORE" -ge 5 ]; then
+            STATUS="warning"  # Medium risk
+          else
+            STATUS="success"  # Low risk
+          fi
+          
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "Final security status: $STATUS (Risk: $RISK_SCORE/10)"
+          
+      - name: Update Commit Status
+        if: always() && env.ACT_MODE != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = '${{ steps.final-status.outputs.status }}';
+            const riskScore = '${{ steps.aggregate.outputs.risk_score }}';
+            const totalVulns = '${{ steps.aggregate.outputs.total_vulns }}';
+            
+            const state = status === 'success' ? 'success' : 
+                         status === 'warning' ? 'pending' : 'failure';
+            
+            const description = `Security: ${totalVulns} issues, risk ${riskScore}/10`;
+            
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: state,
+              description: description,
+              context: 'security/scan'
+            });
+            
+      - name: Mock Commit Status (ACT)
+        if: always() && env.ACT_MODE == 'true'
+        run: |
+          STATUS="${{ steps.final-status.outputs.status }}"
+          RISK="${{ steps.aggregate.outputs.risk_score }}"
+          VULNS="${{ steps.aggregate.outputs.total_vulns }}"
+          
+          echo "🧪 ACT: Mock commit status update"
+          echo "- Status: $STATUS"
+          echo "- Description: Security: $VULNS issues, risk $RISK/10"
+          echo "- Context: security/scan"

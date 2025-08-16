@@ -99,13 +99,17 @@ class AdminToolDispatcher(ToolDispatcher):
                                          tool_name: str, 
                                          base_result: ToolResult) -> ToolResponse:
         """Convert base ToolResult to typed ToolResponse"""
-        current_time = datetime.now(UTC)
-        user_id = self.user.id if self.user else "unknown"
-        
+        response_data = self._prepare_response_data(base_result)
         if base_result.status == ToolStatus.SUCCESS:
-            return self._create_success_response(tool_name, base_result, current_time, user_id)
-        else:
-            return self._create_failure_response(tool_name, base_result, current_time, user_id)
+            return self._create_success_response(tool_name, base_result, response_data['time'], response_data['user_id'])
+        return self._create_failure_response(tool_name, base_result, response_data['time'], response_data['user_id'])
+    
+    def _prepare_response_data(self, base_result: ToolResult) -> Dict[str, Any]:
+        """Prepare common response data."""
+        return {
+            'time': datetime.now(UTC),
+            'user_id': self.user.id if self.user else "unknown"
+        }
     
     def _create_success_response(self, 
                                  tool_name: str, 
@@ -113,16 +117,23 @@ class AdminToolDispatcher(ToolDispatcher):
                                  current_time: datetime,
                                  user_id: str) -> ToolSuccessResponse:
         """Create successful tool response"""
-        return ToolSuccessResponse(
-            tool_name=tool_name,
-            status=AdminToolStatus.COMPLETED,
-            execution_time_ms=0.0,
-            started_at=current_time,
-            completed_at=current_time,
-            user_id=user_id,
-            result=base_result.payload or {},
-            message=base_result.message
-        )
+        return ToolSuccessResponse(**self._build_success_response_params(
+            tool_name, base_result, current_time, user_id
+        ))
+    
+    def _build_success_response_params(self, tool_name: str, base_result: ToolResult,
+                                      current_time: datetime, user_id: str) -> Dict[str, Any]:
+        """Build parameters for success response."""
+        return {
+            "tool_name": tool_name,
+            "status": AdminToolStatus.COMPLETED,
+            "execution_time_ms": 0.0,
+            "started_at": current_time,
+            "completed_at": current_time,
+            "user_id": user_id,
+            "result": base_result.payload or {},
+            "message": base_result.message
+        }
     
     def _create_failure_response(self, 
                                  tool_name: str, 
@@ -130,27 +141,45 @@ class AdminToolDispatcher(ToolDispatcher):
                                  current_time: datetime,
                                  user_id: str) -> ToolFailureResponse:
         """Create failed tool response"""
-        return ToolFailureResponse(
-            tool_name=tool_name,
-            status=AdminToolStatus.FAILED,
-            execution_time_ms=0.0,
-            started_at=current_time,
-            completed_at=current_time,
-            user_id=user_id,
-            error=base_result.message or "Unknown error"
-        )
+        return ToolFailureResponse(**self._build_failure_response_params(
+            tool_name, base_result, current_time, user_id
+        ))
+    
+    def _build_failure_response_params(self, tool_name: str, base_result: ToolResult,
+                                      current_time: datetime, user_id: str) -> Dict[str, Any]:
+        """Build parameters for failure response."""
+        return {
+            "tool_name": tool_name,
+            "status": AdminToolStatus.FAILED,
+            "execution_time_ms": 0.0,
+            "started_at": current_time,
+            "completed_at": current_time,
+            "user_id": user_id,
+            "error": base_result.message or "Unknown error"
+        }
     
     def get_dispatcher_stats(self) -> Dict[str, Any]:
         """Get comprehensive statistics for the admin tool dispatcher"""
-        from .dispatcher_helpers import (
-            build_dispatcher_stats_base, calculate_enabled_tools_count,
-            add_system_health_to_stats, calculate_active_sessions
-        )
-        stats = build_dispatcher_stats_base()
+        stats = self._build_base_stats()
+        self._add_user_specific_stats(stats)
+        self._add_system_health_stats(stats)
+        return stats
+    
+    def _build_base_stats(self) -> Dict[str, Any]:
+        """Build base dispatcher statistics."""
+        from .dispatcher_helpers import build_dispatcher_stats_base
+        return build_dispatcher_stats_base()
+    
+    def _add_user_specific_stats(self, stats: Dict[str, Any]) -> None:
+        """Add user-specific statistics."""
+        from .dispatcher_helpers import calculate_enabled_tools_count, calculate_active_sessions
         stats["enabled_tools"] = calculate_enabled_tools_count(self.user)
         stats["active_sessions"] = calculate_active_sessions(self.user)
+    
+    def _add_system_health_stats(self, stats: Dict[str, Any]) -> None:
+        """Add system health statistics."""
+        from .dispatcher_helpers import add_system_health_to_stats
         add_system_health_to_stats(stats)
-        return stats
     
     def has_admin_access(self) -> bool:
         """Check if the current user has admin access"""
@@ -185,14 +214,18 @@ class AdminToolDispatcher(ToolDispatcher):
     
     def _get_admin_tool_info_detail(self, tool_name: str) -> AdminToolInfo:
         """Get detailed information about an admin tool"""
-        from .dispatcher_helpers import create_admin_tool_info
         try:
             admin_tool_type = AdminToolType(tool_name)
-            return create_admin_tool_info(
-                tool_name, admin_tool_type, self.user, self.admin_tools_enabled
-            )
+            return self._create_admin_tool_info(tool_name, admin_tool_type)
         except ValueError:
             return self._get_not_found_tool_info(tool_name)
+    
+    def _create_admin_tool_info(self, tool_name: str, admin_tool_type: AdminToolType) -> AdminToolInfo:
+        """Create admin tool info object."""
+        from .dispatcher_helpers import create_admin_tool_info
+        return create_admin_tool_info(
+            tool_name, admin_tool_type, self.user, self.admin_tools_enabled
+        )
     
     def _get_base_tool_info_detail(self, tool_name: str) -> AdminToolInfo:
         """Get detailed information about a base tool"""
@@ -238,8 +271,12 @@ class AdminToolDispatcher(ToolDispatcher):
             await self._log_audit_operation(operation)
             return result
         except Exception as e:
-            await self._log_audit_operation(operation)
-            return {"success": False, "error": str(e)}
+            return await self._handle_operation_error(e, operation)
+    
+    async def _handle_operation_error(self, error: Exception, operation: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle operation execution error."""
+        await self._log_audit_operation(operation)
+        return {"success": False, "error": str(error)}
     
     async def _execute_operation_safely(self, tool_name: str, 
                                        params: Dict[str, Any]) -> Dict[str, Any]:

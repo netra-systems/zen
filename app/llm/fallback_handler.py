@@ -67,33 +67,45 @@ class LLMFallbackHandler:
     def _init_default_responses(self) -> None:
         """Initialize default response templates"""
         self.default_responses = {
-            "triage": {
-                "category": "General Inquiry",
-                "confidence_score": 0.5,
-                "priority": "medium",
-                "extracted_entities": {},
-                "tool_recommendations": [],
-                "metadata": {"fallback_used": True}
-            },
-            "data_analysis": {
-                "insights": ["Analysis unavailable due to system limitations"],
-                "recommendations": ["Please try again later"],
-                "confidence": 0.3,
-                "metadata": {"fallback_used": True}
-            },
+            "triage": self._create_triage_response(),
+            "data_analysis": self._create_data_analysis_response(),
             "general": "I apologize, but I'm experiencing technical difficulties. Please try again in a few moments."
+        }
+    
+    def _create_triage_response(self) -> Dict[str, Any]:
+        """Create default triage response template."""
+        return {
+            "category": "General Inquiry",
+            "confidence_score": 0.5,
+            "priority": "medium",
+            "extracted_entities": {},
+            "tool_recommendations": [],
+            "metadata": {"fallback_used": True}
+        }
+    
+    def _create_data_analysis_response(self) -> Dict[str, Any]:
+        """Create default data analysis response template."""
+        return {
+            "insights": ["Analysis unavailable due to system limitations"],
+            "recommendations": ["Please try again later"],
+            "confidence": 0.3,
+            "metadata": {"fallback_used": True}
         }
     
     def _get_circuit_breaker(self, provider: str) -> CircuitBreaker:
         """Get or create circuit breaker for provider"""
         if provider not in self.circuit_breakers:
-            config = CircuitBreakerConfig(
-                failure_threshold=3,
-                recovery_timeout=30.0,
-                name=f"llm_fallback_{provider}"
-            )
-            self.circuit_breakers[provider] = CircuitBreaker(config)
+            self.circuit_breakers[provider] = self._create_circuit_breaker(provider)
         return self.circuit_breakers[provider]
+    
+    def _create_circuit_breaker(self, provider: str) -> CircuitBreaker:
+        """Create new circuit breaker for provider."""
+        config = CircuitBreakerConfig(
+            failure_threshold=3,
+            recovery_timeout=30.0,
+            name=f"llm_fallback_{provider}"
+        )
+        return CircuitBreaker(config)
     
     async def execute_with_fallback(
         self,
@@ -105,59 +117,79 @@ class LLMFallbackHandler:
         """Execute LLM operation with fallback handling"""
         circuit_breaker = self._get_circuit_breaker(provider)
         
-        # Handle case where circuit_breaker might not be properly initialized
-        is_circuit_open = False
-        if self.config.use_circuit_breaker and hasattr(circuit_breaker, 'is_open'):
-            try:
-                is_circuit_open = circuit_breaker.is_open()
-            except (TypeError, AttributeError):
-                if self.config.log_circuit_breaker_warnings:
-                    logger.warning(f"Circuit breaker for {provider} not properly initialized")
-                is_circuit_open = False
-        
-        if is_circuit_open:
+        if self._is_circuit_open(circuit_breaker, provider):
             logger.warning(f"Circuit breaker open for {provider}, using fallback")
             return self._create_fallback_response(fallback_type)
         
+        return await self._execute_with_retry(llm_operation, operation_name, 
+                                             circuit_breaker, provider, fallback_type)
+    
+    def _is_circuit_open(self, circuit_breaker: CircuitBreaker, provider: str) -> bool:
+        """Check if circuit breaker is open with error handling."""
+        if not self.config.use_circuit_breaker or not hasattr(circuit_breaker, 'is_open'):
+            return False
+        try:
+            return circuit_breaker.is_open()
+        except (TypeError, AttributeError):
+            if self.config.log_circuit_breaker_warnings:
+                logger.warning(f"Circuit breaker for {provider} not properly initialized")
+            return False
+    
+    async def _execute_with_retry(self, llm_operation, operation_name: str,
+                                 circuit_breaker: CircuitBreaker, provider: str, 
+                                 fallback_type: str) -> Any:
+        """Execute operation with retry logic."""
         attempt = 0
         last_error = None
         
         while attempt < self.config.max_retries:
             try:
-                result = await asyncio.wait_for(
-                    llm_operation(),
-                    timeout=self.config.timeout
-                )
-                
-                if self.config.use_circuit_breaker and hasattr(circuit_breaker, 'record_success'):
-                    try:
-                        circuit_breaker.record_success()
-                    except (TypeError, AttributeError):
-                        logger.debug(f"Could not record success for circuit breaker {provider}")
-                
+                result = await self._try_operation(llm_operation, circuit_breaker, provider)
                 return result
-                
             except Exception as e:
                 attempt += 1
                 last_error = e
-                failure_type = self._classify_error(e)
-                
-                self._record_retry_attempt(attempt, failure_type, str(e))
-                
-                if self.config.use_circuit_breaker:
-                    circuit_breaker.record_failure()
+                await self._handle_operation_failure(e, attempt, operation_name, circuit_breaker)
                 
                 if attempt < self.config.max_retries:
-                    delay = self._calculate_delay(attempt, failure_type)
-                    logger.warning(
-                        f"LLM operation {operation_name} failed (attempt {attempt}/{self.config.max_retries}): {e}. "
-                        f"Retrying in {delay:.2f}s"
-                    )
-                    await asyncio.sleep(delay)
+                    await self._wait_before_retry(attempt, e, operation_name)
                 else:
                     logger.error(f"LLM operation {operation_name} failed after {attempt} attempts: {e}")
         
         return self._create_fallback_response(fallback_type, last_error)
+    
+    async def _try_operation(self, llm_operation, circuit_breaker: CircuitBreaker, provider: str) -> Any:
+        """Try executing the LLM operation with timeout."""
+        result = await asyncio.wait_for(llm_operation(), timeout=self.config.timeout)
+        self._record_success(circuit_breaker, provider)
+        return result
+    
+    def _record_success(self, circuit_breaker: CircuitBreaker, provider: str) -> None:
+        """Record successful operation in circuit breaker."""
+        if self.config.use_circuit_breaker and hasattr(circuit_breaker, 'record_success'):
+            try:
+                circuit_breaker.record_success()
+            except (TypeError, AttributeError):
+                logger.debug(f"Could not record success for circuit breaker {provider}")
+    
+    async def _handle_operation_failure(self, error: Exception, attempt: int, 
+                                       operation_name: str, circuit_breaker: CircuitBreaker) -> None:
+        """Handle operation failure with logging and circuit breaker recording."""
+        failure_type = self._classify_error(error)
+        self._record_retry_attempt(attempt, failure_type, str(error))
+        
+        if self.config.use_circuit_breaker:
+            circuit_breaker.record_failure()
+    
+    async def _wait_before_retry(self, attempt: int, error: Exception, operation_name: str) -> None:
+        """Wait before retry with exponential backoff."""
+        failure_type = self._classify_error(error)
+        delay = self._calculate_delay(attempt, failure_type)
+        logger.warning(
+            f"LLM operation {operation_name} failed (attempt {attempt}/{self.config.max_retries}): {error}. "
+            f"Retrying in {delay:.2f}s"
+        )
+        await asyncio.sleep(delay)
     
     async def execute_structured_with_fallback(
         self,
@@ -185,37 +217,60 @@ class LLMFallbackHandler:
     
     def _classify_error(self, error: Exception) -> FailureType:
         """Classify error type for appropriate handling"""
-        error_str = str(error).lower()
-        
-        if "timeout" in error_str or isinstance(error, asyncio.TimeoutError):
+        if isinstance(error, asyncio.TimeoutError) or "timeout" in str(error).lower():
             return FailureType.TIMEOUT
-        elif "rate limit" in error_str or "429" in error_str:
+        
+        error_str = str(error).lower()
+        return self._classify_by_error_string(error_str)
+    
+    def _classify_by_error_string(self, error_str: str) -> FailureType:
+        """Classify error by string content."""
+        if "rate limit" in error_str or "429" in error_str:
             return FailureType.RATE_LIMIT
-        elif "auth" in error_str or "401" in error_str or "403" in error_str:
+        elif self._is_auth_error(error_str):
             return FailureType.AUTHENTICATION_ERROR
-        elif "network" in error_str or "connection" in error_str:
+        elif self._is_network_error(error_str):
             return FailureType.NETWORK_ERROR
         elif "validation" in error_str:
             return FailureType.VALIDATION_ERROR
-        elif "api" in error_str or "500" in error_str:
+        elif self._is_api_error(error_str):
             return FailureType.API_ERROR
-        else:
-            return FailureType.UNKNOWN
+        return FailureType.UNKNOWN
+    
+    def _is_auth_error(self, error_str: str) -> bool:
+        """Check if error is authentication-related."""
+        return "auth" in error_str or "401" in error_str or "403" in error_str
+    
+    def _is_network_error(self, error_str: str) -> bool:
+        """Check if error is network-related."""
+        return "network" in error_str or "connection" in error_str
+    
+    def _is_api_error(self, error_str: str) -> bool:
+        """Check if error is API-related."""
+        return "api" in error_str or "500" in error_str
     
     def _calculate_delay(self, attempt: int, failure_type: FailureType) -> float:
         """Calculate exponential backoff delay with jitter"""
+        base_delay = self._get_adjusted_base_delay(failure_type)
+        delay = self._calculate_exponential_delay(base_delay, attempt)
+        return self._add_jitter_to_delay(delay)
+    
+    def _get_adjusted_base_delay(self, failure_type: FailureType) -> float:
+        """Get base delay adjusted for failure type."""
         base_delay = self.config.base_delay
-        
-        # Adjust base delay for different failure types
         if failure_type == FailureType.RATE_LIMIT:
-            base_delay = max(base_delay * 2, 5.0)
+            return max(base_delay * 2, 5.0)
         elif failure_type == FailureType.TIMEOUT:
-            base_delay = max(base_delay * 1.5, 2.0)
-        
+            return max(base_delay * 1.5, 2.0)
+        return base_delay
+    
+    def _calculate_exponential_delay(self, base_delay: float, attempt: int) -> float:
+        """Calculate exponential backoff delay."""
         delay = base_delay * (self.config.exponential_base ** (attempt - 1))
-        delay = min(delay, self.config.max_delay)
-        
-        # Add jitter to prevent thundering herd
+        return min(delay, self.config.max_delay)
+    
+    def _add_jitter_to_delay(self, delay: float) -> float:
+        """Add jitter to delay to prevent thundering herd."""
         import random
         jitter = random.uniform(0.1, 0.3) * delay
         return delay + jitter

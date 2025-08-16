@@ -96,18 +96,12 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
     
     def _get_severity_mapping(self) -> Dict[str, ErrorSeverity]:
         """Get error type to severity mapping."""
-        return {
-            'ValidationError': ErrorSeverity.HIGH,
-            'PermissionError': ErrorSeverity.HIGH,
-            'ConnectionError': ErrorSeverity.MEDIUM,
-            'TimeoutError': ErrorSeverity.MEDIUM,
-            'HTTPException': ErrorSeverity.MEDIUM,
-            'ValueError': ErrorSeverity.HIGH,
-            'TypeError': ErrorSeverity.HIGH,
-            'KeyError': ErrorSeverity.MEDIUM,
-            'FileNotFoundError': ErrorSeverity.MEDIUM,
-            'MemoryError': ErrorSeverity.CRITICAL,
-        }
+        high_severity = ['ValidationError', 'PermissionError', 'ValueError', 'TypeError']
+        medium_severity = ['ConnectionError', 'TimeoutError', 'HTTPException', 'KeyError', 'FileNotFoundError']
+        mapping = {error: ErrorSeverity.HIGH for error in high_severity}
+        mapping.update({error: ErrorSeverity.MEDIUM for error in medium_severity})
+        mapping['MemoryError'] = ErrorSeverity.CRITICAL
+        return mapping
     
     def _extract_request_metadata(self, request: Request) -> Dict[str, Any]:
         """Extract metadata from request for recovery context."""
@@ -118,15 +112,18 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
     
     def _get_base_metadata(self, request: Request) -> Dict[str, Any]:
         """Get base request metadata."""
-        return {
-            'method': request.method,
-            'path': request.url.path,
-            'query_params': dict(request.query_params),
-            'headers': dict(request.headers),
-            'client_host': request.client.host if request.client else None,
-            'user_agent': request.headers.get('user-agent'),
-            'content_type': request.headers.get('content-type'),
+        metadata = {
+            'method': request.method, 'path': request.url.path,
+            'query_params': dict(request.query_params), 'headers': dict(request.headers)
         }
+        self._add_client_metadata(metadata, request)
+        return metadata
+    
+    def _add_client_metadata(self, metadata: Dict[str, Any], request: Request) -> None:
+        """Add client-specific metadata to base metadata."""
+        metadata['client_host'] = request.client.host if request.client else None
+        metadata['user_agent'] = request.headers.get('user-agent')
+        metadata['content_type'] = request.headers.get('content-type')
     
     def _add_user_metadata(self, metadata: Dict[str, Any], request: Request) -> None:
         """Add user context to metadata if available."""
