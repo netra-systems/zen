@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChatHeader } from '@/components/chat/ChatHeader';
 import { MessageList } from '@/components/chat/MessageList';
 import { MessageInput } from '@/components/chat/MessageInput';
@@ -21,15 +21,30 @@ const MainChat: React.FC = () => {
     slowLayerData,
     currentRunId,
     activeThreadId,
-    isThreadLoading
+    isThreadLoading,
+    handleWebSocketEvent
   } = useUnifiedChatStore();
   
-  const { status: wsStatus } = useWebSocket();
+  const { status: wsStatus, messages: wsMessages } = useWebSocket();
   const [isCardCollapsed, setIsCardCollapsed] = useState(false);
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // WebSocket events are automatically processed through the unified store
+  // Process WebSocket messages and feed them to the unified store
+  const lastProcessedIndexRef = useRef(0);
+  
+  useEffect(() => {
+    // Only process new messages
+    const newMessages = wsMessages.slice(lastProcessedIndexRef.current);
+    
+    newMessages.forEach((wsMessage) => {
+      // Route all events through the unified store
+      handleWebSocketEvent(wsMessage as any);
+    });
+    
+    // Update the last processed index
+    lastProcessedIndexRef.current = wsMessages.length;
+  }, [wsMessages, handleWebSocketEvent]);
 
   const hasMessages = messages.length > 0;
   const isWebSocketConnected = wsStatus === 'OPEN';

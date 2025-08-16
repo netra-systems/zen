@@ -267,6 +267,23 @@ class LLMTestManager:
         """Get list of available models."""
         return list(self._clients.keys())
         
+    async def ask_llm(self, prompt: str, model: str = "gpt-4", temperature: float = 0.7) -> str:
+        """Ask LLM interface compatible with agent expectations."""
+        try:
+            model_enum = LLMTestModel(model)
+        except ValueError:
+            model_enum = LLMTestModel.GPT_4
+            
+        request = LLMTestRequest(
+            prompt=prompt,
+            model=model_enum,
+            temperature=temperature,
+            use_cache=self.config.cache_enabled
+        )
+        
+        response = await self.generate_response(request)
+        return response.content
+        
     def get_statistics(self) -> Dict[str, Any]:
         """Get testing statistics."""
         stats = {

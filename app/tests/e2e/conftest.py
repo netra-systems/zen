@@ -44,10 +44,31 @@ def _parse_test_models(models_str: str) -> List[LLMTestModel]:
 
 
 @pytest.fixture(scope="function")
-def real_llm_manager(llm_test_config: LLMTestConfig) -> LLMTestManager:
+def real_llm_manager(llm_test_config: LLMTestConfig):
     """Create real LLM manager with intelligent fallback."""
-    return LLMTestManager(llm_test_config)
+    from app.llm.llm_manager import LLMManager
+    from app.config import Config
+    
+    # Try to create real LLM manager first
+    try:
+        config = Config()
+        return LLMManager(config)
+    except Exception:
+        # Fallback to test manager
+        return LLMTestManager(llm_test_config)
 
+
+@pytest.fixture(scope="function")
+def real_websocket_manager():
+    """Create real WebSocket manager for testing."""
+    from app.ws_manager import WebSocketManager
+    return WebSocketManager()
+
+@pytest.fixture(scope="function")
+def real_tool_dispatcher():
+    """Create real tool dispatcher for testing."""
+    from app.agents.admin_tool_dispatcher.tool_dispatcher import AdminToolDispatcher
+    return AdminToolDispatcher()
 
 @pytest.fixture(scope="function")
 def cached_llm_manager(llm_test_config: LLMTestConfig) -> LLMTestManager:
