@@ -75,7 +75,7 @@ def upgrade() -> None:
     op.add_column('userbase', sa.Column('auto_renew', sa.Boolean(), nullable=True, server_default='false'))
     op.add_column('userbase', sa.Column('plan_tier', sa.String(), nullable=True))
     op.add_column('userbase', sa.Column('plan_started_at', sa.DateTime(), nullable=True))
-    op.add_column('userbase', sa.Column('trial_period', sa.Boolean(), nullable=True, server_default='false'))
+    op.add_column('userbase', sa.Column('trial_period', sa.Integer(), nullable=True, server_default='0'))
 
 
 def downgrade() -> None:

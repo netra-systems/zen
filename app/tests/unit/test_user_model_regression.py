@@ -28,7 +28,7 @@ async def test_user_creation_with_defaults():
     assert user.plan_tier == "free"
     assert user.payment_status == "active"
     assert user.auto_renew is False
-    assert user.trial_period is False
+    assert user.trial_period == 0
     assert isinstance(user.permissions, dict)
     assert isinstance(user.feature_flags, dict)
     assert isinstance(user.tool_permissions, dict)
