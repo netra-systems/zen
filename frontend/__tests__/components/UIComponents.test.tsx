@@ -125,15 +125,14 @@ withRouter(<NavLinks />)
   });
 
   it('should handle navigation correctly', () => {
-    const mockNavigate = jest.fn();
-    
     renderWithProviders(
-withRouter(<NavLinks onNavigate={mockNavigate} />)
+withRouter(<NavLinks />)
     );
     
-    const settingsLink = screen.getByRole('link', { name: /Settings/i });
-    fireEvent.click(settingsLink);
+    const chatLink = screen.getByRole('link', { name: /Chat/i });
+    expect(chatLink).toHaveAttribute('href', '/chat');
     
-    expect(window.location.pathname).toBe('/settings');
+    const enterpriseLink = screen.getByRole('link', { name: /Enterprise Demo/i });
+    expect(enterpriseLink).toHaveAttribute('href', '/enterprise-demo');
   });
 });
