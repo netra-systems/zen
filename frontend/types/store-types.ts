@@ -7,6 +7,7 @@ import type {
   SlowLayerData
 } from './layer-types';
 import type { UnifiedWebSocketEvent, ChatMessage } from './websocket-event-types';
+import type { MCPUIState } from './mcp-types';
 
 // ============================================
 // Agent Execution Tracking
@@ -85,6 +86,10 @@ export interface LegacySubAgentState {
   queuedSubAgents: string[];
 }
 
+export interface MCPState {
+  mcpState?: MCPUIState;
+}
+
 // ============================================
 // Store Actions Types
 // ============================================
@@ -149,6 +154,7 @@ export interface UnifiedChatState extends
   DebugState,
   PerformanceState,
   LegacySubAgentState,
+  MCPState,
   LayerActions,
   WebSocketActions,
   ProcessingActions,
