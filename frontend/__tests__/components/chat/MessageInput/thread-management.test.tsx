@@ -8,20 +8,51 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { ThreadService } from '@/services/threadService';
+import { ThreadRenameService } from '@/services/threadRenameService';
 import { generateUniqueId } from '@/lib/utils';
 
 // Mock dependencies
 jest.mock('@/hooks/useWebSocket', () => ({
   useWebSocket: jest.fn()
 }));
-jest.mock('@/store/chat');
+jest.mock('@/store/unified-chat');
 jest.mock('@/store/threadStore');
 jest.mock('@/store/authStore');
-jest.mock('@/services/threadService');
+jest.mock('@/services/threadService', () => ({
+  ThreadService: {
+    listThreads: jest.fn().mockResolvedValue([]),
+    createThread: jest.fn().mockResolvedValue({ 
+      id: 'new-thread', 
+      created_at: Math.floor(Date.now() / 1000), 
+      updated_at: Math.floor(Date.now() / 1000),
+      message_count: 0,
+      metadata: { title: 'New Chat' }
+    }),
+    getThread: jest.fn().mockResolvedValue({
+      id: 'test-thread',
+      created_at: Math.floor(Date.now() / 1000),
+      updated_at: Math.floor(Date.now() / 1000),
+      message_count: 1,
+      metadata: { title: 'Test Thread', renamed: false }
+    }),
+    deleteThread: jest.fn(),
+    updateThread: jest.fn(),
+    getThreadMessages: jest.fn().mockResolvedValue({ 
+      messages: [], 
+      thread_id: 'test', 
+      total: 0, 
+      limit: 50, 
+      offset: 0 
+    })
+  },
+  ThreadRenameService: {
+    autoRenameThread: jest.fn()
+  }
+}));
 jest.mock('@/lib/utils');
 
 describe('MessageInput - Thread Management', () => {
@@ -34,6 +65,10 @@ describe('MessageInput - Thread Management', () => {
     setCurrentThread: jest.fn(),
     addThread: jest.fn()
   };
+  
+  const mockChatActions = {
+    setActiveThread: jest.fn()
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -43,10 +78,12 @@ describe('MessageInput - Thread Management', () => {
       sendMessage: mockSendMessage,
     });
     
-    (useChatStore as jest.Mock).mockReturnValue({
+    (useUnifiedChatStore as jest.Mock).mockReturnValue({
       setProcessing: mockChatStore.setProcessing,
       isProcessing: false,
       addMessage: mockChatStore.addMessage,
+      activeThreadId: 'thread-1',
+      setActiveThread: mockChatActions.setActiveThread
     });
     
     (useThreadStore as jest.Mock).mockReturnValue({
@@ -64,6 +101,14 @@ describe('MessageInput - Thread Management', () => {
 
   describe('Thread management', () => {
     it('should create new thread if none exists', async () => {
+      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+        setProcessing: mockChatStore.setProcessing,
+        isProcessing: false,
+        addMessage: mockChatStore.addMessage,
+        activeThreadId: null,
+        setActiveThread: mockChatActions.setActiveThread
+      });
+      
       (useThreadStore as jest.Mock).mockReturnValue({
         currentThreadId: null,
         setCurrentThread: mockThreadStore.setCurrentThread,
@@ -85,6 +130,7 @@ describe('MessageInput - Thread Management', () => {
         expect(ThreadService.createThread).toHaveBeenCalledWith('Test message');
         expect(mockThreadStore.addThread).toHaveBeenCalled();
         expect(mockThreadStore.setCurrentThread).toHaveBeenCalledWith('new-thread-1');
+        expect(mockChatActions.setActiveThread).toHaveBeenCalledWith('new-thread-1');
       });
     });
 
@@ -99,7 +145,7 @@ describe('MessageInput - Thread Management', () => {
         expect(mockSendMessage).toHaveBeenCalledWith({
           type: 'user_message',
           payload: {
-            text: 'Test message',
+            content: 'Test message',
             references: [],
             thread_id: 'thread-1'
           }
@@ -110,6 +156,14 @@ describe('MessageInput - Thread Management', () => {
     });
 
     it('should handle thread creation failure', async () => {
+      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+        setProcessing: mockChatStore.setProcessing,
+        isProcessing: false,
+        addMessage: mockChatStore.addMessage,
+        activeThreadId: null,
+        setActiveThread: mockChatActions.setActiveThread
+      });
+      
       (useThreadStore as jest.Mock).mockReturnValue({
         currentThreadId: null,
         setCurrentThread: mockThreadStore.setCurrentThread,
@@ -135,6 +189,14 @@ describe('MessageInput - Thread Management', () => {
     });
 
     it('should truncate long messages for thread title', async () => {
+      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+        setProcessing: mockChatStore.setProcessing,
+        isProcessing: false,
+        addMessage: mockChatStore.addMessage,
+        activeThreadId: null,
+        setActiveThread: mockChatActions.setActiveThread
+      });
+      
       (useThreadStore as jest.Mock).mockReturnValue({
         currentThreadId: null,
         setCurrentThread: mockThreadStore.setCurrentThread,

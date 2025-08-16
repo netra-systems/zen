@@ -10,21 +10,6 @@ const cpuCount = os.cpus().length;
 const optimalWorkers = Math.max(1, Math.floor(cpuCount * 0.75)); // Use 75% of cores
 
 const config = {
-  // TypeScript configuration
-  preset: 'ts-jest/presets/default-esm',
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
-  transform: {
-    '^.+\\.(ts|tsx)$': ['ts-jest', {
-      useESM: true,
-      tsconfig: {
-        jsx: 'react-jsx',
-        moduleResolution: 'node',
-        allowSyntheticDefaultImports: true,
-        esModuleInterop: true,
-      }
-    }],
-  },
-  
   // Performance optimizations
   maxWorkers: optimalWorkers,
   maxConcurrency: 10,

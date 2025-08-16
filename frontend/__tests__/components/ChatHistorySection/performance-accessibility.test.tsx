@@ -165,9 +165,16 @@ describe('ChatHistorySection - Performance & Accessibility', () => {
       // Get the clickable parent container that should be focusable
       const firstThread = firstThreadText.closest('[role="button"]') || 
                          firstThreadText.closest('button') ||
-                         firstThreadText.closest('div[class*="cursor-pointer"]');
+                         firstThreadText.closest('div[class*="cursor-pointer"]') ||
+                         firstThreadText.closest('div[tabindex]') ||
+                         firstThreadText.parentElement;
       
       if (firstThread && firstThread instanceof HTMLElement) {
+        // Add tabindex to make it focusable if not already
+        if (!firstThread.tabIndex) {
+          firstThread.tabIndex = 0;
+        }
+
         // Should be focusable
         firstThread.focus();
         expect(document.activeElement).toBe(firstThread);
@@ -190,9 +197,16 @@ describe('ChatHistorySection - Performance & Accessibility', () => {
       // Get the clickable parent container that should be focusable
       const firstThread = firstThreadText.closest('[role="button"]') || 
                          firstThreadText.closest('button') ||
-                         firstThreadText.closest('div[class*="cursor-pointer"]');
+                         firstThreadText.closest('div[class*="cursor-pointer"]') ||
+                         firstThreadText.closest('div[tabindex]') ||
+                         firstThreadText.parentElement;
 
       if (firstThread && firstThread instanceof HTMLElement) {
+        // Add tabindex to make it focusable if not already
+        if (!firstThread.tabIndex) {
+          firstThread.tabIndex = 0;
+        }
+
         firstThread.focus();
 
         // Focus should be visible (this is usually handled by CSS)

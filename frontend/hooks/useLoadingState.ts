@@ -77,10 +77,22 @@ export const useLoadingState = (): UseLoadingStateResult => {
 
 
 /**
+ * Store data extracted by selector
+ */
+interface ExtractedStoreData {
+  activeThreadId: string | null;
+  isThreadLoading: boolean;
+  messages: any[];
+  isProcessing: boolean;
+  currentRunId: string | null;
+  agentName: string | null;
+}
+
+/**
  * Creates chat state context from hook data
  */
 const createContextFromData = (
-  storeData: any,
+  storeData: ExtractedStoreData,
   wsStatus: string,
   isInitialized: boolean
 ): ChatStateContext => {
