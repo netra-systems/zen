@@ -4,10 +4,16 @@ Enhanced triage agent with advanced categorization and caching capabilities.
 This module provides a clean interface that uses the modular structure for backward compatibility.
 """
 
-from typing import Optional
+import time
+import asyncio
+from typing import Optional, Any
+from pydantic import ValidationError
 
 from app.llm.llm_manager import LLMManager
 from app.agents.base import BaseSubAgent
+from app.schemas.strict_types import TypedAgentResult
+from app.core.type_validators import agent_type_safe
+from app.agents.prompts import triage_prompt_template
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.state import DeepAgentState
 from app.redis_manager import RedisManager
@@ -16,13 +22,18 @@ from app.core.reliability import (
     get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
 )
 from app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
+from app.llm.observability import (
+    start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
+    log_agent_communication, log_agent_input, log_agent_output
+)
 
 # Import from modular structure
+from app.agents.triage_sub_agent.models import (
+    TriageResult,
+    TriageMetadata,
+    ExtractedEntities
+)
 from app.agents.triage_sub_agent.core import TriageCore
-from app.agents.triage_sub_agent.executor import TriageExecutor
-from app.agents.triage_sub_agent.llm_processor import TriageLLMProcessor
-from app.agents.triage_sub_agent.result_processor import TriageResultProcessor
-from app.agents.triage_sub_agent.prompt_builder import TriagePromptBuilder
 
 logger = central_logger.get_logger(__name__)
 

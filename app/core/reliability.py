@@ -52,7 +52,7 @@ class AgentReliabilityWrapper:
         timeout: Optional[float] = None
     ) -> Any:
         """Execute operation with full reliability protection"""
-        if not self.circuit_breaker.can_execute():
+        if not await self.circuit_breaker.can_execute():
             return await self._handle_circuit_breaker_open(operation_name, fallback)
         
         try:

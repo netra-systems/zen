@@ -102,6 +102,10 @@ class CircuitBreaker:
         """Check if circuit breaker is in open state."""
         return self.state == CircuitState.OPEN
     
+    async def can_execute(self) -> bool:
+        """Public interface to check if execution is allowed."""
+        return await self._can_execute()
+    
     async def call(self, func: Callable[[], T]) -> T:
         """Execute function with circuit breaker protection."""
         if not await self._can_execute():
