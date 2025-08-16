@@ -7,7 +7,7 @@ const createJestConfig = nextJest({
 const config = {
   coverageProvider: 'v8',
   testEnvironment: 'jest-environment-jsdom',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testPathIgnorePatterns: [
     '/node_modules/',
     '/__tests__/setup/',  // Ignore setup files that are not actual tests
@@ -22,7 +22,7 @@ const config = {
     {
       displayName: 'components',
       testEnvironment: 'jest-environment-jsdom',
-      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       testMatch: ['<rootDir>/__tests__/components/**/*.test.[jt]s?(x)'],
       moduleNameMapper: {
         '^@/contexts/(.*)$': '<rootDir>/contexts/$1',
@@ -46,7 +46,7 @@ const config = {
     {
       displayName: 'hooks',
       testEnvironment: 'jest-environment-jsdom',
-      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       testMatch: ['<rootDir>/__tests__/hooks/**/*.test.[jt]s?(x)'],
       moduleNameMapper: {
         '^@/contexts/(.*)$': '<rootDir>/contexts/$1',
@@ -70,7 +70,7 @@ const config = {
     {
       displayName: 'store',
       testEnvironment: 'jest-environment-jsdom',
-      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       testMatch: ['<rootDir>/__tests__/store/**/*.test.[jt]s?(x)'],
       moduleNameMapper: {
         '^@/contexts/(.*)$': '<rootDir>/contexts/$1',
@@ -94,7 +94,7 @@ const config = {
     {
       displayName: 'services',
       testEnvironment: 'jest-environment-jsdom',
-      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       testMatch: ['<rootDir>/__tests__/services/**/*.test.[jt]s?(x)'],
       moduleNameMapper: {
         '^@/contexts/(.*)$': '<rootDir>/contexts/$1',
@@ -118,7 +118,7 @@ const config = {
     {
       displayName: 'lib',
       testEnvironment: 'jest-environment-jsdom',
-      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       testMatch: ['<rootDir>/__tests__/lib/**/*.test.[jt]s?(x)'],
       moduleNameMapper: {
         '^@/contexts/(.*)$': '<rootDir>/contexts/$1',
@@ -142,7 +142,7 @@ const config = {
     {
       displayName: 'utils',
       testEnvironment: 'jest-environment-jsdom',
-      setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
+      setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
       testMatch: ['<rootDir>/__tests__/utils/**/*.test.[jt]s?(x)'],
       moduleNameMapper: {
         '^@/contexts/(.*)$': '<rootDir>/contexts/$1',
@@ -184,4 +184,25 @@ const config = {
   ],
 };
 
-module.exports = createJestConfig(config);
+// Create a custom Jest configuration that properly handles TypeScript
+module.exports = async () => {
+  const nextJestConfig = await createJestConfig(config)();
+  
+  return {
+    ...nextJestConfig,
+    // Override transform to properly handle TypeScript files
+    transform: {
+      ...nextJestConfig.transform,
+      '^.+\\.(ts|tsx)$': 'ts-jest',
+    },
+    // Ensure globals configuration for ts-jest
+    globals: {
+      ...nextJestConfig.globals,
+      'ts-jest': {
+        tsconfig: {
+          jsx: 'react-jsx',
+        },
+      },
+    },
+  };
+};

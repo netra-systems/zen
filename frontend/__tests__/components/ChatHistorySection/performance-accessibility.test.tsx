@@ -29,7 +29,7 @@ describe('ChatHistorySection - Performance & Accessibility', () => {
         updated_at: Math.floor(Date.now() / 1000) - (i * 3600),
         user_id: 'user-1',
         message_count: i % 20,
-        status: 'active' as const,
+        status: 'active',
       }));
 
       testSetup.configureStoreMocks({ threads: largeThreadSet });
@@ -77,7 +77,7 @@ describe('ChatHistorySection - Performance & Accessibility', () => {
         updated_at: Math.floor(Date.now() / 1000) - (i * 60),
         user_id: 'user-1',
         message_count: i,
-        status: 'active' as const,
+        status: 'active',
       }));
 
       testSetup.configureStoreMocks({ threads: hugeThreadSet });

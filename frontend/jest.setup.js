@@ -1,7 +1,6 @@
-import 'whatwg-fetch';
-import '@testing-library/jest-dom';
-import fetchMock from 'jest-fetch-mock';
-import React from 'react';
+require('whatwg-fetch');
+require('@testing-library/jest-dom');
+const fetchMock = require('jest-fetch-mock');
 
 fetchMock.enableMocks();
 
@@ -177,7 +176,7 @@ jest.mock('@/hooks/useWebSocket', () => ({
 // Mock the WebSocketProvider context
 jest.mock('@/providers/WebSocketProvider', () => ({
   WebSocketProvider: ({ children }) => children,
-  WebSocketContext: React.createContext(null),
+  WebSocketContext: null,
   useWebSocketContext: () => ({
     sendMessage: jest.fn(),
     connect: jest.fn(),

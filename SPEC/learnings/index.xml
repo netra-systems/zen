@@ -134,7 +134,7 @@
             <name>Testing</name>
             <file>learnings/testing.xml</file>
             <path>SPEC/learnings/testing.xml</path>
-            <learning_count>8</learning_count>
+            <learning_count>9</learning_count>
             <learning_ids>
                 <id>clickhouse-regex-deep-nested-fields</id>
                 <id>clickhouse-function-wrapper-preservation</id>
@@ -144,6 +144,7 @@
                 <id>frontend-component-test-setup</id>
                 <id>windows-jest-bus-error-fix</id>
                 <id>websocket-mock-server-conflicts</id>
+                <id>frontend-testing-complete-guide</id>
             </learning_ids>
         </category>
         <category>
@@ -182,6 +183,6 @@
     
     <statistics>
         <total_categories>14</total_categories>
-        <total_learnings>50</total_learnings>
+        <total_learnings>51</total_learnings>
     </statistics>
 </specification>

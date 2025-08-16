@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Frontend Testing Guide</name>
+        <type>guide</type>
+        <category>Testing</category>
+        <version>1.0</version>
+        <last_updated>2025-01-16</last_updated>
+        <description>Complete guide for running frontend tests, including Windows-specific instructions</description>
+    </metadata>
+    
+    <overview>
+        <title>Frontend Testing Overview</title>
+        <description>
+            This guide provides clear instructions for running frontend tests in the Netra platform.
+            Frontend tests use Jest and React Testing Library, with a custom Windows-compatible runner.
+        </description>
+        <key_components>
+            <component>Jest - Test framework</component>
+            <component>React Testing Library - Component testing</component>
+            <component>jest-websocket-mock - WebSocket mocking</component>
+            <component>run-jest.js - Windows-compatible test runner</component>
+        </key_components>
+    </overview>
+    
+    <quick_start>
+        <title>Quick Start - Running Frontend Tests</title>
+        
+        <primary_methods>
+            <method id="unified_runner">
+                <name>Via Unified Test Runner (RECOMMENDED)</name>
+                <description>Use the project's unified test runner for consistent results</description>
+                <commands>
+                    <command purpose="Run default frontend tests">python test_runner.py --frontend-only</command>
+                    <command purpose="Run smoke tests">python test_runner.py --level smoke --frontend-only</command>
+                    <command purpose="Run unit tests">python test_runner.py --level unit --frontend-only</command>
+                </commands>
+                <works_on>All platforms (Windows, macOS, Linux)</works_on>
+            </method>
+            
+            <method id="direct_npm">
+                <name>Direct NPM Commands</name>
+                <description>Run tests directly via npm scripts</description>
+                <setup>
+                    <step>cd frontend</step>
+                    <step>npm install (if not already done)</step>
+                </setup>
+                <commands>
+                    <command purpose="Run all tests">npm test</command>
+                    <command purpose="Run tests in watch mode">npm test -- --watch</command>
+                    <command purpose="Run with coverage">npm test -- --coverage</command>
+                    <command purpose="Run specific test file">npm test ChatInterface</command>
+                    <command purpose="Update snapshots">npm test -- -u</command>
+                    <command purpose="Clear cache">npm run test:clear-cache</command>
+                </commands>
+                <note>All npm test commands use the Windows-compatible run-jest.js wrapper</note>
+            </method>
+        </primary_methods>
+    </quick_start>
+    
+    <windows_specific>
+        <title>Windows-Specific Instructions</title>
+        
+        <known_issues>
+            <issue id="bus_error">
+                <problem>Bus error when running npm test directly</problem>
+                <cause>NPM/NPX wrappers incompatible with Windows shell scripts</cause>
+                <solution>Use run-jest.js wrapper (already configured in package.json)</solution>
+                <verification>npm test should work without Bus errors</verification>
+            </issue>
+            
+            <issue id="bash_glob_patterns">
+                <problem>Extended glob patterns like @(components|hooks) fail</problem>
+                <cause>Bash-specific syntax not supported on Windows</cause>
+                <solution>run-jest.js converts to Jest project selection</solution>
+                <verification>Test categories run correctly</verification>
+            </issue>
+            
+            <issue id="websocket_conflicts">
+                <problem>WebSocket mock server URL conflicts</problem>
+                <cause>Multiple tests using same WebSocket URL</cause>
+                <solution>WebSocketTestManager generates unique URLs</solution>
+                <verification>No "server already listening" errors</verification>
+            </issue>
+        </known_issues>
+        
+        <setup_instructions>
+            <step>
+                <description>Ensure Node.js is installed</description>
+                <command>node --version</command>
+                <expected>v18.0.0 or higher</expected>
+            </step>
+            <step>
+                <description>Navigate to frontend directory</description>
+                <command>cd frontend</command>
+            </step>
+            <step>
+                <description>Install dependencies</description>
+                <command>npm install</command>
+            </step>
+            <step>
+                <description>Verify test runner exists</description>
+                <command>dir run-jest.js</command>
+                <expected>File should exist</expected>
+            </step>
+        </setup_instructions>
+    </windows_specific>
+    
+    <test_categories>
+        <title>Frontend Test Categories</title>
+        
+        <category id="components">
+            <name>Component Tests</name>
+            <location>frontend/__tests__/components/</location>
+            <description>Tests for React components</description>
+            <run_command>npm test -- --selectProjects=components</run_command>
+        </category>
+        
+        <category id="hooks">
+            <name>Hook Tests</name>
+            <location>frontend/__tests__/hooks/</location>
+            <description>Tests for custom React hooks</description>
+            <run_command>npm test -- --selectProjects=hooks</run_command>
+        </category>
+        
+        <category id="store">
+            <name>Store Tests</name>
+            <location>frontend/__tests__/store/</location>
+            <description>Tests for Zustand state management</description>
+            <run_command>npm test -- --selectProjects=store</run_command>
+        </category>
+        
+        <category id="services">
+            <name>Service Tests</name>
+            <location>frontend/__tests__/services/</location>
+            <description>Tests for service layer and API calls</description>
+            <run_command>npm test -- --selectProjects=services</run_command>
+        </category>
+        
+        <category id="integration">
+            <name>Integration Tests</name>
+            <location>frontend/__tests__/integration/</location>
+            <description>Tests for integrated features</description>
+            <run_command>npm test -- --selectProjects=integration</run_command>
+        </category>
+    </test_categories>
+    
+    <common_commands>
+        <title>Common Test Commands</title>
+        
+        <command_group name="Basic Testing">
+            <command>
+                <description>Run all tests once</description>
+                <windows>cd frontend && npm test</windows>
+                <unix>cd frontend && npm test</unix>
+            </command>
+            <command>
+                <description>Run tests in watch mode</description>
+                <windows>cd frontend && npm test -- --watch</windows>
+                <unix>cd frontend && npm test -- --watch</unix>
+            </command>
+            <command>
+                <description>Run with coverage report</description>
+                <windows>cd frontend && npm test -- --coverage --watchAll=false</windows>
+                <unix>cd frontend && npm test -- --coverage --watchAll=false</unix>
+            </command>
+        </command_group>
+        
+        <command_group name="Performance Testing">
+            <command>
+                <description>Run fast tests (performance mode)</description>
+                <windows>cd frontend && npm run test:fast</windows>
+                <unix>cd frontend && npm run test:fast</unix>
+            </command>
+            <command>
+                <description>Run tests in parallel</description>
+                <windows>cd frontend && npm run test:parallel</windows>
+                <unix>cd frontend && npm run test:parallel</unix>
+            </command>
+        </command_group>
+        
+        <command_group name="Troubleshooting">
+            <command>
+                <description>Clear Jest cache</description>
+                <windows>cd frontend && npm run test:clear-cache</windows>
+                <unix>cd frontend && npm run test:clear-cache</unix>
+            </command>
+            <command>
+                <description>Debug test with open handles</description>
+                <windows>cd frontend && npm test -- --detectOpenHandles</windows>
+                <unix>cd frontend && npm test -- --detectOpenHandles</unix>
+            </command>
+            <command>
+                <description>Update test snapshots</description>
+                <windows>cd frontend && npm test -- -u</windows>
+                <unix>cd frontend && npm test -- -u</unix>
+            </command>
+        </command_group>
+    </common_commands>
+    
+    <troubleshooting>
+        <title>Troubleshooting Frontend Tests</title>
+        
+        <issue>
+            <symptom>Tests fail with "Cannot find module" errors</symptom>
+            <solutions>
+                <solution>Run npm install in frontend directory</solution>
+                <solution>Clear Jest cache: npm run test:clear-cache</solution>
+                <solution>Delete node_modules and reinstall: rm -rf node_modules && npm install</solution>
+            </solutions>
+        </issue>
+        
+        <issue>
+            <symptom>WebSocket tests fail with "server already listening" error</symptom>
+            <solutions>
+                <solution>Ensure tests use WebSocketTestManager for unique URLs</solution>
+                <solution>Check afterEach hooks call wsManager.cleanup()</solution>
+                <solution>Clear any hanging processes and restart tests</solution>
+            </solutions>
+        </issue>
+        
+        <issue>
+            <symptom>Tests hang or timeout</symptom>
+            <solutions>
+                <solution>Run with --detectOpenHandles to find unclosed resources</solution>
+                <solution>Check for missing async/await in test code</solution>
+                <solution>Ensure proper test cleanup in afterEach hooks</solution>
+            </solutions>
+        </issue>
+        
+        <issue>
+            <symptom>Zustand store tests fail with infinite loops</symptom>
+            <solutions>
+                <solution>Define selectors outside components/hooks</solution>
+                <solution>Use shallow comparison for object selectors</solution>
+                <solution>Call useStore directly without wrapper functions</solution>
+            </solutions>
+        </issue>
+        
+        <issue>
+            <symptom>Exit code 255 on Windows</symptom>
+            <solutions>
+                <solution>Ensure using npm test (which uses run-jest.js)</solution>
+                <solution>Avoid direct jest or npx jest commands</solution>
+                <solution>Check run-jest.js exists in frontend directory</solution>
+            </solutions>
+        </issue>
+    </troubleshooting>
+    
+    <best_practices>
+        <title>Frontend Testing Best Practices</title>
+        
+        <practice>
+            <name>Test Isolation</name>
+            <description>Each test should be independent and not affect others</description>
+            <implementation>
+                - Use beforeEach/afterEach for setup/cleanup
+                - Mock external dependencies
+                - Reset stores between tests
+                - Use unique WebSocket URLs per test
+            </implementation>
+        </practice>
+        
+        <practice>
+            <name>Mock Management</name>
+            <description>Properly manage mocks to avoid test pollution</description>
+            <implementation>
+                - Define mocks in jest.setup.ts for global mocks
+                - Use jest.clearAllMocks() in afterEach
+                - Create test-specific mocks when needed
+                - Use WebSocketTestManager for WebSocket mocks
+            </implementation>
+        </practice>
+        
+        <practice>
+            <name>Async Testing</name>
+            <description>Handle asynchronous operations correctly</description>
+            <implementation>
+                - Always use async/await for async tests
+                - Use waitFor for async assertions
+                - Set appropriate timeouts for slow operations
+                - Clean up async operations in afterEach
+            </implementation>
+        </practice>
+        
+        <practice>
+            <name>Performance</name>
+            <description>Keep tests fast and efficient</description>
+            <implementation>
+                - Use test:fast for quick feedback during development
+                - Run minimal tests with --watch during coding
+                - Use parallel execution for CI/CD
+                - Mock heavy operations like API calls
+            </implementation>
+        </practice>
+    </best_practices>
+    
+    <ci_cd_integration>
+        <title>CI/CD Integration</title>
+        
+        <github_actions>
+            <description>Frontend tests in GitHub Actions</description>
+            <configuration>
+                - Uses npm ci for faster, reproducible installs
+                - Runs npm test -- --coverage --watchAll=false
+                - Uploads coverage reports to codecov
+                - Caches node_modules for faster builds
+            </configuration>
+            <command>npm run test:ci</command>
+        </github_actions>
+        
+        <local_ci_simulation>
+            <description>Simulate CI environment locally</description>
+            <commands>
+                <command>cd frontend</command>
+                <command>npm ci</command>
+                <command>npm run test:ci</command>
+            </commands>
+        </local_ci_simulation>
+    </ci_cd_integration>
+    
+    <coverage_requirements>
+        <title>Coverage Requirements</title>
+        
+        <targets>
+            <target component="Components" minimum="85%" current="81%" />
+            <target component="Hooks" minimum="90%" current="88%" />
+            <target component="Services" minimum="90%" current="87%" />
+            <target component="Store" minimum="85%" current="83%" />
+            <target component="Utils" minimum="95%" current="92%" />
+        </targets>
+        
+        <view_coverage>
+            <command>npm test -- --coverage --watchAll=false</command>
+            <report_location>frontend/coverage/lcov-report/index.html</report_location>
+            <open_report>
+                <windows>start frontend\coverage\lcov-report\index.html</windows>
+                <macos>open frontend/coverage/lcov-report/index.html</macos>
+                <linux>xdg-open frontend/coverage/lcov-report/index.html</linux>
+            </open_report>
+        </view_coverage>
+    </coverage_requirements>
+    
+    <summary>
+        <title>Quick Reference Summary</title>
+        
+        <essential_commands>
+            <command purpose="Run all frontend tests">python test_runner.py --frontend-only</command>
+            <command purpose="Run tests directly">cd frontend && npm test</command>
+            <command purpose="Run in watch mode">cd frontend && npm test -- --watch</command>
+            <command purpose="Run with coverage">cd frontend && npm test -- --coverage</command>
+            <command purpose="Clear cache (Windows fix)">cd frontend && npm run test:clear-cache</command>
+        </essential_commands>
+        
+        <windows_reminders>
+            <reminder>Always use npm test (not jest or npx jest directly)</reminder>
+            <reminder>run-jest.js handles Windows compatibility automatically</reminder>
+            <reminder>Use forward slashes in paths even on Windows</reminder>
+            <reminder>WebSocketTestManager prevents URL conflicts</reminder>
+        </windows_reminders>
+    </summary>
+</specification>
