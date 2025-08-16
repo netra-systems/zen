@@ -3,7 +3,7 @@
 Provides health checking, statistics, and configuration information utilities.
 Each function must be ≤8 lines as per architecture requirements.
 """
-from typing import Optional
+from typing import Optional, Any
 from datetime import datetime, UTC
 from app.schemas.llm_base_types import (
     LLMConfigInfo, LLMManagerStats, LLMHealthCheck, LLMProvider

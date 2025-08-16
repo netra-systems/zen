@@ -41,14 +41,18 @@ class StartAgentHandler(BaseMessageHandler):
     async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
         """Handle start_agent message"""
         try:
-            user_request = self._extract_user_request(payload)
-            thread_id, run_id = await self._setup_thread_and_run(user_id, user_request)
-            if not thread_id or not run_id:
-                return
-            response = await self._execute_agent_workflow(user_request, thread_id, user_id, run_id)
-            await self._finalize_agent_response(user_id, thread_id, run_id, response)
+            await self._process_start_agent_request(user_id, payload)
         except Exception as e:
             await self._handle_agent_error(user_id, e)
+    
+    async def _process_start_agent_request(self, user_id: str, payload: Dict[str, Any]) -> None:
+        """Process start agent request workflow."""
+        user_request = self._extract_user_request(payload)
+        thread_id, run_id = await self._setup_thread_and_run(user_id, user_request)
+        if not thread_id or not run_id:
+            return
+        response = await self._execute_agent_workflow(user_request, thread_id, user_id, run_id)
+        await self._finalize_agent_response(user_id, thread_id, run_id, response)
 
     def _extract_user_request(self, payload: Dict[str, Any]) -> str:
         """Extract user request from payload"""
@@ -101,12 +105,16 @@ class StartAgentHandler(BaseMessageHandler):
         """Save assistant response to database"""
         async with get_unit_of_work() as uow:
             if response:
-                content = json.dumps(response) if isinstance(response, dict) else str(response)
-                await uow.messages.create_message(
-                    uow.session, thread_id=thread_id, role="assistant",
-                    content=content, assistant_id="netra-assistant", run_id=run_id
-                )
+                await self._create_assistant_message(uow, thread_id, run_id, response)
             await uow.runs.update_status(uow.session, run_id, "completed")
+    
+    async def _create_assistant_message(self, uow, thread_id: str, run_id: str, response) -> None:
+        """Create assistant message in database."""
+        content = json.dumps(response) if isinstance(response, dict) else str(response)
+        await uow.messages.create_message(
+            uow.session, thread_id=thread_id, role="assistant",
+            content=content, assistant_id="netra-assistant", run_id=run_id
+        )
     
     async def _send_agent_completion(self, user_id: str, response) -> None:
         """Send agent completion message to user"""
@@ -133,15 +141,19 @@ class UserMessageHandler(BaseMessageHandler):
     async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
         """Handle user_message"""
         try:
-            text, references = self._extract_message_data(payload)
-            logger.info(f"Processing user message from {user_id}: {text[:100]}...")
-            thread_id, run_id = await self._setup_user_message_thread(user_id, text, references)
-            if not thread_id or not run_id:
-                return
-            response = await self._process_user_message_workflow(text, thread_id, user_id, run_id)
-            await self._finalize_user_message_response(user_id, thread_id, run_id, response)
+            await self._process_user_message_request(user_id, payload)
         except Exception as e:
             await self._handle_user_message_error(user_id, e)
+    
+    async def _process_user_message_request(self, user_id: str, payload: Dict[str, Any]) -> None:
+        """Process user message request workflow."""
+        text, references = self._extract_message_data(payload)
+        logger.info(f"Processing user message from {user_id}: {text[:100]}...")
+        thread_id, run_id = await self._setup_user_message_thread(user_id, text, references)
+        if not thread_id or not run_id:
+            return
+        response = await self._process_user_message_workflow(text, thread_id, user_id, run_id)
+        await self._finalize_user_message_response(user_id, thread_id, run_id, response)
 
     def _extract_message_data(self, payload: Dict[str, Any]) -> tuple[str, list]:
         """Extract message data from payload"""

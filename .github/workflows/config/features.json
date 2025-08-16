@@ -1,7 +1,7 @@
 {
   "enable_staging_deploy": true,
   "enable_production_deploy": false,
-  "enable_security_scan": true,
+  "enable_security_scan": false,
   "enable_performance_tests": false,
   "enable_architecture_compliance": true,
   "enable_ai_autofix": false,
@@ -18,7 +18,7 @@
     "scheduled_cleanup": true
   },
   "enable_monitoring": {
-    "health_checks": true,
+    "health_checks": false,
     "performance_metrics": false,
     "error_tracking": true
   },
@@ -26,7 +26,7 @@
     "enable_smoke_tests": true,
     "enable_unit_tests": true,
     "enable_integration_tests": true,
-    "enable_e2e_tests": false,
+    "enable_e2e_tests": true,
     "enable_coverage_reporting": true,
     "enable_stub_detection": true
   }

@@ -625,5 +625,266 @@ Real LLM Testing:
     # Exit with appropriate code
     sys.exit(exit_code)
 
+def _create_argument_parser():
+    """Create and configure the argument parser."""
+    parser = argparse.ArgumentParser(
+        description="Unified Test Runner for Netra AI Platform",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=_get_parser_epilog()
+    )
+    _add_main_arguments(parser)
+    _add_component_arguments(parser)
+    _add_output_arguments(parser)
+    _add_llm_arguments(parser)
+    _add_staging_arguments(parser)
+    _add_discovery_arguments(parser)
+    _add_failing_test_arguments(parser)
+    return parser
+
+
+def _get_parser_epilog():
+    """Get the epilog text for the argument parser."""
+    level_descriptions = chr(10).join([
+        f"  {level:<24} - {config['description']}" 
+        for level, config in TEST_LEVELS.items()
+    ])
+    return f"""
+Test Levels:
+{level_descriptions}
+
+Usage Examples:
+  # Quick smoke tests (recommended for pre-commit)
+  python test_runner.py --level smoke
+  
+  # Unit tests for development
+  python test_runner.py --level unit
+  
+  # Full comprehensive testing
+  python test_runner.py --level comprehensive
+  
+  # Modular comprehensive testing (faster, more focused)
+  python test_runner.py --level comprehensive-backend
+  python test_runner.py --level comprehensive-agents
+  python test_runner.py --level comprehensive-database
+  
+  # Backend only testing
+  python test_runner.py --level unit --backend-only
+  
+  # Use simple test runner
+  python test_runner.py --simple
+  
+  # Run ALL tests (backend, frontend, E2E) - comprehensive validation
+  python test_runner.py --level all
+  
+  # Real LLM testing examples:
+  # Unit tests with real LLM calls
+  python test_runner.py --level unit --real-llm
+  
+  # Integration tests with specific model
+  python test_runner.py --level integration --real-llm --llm-model gemini-2.5-pro
+  
+  # Critical tests sequentially to avoid rate limits
+  python test_runner.py --level critical --real-llm --parallel 1
+  
+  # Comprehensive with extended timeout
+  python test_runner.py --level comprehensive --real-llm --llm-timeout 120
+
+Purpose Guide:
+  - smoke:         Use before committing code, quick validation (never uses real LLM)
+  - unit:          Use during development, test individual components  
+  - integration:   Use when testing feature interactions
+  - comprehensive: Use before releases, full system validation
+  - critical:      Use to verify essential functionality only
+  - all:           Complete validation including backend, frontend, and E2E tests
+  
+Real LLM Testing:
+  - Adds --real-llm flag to use actual API calls instead of mocks
+  - Increases test duration 3-5x and incurs API costs
+  - Use gemini-2.5-flash (default) for cost efficiency
+  - Run sequentially (--parallel 1) with production keys to avoid rate limits
+        """
+
+
+def _add_main_arguments(parser):
+    """Add main test level selection arguments."""
+    parser.add_argument(
+        "--level", "-l",
+        choices=list(TEST_LEVELS.keys()),
+        default="smoke",
+        help="Test level to run (default: smoke)"
+    )
+    parser.add_argument(
+        "--simple",
+        action="store_true", 
+        help="Use simple test runner (overrides --level)"
+    )
+
+
+def _add_component_arguments(parser):
+    """Add component selection arguments."""
+    parser.add_argument(
+        "--backend-only",
+        action="store_true",
+        help="Run only backend tests"
+    )
+    parser.add_argument(
+        "--frontend-only", 
+        action="store_true",
+        help="Run only frontend tests"
+    )
+
+
+def _add_output_arguments(parser):
+    """Add output options arguments."""
+    parser.add_argument(
+        "--quiet", "-q",
+        action="store_true",
+        help="Minimal output"
+    )
+    parser.add_argument(
+        "--verbose", "-v",
+        action="store_true", 
+        help="Verbose output"
+    )
+    parser.add_argument(
+        "--no-report",
+        action="store_true",
+        help="Skip generating test reports"
+    )
+
+
+def _add_llm_arguments(parser):
+    """Add real LLM testing arguments."""
+    parser.add_argument(
+        "--real-llm",
+        action="store_true",
+        help="Use real LLM API calls instead of mocks (increases test duration and cost)"
+    )
+    parser.add_argument(
+        "--llm-model",
+        type=str,
+        default="gemini-2.5-flash",
+        choices=["gemini-2.5-flash", "gemini-2.5-pro", "gpt-4", "gpt-3.5-turbo", "claude-3-sonnet"],
+        help="LLM model to use for real tests (default: gemini-2.5-flash for cost efficiency)"
+    )
+    parser.add_argument(
+        "--llm-timeout",
+        type=int,
+        default=30,
+        help="Timeout in seconds for individual LLM calls (default: 30, recommended: 30-120)"
+    )
+    parser.add_argument(
+        "--parallel",
+        type=str,
+        default="auto",
+        help="Parallelism for tests: auto, 1 (sequential), or number of workers"
+    )
+
+
+def _add_staging_arguments(parser):
+    """Add staging environment arguments."""
+    parser.add_argument(
+        "--staging",
+        action="store_true",
+        help="Run tests against staging environment (uses STAGING_URL and STAGING_API_URL env vars)"
+    )
+    parser.add_argument(
+        "--staging-url",
+        type=str,
+        help="Override staging frontend URL"
+    )
+    parser.add_argument(
+        "--staging-api-url",
+        type=str,
+        help="Override staging API URL"
+    )
+    parser.add_argument(
+        "--report-format",
+        type=str,
+        choices=["text", "json", "markdown"],
+        default="markdown",
+        help="Format for test report output (default: markdown)"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        help="Output file for test results (for CI/CD integration)"
+    )
+
+
+def _add_discovery_arguments(parser):
+    """Add test discovery arguments."""
+    parser.add_argument(
+        "--shard",
+        type=str,
+        choices=["core", "agents", "websocket", "database", "api", "frontend"],
+        help="Run a specific shard of tests for parallel execution"
+    )
+    parser.add_argument(
+        "--json-output",
+        type=str,
+        help="Path to save JSON test results (alias for --output with JSON format)"
+    )
+    parser.add_argument(
+        "--coverage-output", 
+        type=str,
+        help="Path to save coverage XML report"
+    )
+    parser.add_argument(
+        "--list", "--discover",
+        action="store_true",
+        dest="list_tests",
+        help="List all available tests with categories and information"
+    )
+    parser.add_argument(
+        "--list-format",
+        type=str,
+        choices=["text", "json", "markdown"],
+        default="text",
+        help="Format for test listing output (default: text)"
+    )
+    parser.add_argument(
+        "--list-level",
+        type=str,
+        choices=list(TEST_LEVELS.keys()),
+        help="List tests for a specific test level only"
+    )
+    parser.add_argument(
+        "--list-category",
+        type=str,
+        help="List tests for a specific category only (e.g., unit, integration, api)"
+    )
+
+
+def _add_failing_test_arguments(parser):
+    """Add failing test management arguments."""
+    parser.add_argument(
+        "--show-failing",
+        action="store_true",
+        help="Display currently failing tests from the log"
+    )
+    parser.add_argument(
+        "--run-failing",
+        action="store_true",
+        help="Run only the currently failing tests"
+    )
+    parser.add_argument(
+        "--fix-failing",
+        action="store_true",
+        help="Attempt to automatically fix failing tests (experimental)"
+    )
+    parser.add_argument(
+        "--max-fixes",
+        type=int,
+        default=None,
+        help="Maximum number of tests to attempt fixing (default: all)"
+    )
+    parser.add_argument(
+        "--clear-failing",
+        action="store_true",
+        help="Clear the failing tests log"
+    )
+
+
 if __name__ == "__main__":
     main()
