@@ -141,10 +141,10 @@ export const MessageItem: React.FC<MessageProps> = React.memo(({ message }) => {
                 <div className="flex items-center space-x-2">
                   {messageIcon}
                   <CardTitle className="text-base font-semibold text-gray-900">
-                    {sub_agent_name || (type === 'user' ? 'You' : 'Netra Agent')}
+                    {(sub_agent_name && sub_agent_name !== 'undefined' && sub_agent_name.trim() !== '') ? sub_agent_name : (type === 'user' ? 'You' : 'Netra Agent')}
                   </CardTitle>
                 </div>
-                {type !== 'user' && sub_agent_name && (
+                {type !== 'user' && sub_agent_name && sub_agent_name !== 'undefined' && sub_agent_name.trim() !== '' && (
                   <p className="text-xs text-gray-500 mt-0.5">
                     {type === 'tool' ? 'Tool Execution' : 'Agent Response'}
                   </p>

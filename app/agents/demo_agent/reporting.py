@@ -1,0 +1,155 @@
+# AI AGENT MODIFICATION METADATA
+# ================================
+# Timestamp: 2025-08-15T12:00:00.000000+00:00
+# Agent: Claude Sonnet 4 claude-sonnet-4-20250514
+# Context: Split demo_agent.py into modular architecture
+# Git: pr-10-anthony-branch | Current | Clean
+# Change: Refactor | Scope: Component | Risk: Low
+# Session: Architecture Compliance Fix
+# Review: Pending | Score: TBD
+# ================================
+"""Demo reporting agent for generating executive-ready reports."""
+
+from typing import Dict, Any, Optional
+from datetime import datetime, UTC
+
+from app.agents.base import BaseSubAgent
+from app.llm.llm_manager import LLMManager
+from app.ws_manager import WebSocketManager
+from app.logging_config import central_logger
+
+logger = central_logger.get_logger(__name__)
+
+
+class DemoReportingAgent(BaseSubAgent):
+    """Specialized reporting agent for demo scenarios."""
+    
+    def __init__(self, llm_manager: LLMManager, websocket_manager: WebSocketManager):
+        super().__init__(llm_manager, websocket_manager)
+        self.agent_name = "DemoReportingAgent"
+        
+    async def process(
+        self,
+        message: str,
+        context: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Generate executive-ready reports for demo sessions.
+        
+        This agent compiles insights and recommendations into
+        a professional report format.
+        """
+        try:
+            return await self._process_reporting_request(message, context)
+        except Exception as e:
+            return self._create_error_response(e)
+            
+    async def _process_reporting_request(
+        self,
+        message: str,
+        context: Optional[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """Process the reporting request with LLM generation."""
+        prompt = self._prepare_reporting_prompt(message, context)
+        response = await self._generate_llm_response(prompt)
+        industry = self._get_industry_from_context(context)
+        return self._create_success_response(response, industry)
+        
+    def _prepare_reporting_prompt(
+        self,
+        message: str,
+        context: Optional[Dict[str, Any]]
+    ) -> str:
+        """Prepare reporting prompt for executive summary generation."""
+        optimization_data = self._get_optimization_data_from_context(context)
+        industry = self._get_industry_from_context(context)
+        return self._build_reporting_prompt_content(message, optimization_data, industry)
+        
+    def _get_optimization_data_from_context(self, context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        """Extract optimization data from context or use default."""
+        if context and "optimization_data" in context:
+            return context["optimization_data"]
+        return {}
+        
+    def _get_industry_from_context(self, context: Optional[Dict[str, Any]]) -> str:
+        """Extract industry from context or use default."""
+        if context and "industry" in context:
+            return context["industry"]
+        return "technology"
+        
+    def _build_reporting_prompt_content(
+        self,
+        message: str,
+        optimization_data: Dict[str, Any],
+        industry: str
+    ) -> str:
+        """Build the complete reporting prompt content."""
+        recommendations = optimization_data.get('recommendations', 'Standard optimizations')
+        return f"""Create an executive summary report for this AI optimization analysis.
+
+Industry: {industry}
+Original Request: {message}
+Optimization Recommendations: {recommendations}
+
+Generate a professional report with:
+1. Executive Summary (2-3 sentences)
+2. Key Findings (3-4 bullet points)
+3. Recommended Actions (prioritized list)
+4. Expected Outcomes (quantified benefits)
+5. Next Steps (clear action items)
+
+Use professional language appropriate for C-suite executives.
+Include specific metrics and timelines where possible."""
+        
+    async def _generate_llm_response(self, prompt: str) -> str:
+        """Generate response from LLM with reporting-focused parameters."""
+        return await self.llm_manager.generate(
+            prompt=prompt,
+            temperature=0.4,
+            max_tokens=800
+        )
+        
+    def _create_success_response(self, response: str, industry: str) -> Dict[str, Any]:
+        """Create a successful reporting response with metadata."""
+        return {
+            "status": "success",
+            "report": response,
+            "metadata": self._create_report_metadata(industry)
+        }
+        
+    def _create_report_metadata(self, industry: str) -> Dict[str, Any]:
+        """Create report metadata for tracking and auditing."""
+        return {
+            "generated_at": datetime.now(UTC).isoformat(),
+            "industry": industry,
+            "report_type": "executive_summary",
+            "agent": self.agent_name
+        }
+        
+    def _create_error_response(self, error: Exception) -> Dict[str, Any]:
+        """Create an error response dict."""
+        logger.error(f"Demo reporting error: {str(error)}")
+        return {
+            "status": "error",
+            "error": str(error),
+            "agent": self.agent_name
+        }
+        
+    def get_report_types(self) -> list:
+        """Get list of available report types."""
+        return [
+            "executive_summary",
+            "technical_analysis",
+            "cost_benefit_analysis",
+            "implementation_roadmap"
+        ]
+        
+    def get_executive_summary_sections(self) -> list:
+        """Get standard sections for executive summary reports."""
+        return [
+            "Executive Summary",
+            "Key Findings", 
+            "Recommended Actions",
+            "Expected Outcomes",
+            "Next Steps"
+        ]

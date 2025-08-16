@@ -202,13 +202,38 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
-          name  = "GOOGLE_OAUTH_CLIENT_ID"
-          value = "dummy-client-id"
+          name  = "GCP_PROJECT_ID_NUMERICAL_STAGING"
+          value = var.project_id_numerical != "" ? var.project_id_numerical : var.project_id
         }
         
         env {
-          name  = "GOOGLE_OAUTH_CLIENT_SECRET"
-          value = "dummy-client-secret"
+          name  = "SECRET_MANAGER_PROJECT_ID"
+          value = var.project_id_numerical != "" ? var.project_id_numerical : var.project_id
+        }
+        
+        env {
+          name  = "LOAD_SECRETS"
+          value = "true"  # Explicitly enable secret loading for staging
+        }
+        
+        env {
+          name  = "GOOGLE_CLIENT_ID"  # Changed to match expected env var
+          value_from {
+            secret_key_ref {
+              name = "google-client-id-staging"
+              key  = "latest"
+            }
+          }
+        }
+        
+        env {
+          name  = "GOOGLE_CLIENT_SECRET"  # Changed to match expected env var
+          value_from {
+            secret_key_ref {
+              name = "google-client-secret-staging"
+              key  = "latest"
+            }
+          }
         }
         
         env {
@@ -242,7 +267,7 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
-          name  = "GOOGLE_GEMINI_API_KEY"
+          name  = "GEMINI_API_KEY"  # Changed from GOOGLE_GEMINI_API_KEY to match expected env var
           value_from {
             secret_key_ref {
               name = "gemini-api-key-staging"
@@ -262,7 +287,7 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
-          name  = "SECRET_KEY"
+          name  = "JWT_SECRET_KEY"  # Changed from SECRET_KEY to match expected env var
           value_from {
             secret_key_ref {
               name = "jwt-secret-key-staging"

@@ -5,6 +5,12 @@ variable "project_id" {
   type        = string
 }
 
+variable "project_id_numerical" {
+  description = "GCP Project ID in numerical format for Secret Manager API"
+  type        = string
+  default     = ""  # Will use project_id if not specified
+}
+
 variable "region" {
   description = "GCP Region for deployment"
   type        = string

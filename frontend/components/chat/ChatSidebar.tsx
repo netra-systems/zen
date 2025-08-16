@@ -44,6 +44,11 @@ export const ChatSidebar: React.FC = () => {
     try {
       const fetchedThreads = await ThreadService.listThreads();
       setThreads(fetchedThreads);
+      
+      // Auto-select first thread if none is active and threads exist
+      if (!activeThreadId && fetchedThreads.length > 0) {
+        await handleThreadClick(fetchedThreads[0].id);
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load threads';
       console.error('Failed to load threads:', errorMessage);
@@ -124,16 +129,34 @@ export const ChatSidebar: React.FC = () => {
         payload: { thread_id: threadId }
       });
       
+      // Emit thread loading event
+      const loadingEvent = new CustomEvent('threadLoading', { 
+        detail: { threadId } 
+      });
+      window.dispatchEvent(loadingEvent);
+      
       // Load thread messages
       const response = await ThreadService.getThreadMessages(threadId);
       
+      // Convert ThreadMessage[] to ChatMessage[] format
+      const convertedMessages = response.messages.map(msg => ({
+        id: msg.id,
+        role: msg.role as 'user' | 'assistant' | 'system',
+        content: msg.content,
+        timestamp: msg.created_at * 1000, // Convert to milliseconds
+        threadId: response.thread_id,
+        metadata: msg.metadata ? {
+          ...msg.metadata
+        } : undefined
+      }));
+      
+      // Load messages directly into store using loadMessages
+      const loadMessages = useUnifiedChatStore.getState().loadMessages;
+      loadMessages(convertedMessages);
+      
       // Emit thread loaded event
       const loadedEvent = new CustomEvent('threadLoaded', { 
-        detail: { 
-          threadId,
-          messages: response.messages,
-          metadata: response.metadata 
-        } 
+        detail: { threadId, messages: convertedMessages } 
       });
       window.dispatchEvent(loadedEvent);
       
@@ -143,9 +166,15 @@ export const ChatSidebar: React.FC = () => {
       });
       window.dispatchEvent(connectEvent);
       
-      console.log('Switched to thread:', threadId, 'with', response.messages.length, 'messages');
+      console.log('Switched to thread:', threadId, 'with', convertedMessages.length, 'messages');
     } catch (error) {
       console.error('Failed to switch thread:', error);
+      
+      // Emit thread loaded event even on error to clear loading state
+      const loadedEvent = new CustomEvent('threadLoaded', { 
+        detail: { threadId, messages: [], error: true } 
+      });
+      window.dispatchEvent(loadedEvent);
     }
   };
 
@@ -340,7 +369,7 @@ export const ChatSidebar: React.FC = () => {
                       <div className="flex items-center space-x-3 mt-1">
                         <span className="text-xs text-gray-500 flex items-center">
                           <Clock className="w-3 h-3 mr-1" />
-                          {formatDistanceToNow(thread.updated_at || thread.created_at, { addSuffix: true })}
+                          {formatDistanceToNow(new Date((thread.updated_at || thread.created_at) * 1000), { addSuffix: true })}
                         </span>
                         {thread.message_count && thread.message_count > 0 && (
                           <span className="text-xs text-gray-500">
