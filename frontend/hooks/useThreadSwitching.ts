@@ -8,9 +8,8 @@
  * @compliance type_safety.xml - Strongly typed hook with clear interfaces
  */
 
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import { shallow } from 'zustand/shallow';
 import type { UnifiedChatState } from '@/types/store-types';
 import { threadLoadingService } from '@/services/threadLoadingService';
 import { 
