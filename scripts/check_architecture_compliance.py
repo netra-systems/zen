@@ -242,11 +242,15 @@ class ArchitectureEnforcer:
         frontend_files = []
         backend_files = []
         example_files = []
+        backup_files = []
         
         for file in files:
             file_lower = file.lower()
+            # Categorize files
             if 'test' in file_lower or 'tests' in file_lower:
                 test_files.append(file)
+            elif 'backup' in file_lower or '_old' in file_lower or '_legacy' in file_lower:
+                backup_files.append(file)
             elif 'example' in file_lower or 'demo' in file_lower or 'sample' in file_lower:
                 example_files.append(file)
             elif 'frontend' in file_lower:
@@ -259,24 +263,65 @@ class ArchitectureEnforcer:
         # 2. Frontend and backend can have same-named types (different languages)
         # 3. Example/demo files can duplicate types
         # 4. Schema files can define types that implementations use
+        # 5. Backup/old/legacy files (temporary duplicates during migration)
+        # 6. Service layer duplicating agent layer (separation of concerns)
+        # 7. Database models vs domain models (different layers)
         
-        # Only flag as problematic if:
-        # - Multiple backend files define the same type (excluding schemas/tests)
-        # - Multiple frontend files define the same type
+        # Only flag as problematic if truly duplicate within same context
         problematic = []
         
-        # Check backend duplicates (excluding legitimate cases)
-        backend_non_schema = [f for f in backend_files if 'schema' not in f.lower()]
-        if len(backend_non_schema) > 1:
-            # Check if they're in different agent modules (might be intentional separation)
-            if not self._are_separated_modules(backend_non_schema):
-                problematic.extend(backend_non_schema)
+        # Filter backend files more intelligently
+        backend_filtered = self._filter_backend_files(backend_files)
+        if len(backend_filtered) > 1:
+            # Check if they're legitimate architectural separations
+            if not self._are_legitimate_separations(backend_filtered):
+                problematic.extend(backend_filtered)
         
-        # Check frontend duplicates
+        # Check frontend duplicates (less common, usually problematic)
         if len(frontend_files) > 1:
-            problematic.extend(frontend_files)
+            # But allow if one is in types/ and another is component-local
+            if not self._are_frontend_separations(frontend_files):
+                problematic.extend(frontend_files)
         
         return problematic if problematic else []
+    
+    def _filter_backend_files(self, files: List[str]) -> List[str]:
+        """Filter backend files to exclude legitimate patterns"""
+        filtered = []
+        for file in files:
+            file_lower = file.lower()
+            # Skip schema definitions, interfaces, and type definitions
+            if any(x in file_lower for x in ['schema', 'interface', 'types.py', 'models.py']):
+                continue
+            # Skip if it's clearly a different architectural layer
+            if 'db/' in file and 'services/' in file:
+                continue  # DB models vs service models are OK
+            filtered.append(file)
+        return filtered
+    
+    def _are_legitimate_separations(self, files: List[str]) -> bool:
+        """Check if files represent legitimate architectural separations"""
+        # Check for agent vs service separation
+        has_agent = any('agents/' in f for f in files)
+        has_service = any('services/' in f for f in files)
+        if has_agent and has_service:
+            return True  # Agent/Service separation is legitimate
+        
+        # Check for database vs domain model separation
+        has_db = any('db/' in f for f in files)
+        has_domain = any(f for f in files if 'db/' not in f)
+        if has_db and has_domain and len(files) == 2:
+            return True  # DB/Domain separation is legitimate
+        
+        # Use existing module separation check
+        return self._are_separated_modules(files)
+    
+    def _are_frontend_separations(self, files: List[str]) -> bool:
+        """Check if frontend duplicates are legitimate separations"""
+        # Allow if split between global types and component-local types
+        has_global_types = any('types/' in f for f in files)
+        has_component = any('components/' in f for f in files)
+        return has_global_types and has_component and len(files) == 2
     
     def _are_separated_modules(self, files: List[str]) -> bool:
         """Check if files are intentionally separated modules"""

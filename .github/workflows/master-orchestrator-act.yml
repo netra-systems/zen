@@ -73,7 +73,7 @@ jobs:
   
   determine-strategy:
     name: Determine Execution Strategy
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
       skip_tests: ${{ steps.check.outputs.skip_tests }}
