@@ -6,7 +6,7 @@ and alerting for circuit breaker state changes across the platform.
 
 import asyncio
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
 from enum import Enum
@@ -125,61 +125,44 @@ class CircuitBreakerMonitor:
                                   new_state: str,
                                   status: Dict[str, Any]) -> None:
         """Handle circuit breaker state change."""
-        event = CircuitBreakerEvent(
-            circuit_name=circuit_name,
-            old_state=old_state,
-            new_state=new_state,
-            timestamp=datetime.utcnow(),
-            failure_count=status.get("failure_count", 0),
-            success_rate=status.get("success_rate", 0.0),
-            metadata=status.get("metrics", {})
-        )
-        
+        from .circuit_breaker_helpers import create_state_change_event, should_create_open_circuit_alert
+        event = create_state_change_event(circuit_name, old_state, new_state, status)
         self._events.append(event)
         self._trim_events()
-        
         logger.info(f"Circuit breaker state change: {circuit_name} {old_state} -> {new_state}")
         
-        # Generate alert for critical state changes
-        if new_state == CircuitState.OPEN.value:
-            await self._create_alert(
-                circuit_name=circuit_name,
-                severity=AlertSeverity.HIGH,
-                message=f"Circuit breaker OPENED due to failures",
-                state=new_state,
-                metrics=status.get("metrics", {})
-            )
+        if should_create_open_circuit_alert(new_state):
+            await self._create_open_circuit_alert(circuit_name, new_state, status)
+    
+    async def _create_open_circuit_alert(self, circuit_name: str, new_state: str, status: Dict[str, Any]) -> None:
+        """Create alert for opened circuit breaker."""
+        await self._create_alert(
+            circuit_name=circuit_name,
+            severity=AlertSeverity.HIGH,
+            message=f"Circuit breaker OPENED due to failures",
+            state=new_state,
+            metrics=status.get("metrics", {})
+        )
     
     async def _check_alerts(self, circuit_name: str, status: Dict[str, Any]) -> None:
         """Check for alert conditions."""
-        state = status.get("state", "unknown")
-        metrics = status.get("metrics", {})
-        success_rate = status.get("success_rate", 1.0)
-        failure_count = status.get("failure_count", 0)
-        
-        # High failure rate alert
-        if state == CircuitState.CLOSED.value and success_rate < 0.5 and metrics.get("total_calls", 0) > 10:
-            await self._create_alert(
-                circuit_name=circuit_name,
-                severity=AlertSeverity.MEDIUM,
-                message=f"Low success rate: {success_rate:.2%}",
-                state=state,
-                metrics=metrics
-            )
-        
-        # High rejection rate alert
-        rejected_calls = metrics.get("rejected_calls", 0)
-        total_calls = metrics.get("total_calls", 1)
-        rejection_rate = rejected_calls / total_calls if total_calls > 0 else 0
-        
-        if rejection_rate > 0.1 and rejected_calls > 5:
-            await self._create_alert(
-                circuit_name=circuit_name,
-                severity=AlertSeverity.HIGH,
-                message=f"High rejection rate: {rejection_rate:.2%}",
-                state=state,
-                metrics=metrics
-            )
+        from .circuit_breaker_helpers import extract_circuit_metrics
+        metrics_data = extract_circuit_metrics(status)
+        await self._check_success_rate_alert(circuit_name, metrics_data)
+        await self._check_rejection_rate_alert(circuit_name, metrics_data)
+    
+    async def _check_success_rate_alert(self, circuit_name: str, metrics_data: Dict[str, Any]) -> None:
+        """Check and create low success rate alert if needed."""
+        from .circuit_breaker_helpers import should_alert_low_success_rate
+        if should_alert_low_success_rate(metrics_data["state"], metrics_data["success_rate"], metrics_data["total_calls"]):
+            await self._create_alert(circuit_name, AlertSeverity.MEDIUM, f"Low success rate: {metrics_data['success_rate']:.2%}", metrics_data["state"], {"total_calls": metrics_data["total_calls"]})
+    
+    async def _check_rejection_rate_alert(self, circuit_name: str, metrics_data: Dict[str, Any]) -> None:
+        """Check and create high rejection rate alert if needed."""
+        from .circuit_breaker_helpers import calculate_rejection_rate, should_alert_high_rejection_rate
+        rejection_rate = calculate_rejection_rate(metrics_data["rejected_calls"], metrics_data["total_calls"])
+        if should_alert_high_rejection_rate(rejection_rate, metrics_data["rejected_calls"]):
+            await self._create_alert(circuit_name, AlertSeverity.HIGH, f"High rejection rate: {rejection_rate:.2%}", metrics_data["state"], {"rejected_calls": metrics_data["rejected_calls"]})
     
     async def _create_alert(self, 
                            circuit_name: str,
@@ -192,7 +175,7 @@ class CircuitBreakerMonitor:
             circuit_name=circuit_name,
             severity=severity,
             message=message,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             state=state,
             metrics=metrics
         )
@@ -234,22 +217,15 @@ class CircuitBreakerMonitor:
     
     def get_health_summary(self) -> Dict[str, Any]:
         """Get health summary of all circuits."""
-        summary = {
-            "total_circuits": len(self._last_states),
-            "healthy_circuits": 0,
-            "degraded_circuits": 0,
-            "unhealthy_circuits": 0,
-            "recent_events": len(self.get_recent_events(10)),
-            "recent_alerts": len(self.get_recent_alerts(10))
-        }
+        from .circuit_breaker_helpers import build_health_summary_base, categorize_circuit_state
+        summary = build_health_summary_base()
+        summary["total_circuits"] = len(self._last_states)
+        summary["recent_events"] = len(self.get_recent_events(10))
+        summary["recent_alerts"] = len(self.get_recent_alerts(10))
         
         for state in self._last_states.values():
-            if state == CircuitState.CLOSED.value:
-                summary["healthy_circuits"] += 1
-            elif state == CircuitState.HALF_OPEN.value:
-                summary["degraded_circuits"] += 1
-            else:
-                summary["unhealthy_circuits"] += 1
+            category = categorize_circuit_state(state)
+            summary[f"{category}_circuits"] += 1
         
         return summary
 
@@ -263,7 +239,7 @@ class CircuitBreakerMetricsCollector:
     async def collect_metrics(self) -> Dict[str, Dict[str, Any]]:
         """Collect current metrics from all circuits."""
         all_status = await circuit_registry.get_all_status()
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(UTC)
         
         for circuit_name, status in all_status.items():
             metrics = self._extract_metrics(status, timestamp)
@@ -299,7 +275,7 @@ class CircuitBreakerMetricsCollector:
         if circuit_name not in self._metrics_history:
             return []
         
-        cutoff_time = datetime.utcnow() - timedelta(hours=hours)
+        cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
         return [
             m for m in self._metrics_history[circuit_name]
             if m["timestamp"] >= cutoff_time

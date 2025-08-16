@@ -15,7 +15,7 @@ Usage:
 """
 
 from typing import Dict, List, Optional, Any
-from datetime import datetime
+from datetime import datetime, UTC
 from pydantic import BaseModel, Field, ConfigDict
 import uuid
 
@@ -38,7 +38,7 @@ class CorpusAuditMetadata(BaseModel):
 class CorpusAuditRecord(BaseModel):
     """Unified corpus audit record - single source of truth."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     user_id: Optional[str] = None
     action: CorpusAuditAction
     status: CorpusAuditStatus
@@ -71,7 +71,7 @@ class CorpusAuditReport(BaseModel):
     records: List[CorpusAuditRecord]
     summary: Dict[str, int] = Field(default_factory=dict)
     time_range: Dict[str, Optional[datetime]] = Field(default_factory=dict)
-    generated_at: datetime = Field(default_factory=datetime.utcnow)
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 # Export all audit models

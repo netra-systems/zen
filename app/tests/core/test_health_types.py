@@ -1,7 +1,7 @@
 """Tests for health monitoring types and enums."""
 
 import pytest
-from datetime import datetime
+from datetime import datetime, UTC
 from dataclasses import asdict
 
 from app.core.health_types import (
@@ -37,7 +37,7 @@ class TestComponentHealth:
             name="test_component",
             status=HealthStatus.HEALTHY,
             health_score=0.95,
-            last_check=datetime.utcnow(),
+            last_check=datetime.now(UTC),
             error_count=0,
             uptime=100.0,
             metadata={"test": "data"}
@@ -56,7 +56,7 @@ class TestComponentHealth:
             name="test",
             status=HealthStatus.HEALTHY,
             health_score=1.0,
-            last_check=datetime.utcnow()
+            last_check=datetime.now(UTC)
         )
         
         assert health.error_count == 0
@@ -74,7 +74,7 @@ class TestSystemAlert:
             component="test_component",
             severity="warning",
             message="Test alert message",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             resolved=False,
             metadata={"source": "test"}
         )
@@ -93,7 +93,7 @@ class TestSystemAlert:
             component="test",
             severity="info",
             message="test",
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(UTC)
         )
         
         assert not alert.resolved
@@ -177,7 +177,7 @@ class TestSystemResourceMetrics:
         )
         
         # Timestamp should be recent
-        time_diff = datetime.utcnow() - metrics.timestamp
+        time_diff = datetime.now(UTC) - metrics.timestamp
         assert time_diff.total_seconds() < 1.0
 
 

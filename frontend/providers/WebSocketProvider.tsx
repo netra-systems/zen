@@ -47,7 +47,9 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         return prevMessages;
       }
       
-      return [...prevMessages, newMessage];
+      // Add new message and limit to last 100 messages for memory cleanup
+      const updatedMessages = [...prevMessages, newMessage];
+      return updatedMessages.length > 100 ? updatedMessages.slice(-100) : updatedMessages;
     });
   }, []);
 

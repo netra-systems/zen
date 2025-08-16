@@ -5,6 +5,7 @@ Main orchestrator for startup checks with modular delegation.
 Maintains 8-line function limit and coordinating responsibility.
 """
 
+import os
 import time
 from typing import Dict, Any, List
 from fastapi import FastAPI
@@ -23,6 +24,7 @@ class StartupChecker:
         self.app = app
         self.results: List[StartupCheckResult] = []
         self.start_time = time.time()
+        self.is_staging = self._is_staging_environment()
         
         self.env_checker = EnvironmentChecker()
         self.db_checker = DatabaseChecker(app)
@@ -54,31 +56,47 @@ class StartupChecker:
         try:
             start = time.time()
             result = await check_func()
-            duration = (time.time() - start) * 1000
-            result.duration_ms = duration
-            self.results.append(result)
+            self._record_check_success(result, start)
         except Exception as e:
-            logger.error(f"Check {check_func.__name__} failed unexpectedly: {e}")
-            self.results.append(StartupCheckResult(
-                name=check_func.__name__,
-                success=False,
-                message=f"Unexpected error: {e}",
-                critical=True
-            ))
+            self._record_check_failure(check_func, e)
     
     def _create_final_report(self) -> Dict[str, Any]:
         """Create final report from all check results"""
         total_duration = (time.time() - self.start_time) * 1000
+        failed_critical, failed_non_critical = self._categorize_failures()
+        passed_count = len([r for r in self.results if r.success])
+        return self._build_report_dict(total_duration, failed_critical, failed_non_critical, passed_count)
+    
+    def _is_staging_environment(self) -> bool:
+        """Check if running in staging environment"""
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        return environment == "staging" or bool(os.getenv("K_SERVICE"))
+    
+    def _record_check_success(self, result: StartupCheckResult, start_time: float) -> None:
+        """Record successful check result with timing"""
+        duration = (time.time() - start_time) * 1000
+        result.duration_ms = duration
+        self.results.append(result)
+    
+    def _record_check_failure(self, check_func, error: Exception) -> None:
+        """Record failed check result"""
+        logger.error(f"Check {check_func.__name__} failed unexpectedly: {error}")
+        self.results.append(StartupCheckResult(
+            name=check_func.__name__, success=False,
+            message=f"Unexpected error: {error}", critical=not self.is_staging
+        ))
+    
+    def _categorize_failures(self) -> tuple:
+        """Categorize failures into critical and non-critical"""
         failed_critical = [r for r in self.results if not r.success and r.critical]
         failed_non_critical = [r for r in self.results if not r.success and not r.critical]
-        
+        return failed_critical, failed_non_critical
+    
+    def _build_report_dict(self, total_duration: float, failed_critical: list, failed_non_critical: list, passed_count: int) -> Dict[str, Any]:
+        """Build final report dictionary"""
         return {
-            "success": len(failed_critical) == 0,
-            "total_checks": len(self.results),
-            "passed": len([r for r in self.results if r.success]),
-            "failed_critical": len(failed_critical),
-            "failed_non_critical": len(failed_non_critical),
-            "duration_ms": total_duration,
-            "results": self.results,
-            "failures": failed_critical + failed_non_critical
+            "success": len(failed_critical) == 0, "total_checks": len(self.results),
+            "passed": passed_count, "failed_critical": len(failed_critical),
+            "failed_non_critical": len(failed_non_critical), "duration_ms": total_duration,
+            "results": self.results, "failures": failed_critical + failed_non_critical
         }

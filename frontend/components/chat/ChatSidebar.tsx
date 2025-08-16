@@ -16,7 +16,8 @@ export const ChatSidebar: React.FC = () => {
     activeThreadId,
     setActiveThread,
     clearMessages,
-    resetLayers 
+    resetLayers,
+    setThreadLoading 
   } = useUnifiedChatStore();
   
   const { sendMessage } = useWebSocket();
@@ -129,11 +130,8 @@ export const ChatSidebar: React.FC = () => {
         payload: { thread_id: threadId }
       });
       
-      // Emit thread loading event
-      const loadingEvent = new CustomEvent('threadLoading', { 
-        detail: { threadId } 
-      });
-      window.dispatchEvent(loadingEvent);
+      // Set thread loading state
+      setThreadLoading(true);
       
       // Load thread messages
       const response = await ThreadService.getThreadMessages(threadId);
@@ -154,11 +152,8 @@ export const ChatSidebar: React.FC = () => {
       const loadMessages = useUnifiedChatStore.getState().loadMessages;
       loadMessages(convertedMessages);
       
-      // Emit thread loaded event
-      const loadedEvent = new CustomEvent('threadLoaded', { 
-        detail: { threadId, messages: convertedMessages } 
-      });
-      window.dispatchEvent(loadedEvent);
+      // Thread loading complete - the store will handle this automatically
+      // when loadMessages is called
       
       // Connect to new thread WebSocket
       const connectEvent = new CustomEvent('connectWebSocket', { 
@@ -170,11 +165,8 @@ export const ChatSidebar: React.FC = () => {
     } catch (error) {
       console.error('Failed to switch thread:', error);
       
-      // Emit thread loaded event even on error to clear loading state
-      const loadedEvent = new CustomEvent('threadLoaded', { 
-        detail: { threadId, messages: [], error: true } 
-      });
-      window.dispatchEvent(loadedEvent);
+      // Clear loading state on error
+      setThreadLoading(false);
     }
   };
 

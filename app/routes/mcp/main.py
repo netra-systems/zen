@@ -177,6 +177,3 @@ async def handle_mcp_message(
         "id": request.get("id", 1)
     }
 
-async def execute_tool(tool_name: str, params: dict) -> dict:
-    """Execute MCP tool for testing"""
-    return {"result": "success", "output": "data"}

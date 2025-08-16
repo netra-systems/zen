@@ -1,0 +1,45 @@
+{
+  "pull_request": {
+    "number": 123,
+    "title": "Test pull request for ACT",
+    "body": "This is a test PR for ACT local testing",
+    "base": {
+      "ref": "main",
+      "sha": "abc123",
+      "repo": {
+        "name": "netra-core-generation-1",
+        "full_name": "test-org/netra-core-generation-1"
+      }
+    },
+    "head": {
+      "ref": "feature/test-branch",
+      "sha": "def456",
+      "repo": {
+        "name": "netra-core-generation-1",
+        "full_name": "test-org/netra-core-generation-1"
+      }
+    },
+    "user": {
+      "login": "test-user",
+      "type": "User"
+    },
+    "draft": false,
+    "merged": false,
+    "mergeable": true,
+    "state": "open"
+  },
+  "action": "opened",
+  "number": 123,
+  "repository": {
+    "name": "netra-core-generation-1",
+    "full_name": "test-org/netra-core-generation-1",
+    "owner": {
+      "login": "test-org",
+      "type": "Organization"
+    }
+  },
+  "sender": {
+    "login": "test-user",
+    "type": "User"
+  }
+}

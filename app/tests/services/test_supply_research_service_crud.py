@@ -14,9 +14,14 @@ from app.db.models_postgres import AISupplyItem, SupplyUpdateLog
 
 
 @pytest.fixture
-def service(db_session):
-    """Create SupplyResearchService instance with real database"""
-    return SupplyResearchService(db_session)
+def mock_db_session():
+    """Create a mock database session."""
+    return MagicMock()
+
+@pytest.fixture
+def service(mock_db_session):
+    """Create SupplyResearchService instance with mock database"""
+    return SupplyResearchService(mock_db_session)
 
 
 @pytest.fixture

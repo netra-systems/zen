@@ -4,7 +4,7 @@ Main types module that aggregates and extends base types.
 """
 
 from typing import Dict, Any, Optional, List, Union, TypeVar, Generic
-from datetime import datetime
+from datetime import datetime, UTC
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field
 import uuid
@@ -68,7 +68,7 @@ class LLMProviderStatus(BaseModel):
     """Status of an LLM provider"""
     provider: LLMProvider
     available: bool
-    health_check_time: datetime = Field(default_factory=datetime.utcnow)
+    health_check_time: datetime = Field(default_factory=lambda: datetime.now(UTC))
     latency_ms: Optional[float] = None
     error_message: Optional[str] = None
     rate_limit_remaining: Optional[int] = None
@@ -78,14 +78,22 @@ class LLMProviderStatus(BaseModel):
 class LLMInstance(ABC, Generic[T]):
     """Generic LLM instance with strong typing"""
     
-    def __init__(self, config: 'LLMConfig'):
-        self.config = config
+    def _init_client_and_cache(self) -> None:
+        """Initialize client and cache components."""
         self._client: Optional[Any] = None  # Provider-specific client
         self._cache: Dict[str, 'LLMCache'] = {}
-        self._metrics: LLMMetrics = LLMMetrics(
+    
+    def _init_metrics(self, config: 'LLMConfig') -> LLMMetrics:
+        """Initialize metrics for the LLM instance."""
+        return LLMMetrics(
             provider=config.provider,
             model=str(config.model)
         )
+    
+    def __init__(self, config: 'LLMConfig'):
+        self.config = config
+        self._init_client_and_cache()
+        self._metrics = self._init_metrics(config)
     
     @abstractmethod
     async def generate(self, request: 'LLMRequest') -> 'LLMResponse':

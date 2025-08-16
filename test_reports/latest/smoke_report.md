@@ -1,23 +1,23 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-15T14:53:50.907293  
+**Generated:** 2025-08-15T21:27:22.544878  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
 ## Test Summary
 
-**Total Tests:** 7  
-**Passed:** 7  
+**Total Tests:** 0  
+**Passed:** 0  
 **Failed:** 0  
 **Skipped:** 0  
 **Errors:** 0  
-**Overall Status:** [PASSED]
+**Overall Status:** [FAILED]
 
 ### Component Breakdown
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 7 | 7 | 0 | 0 | 0 | 6.58s | [PASSED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 4.96s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -27,8 +27,8 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 6.58s
-- **Exit Code:** 0
+- **Total Duration:** 4.96s
+- **Exit Code:** 4
 
 ### Backend Configuration
 ```
@@ -58,38 +58,80 @@ Test Configuration:
 Running command:
   pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
 ================================================================================
-[1m============================= test session starts =============================[0m
-platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
-cachedir: .pytest_cache
-metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
-configfile: pytest.ini
-plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
-asyncio: mode=Mode.AUTO
-[1mcollecting ... [0mcollected 7 items
-
-app/tests/routes/test_health_route.py::test_basic_import [32mPASSED[0m[32m          [ 14%][0m
-app/tests/routes/test_health_route.py::test_health_endpoint_direct [32mPASSED[0m[32m [ 28%][0m
-app/tests/routes/test_health_route.py::test_live_endpoint [32mPASSED[0m[32m         [ 42%][0m
-app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error [32mPASSED[0m[32m [ 57%][0m
-app/tests/core/test_config_manager.py::TestConfigManager::test_initialization [32mPASSED[0m[32m [ 71%][0m
-app/tests/services/test_security_service.py::test_encrypt_and_decrypt [32mPASSED[0m[32m [ 85%][0m
-tests/test_system_startup.py::TestSystemStartup::test_configuration_loading [32mPASSED[0m[32m [100%][0m
-
-[32m============================== [32m[1m7 passed[0m[32m in 0.28s[0m[32m ==============================[0m
+Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
+Loaded .env.development file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development
+Loaded .env.development.local file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development.local
 ================================================================================
-[PASS] ALL TESTS PASSED in 5.81s
+[FAIL] TESTS FAILED with exit code 4 after 4.26s
 ================================================================================
 
-2025-08-15 14:53:49.910 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 10 secrets from environment variables
-2025-08-15 14:53:49.911 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: gemini-api-key, jwt-secret-key, fernet-key
-2025-08-15 14:53:49.911 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 10 secrets loaded
-2025-08-15 14:53:49.911 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 10 secrets
-2025-08-15 14:53:49.911 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 10 secrets (from 10 loaded)
-2025-08-15 14:53:49.911 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
-2025-08-15 14:53:49.912 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
+2025-08-15 21:27:20.331 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
+2025-08-15 21:27:20.331 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
+2025-08-15 21:27:20.331 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
+2025-08-15 21:27:20.331 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
+2025-08-15 21:27:20.332 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
+2025-08-15 21:27:20.332 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
+2025-08-15 21:27:20.332 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
+2025-08-15 21:27:20.333 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set log_level from LOG_LEVEL
+2025-08-15 21:27:20.333 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set environment from ENVIRONMENT
+2025-08-15 21:27:20.333 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse host: localhost
+2025-08-15 21:27:20.333 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse port: 9000
+2025-08-15 21:27:20.333 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse password
+2025-08-15 21:27:20.333 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse user: default
+2025-08-15 21:27:20.333 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set Gemini API key for LLM configs
+2025-08-15 21:27:20.333 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 13 env vars
+2025-08-15 21:27:20.334 | INFO     | app.core.unified_logging:_emit_log:117 | Loading secrets...
+2025-08-15 21:27:20.335 | INFO     | app.core.unified_logging:_emit_log:117 | Starting secret=REDACTED process for environment: development
+2025-08-15 21:27:20.335 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 9 secrets from environment variables
+2025-08-15 21:27:20.335 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: gemini-api-key, jwt-secret-key, fernet-key
+2025-08-15 21:27:20.335 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 9 secrets loaded
+2025-08-15 21:27:20.336 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 9 secrets
+2025-08-15 21:27:20.336 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
+2025-08-15 21:27:20.336 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
+2025-08-15 21:27:20.336 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
+2025-08-15 21:27:20.352 | DEBUG    | logging:handle:1028 | loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
+2025-08-15 21:27:20.352 | DEBUG    | logging:handle:1028 | loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
+2025-08-15 21:27:20.352 | DEBUG    | logging:handle:1028 | loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
+2025-08-15 21:27:20.366 | DEBUG    | logging:handle:1028 | registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
+2025-08-15 21:27:20.626 | INFO     | app.db.postgres_core:_create_and_setup_engine:258 | PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling
+2025-08-15 21:27:20.742 | DEBUG    | app.services.metrics.agent_metrics:__init__:24 | Initialized AgentMetricsCollector with buffer size 5000
+2025-08-15 21:27:21.270 | DEBUG    | logging:handle:1028 | Using orjson library for writing JSON byte strings
+2025-08-15 21:27:21.320 | DEBUG    | logging:handle:1028 | Looking up time zone info from registry
+2025-08-15 21:27:21.685 | INFO     | app.core.unified_logging:_emit_log:117 | SyntheticDataService initialized successfully
+ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py'.
+app\tests\conftest.py:52: in <module>
+    from app.main import app
+app\main.py:48: in <module>
+    app = create_app()
+          ^^^^^^^^^^^^
+app\core\app_factory.py:144: in create_app
+    register_api_routes(app)
+app\core\app_factory.py:62: in register_api_routes
+    _import_and_register_routes(app)
+app\core\app_factory.py:67: in _import_and_register_routes
+    route_modules = _import_route_modules()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+app\core\app_factory.py:74: in _import_route_modules
+    from app.routes import (
+app\routes\demo.py:7: in <module>
+    from app.services.demo_service import DemoService, get_demo_service
+app\services\demo_service.py:6: in <module>
+    from app.services.demo import (
+app\services\demo\__init__.py:3: in <module>
+    from .demo_service import DemoService, get_demo_service
+app\services\demo\demo_service.py:6: in <module>
+    from app.services.agent_service import AgentService
+app\services\agent_service.py:16: in <module>
+    from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+app\agents\supervisor_consolidated.py:12: in <module>
+    from app.agents.base import BaseSubAgent
+app\agents\base.py:7: in <module>
+    from app.agents.base_agent import BaseSubAgent
+app\agents\base_agent.py:9: in <module>
+    from app.schemas import SubAgentLifecycle, DeepAgentState
+E   ImportError: cannot import name 'DeepAgentState' from 'app.schemas' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\schemas\__init__.py)
 --- Logging error in Loguru Handler #1 ---
-Record was: {'elapsed': datetime.timedelta(seconds=3, microseconds=872697), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=32612, name='MainProcess'), 'thread': (id=42976, name='MainThread'), 'time': datetime(2025, 8, 15, 14, 53, 50, 323373, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
+Record was: {'elapsed': datetime.timedelta(seconds=2, microseconds=551722), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=30568, name='MainProcess'), 'thread': (id=17772, name='MainThread'), 'time': datetime(2025, 8, 15, 21, 27, 22, 78421, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
 Traceback (most recent call last):
   File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
     self._sink.write(message)

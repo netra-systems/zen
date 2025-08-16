@@ -1,0 +1,324 @@
+name: Reusable Staging Deployment
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Target environment name'
+        required: false
+        type: string
+        default: 'staging'
+      action:
+        description: 'Deployment action: deploy, destroy, restart, status'
+        required: false
+        type: string
+        default: 'deploy'
+      branch_ref:
+        description: 'Branch reference to deploy'
+        required: false
+        type: string
+        default: ''
+      terraform_workspace:
+        description: 'Terraform workspace to use'
+        required: false
+        type: string
+        default: 'staging'
+      auto_destroy:
+        description: 'Auto destroy on PR close'
+        required: false
+        type: boolean
+        default: true
+      skip_condition:
+        description: 'Skip deployment if condition is met'
+        required: false
+        type: string
+        default: 'false'
+      timeout_minutes:
+        description: 'Deployment timeout in minutes'
+        required: false
+        type: number
+        default: 45
+    outputs:
+      deployment_status:
+        description: 'Deployment status'
+        value: ${{ jobs.deploy.outputs.deployment_status }}
+      frontend_url:
+        description: 'Frontend application URL'
+        value: ${{ jobs.deploy.outputs.frontend_url }}
+      backend_url:
+        description: 'Backend API URL'
+        value: ${{ jobs.deploy.outputs.backend_url }}
+      deployment_id:
+        description: 'GitHub deployment ID'
+        value: ${{ jobs.deploy.outputs.deployment_id }}
+
+permissions:
+  contents: read
+  deployments: write
+  pull-requests: write
+  issues: write
+  statuses: write
+
+env:
+  ACT: 'false'
+  IS_ACT: 'false'
+  TF_IN_AUTOMATION: 'true'
+
+jobs:
+  deploy:
+    runs-on: warp-custom-default
+    if: ${{ inputs.skip_condition != 'true' }}
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    environment: ${{ inputs.environment }}
+    outputs:
+      deployment_status: ${{ steps.final-status.outputs.status }}
+      frontend_url: ${{ steps.extract-urls.outputs.frontend_url }}
+      backend_url: ${{ steps.extract-urls.outputs.backend_url }}
+      deployment_id: ${{ steps.create-deployment.outputs.deployment_id }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch_ref || github.head_ref || github.ref }}
+          
+      - name: Create GitHub deployment
+        id: create-deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: '${{ inputs.branch_ref || github.head_ref || github.ref }}',
+              environment: '${{ inputs.environment }}',
+              description: 'Deploying to ${{ inputs.environment }} via ${{ inputs.action }}',
+              auto_merge: false,
+              required_contexts: []
+            });
+            
+            console.log(`Created deployment: ${deployment.data.id}`);
+            core.setOutput('deployment_id', deployment.data.id);
+            
+            // Set deployment status to in_progress
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.data.id,
+              state: 'in_progress',
+              description: 'Deployment started',
+              environment_url: ''
+            });
+            
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.5.0'
+          terraform_wrapper: false
+          
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+        
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+        
+      - name: Configure GCP credentials
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+          
+      - name: Set up gcloud CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          
+      - name: Initialize Terraform
+        working-directory: ./terraform-gcp
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="prefix=staging/${{ github.repository }}"
+            
+      - name: Select Terraform workspace
+        working-directory: ./terraform-gcp
+        run: |
+          terraform workspace select ${{ inputs.terraform_workspace }} || \
+          terraform workspace new ${{ inputs.terraform_workspace }}
+          
+      - name: Execute deployment action
+        id: deploy-action
+        working-directory: ./terraform-gcp
+        run: |
+          case "${{ inputs.action }}" in
+            "deploy")
+              terraform plan -var-file="staging.tfvars" -out=staging.tfplan
+              terraform apply -auto-approve staging.tfplan
+              ;;
+            "destroy")
+              terraform plan -destroy -var-file="staging.tfvars" -out=destroy.tfplan
+              terraform apply -auto-approve destroy.tfplan
+              ;;
+            "restart")
+              # Restart services without rebuilding infrastructure
+              terraform refresh -var-file="staging.tfvars"
+              # Add restart logic here
+              echo "Restarting services..."
+              ;;
+            "status")
+              terraform show
+              ;;
+            *)
+              echo "Unknown action: ${{ inputs.action }}"
+              exit 1
+              ;;
+          esac
+          
+      - name: Extract deployment URLs
+        id: extract-urls
+        if: inputs.action == 'deploy' || inputs.action == 'status'
+        working-directory: ./terraform-gcp
+        run: |
+          if terraform output frontend_url >/dev/null 2>&1; then
+            frontend_url=$(terraform output -raw frontend_url)
+            echo "frontend_url=$frontend_url" >> $GITHUB_OUTPUT
+          else
+            echo "frontend_url=" >> $GITHUB_OUTPUT
+          fi
+          
+          if terraform output backend_url >/dev/null 2>&1; then
+            backend_url=$(terraform output -raw backend_url)
+            echo "backend_url=$backend_url" >> $GITHUB_OUTPUT
+          else
+            echo "backend_url=" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Run deployment health check
+        id: health-check
+        if: inputs.action == 'deploy'
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 5
+          max_attempts: 3
+          retry_wait_seconds: 30
+          command: |
+            backend_url="${{ steps.extract-urls.outputs.backend_url }}"
+            if [ -n "$backend_url" ]; then
+              curl -f "$backend_url/health" || exit 1
+            fi
+            
+            frontend_url="${{ steps.extract-urls.outputs.frontend_url }}"
+            if [ -n "$frontend_url" ]; then
+              curl -f "$frontend_url" || exit 1
+            fi
+            
+      - name: Determine final status
+        id: final-status
+        if: always()
+        run: |
+          if [ "${{ steps.deploy-action.outcome }}" = "success" ]; then
+            if [ "${{ inputs.action }}" = "deploy" ] && [ "${{ steps.health-check.outcome }}" != "success" ]; then
+              status="failure"
+              echo "Deployment succeeded but health check failed"
+            else
+              status="success"
+            fi
+          elif [ "${{ steps.deploy-action.outcome }}" = "cancelled" ]; then
+            status="cancelled"
+          else
+            status="failure"
+          fi
+          
+          echo "status=$status" >> $GITHUB_OUTPUT
+          
+      - name: Update deployment status
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deploymentId = '${{ steps.create-deployment.outputs.deployment_id }}';
+            const status = '${{ steps.final-status.outputs.status }}';
+            const frontendUrl = '${{ steps.extract-urls.outputs.frontend_url }}';
+            const backendUrl = '${{ steps.extract-urls.outputs.backend_url }}';
+            
+            let state, description, environmentUrl;
+            
+            switch(status) {
+              case 'success':
+                state = 'success';
+                description = 'Deployment completed successfully';
+                environmentUrl = frontendUrl || backendUrl || '';
+                break;
+              case 'cancelled':
+                state = 'error';
+                description = 'Deployment was cancelled';
+                environmentUrl = '';
+                break;
+              default:
+                state = 'failure';
+                description = 'Deployment failed';
+                environmentUrl = '';
+            }
+            
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deploymentId,
+              state: state,
+              description: description,
+              environment_url: environmentUrl
+            });
+            
+      - name: Save deployment info
+        if: success() && inputs.action == 'deploy'
+        run: |
+          mkdir -p deployment-info
+          cat > deployment-info/staging.json << EOF
+          {
+            "deployment_id": "${{ steps.create-deployment.outputs.deployment_id }}",
+            "frontend_url": "${{ steps.extract-urls.outputs.frontend_url }}",
+            "backend_url": "${{ steps.extract-urls.outputs.backend_url }}",
+            "commit_sha": "${{ github.sha }}",
+            "deployed_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "workspace": "${{ inputs.terraform_workspace }}"
+          }
+          EOF
+          
+      - name: Upload deployment artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-artifacts-${{ inputs.environment }}-${{ github.run_id }}
+          path: |
+            terraform-gcp/*.tfplan
+            terraform-gcp/terraform.tfstate
+            deployment-info/
+          retention-days: 7
+          
+      - name: Cleanup on failure
+        if: failure() && inputs.action == 'deploy'
+        working-directory: ./terraform-gcp
+        run: |
+          echo "Cleaning up failed deployment..."
+          # Attempt to destroy partially created resources
+          terraform plan -destroy -var-file="staging.tfvars" -out=cleanup.tfplan || true
+          terraform apply -auto-approve cleanup.tfplan || true

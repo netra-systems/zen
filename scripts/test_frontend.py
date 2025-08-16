@@ -334,11 +334,19 @@ def run_type_check(args) -> int:
     return result.returncode
 
 
-def main():
+def create_argument_parser():
+    """Create and configure argument parser"""
     parser = argparse.ArgumentParser(
         description="Comprehensive frontend test runner for Netra AI Platform",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+        epilog=get_usage_examples()
+    )
+    return parser
+
+
+def get_usage_examples():
+    """Get usage examples string"""
+    return """
 Examples:
   # Run all Jest tests
   python scripts/test_frontend.py
@@ -363,196 +371,181 @@ Examples:
   # Full CI/CD run
   python scripts/test_frontend.py --lint --type-check --coverage --build
         """
-    )
-    
-    # Test selection
-    parser.add_argument(
-        "tests",
-        nargs="*",
-        help="Specific test files or patterns to run"
-    )
-    parser.add_argument(
-        "--category", "-c",
-        choices=list(TEST_CATEGORIES.keys()),
-        help="Run tests from a specific category"
-    )
-    parser.add_argument(
-        "--keyword", "-k",
-        help="Only run tests matching the given pattern"
-    )
-    
-    # Test types
-    parser.add_argument(
-        "--e2e",
-        action="store_true",
-        help="Run E2E tests with Cypress"
-    )
-    parser.add_argument(
-        "--cypress-open",
-        action="store_true",
-        help="Open Cypress interactive runner"
-    )
-    
-    # Jest options
-    parser.add_argument(
-        "--watch", "-w",
-        action="store_true",
-        help="Run Jest in watch mode"
-    )
-    parser.add_argument(
-        "--coverage", "--cov",
-        action="store_true",
-        help="Enable coverage reporting"
-    )
-    parser.add_argument(
-        "--update-snapshots", "-u",
-        action="store_true",
-        help="Update Jest snapshots"
-    )
-    
-    # Additional checks
-    parser.add_argument(
-        "--lint", "-l",
-        action="store_true",
-        help="Run ESLint"
-    )
-    parser.add_argument(
-        "--fix",
-        action="store_true",
-        help="Auto-fix linting issues"
-    )
-    parser.add_argument(
-        "--type-check", "-t",
-        action="store_true",
-        help="Run TypeScript type checking"
-    )
-    parser.add_argument(
-        "--build", "-b",
-        action="store_true",
-        help="Build frontend for production"
-    )
-    
-    # Environment options
-    parser.add_argument(
-        "--check-deps",
-        action="store_true",
-        help="Check test dependencies before running"
-    )
-    parser.add_argument(
-        "--install-deps",
-        action="store_true",
-        help="Install dependencies if missing"
-    )
-    parser.add_argument(
-        "--verbose", "-v",
-        action="store_true",
-        help="Verbose output"
-    )
-    
-    # Isolation options
-    parser.add_argument(
-        "--isolation",
-        action="store_true",
-        help="Use test isolation for concurrent execution"
-    )
-    
-    # Cleanup options
-    parser.add_argument(
-        "--cleanup-on-exit",
-        action="store_true",
-        help="Clean up Node processes on exit (automatic on Windows)"
-    )
-    
-    args = parser.parse_args()
-    
-    # Setup test isolation if requested
-    isolation_manager = None
-    if args.isolation and TestIsolationManager:
-        isolation_manager = TestIsolationManager()
-        isolation_manager.setup_environment()
-        isolation_manager.apply_environment()
-        isolation_manager.register_cleanup()
-    
+
+
+def add_test_selection_args(parser):
+    """Add test selection arguments to parser"""
+    parser.add_argument("tests", nargs="*", help="Specific test files or patterns to run")
+    parser.add_argument("--category", "-c", choices=list(TEST_CATEGORIES.keys()), help="Run tests from a specific category")
+    parser.add_argument("--keyword", "-k", help="Only run tests matching the given pattern")
+
+
+def add_test_type_args(parser):
+    """Add test type arguments to parser"""
+    parser.add_argument("--e2e", action="store_true", help="Run E2E tests with Cypress")
+    parser.add_argument("--cypress-open", action="store_true", help="Open Cypress interactive runner")
+
+
+def add_jest_option_args(parser):
+    """Add Jest option arguments to parser"""
+    parser.add_argument("--watch", "-w", action="store_true", help="Run Jest in watch mode")
+    parser.add_argument("--coverage", "--cov", action="store_true", help="Enable coverage reporting")
+    parser.add_argument("--update-snapshots", "-u", action="store_true", help="Update Jest snapshots")
+
+
+def add_additional_check_args(parser):
+    """Add additional check arguments to parser"""
+    parser.add_argument("--lint", "-l", action="store_true", help="Run ESLint")
+    parser.add_argument("--fix", action="store_true", help="Auto-fix linting issues")
+    parser.add_argument("--type-check", "-t", action="store_true", help="Run TypeScript type checking")
+    parser.add_argument("--build", "-b", action="store_true", help="Build frontend for production")
+
+
+def add_environment_args(parser):
+    """Add environment arguments to parser"""
+    parser.add_argument("--check-deps", action="store_true", help="Check test dependencies before running")
+    parser.add_argument("--install-deps", action="store_true", help="Install dependencies if missing")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+
+
+def add_isolation_args(parser):
+    """Add isolation arguments to parser"""
+    parser.add_argument("--isolation", action="store_true", help="Use test isolation for concurrent execution")
+    parser.add_argument("--cleanup-on-exit", action="store_true", help="Clean up Node processes on exit (automatic on Windows)")
+
+
+def setup_isolation_manager(args):
+    """Setup test isolation manager if requested"""
+    if not (args.isolation and TestIsolationManager):
+        return None
+    manager = TestIsolationManager()
+    manager.setup_environment()
+    manager.apply_environment()
+    manager.register_cleanup()
+    return manager
+
+
+def print_header():
+    """Print test runner header"""
     print("=" * 80)
     print("NETRA AI PLATFORM - FRONTEND TEST RUNNER")
     print("=" * 80)
-    
-    # Check dependencies
-    if args.check_deps:
-        print("\nChecking dependencies...")
-        deps = check_dependencies()
-        for dep, available in deps.items():
-            status = "[OK]" if available else "[MISSING]"
-            print(f"  {status} {dep}")
-        print()
-    
-    # Install dependencies if needed
+
+
+def handle_dependency_check(args):
+    """Handle dependency checking if requested"""
+    if not args.check_deps:
+        return
+    print("\nChecking dependencies...")
+    deps = check_dependencies()
+    for dep, available in deps.items():
+        status = "[OK]" if available else "[MISSING]"
+        print(f"  {status} {dep}")
+    print()
+
+
+def handle_dependency_install(args):
+    """Handle dependency installation if needed"""
     if args.install_deps or not check_node_modules():
         if not install_dependencies(args.install_deps):
             sys.exit(1)
-    
-    # Track overall exit code
-    exit_code = 0
-    
-    # Run linting if requested
-    if args.lint:
-        print("\n" + "=" * 80)
-        lint_result = run_lint(args)
-        if lint_result != 0:
-            exit_code = lint_result
-            if not args.fix:
-                print("[FAIL] Linting failed. Use --fix to auto-fix issues.")
-    
-    # Run type checking if requested
-    if args.type_check:
-        print("\n" + "=" * 80)
-        type_result = run_type_check(args)
-        if type_result != 0:
-            exit_code = type_result
-            print("[FAIL] Type checking failed.")
-    
-    # Run tests
+
+
+def execute_lint_check(args):
+    """Execute linting check if requested"""
+    if not args.lint:
+        return 0
+    print("\n" + "=" * 80)
+    lint_result = run_lint(args)
+    if lint_result != 0 and not args.fix:
+        print("[FAIL] Linting failed. Use --fix to auto-fix issues.")
+    return lint_result
+
+
+def execute_type_check(args):
+    """Execute type checking if requested"""
+    if not args.type_check:
+        return 0
+    print("\n" + "=" * 80)
+    type_result = run_type_check(args)
+    if type_result != 0:
+        print("[FAIL] Type checking failed.")
+    return type_result
+
+
+def execute_tests(args, isolation_manager):
+    """Execute tests based on arguments"""
     if args.e2e or args.cypress_open:
         print("\n" + "=" * 80)
         print("Running Cypress E2E Tests")
         print("-" * 80)
-        test_result = run_cypress_tests(args, isolation_manager)
+        return run_cypress_tests(args, isolation_manager)
     else:
         print("\n" + "=" * 80)
         print("Running Jest Tests")
         print("-" * 80)
-        test_result = run_jest_tests(args, isolation_manager)
-    
-    if test_result != 0:
-        exit_code = test_result
-    
-    # Build if requested
-    if args.build:
-        print("\n" + "=" * 80)
-        build_result = build_frontend(args)
-        if build_result != 0:
-            exit_code = build_result
-            print("[FAIL] Build failed.")
-    
-    # Final results
+        return run_jest_tests(args, isolation_manager)
+
+
+def execute_build(args):
+    """Execute build if requested"""
+    if not args.build:
+        return 0
+    print("\n" + "=" * 80)
+    build_result = build_frontend(args)
+    if build_result != 0:
+        print("[FAIL] Build failed.")
+    return build_result
+
+
+def print_final_results(exit_code):
+    """Print final test results"""
     print("\n" + "=" * 80)
     if exit_code == 0:
         print("[SUCCESS] ALL CHECKS PASSED")
     else:
         print(f"[FAIL] CHECKS FAILED with exit code {exit_code}")
     print("=" * 80)
+
+
+def handle_cleanup(args, exit_code):
+    """Handle cleanup processes if needed"""
+    if not (args.cleanup_on_exit or (exit_code != 0 and sys.platform == "win32")):
+        return
+    cleanup_script = PROJECT_ROOT / "scripts" / "cleanup_test_processes.py"
+    if cleanup_script.exists():
+        try:
+            print("\nCleaning up test processes...")
+            subprocess.run([sys.executable, str(cleanup_script), "--force"], timeout=10, capture_output=True)
+        except:
+            pass
+
+
+def main():
+    """Main entry point for frontend test runner"""
+    parser = create_argument_parser()
+    add_test_selection_args(parser)
+    add_test_type_args(parser)
+    add_jest_option_args(parser)
+    add_additional_check_args(parser)
+    add_environment_args(parser)
+    add_isolation_args(parser)
+    args = parser.parse_args()
     
-    # Clean up Node processes on Windows if requested or if tests failed
-    if args.cleanup_on_exit or (exit_code != 0 and sys.platform == "win32"):
-        cleanup_script = PROJECT_ROOT / "scripts" / "cleanup_test_processes.py"
-        if cleanup_script.exists():
-            try:
-                print("\nCleaning up test processes...")
-                subprocess.run([sys.executable, str(cleanup_script), "--force"], 
-                             timeout=10, capture_output=True)
-            except:
-                pass
+    isolation_manager = setup_isolation_manager(args)
+    print_header()
     
+    handle_dependency_check(args)
+    handle_dependency_install(args)
+    
+    exit_code = 0
+    exit_code = max(exit_code, execute_lint_check(args))
+    exit_code = max(exit_code, execute_type_check(args))
+    exit_code = max(exit_code, execute_tests(args, isolation_manager))
+    exit_code = max(exit_code, execute_build(args))
+    
+    print_final_results(exit_code)
+    handle_cleanup(args, exit_code)
     sys.exit(exit_code)
 
 

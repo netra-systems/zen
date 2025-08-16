@@ -93,6 +93,10 @@ class BaseService(BaseServiceMixin):
         if self._initialized:
             return
         
+        await self._perform_initialization()
+    
+    async def _perform_initialization(self) -> None:
+        """Perform service initialization with error handling."""
         try:
             await self._initialize_impl()
             self._initialized = True

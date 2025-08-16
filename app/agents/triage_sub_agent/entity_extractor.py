@@ -12,7 +12,13 @@ class EntityExtractor:
     
     def __init__(self):
         """Initialize the entity extractor"""
-        self.model_patterns = [
+        self.model_patterns = self._get_model_patterns()
+        self.metric_keywords = self._get_metric_keywords()
+        self.time_patterns = self._get_time_patterns()
+    
+    def _get_model_patterns(self):
+        """Get model name patterns."""
+        return [
             r'gpt-?[0-9]+\.?[0-9]*(?:-?turbo)?',
             r'claude-?[0-9]+(?:-[a-z]+)?',
             r'llama-?[0-9]+(?:b)?(?:-[a-z]+)?',
@@ -22,13 +28,17 @@ class EntityExtractor:
             r'openai',
             r'palm-?[0-9]*'
         ]
-        
-        self.metric_keywords = [
+    
+    def _get_metric_keywords(self):
+        """Get metric keywords."""
+        return [
             'latency', 'throughput', 'cost', 'accuracy', 'error',
             'response time', 'tokens', 'requests per second', 'rps', 'memory'
         ]
-        
-        self.time_patterns = [
+    
+    def _get_time_patterns(self):
+        """Get time pattern expressions."""
+        return [
             r'last\s+(\d+)\s+(hours?|days?|weeks?|months?)',
             r'past\s+(\d+)\s+(hours?|days?|weeks?|months?)',
             r'(\d{4}-\d{2}-\d{2})',
@@ -39,19 +49,20 @@ class EntityExtractor:
         """Extract key entities from the user request"""
         entities = ExtractedEntities()
         
-        # Extract model names
-        entities.models_mentioned = self._extract_models(request)
-        
-        # Extract metrics
-        entities.metrics_mentioned = self._extract_metrics(request)
-        
-        # Extract thresholds and targets
-        entities.thresholds, entities.targets = self._extract_numbers(request)
-        
-        # Extract time ranges
-        entities.time_ranges = self._extract_time_ranges(request)
+        self._populate_models_and_metrics(entities, request)
+        self._populate_numbers_and_times(entities, request)
         
         return entities
+    
+    def _populate_models_and_metrics(self, entities: ExtractedEntities, request: str):
+        """Populate models and metrics in entities."""
+        entities.models_mentioned = self._extract_models(request)
+        entities.metrics_mentioned = self._extract_metrics(request)
+    
+    def _populate_numbers_and_times(self, entities: ExtractedEntities, request: str):
+        """Populate thresholds, targets, and time ranges."""
+        entities.thresholds, entities.targets = self._extract_numbers(request)
+        entities.time_ranges = self._extract_time_ranges(request)
     
     def _extract_models(self, request: str) -> list:
         """Extract model names from request"""
@@ -78,20 +89,25 @@ class EntityExtractor:
         number_pattern = r'\b\d+(?:\.\d+)?(?:\s*(?:ms|s|%|tokens?|requests?|RPS|USD|dollars?))?'
         numbers = re.findall(number_pattern, request)
         
-        for num in numbers:
-            # Check context around the number
-            remaining_text = request[request.find(num):]
-            
-            if self._is_time_value(remaining_text, num):
-                thresholds.append({"type": "time", "value": num})
-            elif self._is_percentage(remaining_text, num):
-                targets.append({"type": "percentage", "value": self._format_percentage(num)})
-            elif self._is_token_value(remaining_text):
-                thresholds.append({"type": "tokens", "value": num})
-            elif self._is_rate_value(remaining_text):
-                thresholds.append({"type": "rate", "value": num})
-        
+        self._categorize_numbers(numbers, request, thresholds, targets)
         return thresholds, targets
+    
+    def _categorize_numbers(self, numbers, request, thresholds, targets):
+        """Categorize numbers into thresholds and targets."""
+        for num in numbers:
+            remaining_text = request[request.find(num):]
+            self._classify_number(num, remaining_text, thresholds, targets)
+    
+    def _classify_number(self, num, remaining_text, thresholds, targets):
+        """Classify a single number based on context."""
+        if self._is_time_value(remaining_text, num):
+            thresholds.append({"type": "time", "value": num})
+        elif self._is_percentage(remaining_text, num):
+            targets.append({"type": "percentage", "value": self._format_percentage(num)})
+        elif self._is_token_value(remaining_text):
+            thresholds.append({"type": "tokens", "value": num})
+        elif self._is_rate_value(remaining_text):
+            thresholds.append({"type": "rate", "value": num})
     
     def _is_time_value(self, remaining_text: str, num: str) -> bool:
         """Check if number represents a time value"""
@@ -121,8 +137,12 @@ class EntityExtractor:
         time_ranges = []
         
         for pattern in self.time_patterns:
-            matches = re.findall(pattern, request.lower())
-            for match in matches:
-                time_ranges.append({"pattern": match})
+            self._process_time_pattern(pattern, request, time_ranges)
         
         return time_ranges
+    
+    def _process_time_pattern(self, pattern, request, time_ranges):
+        """Process a single time pattern and add matches."""
+        matches = re.findall(pattern, request.lower())
+        for match in matches:
+            time_ranges.append({"pattern": match})

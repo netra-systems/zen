@@ -42,12 +42,16 @@ class CodeDetector:
     Identifies code snippets and programming constructs in text input.
     """
     def contains_code(self, text: str) -> bool:
-        # Production regex patterns for code detection
-        patterns = [
-            r'import\s+\w+',
-            r'def\s+\w+\(.*\):',
-            r'class\s+\w+:',
-            r'\{.*\}', # JSON-like structures
-            r';\s*$',  # C-style line endings
-        ]
+        patterns = _get_code_detection_patterns()
         return any(re.search(p, text) for p in patterns)
+
+
+def _get_code_detection_patterns() -> list:
+    """Get regex patterns for code detection."""
+    return [
+        r'import\s+\w+',
+        r'def\s+\w+\(.*\):',
+        r'class\s+\w+:',
+        r'\{.*\}',  # JSON-like structures
+        r';\s*$',   # C-style line endings
+    ]

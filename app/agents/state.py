@@ -7,22 +7,14 @@ from app.core.json_parsing_utils import parse_string_list_field
 # Import actual types needed at runtime
 from app.agents.triage_sub_agent.models import TriageResult
 from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+from app.schemas.agent_models import AgentMetadata
 
 # Import types only for type checking to avoid circular dependencies  
 if TYPE_CHECKING:
     pass
 
 
-class AgentMetadata(BaseModel):
-    """Metadata for agent execution tracking."""
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    last_updated: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    execution_context: Dict[str, str] = Field(default_factory=dict)
-    custom_fields: Dict[str, str] = Field(default_factory=dict)
-    
-    def update_timestamp(self) -> 'AgentMetadata':
-        """Update the last updated timestamp."""
-        return self.model_copy(update={'last_updated': datetime.now(timezone.utc)})
+# AgentMetadata is now imported from agent_models.py - single source of truth
 
 
 class PlanStep(BaseModel):

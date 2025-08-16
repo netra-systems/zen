@@ -7,12 +7,10 @@ health monitoring capabilities for all agent operations.
 import asyncio
 import time
 from typing import Dict, Any, Optional, Callable, Awaitable, List
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from app.logging_config import central_logger
-from .reliability_circuit_breaker import (
-    CircuitBreaker, CircuitBreakerConfig, CircuitBreakerState, ReliabilityMetrics
-)
+from .circuit_breaker import CircuitBreaker, CircuitConfig as CircuitBreakerConfig, CircuitState as CircuitBreakerState, CircuitMetrics as ReliabilityMetrics
 from .reliability_retry import RetryHandler, RetryConfig
 
 logger = central_logger.get_logger(__name__)
@@ -196,7 +194,7 @@ class AgentReliabilityWrapper:
     def _create_error_info(self, operation_name: str, error: Exception) -> Dict[str, Any]:
         """Create error information dictionary"""
         return {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "operation": operation_name,
             "error_type": type(error).__name__,
             "error_message": str(error),
@@ -231,7 +229,7 @@ class AgentReliabilityWrapper:
     
     def _get_recent_errors(self) -> List[Dict[str, Any]]:
         """Get errors from the last 5 minutes"""
-        cutoff_time = datetime.utcnow() - timedelta(minutes=5)
+        cutoff_time = datetime.now(UTC) - timedelta(minutes=5)
         return [
             e for e in self.error_history 
             if datetime.fromisoformat(e["timestamp"]) > cutoff_time

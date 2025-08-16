@@ -8,7 +8,7 @@ All functions are ≤8 lines, total file ≤300 lines as per conventions.
 import asyncio
 import time
 from typing import Dict, Any, List, Optional, Callable
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.logging_config import central_logger
 from .health_types import HealthStatus, ComponentHealth, SystemAlert, HealthCheckResult
@@ -17,6 +17,9 @@ from .health_checkers import (
     check_websocket_health, check_system_resources
 )
 from .alert_manager import AlertManager
+from .agent_health_checker import (
+    register_agent_checker, convert_legacy_result, determine_system_status
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -92,21 +95,32 @@ class SystemHealthMonitor:
     async def _execute_health_check(self, component_name: str, checker_func: Callable) -> HealthCheckResult:
         """Execute health check for a specific component."""
         try:
-            if asyncio.iscoroutinefunction(checker_func):
-                result = await checker_func()
-            else:
-                result = checker_func()
-            
-            if isinstance(result, HealthCheckResult):
-                return result
-            else:
-                return self._convert_legacy_result(component_name, result)
+            result = await self._call_checker_function(checker_func)
+            return self._process_check_result(component_name, result)
         except Exception as e:
             logger.error(f"Health check failed for {component_name}: {e}")
-            return HealthCheckResult(
-                component_name=component_name, success=False, health_score=0.0,
-                response_time_ms=0.0, error_message=str(e)
-            )
+            return self._create_failed_health_result(component_name, e)
+    
+    async def _call_checker_function(self, checker_func: Callable):
+        """Call checker function handling both sync and async."""
+        if asyncio.iscoroutinefunction(checker_func):
+            return await checker_func()
+        else:
+            return checker_func()
+    
+    def _process_check_result(self, component_name: str, result) -> HealthCheckResult:
+        """Process health check result and convert if needed."""
+        if isinstance(result, HealthCheckResult):
+            return result
+        else:
+            return self._convert_legacy_result(component_name, result)
+    
+    def _create_failed_health_result(self, component_name: str, error: Exception) -> HealthCheckResult:
+        """Create health result for failed check."""
+        return HealthCheckResult(
+            component_name=component_name, success=False, health_score=0.0,
+            response_time_ms=0.0, error_message=str(error)
+        )
     
     async def _process_check_results(self, results: List[Any]) -> None:
         """Process health check results and update component health."""
@@ -132,16 +146,22 @@ class SystemHealthMonitor:
         """Update component health from check result."""
         status = self._calculate_health_status(result.health_score)
         previous_health = self.component_health.get(result.component_name)
-        
-        current_health = ComponentHealth(
+        current_health = self._create_component_health(result, status)
+        self.component_health[result.component_name] = current_health
+        await self._check_for_status_change_alert(previous_health, current_health)
+    
+    def _create_component_health(self, result: HealthCheckResult, status: HealthStatus) -> ComponentHealth:
+        """Create ComponentHealth object from result."""
+        return ComponentHealth(
             name=result.component_name, status=status, health_score=result.health_score,
-            last_check=datetime.utcnow(), error_count=1 if not result.success else 0,
+            last_check=datetime.now(UTC), error_count=1 if not result.success else 0,
             uptime=time.time() - self.start_time,
             metadata={**result.metadata, "response_time_ms": result.response_time_ms}
         )
-        
-        self.component_health[result.component_name] = current_health
-        
+    
+    async def _check_for_status_change_alert(self, previous_health: Optional[ComponentHealth], 
+                                           current_health: ComponentHealth) -> None:
+        """Check if status changed and emit alert if needed."""
         if previous_health and previous_health.status != current_health.status:
             alert = await self.alert_manager.create_status_change_alert(previous_health, current_health)
             await self.alert_manager.emit_alert(alert)
@@ -149,70 +169,69 @@ class SystemHealthMonitor:
     async def _check_thresholds(self) -> None:
         """Check for threshold violations and generate alerts."""
         for component_name, health in self.component_health.items():
-            response_time = health.metadata.get("response_time_ms", 0)
-            if response_time > 5000:
-                alert = await self.alert_manager.create_threshold_alert(
-                    component_name, "response_time", response_time, 5000
-                )
-                await self.alert_manager.emit_alert(alert)
-            
-            if health.error_count > 5:
-                alert = await self.alert_manager.create_threshold_alert(
-                    component_name, "error_count", health.error_count, 5
-                )
-                await self.alert_manager.emit_alert(alert)
+            await self._check_response_time_threshold(component_name, health)
+            await self._check_error_count_threshold(component_name, health)
+    
+    async def _check_response_time_threshold(self, component_name: str, health: ComponentHealth) -> None:
+        """Check response time threshold for component."""
+        response_time = health.metadata.get("response_time_ms", 0)
+        if response_time > 5000:
+            alert = await self.alert_manager.create_threshold_alert(
+                component_name, "response_time", response_time, 5000
+            )
+            await self.alert_manager.emit_alert(alert)
+    
+    async def _check_error_count_threshold(self, component_name: str, health: ComponentHealth) -> None:
+        """Check error count threshold for component."""
+        if health.error_count > 5:
+            alert = await self.alert_manager.create_threshold_alert(
+                component_name, "error_count", health.error_count, 5
+            )
+            await self.alert_manager.emit_alert(alert)
     
     async def _evaluate_system_health(self) -> None:
         """Evaluate overall system health and trigger system-wide alerts."""
         try:
-            total_components = len(self.component_health)
-            if total_components == 0:
+            if not self.component_health:
                 return
-            
-            healthy_count = len([h for h in self.component_health.values() 
-                               if h.status == HealthStatus.HEALTHY])
-            critical_count = len([h for h in self.component_health.values() 
-                                if h.status == HealthStatus.CRITICAL])
-            
-            system_health_pct = healthy_count / total_components
-            
-            if critical_count > 0 and system_health_pct < 0.5:
-                await self._trigger_system_wide_alert(
-                    "critical", f"System health critical: {critical_count} critical components, "
-                    f"{system_health_pct:.1%} healthy"
-                )
-            elif system_health_pct < 0.7:
-                await self._trigger_system_wide_alert(
-                    "warning", f"System health degraded: {system_health_pct:.1%} healthy components"
-                )
+            health_stats = self._calculate_health_statistics()
+            await self._evaluate_and_alert_system_health(health_stats)
         except Exception as e:
             logger.error(f"Error evaluating system health: {e}")
+    
+    def _calculate_health_statistics(self) -> Dict[str, Any]:
+        """Calculate system health statistics."""
+        total_components = len(self.component_health)
+        healthy_count = len([h for h in self.component_health.values() 
+                           if h.status == HealthStatus.HEALTHY])
+        critical_count = len([h for h in self.component_health.values() 
+                            if h.status == HealthStatus.CRITICAL])
+        return {
+            "total": total_components, "healthy": healthy_count,
+            "critical": critical_count, "health_pct": healthy_count / total_components
+        }
+    
+    async def _evaluate_and_alert_system_health(self, stats: Dict[str, Any]) -> None:
+        """Evaluate health stats and trigger alerts."""
+        if stats["critical"] > 0 and stats["health_pct"] < 0.5:
+            message = f"System health critical: {stats['critical']} critical components, {stats['health_pct']:.1%} healthy"
+            await self._trigger_system_wide_alert("critical", message)
+        elif stats["health_pct"] < 0.7:
+            message = f"System health degraded: {stats['health_pct']:.1%} healthy components"
+            await self._trigger_system_wide_alert("warning", message)
     
     async def _trigger_system_wide_alert(self, severity: str, message: str) -> None:
         """Trigger a system-wide alert."""
         alert = SystemAlert(
             alert_id=f"system_wide_{severity}_{int(time.time())}", component="system",
-            severity=severity, message=message, timestamp=datetime.utcnow(),
+            severity=severity, message=message, timestamp=datetime.now(UTC),
             metadata={"alert_type": "system_wide"}
         )
         await self.alert_manager.emit_alert(alert)
     
     def _convert_legacy_result(self, component_name: str, legacy_result: Any) -> HealthCheckResult:
         """Convert legacy health check result to new format."""
-        if isinstance(legacy_result, dict):
-            health_score = legacy_result.get("health_score", 1.0)
-            metadata = legacy_result.get("metadata", {})
-        elif isinstance(legacy_result, (int, float)):
-            health_score = float(legacy_result)
-            metadata = {}
-        else:
-            health_score = 1.0 if legacy_result else 0.0
-            metadata = {}
-        
-        return HealthCheckResult(
-            component_name=component_name, success=health_score > 0,
-            health_score=health_score, response_time_ms=0.0, metadata=metadata
-        )
+        return convert_legacy_result(component_name, legacy_result)
     
     def _register_default_checkers(self) -> None:
         """Register default health checkers for core components."""
@@ -226,42 +245,8 @@ class SystemHealthMonitor:
     
     def _register_agent_checker(self) -> None:
         """Register agent health checker if available."""
-        try:
-            from app.services.metrics.agent_metrics import agent_metrics_collector
-            self.register_component_checker("agents", self._create_agent_checker())
-        except ImportError:
-            logger.debug("Agent metrics not available, skipping agent health checker")
+        register_agent_checker(self.register_component_checker)
     
-    def _create_agent_checker(self) -> Callable:
-        """Create agent health checker function."""
-        async def check_agent_health() -> HealthCheckResult:
-            start_time = time.time()
-            try:
-                from app.services.metrics.agent_metrics import agent_metrics_collector
-                system_overview = await agent_metrics_collector.get_system_overview()
-                error_rate = system_overview.get("system_error_rate", 0.0)
-                active_agents = system_overview.get("active_agents", 0)
-                unhealthy_agents = system_overview.get("unhealthy_agents", 0)
-                
-                if active_agents == 0:
-                    health_score = 1.0
-                else:
-                    error_penalty = min(0.5, error_rate * 2)
-                    unhealthy_penalty = min(0.3, (unhealthy_agents / active_agents) * 0.5)
-                    health_score = max(0.0, 1.0 - error_penalty - unhealthy_penalty)
-                
-                response_time = (time.time() - start_time) * 1000
-                return HealthCheckResult(
-                    component_name="agents", success=True, health_score=health_score,
-                    response_time_ms=response_time, metadata=system_overview
-                )
-            except Exception as e:
-                response_time = (time.time() - start_time) * 1000
-                return HealthCheckResult(
-                    component_name="agents", success=False, health_score=0.0,
-                    response_time_ms=response_time, error_message=str(e)
-                )
-        return check_agent_health
     
     def get_system_overview(self) -> Dict[str, Any]:
         """Get comprehensive system health overview."""
@@ -269,32 +254,33 @@ class SystemHealthMonitor:
         if total_components == 0:
             return {"status": "no_components", "components": []}
         
-        healthy_count = len([h for h in self.component_health.values() if h.status == HealthStatus.HEALTHY])
-        degraded_count = len([h for h in self.component_health.values() if h.status == HealthStatus.DEGRADED])
-        unhealthy_count = len([h for h in self.component_health.values() if h.status == HealthStatus.UNHEALTHY])
-        critical_count = len([h for h in self.component_health.values() if h.status == HealthStatus.CRITICAL])
-        
-        system_health_pct = healthy_count / total_components
-        overall_status = self._determine_system_status(system_health_pct, critical_count)
-        
+        component_counts = self._count_components_by_status()
+        return self._build_system_overview_response(total_components, component_counts)
+    
+    def _count_components_by_status(self) -> Dict[str, int]:
+        """Count components by their health status."""
         return {
-            "overall_status": overall_status, "system_health_percentage": system_health_pct * 100,
-            "total_components": total_components, "healthy_components": healthy_count,
-            "degraded_components": degraded_count, "unhealthy_components": unhealthy_count,
-            "critical_components": critical_count, "active_alerts": len(self.alert_manager.get_active_alerts()),
+            "healthy": len([h for h in self.component_health.values() if h.status == HealthStatus.HEALTHY]),
+            "degraded": len([h for h in self.component_health.values() if h.status == HealthStatus.DEGRADED]),
+            "unhealthy": len([h for h in self.component_health.values() if h.status == HealthStatus.UNHEALTHY]),
+            "critical": len([h for h in self.component_health.values() if h.status == HealthStatus.CRITICAL])
+        }
+    
+    def _build_system_overview_response(self, total_components: int, counts: Dict[str, int]) -> Dict[str, Any]:
+        """Build comprehensive system overview response."""
+        health_pct = counts["healthy"] / total_components
+        overall_status = self._determine_system_status(health_pct, counts["critical"])
+        return {
+            "overall_status": overall_status, "system_health_percentage": health_pct * 100,
+            "total_components": total_components, "healthy_components": counts["healthy"],
+            "degraded_components": counts["degraded"], "unhealthy_components": counts["unhealthy"],
+            "critical_components": counts["critical"], "active_alerts": len(self.alert_manager.get_active_alerts()),
             "uptime_seconds": time.time() - self.start_time
         }
     
     def _determine_system_status(self, health_pct: float, critical_count: int) -> str:
         """Determine overall system status."""
-        if critical_count > 0:
-            return "critical"
-        elif health_pct < 0.5:
-            return "unhealthy"
-        elif health_pct < 0.8:
-            return "degraded"
-        else:
-            return "healthy"
+        return determine_system_status(health_pct, critical_count)
 
 
 # Global system health monitor instance

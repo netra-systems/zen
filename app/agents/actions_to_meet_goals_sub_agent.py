@@ -14,7 +14,7 @@ from app.llm.llm_manager import LLMManager
 from app.agents.base import BaseSubAgent
 from app.agents.prompts import actions_to_meet_goals_prompt_template
 from app.agents.tool_dispatcher import ToolDispatcher
-from app.agents.state import DeepAgentState
+from app.agents.state import DeepAgentState, ActionPlanResult, PlanStep
 from app.agents.utils import extract_json_from_response, extract_partial_json
 from app.logging_config import central_logger as logger
 from app.llm.observability import (
@@ -127,12 +127,42 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
         if llm_response:
             logger.debug(f"Received LLM response of {len(llm_response)} characters for run_id: {run_id}")
 
-    async def _process_llm_response(self, llm_response: str, run_id: str) -> dict:
+    async def _process_llm_response(self, llm_response: str, run_id: str) -> ActionPlanResult:
         """Process LLM response with fallback extraction."""
-        action_plan_result = extract_json_from_response(llm_response, max_retries=5)
-        if not action_plan_result:
-            action_plan_result = await self._handle_extraction_failure(llm_response, run_id)
-        return action_plan_result
+        action_plan_dict = extract_json_from_response(llm_response, max_retries=5)
+        if not action_plan_dict:
+            action_plan_dict = await self._handle_extraction_failure(llm_response, run_id)
+        return self._convert_dict_to_action_plan_result(action_plan_dict)
+
+    def _convert_dict_to_action_plan_result(self, action_plan_dict: dict) -> ActionPlanResult:
+        """Convert dictionary to ActionPlanResult with proper typing."""
+        try:
+            plan_steps = self._extract_plan_steps(action_plan_dict)
+            return ActionPlanResult(plan_steps=plan_steps)
+        except Exception:
+            return ActionPlanResult()
+    
+    def _extract_plan_steps(self, action_plan_dict: dict) -> list:
+        """Extract and convert plan steps from dictionary."""
+        steps_data = action_plan_dict.get('plan_steps', [])
+        if not isinstance(steps_data, list):
+            return []
+        return [self._create_plan_step(step) for step in steps_data]
+    
+    def _create_plan_step(self, step_data) -> PlanStep:
+        """Create PlanStep from step data with safe defaults."""
+        if isinstance(step_data, str):
+            return PlanStep(step_id=str(len(step_data)), description=step_data)
+        elif isinstance(step_data, dict):
+            return self._create_plan_step_from_dict(step_data)
+        return PlanStep(step_id='1', description='Default step')
+    
+    def _create_plan_step_from_dict(self, step_data: dict) -> PlanStep:
+        """Create PlanStep from dictionary data."""
+        return PlanStep(
+            step_id=step_data.get('step_id', '1'),
+            description=step_data.get('description', 'No description')
+        )
 
     async def _handle_extraction_failure(self, llm_response: str, run_id: str) -> dict:
         """Handle JSON extraction failure with partial recovery."""

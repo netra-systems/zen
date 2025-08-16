@@ -44,11 +44,15 @@ class PipelineExecutor:
     def _extract_context_params(self, run_id: str, 
                                context: Dict[str, str]) -> Dict[str, str]:
         """Extract parameters for execution context."""
+        base_params = self._get_base_execution_params(run_id, context)
+        return {**base_params, "agent_name": "supervisor"}
+    
+    def _get_base_execution_params(self, run_id: str, context: Dict[str, str]) -> Dict[str, str]:
+        """Get base execution parameters."""
         return {
             "run_id": run_id,
             "thread_id": context["thread_id"],
-            "user_id": context["user_id"],
-            "agent_name": "supervisor"
+            "user_id": context["user_id"]
         }
     
     async def _run_pipeline_with_hooks(self, pipeline: List[PipelineStep],
@@ -95,10 +99,26 @@ class PipelineExecutor:
     def _build_persistence_params(self, state: DeepAgentState, 
                                  context: Dict[str, str]) -> Dict[str, Any]:
         """Build parameters for state persistence."""
+        return self._create_persistence_dict(state, context)
+    
+    def _create_persistence_dict(self, state: DeepAgentState,
+                                context: Dict[str, str]) -> Dict[str, Any]:
+        """Create persistence parameter dictionary."""
+        context_params = self._extract_persistence_context(context)
+        state_params = self._get_state_persistence_params(state)
+        return {**context_params, **state_params}
+    
+    def _extract_persistence_context(self, context: Dict[str, str]) -> Dict[str, str]:
+        """Extract context for persistence."""
         return {
             "run_id": context["run_id"],
             "thread_id": context["thread_id"],
-            "user_id": context["user_id"],
+            "user_id": context["user_id"]
+        }
+    
+    def _get_state_persistence_params(self, state: DeepAgentState) -> Dict[str, Any]:
+        """Get state persistence parameters."""
+        return {
             "state": state,
             "db_session": self.db_session
         }

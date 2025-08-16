@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="domain-mapping">
+  <metadata>
+    <title>Cloud Run Domain Mapping and DNS Configuration Learnings</title>
+    <created>2025-08-16</created>
+    <updated>2025-08-16</updated>
+    <tags>cloud-run, dns, domain-mapping, staging, terraform, pr-deployments</tags>
+  </metadata>
+
+  <learning id="domain-001" priority="critical">
+    <title>Apex Domain vs Subdomain Mapping</title>
+    <problem>
+      Cannot create CNAME record for apex domain (staging.netrasystems.ai).
+      Error: "resource records of type 'CNAME' are only allowed for sub-domains"
+    </problem>
+    <solution>
+      Use subdomains for Cloud Run mappings:
+      - app.staging.netrasystems.ai for frontend
+      - api.staging.netrasystems.ai for backend
+      Apex domains require A records with IP addresses, not supported by Cloud Run's dynamic IPs.
+    </solution>
+  </learning>
+
+  <learning id="domain-002" priority="high">
+    <title>PR-Based Dynamic Subdomain Strategy</title>
+    <problem>
+      Fixed domain mappings don't work well with PR-based deployments where each PR gets its own service.
+    </problem>
+    <solution>
+      Implement a two-tier domain strategy:
+      1. **Production-like staging** (main branch):
+         - app.staging.netrasystems.ai → main frontend
+         - api.staging.netrasystems.ai → main backend
+      
+      2. **PR preview environments**:
+         - pr-123.staging.netrasystems.ai → PR #123 frontend
+         - pr-123-api.staging.netrasystems.ai → PR #123 backend
+         - Use wildcard DNS: *.staging.netrasystems.ai → Cloud Run
+    </solution>
+    <terraform-implementation>
+      ```hcl
+      # Wildcard DNS for PR previews
+      resource "google_dns_record_set" "wildcard_staging" {
+        name = "*.staging.netrasystems.ai."
+        type = "CNAME"
+        ttl  = 300
+        managed_zone = google_dns_managed_zone.staging.name
+        rrdatas = ["ghs.googlehosted.com."]
+      }
+      
+      # Dynamic domain mapping for PRs
+      resource "google_cloud_run_domain_mapping" "pr_preview" {
+        count    = var.is_pr_deployment ? 1 : 0
+        location = var.region
+        name     = "pr-${var.pr_number}.staging.netrasystems.ai"
+        
+        metadata {
+          namespace = var.project_id
+        }
+        
+        spec {
+          route_name = google_cloud_run_service.app.name
+        }
+      }
+      ```
+    </terraform-implementation>
+  </learning>
+
+  <learning id="domain-003" priority="medium">
+    <title>Domain Mapping Commands</title>
+    <problem>
+      Domain mapping requires beta commands and specific flags.
+    </problem>
+    <solution>
+      Use gcloud beta commands:
+      ```bash
+      # Create domain mapping
+      gcloud beta run domain-mappings create \
+        --service SERVICE_NAME \
+        --domain DOMAIN \
+        --region REGION \
+        --project PROJECT
+      
+      # List mappings
+      gcloud beta run domain-mappings list \
+        --region REGION \
+        --project PROJECT
+      
+      # Delete mapping
+      gcloud beta run domain-mappings delete \
+        --domain DOMAIN \
+        --region REGION \
+        --project PROJECT
+      ```
+    </solution>
+  </learning>
+
+  <learning id="domain-004" priority="high">
+    <title>DNS Record Creation Order</title>
+    <problem>
+      Certificate provisioning waits for DNS records to be configured.
+    </problem>
+    <solution>
+      1. Create domain mapping in Cloud Run (generates required DNS info)
+      2. Create DNS records immediately after
+      3. Wait for certificate provisioning (can take 15-30 minutes)
+      
+      ```bash
+      # Create DNS record
+      gcloud dns record-sets create SUBDOMAIN.staging.netrasystems.ai. \
+        --rrdatas="ghs.googlehosted.com." \
+        --type=CNAME \
+        --ttl=300 \
+        --zone=staging \
+        --project=PROJECT
+      ```
+    </solution>
+  </learning>
+
+  <learning id="domain-005" priority="critical">
+    <title>CloudBuild Integration for PR Deployments</title>
+    <problem>
+      CloudBuild needs to handle dynamic domain mappings for PR deployments.
+    </problem>
+    <solution>
+      Add domain mapping steps to cloudbuild.yaml:
+      ```yaml
+      # For PR deployments
+      - name: 'gcr.io/cloud-builders/gcloud'
+        id: 'create-pr-domain-mapping'
+        entrypoint: 'bash'
+        args:
+          - '-c'
+          - |
+            if [ "${_IS_PR}" = "true" ]; then
+              gcloud beta run domain-mappings create \
+                --service ${_SERVICE_NAME} \
+                --domain pr-${_PR_NUMBER}.staging.netrasystems.ai \
+                --region ${_REGION} || true
+            fi
+      ```
+    </solution>
+  </learning>
+
+  <learning id="domain-006" priority="medium">
+    <title>Service Naming Convention</title>
+    <problem>
+      Service names should reflect deployment type for easier management.
+    </problem>
+    <recommended-convention>
+      - **Main branch**: netra-backend, netra-frontend
+      - **PR deployments**: netra-backend-pr-123, netra-frontend-pr-123
+      - **Feature branches**: netra-backend-feature-name, netra-frontend-feature-name
+    </recommended-convention>
+  </learning>
+
+  <learning id="domain-007" priority="low">
+    <title>TTL Settings for DNS Records</title>
+    <problem>
+      High TTL values delay DNS propagation for new deployments.
+    </problem>
+    <solution>
+      Use low TTL (300 seconds) for staging environments to allow quick updates.
+      Production can use higher TTL (3600+ seconds) for better caching.
+    </solution>
+  </learning>
+
+  <best-practices>
+    <practice>Use wildcard DNS for dynamic PR preview environments</practice>
+    <practice>Implement different domain strategies for main vs PR deployments</practice>
+    <practice>Automate domain mapping in CI/CD pipeline</practice>
+    <practice>Use consistent naming conventions for services and domains</practice>
+    <practice>Keep TTL low for staging environments</practice>
+    <practice>Document domain structure in terraform variables</practice>
+  </best-practices>
+
+  <terraform-variables>
+    ```hcl
+    variable "domain_config" {
+      type = object({
+        base_domain = string
+        enable_pr_previews = bool
+        pr_number = optional(string)
+        branch_name = optional(string)
+      })
+      default = {
+        base_domain = "staging.netrasystems.ai"
+        enable_pr_previews = true
+        pr_number = null
+        branch_name = "main"
+      }
+    }
+    ```
+  </terraform-variables>
+
+  <deployment-urls>
+    <current-deployment>
+      <frontend>https://app.staging.netrasystems.ai</frontend>
+      <backend>https://api.staging.netrasystems.ai</backend>
+    </current-deployment>
+    <pr-preview-pattern>
+      <frontend>https://pr-{PR_NUMBER}.staging.netrasystems.ai</frontend>
+      <backend>https://pr-{PR_NUMBER}-api.staging.netrasystems.ai</backend>
+    </pr-preview-pattern>
+  </deployment-urls>
+</learnings>

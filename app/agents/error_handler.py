@@ -10,21 +10,9 @@ from app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-# Import ErrorSeverity from single source of truth
+# Import ErrorSeverity and ErrorCategory from single source of truth
 from app.core.error_codes import ErrorSeverity
-
-
-class ErrorCategory(Enum):
-    """Error category classification."""
-    VALIDATION = "validation"
-    NETWORK = "network"
-    DATABASE = "database"
-    PROCESSING = "processing"
-    WEBSOCKET = "websocket"
-    TIMEOUT = "timeout"
-    CONFIGURATION = "configuration"
-    RESOURCE = "resource"
-    UNKNOWN = "unknown"
+from app.schemas.core_enums import ErrorCategory
 
 
 # Import ErrorContext from single source of truth
@@ -61,17 +49,8 @@ class NetworkError(AgentError):
         )
 
 
-class DatabaseError(AgentError):
-    """Error for database-related failures."""
-    
-    def __init__(self, message: str, context: Optional[ErrorContext] = None):
-        super().__init__(
-            message,
-            severity=ErrorSeverity.HIGH,
-            category=ErrorCategory.DATABASE,
-            context=context,
-            recoverable=True
-        )
+# Import DatabaseError from canonical location
+from app.core.exceptions_database import DatabaseError
 
 
 # Import WebSocketError from canonical location

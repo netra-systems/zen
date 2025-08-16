@@ -22,40 +22,20 @@ class EnvironmentChecker:
         """Check required environment variables are set"""
         required_vars = self._get_required_vars()
         optional_vars = self._get_optional_vars()
-        
         missing_required = self._check_missing_vars(required_vars)
         missing_optional = self._check_missing_vars(optional_vars)
         
         if missing_required:
-            return StartupCheckResult(
-                name="environment_variables",
-                success=False,
-                message=f"Missing required environment variables: {', '.join(missing_required)}",
-                critical=True
-            )
-        else:
-            return self._create_success_result(missing_optional)
+            return self._create_missing_vars_result(missing_required)
+        return self._create_success_result(missing_optional)
     
     async def check_configuration(self) -> StartupCheckResult:
         """Validate application configuration"""
         try:
-            self._validate_database_config()
-            self._validate_secret_key()
-            self._validate_environment()
-            
-            return StartupCheckResult(
-                name="configuration",
-                success=True,
-                message=f"Configuration valid for {settings.environment} environment",
-                critical=not self.is_staging
-            )
+            self._validate_all_configs()
+            return self._create_config_success_result()
         except Exception as e:
-            return StartupCheckResult(
-                name="configuration",
-                success=False,
-                message=str(e),
-                critical=not self.is_staging
-            )
+            return self._create_config_failure_result(e)
     
     def _get_required_vars(self) -> List[str]:
         """Get required environment variables"""
@@ -78,17 +58,10 @@ class EnvironmentChecker:
     
     def _create_success_result(self, missing_optional: List[str]) -> StartupCheckResult:
         """Create success result with optional variables info"""
-        msg = "All required environment variables are set"
-        if self.environment == "development":
-            msg = "Development mode - using default configs"
-        if missing_optional:
-            msg += f" (Optional missing: {', '.join(missing_optional)})"
-            
+        msg = self._build_success_message(missing_optional)
         return StartupCheckResult(
-            name="environment_variables",
-            success=True,
-            message=msg,
-            critical=True
+            name="environment_variables", success=True,
+            message=msg, critical=True
         )
     
     def _validate_database_config(self) -> None:
@@ -106,3 +79,39 @@ class EnvironmentChecker:
         valid_environments = ["development", "testing", "staging", "production"]
         if settings.environment not in valid_environments:
             raise ValueError(f"Invalid environment: {settings.environment}")
+    
+    def _create_missing_vars_result(self, missing_required: List[str]) -> StartupCheckResult:
+        """Create result for missing required variables"""
+        return StartupCheckResult(
+            name="environment_variables", success=False, critical=not self.is_staging,
+            message=f"Missing required environment variables: {', '.join(missing_required)}"
+        )
+    
+    def _validate_all_configs(self) -> None:
+        """Validate all configuration settings"""
+        self._validate_database_config()
+        self._validate_secret_key()
+        self._validate_environment()
+    
+    def _create_config_success_result(self) -> StartupCheckResult:
+        """Create successful configuration result"""
+        return StartupCheckResult(
+            name="configuration", success=True, critical=not self.is_staging,
+            message=f"Configuration valid for {settings.environment} environment"
+        )
+    
+    def _create_config_failure_result(self, error: Exception) -> StartupCheckResult:
+        """Create failed configuration result"""
+        return StartupCheckResult(
+            name="configuration", success=False, critical=not self.is_staging,
+            message=str(error)
+        )
+    
+    def _build_success_message(self, missing_optional: List[str]) -> str:
+        """Build success message with optional variables info"""
+        msg = "All required environment variables are set"
+        if self.environment == "development":
+            msg = "Development mode - using default configs"
+        if missing_optional:
+            msg += f" (Optional missing: {', '.join(missing_optional)})"
+        return msg

@@ -95,6 +95,12 @@ async def _cleanup_client(client):
     if client:
         await client.disconnect()
 
+async def _create_enabled_client():
+    """Create and configure enabled ClickHouse client."""
+    config = _get_clickhouse_config()
+    base_client = _create_base_client(config)
+    return _wrap_client_with_interceptor(base_client)
+
 @asynccontextmanager
 async def get_clickhouse_client():
     """Dependency provider for ClickHouse client with proper connection management."""
@@ -103,9 +109,7 @@ async def get_clickhouse_client():
             yield client
         return
     
-    config = _get_clickhouse_config()
-    base_client = _create_base_client(config)
-    client = _wrap_client_with_interceptor(base_client)
+    client = await _create_enabled_client()
     try:
         yield client
     finally:

@@ -249,6 +249,7 @@ class DataSubAgent(BaseSubAgent):
         """Finalize and return analysis result."""
         data_result = self._ensure_data_result(state.data_result)
         state.data_result = data_result
+        state.step_count += 1
         return self._create_success_result(start_time, data_result)
     
     def _create_execution_engine(self) -> ExecutionEngine:
@@ -294,55 +295,40 @@ class DataSubAgent(BaseSubAgent):
     
     def _convert_anomaly_details(self, llm_anomaly_list: list) -> list:
         """Convert LLM anomaly format to AnomalyDetail format."""
-        from app.schemas.shared_types import AnomalyDetail, AnomalySeverity
-        from datetime import datetime
-        
         converted_details = []
         for item in llm_anomaly_list:
-            if isinstance(item, dict):
-                # Convert LLM format to AnomalyDetail
-                detail = self._create_anomaly_detail(item)
-                converted_details.append(detail.model_dump())
+            detail = self._process_anomaly_item(item)
+            if detail:
+                converted_details.append(detail)
         return converted_details
+    
+    def _process_anomaly_item(self, item: dict) -> Optional[dict]:
+        """Process single anomaly item if valid dict."""
+        if isinstance(item, dict):
+            detail = self._create_anomaly_detail(item)
+            return detail.model_dump()
+        return None
     
     def _create_anomaly_detail(self, item: dict) -> 'AnomalyDetail':
         """Create AnomalyDetail from LLM response."""
-        from app.schemas.shared_types import AnomalyDetail, AnomalySeverity
-        from datetime import datetime
-        
-        # Map severity strings
-        severity_map = {
-            'high': AnomalySeverity.HIGH,
-            'medium': AnomalySeverity.MEDIUM,
-            'low': AnomalySeverity.LOW,
-            'critical': AnomalySeverity.CRITICAL
-        }
-        
-        # Extract or derive required fields
-        timestamp = datetime.utcnow()
-        if 'timestamp' in item:
-            try:
-                timestamp = datetime.fromisoformat(item['timestamp'].replace('Z', '+00:00'))
-            except:
-                pass
-        
-        metric_name = item.get('type', 'unknown_metric')
-        actual_value = item.get('actual_value', 0.0)
-        expected_value = item.get('expected_value', 0.0)
-        deviation_percentage = item.get('deviation_percentage', 0.0)
-        z_score = item.get('z_score', 0.0)
-        severity = severity_map.get(item.get('severity', 'low').lower(), AnomalySeverity.LOW)
-        description = item.get('description', '')
-        
+        from app.schemas.shared_types import AnomalyDetail
+        timestamp = self._extract_timestamp(item)
+        fields = self._extract_anomaly_fields(item)
+        severity = self._map_severity(item, self._get_severity_mapping())
+        return self._build_anomaly_detail(timestamp, fields, severity)
+    
+    def _build_anomaly_detail(self, timestamp, fields: dict, severity) -> 'AnomalyDetail':
+        """Build AnomalyDetail object from components."""
+        from app.schemas.shared_types import AnomalyDetail
         return AnomalyDetail(
             timestamp=timestamp,
-            metric_name=metric_name,
-            actual_value=actual_value,
-            expected_value=expected_value,
-            deviation_percentage=deviation_percentage,
-            z_score=z_score,
+            metric_name=fields['metric_name'],
+            actual_value=fields['actual_value'],
+            expected_value=fields['expected_value'],
+            deviation_percentage=fields['deviation_percentage'],
+            z_score=fields['z_score'],
             severity=severity,
-            description=description
+            description=fields['description']
         )
     
     def _try_anomaly_detection_conversion(
@@ -350,18 +336,8 @@ class DataSubAgent(BaseSubAgent):
     ) -> Union[AnomalyDetectionResponse, DataAnalysisResponse]:
         """Try converting to AnomalyDetectionResponse, fallback to DataAnalysisResponse."""
         try:
-            # Fix common format issues from LLM responses
-            if 'anomalies_detected' in result_dict and isinstance(result_dict['anomalies_detected'], list):
-                # LLM returned list instead of boolean - fix it
-                anomaly_list = result_dict['anomalies_detected']
-                result_dict['anomalies_detected'] = bool(anomaly_list)
-                result_dict['anomaly_details'] = anomaly_list
-                result_dict['anomaly_count'] = len(anomaly_list)
-            
-            # Convert LLM anomaly format to AnomalyDetail format
-            if 'anomaly_details' in result_dict and isinstance(result_dict['anomaly_details'], list):
-                result_dict['anomaly_details'] = self._convert_anomaly_details(result_dict['anomaly_details'])
-            
+            self._fix_anomaly_format_issues(result_dict)
+            self._convert_anomaly_details_format(result_dict)
             return AnomalyDetectionResponse(**result_dict)
         except Exception as e:
             logger.warning(f"Failed to convert dict to typed result: {e}")
@@ -457,10 +433,21 @@ class DataSubAgent(BaseSubAgent):
     
     def _get_delegation_methods(self) -> List[str]:
         """Get list of methods that can be delegated."""
+        process_methods = self._get_process_delegation_methods()
+        analysis_methods = self._get_analysis_delegation_methods()
+        return process_methods + analysis_methods
+    
+    def _get_process_delegation_methods(self) -> List[str]:
+        """Get process-related delegation methods."""
         return [
             "_process_internal", "process_with_retry", "process_with_cache",
             "process_batch_safe", "process_concurrent", "process_stream",
-            "process_and_persist", "handle_supervisor_request", "enrich_data",
+            "process_and_persist", "handle_supervisor_request", "enrich_data"
+        ]
+    
+    def _get_analysis_delegation_methods(self) -> List[str]:
+        """Get analysis-related delegation methods."""
+        return [
             "_transform_with_pipeline", "_apply_operation", "save_state",
             "load_state", "recover", "_analyze_performance_metrics",
             "_detect_anomalies", "_analyze_usage_patterns", "_analyze_correlations"
@@ -532,3 +519,61 @@ class DataSubAgent(BaseSubAgent):
         if patterns: components.append(f"{len(patterns)} usage patterns")
         if anomalies and anomalies.anomalies_detected: components.append("anomalies detected")
         return components
+    
+    # Helper methods for _create_anomaly_detail
+    def _get_severity_mapping(self) -> Dict[str, Any]:
+        """Get severity mapping for anomaly details."""
+        from app.schemas.shared_types import AnomalySeverity
+        return {
+            'high': AnomalySeverity.HIGH,
+            'medium': AnomalySeverity.MEDIUM,
+            'low': AnomalySeverity.LOW,
+            'critical': AnomalySeverity.CRITICAL
+        }
+    
+    def _extract_timestamp(self, item: dict):
+        """Extract timestamp from anomaly item."""
+        from datetime import datetime, UTC
+        default_timestamp = datetime.now(UTC)
+        if 'timestamp' not in item:
+            return default_timestamp
+        return self._parse_timestamp_string(item['timestamp'], default_timestamp)
+    
+    def _parse_timestamp_string(self, timestamp_str: str, default_timestamp):
+        """Parse timestamp string with error handling."""
+        from datetime import datetime
+        try:
+            return datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        except:
+            return default_timestamp
+    
+    def _extract_anomaly_fields(self, item: dict) -> Dict[str, Any]:
+        """Extract all anomaly fields from item."""
+        return {
+            'metric_name': item.get('type', 'unknown_metric'),
+            'actual_value': item.get('actual_value', 0.0),
+            'expected_value': item.get('expected_value', 0.0),
+            'deviation_percentage': item.get('deviation_percentage', 0.0),
+            'z_score': item.get('z_score', 0.0),
+            'description': item.get('description', '')
+        }
+    
+    def _map_severity(self, item: dict, severity_map: Dict) -> Any:
+        """Map severity string to enum value."""
+        from app.schemas.shared_types import AnomalySeverity
+        severity_str = item.get('severity', 'low').lower()
+        return severity_map.get(severity_str, AnomalySeverity.LOW)
+    
+    # Helper methods for _try_anomaly_detection_conversion
+    def _fix_anomaly_format_issues(self, result_dict: dict) -> None:
+        """Fix common format issues from LLM responses."""
+        if 'anomalies_detected' in result_dict and isinstance(result_dict['anomalies_detected'], list):
+            anomaly_list = result_dict['anomalies_detected']
+            result_dict['anomalies_detected'] = bool(anomaly_list)
+            result_dict['anomaly_details'] = anomaly_list
+            result_dict['anomaly_count'] = len(anomaly_list)
+    
+    def _convert_anomaly_details_format(self, result_dict: dict) -> None:
+        """Convert LLM anomaly format to AnomalyDetail format."""
+        if 'anomaly_details' in result_dict and isinstance(result_dict['anomaly_details'], list):
+            result_dict['anomaly_details'] = self._convert_anomaly_details(result_dict['anomaly_details'])

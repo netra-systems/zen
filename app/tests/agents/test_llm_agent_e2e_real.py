@@ -81,6 +81,13 @@ def mock_db_session():
     session.rollback = AsyncMock()
     session.close = AsyncMock()
     session.execute = AsyncMock()
+    
+    # Mock async context manager for begin()
+    async_context_mock = AsyncMock()
+    async_context_mock.__aenter__ = AsyncMock(return_value=async_context_mock)
+    async_context_mock.__aexit__ = AsyncMock(return_value=None)
+    session.begin = Mock(return_value=async_context_mock)
+    
     return session
 
 
@@ -112,12 +119,25 @@ def mock_tool_dispatcher():
 def supervisor_agent(mock_db_session, mock_llm_manager, 
                     mock_websocket_manager, mock_tool_dispatcher):
     """Create supervisor agent with all dependencies mocked"""
+    # Create a proper mock that matches the expected interface
+    mock_persistence = AsyncMock()
+    
+    # Mock the save_agent_state to handle both interfaces
+    async def mock_save_agent_state(*args, **kwargs):
+        if len(args) == 2:  # (request, session) signature
+            return (True, "test_id")
+        elif len(args) == 5:  # (run_id, thread_id, user_id, state, db_session) signature
+            return True
+        else:
+            return (True, "test_id")
+    
+    mock_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
+    mock_persistence.load_agent_state = AsyncMock(return_value=None)
+    mock_persistence.get_thread_context = AsyncMock(return_value=None)
+    mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
+    
     # Patch state persistence to avoid hanging
-    with patch('app.agents.supervisor_consolidated.state_persistence_service') as mock_persistence:
-        mock_persistence.save_agent_state = AsyncMock(return_value=True)
-        mock_persistence.load_agent_state = AsyncMock(return_value=None)
-        mock_persistence.get_thread_context = AsyncMock(return_value=None)
-        
+    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         supervisor = SupervisorAgent(
             mock_db_session,
             mock_llm_manager,
@@ -132,7 +152,7 @@ def supervisor_agent(mock_db_session, mock_llm_manager,
         # Mock the execution engine to prevent hanging
         supervisor.engine.execute_pipeline = AsyncMock(return_value=[])
         
-        # Mock state persistence attribute
+        # Mock state persistence attribute with proper async methods
         supervisor.state_persistence = mock_persistence
         
         return supervisor
@@ -273,31 +293,33 @@ async def test_tool_dispatcher_integration(mock_tool_dispatcher):
 @pytest.mark.asyncio 
 async def test_state_persistence(supervisor_agent):
     """Test agent state persistence and recovery"""
-    # Patch all state persistence service locations
-    with patch('app.services.state_persistence_service.state_persistence_service') as mock_sps1, \
-         patch('app.services.state_persistence.state_persistence_service') as mock_sps2, \
-         patch.object(supervisor_agent, 'state_persistence') as mock_sps3:
-        
-        # Setup all mocks to return success
-        all_mocks = [mock_sps1, mock_sps2, mock_sps3]
-        for mock_service in all_mocks:
-            mock_service.save_agent_state = AsyncMock(return_value=(True, "test_id"))
-            mock_service.load_agent_state = AsyncMock(return_value=None)
-            mock_service.get_thread_context = AsyncMock(return_value=None)
-            mock_service.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
-        
-        # Run test - this should trigger state persistence calls
-        run_id = str(uuid.uuid4())
-        await supervisor_agent.run(
-            "Test persistence",
-            supervisor_agent.thread_id,
-            supervisor_agent.user_id,
-            run_id
-        )
-        
-        # Verify at least one persistence service was called
-        total_save_calls = sum(mock.save_agent_state.call_count for mock in all_mocks)
-        assert total_save_calls >= 0  # Accept any calls, even 0 for now
+    # Create a proper mock that matches the expected interface
+    async def mock_save_agent_state(*args, **kwargs):
+        if len(args) == 2:  # (request, session) signature
+            return (True, "test_id")
+        elif len(args) == 5:  # (run_id, thread_id, user_id, state, db_session) signature
+            return True
+        else:
+            return (True, "test_id")
+    
+    # Setup the supervisor's persistence mock properly
+    supervisor_agent.state_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
+    supervisor_agent.state_persistence.load_agent_state = AsyncMock(return_value=None)
+    supervisor_agent.state_persistence.get_thread_context = AsyncMock(return_value=None)
+    supervisor_agent.state_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
+    
+    # Run test - this should trigger state persistence calls
+    run_id = str(uuid.uuid4())
+    result = await supervisor_agent.run(
+        "Test persistence",
+        supervisor_agent.thread_id,
+        supervisor_agent.user_id,
+        run_id
+    )
+    
+    # Verify the run completed successfully
+    assert result is not None
+    assert isinstance(result, DeepAgentState)
 
 
 @pytest.mark.asyncio
@@ -337,11 +359,24 @@ async def test_multi_agent_coordination(supervisor_agent):
 async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
                                           mock_websocket_manager, mock_tool_dispatcher):
     """Test handling multiple concurrent requests"""
-    with patch('app.agents.supervisor_consolidated.state_persistence_service') as mock_persistence:
-        mock_persistence.save_agent_state = AsyncMock(return_value=True)
-        mock_persistence.load_agent_state = AsyncMock(return_value=None)
-        mock_persistence.get_thread_context = AsyncMock(return_value=None)
-        
+    # Create a proper mock that matches the expected interface
+    mock_persistence = AsyncMock()
+    
+    # Mock the save_agent_state to handle both interfaces
+    async def mock_save_agent_state(*args, **kwargs):
+        if len(args) == 2:  # (request, session) signature
+            return (True, "test_id")
+        elif len(args) == 5:  # (run_id, thread_id, user_id, state, db_session) signature
+            return True
+        else:
+            return (True, "test_id")
+    
+    mock_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
+    mock_persistence.load_agent_state = AsyncMock(return_value=None)
+    mock_persistence.get_thread_context = AsyncMock(return_value=None)
+    mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
+    
+    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         # Create multiple supervisors for concurrent requests
         supervisors = []
         for i in range(5):
@@ -354,6 +389,7 @@ async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
             supervisor.thread_id = str(uuid.uuid4())
             supervisor.user_id = str(uuid.uuid4())
             supervisor.engine.execute_pipeline = AsyncMock(return_value=[])
+            supervisor.state_persistence = mock_persistence
             supervisors.append(supervisor)
         
         # Run concurrent requests
@@ -496,11 +532,24 @@ async def test_end_to_end_optimization_flow():
     ws_manager.send_message = AsyncMock()
     
     # Create supervisor with mocked dependencies
-    with patch('app.agents.supervisor_consolidated.state_persistence_service') as mock_persistence:
-        mock_persistence.save_agent_state = AsyncMock(return_value=True)
-        mock_persistence.load_agent_state = AsyncMock(return_value=None)
-        mock_persistence.get_thread_context = AsyncMock(return_value=None)
-        
+    # Create a proper mock that matches the expected interface
+    mock_persistence = AsyncMock()
+    
+    # Mock the save_agent_state to handle both interfaces
+    async def mock_save_agent_state(*args, **kwargs):
+        if len(args) == 2:  # (request, session) signature
+            return (True, "test_id")
+        elif len(args) == 5:  # (run_id, thread_id, user_id, state, db_session) signature
+            return True
+        else:
+            return (True, "test_id")
+    
+    mock_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
+    mock_persistence.load_agent_state = AsyncMock(return_value=None)
+    mock_persistence.get_thread_context = AsyncMock(return_value=None)
+    mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
+    
+    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
         from app.agents.tool_dispatcher import ToolDispatcher
         dispatcher = Mock(spec=ToolDispatcher)
         dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})

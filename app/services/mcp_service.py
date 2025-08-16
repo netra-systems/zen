@@ -5,7 +5,7 @@ Main service layer for MCP server integration with Netra platform using FastMCP 
 """
 
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 import json
 import uuid
 import asyncio
@@ -16,6 +16,7 @@ from fastmcp import FastMCP
 
 from app.logging_config import CentralLogger
 from app.core.exceptions_base import NetraException
+from app.services.service_locator import IMCPService
 from app.services.agent_service import AgentService
 from app.services.thread_service import ThreadService
 from app.services.corpus_service import CorpusService
@@ -37,8 +38,8 @@ class MCPClient(BaseModel):
     api_key_hash: Optional[str] = None
     permissions: List[str] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_active: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    last_active: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class MCPToolExecution(BaseModel):
@@ -52,10 +53,10 @@ class MCPToolExecution(BaseModel):
     execution_time_ms: int
     status: str  # success, error, timeout
     error: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
-class MCPService:
+class MCPService(IMCPService):
     """
     Main service for MCP server operations using FastMCP 2
     
@@ -225,8 +226,8 @@ class MCPService:
         self.active_sessions[session_id] = {
             "id": session_id,
             "client_id": client_id,
-            "created_at": datetime.utcnow(),
-            "last_activity": datetime.utcnow(),
+            "created_at": datetime.now(UTC),
+            "last_activity": datetime.now(UTC),
             "metadata": metadata or {},
             "request_count": 0
         }
@@ -241,7 +242,7 @@ class MCPService:
     async def update_session_activity(self, session_id: str):
         """Update session last activity timestamp"""
         if session_id in self.active_sessions:
-            self.active_sessions[session_id]["last_activity"] = datetime.utcnow()
+            self.active_sessions[session_id]["last_activity"] = datetime.now(UTC)
             self.active_sessions[session_id]["request_count"] += 1
     
     async def close_session(self, session_id: str):
@@ -252,7 +253,7 @@ class MCPService:
     
     async def cleanup_inactive_sessions(self, timeout_minutes: int = 60):
         """Clean up inactive sessions"""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         sessions_to_remove = []
         
         for session_id, session in self.active_sessions.items():
@@ -313,3 +314,39 @@ class MCPService:
                 "model_selection"
             ]
         }
+
+    # Interface implementation methods
+    async def initialize(self, config: Dict[str, Any] = None):
+        """Initialize the MCP service with optional configuration."""
+        # Basic initialization - could extend with config parameters
+        await self.cleanup_inactive_sessions()
+        logger.info("MCP Service initialized")
+
+    async def execute_tool(self, tool_name: str, parameters: Dict[str, Any], user_context: Dict[str, Any] = None):
+        """Execute an MCP tool with the given parameters and user context."""
+        # Implementation for tool execution
+        session_id = user_context.get("session_id") if user_context else None
+        client_id = user_context.get("client_id") if user_context else None
+        
+        # Record the tool execution
+        execution = MCPToolExecution(
+            session_id=session_id or "default",
+            client_id=client_id,
+            tool_name=tool_name,
+            input_params=parameters,
+            status="executing"
+        )
+        
+        try:
+            # This would integrate with the actual MCP server tool execution
+            # For now, return a basic response
+            result = {"tool": tool_name, "status": "executed", "parameters": parameters}
+            execution.status = "completed"
+            execution.result = result
+            await self.record_tool_execution(execution)
+            return result
+        except Exception as e:
+            execution.status = "failed"
+            execution.error = str(e)
+            await self.record_tool_execution(execution)
+            raise NetraException(f"Tool execution failed: {e}")

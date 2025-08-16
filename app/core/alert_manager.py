@@ -6,7 +6,7 @@ Handles alert generation, thresholds, and recovery actions.
 import asyncio
 import time
 from typing import List, Dict, Any, Callable, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.logging_config import central_logger
 from .health_types import SystemAlert, AlertSeverity, HealthStatus, ComponentHealth, RecoveryAction
@@ -51,7 +51,7 @@ class AlertManager:
             component=current.name,
             severity=severity,
             message=message,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             metadata=self._create_status_metadata(previous, current)
         )
     
@@ -65,13 +65,13 @@ class AlertManager:
             component=component,
             severity=severity,
             message=message,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             metadata={"metric": metric, "value": value, "threshold": threshold}
         )
     
     def get_recent_alerts(self, hours: int = 24) -> List[SystemAlert]:
         """Get alerts from the last N hours."""
-        cutoff = datetime.utcnow().timestamp() - (hours * 3600)
+        cutoff = datetime.now(UTC).timestamp() - (hours * 3600)
         return [alert for alert in self.alerts if alert.timestamp.timestamp() > cutoff]
     
     def get_active_alerts(self) -> List[SystemAlert]:

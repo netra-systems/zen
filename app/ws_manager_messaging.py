@@ -114,12 +114,22 @@ class WebSocketMessagingManager:
 
     async def _validate_and_process(self, conn_info: ConnectionInfo, message: Dict[str, Any]) -> bool:
         """Validate message and process if valid."""
+        # Handle ping messages first
+        if isinstance(message, dict) and message.get("type") == "ping":
+            await self._send_pong_response(conn_info.websocket)
+            return True
+        
         validation_result = self.validate_incoming_message(message)
         if isinstance(validation_result, WebSocketValidationError):
             await self._handle_validation_error(conn_info, validation_result, message)
             return False
         self.core.increment_stat("total_messages_received")
         return True
+    
+    async def _send_pong_response(self, websocket: WebSocket) -> None:
+        """Send pong response to ping message."""
+        pong_message = {"type": "pong", "timestamp": time.time()}
+        await websocket.send_json(pong_message)
 
     async def _handle_validation_error(self, conn_info: ConnectionInfo, 
                                      error: WebSocketValidationError, message: Dict[str, Any]) -> None:

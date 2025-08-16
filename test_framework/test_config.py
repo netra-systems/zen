@@ -145,6 +145,17 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "run_both": True,
         "run_e2e": True
     },
+    "real_e2e": {
+        "description": "[REAL E2E] Tests with actual LLM calls and services (15-20 minutes)",
+        "purpose": "End-to-end validation with real LLM and service integrations",
+        "backend_args": ["-k", "real_ or _real", "-v", "--fail-fast", "--tb=short"],
+        "frontend_args": [],
+        "timeout": 1200,  # 20 minutes for real e2e tests
+        "run_coverage": False,
+        "run_both": False,
+        "requires_env": ["ENABLE_REAL_LLM_TESTING=true"],
+        "highlight": True  # Flag to highlight in output
+    },
     "real_services": {
         "description": "Tests requiring real external services (LLM, DB, Redis, ClickHouse)",
         "purpose": "Validation with actual service dependencies",

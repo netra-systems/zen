@@ -1,6 +1,7 @@
 from typing import Optional, List, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.database.unit_of_work import UnitOfWork, get_unit_of_work
+from app.services.service_locator import IThreadService
 from app.core.exceptions_database import DatabaseError, RecordNotFoundError
 from app.core.exceptions_base import NetraException
 from app.core.error_codes import ErrorCode, ErrorSeverity
@@ -23,7 +24,7 @@ async def uow_context():
     """Context manager for unit of work without existing session"""
     return get_unit_of_work()
 
-class ThreadService:
+class ThreadService(IThreadService):
     """Service for managing conversation threads and messages"""
     
     async def _send_thread_created_event(self, user_id: str) -> None:
@@ -155,3 +156,36 @@ class ThreadService:
             raise
         except Exception as e:
             raise _handle_database_error(f"update run {run_id} status", {"run_id": run_id, "status": status}, e)
+
+    # Interface implementation methods
+    async def create_thread(self, user_id: str, db=None):
+        """Create a new thread for the user."""
+        return await self.get_or_create_thread(user_id, db)
+
+    async def switch_thread(self, user_id: str, thread_id: str, db=None):
+        """Switch user to a different thread."""
+        # Validate that the thread exists and belongs to the user
+        thread = await self.get_thread(thread_id, db)
+        if thread:
+            await manager.send_message(user_id, {
+                "type": "thread_switched", 
+                "payload": {"thread_id": thread_id}
+            })
+            return thread
+        return None
+
+    async def delete_thread(self, thread_id: str, user_id: str, db=None):
+        """Delete a thread for the user."""
+        # Implementation for thread deletion
+        try:
+            async with get_unit_of_work(db) as uow:
+                success = await uow.threads.delete(uow.session, thread_id)
+                if success:
+                    await manager.send_message(user_id, {
+                        "type": "thread_deleted", 
+                        "payload": {"thread_id": thread_id}
+                    })
+                return success
+        except Exception as e:
+            logger.error(f"Failed to delete thread {thread_id}: {e}")
+            return False

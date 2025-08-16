@@ -6,6 +6,8 @@ import uuid
 import random
 from datetime import datetime, UTC
 from typing import Dict, List
+from app.core.exceptions_base import ValidationError
+from app.core.error_codes import ErrorCode
 
 
 class AdvancedGenerationMethods:
@@ -41,7 +43,12 @@ class AdvancedGenerationMethods:
 
     def _select_corpus_record(self, corpus_content: List[Dict]) -> Dict:
         """Select corpus record for generation"""
-        return random.choice(corpus_content) if corpus_content else {"prompt": "test", "response": "test"}
+        if not corpus_content:
+            raise ValidationError(
+                message="Corpus content is empty or not provided",
+                details={"corpus_size": 0},
+                user_message="Cannot generate data without valid corpus content")
+        return random.choice(corpus_content)
 
     def _build_corpus_record(self, index: int, base_record: Dict) -> Dict:
         """Build record from corpus content"""

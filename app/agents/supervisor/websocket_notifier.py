@@ -120,12 +120,17 @@ class WebSocketNotifier:
     def _build_fallback_notification_message(self, context: AgentExecutionContext,
                                             fallback_type: str) -> WebSocketMessage:
         """Build fallback notification message."""
-        payload = {
+        payload = self._create_fallback_payload(context, fallback_type)
+        return WebSocketMessage(type="agent_fallback", payload=payload)
+    
+    def _create_fallback_payload(self, context: AgentExecutionContext,
+                                fallback_type: str) -> dict:
+        """Create fallback notification payload."""
+        return {
             "agent_name": context.agent_name, "run_id": context.run_id,
             "fallback_type": fallback_type, "timestamp": self._get_timestamp(),
             "message": f"{context.agent_name} is using fallback response"
         }
-        return WebSocketMessage(type="agent_fallback", payload=payload)
     
     async def _send_websocket_message(self, thread_id: str, 
                                      message: WebSocketMessage) -> None:

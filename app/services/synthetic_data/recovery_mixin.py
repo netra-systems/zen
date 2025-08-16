@@ -180,8 +180,9 @@ class RecoveryMixin:
     
     def get_circuit_breaker(self) -> 'CircuitBreaker':
         """Get circuit breaker instance"""
-        from .circuit_breaker import CircuitBreaker
-        return CircuitBreaker()
+        from .circuit_breaker import CircuitBreaker, CircuitConfig
+        config = CircuitConfig(name="synthetic_data_recovery")
+        return CircuitBreaker(config)
     
     async def process_with_dlq(
         self, 

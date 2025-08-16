@@ -14,9 +14,11 @@ from app.db.models_postgres import AISupplyItem, ResearchSession
 
 
 @pytest.fixture
-def service(db_session):
-    """Create SupplyResearchService instance with real database"""
-    return SupplyResearchService(db_session)
+def service():
+    """Create SupplyResearchService instance with mock database"""
+    from unittest.mock import MagicMock
+    mock_db = MagicMock()
+    return SupplyResearchService(mock_db)
 
 
 @pytest.fixture
@@ -37,24 +39,26 @@ def sample_supply_item() -> AISupplyItem:
 class TestServiceInitialization:
     """Test service initialization with and without Redis"""
     
-    def test_initialization_with_redis(self, db_session):
+    def test_initialization_with_redis(self):
         """Test initialization with Redis available"""
+        mock_db = MagicMock()
         with patch('app.services.supply_research_service.RedisManager') as mock_redis:
             mock_instance = MagicMock()
             mock_redis.return_value = mock_instance
             
-            service = SupplyResearchService(db_session)
+            service = SupplyResearchService(mock_db)
             
-            assert service.db == db_session
+            assert service.db == mock_db
             assert service.redis_manager == mock_instance
     
-    def test_initialization_without_redis(self, db_session):
+    def test_initialization_without_redis(self):
         """Test initialization when Redis unavailable"""
+        mock_db = MagicMock()
         with patch('app.services.supply_research_service.RedisManager', 
                    side_effect=Exception("Redis not available")):
-            service = SupplyResearchService(db_session)
+            service = SupplyResearchService(mock_db)
             
-            assert service.db == db_session
+            assert service.db == mock_db
             assert service.redis_manager is None
 
 
@@ -64,7 +68,7 @@ class TestSupplyItemRetrieval:
     def test_get_supply_items_no_filters(self, service, sample_supply_item):
         """Test getting all supply items without filters"""
         with patch.object(service.db, 'query') as mock_query:
-            mock_query.return_value.all.return_value = [sample_supply_item]
+            mock_query.return_value.order_by.return_value.all.return_value = [sample_supply_item]
             
             result: List[AISupplyItem] = service.get_supply_items()
             
@@ -74,7 +78,7 @@ class TestSupplyItemRetrieval:
     def test_get_supply_items_with_provider_filter(self, service, sample_supply_item):
         """Test retrieving items filtered by provider"""
         with patch.object(service.db, 'query') as mock_query:
-            mock_chain = mock_query.return_value.filter.return_value
+            mock_chain = mock_query.return_value.filter.return_value.order_by.return_value
             mock_chain.all.return_value = [sample_supply_item]
             
             result: List[AISupplyItem] = service.get_supply_items(provider="openai")
@@ -85,7 +89,7 @@ class TestSupplyItemRetrieval:
     def test_get_supply_items_with_availability_filter(self, service, sample_supply_item):
         """Test retrieving items filtered by availability"""
         with patch.object(service.db, 'query') as mock_query:
-            mock_chain = mock_query.return_value.filter.return_value
+            mock_chain = mock_query.return_value.filter.return_value.order_by.return_value
             mock_chain.all.return_value = [sample_supply_item]
             
             result: List[AISupplyItem] = service.get_supply_items(availability_status="available")
@@ -96,7 +100,7 @@ class TestSupplyItemRetrieval:
     def test_get_supply_items_with_confidence_filter(self, service, sample_supply_item):
         """Test retrieving items filtered by minimum confidence"""
         with patch.object(service.db, 'query') as mock_query:
-            mock_chain = mock_query.return_value.filter.return_value
+            mock_chain = mock_query.return_value.filter.return_value.order_by.return_value
             mock_chain.all.return_value = [sample_supply_item]
             
             result: List[AISupplyItem] = service.get_supply_items(min_confidence=0.8)
@@ -107,7 +111,7 @@ class TestSupplyItemRetrieval:
     def test_get_supply_items_empty_result(self, service):
         """Test retrieving when no items match filters"""
         with patch.object(service.db, 'query') as mock_query:
-            mock_query.return_value.all.return_value = []
+            mock_query.return_value.order_by.return_value.all.return_value = []
             
             result: List[AISupplyItem] = service.get_supply_items()
             

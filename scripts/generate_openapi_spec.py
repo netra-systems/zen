@@ -124,6 +124,79 @@ def save_spec_to_file(spec: dict, output_path: str = "openapi.json") -> str:
         sys.exit(1)
 
 
+def get_readme_url(custom_url: Optional[str]) -> str:
+    """Get ReadMe API URL with default fallback"""
+    return custom_url or "https://dash.readme.com/api/v1"
+
+
+def read_spec_file(spec_file: str) -> str:
+    """Read OpenAPI spec file content"""
+    with open(spec_file, 'r', encoding='utf-8') as f:
+        return f.read()
+
+
+def create_readme_headers(api_key: str, version: str) -> dict:
+    """Create headers for ReadMe API requests"""
+    return {
+        "Authorization": f"Basic {api_key}",
+        "x-readme-version": version,
+        "Content-Type": "application/json"
+    }
+
+
+def check_version_exists(readme_url: str, version: str, headers: dict) -> bool:
+    """Check if version exists in ReadMe"""
+    version_check_url = f"{readme_url}/version/{version}"
+    response = requests.get(version_check_url, headers=headers)
+    return response.status_code != 404
+
+
+def create_readme_version(readme_url: str, version: str, headers: dict) -> bool:
+    """Create new version in ReadMe if it doesn't exist"""
+    print(f"Creating new version '{version}' in ReadMe...")
+    create_version_url = f"{readme_url}/version"
+    version_data = {
+        "version": version,
+        "from": "1.0.0",
+        "is_stable": False,
+        "is_beta": True
+    }
+    response = requests.post(create_version_url, headers=headers, json=version_data)
+    if response.status_code not in [200, 201]:
+        print(f"Warning: Could not create version: {response.text}")
+        return False
+    return True
+
+
+def upload_spec_to_readme(readme_url: str, api_key: str, version: str, spec_content: str) -> bool:
+    """Upload OpenAPI spec to ReadMe"""
+    print(f"Uploading OpenAPI spec to ReadMe (version: {version})...")
+    files = {'spec': ('openapi.json', spec_content, 'application/json')}
+    upload_headers = {"Authorization": f"Basic {api_key}", "x-readme-version": version}
+    upload_url = f"{readme_url}/api-specification"
+    response = requests.post(upload_url, headers=upload_headers, files=files)
+    
+    if response.status_code in [200, 201]:
+        print("Successfully synced OpenAPI spec to ReadMe!")
+        response_data = response.json()
+        if "id" in response_data:
+            print(f"   Specification ID: {response_data['id']}")
+        return True
+    else:
+        print(f"Failed to sync to ReadMe: {response.status_code}")
+        print(f"   Response: {response.text}")
+        return False
+
+
+def handle_readme_sync_error(error: Exception) -> bool:
+    """Handle ReadMe sync errors with appropriate messages"""
+    if isinstance(error, requests.exceptions.RequestException):
+        print(f"Network error while syncing to ReadMe: {error}")
+    else:
+        print(f"Error syncing to ReadMe: {error}")
+    return False
+
+
 def sync_to_readme(
     spec_file: str,
     api_key: str,
@@ -143,79 +216,17 @@ def sync_to_readme(
         True if sync was successful, False otherwise
     """
     try:
-        # Default ReadMe API URL
-        if not readme_url:
-            readme_url = "https://dash.readme.com/api/v1"
+        readme_url = get_readme_url(readme_url)
+        spec_content = read_spec_file(spec_file)
+        headers = create_readme_headers(api_key, version)
         
-        # Read the spec file
-        with open(spec_file, 'r', encoding='utf-8') as f:
-            spec_content = f.read()
+        if not check_version_exists(readme_url, version, headers):
+            create_readme_version(readme_url, version, headers)
         
-        # Prepare the API request
-        headers = {
-            "Authorization": f"Basic {api_key}",
-            "x-readme-version": version,
-            "Content-Type": "application/json"
-        }
+        return upload_spec_to_readme(readme_url, api_key, version, spec_content)
         
-        # First, check if the version exists
-        version_check_url = f"{readme_url}/version/{version}"
-        version_response = requests.get(version_check_url, headers=headers)
-        
-        if version_response.status_code == 404:
-            # Create the version if it doesn't exist
-            print(f"Creating new version '{version}' in ReadMe...")
-            create_version_url = f"{readme_url}/version"
-            version_data = {
-                "version": version,
-                "from": "1.0.0",  # Base version to fork from
-                "is_stable": False,
-                "is_beta": True
-            }
-            create_response = requests.post(
-                create_version_url,
-                headers=headers,
-                json=version_data
-            )
-            
-            if create_response.status_code not in [200, 201]:
-                print(f"Warning: Could not create version: {create_response.text}")
-        
-        # Upload the OpenAPI spec
-        print(f"Uploading OpenAPI spec to ReadMe (version: {version})...")
-        
-        # ReadMe expects the spec to be uploaded as a file
-        files = {
-            'spec': ('openapi.json', spec_content, 'application/json')
-        }
-        
-        upload_url = f"{readme_url}/api-specification"
-        upload_response = requests.post(
-            upload_url,
-            headers={
-                "Authorization": f"Basic {api_key}",
-                "x-readme-version": version
-            },
-            files=files
-        )
-        
-        if upload_response.status_code in [200, 201]:
-            print(f"Successfully synced OpenAPI spec to ReadMe!")
-            response_data = upload_response.json()
-            if "id" in response_data:
-                print(f"   Specification ID: {response_data['id']}")
-            return True
-        else:
-            print(f"Failed to sync to ReadMe: {upload_response.status_code}")
-            print(f"   Response: {upload_response.text}")
-            return False
-            
-    except requests.exceptions.RequestException as e:
-        print(f"Network error while syncing to ReadMe: {e}")
-        return False
     except Exception as e:
-        print(f"Error syncing to ReadMe: {e}")
-        return False
+        return handle_readme_sync_error(e)
 
 
 def validate_spec(spec: dict) -> bool:

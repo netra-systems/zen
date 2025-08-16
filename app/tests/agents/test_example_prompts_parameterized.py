@@ -46,6 +46,11 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         self.context_generator = ContextGenerator()
         self.test_runner = TestRunner()
     
+    @pytest.fixture
+    def setup_real_infrastructure(self):
+        """Setup infrastructure for testing"""
+        return setup_real_infrastructure()
+    
     @pytest.mark.parametrize("prompt_index", range(9))
     @pytest.mark.parametrize("variation_num", range(10))
     async def test_prompt_variations(
@@ -171,6 +176,11 @@ class TestPromptGroups(ExamplePromptsTestBase):
         """Setup test dependencies"""
         self.context_generator = ContextGenerator()
         self.test_runner = TestRunner()
+    
+    @pytest.fixture
+    def setup_real_infrastructure(self):
+        """Setup infrastructure for testing"""
+        return setup_real_infrastructure()
     
     @pytest.mark.parametrize("prompt_index", [0, 6])  # Cost-related prompts
     async def test_cost_optimization_prompts(

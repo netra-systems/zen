@@ -3,7 +3,7 @@ Strong type definitions for data ingestion operations following Netra convention
 """
 
 from typing import Dict, Any, Optional, List, Union, Literal, TypeVar, Generic
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 import uuid
@@ -74,7 +74,7 @@ class DataSource(BaseModel):
     credentials: Optional[Dict[str, str]] = Field(default=None, exclude=True)
     config: Dict[str, Any] = Field(default_factory=dict)
     metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: Optional[datetime] = None
 
 
@@ -103,7 +103,7 @@ class IngestionJob(BaseModel):
     config: IngestionConfig
     schedule: Optional[str] = None  # Cron expression
     status: IngestionStatus = IngestionStatus.PENDING
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     next_run_at: Optional[datetime] = None
@@ -141,7 +141,7 @@ class DataQualityCheck(BaseModel):
 class DataQualityReport(BaseModel):
     """Data quality report"""
     job_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     checks_run: int = 0
     checks_passed: int = 0
     checks_failed: int = 0
@@ -170,7 +170,7 @@ class DataPipeline(BaseModel):
     schedule: Optional[str] = None  # Cron expression
     enabled: bool = Field(default=True)
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: Optional[datetime] = None
 
 
@@ -188,7 +188,7 @@ class IngestionEvent(BaseModel):
     job_id: str
     event_type: Literal["started", "progress", "completed", "failed", "warning"]
     message: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
@@ -210,7 +210,7 @@ class IngestionError(BaseModel):
     record_id: Optional[str] = None
     field: Optional[str] = None
     value: Optional[Any] = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     stack_trace: Optional[str] = None
 
 
@@ -227,7 +227,7 @@ class DataCatalog(BaseModel):
     size_bytes: Optional[int] = None
     tags: List[str] = Field(default_factory=list)
     owner: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     last_updated: Optional[datetime] = None
     last_accessed: Optional[datetime] = None
 
@@ -239,4 +239,4 @@ class DataLineage(BaseModel):
     upstream: List[Dict[str, str]] = Field(default_factory=list)
     downstream: List[Dict[str, str]] = Field(default_factory=list)
     transformations: List[str] = Field(default_factory=list)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

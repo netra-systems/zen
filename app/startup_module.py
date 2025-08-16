@@ -33,25 +33,32 @@ from app.db.index_optimizer import index_manager
 async def _initialize_performance_optimizations(app: FastAPI, logger: logging.Logger) -> None:
     """Initialize performance optimization components."""
     try:
-        # Initialize performance optimization manager
-        await performance_manager.initialize()
-        app.state.performance_manager = performance_manager
-        
-        # Store optimization components in app state
-        app.state.index_manager = index_manager
-        
-        # Schedule index optimization as background task
-        if hasattr(app.state, 'background_task_manager'):
-            app.state.background_task_manager.add_task(
-                _run_index_optimization_background(logger)
-            )
-            logger.info("Database index optimization scheduled as background task")
-        
+        await _setup_performance_manager(app)
+        _setup_optimization_components(app)
+        await _schedule_background_optimizations(app, logger)
         logger.info("Performance optimizations initialized successfully")
-        
     except Exception as e:
         logger.error(f"Failed to initialize performance optimizations: {e}")
         # Don't fail startup, but log the error
+
+
+async def _setup_performance_manager(app: FastAPI) -> None:
+    """Setup performance optimization manager."""
+    await performance_manager.initialize()
+    app.state.performance_manager = performance_manager
+
+
+def _setup_optimization_components(app: FastAPI) -> None:
+    """Setup optimization components in app state."""
+    app.state.index_manager = index_manager
+
+
+async def _schedule_background_optimizations(app: FastAPI, logger: logging.Logger) -> None:
+    """Schedule index optimization as background task."""
+    if hasattr(app.state, 'background_task_manager'):
+        task = _run_index_optimization_background(logger)
+        app.state.background_task_manager.add_task(task)
+        logger.info("Database index optimization scheduled as background task")
 
 
 async def _run_index_optimization_background(logger: logging.Logger) -> None:
@@ -178,11 +185,16 @@ async def _setup_clickhouse_tables(logger: logging.Logger, mode: str) -> None:
     """Setup ClickHouse tables."""
     from app.db.clickhouse_init import initialize_clickhouse_tables
     try:
-        logger.info(f"Initializing ClickHouse tables (mode: {mode})...")
+        _log_clickhouse_start(logger, mode)
         await initialize_clickhouse_tables()
         logger.info("ClickHouse tables initialization complete")
     except Exception as e:
         logger.error(f"Failed to initialize ClickHouse tables: {e}")
+
+
+def _log_clickhouse_start(logger: logging.Logger, mode: str) -> None:
+    """Log ClickHouse initialization start."""
+    logger.info(f"Initializing ClickHouse tables (mode: {mode})...")
 
 
 def _log_clickhouse_skip(logger: logging.Logger, mode: str) -> None:
@@ -195,28 +207,43 @@ def _log_clickhouse_skip(logger: logging.Logger, mode: str) -> None:
 
 def register_websocket_handlers(app: FastAPI) -> None:
     """Create tool registry and dispatcher."""
+    tool_registry = _create_tool_registry(app)
+    app.state.tool_dispatcher = _create_tool_dispatcher(tool_registry)
+
+
+def _create_tool_registry(app: FastAPI):
+    """Create tool registry instance."""
     from app.services.tool_registry import ToolRegistry
+    return ToolRegistry(app.state.db_session_factory)
+
+
+def _create_tool_dispatcher(tool_registry):
+    """Create tool dispatcher instance."""
     from app.agents.tool_dispatcher import ToolDispatcher
-    from app.agents.supervisor_consolidated import SupervisorAgent
-    from app.services.agent_service import AgentService
-    from app.ws_manager import manager as websocket_manager
-    
-    tool_registry = ToolRegistry(app.state.db_session_factory)
-    app.state.tool_dispatcher = ToolDispatcher(tool_registry.get_tools([]))
+    return ToolDispatcher(tool_registry.get_tools([]))
 
 
 def _create_agent_supervisor(app: FastAPI) -> None:
     """Create agent supervisor."""
+    supervisor = _build_supervisor_agent(app)
+    _setup_agent_state(app, supervisor)
+
+
+def _build_supervisor_agent(app: FastAPI):
+    """Build supervisor agent instance."""
     from app.agents.supervisor_consolidated import SupervisorAgent
-    from app.services.agent_service import AgentService
     from app.ws_manager import manager as websocket_manager
-    
-    supervisor = SupervisorAgent(
+    return SupervisorAgent(
         app.state.db_session_factory, 
         app.state.llm_manager, 
         websocket_manager, 
         app.state.tool_dispatcher
     )
+
+
+def _setup_agent_state(app: FastAPI, supervisor) -> None:
+    """Setup agent state in app."""
+    from app.services.agent_service import AgentService
     app.state.agent_supervisor = supervisor
     app.state.agent_service = AgentService(supervisor)
 
@@ -242,11 +269,16 @@ async def _emergency_cleanup(logger: logging.Logger) -> None:
     """Perform emergency cleanup on startup failure."""
     from app.utils.multiprocessing_cleanup import cleanup_multiprocessing
     try:
-        await redis_manager.disconnect()
+        await _cleanup_connections()
         cleanup_multiprocessing()
         await central_logger.shutdown()
     except Exception as cleanup_error:
         logger.error(f"Error during cleanup: {cleanup_error}")
+
+
+async def _cleanup_connections() -> None:
+    """Cleanup Redis connections."""
+    await redis_manager.disconnect()
 
 
 async def validate_schema(logger: logging.Logger) -> None:
@@ -280,16 +312,21 @@ async def start_monitoring(app: FastAPI, logger: logging.Logger) -> None:
 
 async def _create_monitoring_task(app: FastAPI, logger: logging.Logger) -> None:
     """Create comprehensive monitoring tasks."""
+    await _start_connection_monitoring(app)
+    await _start_performance_monitoring(app)
+    logger.info("Comprehensive monitoring started")
+
+
+async def _start_connection_monitoring(app: FastAPI) -> None:
+    """Start database connection monitoring."""
     from app.services.database.connection_monitor import start_connection_monitoring
-    
-    # Start database connection monitoring
     app.state.monitoring_task = asyncio.create_task(start_connection_monitoring())
-    
-    # Start performance monitoring
+
+
+async def _start_performance_monitoring(app: FastAPI) -> None:
+    """Start performance monitoring."""
     await performance_monitor.start_monitoring()
     app.state.performance_monitor = performance_monitor
-    
-    logger.info("Comprehensive monitoring started")
 
 
 def log_startup_complete(start_time: float, logger: logging.Logger) -> None:

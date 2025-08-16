@@ -42,10 +42,15 @@ class AgentExecutionCore:
         """Run agent and track timing."""
         start_time = time.time()
         try:
-            await self._execute_agent_lifecycle(agent, context, state)
-            return self._create_success_result(state, time.time() - start_time)
+            return await self._execute_agent_with_success(agent, context, state, start_time)
         except Exception as e:
             return self._handle_execution_error(context, state, e, start_time)
+    
+    async def _execute_agent_with_success(self, agent, context: AgentExecutionContext,
+                                         state: DeepAgentState, start_time: float) -> AgentExecutionResult:
+        """Execute agent and create success result."""
+        await self._execute_agent_lifecycle(agent, context, state)
+        return self._create_success_result(state, time.time() - start_time)
     
     async def _execute_agent_lifecycle(self, agent, context: AgentExecutionContext,
                                       state: DeepAgentState) -> None:

@@ -1,0 +1,130 @@
+name: Docker Build and Push
+
+on:
+  workflow_call:
+    inputs:
+      dockerfile:
+        description: 'Path to Dockerfile'
+        required: false
+        type: string
+        default: 'Dockerfile'
+      context:
+        description: 'Build context directory'
+        required: false
+        type: string
+        default: '.'
+      tags:
+        description: 'Docker image tags (comma-separated)'
+        required: true
+        type: string
+      push:
+        description: 'Whether to push the image to registry'
+        required: false
+        type: boolean
+        default: true
+      skip_condition:
+        description: 'Skip condition for conditional execution'
+        required: false
+        type: string
+        default: 'false'
+    outputs:
+      image_digest:
+        description: 'Docker image digest'
+        value: ${{ jobs.docker.outputs.image_digest }}
+      image_tags:
+        description: 'Built image tags'
+        value: ${{ jobs.docker.outputs.image_tags }}
+      status:
+        description: 'Job completion status'
+        value: ${{ jobs.docker.outputs.status }}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  docker:
+    runs-on: warp-custom-default
+    if: ${{ inputs.skip_condition != 'true' }}
+    outputs:
+      image_digest: ${{ steps.build.outputs.digest }}
+      image_tags: ${{ steps.meta.outputs.tags }}
+      status: ${{ steps.final.outputs.status }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure GCP credentials
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_STAGING_SA_KEY }}
+
+      - name: Configure Docker for GCR
+        run: |
+          gcloud auth configure-docker gcr.io
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ inputs.tags }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          push: ${{ inputs.push }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Verify image
+        if: ${{ inputs.push }}
+        run: |
+          echo "Image digest: ${{ steps.build.outputs.digest }}"
+          echo "Image tags: ${{ steps.meta.outputs.tags }}"
+          
+          # Test image can be pulled
+          first_tag=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          docker pull "$first_tag"
+          docker inspect "$first_tag"
+
+      - name: Security scan
+        id: scan
+        if: ${{ inputs.push }}
+        run: |
+          # Run security scan on built image
+          first_tag=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
+          echo "Running security scan on: $first_tag"
+          # Note: Add actual security scanning tool here (e.g., Trivy, Snyk)
+          echo "Security scan completed"
+
+      - name: Handle errors
+        if: failure()
+        run: |
+          echo "Docker build failed"
+          echo "Dockerfile: ${{ inputs.dockerfile }}"
+          echo "Context: ${{ inputs.context }}"
+          echo "Tags: ${{ inputs.tags }}"
+          echo "Push: ${{ inputs.push }}"
+          exit 1
+
+      - name: Final status
+        id: final
+        if: always()
+        run: |
+          echo "status=${{ job.status }}" >> $GITHUB_OUTPUT

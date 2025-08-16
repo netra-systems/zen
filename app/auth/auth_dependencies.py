@@ -133,6 +133,45 @@ async def get_current_user_optional(
         logger.warning(f"Optional user authentication failed: {e}")
         return None
 
+async def _process_user_token(token: str, db_session: AsyncSession, security_service: SecurityService) -> Optional[User]:
+    """Process user token and return user if valid."""
+    payload = security_service.decode_access_token(token)
+    if payload is None:
+        logger.error("Token payload is invalid")
+        return None
+    user_id = _extract_user_id_from_payload(payload)
+    if user_id is None:
+        return None
+    return await _fetch_user_by_id(db_session, security_service, user_id)
+
+def _extract_user_id_from_payload(payload: dict) -> Optional[str]:
+    """Extract user ID from token payload."""
+    user_id = payload.get("sub")
+    if user_id is None:
+        logger.error("User ID not found in token payload")
+    return user_id
+
+async def _fetch_user_by_id(db_session: AsyncSession, security_service: SecurityService, user_id: str) -> Optional[User]:
+    """Fetch user by ID."""
+    user = await security_service.get_user_by_id(db_session, user_id)
+    if user is None:
+        logger.error(f"User with ID {user_id} not found")
+    return user
+
+def _validate_user_authentication(user: Optional[User]) -> None:
+    """Validate user authentication."""
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+def _validate_user_is_active(user: User) -> None:
+    """Validate user is active."""
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+
 ActiveUserDep = Depends(get_current_active_user)
 ActiveUserWsDep = Depends(get_current_user_ws)
 DeveloperDep = Depends(require_developer())

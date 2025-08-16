@@ -33,7 +33,6 @@ class ToolPermissionMiddleware:
     async def __call__(self, request: Request, call_next: Callable):
         """Process request with tool permission checking"""
         start_time = time.time()
-        
         try:
             await self._handle_tool_permission_check(request)
             response = await call_next(request)
@@ -96,17 +95,23 @@ class ToolPermissionMiddleware:
     
     async def _extract_from_post_body(self, request: Request) -> Optional[dict]:
         """Extract tool info from POST request body."""
-        if request.method == "POST" and hasattr(request, "_body"):
-            body = await request.body()
-            if body:
-                data = json.loads(body)
-                if "tool_name" in data:
-                    return {
-                        "name": data["tool_name"],
-                        "arguments": data.get("arguments", {}),
-                        "action": data.get("action", "execute")
-                    }
-        return None
+        if not (request.method == "POST" and hasattr(request, "_body")):
+            return None
+        body = await request.body()
+        if not body:
+            return None
+        data = json.loads(body)
+        return self._create_tool_info_from_data(data)
+    
+    def _create_tool_info_from_data(self, data: dict) -> Optional[dict]:
+        """Create tool info from parsed data."""
+        if "tool_name" not in data:
+            return None
+        return {
+            "name": data["tool_name"],
+            "arguments": data.get("arguments", {}),
+            "action": data.get("action", "execute")
+        }
     
     def _extract_from_url_path(self, request: Request) -> Optional[dict]:
         """Extract tool info from URL path."""
@@ -135,22 +140,21 @@ class ToolPermissionMiddleware:
     async def _get_user_from_request(self, request: Request) -> Optional[User]:
         """Get user from request context"""
         try:
-            # Try to get user from dependency injection context
             if hasattr(request.state, 'user'):
                 return request.state.user
-            
-            # Fallback: extract from Authorization header
-            auth_header = request.headers.get("Authorization")
-            if auth_header and auth_header.startswith("Bearer "):
-                # This would typically validate the JWT token and get user
-                # For now, return None to skip permission checking
-                pass
-            
-            return None
-            
+            return self._extract_user_from_auth_header(request)
         except Exception as e:
             logger.error(f"Error getting user from request: {e}")
             return None
+    
+    def _extract_user_from_auth_header(self, request: Request) -> Optional[User]:
+        """Extract user from authorization header."""
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            # This would typically validate the JWT token and get user
+            # For now, return None to skip permission checking
+            pass
+        return None
     
     async def _check_tool_permissions(
         self, 
@@ -246,6 +250,44 @@ class ToolPermissionMiddleware:
             
         except Exception as e:
             logger.error(f"Error logging tool execution: {e}")
+
+    async def _handle_middleware_error(self, error: Exception, request: Request, call_next: Callable):
+        """Handle middleware errors."""
+        logger.error(f"Tool permission middleware error: {error}", exc_info=True)
+        return await call_next(request)
+
+    def _set_request_permission_state(self, request: Request, permission_result, tool_info: dict) -> None:
+        """Set permission state on request."""
+        request.state.permission_check = permission_result
+        request.state.tool_info = tool_info
+
+    def _is_post_request_with_body(self, request: Request) -> bool:
+        """Check if request is POST with body."""
+        return request.method == "POST" and hasattr(request, "_body")
+
+    def _build_tool_info_dict(self, data: dict) -> dict:
+        """Build tool info dictionary from data."""
+        return {
+            "name": data["tool_name"],
+            "arguments": data.get("arguments", {}),
+            "action": data.get("action", "execute")
+        }
+
+    def _build_tool_info_from_path(self, path_parts: list, query_params) -> dict:
+        """Build tool info from URL path parts."""
+        return {
+            "name": path_parts[3],
+            "action": path_parts[4] if len(path_parts) > 4 else "execute",
+            "arguments": dict(query_params)
+        }
+
+    def _build_mcp_tool_info(self, data: dict) -> dict:
+        """Build tool info from MCP data."""
+        return {
+            "name": data.get("method", "unknown"),
+            "arguments": data.get("params", {}),
+            "action": "execute"
+        }
 
 
 def create_tool_permission_dependency(

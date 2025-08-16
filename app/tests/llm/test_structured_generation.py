@@ -9,7 +9,7 @@ from typing import List, Optional
 import json
 
 from app.llm.llm_manager import LLMManager
-from app.llm.llm_mocks import MockLLM, MockStructuredLLM
+from app.tests.helpers.llm_mocks import MockLLM, MockStructuredLLM
 from app.schemas import AppConfig, LLMConfig
 
 
@@ -118,6 +118,7 @@ class TestLLMManagerStructuredGeneration:
     def test_get_structured_llm_with_mock(self, llm_manager):
         """Test getting structured LLM in dev mode (mock)."""
         llm_manager.enabled = False  # Force mock mode
+        llm_manager._core.enabled = False  # Also set core enabled to False
         
         structured_llm = llm_manager.get_structured_llm(
             "test",
@@ -130,9 +131,12 @@ class TestLLMManagerStructuredGeneration:
     def test_get_structured_llm_with_real(self, mock_openai, llm_manager):
         """Test getting structured LLM with real provider."""
         llm_manager.enabled = True
+        llm_manager._core.enabled = True
+        
+        # Mock the get_llm method to return our mock LLM
         mock_llm_instance = MagicMock()
         mock_llm_instance.with_structured_output = MagicMock(return_value="structured_llm")
-        mock_openai.return_value = mock_llm_instance
+        llm_manager._core.get_llm = MagicMock(return_value=mock_llm_instance)
         
         structured_llm = llm_manager.get_structured_llm(
             "test",
@@ -152,7 +156,8 @@ class TestLLMManagerStructuredGeneration:
             tags=["test", "success"]
         )
         
-        with patch.object(llm_manager, 'get_structured_llm') as mock_get:
+        # Mock at the structured operations level
+        with patch.object(llm_manager._structured, 'get_structured_llm') as mock_get:
             mock_structured_llm = AsyncMock()
             mock_structured_llm.ainvoke = AsyncMock(return_value=mock_response)
             mock_get.return_value = mock_structured_llm

@@ -13,6 +13,10 @@ import json
 from app.logging_config import central_logger
 from app.schemas.Metrics import TimeSeriesPoint, MetricType
 from app.redis_manager import RedisManager
+from .time_series_aggregation import (
+    aggregate_series_data, apply_aggregation_function, calculate_series_statistics,
+    filter_points_by_time, calculate_storage_status
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -136,23 +140,7 @@ class TimeSeriesStorage:
     ) -> List[TimeSeriesPoint]:
         """Get series data from local storage"""
         points = list(self._local_storage[series_key])
-        
-        # Filter by time range
-        if start_time or end_time:
-            filtered_points = []
-            for point in points:
-                if start_time and point.timestamp < start_time:
-                    continue
-                if end_time and point.timestamp > end_time:
-                    continue
-                filtered_points.append(point)
-            points = filtered_points
-        
-        # Apply limit
-        if limit:
-            points = points[-limit:]
-        
-        return sorted(points, key=lambda x: x.timestamp)
+        return filter_points_by_time(points, start_time, end_time, limit)
     
     async def aggregate_series(
         self,
@@ -166,55 +154,8 @@ class TimeSeriesStorage:
         start_time = end_time - timedelta(hours=time_range_hours)
         
         raw_points = await self.get_series(series_key, start_time, end_time)
-        
-        if not raw_points:
-            return []
-        
-        # Group points by time intervals
-        interval_seconds = interval_minutes * 60
-        grouped_points = defaultdict(list)
-        
-        for point in raw_points:
-            # Calculate interval bucket
-            timestamp_seconds = int(point.timestamp.timestamp())
-            interval_bucket = (timestamp_seconds // interval_seconds) * interval_seconds
-            bucket_time = datetime.fromtimestamp(interval_bucket, UTC)
-            
-            grouped_points[bucket_time].append(point.value)
-        
-        # Apply aggregation function
-        aggregated_points = []
-        for bucket_time, values in grouped_points.items():
-            aggregated_value = await self._apply_aggregation(values, aggregation_func)
-            
-            aggregated_points.append(TimeSeriesPoint(
-                timestamp=bucket_time,
-                value=aggregated_value,
-                tags={"aggregation": aggregation_func, "interval_minutes": str(interval_minutes)}
-            ))
-        
-        return sorted(aggregated_points, key=lambda x: x.timestamp)
+        return await aggregate_series_data(raw_points, aggregation_func, interval_minutes)
     
-    async def _apply_aggregation(self, values: List[float], func: str) -> float:
-        """Apply aggregation function to values"""
-        if not values:
-            return 0.0
-        
-        if func == "mean" or func == "avg":
-            return statistics.mean(values)
-        elif func == "sum":
-            return sum(values)
-        elif func == "min":
-            return min(values)
-        elif func == "max":
-            return max(values)
-        elif func == "median":
-            return statistics.median(values)
-        elif func == "count":
-            return len(values)
-        else:
-            logger.warning(f"Unknown aggregation function: {func}, using mean")
-            return statistics.mean(values)
     
     def subscribe_to_updates(self, series_key: str, callback: Callable):
         """Subscribe to real-time updates for a series"""
@@ -250,28 +191,7 @@ class TimeSeriesStorage:
         start_time = end_time - timedelta(hours=time_range_hours)
         
         points = await self.get_series(series_key, start_time, end_time)
-        
-        if not points:
-            return {"count": 0, "error": "No data available"}
-        
-        values = [point.value for point in points]
-        
-        stats = {
-            "count": len(values),
-            "min": min(values),
-            "max": max(values),
-            "mean": statistics.mean(values),
-            "median": statistics.median(values),
-            "first_timestamp": points[0].timestamp.isoformat(),
-            "last_timestamp": points[-1].timestamp.isoformat(),
-            "time_span_minutes": (points[-1].timestamp - points[0].timestamp).total_seconds() / 60
-        }
-        
-        if len(values) > 1:
-            stats["std_dev"] = statistics.stdev(values)
-            stats["variance"] = statistics.variance(values)
-        
-        return stats
+        return await calculate_series_statistics(points)
     
     async def cleanup_old_data(self):
         """Clean up old time-series data"""
@@ -290,13 +210,7 @@ class TimeSeriesStorage:
     
     def get_storage_status(self) -> Dict[str, Any]:
         """Get storage system status"""
-        total_points = sum(len(points) for points in self._local_storage.values())
-        
-        return {
-            "local_series_count": len(self._local_storage),
-            "total_local_points": total_points,
-            "redis_available": self.redis_manager is not None,
-            "retention_hours": self.retention_hours,
-            "active_subscribers": sum(len(subs) for subs in self._subscribers.values()),
-            "memory_usage_estimate_mb": (total_points * 100) / (1024 * 1024)  # Rough estimate
-        }
+        return calculate_storage_status(
+            self._local_storage, self._subscribers, 
+            self.retention_hours, self.redis_manager is not None
+        )

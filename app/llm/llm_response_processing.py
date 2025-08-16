@@ -23,63 +23,21 @@ async def stream_llm_response(llm: Any, prompt: str) -> AsyncIterator[str]:
         yield chunk.content
 
 
-def create_mock_structured_response(schema: Type[T]) -> T:
-    """Create mock structured response for development."""
-    mock_data = {}
-    for field_name, field_info in schema.model_fields.items():
-        if field_info.is_required():
-            mock_data[field_name] = get_mock_value_for_field(field_info)
-    return schema(**mock_data)
-
-
-def get_mock_value_for_field(field_info: Any) -> Any:
-    """Get mock value based on field type annotation."""
-    annotation = field_info.annotation
-    if annotation == str:
-        return f"[Mock {field_info}]"
-    elif annotation == float:
-        return 0.5
-    elif annotation == int:
-        return 1
-    elif annotation == bool:
-        return False
-    return get_complex_mock_value(annotation)
-
-
-def get_complex_mock_value(annotation: Any) -> Any:
-    """Handle complex field types for mock values."""
-    if annotation == dict:
-        return {}
-    elif annotation == list:
-        return []
-    elif hasattr(annotation, '__origin__'):
-        return handle_generic_type(annotation)
-    return {}
-
-
-def handle_generic_type(annotation: Any) -> Any:
-    """Handle generic types like List, Dict, Optional."""
-    origin = annotation.__origin__
-    if origin == list:
-        return []
-    elif origin == dict:
-        return {}
-    return None
-
-
 def parse_nested_json_value(value: str) -> Any:
     """Parse JSON string value with error handling."""
     try:
-        # Handle JSON strings that might have extra whitespace
         trimmed = value.strip()
-        if trimmed.startswith(('{', '[')):
+        if _is_json_like(trimmed):
             parsed = json.loads(trimmed)
-            # Recursively parse any nested JSON strings in the result
             return parse_nested_json_recursive(parsed)
     except (json.JSONDecodeError, ValueError) as e:
-        # Log but don't fail - return original value
         logger.debug(f"Could not parse nested JSON: {e}")
     return value
+
+
+def _is_json_like(trimmed: str) -> bool:
+    """Check if string looks like JSON."""
+    return trimmed.startswith(('{', '['))
 
 
 def parse_nested_json_dict(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -127,15 +85,20 @@ def extract_response_content(response: Any) -> str:
 
 def create_token_usage(response: Any) -> TokenUsage:
     """Create TokenUsage from response attributes."""
-    prompt_tokens = getattr(response, 'prompt_tokens', 0)
-    completion_tokens = getattr(response, 'completion_tokens', 0)
-    total_tokens = getattr(response, 'total_tokens', 0)
-    
+    prompt_tokens = _extract_safe_token_count(response, 'prompt_tokens')
+    completion_tokens = _extract_safe_token_count(response, 'completion_tokens')
+    total_tokens = _extract_safe_token_count(response, 'total_tokens')
     return TokenUsage(
-        prompt_tokens=prompt_tokens if isinstance(prompt_tokens, int) else 0,
-        completion_tokens=completion_tokens if isinstance(completion_tokens, int) else 0,
-        total_tokens=total_tokens if isinstance(total_tokens, int) else 0
+        prompt_tokens=prompt_tokens,
+        completion_tokens=completion_tokens,
+        total_tokens=total_tokens
     )
+
+
+def _extract_safe_token_count(response: Any, attr_name: str) -> int:
+    """Extract token count safely, returning 0 if not valid int."""
+    value = getattr(response, attr_name, 0)
+    return value if isinstance(value, int) else 0
 
 
 def get_response_model_name(response: Any, config: Any, 
@@ -157,17 +120,23 @@ async def create_llm_response(response: Any, config: Any, llm_config_name: str,
                             execution_time_ms: float) -> LLMResponse:
     """Create standardized LLM response object."""
     provider = LLMProvider(config.provider) if config else LLMProvider.LOCAL
+    choices_data = _build_response_choices(response)
     return LLMResponse(
         provider=provider,
         model=get_response_model_name(response, config, llm_config_name),
-        choices=[{
-            "message": {"content": extract_response_content(response)},
-            "finish_reason": get_finish_reason(response),
-            "index": 0
-        }],
+        choices=choices_data,
         usage=create_token_usage(response),
         response_time_ms=execution_time_ms
     )
+
+
+def _build_response_choices(response: Any) -> list:
+    """Build choices array for LLM response."""
+    return [{
+        "message": {"content": extract_response_content(response)},
+        "finish_reason": get_finish_reason(response),
+        "index": 0
+    }]
 
 
 def attempt_json_fallback_parse(text_response: str, schema: Type[T]) -> T:
@@ -205,11 +174,17 @@ async def get_cached_structured_response(cache_key: str, llm_config_name: str,
         cache_key, llm_config_name
     )
     if cached_response:
-        try:
-            return schema.model_validate_json(cached_response)
-        except Exception as e:
-            logger.warning(f"Failed to parse cached structured response: {e}")
+        return _parse_cached_response_safely(cached_response, schema)
     return None
+
+
+def _parse_cached_response_safely(cached_response: str, schema: Type[T]) -> Optional[T]:
+    """Parse cached response safely, returning None on error."""
+    try:
+        return schema.model_validate_json(cached_response)
+    except Exception as e:
+        logger.warning(f"Failed to parse cached structured response: {e}")
+        return None
 
 
 def fix_validation_errors(data: Dict[str, Any], error: ValidationError) -> Dict[str, Any]:
@@ -226,23 +201,33 @@ def fix_string_parameters_to_dict(data: Dict[str, Any]) -> Dict[str, Any]:
     if "tool_recommendations" in data and isinstance(data["tool_recommendations"], list):
         for rec in data["tool_recommendations"]:
             if isinstance(rec, dict) and "parameters" in rec:
-                if isinstance(rec["parameters"], str):
-                    try:
-                        rec["parameters"] = json.loads(rec["parameters"])
-                    except (json.JSONDecodeError, TypeError):
-                        rec["parameters"] = {}
+                rec["parameters"] = _convert_string_param_to_dict(rec["parameters"])
     return data
+
+
+def _convert_string_param_to_dict(param: Any) -> Dict[str, Any]:
+    """Convert string parameter to dict, returning empty dict on error."""
+    if isinstance(param, str):
+        try:
+            return json.loads(param)
+        except (json.JSONDecodeError, TypeError):
+            return {}
+    return param if isinstance(param, dict) else {}
 
 
 def fix_dict_recommendations_to_strings(data: Dict[str, Any]) -> Dict[str, Any]:
     """Fix recommendations from dict list to string list."""
     if "recommendations" in data and isinstance(data["recommendations"], list):
-        fixed_recs = []
-        for rec in data["recommendations"]:
-            if isinstance(rec, dict):
-                desc = rec.get("description", str(rec))
-                fixed_recs.append(desc)
-            else:
-                fixed_recs.append(str(rec))
-        data["recommendations"] = fixed_recs
+        data["recommendations"] = _convert_recommendations_to_strings(data["recommendations"])
     return data
+
+
+def _convert_recommendations_to_strings(recommendations: list) -> list:
+    """Convert recommendation items to strings."""
+    fixed_recs = []
+    for rec in recommendations:
+        if isinstance(rec, dict):
+            fixed_recs.append(rec.get("description", str(rec)))
+        else:
+            fixed_recs.append(str(rec))
+    return fixed_recs

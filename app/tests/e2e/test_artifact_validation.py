@@ -135,13 +135,29 @@ class TestArtifactValidation:
     async def test_invalid_data_artifact_validation(self, validation_context):
         """Test validation of invalid data artifact."""
         validator = ArtifactValidator()
-        invalid_data = DataAnalysisResponse(
-            query="",  # Empty query
-            execution_time_ms=-100.0  # Negative execution time
+        
+        # Test that creating invalid data raises expected validation error
+        from pydantic_core import ValidationError
+        try:
+            invalid_data = DataAnalysisResponse(
+                query="",  # Empty query  
+                execution_time_ms=-100.0  # Negative execution time
+            )
+            # If no error raised, fail the test
+            assert False, "Expected ValidationError for negative execution time"
+        except ValidationError as e:
+            # This is expected - validation should catch negative execution time
+            assert "execution_time_ms" in str(e)
+            assert "non-negative" in str(e)
+        
+        # Test with valid data but empty query (different validation level)
+        valid_structure_data = DataAnalysisResponse(
+            query="",  # Empty query - should be caught by artifact validator
+            execution_time_ms=100.0  # Valid execution time
         )
         state = DeepAgentState(
             user_request="Test request",
-            data_result=invalid_data
+            data_result=valid_structure_data
         )
         
         result = validator.validate_data_artifact(state, validation_context)
@@ -165,14 +181,29 @@ class TestArtifactValidation:
     async def test_invalid_optimization_artifact_validation(self, validation_context):
         """Test validation of invalid optimization artifact."""
         validator = ArtifactValidator()
-        invalid_opt = OptimizationsResult(
-            optimization_type="",  # Empty type
-            recommendations=[],  # Empty recommendations
-            confidence_score=1.5  # Invalid confidence score
+        
+        # Test Pydantic validation catches invalid confidence score
+        from pydantic_core import ValidationError
+        try:
+            invalid_opt = OptimizationsResult(
+                optimization_type="test",
+                recommendations=["test"],
+                confidence_score=1.5  # Invalid confidence score > 1.0
+            )
+            assert False, "Expected ValidationError for confidence_score > 1.0"
+        except ValidationError as e:
+            assert "confidence_score" in str(e)
+            assert "less than or equal to 1" in str(e)
+        
+        # Test artifact-level validation with valid Pydantic but invalid business logic
+        valid_structure_opt = OptimizationsResult(
+            optimization_type="",  # Empty type - should be caught by artifact validator
+            recommendations=[],  # Empty recommendations - should be caught by artifact validator
+            confidence_score=0.9  # Valid Pydantic range but we'll test artifact validation
         )
         state = DeepAgentState(
             user_request="Test request",
-            optimizations_result=invalid_opt
+            optimizations_result=valid_structure_opt
         )
         
         result = validator.validate_optimization_artifact(state, validation_context)

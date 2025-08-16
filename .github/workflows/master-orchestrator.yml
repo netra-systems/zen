@@ -1,0 +1,595 @@
+name: Master Orchestrator
+description: Single entry point for all GitHub Actions workflows with conditional execution and centralized configuration
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: false
+        type: choice
+        options:
+          - test
+          - deploy
+          - cleanup
+          - rebuild
+          - destroy
+        default: test
+      test_level:
+        description: 'Test level for test action'
+        required: false
+        type: choice
+        options:
+          - smoke
+          - unit
+          - integration
+          - comprehensive
+        default: unit
+      environment:
+        description: 'Target environment'
+        required: false
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+      force_execution:
+        description: 'Force execution ignoring skip conditions'
+        required: false
+        type: boolean
+        default: false
+  repository_dispatch:
+    types: [trigger-workflow, external-event]
+  schedule:
+    - cron: '0 2 * * *'  # Daily health check at 2 AM UTC
+
+env:
+  # Static defaults - ACT compatible (no self-referencing)
+  ACT: 'false'
+  IS_ACT_ENV: 'false'
+  RUNNER_TYPE: 'warp-custom-default'
+  DEFAULT_TIMEOUT: '30'
+  CONFIG_PATH: '.github/workflows/config'
+
+# Standard permissions following github_actions.xml
+permissions:
+  contents: read
+  deployments: write
+  pull-requests: write
+  issues: write
+  statuses: write
+  checks: write
+  packages: read
+
+# Prevent redundant runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==========================================
+  # PHASE 1: DETERMINE EXECUTION STRATEGY
+  # ==========================================
+  
+  determine-strategy:
+    name: Determine Execution Strategy
+    runs-on: ${{ github.event.act && 'ubuntu-latest' || 'warp-custom-default' }}
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+      skip_tests: ${{ steps.check.outputs.skip_tests }}
+      skip_deploy: ${{ steps.check.outputs.skip_deploy }}
+      test_scope: ${{ steps.check.outputs.test_scope }}
+      execution_path: ${{ steps.check.outputs.execution_path }}
+      changed_areas: ${{ steps.analyze.outputs.changed_areas }}
+      risk_level: ${{ steps.analyze.outputs.risk_level }}
+      target_environment: ${{ steps.check.outputs.target_environment }}
+      act_mode: ${{ steps.env-setup.outputs.act_mode }}
+      runner_type: ${{ steps.env-setup.outputs.runner_type }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Needed for change analysis
+          sparse-checkout: |
+            .github/workflows/config
+            .github/workflows
+            SPEC
+
+      - name: Environment Detection and Setup
+        id: env-setup
+        run: |
+          echo "=== Master Orchestrator Environment Setup ==="
+          
+          # ACT detection using environment variables
+          if [[ "${ACT:-false}" == "true" ]]; then
+            echo "🧪 ACT Mode: Local testing environment"
+            echo "act_mode=true" >> $GITHUB_OUTPUT
+            echo "runner_type=ubuntu-latest" >> $GITHUB_OUTPUT
+            echo "ACT_MODE=true" >> $GITHUB_ENV
+          else
+            echo "☁️ GitHub Actions: Cloud environment"
+            echo "act_mode=false" >> $GITHUB_OUTPUT
+            echo "runner_type=warp-custom-default" >> $GITHUB_OUTPUT
+            echo "ACT_MODE=false" >> $GITHUB_ENV
+          fi
+          
+          echo "Environment setup completed"
+
+      - name: Load Configuration
+        id: load-config
+        run: |
+          echo "🔧 Loading workflow configuration..."
+          
+          # Create default config structure if not exists
+          mkdir -p ${{ env.CONFIG_PATH }}
+          
+          # Load or create settings.json
+          SETTINGS_FILE="${{ env.CONFIG_PATH }}/settings.json"
+          if [ ! -f "$SETTINGS_FILE" ]; then
+            echo "Creating default settings.json"
+            cat > "$SETTINGS_FILE" << 'EOF'
+          {
+            "test_runner": {
+              "default_level": "unit",
+              "timeout_minutes": 30,
+              "retry_failed": true,
+              "max_retries": 2
+            },
+            "deployment": {
+              "auto_deploy_branches": ["main", "develop"],
+              "require_approval": ["production"],
+              "cleanup_on_pr_close": true
+            },
+            "notifications": {
+              "channels": ["pr_comment"],
+              "on_failure": "always",
+              "on_success": "pr_only"
+            }
+          }
+          EOF
+          fi
+          
+          # Load or create features.json
+          FEATURES_FILE="${{ env.CONFIG_PATH }}/features.json"
+          if [ ! -f "$FEATURES_FILE" ]; then
+            echo "Creating default features.json"
+            cat > "$FEATURES_FILE" << 'EOF'
+          {
+            "enable_staging_deploy": true,
+            "enable_production_deploy": false,
+            "enable_security_scan": true,
+            "enable_performance_tests": false,
+            "enable_notifications": {
+              "slack": false,
+              "email": false,
+              "pr_comments": true
+            }
+          }
+          EOF
+          fi
+          
+          echo "Configuration loaded successfully"
+
+      - name: Analyze Changes
+        id: analyze
+        run: |
+          echo "📊 Analyzing repository changes..."
+          
+          # Initialize change tracking
+          BACKEND_CHANGED=false
+          FRONTEND_CHANGED=false
+          INFRASTRUCTURE_CHANGED=false
+          WORKFLOW_CHANGED=false
+          DOCS_ONLY=false
+          CRITICAL_CHANGED=false
+          
+          # Determine changed files based on event type
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For PRs, compare base and head
+            if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+              # ACT mode: use mock changes
+              CHANGED_FILES="app/main.py frontend/components/test.tsx"
+              echo "🧪 ACT: Using mock changed files: $CHANGED_FILES"
+            else
+              # Real mode: get actual changes
+              CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} 2>/dev/null || echo "")
+            fi
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            # For pushes, compare with previous commit
+            CHANGED_FILES=$(git diff --name-only HEAD~1..HEAD 2>/dev/null || echo "")
+          else
+            # For other events, assume full scan needed
+            CHANGED_FILES=""
+          fi
+          
+          # Analyze changed files
+          FILE_COUNT=0
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            FILE_COUNT=$((FILE_COUNT + 1))
+            
+            case "$file" in
+              # Backend changes
+              app/*.py|*.py|requirements.txt|Pipfile|pyproject.toml)
+                BACKEND_CHANGED=true
+                ;;
+              # Frontend changes  
+              frontend/*|*.tsx|*.ts|*.jsx|*.js|package.json|yarn.lock|package-lock.json)
+                FRONTEND_CHANGED=true
+                ;;
+              # Infrastructure changes
+              terraform/*|Dockerfile*|docker-compose*|.dockerignore)
+                INFRASTRUCTURE_CHANGED=true
+                ;;
+              # Workflow changes
+              .github/workflows/*|.github/actions/*)
+                WORKFLOW_CHANGED=true
+                ;;
+              # Documentation only
+              *.md|docs/*|SPEC/*.xml)
+                # Will be marked as docs-only if no other changes
+                ;;
+              # Critical system files
+              app/main.py|app/core/*|app/db/*|app/config.py)
+                CRITICAL_CHANGED=true
+                BACKEND_CHANGED=true
+                ;;
+              *)
+                # Any other file counts as a change
+                BACKEND_CHANGED=true
+                ;;
+            esac
+          done <<< "$CHANGED_FILES"
+          
+          # Check if only documentation changed
+          if [[ "$BACKEND_CHANGED" == "false" && "$FRONTEND_CHANGED" == "false" && 
+                "$INFRASTRUCTURE_CHANGED" == "false" && "$WORKFLOW_CHANGED" == "false" ]]; then
+            DOCS_ONLY=true
+          fi
+          
+          # Determine risk level
+          if [[ "$CRITICAL_CHANGED" == "true" ]]; then
+            RISK_LEVEL="high"
+          elif [[ "$INFRASTRUCTURE_CHANGED" == "true" ]]; then
+            RISK_LEVEL="high"
+          elif [[ "$BACKEND_CHANGED" == "true" && "$FRONTEND_CHANGED" == "true" ]]; then
+            RISK_LEVEL="medium"
+          elif [[ "$BACKEND_CHANGED" == "true" || "$FRONTEND_CHANGED" == "true" ]]; then
+            RISK_LEVEL="low"
+          else
+            RISK_LEVEL="minimal"
+          fi
+          
+          # Create areas JSON
+          AREAS='{"backend":'$BACKEND_CHANGED',"frontend":'$FRONTEND_CHANGED
+          AREAS+=',"infrastructure":'$INFRASTRUCTURE_CHANGED',"workflows":'$WORKFLOW_CHANGED
+          AREAS+=',"docs_only":'$DOCS_ONLY',"critical":'$CRITICAL_CHANGED'}'
+          
+          echo "changed_areas=$AREAS" >> $GITHUB_OUTPUT
+          echo "risk_level=$RISK_LEVEL" >> $GITHUB_OUTPUT
+          echo "file_count=$FILE_COUNT" >> $GITHUB_OUTPUT
+          
+          echo "Change analysis completed:"
+          echo "- Files changed: $FILE_COUNT"
+          echo "- Risk level: $RISK_LEVEL" 
+          echo "- Areas: $AREAS"
+
+      - name: Determine Execution Path
+        id: check
+        run: |
+          echo "🎯 Determining execution strategy..."
+          
+          SHOULD_RUN=true
+          SKIP_TESTS=false
+          SKIP_DEPLOY=false
+          EXECUTION_PATH="standard"
+          TARGET_ENV="staging"
+          
+          # Parse changed areas
+          CHANGED_AREAS='${{ steps.analyze.outputs.changed_areas }}'
+          DOCS_ONLY=$(echo "$CHANGED_AREAS" | grep -o '"docs_only":[^,}]*' | cut -d':' -f2)
+          
+          # Check skip conditions
+          
+          # 1. Skip if commit message contains skip markers
+          COMMIT_MSG="${{ github.event.head_commit.message || github.event.pull_request.title }}"
+          if [[ "$COMMIT_MSG" == *"[skip ci]"* || "$COMMIT_MSG" == *"[ci skip]"* ]]; then
+            if [[ "${{ inputs.force_execution }}" != "true" ]]; then
+              echo "::notice::Skipping due to [skip ci] in commit message"
+              SHOULD_RUN=false
+              EXECUTION_PATH="skipped"
+            fi
+          fi
+          
+          # 2. Skip if only docs changed
+          if [[ "$DOCS_ONLY" == "true" ]]; then
+            if [[ "${{ inputs.force_execution }}" != "true" ]]; then
+              echo "::notice::Only documentation changed, skipping tests"
+              SKIP_TESTS=true
+              EXECUTION_PATH="docs-only"
+            fi
+          fi
+          
+          # 3. Determine test scope based on changes and inputs
+          if [[ -n "${{ inputs.test_level }}" ]]; then
+            TEST_SCOPE="${{ inputs.test_level }}"
+          else
+            case "${{ steps.analyze.outputs.risk_level }}" in
+              "high") TEST_SCOPE="comprehensive" ;;
+              "medium") TEST_SCOPE="integration" ;;
+              "low") TEST_SCOPE="unit" ;;
+              *) TEST_SCOPE="smoke" ;;
+            esac
+          fi
+          
+          # 4. Handle different event types
+          case "${{ github.event_name }}" in
+            "pull_request")
+              if [[ "${{ github.event.action }}" == "closed" ]]; then
+                EXECUTION_PATH="cleanup"
+                SKIP_TESTS=true
+              else
+                EXECUTION_PATH="pr-validation"
+              fi
+              ;;
+            "push")
+              if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+                EXECUTION_PATH="main-deploy"
+                TARGET_ENV="staging"
+              else
+                EXECUTION_PATH="branch-test"
+              fi
+              ;;
+            "workflow_dispatch")
+              EXECUTION_PATH="${{ inputs.action || 'test' }}"
+              TARGET_ENV="${{ inputs.environment || 'staging' }}"
+              ;;
+            "schedule")
+              EXECUTION_PATH="health-check"
+              TEST_SCOPE="smoke"
+              ;;
+            "repository_dispatch")
+              EXECUTION_PATH="external-trigger"
+              ;;
+          esac
+          
+          # 5. ACT mode adjustments
+          if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
+            echo "🧪 ACT mode: Enabling local testing mode"
+            SKIP_DEPLOY=true  # Always skip deploy in ACT
+            EXECUTION_PATH="act-local"
+          fi
+          
+          # Output results
+          echo "should_run=$SHOULD_RUN" >> $GITHUB_OUTPUT
+          echo "skip_tests=$SKIP_TESTS" >> $GITHUB_OUTPUT  
+          echo "skip_deploy=$SKIP_DEPLOY" >> $GITHUB_OUTPUT
+          echo "test_scope=$TEST_SCOPE" >> $GITHUB_OUTPUT
+          echo "execution_path=$EXECUTION_PATH" >> $GITHUB_OUTPUT
+          echo "target_environment=$TARGET_ENV" >> $GITHUB_OUTPUT
+          
+          # Generate summary
+          echo "## 🎯 Execution Strategy" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Execution Path:** $EXECUTION_PATH" >> $GITHUB_STEP_SUMMARY
+          echo "**Should Run:** $SHOULD_RUN" >> $GITHUB_STEP_SUMMARY
+          echo "**Test Scope:** $TEST_SCOPE" >> $GITHUB_STEP_SUMMARY
+          echo "**Skip Tests:** $SKIP_TESTS" >> $GITHUB_STEP_SUMMARY
+          echo "**Skip Deploy:** $SKIP_DEPLOY" >> $GITHUB_STEP_SUMMARY
+          echo "**Target Environment:** $TARGET_ENV" >> $GITHUB_STEP_SUMMARY
+          echo "**Risk Level:** ${{ steps.analyze.outputs.risk_level }}" >> $GITHUB_STEP_SUMMARY
+
+  # ==========================================
+  # PHASE 2: TEST EXECUTION
+  # ==========================================
+
+  run-tests:
+    name: Execute Test Suite
+    needs: determine-strategy
+    if: |
+      needs.determine-strategy.outputs.should_run == 'true' &&
+      needs.determine-strategy.outputs.skip_tests != 'true' &&
+      contains(fromJSON('["test", "pr-validation", "main-deploy", "branch-test", "health-check", "act-local"]'), needs.determine-strategy.outputs.execution_path)
+    uses: ./.github/workflows/reusable/test-runner.yml
+    with:
+      test_level: ${{ needs.determine-strategy.outputs.test_scope }}
+      changed_areas: ${{ needs.determine-strategy.outputs.changed_areas }}
+      act_mode: ${{ needs.determine-strategy.outputs.act_mode }}
+      runner_type: ${{ needs.determine-strategy.outputs.runner_type }}
+    secrets: inherit
+
+  # ==========================================
+  # PHASE 3: DEPLOYMENT
+  # ==========================================
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [determine-strategy, run-tests]
+    if: |
+      always() &&
+      needs.determine-strategy.outputs.should_run == 'true' &&
+      needs.determine-strategy.outputs.skip_deploy != 'true' &&
+      contains(fromJSON('["deploy", "pr-validation", "main-deploy"]'), needs.determine-strategy.outputs.execution_path) &&
+      (needs.run-tests.result == 'success' || needs.run-tests.result == 'skipped') &&
+      needs.determine-strategy.outputs.target_environment == 'staging'
+    uses: ./.github/workflows/reusable/deploy-staging.yml
+    with:
+      environment: staging
+      trigger_context: ${{ needs.determine-strategy.outputs.execution_path }}
+      act_mode: ${{ needs.determine-strategy.outputs.act_mode }}
+    secrets: inherit
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [determine-strategy, run-tests]
+    if: |
+      always() &&
+      needs.determine-strategy.outputs.should_run == 'true' &&
+      needs.determine-strategy.outputs.skip_deploy != 'true' &&
+      needs.determine-strategy.outputs.execution_path == 'deploy' &&
+      needs.determine-strategy.outputs.target_environment == 'production' &&
+      github.ref == 'refs/heads/main' &&
+      (needs.run-tests.result == 'success' || needs.run-tests.result == 'skipped')
+    uses: ./.github/workflows/reusable/deploy-production.yml
+    with:
+      environment: production
+      requires_approval: true
+      act_mode: ${{ needs.determine-strategy.outputs.act_mode }}
+    secrets: inherit
+
+  # ==========================================
+  # PHASE 4: CLEANUP OPERATIONS
+  # ==========================================
+
+  cleanup-resources:
+    name: Cleanup Resources
+    needs: determine-strategy
+    if: |
+      always() &&
+      (needs.determine-strategy.outputs.execution_path == 'cleanup' ||
+       (github.event_name == 'pull_request' && github.event.action == 'closed'))
+    uses: ./.github/workflows/reusable/cleanup.yml
+    with:
+      cleanup_type: ${{ github.event.action == 'closed' && 'pr-closed' || 'manual' }}
+      pr_number: ${{ github.event.pull_request.number }}
+      act_mode: ${{ needs.determine-strategy.outputs.act_mode }}
+    secrets: inherit
+
+  # ==========================================
+  # PHASE 5: SECURITY AND QUALITY
+  # ==========================================
+
+  security-scan:
+    name: Security Scan
+    needs: [determine-strategy, run-tests]
+    if: |
+      needs.determine-strategy.outputs.should_run == 'true' &&
+      contains(fromJSON('["main-deploy", "deploy"]'), needs.determine-strategy.outputs.execution_path) &&
+      needs.determine-strategy.outputs.act_mode != 'true'
+    uses: ./.github/workflows/reusable/security-scan.yml
+    with:
+      scan_level: ${{ needs.determine-strategy.outputs.risk_level == 'high' && 'comprehensive' || 'standard' }}
+    secrets: inherit
+
+  code-quality:
+    name: Code Quality Check
+    needs: [determine-strategy, run-tests]
+    if: |
+      needs.determine-strategy.outputs.should_run == 'true' &&
+      contains(fromJSON('["pr-validation", "main-deploy"]'), needs.determine-strategy.outputs.execution_path)
+    uses: ./.github/workflows/reusable/code-quality.yml
+    with:
+      changed_areas: ${{ needs.determine-strategy.outputs.changed_areas }}
+      act_mode: ${{ needs.determine-strategy.outputs.act_mode }}
+    secrets: inherit
+
+  # ==========================================
+  # PHASE 6: NOTIFICATIONS AND REPORTING
+  # ==========================================
+
+  send-notifications:
+    name: Send Notifications
+    needs: [determine-strategy, run-tests, deploy-staging, deploy-production, cleanup-resources, security-scan, code-quality]
+    if: always() && needs.determine-strategy.outputs.should_run == 'true'
+    uses: ./.github/workflows/reusable/notification-handler.yml
+    with:
+      workflow_status: ${{ job.status }}
+      execution_path: ${{ needs.determine-strategy.outputs.execution_path }}
+      test_result: ${{ needs.run-tests.result || 'skipped' }}
+      deploy_result: ${{ needs.deploy-staging.result || needs.deploy-production.result || 'skipped' }}
+      security_result: ${{ needs.security-scan.result || 'skipped' }}
+      quality_result: ${{ needs.code-quality.result || 'skipped' }}
+      act_mode: ${{ needs.determine-strategy.outputs.act_mode }}
+    secrets: inherit
+
+  # ==========================================
+  # PHASE 7: FINAL REPORTING
+  # ==========================================
+
+  generate-summary:
+    name: Generate Workflow Summary
+    needs: [determine-strategy, run-tests, deploy-staging, deploy-production, cleanup-resources, security-scan, code-quality, send-notifications]
+    if: always()
+    runs-on: ${{ needs.determine-strategy.outputs.runner_type || 'warp-custom-default' }}
+    
+    steps:
+      - name: Generate Final Summary
+        run: |
+          echo "## 🏁 Master Orchestrator Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Execution Path:** ${{ needs.determine-strategy.outputs.execution_path }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Risk Level:** ${{ needs.determine-strategy.outputs.risk_level }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ needs.determine-strategy.outputs.act_mode == 'true' && 'ACT (Local)' || 'GitHub Actions (Cloud)' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Job Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Phase | Job | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Strategy | Determine Strategy | ${{ needs.determine-strategy.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Testing | Run Tests | ${{ needs.run-tests.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy | Staging Deploy | ${{ needs.deploy-staging.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy | Production Deploy | ${{ needs.deploy-production.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Cleanup | Resource Cleanup | ${{ needs.cleanup-resources.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security | Security Scan | ${{ needs.security-scan.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Quality | Code Quality | ${{ needs.code-quality.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Notify | Notifications | ${{ needs.send-notifications.result || 'skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Calculate overall success
+          FAILED_JOBS=0
+          SUCCESS_JOBS=0
+          
+          for result in "${{ needs.determine-strategy.result }}" "${{ needs.run-tests.result }}" "${{ needs.deploy-staging.result }}" "${{ needs.deploy-production.result }}" "${{ needs.cleanup-resources.result }}" "${{ needs.security-scan.result }}" "${{ needs.code-quality.result }}" "${{ needs.send-notifications.result }}"; do
+            case "$result" in
+              "success") SUCCESS_JOBS=$((SUCCESS_JOBS + 1)) ;;
+              "failure") FAILED_JOBS=$((FAILED_JOBS + 1)) ;;
+              "skipped"|"") ;; # Don't count skipped jobs
+            esac
+          done
+          
+          if [ $FAILED_JOBS -eq 0 ]; then
+            echo "**Overall Status:** ✅ **SUCCESS** - All executed jobs completed successfully" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**Overall Status:** ❌ **FAILURE** - $FAILED_JOBS job(s) failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Generated by Master Orchestrator v1.0*" >> $GITHUB_STEP_SUMMARY
+
+      - name: Update Commit Status
+        if: github.event_name == 'pull_request' && needs.determine-strategy.outputs.act_mode != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const failed_jobs = [
+              '${{ needs.determine-strategy.result }}',
+              '${{ needs.run-tests.result }}', 
+              '${{ needs.deploy-staging.result }}',
+              '${{ needs.deploy-production.result }}',
+              '${{ needs.cleanup-resources.result }}',
+              '${{ needs.security-scan.result }}',
+              '${{ needs.code-quality.result }}',
+              '${{ needs.send-notifications.result }}'
+            ].filter(result => result === 'failure').length;
+            
+            const status = failed_jobs === 0 ? 'success' : 'failure';
+            const description = failed_jobs === 0 ? 
+              'All workflow phases completed successfully' : 
+              `${failed_jobs} workflow phase(s) failed`;
+            
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: status,
+              context: 'Master Orchestrator',
+              description: description,
+              target_url: `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`
+            });

@@ -23,10 +23,22 @@ class PipelineBuilder:
     def _add_conditional_steps(self, pipeline: List[PipelineStep],
                               state: DeepAgentState) -> None:
         """Add conditional pipeline steps."""
+        self._add_data_step_if_needed(pipeline, state)
+        self._add_optimization_step_if_needed(pipeline, state)
+        self._add_actions_step_if_needed(pipeline, state)
+    
+    def _add_data_step_if_needed(self, pipeline: List[PipelineStep], state: DeepAgentState) -> None:
+        """Add data analysis step if needed."""
         if self._needs_data_analysis(state):
             pipeline.append(PipelineStep(agent_name="data"))
+    
+    def _add_optimization_step_if_needed(self, pipeline: List[PipelineStep], state: DeepAgentState) -> None:
+        """Add optimization step if needed."""
         if self._needs_optimization(state):
             pipeline.append(PipelineStep(agent_name="optimization"))
+    
+    def _add_actions_step_if_needed(self, pipeline: List[PipelineStep], state: DeepAgentState) -> None:
+        """Add actions step if needed."""
         if self._needs_actions(state):
             pipeline.append(PipelineStep(agent_name="actions"))
     

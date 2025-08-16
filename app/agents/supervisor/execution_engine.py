@@ -104,6 +104,11 @@ class ExecutionEngine:
         """Process single pipeline step. Returns True to stop pipeline."""
         if not await self._should_execute_step(step, state):
             return False
+        return await self._execute_and_check_result(step, context, state, results)
+    
+    async def _execute_and_check_result(self, step: PipelineStep, context: AgentExecutionContext,
+                                       state: DeepAgentState, results: List) -> bool:
+        """Execute step and check if pipeline should stop."""
         result = await self._execute_step(step, context, state)
         results.append(result)
         return self._should_stop_pipeline(result, step)
@@ -139,10 +144,26 @@ class ExecutionEngine:
     def _extract_step_context_params(self, base_context: AgentExecutionContext,
                                    step: PipelineStep) -> Dict[str, Any]:
         """Extract parameters for step context creation."""
+        return self._build_step_context_dict(base_context, step)
+    
+    def _build_step_context_dict(self, base_context: AgentExecutionContext,
+                                step: PipelineStep) -> Dict[str, Any]:
+        """Build step context parameter dictionary."""
+        base_params = self._extract_base_context_params(base_context)
+        step_params = self._extract_step_params(step)
+        return {**base_params, **step_params}
+    
+    def _extract_base_context_params(self, context: AgentExecutionContext) -> Dict[str, str]:
+        """Extract base context parameters."""
         return {
-            "run_id": base_context.run_id,
-            "thread_id": base_context.thread_id,
-            "user_id": base_context.user_id,
+            "run_id": context.run_id,
+            "thread_id": context.thread_id,
+            "user_id": context.user_id
+        }
+    
+    def _extract_step_params(self, step: PipelineStep) -> Dict[str, Any]:
+        """Extract step-specific parameters."""
+        return {
             "agent_name": step.agent_name,
             "metadata": step.metadata
         }

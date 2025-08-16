@@ -44,9 +44,10 @@ class TestSupplyResearchSchedulerJobs:
                       return_value=mock_dependencies['llm_manager']):
                 with patch('app.services.supply_research_scheduler.RedisManager', 
                           return_value=mock_dependencies['redis_manager']):
-                    scheduler = SupplyResearchScheduler()
-                    scheduler.background_manager = mock_dependencies['background_manager']
-                    scheduler.llm_manager = mock_dependencies['llm_manager']
+                    scheduler = SupplyResearchScheduler(
+                        background_manager=mock_dependencies['background_manager'],
+                        llm_manager=mock_dependencies['llm_manager']
+                    )
                     scheduler.redis_manager = mock_dependencies['redis_manager']
                     return scheduler
     

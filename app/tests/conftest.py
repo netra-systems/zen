@@ -98,14 +98,22 @@ def real_llm_manager():
         from app.config import settings
         return LLMManager(settings)
     else:
-        from unittest.mock import AsyncMock, MagicMock
-        mock_manager = MagicMock()
-        # Mock all expected async methods to return proper responses
-        mock_manager.get_response = AsyncMock(return_value="Mock LLM response")
-        mock_manager.get_structured_response = AsyncMock(return_value={"analysis": "mock analysis", "recommendations": []})
-        mock_manager.generate = AsyncMock(return_value="Mock generated content")
-        mock_manager.stream_response = AsyncMock()
-        return mock_manager
+        return _create_mock_llm_manager()
+
+
+def _create_mock_llm_manager():
+    """Create properly configured async mock LLM manager."""
+    from unittest.mock import AsyncMock, MagicMock
+    mock_manager = MagicMock()
+    # Mock all expected async methods to return proper responses
+    mock_manager.get_response = AsyncMock(return_value="Mock LLM response")
+    mock_manager.get_structured_response = AsyncMock(return_value={"analysis": "mock analysis", "recommendations": []})
+    mock_manager.generate = AsyncMock(return_value="Mock generated content")
+    mock_manager.stream_response = AsyncMock()
+    # Add latency-specific mocking for performance testing
+    mock_manager.generate_structured = AsyncMock(return_value={"optimizations": ["cache optimization", "parallel processing"], "confidence": 0.85})
+    mock_manager.analyze_performance = AsyncMock(return_value={"latency_ms": 250, "throughput": 1000, "bottlenecks": ["database", "api calls"]})
+    return mock_manager
 
 
 @pytest.fixture(scope="function") 

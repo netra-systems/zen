@@ -85,18 +85,30 @@ async def test_cache_size_limit():
 
 @pytest.mark.asyncio
 async def test_cache_stats():
-    cache_service = LLMCacheService()
-    
-    await cache_service.cache_response("prompt1", "response1", "llm1", {})
-    await cache_service.get_cached_response("prompt1", "llm1", {})
-    await cache_service.get_cached_response("nonexistent", "llm1", {})
-    
-    stats = await cache_service.get_cache_stats()
-    assert isinstance(stats, dict)  # Should return a dict
-    
-    # Get stats for specific LLM config
-    llm_stats = await cache_service.get_cache_stats("llm1")
-    assert "hits" in llm_stats
-    assert "misses" in llm_stats
-    assert llm_stats["hits"] >= 0
-    assert llm_stats["misses"] >= 0
+    with patch('app.services.llm_cache_service.redis_manager') as mock_redis_manager:
+        # Create mock Redis client
+        mock_redis_client = AsyncMock()
+        mock_redis_manager.get_client = AsyncMock(return_value=mock_redis_client)
+        
+        # Mock stats data
+        stats_data = {"hits": 1, "misses": 1, "total": 2, "hit_rate": 0.5}
+        mock_redis_client.get = AsyncMock(return_value=json.dumps(stats_data))
+        mock_redis_client.set = AsyncMock(return_value=True)
+        mock_redis_client.keys = AsyncMock(return_value=["llm_stats:llm1"])
+        
+        cache_service = LLMCacheService()
+        cache_service.redis_manager = mock_redis_manager
+        
+        await cache_service.cache_response("prompt1", "response1", "llm1", {})
+        await cache_service.get_cached_response("prompt1", "llm1", {})
+        await cache_service.get_cached_response("nonexistent", "llm1", {})
+        
+        stats = await cache_service.get_cache_stats()
+        assert isinstance(stats, dict)  # Should return a dict
+        
+        # Get stats for specific LLM config
+        llm_stats = await cache_service.get_cache_stats("llm1")
+        assert "hits" in llm_stats
+        assert "misses" in llm_stats
+        assert llm_stats["hits"] >= 0
+        assert llm_stats["misses"] >= 0

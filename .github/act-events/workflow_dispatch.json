@@ -1,0 +1,23 @@
+{
+  "inputs": {
+    "action": "test",
+    "test_level": "unit",
+    "environment": "staging",
+    "force_execution": "false"
+  },
+  "ref": "refs/heads/main",
+  "repository": {
+    "name": "netra-core-generation-1",
+    "full_name": "test-org/netra-core-generation-1",
+    "owner": {
+      "login": "test-org",
+      "type": "Organization"
+    },
+    "private": false,
+    "default_branch": "main"
+  },
+  "sender": {
+    "login": "test-user",
+    "type": "User"
+  }
+}

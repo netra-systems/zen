@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Learnings - Database/AsyncIO</name>
+        <type>learnings</type>
+        <category>Database/AsyncIO</category>
+        <version>1.0</version>
+        <last_updated>2025-08-16</last_updated>
+        <description>Learnings and fixes for Database/AsyncIO</description>
+    </metadata>
+    
+    <learnings>
+        <learning id="async-context-manager-dependency-injection">
+                    <title>AsyncSession Context Manager Dependency Injection Issue</title>
+                    <date>2025-08-15</date>
+                    <category>Database/AsyncIO</category>
+                    <description>
+                        FastAPI dependency injection was passing AsyncGeneratorContextManager instead of AsyncSession
+                        to repository methods, causing "_AsyncGeneratorContextManager' object has no attribute 'execute'" errors.
+                    </description>
+                    <symptoms>
+                        <symptom>Error: '_AsyncGeneratorContextManager' object has no attribute 'execute'</symptom>
+                        <symptom>Log: "Async connection checked out from pool: None"</symptom>
+                        <symptom>Repository methods receiving context manager instead of session</symptom>
+                    </symptoms>
+                    <root-causes>
+                        <cause>Direct use of async context manager in FastAPI Depends without proper wrapper</cause>
+                        <cause>FastAPI dependency injection not properly entering async context manager</cause>
+                        <cause>Missing validation of session type in dependency injection</cause>
+                    </root-causes>
+                    <solution>
+                        <step>Create wrapper function get_db_dependency() that explicitly enters context manager</step>
+                        <step>Add validation to ensure AsyncSession type is returned</step>
+                        <step>Add debug logging to track session creation and type</step>
+                        <step>Update DbDep to use the wrapper function instead of direct context manager</step>
+                    </solution>
+                    <files-modified>
+                        <file>app/dependencies.py - Added get_db_dependency wrapper with validation</file>
+                        <file>app/db/postgres.py - Added debug logging for session tracking</file>
+                    </files-modified>
+                    <prevention>
+                        <item>Always wrap async context managers in explicit functions for FastAPI dependencies</item>
+                        <item>Add type validation when passing database sessions</item>
+                        <item>Use debug logging to track session lifecycle</item>
+                        <item>Test dependency injection separately from business logic</item>
+                    </prevention>
+                    <test-case>test_database_connection_pooling.py</test-case>
+                </learning>
+
+    </learnings>
+</specification>

@@ -9,72 +9,62 @@ from app.logging_config import central_logger as logger
 
 
 
+def _create_array_replacement(nested_field: str, array_field: str, index_expr: str) -> str:
+    """Create appropriate replacement for array access."""
+    if nested_field == 'metrics' and array_field == 'value':
+        return f"toFloat64OrZero(arrayElement({nested_field}.{array_field}, {index_expr}))"
+    return f"arrayElement({nested_field}.{array_field}, {index_expr})"
+
+def _replace_array_access(match):
+    """Replace array[index] with arrayElement(array, index)."""
+    nested_field = match.group(1)
+    array_field = match.group(2)
+    index_expr = match.group(3)
+    replacement = _create_array_replacement(nested_field, array_field, index_expr)
+    logger.debug(f"Fixed array access: {match.group(0)} -> {replacement}")
+    return replacement
+
+def _get_array_pattern() -> str:
+    """Get regex pattern for array access syntax."""
+    return r'(\w+)\.(\w+)\[([^\]]+)\]'
+
+def _log_query_fix(query: str, fixed_query: str):
+    """Log query fix information."""
+    logger.info("Fixed ClickHouse query with incorrect array syntax")
+    logger.debug(f"Original: {query[:200]}...")
+    logger.debug(f"Fixed: {fixed_query[:200]}...")
+
 def fix_clickhouse_array_syntax(query: str) -> str:
-    """
-    Fix ClickHouse queries that use incorrect array indexing syntax.
-    Converts metrics.value[idx] to arrayElement(metrics.value, idx)
-    
-    Args:
-        query: The original ClickHouse query
-        
-    Returns:
-        The fixed query with proper array element access
-    """
-    
-    # Pattern to match incorrect array access like metrics.value[idx] or metrics.value[idx-1]
-    # This matches: word.word[expression] where expression can include operations
-    pattern = r'(\w+)\.(\w+)\[([^\]]+)\]'
-    
-    def replace_array_access(match):
-        """Replace array[index] with arrayElement(array, index)"""
-        nested_field = match.group(1)  # e.g., 'metrics'
-        array_field = match.group(2)   # e.g., 'value'
-        index_expr = match.group(3)     # e.g., 'idx' or 'position-1'
-        
-        # Convert to proper ClickHouse syntax with type casting for metrics.value
-        if nested_field == 'metrics' and array_field == 'value':
-            # Cast to Float64 to avoid type mismatch errors
-            replacement = f"toFloat64OrZero(arrayElement({nested_field}.{array_field}, {index_expr}))"
-        else:
-            replacement = f"arrayElement({nested_field}.{array_field}, {index_expr})"
-        
-        logger.debug(f"Fixed array access: {match.group(0)} -> {replacement}")
-        
-        return replacement
-    
-    # Apply the fix
-    fixed_query = re.sub(pattern, replace_array_access, query)
-    
-    # Log if we made any changes
+    """Fix ClickHouse queries with incorrect array indexing syntax."""
+    pattern = _get_array_pattern()
+    fixed_query = re.sub(pattern, _replace_array_access, query)
     if fixed_query != query:
-        logger.info("Fixed ClickHouse query with incorrect array syntax")
-        logger.debug(f"Original: {query[:200]}...")
-        logger.debug(f"Fixed: {fixed_query[:200]}...")
-    
+        _log_query_fix(query, fixed_query)
     return fixed_query
 
 
+def _has_invalid_array_syntax(query: str) -> bool:
+    """Check if query has invalid array access syntax."""
+    return bool(re.search(r'\w+\.\w+\[[^\]]+\]', query))
+
+def _has_metrics_access(query: str) -> bool:
+    """Check if query accesses metrics fields."""
+    return any(field in query for field in ['metrics.value', 'metrics.name', 'metrics.unit'])
+
+def _has_array_functions(query: str) -> bool:
+    """Check if query uses proper array functions."""
+    return any(func in query for func in ['arrayElement', 'arrayFirstIndex', 'arrayExists'])
+
+def _validate_metrics_access(query: str):
+    """Validate metrics field access uses proper array functions."""
+    if _has_metrics_access(query) and not _has_array_functions(query):
+        logger.warning("Query accesses nested fields without proper array functions")
+
 def validate_clickhouse_query(query: str) -> tuple[bool, str]:
-    """
-    Validate a ClickHouse query for common syntax errors.
-    
-    Args:
-        query: The ClickHouse query to validate
-        
-    Returns:
-        Tuple of (is_valid, error_message)
-    """
-    
-    # Check for incorrect array access syntax (with any expression inside brackets)
-    if re.search(r'\w+\.\w+\[[^\]]+\]', query):
+    """Validate a ClickHouse query for common syntax errors."""
+    if _has_invalid_array_syntax(query):
         return False, "Query uses incorrect array syntax. Use arrayElement() instead of []"
-    
-    # Check for proper nested field access
-    if 'metrics.value' in query or 'metrics.name' in query or 'metrics.unit' in query:
-        # Ensure we're using proper array functions
-        if not any(func in query for func in ['arrayElement', 'arrayFirstIndex', 'arrayExists']):
-            logger.warning("Query accesses nested fields without proper array functions")
-    
+    _validate_metrics_access(query)
     return True, ""
 
 
@@ -84,17 +74,16 @@ class ClickHouseQueryInterceptor:
     Can be used as a wrapper around the ClickHouse client.
     """
     
-    def __init__(self, client: Any) -> None:
-        """
-        Initialize the interceptor with a ClickHouse client.
-        
-        Args:
-            client: The ClickHouse client to wrap
-        """
+    def _initialize_state(self, client: Any):
+        """Initialize interceptor state."""
         self.client = client
         self.fix_enabled = True
         self.queries_fixed = 0
         self.queries_executed = 0
+
+    def __init__(self, client: Any) -> None:
+        """Initialize the interceptor with a ClickHouse client."""
+        self._initialize_state(client)
     
     async def execute_query(self, query: str, *args, **kwargs) -> Any:
         """
@@ -150,17 +139,16 @@ class ClickHouseQueryInterceptor:
         else:
             return await self.client.execute(query, *args, **kwargs)
     
+    def _calculate_fix_rate(self) -> float:
+        """Calculate fix rate percentage."""
+        return self.queries_fixed / max(1, self.queries_executed)
+
     def get_stats(self) -> Dict[str, Any]:
-        """
-        Get statistics about query fixing.
-        
-        Returns:
-            Dictionary with statistics
-        """
+        """Get statistics about query fixing."""
         return {
             "queries_executed": self.queries_executed,
             "queries_fixed": self.queries_fixed,
-            "fix_rate": self.queries_fixed / max(1, self.queries_executed),
+            "fix_rate": self._calculate_fix_rate(),
             "fix_enabled": self.fix_enabled
         }
     
@@ -190,13 +178,5 @@ class ClickHouseQueryInterceptor:
         return await self.execute_query(query, *args, **kwargs)
     
     def __getattr__(self, name: str) -> Any:
-        """
-        Proxy all other methods to the wrapped client.
-        
-        Args:
-            name: Method name
-            
-        Returns:
-            Method from wrapped client
-        """
+        """Proxy all other methods to the wrapped client."""
         return getattr(self.client, name)

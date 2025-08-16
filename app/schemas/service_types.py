@@ -3,7 +3,7 @@ Strong type definitions for service layer operations following Netra conventions
 """
 
 from typing import Dict, Any, Optional, List, Union, Literal, TypeVar, Generic, Protocol
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
 import uuid
@@ -49,7 +49,7 @@ class ServiceResponse(BaseModel, Generic[TypeVar('T')]):
     errors: List[ServiceValidationError] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
     metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class PaginationParams(BaseModel):
@@ -181,7 +181,7 @@ class ServiceHealthCheck(BaseModel):
     response_time_ms: float
     dependencies: List[Dict[str, Any]] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class ServiceDependency(BaseModel):
@@ -206,7 +206,7 @@ class ServiceContext(BaseModel):
     ip_address: Optional[str] = None
     user_agent: Optional[str] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class ServiceAuditLog(BaseModel):
@@ -222,7 +222,7 @@ class ServiceAuditLog(BaseModel):
     error_message: Optional[str] = None
     context: ServiceContext
     duration_ms: float
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class ServiceEvent(BaseModel):
@@ -233,7 +233,7 @@ class ServiceEvent(BaseModel):
     entity_id: Optional[str] = None
     payload: Dict[str, Any] = Field(default_factory=dict)
     context: ServiceContext
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class ServiceCapability(BaseModel):
@@ -255,7 +255,7 @@ class ServiceRegistry(BaseModel):
     capabilities: List[ServiceCapability] = Field(default_factory=list)
     dependencies: List[ServiceDependency] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    registered_at: datetime = Field(default_factory=datetime.utcnow)
+    registered_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     last_health_check: Optional[datetime] = None
 
 

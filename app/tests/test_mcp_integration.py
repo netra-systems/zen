@@ -7,7 +7,7 @@ Tests the Model Context Protocol server implementation.
 import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.netra_mcp.netra_mcp_server import NetraMCPServer
 from app.services.mcp_service import MCPService, MCPClient, MCPToolExecution
@@ -223,8 +223,8 @@ class TestMCPService:
         mock_client.api_key_hash = "hashed_key"
         mock_client.permissions = ["read", "write"]
         mock_client.metadata = {}
-        mock_client.created_at = datetime.utcnow()
-        mock_client.last_active = datetime.utcnow()
+        mock_client.created_at = datetime.now(UTC)
+        mock_client.last_active = datetime.now(UTC)
         
         with patch.object(mcp_service.client_repository, 'create_client', return_value=mock_client):
             client = await mcp_service.register_client(
@@ -304,7 +304,7 @@ class TestMCPService:
         
         # Make one session inactive
         mcp_service.active_sessions[inactive_session]["last_activity"] = (
-            datetime.utcnow() - timedelta(minutes=61)
+            datetime.now(UTC) - timedelta(minutes=61)
         )
         
         # Clean up

@@ -29,6 +29,7 @@ class TestStatePersistenceCritical:
         session.execute = AsyncMock()
         session.commit = AsyncMock()
         session.rollback = AsyncMock()
+        session.flush = AsyncMock()
         session.add = Mock()
         return session
     
@@ -81,7 +82,7 @@ class TestStatePersistenceCritical:
             
             assert result is True
             mock_redis_client.set.assert_called()
-            mock_db_session.commit.assert_called_once()
+            mock_db_session.flush.assert_called_once()
     
     @pytest.mark.asyncio
     async def test_load_state_fallback(self, mock_db_session, mock_redis_client):
@@ -140,7 +141,7 @@ class TestStatePersistenceCritical:
             assert success is True
             mock_redis_client.set.assert_called()
             mock_db_session.add.assert_called()
-            mock_db_session.commit.assert_called()
+            mock_db_session.flush.assert_called()
     
     @pytest.mark.asyncio
     async def test_get_sub_agent_result_fallback(self, mock_db_session, mock_redis_client):
@@ -168,7 +169,7 @@ class TestStatePersistenceCritical:
     @pytest.mark.asyncio
     async def test_transaction_rollback_on_error(self, mock_db_session, mock_redis_client):
         """Test transaction rollback when save fails"""
-        mock_db_session.commit.side_effect = Exception("DB Error")
+        mock_db_session.flush.side_effect = Exception("DB Error")
         
         with patch.object(state_persistence_service, 'redis_manager') as mock_redis_mgr:
             mock_redis_mgr.get_client = AsyncMock(return_value=mock_redis_client)

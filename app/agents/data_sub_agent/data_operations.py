@@ -16,6 +16,10 @@ class DataOperations:
         clickhouse_ops: Any,
         redis_manager: Any
     ) -> None:
+        self._assign_dependencies(query_builder, analysis_engine, clickhouse_ops, redis_manager)
+    
+    def _assign_dependencies(self, query_builder: Any, analysis_engine: Any, clickhouse_ops: Any, redis_manager: Any) -> None:
+        """Assign injected dependencies to instance variables."""
         self.query_builder = query_builder
         self.analysis_engine = analysis_engine
         self.clickhouse_ops = clickhouse_ops
@@ -28,16 +32,31 @@ class DataOperations:
         time_range: Tuple[datetime, datetime]
     ) -> Dict[str, Any]:
         """Analyze performance metrics from ClickHouse."""
+        params = self._build_query_params(time_range, user_id, workload_id)
+        data = await self._fetch_performance_data(params)
+        return self._handle_performance_result(data, time_range, params['aggregation'])
+    
+    def _build_query_params(self, time_range: Tuple[datetime, datetime], user_id: int, workload_id: Optional[str]) -> Dict[str, Any]:
+        """Build query parameters for performance analysis."""
         start_time, end_time = time_range
         aggregation = self._determine_aggregation_level(start_time, end_time)
-        
-        query = self._build_performance_query(user_id, workload_id, start_time, end_time, aggregation)
-        cache_key = self._create_cache_key("perf_metrics", user_id, workload_id, start_time, end_time)
-        data = await self._fetch_cached_data(query, cache_key)
-        
+        return {
+            'start_time': start_time, 'end_time': end_time, 'aggregation': aggregation,
+            'user_id': user_id, 'workload_id': workload_id
+        }
+    
+    async def _fetch_performance_data(self, params: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
+        """Fetch performance data using query parameters."""
+        query = self._build_performance_query(
+            params['user_id'], params['workload_id'], params['start_time'], params['end_time'], params['aggregation']
+        )
+        cache_key = self._create_cache_key("perf_metrics", params['user_id'], params['workload_id'], params['start_time'], params['end_time'])
+        return await self._fetch_cached_data(query, cache_key)
+    
+    def _handle_performance_result(self, data: Optional[List[Dict[str, Any]]], time_range: Tuple[datetime, datetime], aggregation: str) -> Dict[str, Any]:
+        """Handle performance analysis result."""
         if not data:
             return self._create_no_data_response("No performance metrics found")
-        
         return self._process_performance_data(data, time_range, aggregation)
     
     async def detect_anomalies(

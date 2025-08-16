@@ -1,0 +1,58 @@
+{
+  "staging": {
+    "auto_deploy": true,
+    "require_approval": false,
+    "cleanup_policy": "on_pr_close",
+    "timeout_minutes": 45,
+    "health_check_url": "/health",
+    "resources": {
+      "cpu": "1 vCPU",
+      "memory": "4GB",
+      "storage": "20GB"
+    },
+    "scaling": {
+      "min_instances": 1,
+      "max_instances": 3,
+      "target_cpu": 70
+    }
+  },
+  "production": {
+    "auto_deploy": false,
+    "require_approval": true,
+    "cleanup_policy": "manual_only",
+    "timeout_minutes": 60,
+    "health_check_url": "/health",
+    "resources": {
+      "cpu": "2 vCPU",
+      "memory": "8GB",
+      "storage": "50GB"
+    },
+    "scaling": {
+      "min_instances": 2,
+      "max_instances": 10,
+      "target_cpu": 60
+    },
+    "restrictions": {
+      "allowed_branches": ["main"],
+      "required_checks": ["tests", "security", "quality"],
+      "approval_count": 2
+    }
+  },
+  "development": {
+    "auto_deploy": true,
+    "require_approval": false,
+    "cleanup_policy": "daily",
+    "timeout_minutes": 30,
+    "health_check_url": "/health",
+    "resources": {
+      "cpu": "0.5 vCPU",
+      "memory": "2GB",
+      "storage": "10GB"
+    },
+    "scaling": {
+      "min_instances": 1,
+      "max_instances": 2,
+      "target_cpu": 80
+    }
+  }
+}

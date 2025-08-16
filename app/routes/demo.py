@@ -19,6 +19,29 @@ from app.routes.demo_websocket import handle_demo_websocket
 router = APIRouter(prefix="/api/demo", tags=["demo"])
 
 
+@router.get("/", response_model=Dict[str, Any])
+async def get_demo_overview(
+    current_user: Optional[Dict] = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """
+    Get demo overview and available features.
+    
+    Returns basic demo information and available demo features.
+    """
+    return {
+        "status": "active",
+        "features": [
+            "ai_optimization_chat",
+            "roi_calculator", 
+            "industry_templates",
+            "synthetic_metrics",
+            "export_reports"
+        ],
+        "message": "Welcome to Netra AI Optimization Demo",
+        "user_authenticated": current_user is not None
+    }
+
+
 @router.post("/chat", response_model=DemoChatResponse)
 async def demo_chat(
     request: DemoChatRequest,

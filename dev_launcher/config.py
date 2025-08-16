@@ -52,7 +52,10 @@ class LauncherConfig:
         
         # Set project ID from environment if not provided
         if self.project_id is None:
-            self.project_id = os.environ.get('GOOGLE_CLOUD_PROJECT', "304612253870")
+            # Determine project ID based on environment
+            environment = os.environ.get("ENVIRONMENT", "development").lower()
+            default_project_id = "701982941522" if environment == "staging" else "304612253870"
+            self.project_id = os.environ.get('GOOGLE_CLOUD_PROJECT', default_project_id)
         
         # Validate configuration
         self._validate()

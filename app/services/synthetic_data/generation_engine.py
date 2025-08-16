@@ -159,9 +159,22 @@ class GenerationEngine:
         workload_type = select_workload_type()
         tool_invocations = generate_tool_invocations(workload_type, self.default_tools)
         request, response = generate_content(workload_type, corpus_content)
+        record_ids = self._generate_record_ids()
+        return self._assemble_record_components(
+            record_ids, config, index, workload_type, tool_invocations, request, response
+        )
+
+    def _generate_record_ids(self) -> Dict:
+        """Generate unique IDs for record"""
+        return {'trace_id': str(uuid.uuid4()), 'span_id': str(uuid.uuid4())}
+
+    def _assemble_record_components(
+        self, record_ids: Dict, config: schemas.LogGenParams, index: int, 
+        workload_type: str, tool_invocations: List[Dict], request: str, response: str
+    ) -> Dict:
+        """Assemble all record components into final dictionary"""
         return {
-            'trace_id': str(uuid.uuid4()), 'span_id': str(uuid.uuid4()),
-            'timestamp': generate_timestamp(config, index), 'workload_type': workload_type,
+            **record_ids, 'timestamp': generate_timestamp(config, index), 'workload_type': workload_type,
             'tool_invocations': tool_invocations, 'request': request, 'response': response,
             'metrics': calculate_metrics(tool_invocations)
         }

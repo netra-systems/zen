@@ -131,22 +131,35 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         headers = self._create_error_headers(request_id, trace_id)
         return JSONResponse(status_code=500, content=content, headers=headers)
 
+    def _handle_successful_request(self, request: Request, response: Response, request_id: str, trace_id: str, start_time: float) -> Response:
+        """Handle successful request completion."""
+        duration = time.time() - start_time
+        self._log_request_success(request, response, duration)
+        return self._add_response_headers(response, request_id, trace_id)
+
+    def _handle_failed_request(self, request: Request, error: Exception, request_id: str, trace_id: str, start_time: float) -> JSONResponse:
+        """Handle failed request completion."""
+        duration = time.time() - start_time
+        self._log_request_error(request, error, duration)
+        return self._create_error_response(request_id, trace_id)
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process each request with logging context."""
         request_id, trace_id, start_time = self._setup_request_context(request)
         self._setup_user_context(request)
         self._log_request_start(request)
         try:
-            response = await call_next(request)
-            duration = time.time() - start_time
-            self._log_request_success(request, response, duration)
-            return self._add_response_headers(response, request_id, trace_id)
-        except Exception as e:
-            duration = time.time() - start_time
-            self._log_request_error(request, e, duration)
-            return self._create_error_response(request_id, trace_id)
+            return await self._process_request_with_logging(request, call_next, request_id, trace_id, start_time)
         finally:
             central_logger.clear_context()
+    
+    async def _process_request_with_logging(self, request: Request, call_next: Callable, request_id: str, trace_id: str, start_time: float) -> Response:
+        """Process request and handle success/error logging."""
+        try:
+            response = await call_next(request)
+            return self._handle_successful_request(request, response, request_id, trace_id, start_time)
+        except Exception as e:
+            return self._handle_failed_request(request, e, request_id, trace_id, start_time)
 
 
 class PerformanceLoggingMiddleware(BaseHTTPMiddleware):

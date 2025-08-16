@@ -24,6 +24,7 @@ from app.llm.llm_manager import LLMManager
 from app.dependencies import get_llm_manager, DbDep
 from app.services.thread_service import ThreadService
 from app.services.message_handlers import MessageHandlerService
+from app.services.service_locator import IAgentService
 from app.services.streaming_service import (
     StreamingService,
     TextStreamProcessor,
@@ -33,7 +34,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = central_logger.get_logger(__name__)
 
-class AgentService:
+class AgentService(IAgentService):
     """Service for managing agent interactions following conventions"""
     
     def __init__(self, supervisor: Supervisor) -> None:
@@ -51,6 +52,30 @@ class AgentService:
         thread_id = getattr(request_model, 'id', run_id)
         user_id = getattr(request_model, 'user_id', 'default_user')
         return await self.supervisor.run(user_request, thread_id, user_id, run_id)
+
+    # Interface implementation methods
+    async def start_agent(self, request_model, run_id: str, stream_updates: bool = False):
+        """Start an agent with the given request model and run ID."""
+        return await self.run(request_model, run_id, stream_updates)
+
+    async def stop_agent(self, user_id: str) -> bool:
+        """Stop an agent for the given user."""
+        # Implement agent stopping logic
+        try:
+            await manager.send_message(user_id, {"type": "agent_stopped"})
+            return True
+        except Exception as e:
+            logger.error(f"Failed to stop agent for user {user_id}: {e}")
+            return False
+
+    async def get_agent_status(self, user_id: str) -> Dict[str, Any]:
+        """Get the status of an agent for the given user."""
+        # Return basic agent status information
+        return {
+            "user_id": user_id,
+            "status": "active",
+            "supervisor_available": self.supervisor is not None
+        }
 
     async def handle_websocket_message(
         self, 

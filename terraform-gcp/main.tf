@@ -174,6 +174,10 @@ resource "google_cloud_run_service" "backend" {
       containers {
         image = "${var.region}-docker.pkg.dev/${var.project_id}/netra-containers/backend:latest"
         
+        ports {
+          container_port = 8080
+        }
+        
         resources {
           limits = {
             cpu    = "1"
@@ -184,11 +188,6 @@ resource "google_cloud_run_service" "backend" {
         env {
           name  = "DATABASE_URL"
           value = "postgresql://${google_sql_user.main.name}:${random_password.db_password.result}@${google_sql_database_instance.postgres.public_ip_address}:5432/${google_sql_database.main.name}"
-        }
-        
-        env {
-          name  = "JWT_SECRET_KEY"
-          value = random_password.jwt_secret.result
         }
         
         env {

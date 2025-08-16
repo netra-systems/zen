@@ -27,66 +27,75 @@ class CorpusRequestParser:
     async def parse_operation_request(self, user_request: str) -> CorpusOperationRequest:
         """Parse corpus operation from user request"""
         correlation_id = generate_llm_correlation_id()
-        
-        # Start heartbeat for LLM operation
         start_llm_heartbeat(correlation_id, "CorpusAdminSubAgent-Parser")
         
         try:
-            prompt = self._build_parsing_prompt(user_request)
-            
-            # Log input to LLM
-            log_agent_input("CorpusAdminSubAgent", "LLM", len(prompt), correlation_id)
-            
-            response = await self.llm_manager.ask_llm(prompt, llm_config_name='default')
-            
-            # Log output from LLM
-            log_agent_output("LLM", "CorpusAdminSubAgent", 
-                           len(response), "success", correlation_id)
-            
-            params = extract_json_from_response(response)
-            
-            if params:
-                return self._create_operation_request(params)
-            return self._create_default_request()
+            return await self._execute_llm_parsing(user_request, correlation_id)
         finally:
-            # Stop heartbeat
             stop_llm_heartbeat(correlation_id)
+    
+    async def _execute_llm_parsing(self, user_request: str, correlation_id: str) -> CorpusOperationRequest:
+        """Execute LLM parsing operation"""
+        prompt = self._build_parsing_prompt(user_request)
+        log_agent_input("CorpusAdminSubAgent", "LLM", len(prompt), correlation_id)
+        
+        response = await self.llm_manager.ask_llm(prompt, llm_config_name='default')
+        log_agent_output("LLM", "CorpusAdminSubAgent", len(response), "success", correlation_id)
+        
+        return self._process_llm_response(response)
+    
+    def _process_llm_response(self, response: str) -> CorpusOperationRequest:
+        """Process LLM response and create operation request"""
+        params = extract_json_from_response(response)
+        
+        if params:
+            return self._create_operation_request(params)
+        return self._create_default_request()
     
     def _build_parsing_prompt(self, user_request: str) -> str:
         """Build LLM prompt for parsing corpus requests"""
-        return f"""
-Analyze the following user request for corpus management and extract operation details:
-
-User Request: {user_request}
-
-Return a JSON object with these fields:
-{{
+        base_prompt = self._get_base_prompt_template()
+        schema_section = self._get_schema_section()
+        examples_section = self._get_examples_section()
+        
+        return f"{base_prompt}{user_request}{schema_section}{examples_section}"
+    
+    def _get_base_prompt_template(self) -> str:
+        """Get base prompt template"""
+        return "\nAnalyze the following user request for corpus management and extract operation details:\n\nUser Request: "
+    
+    def _get_schema_section(self) -> str:
+        """Get JSON schema section of prompt"""
+        return '''\n\nReturn a JSON object with these fields:
+{
     "operation": "create|update|delete|search|analyze|export|import|validate",
-    "corpus_metadata": {{
+    "corpus_metadata": {
         "corpus_name": "<name of corpus>",
         "corpus_type": "documentation|knowledge_base|training_data|reference_data|embeddings",
         "description": "<optional description>",
         "tags": ["<optional tags>"],
         "access_level": "private|team|public"
-    }},
-    "filters": {{
-        "date_range": {{"start": "ISO date", "end": "ISO date"}},
+    },
+    "filters": {
+        "date_range": {"start": "ISO date", "end": "ISO date"},
         "document_types": ["<types>"],
-        "size_range": {{"min": bytes, "max": bytes}}
-    }},
-    "options": {{
+        "size_range": {"min": bytes, "max": bytes}
+    },
+    "options": {
         "include_embeddings": true/false,
         "format": "json|csv|parquet",
         "compression": true/false
-    }}
-}}
-
-Examples:
+    }
+}'''
+    
+    def _get_examples_section(self) -> str:
+        """Get examples section of prompt"""
+        return '''\n\nExamples:
 - "Create a new corpus for product documentation" -> operation: "create"
 - "Search the knowledge base for optimization strategies" -> operation: "search"
 - "Delete old training data from last year" -> operation: "delete"
 - "Export the reference corpus as JSON" -> operation: "export"
-"""
+'''
     
     def _create_operation_request(self, params: Dict[str, Any]) -> CorpusOperationRequest:
         """Create operation request from parsed parameters"""

@@ -170,12 +170,12 @@ python test_runner.py --level unit # DEFAULT tests
 | **WebSocket** | [`websockets.xml`](SPEC/websockets.xml), [`websocket_communication.xml`](SPEC/websocket_communication.xml) |
 | **Security** | [`security.xml`](SPEC/security.xml), [`PRODUCTION_SECRETS_ISOLATION.xml`](SPEC/PRODUCTION_SECRETS_ISOLATION.xml) |
 | **GitHub Actions** | [`github_actions.xml`](SPEC/github_actions.xml) - **CRITICAL: Check permissions first!** |
-| **⚠️ LEARNINGS** | [`learnings.xml`](SPEC/learnings.xml) - **ALWAYS CHECK FIRST - Contains fixes for recurring issues** |
+| **⚠️ LEARNINGS** | [`learnings/index.xml`](SPEC/learnings/index.xml) - **ALWAYS CHECK FIRST - Modular learnings by category** |
 
 ## ⚠️ CRITICAL RULES (Memorize These)
 
 ### BEFORE and AFTER Any Code Change:
-1. **CHECK** [`learnings.xml`](SPEC/learnings.xml) - SEARCH for related issues/fixes FIRST
+1. **CHECK** [`learnings/index.xml`](SPEC/learnings/index.xml) - SEARCH category files for related issues/fixes FIRST
 2. **READ** [`type_safety.xml`](SPEC/type_safety.xml) - SINGLE STRONGLY TYPED TYPES ONLY.
 3. **READ** [`conventions.xml`](SPEC/conventions.xml) - 300-LINE LIMIT  
 4. **RUN** `python test_runner.py --level unit` (DEFAULT)

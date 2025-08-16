@@ -82,41 +82,58 @@ class ExecutionEngine:
         triage_result = state.triage_result
         if not triage_result:
             return self._build_analysis_params_dict({}, {})
-        
-        # Access TriageResult object attributes properly
         key_params = getattr(triage_result, 'key_parameters', {})
-        # Extract user_intent and convert to dict for backward compatibility
-        user_intent = getattr(triage_result, 'user_intent', None)
-        if user_intent:
-            # Convert UserIntent to dict format expected by _build_analysis_params_dict
-            intent = {
-                "primary": getattr(user_intent, 'primary_intent', 'general'),
-                "secondary": getattr(user_intent, 'secondary_intents', [])
-            }
-        else:
-            intent = {}
-        
+        intent = self._extract_user_intent_dict(triage_result)
         return self._build_analysis_params_dict(key_params, intent)
+    
+    def _extract_user_intent_dict(self, triage_result) -> Dict[str, Any]:
+        """Extract user intent and convert to dict format."""
+        user_intent = getattr(triage_result, 'user_intent', None)
+        if not user_intent:
+            return {}
+        return {
+            "primary": getattr(user_intent, 'primary_intent', 'general'),
+            "secondary": getattr(user_intent, 'secondary_intents', [])
+        }
     
     def _build_analysis_params_dict(self, key_params: Any, intent: Dict[str, Any]) -> Dict[str, Any]:
         """Build analysis parameters dictionary."""
-        # Handle both KeyParameters object and dict
-        if hasattr(key_params, '__dict__'):  # Pydantic model
-            return {
-                "user_id": getattr(key_params, "user_id", 1),
-                "workload_id": getattr(key_params, "workload_id", None),
-                "metric_names": getattr(key_params, "metrics", ["latency_ms", "throughput", "cost_cents"]),
-                "time_range_str": getattr(key_params, "time_range", "last_24_hours"),
-                "primary_intent": intent.get("primary", "general")
-            }
-        else:  # Dict or empty dict
-            return {
-                "user_id": key_params.get("user_id", 1) if isinstance(key_params, dict) else 1,
-                "workload_id": key_params.get("workload_id") if isinstance(key_params, dict) else None,
-                "metric_names": key_params.get("metrics", ["latency_ms", "throughput", "cost_cents"]) if isinstance(key_params, dict) else ["latency_ms", "throughput", "cost_cents"],
-                "time_range_str": key_params.get("time_range", "last_24_hours") if isinstance(key_params, dict) else "last_24_hours",
-                "primary_intent": intent.get("primary", "general")
-            }
+        if hasattr(key_params, '__dict__'):
+            return self._build_params_from_object(key_params, intent)
+        else:
+            return self._build_params_from_dict(key_params, intent)
+    
+    def _build_params_from_object(self, key_params: Any, intent: Dict[str, Any]) -> Dict[str, Any]:
+        """Build parameters from Pydantic object."""
+        return {
+            "user_id": getattr(key_params, "user_id", 1),
+            "workload_id": getattr(key_params, "workload_id", None),
+            "metric_names": getattr(key_params, "metrics", ["latency_ms", "throughput", "cost_cents"]),
+            "time_range_str": getattr(key_params, "time_range", "last_24_hours"),
+            "primary_intent": intent.get("primary", "general")
+        }
+    
+    def _build_params_from_dict(self, key_params: Any, intent: Dict[str, Any]) -> Dict[str, Any]:
+        """Build parameters from dict or empty value."""
+        defaults = self._get_default_params()
+        if not isinstance(key_params, dict):
+            key_params = {}
+        return {
+            "user_id": key_params.get("user_id", defaults["user_id"]),
+            "workload_id": key_params.get("workload_id", defaults["workload_id"]),
+            "metric_names": key_params.get("metrics", defaults["metric_names"]),
+            "time_range_str": key_params.get("time_range", defaults["time_range_str"]),
+            "primary_intent": intent.get("primary", "general")
+        }
+    
+    def _get_default_params(self) -> Dict[str, Any]:
+        """Get default parameter values."""
+        return {
+            "user_id": 1,
+            "workload_id": None,
+            "metric_names": ["latency_ms", "throughput", "cost_cents"],
+            "time_range_str": "last_24_hours"
+        }
     
     def _parse_time_range(self, time_range_str: str) -> Tuple[datetime, datetime]:
         """Parse time range string into datetime tuple."""

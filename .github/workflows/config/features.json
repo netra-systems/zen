@@ -1,0 +1,33 @@
+{
+  "enable_staging_deploy": true,
+  "enable_production_deploy": false,
+  "enable_security_scan": false,
+  "enable_performance_tests": false,
+  "enable_architecture_compliance": true,
+  "enable_ai_autofix": false,
+  "enable_parallel_testing": false,
+  "enable_notifications": {
+    "slack": false,
+    "email": false,
+    "pr_comments": true,
+    "github_status": true
+  },
+  "enable_cleanup": {
+    "on_pr_close": true,
+    "on_branch_delete": true,
+    "scheduled_cleanup": true
+  },
+  "enable_monitoring": {
+    "health_checks": false,
+    "performance_metrics": false,
+    "error_tracking": true
+  },
+  "testing_features": {
+    "enable_smoke_tests": true,
+    "enable_unit_tests": true,
+    "enable_integration_tests": true,
+    "enable_e2e_tests": true,
+    "enable_coverage_reporting": true,
+    "enable_stub_detection": true
+  }
+}

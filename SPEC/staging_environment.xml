@@ -10,12 +10,37 @@
 
   <overview>
     <description>
-      Automatic staging environments provide isolated, production-like environments
-      for every pull request, enabling thorough testing before merging to main.
+      Staging deployment system supporting multiple deployment methods:
+      1. GitHub Actions automatic staging - Triggered by PRs, fully automated
+      2. Local to remote staging - Deploy from local machine to GCP staging
+      3. Local staging - Run staging environment locally for development
+      Each method serves different purposes in the development lifecycle.
     </description>
+    <deployment_methods>
+      <method name="GitHub Actions Staging">
+        <trigger>Pull request events (open/update/close)</trigger>
+        <location>GCP Cloud Run</location>
+        <purpose>Automated PR testing in cloud environment</purpose>
+        <automation>Fully automated via GitHub Actions</automation>
+      </method>
+      <method name="Local to Remote Staging">
+        <trigger>Manual via CLI or script</trigger>
+        <location>GCP Cloud Run (staging project)</location>
+        <purpose>Test local changes in cloud before PR</purpose>
+        <automation>Semi-automated via local scripts</automation>
+      </method>
+      <method name="Local Staging">
+        <trigger>Manual via dev_launcher.py</trigger>
+        <location>Local machine (Docker/native)</location>
+        <purpose>Development and debugging</purpose>
+        <automation>Local tooling with hot reload</automation>
+      </method>
+    </deployment_methods>
     <key_features>
-      - Automatic provisioning on PR creation
-      - Automatic teardown on PR close/merge
+      - Three distinct deployment paths for different use cases
+      - GitHub Actions for automatic PR staging
+      - Local deployment to GCP staging for pre-PR testing
+      - Local staging for development with full stack
       - Resource limiting and cost optimization
       - Integration with existing test runner
       - SSL/TLS with automatic certificates
@@ -318,6 +343,181 @@
     </retention>
   </cleanup>
 
+  <deployment_scenarios>
+    <scenario name="GitHub_Actions_Staging">
+      <description>
+        Fully automated staging deployment triggered by pull request events.
+        Creates isolated environment in GCP for each PR.
+      </description>
+      <trigger>PR opened, synchronized, or labeled</trigger>
+      <infrastructure>
+        - GCP Cloud Run for application
+        - Cloud SQL for PostgreSQL
+        - Memorystore for Redis
+        - Automated SSL certificates
+      </infrastructure>
+      <workflow>
+        1. GitHub webhook triggers workflow
+        2. Builds containers in parallel
+        3. Terraform creates PR-specific infrastructure
+        4. Deploys to Cloud Run with PR-specific URL
+        5. Runs automated tests
+        6. Posts results to PR
+        7. Auto-destroys on PR close
+      </workflow>
+      <access>https://pr-{number}.staging.netrasystems.ai</access>
+      <authentication>GitHub OAuth for PR participants</authentication>
+      <use_cases>
+        - Automated PR validation
+        - Reviewer testing
+        - Stakeholder preview
+      </use_cases>
+    </scenario>
+
+    <scenario name="Local_to_Remote_Staging">
+      <description>
+        Deploy local changes to GCP staging environment for cloud testing
+        before creating a pull request. Uses shared staging infrastructure.
+      </description>
+      <trigger>Manual command from local machine</trigger>
+      <infrastructure>
+        - Shared GCP staging project
+        - Persistent staging Cloud Run service
+        - Shared staging databases with namespace isolation
+      </infrastructure>
+      <workflow>
+        1. Run 'gcloud builds submit' from local
+        2. Build container with Cloud Build
+        3. Deploy to staging Cloud Run service
+        4. Use personal namespace in shared databases
+        5. Manual testing via staging URL
+      </workflow>
+      <commands>
+        # Build and deploy backend
+        gcloud builds submit --config=cloudbuild-staging.yaml \
+          --substitutions=_IMAGE_TAG=local-$(git rev-parse --short HEAD)
+        
+        # Deploy specific version
+        gcloud run deploy netra-staging \
+          --image=gcr.io/netra-staging/netra:local-{tag} \
+          --region=us-central1
+      </commands>
+      <access>https://staging.netrasystems.ai</access>
+      <authentication>Development team credentials</authentication>
+      <use_cases>
+        - Pre-PR validation
+        - Integration testing
+        - Performance testing in cloud
+      </use_cases>
+    </scenario>
+
+    <scenario name="Local_Staging">
+      <description>
+        Complete staging environment running on local machine for
+        development and debugging with hot reload capabilities.
+      </description>
+      <trigger>dev_launcher.py or manual setup</trigger>
+      <infrastructure>
+        - Local Python virtual environment
+        - Local PostgreSQL (Docker or native)
+        - Local Redis (Docker or native)
+        - Local ClickHouse (Docker)
+        - Next.js dev server
+      </infrastructure>
+      <workflow>
+        1. Run 'python dev_launcher.py'
+        2. Starts all required services
+        3. Applies database migrations
+        4. Seeds development data
+        5. Starts backend with uvicorn --reload
+        6. Starts frontend with next dev
+        7. Opens browser to localhost
+      </workflow>
+      <commands>
+        # Automated setup
+        python dev_launcher.py
+        
+        # Manual setup
+        docker-compose up -d postgres redis clickhouse
+        python -m venv venv
+        source venv/bin/activate
+        pip install -r requirements.txt
+        alembic upgrade head
+        python scripts/seed_dev_data.py
+        uvicorn app.main:app --reload --port 8000
+        cd frontend && npm run dev
+      </commands>
+      <access>
+        - Backend: http://localhost:8000
+        - Frontend: http://localhost:3000
+        - API Docs: http://localhost:8000/docs
+      </access>
+      <authentication>Disabled or test credentials</authentication>
+      <use_cases>
+        - Active development
+        - Debugging
+        - Unit test development
+        - UI/UX iteration
+      </use_cases>
+    </scenario>
+  </deployment_scenarios>
+
+  <configuration_differences>
+    <difference aspect="Environment Variables">
+      <github_actions>
+        - Sourced from GitHub Secrets
+        - PR-specific namespaces
+        - Production-like values
+      </github_actions>
+      <local_to_remote>
+        - Mix of local .env and GCP Secret Manager
+        - Shared staging credentials
+        - Developer-specific namespaces
+      </local_to_remote>
+      <local_staging>
+        - Local .env file
+        - Development defaults
+        - Simplified authentication
+      </local_staging>
+    </difference>
+
+    <difference aspect="Database Management">
+      <github_actions>
+        - Isolated database per PR
+        - Automatic creation and teardown
+        - Fresh migrations each deployment
+      </github_actions>
+      <local_to_remote>
+        - Shared staging database
+        - Schema namespaces for isolation
+        - Persistent data between deployments
+      </local_to_remote>
+      <local_staging>
+        - Local database instance
+        - Developer controls lifecycle
+        - Persistent development data
+      </local_staging>
+    </difference>
+
+    <difference aspect="Resource Limits">
+      <github_actions>
+        - Strict CPU/memory limits
+        - Auto-scaling with max instances
+        - Cost optimization enabled
+      </github_actions>
+      <local_to_remote>
+        - Moderate resource allocation
+        - Shared between developers
+        - Manual scaling if needed
+      </local_to_remote>
+      <local_staging>
+        - No limits (local resources)
+        - Developer machine dependent
+        - No cost considerations
+      </local_staging>
+    </difference>
+  </configuration_differences>
+
   <implementation_checklist>
     <task status="completed">Create GitHub Actions workflows</task>
     <task status="completed">Implement parallel build jobs for backend/frontend</task>
@@ -325,13 +525,15 @@
     <task status="completed">Set up build caching via GCS</task>
     <task status="completed">Implement automatic cleanup on PR close</task>
     <task status="completed">Add destroy job protection (no cancellation)</task>
-    <task status="pending">Set up Terraform modules</task>
-    <task status="pending">Configure GCP project and APIs</task>
-    <task status="pending">Create staging configuration file</task>
-    <task status="pending">Implement test runner integration</task>
-    <task status="pending">Set up DNS wildcard for *.staging.netrasystems.ai</task>
+    <task status="pending">Set up Terraform modules for PR staging</task>
+    <task status="pending">Configure GCP staging project for local deployments</task>
+    <task status="pending">Create cloudbuild-staging.yaml for local to remote</task>
+    <task status="pending">Update dev_launcher.py for local staging mode</task>
+    <task status="pending">Create staging configuration templates</task>
+    <task status="pending">Implement test runner integration for all modes</task>
+    <task status="pending">Set up DNS for staging environments</task>
     <task status="pending">Create seed data scripts</task>
     <task status="pending">Implement cost monitoring</task>
-    <task status="pending">Write staging environment documentation</task>
+    <task status="pending">Write deployment mode documentation</task>
   </implementation_checklist>
 </specification>

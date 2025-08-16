@@ -5,7 +5,7 @@ Each function ≤8 lines for performance-critical WebSocket error path.
 """
 
 from typing import Dict, Any
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.logging_config import central_logger
 from app.schemas.websocket_message_types import WebSocketValidationError
@@ -73,14 +73,14 @@ def add_fallback_metadata(payload: Dict[str, Any]) -> Dict[str, Any]:
     """Add fallback metadata to payload."""
     payload.update({
         "fallback_applied": True,
-        "timestamp": datetime.utcnow().isoformat()
+        "timestamp": datetime.now(UTC).isoformat()
     })
     return payload
 
 
 def add_error_metadata(payload: Dict[str, Any]) -> Dict[str, Any]:
     """Add error metadata to payload."""
-    payload["timestamp"] = datetime.utcnow().isoformat()
+    payload["timestamp"] = datetime.now(UTC).isoformat()
     return payload
 
 

@@ -1,0 +1,594 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Master GitHub Workflow Architecture</name>
+        <type>architectural</type>
+        <version>1.0</version>
+        <last_updated>2025-08-16</last_updated>
+        <description>Single entry point GitHub Actions architecture with conditional job execution, reusable patterns, and centralized configuration</description>
+    </metadata>
+
+    <critical_principles>
+        <principle priority="HIGHEST">
+            SINGLE ENTRY POINT: All workflows route through master-orchestrator.yml
+            NO DUPLICATE LOGIC: Reusable jobs defined once, referenced everywhere
+            CONFIGURATION-DRIVEN: Enable/disable features via config, not code changes
+            ACT COMPATIBLE: All workflows must run locally with act tool
+            API Verify: All workflows must be verified to completion success via Github Python Workflow Status script.
+        </principle>
+    </critical_principles>
+
+    <architecture>
+        <entry_point>
+            <file>.github/workflows/master-orchestrator.yml</file>
+            <purpose>Central dispatcher for all GitHub Actions workflows</purpose>
+            <triggers>
+                - pull_request: [opened, synchronize, reopened, closed]
+                - push: [main, develop]
+                - workflow_dispatch: Manual triggers with parameters
+                - repository_dispatch: External event triggers
+                - schedule: Cron-based scheduled runs
+            </triggers>
+        </entry_point>
+
+        <workflow_structure>
+            <layer id="orchestrator">
+                <name>Master Orchestrator</name>
+                <responsibilities>
+                    - Parse trigger context
+                    - Load configuration
+                    - Determine execution path
+                    - Call appropriate reusable workflows
+                </responsibilities>
+            </layer>
+            
+            <layer id="reusable-workflows">
+                <name>Reusable Workflow Library</name>
+                <location>.github/workflows/reusable/</location>
+                <workflows>
+                    - test-runner.yml
+                    - deploy-staging.yml
+                    - deploy-production.yml
+                    - security-scan.yml
+                    - code-quality.yml
+                    - notification-handler.yml
+                    - cleanup-resources.yml
+                </workflows>
+            </layer>
+            
+            <layer id="atomic-jobs">
+                <name>Atomic Job Definitions</name>
+                <location>.github/workflows/jobs/</location>
+                <jobs>
+                    - terraform-apply.yml
+                    - docker-build.yml
+                    - test-unit.yml
+                    - test-e2e.yml
+                    - comment-update.yml
+                </jobs>
+            </layer>
+        </workflow_structure>
+    </architecture>
+
+    <conditional_execution>
+        <skip_mechanism>
+            <description>Intelligent job skipping based on context and configuration</description>
+            
+            <skip_conditions>
+                <condition id="docs-only">
+                    <trigger>File changes match: ['**.md', 'docs/**', 'SPEC/**']</trigger>
+                    <skip>All tests and deployments</skip>
+                </condition>
+                
+                <condition id="skip-ci">
+                    <trigger>Commit message contains: [skip ci], [ci skip]</trigger>
+                    <skip>All workflows</skip>
+                </condition>
+                
+                <condition id="frontend-only">
+                    <trigger>Changes only in: frontend/**</trigger>
+                    <skip>Backend tests, backend deployment</skip>
+                </condition>
+                
+                <condition id="backend-only">
+                    <trigger>Changes only in: app/**</trigger>
+                    <skip>Frontend tests, frontend build</skip>
+                </condition>
+            </skip_conditions>
+
+            <implementation>
+                <code language="yaml">
+jobs:
+  determine-strategy:
+    outputs:
+      skip_tests: ${{ steps.check.outputs.skip_tests }}
+      skip_deploy: ${{ steps.check.outputs.skip_deploy }}
+      test_scope: ${{ steps.check.outputs.test_scope }}
+    steps:
+      - id: check
+        run: |
+          # Analyze changed files and commit message
+          # Set outputs based on skip conditions
+          
+  run-tests:
+    needs: determine-strategy
+    if: needs.determine-strategy.outputs.skip_tests != 'true'
+    uses: ./.github/workflows/reusable/test-runner.yml
+    with:
+      scope: ${{ needs.determine-strategy.outputs.test_scope }}
+                </code>
+            </implementation>
+        </skip_mechanism>
+
+        <feature_flags>
+            <description>Configuration-based feature toggling</description>
+            <config_file>.github/workflows/config/features.json</config_file>
+            <example>
+                {
+                  "enable_staging_deploy": true,
+                  "enable_production_deploy": false,
+                  "enable_security_scan": true,
+                  "enable_performance_tests": false,
+                  "enable_notifications": {
+                    "slack": true,
+                    "email": false,
+                    "pr_comments": true
+                  }
+                }
+            </example>
+        </feature_flags>
+    </conditional_execution>
+
+    <testing_configurations>
+        <strategy id="series">
+            <name>Sequential Testing (Default)</name>
+            <description>Tests run in order: smoke → unit → integration → e2e</description>
+            <use_case>Resource-constrained environments, dependency chains</use_case>
+            <implementation>
+                <code language="yaml">
+test-sequence:
+  jobs:
+    smoke:
+      uses: ./.github/workflows/jobs/test-smoke.yml
+    
+    unit:
+      needs: smoke
+      if: success()
+      uses: ./.github/workflows/jobs/test-unit.yml
+    
+    integration:
+      needs: unit
+      if: success()
+      uses: ./.github/workflows/jobs/test-integration.yml
+    
+    e2e:
+      needs: integration
+      if: success()
+      uses: ./.github/workflows/jobs/test-e2e.yml
+                </code>
+            </implementation>
+        </strategy>
+
+        <strategy id="parallel">
+            <name>Parallel Testing</name>
+            <description>All test types run simultaneously</description>
+            <use_case>Fast feedback, abundant resources</use_case>
+            <implementation>
+                <code language="yaml">
+test-parallel:
+  strategy:
+    matrix:
+      test-type: [smoke, unit, integration, e2e]
+  uses: ./.github/workflows/jobs/test-runner.yml
+  with:
+    type: ${{ matrix.test-type }}
+                </code>
+            </implementation>
+        </strategy>
+
+        <strategy id="matrix">
+            <name>Matrix Testing</name>
+            <description>Test across multiple configurations</description>
+            <dimensions>
+                - Python versions: [3.9, 3.10, 3.11]
+                - Node versions: [18, 20]
+                - OS: [ubuntu-latest, windows-latest]
+            </dimensions>
+        </strategy>
+
+        <configuration_selector>
+            <rules>
+                - PR: Use series for comprehensive validation
+                - Main push: Use parallel for speed
+                - Release: Use matrix for compatibility
+            </rules>
+        </configuration_selector>
+    </testing_configurations>
+
+    <reusable_jobs>
+        <pattern id="job-template">
+            <description>Standard structure for all reusable jobs</description>
+            <structure>
+                <code language="yaml">
+name: Reusable Job Template
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: false
+        type: string
+        default: 'development'
+      skip_condition:
+        required: false
+        type: string
+    outputs:
+      status:
+        value: ${{ jobs.main.outputs.status }}
+      
+jobs:
+  main:
+    runs-on: ${{ inputs.runner || 'warp-custom-default' }}
+    if: ${{ inputs.skip_condition != 'true' }}
+    outputs:
+      status: ${{ steps.final.outputs.status }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: execute
+        run: |
+          # Job logic here
+      - id: final
+        if: always()
+        run: echo "status=${{ job.status }}" >> $GITHUB_OUTPUT
+                </code>
+            </structure>
+        </pattern>
+
+        <job_library>
+            <job id="terraform-operations">
+                <file>.github/workflows/jobs/terraform.yml</file>
+                <inputs>action, workspace, var_file</inputs>
+                <outputs>infrastructure_outputs</outputs>
+            </job>
+            
+            <job id="docker-operations">
+                <file>.github/workflows/jobs/docker.yml</file>
+                <inputs>dockerfile, context, tags, push</inputs>
+                <outputs>image_digest</outputs>
+            </job>
+            
+            <job id="notification-handler">
+                <file>.github/workflows/jobs/notify.yml</file>
+                <inputs>status, message, channels</inputs>
+            </job>
+        </job_library>
+    </reusable_jobs>
+
+    <runner_configuration>
+        <runners>
+            <runner id="default">
+                <name>warp-custom-default</name>
+                <type>self-hosted</type>
+                <use_for>All remote GitHub Actions runs</use_for>
+                <specs>
+                    - CPU: 4 cores
+                    - RAM: 16GB
+                    - Storage: 100GB SSD
+                </specs>
+            </runner>
+            
+            <runner id="act-local">
+                <name>ubuntu-latest</name>
+                <type>github-hosted</type>
+                <use_for>Local ACT testing</use_for>
+                <override>ACT automatically uses this instead of warp-custom-default</override>
+            </runner>
+        </runners>
+
+        <act_compatibility>
+            <requirements>
+                - No self-referencing environment variables
+                - Static default values for all env vars
+                - Conditional logic in steps, not workflow level
+                - Use if: conditions instead of complex expressions
+            </requirements>
+            
+            <validation_commands>
+                <command>act --list</command>
+                <command>act pull_request --dryrun</command>
+                <command>act workflow_dispatch -e event.json</command>
+            </validation_commands>
+            
+            <event_file_example>
+                <file>test-events/pr-opened.json</file>
+                <content>
+{
+  "pull_request": {
+    "number": 123,
+    "state": "open",
+    "head": {
+      "ref": "feature/test",
+      "sha": "abc123"
+    }
+  }
+}
+                </content>
+            </event_file_example>
+        </act_compatibility>
+    </runner_configuration>
+
+    <comment_management>
+        <strategy>
+            <principle>Single comment per PR, always updated</principle>
+            <implementation>Find existing comment by bot identifier, update or create</implementation>
+        </strategy>
+
+        <comment_types>
+            <type id="deployment">
+                <identifier><!-- netra-staging-deployment --></identifier>
+                <template>
+## 🚀 Deployment Status
+
+**Environment:** `{{ environment_name }}`
+**Status:** {{ status_emoji }} {{ status_text }}
+
+{% if status == 'success' %}
+### Access URLs:
+- **Frontend:** {{ frontend_url }}
+- **Backend:** {{ backend_url }}
+- **API Docs:** {{ backend_url }}/docs
+
+### Deployment Info:
+- **Commit:** {{ commit_sha }}
+- **Deployed:** {{ timestamp }}
+- **Version:** {{ version }}
+{% endif %}
+
+{% if status == 'failed' %}
+### Error Details:
+```
+{{ error_message }}
+```
+[View Logs]({{ workflow_run_url }})
+{% endif %}
+
+### Actions:
+- 🔄 **Rebuild:** Run workflow with `action=rebuild`
+- 🗑️ **Destroy:** Close PR or run with `action=destroy`
+                </template>
+            </type>
+            
+            <type id="test-results">
+                <identifier><!-- netra-test-results --></identifier>
+                <template>
+## ✅ Test Results
+
+| Test Type | Status | Coverage | Duration |
+|-----------|--------|----------|----------|
+| Unit | {{ unit_status }} | {{ unit_coverage }}% | {{ unit_duration }} |
+| Integration | {{ int_status }} | {{ int_coverage }}% | {{ int_duration }} |
+| E2E | {{ e2e_status }} | - | {{ e2e_duration }} |
+
+**Overall Coverage:** {{ total_coverage }}%
+                </template>
+            </type>
+        </comment_types>
+
+        <update_mechanism>
+            <code language="yaml">
+- name: Update PR Comment
+  uses: actions/github-script@v7
+  with:
+    script: |
+      const identifier = '<!-- netra-staging-deployment -->';
+      const body = `${identifier}\n${commentContent}`;
+      
+      // Find existing comment
+      const { data: comments } = await github.rest.issues.listComments({
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        issue_number: context.issue.number
+      });
+      
+      const botComment = comments.find(c => 
+        c.user.type === 'Bot' && c.body.includes(identifier)
+      );
+      
+      if (botComment) {
+        await github.rest.issues.updateComment({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          comment_id: botComment.id,
+          body
+        });
+      } else {
+        await github.rest.issues.createComment({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          issue_number: context.issue.number,
+          body
+        });
+      }
+            </code>
+        </update_mechanism>
+    </comment_management>
+
+    <configuration_management>
+        <central_config>
+            <location>.github/workflows/config/</location>
+            <files>
+                - settings.json: Global workflow settings
+                - features.json: Feature flags
+                - environments.json: Environment-specific configs
+                - secrets-mapping.json: Secret name mappings
+            </files>
+        </central_config>
+
+        <variable_hierarchy>
+            <precedence>
+                1. Workflow dispatch inputs (highest)
+                2. Repository variables
+                3. Repository secrets
+                4. Environment variables
+                5. Configuration files
+                6. Workflow defaults (lowest)
+            </precedence>
+        </variable_hierarchy>
+
+        <example_config>
+            <file>settings.json</file>
+            <content>
+{
+  "test_runner": {
+    "default_level": "unit",
+    "timeout_minutes": 30,
+    "retry_failed": true,
+    "max_retries": 2
+  },
+  "deployment": {
+    "auto_deploy_branches": ["main", "develop"],
+    "require_approval": ["production"],
+    "cleanup_on_pr_close": true
+  },
+  "notifications": {
+    "channels": ["slack", "pr_comment"],
+    "on_failure": "always",
+    "on_success": "pr_only"
+  }
+}
+            </content>
+        </example_config>
+    </configuration_management>
+
+    <workflow_organization>
+        <directory_structure>
+            <structure>
+.github/
+├── workflows/
+│   ├── master-orchestrator.yml      # Single entry point
+│   ├── reusable/                    # Reusable workflow library
+│   │   ├── test-runner.yml
+│   │   ├── deploy-staging.yml
+│   │   ├── deploy-production.yml
+│   │   ├── security-scan.yml
+│   │   └── cleanup.yml
+│   ├── jobs/                        # Atomic job definitions
+│   │   ├── terraform.yml
+│   │   ├── docker.yml
+│   │   ├── test-unit.yml
+│   │   └── notify.yml
+│   ├── config/                      # Configuration files
+│   │   ├── settings.json
+│   │   ├── features.json
+│   │   └── environments.json
+│   └── pending/                     # Non-vetted workflows
+│       └── experimental.yml
+├── actions/                          # Custom actions
+│   └── comment-updater/
+└── scripts/                          # Support scripts
+    ├── determine-strategy.sh
+    └── parse-config.py
+            </structure>
+        </directory_structure>
+
+        <vetted_workflows>
+            <criteria>
+                - Tested with ACT locally
+                - Reviewed by team lead
+                - Includes error handling
+                - Has rollback capability
+            </criteria>
+            <current_vetted>
+                - test-runner.yml
+                - deploy-staging.yml
+            </current_vetted>
+        </vetted_workflows>
+    </workflow_organization>
+
+    <permissions_model>
+        <standard_permissions>
+            <code language="yaml">
+permissions:
+  contents: read        # Always needed
+  pull-requests: write  # For PR comments
+  issues: write         # For issue operations
+  deployments: write    # For deployment status
+  statuses: write       # For commit status
+  packages: read        # For package registry
+            </code>
+        </standard_permissions>
+
+        <least_privilege>
+            <principle>Grant minimum required permissions per job</principle>
+            <implementation>Define permissions at job level when possible</implementation>
+        </least_privilege>
+    </permissions_model>
+
+    <error_handling>
+        <global_error_handler>
+            <always_run>
+                - Cleanup temporary resources
+                - Update PR comment with status
+                - Send failure notifications
+            </always_run>
+            
+            <retry_logic>
+                <code language="yaml">
+- name: Retry on Failure
+  uses: nick-fields/retry@v2
+  with:
+    timeout_minutes: 10
+    max_attempts: 3
+    retry_wait_seconds: 30
+    command: |
+      # Command that might fail
+            </code>
+            </retry_logic>
+        </global_error_handler>
+    </error_handling>
+
+    <best_practices>
+        <practice>Single source of truth: One master orchestrator</practice>
+        <practice>DRY principle: Reusable workflows for common tasks</practice>
+        <practice>Configuration over code: Use JSON configs for settings</practice>
+        <practice>Fail fast: Validate early in workflow</practice>
+        <practice>Always cleanup: Use finally blocks for resource cleanup</practice>
+        <practice>Version everything: Tag reusable workflows</practice>
+        <practice>Test locally: Validate with ACT before push</practice>
+    </best_practices>
+
+    <implementation_checklist>
+        <phase id="1-setup">
+            - [ ] Create directory structure
+            - [ ] Create master-orchestrator.yml
+            - [ ] Set up configuration files
+        </phase>
+        
+        <phase id="2-migration">
+            - [ ] Extract reusable components from existing workflows
+            - [ ] Create atomic job definitions
+            - [ ] Update to use central orchestrator
+        </phase>
+        
+        <phase id="3-validation">
+            - [ ] Test with ACT locally
+            - [ ] Validate permissions
+            - [ ] Test skip conditions
+        </phase>
+        
+        <phase id="4-rollout">
+            - [ ] Deploy to test branch
+            - [ ] Monitor for issues
+            - [ ] Update documentation
+        </phase>
+    </implementation_checklist>
+
+    <references>
+        <spec>github_actions.xml</spec>
+        <spec>staging_workflow.xml</spec>
+        <spec>testing.xml</spec>
+        <spec>learnings.xml</spec>
+        <documentation>https://docs.github.com/actions</documentation>
+        <tool>https://github.com/nektos/act</tool>
+    </references>
+</specification>

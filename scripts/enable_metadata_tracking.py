@@ -81,78 +81,94 @@ exit 0
             print(f"[ERROR] Failed to install git hooks: {e}")
             return False
     
+    def _get_ai_modifications_schema(self) -> str:
+        """Get AI modifications table schema"""
+        return """
+            CREATE TABLE IF NOT EXISTS ai_modifications (
+                id TEXT PRIMARY KEY,
+                file_path TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
+                agent_name TEXT,
+                agent_version TEXT,
+                task_description TEXT,
+                git_branch TEXT,
+                git_commit TEXT,
+                git_status TEXT,
+                change_type TEXT,
+                change_scope TEXT,
+                risk_level TEXT,
+                review_status TEXT DEFAULT 'Pending',
+                review_score INTEGER,
+                session_id TEXT,
+                sequence_number INTEGER,
+                lines_added INTEGER,
+                lines_modified INTEGER,
+                lines_deleted INTEGER,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """
+
+    def _get_audit_log_schema(self) -> str:
+        """Get audit log table schema"""
+        return """
+            CREATE TABLE IF NOT EXISTS metadata_audit_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                modification_id TEXT,
+                event_type TEXT,
+                event_data TEXT,
+                timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (modification_id) REFERENCES ai_modifications(id)
+            )
+        """
+
+    def _get_rollback_history_schema(self) -> str:
+        """Get rollback history table schema"""
+        return """
+            CREATE TABLE IF NOT EXISTS rollback_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                modification_id TEXT,
+                rollback_command TEXT,
+                rollback_timestamp TEXT,
+                rollback_status TEXT,
+                rollback_by TEXT,
+                FOREIGN KEY (modification_id) REFERENCES ai_modifications(id)
+            )
+        """
+
+    def _create_database_tables(self, cursor) -> None:
+        """Create all database tables"""
+        cursor.execute(self._get_ai_modifications_schema())
+        cursor.execute(self._get_audit_log_schema())
+        cursor.execute(self._get_rollback_history_schema())
+
+    def _create_database_indices(self, cursor) -> None:
+        """Create database indices for performance"""
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_file_path ON ai_modifications(file_path)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_timestamp ON ai_modifications(timestamp)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_session_id ON ai_modifications(session_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_risk_level ON ai_modifications(risk_level)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS idx_review_status ON ai_modifications(review_status)")
+
+    def _setup_database_connection(self):
+        """Setup and return database connection"""
+        import sqlite3
+        conn = sqlite3.connect(self.metadata_db_path)
+        return conn, conn.cursor()
+
+    def _finalize_database_setup(self, conn) -> None:
+        """Finalize database setup with commit and close"""
+        conn.commit()
+        conn.close()
+        print(f"[SUCCESS] Metadata database created at {self.metadata_db_path}")
+
     def create_metadata_database(self) -> bool:
         """Initialize metadata tracking database"""
         try:
-            import sqlite3
-            
-            conn = sqlite3.connect(self.metadata_db_path)
-            cursor = conn.cursor()
-            
-            # Create main tracking table
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS ai_modifications (
-                    id TEXT PRIMARY KEY,
-                    file_path TEXT NOT NULL,
-                    timestamp TEXT NOT NULL,
-                    agent_name TEXT,
-                    agent_version TEXT,
-                    task_description TEXT,
-                    git_branch TEXT,
-                    git_commit TEXT,
-                    git_status TEXT,
-                    change_type TEXT,
-                    change_scope TEXT,
-                    risk_level TEXT,
-                    review_status TEXT DEFAULT 'Pending',
-                    review_score INTEGER,
-                    session_id TEXT,
-                    sequence_number INTEGER,
-                    lines_added INTEGER,
-                    lines_modified INTEGER,
-                    lines_deleted INTEGER,
-                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
-                )
-            """)
-            
-            # Create audit log table
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS metadata_audit_log (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    modification_id TEXT,
-                    event_type TEXT,
-                    event_data TEXT,
-                    timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
-                    FOREIGN KEY (modification_id) REFERENCES ai_modifications(id)
-                )
-            """)
-            
-            # Create rollback history table
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS rollback_history (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    modification_id TEXT,
-                    rollback_command TEXT,
-                    rollback_timestamp TEXT,
-                    rollback_status TEXT,
-                    rollback_by TEXT,
-                    FOREIGN KEY (modification_id) REFERENCES ai_modifications(id)
-                )
-            """)
-            
-            # Create indices for better query performance
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_file_path ON ai_modifications(file_path)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_timestamp ON ai_modifications(timestamp)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_session_id ON ai_modifications(session_id)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_risk_level ON ai_modifications(risk_level)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_review_status ON ai_modifications(review_status)")
-            
-            conn.commit()
-            conn.close()
-            
-            print(f"[SUCCESS] Metadata database created at {self.metadata_db_path}")
+            conn, cursor = self._setup_database_connection()
+            self._create_database_tables(cursor)
+            self._create_database_indices(cursor)
+            self._finalize_database_setup(conn)
             return True
-            
         except Exception as e:
             print(f"[ERROR] Failed to create metadata database: {e}")
             return False

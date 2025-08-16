@@ -1,0 +1,192 @@
+name: 'PR Comment Updater'
+description: 'Find and update existing PR comments or create new ones with templated content'
+author: 'Netra AI Platform'
+
+inputs:
+  identifier:
+    description: 'Unique HTML comment identifier (e.g., <!-- netra-staging-deployment -->)'
+    required: true
+  content:
+    description: 'Comment content to set (supports template variables)'
+    required: true
+  template-variables:
+    description: 'JSON object containing template variables for content substitution'
+    required: false
+    default: '{}'
+  github-token:
+    description: 'GitHub token for API operations'
+    required: true
+    default: ${{ github.token }}
+  pr-number:
+    description: 'Pull request number (auto-detected if not provided)'
+    required: false
+  fail-on-error:
+    description: 'Whether to fail the action if comment update fails'
+    required: false
+    default: 'true'
+
+outputs:
+  comment-id:
+    description: 'ID of the created or updated comment'
+    value: ${{ steps.comment-operation.outputs.comment-id }}
+  comment-url:
+    description: 'URL of the created or updated comment'
+    value: ${{ steps.comment-operation.outputs.comment-url }}
+  operation:
+    description: 'Operation performed: "created" or "updated"'
+    value: ${{ steps.comment-operation.outputs.operation }}
+  success:
+    description: 'Whether the operation was successful'
+    value: ${{ steps.comment-operation.outputs.success }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate Inputs
+      shell: bash
+      run: |
+        if [[ -z "${{ inputs.identifier }}" ]]; then
+          echo "Error: identifier is required"
+          exit 1
+        fi
+        if [[ -z "${{ inputs.content }}" ]]; then
+          echo "Error: content is required"
+          exit 1
+        fi
+        echo "Inputs validated successfully"
+
+    - name: Process Template Variables
+      id: template-processor
+      shell: bash
+      run: |
+        # Process template variables in content
+        CONTENT='${{ inputs.content }}'
+        VARIABLES='${{ inputs.template-variables }}'
+        
+        # Escape content for safe handling
+        PROCESSED_CONTENT=$(echo "$CONTENT" | sed 's/"/\\"/g')
+        
+        # If variables provided, process them
+        if [[ "$VARIABLES" != "{}" && -n "$VARIABLES" ]]; then
+          # Simple variable substitution for common patterns
+          # In a real implementation, you might use a more sophisticated templating engine
+          echo "Processing template variables..."
+          echo "variables=$VARIABLES" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "processed-content<<EOF" >> $GITHUB_OUTPUT
+        echo "$CONTENT" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Determine PR Number
+      id: pr-info
+      shell: bash
+      run: |
+        PR_NUMBER="${{ inputs.pr-number }}"
+        
+        if [[ -z "$PR_NUMBER" ]]; then
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+          elif [[ "${{ github.event_name }}" == "issue_comment" ]]; then
+            PR_NUMBER="${{ github.event.issue.number }}"
+          else
+            echo "Error: Cannot determine PR number. Please provide pr-number input."
+            exit 1
+          fi
+        fi
+        
+        echo "pr-number=$PR_NUMBER" >> $GITHUB_OUTPUT
+        echo "Using PR number: $PR_NUMBER"
+
+    - name: Update or Create PR Comment
+      id: comment-operation
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const identifier = '${{ inputs.identifier }}';
+          const content = `${identifier}
+          ${{ steps.template-processor.outputs.processed-content }}`;
+          const prNumber = parseInt('${{ steps.pr-info.outputs.pr-number }}');
+          const failOnError = '${{ inputs.fail-on-error }}' === 'true';
+          
+          try {
+            // Find existing comment by bot identifier
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes(identifier)
+            );
+            
+            let result;
+            let operation;
+            
+            if (botComment) {
+              // Update existing comment
+              result = await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: content
+              });
+              operation = 'updated';
+              console.log(`Updated existing comment ${botComment.id}`);
+            } else {
+              // Create new comment
+              result = await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body: content
+              });
+              operation = 'created';
+              console.log(`Created new comment ${result.data.id}`);
+            }
+            
+            // Set outputs
+            core.setOutput('comment-id', result.data.id);
+            core.setOutput('comment-url', result.data.html_url);
+            core.setOutput('operation', operation);
+            core.setOutput('success', 'true');
+            
+            return {
+              commentId: result.data.id,
+              commentUrl: result.data.html_url,
+              operation: operation
+            };
+            
+          } catch (error) {
+            console.error('Comment operation failed:', error.message);
+            core.setOutput('success', 'false');
+            
+            if (failOnError) {
+              core.setFailed(`Failed to ${botComment ? 'update' : 'create'} comment: ${error.message}`);
+            } else {
+              console.log('Continuing despite error (fail-on-error=false)');
+            }
+            
+            return null;
+          }
+
+    - name: Output Summary
+      shell: bash
+      if: always()
+      run: |
+        echo "## Comment Update Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Operation**: ${{ steps.comment-operation.outputs.operation || 'failed' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Success**: ${{ steps.comment-operation.outputs.success || 'false' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **PR Number**: ${{ steps.pr-info.outputs.pr-number }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Identifier**: \`${{ inputs.identifier }}\`" >> $GITHUB_STEP_SUMMARY
+        
+        if [[ "${{ steps.comment-operation.outputs.success }}" == "true" ]]; then
+          echo "- **Comment ID**: ${{ steps.comment-operation.outputs.comment-id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Comment URL**: ${{ steps.comment-operation.outputs.comment-url }}" >> $GITHUB_STEP_SUMMARY
+        fi
+
+branding:
+  icon: 'message-circle'
+  color: 'blue'

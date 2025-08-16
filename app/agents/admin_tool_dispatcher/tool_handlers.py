@@ -48,41 +48,34 @@ async def handle_corpus_create(user: User,
                               **kwargs) -> Dict[str, Any]:
     """Handle corpus creation"""
     from app.services import corpus_service
+    from .tool_handler_helpers import create_corpus_success_response
     params = extract_corpus_create_params(kwargs, user)
     result = await corpus_service.create_corpus(**params, db=db)
-    return {"status": "success", "corpus": result}
+    return create_corpus_success_response(result)
 
 
 def extract_corpus_create_params(kwargs: Dict[str, Any], user: User) -> Dict[str, Any]:
     """Extract parameters for corpus creation."""
-    domain = kwargs.get('domain', 'general')
-    return {
-        "name": kwargs.get('name', f'corpus_{domain}'),
-        "domain": domain,
-        "description": kwargs.get('description', f'Corpus for {domain} domain'),
-        "user_id": user.id
-    }
+    from .tool_handler_helpers import build_corpus_create_params_base, add_corpus_description
+    params = build_corpus_create_params_base(kwargs, user)
+    add_corpus_description(params, kwargs)
+    return params
 
 
 async def handle_corpus_list(db: Session) -> Dict[str, Any]:
     """Handle corpus listing"""
     from app.services import corpus_service
-    
+    from .tool_handler_helpers import create_corpus_list_response
     corpora = await corpus_service.list_corpora(db)
-    return {"status": "success", "corpora": corpora}
+    return create_corpus_list_response(corpora)
 
 
 async def handle_corpus_validate(**kwargs) -> Dict[str, Any]:
     """Handle corpus validation"""
+    from .tool_handler_helpers import check_corpus_id_required, create_corpus_validation_response
     corpus_id = kwargs.get('corpus_id')
-    if not corpus_id:
-        return {"error": "corpus_id required for validation"}
-    
-    return {
-        "status": "success", 
-        "valid": True, 
-        "corpus_id": corpus_id
-    }
+    check_corpus_id_required(corpus_id)
+    return create_corpus_validation_response(corpus_id)
 
 
 async def execute_synthetic_generator(action: str, 
@@ -110,29 +103,28 @@ async def handle_synthetic_generate(user: User,
                                    **kwargs) -> Dict[str, Any]:
     """Handle synthetic data generation"""
     from app.services.synthetic_data_service import SyntheticDataService
+    from .tool_handler_helpers import create_synthetic_success_response
     synthetic_service = SyntheticDataService(db)
     params = extract_synthetic_params(kwargs, user)
     result = await synthetic_service.generate_synthetic_data(**params)
-    return {"status": "success", "data": result}
+    return create_synthetic_success_response(result)
 
 
 def extract_synthetic_params(kwargs: Dict[str, Any], user: User) -> Dict[str, Any]:
     """Extract parameters for synthetic data generation."""
-    return {
-        "preset": kwargs.get('preset'),
-        "corpus_id": kwargs.get('corpus_id'),
-        "count": kwargs.get('count', 10),
-        "user_id": user.id
-    }
+    from .tool_handler_helpers import extract_corpus_service_params, add_user_id_to_params
+    params = extract_corpus_service_params(kwargs)
+    add_user_id_to_params(params, user)
+    return params
 
 
 async def handle_synthetic_list_presets(db: Session) -> Dict[str, Any]:
     """Handle listing synthetic data presets"""
     from app.services.synthetic_data_service import SyntheticDataService
-    
+    from .tool_handler_helpers import create_presets_list_response
     synthetic_service = SyntheticDataService(db)
     presets = await synthetic_service.list_presets()
-    return {"status": "success", "presets": presets}
+    return create_presets_list_response(presets)
 
 
 async def execute_user_admin(action: str, 
@@ -158,23 +150,24 @@ def get_user_admin_handlers() -> Dict[str, Callable]:
 async def handle_user_create(db: Session, **kwargs) -> Dict[str, Any]:
     """Handle user creation"""
     from app.services import user_service
+    from .tool_handler_helpers import check_email_required, build_user_create_params, create_user_success_response
     email = kwargs.get('email')
-    if not email:
-        return {"error": "email required for user creation"}
-    params = {"email": email, "role": kwargs.get('role', 'standard_user'), "db": db}
+    check_email_required(email)
+    params = build_user_create_params(kwargs)
+    params["db"] = db
     result = await user_service.create_user(**params)
-    return {"status": "success", "user": result}
+    return create_user_success_response(result)
 
 
 async def handle_user_grant_permission(db: Session, **kwargs) -> Dict[str, Any]:
     """Handle granting user permissions"""
     from app.services.permission_service import PermissionService
+    from .tool_handler_helpers import check_user_permission_params, create_permission_grant_response
     user_email = kwargs.get('user_email')
     permission = kwargs.get('permission')
-    if not user_email or not permission:
-        return {"error": "user_email and permission required"}
+    check_user_permission_params(user_email, permission)
     success = await PermissionService.grant_permission(user_email, permission, db)
-    return {"status": "success" if success else "error", "granted": success}
+    return create_permission_grant_response(success)
 
 
 async def execute_system_configurator(action: str, 
@@ -190,17 +183,11 @@ async def execute_system_configurator(action: str,
 
 async def handle_system_update_setting(**kwargs) -> Dict[str, Any]:
     """Handle system setting update"""
+    from .tool_handler_helpers import check_setting_name_required, create_setting_update_result
     setting_name = kwargs.get('setting_name')
     value = kwargs.get('value')
-    if not setting_name:
-        return {"error": "setting_name required"}
-    
-    return {
-        "status": "success", 
-        "setting": setting_name, 
-        "value": value,
-        "message": "Setting update simulated (would require restart)"
-    }
+    check_setting_name_required(setting_name)
+    return create_setting_update_result(setting_name, value)
 
 
 async def execute_log_analyzer(action: str, 
@@ -219,25 +206,24 @@ async def handle_log_analyze(user: User,
                             **kwargs) -> Dict[str, Any]:
     """Handle log analysis"""
     from app.services.debug_service import DebugService
-    query, time_range = extract_log_params(kwargs)
+    from .tool_handler_helpers import extract_log_analysis_params, build_debug_service_params, create_log_analysis_result
+    query, time_range = extract_log_analysis_params(kwargs)
     debug_service = DebugService(db)
-    result = await debug_service.get_debug_info(
-        component='logs', include_logs=True, user_id=user.id
-    )
-    return build_log_analysis_response(query, time_range, result)
+    service_params = build_debug_service_params(user)
+    result = await debug_service.get_debug_info(**service_params)
+    return create_log_analysis_result(query, time_range, result)
 
 
 def extract_log_params(kwargs: Dict[str, Any]) -> tuple:
     """Extract log analysis parameters."""
-    return kwargs.get('query', ''), kwargs.get('time_range', '1h')
+    from .tool_handler_helpers import extract_log_analysis_params
+    return extract_log_analysis_params(kwargs)
 
 
 def build_log_analysis_response(query: str, time_range: str, result: dict) -> Dict[str, Any]:
     """Build log analysis response."""
-    return {
-        "status": "success", "query": query, "time_range": time_range,
-        "logs": result.get('logs', []), "summary": f"Log analysis for query: {query}"
-    }
+    from .tool_handler_helpers import create_log_analysis_result
+    return create_log_analysis_result(query, time_range, result)
 
 
 def get_tool_executor(tool_name: str) -> Optional[Callable]:
@@ -258,8 +244,7 @@ async def execute_admin_tool(tool_name: str,
                             action: str, 
                             **kwargs) -> Dict[str, Any]:
     """Execute admin tool with appropriate handler"""
+    from .tool_handler_helpers import check_tool_executor_exists
     executor = get_tool_executor(tool_name)
-    if not executor:
-        return {"error": f"Unknown admin tool: {tool_name}"}
-    
+    check_tool_executor_exists(executor)
     return await executor(action, user, db, **kwargs)

@@ -90,7 +90,7 @@ describe('useAgent', () => {
     expect(mockSendMessage).toHaveBeenCalled();
     const sentData = mockSendMessage.mock.calls[0][0];
     expect(sentData.type).toBe('message');
-    expect(sentData.payload.text).toBe('Test message');
+    expect(sentData.payload.content).toBe('Test message');
   });
 
   it('should handle API error', async () => {

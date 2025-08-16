@@ -2,7 +2,7 @@
 User Plan Schemas
 """
 from typing import Dict, List, Optional, Any
-from datetime import datetime
+from datetime import datetime, UTC
 from pydantic import BaseModel, Field
 from enum import Enum
 
@@ -39,7 +39,7 @@ class UserPlan(BaseModel):
     user_id: str = Field(description="User identifier")
     tier: PlanTier = Field(description="Plan tier")
     features: PlanFeatures = Field(description="Plan features")
-    started_at: datetime = Field(default_factory=datetime.utcnow)
+    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     expires_at: Optional[datetime] = Field(default=None, description="Plan expiration")
     auto_renew: bool = Field(default=False, description="Auto-renewal enabled")
     payment_status: str = Field(default="active", description="Payment status")
@@ -58,7 +58,7 @@ class PlanDefinition(BaseModel):
     trial_days: int = Field(default=0, description="Free trial days")
     popular: bool = Field(default=False, description="Popular plan marker")
     hidden: bool = Field(default=False, description="Hidden from selection")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class UsageRecord(BaseModel):
@@ -71,7 +71,7 @@ class UsageRecord(BaseModel):
     cost_cents: Optional[int] = Field(default=None, description="Cost in cents")
     status: str = Field(description="Execution status")
     plan_tier: str = Field(description="User's plan at time of usage")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class PlanUsageSummary(BaseModel):

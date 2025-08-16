@@ -38,11 +38,22 @@ class LLMStructuredOperations:
         """Ask an LLM and get a structured response as a Pydantic model instance."""
         cache_key = create_structured_cache_key(prompt, llm_config_name, schema.__name__)
         
-        if use_cache:
-            cached_result = await get_cached_structured_response(cache_key, llm_config_name, schema)
-            if cached_result:
-                return cached_result
+        cached_result = await self._try_get_cached_result(cache_key, llm_config_name, schema, use_cache)
+        if cached_result:
+            return cached_result
         
+        return await self._generate_or_fallback(prompt, llm_config_name, schema, cache_key, use_cache, **kwargs)
+    
+    async def _try_get_cached_result(self, cache_key: str, llm_config_name: str, 
+                                   schema: Type[T], use_cache: bool) -> Optional[T]:
+        """Try to get cached result if caching is enabled."""
+        if use_cache:
+            return await get_cached_structured_response(cache_key, llm_config_name, schema)
+        return None
+    
+    async def _generate_or_fallback(self, prompt: str, llm_config_name: str, schema: Type[T], 
+                                  cache_key: str, use_cache: bool, **kwargs) -> T:
+        """Generate structured response or use fallback parsing."""
         try:
             return await self._generate_structured_response(prompt, llm_config_name, schema, 
                                                           cache_key, use_cache, **kwargs)
@@ -56,14 +67,16 @@ class LLMStructuredOperations:
         """Generate structured response using LLM."""
         structured_llm = self.get_structured_llm(llm_config_name, schema, **kwargs)
         response = await structured_llm.ainvoke(prompt)
-        
-        response_data = response.model_dump()
-        parsed_data = parse_nested_json_recursive(response_data)
-        final_response = schema(**parsed_data)
-        
+        final_response = self._process_llm_response(response, schema)
         await self._cache_structured_if_needed(use_cache, prompt, final_response, 
                                              cache_key, llm_config_name)
         return final_response
+    
+    def _process_llm_response(self, response: Any, schema: Type[T]) -> T:
+        """Process LLM response and convert to structured format."""
+        response_data = response.model_dump()
+        parsed_data = parse_nested_json_recursive(response_data)
+        return schema(**parsed_data)
     
     async def _fallback_structured_parse(self, prompt: str, llm_config_name: str, 
                                        schema: Type[T], use_cache: bool, 

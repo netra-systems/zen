@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Learnings - Development/Git</name>
+        <type>learnings</type>
+        <category>Development/Git</category>
+        <version>1.0</version>
+        <last_updated>2025-08-16</last_updated>
+        <description>Learnings and fixes for Development/Git</description>
+    </metadata>
+    
+    <learnings>
+        <learning id="branch-management">
+                    <title>Git Branch Management for Deployments</title>
+                    <date>2025-08-15</date>
+                    <category>Development/Git</category>
+                    <description>
+                        PR branches are automatically created and managed. PR 9 (anthony-aug-13-2) was merged
+                        and a new branch pr-10-anthony-branch was created for continued work.
+                    </description>
+                    <details>
+                        <item>PR 9 (anthony-aug-13-2) successfully merged into main</item>
+                        <item>New work continues on pr-10-anthony-branch</item>
+                        <item>No code was lost during branch transitions</item>
+                        <item>Commit history preserved across branches</item>
+                    </details>
+                </learning>
+
+    </learnings>
+</specification>

@@ -44,10 +44,18 @@ class AgentRegistry:
     
     def _register_workflow_agents(self, DataSubAgent) -> None:
         """Register workflow agents with manager and dispatcher."""
+        self._register_core_workflow_agents(DataSubAgent)
+        self._register_optimization_agents()
+    
+    def _register_core_workflow_agents(self, DataSubAgent) -> None:
+        """Register core workflow agents."""
         self.register("triage", TriageSubAgent(
             self.llm_manager, self.tool_dispatcher))
         self.register("data", DataSubAgent(
             self.llm_manager, self.tool_dispatcher))
+    
+    def _register_optimization_agents(self) -> None:
+        """Register optimization and action agents."""
         self.register("optimization", OptimizationsCoreSubAgent(
             self.llm_manager, self.tool_dispatcher))
         self.register("actions", ActionsToMeetGoalsSubAgent(

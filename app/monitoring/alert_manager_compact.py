@@ -15,7 +15,7 @@ from .alert_models import (
     create_default_alert_rules, create_default_notification_configs
 )
 from .alert_evaluator import AlertEvaluator
-from .alert_notifications import NotificationManager
+from .alert_notifications import NotificationDeliveryManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -33,7 +33,7 @@ class AlertManager:
         
         # Core components
         self.evaluator = AlertEvaluator(self.metrics_collector)
-        self.notifier = NotificationManager()
+        self.notifier = NotificationDeliveryManager()
         
         # Alert storage
         self.active_alerts: Dict[str, Alert] = {}

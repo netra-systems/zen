@@ -46,7 +46,7 @@ class TestSupervisorOrchestration:
         
         setup_data_agent_mock(supervisor, {
             'user_request': "Analyze and optimize",
-            'data_result': {"metrics": {"accuracy": 0.85}, "trends": "stable"}
+            'data_result': {"analysis": {"metrics": {"accuracy": 0.85}, "trends": "stable"}}
         })
         
         setup_optimization_agent_mock(supervisor, {
@@ -72,8 +72,8 @@ class TestSupervisorOrchestration:
         
         # Verify final state contains all results
         final_state = opt_result.state
-        assert final_state.triage_result["message_type"] == "complex_query"
-        assert final_state.data_result["metrics"]["accuracy"] == 0.85
+        assert final_state.triage_result.category == "complex_query"
+        assert final_state.data_result.confidence_score == 0.85
         assert len(final_state.optimizations_result.recommendations) == 2
     
     @pytest.mark.asyncio

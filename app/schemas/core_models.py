@@ -17,10 +17,11 @@ Usage:
 from typing import Dict, List, Optional, Union, Any
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
+from dataclasses import dataclass, field
 import uuid
 
 # Import enums from the dedicated module
-from app.schemas.core_enums import MessageType
+from app.schemas.core_enums import MessageType, CircuitBreakerState
 
 
 class UserBase(BaseModel):
@@ -111,6 +112,48 @@ class Thread(BaseModel):
     )
 
 
+@dataclass
+class CircuitBreakerConfig:
+    """Unified configuration for circuit breaker behavior - consolidates all variants."""
+    # Basic circuit breaker settings
+    failure_threshold: int = 5
+    success_threshold: int = 3
+    recovery_timeout: float = 60.0
+    half_open_max_calls: int = 3
+    
+    # Advanced settings for adaptive behavior
+    timeout_seconds: int = 60
+    health_check_interval: int = 30
+    slow_call_threshold: float = 5.0
+    max_wait_duration: int = 300
+    adaptive_threshold: bool = True
+    
+    # Identification
+    name: str = "default"
+
+
+@dataclass
+class HealthCheckResult:
+    """Result of a health check operation."""
+    status: str  # Using string to avoid enum dependency
+    response_time: float
+    details: Dict[str, Any] = field(default_factory=dict)
+    timestamp: datetime = field(default_factory=datetime.now)
+
+
+@dataclass
+class ReliabilityMetrics:
+    """Metrics for reliability monitoring - consolidated from all variants."""
+    total_calls: int = 0
+    successful_calls: int = 0
+    failed_calls: int = 0
+    circuit_breaker_opens: int = 0
+    recovery_attempts: int = 0
+    last_failure_time: Optional[float] = None
+    last_success_time: Optional[float] = None
+    error_types: Dict[str, int] = field(default_factory=dict)
+
+
 # Export all core models
 __all__ = [
     "UserBase",
@@ -120,5 +163,8 @@ __all__ = [
     "MessageMetadata",
     "Message",
     "ThreadMetadata", 
-    "Thread"
+    "Thread",
+    "CircuitBreakerConfig",
+    "HealthCheckResult",
+    "ReliabilityMetrics"
 ]

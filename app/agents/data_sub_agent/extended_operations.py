@@ -29,14 +29,19 @@ class ExtendedOperations:
         # Use agent's current config, not the cached config
         agent_config = getattr(self.agent, 'config', self.config)
         max_retries = agent_config.get("max_retries", 3)
-        max_attempts = max_retries
-        for attempt in range(max_attempts):
+        last_exception = None
+        
+        for attempt in range(max_retries):
             try:
                 return await self._process_internal(data)
             except Exception as e:
-                if attempt >= max_attempts - 1:
-                    raise e
-                await asyncio.sleep(0.1 * (2 ** attempt))
+                last_exception = e
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(0.1 * (2 ** attempt))
+        
+        # If all attempts failed, raise the last exception
+        if last_exception:
+            raise last_exception
         
     async def process_with_cache(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process data with caching support."""
@@ -174,3 +179,35 @@ class ExtendedOperations:
         """Recover agent from saved state."""
         await self.load_state()
         logger.debug("Agent recovery completed")
+    
+    # Helper methods for refactored functions
+    async def _handle_retry_exception(self, exception: Exception, attempt: int, max_retries: int) -> Exception:
+        """Handle exception during retry attempt."""
+        if attempt < max_retries - 1:
+            await asyncio.sleep(0.1 * (2 ** attempt))
+        return exception
+    
+    def _generate_timestamp(self):
+        """Generate current timestamp."""
+        from datetime import datetime, UTC
+        return datetime.now(UTC)
+    
+    def _generate_persistence_id(self, timestamp) -> str:
+        """Generate persistence ID from timestamp."""
+        return f"{self.agent.name}_{int(timestamp.timestamp())}"
+    
+    def _create_enrichment_metadata(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create enrichment metadata for data."""
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "source": data.get("source", "unknown"),
+            "enriched": True
+        }
+    
+    def _create_state_data(self) -> Dict[str, Any]:
+        """Create state data for persistence."""
+        return {
+            "context": self.agent.context,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "agent_id": getattr(self.agent, 'id', 'unknown')
+        }

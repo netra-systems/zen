@@ -1,3 +1,4 @@
+import os
 from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
 from .Auth import AuthEndpoints, AuthConfigResponse, DevUser
@@ -15,7 +16,9 @@ class SecretReference(BaseModel):
     name: str
     target_field: str
     target_models: Optional[List[str]] = None
-    project_id: str = "304612253870"
+    project_id: str = Field(default_factory=lambda: os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
+                                                                   os.environ.get("SECRET_MANAGER_PROJECT_ID", 
+                                                                   "701982941522" if os.environ.get("ENVIRONMENT", "").lower() == "staging" else "304612253870")))
     version: str = "latest"
 
 

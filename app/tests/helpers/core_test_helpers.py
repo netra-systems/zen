@@ -14,21 +14,37 @@ from cryptography.fernet import Fernet
 def create_mock_config():
     """Create a mock configuration object with all required fields."""
     config = Mock()
+    _set_basic_config_fields(config)
+    _set_service_configs(config)
+    _set_auth_configs(config)
+    
+    return config
+
+
+def _set_basic_config_fields(config):
+    """Set basic configuration fields."""
     config.environment = "production"
     config.database_url = "postgresql://user:pass@localhost/db"
     config.jwt_secret_key = "a" * 32
     config.fernet_key = Fernet.generate_key()
+
+
+def _set_service_configs(config):
+    """Set service configuration fields."""
     config.clickhouse_logging = Mock(enabled=True)
     config.clickhouse_native = Mock(host="localhost", password="pass")
     config.clickhouse_https = Mock(host="localhost", password="pass")
     config.clickhouse_https_dev = Mock(host="localhost", password="pass")
+    config.redis = Mock(host="localhost", password="pass")
+
+
+def _set_auth_configs(config):
+    """Set authentication configuration fields."""
     config.oauth_config = Mock(client_id="id", client_secret="secret")
     config.llm_configs = {
         "default": Mock(api_key="key", model_name="model", provider="openai")
     }
-    config.redis = Mock(host="localhost", password="pass")
     config.langfuse = Mock(secret_key="key", public_key="pub")
-    return config
 
 
 def create_failing_async_func(fail_count: int, success_result: str = "success"):
@@ -48,12 +64,18 @@ def create_failing_async_func(fail_count: int, success_result: str = "success"):
 def create_mock_database():
     """Create a mock database with standard methods."""
     mock_db = AsyncMock()
+    _setup_mock_database_results(mock_db)
+    
+    return mock_db
+
+
+def _setup_mock_database_results(mock_db):
+    """Setup mock database return values."""
     mock_db.execute.return_value.fetchall.return_value = [
         ("users", "id", "integer"),
         ("users", "email", "varchar"),
     ]
     mock_db.execute.return_value.scalar.return_value = 1
-    return mock_db
 
 
 def create_log_record(name: str, level: int, message: str):
@@ -90,24 +112,38 @@ def create_schema_comparison_data():
         "users": ["id", "email", "created_at"],
         "posts": ["id", "user_id", "content"]
     }
+    actual_schema = _create_actual_schema_with_differences()
     
-    actual_schema = {
+    return expected_schema, actual_schema
+
+
+def _create_actual_schema_with_differences():
+    """Create actual schema with intentional differences."""
+    return {
         "users": ["id", "email"],  # Missing created_at
         "posts": ["id", "user_id", "content", "deleted"]  # Extra column
     }
-    
-    return expected_schema, actual_schema
 
 
 def assert_schema_diff_results(diff: Dict, expected_missing: List[str], expected_extra: List[str]):
     """Assert schema diff contains expected differences."""
     for table, changes in diff.items():
-        if "missing" in changes and expected_missing:
-            for field in expected_missing:
-                assert field in changes["missing"]
-        if "extra" in changes and expected_extra:
-            for field in expected_extra:
-                assert field in changes["extra"]
+        _assert_missing_fields(changes, expected_missing)
+        _assert_extra_fields(changes, expected_extra)
+
+
+def _assert_missing_fields(changes: Dict, expected_missing: List[str]):
+    """Assert missing fields are correctly identified."""
+    if "missing" in changes and expected_missing:
+        for field in expected_missing:
+            assert field in changes["missing"]
+
+
+def _assert_extra_fields(changes: Dict, expected_extra: List[str]):
+    """Assert extra fields are correctly identified."""
+    if "extra" in changes and expected_extra:
+        for field in expected_extra:
+            assert field in changes["extra"]
 
 
 def create_mock_secret_manager_with_rotation():
@@ -118,35 +154,47 @@ def create_mock_secret_manager_with_rotation():
         def __init__(self, key):
             self.fernet = Fernet(key)
             self.old_keys = []
-        
-        def encrypt_secret(self, secret: str) -> str:
-            return self.fernet.encrypt(secret.encode()).decode()
-        
-        def decrypt_secret(self, encrypted: str) -> str:
-            try:
-                return self.fernet.decrypt(encrypted.encode()).decode()
-            except:
-                # Try old keys for rotation support
-                for old_fernet in self.old_keys:
-                    try:
-                        return old_fernet.decrypt(encrypted.encode()).decode()
-                    except:
-                        continue
-                raise
-        
-        def rotate_key(self, new_key):
-            self.old_keys.append(self.fernet)
-            self.fernet = Fernet(new_key)
-        
-        def store_secrets(self, secrets: Dict, path: str):
-            # Mock implementation
-            pass
-        
-        def load_secrets(self, path: str) -> Dict:
-            # Mock implementation
-            return {"api_key": "secret_key_123", "db_password": "password_456"}
+    
+    _add_secret_manager_methods(MockSecretManager)
     
     return MockSecretManager
+
+
+def _add_secret_manager_methods(cls):
+    """Add methods to MockSecretManager class."""
+    def encrypt_secret(self, secret: str) -> str:
+        return self.fernet.encrypt(secret.encode()).decode()
+    
+    def decrypt_secret(self, encrypted: str) -> str:
+        return self._try_decrypt_with_current_and_old_keys(encrypted)
+    
+    def rotate_key(self, new_key):
+        self.old_keys.append(self.fernet)
+        self.fernet = Fernet(new_key)
+    
+    def store_secrets(self, secrets: Dict, path: str):
+        pass  # Mock implementation
+    
+    def load_secrets(self, path: str) -> Dict:
+        return {"api_key": "secret_key_123", "db_password": "password_456"}
+    
+    def _try_decrypt_with_current_and_old_keys(self, encrypted: str) -> str:
+        try:
+            return self.fernet.decrypt(encrypted.encode()).decode()
+        except:
+            for old_fernet in self.old_keys:
+                try:
+                    return old_fernet.decrypt(encrypted.encode()).decode()
+                except:
+                    continue
+            raise
+    
+    cls.encrypt_secret = encrypt_secret
+    cls.decrypt_secret = decrypt_secret
+    cls.rotate_key = rotate_key
+    cls.store_secrets = store_secrets
+    cls.load_secrets = load_secrets
+    cls._try_decrypt_with_current_and_old_keys = _try_decrypt_with_current_and_old_keys
 
 
 def create_unified_logger_with_context():
@@ -156,28 +204,38 @@ def create_unified_logger_with_context():
             self.correlation_id = None
             self.context = {}
             self.logs = []
-        
-        def set_correlation_id(self, correlation_id: str):
-            self.correlation_id = correlation_id
-        
-        def add_context(self, context: Dict):
-            self.context.update(context)
-        
-        def log(self, level: str, message: str, **kwargs) -> Dict:
-            log_entry = {
-                "level": level,
-                "message": message,
-                "correlation_id": self.correlation_id,
-                **self.context,
-                **kwargs
-            }
-            self.logs.append(log_entry)
-            return log_entry
-        
-        def get_aggregated_logs(self) -> List[Dict]:
-            return self.logs
+    
+    _add_logger_methods(MockUnifiedLogger)
     
     return MockUnifiedLogger
+
+
+def _add_logger_methods(cls):
+    """Add methods to MockUnifiedLogger class."""
+    def set_correlation_id(self, correlation_id: str):
+        self.correlation_id = correlation_id
+    
+    def add_context(self, context: Dict):
+        self.context.update(context)
+    
+    def log(self, level: str, message: str, **kwargs) -> Dict:
+        log_entry = {
+            "level": level,
+            "message": message,
+            "correlation_id": self.correlation_id,
+            **self.context,
+            **kwargs
+        }
+        self.logs.append(log_entry)
+        return log_entry
+    
+    def get_aggregated_logs(self) -> List[Dict]:
+        return self.logs
+    
+    cls.set_correlation_id = set_correlation_id
+    cls.add_context = add_context
+    cls.log = log
+    cls.get_aggregated_logs = get_aggregated_logs
 
 
 def create_startup_check_results():

@@ -21,21 +21,21 @@ const MainChat: React.FC = () => {
     mediumLayerData,
     slowLayerData,
     currentRunId,
-    activeThreadId
+    activeThreadId,
+    isThreadLoading
   } = useUnifiedChatStore();
   
   const { status: wsStatus } = useWebSocket();
   const [isCardCollapsed, setIsCardCollapsed] = useState(false);
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   
   // Connect WebSocket messages to unified chat store
   useChatWebSocket();
 
   const hasMessages = messages.length > 0;
   const isWebSocketConnected = wsStatus === 'OPEN';
-  const isLoading = !isInitialized || !isWebSocketConnected || isLoadingMessages;
+  const isLoading = !isInitialized || !isWebSocketConnected || isThreadLoading;
   const isEmptyState = !activeThreadId && !hasMessages && !isLoading;
   const hasThreadButNoMessages = activeThreadId && !hasMessages && !isLoading && !isProcessing;
   
@@ -51,19 +51,8 @@ const MainChat: React.FC = () => {
     }
   }, [isWebSocketConnected, isInitialized]);
 
-  // Track message loading state
-  useEffect(() => {
-    const handleThreadLoading = () => setIsLoadingMessages(true);
-    const handleThreadLoaded = () => setIsLoadingMessages(false);
-    
-    window.addEventListener('threadLoading', handleThreadLoading);
-    window.addEventListener('threadLoaded', handleThreadLoaded);
-    
-    return () => {
-      window.removeEventListener('threadLoading', handleThreadLoading);
-      window.removeEventListener('threadLoaded', handleThreadLoaded);
-    };
-  }, []);
+  // Thread loading is now managed through the unified store via WebSocket events
+  // The store handles 'thread_loading' and 'thread_loaded' events automatically
 
   // Auto-collapse card after completion
   useEffect(() => {
@@ -103,7 +92,8 @@ const MainChat: React.FC = () => {
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           <div className="text-sm text-gray-600">
-            {!isWebSocketConnected ? 'Connecting to chat service...' : 'Loading chat...'}
+            {!isWebSocketConnected ? 'Connecting to chat service...' : 
+             isThreadLoading ? 'Loading thread messages...' : 'Loading chat...'}
           </div>
         </div>
       </div>

@@ -300,8 +300,8 @@ If you need to redeploy the staging environment, you can:
         except Exception as e:
             print(f"  Error posting comment: {e}")
     
-    def run_cleanup(self, config: Dict) -> Dict:
-        """Run the cleanup process based on configuration"""
+    def _print_cleanup_header(self) -> None:
+        """Print cleanup process header information"""
         print("=" * 60)
         print("STAGING ENVIRONMENT CLEANUP")
         print("=" * 60)
@@ -309,156 +309,175 @@ If you need to redeploy the staging environment, you can:
         print(f"Region: {self.region}")
         print(f"Dry Run: {self.dry_run}")
         print("=" * 60)
-        
-        # Get all staging environments
-        environments = self.get_all_staging_environments()
-        
-        # Check each environment against cleanup criteria
+    
+    def _check_pr_cleanup_criteria(self, pr_number: str) -> Tuple[bool, str]:
+        """Check if environment should be cleaned up based on PR status"""
+        pr_state, pr_closed = self.check_pr_status(pr_number)
+        if pr_closed:
+            return True, f"PR is {pr_state}"
+        return False, ""
+    
+    def _check_age_and_activity_criteria(self, env: Dict, config: Dict) -> Tuple[bool, str]:
+        """Check if environment should be cleaned up based on age and activity"""
+        if config.get("max_age_days") and self.check_environment_age(env["created_at"], config["max_age_days"]):
+            return True, f"Environment older than {config['max_age_days']} days"
+        if config.get("inactive_hours") and self.check_environment_activity(env["updated_at"], config["inactive_hours"]):
+            return True, f"Inactive for {config['inactive_hours']} hours"
+        return False, ""
+    
+    def _check_cost_criteria(self, pr_number: str, config: Dict) -> Tuple[bool, str]:
+        """Check if environment should be cleaned up based on cost"""
+        if not config.get("max_cost_per_pr"):
+            return False, ""
+        usage = self.get_resource_usage(pr_number)
+        if usage["estimated_cost"] > config["max_cost_per_pr"]:
+            self.cleanup_report["resources_freed"][pr_number] = usage
+            return True, f"Exceeded cost limit (${usage['estimated_cost']:.2f})"
+        return False, ""
+    
+    def _should_cleanup_environment(self, env: Dict, config: Dict) -> Tuple[bool, str]:
+        """Determine if environment should be cleaned up and why"""
+        pr_number = env["pr_number"]
+        should_cleanup, reason = self._check_pr_cleanup_criteria(pr_number)
+        if should_cleanup:
+            return should_cleanup, reason
+        should_cleanup, reason = self._check_age_and_activity_criteria(env, config)
+        if should_cleanup:
+            return should_cleanup, reason
+        return self._check_cost_criteria(pr_number, config)
+    
+    def _process_environments(self, environments: List[Dict], config: Dict) -> None:
+        """Process all environments for potential cleanup"""
         for env in environments:
             pr_number = env["pr_number"]
-            should_cleanup = False
-            cleanup_reason = ""
-            
-            # Check PR status
-            pr_state, pr_closed = self.check_pr_status(pr_number)
-            if pr_closed:
-                should_cleanup = True
-                cleanup_reason = f"PR is {pr_state}"
-            
-            # Check age
-            elif config.get("max_age_days") and self.check_environment_age(
-                env["created_at"],
-                config["max_age_days"]
-            ):
-                should_cleanup = True
-                cleanup_reason = f"Environment older than {config['max_age_days']} days"
-            
-            # Check inactivity
-            elif config.get("inactive_hours") and self.check_environment_activity(
-                env["updated_at"],
-                config["inactive_hours"]
-            ):
-                should_cleanup = True
-                cleanup_reason = f"Inactive for {config['inactive_hours']} hours"
-            
-            # Check resource usage/cost
-            if config.get("max_cost_per_pr"):
-                usage = self.get_resource_usage(pr_number)
-                if usage["estimated_cost"] > config["max_cost_per_pr"]:
-                    should_cleanup = True
-                    cleanup_reason = f"Exceeded cost limit (${usage['estimated_cost']:.2f})"
-                    self.cleanup_report["resources_freed"][pr_number] = usage
-            
-            # Perform cleanup if needed
+            should_cleanup, cleanup_reason = self._should_cleanup_environment(env, config)
             if should_cleanup:
                 self.cleanup_environment(env, cleanup_reason)
             else:
                 print(f"PR #{pr_number}: Active, keeping environment")
-        
-        # Generate summary
+    
+    def _calculate_total_cost_saved(self) -> float:
+        """Calculate total cost saved from cleanup"""
+        return sum(
+            usage["estimated_cost"] 
+            for usage in self.cleanup_report["resources_freed"].values()
+        )
+    
+    def _print_cleanup_summary(self) -> None:
+        """Print cleanup process summary"""
         print("\n" + "=" * 60)
         print("CLEANUP SUMMARY")
         print("=" * 60)
         print(f"Environments Checked: {self.cleanup_report['environments_checked']}")
         print(f"Environments Cleaned: {self.cleanup_report['environments_cleaned']}")
-        
         if self.cleanup_report["resources_freed"]:
-            total_cost_saved = sum(
-                usage["estimated_cost"] 
-                for usage in self.cleanup_report["resources_freed"].values()
-            )
+            total_cost_saved = self._calculate_total_cost_saved()
             print(f"Estimated Cost Saved: ${total_cost_saved:.2f}")
-        
         if self.cleanup_report["errors"]:
             print(f"Errors: {len(self.cleanup_report['errors'])}")
             for error in self.cleanup_report["errors"][:5]:
                 print(f"  - {error}")
-        
         print("=" * 60)
-        
+    
+    def run_cleanup(self, config: Dict) -> Dict:
+        """Run the cleanup process based on configuration"""
+        self._print_cleanup_header()
+        environments = self.get_all_staging_environments()
+        self._process_environments(environments, config)
+        self._print_cleanup_summary()
         return self.cleanup_report
 
 
-def main():
+def create_argument_parser() -> argparse.ArgumentParser:
+    """Create and configure the argument parser."""
     parser = argparse.ArgumentParser(description="Clean up stale staging environments")
-    parser.add_argument(
-        "--project-id",
-        type=str,
-        default=os.getenv("GCP_PROJECT_ID"),
-        help="GCP Project ID"
-    )
-    parser.add_argument(
-        "--region",
-        type=str,
-        default=os.getenv("GCP_REGION", "us-central1"),
-        help="GCP Region"
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Perform dry run without actual cleanup"
-    )
-    parser.add_argument(
-        "--max-age-days",
-        type=int,
-        default=7,
-        help="Maximum age in days before cleanup"
-    )
-    parser.add_argument(
-        "--inactive-hours",
-        type=int,
-        default=24,
-        help="Hours of inactivity before cleanup"
-    )
-    parser.add_argument(
-        "--max-cost-per-pr",
-        type=float,
-        default=50.0,
-        help="Maximum cost per PR before cleanup"
-    )
-    parser.add_argument(
-        "--config-file",
-        type=str,
-        help="Configuration file (JSON)"
-    )
-    parser.add_argument(
-        "--output",
-        type=str,
-        help="Output file for cleanup report (JSON)"
-    )
-    
+    _add_basic_arguments(parser)
+    _add_cleanup_arguments(parser)
+    _add_config_arguments(parser)
+    return parser
+
+
+def _add_basic_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add basic configuration arguments."""
+    parser.add_argument("--project-id", type=str, default=os.getenv("GCP_PROJECT_ID"), help="GCP Project ID")
+    parser.add_argument("--region", type=str, default=os.getenv("GCP_REGION", "us-central1"), help="GCP Region")
+    parser.add_argument("--dry-run", action="store_true", help="Perform dry run without actual cleanup")
+
+
+def _add_cleanup_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add cleanup criteria arguments."""
+    parser.add_argument("--max-age-days", type=int, default=7, help="Maximum age in days before cleanup")
+    parser.add_argument("--inactive-hours", type=int, default=24, help="Hours of inactivity before cleanup")
+    parser.add_argument("--max-cost-per-pr", type=float, default=50.0, help="Maximum cost per PR before cleanup")
+
+
+def _add_config_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add configuration file arguments."""
+    parser.add_argument("--config-file", type=str, help="Configuration file (JSON)")
+    parser.add_argument("--output", type=str, help="Output file for cleanup report (JSON)")
+
+
+def parse_and_validate_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
+    """Parse and validate command line arguments."""
     args = parser.parse_args()
-    
     if not args.project_id:
         print("Error: GCP Project ID is required")
         sys.exit(1)
-    
-    # Load configuration
+    return args
+
+
+def load_configuration(args: argparse.Namespace) -> Dict:
+    """Load configuration from file or command line arguments."""
     if args.config_file:
-        with open(args.config_file, 'r') as f:
-            config = json.load(f)
-    else:
-        config = {
-            "max_age_days": args.max_age_days,
-            "inactive_hours": args.inactive_hours,
-            "max_cost_per_pr": args.max_cost_per_pr
-        }
-    
-    # Initialize cleaner
-    cleaner = StagingEnvironmentCleaner(
+        return _load_config_from_file(args.config_file)
+    return _create_config_from_args(args)
+
+
+def _load_config_from_file(config_file: str) -> Dict:
+    """Load configuration from JSON file."""
+    with open(config_file, 'r') as f:
+        return json.load(f)
+
+
+def _create_config_from_args(args: argparse.Namespace) -> Dict:
+    """Create configuration from command line arguments."""
+    return {
+        "max_age_days": args.max_age_days,
+        "inactive_hours": args.inactive_hours,
+        "max_cost_per_pr": args.max_cost_per_pr
+    }
+
+
+def initialize_cleaner(args: argparse.Namespace) -> StagingEnvironmentCleaner:
+    """Initialize the staging environment cleaner."""
+    return StagingEnvironmentCleaner(
         project_id=args.project_id,
         region=args.region,
         dry_run=args.dry_run
     )
-    
-    # Run cleanup
+
+
+def execute_cleanup_and_save_report(cleaner: StagingEnvironmentCleaner, config: Dict, output_file: Optional[str]) -> None:
+    """Execute cleanup and save report if requested."""
     report = cleaner.run_cleanup(config)
-    
-    # Save report if requested
-    if args.output:
-        with open(args.output, 'w') as f:
-            json.dump(report, f, indent=2, default=str)
-        print(f"\nCleanup report saved to: {args.output}")
+    if output_file:
+        _save_report_to_file(report, output_file)
+
+
+def _save_report_to_file(report: Dict, output_file: str) -> None:
+    """Save cleanup report to JSON file."""
+    with open(output_file, 'w') as f:
+        json.dump(report, f, indent=2, default=str)
+    print(f"\nCleanup report saved to: {output_file}")
+
+
+def main():
+    """Main entry point for cleanup script."""
+    parser = create_argument_parser()
+    args = parse_and_validate_args(parser)
+    config = load_configuration(args)
+    cleaner = initialize_cleaner(args)
+    execute_cleanup_and_save_report(cleaner, config, args.output)
 
 
 if __name__ == "__main__":

@@ -29,15 +29,6 @@ async def get_public_config():
         })
     }
 
-@router.get("/config")
-async def get_api_config():
-    """Get configuration for API testing"""
-    return {
-        "log_level": "INFO",
-        "max_retries": 3,
-        "timeout": 30,
-        "ws_url": settings.ws_config.ws_url
-    }
 
 @router.put("/config")
 async def update_api_config(config: ConfigUpdate):

@@ -1,9 +1,14 @@
 """Strong type definitions for Quality Routes and monitoring services."""
 
-from typing import Any, Dict, Optional, List, Union, Literal
+from typing import Any, Dict, Optional, List, Union, Literal, TYPE_CHECKING
 from pydantic import BaseModel, Field, ConfigDict
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
+from abc import ABC, abstractmethod
+
+# Import types only for type checking to avoid circular dependencies  
+if TYPE_CHECKING:
+    pass
 
 
 class QualityLevel(str, Enum):
@@ -83,7 +88,7 @@ class QualityValidationResult(BaseModel):
     metrics: QualityMetrics = Field(description="Detailed quality metrics")
     retry_suggested: bool = Field(description="Whether retry is suggested")
     retry_prompt_adjustments: List[str] = Field(default_factory=list, description="Suggested prompt adjustments")
-    validation_timestamp: datetime = Field(default_factory=datetime.utcnow, description="Validation timestamp")
+    validation_timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Validation timestamp")
     validation_duration_ms: float = Field(description="Time taken for validation")
 
 
@@ -167,7 +172,7 @@ class QualityDashboardData(BaseModel):
     system_health: Dict[str, Any] = Field(description="Overall system health metrics")
     period_hours: int = Field(description="Time period for data")
     user_id: Optional[str] = Field(default=None, description="User requesting dashboard")
-    generated_at: datetime = Field(default_factory=datetime.utcnow, description="Dashboard generation timestamp")
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Dashboard generation timestamp")
 
 
 class QualityReportType(str, Enum):
@@ -235,7 +240,7 @@ class QualityThresholdCheck(BaseModel):
     alert: bool = Field(description="Whether an alert should be triggered")
     severity: AlertSeverity = Field(description="Alert severity if triggered")
     message: Optional[str] = Field(default=None, description="Alert message")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Check timestamp")
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Check timestamp")
 
 
 class QualityTrendData(BaseModel):
@@ -244,3 +249,23 @@ class QualityTrendData(BaseModel):
     data: QualityDashboardData = Field(description="Dashboard data for this date")
     comparison_previous: Optional[Dict[str, float]] = Field(default=None, description="Comparison with previous period")
     notable_changes: List[str] = Field(default_factory=list, description="Notable changes from previous period")
+
+
+# Quality Validator Interface (Single Source of Truth)
+class QualityValidatorInterface(ABC):
+    """Interface for all quality validator implementations - prevents duplicate validator classes"""
+    
+    @abstractmethod
+    async def validate_content(
+        self, 
+        content: str, 
+        content_type: Optional[str] = None,
+        context: Optional[Dict[str, Any]] = None
+    ) -> QualityValidationResult:
+        """Validate content and return detailed quality results"""
+        pass
+    
+    @abstractmethod
+    def get_validation_stats(self) -> Dict[str, Any]:
+        """Get validation statistics"""
+        pass

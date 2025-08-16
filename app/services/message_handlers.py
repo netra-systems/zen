@@ -2,6 +2,7 @@ from typing import Dict, Optional, List, TYPE_CHECKING, TypedDict, Union, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
 from app.logging_config import central_logger
+from app.services.service_locator import IMessageHandlerService
 from app.db.models_postgres import Thread, Run
 
 if TYPE_CHECKING:
@@ -44,7 +45,7 @@ class StartAgentPayloadTyped(TypedDict):
     context: Optional[Dict[str, Union[str, int, float, bool]]]
     settings: Optional[Dict[str, Union[str, int, float, bool]]]
 
-class MessageHandlerService:
+class MessageHandlerService(IMessageHandlerService):
     """Handles different types of WebSocket messages following conventions"""
     
     def __init__(self, supervisor: 'SupervisorAgent', thread_service: ThreadService):
@@ -291,3 +292,27 @@ class MessageHandlerService:
         await manager.broadcasting.leave_all_rooms(user_id)
         await manager.broadcasting.join_room(user_id, thread_id)
         logger.info(f"User {user_id} switched to thread {thread_id}")
+
+    # Interface implementation methods
+    async def handle_message(self, user_id: str, message_type: str, payload: Dict[str, Any]):
+        """Handle a WebSocket message with proper type and payload."""
+        # Route to specific handlers based on message type
+        if message_type == "start_agent":
+            await self.handle_start_agent(user_id, payload, None)
+        elif message_type == "user_message":
+            await self.handle_user_message(user_id, payload, None)
+        elif message_type == "get_thread_history":
+            await self.handle_thread_history(user_id, None)
+        elif message_type == "stop_agent":
+            await self.handle_stop_agent(user_id)
+        elif message_type == "switch_thread":
+            await self.handle_switch_thread(user_id, payload, None)
+        else:
+            await manager.send_error(user_id, f"Unknown message type: {message_type}")
+
+    async def process_user_message(self, user_id: str, message: str, thread_id: str = None):
+        """Process a user message in a specific thread."""
+        payload = {"text": message}
+        if thread_id:
+            payload["thread_id"] = thread_id
+        await self.handle_user_message(user_id, payload, None)

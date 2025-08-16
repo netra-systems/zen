@@ -4,7 +4,7 @@ Centralized type definitions for system health monitoring components.
 """
 
 from typing import Dict, Any
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 from dataclasses import dataclass, field
 
@@ -59,7 +59,7 @@ class SystemResourceMetrics:
     memory_usage_percent: float
     disk_usage_percent: float
     network_connections: int
-    timestamp: datetime = field(default_factory=datetime.utcnow)
+    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 class AlertSeverity(Enum):

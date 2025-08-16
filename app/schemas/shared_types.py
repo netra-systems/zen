@@ -6,7 +6,7 @@ Single source of truth for production types used across multiple modules.
 from typing import Dict, Optional, List, AsyncGenerator, Union, Any, Literal
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field, field_validator
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 import asyncio
 from app.core.json_parsing_utils import parse_dict_field, parse_string_list_field
@@ -46,7 +46,7 @@ class ProcessingResult(BaseModel):
     data: Optional[Dict[str, Union[str, int, float, bool]]] = Field(default=None, description="Result data")
     metadata: Dict[str, Union[str, int, float, bool]] = Field(default_factory=dict, description="Processing metadata")
     errors: List[str] = Field(default_factory=list, description="Error messages")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Processing timestamp")
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Processing timestamp")
 
 
 class ErrorContext(BaseModel):
@@ -54,7 +54,7 @@ class ErrorContext(BaseModel):
     # Core identifiers  
     trace_id: str = Field(..., description="Unique trace identifier")
     operation: str = Field(..., description="Operation being performed")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Error timestamp")
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Error timestamp")
     user_id: Optional[str] = Field(default=None, description="User identifier")
     
     # Additional context for compatibility with existing code
@@ -121,7 +121,7 @@ class ServiceHealth(BaseModel):
     """Standard service health check response"""
     service_name: str = Field(..., description="Service name")
     status: str = Field(..., description="Health status")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     dependencies: Dict[str, str] = Field(default_factory=dict, description="Dependency statuses")
     metrics: Dict[str, Any] = Field(default_factory=dict, description="Health metrics")
 
@@ -140,7 +140,7 @@ class EventContext(BaseModel):
     event_id: str = Field(..., description="Unique event identifier")
     event_type: str = Field(..., description="Event type")
     source: str = Field(..., description="Event source")
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     data: Dict[str, Any] = Field(..., description="Event data")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Event metadata")
 

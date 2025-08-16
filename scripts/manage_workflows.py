@@ -162,85 +162,117 @@ class WorkflowManager:
         return WorkflowConfigUtils.validate_config_issues(self.config)
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Manage GitHub Workflows')
-    subparsers = parser.add_subparsers(dest='command', help='Commands')
-    
-    # List command
+def _setup_list_parser(subparsers) -> None:
+    """Setup list command parser (≤8 lines)"""
     subparsers.add_parser('list', help='List all workflows and their status')
-    
-    # Enable command
+
+
+def _setup_workflow_parsers(subparsers) -> None:
+    """Setup enable/disable workflow parsers (≤8 lines)"""
     enable_parser = subparsers.add_parser('enable', help='Enable a workflow')
     enable_parser.add_argument('workflow', help='Workflow name')
-    
-    # Disable command
     disable_parser = subparsers.add_parser('disable', help='Disable a workflow')
     disable_parser.add_argument('workflow', help='Workflow name')
-    
-    # Feature command
+
+
+def _setup_feature_parser(subparsers) -> None:
+    """Setup feature command parser (≤8 lines)"""
     feature_parser = subparsers.add_parser('feature', help='Enable/disable a feature')
     feature_parser.add_argument('name', help='Feature name')
     feature_parser.add_argument('--enable', action='store_true', help='Enable feature')
     feature_parser.add_argument('--disable', action='store_true', help='Disable feature')
-    
-    # Budget command
+
+
+def _setup_budget_parser(subparsers) -> None:
+    """Setup budget command parser (≤8 lines)"""
     budget_parser = subparsers.add_parser('budget', help='Set cost budget')
     budget_parser.add_argument('--daily', type=float, help='Daily budget limit')
     budget_parser.add_argument('--monthly', type=float, help='Monthly budget limit')
-    
-    # Preset command
+
+
+def _setup_utility_parsers(subparsers) -> None:
+    """Setup preset/show/validate parsers (≤8 lines)"""
     preset_parser = subparsers.add_parser('preset', help='Apply configuration preset')
-    preset_parser.add_argument('name', choices=['minimal', 'standard', 'full', 'cost_optimized'],
-                              help='Preset name')
-    
-    # Show command
+    preset_parser.add_argument('name', choices=['minimal', 'standard', 'full', 'cost_optimized'], help='Preset name')
     subparsers.add_parser('show', help='Show current configuration')
-    
-    # Validate command
     subparsers.add_parser('validate', help='Validate configuration')
-    
-    args = parser.parse_args()
-    
-    # Initialize manager
-    manager = WorkflowManager()
-    
-    # Execute command
+
+
+def _configure_all_subparsers(subparsers) -> None:
+    """Configure all command subparsers (≤8 lines)"""
+    _setup_list_parser(subparsers)
+    _setup_workflow_parsers(subparsers)
+    _setup_feature_parser(subparsers)
+    _setup_budget_parser(subparsers)
+    _setup_utility_parsers(subparsers)
+
+
+def _create_argument_parser() -> argparse.ArgumentParser:
+    """Create and configure argument parser (≤8 lines)"""
+    parser = argparse.ArgumentParser(description='Manage GitHub Workflows')
+    subparsers = parser.add_subparsers(dest='command', help='Commands')
+    _configure_all_subparsers(subparsers)
+    return parser
+
+
+def _display_workflow_list(manager: WorkflowManager) -> None:
+    """Display formatted workflow status list (≤8 lines)"""
+    status = manager.get_workflow_status()
+    print("\n[WORKFLOWS] Status")
+    print("=" * 50)
+    for name, info in status.items():
+        status_icon = "[ON]" if info['enabled'] else "[OFF]"
+        print(f"{status_icon} {name:<30} [{info['category']}]")
+
+
+def _handle_feature_command(manager: WorkflowManager, args) -> None:
+    """Handle feature enable/disable command (≤8 lines)"""
+    if args.enable:
+        manager.set_feature(args.name, True)
+    elif args.disable:
+        manager.set_feature(args.name, False)
+    else:
+        print("[ERROR] Please specify --enable or --disable")
+
+
+def _execute_workflow_command(manager: WorkflowManager, args) -> None:
+    """Execute workflow-related commands (≤8 lines)"""
     if args.command == 'list':
-        status = manager.get_workflow_status()
-        print("\n[WORKFLOWS] Status")
-        print("=" * 50)
-        for name, info in status.items():
-            status_icon = "[ON]" if info['enabled'] else "[OFF]"
-            print(f"{status_icon} {name:<30} [{info['category']}]")
-            
+        _display_workflow_list(manager)
     elif args.command == 'enable':
         manager.enable_workflow(args.workflow)
-        
     elif args.command == 'disable':
         manager.disable_workflow(args.workflow)
-        
-    elif args.command == 'feature':
-        if args.enable:
-            manager.set_feature(args.name, True)
-        elif args.disable:
-            manager.set_feature(args.name, False)
-        else:
-            print("[ERROR] Please specify --enable or --disable")
-            
+
+
+def _execute_config_command(manager: WorkflowManager, args) -> None:
+    """Execute configuration-related commands (≤8 lines)"""
+    if args.command == 'feature':
+        _handle_feature_command(manager, args)
     elif args.command == 'budget':
         manager.set_cost_budget(daily=args.daily, monthly=args.monthly)
-        
     elif args.command == 'preset':
         manager.apply_preset(args.name)
-        
-    elif args.command == 'show':
+
+
+def _execute_utility_command(manager: WorkflowManager, args, parser: argparse.ArgumentParser) -> None:
+    """Execute utility commands (≤8 lines)"""
+    if args.command == 'show':
         manager.show_config()
-        
     elif args.command == 'validate':
         manager.validate_config()
-        
     else:
         parser.print_help()
+
+
+def main():
+    """Main orchestrator function (≤8 lines)"""
+    parser = _create_argument_parser()
+    args = parser.parse_args()
+    manager = WorkflowManager()
+    _execute_workflow_command(manager, args)
+    _execute_config_command(manager, args)
+    _execute_utility_command(manager, args, parser)
 
 
 if __name__ == '__main__':

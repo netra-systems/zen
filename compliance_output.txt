@@ -1,0 +1,100 @@
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\scripts\check_architecture_compliance.py:254: DeprecationWarning: ast.Str is deprecated and will be removed in Python 3.14; use ast.Constant instead
+  isinstance(node.body[0].value, (ast.Constant, ast.Str))):
+
+================================================================================
+ARCHITECTURE COMPLIANCE REPORT
+================================================================================
+
+[FILE SIZE VIOLATIONS] (>300 lines)
+----------------------------------------
+   743 lines: app\tests\services\test_database_repository_transactions.py
+   740 lines: app\tests\services\test_clickhouse_query_fixer.py
+   739 lines: app\tests\test_real_services_comprehensive.py
+   734 lines: app\tests\agents\test_error_handler_unit.py
+   725 lines: app\tests\services\test_unified_tool_registry_management.py
+   718 lines: app\tests\core\test_async_utils_complete.py
+   718 lines: app\tests\core\test_service_interfaces.py
+   716 lines: app\tests\services\test_security_service_authentication_enhanced.py
+   691 lines: app\tests\services\test_websocket_message_handler_routing.py
+   687 lines: app\tests\test_business_value_critical.py
+  ... and 332 more files
+
+  Total violations: 342
+
+[FUNCTION COMPLEXITY VIOLATIONS] (>8 lines)
+----------------------------------------
+  VIOLATIONS (must fix):
+     74 lines: sync_to_readme() in scripts\generate_openapi_spec.py
+     73 lines: create_metadata_database() in scripts\enable_metadata_tracking.py
+     73 lines: get_openapi_spec() in scripts\generate_openapi_spec.py
+     72 lines: _analyze_performance_metrics() in app\agents\data_sub_agent\agent_backup.py
+     72 lines: run() in scripts\run_review.py
+    ... and 2663 more violations
+
+  WARNINGS (example/demo files):
+    219 lines: main() in scripts\test_frontend.py
+    150 lines: main() in scripts\test_backend.py
+    126 lines: test_agent_coordination_with_external_api_call() in app\tests\integration\test_critical_path_integration.py
+    125 lines: test_authentication_expiry_during_connection() in app\tests\websocket\test_compression_auth.py
+    114 lines: test_critical_path_failure_recovery() in app\tests\integration\test_critical_path_integration.py
+    ... and 2934 more warnings
+
+  Total: 2668 violations, 2939 warnings
+
+[DUPLICATE TYPE DEFINITIONS]
+----------------------------------------
+  Type 'ProductionTool' defined in 2 files
+    Files: app\agents\production_tool.py, app\agents\tool_dispatcher_old.py
+  Type 'QualityValidator' defined in 2 files
+    Files: app\agents\quality_checks.py, app\services\quality_gate\quality_gate_validators.py
+  Type 'SyntheticDataResult' defined in 2 files
+    Files: app\agents\state.py, app\agents\synthetic_data_generator.py
+  Type 'DeepAgentState' defined in 2 files
+    Files: app\agents\state.py, app\schemas\agent_models.py
+  Type 'GenerationStatus' defined in 2 files
+    Files: app\agents\synthetic_data_generator.py, app\services\synthetic_data\enums.py
+  Type 'WorkloadProfile' defined in 2 files
+    Files: app\agents\synthetic_data_presets.py, frontend\components\demo\WorkloadSelector.tsx
+  Type 'ToolDispatcher' defined in 3 files
+    Files: app\agents\tool_dispatcher_core.py, app\agents\tool_dispatcher_old.py, app\tests\services\test_tool_dispatcher.py
+  Type 'ToolExecutionEngine' defined in 2 files
+    Files: app\agents\tool_dispatcher_execution.py, app\services\unified_tool_registry\execution_engine.py
+  Type 'ToolRegistry' defined in 2 files
+    Files: app\agents\tool_dispatcher_registry.py, app\services\tool_registry.py
+  Type 'TriageSubAgent' defined in 2 files
+    Files: app\agents\triage_sub_agent.py, app\agents\triage_sub_agent\agent.py
+
+  ... and 398 more duplicate types
+
+  Total duplicate types: 408
+
+[TEST STUBS IN PRODUCTION]
+----------------------------------------
+  app\core\async_retry_logic.py (line 32): Test stub detected: Args/kwargs with static return
+  app\core\config_validator.py (line 1): Test stub detected: For testing docstring
+  app\db\query_cache.py (line 1): Test stub detected: Placeholder docstring
+  app\middleware\metrics_middleware.py (line 65): Test stub detected: Args/kwargs with static return
+  app\middleware\metrics_middleware_compact.py (line 34): Test stub detected: Args/kwargs with static return
+  app\routes\quality.py (line 1): Test stub detected: For testing docstring
+  app\services\service_locator.py (line 1): Test stub detected: For testing docstring
+  app\services\supply_research_scheduler.py (line 1): Test stub detected: Placeholder docstring
+  app\services\apex_optimizer_agent\dev_utils.py (line 10): Test stub detected: For testing docstring
+  app\services\database\rollback_manager_postgres.py (line 1): Test stub detected: Placeholder docstring
+  ... and 150 more files
+
+  Total suspicious files: 160
+
+================================================================================
+SUMMARY
+================================================================================
+[FAIL] VIOLATIONS FOUND: 3578 issues requiring fixes
+       WARNINGS: 2939 issues in example/demo files
+Compliance Score: 25.0%
+
+Required Actions:
+  - Split 342 oversized files
+  - Refactor 2668 complex functions
+  - Deduplicate 408 type definitions
+  - Remove 160 test stubs from production
+
+Refer to ALIGNMENT_ACTION_PLAN.md for remediation steps

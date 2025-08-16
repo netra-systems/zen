@@ -139,55 +139,70 @@ class UnifiedTestRunner:
     
     def save_test_report(self, level: str, config: Dict, output: str, exit_code: int):
         """Save test report to test_reports directory with latest/history structure."""
-        # Use enhanced reporter if available
         if self.enhanced_reporter:
-            try:
-                # Generate comprehensive report
-                report_content = self.enhanced_reporter.generate_comprehensive_report(
-                    level=level,
-                    results=self.results,
-                    config=config,
-                    exit_code=exit_code
-                )
-                
-                # Calculate metrics for enhanced reporter
-                backend_counts = self.results["backend"]["test_counts"]
-                frontend_counts = self.results["frontend"]["test_counts"]
-                
-                metrics = {
-                    "total_tests": backend_counts["total"] + frontend_counts["total"],
-                    "passed": backend_counts["passed"] + frontend_counts["passed"],
-                    "failed": backend_counts["failed"] + frontend_counts["failed"],
-                    "coverage": self.results["backend"].get("coverage") or self.results["frontend"].get("coverage")
-                }
-                
-                # Save using enhanced reporter
-                self.enhanced_reporter.save_report(
-                    level=level,
-                    report_content=report_content,
-                    results=self.results,
-                    metrics=metrics
-                )
-                
-                # Also run cleanup periodically
-                import random
-                if random.random() < 0.1:  # 10% chance to run cleanup
-                    print("[INFO] Running report cleanup...")
-                    self.enhanced_reporter.cleanup_old_reports(keep_days=7)
-                
+            success = self._try_enhanced_report(level, config, exit_code)
+            if success:
                 return
-            except Exception as e:
-                # Handle Unicode encoding errors on Windows
-                error_msg = str(e)
-                try:
-                    print(f"[WARNING] Enhanced reporter failed, using standard: {error_msg}")
-                except UnicodeEncodeError:
-                    # Fallback for Unicode issues
-                    safe_msg = error_msg.encode('ascii', 'replace').decode('ascii')
-                    print(f"[WARNING] Enhanced reporter failed, using standard: {safe_msg}")
         
         # Use standard reporter
         save_test_report(self.results, level, config, exit_code, self.reports_dir, self.staging_mode)
+    
+    def _try_enhanced_report(self, level: str, config: Dict, exit_code: int) -> bool:
+        """Try to use enhanced reporter, return success status."""
+        try:
+            report_content = self._generate_enhanced_report(level, config, exit_code)
+            metrics = self._calculate_test_metrics()
+            self._save_enhanced_report(level, report_content, metrics)
+            self._maybe_cleanup_reports()
+            return True
+        except Exception as e:
+            self._handle_enhanced_reporter_error(e)
+            return False
+    
+    def _generate_enhanced_report(self, level: str, config: Dict, exit_code: int) -> str:
+        """Generate comprehensive report using enhanced reporter."""
+        return self.enhanced_reporter.generate_comprehensive_report(
+            level=level,
+            results=self.results,
+            config=config,
+            exit_code=exit_code
+        )
+    
+    def _calculate_test_metrics(self) -> Dict:
+        """Calculate test metrics for enhanced reporter."""
+        backend_counts = self.results["backend"]["test_counts"]
+        frontend_counts = self.results["frontend"]["test_counts"]
+        return {
+            "total_tests": backend_counts["total"] + frontend_counts["total"],
+            "passed": backend_counts["passed"] + frontend_counts["passed"],
+            "failed": backend_counts["failed"] + frontend_counts["failed"],
+            "coverage": self.results["backend"].get("coverage") or self.results["frontend"].get("coverage")
+        }
+    
+    def _save_enhanced_report(self, level: str, report_content: str, metrics: Dict):
+        """Save report using enhanced reporter."""
+        self.enhanced_reporter.save_report(
+            level=level,
+            report_content=report_content,
+            results=self.results,
+            metrics=metrics
+        )
+    
+    def _maybe_cleanup_reports(self):
+        """Periodically cleanup old reports."""
+        import random
+        if random.random() < 0.1:  # 10% chance to run cleanup
+            print("[INFO] Running report cleanup...")
+            self.enhanced_reporter.cleanup_old_reports(keep_days=7)
+    
+    def _handle_enhanced_reporter_error(self, e: Exception):
+        """Handle enhanced reporter errors gracefully."""
+        error_msg = str(e)
+        try:
+            print(f"[WARNING] Enhanced reporter failed, using standard: {error_msg}")
+        except UnicodeEncodeError:
+            safe_msg = error_msg.encode('ascii', 'replace').decode('ascii')
+            print(f"[WARNING] Enhanced reporter failed, using standard: {safe_msg}")
     
     def generate_json_report(self, level: str, config: Dict, exit_code: int) -> Dict:
         """Generate JSON report for CI/CD integration."""

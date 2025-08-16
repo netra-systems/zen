@@ -31,16 +31,20 @@ class SupplyResearcherAgent(BaseSubAgent):
         db: Session,
         supply_service: Optional[SupplyResearchService] = None
     ):
-        super().__init__(
-            llm_manager,
-            name="SupplyResearcherAgent",
-            description="Researches and updates AI model supply information using Google Deep Research"
-        )
+        super().__init__(llm_manager, name="SupplyResearcherAgent", 
+                        description="Researches and updates AI model supply information using Google Deep Research")
+        self._init_database_components(db, supply_service)
+        self._init_research_components(db)
+    
+    def _init_database_components(self, db: Session, supply_service: Optional[SupplyResearchService]) -> None:
+        """Initialize database-related components."""
         self.db = db
         self.supply_service = supply_service or SupplyResearchService(db)
         self.research_timeout = 300
         self.confidence_threshold = 0.7
-        
+    
+    def _init_research_components(self, db: Session) -> None:
+        """Initialize research-related components."""
         self.parser = SupplyRequestParser()
         self.research_engine = SupplyResearchEngine()
         self.data_extractor = SupplyDataExtractor()
@@ -54,30 +58,39 @@ class SupplyResearcherAgent(BaseSubAgent):
     ) -> None:
         """Execute supply research based on request"""
         try:
-            request = state.user_request or "Provide AI market overview"
-            
-            await self._send_parsing_update(run_id, stream_updates)
-            parsed_request = self.parser.parse_natural_language_request(request)
-            logger.info(f"Parsed request: {parsed_request}")
-            
-            research_session = await self._create_research_session(parsed_request, state)
-            
-            await self._send_research_update(run_id, stream_updates, parsed_request)
-            research_result = await self._conduct_research(parsed_request, research_session)
-            
-            await self._send_processing_update(run_id, stream_updates)
-            result = await self._process_research_results(
-                research_result, parsed_request, research_session, run_id, stream_updates
-            )
-            
-            state.supply_research_result = result
-            await self._send_completion_update(run_id, stream_updates, result)
-            
-            logger.info(f"SupplyResearcherAgent completed for run_id: {run_id}")
-            
+            await self._execute_research_pipeline(state, run_id, stream_updates)
         except Exception as e:
             await self._handle_execution_error(e, state, run_id, stream_updates)
             raise
+    
+    async def _execute_research_pipeline(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+        """Execute the main research pipeline."""
+        request = state.user_request or "Provide AI market overview"
+        parsed_request = await self._parse_and_log_request(request, run_id, stream_updates)
+        research_session = await self._create_research_session(parsed_request, state)
+        research_result = await self._conduct_research_with_updates(parsed_request, research_session, run_id, stream_updates)
+        result = await self._process_and_finalize_results(research_result, parsed_request, research_session, run_id, stream_updates, state)
+        logger.info(f"SupplyResearcherAgent completed for run_id: {run_id}")
+    
+    async def _parse_and_log_request(self, request: str, run_id: str, stream_updates: bool):
+        """Parse request and log details."""
+        await self._send_parsing_update(run_id, stream_updates)
+        parsed_request = self.parser.parse_natural_language_request(request)
+        logger.info(f"Parsed request: {parsed_request}")
+        return parsed_request
+    
+    async def _conduct_research_with_updates(self, parsed_request, research_session, run_id: str, stream_updates: bool):
+        """Conduct research with status updates."""
+        await self._send_research_update(run_id, stream_updates, parsed_request)
+        return await self._conduct_research(parsed_request, research_session)
+    
+    async def _process_and_finalize_results(self, research_result, parsed_request, research_session, run_id: str, stream_updates: bool, state: DeepAgentState):
+        """Process results and finalize state."""
+        await self._send_processing_update(run_id, stream_updates)
+        result = await self._process_research_results(research_result, parsed_request, research_session, run_id, stream_updates)
+        state.supply_research_result = result
+        await self._send_completion_update(run_id, stream_updates, result)
+        return result
     
     async def process_scheduled_research(
         self,
@@ -85,28 +98,40 @@ class SupplyResearcherAgent(BaseSubAgent):
         providers: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """Process scheduled research for multiple providers"""
-        if providers is None:
-            providers = list(self.parser.provider_patterns.keys())
-        
+        provider_list = providers or list(self.parser.provider_patterns.keys())
+        results = await self._process_providers_research(research_type, provider_list)
+        return self._build_scheduled_research_result(research_type, results)
+    
+    async def _process_providers_research(self, research_type: ResearchType, providers: List[str]) -> List[Dict[str, Any]]:
+        """Process research for all providers."""
         results = []
         for provider in providers:
-            try:
-                state = self._create_scheduled_state(research_type, provider)
-                await self.execute(state, f"scheduled_{provider}_{datetime.now().timestamp()}", False)
-                
-                if hasattr(state, 'supply_research_result'):
-                    results.append({
-                        "provider": provider,
-                        "result": state.supply_research_result
-                    })
-            
-            except Exception as e:
-                logger.error(f"Scheduled research failed for {provider}: {e}")
-                results.append({
-                    "provider": provider,
-                    "error": str(e)
-                })
-        
+            result = await self._process_single_provider_research(research_type, provider)
+            results.append(result)
+        return results
+    
+    async def _process_single_provider_research(self, research_type: ResearchType, provider: str) -> Dict[str, Any]:
+        """Process research for a single provider."""
+        try:
+            state = self._create_scheduled_state(research_type, provider)
+            await self.execute(state, f"scheduled_{provider}_{datetime.now().timestamp()}", False)
+            return self._create_success_provider_result(provider, state)
+        except Exception as e:
+            return self._create_error_provider_result(provider, e)
+    
+    def _create_success_provider_result(self, provider: str, state: DeepAgentState) -> Dict[str, Any]:
+        """Create successful provider result."""
+        if hasattr(state, 'supply_research_result'):
+            return {"provider": provider, "result": state.supply_research_result}
+        return {"provider": provider, "error": "No result generated"}
+    
+    def _create_error_provider_result(self, provider: str, error: Exception) -> Dict[str, Any]:
+        """Create error provider result."""
+        logger.error(f"Scheduled research failed for {provider}: {error}")
+        return {"provider": provider, "error": str(error)}
+    
+    def _build_scheduled_research_result(self, research_type: ResearchType, results: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Build final scheduled research result."""
         return {
             "research_type": research_type.value,
             "providers_processed": len(results),
@@ -128,17 +153,23 @@ class SupplyResearcherAgent(BaseSubAgent):
     ) -> ResearchSession:
         """Create research session record"""
         research_query = self.research_engine.generate_research_query(parsed_request)
-        
-        research_session = ResearchSession(
+        research_session = self._build_research_session(research_query, state)
+        self._save_research_session(research_session)
+        return research_session
+    
+    def _build_research_session(self, research_query: str, state: DeepAgentState) -> ResearchSession:
+        """Build research session object."""
+        return ResearchSession(
             query=research_query,
             status="pending",
             initiated_by=f"user_{state.user_id}" if hasattr(state, 'user_id') else "system",
             created_at=datetime.now(UTC)
         )
+    
+    def _save_research_session(self, research_session: ResearchSession) -> None:
+        """Save research session to database."""
         self.db.add(research_session)
         self.db.commit()
-        
-        return research_session
     
     async def _send_research_update(
         self,

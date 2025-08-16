@@ -3,8 +3,8 @@
 Provides health checking, statistics, and configuration information utilities.
 Each function must be ≤8 lines as per architecture requirements.
 """
-from typing import Optional
-from datetime import datetime
+from typing import Optional, Any
+from datetime import datetime, UTC
 from app.schemas.llm_base_types import (
     LLMConfigInfo, LLMManagerStats, LLMHealthCheck, LLMProvider
 )
@@ -26,21 +26,26 @@ class LLMManagementUtilities:
         config = self.core.settings.llm_configs.get(name)
         if not config:
             return None
-        
+        return self._build_config_info(name, config)
+    
+    def _build_config_info(self, name: str, config: Any) -> LLMConfigInfo:
+        """Build LLMConfigInfo from configuration."""
         return LLMConfigInfo(
             name=name,
             provider=LLMProvider(config.provider),
             model_name=config.model_name,
             api_key_configured=bool(config.api_key),
             generation_config=GenerationConfig(**config.generation_config),
-            enabled=bool(config.api_key) if config.provider == "google" else True
+            enabled=self._determine_config_enabled(config)
         )
+    
+    def _determine_config_enabled(self, config: Any) -> bool:
+        """Determine if configuration is enabled based on provider requirements."""
+        return bool(config.api_key) if config.provider == "google" else True
     
     def get_manager_stats(self) -> LLMManagerStats:
         """Get LLM manager statistics."""
-        active_configs = [name for name, config in self.core.settings.llm_configs.items() 
-                         if config.api_key or config.provider != "google"]
-        
+        active_configs = self._get_active_configs()
         return LLMManagerStats(
             total_requests=0,  # Would need to implement request tracking
             cached_responses=0,  # Would need to implement cache tracking
@@ -50,26 +55,37 @@ class LLMManagementUtilities:
             enabled=self.core.enabled
         )
     
+    def _get_active_configs(self) -> list:
+        """Get list of active configuration names."""
+        return [name for name, config in self.core.settings.llm_configs.items() 
+                if config.api_key or config.provider != "google"]
+    
     async def health_check(self, config_name: str) -> LLMHealthCheck:
         """Perform health check on an LLM configuration."""
         start_time = time.time()
         try:
-            # Simple test prompt
             test_response = await self.core.ask_llm("Hello", config_name, use_cache=False)
             response_time_ms = (time.time() - start_time) * 1000
-            
-            return LLMHealthCheck(
-                config_name=config_name,
-                healthy=bool(test_response),
-                response_time_ms=response_time_ms,
-                last_checked=datetime.utcnow()
-            )
+            return self._create_healthy_check_result(config_name, test_response, response_time_ms)
         except Exception as e:
             response_time_ms = (time.time() - start_time) * 1000
-            return LLMHealthCheck(
-                config_name=config_name,
-                healthy=False,
-                response_time_ms=response_time_ms,
-                error=str(e),
-                last_checked=datetime.utcnow()
-            )
+            return self._create_unhealthy_check_result(config_name, response_time_ms, str(e))
+    
+    def _create_healthy_check_result(self, config_name: str, test_response: Any, response_time_ms: float) -> LLMHealthCheck:
+        """Create healthy health check result."""
+        return LLMHealthCheck(
+            config_name=config_name,
+            healthy=bool(test_response),
+            response_time_ms=response_time_ms,
+            last_checked=datetime.now(UTC)
+        )
+    
+    def _create_unhealthy_check_result(self, config_name: str, response_time_ms: float, error: str) -> LLMHealthCheck:
+        """Create unhealthy health check result."""
+        return LLMHealthCheck(
+            config_name=config_name,
+            healthy=False,
+            response_time_ms=response_time_ms,
+            error=error,
+            last_checked=datetime.now(UTC)
+        )

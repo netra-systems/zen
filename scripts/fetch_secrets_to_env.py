@@ -16,8 +16,11 @@ def fetch_secret(client, project_id, secret_name, version="latest"):
 
 def _get_project_id() -> str:
     """Get project ID from environment or use default."""
-    project_id = os.environ.get('GOOGLE_CLOUD_PROJECT', "304612253870")
-    print(f"Using project ID: {project_id}")
+    # Determine project ID based on environment
+    environment = os.environ.get("ENVIRONMENT", "development").lower()
+    default_project_id = "701982941522" if environment == "staging" else "304612253870"
+    project_id = os.environ.get('GOOGLE_CLOUD_PROJECT', default_project_id)
+    print(f"Using project ID: {project_id} for environment: {environment}")
     return project_id
 
 def _create_secret_client() -> secretmanager.SecretManagerServiceClient:

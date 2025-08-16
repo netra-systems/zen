@@ -7,6 +7,7 @@ and enable proper dependency injection throughout the application.
 from typing import Dict, Type, Any, Optional, TypeVar, Generic, Callable
 from functools import lru_cache
 import threading
+from abc import ABC, abstractmethod
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -163,42 +164,139 @@ service_locator = ServiceLocator()
 # SERVICE INTERFACES
 # ============================================================================
 
-class IAgentService:
+class IAgentService(ABC):
     """Interface for agent service."""
-    async def start_agent(self, *args, **kwargs): pass
-    async def stop_agent(self, *args, **kwargs): pass
-    async def get_agent_status(self, *args, **kwargs): pass
+    
+    @abstractmethod
+    async def start_agent(self, request_model, run_id: str, stream_updates: bool = False):
+        """Start an agent with the given request model and run ID."""
+        pass
+    
+    @abstractmethod
+    async def stop_agent(self, user_id: str) -> bool:
+        """Stop an agent for the given user."""
+        pass
+    
+    @abstractmethod
+    async def get_agent_status(self, user_id: str) -> Dict[str, Any]:
+        """Get the status of an agent for the given user."""
+        pass
 
 
-class IThreadService:
+class IThreadService(ABC):
     """Interface for thread service."""
-    async def create_thread(self, *args, **kwargs): pass
-    async def get_thread(self, *args, **kwargs): pass
-    async def switch_thread(self, *args, **kwargs): pass
-    async def delete_thread(self, *args, **kwargs): pass
+    
+    @abstractmethod
+    async def create_thread(self, user_id: str, db=None):
+        """Create a new thread for the user."""
+        pass
+    
+    @abstractmethod
+    async def get_thread(self, thread_id: str, user_id: str, db=None):
+        """Get a specific thread by ID."""
+        pass
+    
+    @abstractmethod
+    async def switch_thread(self, user_id: str, thread_id: str, db=None):
+        """Switch user to a different thread."""
+        pass
+    
+    @abstractmethod
+    async def delete_thread(self, thread_id: str, user_id: str, db=None):
+        """Delete a thread for the user."""
+        pass
 
 
-class IMessageHandlerService:
+class IMessageHandlerService(ABC):
     """Interface for message handler service."""
-    async def handle_message(self, *args, **kwargs): pass
-    async def process_user_message(self, *args, **kwargs): pass
+    
+    @abstractmethod
+    async def handle_message(self, user_id: str, message_type: str, payload: Dict[str, Any]):
+        """Handle a WebSocket message with proper type and payload."""
+        pass
+    
+    @abstractmethod
+    async def process_user_message(self, user_id: str, message: str, thread_id: str = None):
+        """Process a user message in a specific thread."""
+        pass
 
 
-class IMCPService:
+class IMCPService(ABC):
     """Interface for MCP service."""
-    async def initialize(self, *args, **kwargs): pass
-    async def execute_tool(self, *args, **kwargs): pass
+    
+    @abstractmethod
+    async def initialize(self, config: Dict[str, Any] = None):
+        """Initialize the MCP service with optional configuration."""
+        pass
+    
+    @abstractmethod
+    async def execute_tool(self, tool_name: str, parameters: Dict[str, Any], user_context: Dict[str, Any] = None):
+        """Execute an MCP tool with the given parameters and user context."""
+        pass
 
 
-class IWebSocketService:
+class IWebSocketService(ABC):
     """Interface for WebSocket service."""
-    async def send_message(self, *args, **kwargs): pass
-    async def broadcast(self, *args, **kwargs): pass
+    
+    @abstractmethod
+    async def send_message(self, user_id: str, message: Dict[str, Any]):
+        """Send a message to a specific user via WebSocket."""
+        pass
+    
+    @abstractmethod
+    async def broadcast(self, message: Dict[str, Any], exclude_user_ids: list = None):
+        """Broadcast a message to all connected users, optionally excluding some."""
+        pass
 
 
 # ============================================================================
 # SERVICE REGISTRATION HELPERS
 # ============================================================================
+
+def _create_agent_service():
+    """Create AgentService with proper dependencies."""
+    from app.agents.supervisor_consolidated import SupervisorAgent
+    from app.services.agent_service import AgentService
+    # Create a supervisor instance with minimal dependencies for service locator
+    supervisor = SupervisorAgent(None, None, None, None)  # Will be properly initialized when used
+    return AgentService(supervisor)
+
+def _create_message_handler_service():
+    """Create MessageHandlerService with proper dependencies."""
+    from app.agents.supervisor_consolidated import SupervisorAgent
+    from app.services.message_handlers import MessageHandlerService
+    from app.services.thread_service import ThreadService
+    # Create dependencies
+    supervisor = SupervisorAgent(None, None, None, None)  # Will be properly initialized when used
+    thread_service = ThreadService()
+    return MessageHandlerService(supervisor, thread_service)
+
+def _create_mcp_service():
+    """Create MCPService with proper dependencies."""
+    from app.services.mcp_service import MCPService
+    from app.services.agent_service import AgentService
+    from app.services.thread_service import ThreadService
+    from app.services.corpus_service import CorpusService
+    from app.services.synthetic_data_service import SyntheticDataService
+    from app.services.security_service import SecurityService
+    from app.services.supply_catalog_service import SupplyCatalogService
+    
+    # Create minimal dependencies - these will be properly initialized when used
+    agent_service = _create_agent_service()
+    thread_service = ThreadService()
+    corpus_service = CorpusService()
+    synthetic_data_service = SyntheticDataService()
+    security_service = SecurityService()
+    supply_catalog_service = SupplyCatalogService()
+    
+    return MCPService(
+        agent_service=agent_service,
+        thread_service=thread_service,
+        corpus_service=corpus_service,
+        synthetic_data_service=synthetic_data_service,
+        security_service=security_service,
+        supply_catalog_service=supply_catalog_service
+    )
 
 def register_core_services():
     """Register all core services with proper dependency injection."""
@@ -206,11 +304,12 @@ def register_core_services():
     from app.services.thread_service import ThreadService
     from app.services.message_handlers import MessageHandlerService
     from app.services.mcp_service import MCPService
+    from app.services.websocket_service import WebSocketService
     
     # Register services with factories to delay initialization
     service_locator.register(
         IAgentService,
-        factory=lambda: AgentService(),
+        factory=lambda: _create_agent_service(),
         singleton=True
     )
     
@@ -222,16 +321,20 @@ def register_core_services():
     
     service_locator.register(
         IMessageHandlerService,
-        factory=lambda: MessageHandlerService(
-            agent_service=service_locator.get(IAgentService),
-            thread_service=service_locator.get(IThreadService)
-        ),
+        factory=lambda: _create_message_handler_service(),
         singleton=True
     )
     
+    # Note: MCPService registration disabled due to complex repository dependencies
+    # service_locator.register(
+    #     IMCPService,
+    #     factory=lambda: _create_mcp_service(),
+    #     singleton=True
+    # )
+    
     service_locator.register(
-        IMCPService,
-        factory=lambda: MCPService(),
+        IWebSocketService,
+        factory=lambda: WebSocketService(),
         singleton=True
     )
     

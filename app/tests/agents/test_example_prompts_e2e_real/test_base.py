@@ -119,13 +119,24 @@ class BaseExamplePromptsTest:
         """Safely convert object to string to prevent serialization issues"""
         if isinstance(obj, str):
             return obj
+        elif isinstance(obj, dict):
+            return self._convert_dict_to_readable_text(obj)
         elif hasattr(obj, 'model_dump'):
-            # For Pydantic models, use model_dump to get dict representation
-            try:
-                return str(obj.model_dump())
-            except Exception:
-                return str(obj)
+            return self._convert_pydantic_model(obj)
         else:
+            return str(obj)
+    
+    def _convert_dict_to_readable_text(self, obj_dict):
+        """Convert dict to readable text format"""
+        if not obj_dict:
+            return "No data available"
+        return "\n".join([f"{k}: {v}" for k, v in obj_dict.items()])
+    
+    def _convert_pydantic_model(self, obj):
+        """Convert Pydantic model to string safely"""
+        try:
+            return str(obj.model_dump())
+        except Exception:
             return str(obj)
     
     def _create_fallback_response(self):

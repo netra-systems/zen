@@ -1,24 +1,24 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-15T16:36:05.900388  
+**Generated:** 2025-08-15T21:27:00.273999  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
 ## Test Summary
 
-**Total Tests:** 1079  
-**Passed:** 1054  
-**Failed:** 1  
-**Skipped:** 23  
-**Errors:** 1  
+**Total Tests:** 0  
+**Passed:** 0  
+**Failed:** 0  
+**Skipped:** 0  
+**Errors:** 0  
 **Overall Status:** [FAILED]
 
 ### Component Breakdown
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 1079 | 1054 | 1 | 23 | 1 | 66.93s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.32s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 4.18s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.25s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,7 +27,7 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 67.26s
+- **Total Duration:** 4.43s
 - **Exit Code:** 255
 
 ### Backend Configuration
@@ -58,84 +58,42 @@ Test Configuration:
 Running command:
   pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
 ================================================================================
-[1m============================= test session starts =============================[0m
-platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
-cachedir: .pytest_cache
-metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
-configfile: pytest.ini
-plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
-asyncio: mode=Mode.AUTO
-created: 4/4 workers
-4 workers [2287 items]
+Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
+Loaded .env.development file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development
+Loaded .env.development.local file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development.local
+================================================================================
+[FAIL] TESTS FAILED with exit code 4 after 3.70s
+[Coverage] Coverage Report: reports/coverage/html/index.html
+================================================================================
 
-scheduling tests via LoadScheduling
+ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py'.
+app\tests\conftest.py:52: in <module>
+    from app.main import app
+app\main.py:46: in <module>
+    from app.core.app_factory import create_app
+app\core\app_factory.py:9: in <module>
+    from app.core.lifespan_manager import lifespan
+app\core\lifespan_manager.py:8: in <module>
+    from app.startup_module import run_complete_startup
+app\startup_module.py:16: in <module>
+    from app.config import settings
+app\config.py:6: in <module>
+    from app.config_manager import ConfigManager
+app\config_manager.py:18: in <module>
+    from app.config_environment import ConfigEnvironment
+app\config_environment.py:7: in <module>
+    from typing import Dict, type
+E   ImportError: cannot import name 'type' from 'typing' (C:\Users\antho\miniconda3\Lib\typing.py). Did you mean: 'Type'?
+--- Logging error in Loguru Handler #1 ---
+Record was: {'elapsed': datetime.timedelta(seconds=1, microseconds=84133), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=28892, name='MainProcess'), 'thread': (id=27108, name='MainThread'), 'time': datetime(2025, 8, 15, 21, 26, 59, 787337, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
+Traceback (most recent call last):
+  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
+    self._sink.write(message)
+  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_simple_sinks.py", line 16, in write
+    self._stream.write(message)
+ValueError: I/O operation on closed file.
+--- End of logging error ---
 
-app\tests\services\agents\test_tools.py::test_tool_dispatcher 
-app\tests\services\synthetic_data\test_admin_visibility.py::TestAdminVisibility::test_performance_profiling 
-app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_circuit_breaker_pattern <- tests\services\test_agent_service_orchestration_workflows.py 
-app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_log_operation_with_duration 
-[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_admin_visibility.py::TestAdminVisibility::test_performance_profiling 
-app\tests\services\synthetic_data\test_admin_visibility.py::TestAdminVisibility::test_alert_configuration 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_circuit_breaker_pattern <- tests\services\test_agent_service_orchestration_workflows.py 
-app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_graceful_degradation_under_load <- tests\services\test_agent_service_orchestration_workflows.py 
-[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_graceful_degradation_under_load <- tests\services\test_agent_service_orchestration_workflows.py 
-app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_error_propagation_and_isolation <- tests\services\test_agent_service_orchestration_workflows.py 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher 
-app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
-app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_log_operation_with_duration 
-app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
-app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_log_operation_failure 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_log_operation_failure 
-app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_search_audit_logs_success 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_search_audit_logs_success 
-app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_search_audit_logs_failure 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
-app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_search_audit_logs_failure 
-app\tests\services\test_corpus_audit.py::TestAuditTimer::test_timer_measures_duration 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditTimer::test_timer_measures_duration 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_validation_missing_required 
-app\tests\services\test_corpus_audit.py::TestAuditTimer::test_timer_without_context 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditTimer::test_timer_without_context 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_dict_conversion 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization 
-app\tests\services\test_corpus_audit.py::TestAuditIntegration::test_create_audit_logger_factory 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_json_serialization 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_edge_cases 
-[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditIntegration::test_create_audit_logger_factory 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
-[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_instantiation 
-app\tests\services\test_corpus_audit.py::TestAuditIntegration::test_end_to_end_audit_workflow 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_get_metadata 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
-[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditIntegration::test_end_to_end_audit_workflow 
-app\tests\services\test_corpus_audit.py::TestAuditPerformance::test_large_result_data_handling 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_wrapper 
-[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditPerformance::test_large_result_data_handling 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
-app\tests\services\test_corpus_audit.py::TestAuditPerformance::test_metadata_edge_cases 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_base_tool_execute_failure 
-[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestAuditPerformance::test_metadata_edge_cases 
-[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration.py::TestAgentErrorRecovery::test_error_propagation_and_isolation <- tests\services\test_agent_service_orchestration_workflows.py 
-app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_method 
-app\tests\services\test_corpus_metrics.py::TestCorpusMetricsCollector::test_collector_initialization 
-app\tests\services\test_agent_service_orchestration_agents.py::TestAgentLifecycleManagement::test_agent_creation_and_assignment 
-[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestBaseTool::test_concrete_tool_run_method 
-[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_agents.py::TestAgentLifecycleManagement::test_agent_creation_and_assignment 
-app\tests\services\apex_optimizer_ag...(truncated)
 ```
 
 ### Frontend Output
@@ -160,18 +118,5 @@ Cleaning up test processes...
 operable program or batch file.
 
 ```
-
-## Error Summary
-
-### Backend Errors
-- [gw3][36m [ 34%] [0m[31mERROR[0m app\tests\services\test_supply_research_service_basic.py::TestSupplyItemRetrieval::test_get_supply_items_empty_result
-- [gw1][36m [ 47%] [0m[31mFAILED[0m app\tests\services\test_state_persistence_integration_critical.py::TestStatePersistenceCritical::test_save_state_with_datetime Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
-- =================================== ERRORS ====================================
-- [31m[1m_ ERROR at setup of TestSupplyItemRetrieval.test_get_supply_items_empty_result _[0m
-- [31mFAILED[0m app\tests\services\test_state_persistence_integration_critical.py::[1mTestStatePersistenceCritical::test_save_state_with_datetime[0m - AssertionError: Expected 'commit' to have been called once. Called 0 times.
-- [31mERROR[0m app\tests\services\test_supply_research_service_basic.py::[1mTestSupplyItemRetrieval::test_get_supply_items_empty_result[0m - AttributeError: 'FixtureDef' object has no attribute 'unittest'
-- [FAIL] TESTS FAILED with exit code 2 after 65.97s
-
-
 ---
 *Generated by Netra AI Unified Test Runner v3.0*

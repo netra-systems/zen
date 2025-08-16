@@ -137,10 +137,7 @@ class CircuitBreaker:
     async def _execute_with_monitoring(self, func: Callable[[], T]) -> T:
         """Execute function with timeout and failure tracking."""
         try:
-            result = await asyncio.wait_for(
-                self._call_function(func), 
-                timeout=self.config.timeout_seconds
-            )
+            result = await self._execute_function_with_timeout(func)
             await self._record_success()
             return result
         except asyncio.TimeoutError:
@@ -149,6 +146,13 @@ class CircuitBreaker:
         except Exception as e:
             await self._record_failure(type(e).__name__)
             raise
+    
+    async def _execute_function_with_timeout(self, func: Callable[[], T]) -> T:
+        """Execute function with configured timeout."""
+        return await asyncio.wait_for(
+            self._call_function(func), 
+            timeout=self.config.timeout_seconds
+        )
     
     async def _call_function(self, func: Callable[[], T]) -> T:
         """Call function handling both sync and async."""
@@ -244,6 +248,10 @@ class CircuitBreaker:
     
     def get_status(self) -> Dict[str, Any]:
         """Get comprehensive circuit breaker status."""
+        return self._build_status_dict()
+    
+    def _build_status_dict(self) -> Dict[str, Any]:
+        """Build status dictionary with all circuit breaker information."""
         return {
             "name": self.config.name,
             "state": self.state.value,
