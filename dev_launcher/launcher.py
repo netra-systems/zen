@@ -361,6 +361,7 @@ class DevLauncher:
             BACKEND_PORT=str(port),
             PYTHONPATH=str(self.config.project_root),
             ENVIRONMENT="development",  # Explicitly set development environment
+            CORS_ORIGINS="*",  # Allow all origins in development
             **service_env_vars,
             **self.config.env_overrides
         )

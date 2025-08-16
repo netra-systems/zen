@@ -50,6 +50,9 @@ def _get_development_cors_origins() -> list[str]:
     """Get CORS origins for development environment."""
     cors_origins_env = os.environ.get("CORS_ORIGINS", "")
     if cors_origins_env:
+        # Handle wildcard separately - don't try to split it
+        if cors_origins_env == "*":
+            return ["*"]
         return cors_origins_env.split(",")
     # Allow all localhost origins in development (any port)
     return ["http://localhost:3000", "http://localhost:8000", "*"]
@@ -115,18 +118,17 @@ def is_origin_allowed(origin: str, allowed_origins: List[str]) -> bool:
     
     # Allow all origins if wildcard is specified
     if "*" in allowed_origins:
-        # In development, allow any localhost/127.0.0.1 with any port
+        # In development, allow everything
         if settings.environment == "development":
-            localhost_pattern = r'^https?://(localhost|127\.0\.0\.1)(:\d+)?$'
-            return bool(re.match(localhost_pattern, origin))
+            return True
         # In staging, check patterns below instead of allowing all
         if settings.environment == "staging":
             pass  # Continue to pattern matching below
         else:
             return True
     
-    # Check wildcard patterns for staging
-    if settings.environment == "staging":
+    # Check wildcard patterns for staging and development
+    if settings.environment in ["staging", "development"]:
         # Allow any subdomain of staging.netrasystems.ai
         staging_pattern = r'^https://[a-zA-Z0-9\-]+\.staging\.netrasystems\.ai$'
         if re.match(staging_pattern, origin):
@@ -138,7 +140,7 @@ def is_origin_allowed(origin: str, allowed_origins: List[str]) -> bool:
         if re.match(cloud_run_pattern, origin):
             return True
         
-        # Allow localhost for local development against staging
+        # Allow localhost for local development - any port
         localhost_pattern = r'^https?://(localhost|127\.0\.0\.1)(:\d+)?$'
         if re.match(localhost_pattern, origin):
             return True
