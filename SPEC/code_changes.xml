@@ -245,14 +245,18 @@
       </actions>
     </checklist-item>
     
-    <checklist-item id="state-management">
+    <checklist-item id="state-management" critical="true">
       <title>State Management Changes</title>
+      <warning>CRITICAL: Incorrect selector patterns cause infinite loops!</warning>
       <actions>
         <action>Update Zustand store in frontend/store/</action>
+        <action priority="CRITICAL">Use individual selectors - NEVER object-returning selectors</action>
+        <action priority="CRITICAL">Verify no infinite loops with "getSnapshot" errors</action>
         <action>Add store tests in frontend/__tests__/store/</action>
         <action>Update components using the store</action>
         <action>Ensure state persistence if needed</action>
       </actions>
+      <reference>SPEC/learnings/frontend.xml#zustand-individual-selectors-pattern</reference>
     </checklist-item>
     
     <checklist-item id="npm-dependencies">
