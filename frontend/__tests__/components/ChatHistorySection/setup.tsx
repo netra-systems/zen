@@ -117,13 +117,17 @@ export class ChatHistoryTestSetup {
       isAuthenticated: true
     });
     
-    // Configure store mocks
-    (useThreadStore as unknown as jest.Mock).mockReturnValue(mockThreadStore);
-    (useChatStore as unknown as jest.Mock).mockReturnValue(mockChatStore);
-    (useAuthStore as unknown as jest.Mock).mockReturnValue(mockAuthStore);
+    // Configure store mocks with explicit implementation
+    (useThreadStore as unknown as jest.Mock).mockImplementation(() => mockThreadStore);
+    (useChatStore as unknown as jest.Mock).mockImplementation(() => mockChatStore);
+    (useAuthStore as unknown as jest.Mock).mockImplementation(() => mockAuthStore);
 
+    // Configure service mocks
     (ThreadService.listThreads as jest.Mock).mockResolvedValue(mockThreads);
     (ThreadService.getThreadMessages as jest.Mock).mockResolvedValue({ messages: [] });
+    (ThreadService.createThread as jest.Mock).mockResolvedValue(mockThreads[0]);
+    (ThreadService.updateThread as jest.Mock).mockResolvedValue(mockThreads[0]);
+    (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
   }
 
   afterEach() {
