@@ -92,6 +92,21 @@
             </learning_ids>
         </category>
         <category>
+            <name>Domain Mapping</name>
+            <file>learnings/domain_mapping.xml</file>
+            <path>SPEC/learnings/domain_mapping.xml</path>
+            <learning_count>7</learning_count>
+            <learning_ids>
+                <id>domain-001</id>
+                <id>domain-002</id>
+                <id>domain-003</id>
+                <id>domain-004</id>
+                <id>domain-005</id>
+                <id>domain-006</id>
+                <id>domain-007</id>
+            </learning_ids>
+        </category>
+        <category>
             <name>Type Safety</name>
             <file>learnings/type_safety.xml</file>
             <path>SPEC/learnings/type_safety.xml</path>
@@ -110,7 +125,7 @@
     </usage>
     
     <statistics>
-        <total_categories>9</total_categories>
-        <total_learnings>19</total_learnings>
+        <total_categories>10</total_categories>
+        <total_learnings>26</total_learnings>
     </statistics>
 </specification>
