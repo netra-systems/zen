@@ -75,7 +75,7 @@ class TestSupplyResearchScheduler:
             providers=["openai"]
         )
         
-        with patch('app.db.postgres.Database') as mock_db_manager:
+        with patch('app.services.supply_research.research_executor.Database') as mock_db_manager:
             mock_db = Mock()
             mock_db_manager.return_value.get_db.return_value.__enter__ = Mock(return_value=mock_db)
             mock_db_manager.return_value.get_db.return_value.__exit__ = Mock(return_value=None)

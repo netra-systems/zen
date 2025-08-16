@@ -1,7 +1,7 @@
 """Netra MCP Server Resources Registration"""
 
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any
 
 from app.logging_config import CentralLogger
@@ -30,7 +30,7 @@ class NetraMCPResources:
             """Get historical optimization results and recommendations"""
             try:
                 if server.corpus_service:
-                    end_date = datetime.utcnow()
+                    end_date = datetime.now(UTC)
                     start_date = end_date - timedelta(days=30)
                     
                     history_data = await server.corpus_service.get_optimization_history(
@@ -162,7 +162,7 @@ class NetraMCPResources:
         async def get_current_metrics() -> str:
             """Get current system metrics and performance indicators"""
             try:
-                metrics = {"timestamp": datetime.utcnow().isoformat()}
+                metrics = {"timestamp": datetime.now(UTC).isoformat()}
                 
                 if server.thread_service:
                     thread_metrics = await server.thread_service.get_metrics()

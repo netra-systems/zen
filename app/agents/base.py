@@ -123,6 +123,10 @@ class BaseSubAgent(ABC):
                 return
             
             await self.execute(state, run_id, stream_updates)
+            
+            # Increment step count on successful completion
+            state.step_count += 1
+            
             await self._post_run(state, run_id, stream_updates, success=True)
             
         except WebSocketDisconnect as e:

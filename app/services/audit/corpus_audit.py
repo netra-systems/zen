@@ -74,33 +74,20 @@ class CorpusAuditLogger:
         metadata: Optional[CorpusAuditMetadata]
     ) -> Dict[str, Any]:
         """Prepare audit data for database insertion."""
-        return {
-            "action": action.value,
-            "resource_type": resource_type,
-            "status": status.value,
-            "user_id": user_id,
-            "corpus_id": corpus_id,
-            "resource_id": resource_id,
-            "operation_duration_ms": operation_duration_ms,
-            "result_data": result_data or {},
-            **self._extract_metadata_fields(metadata)
-        }
+        from .corpus_audit_helpers import prepare_audit_data_dict, extract_metadata_core_fields, extract_metadata_extended_fields
+        base_data = prepare_audit_data_dict(action, resource_type, status, user_id, corpus_id, resource_id, operation_duration_ms, result_data)
+        core_metadata = extract_metadata_core_fields(metadata)
+        extended_metadata = extract_metadata_extended_fields(metadata)
+        return {**base_data, **core_metadata, **extended_metadata}
 
     def _extract_metadata_fields(self, metadata: Optional[CorpusAuditMetadata]) -> Dict[str, Any]:
         """Extract metadata fields for database storage."""
+        from .corpus_audit_helpers import extract_metadata_core_fields, extract_metadata_extended_fields
         if not metadata:
             return {}
-        
-        return {
-            "user_agent": metadata.user_agent,
-            "ip_address": metadata.ip_address,
-            "request_id": metadata.request_id,
-            "session_id": metadata.session_id,
-            "configuration": metadata.configuration,
-            "performance_metrics": metadata.performance_metrics,
-            "error_details": metadata.error_details,
-            "compliance_flags": metadata.compliance_flags
-        }
+        core_fields = extract_metadata_core_fields(metadata)
+        extended_fields = extract_metadata_extended_fields(metadata)
+        return {**core_fields, **extended_fields}
 
     def _convert_to_record(self, audit_log: CorpusAuditLog) -> CorpusAuditRecord:
         """Convert database model to audit record."""
@@ -109,32 +96,15 @@ class CorpusAuditLogger:
     
     def _create_audit_metadata_from_log(self, audit_log: CorpusAuditLog) -> CorpusAuditMetadata:
         """Create audit metadata object from database log."""
-        return CorpusAuditMetadata(
-            user_agent=audit_log.user_agent,
-            ip_address=audit_log.ip_address,
-            request_id=audit_log.request_id,
-            session_id=audit_log.session_id,
-            configuration=audit_log.configuration or {},
-            performance_metrics=audit_log.performance_metrics or {},
-            error_details=audit_log.error_details,
-            compliance_flags=audit_log.compliance_flags or []
-        )
+        from .corpus_audit_helpers import build_metadata_from_log
+        return build_metadata_from_log(audit_log)
     
     def _create_audit_record_from_log(self, audit_log: CorpusAuditLog, metadata: CorpusAuditMetadata) -> CorpusAuditRecord:
         """Create audit record object from database log and metadata."""
-        return CorpusAuditRecord(
-            id=audit_log.id,
-            timestamp=audit_log.timestamp,
-            user_id=audit_log.user_id,
-            action=CorpusAuditAction(audit_log.action),
-            status=CorpusAuditStatus(audit_log.status),
-            corpus_id=audit_log.corpus_id,
-            resource_type=audit_log.resource_type,
-            resource_id=audit_log.resource_id,
-            operation_duration_ms=audit_log.operation_duration_ms,
-            result_data=audit_log.result_data or {},
-            metadata=metadata
-        )
+        from .corpus_audit_helpers import create_audit_record_base, create_audit_record_extended
+        core_fields = create_audit_record_base(audit_log)
+        operational_fields = create_audit_record_extended(audit_log, metadata)
+        return CorpusAuditRecord(**core_fields, **operational_fields)
 
     async def track_user_action(
         self, db: AsyncSession, user_id: str, action: CorpusAuditAction,
@@ -173,14 +143,21 @@ class CorpusAuditLogger:
     ) -> CorpusAuditReport:
         """Search audit logs and generate comprehensive report."""
         try:
-            records = await self.repository.search_records(db, filters)
-            total_count = await self.repository.count_records(db, filters)
-            summary_stats = await self.repository.get_summary_stats(db, filters)
-            
-            return self._build_audit_report(records, total_count, summary_stats, filters)
+            return await self._execute_audit_search(db, filters)
         except Exception as e:
-            logger.error(f"Failed to search audit logs: {e}")
-            raise NetraException(f"Audit search failed: {str(e)}")
+            return self._handle_search_error(e)
+    
+    async def _execute_audit_search(self, db: AsyncSession, filters: CorpusAuditSearchFilter) -> CorpusAuditReport:
+        """Execute the audit search operation."""
+        records = await self.repository.search_records(db, filters)
+        total_count = await self.repository.count_records(db, filters)
+        summary_stats = await self.repository.get_summary_stats(db, filters)
+        return self._build_audit_report(records, total_count, summary_stats, filters)
+    
+    def _handle_search_error(self, error: Exception) -> None:
+        """Handle audit search errors."""
+        logger.error(f"Failed to search audit logs: {error}")
+        raise NetraException(f"Audit search failed: {str(error)}")
 
     def _build_audit_report(
         self, records: List[CorpusAuditLog], total_count: int,
@@ -188,12 +165,19 @@ class CorpusAuditLogger:
     ) -> CorpusAuditReport:
         """Build comprehensive audit report."""
         audit_records = [self._convert_to_record(record) for record in records]
-        
-        time_range = {
-            "start_date": filters.start_date,
-            "end_date": filters.end_date
-        }
-        
+        time_range = self._create_time_range_dict(filters)
+        return self._create_audit_report_object(total_count, audit_records, summary_stats, time_range)
+    
+    def _create_time_range_dict(self, filters: CorpusAuditSearchFilter) -> Dict[str, Any]:
+        """Create time range dictionary from filters."""
+        from .corpus_audit_helpers import create_time_range_from_filters
+        return create_time_range_from_filters(filters)
+    
+    def _create_audit_report_object(
+        self, total_count: int, audit_records: List[CorpusAuditRecord],
+        summary_stats: Dict[str, int], time_range: Dict[str, Any]
+    ) -> CorpusAuditReport:
+        """Create CorpusAuditReport object."""
         return CorpusAuditReport(
             total_records=total_count,
             records=audit_records,

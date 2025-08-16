@@ -10,21 +10,9 @@ from app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-# Import ErrorSeverity from single source of truth
+# Import ErrorSeverity and ErrorCategory from single source of truth
 from app.core.error_codes import ErrorSeverity
-
-
-class ErrorCategory(Enum):
-    """Error category classification."""
-    VALIDATION = "validation"
-    NETWORK = "network"
-    DATABASE = "database"
-    PROCESSING = "processing"
-    WEBSOCKET = "websocket"
-    TIMEOUT = "timeout"
-    CONFIGURATION = "configuration"
-    RESOURCE = "resource"
-    UNKNOWN = "unknown"
+from app.schemas.core_enums import ErrorCategory
 
 
 # Import ErrorContext from single source of truth

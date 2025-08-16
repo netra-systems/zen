@@ -1,24 +1,11 @@
 """Circuit breaker implementation for supervisor agent."""
 
-from enum import Enum
-from dataclasses import dataclass
 import time
 from typing import Optional
 
-
-class CircuitBreakerState(Enum):
-    """Circuit breaker states"""
-    CLOSED = "closed"
-    OPEN = "open"
-    HALF_OPEN = "half_open"
-
-
-@dataclass
-class CircuitBreakerConfig:
-    """Configuration for circuit breaker pattern"""
-    failure_threshold: int = 5
-    recovery_timeout: float = 60.0
-    half_open_max_calls: int = 3
+# Import unified types from single source of truth
+from app.schemas.core_enums import CircuitBreakerState
+from app.schemas.core_models import CircuitBreakerConfig
 
 
 class CircuitBreaker:

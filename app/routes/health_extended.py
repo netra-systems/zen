@@ -8,120 +8,65 @@ from app.logging_config import central_logger
 from typing import Dict, Any
 import psutil
 import asyncio
-from datetime import datetime
+from datetime import datetime, UTC
+from app.routes.utils.health_helpers import (
+    test_database_connectivity, get_database_statistics, build_database_health_response,
+    get_system_metrics, get_process_metrics, build_system_health_response,
+    build_system_error_response, get_pool_configuration, calculate_pool_utilization
+)
+from app.routes.utils.error_handlers import handle_database_error
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter(prefix="/health", tags=["health"])
+
+async def _check_database_health(db: AsyncSession) -> Dict[str, Any]:
+    """Check database health components."""
+    db_connected = await test_database_connectivity(db)
+    pool_status = get_pool_status()
+    stats = await get_database_statistics(db)
+    return build_database_health_response(db_connected, pool_status, stats)
 
 @router.get("/database")
 async def health_database(db: AsyncSession = Depends(get_db_dependency)) -> Dict[str, Any]:
     """Check database health and connection pool status."""
     try:
-        # Test database connectivity
-        result = await db.execute(text("SELECT 1"))
-        db_connected = result.scalar() == 1
-        
-        # Get pool status
-        pool_status = get_pool_status()
-        
-        # Get database statistics if available
-        stats = {}
-        if async_engine:
-            try:
-                result = await db.execute(text("""
-                    SELECT 
-                        count(*) as active_connections,
-                        max(state_change) as last_activity
-                    FROM pg_stat_activity 
-                    WHERE datname = current_database()
-                """))
-                row = result.first()
-                if row:
-                    stats = {
-                        "active_connections": row.active_connections,
-                        "last_activity": row.last_activity.isoformat() if row.last_activity else None
-                    }
-            except Exception as e:
-                logger.warning(f"Could not fetch database statistics: {e}")
-        
-        return {
-            "status": "healthy" if db_connected else "unhealthy",
-            "connected": db_connected,
-            "pool_status": pool_status,
-            "database_stats": stats,
-            "timestamp": datetime.utcnow().isoformat()
-        }
+        return await _check_database_health(db)
     except Exception as e:
-        logger.error(f"Database health check failed: {e}")
-        raise HTTPException(status_code=503, detail=f"Database unhealthy: {str(e)}")
+        handle_database_error(e)
+
+def _gather_system_health_data() -> Dict[str, Any]:
+    """Gather system health data."""
+    system_metrics = get_system_metrics()
+    process_metrics = get_process_metrics()
+    return build_system_health_response(system_metrics, process_metrics)
 
 @router.get("/system")
 async def health_system() -> Dict[str, Any]:
     """Check system resource usage."""
     try:
-        cpu_percent = psutil.cpu_percent(interval=0.1)
-        memory = psutil.virtual_memory()
-        disk = psutil.disk_usage('/')
-        
-        # Get process-specific metrics
-        process = psutil.Process()
-        process_memory = process.memory_info()
-        
-        return {
-            "status": "healthy",
-            "system": {
-                "cpu_percent": cpu_percent,
-                "memory": {
-                    "total": memory.total,
-                    "available": memory.available,
-                    "percent": memory.percent
-                },
-                "disk": {
-                    "total": disk.total,
-                    "free": disk.free,
-                    "percent": disk.percent
-                }
-            },
-            "process": {
-                "memory_rss": process_memory.rss,
-                "memory_vms": process_memory.vms,
-                "cpu_percent": process.cpu_percent(),
-                "num_threads": process.num_threads(),
-                "connections": len(process.connections(kind='inet'))
-            },
-            "timestamp": datetime.utcnow().isoformat()
-        }
+        return _gather_system_health_data()
     except Exception as e:
         logger.error(f"System health check failed: {e}")
-        return {
-            "status": "error",
-            "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
-        }
+        return build_system_error_response(str(e))
+
+def _build_base_pool_metrics(pool_status: Dict) -> Dict[str, Any]:
+    """Build base pool metrics."""
+    return {
+        "pool_configuration": get_pool_configuration(),
+        "current_status": pool_status,
+        "timestamp": datetime.now(UTC).isoformat()
+    }
+
+def _build_pool_metrics() -> Dict[str, Any]:
+    """Build pool metrics response."""
+    pool_status = get_pool_status()
+    metrics = _build_base_pool_metrics(pool_status)
+    utilization = calculate_pool_utilization(pool_status)
+    if utilization:
+        metrics["utilization"] = utilization
+    return metrics
 
 @router.get("/pool-metrics")
 async def pool_metrics() -> Dict[str, Any]:
     """Get detailed connection pool metrics for monitoring."""
-    metrics = {
-        "pool_configuration": {
-            "pool_size": 20,
-            "max_overflow": 30,
-            "pool_timeout": 30,
-            "pool_recycle": 1800,
-            "max_connections": 100
-        },
-        "current_status": get_pool_status(),
-        "timestamp": datetime.utcnow().isoformat()
-    }
-    
-    # Calculate pool utilization
-    if metrics["current_status"]["async"]:
-        async_pool = metrics["current_status"]["async"]
-        if async_pool.get("size") is not None and async_pool.get("checked_in") is not None:
-            active = async_pool["size"] - async_pool["checked_in"]
-            metrics["utilization"] = {
-                "active_connections": active,
-                "utilization_percent": (active / (async_pool["size"] + async_pool.get("overflow", 0))) * 100 if async_pool["size"] else 0
-            }
-    
-    return metrics
+    return _build_pool_metrics()

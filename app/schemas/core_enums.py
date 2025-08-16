@@ -182,6 +182,36 @@ MessageTypeLiteral = Literal[
 ]
 
 
+class ErrorCategory(str, Enum):
+    """Unified error category classification - consolidates all error types."""
+    # System and infrastructure errors
+    SYSTEM = "system"
+    APPLICATION = "application"
+    SECURITY = "security"
+    BUSINESS = "business"
+    INFRASTRUCTURE = "infrastructure"
+    INTEGRATION = "integration"
+    USER = "user"
+    
+    # Operational errors
+    VALIDATION = "validation"
+    NETWORK = "network"
+    DATABASE = "database"
+    PROCESSING = "processing"
+    WEBSOCKET = "websocket"
+    TIMEOUT = "timeout"
+    CONFIGURATION = "configuration"
+    RESOURCE = "resource"
+    UNKNOWN = "unknown"
+
+
+class CircuitBreakerState(str, Enum):
+    """Unified circuit breaker states."""
+    CLOSED = "closed"
+    OPEN = "open"
+    HALF_OPEN = "half_open"
+
+
 # Export all enums
 __all__ = [
     "MessageType",
@@ -190,5 +220,7 @@ __all__ = [
     "WebSocketConnectionState",
     "CorpusAuditAction",
     "CorpusAuditStatus",
+    "ErrorCategory",
+    "CircuitBreakerState",
     "MessageTypeLiteral"
 ]

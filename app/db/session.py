@@ -23,23 +23,29 @@ class SessionManager:
             self.total_sessions_created = 0
             self.initialized = True
     
-    @asynccontextmanager
-    async def get_session(self) -> AsyncIterator[AsyncSession]:
-        """Get a database session with monitoring."""
+    async def _increment_session_counters(self) -> int:
+        """Increment session counters and return session ID."""
         async with self._lock:
             self.active_sessions += 1
             self.total_sessions_created += 1
-            session_id = self.total_sessions_created
-        
+            return self.total_sessions_created
+    
+    async def _decrement_session_counter(self, session_id: int):
+        """Decrement session counter and log closure."""
+        async with self._lock:
+            self.active_sessions -= 1
+        logger.debug(f"Closed session {session_id}, active: {self.active_sessions}")
+    
+    @asynccontextmanager
+    async def get_session(self) -> AsyncIterator[AsyncSession]:
+        """Get a database session with monitoring."""
+        session_id = await self._increment_session_counters()
         logger.debug(f"Opening session {session_id}, active: {self.active_sessions}")
-        
         try:
             async with get_async_db() as session:
                 yield session
         finally:
-            async with self._lock:
-                self.active_sessions -= 1
-            logger.debug(f"Closed session {session_id}, active: {self.active_sessions}")
+            await self._decrement_session_counter(session_id)
     
     def get_stats(self) -> dict:
         """Get session manager statistics."""
@@ -51,6 +57,12 @@ class SessionManager:
 # Global session manager instance
 session_manager = SessionManager()
 
+def _validate_session_factory():
+    """Validate that session factory is initialized."""
+    if async_session_factory is None:
+        logger.error("async_session_factory is not initialized")
+        raise RuntimeError("Database not configured")
+
 @asynccontextmanager
 async def get_db_session() -> AsyncIterator[AsyncSession]:
     """Provide a transactional scope around a series of operations.
@@ -58,9 +70,6 @@ async def get_db_session() -> AsyncIterator[AsyncSession]:
     This function maintains backward compatibility while using the improved
     session management from postgres.py.
     """
-    if async_session_factory is None:
-        logger.error("async_session_factory is not initialized")
-        raise RuntimeError("Database not configured")
-    
+    _validate_session_factory()
     async with session_manager.get_session() as session:
         yield session

@@ -6,7 +6,7 @@ import pytest_asyncio
 import uuid
 import json
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import List, Dict, Any, Optional
 
@@ -315,7 +315,7 @@ class TestWorkloadEventsOperations:
         test_event_id = str(uuid.uuid4())
         test_event = {
             'event_id': test_event_id,
-            'timestamp': datetime.utcnow(),
+            'timestamp': datetime.now(UTC),
             'user_id': 12345,  # UInt32 as per schema
             'workload_id': 'test_workload_service',
             'event_type': 'service_test',

@@ -5,7 +5,7 @@ from contextvars import ContextVar
 from typing import Dict, Any, Optional
 from uuid import uuid4
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 # Context variables for error tracking
@@ -19,7 +19,7 @@ class ErrorContextModel(BaseModel):
     """Error context model for consistent error handling"""
     trace_id: str = Field(..., description="Unique trace identifier")
     operation: str = Field(..., description="Operation being performed")
-    timestamp: datetime = Field(default_factory=datetime.utcnow, description="Error timestamp")
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Error timestamp")
     user_id: Optional[str] = Field(default=None, description="User identifier")
     correlation_id: Optional[str] = Field(default=None, description="Correlation identifier")
     request_id: Optional[str] = Field(default=None, description="Request identifier")
@@ -94,20 +94,30 @@ class AsyncErrorContext:
     @staticmethod
     def get_all_context() -> Dict[str, Any]:
         """Get all context information."""
-        base_context = {
+        base_context = AsyncErrorContext._get_base_context()
+        base_context = AsyncErrorContext._filter_none_values(base_context)
+        return AsyncErrorContext._merge_custom_context(base_context)
+    
+    @staticmethod
+    def _get_base_context() -> Dict[str, Any]:
+        """Get base context information."""
+        return {
             'trace_id': _trace_id_context.get(),
             'request_id': _request_id_context.get(),
             'user_id': _user_id_context.get(),
         }
-        
-        # Remove None values
-        base_context = {k: v for k, v in base_context.items() if v is not None}
-        
-        # Add custom context
+    
+    @staticmethod
+    def _filter_none_values(context: Dict[str, Any]) -> Dict[str, Any]:
+        """Remove None values from context."""
+        return {k: v for k, v in context.items() if v is not None}
+    
+    @staticmethod
+    def _merge_custom_context(base_context: Dict[str, Any]) -> Dict[str, Any]:
+        """Merge custom context with base context."""
         custom_context = _error_context.get()
         if custom_context:
             base_context.update(custom_context)
-        
         return base_context
     
     @staticmethod
@@ -129,12 +139,18 @@ class AsyncErrorContextManager:
         user_id: Optional[str] = None,
         **context_kwargs
     ):
+        self._init_context_values(trace_id, request_id, user_id, context_kwargs)
+        self._init_previous_values()
+    
+    def _init_context_values(self, trace_id: Optional[str], request_id: Optional[str], user_id: Optional[str], context_kwargs: dict) -> None:
+        """Initialize context values."""
         self.trace_id = trace_id or str(uuid4())
         self.request_id = request_id
         self.user_id = user_id
         self.context_kwargs = context_kwargs
-        
-        # Store previous values for restoration
+    
+    def _init_previous_values(self) -> None:
+        """Initialize previous values for restoration."""
         self.previous_trace_id = None
         self.previous_request_id = None
         self.previous_user_id = None
@@ -142,43 +158,62 @@ class AsyncErrorContextManager:
     
     def __enter__(self):
         """Enter the context manager."""
-        # Store previous values
+        self._store_previous_values()
+        self._set_new_context_values()
+        return self
+    
+    def _store_previous_values(self) -> None:
+        """Store previous context values for restoration."""
         self.previous_trace_id = AsyncErrorContext.get_trace_id()
         self.previous_request_id = AsyncErrorContext.get_request_id()
         self.previous_user_id = AsyncErrorContext.get_user_id()
         self.previous_context = _error_context.get().copy()
-        
-        # Set new values
+    
+    def _set_new_context_values(self) -> None:
+        """Set new context values."""
         ErrorContext.set_trace_id(self.trace_id)
+        self._set_optional_context_ids()
+        self._set_custom_context_kwargs()
+    
+    def _set_optional_context_ids(self) -> None:
+        """Set optional request and user IDs."""
         if self.request_id:
             ErrorContext.set_request_id(self.request_id)
         if self.user_id:
             ErrorContext.set_user_id(self.user_id)
-        
+    
+    def _set_custom_context_kwargs(self) -> None:
+        """Set custom context keyword arguments."""
         for key, value in self.context_kwargs.items():
             ErrorContext.set_context(key, value)
-        
-        return self
     
     def __exit__(self, exc_type: Optional[type], exc_val: Optional[Exception], exc_tb: Optional[Any]) -> None:
         """Exit the context manager."""
-        # Restore previous values
+        self._restore_trace_id()
+        self._restore_request_id()
+        self._restore_user_id()
+        _error_context.set(self.previous_context)
+    
+    def _restore_trace_id(self) -> None:
+        """Restore previous trace ID."""
         if self.previous_trace_id:
             AsyncErrorContext.set_trace_id(self.previous_trace_id)
         else:
             _trace_id_context.set(None)
-            
+    
+    def _restore_request_id(self) -> None:
+        """Restore previous request ID."""
         if self.previous_request_id:
             AsyncErrorContext.set_request_id(self.previous_request_id)
         else:
             _request_id_context.set(None)
-            
+    
+    def _restore_user_id(self) -> None:
+        """Restore previous user ID."""
         if self.previous_user_id:
             AsyncErrorContext.set_user_id(self.previous_user_id)
         else:
             _user_id_context.set(None)
-        
-        _error_context.set(self.previous_context)
 
 
 def with_error_context(
@@ -189,17 +224,31 @@ def with_error_context(
 ):
     """Decorator to add error context to a function."""
     def decorator(func):
-        if asyncio.iscoroutinefunction(func):
-            async def async_wrapper(*args, **kwargs):
-                with AsyncErrorContextManager(trace_id, request_id, user_id, **context_kwargs):
-                    return await func(*args, **kwargs)
-            return async_wrapper
-        else:
-            def sync_wrapper(*args, **kwargs):
-                with AsyncErrorContextManager(trace_id, request_id, user_id, **context_kwargs):
-                    return func(*args, **kwargs)
-            return sync_wrapper
+        return _create_context_wrapper(func, trace_id, request_id, user_id, **context_kwargs)
     return decorator
+
+
+def _create_context_wrapper(func, trace_id, request_id, user_id, **context_kwargs):
+    """Create appropriate wrapper based on function type."""
+    if asyncio.iscoroutinefunction(func):
+        return _create_async_wrapper(func, trace_id, request_id, user_id, **context_kwargs)
+    return _create_sync_wrapper(func, trace_id, request_id, user_id, **context_kwargs)
+
+
+def _create_async_wrapper(func, trace_id, request_id, user_id, **context_kwargs):
+    """Create async wrapper with error context."""
+    async def async_wrapper(*args, **kwargs):
+        with AsyncErrorContextManager(trace_id, request_id, user_id, **context_kwargs):
+            return await func(*args, **kwargs)
+    return async_wrapper
+
+
+def _create_sync_wrapper(func, trace_id, request_id, user_id, **context_kwargs):
+    """Create sync wrapper with error context."""
+    def sync_wrapper(*args, **kwargs):
+        with AsyncErrorContextManager(trace_id, request_id, user_id, **context_kwargs):
+            return func(*args, **kwargs)
+    return sync_wrapper
 
 
 def get_enriched_error_context(additional_context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:

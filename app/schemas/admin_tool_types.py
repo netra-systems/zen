@@ -3,7 +3,7 @@ Strong type definitions for Admin Tool Dispatcher operations following Netra con
 """
 
 from typing import Dict, Any, Optional, List, Union, Literal
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 import uuid
@@ -47,7 +47,7 @@ class ExecutionContext(BaseModel):
     user_role: str
     session_id: str
     ip_address: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     request_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     environment: str
     metadata: Dict[str, Any] = Field(default_factory=dict)
@@ -59,7 +59,7 @@ class ToolResponse(BaseModel):
     tool_type: AdminToolType
     status: ToolStatus
     execution_time_ms: float
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     
     model_config = ConfigDict(use_enum_values=True)
 
@@ -220,7 +220,7 @@ class AdminToolMetrics(BaseModel):
 class AdminToolAuditLog(BaseModel):
     """Audit log entry for admin tool usage"""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     tool_name: str
     tool_type: AdminToolType
     user_id: str

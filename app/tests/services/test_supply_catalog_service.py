@@ -24,11 +24,18 @@ class TestSupplyCatalogService:
 
     def test_get_all_options(self, supply_catalog_service, mock_db_session):
         """Test retrieving all supply options."""
-        # Mock the database response
-        mock_options = [
-            MagicMock(id=1, name="gpt-4", provider="OpenAI"),
-            MagicMock(id=2, name="claude-3", provider="Anthropic")
-        ]
+        # Mock the database response with proper attribute configuration
+        mock_option1 = MagicMock()
+        mock_option1.id = 1
+        mock_option1.name = "gpt-4"
+        mock_option1.provider = "OpenAI"
+        
+        mock_option2 = MagicMock()
+        mock_option2.id = 2
+        mock_option2.name = "claude-3"
+        mock_option2.provider = "Anthropic"
+        
+        mock_options = [mock_option1, mock_option2]
         mock_db_session.query.return_value.all.return_value = mock_options
         
         result = supply_catalog_service.get_all_options(mock_db_session)
@@ -40,7 +47,10 @@ class TestSupplyCatalogService:
 
     def test_get_option_by_id(self, supply_catalog_service, mock_db_session):
         """Test retrieving supply option by ID."""
-        mock_option = MagicMock(id=1, name="gpt-4", provider="OpenAI")
+        mock_option = MagicMock()
+        mock_option.id = 1
+        mock_option.name = "gpt-4"
+        mock_option.provider = "OpenAI"
         mock_db_session.get.return_value = mock_option
         
         result = supply_catalog_service.get_option_by_id(mock_db_session, 1)
@@ -51,7 +61,9 @@ class TestSupplyCatalogService:
 
     def test_get_option_by_name(self, supply_catalog_service, mock_db_session):
         """Test retrieving supply option by name."""
-        mock_option = MagicMock(name="gpt-4", provider="OpenAI")
+        mock_option = MagicMock()
+        mock_option.name = "gpt-4"
+        mock_option.provider = "OpenAI"
         mock_db_session.query.return_value.filter.return_value.first.return_value = mock_option
         
         result = supply_catalog_service.get_option_by_name(mock_db_session, "gpt-4")

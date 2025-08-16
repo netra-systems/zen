@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-15T14:13:22.783418  
+**Generated:** 2025-08-15T19:41:11.093126  
 **Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
 **Purpose:** Feature validation, API testing
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 1 | 0 | 0 | 0 | 1 | 20.91s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
+| Backend   | 1 | 0 | 0 | 0 | 1 | 23.03s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 38.84s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,8 +27,8 @@
 - **Purpose:** Feature validation, API testing
 - **Timeout:** 300s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 20.91s
-- **Exit Code:** 2
+- **Total Duration:** 61.87s
+- **Exit Code:** 15
 
 ### Backend Configuration
 ```
@@ -101,66 +101,70 @@ Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generatio
 Loaded .env.development file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development
 Loaded .env.development.local file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development.local
 ------------------------------- Captured stderr -------------------------------
-2025-08-15 14:13:13.116 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
-2025-08-15 14:13:13.117 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
-2025-08-15 14:13:13.117 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
-2025-08-15 14:13:13.118 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
-2025-08-15 14:13:13.118 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
-2025-08-15 14:13:13.118 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
-2025-08-15 14:13:13.118 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
-2025-08-15 14:13:13.118 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set log_level from LOG_LEVEL
-2025-08-15 14:13:13.118 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set environment from ENVIRONMENT
-2025-08-15 14:13:13.118 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse host: localhost
-2025-08-15 14:13:13.119 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse port: 9000
-2025-08-15 14:13:13.119 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse password
-2025-08-15 14:13:13.119 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse user: default
-2025-08-15 14:13:13.120 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set Gemini API key for LLM configs
-2025-08-15 14:13:13.120 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 13 env vars
-2025-08-15 14:13:13.120 | INFO     | app.core.unified_logging:_emit_log:117 | Loading secrets...
-2025-08-15 14:13:13.122 | INFO     | app.core.unified_logging:_emit_log:117 | Starting secret=REDACTED process for environment: development
-2025-08-15 14:13:13.122 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 9 secrets from environment variables
-2025-08-15 14:13:13.122 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: gemini-api-key, jwt-secret-key, fernet-key
-2025-08-15 14:13:13.123 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 9 secrets loaded
-2025-08-15 14:13:13.123 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 9 secrets
-2025-08-15 14:13:13.125 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
-2025-08-15 14:13:13.125 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
-2025-08-15 14:13:13.125 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
-2025-08-15 14:13:13.152 | DEBUG    | logging:handle:1028 | loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
-2025-08-15 14:13:13.152 | DEBUG    | logging:handle:1028 | loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
-2025-08-15 14:13:13.152 | DEBUG    | logging:handle:1028 | loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
-2025-08-15 14:13:13.191 | DEBUG    | logging:handle:1028 | registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
-2025-08-15 14:13:13.531 | INFO     | app.db.postgres:<module>:246 | PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling
-2025-08-15 14:13:14.876 | DEBUG    | logging:handle:1028 | Using orjson library for writing JSON byte strings
-2025-08-15 14:13:14.990 | DEBUG    | logging:handle:1028 | Looking up time zone info from registry
-2025-08-15 14:13:15.885 | INFO     | app.core.unified_logging:_emit_log:117 | SyntheticDataService initialized successfully
-2025-08-15 14:13:17.260 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
-2025-08-15 14:13:17.290 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
-2025-08-15 14:13:17.353 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
-2025-08-15 14:13:17.487 | INFO     | app.services.quality_gate.quality_gate_core:__init__:34 | Quality Gate Service initialized
-2025-08-15 14:13:17.487 | INFO     | app.services.quality_monitoring.service:__init__:48 | Quality Monitoring Service initialized
-2025-08-15 14:13:17.487 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
+2025-08-15 19:40:23.345 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set log_level from LOG_LEVEL
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set environment from ENVIRONMENT
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse host: localhost
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse port: 9000
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse password
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse user: default
+2025-08-15 19:40:23.346 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set Gemini API key for LLM configs
+2025-08-15 19:40:23.346 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 13 env vars
+2025-08-15 19:40:23.346 | INFO     | app.core.unified_logging:_emit_log:117 | Loading secrets...
+2025-08-15 19:40:23.346 | INFO     | app.core.unified_logging:_emit_log:117 | Starting secret=REDACTED process for environment: development
+2025-08-15 19:40:23.352 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 9 secrets from environment variables
+2025-08-15 19:40:23.352 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: gemini-api-key, jwt-secret-key, fernet-key
+2025-08-15 19:40:23.352 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 9 secrets loaded
+2025-08-15 19:40:23.353 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 9 secrets
+2025-08-15 19:40:23.354 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
+2025-08-15 19:40:23.354 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
+2025-08-15 19:40:23.354 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
+2025-08-15 19:40:23.387 | DEBUG    | logging:handle:1028 | loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
+2025-08-15 19:40:23.388 | DEBUG    | logging:handle:1028 | loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
+2025-08-15 19:40:23.388 | DEBUG    | logging:handle:1028 | loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
+2025-08-15 19:40:23.437 | DEBUG    | logging:handle:1028 | registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
+2025-08-15 19:40:23.740 | INFO     | app.db.postgres_core:_initialize_async_engine:159 | PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling
+2025-08-15 19:40:24.009 | DEBUG    | app.services.metrics.agent_metrics:__init__:24 | Initialized AgentMetricsCollector with buffer size 5000
+2025-08-15 19:40:25.310 | DEBUG    | logging:handle:1028 | Using orjson library for writing JSON byte strings
+2025-08-15 19:40:25.390 | DEBUG    | logging:handle:1028 | Looking up time zone info from registry
+2025-08-15 19:40:26.230 | INFO     | app.core.unified_logging:_emit_log:117 | SyntheticDataService initialized successfully
+2025-08-15 19:40:27.517 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
+2025-08-15 19:40:27.554 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
+2025-08-15 19:40:27.610 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
+2025-08-15 19:40:27.746 | INFO     | app.services.quality_gate.quality_gate_core:__init__:34 | Quality Gate Service initialized
+2025-08-15 19:40:27.751 | INFO     | app.services.quality_monitoring.service:__init__:48 | Quality Monitoring Service initialized
+2025-08-15 19:40:27.751 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
 [36m[1m=========================== short test summary info ===========================[0m
 [31mERROR[0m integration_tests/test_app.py
 [31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
 !!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
-[31m============================== [31m[1m1 error[0m[31m in 12.52s[0m[31m ==============================[0m
+[31m============================== [31m[1m1 error[0m[31m in 13.15s[0m[31m ==============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 2 after 20.04s
+[FAIL] TESTS FAILED with exit code 2 after 22.13s
 [Coverage] Coverage Report: reports/coverage/html/index.html
 ================================================================================
 
-2025-08-15 14:13:05.402 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
-2025-08-15 14:13:05.403 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
-2025-08-15 14:13:05.403 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
-2025-08-15 14:13:05.403 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
-2025-08-15 14:13:05.404 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
-2025-08-15 14:13:05.404 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
-2025-08-15 14:13:05.404 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
-2025-08-15 14:13:05.404 | DEBUG    |...(truncated)
+2025-08-15 19:40:13.691 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
+2025-08-15 19:40:13.692 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
+2025-08-15 19:40:13.692 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
+2025-08-15 19:40:13.692 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
+2025-08-15 19:40:13.692 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
+2025-08-15 19:40:13.693 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key fr...(truncated)
 ```
 
 ### Frontend Output
 ```
+
+> netra-frontend-apex-v1@0.1.0 test
+> jest --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
+
+
 
 ```
 
@@ -170,7 +174,7 @@ Loaded .env.development.local file from C:\Users\antho\OneDrive\Desktop\Netra\ne
 - =================================== ERRORS ====================================
 - [31m[1m_______________ ERROR collecting integration_tests/test_app.py ________________[0m
 - [31mERROR[0m integration_tests/test_app.py
-- [FAIL] TESTS FAILED with exit code 2 after 20.04s
+- [FAIL] TESTS FAILED with exit code 2 after 22.13s
 
 
 ---

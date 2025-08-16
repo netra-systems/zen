@@ -44,7 +44,7 @@ def mock_websocket_manager():
 def mock_tool_dispatcher():
     return AsyncMock()
 
-@pytest.mark.skip(reason="Complex mock setup issues with coroutines - needs refactoring")
+# @pytest.mark.skip(reason="Complex mock setup issues with coroutines - needs refactoring")
 @pytest.mark.asyncio
 async def test_subagent_workflow_end_to_end(mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher):
     # Arrange
@@ -58,12 +58,15 @@ async def test_subagent_workflow_end_to_end(mock_db_session, mock_llm_manager, m
 
         input_data = "test query"
         run_id = "test_run_id"
+        thread_id = "test_thread_id"
+        user_id = "test_user_id"
 
         # Act
-        result = await supervisor.run(input_data, run_id, stream_updates=False)
+        result = await supervisor.run(input_data, thread_id, user_id, run_id)
 
         # Assert
-        assert result.report_result != None
-        # The report structure has changed - it now contains action_plan
-        assert "action_plan" in result.report_result
-        assert result.report_result["action_plan"] == ["Action 1"]
+        assert result.report_result is not None
+        # Verify the workflow completed successfully with proper report structure
+        assert result.report_result.report_type == "analysis"
+        assert hasattr(result.report_result, 'content')
+        assert result.report_result.generated_at is not None

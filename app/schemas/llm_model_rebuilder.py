@@ -36,7 +36,7 @@ def rebuild_response_models():
         import app.schemas.llm_request_types as request_types
         from app.schemas.llm_response_types import (
             LLMResponse, LLMStreamChunk, LLMCache,
-            BatchLLMResponse, MockLLMResponse
+            BatchLLMResponse
         )
         
         # Combine namespace for forward reference resolution
@@ -46,7 +46,6 @@ def rebuild_response_models():
         LLMStreamChunk.model_rebuild(_types_namespace=rebuild_ns)
         LLMCache.model_rebuild(_types_namespace=rebuild_ns)
         BatchLLMResponse.model_rebuild()
-        MockLLMResponse.model_rebuild(_types_namespace=rebuild_ns)
         
     except Exception as e:
         logger.warning(f"Response model rebuild failed: {e}")

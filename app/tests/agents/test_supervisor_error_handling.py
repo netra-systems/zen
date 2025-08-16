@@ -144,7 +144,7 @@ class TestRetryMechanisms:
         end_time = asyncio.get_event_loop().time()
         
         assert result.success
-        assert result.state.triage_result["success"]
+        assert result.state.triage_result.category == "success"
         # Should have taken some time due to backoff
         assert end_time - start_time > 0.1
     

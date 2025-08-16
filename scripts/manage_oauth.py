@@ -210,87 +210,127 @@ class LocalOAuthConfig:
             print('\n'.join(env_content))
 
 
-def main():
-    """Main entry point for OAuth management script."""
+def create_main_parser() -> argparse.ArgumentParser:
+    """Create main argument parser with all subcommands."""
     parser = argparse.ArgumentParser(description='Manage OAuth configuration for Netra platform')
-    
     subparsers = parser.add_subparsers(dest='command', help='Available commands')
-    
-    # Add PR redirect URI
+    _add_pr_subcommands(subparsers)
+    _add_config_subcommands(subparsers)
+    return parser
+
+
+def _add_pr_subcommands(subparsers) -> None:
+    """Add PR-related subcommands."""
+    _add_pr_add_command(subparsers)
+    _add_pr_remove_command(subparsers)
+    _add_pr_list_command(subparsers)
+
+
+def _add_pr_add_command(subparsers) -> None:
+    """Add 'add-pr' subcommand."""
     add_pr_parser = subparsers.add_parser('add-pr', help='Add redirect URIs for PR environment')
     add_pr_parser.add_argument('pr_number', type=int, help='PR number')
     add_pr_parser.add_argument('--client-id', required=True, help='OAuth client ID')
     add_pr_parser.add_argument('--project-id', help='Google Cloud project ID')
     add_pr_parser.add_argument('--service-account', help='Path to service account JSON')
-    
-    # Remove PR redirect URI
+
+
+def _add_pr_remove_command(subparsers) -> None:
+    """Add 'remove-pr' subcommand."""
     remove_pr_parser = subparsers.add_parser('remove-pr', help='Remove redirect URIs for PR environment')
     remove_pr_parser.add_argument('pr_number', type=int, help='PR number')
     remove_pr_parser.add_argument('--client-id', required=True, help='OAuth client ID')
     remove_pr_parser.add_argument('--project-id', help='Google Cloud project ID')
     remove_pr_parser.add_argument('--service-account', help='Path to service account JSON')
-    
-    # List redirect URIs
+
+
+def _add_pr_list_command(subparsers) -> None:
+    """Add 'list' subcommand."""
     list_parser = subparsers.add_parser('list', help='List current redirect URIs')
     list_parser.add_argument('--client-id', required=True, help='OAuth client ID')
     list_parser.add_argument('--project-id', help='Google Cloud project ID')
     list_parser.add_argument('--service-account', help='Path to service account JSON')
-    
-    # Set client ID
+
+
+def _add_config_subcommands(subparsers) -> None:
+    """Add configuration-related subcommands."""
+    _add_set_client_id_command(subparsers)
+    _add_set_client_secret_command(subparsers)
+    _add_generate_env_command(subparsers)
+
+
+def _add_set_client_id_command(subparsers) -> None:
+    """Add 'set-client-id' subcommand."""
     set_id_parser = subparsers.add_parser('set-client-id', help='Set OAuth client ID for environment')
     set_id_parser.add_argument('environment', choices=['development', 'testing', 'staging', 'production'])
     set_id_parser.add_argument('client_id', help='OAuth client ID')
-    
-    # Set client secret
+
+
+def _add_set_client_secret_command(subparsers) -> None:
+    """Add 'set-client-secret' subcommand."""
     set_secret_parser = subparsers.add_parser('set-client-secret', help='Set OAuth client secret for environment')
     set_secret_parser.add_argument('environment', choices=['development', 'testing', 'staging', 'production'])
     set_secret_parser.add_argument('client_secret', help='OAuth client secret')
-    
-    # Generate env file
+
+
+def _add_generate_env_command(subparsers) -> None:
+    """Add 'generate-env' subcommand."""
     gen_env_parser = subparsers.add_parser('generate-env', help='Generate environment file')
     gen_env_parser.add_argument('environment', choices=['development', 'testing', 'staging', 'production'])
     gen_env_parser.add_argument('--output', help='Output file path')
-    
+
+
+def handle_google_api_commands(args: argparse.Namespace) -> None:
+    """Handle commands that use Google API."""
+    if not args.project_id:
+        logger.error("Project ID is required for Google API operations")
+        return
+    manager = OAuthManager(args.project_id, args.service_account)
+    _execute_google_api_command(manager, args)
+
+
+def _execute_google_api_command(manager: OAuthManager, args: argparse.Namespace) -> None:
+    """Execute specific Google API command."""
+    if args.command == 'add-pr':
+        success = manager.add_pr_redirect_uri(args.pr_number, args.client_id)
+        sys.exit(0 if success else 1)
+    elif args.command == 'remove-pr':
+        success = manager.remove_pr_redirect_uri(args.pr_number, args.client_id)
+        sys.exit(0 if success else 1)
+    elif args.command == 'list':
+        _handle_list_command(manager, args)
+
+
+def _handle_list_command(manager: OAuthManager, args: argparse.Namespace) -> None:
+    """Handle list redirect URIs command."""
+    uris = manager.list_redirect_uris(args.client_id)
+    if uris:
+        print(json.dumps(uris, indent=2))
+    sys.exit(0 if uris else 1)
+
+
+def handle_local_config_commands(args: argparse.Namespace) -> None:
+    """Handle commands that use local configuration."""
+    config = LocalOAuthConfig()
+    if args.command == 'set-client-id':
+        config.set_client_id(args.environment, args.client_id)
+    elif args.command == 'set-client-secret':
+        config.set_client_secret(args.environment, args.client_secret)
+    elif args.command == 'generate-env':
+        config.generate_env_file(args.environment, args.output)
+
+
+def main():
+    """Main entry point for OAuth management script."""
+    parser = create_main_parser()
     args = parser.parse_args()
-    
     if not args.command:
         parser.print_help()
         return
-    
-    # Commands that use Google API
     if args.command in ['add-pr', 'remove-pr', 'list']:
-        if not args.project_id:
-            logger.error("Project ID is required for Google API operations")
-            return
-        
-        manager = OAuthManager(args.project_id, args.service_account)
-        
-        if args.command == 'add-pr':
-            success = manager.add_pr_redirect_uri(args.pr_number, args.client_id)
-            sys.exit(0 if success else 1)
-        
-        elif args.command == 'remove-pr':
-            success = manager.remove_pr_redirect_uri(args.pr_number, args.client_id)
-            sys.exit(0 if success else 1)
-        
-        elif args.command == 'list':
-            uris = manager.list_redirect_uris(args.client_id)
-            if uris:
-                print(json.dumps(uris, indent=2))
-            sys.exit(0 if uris else 1)
-    
-    # Commands that use local configuration
+        handle_google_api_commands(args)
     else:
-        config = LocalOAuthConfig()
-        
-        if args.command == 'set-client-id':
-            config.set_client_id(args.environment, args.client_id)
-        
-        elif args.command == 'set-client-secret':
-            config.set_client_secret(args.environment, args.client_secret)
-        
-        elif args.command == 'generate-env':
-            config.generate_env_file(args.environment, args.output)
+        handle_local_config_commands(args)
 
 
 if __name__ == '__main__':

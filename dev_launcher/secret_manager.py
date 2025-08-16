@@ -34,7 +34,10 @@ class SecretLoader:
             verbose: Whether to show verbose output
             project_root: Project root directory
         """
-        self.project_id = project_id or os.environ.get('GOOGLE_CLOUD_PROJECT', "304612253870")
+        # Determine project ID based on environment
+        environment = os.environ.get("ENVIRONMENT", "development").lower()
+        default_project_id = "701982941522" if environment == "staging" else "304612253870"
+        self.project_id = project_id or os.environ.get('GOOGLE_CLOUD_PROJECT', default_project_id)
         self.verbose = verbose
         self.project_root = project_root or Path.cwd()
         self.loaded_secrets: Dict[str, str] = {}

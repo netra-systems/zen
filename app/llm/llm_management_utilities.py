@@ -4,7 +4,7 @@ Provides health checking, statistics, and configuration information utilities.
 Each function must be ≤8 lines as per architecture requirements.
 """
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, UTC
 from app.schemas.llm_base_types import (
     LLMConfigInfo, LLMManagerStats, LLMHealthCheck, LLMProvider
 )
@@ -62,7 +62,7 @@ class LLMManagementUtilities:
                 config_name=config_name,
                 healthy=bool(test_response),
                 response_time_ms=response_time_ms,
-                last_checked=datetime.utcnow()
+                last_checked=datetime.now(UTC)
             )
         except Exception as e:
             response_time_ms = (time.time() - start_time) * 1000
@@ -71,5 +71,5 @@ class LLMManagementUtilities:
                 healthy=False,
                 response_time_ms=response_time_ms,
                 error=str(e),
-                last_checked=datetime.utcnow()
+                last_checked=datetime.now(UTC)
             )

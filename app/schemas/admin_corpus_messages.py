@@ -9,7 +9,7 @@ Maximum 300 lines per conventions.xml, each function ≤8 lines.
 from typing import Dict, Any, List, Optional, Literal
 from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 class CorpusIntent(str, Enum):
@@ -34,7 +34,7 @@ class CorpusDiscoveryRequest(BaseModel):
     query: str
     context: Dict[str, Any] = Field(default_factory=dict)
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusDiscoveryResponse(BaseModel):
@@ -48,7 +48,7 @@ class CorpusDiscoveryResponse(BaseModel):
     suggestions: List[str] = Field(default_factory=list)
     parameters: Optional[Dict[str, Any]] = None
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusGenerationRequest(BaseModel):
@@ -62,7 +62,7 @@ class CorpusGenerationRequest(BaseModel):
     options: Dict[str, Any] = Field(default_factory=dict)
     target_table: Optional[str] = None
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusGenerationResponse(BaseModel):
@@ -76,7 +76,7 @@ class CorpusGenerationResponse(BaseModel):
     message: str
     metadata: Dict[str, Any] = Field(default_factory=dict)
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class ConfigurationSuggestionRequest(BaseModel):
@@ -87,7 +87,7 @@ class ConfigurationSuggestionRequest(BaseModel):
     workload_type: Optional[str] = None
     constraints: Dict[str, Any] = Field(default_factory=dict)
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class ConfigurationSuggestionResponse(BaseModel):
@@ -97,7 +97,7 @@ class ConfigurationSuggestionResponse(BaseModel):
     preview: Dict[str, Any] = Field(default_factory=dict)
     validation_results: List[str] = Field(default_factory=list)
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusOperationStatus(BaseModel):
@@ -110,7 +110,7 @@ class CorpusOperationStatus(BaseModel):
     message: Optional[str] = None
     details: Dict[str, Any] = Field(default_factory=dict)
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusValidationRequest(BaseModel):
@@ -120,7 +120,7 @@ class CorpusValidationRequest(BaseModel):
     validation_types: List[str] = Field(default_factory=list)
     options: Dict[str, Any] = Field(default_factory=dict)
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusValidationResponse(BaseModel):
@@ -132,7 +132,7 @@ class CorpusValidationResponse(BaseModel):
     errors: List[str] = Field(default_factory=list)
     warnings: List[str] = Field(default_factory=list)
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusAutoCompleteRequest(BaseModel):
@@ -143,7 +143,7 @@ class CorpusAutoCompleteRequest(BaseModel):
     context: Dict[str, Any] = Field(default_factory=dict)
     limit: int = Field(default=10, ge=1, le=50)
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusAutoCompleteResponse(BaseModel):
@@ -152,7 +152,7 @@ class CorpusAutoCompleteResponse(BaseModel):
     suggestions: List[str] = Field(default_factory=list)
     category: str
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusErrorMessage(BaseModel):
@@ -164,7 +164,7 @@ class CorpusErrorMessage(BaseModel):
     details: Dict[str, Any] = Field(default_factory=dict)
     recoverable: bool = True
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusStreamUpdate(BaseModel):
@@ -176,7 +176,7 @@ class CorpusStreamUpdate(BaseModel):
     data: str
     metadata: Dict[str, Any] = Field(default_factory=dict)
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusConfigPreview(BaseModel):
@@ -188,7 +188,7 @@ class CorpusConfigPreview(BaseModel):
     resource_requirements: Dict[str, Any] = Field(default_factory=dict)
     warnings: List[str] = Field(default_factory=list)
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusBatchRequest(BaseModel):
@@ -198,7 +198,7 @@ class CorpusBatchRequest(BaseModel):
     execution_mode: Literal["sequential", "parallel"] = "sequential"
     stop_on_error: bool = True
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class CorpusBatchResponse(BaseModel):
@@ -210,7 +210,7 @@ class CorpusBatchResponse(BaseModel):
     failed: int
     results: List[Dict[str, Any]] = Field(default_factory=list)
     session_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 # Message type mapping for deserialization

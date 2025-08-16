@@ -41,7 +41,7 @@ class QueuedMessage:
     status: MessageStatus = MessageStatus.PENDING
     retry_count: int = 0
     max_retries: int = 3
-    created_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     processing_started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
     error: Optional[str] = None

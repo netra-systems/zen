@@ -4,7 +4,7 @@ Following Netra conventions with strong typing.
 """
 
 from typing import Dict, Any, Optional, List, Union, ForwardRef
-from datetime import datetime
+from datetime import datetime, UTC
 from pydantic import BaseModel, Field
 import uuid
 from app.schemas.llm_base_types import LLMProvider, TokenUsage
@@ -20,7 +20,7 @@ class LLMResponse(BaseModel):
     model: str
     choices: List[Dict[str, Any]]  # Provider-specific format
     usage: TokenUsage
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     response_time_ms: float
     cached: bool = Field(default=False)
     finish_reason: Optional[str] = None
@@ -41,10 +41,10 @@ class LLMCache(BaseModel):
     key: str
     request: LLMRequest
     response: LLMResponse
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     expires_at: Optional[datetime] = None
     hit_count: int = Field(default=0)
-    last_accessed: datetime = Field(default_factory=datetime.utcnow)
+    last_accessed: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class BatchLLMResponse(BaseModel):
@@ -54,22 +54,6 @@ class BatchLLMResponse(BaseModel):
     total_time_ms: float
 
 
-def _default_token_usage():
-    """Create default token usage for mock responses"""
-    from app.schemas.llm_types import TokenUsage
-    return TokenUsage(
-        prompt_tokens=10, 
-        completion_tokens=20, 
-        total_tokens=30
-    )
-
-
-class MockLLMResponse(BaseModel):
-    """Mock LLM response for testing"""
-    content: str
-    model: str = "mock-model"
-    usage: TokenUsage = Field(default_factory=_default_token_usage)
-    response_time_ms: float = 100.0
 
 
 class E2ETestInfrastructure(BaseModel):

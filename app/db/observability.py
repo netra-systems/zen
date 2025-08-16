@@ -107,61 +107,64 @@ class DatabaseObservability:
         self._monitoring_task = asyncio.create_task(self._monitoring_loop())
         logger.info("Database observability monitoring started")
     
-    async def stop_monitoring(self) -> None:
-        """Stop background monitoring."""
-        self._running = False
-        
+    async def _cancel_monitoring_task(self):
+        """Cancel the monitoring task if it exists."""
         if self._monitoring_task:
             self._monitoring_task.cancel()
             try:
                 await self._monitoring_task
             except asyncio.CancelledError:
                 pass
-        
+    
+    async def stop_monitoring(self) -> None:
+        """Stop background monitoring."""
+        self._running = False
+        await self._cancel_monitoring_task()
         logger.info("Database observability monitoring stopped")
+    
+    async def _execute_monitoring_cycle(self):
+        """Execute one monitoring cycle."""
+        await self._collect_metrics()
+        await self._check_alerts()
+        await asyncio.sleep(self._collection_interval)
+    
+    async def _handle_monitoring_error(self, e: Exception):
+        """Handle monitoring loop error."""
+        logger.error(f"Database monitoring error: {e}")
+        await asyncio.sleep(self._collection_interval)
     
     async def _monitoring_loop(self) -> None:
         """Main monitoring loop."""
         while self._running:
             try:
-                await self._collect_metrics()
-                await self._check_alerts()
-                await asyncio.sleep(self._collection_interval)
-                
+                await self._execute_monitoring_cycle()
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"Database monitoring error: {e}")
-                await asyncio.sleep(self._collection_interval)
+                await self._handle_monitoring_error(e)
+    
+    async def _gather_all_metrics(self, metrics: DatabaseMetrics):
+        """Gather all types of database metrics."""
+        await self._collect_connection_metrics(metrics)
+        await self._collect_query_metrics(metrics)
+        await self._collect_transaction_metrics(metrics)
+        await self._collect_cache_metrics(metrics)
+        await self._calculate_performance_metrics(metrics)
+    
+    def _store_collected_metrics(self, metrics: DatabaseMetrics):
+        """Store collected metrics and log summary."""
+        self.current_metrics = metrics
+        self.metrics_history.append(metrics)
+        logger.debug(f"Collected database metrics: {metrics.total_queries} queries, "
+                    f"{metrics.active_connections} connections")
     
     async def _collect_metrics(self) -> None:
         """Collect comprehensive database metrics."""
         timestamp = datetime.now()
         metrics = DatabaseMetrics(timestamp=timestamp)
-        
         try:
-            # Collect connection metrics
-            await self._collect_connection_metrics(metrics)
-            
-            # Collect query metrics
-            await self._collect_query_metrics(metrics)
-            
-            # Collect transaction metrics
-            await self._collect_transaction_metrics(metrics)
-            
-            # Collect cache metrics
-            await self._collect_cache_metrics(metrics)
-            
-            # Calculate performance metrics
-            await self._calculate_performance_metrics(metrics)
-            
-            # Store metrics
-            self.current_metrics = metrics
-            self.metrics_history.append(metrics)
-            
-            logger.debug(f"Collected database metrics: {metrics.total_queries} queries, "
-                        f"{metrics.active_connections} connections")
-            
+            await self._gather_all_metrics(metrics)
+            self._store_collected_metrics(metrics)
         except Exception as e:
             logger.error(f"Error collecting database metrics: {e}")
     

@@ -2,7 +2,7 @@
 Tool Permission Schemas
 """
 from typing import Dict, List, Optional, Any, Union
-from datetime import datetime
+from datetime import datetime, UTC
 from pydantic import BaseModel, Field
 from enum import Enum
 
@@ -41,7 +41,7 @@ class ToolPermission(BaseModel):
     business_requirements: BusinessRequirement = Field(default_factory=BusinessRequirement)
     rate_limits: Optional[RateLimit] = Field(default=None, description="Rate limiting rules")
     expires_at: Optional[datetime] = Field(default=None, description="Permission expiration")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class UserToolPermission(BaseModel):
@@ -51,7 +51,7 @@ class UserToolPermission(BaseModel):
     permission_level: PermissionLevel = Field(description="Granted permission level")
     granted_by: Optional[str] = Field(default=None, description="Who granted this permission")
     expires_at: Optional[datetime] = Field(default=None, description="Permission expiration")
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class ToolExecutionContext(BaseModel):

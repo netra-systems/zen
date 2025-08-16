@@ -24,6 +24,7 @@ from app.services.quality_gate_service import QualityGateService, ContentType, Q
 from app.services.corpus_service import CorpusService
 from app.services.apex_optimizer_agent.tools.tool_dispatcher import ApexToolSelector
 from app.services.state_persistence_service import state_persistence_service
+from app.agents.tool_dispatcher import ToolDispatcher
 from app.ws_manager import WebSocketManager
 from app.config import get_config
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -98,7 +99,7 @@ def setup_real_infrastructure():
     synthetic_data_service = Mock(spec=SyntheticDataService)
     synthetic_data_service.generate_workload = AsyncMock(return_value={
         "workload_id": str(uuid.uuid4()),
-        "category": WorkloadCategory.RETRIEVAL.value,
+        "category": WorkloadCategory.RAG_PIPELINE.value,
         "data": {"test": "data"},
         "metadata": {"generated_at": datetime.now().isoformat()}
     })
@@ -123,11 +124,18 @@ def setup_real_infrastructure():
     state_persistence_service_mock.save_state = AsyncMock()
     state_persistence_service_mock.load_state = AsyncMock(return_value=None)
     
+    tool_dispatcher = Mock(spec=ToolDispatcher)
+    tool_dispatcher.dispatch = AsyncMock(return_value={
+        "response": "Tool executed successfully",
+        "success": True
+    })
+    
     return {
         "config": config,
         "db_session": db_session,
         "llm_manager": llm_manager,
         "websocket_manager": websocket_manager,
+        "tool_dispatcher": tool_dispatcher,
         "synthetic_data_service": synthetic_data_service,
         "quality_gate_service": quality_gate_service,
         "corpus_service": corpus_service,

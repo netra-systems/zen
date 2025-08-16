@@ -13,6 +13,10 @@ import traceback
 from app.logging_config import central_logger
 from app.services.metrics.agent_metrics_compact import AgentMetricsCollector
 from app.services.metrics.agent_metrics_models import FailureType
+from app.middleware.metrics_helpers import (
+    AgentNameExtractor, OperationTypeDetector, FailureClassifier,
+    PerformanceMonitor, ErrorHandler, OperationMetadataBuilder, TimeoutHandler
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -37,78 +41,85 @@ class MetricsMiddlewareCore:
     
     def _extract_agent_name(self, func: Callable, args: tuple, kwargs: dict) -> str:
         """Extract agent name from function context."""
-        # Check if this is a method call with 'self' having a name attribute
-        if args and hasattr(args[0], 'name'):
-            return args[0].name
-        elif args and hasattr(args[0], '__class__'):
-            return args[0].__class__.__name__
-        
-        # Check kwargs for agent_name or similar
-        for key in ['agent_name', 'name', 'agent_id']:
-            if key in kwargs:
-                return str(kwargs[key])
-        
-        # Fallback to module and function name
-        module_name = func.__module__.split('.')[-1] if func.__module__ else "unknown"
-        return f"{module_name}_{func.__name__}"
+        name_from_self = AgentNameExtractor.extract_from_self_attribute(args)
+        if name_from_self:
+            return name_from_self
+        return self._extract_agent_name_fallback(func, args, kwargs)
+    
+    def _extract_agent_name_fallback(self, func: Callable, args: tuple, kwargs: dict) -> str:
+        """Extract agent name from alternative sources."""
+        name_from_class = AgentNameExtractor.extract_from_class_name(args)
+        if name_from_class:
+            return name_from_class
+        name_from_kwargs = AgentNameExtractor.extract_from_kwargs(kwargs, AgentNameExtractor.get_default_kwargs_keys())
+        if name_from_kwargs:
+            return name_from_kwargs
+        return AgentNameExtractor.extract_from_function_module(func)
     
     def _extract_operation_type(self, func: Callable) -> str:
         """Extract operation type from function name."""
         func_name = func.__name__
-        
-        # Common operation type mappings
-        if any(keyword in func_name.lower() for keyword in ['execute', 'run', 'process']):
+        if self._is_execution_or_validation_type(func_name):
+            return self._get_execution_or_validation_type(func_name)
+        return self._get_other_operation_type(func_name)
+    
+    def _is_execution_or_validation_type(self, func_name: str) -> bool:
+        """Check if function is execution or validation type."""
+        return (OperationTypeDetector.detect_execution_type(func_name) or
+                OperationTypeDetector.detect_validation_type(func_name))
+    
+    def _get_execution_or_validation_type(self, func_name: str) -> str:
+        """Get execution or validation operation type."""
+        if OperationTypeDetector.detect_execution_type(func_name):
             return "execution"
-        elif any(keyword in func_name.lower() for keyword in ['validate', 'check']):
-            return "validation"
-        elif any(keyword in func_name.lower() for keyword in ['analyze', 'compute', 'calculate']):
+        return "validation"
+    
+    def _get_other_operation_type(self, func_name: str) -> str:
+        """Get analysis, data retrieval, notification, or general type."""
+        if OperationTypeDetector.detect_analysis_type(func_name):
             return "analysis"
-        elif any(keyword in func_name.lower() for keyword in ['fetch', 'get', 'retrieve']):
+        elif OperationTypeDetector.detect_data_retrieval_type(func_name):
             return "data_retrieval"
-        elif any(keyword in func_name.lower() for keyword in ['send', 'notify', 'broadcast']):
+        elif OperationTypeDetector.detect_notification_type(func_name):
             return "notification"
-        else:
-            return "general"
+        return "general"
     
     def _classify_failure_type(self, error: Exception, error_message: str) -> FailureType:
         """Classify error into failure type."""
         error_type = type(error).__name__.lower()
         message_lower = error_message.lower()
-        
-        # Classification logic (8 lines max)
-        if "timeout" in error_type or "timeout" in message_lower:
+        if self._is_timeout_or_validation_error(error_type, message_lower):
+            return self._get_timeout_or_validation_failure_type(error_type, message_lower)
+        return self._get_other_failure_type(message_lower)
+    
+    def _is_timeout_or_validation_error(self, error_type: str, message_lower: str) -> bool:
+        """Check if error is timeout or validation type."""
+        return (FailureClassifier.is_timeout_error(error_type, message_lower) or
+                FailureClassifier.is_validation_error(error_type, message_lower))
+    
+    def _get_timeout_or_validation_failure_type(self, error_type: str, message_lower: str) -> FailureType:
+        """Get timeout or validation failure type."""
+        if FailureClassifier.is_timeout_error(error_type, message_lower):
             return FailureType.TIMEOUT
-        elif "validation" in error_type or "validation" in message_lower:
-            return FailureType.VALIDATION_ERROR
-        elif "websocket" in error_type or "websocket" in message_lower:
+        return FailureType.VALIDATION_ERROR
+    
+    def _get_other_failure_type(self, message_lower: str) -> FailureType:
+        """Get websocket, resource, dependency, or execution failure type."""
+        if FailureClassifier.is_websocket_error('', message_lower):
             return FailureType.WEBSOCKET_ERROR
-        elif "memory" in message_lower or "resource" in message_lower:
+        elif FailureClassifier.is_resource_error(message_lower):
             return FailureType.RESOURCE_ERROR
-        elif "connection" in message_lower or "network" in message_lower:
+        elif FailureClassifier.is_dependency_error(message_lower):
             return FailureType.DEPENDENCY_ERROR
-        else:
-            return FailureType.EXECUTION_ERROR
+        return FailureType.EXECUTION_ERROR
     
     def _get_memory_usage(self) -> float:
         """Get current memory usage in MB."""
-        try:
-            import psutil
-            process = psutil.Process()
-            return process.memory_info().rss / 1024 / 1024  # Convert to MB
-        except ImportError:
-            return 0.0
-        except Exception:
-            return 0.0
+        return PerformanceMonitor.get_memory_usage_mb()
     
     def _get_cpu_usage(self) -> float:
         """Get current CPU usage percentage."""
-        try:
-            import psutil
-            return psutil.cpu_percent(interval=0.1)
-        except ImportError:
-            return 0.0
-        except Exception:
-            return 0.0
+        return PerformanceMonitor.get_cpu_usage_percent()
     
     async def _handle_timeout(
         self, 
@@ -117,9 +128,9 @@ class MetricsMiddlewareCore:
         error: asyncio.TimeoutError
     ):
         """Handle operation timeout."""
-        timeout_ms = timeout_seconds * 1000
+        timeout_ms = TimeoutHandler.convert_timeout_to_ms(timeout_seconds)
         await self.metrics_collector.record_timeout(operation_id, timeout_ms)
-        logger.warning(f"Operation {operation_id} timed out after {timeout_seconds}s")
+        ErrorHandler.log_timeout_error(operation_id, timeout_seconds)
     
     async def _handle_operation_error(
         self, 
@@ -130,26 +141,24 @@ class MetricsMiddlewareCore:
         kwargs: dict
     ):
         """Handle operation error and classify failure type."""
-        error_type = type(error).__name__
-        error_message = str(error)
-        
-        # Classify failure type
+        error_info = self._extract_and_classify_error(error)
+        metadata = ErrorHandler.create_error_metadata(error_info['type'], func)
+        await self._record_operation_failure(operation_id, error_info, metadata)
+        ErrorHandler.log_operation_error(operation_id, error_info['type'], error_info['message'])
+    
+    def _extract_and_classify_error(self, error: Exception) -> dict:
+        """Extract error information and classify failure type."""
+        error_type, error_message = ErrorHandler.extract_error_info(error)
         failure_type = self._classify_failure_type(error, error_message)
-        
-        # Record the error
+        formatted_message = ErrorHandler.format_error_message(error_type, error_message)
+        return {'type': error_type, 'message': error_message, 'formatted': formatted_message, 'failure_type': failure_type}
+    
+    async def _record_operation_failure(self, operation_id: str, error_info: dict, metadata: dict) -> None:
+        """Record operation failure in metrics."""
         await self.metrics_collector.end_operation(
-            operation_id=operation_id,
-            success=False,
-            failure_type=failure_type,
-            error_message=f"{error_type}: {error_message}",
-            metadata={
-                "error_type": error_type,
-                "function_name": func.__name__,
-                "traceback": traceback.format_exc()
-            }
+            operation_id=operation_id, success=False, failure_type=error_info['failure_type'],
+            error_message=error_info['formatted'], metadata=metadata
         )
-        
-        logger.error(f"Operation {operation_id} failed: {error_type}: {error_message}")
     
     async def track_operation_with_context(
         self,
@@ -164,53 +173,79 @@ class MetricsMiddlewareCore:
         """Track operation with full context and error handling."""
         if not self._enabled:
             return await operation_func(*args, **kwargs)
-        
-        # Start operation tracking
-        operation_id = await self.metrics_collector.start_operation(
-            agent_name=agent_name,
-            operation_type=operation_type,
-            metadata={
-                "function_name": operation_func.__name__,
-                "module": operation_func.__module__,
-                "start_time": datetime.now(UTC)
-            }
+        return await self._execute_tracked_context_operation(
+            agent_name, operation_type, operation_func, include_performance, timeout_seconds, args, kwargs
         )
-        
-        start_time = time.time()
-        memory_before = self._get_memory_usage() if include_performance else 0.0
-        
+    
+    async def _execute_tracked_context_operation(
+        self, agent_name: str, operation_type: str, operation_func: Callable, 
+        include_performance: bool, timeout_seconds: Optional[float], args: tuple, kwargs: dict
+    ) -> Any:
+        """Execute operation with full context tracking."""
+        operation_id, start_time, memory_before = await self._prepare_context_tracking(
+            agent_name, operation_type, operation_func, include_performance
+        )
         try:
-            # Execute the function with timeout if specified
-            if timeout_seconds:
-                result = await asyncio.wait_for(
-                    operation_func(*args, **kwargs), 
-                    timeout=timeout_seconds
-                )
-            else:
-                result = await operation_func(*args, **kwargs)
-            
-            # Calculate performance metrics
-            execution_time = (time.time() - start_time) * 1000
-            memory_after = self._get_memory_usage() if include_performance else 0.0
-            memory_delta = max(0, memory_after - memory_before)
-            
-            # Record successful operation
-            await self.metrics_collector.end_operation(
-                operation_id=operation_id,
-                success=True,
-                memory_usage_mb=memory_delta,
-                cpu_usage_percent=self._get_cpu_usage() if include_performance else 0.0,
-                metadata={
-                    "execution_time_ms": execution_time,
-                    "result_type": type(result).__name__ if result else "None"
-                }
-            )
-            
+            result = await self._execute_context_function(operation_func, timeout_seconds, args, kwargs)
+            await self._record_context_success(operation_id, result, start_time, memory_before, include_performance)
             return result
-            
         except asyncio.TimeoutError as e:
             await self._handle_timeout(operation_id, timeout_seconds or 0, e)
             raise
         except Exception as e:
             await self._handle_operation_error(operation_id, e, operation_func, args, kwargs)
             raise
+    
+    async def _prepare_context_tracking(
+        self, agent_name: str, operation_type: str, operation_func: Callable, include_performance: bool
+    ) -> tuple[str, float, float]:
+        """Prepare context tracking with metadata."""
+        operation_id = await self._start_context_operation(agent_name, operation_type, operation_func)
+        start_time, memory_before = self._initialize_context_performance_tracking(include_performance)
+        return operation_id, start_time, memory_before
+    
+    async def _start_context_operation(self, agent_name: str, operation_type: str, operation_func: Callable) -> str:
+        """Start context operation with metadata."""
+        metadata = OperationMetadataBuilder.create_start_metadata(operation_func)
+        return await self.metrics_collector.start_operation(
+            agent_name=agent_name, operation_type=operation_type, metadata=metadata
+        )
+    
+    def _initialize_context_performance_tracking(self, include_performance: bool) -> tuple[float, float]:
+        """Initialize context performance tracking variables."""
+        start_time = time.time()
+        memory_before = self._get_memory_usage() if include_performance else 0.0
+        return start_time, memory_before
+    
+    async def _execute_context_function(
+        self, operation_func: Callable, timeout_seconds: Optional[float], args: tuple, kwargs: dict
+    ) -> Any:
+        """Execute function with optional timeout."""
+        if timeout_seconds:
+            return await TimeoutHandler.execute_with_timeout(operation_func, timeout_seconds, *args, **kwargs)
+        else:
+            return await TimeoutHandler.execute_without_timeout(operation_func, *args, **kwargs)
+    
+    async def _record_context_success(
+        self, operation_id: str, result: Any, start_time: float, memory_before: float, include_performance: bool
+    ) -> None:
+        """Record successful context operation."""
+        execution_time_ms = PerformanceMonitor.calculate_execution_time_ms(start_time)
+        performance_metrics = self._collect_context_performance_metrics(memory_before, include_performance)
+        metadata = OperationMetadataBuilder.create_success_metadata(execution_time_ms, result)
+        await self._finalize_context_success(operation_id, performance_metrics, metadata)
+    
+    def _collect_context_performance_metrics(self, memory_before: float, include_performance: bool) -> dict:
+        """Collect context performance metrics for operation."""
+        memory_after = self._get_memory_usage() if include_performance else 0.0
+        memory_delta = PerformanceMonitor.calculate_memory_delta(memory_before, memory_after)
+        cpu_usage = self._get_cpu_usage() if include_performance else 0.0
+        return {'memory_usage_mb': memory_delta, 'cpu_usage_percent': cpu_usage}
+    
+    async def _finalize_context_success(self, operation_id: str, performance_metrics: dict, metadata: dict) -> None:
+        """Finalize successful context operation recording."""
+        await self.metrics_collector.end_operation(
+            operation_id=operation_id, success=True, 
+            memory_usage_mb=performance_metrics['memory_usage_mb'],
+            cpu_usage_percent=performance_metrics['cpu_usage_percent'], metadata=metadata
+        )

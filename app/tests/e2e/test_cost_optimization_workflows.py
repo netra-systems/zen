@@ -46,6 +46,7 @@ def _build_cost_setup(agents: Dict, llm: LLMManager, ws: WebSocketManager) -> Di
     }
 
 
+@pytest.mark.real_llm
 class TestCostQualityConstraints:
     """Test cost optimization with quality preservation requirements."""
     
@@ -176,6 +177,7 @@ def _validate_comprehensive_optimization(result: Dict, state: DeepAgentState):
     assert hasattr(state, 'optimizations_result') or result['execution_result'] is not None
 
 
+@pytest.mark.real_llm
 class TestBudgetConstrainedOptimization:
     """Test optimization workflows with strict budget constraints."""
     
@@ -217,6 +219,7 @@ def _validate_efficiency_focus(result: Dict):
     assert result['state_updated']
 
 
+@pytest.mark.real_llm
 class TestWorkflowIntegrity:
     """Test integrity of complete cost optimization workflows."""
     
@@ -249,6 +252,7 @@ def _validate_data_continuity(results: List[Dict], state: DeepAgentState):
     assert hasattr(state, 'metadata')
 
 
+@pytest.mark.real_llm
 class TestErrorHandling:
     """Test error handling in cost optimization workflows."""
     

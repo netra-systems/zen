@@ -8,7 +8,11 @@ from app.schemas import AppConfig
 from app.schemas.llm_base_types import LLMProvider
 from app.schemas.llm_config_types import LLMConfig as GenerationConfig
 from app.schemas.llm_response_types import LLMResponse
-from app.llm.llm_mocks import MockLLM
+# Only import MockLLM for development mode to avoid test dependencies in production
+try:
+    from app.tests.helpers.llm_mocks import MockLLM
+except ImportError:
+    MockLLM = None
 from app.core.exceptions_service import ServiceUnavailableError
 from app.llm.llm_provider_handlers import create_llm_for_provider, validate_provider_key
 from app.llm.llm_response_processing import create_cached_llm_response, create_llm_response, stream_llm_response
@@ -67,13 +71,13 @@ class LLMCoreOperations:
 
     def _handle_disabled_llm(self, name: str) -> Any:
         """Handle disabled LLM based on environment - dev gets mock, production gets error."""
-        if self.settings.environment == "development":
+        if self.settings.environment == "development" and MockLLM is not None:
             logger.debug(f"Returning mock LLM for '{name}' - LLMs disabled in dev mode")
             return MockLLM(name)
         
-        error_msg = f"LLM '{name}' is not available - LLM service is disabled in production"
+        error_msg = f"LLM '{name}' is not available - LLM service is disabled"
         logger.error(error_msg)
-        raise RuntimeError(error_msg)
+        raise ServiceUnavailableError(error_msg)
 
     def get_llm(self, name: str, generation_config: Optional[GenerationConfig] = None) -> Any:
         """Get LLM instance with caching."""

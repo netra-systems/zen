@@ -14,6 +14,13 @@ from app.logging_config import central_logger
 from app.schemas.Metrics import (
     CorpusMetric, MetricType, OperationMetrics, TimeSeriesPoint
 )
+from .core_collector_helpers import (
+    create_operation_data, calculate_timing_data, prepare_base_metrics_data,
+    build_operation_metrics, calculate_throughput, get_generation_metric_base_fields,
+    get_generation_metric_additional_fields, calculate_success_rate_from_counts,
+    calculate_average_time, is_entry_valid_for_time_series, create_time_series_point,
+    extract_metric_value, filter_recent_metrics
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -31,15 +38,8 @@ class CoreMetricsCollector:
     async def start_operation(self, corpus_id: str, operation_type: str) -> str:
         """Start tracking an operation"""
         operation_id = str(uuid.uuid4())
-        start_time = datetime.now(UTC)
-        
-        self._active_operations[operation_id] = {
-            "corpus_id": corpus_id,
-            "operation_type": operation_type,
-            "start_time": start_time,
-            "start_timestamp": time.time()
-        }
-        
+        operation_data = create_operation_data(corpus_id, operation_type)
+        self._active_operations[operation_id] = operation_data
         logger.debug(f"Started tracking operation {operation_id} for corpus {corpus_id}")
         return operation_id
     
@@ -54,7 +54,11 @@ class CoreMetricsCollector:
         operation_data = self._get_and_remove_operation_data(operation_id)
         if not operation_data:
             return None
-        
+        return await self._process_operation_completion(operation_data, success, records_processed, error_message)
+    
+    async def _process_operation_completion(self, operation_data: Dict[str, Any], success: bool, 
+                                          records_processed: Optional[int], error_message: Optional[str]) -> OperationMetrics:
+        """Process operation completion and create metrics."""
         metrics = self._create_operation_metrics(operation_data, success, records_processed, error_message)
         await self._record_operation_metrics(operation_data["corpus_id"], metrics)
         return metrics
@@ -69,47 +73,37 @@ class CoreMetricsCollector:
     def _create_operation_metrics(self, operation_data: Dict[str, Any], success: bool, 
                                  records_processed: Optional[int], error_message: Optional[str]) -> OperationMetrics:
         """Create operation metrics from operation data."""
-        end_time = datetime.now(UTC)
-        duration_ms = int((time.time() - operation_data["start_timestamp"]) * 1000)
-        
-        return OperationMetrics(
-            operation_type=operation_data["operation_type"],
-            start_time=operation_data["start_time"],
-            end_time=end_time,
-            duration_ms=duration_ms,
-            success=success,
-            error_message=error_message,
-            records_processed=records_processed,
-            throughput_per_second=self._calculate_throughput(records_processed, duration_ms)
-        )
-    
-    def _calculate_throughput(self, records: Optional[int], duration_ms: int) -> Optional[float]:
-        """Calculate throughput in records per second"""
-        if not records or duration_ms <= 0:
-            return None
-        return (records * 1000.0) / duration_ms
+        timing_data = calculate_timing_data(operation_data["start_timestamp"], operation_data["start_time"])
+        base_data = prepare_base_metrics_data(operation_data, success, error_message, records_processed)
+        throughput = calculate_throughput(records_processed, timing_data["duration_ms"])
+        return build_operation_metrics(base_data, timing_data, throughput)
     
     async def _record_operation_metrics(self, corpus_id: str, metrics: OperationMetrics):
         """Record operation metrics internally"""
         operation_key = f"{corpus_id}:{metrics.operation_type}"
-        
-        # Track timing
-        self._operation_times[operation_key].append(metrics.duration_ms)
-        
-        # Track success/failure
-        if metrics.success:
+        self._track_timing_metrics(operation_key, metrics.duration_ms)
+        self._track_success_failure_metrics(operation_key, metrics.success)
+        self._buffer_metrics_for_export(corpus_id, metrics)
+        logger.debug(f"Recorded metrics for {operation_key}: {metrics.duration_ms}ms, success={metrics.success}")
+    
+    def _track_timing_metrics(self, operation_key: str, duration_ms: int) -> None:
+        """Track timing metrics for operation."""
+        self._operation_times[operation_key].append(duration_ms)
+    
+    def _track_success_failure_metrics(self, operation_key: str, success: bool) -> None:
+        """Track success/failure metrics for operation."""
+        if success:
             self._success_counts[operation_key]["success"] += 1
         else:
             self._success_counts[operation_key]["failure"] += 1
-        
-        # Buffer for export
+    
+    def _buffer_metrics_for_export(self, corpus_id: str, metrics: OperationMetrics) -> None:
+        """Buffer metrics for export."""
         self._metrics_buffer.append({
             "corpus_id": corpus_id,
             "metrics": metrics,
             "timestamp": datetime.now(UTC)
         })
-        
-        logger.debug(f"Recorded metrics for {operation_key}: {metrics.duration_ms}ms, success={metrics.success}")
     
     async def record_generation_time(self, corpus_id: str, duration_ms: int):
         """Record generation time metric"""
@@ -118,16 +112,9 @@ class CoreMetricsCollector:
     
     def _create_generation_time_metric(self, corpus_id: str, duration_ms: int) -> CorpusMetric:
         """Create generation time metric."""
-        return CorpusMetric(
-            metric_id=str(uuid.uuid4()),
-            corpus_id=corpus_id,
-            metric_type=MetricType.GENERATION_TIME,
-            value=duration_ms,
-            unit="milliseconds",
-            timestamp=datetime.now(UTC),
-            tags={"source": "generation"},
-            metadata={"operation": "content_generation"}
-        )
+        base_fields = get_generation_metric_base_fields(corpus_id, duration_ms)
+        additional_fields = get_generation_metric_additional_fields()
+        return CorpusMetric(**base_fields, **additional_fields)
     
     async def _store_metric(self, metric: CorpusMetric):
         """Store individual metric"""
@@ -140,7 +127,7 @@ class CoreMetricsCollector:
     def get_success_rate(self, corpus_id: str, operation_type: str = None) -> float:
         """Calculate success rate for operations"""
         counts = self._get_success_counts_for_corpus(corpus_id, operation_type)
-        return self._calculate_success_rate_from_counts(counts)
+        return calculate_success_rate_from_counts(counts)
     
     def _get_success_counts_for_corpus(self, corpus_id: str, operation_type: Optional[str]) -> Dict[str, int]:
         """Get success counts for corpus and operation type."""
@@ -158,15 +145,10 @@ class CoreMetricsCollector:
                 counts["failure"] += data["failure"]
         return counts
     
-    def _calculate_success_rate_from_counts(self, counts: Dict[str, int]) -> float:
-        """Calculate success rate from success/failure counts."""
-        total = counts["success"] + counts["failure"]
-        return counts["success"] / total if total > 0 else 0.0
-    
     def get_average_generation_time(self, corpus_id: str, operation_type: str = None) -> float:
         """Get average generation time"""
         times = self._get_operation_times_for_corpus(corpus_id, operation_type)
-        return self._calculate_average_time(times)
+        return calculate_average_time(times)
     
     def _get_operation_times_for_corpus(self, corpus_id: str, operation_type: Optional[str]) -> List[float]:
         """Get operation times for corpus and operation type."""
@@ -183,10 +165,6 @@ class CoreMetricsCollector:
                 times.extend(list(data))
         return times
     
-    def _calculate_average_time(self, times: List[float]) -> float:
-        """Calculate average time from list of times."""
-        return sum(times) / len(times) if times else 0.0
-    
     def get_time_series_data(
         self, 
         corpus_id: str, 
@@ -202,39 +180,11 @@ class CoreMetricsCollector:
         """Extract time series points from metrics buffer."""
         points = []
         for entry in self._metrics_buffer:
-            if self._is_entry_valid_for_time_series(entry, corpus_id, cutoff_time):
-                point = self._create_time_series_point(entry, metric_type)
+            if is_entry_valid_for_time_series(entry, corpus_id, cutoff_time):
+                point = create_time_series_point(entry, metric_type)
                 if point:
                     points.append(point)
         return points
-    
-    def _is_entry_valid_for_time_series(self, entry: Dict, corpus_id: str, cutoff_time: datetime) -> bool:
-        """Check if entry is valid for time series data."""
-        if entry.get("timestamp", datetime.min.replace(tzinfo=UTC)) < cutoff_time:
-            return False
-        return "metrics" in entry and entry.get("corpus_id") == corpus_id
-    
-    def _create_time_series_point(self, entry: Dict, metric_type: str) -> Optional[TimeSeriesPoint]:
-        """Create time series point from entry."""
-        metrics = entry["metrics"]
-        value = self._extract_metric_value(metrics, metric_type)
-        if value is not None:
-            return TimeSeriesPoint(
-                timestamp=entry["timestamp"],
-                value=value,
-                tags={"operation": metrics.operation_type}
-            )
-        return None
-    
-    def _extract_metric_value(self, metrics: OperationMetrics, metric_type: str) -> Optional[float]:
-        """Extract specific metric value from operation metrics"""
-        mapping = {
-            "duration": metrics.duration_ms,
-            "throughput": metrics.throughput_per_second,
-            "records": metrics.records_processed,
-            "success": 1.0 if metrics.success else 0.0
-        }
-        return mapping.get(metric_type)
     
     def get_buffer_status(self) -> Dict[str, Any]:
         """Get current buffer status"""
@@ -249,13 +199,5 @@ class CoreMetricsCollector:
     async def clear_old_data(self, age_hours: int = 24):
         """Clear old data from buffers"""
         cutoff_time = datetime.now(UTC) - timedelta(hours=age_hours)
-        self._metrics_buffer = self._filter_recent_metrics(cutoff_time)
+        self._metrics_buffer = filter_recent_metrics(self._metrics_buffer, cutoff_time, self.max_buffer_size)
         logger.info(f"Cleared metrics data older than {age_hours} hours")
-    
-    def _filter_recent_metrics(self, cutoff_time: datetime) -> deque:
-        """Filter and return recent metrics from buffer."""
-        filtered_buffer = deque(maxlen=self.max_buffer_size)
-        for entry in self._metrics_buffer:
-            if entry.get("timestamp", datetime.min.replace(tzinfo=UTC)) >= cutoff_time:
-                filtered_buffer.append(entry)
-        return filtered_buffer

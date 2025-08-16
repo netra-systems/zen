@@ -6,7 +6,7 @@ Extends the base system health monitor with comprehensive agent monitoring.
 import asyncio
 import time
 from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from app.logging_config import central_logger
 from .system_health_monitor import SystemHealthMonitor, HealthStatus, ComponentHealth, SystemAlert
@@ -267,7 +267,7 @@ class EnhancedSystemHealthMonitor(SystemHealthMonitor):
             system_overview = await metrics_collector.get_system_overview()
             
             return {
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(UTC),
                 "system_health": basic_health,
                 "agent_health": agent_health,
                 "metrics_overview": system_overview,
@@ -281,7 +281,7 @@ class EnhancedSystemHealthMonitor(SystemHealthMonitor):
             }
         except Exception as e:
             logger.error(f"Error generating comprehensive health report: {e}")
-            return {"error": str(e), "timestamp": datetime.utcnow()}
+            return {"error": str(e), "timestamp": datetime.now(UTC)}
 
     async def start_monitoring(self):
         """Start enhanced monitoring including alert manager."""

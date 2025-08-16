@@ -18,8 +18,7 @@ from app.schemas.llm_response_types import (
     LLMResponse,
     LLMStreamChunk,
     BatchLLMResponse,
-    LLMCache,
-    MockLLMResponse
+    LLMCache
 )
 
 # Re-export core types
@@ -58,7 +57,7 @@ __all__ = [
     
     # Response types
     "LLMResponse", "LLMStreamChunk", "BatchLLMResponse", 
-    "LLMCache", "MockLLMResponse",
+    "LLMCache",
     
     # Core types
     "LLMProvider", "LLMModel", "LLMRole", "TokenUsage", "LLMMessage",

@@ -8,7 +8,7 @@ import asyncio
 import uuid
 import json
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import List, Dict, Any, Optional
 import clickhouse_connect
 from clickhouse_connect.driver.client import Client
@@ -152,7 +152,7 @@ class TestWorkloadEventsTable:
             
             # Generate test workload events
             test_events = []
-            base_time = datetime.utcnow()
+            base_time = datetime.now(UTC)
             
             for i in range(10):
                 event = {
@@ -393,7 +393,7 @@ class TestClickHousePerformance:
             # Generate large batch of events
             batch_size = 1000
             events = []
-            base_time = datetime.utcnow()
+            base_time = datetime.now(UTC)
             
             for i in range(batch_size):
                 event = [

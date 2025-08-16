@@ -1,7 +1,7 @@
 """Agent state schemas for state persistence and recovery."""
 
 from typing import Dict, Any, Optional, List, Union
-from datetime import datetime
+from datetime import datetime, UTC
 from pydantic import BaseModel, Field, ConfigDict
 from enum import Enum
 
@@ -65,7 +65,7 @@ class AgentStateMetadata(BaseModel):
     step_count: int = 0
     agent_phase: Optional[AgentPhase] = None
     execution_context: Dict[str, Any] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     expires_at: Optional[datetime] = None
 
 
@@ -100,7 +100,7 @@ class StateTransaction(BaseModel):
     status: StateTransactionStatus = StateTransactionStatus.PENDING
     error_message: Optional[str] = None
     execution_time_ms: Optional[int] = None
-    started_at: datetime = Field(default_factory=datetime.utcnow)
+    started_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     completed_at: Optional[datetime] = None
 
 
@@ -122,7 +122,7 @@ class RecoveryOperation(BaseModel):
     lost_data: Optional[Dict[str, Any]] = None
     data_integrity_score: Optional[int] = None
     recovery_time_ms: Optional[int] = None
-    initiated_at: datetime = Field(default_factory=datetime.utcnow)
+    initiated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     completed_at: Optional[datetime] = None
 
 
@@ -187,7 +187,7 @@ class StateBackupInfo(BaseModel):
     backup_type: str  # full, incremental, differential
     file_path: Optional[str] = None
     size_bytes: int
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     retention_days: int = 30
 
 
@@ -200,4 +200,4 @@ class StateHealthCheck(BaseModel):
     data_integrity_score: float = Field(ge=0.0, le=1.0, default=1.0)
     issues: List[str] = Field(default_factory=list)
     recommendations: List[str] = Field(default_factory=list)
-    checked_at: datetime = Field(default_factory=datetime.utcnow)
+    checked_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

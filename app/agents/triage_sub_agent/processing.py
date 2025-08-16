@@ -28,98 +28,29 @@ class TriageProcessor:
     async def process_with_llm(self, state, run_id, start_time):
         """Process request with LLM using structured generation"""
         retry_count = 0
-        triage_result = None
+        triage_result = await self._retry_llm_processing(state, run_id, retry_count)
         
-        while retry_count < self.triage_core.max_retries and not triage_result:
-            try:
-                enhanced_prompt = self._build_enhanced_prompt(state.user_request)
-                
-                # Try structured generation first
-                try:
-                    validated_result = await self.llm_manager.ask_structured_llm(
-                        enhanced_prompt,
-                        llm_config_name='triage',
-                        schema=TriageResult,
-                        use_cache=False
-                    )
-                    triage_result = validated_result.model_dump()
-                except ValidationError as validation_error:
-                    # Try to fix validation errors and retry once
-                    if "Input should be a valid dictionary" in str(validation_error):
-                        self.logger.warning(f"String parameters detected, using fallback processing")
-                        triage_result = await self._fallback_llm_processing(
-                            enhanced_prompt, run_id, validation_error
-                        )
-                    else:
-                        raise validation_error
-                except Exception as struct_error:
-                    triage_result = await self._fallback_llm_processing(
-                        enhanced_prompt, run_id, struct_error
-                    )
-                
-            except Exception as e:
-                self.logger.warning(f"Triage attempt {retry_count + 1} failed for run_id {run_id}: {e}")
-                retry_count += 1
-                
-                if retry_count < self.triage_core.max_retries:
-                    await asyncio.sleep(2 ** retry_count)
-        
-        # Use fallback if all retries failed
         if not triage_result:
-            self.logger.warning(f"Using fallback categorization for run_id: {run_id}")
-            fallback = self.triage_core.create_fallback_result(state.user_request)
-            triage_result = fallback.model_dump()
+            triage_result = self._create_fallback_triage_result(state, run_id)
         
-        # Add metadata
-        triage_result = self._add_metadata(triage_result, start_time, retry_count)
-        
-        return triage_result
+        return self._add_metadata(triage_result, start_time, retry_count)
     
     def _build_enhanced_prompt(self, user_request):
         """Build enhanced prompt for LLM processing"""
-        return f"""
-{triage_prompt_template.format(user_request=user_request)}
-
-Consider the following in your analysis:
-1. Extract all mentioned models, metrics, and time ranges
-2. Determine the urgency and complexity of the request
-3. Suggest specific tools that would be helpful
-4. Identify any constraints or requirements mentioned
-
-Categorize into one of these main categories:
-- Cost Optimization
-- Performance Optimization
-- Workload Analysis
-- Configuration & Settings
-- Monitoring & Reporting
-- Model Selection
-- Supply Catalog Management
-- Quality Optimization
-"""
+        base_prompt = triage_prompt_template.format(user_request=user_request)
+        analysis_instructions = self._get_analysis_instructions()
+        category_options = self._get_category_options()
+        
+        return f"{base_prompt}\n\n{analysis_instructions}\n\n{category_options}"
     
     async def _fallback_llm_processing(self, enhanced_prompt, run_id, struct_error):
         """Fallback to regular LLM with JSON extraction"""
-        self.logger.warning(f"Structured generation failed, falling back to JSON extraction: {struct_error}")
-        
-        llm_response_str = await self.llm_manager.ask_llm(
-            enhanced_prompt + "\n\nIMPORTANT: Return a properly formatted JSON object with all required fields.",
-            llm_config_name='triage'
-        )
-        
-        # Extract and validate JSON
-        extracted_json = self.triage_core.extract_and_validate_json(llm_response_str)
+        self._log_fallback_warning(struct_error)
+        llm_response = await self._get_fallback_llm_response(enhanced_prompt)
+        extracted_json = self.triage_core.extract_and_validate_json(llm_response)
         
         if extracted_json:
-            try:
-                # Fix string parameters before validation
-                fixed_json = self._fix_string_parameters(extracted_json)
-                validated_result = TriageResult(**fixed_json)
-                return validated_result.model_dump()
-            except ValidationError as e:
-                self.logger.warning(f"Validation error for run_id {run_id}: {e}")
-                # Return fixed JSON even if validation fails
-                return self._fix_string_parameters(extracted_json)
-        
+            return self._process_extracted_fallback_json(extracted_json, run_id)
         return None
     
     def _fix_string_parameters(self, data):

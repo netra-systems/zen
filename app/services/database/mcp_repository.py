@@ -4,7 +4,7 @@ Provides database operations for MCP clients and tool executions.
 """
 
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, and_
 from app.services.database.base_repository import BaseRepository
@@ -26,8 +26,8 @@ class MCPClientModel:
         self.api_key_hash = kwargs.get('api_key_hash')
         self.permissions = kwargs.get('permissions', [])
         self.metadata = kwargs.get('metadata', {})
-        self.created_at = kwargs.get('created_at', datetime.utcnow())
-        self.last_active = kwargs.get('last_active', datetime.utcnow())
+        self.created_at = kwargs.get('created_at', datetime.now(UTC))
+        self.last_active = kwargs.get('last_active', datetime.now(UTC))
 
 
 class MCPToolExecutionModel:
@@ -44,7 +44,7 @@ class MCPToolExecutionModel:
         self.execution_time_ms = kwargs.get('execution_time_ms', 0)
         self.status = kwargs.get('status', 'pending')
         self.error = kwargs.get('error')
-        self.created_at = kwargs.get('created_at', datetime.utcnow())
+        self.created_at = kwargs.get('created_at', datetime.now(UTC))
 
 
 class MCPClientRepository(BaseRepository[MCPClientModel]):
@@ -133,7 +133,7 @@ class MCPClientRepository(BaseRepository[MCPClientModel]):
         try:
             client = await self.get_client(db, client_id)
             if client:
-                client.last_active = datetime.utcnow()
+                client.last_active = datetime.now(UTC)
                 await db.commit()
                 return True
             return False

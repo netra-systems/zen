@@ -5,7 +5,7 @@ Provides centralized state management with transaction support.
 
 from typing import Dict, Any, Optional, List, Type, Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from enum import Enum
 import asyncio
 import json
@@ -41,7 +41,7 @@ class StateSnapshot:
 class StateTransaction:
     """Represents a state transaction"""
     id: str
-    started_at: datetime = field(default_factory=datetime.utcnow)
+    started_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     status: TransactionStatus = TransactionStatus.PENDING
     operations: List[Dict[str, Any]] = field(default_factory=list)
     snapshots: List[StateSnapshot] = field(default_factory=list)

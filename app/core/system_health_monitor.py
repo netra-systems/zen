@@ -8,7 +8,7 @@ All functions are ≤8 lines, total file ≤300 lines as per conventions.
 import asyncio
 import time
 from typing import Dict, Any, List, Optional, Callable
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.logging_config import central_logger
 from .health_types import HealthStatus, ComponentHealth, SystemAlert, HealthCheckResult
@@ -135,7 +135,7 @@ class SystemHealthMonitor:
         
         current_health = ComponentHealth(
             name=result.component_name, status=status, health_score=result.health_score,
-            last_check=datetime.utcnow(), error_count=1 if not result.success else 0,
+            last_check=datetime.now(UTC), error_count=1 if not result.success else 0,
             uptime=time.time() - self.start_time,
             metadata={**result.metadata, "response_time_ms": result.response_time_ms}
         )
@@ -192,7 +192,7 @@ class SystemHealthMonitor:
         """Trigger a system-wide alert."""
         alert = SystemAlert(
             alert_id=f"system_wide_{severity}_{int(time.time())}", component="system",
-            severity=severity, message=message, timestamp=datetime.utcnow(),
+            severity=severity, message=message, timestamp=datetime.now(UTC),
             metadata={"alert_type": "system_wide"}
         )
         await self.alert_manager.emit_alert(alert)

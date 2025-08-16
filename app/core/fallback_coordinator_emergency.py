@@ -3,7 +3,7 @@ Emergency fallback responses and cascade prevention.
 """
 
 from typing import Dict, Any
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.logging_config import central_logger
 
@@ -44,34 +44,48 @@ class EmergencyFallbackManager:
                                        fallback_type: str) -> Dict[str, Any]:
         """Execute emergency fallback when system is critical"""
         logger.warning(f"Executing emergency fallback for {agent_name}.{operation_name}")
-        
-        response = self.emergency_responses.get(fallback_type, self.emergency_responses["general"]).copy()
+        response = self._get_emergency_response_template(fallback_type)
+        return self._add_emergency_metadata(response, agent_name, operation_name)
+    
+    def _get_emergency_response_template(self, fallback_type: str) -> Dict[str, Any]:
+        """Get emergency response template for fallback type."""
+        return self.emergency_responses.get(fallback_type, self.emergency_responses["general"]).copy()
+    
+    def _add_emergency_metadata(self, response: Dict[str, Any], agent_name: str, operation_name: str) -> Dict[str, Any]:
+        """Add metadata to emergency response."""
         response.update({
             "agent": agent_name,
             "operation": operation_name,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "status": "emergency_fallback"
         })
-        
         return response
     
     async def execute_limited_fallback(self, agent_name: str, operation_name: str) -> Dict[str, Any]:
         """Execute limited fallback to prevent cascade"""
         logger.warning(f"Executing cascade prevention fallback for {agent_name}.{operation_name}")
-        
+        basic_response = self._build_basic_cascade_response(agent_name, operation_name)
+        return self._add_cascade_recommendations(basic_response)
+    
+    def _build_basic_cascade_response(self, agent_name: str, operation_name: str) -> Dict[str, Any]:
+        """Build basic cascade prevention response."""
         return {
             "status": "cascade_prevention",
             "message": f"Limited fallback for {agent_name} to prevent system cascade failure",
             "agent": agent_name,
             "operation": operation_name,
-            "timestamp": datetime.utcnow().isoformat(),
-            "fallback_type": "cascade_prevention",
-            "recommendations": [
-                "System is under high load",
-                "Try again in a few minutes",
-                "Consider simplifying your request"
-            ]
+            "timestamp": datetime.now(UTC).isoformat(),
+            "fallback_type": "cascade_prevention"
         }
+    
+    def _add_cascade_recommendations(self, response: Dict[str, Any]) -> Dict[str, Any]:
+        """Add recommendations to cascade prevention response."""
+        response["recommendations"] = [
+            "System is under high load",
+            "Try again in a few minutes",
+            "Consider simplifying your request"
+        ]
+        return response
     
     def get_emergency_response_template(self, fallback_type: str) -> Dict[str, Any]:
         """Get emergency response template for fallback type"""

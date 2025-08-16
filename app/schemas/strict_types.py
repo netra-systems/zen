@@ -6,7 +6,7 @@ replacing all Any types with proper typed unions and concrete types.
 
 from typing import Protocol, Dict, List, Optional, Union, Literal
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, UTC
 from pydantic import BaseModel, Field
 
 from app.agents.triage_sub_agent.models import TriageResult
@@ -120,7 +120,7 @@ class AgentExecutionContext(BaseModel):
     user_id: Optional[str] = Field(default=None, max_length=255)
     thread_id: Optional[str] = Field(default=None, max_length=255)
     stream_updates: bool = Field(default=False)
-    execution_start: datetime = Field(default_factory=datetime.utcnow)
+    execution_start: datetime = Field(default_factory=lambda: datetime.now(UTC))
     timeout_seconds: int = Field(default=300, ge=1, le=3600)
 
 

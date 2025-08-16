@@ -34,13 +34,13 @@ class QueryBuilder:
         SELECT
             {time_function}(timestamp) as time_bucket,
             count() as event_count,
-            quantileIf(0.5, metric_value, has_latency) as latency_p50,
-            quantileIf(0.95, metric_value, has_latency) as latency_p95,
-            quantileIf(0.99, metric_value, has_latency) as latency_p99,
-            avgIf(throughput_value, has_throughput) as avg_throughput,
-            maxIf(throughput_value, has_throughput) as peak_throughput,
+            quantileIf(0.5, toFloat64(metric_value), has_latency) as latency_p50,
+            quantileIf(0.95, toFloat64(metric_value), has_latency) as latency_p95,
+            quantileIf(0.99, toFloat64(metric_value), has_latency) as latency_p99,
+            avgIf(toFloat64(throughput_value), has_throughput) as avg_throughput,
+            maxIf(toFloat64(throughput_value), has_throughput) as peak_throughput,
             countIf(event_type = 'error') / count() * 100 as error_rate,
-            sumIf(cost_value, has_cost) / 100.0 as total_cost,
+            sumIf(toFloat64(cost_value), has_cost) / 100.0 as total_cost,
             uniqExact(workload_id) as unique_workloads
         FROM (
             SELECT
@@ -48,9 +48,9 @@ class QueryBuilder:
                 arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as idx,
                 arrayFirstIndex(x -> x = 'throughput', metrics.name) as idx2,
                 arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx3,
-                if(idx > 0, arrayElement(metrics.value, idx), 0.0) as metric_value,
-                if(idx2 > 0, arrayElement(metrics.value, idx2), 0.0) as throughput_value,
-                if(idx3 > 0, arrayElement(metrics.value, idx3), 0.0) as cost_value,
+                if(idx > 0, metrics.value[idx], 0.0) as metric_value,
+                if(idx2 > 0, metrics.value[idx2], 0.0) as throughput_value,
+                if(idx3 > 0, metrics.value[idx3], 0.0) as cost_value,
                 idx > 0 as has_latency,
                 idx2 > 0 as has_throughput,
                 idx3 > 0 as has_cost
@@ -80,8 +80,8 @@ class QueryBuilder:
         WITH baseline AS (
             SELECT
                 arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx,
-                avg(if(idx > 0, arrayElement(metrics.value, idx), 0.0)) as mean_val,
-                stddevPop(if(idx > 0, arrayElement(metrics.value, idx), 0.0)) as std_val
+                avg(if(idx > 0, metrics.value[idx], 0.0)) as mean_val,
+                stddevPop(if(idx > 0, metrics.value[idx], 0.0)) as std_val
             FROM workload_events
             WHERE user_id = {user_id}
                 AND timestamp >= '{(start_time - timedelta(days=7)).isoformat()}'
@@ -90,8 +90,8 @@ class QueryBuilder:
         SELECT
             timestamp,
             arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx,
-            if(idx > 0, arrayElement(metrics.value, idx), 0.0) as metric_value,
-            (metric_value - baseline.mean_val) / baseline.std_val as z_score,
+            if(idx > 0, metrics.value[idx], 0.0) as metric_value,
+            if(baseline.std_val > 0, (toFloat64(metric_value) - baseline.mean_val) / baseline.std_val, 0.0) as z_score,
             abs(z_score) > {z_score_threshold} as is_anomaly
         FROM workload_events, baseline
         WHERE user_id = {user_id}
@@ -115,18 +115,18 @@ class QueryBuilder:
         return f"""
         {QueryBuilder.QUERY_SOURCE_MARKER}
         SELECT
-            corr(m1_value, m2_value) as correlation_coefficient,
+            corr(toFloat64(m1_value), toFloat64(m2_value)) as correlation_coefficient,
             count() as sample_size,
-            avg(m1_value) as metric1_avg,
-            avg(m2_value) as metric2_avg,
-            stddevPop(m1_value) as metric1_std,
-            stddevPop(m2_value) as metric2_std
+            avg(toFloat64(m1_value)) as metric1_avg,
+            avg(toFloat64(m2_value)) as metric2_avg,
+            stddevPop(toFloat64(m1_value)) as metric1_std,
+            stddevPop(toFloat64(m2_value)) as metric2_std
         FROM (
             SELECT
                 arrayFirstIndex(x -> x = '{metric1}', metrics.name) as idx1,
                 arrayFirstIndex(x -> x = '{metric2}', metrics.name) as idx2,
-                if(idx1 > 0, arrayElement(metrics.value, idx1), 0.0) as m1_value,
-                if(idx2 > 0, arrayElement(metrics.value, idx2), 0.0) as m2_value
+                if(idx1 > 0, metrics.value[idx1], 0.0) as m1_value,
+                if(idx2 > 0, metrics.value[idx2], 0.0) as m2_value
             FROM workload_events
             WHERE user_id = {user_id}
                 AND timestamp >= '{start_time.isoformat()}'
@@ -149,15 +149,15 @@ class QueryBuilder:
             toHour(timestamp) as hour_of_day,
             count() as event_count,
             uniqExact(workload_id) as unique_workloads,
-            uniqExact(model_name) as unique_models,
-            sumIf(cost_value, has_cost) / 100.0 as total_cost
+            uniqExact(event_category) as unique_categories,
+            sumIf(toFloat64(cost_value), has_cost) / 100.0 as total_cost
         FROM (
             SELECT
                 timestamp,
                 workload_id,
-                model_name,
+                event_category,
                 arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx,
-                if(idx > 0, arrayElement(metrics.value, idx), 0.0) as cost_value,
+                if(idx > 0, metrics.value[idx], 0.0) as cost_value,
                 idx > 0 as has_cost
             FROM workload_events
             WHERE user_id = {user_id}

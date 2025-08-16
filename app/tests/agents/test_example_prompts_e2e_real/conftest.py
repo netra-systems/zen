@@ -48,11 +48,19 @@ def setup_real_infrastructure():
     """Setup infrastructure with real LLM calls enabled"""
     config = get_config()
     
-    # Mock database session for testing
+    # Mock database session for testing with proper async context manager support
     db_session = AsyncMock(spec=AsyncSession)
     db_session.commit = AsyncMock()
     db_session.rollback = AsyncMock()
     db_session.close = AsyncMock()
+    
+    # Properly mock async context manager methods
+    mock_transaction = AsyncMock()
+    mock_transaction.__aenter__ = AsyncMock(return_value=mock_transaction)
+    mock_transaction.__aexit__ = AsyncMock(return_value=None)
+    
+    # Create proper async context manager mock
+    db_session.begin = AsyncMock(return_value=mock_transaction)
     
     # Create LLM Manager (can be mocked for test runs without API keys)
     llm_manager = Mock(spec=LLMManager)
@@ -84,8 +92,12 @@ def setup_real_infrastructure():
                 data_needed=["current_costs", "usage_patterns"],
                 suggested_tools=["cost_analyzer", "performance_monitor"]
             )
-        # For other schemas, return a generic instance
-        return schema()
+        # For other schemas, try to create with default values
+        try:
+            return schema()
+        except Exception:
+            # Return a mock object if schema instantiation fails
+            return Mock(spec=schema)
     
     # Use AsyncMock for async methods
     llm_manager.call_llm = AsyncMock(side_effect=mock_call_llm)

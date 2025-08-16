@@ -2,21 +2,32 @@ from fastapi import APIRouter, WebSocket, Depends, WebSocketDisconnect
 from app.ws_manager import manager
 from app.logging_config import central_logger
 from app.db.postgres import get_async_db
+from app.routes.utils.websocket_helpers import (
+    accept_websocket_connection, extract_app_services,
+    authenticate_websocket_user, receive_message_with_timeout, handle_pong_message,
+    parse_json_message, validate_and_handle_message, process_agent_message,
+    check_connection_alive, cleanup_websocket_connection
+)
 import asyncio
 import json
+import time
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter()
 
-async def _accept_websocket_connection(websocket: WebSocket) -> str:
-    """Accept WebSocket connection and validate token."""
-    await websocket.accept()
+async def _validate_websocket_token(websocket: WebSocket) -> str:
+    """Validate WebSocket token from query params."""
     token = websocket.query_params.get("token")
     if not token:
         logger.error("No token provided in query parameters")
         await websocket.close(code=1008, reason="No token provided")
         raise ValueError("No token provided")
     return token
+
+async def _accept_websocket_connection(websocket: WebSocket) -> str:
+    """Accept WebSocket connection and validate token."""
+    await websocket.accept()
+    return await _validate_websocket_token(websocket)
 
 async def _get_app_services(websocket: WebSocket):
     """Extract services from app state."""
@@ -121,53 +132,92 @@ async def _parse_json_message(data: str, user_id_str: str):
         await manager.send_error(user_id_str, "Invalid JSON message format")
         return None
 
-async def _validate_and_handle_message(user_id_str: str, websocket: WebSocket, message) -> bool:
-    """Validate message and handle with manager."""
-    if not await manager.handle_message(user_id_str, websocket, message):
-        # Message was invalid or rate limited - error already sent
-        return False
-    return True
 
 async def _process_agent_message(user_id_str: str, data: str, agent_service):
     """Process message through agent service."""
     async with get_async_db() as db_session:
         await agent_service.handle_websocket_message(user_id_str, data, db_session)
 
-async def _handle_connection_timeout(conn_info, user_id_str: str) -> bool:
-    """Handle connection timeout and check if alive."""
-    if not manager.connection_manager.is_connection_alive(conn_info):
-        logger.warning(f"Connection timeout for user {user_id_str}")
-        return False
+
+async def _handle_none_message() -> bool:
+    """Handle None message case."""
     return True
+
+async def _process_valid_message(
+    user_id_str: str, data: str, agent_service
+) -> bool:
+    """Process validated message through agent service."""
+    await process_agent_message(user_id_str, data, agent_service)
+    return True
+
+async def _handle_validated_message(
+    user_id_str: str, websocket: WebSocket, message, data: str, agent_service
+) -> bool:
+    """Handle message after validation."""
+    if not await validate_and_handle_message(user_id_str, websocket, message, manager):
+        return True
+    return await _process_valid_message(user_id_str, data, agent_service)
+
+async def _process_message_by_type(
+    user_id_str: str, websocket: WebSocket, message, data: str, agent_service
+) -> bool:
+    """Process message based on type."""
+    return await _handle_validated_message(
+        user_id_str, websocket, message, data, agent_service
+    )
 
 async def _handle_parsed_message(
     user_id_str: str, websocket: WebSocket, message, data: str, agent_service
 ) -> bool:
     """Handle parsed message validation and processing."""
     if message is None:
-        return True
-    if not await _validate_and_handle_message(user_id_str, websocket, message):
-        return True
-    await _process_agent_message(user_id_str, data, agent_service)
-    return True
+        return await _handle_none_message()
+    return await _process_message_by_type(
+        user_id_str, websocket, message, data, agent_service
+    )
 
 async def _process_single_message(user_id_str: str, websocket: WebSocket, agent_service):
     """Process a single WebSocket message."""
-    data = await _receive_message_with_timeout(websocket)
-    if await _handle_pong_message(data, user_id_str, websocket):
+    data = await receive_message_with_timeout(websocket)
+    
+    # Parse JSON first, then check for ping
+    message = await parse_json_message(data, user_id_str, manager)
+    if message and isinstance(message, dict) and message.get("type") == "ping":
+        await websocket.send_json({"type": "pong", "timestamp": time.time()})
         return True
-    message = await _parse_json_message(data, user_id_str)
+    
+    # Handle other message types    
+    if await handle_pong_message(data, user_id_str, websocket, manager):
+        return True
     return await _handle_parsed_message(user_id_str, websocket, message, data, agent_service)
+
+async def _handle_message_timeout(conn_info, user_id_str: str) -> bool:
+    """Handle message processing timeout."""
+    return check_connection_alive(conn_info, user_id_str, manager)
+
+async def _try_process_single_message(
+    user_id_str: str, websocket: WebSocket, agent_service
+) -> bool:
+    """Try to process single message."""
+    await _process_single_message(user_id_str, websocket, agent_service)
+    return True
+
+async def _process_message_with_timeout_handling(
+    user_id_str: str, websocket: WebSocket, conn_info, agent_service
+) -> bool:
+    """Process single message with timeout handling."""
+    try:
+        return await _try_process_single_message(user_id_str, websocket, agent_service)
+    except asyncio.TimeoutError:
+        return await _handle_message_timeout(conn_info, user_id_str)
 
 async def _handle_message_loop(user_id_str: str, websocket: WebSocket, conn_info, agent_service):
     """Handle the main message processing loop."""
     while True:
-        try:
-            await _process_single_message(user_id_str, websocket, agent_service)
-        except asyncio.TimeoutError:
-            if not await _handle_connection_timeout(conn_info, user_id_str):
-                break
-            continue
+        if not await _process_message_with_timeout_handling(
+            user_id_str, websocket, conn_info, agent_service
+        ):
+            break
 
 async def _handle_websocket_disconnect(e: WebSocketDisconnect, user_id_str: str, websocket: WebSocket):
     """Handle WebSocket disconnect."""
@@ -179,21 +229,24 @@ async def _handle_websocket_error(e: Exception, user_id_str: str, websocket: Web
     logger.error(f"WebSocket error for user {user_id_str}: {e}", exc_info=True)
     await manager.disconnect_user(user_id_str, websocket, code=1011, reason="Server error")
 
-async def _cleanup_connection(user_id_str: str, websocket: WebSocket):
-    """Ensure connection cleanup happens."""
-    if user_id_str and user_id_str in manager.connection_manager.active_connections:
-        connections = manager.connection_manager.active_connections.get(user_id_str, [])
-        if any(conn.websocket == websocket for conn in connections):
-            await manager.disconnect_user(user_id_str, websocket)
+
+async def _setup_websocket_auth(websocket: WebSocket):
+    """Setup WebSocket authentication."""
+    token = await accept_websocket_connection(websocket)
+    security_service, agent_service = extract_app_services(websocket)
+    user_id_str = await authenticate_websocket_user(websocket, token, security_service)
+    return user_id_str, agent_service
+
+async def _finalize_websocket_connection(user_id_str: str, websocket: WebSocket):
+    """Finalize WebSocket connection setup."""
+    conn_info = await manager.connect_user(user_id_str, websocket)
+    logger.info(f"WebSocket connection established for user {user_id_str}")
+    return conn_info
 
 async def _establish_websocket_connection(websocket: WebSocket):
     """Establish and authenticate WebSocket connection."""
-    token = await _accept_websocket_connection(websocket)
-    security_service, agent_service = await _get_app_services(websocket)
-    user_id_str = await _authenticate_websocket_user(websocket, token, security_service)
-    
-    conn_info = await manager.connect_user(user_id_str, websocket)
-    logger.info(f"WebSocket connection established for user {user_id_str}")
+    user_id_str, agent_service = await _setup_websocket_auth(websocket)
+    conn_info = await _finalize_websocket_connection(user_id_str, websocket)
     return user_id_str, conn_info, agent_service
 
 async def _handle_disconnect_exception(e: WebSocketDisconnect, user_id_str: str, websocket: WebSocket):
@@ -222,14 +275,18 @@ async def _run_websocket_session(websocket: WebSocket):
     await _handle_message_loop(user_id_str, websocket, conn_info, agent_service)
     return user_id_str
 
-@router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    """Main WebSocket endpoint handler."""
+async def _execute_websocket_session(websocket: WebSocket):
+    """Execute WebSocket session with error handling."""
     user_id_str = None
     try:
         user_id_str = await _run_websocket_session(websocket)
     except Exception as e:
         await _handle_websocket_exceptions(e, user_id_str, websocket)
-    finally:
-        if user_id_str:
-            await _cleanup_connection(user_id_str, websocket)
+    return user_id_str
+
+@router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    """Main WebSocket endpoint handler."""
+    user_id_str = await _execute_websocket_session(websocket)
+    if user_id_str:
+        await cleanup_websocket_connection(user_id_str, websocket, manager)

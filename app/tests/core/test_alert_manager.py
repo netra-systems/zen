@@ -4,7 +4,7 @@ import pytest
 import time
 import asyncio
 from unittest.mock import Mock, AsyncMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 from app.core.alert_manager import AlertManager
 from app.core.health_types import (
@@ -52,7 +52,7 @@ class TestAlertManager:
             component="test_component",
             severity="warning",
             message="Test alert",
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(UTC)
         )
         
         await self.alert_manager.emit_alert(alert)
@@ -71,7 +71,7 @@ class TestAlertManager:
             component="test",
             severity="info",
             message="Test",
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(UTC)
         )
         
         await self.alert_manager.emit_alert(alert)
@@ -92,7 +92,7 @@ class TestAlertManager:
             component="test",
             severity="error",
             message="Test",
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(UTC)
         )
         
         # Should not raise exception even if callback fails
@@ -107,7 +107,7 @@ class TestAlertManager:
             name="test_component",
             status=HealthStatus.HEALTHY,
             health_score=0.9,
-            last_check=datetime.utcnow(),
+            last_check=datetime.now(UTC),
             error_count=0
         )
         
@@ -115,7 +115,7 @@ class TestAlertManager:
             name="test_component",
             status=HealthStatus.CRITICAL,
             health_score=0.1,
-            last_check=datetime.utcnow(),
+            last_check=datetime.now(UTC),
             error_count=5
         )
         
@@ -134,14 +134,14 @@ class TestAlertManager:
             name="test_component",
             status=HealthStatus.CRITICAL,
             health_score=0.1,
-            last_check=datetime.utcnow()
+            last_check=datetime.now(UTC)
         )
         
         current_health = ComponentHealth(
             name="test_component",
             status=HealthStatus.HEALTHY,
             health_score=0.95,
-            last_check=datetime.utcnow()
+            last_check=datetime.now(UTC)
         )
         
         alert = await self.alert_manager.create_status_change_alert(previous_health, current_health)
@@ -180,7 +180,7 @@ class TestAlertManager:
             component="test",
             severity="info",
             message="Old alert",
-            timestamp=datetime.utcnow() - timedelta(hours=25)
+            timestamp=datetime.now(UTC) - timedelta(hours=25)
         )
         self.alert_manager.alerts.append(old_alert)
         
@@ -190,7 +190,7 @@ class TestAlertManager:
             component="test",
             severity="info",
             message="Recent alert",
-            timestamp=datetime.utcnow() - timedelta(hours=1)
+            timestamp=datetime.now(UTC) - timedelta(hours=1)
         )
         self.alert_manager.alerts.append(recent_alert)
         
@@ -206,7 +206,7 @@ class TestAlertManager:
             component="test",
             severity="info",
             message="Resolved",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             resolved=True
         )
         
@@ -215,7 +215,7 @@ class TestAlertManager:
             component="test",
             severity="warning",
             message="Active",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             resolved=False
         )
         
@@ -233,7 +233,7 @@ class TestAlertManager:
             component="test",
             severity="warning",
             message="Test",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             resolved=False
         )
         self.alert_manager.alerts.append(alert)
@@ -262,7 +262,7 @@ class TestAlertManager:
                 component="test",
                 severity="info",
                 message=f"Alert {i}",
-                timestamp=datetime.utcnow()
+                timestamp=datetime.now(UTC)
             )
             await self.alert_manager.emit_alert(alert)
         
@@ -283,7 +283,7 @@ class TestAlertManager:
             component="memory",
             severity="critical",
             message="Memory usage critical",
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(UTC)
         )
         
         await self.alert_manager.emit_alert(alert)
@@ -302,7 +302,7 @@ class TestAlertManager:
             component="database",
             severity="error",
             message="Database error",
-            timestamp=datetime.utcnow()
+            timestamp=datetime.now(UTC)
         )
         
         # Should not raise exception even if recovery fails
@@ -321,18 +321,18 @@ class TestAlertManager:
         """Test recovery action determination."""
         memory_alert = SystemAlert(
             alert_id="mem_alert", component="memory", severity="error",
-            message="Memory high", timestamp=datetime.utcnow()
+            message="Memory high", timestamp=datetime.now(UTC)
         )
         assert self.alert_manager._determine_recovery_action(memory_alert) == "clear_cache"
         
         db_alert = SystemAlert(
             alert_id="db_alert", component="database", severity="error",
-            message="DB error", timestamp=datetime.utcnow()
+            message="DB error", timestamp=datetime.now(UTC)
         )
         assert self.alert_manager._determine_recovery_action(db_alert) == "restart_service"
         
         critical_alert = SystemAlert(
             alert_id="crit_alert", component="system", severity="critical",
-            message="System critical", timestamp=datetime.utcnow()
+            message="System critical", timestamp=datetime.now(UTC)
         )
         assert self.alert_manager._determine_recovery_action(critical_alert) == "notify_admin"

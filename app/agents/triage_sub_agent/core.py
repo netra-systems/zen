@@ -263,9 +263,18 @@ class TriageCore:
     
     def _process_line_for_key_value(self, line: str, result: dict) -> None:
         """Process a single line for key-value extraction."""
-        if ':' in line:
-            key_match = re.match(r'^\s*"?(\w+)"?\s*:\s*"([^"]*)"', line)
-            if key_match:
-                key = key_match.group(1)
-                value = key_match.group(2)
-                result[key] = value
+        if ':' not in line:
+            return
+        key_match = self._extract_key_value_match(line)
+        if key_match:
+            self._store_key_value_pair(key_match, result)
+    
+    def _extract_key_value_match(self, line: str):
+        """Extract key-value match from line."""
+        return re.match(r'^\s*"?(\w+)"?\s*:\s*"([^"]*)"', line)
+    
+    def _store_key_value_pair(self, key_match, result: dict) -> None:
+        """Store extracted key-value pair in result."""
+        key = key_match.group(1)
+        value = key_match.group(2)
+        result[key] = value

@@ -5,43 +5,16 @@ metrics tracking, and automatic recovery capabilities.
 """
 
 import time
-from enum import Enum
-from dataclasses import dataclass, field
 from typing import Dict, Any, Optional
 
 from app.logging_config import central_logger
 from app.core.error_codes import ErrorSeverity
 
+# Import unified types from single source of truth
+from app.schemas.core_enums import CircuitBreakerState
+from app.schemas.core_models import CircuitBreakerConfig, ReliabilityMetrics
+
 logger = central_logger.get_logger(__name__)
-
-
-class CircuitBreakerState(Enum):
-    """Circuit breaker states"""
-    CLOSED = "closed"
-    OPEN = "open"
-    HALF_OPEN = "half_open"
-
-
-@dataclass
-class CircuitBreakerConfig:
-    """Configuration for circuit breaker pattern - optimized for responsive error handling"""
-    failure_threshold: int = 3
-    recovery_timeout: float = 30.0
-    half_open_max_calls: int = 2
-    name: str = "default"
-
-
-@dataclass
-class ReliabilityMetrics:
-    """Metrics for reliability monitoring"""
-    total_calls: int = 0
-    successful_calls: int = 0
-    failed_calls: int = 0
-    circuit_breaker_opens: int = 0
-    recovery_attempts: int = 0
-    last_failure_time: Optional[float] = None
-    last_success_time: Optional[float] = None
-    error_types: Dict[str, int] = field(default_factory=dict)
 
 
 class CircuitBreaker:

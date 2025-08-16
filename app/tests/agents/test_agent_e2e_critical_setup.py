@@ -30,11 +30,17 @@ class AgentE2ETestBase:
     @pytest.fixture
     def setup_agent_infrastructure(self):
         """Setup complete agent infrastructure for testing"""
-        # Mock database session
+        # Mock database session with proper async context manager support
         db_session = AsyncMock(spec=AsyncSession)
         db_session.commit = AsyncMock()
         db_session.rollback = AsyncMock()
         db_session.close = AsyncMock()
+        
+        # Configure begin() to return an async context manager
+        async_context_manager = AsyncMock()
+        async_context_manager.__aenter__ = AsyncMock(return_value=db_session)
+        async_context_manager.__aexit__ = AsyncMock(return_value=None)
+        db_session.begin = AsyncMock(return_value=async_context_manager)
         
         # Mock LLM Manager with proper JSON response for ask_llm
         llm_manager = Mock(spec=LLMManager)
@@ -108,9 +114,9 @@ class AgentE2ETestBase:
         })
         
         # Mock state persistence service with proper async return values
-        mock_save_state = AsyncMock(return_value=None)
+        mock_save_state = AsyncMock(return_value=(True, "state_saved"))
         mock_load_state = AsyncMock(return_value=None) 
-        mock_get_context = AsyncMock(return_value=None)
+        mock_get_context = AsyncMock(return_value={})
         
         with patch.object(state_persistence_service, 'save_agent_state', mock_save_state):
             with patch.object(state_persistence_service, 'load_agent_state', mock_load_state):

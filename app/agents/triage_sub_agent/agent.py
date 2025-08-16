@@ -94,6 +94,7 @@ class TriageSubAgent(BaseSubAgent):
             validation_status=validation
         )
         state.triage_result = error_result
+        state.step_count += 1
     
     def _ensure_triage_result(self, result) -> TriageResult:
         """Ensure result is a proper TriageResult object."""
@@ -118,20 +119,21 @@ class TriageSubAgent(BaseSubAgent):
             category="unknown",
             confidence_score=0.5
         )
+    
+    def _log_execution_start(self, run_id: str) -> None:
+        """Log the start of triage execution."""
+        self.logger.info(f"TriageSubAgent starting execution for run_id: {run_id}")
 
     async def execute(self, state: DeepAgentState, run_id: str, 
                      stream_updates: bool) -> None:
         """Execute enhanced triage with comprehensive fallback handling."""
-        # Log agent communication start
-        log_agent_communication("Supervisor", "TriageSubAgent", run_id, "execute_request")
-        
+        self._log_execution_start(run_id)
         start_time = time.time()
         
         try:
             await self._execute_triage_with_fallback_protection(state, run_id, stream_updates)
         except Exception as e:
-            logger.error(f"Triage execution failed for run_id {run_id}: {e}")
-            raise
+            self._handle_execution_error(run_id, e)
     
     async def _execute_triage_with_fallback_protection(
         self, state: DeepAgentState, run_id: str, stream_updates: bool
@@ -161,6 +163,7 @@ class TriageSubAgent(BaseSubAgent):
         """Handle successful triage result."""
         triage_result = self._ensure_triage_result(result)
         state.triage_result = triage_result
+        state.step_count += 1
         
         if stream_updates:
             await self._send_completion_update(run_id, triage_result)
@@ -171,6 +174,7 @@ class TriageSubAgent(BaseSubAgent):
         """Handle fallback triage result."""
         fallback_result = await self._create_emergency_fallback(state, run_id)
         state.triage_result = fallback_result
+        state.step_count += 1
         
         if stream_updates:
             await self._send_emergency_update(run_id, fallback_result)
@@ -194,15 +198,9 @@ class TriageSubAgent(BaseSubAgent):
     
     def _get_category_options(self) -> str:
         """Get category options for triage classification."""
-        return """Categorize into one of these main categories:
-- Cost Optimization
-- Performance Optimization
-- Workload Analysis
-- Configuration & Settings
-- Monitoring & Reporting
-- Model Selection
-- Supply Catalog Management
-- Quality Optimization"""
+        categories = self._get_main_categories()
+        formatted_categories = self._format_category_list(categories)
+        return f"Categorize into one of these main categories:\n{formatted_categories}"
     
     
     def _enrich_triage_result(self, triage_result, user_request):
@@ -274,13 +272,9 @@ class TriageSubAgent(BaseSubAgent):
     
     def _log_performance_metrics(self, run_id, triage_result):
         """Log performance metrics"""
-        self.logger.info(
-            f"Triage completed for run_id {run_id}: "
-            f"category={triage_result.get('category')}, "
-            f"confidence={triage_result.get('confidence_score', 0)}, "
-            f"duration={triage_result['metadata']['triage_duration_ms']}ms, "
-            f"cache_hit={triage_result['metadata']['cache_hit']}"
-        )
+        metrics = self._extract_performance_metrics(triage_result)
+        log_message = self._format_performance_log_message(run_id, metrics)
+        self.logger.info(log_message)
     
     async def _send_final_update(self, run_id, triage_result):
         """Send final update via WebSocket"""
@@ -394,30 +388,22 @@ class TriageSubAgent(BaseSubAgent):
     def _prepare_cached_result(self, cached_result: dict, start_time: float) -> dict:
         """Prepare cached result with updated metadata."""
         triage_result = cached_result.copy()
-        if "metadata" not in triage_result:
-            triage_result["metadata"] = {}
-        
-        triage_result["metadata"].update({
-            "cache_hit": True,
-            "triage_duration_ms": int((time.time() - start_time) * 1000),
-            "fallback_used": False
-        })
+        self._ensure_metadata_exists(triage_result)
+        cache_metadata = self._build_cache_metadata(start_time)
+        triage_result["metadata"].update(cache_metadata)
         return triage_result
     
     async def _process_with_enhanced_llm(self, state: DeepAgentState,
                                        run_id: str, start_time: float) -> dict:
         """Process with LLM using enhanced error handling."""
         enhanced_prompt = self._build_enhanced_prompt(state.user_request)
-        
-        async def _llm_operation():
-            return await self._try_structured_then_fallback_llm(enhanced_prompt, run_id)
-        
-        result = await self._execute_llm_with_fallback_protection(_llm_operation)
+        llm_operation = self._create_llm_operation(enhanced_prompt, run_id)
+        result = await self._execute_llm_with_fallback_protection(llm_operation)
         triage_result = self._convert_result_to_dict(result)
         return self._add_metadata(triage_result, start_time, 0)
     
     async def _try_structured_then_fallback_llm(self, enhanced_prompt: str, run_id: str) -> dict:
-        """Try structured LLM first, then fallback to regular LLM."""
+        """Try structured LLM first with retry for ValidationError, then fallback to regular LLM."""
         correlation_id = generate_llm_correlation_id()
         
         # Start heartbeat for LLM operation
@@ -427,15 +413,27 @@ class TriageSubAgent(BaseSubAgent):
             # Log input to LLM
             log_agent_input("TriageSubAgent", "LLM", len(enhanced_prompt), correlation_id)
             
-            validated_result = await self.llm_manager.ask_structured_llm(
-                enhanced_prompt, llm_config_name='triage', schema=TriageResult, use_cache=False
-            )
+            # Retry mechanism for ValidationError
+            max_retries = 2
+            for attempt in range(max_retries):
+                try:
+                    validated_result = await self.llm_manager.ask_structured_llm(
+                        enhanced_prompt, llm_config_name='triage', schema=TriageResult, use_cache=False
+                    )
+                    
+                    # Log output from LLM
+                    log_agent_output("LLM", "TriageSubAgent", 
+                                   len(str(validated_result)), "success", correlation_id)
+                    
+                    return validated_result.model_dump()
+                except ValidationError as ve:
+                    if attempt < max_retries - 1:
+                        logger.warning(f"ValidationError on attempt {attempt + 1}, retrying: {ve}")
+                        continue
+                    else:
+                        logger.error(f"ValidationError after {max_retries} attempts: {ve}")
+                        raise ve
             
-            # Log output from LLM
-            log_agent_output("LLM", "TriageSubAgent", 
-                           len(str(validated_result)), "success", correlation_id)
-            
-            return validated_result.model_dump()
         except Exception as e:
             # Log error output
             log_agent_output("LLM", "TriageSubAgent", 0, "error", correlation_id)
@@ -562,3 +560,61 @@ class TriageSubAgent(BaseSubAgent):
             "message": "Triage completed using emergency fallback",
             "result": result
         })
+    
+    def _log_execution_start(self, run_id: str) -> None:
+        """Log agent communication start."""
+        log_agent_communication("Supervisor", "TriageSubAgent", run_id, "execute_request")
+    
+    def _handle_execution_error(self, run_id: str, error: Exception) -> None:
+        """Handle execution error and re-raise."""
+        logger.error(f"Triage execution failed for run_id {run_id}: {error}")
+        raise error
+    
+    def _get_main_categories(self) -> list:
+        """Get list of main triage categories."""
+        return [
+            "Cost Optimization", "Performance Optimization", "Workload Analysis",
+            "Configuration & Settings", "Monitoring & Reporting", "Model Selection",
+            "Supply Catalog Management", "Quality Optimization"
+        ]
+    
+    def _format_category_list(self, categories: list) -> str:
+        """Format categories as bulleted list."""
+        return "\n".join([f"- {category}" for category in categories])
+    
+    def _extract_performance_metrics(self, triage_result: dict) -> dict:
+        """Extract performance metrics from triage result."""
+        metadata = triage_result.get('metadata', {})
+        return {
+            'category': triage_result.get('category'),
+            'confidence': triage_result.get('confidence_score', 0),
+            'duration_ms': metadata.get('triage_duration_ms'),
+            'cache_hit': metadata.get('cache_hit')
+        }
+    
+    def _format_performance_log_message(self, run_id: str, metrics: dict) -> str:
+        """Format performance log message."""
+        return (
+            f"Triage completed for run_id {run_id}: "
+            f"category={metrics['category']}, confidence={metrics['confidence']}, "
+            f"duration={metrics['duration_ms']}ms, cache_hit={metrics['cache_hit']}"
+        )
+    
+    def _ensure_metadata_exists(self, triage_result: dict) -> None:
+        """Ensure metadata section exists in triage result."""
+        if "metadata" not in triage_result:
+            triage_result["metadata"] = {}
+    
+    def _build_cache_metadata(self, start_time: float) -> dict:
+        """Build cache metadata dictionary."""
+        return {
+            "cache_hit": True,
+            "triage_duration_ms": int((time.time() - start_time) * 1000),
+            "fallback_used": False
+        }
+    
+    def _create_llm_operation(self, enhanced_prompt: str, run_id: str):
+        """Create LLM operation function."""
+        async def _llm_operation():
+            return await self._try_structured_then_fallback_llm(enhanced_prompt, run_id)
+        return _llm_operation

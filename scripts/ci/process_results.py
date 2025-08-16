@@ -24,86 +24,142 @@ class TestResultProcessor:
         with open(self.input_file) as f:
             return json.load(f)
             
-    def generate_markdown_report(self) -> str:
-        """Generate a markdown formatted test report."""
-        report = []
-        
-        # Summary section
+    def _extract_summary_data(self) -> Dict[str, Any]:
+        """Extract summary statistics from test results."""
         summary = self.results.get("summary", {})
-        total = summary.get("total", 0)
-        passed = summary.get("passed", 0)
-        failed = summary.get("failed", 0)
-        skipped = summary.get("skipped", 0)
-        duration = summary.get("duration", 0)
-        
-        # Calculate pass rate
-        pass_rate = (passed / total * 100) if total > 0 else 0
-        
-        # Status badge
+        return {
+            "total": summary.get("total", 0),
+            "passed": summary.get("passed", 0),
+            "failed": summary.get("failed", 0),
+            "skipped": summary.get("skipped", 0),
+            "duration": summary.get("duration", 0)
+        }
+    
+    def _calculate_pass_rate(self, passed: int, total: int) -> float:
+        """Calculate test pass rate percentage."""
+        return (passed / total * 100) if total > 0 else 0
+    
+    def _generate_status_badge(self, failed: int) -> str:
+        """Generate status badge based on test results."""
         if failed == 0:
-            status = "✅ **All tests passed!**"
-        else:
-            status = f"❌ **{failed} test(s) failed**"
-            
-        report.append(f"{status}\n")
-        report.append(f"**Pass Rate:** {pass_rate:.1f}% ({passed}/{total})")
-        report.append(f"**Duration:** {duration:.2f}s")
+            return "✅ **All tests passed!**"
+        return f"❌ **{failed} test(s) failed**"
+    
+    def _generate_summary_section(self, stats: Dict[str, Any]) -> List[str]:
+        """Generate summary section of the report."""
+        pass_rate = self._calculate_pass_rate(stats["passed"], stats["total"])
+        status = self._generate_status_badge(stats["failed"])
         
-        if skipped > 0:
-            report.append(f"**Skipped:** {skipped}")
-            
-        # Failed tests details
-        if failed > 0:
-            report.append("\n### Failed Tests")
-            failed_tests = [t for t in self.results.get("tests", []) if t.get("status") == "failed"]
-            
-            for test in failed_tests[:10]:  # Show first 10 failures
-                report.append(f"\n#### `{test['name']}`")
-                report.append(f"**File:** `{test.get('file', 'unknown')}`")
-                report.append(f"**Error:** {test.get('error', 'No error message')}")
-                
-                if test.get("traceback"):
-                    report.append("<details>")
-                    report.append("<summary>Stack Trace</summary>")
-                    report.append("")
-                    report.append("```python")
-                    report.append(test["traceback"][:1000])  # Limit traceback length
-                    report.append("```")
-                    report.append("</details>")
-                    
-            if len(failed_tests) > 10:
-                report.append(f"\n*... and {len(failed_tests) - 10} more failures*")
-                
-        # Slow tests
+        lines = [
+            f"{status}\n",
+            f"**Pass Rate:** {pass_rate:.1f}% ({stats['passed']}/{stats['total']})",
+            f"**Duration:** {stats['duration']:.2f}s"
+        ]
+        
+        if stats["skipped"] > 0:
+            lines.append(f"**Skipped:** {stats['skipped']}")
+        
+        return lines
+    
+    def _format_test_failure(self, test: Dict[str, Any]) -> List[str]:
+        """Format individual test failure details."""
+        lines = [
+            f"\n#### `{test['name']}`",
+            f"**File:** `{test.get('file', 'unknown')}`",
+            f"**Error:** {test.get('error', 'No error message')}"
+        ]
+        
+        if test.get("traceback"):
+            lines.extend(self._format_traceback(test["traceback"]))
+        
+        return lines
+    
+    def _format_traceback(self, traceback: str) -> List[str]:
+        """Format traceback section for test failure."""
+        return [
+            "<details>",
+            "<summary>Stack Trace</summary>",
+            "",
+            "```python",
+            traceback[:1000],  # Limit traceback length
+            "```",
+            "</details>"
+        ]
+    
+    def _generate_failed_tests_section(self) -> List[str]:
+        """Generate failed tests section of the report."""
+        failed_tests = [t for t in self.results.get("tests", []) if t.get("status") == "failed"]
+        if not failed_tests:
+            return []
+        
+        lines = ["\n### Failed Tests"]
+        for test in failed_tests[:10]:  # Show first 10 failures
+            lines.extend(self._format_test_failure(test))
+        
+        if len(failed_tests) > 10:
+            lines.append(f"\n*... and {len(failed_tests) - 10} more failures*")
+        
+        return lines
+    
+    def _generate_slow_tests_section(self) -> List[str]:
+        """Generate slow tests section of the report."""
         slow_tests = sorted(
             [t for t in self.results.get("tests", []) if t.get("duration", 0) > 1],
             key=lambda x: x.get("duration", 0),
             reverse=True
         )[:5]
         
-        if slow_tests:
-            report.append("\n### Slowest Tests")
-            for test in slow_tests:
-                report.append(f"- `{test['name']}`: {test['duration']:.2f}s")
-                
-        # Coverage information if available
-        if "coverage" in self.results:
-            coverage = self.results["coverage"]
-            report.append("\n### Coverage")
-            report.append(f"**Overall:** {coverage.get('total', 0):.1f}%")
-            
-            if "files" in coverage:
-                report.append("\n<details>")
-                report.append("<summary>File Coverage</summary>")
-                report.append("")
-                report.append("| File | Coverage |")
-                report.append("|------|----------|")
-                
-                for file, cov in sorted(coverage["files"].items()):
-                    report.append(f"| `{file}` | {cov:.1f}% |")
-                    
-                report.append("</details>")
-                
+        if not slow_tests:
+            return []
+        
+        lines = ["\n### Slowest Tests"]
+        for test in slow_tests:
+            lines.append(f"- `{test['name']}`: {test['duration']:.2f}s")
+        
+        return lines
+    
+    def _generate_coverage_section(self) -> List[str]:
+        """Generate coverage information section."""
+        if "coverage" not in self.results:
+            return []
+        
+        coverage = self.results["coverage"]
+        lines = [
+            "\n### Coverage",
+            f"**Overall:** {coverage.get('total', 0):.1f}%"
+        ]
+        
+        if "files" in coverage:
+            lines.extend(self._format_file_coverage(coverage["files"]))
+        
+        return lines
+    
+    def _format_file_coverage(self, files: Dict[str, float]) -> List[str]:
+        """Format file coverage table."""
+        lines = [
+            "\n<details>",
+            "<summary>File Coverage</summary>",
+            "",
+            "| File | Coverage |",
+            "|------|----------|"
+        ]
+        
+        for file, cov in sorted(files.items()):
+            lines.append(f"| `{file}` | {cov:.1f}% |")
+        
+        lines.append("</details>")
+        return lines
+    
+    def generate_markdown_report(self) -> str:
+        """Generate a markdown formatted test report."""
+        stats = self._extract_summary_data()
+        report = []
+        
+        report.extend(self._generate_summary_section(stats))
+        report.extend(self._generate_failed_tests_section())
+        report.extend(self._generate_slow_tests_section())
+        report.extend(self._generate_coverage_section())
+        
         return "\n".join(report)
         
     def generate_json_summary(self) -> Dict[str, Any]:

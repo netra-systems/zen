@@ -122,7 +122,7 @@ const EnterpriseDemoPage: NextPage = () => {
           Netra AI Optimization Platform
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-          The world&apos;s most advanced AI optimization platform, trusted by industry leaders including OpenAI and Anthropic
+          The world&apos;s most advanced AI optimization platform, trusted by industry leaders.
         </p>
         <div className="flex gap-4 justify-center pt-4">
           <Button size="lg" onClick={() => router.push('/chat')}>

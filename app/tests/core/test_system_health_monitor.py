@@ -4,7 +4,7 @@ import pytest
 import asyncio
 import time
 from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime
+from datetime import datetime, UTC
 
 from app.core.system_health_monitor import SystemHealthMonitor, system_health_monitor
 from app.core.health_types import HealthStatus, ComponentHealth, HealthCheckResult
@@ -216,7 +216,7 @@ class TestSystemHealthMonitor:
         # Add component with high response time
         health = ComponentHealth(
             name="slow_component", status=HealthStatus.HEALTHY, health_score=0.9,
-            last_check=datetime.utcnow(), metadata={"response_time_ms": 6000}
+            last_check=datetime.now(UTC), metadata={"response_time_ms": 6000}
         )
         self.monitor.component_health["slow_component"] = health
         
@@ -238,7 +238,7 @@ class TestSystemHealthMonitor:
         # Add component with high error count
         health = ComponentHealth(
             name="error_component", status=HealthStatus.DEGRADED, health_score=0.6,
-            last_check=datetime.utcnow(), error_count=10
+            last_check=datetime.now(UTC), error_count=10
         )
         self.monitor.component_health["error_component"] = health
         
@@ -254,10 +254,10 @@ class TestSystemHealthMonitor:
         """Test system health evaluation with critical components."""
         # Add healthy and critical components
         self.monitor.component_health["healthy"] = ComponentHealth(
-            name="healthy", status=HealthStatus.HEALTHY, health_score=0.9, last_check=datetime.utcnow()
+            name="healthy", status=HealthStatus.HEALTHY, health_score=0.9, last_check=datetime.now(UTC)
         )
         self.monitor.component_health["critical"] = ComponentHealth(
-            name="critical", status=HealthStatus.CRITICAL, health_score=0.1, last_check=datetime.utcnow()
+            name="critical", status=HealthStatus.CRITICAL, health_score=0.1, last_check=datetime.now(UTC)
         )
         
         self.monitor._trigger_system_wide_alert = AsyncMock()
@@ -276,12 +276,12 @@ class TestSystemHealthMonitor:
         for i in range(5):
             self.monitor.component_health[f"unhealthy_{i}"] = ComponentHealth(
                 name=f"unhealthy_{i}", status=HealthStatus.UNHEALTHY,
-                health_score=0.3, last_check=datetime.utcnow()
+                health_score=0.3, last_check=datetime.now(UTC)
             )
         
         # Add one healthy component (20% healthy)
         self.monitor.component_health["healthy"] = ComponentHealth(
-            name="healthy", status=HealthStatus.HEALTHY, health_score=0.9, last_check=datetime.utcnow()
+            name="healthy", status=HealthStatus.HEALTHY, health_score=0.9, last_check=datetime.now(UTC)
         )
         
         self.monitor._trigger_system_wide_alert = AsyncMock()
@@ -305,13 +305,13 @@ class TestSystemHealthMonitor:
         """Test getting system overview."""
         # Add components with different statuses
         self.monitor.component_health["healthy"] = ComponentHealth(
-            name="healthy", status=HealthStatus.HEALTHY, health_score=0.9, last_check=datetime.utcnow()
+            name="healthy", status=HealthStatus.HEALTHY, health_score=0.9, last_check=datetime.now(UTC)
         )
         self.monitor.component_health["degraded"] = ComponentHealth(
-            name="degraded", status=HealthStatus.DEGRADED, health_score=0.6, last_check=datetime.utcnow()
+            name="degraded", status=HealthStatus.DEGRADED, health_score=0.6, last_check=datetime.now(UTC)
         )
         self.monitor.component_health["critical"] = ComponentHealth(
-            name="critical", status=HealthStatus.CRITICAL, health_score=0.1, last_check=datetime.utcnow()
+            name="critical", status=HealthStatus.CRITICAL, health_score=0.1, last_check=datetime.now(UTC)
         )
         
         overview = self.monitor.get_system_overview()

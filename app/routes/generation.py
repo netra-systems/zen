@@ -66,58 +66,151 @@ async def get_job_status(job_id: str) -> Dict[str, Any]:
         raise HTTPException(status_code=404, detail="Job not found.")
     return job
 
+def _get_corpus_directory() -> str:
+    """Get the corpus directory path."""
+    return os.path.join("app", "data", "generated", "content_corpuses")
+
+def _check_directory_exists(directory: str) -> bool:
+    """Check if directory exists."""
+    return os.path.exists(directory)
+
+def _get_job_path(job_id: str, corpus_dir: str) -> str:
+    """Get job directory path."""
+    return os.path.join(corpus_dir, job_id)
+
+def _create_corpus_entry_dict(job_id: str, corpus_file: str) -> Dict:
+    """Create corpus entry dictionary."""
+    return {"corpus_id": job_id, "path": corpus_file}
+
+def _check_corpus_path_validity(job_path: str) -> bool:
+    """Check if corpus job path is valid directory."""
+    return os.path.isdir(job_path)
+
+def _get_corpus_file_path(job_path: str) -> str:
+    """Get corpus file path from job path."""
+    return os.path.join(job_path, "content_corpus.json")
+
+def _build_corpus_entry(job_id: str, corpus_dir: str) -> Optional[Dict]:
+    """Build corpus entry if valid."""
+    job_path = _get_job_path(job_id, corpus_dir)
+    if not _check_corpus_path_validity(job_path):
+        return None
+    corpus_file = _get_corpus_file_path(job_path)
+    if os.path.exists(corpus_file):
+        return _create_corpus_entry_dict(job_id, corpus_file)
+    return None
+
+def _collect_corpus_entries(corpus_dir: str) -> List[Dict]:
+    """Collect all valid corpus entries."""
+    corpuses = []
+    for job_id in os.listdir(corpus_dir):
+        entry = _build_corpus_entry(job_id, corpus_dir)
+        if entry:
+            corpuses.append(entry)
+    return corpuses
+
 @router.get("/content")
 def list_content_corpuses() -> List[Dict]:
     """Lists all available, successfully generated content corpuses."""
-    corpus_dir = os.path.join("app", "data", "generated", "content_corpuses")
-    if not os.path.exists(corpus_dir):
+    corpus_dir = _get_corpus_directory()
+    if not _check_directory_exists(corpus_dir):
         return []
-    
-    corpuses = []
-    for job_id in os.listdir(corpus_dir):
-        job_path = os.path.join(corpus_dir, job_id)
-        if os.path.isdir(job_path):
-            corpus_file = os.path.join(job_path, "content_corpus.json")
-            if os.path.exists(corpus_file):
-                corpuses.append({"corpus_id": job_id, "path": corpus_file})
-    return corpuses
+    return _collect_corpus_entries(corpus_dir)
+
+def _get_log_sets_directory() -> str:
+    """Get the log sets directory path."""
+    return os.path.join("app", "data", "generated", "log_sets")
+
+def _get_log_job_path(job_id: str, log_set_dir: str) -> str:
+    """Get log job directory path."""
+    return os.path.join(log_set_dir, job_id)
+
+def _create_log_entry_dict(job_id: str, log_file: str) -> Dict:
+    """Create log set entry dictionary."""
+    return {"log_set_id": job_id, "path": log_file}
+
+def _check_log_path_validity(job_path: str) -> bool:
+    """Check if log job path is valid directory."""
+    return os.path.isdir(job_path)
+
+def _get_log_file_path(job_path: str) -> str:
+    """Get log file path from job path."""
+    return os.path.join(job_path, "synthetic_logs.json")
+
+def _build_log_set_entry(job_id: str, log_set_dir: str) -> Optional[Dict]:
+    """Build log set entry if valid."""
+    job_path = _get_log_job_path(job_id, log_set_dir)
+    if not _check_log_path_validity(job_path):
+        return None
+    log_file = _get_log_file_path(job_path)
+    if os.path.exists(log_file):
+        return _create_log_entry_dict(job_id, log_file)
+    return None
+
+def _collect_log_set_entries(log_set_dir: str) -> List[Dict]:
+    """Collect all valid log set entries."""
+    log_sets = []
+    for job_id in os.listdir(log_set_dir):
+        entry = _build_log_set_entry(job_id, log_set_dir)
+        if entry:
+            log_sets.append(entry)
+    return log_sets
 
 @router.get("/logs")
 def list_log_sets() -> List[Dict]:
     """Lists all available, successfully generated synthetic log sets."""
-    log_set_dir = os.path.join("app", "data", "generated", "log_sets")
-    if not os.path.exists(log_set_dir):
+    log_set_dir = _get_log_sets_directory()
+    if not _check_directory_exists(log_set_dir):
         return []
-        
-    log_sets = []
-    for job_id in os.listdir(log_set_dir):
-        job_path = os.path.join(log_set_dir, job_id)
-        if os.path.isdir(job_path):
-            log_file = os.path.join(job_path, "synthetic_logs.json")
-            if os.path.exists(log_file):
-                log_sets.append({"log_set_id": job_id, "path": log_file})
-    return log_sets
+    return _collect_log_set_entries(log_set_dir)
+
+def _get_clickhouse_logger():
+    """Get logger for ClickHouse operations."""
+    logger = central_logger.get_logger(__name__)
+    logger.info("Attempting to list ClickHouse tables.")
+    return logger
+
+async def _get_validated_clickhouse_client(logger):
+    """Get and validate ClickHouse client."""
+    client = await get_clickhouse_client().__aenter__()
+    if client is None:
+        logger.error("Failed to get ClickHouse client.")
+        raise HTTPException(status_code=500, detail="Failed to get ClickHouse client.")
+    logger.info("Successfully acquired ClickHouse client.")
+    return client
+
+async def _execute_show_tables_query(client, logger):
+    """Execute SHOW TABLES query."""
+    result = await client.execute_query("SHOW TABLES")
+    logger.info(f"Successfully executed 'SHOW TABLES' query. Result: {result}")
+    return result
+
+def _process_tables_result(result, logger) -> List[str]:
+    """Process tables query result."""
+    if result:
+        table_names = [row[0] for row in result]
+        logger.info(f"Returning table names: {table_names}")
+        return table_names
+    logger.info("No tables found in ClickHouse.")
+    return []
+
+async def _handle_clickhouse_query_error(e: Exception, logger):
+    """Handle ClickHouse query errors."""
+    logger.error(f"Failed to fetch tables from ClickHouse: {e}", exc_info=True)
+    raise HTTPException(status_code=500, detail=f"Failed to fetch tables from ClickHouse: {e}")
+
+async def _execute_clickhouse_tables_query(logger):
+    """Execute ClickHouse tables query with client."""
+    async with get_clickhouse_client() as client:
+        validated_client = await _get_validated_clickhouse_client(logger)
+        result = await _execute_show_tables_query(validated_client, logger)
+        return _process_tables_result(result, logger)
 
 @router.get("/clickhouse_tables")
 async def list_clickhouse_tables() -> List[str]:
     """Lists all tables in the ClickHouse database."""
-    logger = central_logger.get_logger(__name__)
-    logger.info("Attempting to list ClickHouse tables.")
+    logger = _get_clickhouse_logger()
     try:
-        async with get_clickhouse_client() as client:
-            if client is None:
-                logger.error("Failed to get ClickHouse client.")
-                raise HTTPException(status_code=500, detail="Failed to get ClickHouse client.")
-            logger.info("Successfully acquired ClickHouse client.")
-            result = await client.execute_query("SHOW TABLES")
-            logger.info(f"Successfully executed 'SHOW TABLES' query. Result: {result}")
-            if result:
-                table_names = [row[0] for row in result]
-                logger.info(f"Returning table names: {table_names}")
-                return table_names
-            else:
-                logger.info("No tables found in ClickHouse.")
-                return []
+        return await _execute_clickhouse_tables_query(logger)
     except Exception as e:
-        logger.error(f"Failed to fetch tables from ClickHouse: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to fetch tables from ClickHouse: {e}")
+        await _handle_clickhouse_query_error(e, logger)

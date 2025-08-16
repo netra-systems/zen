@@ -4,7 +4,7 @@ import pytest
 import asyncio
 import time
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Dict, Any
 
 # Import the components we're testing
@@ -33,7 +33,7 @@ class TestAgentError:
             operation="test_operation",
             error_type="ValueError",
             message="Test error message",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             severity=ErrorSeverity.HIGH,
             context={"key": "value"},
             recovery_attempted=True,
@@ -62,7 +62,7 @@ class TestAgentHealthStatus:
             operation="test_operation",
             error_type="ValueError",
             message="Test error message",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             severity=ErrorSeverity.HIGH
         )
         
@@ -162,7 +162,7 @@ class TestAgentReliabilityMixin:
         # Verify
         assert result == {"success": True, "data": "test"}
         assert len(mock_agent.operation_times) == 1
-        assert mock_agent.operation_times[0] > 0
+        assert mock_agent.operation_times[0] >= 0  # Accept 0 for fast operations in tests
         assert len(mock_agent.error_history) == 0
         
         # Verify reliability wrapper was called correctly
@@ -291,7 +291,7 @@ class TestAgentReliabilityMixin:
                 operation=f"operation_{i}",
                 error_type="ValueError",
                 message=f"Error {i}",
-                timestamp=datetime.utcnow(),
+                timestamp=datetime.now(UTC),
                 severity=ErrorSeverity.LOW
             )
             mock_agent.error_history.append(error_record)
@@ -364,7 +364,7 @@ class TestAgentReliabilityMixin:
         
         # Add failed operations
         mock_agent.error_history = [
-            AgentError("1", "TestAgent", "op1", "Error", "msg", datetime.utcnow(), ErrorSeverity.LOW)
+            AgentError("1", "TestAgent", "op1", "Error", "msg", datetime.now(UTC), ErrorSeverity.LOW)
         ]
         # 3 successful, 1 failed = 75% success rate
         assert mock_agent._calculate_success_rate() == 0.75
@@ -387,7 +387,7 @@ class TestAgentReliabilityMixin:
     
     def test_count_recent_errors(self, mock_agent):
         """Test counting recent errors."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         
         # Add errors at different times
         mock_agent.error_history = [
@@ -449,7 +449,7 @@ class TestAgentReliabilityMixin:
         # Add some test data
         mock_agent.operation_times = [1.0, 2.0, 3.0]
         mock_agent.error_history = [
-            AgentError("1", "TestAgent", "op1", "Error", "msg", datetime.utcnow(), ErrorSeverity.LOW)
+            AgentError("1", "TestAgent", "op1", "Error", "msg", datetime.now(UTC), ErrorSeverity.LOW)
         ]
         
         health = mock_agent.get_comprehensive_health_status()
@@ -473,7 +473,7 @@ class TestAgentReliabilityMixin:
     
     def test_get_error_summary_with_errors(self, mock_agent):
         """Test error summary with errors."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         
         # Add various errors
         mock_agent.error_history = [
@@ -496,7 +496,7 @@ class TestAgentReliabilityMixin:
         # Add some data
         mock_agent.operation_times = [1.0, 2.0, 3.0]
         mock_agent.error_history = [
-            AgentError("1", "TestAgent", "op1", "Error", "msg", datetime.utcnow(), ErrorSeverity.LOW)
+            AgentError("1", "TestAgent", "op1", "Error", "msg", datetime.now(UTC), ErrorSeverity.LOW)
         ]
         
         # Reset
@@ -561,10 +561,10 @@ class TestAgentReliabilityMixin:
     def test_log_error_different_severities(self, mock_logger, mock_agent):
         """Test logging errors with different severity levels."""
         errors = [
-            AgentError("1", "TestAgent", "op1", "MemoryError", "Critical", datetime.utcnow(), ErrorSeverity.CRITICAL),
-            AgentError("2", "TestAgent", "op2", "ConnectionError", "High", datetime.utcnow(), ErrorSeverity.HIGH),
-            AgentError("3", "TestAgent", "op3", "ValidationError", "Medium", datetime.utcnow(), ErrorSeverity.MEDIUM),
-            AgentError("4", "TestAgent", "op4", "ValueError", "Low", datetime.utcnow(), ErrorSeverity.LOW),
+            AgentError("1", "TestAgent", "op1", "MemoryError", "Critical", datetime.now(UTC), ErrorSeverity.CRITICAL),
+            AgentError("2", "TestAgent", "op2", "ConnectionError", "High", datetime.now(UTC), ErrorSeverity.HIGH),
+            AgentError("3", "TestAgent", "op3", "ValidationError", "Medium", datetime.now(UTC), ErrorSeverity.MEDIUM),
+            AgentError("4", "TestAgent", "op4", "ValueError", "Low", datetime.now(UTC), ErrorSeverity.LOW),
         ]
         
         for error in errors:

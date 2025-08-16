@@ -5,7 +5,7 @@ Main service layer for MCP server integration with Netra platform using FastMCP 
 """
 
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, UTC
 import json
 import uuid
 import asyncio
@@ -37,8 +37,8 @@ class MCPClient(BaseModel):
     api_key_hash: Optional[str] = None
     permissions: List[str] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    last_active: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    last_active: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class MCPToolExecution(BaseModel):
@@ -52,7 +52,7 @@ class MCPToolExecution(BaseModel):
     execution_time_ms: int
     status: str  # success, error, timeout
     error: Optional[str] = None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class MCPService:
@@ -225,8 +225,8 @@ class MCPService:
         self.active_sessions[session_id] = {
             "id": session_id,
             "client_id": client_id,
-            "created_at": datetime.utcnow(),
-            "last_activity": datetime.utcnow(),
+            "created_at": datetime.now(UTC),
+            "last_activity": datetime.now(UTC),
             "metadata": metadata or {},
             "request_count": 0
         }
@@ -241,7 +241,7 @@ class MCPService:
     async def update_session_activity(self, session_id: str):
         """Update session last activity timestamp"""
         if session_id in self.active_sessions:
-            self.active_sessions[session_id]["last_activity"] = datetime.utcnow()
+            self.active_sessions[session_id]["last_activity"] = datetime.now(UTC)
             self.active_sessions[session_id]["request_count"] += 1
     
     async def close_session(self, session_id: str):
@@ -252,7 +252,7 @@ class MCPService:
     
     async def cleanup_inactive_sessions(self, timeout_minutes: int = 60):
         """Clean up inactive sessions"""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         sessions_to_remove = []
         
         for session_id, session in self.active_sessions.items():

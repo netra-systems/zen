@@ -265,14 +265,14 @@ class TestCircuitBreakerMonitoring:
     
     def test_recent_events(self):
         """Test recent events tracking."""
-        from datetime import datetime
+        from datetime import datetime, UTC
         
         # Add test events
         event1 = CircuitBreakerEvent(
             circuit_name="test1",
             old_state="closed",
             new_state="open",
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(UTC),
             failure_count=3,
             success_rate=0.5
         )

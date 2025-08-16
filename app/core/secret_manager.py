@@ -1,7 +1,7 @@
 """Secret management utilities for configuration loading."""
 
 import os
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from app.logging_config import central_logger as logger
 from google.cloud import secretmanager
 from tenacity import retry, stop_after_attempt, wait_fixed
@@ -20,12 +20,21 @@ class SecretManager:
         self._client: Optional[secretmanager.SecretManagerServiceClient] = None
         # Use numerical project ID for Secret Manager (required by API)
         # Staging: Use numerical ID if provided, otherwise use project name
-        self._project_id = os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
-                                         os.environ.get("SECRET_MANAGER_PROJECT_ID",
-                                         "304612253870"))  # Default to production numerical ID
+        environment = os.environ.get("ENVIRONMENT", "development").lower()
+        
+        # Set project ID based on environment
+        if environment == "staging":
+            # For staging, use staging numerical ID
+            self._project_id = os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
+                                             os.environ.get("SECRET_MANAGER_PROJECT_ID",
+                                             "701982941522"))  # Default to staging numerical ID
+        else:
+            # For production or other environments
+            self._project_id = os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
+                                             os.environ.get("SECRET_MANAGER_PROJECT_ID",
+                                             "304612253870"))  # Default to production numerical ID
         
         # Log which project we're using for Secret Manager
-        environment = os.environ.get("ENVIRONMENT", "development").lower()
         if environment in ["staging", "production"] or os.environ.get("K_SERVICE"):
             self._logger.info(f"Secret Manager initialized with project ID: {self._project_id} for environment: {environment}")
         
@@ -87,83 +96,70 @@ class SecretManager:
     def _load_from_secret_manager(self) -> Dict[str, Any]:
         """Load secrets from Google Cloud Secret Manager."""
         try:
-            self._logger.info(f"Initializing Google Secret Manager client for project: {self._project_id}")
-            client = self._get_secret_client()
-            secrets = {}
-            
-            # Check if we're in staging environment
-            environment = os.environ.get("ENVIRONMENT", "development").lower()
-            k_service = os.environ.get("K_SERVICE")
-            is_staging = environment == "staging" or (k_service and "staging" in k_service.lower())
-            
-            self._logger.info(f"Secret Manager environment detection - Environment: {environment}, K_SERVICE: {k_service}, Is Staging: {is_staging}")
-            
-            # Define the secrets we need to load from Google Secret Manager
-            secret_names = [
-                # LLM API Keys (gemini is required, others are optional)
-                "gemini-api-key",       # Required - used for default LLM operations
-                "anthropic-api-key",    # Optional - for Anthropic models
-                "openai-api-key",       # Optional - for OpenAI models
-                "cohere-api-key",       # Optional - for Cohere models
-                "mistral-api-key",      # Optional - for Mistral models
-                
-                # OAuth and Authentication
-                "google-client-id",     # Required for Google OAuth
-                "google-client-secret", # Required for Google OAuth
-                "jwt-secret-key",       # Required - JWT token signing
-                "fernet-key",           # Required - encryption key
-                
-                # Observability
-                "langfuse-secret-key",  # Optional - for LLM monitoring
-                "langfuse-public-key",  # Optional - for LLM monitoring
-                
-                # Database Passwords
-                "clickhouse-default-password",      # Optional - ClickHouse access
-                "clickhouse-development-password",  # Optional - ClickHouse dev
-                "redis-default",                    # Optional - Redis password
-                
-                # Additional secrets that may be needed
-                "slack-webhook-url",    # Optional - for notifications
-                "sendgrid-api-key",     # Optional - for email
-                "sentry-dsn"            # Optional - for error tracking
-            ]
-            
-            successful_secrets = []
-            failed_secrets = []
-            
-            for secret_name in secret_names:
-                try:
-                    # In staging, append -staging suffix to secret names
-                    actual_secret_name = f"{secret_name}-staging" if is_staging else secret_name
-                    
-                    secret_value = self._fetch_secret(client, actual_secret_name)
-                    if secret_value:
-                        # Store with original name as key for config mapping
-                        secrets[secret_name] = secret_value
-                        successful_secrets.append(secret_name)
-                        self._logger.debug(f"✓ Successfully loaded: {actual_secret_name}")
-                    else:
-                        failed_secrets.append(secret_name)
-                except Exception as e:
-                    failed_secrets.append(secret_name)
-                    self._logger.debug(f"✗ Failed to fetch {secret_name}: {str(e)[:100]}")
-            
-            # Detailed summary
-            self._logger.info(f"Google Secret Manager loading complete:")
-            self._logger.info(f"  - Successfully loaded: {len(successful_secrets)} secrets")
-            if successful_secrets:
-                self._logger.info(f"  - Loaded secrets: {', '.join(successful_secrets[:5])}{'...' if len(successful_secrets) > 5 else ''}")
-            if failed_secrets:
-                critical_failed = [s for s in failed_secrets if s in ['gemini-api-key', 'jwt-secret-key', 'fernet-key']]
-                if critical_failed:
-                    self._logger.warning(f"  - CRITICAL secrets not found: {', '.join(critical_failed)}")
-                self._logger.debug(f"  - Optional secrets not found: {', '.join([s for s in failed_secrets if s not in critical_failed])}")
-            
+            client = self._initialize_secret_client()
+            environment, is_staging = self._detect_environment()
+            secrets = self._fetch_all_secrets(client, is_staging)
             return secrets
-            
         except Exception as e:
             self._logger.error(f"Error loading secrets from Secret Manager: {e}")
             raise SecretManagerError(f"Secret Manager loading failed: {e}")
+    
+    def _initialize_secret_client(self) -> secretmanager.SecretManagerServiceClient:
+        """Initialize Secret Manager client with logging."""
+        self._logger.info(f"Initializing Google Secret Manager client for project: {self._project_id}")
+        return self._get_secret_client()
+    
+    def _detect_environment(self) -> tuple:
+        """Detect environment configuration and log details."""
+        from .secret_manager_helpers import detect_environment_config
+        environment, is_staging = detect_environment_config()
+        k_service = os.environ.get("K_SERVICE")
+        self._logger.info(f"Secret Manager environment detection - Environment: {environment}, K_SERVICE: {k_service}, Is Staging: {is_staging}")
+        return environment, is_staging
+    
+    def _fetch_all_secrets(self, client: secretmanager.SecretManagerServiceClient, is_staging: bool) -> Dict[str, Any]:
+        """Fetch all required secrets with proper tracking."""
+        from .secret_manager_helpers import get_secret_names_list, initialize_fetch_tracking
+        secret_names = get_secret_names_list()
+        successful_secrets, failed_secrets = initialize_fetch_tracking()
+        secrets = self._process_secret_names(client, secret_names, is_staging, successful_secrets, failed_secrets)
+        self._log_fetch_summary(successful_secrets, failed_secrets)
+        return secrets
+    
+    def _process_secret_names(self, client: secretmanager.SecretManagerServiceClient, 
+                             secret_names: List[str], is_staging: bool,
+                             successful_secrets: List[str], failed_secrets: List[str]) -> Dict[str, Any]:
+        """Process all secret names and build secrets dictionary."""
+        secrets = {}
+        for secret_name in secret_names:
+            secret_value = self._fetch_individual_secret(client, secret_name, is_staging)
+            self._track_secret_fetch_result(secret_name, secret_value, secrets, successful_secrets, failed_secrets)
+        return secrets
+    
+    def _fetch_individual_secret(self, client: secretmanager.SecretManagerServiceClient, 
+                                secret_name: str, is_staging: bool) -> Optional[str]:
+        """Fetch individual secret with error handling."""
+        from .secret_manager_helpers import determine_actual_secret_name
+        try:
+            actual_secret_name = determine_actual_secret_name(secret_name, is_staging)
+            return self._fetch_secret(client, actual_secret_name)
+        except Exception as e:
+            self._logger.debug(f"✗ Failed to fetch {secret_name}: {str(e)[:100]}")
+            return None
+    
+    def _track_secret_fetch_result(self, secret_name: str, secret_value: Optional[str],
+                                  secrets: Dict[str, Any], successful_secrets: List[str], failed_secrets: List[str]) -> None:
+        """Track the result of secret fetching operation."""
+        from .secret_manager_helpers import track_secret_result
+        if secret_value:
+            secrets[secret_name] = secret_value
+            self._logger.debug(f"✓ Successfully loaded: {secret_name}")
+        track_secret_result(secret_name, secret_value, successful_secrets, failed_secrets)
+    
+    def _log_fetch_summary(self, successful_secrets: List[str], failed_secrets: List[str]) -> None:
+        """Log comprehensive summary of secret fetching results."""
+        from .secret_manager_helpers import prepare_secrets_dict
+        prepare_secrets_dict(successful_secrets, failed_secrets)
     
     def _fetch_secret(self, client: secretmanager.SecretManagerServiceClient, secret_name: str, version: str = "latest") -> Optional[str]:
         """Fetch a single secret from Secret Manager."""

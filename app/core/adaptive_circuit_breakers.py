@@ -13,14 +13,14 @@ from typing import Any, Callable, Dict, List, Optional, Set
 
 from app.logging_config import central_logger
 
+# Import unified types from single source of truth
+from app.schemas.core_enums import CircuitBreakerState
+from app.schemas.core_models import CircuitBreakerConfig, HealthCheckResult
+
 logger = central_logger.get_logger(__name__)
 
-
-class CircuitState(Enum):
-    """States of a circuit breaker."""
-    CLOSED = "closed"      # Normal operation
-    OPEN = "open"          # Failing, requests blocked
-    HALF_OPEN = "half_open"  # Testing recovery
+# Use CircuitBreakerState as CircuitState for backward compatibility
+CircuitState = CircuitBreakerState
 
 
 class HealthStatus(Enum):
@@ -29,27 +29,6 @@ class HealthStatus(Enum):
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
     UNKNOWN = "unknown"
-
-
-@dataclass
-class CircuitBreakerConfig:
-    """Configuration for circuit breaker behavior."""
-    failure_threshold: int = 5
-    success_threshold: int = 3
-    timeout_seconds: int = 60
-    health_check_interval: int = 30
-    slow_call_threshold: float = 5.0
-    max_wait_duration: int = 300
-    adaptive_threshold: bool = True
-
-
-@dataclass
-class HealthCheckResult:
-    """Result of a health check operation."""
-    status: HealthStatus
-    response_time: float
-    details: Dict[str, Any] = field(default_factory=dict)
-    timestamp: datetime = field(default_factory=datetime.now)
 
 
 class HealthChecker(ABC):

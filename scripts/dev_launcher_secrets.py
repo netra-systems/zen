@@ -17,7 +17,10 @@ class EnhancedSecretLoader:
     """Enhanced secret loader with detailed visibility."""
     
     def __init__(self, project_id: Optional[str] = None, verbose: bool = False) -> None:
-        self.project_id = project_id or os.environ.get('GOOGLE_CLOUD_PROJECT', "304612253870")
+        # Determine project ID based on environment
+        environment = os.environ.get("ENVIRONMENT", "development").lower()
+        default_project_id = "701982941522" if environment == "staging" else "304612253870"
+        self.project_id = project_id or os.environ.get('GOOGLE_CLOUD_PROJECT', default_project_id)
         self.verbose = verbose
         self.loaded_secrets: Dict[str, str] = {}
         self.failed_secrets: List[Tuple[str, str]] = []

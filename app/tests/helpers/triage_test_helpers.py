@@ -55,11 +55,11 @@ class MockLLMManager:
     
     def _create_side_effect(self):
         """Create side effect function for mock"""
-        def side_effect(*args, **kwargs):
-            return self._get_next_response()
+        async def side_effect(*args, **kwargs):
+            return await self._get_next_response()
         return side_effect
     
-    def _get_next_response(self):
+    async def _get_next_response(self):
         """Get next response from queue"""
         if self._should_fail():
             raise Exception(f"LLM error {self.call_count}")
@@ -84,25 +84,42 @@ class MockLLMManager:
     
     def _create_structured_side_effect(self):
         """Create side effect for structured LLM calls"""
-        def side_effect(*args, **kwargs):
-            return self._get_structured_response()
+        async def side_effect(*args, **kwargs):
+            return await self._get_structured_response()
         return side_effect
     
-    def _get_structured_response(self):
-        """Convert JSON response to TriageResult object"""
+    async def _get_structured_response(self):
+        """Convert JSON response to TriageResult object asynchronously"""
         import json
-        from app.agents.triage_sub_agent.models import TriageResult
+        from app.agents.triage_sub_agent.models import TriageResult, TriageMetadata
         
-        # Use the same response without incrementing the call count
+        # Use the same response without incrementing the call count twice
+        if self._should_fail():
+            raise Exception(f"LLM error {self.call_count}")
+        
         response_str = self._get_response_or_default()
-        self.call_count += 1  # Increment here to stay in sync
+        self.call_count += 1
         
         try:
             response_dict = json.loads(response_str)
+            # Ensure proper metadata structure
+            if 'metadata' not in response_dict:
+                response_dict['metadata'] = {
+                    'cache_hit': False,
+                    'fallback_used': False,
+                    'triage_duration_ms': 150
+                }
             return TriageResult(**response_dict)
         except Exception:
-            # Fallback to default TriageResult
-            return TriageResult(category="General Inquiry")
+            # Fallback to default TriageResult with proper metadata
+            return TriageResult(
+                category="General Inquiry",
+                metadata=TriageMetadata(
+                    cache_hit=False,
+                    fallback_used=True,
+                    triage_duration_ms=200
+                )
+            )
 
 
 class MockToolDispatcher:

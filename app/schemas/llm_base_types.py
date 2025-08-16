@@ -61,8 +61,25 @@ class TokenUsage(BaseModel):
     @property
     def cost_estimate(self) -> Optional[float]:
         """Estimate cost based on token usage"""
-        # This would need provider-specific pricing
-        return None
+        # Import here to avoid circular dependencies
+        try:
+            from app.services.cost_calculator import create_cost_calculator
+            calculator = create_cost_calculator()
+            # Use GPT-3.5-turbo as default for estimation
+            cost = calculator.calculate_cost(self, LLMProvider.OPENAI, "gpt-3.5-turbo")
+            return float(cost)
+        except ImportError:
+            return None
+    
+    def calculate_precise_cost(self, provider: "LLMProvider", model: str) -> Optional[float]:
+        """Calculate precise cost for specific provider and model"""
+        try:
+            from app.services.cost_calculator import create_cost_calculator
+            calculator = create_cost_calculator()
+            cost = calculator.calculate_cost(self, provider, model)
+            return float(cost)
+        except ImportError:
+            return None
 
 
 class LLMMessage(BaseModel):

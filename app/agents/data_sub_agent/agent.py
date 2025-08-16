@@ -249,6 +249,7 @@ class DataSubAgent(BaseSubAgent):
         """Finalize and return analysis result."""
         data_result = self._ensure_data_result(state.data_result)
         state.data_result = data_result
+        state.step_count += 1
         return self._create_success_result(start_time, data_result)
     
     def _create_execution_engine(self) -> ExecutionEngine:
@@ -308,7 +309,7 @@ class DataSubAgent(BaseSubAgent):
     def _create_anomaly_detail(self, item: dict) -> 'AnomalyDetail':
         """Create AnomalyDetail from LLM response."""
         from app.schemas.shared_types import AnomalyDetail, AnomalySeverity
-        from datetime import datetime
+        from datetime import datetime, UTC
         
         # Map severity strings
         severity_map = {
@@ -319,7 +320,7 @@ class DataSubAgent(BaseSubAgent):
         }
         
         # Extract or derive required fields
-        timestamp = datetime.utcnow()
+        timestamp = datetime.now(UTC)
         if 'timestamp' in item:
             try:
                 timestamp = datetime.fromisoformat(item['timestamp'].replace('Z', '+00:00'))
@@ -532,3 +533,56 @@ class DataSubAgent(BaseSubAgent):
         if patterns: components.append(f"{len(patterns)} usage patterns")
         if anomalies and anomalies.anomalies_detected: components.append("anomalies detected")
         return components
+    
+    # Helper methods for _create_anomaly_detail
+    def _get_severity_mapping(self) -> Dict[str, Any]:
+        """Get severity mapping for anomaly details."""
+        from app.schemas.shared_types import AnomalySeverity
+        return {
+            'high': AnomalySeverity.HIGH,
+            'medium': AnomalySeverity.MEDIUM,
+            'low': AnomalySeverity.LOW,
+            'critical': AnomalySeverity.CRITICAL
+        }
+    
+    def _extract_timestamp(self, item: dict):
+        """Extract timestamp from anomaly item."""
+        from datetime import datetime, UTC
+        timestamp = datetime.now(UTC)
+        if 'timestamp' in item:
+            try:
+                timestamp = datetime.fromisoformat(item['timestamp'].replace('Z', '+00:00'))
+            except:
+                pass
+        return timestamp
+    
+    def _extract_anomaly_fields(self, item: dict) -> Dict[str, Any]:
+        """Extract all anomaly fields from item."""
+        return {
+            'metric_name': item.get('type', 'unknown_metric'),
+            'actual_value': item.get('actual_value', 0.0),
+            'expected_value': item.get('expected_value', 0.0),
+            'deviation_percentage': item.get('deviation_percentage', 0.0),
+            'z_score': item.get('z_score', 0.0),
+            'description': item.get('description', '')
+        }
+    
+    def _map_severity(self, item: dict, severity_map: Dict) -> Any:
+        """Map severity string to enum value."""
+        from app.schemas.shared_types import AnomalySeverity
+        severity_str = item.get('severity', 'low').lower()
+        return severity_map.get(severity_str, AnomalySeverity.LOW)
+    
+    # Helper methods for _try_anomaly_detection_conversion
+    def _fix_anomaly_format_issues(self, result_dict: dict) -> None:
+        """Fix common format issues from LLM responses."""
+        if 'anomalies_detected' in result_dict and isinstance(result_dict['anomalies_detected'], list):
+            anomaly_list = result_dict['anomalies_detected']
+            result_dict['anomalies_detected'] = bool(anomaly_list)
+            result_dict['anomaly_details'] = anomaly_list
+            result_dict['anomaly_count'] = len(anomaly_list)
+    
+    def _convert_anomaly_details_format(self, result_dict: dict) -> None:
+        """Convert LLM anomaly format to AnomalyDetail format."""
+        if 'anomaly_details' in result_dict and isinstance(result_dict['anomaly_details'], list):
+            result_dict['anomaly_details'] = self._convert_anomaly_details(result_dict['anomaly_details'])

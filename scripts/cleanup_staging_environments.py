@@ -379,86 +379,96 @@ If you need to redeploy the staging environment, you can:
         return self.cleanup_report
 
 
-def main():
+def create_argument_parser() -> argparse.ArgumentParser:
+    """Create and configure the argument parser."""
     parser = argparse.ArgumentParser(description="Clean up stale staging environments")
-    parser.add_argument(
-        "--project-id",
-        type=str,
-        default=os.getenv("GCP_PROJECT_ID"),
-        help="GCP Project ID"
-    )
-    parser.add_argument(
-        "--region",
-        type=str,
-        default=os.getenv("GCP_REGION", "us-central1"),
-        help="GCP Region"
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Perform dry run without actual cleanup"
-    )
-    parser.add_argument(
-        "--max-age-days",
-        type=int,
-        default=7,
-        help="Maximum age in days before cleanup"
-    )
-    parser.add_argument(
-        "--inactive-hours",
-        type=int,
-        default=24,
-        help="Hours of inactivity before cleanup"
-    )
-    parser.add_argument(
-        "--max-cost-per-pr",
-        type=float,
-        default=50.0,
-        help="Maximum cost per PR before cleanup"
-    )
-    parser.add_argument(
-        "--config-file",
-        type=str,
-        help="Configuration file (JSON)"
-    )
-    parser.add_argument(
-        "--output",
-        type=str,
-        help="Output file for cleanup report (JSON)"
-    )
-    
+    _add_basic_arguments(parser)
+    _add_cleanup_arguments(parser)
+    _add_config_arguments(parser)
+    return parser
+
+
+def _add_basic_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add basic configuration arguments."""
+    parser.add_argument("--project-id", type=str, default=os.getenv("GCP_PROJECT_ID"), help="GCP Project ID")
+    parser.add_argument("--region", type=str, default=os.getenv("GCP_REGION", "us-central1"), help="GCP Region")
+    parser.add_argument("--dry-run", action="store_true", help="Perform dry run without actual cleanup")
+
+
+def _add_cleanup_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add cleanup criteria arguments."""
+    parser.add_argument("--max-age-days", type=int, default=7, help="Maximum age in days before cleanup")
+    parser.add_argument("--inactive-hours", type=int, default=24, help="Hours of inactivity before cleanup")
+    parser.add_argument("--max-cost-per-pr", type=float, default=50.0, help="Maximum cost per PR before cleanup")
+
+
+def _add_config_arguments(parser: argparse.ArgumentParser) -> None:
+    """Add configuration file arguments."""
+    parser.add_argument("--config-file", type=str, help="Configuration file (JSON)")
+    parser.add_argument("--output", type=str, help="Output file for cleanup report (JSON)")
+
+
+def parse_and_validate_args(parser: argparse.ArgumentParser) -> argparse.Namespace:
+    """Parse and validate command line arguments."""
     args = parser.parse_args()
-    
     if not args.project_id:
         print("Error: GCP Project ID is required")
         sys.exit(1)
-    
-    # Load configuration
+    return args
+
+
+def load_configuration(args: argparse.Namespace) -> Dict:
+    """Load configuration from file or command line arguments."""
     if args.config_file:
-        with open(args.config_file, 'r') as f:
-            config = json.load(f)
-    else:
-        config = {
-            "max_age_days": args.max_age_days,
-            "inactive_hours": args.inactive_hours,
-            "max_cost_per_pr": args.max_cost_per_pr
-        }
-    
-    # Initialize cleaner
-    cleaner = StagingEnvironmentCleaner(
+        return _load_config_from_file(args.config_file)
+    return _create_config_from_args(args)
+
+
+def _load_config_from_file(config_file: str) -> Dict:
+    """Load configuration from JSON file."""
+    with open(config_file, 'r') as f:
+        return json.load(f)
+
+
+def _create_config_from_args(args: argparse.Namespace) -> Dict:
+    """Create configuration from command line arguments."""
+    return {
+        "max_age_days": args.max_age_days,
+        "inactive_hours": args.inactive_hours,
+        "max_cost_per_pr": args.max_cost_per_pr
+    }
+
+
+def initialize_cleaner(args: argparse.Namespace) -> StagingEnvironmentCleaner:
+    """Initialize the staging environment cleaner."""
+    return StagingEnvironmentCleaner(
         project_id=args.project_id,
         region=args.region,
         dry_run=args.dry_run
     )
-    
-    # Run cleanup
+
+
+def execute_cleanup_and_save_report(cleaner: StagingEnvironmentCleaner, config: Dict, output_file: Optional[str]) -> None:
+    """Execute cleanup and save report if requested."""
     report = cleaner.run_cleanup(config)
-    
-    # Save report if requested
-    if args.output:
-        with open(args.output, 'w') as f:
-            json.dump(report, f, indent=2, default=str)
-        print(f"\nCleanup report saved to: {args.output}")
+    if output_file:
+        _save_report_to_file(report, output_file)
+
+
+def _save_report_to_file(report: Dict, output_file: str) -> None:
+    """Save cleanup report to JSON file."""
+    with open(output_file, 'w') as f:
+        json.dump(report, f, indent=2, default=str)
+    print(f"\nCleanup report saved to: {output_file}")
+
+
+def main():
+    """Main entry point for cleanup script."""
+    parser = create_argument_parser()
+    args = parse_and_validate_args(parser)
+    config = load_configuration(args)
+    cleaner = initialize_cleaner(args)
+    execute_cleanup_and_save_report(cleaner, config, args.output)
 
 
 if __name__ == "__main__":

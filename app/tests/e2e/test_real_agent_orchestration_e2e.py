@@ -12,7 +12,7 @@ from typing import Dict, List
 from app.agents.state import DeepAgentState
 from app.schemas import SubAgentLifecycle
 from app.agents.triage_sub_agent.models import TriageResult
-from app.agents.data_sub_agent.models import DataAnalysisResponse
+from app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
 from app.tests.e2e.state_validation_utils import StateIntegrityChecker, StateValidationReporter
 
 
@@ -266,6 +266,10 @@ class TestRealAgentTypeValidation:
     async def _validate_data_types(self, state: DeepAgentState):
         """Validate data result types."""
         if state.data_result is not None:
-            assert isinstance(state.data_result, DataAnalysisResponse)
-            assert isinstance(state.data_result.summary, str)
-            assert isinstance(state.data_result.recommendations, list)
+            valid_types = (DataAnalysisResponse, AnomalyDetectionResponse)
+            assert isinstance(state.data_result, valid_types)
+            if isinstance(state.data_result, DataAnalysisResponse):
+                assert isinstance(state.data_result.summary, str)
+                assert isinstance(state.data_result.recommendations, list)
+            elif isinstance(state.data_result, AnomalyDetectionResponse):
+                assert isinstance(state.data_result.recommended_actions, list)
