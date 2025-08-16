@@ -54,11 +54,29 @@ class OptimizationsResult(BaseModel):
 
 class ActionPlanResult(BaseModel):
     """Typed model for action plan results."""
+    # Core action plan fields from agent implementation
+    action_plan_summary: str = "Action plan generated"
+    total_estimated_time: str = "To be determined"
+    required_approvals: List[str] = Field(default_factory=list)
+    actions: List[dict] = Field(default_factory=list)
+    execution_timeline: List[dict] = Field(default_factory=list)
+    supply_config_updates: List[dict] = Field(default_factory=list)
+    post_implementation: dict = Field(default_factory=dict)
+    cost_benefit_analysis: dict = Field(default_factory=dict)
+    
+    # Legacy fields for compatibility
     plan_steps: List[PlanStep] = Field(default_factory=list)
     priority: str = "medium"
     estimated_duration: Optional[str] = None
     required_resources: List[str] = Field(default_factory=list)
     success_metrics: List[str] = Field(default_factory=list)
+    
+    # Extraction status fields
+    partial_extraction: bool = False
+    extracted_fields: List[str] = Field(default_factory=list)
+    error: Optional[str] = None
+    
+    # Metadata
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
     
     @field_validator('required_resources', mode='before')
