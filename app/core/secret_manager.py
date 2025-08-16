@@ -203,8 +203,21 @@ class SecretManager:
             "sentry-dsn": "SENTRY_DSN"
         }
         
+        # Check if we're in staging environment
+        environment = os.environ.get("ENVIRONMENT", "development").lower()
+        k_service = os.environ.get("K_SERVICE")
+        is_staging = environment == "staging" or (k_service and "staging" in k_service.lower())
+        
         secrets = {}
         for secret_name, env_var in env_mapping.items():
+            # Try staging-suffixed env var first if in staging
+            if is_staging:
+                staging_env_var = f"{env_var}_STAGING"
+                value = os.environ.get(staging_env_var)
+                if value:
+                    secrets[secret_name] = value
+                    continue
+            # Fall back to regular env var
             value = os.environ.get(env_var)
             if value:
                 secrets[secret_name] = value

@@ -325,11 +325,12 @@ def register_core_services():
         singleton=True
     )
     
-    service_locator.register(
-        IMCPService,
-        factory=lambda: _create_mcp_service(),
-        singleton=True
-    )
+    # Note: MCPService registration disabled due to complex repository dependencies
+    # service_locator.register(
+    #     IMCPService,
+    #     factory=lambda: _create_mcp_service(),
+    #     singleton=True
+    # )
     
     service_locator.register(
         IWebSocketService,

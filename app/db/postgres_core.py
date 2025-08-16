@@ -25,14 +25,21 @@ class Database:
         """Determine appropriate pool class for database type."""
         return NullPool if "sqlite" in db_url else QueuePool
     
+    def _get_pool_size(self, pool_class) -> int:
+        """Get pool size based on pool class."""
+        return DatabaseConfig.POOL_SIZE if pool_class == QueuePool else 0
+
+    def _get_max_overflow(self, pool_class) -> int:
+        """Get max overflow based on pool class."""
+        return DatabaseConfig.MAX_OVERFLOW if pool_class == QueuePool else 0
+
     def _create_engine(self, db_url: str, pool_class):
         """Create database engine with optimized pooling configuration."""
         return create_engine(
             db_url, echo=DatabaseConfig.ECHO, echo_pool=DatabaseConfig.ECHO_POOL,
-            poolclass=pool_class, pool_size=DatabaseConfig.POOL_SIZE if pool_class == QueuePool else 0,
-            max_overflow=DatabaseConfig.MAX_OVERFLOW if pool_class == QueuePool else 0,
-            pool_timeout=DatabaseConfig.POOL_TIMEOUT, pool_recycle=DatabaseConfig.POOL_RECYCLE,
-            pool_pre_ping=DatabaseConfig.POOL_PRE_PING
+            poolclass=pool_class, pool_size=self._get_pool_size(pool_class),
+            max_overflow=self._get_max_overflow(pool_class), pool_timeout=DatabaseConfig.POOL_TIMEOUT,
+            pool_recycle=DatabaseConfig.POOL_RECYCLE, pool_pre_ping=DatabaseConfig.POOL_PRE_PING
         )
     
     def _create_session_factory(self):
@@ -69,17 +76,29 @@ class Database:
         logger.error(f"Database transaction rolled back: {e}")
         raise
     
+    def _create_session(self) -> Session:
+        """Create new database session."""
+        return self.SessionLocal()
+
+    def _commit_session(self, db: Session):
+        """Commit database session."""
+        db.commit()
+
+    def _close_session(self, db: Session):
+        """Close database session."""
+        db.close()
+
     @contextmanager
     def get_db(self) -> Generator[Session, None, None]:
         """Provide a transactional scope around a series of operations."""
-        db = self.SessionLocal()
+        db = self._create_session()
         try:
             yield db
-            db.commit()
+            self._commit_session(db)
         except Exception as e:
             self._handle_transaction_error(db, e)
         finally:
-            db.close()
+            self._close_session(db)
 
     def close(self):
         """Close all database connections."""
@@ -105,13 +124,24 @@ def _convert_sqlite_url(db_url: str) -> str:
     """Convert sqlite:// URL to async format."""
     return db_url.replace("sqlite://", "sqlite+aiosqlite://", 1)
 
+def _check_url_type(db_url: str) -> str:
+    """Determine URL type and return conversion function name."""
+    if db_url.startswith("postgresql://"):
+        return "postgresql"
+    elif db_url.startswith("postgres://"):
+        return "postgres"
+    elif db_url.startswith("sqlite://"):
+        return "sqlite"
+    return "none"
+
 def _get_async_db_url(db_url: str) -> str:
     """Convert sync database URL to async format."""
-    if db_url.startswith("postgresql://"):
+    url_type = _check_url_type(db_url)
+    if url_type == "postgresql":
         return _convert_postgresql_url(db_url)
-    elif db_url.startswith("postgres://"):
+    elif url_type == "postgres":
         return _convert_postgres_url(db_url)
-    elif db_url.startswith("sqlite://"):
+    elif url_type == "sqlite":
         return _convert_sqlite_url(db_url)
     return db_url
 

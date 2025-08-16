@@ -49,10 +49,15 @@ def _get_standard_error_details(actual_type: str) -> str:
     return f"Expected AsyncSession, got {actual_type}"
 
 
+def _check_session_none(session: Any) -> str:
+    """Check if session is None and return error."""
+    return "Session is None" if session is None else ""
+
 def get_session_validation_error(session: Any) -> str:
     """Get descriptive error for invalid session type."""
-    if session is None:
-        return "Session is None"
+    none_error = _check_session_none(session)
+    if none_error:
+        return none_error
     
     actual_type = type(session).__name__
     if 'Mock' in actual_type:

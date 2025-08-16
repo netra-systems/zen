@@ -19,18 +19,32 @@ class QueryBuilder:
         aggregation_level: str = "minute"
     ) -> str:
         """Build query for performance metrics"""
-        
-        time_function = {
+        time_function = QueryBuilder._get_time_function(aggregation_level)
+        workload_filter = QueryBuilder._build_workload_filter(workload_id)
+        select_clause = QueryBuilder._build_performance_select_clause(time_function)
+        subquery = QueryBuilder._build_performance_subquery(user_id, start_time, end_time, workload_filter)
+        return QueryBuilder._assemble_performance_query(select_clause, subquery)
+    
+    @staticmethod
+    def _get_time_function(aggregation_level: str) -> str:
+        """Get ClickHouse time function for aggregation level."""
+        time_functions = {
             "second": "toStartOfSecond",
             "minute": "toStartOfMinute",
             "hour": "toStartOfHour",
             "day": "toStartOfDay"
-        }.get(aggregation_level, "toStartOfMinute")
-        
-        workload_filter = f"AND workload_id = '{workload_id}'" if workload_id else ""
-        
+        }
+        return time_functions.get(aggregation_level, "toStartOfMinute")
+    
+    @staticmethod
+    def _build_workload_filter(workload_id: Optional[str]) -> str:
+        """Build workload filter clause."""
+        return f"AND workload_id = '{workload_id}'" if workload_id else ""
+    
+    @staticmethod
+    def _build_performance_select_clause(time_function: str) -> str:
+        """Build SELECT clause for performance metrics."""
         return f"""
-        {QueryBuilder.QUERY_SOURCE_MARKER}
         SELECT
             {time_function}(timestamp) as time_bucket,
             count() as event_count,
@@ -41,7 +55,12 @@ class QueryBuilder:
             maxIf(toFloat64(throughput_value), has_throughput) as peak_throughput,
             countIf(event_type = 'error') / count() * 100 as error_rate,
             sumIf(toFloat64(cost_value), has_cost) / 100.0 as total_cost,
-            uniqExact(workload_id) as unique_workloads
+            uniqExact(workload_id) as unique_workloads"""
+    
+    @staticmethod
+    def _build_performance_subquery(user_id: int, start_time: datetime, end_time: datetime, workload_filter: str) -> str:
+        """Build subquery for performance metrics."""
+        return f"""
         FROM (
             SELECT
                 *,
@@ -59,7 +78,15 @@ class QueryBuilder:
                 AND timestamp >= '{start_time.isoformat()}'
                 AND timestamp <= '{end_time.isoformat()}'
                 {workload_filter}
-        )
+        )"""
+    
+    @staticmethod
+    def _assemble_performance_query(select_clause: str, subquery: str) -> str:
+        """Assemble complete performance query."""
+        return f"""
+        {QueryBuilder.QUERY_SOURCE_MARKER}
+        {select_clause}
+        {subquery}
         GROUP BY time_bucket
         ORDER BY time_bucket DESC
         LIMIT 10000
@@ -74,20 +101,29 @@ class QueryBuilder:
         z_score_threshold: float = 2.0
     ) -> str:
         """Build query for anomaly detection"""
-        
-        return f"""
-        {QueryBuilder.QUERY_SOURCE_MARKER}
-        WITH baseline AS (
+        baseline_clause = QueryBuilder._build_anomaly_baseline_clause(user_id, metric_name, start_time)
+        main_query = QueryBuilder._build_anomaly_main_query(user_id, metric_name, start_time, end_time, z_score_threshold)
+        return QueryBuilder._assemble_anomaly_query(baseline_clause, main_query)
+    
+    @staticmethod
+    def _build_anomaly_baseline_clause(user_id: int, metric_name: str, start_time: datetime) -> str:
+        """Build baseline CTE for anomaly detection."""
+        baseline_start = (start_time - timedelta(days=7)).isoformat()
+        return f"""WITH baseline AS (
             SELECT
                 arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx,
                 avg(if(idx > 0, metrics.value[idx], 0.0)) as mean_val,
                 stddevPop(if(idx > 0, metrics.value[idx], 0.0)) as std_val
             FROM workload_events
             WHERE user_id = {user_id}
-                AND timestamp >= '{(start_time - timedelta(days=7)).isoformat()}'
+                AND timestamp >= '{baseline_start}'
                 AND timestamp < '{start_time.isoformat()}'
-        )
-        SELECT
+        )"""
+    
+    @staticmethod
+    def _build_anomaly_main_query(user_id: int, metric_name: str, start_time: datetime, end_time: datetime, z_score_threshold: float) -> str:
+        """Build main SELECT for anomaly detection."""
+        return f"""SELECT
             timestamp,
             arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx,
             if(idx > 0, metrics.value[idx], 0.0) as metric_value,
@@ -99,7 +135,15 @@ class QueryBuilder:
             AND timestamp <= '{end_time.isoformat()}'
             AND is_anomaly = 1
         ORDER BY abs(z_score) DESC
-        LIMIT 100
+        LIMIT 100"""
+    
+    @staticmethod
+    def _assemble_anomaly_query(baseline_clause: str, main_query: str) -> str:
+        """Assemble complete anomaly detection query."""
+        return f"""
+        {QueryBuilder.QUERY_SOURCE_MARKER}
+        {baseline_clause}
+        {main_query}
         """
     
     @staticmethod

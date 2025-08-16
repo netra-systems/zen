@@ -69,13 +69,25 @@ class ConfigurationSuggestionEngine:
     
     def _extract_focus_from_query(self, profile: OptimizationProfile, query: str) -> OptimizationProfile:
         """Extract optimization focus from query"""
-        if any(word in query for word in ["fast", "speed", "performance", "quick"]):
+        if self._has_performance_keywords(query):
             profile.focus = "performance"
-        elif any(word in query for word in ["accurate", "quality", "precise", "reliable"]):
+        elif self._has_quality_keywords(query):
             profile.focus = "quality"
-        elif any(word in query for word in ["cost", "efficient", "optimize", "balanced"]):
+        elif self._has_efficiency_keywords(query):
             profile.focus = "balanced"
         return profile
+    
+    def _has_performance_keywords(self, query: str) -> bool:
+        """Check if query contains performance-related keywords"""
+        return any(word in query for word in ["fast", "speed", "performance", "quick"])
+    
+    def _has_quality_keywords(self, query: str) -> bool:
+        """Check if query contains quality-related keywords"""
+        return any(word in query for word in ["accurate", "quality", "precise", "reliable"])
+    
+    def _has_efficiency_keywords(self, query: str) -> bool:
+        """Check if query contains efficiency-related keywords"""
+        return any(word in query for word in ["cost", "efficient", "optimize", "balanced"])
     
     def _apply_context_to_profile(self, profile: OptimizationProfile, context: Dict) -> OptimizationProfile:
         """Apply context information to optimization profile"""
