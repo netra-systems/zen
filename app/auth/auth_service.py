@@ -12,7 +12,7 @@ import os
 import json
 import time
 import secrets
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, TypedDict
 from urllib.parse import urlencode, quote, unquote
 
 from fastapi import FastAPI, Request, HTTPException, Response, status
@@ -29,6 +29,31 @@ from app.auth.oauth_proxy import oauth_proxy
 
 logger = central_logger.get_logger(__name__)
 redis_service = RedisManager()
+
+
+# Strongly typed data structures for security
+class UserInfo(TypedDict):
+    """Google OAuth user information structure."""
+    id: str
+    email: str
+    name: str
+    picture: Optional[str]
+    
+    
+class OAuthTokenData(TypedDict):
+    """OAuth token response structure."""
+    access_token: str
+    token_type: str
+    expires_in: int
+    refresh_token: Optional[str]
+    
+    
+class StateData(TypedDict):
+    """OAuth state data structure."""
+    csrf_token: str
+    return_url: str
+    timestamp: int
+    pr_number: Optional[str]
 
 # Create FastAPI app
 app = FastAPI(
@@ -51,9 +76,16 @@ app.add_middleware(
 # Service startup
 @app.on_event("startup")
 async def startup_event():
-    """Initialize auth service dependencies."""
-    await redis_service.connect()
-    logger.info("Auth service started successfully")
+    """Initialize auth service dependencies with error handling."""
+    try:
+        await redis_service.connect()
+        logger.info("Auth service started successfully")
+    except ConnectionError as e:
+        logger.error(f"Failed to connect to Redis during startup: {str(e)}")
+        # Continue startup without Redis - some features may be degraded
+    except Exception as e:
+        logger.critical(f"Critical startup failure: {str(e)}")
+        raise  # Re-raise critical startup errors
 
 
 class AuthTokenService:
@@ -79,13 +111,13 @@ class AuthTokenService:
             )
         return secret
         
-    def generate_jwt(self, user_info: Dict[str, Any]) -> str:
+    def generate_jwt(self, user_info: UserInfo) -> str:
         """Generate JWT token with user claims."""
         now = datetime.now(timezone.utc)
         payload = self._build_jwt_payload(user_info, now)
         return jwt.encode(payload, self.jwt_secret, algorithm="HS256")
     
-    def _build_jwt_payload(self, user_info: Dict[str, Any], now: datetime) -> Dict[str, Any]:
+    def _build_jwt_payload(self, user_info: UserInfo, now: datetime) -> Dict[str, Any]:
         """Build JWT payload with standard claims."""
         return {
             "sub": user_info.get("id"), "email": user_info.get("email"),
@@ -120,20 +152,23 @@ class AuthSessionManager:
         state_id = await self._store_state_data(state_data)
         return state_id
     
-    def _build_state_data(self, pr_number: Optional[str], return_url: str, csrf_token: str) -> Dict[str, Any]:
+    def _build_state_data(self, pr_number: Optional[str], return_url: str, csrf_token: str) -> StateData:
         """Build OAuth state data."""
-        data = {"csrf_token": csrf_token, "return_url": return_url, "timestamp": int(time.time())}
-        if pr_number:
-            data["pr_number"] = pr_number
+        data: StateData = {
+            "csrf_token": csrf_token, 
+            "return_url": return_url, 
+            "timestamp": int(time.time()),
+            "pr_number": pr_number
+        }
         return data
     
-    async def _store_state_data(self, state_data: Dict[str, Any]) -> str:
+    async def _store_state_data(self, state_data: StateData) -> str:
         """Store state data in Redis and return state ID."""
         state_id = secrets.token_urlsafe(16)
         await redis_service.setex(f"oauth_state:{state_id}", self.session_ttl, json.dumps(state_data))
         return state_id
     
-    async def validate_and_consume_state(self, state_id: str) -> Dict[str, Any]:
+    async def validate_and_consume_state(self, state_id: str) -> StateData:
         """Validate OAuth state and consume it."""
         state_json = await redis_service.get(f"oauth_state:{state_id}")
         if not state_json:
@@ -141,7 +176,7 @@ class AuthSessionManager:
         await redis_service.delete(f"oauth_state:{state_id}")
         return self._validate_state_data(json.loads(state_json))
     
-    def _validate_state_data(self, state_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_state_data(self, state_data: StateData) -> StateData:
         """Validate state data timestamp and structure."""
         current_time = int(time.time())
         if current_time - state_data.get("timestamp", 0) > self.session_ttl:
@@ -183,11 +218,21 @@ def _get_default_return_url() -> str:
 
 
 def _validate_return_url_security(url: str) -> None:
-    """Validate return URL for security."""
+    """Validate return URL for security with enhanced checks."""
+    # Check for malicious URL patterns
+    malicious_patterns = ["javascript:", "data:", "vbscript:", "file:", "ftp:"]
+    if any(url.lower().startswith(pattern) for pattern in malicious_patterns):
+        raise HTTPException(status_code=400, detail="Malicious URL scheme detected")
+    
+    # Check for URL length to prevent DoS
+    if len(url) > 2048:
+        raise HTTPException(status_code=400, detail="URL too long")
+    
+    # Validate against allowed origins
     config = auth_env_config.get_oauth_config()
     allowed_origins = config.javascript_origins
     if not any(url.startswith(origin) for origin in allowed_origins):
-        raise HTTPException(status_code=400, detail="Invalid return URL")
+        raise HTTPException(status_code=400, detail="Invalid return URL origin")
 
 
 def _build_google_oauth_url(oauth_config, state_id: str) -> str:
@@ -223,7 +268,7 @@ async def handle_oauth_callback(request: Request, code: str, state: str):
     return _build_oauth_callback_response(state_data, jwt_token, user_info)
 
 
-async def _exchange_code_for_tokens(code: str, oauth_config) -> Dict[str, Any]:
+async def _exchange_code_for_tokens(code: str, oauth_config) -> OAuthTokenData:
     """Exchange authorization code for access tokens."""
     token_url = "https://oauth2.googleapis.com/token"
     redirect_uri = _get_oauth_redirect_uri()
@@ -235,7 +280,7 @@ async def _exchange_code_for_tokens(code: str, oauth_config) -> Dict[str, Any]:
     return await _perform_token_exchange_request(token_url, data)
 
 
-async def _perform_token_exchange_request(url: str, data: Dict[str, str]) -> Dict[str, Any]:
+async def _perform_token_exchange_request(url: str, data: Dict[str, str]) -> OAuthTokenData:
     """Perform HTTP request for token exchange with timeout and security."""
     timeout = httpx.Timeout(10.0, connect=5.0)
     async with httpx.AsyncClient(timeout=timeout) as client:
@@ -250,7 +295,7 @@ async def _perform_token_exchange_request(url: str, data: Dict[str, str]) -> Dic
             raise HTTPException(status_code=503, detail="OAuth service temporarily unavailable")
 
 
-async def _get_user_info_from_google(access_token: str) -> Dict[str, Any]:
+async def _get_user_info_from_google(access_token: str) -> UserInfo:
     """Get user information from Google API with timeout and security."""
     user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
     headers = {"Authorization": f"Bearer {access_token}"}
@@ -267,10 +312,10 @@ async def _get_user_info_from_google(access_token: str) -> Dict[str, Any]:
             raise HTTPException(status_code=503, detail="User info service temporarily unavailable")
 
 
-def _build_oauth_callback_response(state_data: Dict[str, Any], jwt_token: str, user_info: Dict[str, Any]):
+def _build_oauth_callback_response(state_data: StateData, jwt_token: str, user_info: UserInfo):
     """Build OAuth callback response with redirect."""
     return_url = state_data["return_url"]
-    if "pr_number" in state_data:
+    if state_data["pr_number"]:
         return _build_pr_environment_response(return_url, jwt_token, user_info, state_data["pr_number"])
     redirect_url = f"{return_url}/auth/complete"
     response = RedirectResponse(url=redirect_url)
@@ -278,7 +323,7 @@ def _build_oauth_callback_response(state_data: Dict[str, Any], jwt_token: str, u
     return response
 
 
-def _build_pr_environment_response(return_url: str, jwt_token: str, user_info: Dict[str, Any], pr_number: str):
+def _build_pr_environment_response(return_url: str, jwt_token: str, user_info: UserInfo, pr_number: str):
     """Build response for PR environment with token transfer."""
     redirect_url = f"{return_url}/auth/complete?token={jwt_token}"
     response = RedirectResponse(url=redirect_url)
@@ -287,20 +332,30 @@ def _build_pr_environment_response(return_url: str, jwt_token: str, user_info: D
 
 
 def _set_auth_cookies(response: Response, jwt_token: str) -> None:
-    """Set secure authentication cookies."""
+    """Set secure authentication cookies with enhanced security."""
     response.set_cookie(
         key="netra_auth_token", value=jwt_token, max_age=3600,
-        secure=True, httponly=True, samesite="strict"
+        secure=True, httponly=True, samesite="strict", path="/",
+        domain=None  # Restrict to exact domain for security
     )
+    # Add security headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
 
 
 def _set_pr_auth_cookies(response: Response, jwt_token: str, pr_number: str) -> None:
-    """Set authentication cookies for PR environment."""
+    """Set authentication cookies for PR environment with enhanced security."""
     response.set_cookie(
         key="netra_auth_token", value=jwt_token, max_age=3600,
-        secure=True, httponly=True, samesite="none",
-        domain=".staging.netrasystems.ai"
+        secure=True, httponly=True, samesite="none", path="/",
+        domain=f"pr-{pr_number}.staging.netrasystems.ai"  # More specific domain
     )
+    # Add security headers for PR environment
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"  # Allow framing within same origin for PR
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'"
 
 
 @app.post("/auth/token")

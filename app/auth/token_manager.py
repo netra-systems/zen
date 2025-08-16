@@ -110,8 +110,16 @@ class JWTTokenManager:
                 await self.redis_manager.set(revocation_key, "revoked", ex=3600)
             
             logger.info(f"JWT revoked for user {claims.user_id}")
+        except ValidationError as e:
+            logger.error(f"Invalid token format during revocation: {str(e)}")
+            raise AuthenticationError("Invalid token format")
+        except ConnectionError as e:
+            logger.error(f"Redis connection failed during token revocation: {str(e)}")
+            # Continue without revocation if Redis is down
         except Exception as e:
-            logger.error(f"Failed to revoke token: {str(e)}")
+            logger.error(f"Unexpected error during token revocation: {str(e)}")
+            # Re-raise for unknown errors to surface issues
+            raise
             
     def _decode_token_payload(self, token: str) -> Dict[str, Any]:
         """Decode JWT payload without validation."""

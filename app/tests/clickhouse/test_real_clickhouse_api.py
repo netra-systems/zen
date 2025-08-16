@@ -342,6 +342,7 @@ class TestCorpusTableOperations:
         table_name = f"netra_content_corpus_{corpus_id}"
         create_query = self._build_corpus_create_query(table_name)
         
+        try:
             await self._test_corpus_table_operations(client, table_name, corpus_id)
         except Exception as e:
             if "not enough privileges" in str(e).lower():

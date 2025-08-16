@@ -127,7 +127,7 @@ class TokenValidator:
         """Check if backup code matches and unused."""
         return entry["code"] == code and not entry["used"]
     
-    def _mark_backup_used(self, user_id: str, backup_code: str):
+    def _mark_backup_used(self, user_id: str, backup_code: str) -> None:
         """Mark backup code as used."""
         enhanced_secret_manager.mark_backup_code_used(user_id, backup_code)
         self._log_backup_used(user_id)
@@ -141,7 +141,7 @@ class TokenValidator:
         """Get SMS codes for user."""
         return enhanced_secret_manager.get_user_sms_codes(user_id)
     
-    def _invalidate_sms_code(self, user_id: str, sms_code: str):
+    def _invalidate_sms_code(self, user_id: str, sms_code: str) -> None:
         """Mark SMS code as used."""
         enhanced_secret_manager._invalidate_sms_code(user_id, sms_code)
     
