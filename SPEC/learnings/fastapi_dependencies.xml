@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="fastapi-dependencies">
+    <title>FastAPI Dependency Injection with Async Context Managers</title>
+    
+    <issue date="2025-08-16">
+        <description>
+            Health check endpoint failed with error: '_AsyncGeneratorContextManager' object has no attribute 'execute'
+        </description>
+        
+        <root_cause>
+            Using @asynccontextmanager decorated function directly with FastAPI's Depends() 
+            causes the dependency injection to return the context manager itself instead of the yielded session.
+        </root_cause>
+        
+        <incorrect_pattern>
+            <code><![CDATA[
+# In postgres_session.py
+@asynccontextmanager
+async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
+    # Context manager logic
+    yield session
+
+# In route handler
+async def ready(db: AsyncSession = Depends(get_async_db)):
+    # ERROR: db is the context manager, not the session
+    await db.execute(...)  # Fails
+            ]]></code>
+        </incorrect_pattern>
+        
+        <correct_pattern>
+            <code><![CDATA[
+# In dependencies.py - wrapper without @asynccontextmanager
+async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
+    async with get_async_db() as session:  # Use context manager
+        yield session  # Yield the actual session
+
+# In route handler
+async def ready(db: AsyncSession = Depends(get_db_dependency)):
+    # SUCCESS: db is the actual AsyncSession
+    await db.execute(...)  # Works correctly
+            ]]></code>
+        </correct_pattern>
+        
+        <key_learnings>
+            <learning>
+                FastAPI's Depends() expects a regular async generator function, 
+                NOT an @asynccontextmanager decorated function
+            </learning>
+            <learning>
+                Always create a wrapper function for context managers when using with Depends()
+            </learning>
+            <learning>
+                The wrapper should use the context manager internally and yield the resource
+            </learning>
+        </key_learnings>
+        
+        <affected_areas>
+            <area>Health check endpoints (/ready)</area>
+            <area>Any route using database session dependencies</area>
+            <area>WebSocket endpoints (already documented separately)</area>
+        </affected_areas>
+        
+        <prevention>
+            <rule>Never use @asynccontextmanager decorated functions directly with Depends()</rule>
+            <rule>Always use get_db_dependency() or similar wrappers for database sessions</rule>
+            <rule>Test health endpoints after any dependency changes</rule>
+        </prevention>
+    </issue>
+</learnings>

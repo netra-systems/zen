@@ -1,11 +1,12 @@
 from sqlalchemy import text
 from fastapi import APIRouter, HTTPException, Depends
-from app.db.postgres import get_async_db, async_engine
+from app.db.postgres import async_engine
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.logging_config import central_logger
 from app.services.database_env_service import DatabaseEnvironmentValidator
 from app.services.schema_validation_service import SchemaValidationService
 from app.config import settings
+from app.dependencies import get_db_dependency
 
 import asyncio
 from typing import Dict, Any
@@ -59,7 +60,7 @@ async def _handle_clickhouse_error(error: Exception) -> None:
         raise
 
 @router.get("/ready")
-async def ready(db: AsyncSession = Depends(get_async_db)) -> Dict[str, str]:
+async def ready(db: AsyncSession = Depends(get_db_dependency)) -> Dict[str, str]:
     """
     Readiness probe to check if the application is ready to serve requests.
     """

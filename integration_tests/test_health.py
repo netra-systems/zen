@@ -3,7 +3,7 @@ import os
 from fastapi.testclient import TestClient
 from app.main import app
 from unittest.mock import patch, MagicMock
-from app.db.postgres import get_async_db
+from app.dependencies import get_db_dependency
 
 # Set testing flags to simplify startup
 os.environ["TESTING"] = "1"
@@ -43,7 +43,7 @@ def test_ready_endpoint_success(client: TestClient):
     async def mock_get_db_success():
         return mock_session
     
-    app.dependency_overrides[get_async_db] = mock_get_db_success
+    app.dependency_overrides[get_db_dependency] = mock_get_db_success
     
     response = client.get("/health/ready")
     assert response.status_code == 200
@@ -64,7 +64,7 @@ def test_ready_endpoint_db_failure(client: TestClient):
         async def mock_get_db_failure():
             return mock_session
 
-        app.dependency_overrides[get_async_db] = mock_get_db_failure
+        app.dependency_overrides[get_db_dependency] = mock_get_db_failure
         
         response = client.get("/health/ready")
         assert response.status_code == 503

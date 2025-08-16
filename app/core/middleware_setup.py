@@ -50,24 +50,17 @@ def _get_development_cors_origins() -> list[str]:
     cors_origins_env = os.environ.get("CORS_ORIGINS", "")
     if cors_origins_env:
         return cors_origins_env.split(",")
-    # Restrict to localhost origins only in development
-    return [
-        "http://localhost:3000",
-        "http://localhost:3001", 
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000"
-    ]
+    # Allow all localhost origins in development (any port)
+    return ["*"]  # Will be handled by custom middleware for port flexibility
 
 
 def setup_cors_middleware(app: FastAPI) -> None:
     """Configure CORS middleware."""
-    if settings.environment == "staging":
-        # Use custom middleware for staging to support wildcard subdomains
+    if settings.environment in ["staging", "development"]:
+        # Use custom middleware for staging and development to support wildcards
         app.add_middleware(CustomCORSMiddleware)
     else:
-        # Use standard CORS middleware for other environments
+        # Use standard CORS middleware for production
         allowed_origins = get_cors_origins()
         app.add_middleware(
             CORSMiddleware,
@@ -115,6 +108,14 @@ def is_origin_allowed(origin: str, allowed_origins: List[str]) -> bool:
     if not origin:
         return False
     
+    # Allow all origins if wildcard is specified
+    if "*" in allowed_origins:
+        # In development, only allow localhost/127.0.0.1 with any port
+        if settings.environment == "development":
+            localhost_pattern = r'^https?://(localhost|127\.0\.0\.1)(:\d+)?$'
+            return bool(re.match(localhost_pattern, origin))
+        return True
+    
     # Direct match
     if origin in allowed_origins:
         return True
@@ -144,8 +145,7 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
         
         # Add CORS headers if origin is allowed
         allowed_origins = get_cors_origins()
-        if origin and (origin == "*" in allowed_origins or 
-                      is_origin_allowed(origin, allowed_origins)):
+        if origin and is_origin_allowed(origin, allowed_origins):
             response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
             response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
