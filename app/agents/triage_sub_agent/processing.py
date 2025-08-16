@@ -58,49 +58,74 @@ class TriageProcessor:
         if not isinstance(data, dict):
             return data
         
-        # Fix tool_recommendations parameters field
-        if "tool_recommendations" in data and isinstance(data["tool_recommendations"], list):
-            for rec in data["tool_recommendations"]:
-                if isinstance(rec, dict) and "parameters" in rec:
-                    if isinstance(rec["parameters"], str):
-                        try:
-                            # Parse JSON string to dict
-                            import json
-                            rec["parameters"] = json.loads(rec["parameters"])
-                        except (json.JSONDecodeError, TypeError):
-                            # Fallback to empty dict if parsing fails
-                            rec["parameters"] = {}
-        
+        self._fix_tool_recommendation_parameters(data)
         return data
+    
+    def _fix_tool_recommendation_parameters(self, data):
+        """Fix parameters field in tool recommendations."""
+        if not self._has_tool_recommendations(data):
+            return
+        
+        for rec in data["tool_recommendations"]:
+            self._fix_recommendation_parameters(rec)
+    
+    def _has_tool_recommendations(self, data):
+        """Check if data has tool recommendations."""
+        return ("tool_recommendations" in data and 
+                isinstance(data["tool_recommendations"], list))
+    
+    def _fix_recommendation_parameters(self, rec):
+        """Fix parameters field in a single recommendation."""
+        if not (isinstance(rec, dict) and "parameters" in rec):
+            return
+        
+        if isinstance(rec["parameters"], str):
+            rec["parameters"] = self._parse_json_parameters(rec["parameters"])
+    
+    def _parse_json_parameters(self, parameters_str):
+        """Parse JSON string parameters with fallback."""
+        try:
+            import json
+            return json.loads(parameters_str)
+        except (json.JSONDecodeError, TypeError):
+            return {}
     
     def enrich_triage_result(self, triage_result, user_request):
         """Enrich triage result with additional analysis"""
-        # Extract entities and intent if not already done
+        self._ensure_entities_extracted(triage_result, user_request)
+        self._ensure_intent_detected(triage_result, user_request)
+        self._handle_admin_mode_detection(triage_result, user_request)
+        self._ensure_tool_recommendations(triage_result)
+        return triage_result
+    
+    def _ensure_entities_extracted(self, triage_result, user_request):
+        """Ensure entities are extracted from request."""
         if not triage_result.get("extracted_entities"):
             entities = self.triage_core.entity_extractor.extract_entities(user_request)
             triage_result["extracted_entities"] = entities.model_dump()
-        
+    
+    def _ensure_intent_detected(self, triage_result, user_request):
+        """Ensure user intent is detected."""
         if not triage_result.get("user_intent"):
             intent = self.triage_core.intent_detector.detect_intent(user_request)
             triage_result["user_intent"] = intent.model_dump()
-        
-        # Detect admin mode
+    
+    def _handle_admin_mode_detection(self, triage_result, user_request):
+        """Handle admin mode detection and category adjustment."""
         is_admin = self.triage_core.intent_detector.detect_admin_mode(user_request)
         triage_result["is_admin_mode"] = is_admin
         
-        # Adjust category for admin mode
         if is_admin:
             triage_result = self._adjust_admin_category(triage_result, user_request)
-        
-        # Add tool recommendations if not present
+    
+    def _ensure_tool_recommendations(self, triage_result):
+        """Ensure tool recommendations are present."""
         if not triage_result.get("tool_recommendations"):
             tools = self.triage_core.tool_recommender.recommend_tools(
                 triage_result.get("category", "General Inquiry"),
                 ExtractedEntities(**triage_result.get("extracted_entities", {}))
             )
             triage_result["tool_recommendations"] = [t.model_dump() for t in tools]
-        
-        return triage_result
     
     def _adjust_admin_category(self, triage_result, user_request):
         """Adjust category for admin mode requests"""
