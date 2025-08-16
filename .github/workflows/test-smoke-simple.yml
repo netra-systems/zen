@@ -13,7 +13,7 @@ env:
 jobs:
   smoke-test:
     name: Quick Validation
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.act && 'ubuntu-latest' || 'warp-custom-default' }}
     timeout-minutes: 5
     
     steps:
