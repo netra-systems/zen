@@ -9,7 +9,7 @@ on:
 jobs:
   test:
     name: Basic ACT Test
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.event.act && 'ubuntu-latest' || 'warp-custom-default' }}
     steps:
       - name: Print environment
         run: |

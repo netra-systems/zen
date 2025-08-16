@@ -77,7 +77,7 @@ jobs:
   
   determine-strategy:
     name: Determine Execution Strategy
-    runs-on: warp-custom-default
+    runs-on: ${{ github.event.act && 'ubuntu-latest' || 'warp-custom-default' }}
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
       skip_tests: ${{ steps.check.outputs.skip_tests }}

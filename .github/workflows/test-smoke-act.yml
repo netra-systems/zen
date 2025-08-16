@@ -40,7 +40,7 @@ permissions:
 jobs:
   smoke-test:
     name: Quick Validation (<30s)
-    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'ubuntu-latest' }}
+    runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
     timeout-minutes: 5
     
     outputs:
