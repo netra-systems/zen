@@ -7,7 +7,7 @@ import os
 import shutil
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 
@@ -35,7 +35,7 @@ def run_gh_command(args: List[str]) -> Dict[str, Any]:
     cmd = [gh_path, "api"] + args
     try:
         result = subprocess.run(
-            cmd, capture_output=True, text=True, check=True
+            cmd, capture_output=True, text=True, check=True, encoding='utf-8'
         )
         return json.loads(result.stdout) if result.stdout else {}
     except subprocess.CalledProcessError as e:
@@ -47,25 +47,34 @@ def get_workflow_runs(
     repo: str, days_old: int, workflow_id: Optional[str] = None
 ) -> List[Dict[str, Any]]:
     """Get workflow runs older than specified days."""
-    cutoff_date = datetime.now() - timedelta(days=days_old)
+    cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_old)
     
     endpoint = f"repos/{repo}/actions/runs"
     if workflow_id:
         endpoint = f"repos/{repo}/actions/workflows/{workflow_id}/runs"
     
-    params = ["--paginate", "-X", "GET", endpoint]
-    data = run_gh_command(params)
-    
-    if not data or "workflow_runs" not in data:
-        return []
-    
+    # Use per_page and iterate through pages manually
     old_runs = []
-    for run in data["workflow_runs"]:
-        run_date = datetime.fromisoformat(
-            run["created_at"].replace("Z", "+00:00")
-        )
-        if run_date < cutoff_date:
-            old_runs.append(run)
+    page = 1
+    while True:
+        params = ["-X", "GET", f"{endpoint}?per_page=100&page={page}"]
+        data = run_gh_command(params)
+        
+        if not data or "workflow_runs" not in data or not data["workflow_runs"]:
+            break
+        
+        for run in data["workflow_runs"]:
+            run_date = datetime.fromisoformat(
+                run["created_at"].replace("Z", "+00:00")
+            )
+            if run_date < cutoff_date:
+                old_runs.append(run)
+        
+        # If we got less than 100 results, we're on the last page
+        if len(data["workflow_runs"]) < 100:
+            break
+        
+        page += 1
     
     return old_runs
 
@@ -79,22 +88,32 @@ def delete_workflow_run(repo: str, run_id: int) -> bool:
 
 def get_artifacts(repo: str, days_old: int) -> List[Dict[str, Any]]:
     """Get artifacts older than specified days."""
-    cutoff_date = datetime.now() - timedelta(days=days_old)
+    cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_old)
     
     endpoint = f"repos/{repo}/actions/artifacts"
-    params = ["--paginate", "-X", "GET", endpoint]
-    data = run_gh_command(params)
     
-    if not data or "artifacts" not in data:
-        return []
-    
+    # Use per_page and iterate through pages manually
     old_artifacts = []
-    for artifact in data["artifacts"]:
-        created_date = datetime.fromisoformat(
-            artifact["created_at"].replace("Z", "+00:00")
-        )
-        if created_date < cutoff_date:
-            old_artifacts.append(artifact)
+    page = 1
+    while True:
+        params = ["-X", "GET", f"{endpoint}?per_page=100&page={page}"]
+        data = run_gh_command(params)
+        
+        if not data or "artifacts" not in data or not data["artifacts"]:
+            break
+        
+        for artifact in data["artifacts"]:
+            created_date = datetime.fromisoformat(
+                artifact["created_at"].replace("Z", "+00:00")
+            )
+            if created_date < cutoff_date:
+                old_artifacts.append(artifact)
+        
+        # If we got less than 100 results, we're on the last page
+        if len(data["artifacts"]) < 100:
+            break
+        
+        page += 1
     
     return old_artifacts
 
