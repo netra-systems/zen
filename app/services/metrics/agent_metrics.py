@@ -108,6 +108,13 @@ class AgentMetricsCollector:
                 points.append(point)
         return points
     
+    def _create_point_from_record(self, record: AgentOperationRecord, agent_name: str, metric_type: AgentMetricType) -> Optional[TimeSeriesPoint]:
+        """Create time series point from operation record."""
+        if not record.end_time:
+            return None
+        value = self._extract_metric_value(record, metric_type)
+        return self._create_time_series_point(record, value, agent_name) if value is not None else None
+    
     def _create_time_series_point(self, record: AgentOperationRecord, value: float, agent_name: str) -> TimeSeriesPoint:
         """Create a single time series point."""
         return TimeSeriesPoint(

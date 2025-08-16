@@ -172,7 +172,7 @@ class CoreMetricsCollector:
         time_range_minutes: int = 60
     ) -> List[TimeSeriesPoint]:
         """Get time series data for visualization"""
-        cutoff_time = datetime.now(UTC) - timedelta(minutes=time_range_minutes)
+        cutoff_time = self._calculate_cutoff_time(time_range_minutes)
         points = self._extract_time_series_points(corpus_id, metric_type, cutoff_time)
         return sorted(points, key=lambda x: x.timestamp)
     
@@ -180,24 +180,44 @@ class CoreMetricsCollector:
         """Extract time series points from metrics buffer."""
         points = []
         for entry in self._metrics_buffer:
-            if is_entry_valid_for_time_series(entry, corpus_id, cutoff_time):
-                point = create_time_series_point(entry, metric_type)
-                if point:
-                    points.append(point)
+            point = self._process_buffer_entry(entry, corpus_id, metric_type, cutoff_time)
+            if point:
+                points.append(point)
         return points
     
     def get_buffer_status(self) -> Dict[str, Any]:
         """Get current buffer status"""
-        return {
-            "active_operations": len(self._active_operations),
-            "buffered_metrics": len(self._metrics_buffer),
-            "tracked_corpus_operations": len(self._operation_times),
-            "success_counters": len(self._success_counts),
-            "buffer_utilization": len(self._metrics_buffer) / self.max_buffer_size
-        }
+        operational_stats = self._get_operational_stats()
+        buffer_stats = self._get_buffer_stats()
+        return {**operational_stats, **buffer_stats}
     
     async def clear_old_data(self, age_hours: int = 24):
         """Clear old data from buffers"""
         cutoff_time = datetime.now(UTC) - timedelta(hours=age_hours)
         self._metrics_buffer = filter_recent_metrics(self._metrics_buffer, cutoff_time, self.max_buffer_size)
         logger.info(f"Cleared metrics data older than {age_hours} hours")
+    
+    def _calculate_cutoff_time(self, time_range_minutes: int) -> datetime:
+        """Calculate cutoff time for time series data."""
+        return datetime.now(UTC) - timedelta(minutes=time_range_minutes)
+    
+    def _process_buffer_entry(self, entry: Dict, corpus_id: str, metric_type: str, cutoff_time: datetime) -> Optional[TimeSeriesPoint]:
+        """Process buffer entry and create time series point if valid."""
+        if is_entry_valid_for_time_series(entry, corpus_id, cutoff_time):
+            return create_time_series_point(entry, metric_type)
+        return None
+    
+    def _get_operational_stats(self) -> Dict[str, int]:
+        """Get operational statistics."""
+        return {
+            "active_operations": len(self._active_operations),
+            "tracked_corpus_operations": len(self._operation_times),
+            "success_counters": len(self._success_counts)
+        }
+    
+    def _get_buffer_stats(self) -> Dict[str, float]:
+        """Get buffer-related statistics."""
+        return {
+            "buffered_metrics": len(self._metrics_buffer),
+            "buffer_utilization": len(self._metrics_buffer) / self.max_buffer_size
+        }

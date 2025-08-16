@@ -35,73 +35,27 @@ class QualityValidationService:
         """
         metrics = self._calculate_metrics(output, output_type)
         is_valid = QualityValidators.determine_validity(metrics, self.config)
-        
         return is_valid, metrics
     
     def _calculate_metrics(self, output: str, output_type: str) -> QualityMetrics:
         """Calculate all quality metrics for the output"""
-        # Calculate individual scores
-        specificity = QualityScoreCalculators.calculate_specificity_score(output)
-        actionability = QualityScoreCalculators.calculate_actionability_score(output)
-        quantification = QualityScoreCalculators.calculate_quantification_score(output)
-        novelty = QualityScoreCalculators.calculate_novelty_score(output)
-        completeness = QualityScoreCalculators.calculate_completeness_score(output, output_type)
-        domain_relevance = QualityScoreCalculators.calculate_domain_relevance_score(output)
-        
-        # Calculate weighted overall score
-        overall_score = self._calculate_weighted_score(
-            specificity, actionability, quantification,
-            novelty, completeness, domain_relevance
-        )
-        
-        # Determine quality level
+        individual_scores = self._calculate_individual_scores(output, output_type)
+        overall_score = self._calculate_weighted_score(**individual_scores)
         quality_level = QualityValidators.determine_quality_level(overall_score)
-        
-        # Detect issues
-        scores_dict = {
-            'specificity': specificity,
-            'actionability': actionability,
-            'quantification': quantification
-        }
-        issues = QualityValidators.detect_issues(output, scores_dict, self.config)
-        
-        # Suggest improvements
-        improvements = QualityValidators.suggest_improvements(scores_dict)
-        
-        return QualityMetrics(
-            overall_score=overall_score,
-            specificity_score=specificity,
-            actionability_score=actionability,
-            quantification_score=quantification,
-            novelty_score=novelty,
-            completeness_score=completeness,
-            domain_relevance_score=domain_relevance,
-            quality_level=quality_level,
-            issues_detected=issues,
-            improvements_suggested=improvements
-        )
+        issues, improvements = self._analyze_quality_issues(output, individual_scores)
+        return self._build_quality_metrics(individual_scores, overall_score, quality_level, issues, improvements)
     
     def _calculate_weighted_score(self, specificity: float, actionability: float,
                                  quantification: float, novelty: float,
                                  completeness: float, domain_relevance: float) -> float:
         """Calculate weighted overall score from individual metrics"""
-        weights = {
-            'specificity': 0.25,
-            'actionability': 0.20,
-            'quantification': 0.20,
-            'novelty': 0.10,
-            'completeness': 0.15,
-            'domain_relevance': 0.10
+        weights = self._get_quality_weights()
+        scores = {
+            'specificity': specificity, 'actionability': actionability,
+            'quantification': quantification, 'novelty': novelty,
+            'completeness': completeness, 'domain_relevance': domain_relevance
         }
-        
-        return (
-            specificity * weights['specificity'] +
-            actionability * weights['actionability'] +
-            quantification * weights['quantification'] +
-            novelty * weights['novelty'] +
-            completeness * weights['completeness'] +
-            domain_relevance * weights['domain_relevance']
-        )
+        return sum(scores[metric] * weight for metric, weight in weights.items())
     
     def validate_agent_output(self, 
                              agent_name: str,
@@ -116,12 +70,8 @@ class QualityValidationService:
         Returns:
             Tuple of (is_valid, quality_metrics)
         """
-        # Extract text content from agent output
         text_content = self._extract_text_content(output)
-        
-        # Determine output type based on agent
         output_type = self._get_output_type_for_agent(agent_name)
-        
         return self.validate_output(text_content, output_type)
     
     def _extract_text_content(self, output: Dict[str, Any]) -> str:

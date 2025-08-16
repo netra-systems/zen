@@ -20,10 +20,20 @@ class SemanticVectorizer:
         Creates a deterministic semantic vector based on text content hash.
         Provides consistent, reproducible embeddings for semantic analysis.
         """
-        # Create a stable seed from the text hash
-        seed = int.from_bytes(text.encode(), 'little') % (2**32 - 1)
-        np.random.seed(seed)
-        vector = np.random.rand(self._dimension)
-        # Normalize to a unit vector, a common practice for embeddings
-        vector /= np.linalg.norm(vector)
+        seed = _create_text_seed(text)
+        vector = _generate_normalized_vector(seed, self._dimension)
         return vector.tolist()
+
+
+def _create_text_seed(text: str) -> int:
+    """Create a stable seed from text hash."""
+    return int.from_bytes(text.encode(), 'little') % (2**32 - 1)
+
+
+def _generate_normalized_vector(seed: int, dimension: int) -> np.ndarray:
+    """Generate a normalized vector from seed."""
+    np.random.seed(seed)
+    vector = np.random.rand(dimension)
+    # Normalize to a unit vector, a common practice for embeddings
+    vector /= np.linalg.norm(vector)
+    return vector

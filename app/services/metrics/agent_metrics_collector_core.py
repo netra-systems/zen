@@ -106,10 +106,9 @@ class AgentMetricsCollectorCore:
     def _build_completion_data(self, success: bool, failure_type: Optional[FailureType], error_message: Optional[str], 
                               memory_usage_mb: float, cpu_usage_percent: float, metadata: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         """Build completion data dictionary."""
-        return {
-            'success': success, 'failure_type': failure_type, 'error_message': error_message,
-            'memory_usage_mb': memory_usage_mb, 'cpu_usage_percent': cpu_usage_percent, 'metadata': metadata
-        }
+        basic_data = {'success': success, 'failure_type': failure_type, 'error_message': error_message}
+        resource_data = {'memory_usage_mb': memory_usage_mb, 'cpu_usage_percent': cpu_usage_percent, 'metadata': metadata}
+        return {**basic_data, **resource_data}
 
     async def _finalize_and_process_operation(self, record: AgentOperationRecord, completion_data: Dict[str, Any]) -> AgentOperationRecord:
         """Finalize operation record and process completion."""
@@ -147,10 +146,8 @@ class AgentMetricsCollectorCore:
     async def _end_operation_with_data(self, operation_id: str, completion_data: Dict[str, Any]) -> None:
         """End operation with pre-built completion data."""
         await self.end_operation(
-            operation_id=operation_id,
-            success=completion_data['success'],
-            failure_type=completion_data['failure_type'],
-            error_message=completion_data['error_message']
+            operation_id=operation_id, success=completion_data['success'],
+            failure_type=completion_data['failure_type'], error_message=completion_data['error_message']
         )
 
     async def _update_agent_metrics(self, record: AgentOperationRecord) -> None:
