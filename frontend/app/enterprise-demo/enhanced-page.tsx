@@ -12,7 +12,6 @@ import { ArrowRight, BarChart3, Brain, Database, Rocket, Shield, Sparkles, Chevr
 import { motion, AnimatePresence } from 'framer-motion';
 import WorkloadSelector from '@/components/demo/WorkloadSelector';
 import { useChatStore } from '@/store/chat';
-import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { useAgent } from '@/hooks/useAgent';
 import AgentStatusPanel from '@/components/chat/AgentStatusPanel';
 
@@ -23,7 +22,6 @@ const EnhancedEnterpriseDemoPage: NextPage = () => {
   const [selectedWorkload, setSelectedWorkload] = useState<string | null>(null);
   const [, setSyntheticDataGenerated] = useState(false);
   const { sendUserMessage } = useAgent();
-  const { } = useChatWebSocket();
   const { isProcessing } = useChatStore();
 
   useEffect(() => {
