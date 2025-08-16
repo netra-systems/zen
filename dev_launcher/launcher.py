@@ -360,6 +360,7 @@ class DevLauncher:
         return create_process_env(
             BACKEND_PORT=str(port),
             PYTHONPATH=str(self.config.project_root),
+            ENVIRONMENT="development",  # Explicitly set development environment
             **service_env_vars,
             **self.config.env_overrides
         )
