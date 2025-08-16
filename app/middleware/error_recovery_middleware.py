@@ -4,29 +4,35 @@ Provides middleware-level error interception with automatic recovery attempts,
 circuit breaking, and comprehensive error logging with context.
 """
 
-import asyncio
-import json
 import time
-import traceback
-from typing import Callable, Dict, Any, Optional
-from datetime import datetime
-
-from fastapi import Request, Response, HTTPException
+from typing import Callable, Optional
+from fastapi import Request, Response
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.error_recovery import (
-    ErrorRecoveryManager,
-    RecoveryExecutor,
     RecoveryContext,
     OperationType,
     recovery_manager,
     recovery_executor
 )
-from app.core.error_codes import ErrorSeverity
-from app.core.exceptions_base import NetraException
 from app.services.transaction_manager import transaction_manager
 from app.logging_config import central_logger
+from .error_recovery_helpers import (
+    determine_operation_type,
+    determine_severity,
+    extract_request_metadata,
+    build_error_data,
+    enhance_error_data,
+    log_by_severity,
+    build_recovery_context
+)
+from .error_response_builder import (
+    create_circuit_breaker_response,
+    create_recovery_response,
+    create_error_response,
+    add_success_headers
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -40,17 +46,6 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         self.recovery_manager = recovery_manager
         self.recovery_executor = recovery_executor
         self.transaction_manager = transaction_manager
-        self._setup_operation_mapping()
-    
-    def _setup_operation_mapping(self) -> None:
-        """Setup request type to operation type mapping."""
-        self.operation_mapping = {
-            'POST': OperationType.DATABASE_WRITE,
-            'PUT': OperationType.DATABASE_WRITE,
-            'PATCH': OperationType.DATABASE_WRITE,
-            'DELETE': OperationType.DATABASE_WRITE,
-            'GET': OperationType.DATABASE_READ,
-        }
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request with error recovery capabilities."""
@@ -62,82 +57,10 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
             request, call_next, operation_id, operation_type
         )
     
-    def _determine_operation_type(self, request: Request) -> OperationType:
-        """Determine operation type from request."""
-        path = request.url.path.lower()
-        method = request.method
-        special_type = self._get_special_operation_type(path)
-        if special_type:
-            return special_type
-        return self.operation_mapping.get(method, OperationType.DATABASE_READ)
-    
-    def _get_special_operation_type(self, path: str) -> Optional[OperationType]:
-        """Get special operation type for specific paths."""
-        if '/websocket' in path or '/ws' in path:
-            return OperationType.WEBSOCKET_SEND
-        elif '/llm' in path or '/ai' in path or '/agent' in path:
-            return OperationType.LLM_REQUEST
-        elif '/api/external' in path:
-            return OperationType.EXTERNAL_API
-        elif '/files' in path or '/upload' in path:
-            return OperationType.FILE_OPERATION
-        elif '/cache' in path:
-            return OperationType.CACHE_OPERATION
-        return None
-    
-    def _determine_severity(self, error: Exception) -> ErrorSeverity:
-        """Determine error severity from exception type."""
-        if isinstance(error, NetraException):
-            return error.error_details.severity
-        error_type = type(error).__name__
-        return self._get_severity_mapping().get(error_type, ErrorSeverity.MEDIUM)
-    
-    def _get_severity_mapping(self) -> Dict[str, ErrorSeverity]:
-        """Get error type to severity mapping."""
-        high_severity = ['ValidationError', 'PermissionError', 'ValueError', 'TypeError']
-        medium_severity = ['ConnectionError', 'TimeoutError', 'HTTPException', 'KeyError', 'FileNotFoundError']
-        mapping = {error: ErrorSeverity.HIGH for error in high_severity}
-        mapping.update({error: ErrorSeverity.MEDIUM for error in medium_severity})
-        mapping['MemoryError'] = ErrorSeverity.CRITICAL
-        return mapping
-    
-    def _extract_request_metadata(self, request: Request) -> Dict[str, Any]:
-        """Extract metadata from request for recovery context."""
-        metadata = self._get_base_metadata(request)
-        self._add_user_metadata(metadata, request)
-        self._add_request_id_metadata(metadata, request)
-        return metadata
-    
-    def _get_base_metadata(self, request: Request) -> Dict[str, Any]:
-        """Get base request metadata."""
-        metadata = {
-            'method': request.method, 'path': request.url.path,
-            'query_params': dict(request.query_params), 'headers': dict(request.headers)
-        }
-        self._add_client_metadata(metadata, request)
-        return metadata
-    
-    def _add_client_metadata(self, metadata: Dict[str, Any], request: Request) -> None:
-        """Add client-specific metadata to base metadata."""
-        metadata['client_host'] = request.client.host if request.client else None
-        metadata['user_agent'] = request.headers.get('user-agent')
-        metadata['content_type'] = request.headers.get('content-type')
-    
-    def _add_user_metadata(self, metadata: Dict[str, Any], request: Request) -> None:
-        """Add user context to metadata if available."""
-        if hasattr(request.state, 'user') and request.state.user:
-            metadata['user_id'] = str(request.state.user.id)
-            metadata['user_email'] = getattr(request.state.user, 'email', None)
-    
-    def _add_request_id_metadata(self, metadata: Dict[str, Any], request: Request) -> None:
-        """Add request ID to metadata if available."""
-        if hasattr(request.state, 'request_id'):
-            metadata['request_id'] = request.state.request_id
-    
     def _create_operation_context(self, request: Request) -> tuple[str, OperationType]:
         """Create operation context for request processing."""
         operation_id = f"{request.method}:{request.url.path}:{int(time.time())}"
-        operation_type = self._determine_operation_type(request)
+        operation_type = determine_operation_type(request)
         return operation_id, operation_type
     
     def _check_circuit_breaker(self, request: Request) -> Optional[JSONResponse]:
@@ -147,19 +70,8 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         )
         if not circuit_breaker.should_allow_request():
             logger.warning(f"Circuit breaker open for {request.url.path}")
-            return self._create_circuit_breaker_response()
+            return create_circuit_breaker_response()
         return None
-    
-    def _create_circuit_breaker_response(self) -> JSONResponse:
-        """Create service unavailable response for circuit breaker."""
-        return JSONResponse(
-            status_code=503,
-            content={
-                "error": "SERVICE_UNAVAILABLE",
-                "message": "Service temporarily unavailable",
-                "retry_after": 60
-            }
-        )
     
     async def _execute_request_with_retry(
         self,
@@ -214,17 +126,6 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
                 attempt, max_attempts, circuit_breaker
             )
     
-    async def _handle_attempt_error(
-        self, request: Request, error: Exception, operation_id: str, 
-        operation_type: OperationType, attempt: int, max_attempts: int, circuit_breaker
-    ):
-        """Handle error during single attempt."""
-        recovery_response = await self._handle_request_error(
-            request, error, operation_id, operation_type, 
-            attempt, max_attempts, circuit_breaker
-        )
-        return recovery_response if recovery_response else error
-    
     async def _handle_request_attempt(
         self,
         request: Request,
@@ -238,13 +139,18 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         request.state.attempt = attempt
         response = await call_next(request)
         circuit_breaker.record_success()
-        return self._add_success_headers(response, operation_id, attempt)
+        return add_success_headers(response, operation_id, attempt)
     
-    def _add_success_headers(self, response: Response, operation_id: str, attempt: int) -> Response:
-        """Add success headers to response."""
-        response.headers["X-Operation-ID"] = operation_id
-        response.headers["X-Attempt"] = str(attempt + 1)
-        return response
+    async def _handle_attempt_error(
+        self, request: Request, error: Exception, operation_id: str, 
+        operation_type: OperationType, attempt: int, max_attempts: int, circuit_breaker
+    ):
+        """Handle error during single attempt."""
+        recovery_response = await self._handle_request_error(
+            request, error, operation_id, operation_type, 
+            attempt, max_attempts, circuit_breaker
+        )
+        return recovery_response if recovery_response else error
     
     async def _handle_request_error(
         self,
@@ -275,9 +181,9 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         request: Request
     ) -> RecoveryContext:
         """Create recovery context for error handling."""
-        metadata = self._extract_request_metadata(request)
-        severity = self._determine_severity(error)
-        return self._build_recovery_context(
+        metadata = extract_request_metadata(request)
+        severity = determine_severity(error)
+        return build_recovery_context(
             operation_id, operation_type, error, severity, attempt, max_attempts, metadata
         )
     
@@ -312,9 +218,7 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
     ) -> Optional[JSONResponse]:
         """Handle successful recovery attempt."""
         if recovery_result.action_taken.value == "compensate":
-            return self._create_recovery_response(
-                request, context, recovery_result
-            )
+            return create_recovery_response(request, context, recovery_result)
         return None
     
     async def _handle_final_failure(
@@ -326,7 +230,7 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
     ) -> JSONResponse:
         """Handle final failure after all attempts exhausted."""
         circuit_breaker.record_failure(type(error).__name__)
-        return await self._create_error_response(request, error, operation_id)
+        return create_error_response(request, error, operation_id)
     
     async def _log_error_with_context(
         self,
@@ -335,161 +239,6 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         request: Request
     ) -> None:
         """Log error with comprehensive context."""
-        error_data = self._build_error_data(error, context, request)
-        self._enhance_error_data(error_data, request, context)
-        self._log_by_severity(context.severity, error_data)
-    
-    def _enhance_error_data(self, error_data: dict, request: Request, context: RecoveryContext) -> None:
-        """Enhance error data with additional context."""
-        self._add_user_context_to_error_data(error_data, request)
-        self._add_stack_trace_if_critical(error_data, context)
-    
-    def _build_error_data(self, error: Exception, context: RecoveryContext, request: Request) -> Dict[str, Any]:
-        """Build base error data dictionary."""
-        base_data = self._get_error_base_data(error, context)
-        request_data = self._get_error_request_data(request)
-        base_data.update(request_data)
-        return base_data
-    
-    def _add_user_context_to_error_data(self, error_data: Dict[str, Any], request: Request) -> None:
-        """Add user context to error data if available."""
-        if hasattr(request.state, 'user') and request.state.user:
-            error_data['user_id'] = str(request.state.user.id)
-    
-    def _add_stack_trace_if_critical(self, error_data: Dict[str, Any], context: RecoveryContext) -> None:
-        """Add stack trace for critical errors."""
-        if context.severity == ErrorSeverity.CRITICAL:
-            error_data['stack_trace'] = traceback.format_exc()
-    
-    def _log_by_severity(self, severity: ErrorSeverity, error_data: Dict[str, Any]) -> None:
-        """Log error based on severity level."""
-        if severity == ErrorSeverity.CRITICAL:
-            logger.critical("Critical error in request processing", **error_data)
-        elif severity == ErrorSeverity.HIGH:
-            logger.error("High severity error in request processing", **error_data)
-        elif severity == ErrorSeverity.MEDIUM:
-            logger.warning("Medium severity error in request processing", **error_data)
-        else:
-            logger.info("Low severity error in request processing", **error_data)
-    
-    def _create_recovery_response(
-        self,
-        request: Request,
-        context: RecoveryContext,
-        recovery_result
-    ) -> JSONResponse:
-        """Create response after successful recovery."""
-        content = self._build_recovery_content(context, recovery_result)
-        headers = self._build_recovery_headers(context, recovery_result)
-        return JSONResponse(status_code=200, content=content, headers=headers)
-    
-    def _build_recovery_content(self, context: RecoveryContext, recovery_result) -> Dict[str, Any]:
-        """Build recovery response content."""
-        return {
-            "success": True,
-            "message": "Request completed with recovery",
-            "recovery_info": {
-                "action_taken": recovery_result.action_taken.value,
-                "operation_id": context.operation_id,
-                "compensation_required": recovery_result.compensation_required,
-                "retry_count": context.retry_count
-            }
-        }
-    
-    def _build_recovery_headers(self, context: RecoveryContext, recovery_result) -> Dict[str, str]:
-        """Build recovery response headers."""
-        return {
-            "X-Operation-ID": context.operation_id,
-            "X-Recovery-Action": recovery_result.action_taken.value,
-            "X-Retry-Count": str(context.retry_count)
-        }
-    
-    async def _create_error_response(
-        self,
-        request: Request,
-        error: Exception,
-        operation_id: str
-    ) -> JSONResponse:
-        """Create final error response after all recovery attempts failed."""
-        status_code = self._determine_error_status_code(error)
-        error_response = self._build_complete_error_response(error, operation_id, request)
-        headers = self._build_error_response_headers(operation_id, error)
-        return JSONResponse(status_code=status_code, content=error_response, headers=headers)
-    
-    def _build_complete_error_response(self, error: Exception, operation_id: str, request: Request) -> dict:
-        """Build complete error response with all fields."""
-        error_response = self._build_error_response_content(error, operation_id, request)
-        self._add_optional_error_ids(error_response, request)
-        return error_response
-    
-    def _determine_error_status_code(self, error: Exception) -> int:
-        """Determine HTTP status code for error type."""
-        if isinstance(error, HTTPException):
-            return error.status_code
-        elif isinstance(error, (ValueError, TypeError)):
-            return 400
-        elif isinstance(error, PermissionError):
-            return 403
-        elif isinstance(error, FileNotFoundError):
-            return 404
-        return 500
-    
-    def _build_error_response_content(self, error: Exception, operation_id: str, request: Request) -> Dict[str, Any]:
-        """Build error response content."""
-        base_content = self._get_error_response_base(error, operation_id)
-        request_content = self._get_error_response_request_data(request)
-        base_content.update(request_content)
-        return base_content
-    
-    def _add_optional_error_ids(self, error_response: Dict[str, Any], request: Request) -> None:
-        """Add optional request and trace IDs to error response."""
-        if hasattr(request.state, 'request_id'):
-            error_response["request_id"] = request.state.request_id
-        if hasattr(request.state, 'trace_id'):
-            error_response["trace_id"] = request.state.trace_id
-    
-    def _build_error_response_headers(self, operation_id: str, error: Exception) -> Dict[str, str]:
-        """Build error response headers."""
-        return {
-            "X-Operation-ID": operation_id,
-            "X-Error-Type": type(error).__name__,
-            "X-Error-Recovery": "failed"
-        }
-    
-    def _build_recovery_context(
-        self, operation_id: str, operation_type: OperationType, error: Exception,
-        severity: ErrorSeverity, attempt: int, max_attempts: int, metadata: Dict[str, Any]
-    ) -> RecoveryContext:
-        """Build recovery context with all parameters."""
-        return RecoveryContext(
-            operation_id=operation_id, operation_type=operation_type, error=error,
-            severity=severity, retry_count=attempt, max_retries=max_attempts - 1, metadata=metadata
-        )
-    
-    def _get_error_base_data(self, error: Exception, context: RecoveryContext) -> Dict[str, Any]:
-        """Get base error data from error and context."""
-        return {
-            'operation_id': context.operation_id, 'operation_type': context.operation_type.value,
-            'severity': context.severity.value, 'retry_count': context.retry_count,
-            'error_type': type(error).__name__, 'error_message': str(error),
-            'elapsed_time_ms': context.elapsed_time.total_seconds() * 1000
-        }
-    
-    def _get_error_request_data(self, request: Request) -> Dict[str, Any]:
-        """Get error data from request."""
-        return {
-            'request_method': request.method, 'request_path': request.url.path,
-            'client_ip': request.client.host if request.client else None,
-            'user_agent': request.headers.get('user-agent')
-        }
-    
-    def _get_error_response_base(self, error: Exception, operation_id: str) -> Dict[str, Any]:
-        """Get base error response data."""
-        return {
-            "error": True, "error_type": type(error).__name__, "message": str(error),
-            "operation_id": operation_id, "timestamp": datetime.now().isoformat()
-        }
-    
-    def _get_error_response_request_data(self, request: Request) -> Dict[str, Any]:
-        """Get error response request data."""
-        return {"path": request.url.path, "method": request.method}
+        error_data = build_error_data(error, context, request)
+        enhance_error_data(error_data, request, context)
+        log_by_severity(context.severity, error_data)
