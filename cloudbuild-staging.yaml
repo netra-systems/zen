@@ -54,7 +54,7 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'netra-backend-staging'
+      - 'netra-backend'
       - '--image'
       - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/backend:${_BRANCH_NAME}-${SHORT_SHA}'
       - '--region'
