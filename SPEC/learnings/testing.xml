@@ -191,6 +191,32 @@
             </best_practice>
             <verification>WebSocket tests run without URL conflicts or cleanup errors</verification>
         </learning>
+        
+        <learning id="frontend-testing-complete-guide">
+            <title>Frontend Testing Complete Guide Reference</title>
+            <problem>
+                Frontend test documentation scattered across multiple files
+                Windows-specific issues not clearly documented
+                Developers unsure how to run frontend tests correctly
+                No clear guide for different test categories and commands
+            </problem>
+            <solution>
+                Created comprehensive frontend_testing_guide.xml specification
+                Documented all test running methods (unified runner and direct npm)
+                Added Windows-specific troubleshooting and solutions
+                Included test categories, common commands, and best practices
+            </solution>
+            <reference>
+                See SPEC/frontend_testing_guide.xml for complete documentation
+            </reference>
+            <key_points>
+                Primary method: python test_runner.py --frontend-only
+                Direct method: cd frontend && npm test
+                Windows uses run-jest.js wrapper automatically
+                Clear cache with: npm run test:clear-cache
+                All test categories documented with specific commands
+            </key_points>
+        </learning>
     </learnings>
     
     <best_practices>
