@@ -75,6 +75,22 @@
             </learning_ids>
         </category>
         <category>
+            <name>GCP Deployment</name>
+            <file>learnings/gcp_deployment.xml</file>
+            <path>SPEC/learnings/gcp_deployment.xml</path>
+            <learning_count>8</learning_count>
+            <learning_ids>
+                <id>gcp-001</id>
+                <id>gcp-002</id>
+                <id>gcp-003</id>
+                <id>gcp-004</id>
+                <id>gcp-005</id>
+                <id>gcp-006</id>
+                <id>gcp-007</id>
+                <id>gcp-008</id>
+            </learning_ids>
+        </category>
+        <category>
             <name>Type Safety</name>
             <file>learnings/type_safety.xml</file>
             <path>SPEC/learnings/type_safety.xml</path>
@@ -93,7 +109,7 @@
     </usage>
     
     <statistics>
-        <total_categories>8</total_categories>
-        <total_learnings>10</total_learnings>
+        <total_categories>9</total_categories>
+        <total_learnings>18</total_learnings>
     </statistics>
 </specification>

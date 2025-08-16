@@ -69,7 +69,7 @@ steps:
       - '--max-instances'
       - '2'
       - '--cpu'
-      - '0.5'
+      - '1'
       - '--memory'
       - '1Gi'
     waitFor: ['push-backend']

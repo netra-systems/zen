@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="gcp-deployment">
+  <metadata>
+    <title>GCP Cloud Build and Cloud Run Deployment Learnings</title>
+    <created>2025-08-16</created>
+    <updated>2025-08-16</updated>
+    <tags>gcp, cloud-build, cloud-run, deployment, staging, permissions</tags>
+  </metadata>
+
+  <learning id="gcp-001" priority="critical">
+    <title>Cloud Build Service Account Permissions</title>
+    <problem>
+      Cloud Build fails with permission errors when trying to push to Artifact Registry or deploy to Cloud Run.
+      Error: "Permission 'artifactregistry.repositories.uploadArtifacts' denied"
+      Error: "Permission 'run.services.get' denied"
+    </problem>
+    <solution>
+      Grant the following IAM roles to the Cloud Build service accounts:
+      - 701982941522-compute@developer.gserviceaccount.com needs:
+        * roles/storage.admin (for Cloud Storage access)
+        * roles/artifactregistry.writer (for pushing images)
+        * roles/run.developer (for deploying to Cloud Run)
+        * roles/iam.serviceAccountUser (to act as other service accounts)
+        * roles/logging.logWriter (for build logs)
+      - 701982941522@cloudbuild.gserviceaccount.com needs similar permissions
+    </solution>
+    <commands>
+      gcloud projects add-iam-policy-binding PROJECT_ID --member="serviceAccount:SERVICE_ACCOUNT" --role="ROLE"
+    </commands>
+  </learning>
+
+  <learning id="gcp-002" priority="high">
+    <title>Docker BuildKit Support in Cloud Build</title>
+    <problem>
+      Dockerfiles using BuildKit features like --mount fail in Cloud Build.
+      Error: "the --mount option requires BuildKit"
+    </problem>
+    <solution>
+      Add DOCKER_BUILDKIT=1 environment variable to the build step in cloudbuild.yaml:
+      ```yaml
+      - name: 'gcr.io/cloud-builders/docker'
+        env:
+          - 'DOCKER_BUILDKIT=1'
+        args: ['build', ...]
+      ```
+    </solution>
+  </learning>
+
+  <learning id="gcp-003" priority="high">
+    <title>Cloud Run CPU Limits with Concurrency</title>
+    <problem>
+      Cloud Run deployment fails with: "Total cpu < 1 is not supported with concurrency > 1"
+    </problem>
+    <solution>
+      When deploying to Cloud Run with default concurrency settings, CPU must be >= 1.
+      Change from '--cpu' '0.5' to '--cpu' '1' in cloudbuild.yaml
+    </solution>
+  </learning>
+
+  <learning id="gcp-004" priority="medium">
+    <title>Optimizing Cloud Build Upload Size</title>
+    <problem>
+      Cloud Build uploads large tarballs (40+ MB) including unnecessary files like node_modules, 
+      virtual environments, and build artifacts.
+    </problem>
+    <solution>
+      Create a comprehensive .gcloudignore file to exclude:
+      - Virtual environment directories (venv, .venv, env)
+      - Package directories (node_modules, site-packages, vendor)
+      - Build/dist directories
+      - IDE configurations (.idea, .vscode)
+      - Test coverage reports
+      - Terraform directories
+      This reduced build size from 40MB to 29MB
+    </solution>
+  </learning>
+
+  <learning id="gcp-005" priority="high">
+    <title>Frontend Library Directory Exclusion</title>
+    <problem>
+      .gcloudignore pattern "lib/" excludes frontend/lib directory causing Docker build failure.
+      Error: "/frontend/lib" not found
+    </problem>
+    <solution>
+      Use more specific patterns in .gcloudignore:
+      - Change "lib/" to "/lib/" to only exclude root lib directory
+      - This preserves frontend/lib while excluding Python lib directories
+    </solution>
+  </learning>
+
+  <learning id="gcp-006" priority="medium">
+    <title>Cloud Run Service Naming</title>
+    <problem>
+      Deployment fails when trying to deploy to non-existent service names.
+      Error: "Permission 'run.services.get' denied on resource 'services/netra-backend-staging'"
+    </problem>
+    <solution>
+      Check existing Cloud Run services first:
+      ```bash
+      gcloud run services list --platform=managed --region=REGION --project=PROJECT
+      ```
+      Use existing service names or ensure permissions to create new services.
+    </solution>
+  </learning>
+
+  <learning id="gcp-007" priority="low">
+    <title>Cloud Build Logging</title>
+    <problem>
+      Limited visibility into build failures with standard gcloud builds submit.
+    </problem>
+    <solution>
+      Use gcloud beta builds submit for better logging:
+      - Shows real-time logs from Cloud Logging
+      - Better error messages
+      - More detailed step execution info
+    </solution>
+  </learning>
+
+  <learning id="gcp-008" priority="medium">
+    <title>IAM Permission Propagation</title>
+    <problem>
+      IAM permission changes may take a few seconds to propagate.
+    </problem>
+    <solution>
+      After granting new IAM roles, wait a few seconds before retrying deployments.
+      Permissions are eventually consistent across GCP.
+    </solution>
+  </learning>
+
+  <best-practices>
+    <practice>Always check existing Cloud Run services before deployment</practice>
+    <practice>Create .gcloudignore early to optimize build uploads</practice>
+    <practice>Use specific path patterns in .gcloudignore to avoid unintended exclusions</practice>
+    <practice>Enable BuildKit in Cloud Build when using modern Dockerfile features</practice>
+    <practice>Set CPU >= 1 for Cloud Run services with default concurrency</practice>
+    <practice>Grant all necessary IAM roles before starting deployment</practice>
+    <practice>Use gcloud beta commands for better debugging capabilities</practice>
+  </best-practices>
+
+  <troubleshooting-checklist>
+    <step>1. Check IAM permissions for all service accounts involved</step>
+    <step>2. Verify Artifact Registry repositories exist and are accessible</step>
+    <step>3. Confirm Cloud Run service names match existing services or can be created</step>
+    <step>4. Ensure .gcloudignore isn't excluding required files</step>
+    <step>5. Verify Docker BuildKit is enabled if using advanced Dockerfile features</step>
+    <step>6. Check CPU/memory limits meet Cloud Run requirements</step>
+    <step>7. Review build logs for specific error messages</step>
+  </troubleshooting-checklist>
+</learnings>
