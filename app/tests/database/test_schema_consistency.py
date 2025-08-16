@@ -13,15 +13,15 @@ from app.db.base import Base
 class TestSchemaConsistency:
     """Test database schema consistency."""
     
-    def test_user_trial_period_is_boolean(self):
-        """Verify trial_period is Boolean in User model."""
+    def test_user_trial_period_is_integer(self):
+        """Verify trial_period is Integer in User model."""
         mapper = inspect(User)
         trial_period_col = mapper.columns['trial_period']
         
-        # Check column type is Boolean
-        assert isinstance(trial_period_col.type, Boolean)
+        # Check column type is Integer
+        assert isinstance(trial_period_col.type, Integer)
         assert trial_period_col.nullable is True
-        assert trial_period_col.default.arg is False
+        assert trial_period_col.default.arg == 0
     
     def test_user_model_types_match_expectations(self):
         """Verify all User model column types match expected types."""
@@ -41,7 +41,7 @@ class TestSchemaConsistency:
             'plan_started_at': DateTime,
             'auto_renew': Boolean,
             'payment_status': String,
-            'trial_period': Boolean,  # Critical: must be Boolean
+            'trial_period': Integer,  # Critical: must be Integer (days)
         }
         
         for col_name, expected_type in expected_types.items():

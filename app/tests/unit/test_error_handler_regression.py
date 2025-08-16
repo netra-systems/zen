@@ -6,7 +6,7 @@ Tests to prevent IndexError when logging SQLAlchemy errors.
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from sqlalchemy.exc import DataError, IntegrityError
-from app.core.error_handlers import ErrorHandler
+from app.core.error_handlers import ApiErrorHandler
 from app.core.exceptions_database import ErrorCode
 
 
@@ -14,7 +14,7 @@ def test_error_handler_sqlalchemy_logging():
     """Test that SQLAlchemy errors are logged without IndexError."""
     # Create error handler with mocked logger
     mock_logger = Mock()
-    error_handler = ErrorHandler()
+    error_handler = ApiErrorHandler()
     error_handler._logger = mock_logger
     
     # Create a SQLAlchemy DataError with complex message
@@ -43,7 +43,7 @@ def test_error_handler_sqlalchemy_logging():
 
 def test_error_handler_integrity_error():
     """Test handling IntegrityError with duplicate key."""
-    error_handler = ErrorHandler()
+    error_handler = ApiErrorHandler()
     mock_logger = Mock()
     error_handler._logger = mock_logger
     
@@ -57,14 +57,14 @@ def test_error_handler_integrity_error():
         request_id="req-789"
     )
     
-    # Should detect as duplicate error
-    assert response.error_code == ErrorCode.DATABASE_DUPLICATE_ERROR.value
+    # Should detect as constraint violation (duplicate key is a constraint)
+    assert response.error_code == ErrorCode.DATABASE_CONSTRAINT_VIOLATION.value
     assert "already exists" in response.user_message
 
 
 def test_error_handler_data_error():
     """Test handling DataError for invalid data."""
-    error_handler = ErrorHandler()
+    error_handler = ApiErrorHandler()
     mock_logger = Mock()
     error_handler._logger = mock_logger
     
@@ -79,13 +79,13 @@ def test_error_handler_data_error():
     )
     
     # Should detect as validation error
-    assert response.error_code == ErrorCode.DATABASE_VALIDATION_ERROR.value
+    assert response.error_code == ErrorCode.DATA_VALIDATION_ERROR.value
     assert "Invalid data format" in response.user_message
 
 
 def test_error_handler_general_sqlalchemy():
     """Test handling general SQLAlchemy error."""
-    error_handler = ErrorHandler()
+    error_handler = ApiErrorHandler()
     mock_logger = Mock()
     error_handler._logger = mock_logger
     
@@ -112,7 +112,7 @@ def test_error_handler_general_sqlalchemy():
 
 def test_error_handler_complex_parameter_error():
     """Test error with complex parameter binding message."""
-    error_handler = ErrorHandler()
+    error_handler = ApiErrorHandler()
     mock_logger = Mock()
     error_handler._logger = mock_logger
     
@@ -130,7 +130,7 @@ def test_error_handler_complex_parameter_error():
     
     # Verify it handled correctly
     assert response is not None
-    assert response.error_code == ErrorCode.DATABASE_VALIDATION_ERROR.value
+    assert response.error_code == ErrorCode.DATA_VALIDATION_ERROR.value
     
     # Logger should have been called without error
     mock_logger.error.assert_called()

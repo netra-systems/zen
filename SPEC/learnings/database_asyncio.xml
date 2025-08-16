@@ -48,37 +48,37 @@
                 </learning>
 
         <learning id="trial-period-type-mismatch">
-            <title>Database Column Type Mismatch - trial_period Boolean vs Integer</title>
+            <title>Database Column Type Mismatch - trial_period semantic change</title>
             <date>2025-08-16</date>
             <category>Database/AsyncIO</category>
             <description>
-                SQLAlchemy model defined trial_period as Boolean but Alembic migration created it as Integer,
-                causing "column 'trial_period' is of type integer but expression is of type boolean" error.
+                Initial design had trial_period as Boolean (is in trial), but was changed to Integer (trial days).
+                Migration, model, and schema needed alignment to use Integer type consistently.
             </description>
             <symptoms>
                 <symptom>Error: asyncpg.exceptions.DatatypeMismatchError: column "trial_period" is of type integer but expression is of type boolean</symptom>
-                <symptom>Database expects integer but model passes boolean value</symptom>
-                <symptom>Migration script and model definition have different types</symptom>
+                <symptom>Semantic mismatch: Boolean (is in trial) vs Integer (trial days)</symptom>
+                <symptom>Inconsistent types across migration, model, and schema</symptom>
             </symptoms>
             <root-causes>
-                <cause>Alembic migration defined trial_period as sa.Integer()</cause>
-                <cause>SQLAlchemy model defined trial_period as Boolean()</cause>
-                <cause>Pydantic schema also defined trial_period as bool</cause>
-                <cause>Type mismatch between migration and model definitions</cause>
+                <cause>Design change from Boolean flag to Integer days</cause>
+                <cause>Migration updated to use sa.Integer() for trial days</cause>
+                <cause>Model updated to use Integer() with default=0</cause>
+                <cause>Schema needed update from bool to int</cause>
             </root-causes>
             <solution>
-                <step>Update Alembic migration to use sa.Boolean() instead of sa.Integer()</step>
-                <step>Add server_default='false' to migration for consistency</step>
-                <step>Ensure model uses Boolean() with default=False</step>
-                <step>Verify Pydantic schema uses bool type</step>
+                <step>Ensure migration uses sa.Integer() with server_default='0'</step>
+                <step>Update model to use Integer() with default=0</step>
+                <step>Update Pydantic schema to use int with default=0</step>
+                <step>Change semantics: 0 = no trial, positive = trial days remaining</step>
             </solution>
             <files-modified>
-                <file>app/alembic/versions/bb39e1c49e2d_add_missing_tables_and_columns.py - Changed trial_period from Integer to Boolean</file>
-                <file>app/db/models_user.py - Confirmed trial_period as Boolean</file>
-                <file>app/schemas/UserPlan.py - Confirmed trial_period as bool</file>
+                <file>app/alembic/versions/bb39e1c49e2d_add_missing_tables_and_columns.py - Uses Integer for trial days</file>
+                <file>app/db/models_user.py - Uses Integer() with default=0</file>
+                <file>app/schemas/UserPlan.py - Uses int with default=0</file>
             </files-modified>
             <prevention>
-                <item>Always ensure migration types match model definitions</item>
+                <item>Document semantic changes clearly when changing field meanings</item>
                 <item>Create schema consistency tests to verify type alignment</item>
                 <item>Test both model creation and database operations</item>
                 <item>Use consistent type definitions across migrations, models, and schemas</item>

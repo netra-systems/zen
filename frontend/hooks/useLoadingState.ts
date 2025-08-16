@@ -11,6 +11,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUnifiedChatStore } from '../store/unified-chat';
 import { useWebSocket } from './useWebSocket';
+import { shallow } from 'zustand/shallow';
 import {
   ChatLoadingState,
   LoadingStateResult,
@@ -58,17 +59,22 @@ export const useLoadingState = (): UseLoadingStateResult => {
 };
 
 /**
+ * Selector for extracting store data with stable reference
+ */
+const storeSelector = (state: any) => ({
+  activeThreadId: state.activeThreadId,
+  isThreadLoading: state.isThreadLoading,
+  messages: state.messages,
+  isProcessing: state.isProcessing,
+  currentRunId: state.currentRunId,
+  agentName: state.fastLayerData?.agentName || null
+});
+
+/**
  * Extracts necessary data from unified store
  */
 const extractStoreData = () => {
-  return useUnifiedChatStore((state) => ({
-    activeThreadId: state.activeThreadId,
-    isThreadLoading: state.isThreadLoading,
-    messages: state.messages,
-    isProcessing: state.isProcessing,
-    currentRunId: state.currentRunId,
-    agentName: state.fastLayerData?.agentName || null
-  }));
+  return useUnifiedChatStore(storeSelector, shallow);
 };
 
 /**

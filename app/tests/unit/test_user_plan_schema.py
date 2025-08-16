@@ -1,6 +1,6 @@
 """Unit tests for UserPlan schema validation.
 
-Tests to ensure UserPlan pydantic model correctly validates trial_period as boolean.
+Tests to ensure UserPlan pydantic model correctly validates trial_period as integer.
 Prevents schema type mismatches with database.
 """
 
@@ -18,8 +18,8 @@ from app.schemas.UserPlan import (
 class TestUserPlanSchema:
     """Test UserPlan schema validation."""
     
-    def test_trial_period_accepts_boolean_true(self):
-        """Verify trial_period accepts boolean True value."""
+    def test_trial_period_accepts_integer_days(self):
+        """Verify trial_period accepts integer value for trial days."""
         features = PlanFeatures(
             permissions=["basic"],
             tool_allowances=[
@@ -31,14 +31,14 @@ class TestUserPlanSchema:
             user_id="test-user-123",
             tier=PlanTier.FREE,
             features=features,
-            trial_period=True  # Boolean value
+            trial_period=14  # 14 days trial
         )
         
-        assert plan.trial_period is True
-        assert isinstance(plan.trial_period, bool)
+        assert plan.trial_period == 14
+        assert isinstance(plan.trial_period, int)
     
-    def test_trial_period_accepts_boolean_false(self):
-        """Verify trial_period accepts boolean False value."""
+    def test_trial_period_accepts_zero(self):
+        """Verify trial_period accepts 0 to indicate no trial."""
         features = PlanFeatures(
             permissions=["basic"],
             tool_allowances=[
@@ -50,14 +50,14 @@ class TestUserPlanSchema:
             user_id="test-user-456",
             tier=PlanTier.PRO,
             features=features,
-            trial_period=False  # Boolean value
+            trial_period=0  # No trial
         )
         
-        assert plan.trial_period is False
-        assert isinstance(plan.trial_period, bool)
+        assert plan.trial_period == 0
+        assert isinstance(plan.trial_period, int)
     
-    def test_trial_period_defaults_to_false(self):
-        """Verify trial_period defaults to False when not provided."""
+    def test_trial_period_defaults_to_zero(self):
+        """Verify trial_period defaults to 0 when not provided."""
         features = PlanFeatures(
             permissions=["basic"],
             tool_allowances=[
@@ -72,11 +72,11 @@ class TestUserPlanSchema:
             # trial_period not provided
         )
         
-        assert plan.trial_period is False
-        assert isinstance(plan.trial_period, bool)
+        assert plan.trial_period == 0
+        assert isinstance(plan.trial_period, int)
     
-    def test_trial_period_rejects_integer(self):
-        """Verify trial_period rejects integer values."""
+    def test_trial_period_accepts_integer(self):
+        """Verify trial_period accepts integer values for trial days."""
         features = PlanFeatures(
             permissions=["basic"],
             tool_allowances=[
@@ -84,17 +84,17 @@ class TestUserPlanSchema:
             ]
         )
         
-        # Should coerce integer to boolean
+        # Should accept integer for trial days
         plan = UserPlan(
             user_id="test-user-int",
             tier=PlanTier.FREE,
             features=features,
-            trial_period=1  # Integer value
+            trial_period=7  # 7 days trial
         )
         
-        # Pydantic will coerce 1 to True
-        assert plan.trial_period is True
-        assert isinstance(plan.trial_period, bool)
+        # Should store as integer
+        assert plan.trial_period == 7
+        assert isinstance(plan.trial_period, int)
     
     def test_full_plan_creation_with_trial(self):
         """Test creating a complete UserPlan with trial period."""
@@ -119,11 +119,11 @@ class TestUserPlanSchema:
             expires_at=None,
             auto_renew=False,
             payment_status="trial",
-            trial_period=True,  # User is in trial
+            trial_period=30,  # 30 days trial
             upgraded_from=PlanTier.FREE.value
         )
         
-        assert plan.trial_period is True
+        assert plan.trial_period == 30
         assert plan.payment_status == "trial"
         assert plan.tier == PlanTier.PRO
-        assert isinstance(plan.trial_period, bool)
+        assert isinstance(plan.trial_period, int)

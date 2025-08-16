@@ -205,6 +205,11 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
+          name  = "CORS_ORIGINS"
+          value = "https://staging.netrasystems.ai,https://app.staging.netrasystems.ai,https://auth.staging.netrasystems.ai,https://backend.staging.netrasystems.ai,*"
+        }
+        
+        env {
           name  = "GCP_PROJECT_ID_NUMERICAL_STAGING"
           value = var.project_id_numerical != "" ? var.project_id_numerical : var.project_id
         }
