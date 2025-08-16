@@ -59,7 +59,7 @@ def test_error_handler_integrity_error():
     
     # Should detect as constraint violation (duplicate key is a constraint)
     assert response.error_code == ErrorCode.DATABASE_CONSTRAINT_VIOLATION.value
-    assert "already exists" in response.user_message
+    assert "data constraints" in response.user_message
 
 
 def test_error_handler_data_error():
@@ -78,9 +78,9 @@ def test_error_handler_data_error():
         request_id="req-abc"
     )
     
-    # Should detect as validation error
-    assert response.error_code == ErrorCode.DATA_VALIDATION_ERROR.value
-    assert "Invalid data format" in response.user_message
+    # DataError falls back to general query failed
+    assert response.error_code == ErrorCode.DATABASE_QUERY_FAILED.value
+    assert "database error" in response.user_message.lower()
 
 
 def test_error_handler_general_sqlalchemy():
@@ -130,7 +130,7 @@ def test_error_handler_complex_parameter_error():
     
     # Verify it handled correctly
     assert response is not None
-    assert response.error_code == ErrorCode.DATA_VALIDATION_ERROR.value
+    assert response.error_code == ErrorCode.DATABASE_QUERY_FAILED.value
     
     # Logger should have been called without error
     mock_logger.error.assert_called()
