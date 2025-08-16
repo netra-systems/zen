@@ -1,0 +1,155 @@
+# This file specifies files that are *not* uploaded to Google Cloud
+# using gcloud. It follows the same syntax as .gitignore, with the addition of
+# "#!include" directives (which insert the entries of the given .gitignore-style
+# file at that point).
+
+# Include .gitignore rules
+#!include:.gitignore
+
+# Virtual environment directories
+venv/
+.venv/
+env/
+virtualenv/
+ENV/
+env.bak/
+venv.bak/
+**/venv/
+**/.venv/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Package directories
+site-packages/
+dist-packages/
+vendor/
+third_party/
+
+# Build/distribution directories
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Package manager directories
+node_modules/
+bower_components/
+jspm_packages/
+**/node_modules/
+
+# IDE directories
+.idea/
+.vscode/
+.vs/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# Testing/coverage directories
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+test-results/
+cypress/videos/
+cypress/screenshots/
+
+# Framework-specific third-party directories
+static/admin/
+static/rest_framework/
+**/static/admin/
+**/static/rest_framework/
+
+# Terraform directories
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform-dev-postgres/
+terraform-gcp/
+
+# Documentation and non-essential files
+*.md
+!README.md
+docs/
+SPEC/
+test_reports/
+scripts/test_*.py
+*.log
+*.bak
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Git directories
+.git/
+.github/
+
+# Environment files (keep for reference but exclude from builds)
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Development launcher and test framework (not needed in production)
+dev_launcher/
+test_framework/
+
+# Frontend development files (if building separately)
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+
+# Temporary files
+tmp/
+temp/
+*.temp
+*.tmp
+
+# Large test data files
+**/test_data/
+**/fixtures/large_*.json
+
+# Backup files
+*.backup
+*.old
+*.orig
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Local configuration that shouldn't be deployed
+local_config/
+*.local.*
