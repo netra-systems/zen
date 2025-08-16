@@ -14,8 +14,12 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { ChatLoadingState } from '@/types/loading-state';
 
 // Mock the dependencies
-jest.mock('@/store/unified-chat');
-jest.mock('@/hooks/useWebSocket');
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: jest.fn()
+}));
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: jest.fn()
+}));
 
 describe('useLoadingState Hook', () => {
   const mockUseUnifiedChatStore = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
@@ -23,9 +27,6 @@ describe('useLoadingState Hook', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Reset store state
-    mockUseUnifiedChatStore.mockReset();
-    mockUseWebSocket.mockReset();
   });
 
   /**
