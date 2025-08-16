@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from ...db import models_postgres as models
 from ... import schemas
 from ...core.exceptions_base import NetraException
+from ...core.error_codes import ErrorCode
 from .base import ContentSource, CorpusStatus
 from .base_service import BaseCorpusService
 
@@ -92,7 +93,7 @@ class CorpusCreationService(BaseCorpusService):
         """Create persistence error exception"""
         return NetraException(
             message=f"Database connection failure during corpus creation",
-            error_code="DB_CORPUS_CREATE_FAILED",
+            code=ErrorCode.DATABASE_CONNECTION_FAILED,
             context={"corpus_name": corpus_name, "user_id": user_id, "error": error}
         )
     

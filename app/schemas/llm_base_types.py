@@ -63,8 +63,7 @@ class TokenUsage(BaseModel):
         """Estimate cost based on token usage"""
         try:
             calculator = self._create_cost_calculator()
-            cost = self._calculate_default_cost(calculator)
-            return float(cost)
+            return self._calculate_default_cost(calculator)
         except ImportError:
             return None
     
@@ -75,16 +74,21 @@ class TokenUsage(BaseModel):
     
     def _calculate_default_cost(self, calculator) -> float:
         """Calculate cost using default provider and model."""
-        return calculator.calculate_cost(self, LLMProvider.OPENAI, "gpt-3.5-turbo")
+        cost = calculator.calculate_cost(self, LLMProvider.OPENAI, "gpt-3.5-turbo")
+        return float(cost)
     
     def calculate_precise_cost(self, provider: "LLMProvider", model: str) -> Optional[float]:
         """Calculate precise cost for specific provider and model"""
         try:
             calculator = self._create_cost_calculator()
-            cost = calculator.calculate_cost(self, provider, model)
-            return float(cost)
+            return self._calculate_cost_with_provider(calculator, provider, model)
         except ImportError:
             return None
+    
+    def _calculate_cost_with_provider(self, calculator, provider: "LLMProvider", model: str) -> float:
+        """Calculate cost with specific provider and model."""
+        cost = calculator.calculate_cost(self, provider, model)
+        return float(cost)
 
 
 class LLMMessage(BaseModel):

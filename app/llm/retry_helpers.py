@@ -58,21 +58,34 @@ async def execute_retry_template(handler, retry_executor: RetryExecutor, llm_ope
     result = await _execute_retry_loop(handler, retry_executor, llm_operation, operation_name, circuit_breaker, provider)
     return result if result is not None else handler._create_fallback_response(fallback_type, None)
 
+async def _attempt_retry_operation(retry_executor: RetryExecutor, llm_operation, 
+                                  circuit_breaker, provider: str) -> Optional[Any]:
+    """Attempt a single retry operation."""
+    result = await try_retry_attempt(retry_executor, llm_operation, circuit_breaker, provider)
+    return result if result is not None else None
+
+async def _process_retry_attempt(handler, retry_executor: RetryExecutor, llm_operation,
+                                operation_name: str, circuit_breaker, provider: str, 
+                                attempt: int, last_error) -> tuple:
+    """Process a single retry attempt."""
+    result = await _attempt_retry_operation(retry_executor, llm_operation, circuit_breaker, provider)
+    if result is not None:
+        return result, None, None
+    return None, *await handle_retry_failure(
+        retry_executor, attempt, operation_name, circuit_breaker, last_error, handler.config
+    )
+
 async def _execute_retry_loop(handler, retry_executor: RetryExecutor, llm_operation,
                             operation_name: str, circuit_breaker, provider: str) -> Optional[Any]:
     """Execute retry loop and return successful result or None."""
     attempt, last_error = 0, None
-    
     while attempt < handler.config.max_retries:
-        result = await try_retry_attempt(retry_executor, llm_operation, circuit_breaker, provider)
-        if result is not None:
-            return result  # Success case
-        
-        attempt, last_error = await handle_retry_failure(
-            retry_executor, attempt, operation_name, circuit_breaker, last_error, handler.config
+        result, attempt, last_error = await _process_retry_attempt(
+            handler, retry_executor, llm_operation, operation_name, circuit_breaker, provider, attempt, last_error
         )
-    
-    return None  # All attempts failed
+        if result is not None:
+            return result
+    return None
 
 
 def create_health_status_base(retry_history: list) -> dict:
@@ -107,15 +120,15 @@ def add_circuit_breaker_status(health_status: dict, circuit_breakers: dict) -> d
     return health_status
 
 
+def _count_failures_by_type(recent_failures: list, failure_type) -> int:
+    """Count failures of a specific type."""
+    return len([a for a in recent_failures if a.failure_type == failure_type])
+
 def add_failure_type_breakdown(health_status: dict, recent_failures: list) -> dict:
     """Add failure type breakdown to health status."""
     from .fallback_handler import FailureType
-    
     health_status["failure_types"] = {
-        failure_type.value: len([
-            a for a in recent_failures 
-            if a.failure_type == failure_type
-        ])
+        failure_type.value: _count_failures_by_type(recent_failures, failure_type)
         for failure_type in FailureType
     }
     return health_status

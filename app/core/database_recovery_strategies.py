@@ -13,156 +13,17 @@ from typing import Any, Dict, List, Optional, Set
 
 from app.logging_config import central_logger
 
+# Import consolidated types
+from .database_types import DatabaseType, PoolHealth, DatabaseConfig, PoolMetrics
+from .database_health_monitoring import DatabaseHealthChecker
+
 logger = central_logger.get_logger(__name__)
 
 
-class DatabaseType(Enum):
-    """Types of databases."""
-    POSTGRESQL = "postgresql"
-    CLICKHOUSE = "clickhouse"
-    REDIS = "redis"
+# Types imported from database_types.py
 
 
-class PoolHealth(Enum):
-    """Database pool health states."""
-    HEALTHY = "healthy"
-    DEGRADED = "degraded"
-    UNHEALTHY = "unhealthy"
-    CRITICAL = "critical"
-
-
-@dataclass
-class DatabaseConfig:
-    """Database connection configuration."""
-    host: str
-    port: int
-    database: str
-    username: str
-    password: str
-    pool_size: int = 10
-    max_overflow: int = 20
-    timeout: float = 30.0
-    retry_attempts: int = 3
-
-
-@dataclass
-class PoolMetrics:
-    """Metrics for database connection pool."""
-    pool_id: str
-    database_type: DatabaseType
-    total_connections: int = 0
-    active_connections: int = 0
-    idle_connections: int = 0
-    failed_connections: int = 0
-    connection_errors: int = 0
-    query_count: int = 0
-    avg_response_time: float = 0.0
-    last_health_check: Optional[datetime] = None
-    health_status: PoolHealth = PoolHealth.HEALTHY
-
-
-class DatabaseHealthChecker:
-    """Health checker for database connections."""
-    
-    def __init__(self, db_type: DatabaseType):
-        """Initialize health checker."""
-        self.db_type = db_type
-        self.health_queries = {
-            DatabaseType.POSTGRESQL: "SELECT 1",
-            DatabaseType.CLICKHOUSE: "SELECT 1",
-            DatabaseType.REDIS: "PING"
-        }
-    
-    async def check_pool_health(self, pool: Any) -> PoolMetrics:
-        """Check health of database connection pool."""
-        start_time = datetime.now()
-        
-        try:
-            # Get basic pool metrics
-            metrics = self._get_pool_metrics(pool)
-            
-            # Perform health check query
-            async with pool.acquire() as conn:
-                query = self.health_queries.get(
-                    self.db_type,
-                    "SELECT 1"
-                )
-                
-                if self.db_type == DatabaseType.REDIS:
-                    await conn.ping()
-                else:
-                    await conn.fetchval(query)
-            
-            # Calculate response time
-            response_time = (datetime.now() - start_time).total_seconds()
-            metrics.avg_response_time = response_time
-            metrics.last_health_check = datetime.now()
-            
-            # Determine health status
-            metrics.health_status = self._determine_health_status(metrics)
-            
-            return metrics
-            
-        except Exception as e:
-            logger.error(f"Database health check failed: {e}")
-            
-            metrics = self._get_pool_metrics(pool)
-            metrics.connection_errors += 1
-            metrics.health_status = PoolHealth.UNHEALTHY
-            metrics.last_health_check = datetime.now()
-            
-            return metrics
-    
-    def _get_pool_metrics(self, pool: Any) -> PoolMetrics:
-        """Extract metrics from pool object."""
-        pool_id = getattr(pool, '_pool_id', str(id(pool)))
-        
-        # Try to get pool statistics
-        try:
-            if hasattr(pool, 'size'):
-                total_connections = pool.size
-            elif hasattr(pool, '_pool'):
-                total_connections = len(pool._pool)
-            else:
-                total_connections = 0
-            
-            if hasattr(pool, '_used'):
-                active_connections = len(pool._used)
-            elif hasattr(pool, '_in_use'):
-                active_connections = pool._in_use
-            else:
-                active_connections = 0
-            
-            idle_connections = total_connections - active_connections
-            
-        except Exception:
-            total_connections = 0
-            active_connections = 0
-            idle_connections = 0
-        
-        return PoolMetrics(
-            pool_id=pool_id,
-            database_type=self.db_type,
-            total_connections=total_connections,
-            active_connections=active_connections,
-            idle_connections=idle_connections
-        )
-    
-    def _determine_health_status(self, metrics: PoolMetrics) -> PoolHealth:
-        """Determine health status from metrics."""
-        # Critical: No connections or high error rate
-        if metrics.total_connections == 0 or metrics.connection_errors > 10:
-            return PoolHealth.CRITICAL
-        
-        # Unhealthy: High response time or many failed connections
-        if metrics.avg_response_time > 5.0 or metrics.failed_connections > 5:
-            return PoolHealth.UNHEALTHY
-        
-        # Degraded: Moderate response time or some failures
-        if metrics.avg_response_time > 2.0 or metrics.failed_connections > 2:
-            return PoolHealth.DEGRADED
-        
-        return PoolHealth.HEALTHY
+# DatabaseHealthChecker imported from database_health_monitoring.py
 
 
 class DatabaseRecoveryStrategy(ABC):

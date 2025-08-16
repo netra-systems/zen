@@ -43,28 +43,31 @@ def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(Exception, general_exception_handler)
 
 
-def setup_middleware(app: FastAPI) -> None:
-    """Setup all middleware for the application."""
-    # Security middleware should be first to reject malicious requests early
+def _setup_security_middleware(app: FastAPI) -> None:
+    """Setup security middleware components."""
     from app.middleware.ip_blocking import ip_blocking_middleware
     from app.middleware.path_traversal_protection import path_traversal_protection_middleware
     from app.middleware.security_headers import SecurityHeadersMiddleware
     from app.config import settings
     
-    # Block malicious IPs first
     app.middleware("http")(ip_blocking_middleware)
-    
-    # Block path traversal attempts
     app.middleware("http")(path_traversal_protection_middleware)
-    
-    # Add security headers middleware
     app.add_middleware(SecurityHeadersMiddleware, environment=settings.environment)
-    
+
+
+def _setup_request_middleware(app: FastAPI) -> None:
+    """Setup CORS, error, and request logging middleware."""
     setup_cors_middleware(app)
     app.middleware("http")(create_cors_redirect_middleware())
     app.middleware("http")(create_error_context_middleware())
     app.middleware("http")(create_request_logging_middleware())
     setup_session_middleware(app)
+
+
+def setup_middleware(app: FastAPI) -> None:
+    """Setup all middleware for the application."""
+    _setup_security_middleware(app)
+    _setup_request_middleware(app)
 
 
 def initialize_oauth(app: FastAPI) -> None:
@@ -84,12 +87,22 @@ def _import_and_register_routes(app: FastAPI) -> None:
     _register_route_modules(app, route_configs)
 
 
-def _import_route_modules() -> dict:
-    """Import all route modules."""
+def _import_basic_route_modules() -> dict:
+    """Import basic route modules."""
     from app.routes import (
         supply, generation, admin, references, health, 
         corpus, synthetic_data, config, demo, unified_tools, quality
     )
+    return {
+        "supply": supply, "generation": generation, "admin": admin,
+        "references": references, "health": health, "corpus": corpus,
+        "synthetic_data": synthetic_data, "config": config, "demo": demo,
+        "unified_tools": unified_tools, "quality": quality
+    }
+
+
+def _import_named_routers() -> dict:
+    """Import named router modules."""
     from app.routes.auth import router as auth_router
     from app.routes.agent_route import router as agent_router
     from app.routes.llm_cache import router as llm_cache_router
@@ -97,23 +110,34 @@ def _import_route_modules() -> dict:
     from app.routes.health_extended import router as health_extended_router
     from app.routes.monitoring import router as monitoring_router
     from app.routes.websockets import router as websockets_router
-    from app.routes.factory_status import router as factory_status_router
-    from app.routes.factory_status_simple import router as factory_status_simple_router
-    from app.routes.factory_compliance import router as factory_compliance_router
-    from app.routes.github_analyzer import router as github_analyzer_router
-    # from app.routes.mcp.main import router as mcp_router  # Temporarily disabled due to import issues
     return {
         "auth_router": auth_router, "agent_router": agent_router,
         "llm_cache_router": llm_cache_router, "threads_router": threads_router,
         "health_extended_router": health_extended_router, "monitoring_router": monitoring_router,
-        "websockets_router": websockets_router, "factory_status_router": factory_status_router,
+        "websockets_router": websockets_router
+    }
+
+
+def _import_factory_routers() -> dict:
+    """Import factory and analyzer router modules."""
+    from app.routes.factory_status import router as factory_status_router
+    from app.routes.factory_status_simple import router as factory_status_simple_router
+    from app.routes.factory_compliance import router as factory_compliance_router
+    from app.routes.github_analyzer import router as github_analyzer_router
+    return {
+        "factory_status_router": factory_status_router,
         "factory_status_simple_router": factory_status_simple_router,
         "factory_compliance_router": factory_compliance_router,
-        "github_analyzer_router": github_analyzer_router,
-        "supply": supply, "generation": generation,
-        "admin": admin, "references": references, "health": health, "corpus": corpus,
-        "synthetic_data": synthetic_data, "config": config, "demo": demo, "unified_tools": unified_tools, "quality": quality
+        "github_analyzer_router": github_analyzer_router
     }
+
+
+def _import_route_modules() -> dict:
+    """Import all route modules."""
+    basic_modules = _import_basic_route_modules()
+    named_routers = _import_named_routers()
+    factory_routers = _import_factory_routers()
+    return {**basic_modules, **named_routers, **factory_routers}
 
 
 def _get_route_configurations(modules: dict) -> dict:

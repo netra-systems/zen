@@ -3,76 +3,91 @@
 import os
 import subprocess
 import sys
+from typing import List
 
-def reset_local_clickhouse():
-    """Reset local ClickHouse using Docker."""
+def _print_reset_header() -> None:
+    """Print the reset operation header."""
     print("\n" + "=" * 60)
     print("Resetting Local ClickHouse (Docker)")
     print("=" * 60)
-    
+
+def _check_docker_container() -> bool:
+    """Check if ClickHouse Docker container is running."""
+    result = subprocess.run(
+        ["docker", "ps", "--filter", "name=netra-clickhouse-dev", "--format", "{{.Names}}"],
+        capture_output=True, text=True
+    )
+    if "netra-clickhouse-dev" not in result.stdout:
+        print("[WARNING] Docker container 'netra-clickhouse-dev' not found or not running")
+        return False
+    print("[OK] Found Docker container: netra-clickhouse-dev")
+    return True
+
+def _get_database_tables(db: str) -> List[str]:
+    """Get all tables from a specific database."""
+    cmd = f'docker exec netra-clickhouse-dev clickhouse-client --database {db} --query "SELECT name FROM system.tables WHERE database = '"'"'{db}'"'"' AND engine NOT LIKE '"'"'%View%'"'"' ORDER BY name"'
+    result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"  [ERROR] Failed to list tables: {result.stderr}")
+        return []
+    tables = result.stdout.strip().split('\n') if result.stdout.strip() else []
+    return [t for t in tables if t]  # Remove empty strings
+
+def _display_tables_info(db: str, tables: List[str]) -> None:
+    """Display information about tables found in database."""
+    if not tables:
+        print(f"  [OK] No tables found in {db}")
+        return
+    print(f"  Found {len(tables)} table(s):")
+    for table in tables:
+        print(f"    - {table}")
+
+def _drop_table_from_db(db: str, table: str) -> bool:
+    """Drop a single table from the database."""
+    drop_cmd = f'docker exec netra-clickhouse-dev clickhouse-client --database {db} --query "DROP TABLE IF EXISTS {table}"'
+    drop_result = subprocess.run(drop_cmd, shell=True, capture_output=True, text=True)
+    if drop_result.returncode == 0:
+        print(f"    [OK] Dropped: {table}")
+        return True
+    print(f"    [ERROR] Failed to drop {table}: {drop_result.stderr}")
+    return False
+
+def _verify_tables_dropped(db: str) -> bool:
+    """Verify all tables have been dropped from database."""
+    verify_cmd = f'docker exec netra-clickhouse-dev clickhouse-client --database {db} --query "SELECT count(*) FROM system.tables WHERE database = '"'"'{db}'"'"' AND engine NOT LIKE '"'"'%View%'"'"'"'
+    verify_result = subprocess.run(verify_cmd, shell=True, capture_output=True, text=True)
+    if verify_result.returncode != 0:
+        return False
+    count = verify_result.stdout.strip()
+    if count == "0":
+        print(f"  [SUCCESS] All tables dropped from {db}")
+        return True
+    print(f"  [WARNING] {count} tables still exist in {db}")
+    return False
+
+def _process_single_database(db: str) -> bool:
+    """Process and reset a single database."""
+    print(f"\nProcessing database: {db}")
+    tables = _get_database_tables(db)
+    _display_tables_info(db, tables)
+    if not tables:
+        return True
+    print(f"\n  Dropping tables in {db}...")
+    for table in tables:
+        _drop_table_from_db(db, table)
+    return _verify_tables_dropped(db)
+
+def reset_local_clickhouse() -> bool:
+    """Reset local ClickHouse using Docker."""
+    _print_reset_header()
     try:
-        # Check if container is running
-        result = subprocess.run(
-            ["docker", "ps", "--filter", "name=netra-clickhouse-dev", "--format", "{{.Names}}"],
-            capture_output=True, text=True
-        )
-        
-        if "netra-clickhouse-dev" not in result.stdout:
-            print("[WARNING] Docker container 'netra-clickhouse-dev' not found or not running")
+        if not _check_docker_container():
             return False
-        
-        print("[OK] Found Docker container: netra-clickhouse-dev")
-        
-        # List databases
         print("\nChecking databases...")
         databases = ["default", "netra_dev"]
-        
         for db in databases:
-            print(f"\nProcessing database: {db}")
-            
-            # Get all tables
-            cmd = f'docker exec netra-clickhouse-dev clickhouse-client --database {db} --query "SELECT name FROM system.tables WHERE database = \'{db}\' AND engine NOT LIKE \'%View%\' ORDER BY name"'
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
-            
-            if result.returncode != 0:
-                print(f"  [ERROR] Failed to list tables: {result.stderr}")
-                continue
-            
-            tables = result.stdout.strip().split('\n') if result.stdout.strip() else []
-            tables = [t for t in tables if t]  # Remove empty strings
-            
-            if not tables:
-                print(f"  [OK] No tables found in {db}")
-                continue
-            
-            print(f"  Found {len(tables)} table(s):")
-            for table in tables:
-                print(f"    - {table}")
-            
-            # Drop each table
-            print(f"\n  Dropping tables in {db}...")
-            for table in tables:
-                drop_cmd = f'docker exec netra-clickhouse-dev clickhouse-client --database {db} --query "DROP TABLE IF EXISTS {table}"'
-                drop_result = subprocess.run(drop_cmd, shell=True, capture_output=True, text=True)
-                
-                if drop_result.returncode == 0:
-                    print(f"    [OK] Dropped: {table}")
-                else:
-                    print(f"    [ERROR] Failed to drop {table}: {drop_result.stderr}")
-            
-            # Verify
-            verify_cmd = f'docker exec netra-clickhouse-dev clickhouse-client --database {db} --query "SELECT count(*) FROM system.tables WHERE database = \'{db}\' AND engine NOT LIKE \'%View%\'"'
-            verify_result = subprocess.run(verify_cmd, shell=True, capture_output=True, text=True)
-            
-            if verify_result.returncode == 0:
-                count = verify_result.stdout.strip()
-                if count == "0":
-                    print(f"  [SUCCESS] All tables dropped from {db}")
-                else:
-                    print(f"  [WARNING] {count} tables still exist in {db}")
-        
+            _process_single_database(db)
         return True
-        
     except Exception as e:
         print(f"[ERROR] Unexpected error: {e}")
         return False

@@ -43,9 +43,8 @@ class LLMManagementUtilities:
         """Determine if configuration is enabled based on provider requirements."""
         return bool(config.api_key) if config.provider == "google" else True
     
-    def get_manager_stats(self) -> LLMManagerStats:
-        """Get LLM manager statistics."""
-        active_configs = self._get_active_configs()
+    def _create_stats_object(self, active_configs: list) -> LLMManagerStats:
+        """Create LLMManagerStats object with current values."""
         return LLMManagerStats(
             total_requests=0,  # Would need to implement request tracking
             cached_responses=0,  # Would need to implement cache tracking
@@ -54,6 +53,11 @@ class LLMManagementUtilities:
             active_configs=active_configs,
             enabled=self.core.enabled
         )
+    
+    def get_manager_stats(self) -> LLMManagerStats:
+        """Get LLM manager statistics."""
+        active_configs = self._get_active_configs()
+        return self._create_stats_object(active_configs)
     
     def _get_active_configs(self) -> list:
         """Get list of active configuration names."""

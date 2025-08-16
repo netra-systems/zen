@@ -210,18 +210,25 @@ class DataLogger:
         data = self._build_input_json_data(agent_name, correlation_id, prompt, params)
         logger.debug(f"LLM input: {json.dumps(data, indent=2)}")
 
-    def _build_input_json_data(self, agent_name: str, correlation_id: str,
-                              prompt: str, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Build input JSON data structure."""
+    def _build_input_metadata(self, agent_name: str, correlation_id: str) -> Dict[str, Any]:
+        """Build basic input metadata structure."""
         return {
             "type": "llm_input",
             "agent_name": agent_name,
             "correlation_id": correlation_id,
-            "prompt_size": len(prompt),
-            "prompt_preview": self._truncate_text(prompt),
-            "parameters": self._sanitize_params(params),
             "timestamp": time.time()
         }
+    
+    def _build_input_json_data(self, agent_name: str, correlation_id: str,
+                              prompt: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Build input JSON data structure."""
+        data = self._build_input_metadata(agent_name, correlation_id)
+        data.update({
+            "prompt_size": len(prompt),
+            "prompt_preview": self._truncate_text(prompt),
+            "parameters": self._sanitize_params(params)
+        })
+        return data
 
     def _log_output_json(self, agent_name: str, correlation_id: str,
                         response: str, tokens: Optional[int]) -> None:
@@ -230,18 +237,25 @@ class DataLogger:
         data = self._build_output_json_data(agent_name, correlation_id, response, tokens)
         logger.debug(f"LLM output: {json.dumps(data, indent=2)}")
 
-    def _build_output_json_data(self, agent_name: str, correlation_id: str,
-                               response: str, tokens: Optional[int]) -> Dict[str, Any]:
-        """Build output JSON data structure."""
+    def _build_output_metadata(self, agent_name: str, correlation_id: str) -> Dict[str, Any]:
+        """Build basic output metadata structure."""
         return {
             "type": "llm_output",
             "agent_name": agent_name,
             "correlation_id": correlation_id,
-            "response_size": len(response),
-            "response_preview": self._truncate_text(response),
-            "token_count": tokens,
             "timestamp": time.time()
         }
+    
+    def _build_output_json_data(self, agent_name: str, correlation_id: str,
+                               response: str, tokens: Optional[int]) -> Dict[str, Any]:
+        """Build output JSON data structure."""
+        data = self._build_output_metadata(agent_name, correlation_id)
+        data.update({
+            "response_size": len(response),
+            "response_preview": self._truncate_text(response),
+            "token_count": tokens
+        })
+        return data
 
     def _log_input_text(self, agent_name: str, correlation_id: str,
                        prompt: str, params: Dict[str, Any]) -> None:
@@ -407,18 +421,22 @@ class SubAgentLogger:
         data = self._build_output_data(to_agent, from_agent, data_size, status, correlation_id)
         logger.info(f"Agent output: {json.dumps(data)}")
     
-    def _build_output_data(self, to_agent: str, from_agent: str, 
-                          data_size: int, status: str, correlation_id: str) -> Dict[str, Any]:
-        """Build output data dictionary."""
+    def _build_agent_output_base(self, to_agent: str, from_agent: str, correlation_id: str) -> Dict[str, Any]:
+        """Build base agent output structure."""
         return {
             "type": "agent_output",
             "to_agent": to_agent,
             "from_agent": from_agent,
-            "data_size": data_size,
-            "status": status,
             "correlation_id": correlation_id,
             "timestamp": time.time()
         }
+    
+    def _build_output_data(self, to_agent: str, from_agent: str, 
+                          data_size: int, status: str, correlation_id: str) -> Dict[str, Any]:
+        """Build output data dictionary."""
+        data = self._build_agent_output_base(to_agent, from_agent, correlation_id)
+        data.update({"data_size": data_size, "status": status})
+        return data
     
     def _log_communication_text(self, from_agent: str, to_agent: str, 
                                correlation_id: str, message_type: str) -> None:

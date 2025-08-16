@@ -51,12 +51,20 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     
     def _process_response_headers(self, request: Request, response: Response, nonce: str, start_time: float) -> Response:
         """Process and add all security headers to response."""
+        self._add_all_headers(request, response, nonce)
+        self._finalize_response_processing(request, nonce, start_time)
+        return response
+    
+    def _add_all_headers(self, request: Request, response: Response, nonce: str) -> None:
+        """Add all security headers to response."""
         self._add_base_headers(response)
         self._add_dynamic_headers(request, response, nonce)
         self._add_path_specific_headers(request, response)
+    
+    def _finalize_response_processing(self, request: Request, nonce: str, start_time: float) -> None:
+        """Finalize response processing with metrics and logging."""
         self._update_metrics(nonce)
         self._log_header_processing(request, start_time)
-        return response
     
     def _add_base_headers(self, response: Response) -> None:
         """Add base security headers to response."""
@@ -186,6 +194,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         total_requests = self.metrics["requests_processed"]
         violation_rate = self.metrics["csp_violations"] / max(1, total_requests)
         health_score = max(0.0, 1.0 - (violation_rate * 2))
+        return self._build_health_metrics_dict(health_score, violation_rate, total_requests)
+    
+    def _build_health_metrics_dict(self, health_score: float, violation_rate: float, total_requests: int) -> Dict[str, float]:
+        """Build health metrics dictionary."""
         return {
             "health_score": health_score,
             "violation_rate": violation_rate,
@@ -194,12 +206,17 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     
     def _build_health_status_response(self, metrics_data: Dict[str, float], status: str) -> Dict[str, Any]:
         """Build complete health status response."""
+        base_response = self._build_base_health_response(metrics_data, status)
+        base_response["security_features"] = self._get_security_features_status()
+        return base_response
+    
+    def _build_base_health_response(self, metrics_data: Dict[str, float], status: str) -> Dict[str, Any]:
+        """Build base health response without security features."""
         return {
             "status": status,
             "health_score": metrics_data["health_score"],
             "violation_rate": metrics_data["violation_rate"],
-            "total_requests": metrics_data["total_requests"],
-            "security_features": self._get_security_features_status()
+            "total_requests": metrics_data["total_requests"]
         }
     
     def _determine_health_status(self, health_score: float) -> str:

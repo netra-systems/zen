@@ -11,9 +11,10 @@ from pydantic import BaseModel, Field
 import json
 
 from app.services.factory_status.report_builder import ReportBuilder, FactoryStatusReport
-from app.services.factory_status.factory_status_integration import (
-    init_compliance_api, ComplianceAPIHandler
-)
+# Compliance integration available but not used in current routes
+# from app.services.factory_status.factory_status_integration import (
+#     init_compliance_api, ComplianceAPIHandler
+# )
 from app.core.exceptions import NetraException
 from app.auth.auth_dependencies import get_current_user
 
@@ -64,7 +65,7 @@ class HistoryRequest(BaseModel):
 # In-memory cache for demo (replace with Redis in production)
 _report_cache: Dict[str, FactoryStatusReport] = {}
 _latest_report_id: Optional[str] = None
-_compliance_handler: Optional[ComplianceAPIHandler] = None
+# _compliance_handler: Optional[ComplianceAPIHandler] = None  # Not used currently
 
 
 @router.get("/latest", response_model=ReportResponse)

@@ -145,13 +145,18 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process each request with logging context."""
-        request_id, trace_id, start_time = self._setup_request_context(request)
-        self._setup_user_context(request)
-        self._log_request_start(request)
+        request_id, trace_id, start_time = self._setup_complete_logging_context(request)
         try:
             return await self._process_request_with_logging(request, call_next, request_id, trace_id, start_time)
         finally:
             central_logger.clear_context()
+    
+    def _setup_complete_logging_context(self, request: Request) -> tuple[str, str, float]:
+        """Setup complete logging context including user context."""
+        request_id, trace_id, start_time = self._setup_request_context(request)
+        self._setup_user_context(request)
+        self._log_request_start(request)
+        return request_id, trace_id, start_time
     
     async def _process_request_with_logging(self, request: Request, call_next: Callable, request_id: str, trace_id: str, start_time: float) -> Response:
         """Process request and handle success/error logging."""

@@ -299,43 +299,49 @@ def create_tool_permission_dependency(
     ):
         """Dependency to check tool permissions"""
         try:
-            # Create execution context
-            context = ToolExecutionContext(
-                user_id=str(current_user.id),
-                tool_name=tool_name,
-                requested_action=action,
-                user_plan=getattr(current_user, 'plan_tier', 'free'),
-                user_roles=getattr(current_user, 'roles', []),
-                feature_flags=getattr(current_user, 'feature_flags', {}),
-                is_developer=getattr(current_user, 'is_developer', False),
-            )
-            
-            # Check permissions
+            context = _create_execution_context_for_dependency(current_user, tool_name, action)
             permission_result = await permission_service.check_tool_permission(context)
-            
-            if not permission_result.allowed:
-                raise HTTPException(
-                    status_code=403,
-                    detail={
-                        "error": "permission_denied",
-                        "message": permission_result.reason,
-                        "required_permissions": permission_result.required_permissions,
-                        "upgrade_path": permission_result.upgrade_path
-                    }
-                )
-            
+            _validate_permission_result(permission_result)
             return permission_result
-            
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Tool permission dependency error: {e}")
-            raise HTTPException(
-                status_code=500,
-                detail="Permission check failed"
-            )
+            _handle_dependency_error(e)
     
     return check_tool_permission
+
+def _create_execution_context_for_dependency(current_user: User, tool_name: str, action: str) -> ToolExecutionContext:
+    """Create execution context for dependency check."""
+    return ToolExecutionContext(
+        user_id=str(current_user.id),
+        tool_name=tool_name,
+        requested_action=action,
+        user_plan=getattr(current_user, 'plan_tier', 'free'),
+        user_roles=getattr(current_user, 'roles', []),
+        feature_flags=getattr(current_user, 'feature_flags', {}),
+        is_developer=getattr(current_user, 'is_developer', False),
+    )
+
+def _validate_permission_result(permission_result) -> None:
+    """Validate permission result and raise exception if denied."""
+    if not permission_result.allowed:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "permission_denied",
+                "message": permission_result.reason,
+                "required_permissions": permission_result.required_permissions,
+                "upgrade_path": permission_result.upgrade_path
+            }
+        )
+
+def _handle_dependency_error(error: Exception) -> None:
+    """Handle dependency error."""
+    logger.error(f"Tool permission dependency error: {error}")
+    raise HTTPException(
+        status_code=500,
+        detail="Permission check failed"
+    )
 
 
 # Convenience function to create the middleware

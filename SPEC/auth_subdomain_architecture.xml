@@ -1,0 +1,493 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Auth Subdomain Architecture</name>
+        <type>auth_subdomain_system</type>
+        <version>3.0</version>
+        <created>2025-08-16</created>
+        <supersedes>auth_environment_isolation.xml</supersedes>
+        <description>Complete auth subdomain architecture for all environments with OAuth proxy service</description>
+    </metadata>
+    
+    <primary-goal>Dedicated auth subdomain service handling OAuth flows across all environments, especially dynamic PR staging deployments</primary-goal>
+    
+    <core-architecture>
+        <principle id="auth-subdomain-isolation">
+            <name>Auth Subdomain Isolation</name>
+            <description>Dedicated auth.{domain} subdomain for each environment handling all OAuth operations</description>
+            <benefits>
+                <benefit>Single OAuth callback URL per environment</benefit>
+                <benefit>No Google Console updates for new PR environments</benefit>
+                <benefit>Centralized token management</benefit>
+                <benefit>Enhanced security through isolation</benefit>
+            </benefits>
+        </principle>
+        
+        <principle id="environment-specific-auth">
+            <name>Environment-Specific Auth Services</name>
+            <description>Each environment has its own auth subdomain with specific configuration</description>
+            <environments>
+                <env name="development" auth_domain="localhost:8001" api_domain="localhost:8000" frontend_domain="localhost:3000"/>
+                <env name="testing" auth_domain="auth.test.local" api_domain="api.test.local" frontend_domain="test.local"/>
+                <env name="staging" auth_domain="auth.staging.netrasystems.ai" api_domain="*.staging.netrasystems.ai" frontend_domain="*.staging.netrasystems.ai"/>
+                <env name="production" auth_domain="auth.netrasystems.ai" api_domain="api.netrasystems.ai" frontend_domain="netrasystems.ai"/>
+            </environments>
+        </principle>
+        
+        <principle id="oauth-proxy-service">
+            <name>OAuth Proxy Service for Dynamic Environments</name>
+            <description>Proxy service handling OAuth for unlimited PR staging environments</description>
+            <flow>
+                <step>PR environment initiates OAuth via auth subdomain</step>
+                <step>State encodes PR number and return URL</step>
+                <step>Google OAuth callback to auth subdomain</step>
+                <step>Token exchange and storage in Redis</step>
+                <step>Secure redirect back to PR environment</step>
+            </flow>
+        </principle>
+    </core-architecture>
+    
+    <deployment-configuration>
+        <environment name="development">
+            <auth_service>
+                <host>localhost</host>
+                <port>8001</port>
+                <oauth_client_env>GOOGLE_OAUTH_CLIENT_ID_DEV</oauth_client_env>
+                <oauth_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_DEV</oauth_secret_env>
+                <features>
+                    <dev_login>true</dev_login>
+                    <mock_auth>true</mock_auth>
+                    <hot_reload>true</hot_reload>
+                </features>
+                <startup_command>uvicorn app.auth.auth_service:app --host 0.0.0.0 --port 8001 --reload</startup_command>
+            </auth_service>
+            <google_oauth_config>
+                <redirect_uris>
+                    <uri>http://localhost:8001/auth/callback</uri>
+                </redirect_uris>
+                <javascript_origins>
+                    <origin>http://localhost:3000</origin>
+                    <origin>http://localhost:8000</origin>
+                    <origin>http://localhost:8001</origin>
+                </javascript_origins>
+            </google_oauth_config>
+        </environment>
+        
+        <environment name="testing">
+            <auth_service>
+                <host>auth.test.local</host>
+                <port>443</port>
+                <oauth_client_env>GOOGLE_OAUTH_CLIENT_ID_TEST</oauth_client_env>
+                <oauth_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_TEST</oauth_secret_env>
+                <features>
+                    <dev_login>false</dev_login>
+                    <mock_auth>true</mock_auth>
+                </features>
+                <docker_config>
+                    <image>netra-auth-service:test</image>
+                    <environment>ENVIRONMENT=testing</environment>
+                </docker_config>
+            </auth_service>
+            <google_oauth_config>
+                <redirect_uris>
+                    <uri>https://auth.test.local/auth/callback</uri>
+                </redirect_uris>
+                <javascript_origins>
+                    <origin>https://test.local</origin>
+                    <origin>https://auth.test.local</origin>
+                </javascript_origins>
+            </google_oauth_config>
+        </environment>
+        
+        <environment name="staging">
+            <auth_service>
+                <host>auth.staging.netrasystems.ai</host>
+                <port>443</port>
+                <oauth_client_env>GOOGLE_OAUTH_CLIENT_ID_STAGING</oauth_client_env>
+                <oauth_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_STAGING</oauth_secret_env>
+                <features>
+                    <dev_login>false</dev_login>
+                    <mock_auth>false</mock_auth>
+                    <pr_proxy>true</pr_proxy>
+                </features>
+                <cloud_run_config>
+                    <service_name>auth-staging</service_name>
+                    <region>us-central1</region>
+                    <memory>512Mi</memory>
+                    <cpu>1</cpu>
+                    <min_instances>1</min_instances>
+                    <max_instances>10</max_instances>
+                    <environment_variables>
+                        <ENVIRONMENT>staging</ENVIRONMENT>
+                        <REDIS_URL>redis://staging-redis:6379</REDIS_URL>
+                    </environment_variables>
+                </cloud_run_config>
+            </auth_service>
+            <google_oauth_config>
+                <redirect_uris>
+                    <uri>https://auth.staging.netrasystems.ai/auth/callback</uri>
+                </redirect_uris>
+                <javascript_origins>
+                    <origin>https://auth.staging.netrasystems.ai</origin>
+                </javascript_origins>
+            </google_oauth_config>
+        </environment>
+        
+        <environment name="production">
+            <auth_service>
+                <host>auth.netrasystems.ai</host>
+                <port>443</port>
+                <oauth_client_env>GOOGLE_OAUTH_CLIENT_ID_PROD</oauth_client_env>
+                <oauth_secret_env>GOOGLE_OAUTH_CLIENT_SECRET_PROD</oauth_secret_env>
+                <features>
+                    <dev_login>false</dev_login>
+                    <mock_auth>false</mock_auth>
+                </features>
+                <cloud_run_config>
+                    <service_name>auth-production</service_name>
+                    <region>us-central1</region>
+                    <memory>1Gi</memory>
+                    <cpu>2</cpu>
+                    <min_instances>2</min_instances>
+                    <max_instances>100</max_instances>
+                    <environment_variables>
+                        <ENVIRONMENT>production</ENVIRONMENT>
+                        <REDIS_URL>redis://prod-redis:6379</REDIS_URL>
+                    </environment_variables>
+                </cloud_run_config>
+            </auth_service>
+            <google_oauth_config>
+                <redirect_uris>
+                    <uri>https://auth.netrasystems.ai/auth/callback</uri>
+                </redirect_uris>
+                <javascript_origins>
+                    <origin>https://netrasystems.ai</origin>
+                    <origin>https://auth.netrasystems.ai</origin>
+                </javascript_origins>
+            </google_oauth_config>
+        </environment>
+    </deployment-configuration>
+    
+    <auth-service-implementation>
+        <service_structure>
+            <file path="app/auth/auth_service.py">
+                <description>Main FastAPI application for auth subdomain</description>
+                <endpoints>
+                    <endpoint method="GET" path="/auth/login">Initiate OAuth flow</endpoint>
+                    <endpoint method="GET" path="/auth/callback">Handle OAuth callback</endpoint>
+                    <endpoint method="POST" path="/auth/token">Exchange code for JWT</endpoint>
+                    <endpoint method="POST" path="/auth/logout">Revoke tokens</endpoint>
+                    <endpoint method="GET" path="/auth/status">Service health check</endpoint>
+                    <endpoint method="GET" path="/auth/config">Frontend configuration</endpoint>
+                </endpoints>
+            </file>
+            
+            <file path="app/auth/pr_router.py">
+                <description>PR-specific OAuth routing for staging</description>
+                <functionality>
+                    <function>Handle PR environment OAuth initiation</function>
+                    <function>Encode/decode PR state in OAuth flow</function>
+                    <function>Route callbacks to correct PR environment</function>
+                </functionality>
+            </file>
+            
+            <file path="app/auth/token_service.py">
+                <description>JWT token generation and validation</description>
+                <functionality>
+                    <function>Generate JWT with user claims</function>
+                    <function>Validate and refresh tokens</function>
+                    <function>Manage token revocation</function>
+                </functionality>
+            </file>
+            
+            <file path="app/auth/redis_session.py">
+                <description>Redis-based session management</description>
+                <functionality>
+                    <function>Store temporary OAuth state</function>
+                    <function>Cache user sessions</function>
+                    <function>Handle PR environment mappings</function>
+                </functionality>
+            </file>
+        </service_structure>
+        
+        <pr_environment_flow>
+            <step number="1">
+                <action>PR Frontend Initiates OAuth</action>
+                <details>
+                    Frontend at pr-123.staging.netrasystems.ai redirects to
+                    auth.staging.netrasystems.ai/auth/login?pr=123&return_url={encoded_url}
+                </details>
+            </step>
+            <step number="2">
+                <action>Auth Service Encodes State</action>
+                <details>
+                    Creates state with PR number, CSRF token, return URL, timestamp
+                    Stores CSRF in Redis with 5-minute TTL
+                </details>
+            </step>
+            <step number="3">
+                <action>Google OAuth Flow</action>
+                <details>
+                    Redirect to Google with auth.staging.netrasystems.ai/auth/callback
+                    User authenticates with Google
+                </details>
+            </step>
+            <step number="4">
+                <action>Callback Processing</action>
+                <details>
+                    Decode state to get PR number
+                    Exchange code for tokens
+                    Generate JWT with user info
+                </details>
+            </step>
+            <step number="5">
+                <action>Return to PR Environment</action>
+                <details>
+                    Store JWT in Redis with PR-specific key
+                    Redirect to pr-123.staging.netrasystems.ai with secure cookie
+                    Frontend retrieves JWT and stores in localStorage
+                </details>
+            </step>
+        </pr_environment_flow>
+    </auth-service-implementation>
+    
+    <configuration-management>
+        <environment_variables>
+            <variable name="ENVIRONMENT" required="true" description="Current environment (development/testing/staging/production)"/>
+            <variable name="AUTH_SERVICE_PORT" default="8001" description="Port for auth service"/>
+            <variable name="GOOGLE_OAUTH_CLIENT_ID_{ENV}" required="true" description="Environment-specific OAuth client ID"/>
+            <variable name="GOOGLE_OAUTH_CLIENT_SECRET_{ENV}" required="true" description="Environment-specific OAuth client secret"/>
+            <variable name="JWT_SECRET_KEY" required="true" description="Secret key for JWT signing"/>
+            <variable name="REDIS_URL" required="true" description="Redis connection URL for session storage"/>
+            <variable name="PR_NUMBER" required="false" description="PR number for staging environments"/>
+            <variable name="CORS_ALLOWED_ORIGINS" required="true" description="Comma-separated list of allowed origins"/>
+        </environment_variables>
+        
+        <config_files>
+            <file path=".env.development">
+                <content>
+                    ENVIRONMENT=development
+                    AUTH_SERVICE_PORT=8001
+                    GOOGLE_OAUTH_CLIENT_ID_DEV=your-dev-client-id
+                    GOOGLE_OAUTH_CLIENT_SECRET_DEV=your-dev-secret
+                    JWT_SECRET_KEY=dev-jwt-secret-key
+                    REDIS_URL=redis://localhost:6379
+                    CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8000
+                </content>
+            </file>
+            
+            <file path=".env.staging">
+                <content>
+                    ENVIRONMENT=staging
+                    AUTH_SERVICE_PORT=443
+                    GOOGLE_OAUTH_CLIENT_ID_STAGING=${SECRET_GOOGLE_CLIENT_ID_STAGING}
+                    GOOGLE_OAUTH_CLIENT_SECRET_STAGING=${SECRET_GOOGLE_SECRET_STAGING}
+                    JWT_SECRET_KEY=${SECRET_JWT_KEY_STAGING}
+                    REDIS_URL=${SECRET_REDIS_URL_STAGING}
+                    CORS_ALLOWED_ORIGINS=https://*.staging.netrasystems.ai
+                </content>
+            </file>
+            
+            <file path=".env.production">
+                <content>
+                    ENVIRONMENT=production
+                    AUTH_SERVICE_PORT=443
+                    GOOGLE_OAUTH_CLIENT_ID_PROD=${SECRET_GOOGLE_CLIENT_ID_PROD}
+                    GOOGLE_OAUTH_CLIENT_SECRET_PROD=${SECRET_GOOGLE_SECRET_PROD}
+                    JWT_SECRET_KEY=${SECRET_JWT_KEY_PROD}
+                    REDIS_URL=${SECRET_REDIS_URL_PROD}
+                    CORS_ALLOWED_ORIGINS=https://netrasystems.ai,https://api.netrasystems.ai
+                </content>
+            </file>
+        </config_files>
+    </configuration-management>
+    
+    <infrastructure-as-code>
+        <terraform_modules>
+            <module path="terraform-gcp/modules/auth-service">
+                <description>Terraform module for auth service deployment</description>
+                <resources>
+                    <resource type="google_cloud_run_service" name="auth_service"/>
+                    <resource type="google_cloud_run_domain_mapping" name="auth_subdomain"/>
+                    <resource type="google_redis_instance" name="auth_redis"/>
+                    <resource type="google_secret_manager_secret" name="oauth_credentials"/>
+                </resources>
+            </module>
+        </terraform_modules>
+        
+        <github_workflows>
+            <workflow path=".github/workflows/deploy-auth-service.yml">
+                <description>Deploy auth service to Cloud Run</description>
+                <triggers>
+                    <trigger>Push to main branch (production)</trigger>
+                    <trigger>Push to staging branch (staging)</trigger>
+                    <trigger>PR opened/updated (PR staging)</trigger>
+                </triggers>
+                <steps>
+                    <step>Build Docker image</step>
+                    <step>Push to Artifact Registry</step>
+                    <step>Deploy to Cloud Run</step>
+                    <step>Update DNS if needed</step>
+                    <step>Run health checks</step>
+                </steps>
+            </workflow>
+        </github_workflows>
+    </infrastructure-as-code>
+    
+    <security-considerations>
+        <consideration priority="critical">
+            <title>CSRF Protection</title>
+            <implementation>
+                <measure>Generate cryptographically secure CSRF tokens</measure>
+                <measure>Store in Redis with short TTL (5 minutes)</measure>
+                <measure>Validate on every callback</measure>
+                <measure>Single-use tokens (delete after validation)</measure>
+            </implementation>
+        </consideration>
+        
+        <consideration priority="critical">
+            <title>Token Security</title>
+            <implementation>
+                <measure>JWT signed with RS256 (asymmetric)</measure>
+                <measure>Short token lifetime (1 hour)</measure>
+                <measure>Secure cookie flags (HttpOnly, Secure, SameSite)</measure>
+                <measure>Token rotation on refresh</measure>
+            </implementation>
+        </consideration>
+        
+        <consideration priority="high">
+            <title>PR Environment Isolation</title>
+            <implementation>
+                <measure>Validate PR numbers against active PRs</measure>
+                <measure>Separate Redis namespaces per PR</measure>
+                <measure>Automatic cleanup on PR close</measure>
+                <measure>Rate limiting per PR environment</measure>
+            </implementation>
+        </consideration>
+        
+        <consideration priority="high">
+            <title>Secret Management</title>
+            <implementation>
+                <measure>Use Google Secret Manager for production secrets</measure>
+                <measure>Environment-specific OAuth clients</measure>
+                <measure>Regular secret rotation</measure>
+                <measure>Audit logging for secret access</measure>
+            </implementation>
+        </consideration>
+    </security-considerations>
+    
+    <monitoring-and-observability>
+        <metrics>
+            <metric name="auth_requests_total" type="counter" description="Total authentication requests"/>
+            <metric name="auth_success_rate" type="gauge" description="Authentication success rate"/>
+            <metric name="oauth_callback_latency" type="histogram" description="OAuth callback processing time"/>
+            <metric name="pr_environment_auth_attempts" type="counter" labels="pr_number" description="Auth attempts per PR"/>
+            <metric name="token_validation_errors" type="counter" description="JWT validation failures"/>
+        </metrics>
+        
+        <logging>
+            <log_event level="INFO" event="auth_initiated" fields="user_email, environment, pr_number"/>
+            <log_event level="INFO" event="auth_successful" fields="user_id, environment, pr_number"/>
+            <log_event level="ERROR" event="auth_failed" fields="reason, environment, pr_number"/>
+            <log_event level="WARNING" event="csrf_validation_failed" fields="pr_number, timestamp"/>
+            <log_event level="INFO" event="token_issued" fields="user_id, token_id, expiry"/>
+        </logging>
+        
+        <alerts>
+            <alert name="high_auth_failure_rate" condition="auth_success_rate < 0.95" severity="warning"/>
+            <alert name="auth_service_down" condition="up{job='auth-service'} == 0" severity="critical"/>
+            <alert name="high_oauth_latency" condition="oauth_callback_latency > 5s" severity="warning"/>
+        </alerts>
+    </monitoring-and-observability>
+    
+    <testing-strategy>
+        <unit_tests>
+            <test>State encoding/decoding with all edge cases</test>
+            <test>CSRF token generation and validation</test>
+            <test>JWT generation with correct claims</test>
+            <test>Environment detection logic</test>
+            <test>PR number extraction and validation</test>
+        </unit_tests>
+        
+        <integration_tests>
+            <test>Complete OAuth flow with mock provider</test>
+            <test>Redis session storage and retrieval</test>
+            <test>Cross-origin request handling</test>
+            <test>Token refresh flow</test>
+            <test>PR environment routing</test>
+        </integration_tests>
+        
+        <e2e_tests>
+            <test>Full OAuth login flow per environment</test>
+            <test>PR environment authentication</test>
+            <test>Logout and session cleanup</test>
+            <test>Token expiry handling</test>
+            <test>Multiple concurrent PR environments</test>
+        </e2e_tests>
+    </testing-strategy>
+    
+    <migration-plan>
+        <phase number="1" name="Setup OAuth Clients">
+            <duration>1 day</duration>
+            <tasks>
+                <task>Create OAuth clients in Google Console for each environment</task>
+                <task>Configure redirect URIs for auth subdomains</task>
+                <task>Store credentials in Secret Manager</task>
+                <task>Document client IDs and configuration</task>
+            </tasks>
+        </phase>
+        
+        <phase number="2" name="Implement Auth Service">
+            <duration>3 days</duration>
+            <tasks>
+                <task>Create auth service FastAPI application</task>
+                <task>Implement OAuth flow handlers</task>
+                <task>Add PR environment routing logic</task>
+                <task>Implement JWT token service</task>
+                <task>Add Redis session management</task>
+            </tasks>
+        </phase>
+        
+        <phase number="3" name="Deploy Infrastructure">
+            <duration>2 days</duration>
+            <tasks>
+                <task>Create Terraform modules for auth service</task>
+                <task>Deploy Redis instances per environment</task>
+                <task>Configure Cloud Run services</task>
+                <task>Setup DNS for auth subdomains</task>
+                <task>Configure SSL certificates</task>
+            </tasks>
+        </phase>
+        
+        <phase number="4" name="Update Applications">
+            <duration>2 days</duration>
+            <tasks>
+                <task>Update frontend to use auth subdomain</task>
+                <task>Modify API authentication middleware</task>
+                <task>Update WebSocket authentication</task>
+                <task>Add auth service discovery endpoints</task>
+            </tasks>
+        </phase>
+        
+        <phase number="5" name="Testing and Validation">
+            <duration>2 days</duration>
+            <tasks>
+                <task>Run unit and integration tests</task>
+                <task>Perform E2E testing in staging</task>
+                <task>Test PR environment authentication</task>
+                <task>Security audit and penetration testing</task>
+                <task>Load testing for auth service</task>
+            </tasks>
+        </phase>
+        
+        <phase number="6" name="Production Rollout">
+            <duration>1 day</duration>
+            <tasks>
+                <task>Deploy auth service to production</task>
+                <task>Monitor authentication metrics</task>
+                <task>Gradual rollout with feature flags</task>
+                <task>Document runbooks and procedures</task>
+            </tasks>
+        </phase>
+    </migration-plan>
+</specification>

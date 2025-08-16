@@ -57,20 +57,15 @@ def _get_content_corpus_engine() -> str:
     return "ENGINE = MergeTree()\nORDER BY (created_at, workload_type)"
 
 
-def _format_corpus_table(table_name: str, columns: str, engine: str) -> str:
-    """Formats the complete CREATE TABLE statement."""
+def get_content_corpus_schema(table_name: str) -> str:
+    """Returns the CREATE TABLE statement for a content corpus table with a dynamic name."""
+    columns = _get_content_corpus_columns()
+    engine = _get_content_corpus_engine()
     return f"""CREATE TABLE IF NOT EXISTS {table_name}
     (
 {columns}
     )
     {engine}"""
-
-
-def get_content_corpus_schema(table_name: str) -> str:
-    """Returns the CREATE TABLE statement for a content corpus table with a dynamic name."""
-    columns = _get_content_corpus_columns()
-    engine = _get_content_corpus_engine()
-    return _format_corpus_table(table_name, columns, engine)
 
 WORKLOAD_EVENTS_TABLE_NAME = 'workload_events'
 WORKLOAD_EVENTS_TABLE_SCHEMA = f"""
@@ -130,27 +125,16 @@ def _get_application_context_columns() -> str:
         application_context_client_ip IPv4"""
 
 
-def _get_request_columns() -> str:
-    """Returns request column definitions."""
+def _get_request_response_columns() -> str:
+    """Returns request and response column definitions."""
     return """        request_model JSON,
         request_prompt JSON,
-        request_generation_config JSON"""
-
-
-def _get_response_columns() -> str:
-    """Returns response column definitions."""
-    return """        response JSON,
+        request_generation_config JSON,
+        response JSON,
         response_completion JSON,
         response_tool_calls JSON,
         response_usage JSON,
         response_system JSON"""
-
-
-def _get_request_response_columns() -> str:
-    """Returns request and response column definitions."""
-    request_cols = _get_request_columns()
-    response_cols = _get_response_columns()
-    return f"{request_cols},\n{response_cols}"
 
 
 def _get_metrics_governance_columns() -> str:

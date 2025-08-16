@@ -17,6 +17,9 @@ from app.logging_config import central_logger
 from app.schemas.core_enums import CircuitBreakerState
 from app.schemas.core_models import CircuitBreakerConfig, HealthCheckResult
 
+# Import DatabaseHealthChecker from consolidated location
+from .shared_health_types import DatabaseHealthChecker
+
 logger = central_logger.get_logger(__name__)
 
 # Use CircuitBreakerState as CircuitState for backward compatibility
@@ -40,37 +43,7 @@ class HealthChecker(ABC):
         pass
 
 
-class DatabaseHealthChecker(HealthChecker):
-    """Health checker for database connections."""
-    
-    def __init__(self, db_pool):
-        """Initialize with database pool."""
-        self.db_pool = db_pool
-    
-    async def check_health(self) -> HealthCheckResult:
-        """Check database connection health."""
-        start_time = datetime.now()
-        
-        try:
-            # Simple health check query
-            async with self.db_pool.acquire() as conn:
-                await conn.fetchval("SELECT 1")
-            
-            response_time = (datetime.now() - start_time).total_seconds()
-            
-            return HealthCheckResult(
-                status=HealthStatus.HEALTHY if response_time < 1.0 else HealthStatus.DEGRADED,
-                response_time=response_time,
-                details={'connection_count': self.db_pool.size}
-            )
-            
-        except Exception as e:
-            response_time = (datetime.now() - start_time).total_seconds()
-            return HealthCheckResult(
-                status=HealthStatus.UNHEALTHY,
-                response_time=response_time,
-                details={'error': str(e)}
-            )
+# DatabaseHealthChecker imported from shared_health_types.py
 
 
 class ApiHealthChecker(HealthChecker):

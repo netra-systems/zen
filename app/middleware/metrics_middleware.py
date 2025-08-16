@@ -83,12 +83,18 @@ class AgentMetricsMiddleware:
             func, args, kwargs, operation_type, include_performance
         )
         try:
-            result = await self._execute_tracked_function(func, timeout_seconds, args, kwargs)
-            await self._record_successful_operation(operation_id, result, start_time, memory_before, include_performance)
-            return result
+            return await self._execute_and_record_operation(
+                func, timeout_seconds, args, kwargs, operation_id, start_time, memory_before, include_performance
+            )
         except Exception as e:
             await self._handle_tracked_exception(operation_id, e, func, args, kwargs, timeout_seconds)
             raise
+    
+    async def _execute_and_record_operation(self, func: Callable, timeout_seconds: Optional[float], args: tuple, kwargs: dict, operation_id: str, start_time: float, memory_before: float, include_performance: bool) -> Any:
+        """Execute function and record successful operation."""
+        result = await self._execute_tracked_function(func, timeout_seconds, args, kwargs)
+        await self._record_successful_operation(operation_id, result, start_time, memory_before, include_performance)
+        return result
     
     async def _handle_tracked_exception(self, operation_id: str, e: Exception, func: Callable, args: tuple, kwargs: dict, timeout_seconds: Optional[float]) -> None:
         """Handle tracked operation exceptions."""
@@ -374,13 +380,17 @@ class AgentMetricsContextManager:
     
     async def __aenter__(self):
         """Start operation tracking."""
-        self.operation_id = await self.middleware.metrics_collector.start_operation(
+        self.operation_id = await self._start_operation_tracking()
+        self.start_time = time.time()
+        return self
+    
+    async def _start_operation_tracking(self) -> str:
+        """Start operation tracking and return operation ID."""
+        return await self.middleware.metrics_collector.start_operation(
             agent_name=self.agent_name,
             operation_type=self.operation_type,
             metadata={"context_manager": True}
         )
-        self.start_time = time.time()
-        return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """End operation tracking."""

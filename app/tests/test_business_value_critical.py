@@ -350,70 +350,66 @@ class TestBusinessValueCritical:
             "tool_dispatcher": tool_dispatcher,
             "workload_data": workload_data
         }
+    def _setup_test_run(self, user_request: str) -> tuple[str, str]:
+        """Setup test run with unique ID and user request"""
+        run_id = str(uuid.uuid4())
+        return run_id, user_request
+
+    async def _execute_with_mocked_state(self, supervisor, user_request: str, run_id: str):
+        """Execute supervisor with mocked state persistence"""
+        with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
+            with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
+                with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
+                    return await supervisor.run(user_request, "test_thread", "test_user", run_id)
+
+    def _verify_basic_result(self, result_state, user_request: str):
+        """Verify basic result assertions"""
+        assert result_state != None
+        assert result_state.user_request == user_request
+
+    def _verify_llm_optimization_calls(self, llm_manager):
+        """Verify LLM optimization calls were made"""
+        assert llm_manager.ask_llm.called
+        optimization_calls = [call for call in llm_manager.ask_llm.call_args_list 
+                             if "optimiz" in str(call).lower()]
+        assert len(optimization_calls) > 0
+
+    def _verify_cost_analysis_tools(self, tool_dispatcher):
+        """Verify cost analysis tool usage"""
+        if tool_dispatcher.dispatch_tool.called:
+            tool_calls = tool_dispatcher.dispatch_tool.call_args_list
+            cost_analysis_calls = [call for call in tool_calls 
+                                  if "cost" in str(call).lower()]
+            assert len(cost_analysis_calls) >= 0
+
     async def test_1_cost_optimization_request(self, setup_test_infrastructure):
         """
         Business Value Test 1: Cost Optimization Analysis
         User Story: As a CTO, I need to reduce my AI costs by 40% while maintaining quality
         """
         infra = setup_test_infrastructure
-        supervisor = infra["supervisor"]
-        workload_data = infra["workload_data"]
-        
-        run_id = str(uuid.uuid4())
-        user_request = "How can I reduce my GPT-4 costs by 40% while maintaining quality?"
-        
-        # Mock state persistence
-        with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
-            with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
-                with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
-                    # Execute the agent workflow
-                    result_state = await supervisor.run(user_request, "test_thread", "test_user", run_id)
-        
-        # Business value assertions
-        assert result_state != None
-        assert result_state.user_request == user_request
-        
-        # Verify cost optimization recommendations were generated
-        llm_manager = infra["llm_manager"]
-        assert llm_manager.ask_llm.called
-        
-        # Check if optimization prompt was used
-        optimization_calls = [call for call in llm_manager.ask_llm.call_args_list 
-                             if "optimiz" in str(call).lower()]
-        assert len(optimization_calls) > 0
-        
-        # Verify tool usage for cost analysis
-        tool_dispatcher = infra["tool_dispatcher"]
+        run_id, user_request = self._setup_test_run("How can I reduce my GPT-4 costs by 40% while maintaining quality?")
+        result_state = await self._execute_with_mocked_state(infra["supervisor"], user_request, run_id)
+        self._verify_basic_result(result_state, user_request)
+        self._verify_llm_optimization_calls(infra["llm_manager"])
+        self._verify_cost_analysis_tools(infra["tool_dispatcher"])
+    def _verify_performance_analysis_tools(self, tool_dispatcher):
+        """Verify performance analysis tool usage"""
         if tool_dispatcher.dispatch_tool.called:
-            tool_calls = tool_dispatcher.dispatch_tool.call_args_list
-            cost_analysis_calls = [call for call in tool_calls 
-                                  if "cost" in str(call).lower()]
-            assert len(cost_analysis_calls) >= 0  # May or may not be called
+            bottleneck_calls = [call for call in tool_dispatcher.dispatch_tool.call_args_list
+                              if "bottleneck" in str(call).lower()]
+            assert len(bottleneck_calls) >= 0
+
     async def test_2_performance_bottleneck_identification(self, setup_test_infrastructure):
         """
         Business Value Test 2: Performance Bottleneck Analysis
         User Story: As an ML Engineer, I need to identify why P95 latency increased to 800ms
         """
         infra = setup_test_infrastructure
-        supervisor = infra["supervisor"]
-        
-        run_id = str(uuid.uuid4())
-        user_request = "P95 latency increased from 200ms to 800ms. Identify bottlenecks and solutions."
-        
-        with patch('app.services.state_persistence_service.state_persistence_service.save_agent_state', AsyncMock()):
-            with patch('app.services.state_persistence_service.state_persistence_service.load_agent_state', AsyncMock(return_value=None)):
-                with patch('app.services.state_persistence_service.state_persistence_service.get_thread_context', AsyncMock(return_value=None)):
-                    result_state = await supervisor.run(user_request, "test_thread", "test_user", run_id)
-        
+        run_id, user_request = self._setup_test_run("P95 latency increased from 200ms to 800ms. Identify bottlenecks and solutions.")
+        result_state = await self._execute_with_mocked_state(infra["supervisor"], user_request, run_id)
         assert result_state != None
-        
-        # Verify performance analysis was conducted
-        tool_dispatcher = infra["tool_dispatcher"]
-        if tool_dispatcher.dispatch_tool.called:
-            # Check for bottleneck identification tool usage
-            bottleneck_calls = [call for call in tool_dispatcher.dispatch_tool.call_args_list
-                              if "bottleneck" in str(call).lower()]
-            assert len(bottleneck_calls) >= 0
+        self._verify_performance_analysis_tools(infra["tool_dispatcher"])
     async def test_3_model_comparison_and_selection(self, setup_test_infrastructure):
         """
         Business Value Test 3: Model Comparison for Use Case

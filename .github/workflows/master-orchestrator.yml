@@ -499,7 +499,7 @@ jobs:
     if: always() && needs.determine-strategy.outputs.should_run == 'true'
     uses: ./.github/workflows/reusable/notification-handler.yml
     with:
-      workflow_status: ${{ job.status }}
+      workflow_status: ${{ contains(needs.*.result, 'failure') && 'failure' || contains(needs.*.result, 'cancelled') && 'cancelled' || 'success' }}
       execution_path: ${{ needs.determine-strategy.outputs.execution_path }}
       test_result: ${{ needs.run-tests.result || 'skipped' }}
       deploy_result: ${{ needs.deploy-staging.result || needs.deploy-production.result || 'skipped' }}
