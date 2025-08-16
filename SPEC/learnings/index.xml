@@ -166,10 +166,12 @@
             <name>Frontend</name>
             <file>learnings/frontend.xml</file>
             <path>SPEC/learnings/frontend.xml</path>
-            <learning_count>2</learning_count>
+            <learning_count>4</learning_count>
             <learning_ids>
                 <id>zustand-selector-infinite-loop</id>
                 <id>zustand-hook-selector-inline</id>
+                <id>zustand-selector-memoization</id>
+                <id>zustand-individual-selectors-pattern</id>
             </learning_ids>
         </category>
     </categories>

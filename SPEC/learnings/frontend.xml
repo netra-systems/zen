@@ -199,5 +199,78 @@ export const useLoadingState = () => {
                 <reference>Zustand getSnapshot caching documentation</reference>
             </references>
         </learning>
+        
+        <learning>
+            <id>zustand-individual-selectors-pattern</id>
+            <date>2025-08-16</date>
+            <category>State Management</category>
+            <severity>critical</severity>
+            <title>Use Individual Selectors Instead of Object Selectors</title>
+            
+            <problem>
+                <description>Object-returning selectors create new references on every call causing infinite loops</description>
+                <error_message>Error: The result of getSnapshot should be cached to avoid an infinite loop</error_message>
+                <impact>Even with shallow comparison and memoization, object selectors can cause infinite loops</impact>
+            </problem>
+            
+            <solution>
+                <description>Use individual selectors for each piece of state instead of selecting multiple as an object</description>
+                <implementation>
+                    <step>Select each state property individually with separate useStore calls</step>
+                    <step>Construct objects locally after selection if needed</step>
+                    <step>This ensures React only re-renders when actual values change</step>
+                    <step>Eliminates need for shallow comparison and complex memoization</step>
+                </implementation>
+                <code_example>
+// PROBLEMATIC - Object selector (can cause infinite loops)
+const storeSelector = (state: UnifiedChatState) => ({
+  activeThreadId: state.activeThreadId,
+  isThreadLoading: state.isThreadLoading,
+  messages: state.messages,
+  isProcessing: state.isProcessing
+});
+
+export const useLoadingState = () => {
+  const storeData = useUnifiedChatStore(storeSelector, shallow); // CAN STILL LOOP!
+  // ...
+};
+
+// RECOMMENDED - Individual selectors (no infinite loops)
+export const useLoadingState = () => {
+  // Select individual properties to avoid creating new objects
+  const activeThreadId = useUnifiedChatStore(state => state.activeThreadId);
+  const isThreadLoading = useUnifiedChatStore(state => state.isThreadLoading);
+  const messages = useUnifiedChatStore(state => state.messages);
+  const isProcessing = useUnifiedChatStore(state => state.isProcessing);
+  
+  // Create object locally if needed
+  const storeData = {
+    activeThreadId,
+    isThreadLoading,
+    messages,
+    isProcessing
+  };
+  // ...
+};
+                </code_example>
+            </solution>
+            
+            <prevention>
+                <rule>Prefer individual selectors over object-returning selectors</rule>
+                <rule>Each useStore call should select a single primitive or stable reference</rule>
+                <rule>Construct objects locally after selection if grouping is needed</rule>
+                <rule>This pattern completely avoids infinite loop issues</rule>
+            </prevention>
+            
+            <affected_files>
+                <file>frontend/hooks/useLoadingState.ts</file>
+                <file>frontend/hooks/useThreadSwitching.ts</file>
+            </affected_files>
+            
+            <references>
+                <reference>React useSyncExternalStore stable getSnapshot requirement</reference>
+                <reference>Zustand performance best practices</reference>
+            </references>
+        </learning>
     </learnings>
 </specification>

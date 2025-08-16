@@ -310,14 +310,79 @@ def create_test_message(thread_id, role="user"):
 
 For complete frontend testing documentation including Windows-specific instructions, see `SPEC/frontend_testing_guide.xml`.
 
+### Frontend Test Suite Organization
+
+Frontend tests are organized into parallel-executable suites for optimal performance:
+
+| Suite | Description | Priority | Weight | Timeout |
+|-------|-------------|----------|--------|---------|
+| **components** | Component unit tests | 1 | 0.8 | 5s |
+| **chat** | Chat-related components | 2 | 0.8 | 8s |
+| **hooks** | React hooks tests | 1 | 0.6 | 5s |
+| **auth** | Authentication tests | 2 | 0.4 | 8s |
+| **integration-basic** | Basic integration tests | 3 | 0.5 | 15s |
+| **integration-advanced** | Advanced integration tests | 3 | 0.6 | 20s |
+| **integration-comprehensive** | Comprehensive integration | 4 | 0.8 | 25s |
+| **integration-critical** | Critical path tests | 4 | 0.8 | 20s |
+| **system** | System-level tests | 3 | 0.4 | 15s |
+| **imports** | Import verification (sequential) | 1 | 0.2 | 5s |
+| **core** | Core unified tests | 2 | 0.4 | 10s |
+
 ### Quick Start
 
 ```bash
-# Using unified test runner (recommended)
+# Run all test suites in parallel (recommended)
+cd frontend && npm run test:suites
+
+# Run specific test suite
+npm run test:suites:components
+npm run test:suites:chat
+npm run test:suites:hooks
+
+# Run by priority level (fast/medium/slow)
+npm run test:suites:fast     # Priority 1 tests only
+npm run test:suites:medium   # Priority 1-2 tests
+npm run test:suites:slow     # All tests including heavy integration
+
+# Run all integration tests
+npm run test:suites:integration
+
+# Control parallelization
+npm run test:suites:parallel    # Max 8 parallel suites
+npm run test:suites:sequential  # Run sequentially
+
+# Watch mode for development
+npm run test:suites:watch
+
+# Generate coverage report
+npm run test:suites:coverage
+
+# Using unified test runner
 python test_runner.py --frontend-only
 
-# Or directly with npm
-cd frontend && npm test
+# Using the test suite runner directly
+cd frontend
+node test-suite-runner.js --all              # Run all suites
+node test-suite-runner.js components hooks   # Run specific suites
+node test-suite-runner.js --priority 1       # Run priority 1 tests
+node test-suite-runner.js --max-parallel 4   # Limit parallel execution
+```
+
+### Parallel Execution Strategy
+
+The test suite runner intelligently manages parallel execution based on:
+
+1. **Priority Groups**: Tests run in priority order (1-4)
+2. **Resource Weights**: Heavy tests get fewer parallel slots
+3. **CPU Optimization**: Uses 75% of available CPU cores by default
+4. **Smart Chunking**: Groups compatible tests for parallel execution
+
+Example execution flow:
+```
+Priority 1 (Fast) → components, hooks, imports (parallel)
+Priority 2 (Medium) → chat, auth, core (parallel)  
+Priority 3 (Slower) → integration-basic, system (parallel)
+Priority 4 (Heavy) → integration-comprehensive, critical (limited parallel)
 ```
 
 ## Integration Testing

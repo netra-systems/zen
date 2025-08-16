@@ -33,6 +33,26 @@
   </core_principles>
 
   <common_regression_patterns>
+    <pattern id="zustand_selector_infinite_loop">
+      <name>Zustand Selector Infinite Loop</name>
+      <triggers>
+        - Using object-returning selectors with Zustand stores
+        - Creating selector functions that return new objects
+        - Memoizing selectors incorrectly
+      </triggers>
+      <regression>
+        Application crashes with infinite re-render loop:
+        - Error: "The result of getSnapshot should be cached to avoid an infinite loop"
+        - React useSyncExternalStore detects unstable references
+        - Performance degradation and browser crash
+      </regression>
+      <prevention>
+        - ALWAYS use individual selectors for each state property
+        - NEVER return new objects from selectors
+        - Select primitives or stable references only
+        - See SPEC/learnings/frontend.xml#zustand-individual-selectors-pattern
+      </prevention>
+    </pattern>
     <pattern id="file_creation">
       <name>Unnecessary File Creation</name>
       <triggers>
