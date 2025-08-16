@@ -383,63 +383,112 @@ async def run_data_ingestion_job(job_id: str, params: dict):
 
 from app.data.synthetic.synthetic_data import main as synthetic_data_main
 
-async def run_synthetic_data_generation_job(job_id: str, params: dict):
-    """Generates and ingests synthetic logs in batches from a ClickHouse corpus."""
+def _extract_synthetic_job_params(params: dict) -> tuple[int, int, str, str]:
+    """Extracts and validates parameters for synthetic data generation job."""
     batch_size = getattr(params, 'batch_size', 1000)
     total_logs_to_gen = getattr(params, 'num_traces', 10000)
     source_table = getattr(params, 'source_table', 'content_corpus')
     destination_table = getattr(params, 'destination_table', 'synthetic_data')
-    
-    await update_job_status(job_id, "running", progress=0, total_tasks=total_logs_to_gen, records_ingested=0)
+    return batch_size, total_logs_to_gen, source_table, destination_table
 
+async def _initialize_synthetic_job_status(job_id: str, total_logs: int):
+    """Initializes job status for synthetic data generation."""
+    await update_job_status(
+        job_id, "running", 
+        progress=0, 
+        total_tasks=total_logs, 
+        records_ingested=0
+    )
+
+def _create_clickhouse_client():
+    """Creates and returns ClickHouse client with interceptor."""
     base_client = ClickHouseDatabase(
-        host=settings.clickhouse_https.host, port=settings.clickhouse_https.port,
-        user=settings.clickhouse_https.user, password=settings.clickhouse_https.password,
+        host=settings.clickhouse_https.host,
+        port=settings.clickhouse_https.port,
+        user=settings.clickhouse_https.user,
+        password=settings.clickhouse_https.password,
         database=settings.clickhouse_https.database
     )
-    client = ClickHouseQueryInterceptor(base_client)
+    return ClickHouseQueryInterceptor(base_client)
+
+async def _setup_destination_table(client, destination_table: str):
+    """Creates the destination table schema in ClickHouse."""
+    table_schema = get_llm_events_table_schema(destination_table)
+    await client.command(table_schema)
+
+class _SyntheticDataArgs:
+    """Arguments container for synthetic data generation."""
+    def __init__(self, num_traces: int, config: str, max_cores: int, corpus: dict):
+        self.num_traces = num_traces
+        self.config = config
+        self.max_cores = max_cores
+        self.corpus = corpus
+
+async def _prepare_synthetic_generation(total_logs: int, source_table: str):
+    """Prepares generation arguments and retrieves corpus."""
+    content_corpus = await get_corpus_from_clickhouse(source_table)
+    args = _SyntheticDataArgs(total_logs, "config.yaml", cpu_count(), content_corpus)
+    generated_logs = await synthetic_data_main(args)
+    return generated_logs
+
+async def _process_synthetic_batch(client, log_batch: list, destination_table: str, records_ingested: int) -> int:
+    """Processes a batch of synthetic logs and returns updated count."""
+    if not log_batch:
+        return records_ingested
+    ingested_count = await ingest_records(client, log_batch, destination_table)
+    return records_ingested + ingested_count
+
+async def _update_batch_progress(job_id: str, progress: int, records_ingested: int):
+    """Updates job progress status during batch processing."""
+    await update_job_status(
+        job_id, "running", 
+        progress=progress, 
+        records_ingested=records_ingested
+    )
+
+async def _finalize_synthetic_job(job_id: str, destination_table: str, total_logs: int, records_ingested: int):
+    """Finalizes successful synthetic data generation job."""
+    summary = {
+        "message": f"Synthetic data generated and saved to {destination_table}", 
+        "records_ingested": records_ingested
+    }
+    await update_job_status(job_id, "completed", progress=total_logs, records_ingested=records_ingested, summary=summary)
+
+async def _handle_synthetic_job_error(job_id: str, error: Exception):
+    """Handles errors during synthetic data generation job."""
+    central_logger.get_logger(__name__).exception("Error during synthetic data generation job")
+    await update_job_status(job_id, "failed", error=str(error))
+
+def _cleanup_synthetic_client(client):
+    """Safely disconnects ClickHouse client if available."""
+    if client:
+        client.disconnect()
+
+async def run_synthetic_data_generation_job(job_id: str, params: dict):
+    """Generates and ingests synthetic logs in batches from a ClickHouse corpus."""
+    batch_size, total_logs_to_gen, source_table, destination_table = _extract_synthetic_job_params(params)
+    await _initialize_synthetic_job_status(job_id, total_logs_to_gen)
+    client = _create_clickhouse_client()
     
     try:
-        # Create the destination table
-        table_schema = get_llm_events_table_schema(destination_table)
-        await client.command(table_schema)
-
-        content_corpus = await get_corpus_from_clickhouse(source_table)
-        
-        class Args:
-            def __init__(self, num_traces, config, max_cores, corpus):
-                self.num_traces = num_traces
-                self.config = config
-                self.max_cores = max_cores
-                self.corpus = corpus
-
-        args = Args(total_logs_to_gen, "config.yaml", cpu_count(), content_corpus)
-        
-        generated_logs = await synthetic_data_main(args)
+        await _setup_destination_table(client, destination_table)
+        generated_logs = await _prepare_synthetic_generation(total_logs_to_gen, source_table)
         records_ingested = 0
         log_batch = []
-
+        
         for i, log_record in enumerate(generated_logs):
             log_batch.append(log_record)
             if len(log_batch) >= batch_size:
-                ingested_count = await ingest_records(client, log_batch, destination_table)
-                records_ingested += ingested_count
+                records_ingested = await _process_synthetic_batch(client, log_batch, destination_table, records_ingested)
                 log_batch.clear()
-                await update_job_status(job_id, "running", progress=i + 1, records_ingested=records_ingested)
-
-        if log_batch:
-            ingested_count = await ingest_records(client, log_batch, destination_table)
-            records_ingested += ingested_count
-
-        summary = {"message": f"Synthetic data generated and saved to {destination_table}", "records_ingested": records_ingested}
-        await update_job_status(job_id, "completed", progress=total_logs_to_gen, records_ingested=records_ingested, summary=summary)
-
+                await _update_batch_progress(job_id, i + 1, records_ingested)
+        
+        records_ingested = await _process_synthetic_batch(client, log_batch, destination_table, records_ingested)
+        await _finalize_synthetic_job(job_id, destination_table, total_logs_to_gen, records_ingested)
     except Exception as e:
-        central_logger.get_logger(__name__).exception("Error during synthetic data generation job")
-        await update_job_status(job_id, "failed", error=str(e))
+        await _handle_synthetic_job_error(job_id, e)
     finally:
-        if 'client' in locals() and client:
-            client.disconnect()
+        _cleanup_synthetic_client(client)
 
 def get_config():
     """Loads the application configuration from config.yaml."""

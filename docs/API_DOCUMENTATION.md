@@ -29,98 +29,103 @@ Authorization: Bearer <your-jwt-token>
 
 Google OAuth 2.0 is supported for user authentication:
 
-1. Redirect user to `/api/auth/google/authorize`
-2. Handle callback at `/api/auth/google/callback`
-3. Receive JWT token in response
+1. Get configuration from `/api/auth/config`
+2. Redirect user to `/api/auth/login`
+3. Handle callback at `/api/auth/callback`
+4. Frontend receives JWT token via redirect
 
 ## REST API Endpoints
 
 ### Authentication Endpoints
 
-#### Login
+#### Authentication Configuration
 ```http
-POST /api/auth/login
-Content-Type: application/json
+GET /api/auth/config
 
+Response:
 {
-  "email": "user@example.com",
-  "password": "your-password"
+  "development_mode": true,
+  "google_client_id": "your-google-client-id",
+  "endpoints": {
+    "login": "http://localhost:8000/api/auth/login",
+    "logout": "http://localhost:8000/api/auth/logout",
+    "callback": "http://localhost:8000/api/auth/callback",
+    "token": "http://localhost:8000/api/auth/token",
+    "user": "http://localhost:8000/api/users/me",
+    "dev_login": "http://localhost:8000/api/auth/dev_login"
+  },
+  "authorized_javascript_origins": ["http://localhost:3000"],
+  "authorized_redirect_uris": ["http://localhost:8000/api/auth/callback"]
 }
+```
+
+#### OAuth2 Token Exchange
+```http
+POST /api/auth/token
+Content-Type: application/x-www-form-urlencoded
+
+username=user@example.com&password=your-password&grant_type=password
 
 Response:
 {
   "access_token": "eyJ...",
-  "token_type": "bearer",
-  "user": {
-    "id": "uuid",
-    "email": "user@example.com",
-    "full_name": "John Doe",
-    "plan_tier": "pro"
-  }
+  "token_type": "bearer"
 }
+```
+
+#### Google OAuth Login
+```http
+GET /api/auth/login
+Redirects to Google OAuth consent page or proxy for PR environments
+
+Response:
+Redirect to Google OAuth or proxy URL
+```
+
+#### OAuth Callback
+```http
+GET /api/auth/callback?code=<auth-code>&state=<state>
+Handles OAuth callback from Google
+
+Response:
+Redirect to frontend with token:
+http://localhost:3000/auth/callback?token=<jwt-token>
+
+Error Response:
+Redirect to frontend with error:
+http://localhost:3000/auth/error?message=<error-message>
 ```
 
 #### Logout
 ```http
 POST /api/auth/logout
-Authorization: Bearer <token>
 
 Response:
 {
-  "message": "Successfully logged out"
+  "message": "Successfully logged out",
+  "success": true
 }
 ```
 
-#### Get Current User
+#### Development Login
 ```http
-GET /api/auth/me
-Authorization: Bearer <token>
-
-Response:
-{
-  "id": "uuid",
-  "email": "user@example.com",
-  "full_name": "John Doe",
-  "plan_tier": "pro",
-  "tool_permissions": {},
-  "feature_flags": {}
-}
-```
-
-#### Google OAuth
-```http
-GET /api/auth/google/authorize
-Redirects to Google OAuth consent page
-
-GET /api/auth/google/callback?code=<auth-code>
-Handles OAuth callback and returns JWT
-```
-
-### Thread Management
-
-#### Create Thread
-```http
-POST /api/threads
-Authorization: Bearer <token>
+POST /api/auth/dev_login
 Content-Type: application/json
 
 {
-  "name": "My Optimization Thread",
-  "metadata": {
-    "project": "AI Workload Optimization"
-  }
+  "email": "dev@example.com"
 }
 
 Response:
 {
-  "id": "thread-uuid",
-  "user_id": "user-uuid",
-  "name": "My Optimization Thread",
-  "created_at": "2024-01-15T10:00:00Z",
-  "updated_at": "2024-01-15T10:00:00Z",
-  "metadata": {}
+  "access_token": "eyJ...",
+  "token_type": "bearer"
 }
+
+Note: Only available in development mode when DEV_LOGIN=true
 ```
+
+### Thread Management
 
 #### List Threads
 ```http
@@ -129,24 +134,46 @@ Authorization: Bearer <token>
 
 Query Parameters:
 - limit: Number of threads to return (default: 20, max: 100)
-- offset: Pagination offset (default: 0)
-- order_by: Sort field (created_at, updated_at, name)
-- order_dir: Sort direction (asc, desc)
+- offset: Pagination offset (default: 0, min: 0)
+
+Response:
+[
+  {
+    "id": "thread-uuid",
+    "object": "thread",
+    "title": "Thread Title",
+    "created_at": 1642262400,
+    "updated_at": 1642262400,
+    "metadata": {},
+    "message_count": 0
+  }
+]
+```
+
+#### Create Thread
+```http
+POST /api/threads
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "title": "My Optimization Thread",
+  "metadata": {
+    "project": "AI Workload Optimization"
+  }
+}
 
 Response:
 {
-  "threads": [
-    {
-      "id": "thread-uuid",
-      "name": "Thread Name",
-      "created_at": "2024-01-15T10:00:00Z",
-      "updated_at": "2024-01-15T10:00:00Z",
-      "message_count": 10
-    }
-  ],
-  "total": 50,
-  "limit": 20,
-  "offset": 0
+  "id": "thread-uuid",
+  "object": "thread",
+  "title": "My Optimization Thread",
+  "created_at": 1642262400,
+  "updated_at": 1642262400,
+  "metadata": {
+    "project": "AI Workload Optimization"
+  },
+  "message_count": 0
 }
 ```
 
@@ -158,18 +185,39 @@ Authorization: Bearer <token>
 Response:
 {
   "id": "thread-uuid",
-  "user_id": "user-uuid",
-  "name": "Thread Name",
-  "created_at": "2024-01-15T10:00:00Z",
-  "updated_at": "2024-01-15T10:00:00Z",
-  "messages": [
-    {
-      "id": "message-uuid",
-      "role": "user",
-      "content": "Optimize my AI workload",
-      "created_at": "2024-01-15T10:01:00Z"
-    }
-  ]
+  "object": "thread",
+  "title": "Thread Title",
+  "created_at": 1642262400,
+  "updated_at": 1642262400,
+  "metadata": {},
+  "message_count": 5
+}
+```
+
+#### Update Thread
+```http
+PUT /api/threads/{thread_id}
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "title": "Updated Thread Title",
+  "metadata": {
+    "updated": true
+  }
+}
+
+Response:
+{
+  "id": "thread-uuid",
+  "object": "thread",
+  "title": "Updated Thread Title",
+  "created_at": 1642262400,
+  "updated_at": 1642262500,
+  "metadata": {
+    "updated": true
+  },
+  "message_count": 5
 }
 ```
 
@@ -180,19 +228,46 @@ Authorization: Bearer <token>
 
 Response:
 {
-  "message": "Thread deleted successfully"
+  "success": true,
+  "message": "Thread archived successfully"
 }
 ```
 
-#### Switch Active Thread
+#### Get Thread Messages
 ```http
-PUT /api/threads/{thread_id}/switch
+GET /api/threads/{thread_id}/messages
+Authorization: Bearer <token>
+
+Query Parameters:
+- limit: Number of messages to return (default: 50, max: 100)
+- offset: Pagination offset (default: 0, min: 0)
+
+Response:
+{
+  "messages": [
+    {
+      "id": "message-uuid",
+      "role": "user",
+      "content": "Optimize my AI workload",
+      "created_at": 1642262460
+    }
+  ],
+  "total": 10,
+  "limit": 50,
+  "offset": 0
+}
+```
+
+#### Auto-rename Thread
+```http
+POST /api/threads/{thread_id}/auto-rename
 Authorization: Bearer <token>
 
 Response:
 {
   "id": "thread-uuid",
-  "active": true
+  "title": "AI Workload Optimization Discussion",
+  "success": true
 }
 ```
 
