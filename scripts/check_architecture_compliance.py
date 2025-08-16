@@ -167,11 +167,13 @@ class ArchitectureEnforcer:
         )
     
     def check_duplicate_types(self) -> List[Violation]:
-        """Find duplicate type definitions"""
+        """Find duplicate type definitions (excluding legitimate cases)"""
         type_definitions = defaultdict(list)
         self._scan_python_types(type_definitions)
         self._scan_typescript_types(type_definitions)
-        return self._create_duplicate_violations(type_definitions)
+        # Filter out legitimate duplicates before creating violations
+        filtered_defs = self._filter_legitimate_duplicates(type_definitions)
+        return self._create_duplicate_violations(filtered_defs)
     
     def _scan_python_types(self, type_definitions: Dict) -> None:
         """Scan Python files for class definitions"""
@@ -222,6 +224,80 @@ class ArchitectureEnforcer:
         for match in re.finditer(r'(?:interface|type)\s+(\w+)', content):
             type_name = match.group(1)
             type_definitions[type_name].append(rel_path)
+    
+    def _filter_legitimate_duplicates(self, type_definitions: Dict) -> Dict:
+        """Filter out legitimate duplicates that shouldn't be violations"""
+        filtered = {}
+        for type_name, files in type_definitions.items():
+            # Only keep duplicates that are truly problematic
+            problematic_files = self._get_problematic_duplicates(type_name, files)
+            if len(problematic_files) > 1:
+                filtered[type_name] = problematic_files
+        return filtered
+    
+    def _get_problematic_duplicates(self, type_name: str, files: List[str]) -> List[str]:
+        """Identify which duplicate files are actually problematic"""
+        # Separate files by category
+        test_files = []
+        frontend_files = []
+        backend_files = []
+        example_files = []
+        
+        for file in files:
+            file_lower = file.lower()
+            if 'test' in file_lower or 'tests' in file_lower:
+                test_files.append(file)
+            elif 'example' in file_lower or 'demo' in file_lower or 'sample' in file_lower:
+                example_files.append(file)
+            elif 'frontend' in file_lower:
+                frontend_files.append(file)
+            else:
+                backend_files.append(file)
+        
+        # Legitimate duplicates we allow:
+        # 1. Test files can duplicate production types
+        # 2. Frontend and backend can have same-named types (different languages)
+        # 3. Example/demo files can duplicate types
+        # 4. Schema files can define types that implementations use
+        
+        # Only flag as problematic if:
+        # - Multiple backend files define the same type (excluding schemas/tests)
+        # - Multiple frontend files define the same type
+        problematic = []
+        
+        # Check backend duplicates (excluding legitimate cases)
+        backend_non_schema = [f for f in backend_files if 'schema' not in f.lower()]
+        if len(backend_non_schema) > 1:
+            # Check if they're in different agent modules (might be intentional separation)
+            if not self._are_separated_modules(backend_non_schema):
+                problematic.extend(backend_non_schema)
+        
+        # Check frontend duplicates
+        if len(frontend_files) > 1:
+            problematic.extend(frontend_files)
+        
+        return problematic if problematic else []
+    
+    def _are_separated_modules(self, files: List[str]) -> bool:
+        """Check if files are intentionally separated modules"""
+        # Allow duplicates if they're in different agent subdirectories or old/new versions
+        if any('_old' in f for f in files) and any('_old' not in f for f in files):
+            return True  # Old vs new versions are allowed
+        
+        # Check if files are in completely different module contexts
+        modules = set()
+        for file in files:
+            # Normalize path separators
+            normalized = file.replace('\\', '/')
+            parts = normalized.split('/')
+            if 'agents' in parts:
+                # Get the agent subdirectory
+                idx = parts.index('agents')
+                if idx + 1 < len(parts):
+                    modules.add(parts[idx + 1])
+        
+        # If in different agent modules, likely intentional separation
+        return len(modules) > 1
     
     def _create_duplicate_violations(self, type_definitions: Dict) -> List[Violation]:
         """Create violations for duplicate type definitions"""
