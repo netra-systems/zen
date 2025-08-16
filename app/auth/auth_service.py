@@ -61,8 +61,23 @@ class AuthTokenService:
     
     def __init__(self):
         """Initialize token service."""
-        self.jwt_secret = os.getenv("JWT_SECRET_KEY", "dev-secret-key")
+        self.jwt_secret = self._get_secure_jwt_secret()
         self.token_expiry = 3600  # 1 hour
+        
+    def _get_secure_jwt_secret(self) -> str:
+        """Get JWT secret with security validation."""
+        secret = os.getenv("JWT_SECRET_KEY")
+        if not secret:
+            raise HTTPException(
+                status_code=500, 
+                detail="JWT_SECRET_KEY environment variable must be set"
+            )
+        if len(secret) < 32:
+            raise HTTPException(
+                status_code=500,
+                detail="JWT_SECRET_KEY must be at least 32 characters long"
+            )
+        return secret
         
     def generate_jwt(self, user_info: Dict[str, Any]) -> str:
         """Generate JWT token with user claims."""
@@ -221,25 +236,35 @@ async def _exchange_code_for_tokens(code: str, oauth_config) -> Dict[str, Any]:
 
 
 async def _perform_token_exchange_request(url: str, data: Dict[str, str]) -> Dict[str, Any]:
-    """Perform HTTP request for token exchange."""
-    async with httpx.AsyncClient() as client:
-        response = await client.post(url, data=data)
-        if response.status_code != 200:
-            logger.error(f"Token exchange failed: {response.text}")
-            raise HTTPException(status_code=400, detail="OAuth token exchange failed")
-        return response.json()
+    """Perform HTTP request for token exchange with timeout and security."""
+    timeout = httpx.Timeout(10.0, connect=5.0)
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        try:
+            response = await client.post(url, data=data)
+            if response.status_code != 200:
+                logger.error(f"Token exchange failed: {response.text}")
+                raise HTTPException(status_code=400, detail="OAuth token exchange failed")
+            return response.json()
+        except httpx.TimeoutException:
+            logger.error("Token exchange request timed out")
+            raise HTTPException(status_code=503, detail="OAuth service temporarily unavailable")
 
 
 async def _get_user_info_from_google(access_token: str) -> Dict[str, Any]:
-    """Get user information from Google API."""
+    """Get user information from Google API with timeout and security."""
     user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
     headers = {"Authorization": f"Bearer {access_token}"}
-    async with httpx.AsyncClient() as client:
-        response = await client.get(user_info_url, headers=headers)
-        if response.status_code != 200:
-            logger.error(f"Failed to get user info: {response.text}")
-            raise HTTPException(status_code=400, detail="Failed to retrieve user information")
-        return response.json()
+    timeout = httpx.Timeout(10.0, connect=5.0)
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        try:
+            response = await client.get(user_info_url, headers=headers)
+            if response.status_code != 200:
+                logger.error(f"Failed to get user info: {response.text}")
+                raise HTTPException(status_code=400, detail="Failed to retrieve user information")
+            return response.json()
+        except httpx.TimeoutException:
+            logger.error("User info request timed out")
+            raise HTTPException(status_code=503, detail="User info service temporarily unavailable")
 
 
 def _build_oauth_callback_response(state_data: Dict[str, Any], jwt_token: str, user_info: Dict[str, Any]):

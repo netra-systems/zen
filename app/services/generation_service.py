@@ -34,6 +34,12 @@ from .synthetic_data_service import (
     GenerationStatus
 )
 
+# Synthetic data job service
+from .synthetic_data_job_service import run_synthetic_data_generation_job
+
+# Data ingestion service
+from .data_ingestion_service import run_data_ingestion_job
+
 __all__ = [
     # Job management
     'update_job_status',
@@ -57,5 +63,9 @@ __all__ = [
     'SyntheticDataService',
     'synthetic_data_service',
     'WorkloadCategory',
-    'GenerationStatus'
+    'GenerationStatus',
+    'run_synthetic_data_generation_job',
+    
+    # Data ingestion
+    'run_data_ingestion_job'
 ]
