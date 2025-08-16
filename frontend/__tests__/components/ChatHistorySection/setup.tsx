@@ -95,6 +95,8 @@ export const mockThreads = [
 ];
 
 export class ChatHistoryTestSetup {
+  public mockThreads = mockThreads;
+  
   beforeEach() {
     jest.clearAllMocks();
     
@@ -168,6 +170,16 @@ export class ChatHistoryTestSetup {
       status: 'active' as const,
       ...overrides,
     };
+  }
+
+  // Helper to get current mock threads
+  getCurrentMockThreads() {
+    return this.mockThreads;
+  }
+
+  // Helper to update the mock threads reference
+  updateMockThreads(newThreads: typeof mockThreads) {
+    this.mockThreads = newThreads;
   }
 
   // Helper to simulate loading states

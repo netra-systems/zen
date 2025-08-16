@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act, withRouter } from '../utils/test-utils';
+import { render as renderWithProviders, screen, fireEvent, waitFor, act, withRouter } from '../utils/test-utils';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 // Using Jest, not vitest
 import { ErrorFallback } from '@/components/ErrorFallback';

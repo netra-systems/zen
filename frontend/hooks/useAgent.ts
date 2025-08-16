@@ -10,7 +10,7 @@ export const useAgent = () => {
     const message = {
       type: 'message' as const,
       payload: {
-        text,
+        content: text,
       },
     };
     webSocket?.sendMessage(message);

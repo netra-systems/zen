@@ -8,10 +8,11 @@
  * @compliance type_safety.xml - Strongly typed hook with clear interfaces
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useUnifiedChatStore } from '../store/unified-chat';
 import { useWebSocket } from './useWebSocket';
 import { shallow } from 'zustand/shallow';
+import type { UnifiedChatState } from '../types/store-types';
 import {
   ChatLoadingState,
   LoadingStateResult,
@@ -37,6 +38,18 @@ export interface UseLoadingStateResult {
 }
 
 /**
+ * Selector for extracting store data with stable reference and proper typing
+ */
+const storeSelector = (state: UnifiedChatState) => ({
+  activeThreadId: state.activeThreadId,
+  isThreadLoading: state.isThreadLoading,
+  messages: state.messages,
+  isProcessing: state.isProcessing,
+  currentRunId: state.currentRunId,
+  agentName: state.fastLayerData?.agentName || null
+});
+
+/**
  * Main loading state hook for MainChat component
  * Provides race-condition-free loading state management
  */
@@ -45,7 +58,11 @@ export const useLoadingState = (): UseLoadingStateResult => {
   const [currentState, setCurrentState] = useState<ChatLoadingState>(ChatLoadingState.INITIALIZING);
   const previousStateRef = useRef<ChatLoadingState>(ChatLoadingState.INITIALIZING);
   
-  const storeData = extractStoreData();
+  // Use memoized selector to ensure stable reference for getSnapshot
+  const memoizedSelector = useMemo(() => storeSelector, []);
+  
+  // Use selector with shallow comparison to prevent infinite loops
+  const storeData = useUnifiedChatStore(memoizedSelector, shallow);
   const { status: wsStatus } = useWebSocket();
   
   const context = createContextFromData(storeData, wsStatus, isInitialized);
@@ -58,24 +75,6 @@ export const useLoadingState = (): UseLoadingStateResult => {
   return createHookResult(result, isInitialized);
 };
 
-/**
- * Selector for extracting store data with stable reference
- */
-const storeSelector = (state: any) => ({
-  activeThreadId: state.activeThreadId,
-  isThreadLoading: state.isThreadLoading,
-  messages: state.messages,
-  isProcessing: state.isProcessing,
-  currentRunId: state.currentRunId,
-  agentName: state.fastLayerData?.agentName || null
-});
-
-/**
- * Extracts necessary data from unified store
- */
-const extractStoreData = () => {
-  return useUnifiedChatStore(storeSelector, shallow);
-};
 
 /**
  * Creates chat state context from hook data

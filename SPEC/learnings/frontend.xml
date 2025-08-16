@@ -67,5 +67,70 @@ const extractStoreData = () => {
                 <reference>React useSyncExternalStore documentation</reference>
             </references>
         </learning>
+        
+        <learning>
+            <id>zustand-hook-selector-inline</id>
+            <date>2025-01-16</date>
+            <category>State Management</category>
+            <severity>critical</severity>
+            <title>Zustand Hook Selector Must Be Called Inline</title>
+            
+            <problem>
+                <description>Wrapping useStore hook call in a function causes getSnapshot infinite loop even with stable selector</description>
+                <error_message>Error: The result of getSnapshot should be cached to avoid an infinite loop</error_message>
+                <impact>Hook creates infinite render loop when selector is wrapped in function</impact>
+            </problem>
+            
+            <solution>
+                <description>Call useStore directly in component/hook without wrapper function</description>
+                <implementation>
+                    <step>Remove wrapper functions around useStore calls</step>
+                    <step>Call useStore directly with selector and shallow</step>
+                    <step>Keep selector definition stable outside hook</step>
+                </implementation>
+                <code_example>
+// WRONG - Wrapper function causes infinite loop
+const storeSelector = (state: any) => ({
+  activeThreadId: state.activeThreadId,
+  isThreadLoading: state.isThreadLoading
+});
+
+const extractStoreData = () => {
+  return useUnifiedChatStore(storeSelector, shallow);
+};
+
+export const useLoadingState = () => {
+  const storeData = extractStoreData(); // INFINITE LOOP!
+  // ...
+};
+
+// CORRECT - Direct inline call
+const storeSelector = (state: any) => ({
+  activeThreadId: state.activeThreadId,
+  isThreadLoading: state.isThreadLoading
+});
+
+export const useLoadingState = () => {
+  const storeData = useUnifiedChatStore(storeSelector, shallow); // WORKS!
+  // ...
+};
+                </code_example>
+            </solution>
+            
+            <prevention>
+                <rule>Never wrap useStore calls in functions within hooks</rule>
+                <rule>Call useStore directly at the hook's top level</rule>
+                <rule>Keep selector definitions outside component to maintain stability</rule>
+            </prevention>
+            
+            <affected_files>
+                <file>frontend/hooks/useLoadingState.ts</file>
+            </affected_files>
+            
+            <references>
+                <reference>React Rules of Hooks - hooks must be called at top level</reference>
+                <reference>useSyncExternalStore getSnapshot caching requirements</reference>
+            </references>
+        </learning>
     </learnings>
 </specification>

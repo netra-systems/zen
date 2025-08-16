@@ -10,6 +10,21 @@ const cpuCount = os.cpus().length;
 const optimalWorkers = Math.max(1, Math.floor(cpuCount * 0.75)); // Use 75% of cores
 
 const config = {
+  // TypeScript configuration
+  preset: 'ts-jest/presets/default-esm',
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      useESM: true,
+      tsconfig: {
+        jsx: 'react-jsx',
+        moduleResolution: 'node',
+        allowSyntheticDefaultImports: true,
+        esModuleInterop: true,
+      }
+    }],
+  },
+  
   // Performance optimizations
   maxWorkers: optimalWorkers,
   maxConcurrency: 10,
@@ -84,17 +99,7 @@ const config = {
     ['default', { summaryThreshold: 10 }]
   ],
   
-  // Disable source maps in tests for speed
-  globals: {
-    'ts-jest': {
-      isolatedModules: true,
-      tsconfig: {
-        jsx: 'react',
-        sourceMap: false,
-        inlineSourceMap: false,
-      }
-    }
-  },
+  // Disable source maps in tests for speed (handled in transform config above)
   
   // Uncomment below to use projects (currently disabled for simpler setup)
   // projects: [
