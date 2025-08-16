@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Frontend Learnings</name>
+        <type>learnings</type>
+        <version>1.0</version>
+        <last_updated>2025-01-16</last_updated>
+        <description>Frontend-specific learnings and troubleshooting patterns</description>
+    </metadata>
+    
+    <learnings>
+        <learning>
+            <id>zustand-selector-infinite-loop</id>
+            <date>2025-01-16</date>
+            <category>State Management</category>
+            <severity>critical</severity>
+            <title>Zustand Selector Infinite Loop Prevention</title>
+            
+            <problem>
+                <description>Creating new selector functions on every render causes infinite loops with useSyncExternalStore</description>
+                <error_message>Error: The result of getSnapshot should be cached to avoid an infinite loop</error_message>
+                <impact>Application crashes with infinite re-render loop</impact>
+            </problem>
+            
+            <solution>
+                <description>Use stable selector references with shallow comparison</description>
+                <implementation>
+                    <step>Define selector functions outside of components/hooks</step>
+                    <step>Use zustand's shallow comparison for object selectors</step>
+                    <step>Import shallow from 'zustand/shallow'</step>
+                </implementation>
+                <code_example>
+// WRONG - Creates new selector on every render
+const extractStoreData = () => {
+  return useUnifiedChatStore((state) => ({
+    activeThreadId: state.activeThreadId,
+    isThreadLoading: state.isThreadLoading
+  }));
+};
+
+// CORRECT - Stable selector with shallow comparison
+import { shallow } from 'zustand/shallow';
+
+const storeSelector = (state: any) => ({
+  activeThreadId: state.activeThreadId,
+  isThreadLoading: state.isThreadLoading
+});
+
+const extractStoreData = () => {
+  return useUnifiedChatStore(storeSelector, shallow);
+};
+                </code_example>
+            </solution>
+            
+            <prevention>
+                <rule>Always define Zustand selectors outside of components or hooks</rule>
+                <rule>Use shallow comparison when selecting multiple properties as an object</rule>
+                <rule>Memoize complex selectors with useCallback if they must be inside components</rule>
+            </prevention>
+            
+            <affected_files>
+                <file>frontend/hooks/useLoadingState.ts</file>
+            </affected_files>
+            
+            <references>
+                <reference>https://github.com/pmndrs/zustand#selecting-multiple-state-slices</reference>
+                <reference>React useSyncExternalStore documentation</reference>
+            </references>
+        </learning>
+    </learnings>
+</specification>

@@ -106,7 +106,7 @@ const useStateTransition = (
   setCurrentState: (state: ChatLoadingState) => void,
   previousStateRef: React.MutableRefObject<ChatLoadingState>
 ) => {
-  const handleTransition = useCallback(() => {
+  useEffect(() => {
     if (currentState === newState) return;
     
     const transition = validateStateTransition(currentState, newState);
@@ -114,11 +114,7 @@ const useStateTransition = (
       previousStateRef.current = currentState;
       setCurrentState(newState);
     }
-  }, [currentState, newState, setCurrentState, previousStateRef]);
-  
-  useEffect(() => {
-    handleTransition();
-  }, [handleTransition]);
+  }, [newState]); // Only depend on newState to avoid loops
 };
 
 /**
