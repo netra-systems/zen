@@ -237,14 +237,19 @@ class ResilientLLMClient:
         """Yield circuit breaker unavailable message."""
         yield "[Circuit breaker open - streaming unavailable]"
     
-    async def stream_llm(self, prompt: str, llm_config_name: str) -> AsyncIterator[str]:
-        """Stream LLM response with circuit breaker protection."""
-        circuit = await self._get_circuit(llm_config_name)
-        if not await self._check_streaming_availability(circuit, llm_config_name):
+    async def _handle_stream_execution(self, circuit: CircuitBreaker, prompt: str, config_name: str) -> AsyncIterator[str]:
+        """Handle stream execution with availability check."""
+        if not await self._check_streaming_availability(circuit, config_name):
             async for chunk in self._yield_unavailable_message():
                 yield chunk
             return
-        async for chunk in self._execute_streaming(circuit, prompt, llm_config_name):
+        async for chunk in self._execute_streaming(circuit, prompt, config_name):
+            yield chunk
+    
+    async def stream_llm(self, prompt: str, llm_config_name: str) -> AsyncIterator[str]:
+        """Stream LLM response with circuit breaker protection."""
+        circuit = await self._get_circuit(llm_config_name)
+        async for chunk in self._handle_stream_execution(circuit, prompt, llm_config_name):
             yield chunk
     
     async def _get_fallback_response(self, prompt: str, config_name: str) -> str:

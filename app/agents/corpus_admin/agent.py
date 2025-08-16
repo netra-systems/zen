@@ -64,12 +64,16 @@ class CorpusAdminSubAgent(BaseSubAgent):
         """Execute the complete corpus operation workflow."""
         await self._send_initial_update(run_id, stream_updates)
         operation_request = await self.parser.parse_operation_request(state.user_request)
-        
-        if await self._handle_approval_check(operation_request, state, run_id, stream_updates):
-            return
-        
-        await self._complete_corpus_operation(operation_request, state, run_id, stream_updates, start_time)
+        await self._process_operation_with_approval(operation_request, state, run_id, stream_updates, start_time)
         log_agent_communication("CorpusAdminSubAgent", "Supervisor", run_id, "execute_response")
+    
+    async def _process_operation_with_approval(
+        self, operation_request, state: DeepAgentState, run_id: str, stream_updates: bool, start_time: float
+    ) -> None:
+        """Process operation with approval check"""
+        approval_required = await self._handle_approval_check(operation_request, state, run_id, stream_updates)
+        if not approval_required:
+            await self._complete_corpus_operation(operation_request, state, run_id, stream_updates, start_time)
     
     async def _complete_corpus_operation(
         self, operation_request, state: DeepAgentState, run_id: str, stream_updates: bool, start_time: float
@@ -203,8 +207,16 @@ class CorpusAdminSubAgent(BaseSubAgent):
     ) -> None:
         """Handle execution errors"""
         logger.error(f"Corpus operation failed for run_id {run_id}: {error}")
+        await self._store_error_result(error, state)
+        await self._send_error_notification(run_id, error, stream_updates)
+    
+    async def _store_error_result(self, error: Exception, state: DeepAgentState) -> None:
+        """Store error result in state"""
         error_result = self._create_error_result(error)
         state.corpus_admin_result = error_result.model_dump()
+    
+    async def _send_error_notification(self, run_id: str, error: Exception, stream_updates: bool) -> None:
+        """Send error notification if streaming enabled"""
         if stream_updates:
             await self._send_error_update(run_id, error)
     
@@ -237,13 +249,18 @@ class CorpusAdminSubAgent(BaseSubAgent):
     
     def _create_approval_result(self, operation_request, approval_message: str) -> CorpusOperationResult:
         """Create approval result for pending operation."""
-        return CorpusOperationResult(
-            success=False,
-            operation=operation_request.operation,
-            corpus_metadata=operation_request.corpus_metadata,
-            requires_approval=True,
-            approval_message=approval_message
-        )
+        approval_params = self._build_approval_result_params(operation_request, approval_message)
+        return CorpusOperationResult(**approval_params)
+    
+    def _build_approval_result_params(self, operation_request, approval_message: str) -> dict:
+        """Build parameters for approval result"""
+        return {
+            "success": False,
+            "operation": operation_request.operation,
+            "corpus_metadata": operation_request.corpus_metadata,
+            "requires_approval": True,
+            "approval_message": approval_message
+        }
     
     async def _send_approval_update(
         self, 

@@ -78,7 +78,67 @@
           </submodule>
         </submodules>
       </module>
+      
+      <module name="spec_compliance_scorer" max_lines="300">
+        <responsibility>Score module compliance against SPEC requirements</responsibility>
+        <submodules>
+          <submodule name="spec_loader" max_lines="300">
+            <function>Load and parse all SPEC XML files</function>
+          </submodule>
+          <submodule name="compliance_analyzer" max_lines="300">
+            <function>Analyze code against spec requirements</function>
+          </submodule>
+          <submodule name="claude_cli_runner" max_lines="300">
+            <function>Execute Claude CLI for deep compliance review</function>
+            <configuration>local_only="true" env="development"</configuration>
+          </submodule>
+          <submodule name="score_calculator" max_lines="300">
+            <function>Calculate compliance scores per module and overall</function>
+          </submodule>
+          <submodule name="report_formatter" max_lines="300">
+            <function>Format compliance scores into reports</function>
+          </submodule>
+        </submodules>
+      </module>
     </modules>
+    
+    <orchestration_integration>
+      <reference spec="master_orchestration.xml">
+        <integration_point id="SPEC-ALIGNMENT">
+          <description>Leverage spec alignment task set for comprehensive analysis</description>
+          <task_set_ref>master_orchestration.xml#SPEC-ALIGNMENT</task_set_ref>
+        </integration_point>
+        <integration_point id="ARCHITECTURE">
+          <description>Use architecture compliance detection from orchestration</description>
+          <task_set_ref>master_orchestration.xml#ARCHITECTURE</task_set_ref>
+        </integration_point>
+        <integration_point id="CODE-REVIEW">
+          <description>Integrate code review quality metrics</description>
+          <task_set_ref>master_orchestration.xml#CODE-REVIEW</task_set_ref>
+        </integration_point>
+      </reference>
+      
+      <shared_principles>
+        <principle ref="master_orchestration.xml#root-cause-analysis">
+          <application>Apply deep thinking to metric anomalies</application>
+        </principle>
+        <principle ref="master_orchestration.xml#compliance-first">
+          <application>Prioritize architecture compliance in all reports</application>
+        </principle>
+        <principle ref="master_orchestration.xml#multi-agent-coordination">
+          <application>Use parallel agents for metric collection</application>
+        </principle>
+      </shared_principles>
+      
+      <execution_strategies>
+        <strategy ref="master_orchestration.xml#parallel-execution">
+          <application>Collect metrics from multiple sources concurrently</application>
+        </strategy>
+        <strategy ref="master_orchestration.xml#continuous-validation">
+          <application>Validate metrics continuously during collection</application>
+        </strategy>
+      </execution_strategies>
+    </orchestration_integration>
   </architecture>
 
   <metrics>
@@ -141,6 +201,50 @@
         <calculation>Run architecture compliance check on changed files</calculation>
       </metric>
     </metric_category>
+    
+    <metric_category name="spec_compliance">
+      <metric name="overall_compliance_score">
+        <description>Overall SPEC compliance score (0-100)</description>
+        <calculation>Weighted average of all module compliance scores</calculation>
+        <weight_factors>
+          <factor name="architecture_compliance" weight="0.3">300/8 line limits</factor>
+          <factor name="type_safety" weight="0.25">Strong typing compliance</factor>
+          <factor name="spec_alignment" weight="0.2">Code matches spec definitions</factor>
+          <factor name="test_coverage" weight="0.15">Test requirements met</factor>
+          <factor name="documentation" weight="0.1">Doc completeness</factor>
+        </weight_factors>
+      </metric>
+      <metric name="module_compliance_scores">
+        <description>Individual module compliance scores</description>
+        <calculation>Per-module analysis against relevant specs</calculation>
+        <dimensions>
+          <dimension>Line count compliance (max 300)</dimension>
+          <dimension>Function length compliance (max 8)</dimension>
+          <dimension>Type safety adherence</dimension>
+          <dimension>Single responsibility principle</dimension>
+          <dimension>Test coverage percentage</dimension>
+        </dimensions>
+      </metric>
+      <metric name="spec_violation_count">
+        <description>Number of active spec violations</description>
+        <calculation>Count of all detected violations by category</calculation>
+        <categories>
+          <category>Architecture violations</category>
+          <category>Type safety violations</category>
+          <category>Missing tests</category>
+          <category>Documentation gaps</category>
+        </categories>
+      </metric>
+      <metric name="claude_review_score">
+        <description>Claude CLI deep review score</description>
+        <calculation>AI-powered compliance analysis score</calculation>
+        <configuration>
+          <enabled_environments>development, staging</enabled_environments>
+          <disabled_environments>production</disabled_environments>
+          <frequency>daily</frequency>
+        </configuration>
+      </metric>
+    </metric_category>
   </metrics>
 
   <report_format>
@@ -192,6 +296,23 @@
         <field>Architecture compliance status</field>
       </fields>
     </section>
+    
+    <section name="spec_compliance_report">
+      <content>SPEC compliance scoring and analysis</content>
+      <visualization>Compliance score dashboard with module breakdown</visualization>
+      <fields>
+        <field>Overall compliance score (0-100)</field>
+        <field>Top 5 compliant modules</field>
+        <field>Bottom 5 modules needing attention</field>
+        <field>Critical violations requiring immediate action</field>
+        <field>Trend analysis (improving/declining)</field>
+        <field>Claude review insights (dev only)</field>
+      </fields>
+      <orchestration_reference>
+        <description>Leverages master orchestration spec alignment</description>
+        <task_set>master_orchestration.xml#SPEC-ALIGNMENT</task_set>
+      </orchestration_reference>
+    </section>
   </report_format>
 
   <automation>
@@ -242,6 +363,30 @@
     <endpoint method="POST" path="/api/factory-status/generate">
       <description>Trigger manual report generation</description>
       <response>New report or status</response>
+    </endpoint>
+    
+    <endpoint method="GET" path="/api/factory-status/compliance/score">
+      <description>Get current SPEC compliance scores</description>
+      <response>Overall and module-level compliance scores</response>
+    </endpoint>
+    
+    <endpoint method="POST" path="/api/factory-status/compliance/analyze">
+      <description>Trigger compliance analysis for specific modules</description>
+      <parameters>
+        <param name="modules">Array of module names to analyze</param>
+        <param name="use_claude_cli">Enable Claude CLI review (dev only)</param>
+      </parameters>
+      <response>Detailed compliance analysis report</response>
+      <security>Restricted to development environment for Claude CLI</security>
+    </endpoint>
+    
+    <endpoint method="GET" path="/api/factory-status/compliance/violations">
+      <description>Get list of current spec violations</description>
+      <parameters>
+        <param name="severity">Filter by severity level</param>
+        <param name="category">Filter by violation category</param>
+      </parameters>
+      <response>Categorized list of violations with remediation steps</response>
     </endpoint>
   </api_endpoints>
 

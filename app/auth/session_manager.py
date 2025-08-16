@@ -28,9 +28,13 @@ class SessionLifecycleManager:
         csrf_token = self._generate_csrf_token()
         self._enforce_concurrent_session_limit(user_id)
         session = self._build_security_session(session_id, user_id, ip_address, user_agent, csrf_token)
+        self._store_and_log_session(session_id, session, user_id)
+        return session_id
+    
+    def _store_and_log_session(self, session_id: str, session: SecuritySession, user_id: str) -> None:
+        """Store session and log creation."""
         self.active_sessions[session_id] = session
         self._log_session_creation(session_id, user_id)
-        return session_id
     
     def _generate_session_id(self) -> str:
         """Generate secure session ID."""

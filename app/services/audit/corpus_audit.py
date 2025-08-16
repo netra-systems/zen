@@ -41,24 +41,22 @@ class CorpusAuditLogger:
     ) -> CorpusAuditRecord:
         """Log a corpus operation with comprehensive audit trail."""
         try:
-            return await self._execute_audit_logging(
-                db, action, resource_type, status, user_id, corpus_id,
-                resource_id, operation_duration_ms, result_data, metadata
-            )
+            params = self._build_log_params(action, resource_type, status, user_id, corpus_id, resource_id, operation_duration_ms, result_data, metadata)
+            return await self._execute_audit_logging(db, params)
         except Exception as e:
             return self._handle_audit_logging_error(e)
     
-    async def _execute_audit_logging(
-        self, db: AsyncSession, action: CorpusAuditAction, resource_type: str,
-        status: CorpusAuditStatus, user_id: Optional[str], corpus_id: Optional[str],
-        resource_id: Optional[str], operation_duration_ms: Optional[float],
-        result_data: Optional[Dict[str, Any]], metadata: Optional[CorpusAuditMetadata]
-    ) -> CorpusAuditRecord:
+    def _build_log_params(self, action: CorpusAuditAction, resource_type: str, status: CorpusAuditStatus, user_id: Optional[str], corpus_id: Optional[str], resource_id: Optional[str], operation_duration_ms: Optional[float], result_data: Optional[Dict[str, Any]], metadata: Optional[CorpusAuditMetadata]) -> Dict[str, Any]:
+        """Build parameters dictionary for audit logging."""
+        return {
+            "action": action, "resource_type": resource_type, "status": status,
+            "user_id": user_id, "corpus_id": corpus_id, "resource_id": resource_id,
+            "operation_duration_ms": operation_duration_ms, "result_data": result_data, "metadata": metadata
+        }
+
+    async def _execute_audit_logging(self, db: AsyncSession, params: Dict[str, Any]) -> CorpusAuditRecord:
         """Execute the audit logging operation."""
-        audit_data = self._prepare_audit_data(
-            action, resource_type, status, user_id, corpus_id,
-            resource_id, operation_duration_ms, result_data, metadata
-        )
+        audit_data = self._prepare_audit_data_from_params(params)
         audit_log = await self.repository.create(db, **audit_data)
         return self._convert_to_record(audit_log)
     
@@ -67,17 +65,12 @@ class CorpusAuditLogger:
         logger.error(f"Failed to log audit operation: {error}")
         raise NetraException(f"Audit logging failed: {str(error)}")
 
-    def _prepare_audit_data(
-        self, action: CorpusAuditAction, resource_type: str, status: CorpusAuditStatus,
-        user_id: Optional[str], corpus_id: Optional[str], resource_id: Optional[str],
-        operation_duration_ms: Optional[float], result_data: Optional[Dict[str, Any]],
-        metadata: Optional[CorpusAuditMetadata]
-    ) -> Dict[str, Any]:
-        """Prepare audit data for database insertion."""
+    def _prepare_audit_data_from_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Prepare audit data from parameters dictionary."""
         from .corpus_audit_helpers import prepare_audit_data_dict, extract_metadata_core_fields, extract_metadata_extended_fields
-        base_data = prepare_audit_data_dict(action, resource_type, status, user_id, corpus_id, resource_id, operation_duration_ms, result_data)
-        core_metadata = extract_metadata_core_fields(metadata)
-        extended_metadata = extract_metadata_extended_fields(metadata)
+        base_data = prepare_audit_data_dict(**{k: v for k, v in params.items() if k != 'metadata'})
+        core_metadata = extract_metadata_core_fields(params['metadata'])
+        extended_metadata = extract_metadata_extended_fields(params['metadata'])
         return {**base_data, **core_metadata, **extended_metadata}
 
     def _extract_metadata_fields(self, metadata: Optional[CorpusAuditMetadata]) -> Dict[str, Any]:
@@ -113,12 +106,16 @@ class CorpusAuditLogger:
     ) -> CorpusAuditRecord:
         """Track user-specific actions with enhanced metadata."""
         try:
-            return await self.log_operation(
-                db, action, resource_type, CorpusAuditStatus.SUCCESS,
-                user_id, None, resource_id, None, None, metadata
-            )
+            return await self._execute_user_action_logging(db, user_id, action, resource_type, resource_id, metadata)
         except Exception as e:
             self._handle_user_action_error(e)
+
+    async def _execute_user_action_logging(self, db: AsyncSession, user_id: str, action: CorpusAuditAction, resource_type: str, resource_id: Optional[str], metadata: Optional[CorpusAuditMetadata]) -> CorpusAuditRecord:
+        """Execute user action logging operation."""
+        return await self.log_operation(
+            db, action, resource_type, CorpusAuditStatus.SUCCESS,
+            user_id, None, resource_id, None, None, metadata
+        )
 
     async def record_configuration(
         self, db: AsyncSession, config_data: Dict[str, Any],
@@ -126,13 +123,17 @@ class CorpusAuditLogger:
     ) -> CorpusAuditRecord:
         """Record configuration changes with full audit trail."""
         try:
-            metadata = CorpusAuditMetadata(configuration=config_data)
-            return await self.log_operation(
-                db, CorpusAuditAction.UPDATE, "configuration",
-                CorpusAuditStatus.SUCCESS, user_id, None, operation_name, None, config_data, metadata
-            )
+            return await self._execute_configuration_logging(db, config_data, user_id, operation_name)
         except Exception as e:
             self._handle_configuration_error(e)
+
+    async def _execute_configuration_logging(self, db: AsyncSession, config_data: Dict[str, Any], user_id: Optional[str], operation_name: str) -> CorpusAuditRecord:
+        """Execute configuration change logging."""
+        metadata = CorpusAuditMetadata(configuration=config_data)
+        return await self.log_operation(
+            db, CorpusAuditAction.UPDATE, "configuration",
+            CorpusAuditStatus.SUCCESS, user_id, None, operation_name, None, config_data, metadata
+        )
 
     async def search_audit_logs(
         self,
@@ -190,8 +191,12 @@ class CorpusAuditLogger:
         try:
             return await self.search_audit_logs(db, filters)
         except Exception as e:
-            logger.error(f"Failed to generate audit report: {e}")
-            raise NetraException(f"Audit report generation failed: {str(e)}")
+            return self._handle_report_generation_error(e)
+
+    def _handle_report_generation_error(self, error: Exception) -> None:
+        """Handle audit report generation errors."""
+        logger.error(f"Failed to generate audit report: {error}")
+        raise NetraException(f"Audit report generation failed: {str(error)}")
     
     def _handle_user_action_error(self, error: Exception) -> None:
         """Handle user action tracking errors."""

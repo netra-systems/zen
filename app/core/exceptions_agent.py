@@ -41,10 +41,8 @@ class AgentExecutionError(AgentError):
     def __init__(self, agent_name: str = None, task: str = None, **kwargs):
         details = self._build_execution_details(agent_name, task)
         message = self._build_execution_message(agent_name, task)
-        super().__init__(
-            agent_name=agent_name, message=message, details=details,
-            user_message="The AI agent encountered an error. Please try again", **kwargs
-        )
+        init_params = self._build_execution_init_params(agent_name, message, details, kwargs)
+        super().__init__(**init_params)
     
     def _build_execution_details(self, agent_name: str, task: str) -> dict:
         """Build execution error details dictionary."""
@@ -60,6 +58,13 @@ class AgentExecutionError(AgentError):
         elif agent_name:
             return f"Agent {agent_name} execution failed"
         return "Agent execution failed"
+    
+    def _build_execution_init_params(self, agent_name: str, message: str, details: dict, kwargs: dict) -> dict:
+        """Build initialization parameters for AgentExecutionError."""
+        return {
+            "agent_name": agent_name, "message": message, "details": details,
+            "user_message": "The AI agent encountered an error. Please try again", **kwargs
+        }
 
 
 class AgentTimeoutError(AgentError):
@@ -72,11 +77,8 @@ class AgentTimeoutError(AgentError):
     def __init__(self, agent_name: str = None, timeout_seconds: Optional[Union[int, float]] = None, **kwargs):
         details = self._build_timeout_details(agent_name, timeout_seconds)
         message = self._build_timeout_message(agent_name, timeout_seconds)
-        NetraException.__init__(
-            self, message=message, code=ErrorCode.AGENT_TIMEOUT, severity=ErrorSeverity.HIGH,
-            details=details, user_message="The AI operation is taking longer than expected. Please try again",
-            **kwargs
-        )
+        init_params = self._build_timeout_init_params(message, details, kwargs)
+        NetraException.__init__(self, **init_params)
     
     def _build_timeout_details(self, agent_name: str, timeout_seconds: Optional[Union[int, float]]) -> dict:
         """Build timeout error details dictionary."""
@@ -91,6 +93,14 @@ class AgentTimeoutError(AgentError):
         if timeout:
             return f"{base} after {timeout}s"
         return base
+    
+    def _build_timeout_init_params(self, message: str, details: dict, kwargs: dict) -> dict:
+        """Build initialization parameters for AgentTimeoutError."""
+        return {
+            "message": message, "code": ErrorCode.AGENT_TIMEOUT, "severity": ErrorSeverity.HIGH,
+            "details": details, "user_message": "The AI operation is taking longer than expected. Please try again",
+            **kwargs
+        }
 
 
 class LLMError(NetraException):
@@ -103,11 +113,8 @@ class LLMError(NetraException):
     def __init__(self, provider: str = None, model: str = None, **kwargs):
         details = self._build_llm_details(provider, model)
         message = self._build_llm_message(provider, model)
-        super().__init__(
-            message=message, code=ErrorCode.LLM_REQUEST_FAILED, severity=ErrorSeverity.HIGH,
-            details=details, user_message="AI service is temporarily unavailable. Please try again",
-            **kwargs
-        )
+        init_params = self._build_llm_init_params(message, details, kwargs)
+        super().__init__(**init_params)
     
     def _build_llm_details(self, provider: str, model: str) -> dict:
         """Build LLM error details dictionary."""
@@ -123,6 +130,14 @@ class LLMError(NetraException):
         if provider and model:
             return f"LLM request failed ({provider}/{model})"
         return "LLM request failed"
+    
+    def _build_llm_init_params(self, message: str, details: dict, kwargs: dict) -> dict:
+        """Build initialization parameters for LLMError."""
+        return {
+            "message": message, "code": ErrorCode.LLM_REQUEST_FAILED, "severity": ErrorSeverity.HIGH,
+            "details": details, "user_message": "AI service is temporarily unavailable. Please try again",
+            **kwargs
+        }
 
 
 class LLMRequestError(LLMError):
@@ -135,9 +150,8 @@ class LLMRequestError(LLMError):
     def __init__(self, provider: str = None, model: str = None, status_code: int = None, **kwargs):
         details = self._build_request_details(provider, model, status_code)
         message = self._build_request_message(provider, model, status_code)
-        super().__init__(
-            provider=provider, model=model, message=message, details=details, **kwargs
-        )
+        init_params = self._build_request_init_params(provider, model, message, details, kwargs)
+        super().__init__(**init_params)
     
     def _build_request_details(self, provider: str, model: str, status_code: int) -> dict:
         """Build request error details with status code."""
@@ -152,6 +166,12 @@ class LLMRequestError(LLMError):
         if status_code:
             return f"{base} (HTTP {status_code})"
         return base
+    
+    def _build_request_init_params(self, provider: str, model: str, message: str, details: dict, kwargs: dict) -> dict:
+        """Build initialization parameters for LLMRequestError."""
+        return {
+            "provider": provider, "model": model, "message": message, "details": details, **kwargs
+        }
 
 
 class LLMRateLimitError(LLMError):
@@ -164,11 +184,8 @@ class LLMRateLimitError(LLMError):
     def __init__(self, provider: str = None, retry_after: Optional[Union[int, float]] = None, **kwargs):
         details = self._build_rate_limit_details(provider, retry_after, kwargs.get('details', {}))
         message = self._build_rate_limit_message(provider, retry_after)
-        super().__init__(
-            provider=provider, message=message, code=ErrorCode.LLM_RATE_LIMIT_EXCEEDED,
-            severity=ErrorSeverity.MEDIUM, details=details,
-            user_message="Too many requests. Please wait a moment and try again", **kwargs
-        )
+        init_params = self._build_rate_limit_init_params(provider, message, details, kwargs)
+        super().__init__(**init_params)
     
     def _build_rate_limit_details(self, provider: str, retry_after: Optional[Union[int, float]], existing_details: dict) -> dict:
         """Build rate limit error details."""
@@ -185,6 +202,14 @@ class LLMRateLimitError(LLMError):
         if retry_after:
             return f"{base}. Retry after {retry_after}s"
         return base
+    
+    def _build_rate_limit_init_params(self, provider: str, message: str, details: dict, kwargs: dict) -> dict:
+        """Build initialization parameters for LLMRateLimitError."""
+        return {
+            "provider": provider, "message": message, "code": ErrorCode.LLM_RATE_LIMIT_EXCEEDED,
+            "severity": ErrorSeverity.MEDIUM, "details": details,
+            "user_message": "Too many requests. Please wait a moment and try again", **kwargs
+        }
 
 
 class AgentCoordinationError(AgentError):
@@ -197,10 +222,8 @@ class AgentCoordinationError(AgentError):
     def __init__(self, source_agent: str = None, target_agent: str = None, **kwargs):
         details = self._build_coordination_details(source_agent, target_agent)
         message = self._build_coordination_message(source_agent, target_agent)
-        super().__init__(
-            agent_name=source_agent, message=message, details=details,
-            user_message="Agent coordination failed. Please try again", **kwargs
-        )
+        init_params = self._build_coordination_init_params(source_agent, message, details, kwargs)
+        super().__init__(**init_params)
     
     def _build_coordination_details(self, source_agent: str, target_agent: str) -> dict:
         """Build coordination error details dictionary."""
@@ -218,6 +241,13 @@ class AgentCoordinationError(AgentError):
         elif source:
             return f"Agent {source} coordination failed"
         return "Agent coordination failed"
+    
+    def _build_coordination_init_params(self, source_agent: str, message: str, details: dict, kwargs: dict) -> dict:
+        """Build initialization parameters for AgentCoordinationError."""
+        return {
+            "agent_name": source_agent, "message": message, "details": details,
+            "user_message": "Agent coordination failed. Please try again", **kwargs
+        }
 
 
 class AgentConfigurationError(AgentError):
@@ -230,10 +260,8 @@ class AgentConfigurationError(AgentError):
     def __init__(self, agent_name: str = None, config_key: str = None, **kwargs):
         details = self._build_config_details(agent_name, config_key)
         message = self._build_config_message(agent_name, config_key)
-        super().__init__(
-            agent_name=agent_name, message=message, code=ErrorCode.CONFIGURATION_ERROR,
-            details=details, **kwargs
-        )
+        init_params = self._build_config_init_params(agent_name, message, details, kwargs)
+        super().__init__(**init_params)
     
     def _build_config_details(self, agent_name: str, config_key: str) -> dict:
         """Build configuration error details dictionary."""
@@ -248,3 +276,10 @@ class AgentConfigurationError(AgentError):
         if config_key:
             return f"{base}: {config_key}"
         return base
+    
+    def _build_config_init_params(self, agent_name: str, message: str, details: dict, kwargs: dict) -> dict:
+        """Build initialization parameters for AgentConfigurationError."""
+        return {
+            "agent_name": agent_name, "message": message, "code": ErrorCode.CONFIGURATION_ERROR,
+            "details": details, **kwargs
+        }

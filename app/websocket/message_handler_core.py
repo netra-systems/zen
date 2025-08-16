@@ -28,26 +28,46 @@ class ReliableMessageHandler:
         validator: Optional[MessageValidator] = None,
         error_handler: Optional[WebSocketErrorHandler] = None
     ):
+        self._initialize_handlers(validator, error_handler)
+        self._initialize_reliability_wrapper()
+        self._initialize_stats()
+
+    def _initialize_handlers(self, validator: Optional[MessageValidator], error_handler: Optional[WebSocketErrorHandler]) -> None:
+        """Initialize validator and error handler with defaults."""
         self.validator = validator or default_message_validator
         self.error_handler = error_handler or default_error_handler
-        
-        # Initialize reliability wrapper for message handling
+
+    def _initialize_reliability_wrapper(self) -> None:
+        """Initialize reliability wrapper for message handling."""
+        circuit_config = self._create_circuit_breaker_config()
+        retry_config = self._create_retry_config()
         self.reliability = get_reliability_wrapper(
-            "WebSocketMessageHandler",
-            CircuitBreakerConfig(
-                failure_threshold=5,
-                recovery_timeout=30.0,
-                name="WebSocketMessageHandler"
-            ),
-            RetryConfig(
-                max_retries=2,
-                base_delay=0.5,
-                max_delay=5.0
-            )
+            "WebSocketMessageHandler", circuit_config, retry_config
         )
-        
-        # Message processing statistics
-        self.stats = {
+
+    def _create_circuit_breaker_config(self) -> CircuitBreakerConfig:
+        """Create circuit breaker configuration."""
+        return CircuitBreakerConfig(
+            failure_threshold=5,
+            recovery_timeout=30.0,
+            name="WebSocketMessageHandler"
+        )
+
+    def _create_retry_config(self) -> RetryConfig:
+        """Create retry configuration."""
+        return RetryConfig(
+            max_retries=2,
+            base_delay=0.5,
+            max_delay=5.0
+        )
+
+    def _initialize_stats(self) -> None:
+        """Initialize message processing statistics."""
+        self.stats = self._create_default_stats()
+
+    def _create_default_stats(self) -> Dict[str, int]:
+        """Create default statistics dictionary."""
+        return {
             "messages_processed": 0,
             "messages_failed": 0,
             "validation_failures": 0,
@@ -94,12 +114,20 @@ class ReliableMessageHandler:
     async def _process_message_steps(self, raw_message: str, conn_info: ConnectionInfo, message_processor) -> bool:
         """Execute message processing steps."""
         message_data = await self._parse_json_message(raw_message, conn_info)
-        if message_data is None:
+        if not await self._handle_parse_result(message_data):
             return False
         validated_message = await self._validate_and_sanitize_message(message_data, conn_info)
-        if validated_message is None:
+        if not await self._handle_validation_result(validated_message):
             return False
         return await self._execute_message_processor(validated_message, conn_info, message_processor)
+
+    async def _handle_parse_result(self, message_data) -> bool:
+        """Handle parse result validation."""
+        return message_data is not None
+
+    async def _handle_validation_result(self, validated_message) -> bool:
+        """Handle validation result validation."""
+        return validated_message is not None
 
     def _create_fallback_message_func(self, conn_info: ConnectionInfo):
         """Create fallback message handling function."""

@@ -160,13 +160,14 @@ class AdminToolDispatcher(ToolDispatcher):
     def _build_failure_response_params(self, tool_name: str, base_result: ToolResult,
                                       current_time: datetime, user_id: str) -> Dict[str, Any]:
         """Build parameters for failure response."""
+        base_params = self._get_base_response_params(tool_name, current_time, user_id)
+        failure_params = self._get_failure_specific_params(base_result)
+        return {**base_params, **failure_params}
+    
+    def _get_failure_specific_params(self, base_result: ToolResult) -> Dict[str, Any]:
+        """Get failure-specific response parameters"""
         return {
-            "tool_name": tool_name,
             "status": AdminToolStatus.FAILED,
-            "execution_time_ms": 0.0,
-            "started_at": current_time,
-            "completed_at": current_time,
-            "user_id": user_id,
             "error": base_result.message or "Unknown error"
         }
     
@@ -218,10 +219,12 @@ class AdminToolDispatcher(ToolDispatcher):
         """Get information about a specific tool"""
         if self._is_admin_tool(tool_name):
             return self._get_admin_tool_info_detail(tool_name)
-        
+        return self._get_regular_tool_info(tool_name)
+    
+    def _get_regular_tool_info(self, tool_name: str) -> AdminToolInfo:
+        """Get information for regular (non-admin) tools"""
         if tool_name in self.tools:
             return self._get_base_tool_info_detail(tool_name)
-        
         return self._get_not_found_tool_info(tool_name)
     
     def _get_admin_tool_info_detail(self, tool_name: str) -> AdminToolInfo:
@@ -252,13 +255,18 @@ class AdminToolDispatcher(ToolDispatcher):
     
     async def dispatch_admin_operation(self, operation: Dict[str, Any]) -> Dict[str, Any]:
         """Dispatch admin operation based on operation type"""
-        operation_type = operation.get("type")
-        params = operation.get("params", {})
-        user_role = operation.get("user_role", "user")
-        
-        self._check_operation_permissions(operation_type, user_role)
-        tool_name = self._get_operation_tool_name(operation_type)
-        return await self._execute_operation_with_audit(tool_name, params, operation)
+        operation_params = self._extract_operation_params(operation)
+        self._check_operation_permissions(operation_params["type"], operation_params["user_role"])
+        tool_name = self._get_operation_tool_name(operation_params["type"])
+        return await self._execute_operation_with_audit(tool_name, operation_params["params"], operation)
+    
+    def _extract_operation_params(self, operation: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract operation parameters"""
+        return {
+            "type": operation.get("type"),
+            "params": operation.get("params", {}),
+            "user_role": operation.get("user_role", "user")
+        }
     
     def _check_operation_permissions(self, operation_type: str, user_role: str) -> None:
         """Check permissions for sensitive operations"""
@@ -279,11 +287,17 @@ class AdminToolDispatcher(ToolDispatcher):
                                            operation: Dict[str, Any]) -> Dict[str, Any]:
         """Execute operation and audit the result"""
         try:
-            result = await self._execute_operation_safely(tool_name, params)
-            await self._log_audit_operation(operation)
-            return result
+            return await self._execute_and_audit_success(tool_name, params, operation)
         except Exception as e:
             return await self._handle_operation_error(e, operation)
+    
+    async def _execute_and_audit_success(self, tool_name: str, 
+                                        params: Dict[str, Any],
+                                        operation: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute operation and audit successful result"""
+        result = await self._execute_operation_safely(tool_name, params)
+        await self._log_audit_operation(operation)
+        return result
     
     async def _handle_operation_error(self, error: Exception, operation: Dict[str, Any]) -> Dict[str, Any]:
         """Handle operation execution error."""
