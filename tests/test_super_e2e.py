@@ -101,7 +101,12 @@ class TestSystemE2E:
         """Stop the backend server"""
         if cls.backend_process:
             cls.backend_process.terminate()
-            cls.backend_process.wait(timeout=10)
+            try:
+                cls.backend_process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                print("Process didn't terminate, force killing")
+                cls.backend_process.kill()
+                cls.backend_process.wait(timeout=5)
             cls.backend_process = None
             print("Backend server stopped")
     
@@ -574,7 +579,9 @@ class TestSystemE2E:
         self.stop_backend()
         
         # Verify services are stopped
-        # Removed unnecessary sleep
+        # Add small delay for process shutdown
+        import time
+        time.sleep(2)
         try:
             response = requests.get(f"{self.backend_url}/health", timeout=1)
             assert False, "Backend should be stopped"
