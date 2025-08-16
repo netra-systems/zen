@@ -11,6 +11,10 @@ terraform {
       version = "~> 3.5"
     }
   }
+  
+  backend "gcs" {
+    # Bucket and prefix will be configured via -backend-config
+  }
 }
 
 provider "google" {
