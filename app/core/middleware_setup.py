@@ -151,6 +151,11 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
             response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
             response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID"
             response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID"
+        elif origin:
+            # Log for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.debug(f"CORS: Origin {origin} not allowed. Allowed: {allowed_origins}")
         
         return response
 
