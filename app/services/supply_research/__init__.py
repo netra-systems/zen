@@ -1,17 +1,19 @@
 """
 Supply Research Module
-Provides modular components for supply research scheduling
+Provides modular components for supply research operations
 """
 
-from .scheduler_models import ScheduleFrequency, ResearchSchedule
-from .schedule_manager import ScheduleManager
-from .research_executor import ResearchExecutor
-from .result_manager import ResultManager
+# Import only the modules that don't cause circular imports
+from .supply_item_operations import SupplyItemOperations
+from .research_session_operations import ResearchSessionOperations
+from .price_analysis_operations import PriceAnalysisOperations
+from .market_operations import MarketOperations
+from .supply_validation import SupplyValidation
 
 __all__ = [
-    'ScheduleFrequency',
-    'ResearchSchedule',
-    'ScheduleManager', 
-    'ResearchExecutor',
-    'ResultManager'
+    'SupplyItemOperations',
+    'ResearchSessionOperations',
+    'PriceAnalysisOperations',
+    'MarketOperations',
+    'SupplyValidation'
 ]

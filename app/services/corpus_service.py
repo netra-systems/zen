@@ -41,6 +41,7 @@ class CorpusService:
         """Initialize with modular service delegation"""
         self._modular_service = ModularCorpusService()
         self.query_expansion = None  # Mock attribute for tests
+        self._active_filters = {}  # Store active search filters
     
     async def create_corpus(self, *args, **kwargs):
         """Create corpus with test compatibility"""
@@ -235,8 +236,34 @@ class CorpusService:
         return f"improved_{original_query}"
     
     async def apply_filters(self, filters: Dict) -> None:
-        """Apply search filters"""
-        pass
+        """Apply search filters to corpus operations"""
+        if not filters:
+            logger.debug("No filters provided, skipping filter application")
+            return
+        
+        # Validate filter structure
+        self._validate_filter_structure(filters)
+        
+        # Apply filters through modular service if available
+        if hasattr(self._modular_service, 'apply_search_filters'):
+            await self._modular_service.apply_search_filters(filters)
+        else:
+            # Store filters for next search operation
+            self._active_filters = filters
+            logger.info(f"Applied filters for next search: {list(filters.keys())}")
+    
+    def _validate_filter_structure(self, filters: Dict) -> None:
+        """Validate filter structure and types"""
+        allowed_filter_types = {
+            'date_range', 'content_type', 'workload_type', 'score_threshold',
+            'tags', 'created_by', 'status', 'metadata_fields'
+        }
+        
+        unknown_filters = set(filters.keys()) - allowed_filter_types
+        if unknown_filters:
+            logger.warning(f"Unknown filter types ignored: {unknown_filters}")
+            for key in unknown_filters:
+                filters.pop(key, None)
     
     async def reindex_corpus(self, corpus_id: str, model_version: str = None) -> Dict:
         """Reindex corpus with new embedding model"""

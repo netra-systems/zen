@@ -60,10 +60,9 @@ class DataSubAgent(BaseSubAgent):
     
     def _setup_cache_wrapper(self) -> None:
         """Setup cache wrapper for test compatibility."""
-        # Wrap _get_cached_schema for test compatibility - disabled temporarily
-        # original_method = self._get_cached_schema
-        # self._get_cached_schema = CachedMethodWrapper(original_method, self.cache_clear)
-        pass
+        # Cache wrapper setup is not currently needed
+        # Implementation can be added when cache functionality is required
+        logger.debug("Cache wrapper setup skipped - not currently required")
         
     def _init_base_agent(self, llm_manager: LLMManager) -> None:
         """Initialize base agent with core parameters."""
@@ -544,7 +543,7 @@ class DataSubAgent(BaseSubAgent):
         from datetime import datetime
         try:
             return datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
-        except:
+        except (ValueError, TypeError, AttributeError):
             return default_timestamp
     
     def _extract_anomaly_fields(self, item: dict) -> Dict[str, Any]:

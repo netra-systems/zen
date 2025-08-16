@@ -28,6 +28,66 @@ from typing import List
 
 logger = central_logger
 
+def _determine_admin_access(db: Optional[Session], user: Optional[User]) -> bool:
+    """Determine if user has admin access."""
+    if not db or not user:
+        return False
+    return PermissionService.is_developer_or_higher(user)
+
+
+def _create_admin_tool_dispatcher(tools: List[BaseTool], db: Session, user: User) -> AdminToolDispatcher:
+    """Create admin tool dispatcher and log information."""
+    logger.info(f"Creating supervisor with admin tools for user {user.email}")
+    tool_dispatcher = AdminToolDispatcher(tools, db, user)
+    admin_tools = tool_dispatcher.list_all_tools()
+    logger.info(f"Total tools available (including admin): {len(admin_tools)}")
+    return tool_dispatcher
+
+
+def _create_standard_tool_dispatcher(tools: List[BaseTool]) -> ToolDispatcher:
+    """Create standard tool dispatcher."""
+    logger.info("Creating supervisor with standard tools only")
+    return ToolDispatcher(tools)
+
+
+def _determine_supervisor_mode(has_admin_access: bool, enable_quality_gates: bool) -> SupervisorMode:
+    """Determine appropriate supervisor mode."""
+    if has_admin_access:
+        return SupervisorMode.ADMIN_ENABLED
+    return SupervisorMode.QUALITY_ENHANCED if enable_quality_gates else SupervisorMode.BASIC
+
+
+def _create_supervisor_config(mode: SupervisorMode, enable_quality_gates: bool, has_admin_access: bool) -> SupervisorConfig:
+    """Create supervisor configuration."""
+    return SupervisorConfig(
+        mode=mode,
+        enable_quality_gates=enable_quality_gates,
+        enable_admin_tools=has_admin_access,
+        enable_circuit_breaker=True
+    )
+
+
+def _create_supervisor_instance(
+    db: Optional[Session],
+    llm_manager: LLMManager,
+    websocket_manager,
+    tool_dispatcher,
+    config: SupervisorConfig,
+    user: Optional[User],
+    thread_id: Optional[str]
+) -> SupervisorAgent:
+    """Create supervisor agent instance."""
+    return SupervisorAgent(
+        db_session=db,
+        llm_manager=llm_manager,
+        websocket_manager=websocket_manager,
+        tool_dispatcher=tool_dispatcher,
+        config=config,
+        user_id=str(user.id) if user else None,
+        thread_id=thread_id
+    )
+
+
 def create_supervisor_with_admin_support(
     llm_manager: LLMManager,
     tools: List[BaseTool],
@@ -51,43 +111,16 @@ def create_supervisor_with_admin_support(
     Returns:
         Configured SupervisorAgent instance
     """
-    
-    # Determine supervisor mode and tool dispatcher
-    has_admin_access = db and user and PermissionService.is_developer_or_higher(user)
+    has_admin_access = _determine_admin_access(db, user)
     
     if has_admin_access:
-        logger.info(f"Creating supervisor with admin tools for user {user.email}")
-        tool_dispatcher = AdminToolDispatcher(tools, db, user)
-        mode = SupervisorMode.ADMIN_ENABLED
-        
-        # Log available admin tools
-        admin_tools = tool_dispatcher.list_all_tools()
-        logger.info(f"Total tools available (including admin): {len(admin_tools)}")
+        tool_dispatcher = _create_admin_tool_dispatcher(tools, db, user)
     else:
-        logger.info("Creating supervisor with standard tools only")
-        tool_dispatcher = ToolDispatcher(tools)
-        mode = SupervisorMode.QUALITY_ENHANCED if enable_quality_gates else SupervisorMode.BASIC
+        tool_dispatcher = _create_standard_tool_dispatcher(tools)
     
-    # Create supervisor configuration
-    config = SupervisorConfig(
-        mode=mode,
-        enable_quality_gates=enable_quality_gates,
-        enable_admin_tools=has_admin_access,
-        enable_circuit_breaker=True
-    )
-    
-    # Create unified supervisor agent
-    supervisor = SupervisorAgent(
-        db_session=db,
-        llm_manager=llm_manager,
-        websocket_manager=websocket_manager,
-        tool_dispatcher=tool_dispatcher,
-        config=config,
-        user_id=str(user.id) if user else None,
-        thread_id=thread_id
-    )
-    
-    return supervisor
+    mode = _determine_supervisor_mode(has_admin_access, enable_quality_gates)
+    config = _create_supervisor_config(mode, enable_quality_gates, has_admin_access)
+    return _create_supervisor_instance(db, llm_manager, websocket_manager, tool_dispatcher, config, user, thread_id)
 
 
 def check_admin_command(message: str) -> Optional[str]:

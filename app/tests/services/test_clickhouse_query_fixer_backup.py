@@ -103,23 +103,63 @@ class QueryTestSuite:
         
     def _generate_test_queries(self) -> Dict[str, str]:
         """Generate various test queries with array syntax issues"""
+        queries = {}
+        queries.update(self._generate_basic_queries())
+        queries.update(self._generate_complex_queries())
+        queries.update(self._generate_advanced_queries())
+        queries.update(self._generate_aggregation_queries())
+        return queries
+    
+    def _generate_basic_queries(self) -> Dict[str, str]:
+        """Generate basic test queries"""
         return {
-            'basic_array_access': """
+            'basic_array_access': self._get_basic_array_query(),
+            'nested_array_access': self._get_nested_array_query()
+        }
+    
+    def _generate_complex_queries(self) -> Dict[str, str]:
+        """Generate complex test queries"""
+        return {
+            'complex_query_with_arrays': self._get_complex_query(),
+            'multiple_array_fields': self._get_multiple_fields_query()
+        }
+    
+    def _generate_advanced_queries(self) -> Dict[str, str]:
+        """Generate advanced test queries"""
+        return {
+            'subquery_with_arrays': self._get_subquery(),
+            'join_with_array_access': self._get_join_query(),
+            'window_function_with_arrays': self._get_window_query()
+        }
+    
+    def _generate_aggregation_queries(self) -> Dict[str, str]:
+        """Generate aggregation test queries"""
+        return {
+            'aggregation_with_arrays': self._get_aggregation_query()
+        }
+    
+    def _get_basic_array_query(self) -> str:
+        """Get basic array access query"""
+        return """
                 SELECT metrics.value[1] as first_metric
                 FROM performance_data
                 WHERE timestamp > '2023-01-01'
-            """,
-            
-            'nested_array_access': """
+            """
+    
+    def _get_nested_array_query(self) -> str:
+        """Get nested array access query"""
+        return """
                 SELECT 
                     metrics.name[idx] as metric_name,
                     metrics.value[idx] as metric_value,
                     metrics.unit[idx] as metric_unit
                 FROM performance_logs
                 WHERE arrayExists(x -> x > 100, metrics.value)
-            """,
-            
-            'complex_query_with_arrays': """
+            """
+    
+    def _get_complex_query(self) -> str:
+        """Get complex query with arrays"""
+        return """
                 WITH filtered_metrics AS (
                     SELECT 
                         timestamp,
@@ -134,9 +174,11 @@ class QueryTestSuite:
                     current_value - previous_value as delta
                 FROM filtered_metrics
                 ORDER BY timestamp DESC
-            """,
-            
-            'multiple_array_fields': """
+            """
+    
+    def _get_multiple_fields_query(self) -> str:
+        """Get multiple array fields query"""
+        return """
                 SELECT
                     logs.level[i] as log_level,
                     logs.message[i] as log_message,
@@ -145,9 +187,11 @@ class QueryTestSuite:
                     performance.memory[i] as memory_usage
                 FROM application_logs
                 WHERE arrayLength(logs.level) = arrayLength(performance.cpu)
-            """,
-            
-            'subquery_with_arrays': """
+            """
+    
+    def _get_subquery(self) -> str:
+        """Get subquery with arrays"""
+        return """
                 SELECT user_id, avg_performance
                 FROM (
                     SELECT 
@@ -158,9 +202,11 @@ class QueryTestSuite:
                     GROUP BY user_id
                 )
                 WHERE avg_performance < 1000
-            """,
-            
-            'join_with_array_access': """
+            """
+    
+    def _get_join_query(self) -> str:
+        """Get join query with array access"""
+        return """
                 SELECT 
                     a.user_id,
                     a.metrics.latency[pos] as user_latency,
@@ -168,18 +214,22 @@ class QueryTestSuite:
                 FROM user_metrics a
                 JOIN system_metrics b ON a.timestamp = b.timestamp
                 WHERE a.metrics.status[pos] = 'active'
-            """,
-            
-            'window_function_with_arrays': """
+            """
+    
+    def _get_window_query(self) -> str:
+        """Get window function query with arrays"""
+        return """
                 SELECT 
                     timestamp,
                     metrics.value[offset] as current_value,
                     LAG(metrics.value[offset], 1) OVER (ORDER BY timestamp) as previous_value
                 FROM performance_data
                 WHERE metrics.type[offset] = 'latency'
-            """,
-            
-            'aggregation_with_arrays': """
+            """
+    
+    def _get_aggregation_query(self) -> str:
+        """Get aggregation query with arrays"""
+        return """
                 SELECT 
                     date(timestamp) as day,
                     sum(costs.amount[item_idx]) as total_cost,
@@ -190,7 +240,6 @@ class QueryTestSuite:
                 GROUP BY date(timestamp)
                 ORDER BY day DESC
             """
-        }
     
     def _generate_expected_fixes(self) -> Dict[str, str]:
         """Generate expected fixed versions of test queries"""

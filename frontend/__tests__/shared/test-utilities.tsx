@@ -28,20 +28,26 @@ export const setupNextjsMocks = () => {
   }));
 };
 
-// WebSocket test utilities
+// WebSocket test utilities - DEPRECATED: Use WebSocketTestManager instead
 export class WebSocketTestHelper {
   public server?: WS;
 
   constructor(private url: string = 'ws://localhost:8000/ws') {}
 
   setup() {
+    this.cleanup(); // Ensure clean state first
     this.server = new WS(this.url);
     return this.server;
   }
 
   cleanup() {
-    if (this.server) {
+    try {
+      if (this.server) {
+        this.server = undefined;
+      }
       WS.clean();
+    } catch (error) {
+      // Ignore cleanup errors for non-existent servers
     }
   }
 

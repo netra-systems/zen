@@ -8,6 +8,7 @@ import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 import { TestProviders } from '../test-utils/providers';
+import { createWebSocketManager, WebSocketTestManager } from '../helpers/websocket-test-manager';
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -16,15 +17,16 @@ global.fetch = jest.fn();
 global.URL.createObjectURL = jest.fn(() => 'mock-blob-url');
 global.URL.revokeObjectURL = jest.fn();
 
-// Mock WebSocket
-let mockWs: WS;
+// WebSocket test manager
+let wsManager: WebSocketTestManager;
 
 beforeEach(() => {
-  mockWs = new WS('ws://localhost:8000/ws');
+  wsManager = createWebSocketManager();
+  wsManager.setup();
 });
 
 afterEach(() => {
-  WS.clean();
+  wsManager.cleanup();
   jest.clearAllMocks();
 });
 
@@ -410,7 +412,7 @@ describe('Real-time Metrics Dashboard', () => {
       });
       
       React.useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket(wsManager.getUrl());
         ws.onmessage = (event) => {
           const data = JSON.parse(event.data);
           if (data.type === 'metrics') {
@@ -435,17 +437,17 @@ describe('Real-time Metrics Dashboard', () => {
       </TestProviders>
     );
     
-    await mockWs.connected;
+    await wsManager.waitForConnection();
     
     act(() => {
-      mockWs.send(JSON.stringify({
+      wsManager.sendMessage({
         type: 'metrics',
         metrics: {
           cpu: 45,
           memory: 67,
           requests: 150
         }
-      }));
+      });
     });
     
     await waitFor(() => {

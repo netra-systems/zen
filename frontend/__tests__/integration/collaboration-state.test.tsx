@@ -7,6 +7,7 @@ import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 import { TestProviders } from '../test-utils/providers';
+import { createWebSocketManager, WebSocketTestManager } from '../helpers/websocket-test-manager';
 
 // Mock fetch
 global.fetch = jest.fn();
@@ -20,15 +21,16 @@ const localStorageMock = {
 };
 global.localStorage = localStorageMock as any;
 
-// Mock WebSocket
-let mockWs: WS;
+// WebSocket test manager
+let wsManager: WebSocketTestManager;
 
 beforeEach(() => {
-  mockWs = new WS('ws://localhost:8000/ws');
+  wsManager = createWebSocketManager();
+  wsManager.setup();
 });
 
 afterEach(() => {
-  WS.clean();
+  wsManager.cleanup();
   jest.clearAllMocks();
   localStorageMock.clear();
 });
@@ -93,7 +95,7 @@ describe('Collaboration Features', () => {
       const [edits, setEdits] = React.useState<any[]>([]);
       
       React.useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket(wsManager.getUrl());
         ws.onmessage = (event) => {
           const data = JSON.parse(event.data);
           if (data.type === 'collaborative_edit') {
@@ -106,14 +108,14 @@ describe('Collaboration Features', () => {
       
       const sendEdit = () => {
         // Simulate sending an edit
-        mockWs.send(JSON.stringify({
+        wsManager.sendMessage({
           type: 'collaborative_edit',
           edit: {
             user: 'current_user',
             content: 'Updated content',
             timestamp: Date.now()
           }
-        }));
+        });
       };
       
       return (
@@ -136,18 +138,18 @@ describe('Collaboration Features', () => {
       </TestProviders>
     );
     
-    await mockWs.connected;
+    await wsManager.waitForConnection();
     
     // Simulate receiving an edit from another user
     act(() => {
-      mockWs.send(JSON.stringify({
+      wsManager.sendMessage({
         type: 'collaborative_edit',
         edit: {
           user: 'other_user',
           content: 'Collaborative change',
           timestamp: Date.now()
         }
-      }));
+      });
     });
     
     await waitFor(() => {
@@ -160,7 +162,7 @@ describe('Collaboration Features', () => {
       const [activeUsers, setActiveUsers] = React.useState<any[]>([]);
       
       React.useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8000/ws');
+        const ws = new WebSocket(wsManager.getUrl());
         ws.onmessage = (event) => {
           const data = JSON.parse(event.data);
           if (data.type === 'presence_update') {
@@ -197,17 +199,17 @@ describe('Collaboration Features', () => {
       </TestProviders>
     );
     
-    await mockWs.connected;
+    await wsManager.waitForConnection();
     
     // Simulate presence update
     act(() => {
-      mockWs.send(JSON.stringify({
+      wsManager.sendMessage({
         type: 'presence_update',
         users: [
           { id: '1', name: 'Alice', status: 'typing' },
           { id: '2', name: 'Bob', status: 'viewing' }
         ]
-      }));
+      });
     });
     
     await waitFor(() => {

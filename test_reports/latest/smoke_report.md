@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-15T23:11:00.478750  
+**Generated:** 2025-08-15T23:52:10.097356  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -17,7 +17,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 2 | 1 | 1 | 0 | 0 | 20.04s | [FAILED] |
+| Backend   | 2 | 1 | 1 | 0 | 0 | 7.51s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -27,7 +27,7 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 20.04s
+- **Total Duration:** 7.51s
 - **Exit Code:** 1
 
 ### Backend Configuration
@@ -56,7 +56,7 @@ Test Configuration:
   Environment: testing
 
 Running command:
-  pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
+  pytest app/tests/routes/test_health_route.py app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error app/tests/core/test_config_manager.py::TestConfigManager::test_initialization app/tests/services/test_security_service.py::test_encrypt_and_decrypt tests/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
 [1m============================= test session starts =============================[0m
 platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
@@ -198,9 +198,9 @@ app/tests/routes/test_health_route.py::test_health_endpoint_direct [31mFAILED[
 
 ### Backend Errors
 - app/tests/routes/test_health_route.py::test_health_endpoint_direct [31mFAILED[0m[31m [ 28%][0m
-- 2025-08-15 23:10:52.933 | ERROR    | app.core.error_handlers:_handle_unknown_exception:222 | Unhandled exception: 'NoneType' object has no attribute 'encode'
+- 2025-08-15 23:52:08.448 | ERROR    | app.core.error_handlers:_handle_unknown_exception:222 | Unhandled exception: 'NoneType' object has no attribute 'encode'
 - [31mFAILED[0m app/tests/routes/test_health_route.py::[1mtest_health_endpoint_direct[0m - AttributeError: 'NoneType' object has no attribute 'encode'
-- [FAIL] TESTS FAILED with exit code 1 after 18.17s
+- [FAIL] TESTS FAILED with exit code 1 after 6.72s
 
 
 ---

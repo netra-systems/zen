@@ -395,10 +395,8 @@ class TestStartupChecker:
         mock_db.add.assert_called_once()
         mock_db.commit.assert_called_once()
     
-    @pytest.mark.asyncio
-    async def test_run_all_checks_success(self, checker):
-        """Test running all checks successfully"""
-        # Mock all check methods on the sub-checkers to succeed
+    def _mock_all_check_methods(self, checker):
+        """Mock all check methods on sub-checkers"""
         checker.env_checker.check_environment_variables = AsyncMock()
         checker.env_checker.check_configuration = AsyncMock()
         checker.system_checker.check_file_permissions = AsyncMock()
@@ -407,170 +405,125 @@ class TestStartupChecker:
         checker.service_checker.check_clickhouse = AsyncMock()
         checker.service_checker.check_llm_providers = AsyncMock()
         checker.system_checker.check_memory_and_resources = AsyncMock()
+
+    def _mock_remaining_check_methods(self, checker):
+        """Mock remaining check methods"""
         checker.system_checker.check_network_connectivity = AsyncMock()
         checker.db_checker.check_or_create_assistant = AsyncMock()
-        
-        # Return success results for each check
+
+    def _setup_successful_check_returns(self, checker):
+        """Set up successful return values for all checks"""
+        self._setup_env_check_returns(checker)
+        self._setup_system_check_returns(checker)
+        self._setup_db_check_returns(checker)
+        self._setup_service_check_returns(checker)
+
+    def _setup_env_check_returns(self, checker):
+        """Set up environment check return values"""
         checker.env_checker.check_environment_variables.return_value = StartupCheckResult(
-            name="environment_variables",
-            success=True,
-            message="Check passed",
-            critical=True
-        )
+            name="environment_variables", success=True, message="Check passed", critical=True)
         checker.env_checker.check_configuration.return_value = StartupCheckResult(
-            name="configuration",
-            success=True,
-            message="Check passed",
-            critical=True
-        )
+            name="configuration", success=True, message="Check passed", critical=True)
+
+    def _setup_system_check_returns(self, checker):
+        """Set up system check return values"""
         checker.system_checker.check_file_permissions.return_value = StartupCheckResult(
-            name="file_permissions",
-            success=True,
-            message="Check passed",
-            critical=True
-        )
-        checker.db_checker.check_database_connection.return_value = StartupCheckResult(
-            name="database_connection",
-            success=True,
-            message="Check passed",
-            critical=True
-        )
-        checker.service_checker.check_redis.return_value = StartupCheckResult(
-            name="redis_connection",
-            success=True,
-            message="Check passed",
-            critical=True
-        )
-        checker.service_checker.check_clickhouse.return_value = StartupCheckResult(
-            name="clickhouse_connection",
-            success=True,
-            message="Check passed",
-            critical=True
-        )
-        checker.service_checker.check_llm_providers.return_value = StartupCheckResult(
-            name="llm_providers",
-            success=True,
-            message="Check passed",
-            critical=True
-        )
+            name="file_permissions", success=True, message="Check passed", critical=True)
         checker.system_checker.check_memory_and_resources.return_value = StartupCheckResult(
-            name="system_resources",
-            success=True,
-            message="Check passed",
-            critical=True
-        )
+            name="system_resources", success=True, message="Check passed", critical=True)
         checker.system_checker.check_network_connectivity.return_value = StartupCheckResult(
-            name="network_connectivity",
-            success=True,
-            message="Check passed",
-            critical=True
-        )
+            name="network_connectivity", success=True, message="Check passed", critical=True)
+
+    def _setup_db_check_returns(self, checker):
+        """Set up database check return values"""
+        checker.db_checker.check_database_connection.return_value = StartupCheckResult(
+            name="database_connection", success=True, message="Check passed", critical=True)
         checker.db_checker.check_or_create_assistant.return_value = StartupCheckResult(
-            name="netra_assistant",
-            success=True,
-            message="Check passed",
-            critical=True
-        )
-        
-        results = await checker.run_all_checks()
-        
+            name="netra_assistant", success=True, message="Check passed", critical=True)
+
+    def _setup_service_check_returns(self, checker):
+        """Set up service check return values"""
+        checker.service_checker.check_redis.return_value = StartupCheckResult(
+            name="redis_connection", success=True, message="Check passed", critical=True)
+        checker.service_checker.check_clickhouse.return_value = StartupCheckResult(
+            name="clickhouse_connection", success=True, message="Check passed", critical=True)
+        checker.service_checker.check_llm_providers.return_value = StartupCheckResult(
+            name="llm_providers", success=True, message="Check passed", critical=True)
+
+    def _assert_successful_results(self, results):
+        """Assert results indicate successful checks"""
         assert results["success"] == True
         assert results["total_checks"] == 10
         assert results["passed"] == 10
         assert results["failed_critical"] == 0
         assert results["failed_non_critical"] == 0
-    
+
     @pytest.mark.asyncio
-    async def test_run_all_checks_with_critical_failure(self, checker):
-        """Test running checks with a critical failure"""
-        # Mock checks on sub-checkers
+    async def test_run_all_checks_success(self, checker):
+        """Test running all checks successfully"""
+        self._mock_all_check_methods(checker)
+        self._mock_remaining_check_methods(checker)
+        self._setup_successful_check_returns(checker)
+        results = await checker.run_all_checks()
+        self._assert_successful_results(results)
+    
+    def _setup_critical_failure_env_checks(self, checker):
+        """Set up environment checks for critical failure test"""
         checker.env_checker.check_environment_variables = AsyncMock(
             return_value=StartupCheckResult(
-                name="environment_variables",
-                success=True,
-                message="Check passed",
-                critical=True
-            )
-        )
+                name="environment_variables", success=True, message="Check passed", critical=True))
         checker.env_checker.check_configuration = AsyncMock(
             return_value=StartupCheckResult(
-                name="configuration",
-                success=True,
-                message="Check passed",
-                critical=True
-            )
-        )
+                name="configuration", success=True, message="Check passed", critical=True))
+
+    def _setup_critical_failure_system_checks(self, checker):
+        """Set up system checks for critical failure test"""
         checker.system_checker.check_file_permissions = AsyncMock(
             return_value=StartupCheckResult(
-                name="file_permissions",
-                success=True,
-                message="Check passed",
-                critical=True
-            )
-        )
-        # Add a critical failure for database
-        checker.db_checker.check_database_connection = AsyncMock(
-            return_value=StartupCheckResult(
-                name="database_connection",
-                success=False,
-                message="Database connection failed",
-                critical=True
-            )
-        )
-        checker.service_checker.check_redis = AsyncMock(
-            return_value=StartupCheckResult(
-                name="redis_connection",
-                success=True,
-                message="Check passed",
-                critical=False
-            )
-        )
-        checker.service_checker.check_clickhouse = AsyncMock(
-            return_value=StartupCheckResult(
-                name="clickhouse_connection",
-                success=True,
-                message="Check passed",
-                critical=False
-            )
-        )
-        checker.service_checker.check_llm_providers = AsyncMock(
-            return_value=StartupCheckResult(
-                name="llm_providers",
-                success=True,
-                message="Check passed",
-                critical=False
-            )
-        )
+                name="file_permissions", success=True, message="Check passed", critical=True))
         checker.system_checker.check_memory_and_resources = AsyncMock(
             return_value=StartupCheckResult(
-                name="system_resources",
-                success=True,
-                message="Check passed",
-                critical=False
-            )
-        )
+                name="system_resources", success=True, message="Check passed", critical=False))
         checker.system_checker.check_network_connectivity = AsyncMock(
             return_value=StartupCheckResult(
-                name="network_connectivity",
-                success=True,
-                message="Check passed",
-                critical=False
-            )
-        )
+                name="network_connectivity", success=True, message="Check passed", critical=False))
+
+    def _setup_critical_failure_db_checks(self, checker):
+        """Set up database checks with critical failure"""
+        checker.db_checker.check_database_connection = AsyncMock(
+            return_value=StartupCheckResult(
+                name="database_connection", success=False, message="Database connection failed", critical=True))
         checker.db_checker.check_or_create_assistant = AsyncMock(
             return_value=StartupCheckResult(
-                name="netra_assistant",
-                success=True,
-                message="Check passed",
-                critical=False
-            )
-        )
-        
-        results = await checker.run_all_checks()
-        
+                name="netra_assistant", success=True, message="Check passed", critical=False))
+
+    def _setup_critical_failure_service_checks(self, checker):
+        """Set up service checks for critical failure test"""
+        checker.service_checker.check_redis = AsyncMock(
+            return_value=StartupCheckResult(
+                name="redis_connection", success=True, message="Check passed", critical=False))
+        checker.service_checker.check_clickhouse = AsyncMock(
+            return_value=StartupCheckResult(
+                name="clickhouse_connection", success=True, message="Check passed", critical=False))
+        checker.service_checker.check_llm_providers = AsyncMock(
+            return_value=StartupCheckResult(
+                name="llm_providers", success=True, message="Check passed", critical=False))
+
+    def _assert_critical_failure_results(self, results):
+        """Assert results show critical failure"""
         assert results["success"] == False
         assert results["failed_critical"] == 1
         assert len(results["failures"]) == 1
+
+    @pytest.mark.asyncio
+    async def test_run_all_checks_with_critical_failure(self, checker):
+        """Test running checks with a critical failure"""
+        self._setup_critical_failure_env_checks(checker)
+        self._setup_critical_failure_system_checks(checker)
+        self._setup_critical_failure_db_checks(checker)
+        self._setup_critical_failure_service_checks(checker)
+        results = await checker.run_all_checks()
+        self._assert_critical_failure_results(results)
 
 
 class TestRunStartupChecks:

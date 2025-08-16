@@ -217,91 +217,60 @@ class TestUpdater:
 
 async def main():
     """Main entry point"""
-    parser = argparse.ArgumentParser(
-        description="Test Update Automation System - Achieve 97% test coverage with Ultra-Thinking"
-    )
-    
-    parser.add_argument(
-        "--mode",
-        type=str,
-        choices=[mode.value for mode in TestUpdateMode],
-        default="execute-spec",
-        help="Execution mode"
-    )
-    
-    parser.add_argument(
-        "--setup",
-        action="store_true",
-        help="Initial setup of test update system"
-    )
-    
-    parser.add_argument(
-        "--analyze-baseline",
-        action="store_true",
-        help="Analyze current test coverage baseline"
-    )
-    
-    parser.add_argument(
-        "--execute-spec",
-        action="store_true",
-        help="Execute full test update specification with ultra-thinking"
-    )
-    
-    parser.add_argument(
-        "--ultra-think",
-        action="store_true",
-        help="Enable ultra-thinking deep analysis capabilities"
-    )
-    
-    parser.add_argument(
-        "--daily-cycle",
-        action="store_true",
-        help="Run daily test update cycle with autonomous review"
-    )
-    
-    parser.add_argument(
-        "--weekly-optimization",
-        action="store_true",
-        help="Run weekly test optimization"
-    )
-    
-    parser.add_argument(
-        "--monthly-audit",
-        action="store_true",
-        help="Run monthly test audit"
-    )
-    
-    parser.add_argument(
-        "--schedule-automation",
-        action="store_true",
-        help="Schedule automated test updates"
-    )
-    
-    parser.add_argument(
-        "--monitor",
-        action="store_true",
-        help="Monitor test coverage progress"
-    )
-    
-    parser.add_argument(
-        "--with-metadata",
-        action="store_true",
-        help="Include AI agent metadata tracking for all modifications"
-    )
-    
+    parser = _create_argument_parser()
+    _add_all_arguments(parser)
     args = parser.parse_args()
-    
     updater = TestUpdater()
     mode_handler = TestUpdateModeHandler(updater)
-    
-    # Check for ultra-thinking mode
+    ultra_think, with_metadata = _extract_execution_flags(args)
+    await _execute_with_mode_handler(updater, mode_handler, args, ultra_think, with_metadata)
+
+def _create_argument_parser():
+    """Create main argument parser"""
+    return argparse.ArgumentParser(
+        description="Test Update Automation System - Achieve 97% test coverage with Ultra-Thinking"
+    )
+
+def _add_all_arguments(parser):
+    """Add all command line arguments to parser"""
+    _add_mode_arguments(parser)
+    _add_execution_arguments(parser)
+    _add_cycle_arguments(parser)
+    _add_utility_arguments(parser)
+
+def _add_mode_arguments(parser):
+    """Add mode selection arguments"""
+    parser.add_argument("--mode", type=str, choices=[mode.value for mode in TestUpdateMode], default="execute-spec", help="Execution mode")
+    parser.add_argument("--setup", action="store_true", help="Initial setup of test update system")
+    parser.add_argument("--analyze-baseline", action="store_true", help="Analyze current test coverage baseline")
+    parser.add_argument("--execute-spec", action="store_true", help="Execute full test update specification with ultra-thinking")
+
+def _add_execution_arguments(parser):
+    """Add execution control arguments"""
+    parser.add_argument("--ultra-think", action="store_true", help="Enable ultra-thinking deep analysis capabilities")
+    parser.add_argument("--with-metadata", action="store_true", help="Include AI agent metadata tracking for all modifications")
+
+def _add_cycle_arguments(parser):
+    """Add cycle-based arguments"""
+    parser.add_argument("--daily-cycle", action="store_true", help="Run daily test update cycle with autonomous review")
+    parser.add_argument("--weekly-optimization", action="store_true", help="Run weekly test optimization")
+    parser.add_argument("--monthly-audit", action="store_true", help="Run monthly test audit")
+
+def _add_utility_arguments(parser):
+    """Add utility arguments"""
+    parser.add_argument("--schedule-automation", action="store_true", help="Schedule automated test updates")
+    parser.add_argument("--monitor", action="store_true", help="Monitor test coverage progress")
+
+def _extract_execution_flags(args):
+    """Extract execution flags from arguments"""
     ultra_think = args.ultra_think or args.execute_spec
     with_metadata = args.with_metadata
-    
-    # Add method to TestUpdater for mode handling
+    return ultra_think, with_metadata
+
+def _execute_with_mode_handler(updater, mode_handler, args, ultra_think, with_metadata):
+    """Execute with mode handler integration"""
     updater._execute_mode_handler = mode_handler.handle_mode
-    
-    await updater._execute_mode_handler(args, ultra_think, with_metadata)
+    return updater._execute_mode_handler(args, ultra_think, with_metadata)
 
 
 class TestUpdateModeHandler:

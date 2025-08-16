@@ -126,6 +126,71 @@
             </files_affected>
             <verification>Component tests pass with proper mocking</verification>
         </learning>
+        
+        <learning id="windows-jest-bus-error-fix">
+            <title>Windows Jest Bus Error - NPM Wrapper Issue</title>
+            <problem>
+                Bus error when running npm test on Windows
+                NPM/NPX wrappers failing to execute Jest properly
+                Node.js line 65: Bus error "$NODE_EXE" "$NPM_CLI_JS" "$@"
+                Jest binary wrappers incompatible with Windows environment
+            </problem>
+            <solution>
+                Created Windows-compatible Jest runner (run-jest.js)
+                Updated package.json scripts to use direct Node.js execution
+                Bypassed npm/npx wrappers by calling Jest directly through Node.js
+                Used path: node_modules/jest/bin/jest.js for direct execution
+            </solution>
+            <files_affected>
+                <file>frontend/run-jest.js</file>
+                <file>frontend/package.json</file>
+            </files_affected>
+            <technical_details>
+                Root cause: Windows incompatibility with Unix shell scripts in npm binary wrappers
+                Solution: Direct Node.js execution bypasses shell script wrapper layer
+                Command: node run-jest.js (instead of jest or npx jest)
+            </technical_details>
+            <verification>All Jest commands work without Bus error on Windows</verification>
+        </learning>
+        
+        <learning id="websocket-mock-server-conflicts">
+            <title>WebSocket Mock Server URL Conflicts and Cleanup Issues</title>
+            <problem>
+                "A mock server is already listening on this url" error in jest-websocket-mock
+                Multiple test files creating mock servers on same URL 'ws://localhost:8000/ws'
+                "Cannot read properties of undefined (reading 'close')" in WS.clean()
+                WS.clean() called when mockWs undefined, causing test failures
+                No test isolation between WebSocket mock servers
+            </problem>
+            <solution>
+                Created centralized WebSocketTestManager with unique URLs per test
+                Implemented safe cleanup with try-catch blocks for WS.clean()
+                Generated unique URLs using timestamp + random suffix pattern
+                Added proper beforeEach/afterEach hooks with existence checks
+                Created websocket-test-manager.ts module for test isolation
+            </solution>
+            <files_affected>
+                <file>frontend/__tests__/helpers/websocket-test-manager.ts</file>
+                <file>frontend/__tests__/shared/test-utilities.tsx</file>
+                <file>frontend/__tests__/helpers/test-setup-helpers.ts</file>
+                <file>frontend/__tests__/integration/advanced-features.test.tsx</file>
+                <file>frontend/__tests__/integration/collaboration-state.test.tsx</file>
+                <file>frontend/__tests__/integration/corpus-management.test.tsx</file>
+            </files_affected>
+            <technical_details>
+                Root cause: jest-websocket-mock doesn't allow multiple servers on same URL
+                Pattern: Generate unique URLs: ws://localhost:8000/ws-${timestamp}-${random}
+                Safe cleanup: Wrap WS.clean() in try-catch blocks
+                Manager pattern: Centralize WebSocket mock server lifecycle
+            </technical_details>
+            <best_practice>
+                Use WebSocketTestManager instead of direct WS instantiation
+                Always call wsManager.cleanup() in afterEach hooks
+                Use unique URLs to prevent server conflicts
+                Handle undefined mock servers gracefully
+            </best_practice>
+            <verification>WebSocket tests run without URL conflicts or cleanup errors</verification>
+        </learning>
     </learnings>
     
     <best_practices>

@@ -12,7 +12,7 @@ from app.services.supply_research_scheduler import (
     ResearchSchedule,
     ScheduleFrequency
 )
-from app.agents.supply_researcher_sub_agent import ResearchType
+from app.agents.supply_researcher.models import ResearchType
 from app.tests.services.supply_research_scheduler.test_scheduler_initialization import (
     MockBackgroundTaskManager,
     MockLLMManager,

@@ -89,131 +89,19 @@ class ToolPermissionService:
             business_requirements=BusinessRequirement(developer_status=True, environment=["development", "staging"])
         )
     
-    async def check_tool_permission(
-        self, 
-        context: ToolExecutionContext
-    ) -> PermissionCheckResult:
-        """
-        Check if user has permission to execute a tool
-        
-        Args:
-            context: Tool execution context
-            
-        Returns:
-            Permission check result
-        """
+    async def check_tool_permission(self, context: ToolExecutionContext) -> PermissionCheckResult:
+        """Check if user has permission to execute a tool"""
         try:
-            # Get user's plan and permissions
-            user_plan = await self._get_user_plan(context.user_id)
-            user_permissions = self._get_user_permissions(context, user_plan)
-            
-            # Find required permissions for tool
-            required_permissions = self._get_tool_required_permissions(context.tool_name)
-            if not required_permissions:
-                # Tool doesn't require specific permissions
-                return PermissionCheckResult(allowed=True)
-            
-            # Check if user has required permissions
-            missing_permissions = []
-            for perm_name in required_permissions:
-                if not self._has_permission(perm_name, user_permissions, context, user_plan):
-                    missing_permissions.append(perm_name)
-            
-            if missing_permissions:
-                return PermissionCheckResult(
-                    allowed=False,
-                    reason=f"Missing permissions: {', '.join(missing_permissions)}",
-                    required_permissions=required_permissions,
-                    missing_permissions=missing_permissions,
-                    upgrade_path=self._get_upgrade_path(missing_permissions, user_plan)
-                )
-            
-            # Check rate limits
-            rate_limit_result = await self._check_rate_limits(context, required_permissions)
-            if not rate_limit_result["allowed"]:
-                return PermissionCheckResult(
-                    allowed=False,
-                    reason=f"Rate limit exceeded: {rate_limit_result['message']}",
-                    rate_limit_status=rate_limit_result,
-                    upgrade_path=self._get_upgrade_path_for_rate_limits(user_plan)
-                )
-            
-            return PermissionCheckResult(
-                allowed=True,
-                required_permissions=required_permissions,
-                business_requirements_met=True,
-                rate_limit_status=rate_limit_result
-            )
-            
+            validation_result = await self._validate_tool_permissions(context)
+            return validation_result or await self._process_permission_check(context)
         except Exception as e:
-            logger.error(f"Error checking tool permission: {e}", exc_info=True)
-            return PermissionCheckResult(
-                allowed=False,
-                reason=f"Permission check failed: {str(e)}"
-            )
+            return self._create_error_result(e)
     
-    async def get_user_tool_availability(
-        self, 
-        user_id: str, 
-        tool_registry: Dict[str, Any]
-    ) -> List[ToolAvailability]:
-        """
-        Get list of tools available to a user
-        
-        Args:
-            user_id: User identifier
-            tool_registry: Registry of all tools
-            
-        Returns:
-            List of tool availability information
-        """
+    async def get_user_tool_availability(self, user_id: str, tool_registry: Dict[str, Any]) -> List[ToolAvailability]:
+        """Get list of tools available to a user"""
         try:
-            # Get user context
-            user_plan = await self._get_user_plan(user_id)
-            # Note: We would normally get this from the database
-            # For now, create a basic context
-            context_base = ToolExecutionContext(
-                user_id=user_id,
-                tool_name="",  # Will be set per tool
-                requested_action="list",
-                user_plan=user_plan.tier.value if user_plan else "free",
-                user_roles=[],  # Would come from user object
-                is_developer=False  # Would come from user object
-            )
-            
-            availability_list = []
-            
-            for tool_name, tool_info in tool_registry.items():
-                context = context_base.copy()
-                context.tool_name = tool_name
-                
-                # Check permission
-                permission_result = await self.check_tool_permission(context)
-                
-                # Get usage info
-                usage_today = await self._get_usage_count(user_id, tool_name, "day")
-                
-                availability = ToolAvailability(
-                    tool_name=tool_name,
-                    category=tool_info.get("category", "uncategorized"),
-                    description=tool_info.get("description", "No description"),
-                    available=permission_result.allowed,
-                    required_permissions=permission_result.required_permissions,
-                    missing_requirements=permission_result.missing_permissions,
-                    usage_today=usage_today,
-                    upgrade_required=permission_result.upgrade_path
-                )
-                
-                # Add rate limit info if available
-                if permission_result.rate_limit_status:
-                    rate_limits = permission_result.rate_limit_status.get("limits")
-                    if rate_limits:
-                        availability.rate_limits = RateLimit(**rate_limits)
-                
-                availability_list.append(availability)
-            
-            return availability_list
-            
+            context_base = await self._create_base_context(user_id)
+            return await self._process_tool_registry(context_base, tool_registry)
         except Exception as e:
             logger.error(f"Error getting tool availability: {e}", exc_info=True)
             return []
@@ -450,6 +338,116 @@ class ToolPermissionService:
         
         return None
     
+    async def _validate_tool_permissions(self, context: ToolExecutionContext) -> Optional[PermissionCheckResult]:
+        """Validate tool permissions and return early if no permissions needed"""
+        required_permissions = self._get_tool_required_permissions(context.tool_name)
+        if not required_permissions:
+            return PermissionCheckResult(allowed=True)
+        user_plan = await self._get_user_plan(context.user_id)
+        user_permissions = self._get_user_permissions(context, user_plan)
+        missing_permissions = self._check_missing_permissions(required_permissions, user_permissions, context, user_plan)
+        return self._create_permission_denied_result(missing_permissions, required_permissions, user_plan) if missing_permissions else None
+
+    async def _process_permission_check(self, context: ToolExecutionContext) -> PermissionCheckResult:
+        """Process permission check after validation"""
+        required_permissions = self._get_tool_required_permissions(context.tool_name)
+        user_plan = await self._get_user_plan(context.user_id)
+        rate_limit_result = await self._check_rate_limits(context, required_permissions)
+        if not rate_limit_result["allowed"]:
+            return self._create_rate_limit_denied_result(rate_limit_result, user_plan)
+        return self._create_success_result(required_permissions, rate_limit_result)
+
+    def _check_missing_permissions(
+        self, required_permissions: List[str], user_permissions: Set[str], 
+        context: ToolExecutionContext, user_plan: UserPlan
+    ) -> List[str]:
+        """Check for missing permissions"""
+        return [perm for perm in required_permissions 
+                if not self._has_permission(perm, user_permissions, context, user_plan)]
+
+    def _create_permission_denied_result(
+        self, missing_permissions: List[str], required_permissions: List[str], user_plan: UserPlan
+    ) -> PermissionCheckResult:
+        """Create permission denied result"""
+        return PermissionCheckResult(
+            allowed=False, reason=f"Missing permissions: {', '.join(missing_permissions)}",
+            required_permissions=required_permissions, missing_permissions=missing_permissions,
+            upgrade_path=self._get_upgrade_path(missing_permissions, user_plan))
+
+    def _create_rate_limit_denied_result(
+        self, rate_limit_result: Dict[str, Any], user_plan: UserPlan
+    ) -> PermissionCheckResult:
+        """Create rate limit denied result"""
+        return PermissionCheckResult(
+            allowed=False, reason=f"Rate limit exceeded: {rate_limit_result['message']}",
+            rate_limit_status=rate_limit_result,
+            upgrade_path=self._get_upgrade_path_for_rate_limits(user_plan))
+
+    def _create_success_result(
+        self, required_permissions: List[str], rate_limit_result: Dict[str, Any]
+    ) -> PermissionCheckResult:
+        """Create successful permission check result"""
+        return PermissionCheckResult(
+            allowed=True, required_permissions=required_permissions,
+            business_requirements_met=True, rate_limit_status=rate_limit_result)
+
+    def _create_error_result(self, error: Exception) -> PermissionCheckResult:
+        """Create error result for permission check"""
+        logger.error(f"Error checking tool permission: {error}", exc_info=True)
+        return PermissionCheckResult(
+            allowed=False,
+            reason=f"Permission check failed: {str(error)}"
+        )
+
+    async def _create_base_context(self, user_id: str) -> ToolExecutionContext:
+        """Create base context for tool availability checking"""
+        user_plan = await self._get_user_plan(user_id)
+        return ToolExecutionContext(
+            user_id=user_id,
+            tool_name="",
+            requested_action="list",
+            user_plan=user_plan.tier.value if user_plan else "free",
+            user_roles=[],
+            is_developer=False
+        )
+
+    async def _process_tool_registry(
+        self, context_base: ToolExecutionContext, tool_registry: Dict[str, Any]
+    ) -> List[ToolAvailability]:
+        """Process tool registry to create availability list"""
+        availability_list = []
+        for tool_name, tool_info in tool_registry.items():
+            context = context_base.copy()
+            context.tool_name = tool_name
+            availability = await self._process_tool_availability(context, tool_info)
+            availability_list.append(availability)
+        return availability_list
+
+    async def _process_tool_availability(
+        self, context: ToolExecutionContext, tool_info: Dict[str, Any]
+    ) -> ToolAvailability:
+        """Process availability for a single tool"""
+        permission_result = await self.check_tool_permission(context)
+        usage_today = await self._get_usage_count(context.user_id, context.tool_name, "day")
+        availability = self._create_tool_availability(context, tool_info, permission_result, usage_today)
+        self._add_rate_limit_info(availability, permission_result)
+        return availability
+
+    def _create_tool_availability(self, context: ToolExecutionContext, tool_info: Dict[str, Any], 
+                                  permission_result: PermissionCheckResult, usage_today: int) -> ToolAvailability:
+        """Create ToolAvailability object"""
+        return ToolAvailability(tool_name=context.tool_name, category=tool_info.get("category", "uncategorized"),
+                               description=tool_info.get("description", "No description"), available=permission_result.allowed,
+                               required_permissions=permission_result.required_permissions, missing_requirements=permission_result.missing_permissions,
+                               usage_today=usage_today, upgrade_required=permission_result.upgrade_path)
+
+    def _add_rate_limit_info(self, availability: ToolAvailability, permission_result: PermissionCheckResult) -> None:
+        """Add rate limit information to availability if present"""
+        if permission_result.rate_limit_status:
+            rate_limits = permission_result.rate_limit_status.get("limits")
+            if rate_limits:
+                availability.rate_limits = RateLimit(**rate_limits)
+
     def _get_upgrade_path_for_rate_limits(self, user_plan: UserPlan) -> Optional[str]:
         """Get upgrade path for rate limit issues"""
         if user_plan.tier == PlanTier.FREE:

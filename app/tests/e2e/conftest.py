@@ -239,3 +239,19 @@ def performance_thresholds():
         "cache_hit_rate": 0.8,
         "error_rate": 0.05
     }
+
+
+@pytest.fixture
+async def db_session():
+    """Database session fixture for thread tests."""
+    from unittest.mock import AsyncMock
+    from sqlalchemy.ext.asyncio import AsyncSession
+    
+    session = AsyncMock(spec=AsyncSession)
+    session.begin = AsyncMock()
+    session.commit = AsyncMock()
+    session.rollback = AsyncMock()
+    session.flush = AsyncMock()
+    session.refresh = AsyncMock()
+    session.close = AsyncMock()
+    return session

@@ -15,116 +15,120 @@ from unittest.mock import AsyncMock
 import websockets
 
 
-@pytest.mark.asyncio
-async def test_message_ordering_under_load():
-    """Test that messages maintain order even under heavy load"""
-    
-    NUM_CLIENTS = 50
-    MESSAGES_PER_CLIENT = 100
-    
-    class OrderedWebSocket:
-        def __init__(self, client_id: str):
-            self.client_id = client_id
-            self.sent_messages: List[Dict] = []
-            self.received_messages: List[Dict] = []
-            self.sequence = 0
-            
-        async def send_ordered_message(self, content: str) -> Dict:
-            """Send a message with sequence number"""
-            message = {
-                'client_id': self.client_id,
-                'sequence': self.sequence,
-                'content': content,
-                'timestamp': time.time(),
-                'hash': hashlib.md5(f"{self.client_id}_{self.sequence}_{content}".encode()).hexdigest()
-            }
-            self.sequence += 1
-            self.sent_messages.append(message)
-            
-            # Simulate network delay
-            await asyncio.sleep(random.uniform(0, 0.01))
-            return message
-        
-        async def receive_message(self, message: Dict):
-            """Receive and validate message order"""
-            self.received_messages.append(message)
-            
-            # Check sequence
-            if len(self.received_messages) > 1:
-                prev_seq = self.received_messages[-2]['sequence']
-                curr_seq = message['sequence']
-                assert curr_seq == prev_seq + 1, f"Out of order: expected {prev_seq + 1}, got {curr_seq}"
-    
-    # Create clients
-    clients = [OrderedWebSocket(f"client_{i}") for i in range(NUM_CLIENTS)]
-    
-    # Central message router (simulating server)
-    message_queue: asyncio.Queue = asyncio.Queue()
+class OrderedWebSocket:
+    def __init__(self, client_id: str):
+        self.client_id = client_id
+        self.sent_messages: List[Dict] = []
+        self.received_messages: List[Dict] = []
+        self.sequence = 0
+
+    async def send_ordered_message(self, content: str) -> Dict:
+        """Send a message with sequence number"""
+        message = self._create_message(content)
+        self.sequence += 1
+        self.sent_messages.append(message)
+        await asyncio.sleep(random.uniform(0, 0.01))
+        return message
+
+    def _create_message(self, content: str) -> Dict:
+        return {
+            'client_id': self.client_id,
+            'sequence': self.sequence,
+            'content': content,
+            'timestamp': time.time(),
+            'hash': hashlib.md5(f"{self.client_id}_{self.sequence}_{content}".encode()).hexdigest()
+        }
+
+    async def receive_message(self, message: Dict):
+        """Receive and validate message order"""
+        self.received_messages.append(message)
+        if len(self.received_messages) > 1:
+            self._validate_message_order(message)
+
+    def _validate_message_order(self, message: Dict):
+        prev_seq = self.received_messages[-2]['sequence']
+        curr_seq = message['sequence']
+        assert curr_seq == prev_seq + 1, f"Out of order: expected {prev_seq + 1}, got {curr_seq}"
+
+
+async def _create_message_router(clients: List[OrderedWebSocket], message_queue: asyncio.Queue) -> int:
+    """Route messages maintaining order per client"""
+    client_queues: Dict[str, List[Dict]] = {}
     out_of_order_count = 0
     
-    async def message_router():
-        """Route messages maintaining order per client"""
-        client_queues: Dict[str, List[Dict]] = {}
-        
-        while True:
-            try:
-                message = await asyncio.wait_for(message_queue.get(), timeout=1.0)
-                client_id = message['client_id']
-                
-                if client_id not in client_queues:
-                    client_queues[client_id] = []
-                
-                # Check order for this client
-                if client_queues[client_id]:
-                    last_seq = client_queues[client_id][-1]['sequence']
-                    if message['sequence'] <= last_seq:
-                        nonlocal out_of_order_count
-                        out_of_order_count += 1
-                
-                client_queues[client_id].append(message)
-                
-                # Find corresponding client and deliver
-                for client in clients:
-                    if client.client_id == client_id:
-                        await client.receive_message(message)
-                        break
-                        
-            except asyncio.TimeoutError:
-                break
+    while True:
+        try:
+            message = await asyncio.wait_for(message_queue.get(), timeout=1.0)
+            out_of_order_count += await _process_message(message, client_queues, clients)
+        except asyncio.TimeoutError:
+            break
+    return out_of_order_count
+
+
+async def _process_message(message: Dict, client_queues: Dict, clients: List) -> int:
+    client_id = message['client_id']
+    if client_id not in client_queues:
+        client_queues[client_id] = []
     
-    # Start router
-    router_task = asyncio.create_task(message_router())
-    
-    # Send messages concurrently from all clients
-    async def client_sender(client: OrderedWebSocket):
-        for i in range(MESSAGES_PER_CLIENT):
-            msg = await client.send_ordered_message(f"Message {i}")
-            await message_queue.put(msg)
-            
-            # Varying delays to simulate real conditions
-            if i % 10 == 0:
-                await asyncio.sleep(0.01)  # Occasional pause
-    
-    # Execute all clients concurrently
-    sender_tasks = [client_sender(client) for client in clients]
-    await asyncio.gather(*sender_tasks)
-    
-    # Wait for processing
-    await asyncio.sleep(2)
-    router_task.cancel()
-    
-    # Verify results
+    out_of_order = _check_message_order(message, client_queues[client_id])
+    client_queues[client_id].append(message)
+    await _deliver_message_to_client(message, clients)
+    return out_of_order
+
+
+def _check_message_order(message: Dict, client_queue: List[Dict]) -> int:
+    if client_queue:
+        last_seq = client_queue[-1]['sequence']
+        if message['sequence'] <= last_seq:
+            return 1
+    return 0
+
+
+async def _deliver_message_to_client(message: Dict, clients: List):
+    for client in clients:
+        if client.client_id == message['client_id']:
+            await client.receive_message(message)
+            break
+
+
+async def _client_sender(client: OrderedWebSocket, message_queue: asyncio.Queue, messages_per_client: int):
+    for i in range(messages_per_client):
+        msg = await client.send_ordered_message(f"Message {i}")
+        await message_queue.put(msg)
+        if i % 10 == 0:
+            await asyncio.sleep(0.01)
+
+
+def _verify_message_results(clients: List[OrderedWebSocket], num_clients: int, messages_per_client: int, out_of_order_count: int):
     total_sent = sum(len(c.sent_messages) for c in clients)
     total_received = sum(len(c.received_messages) for c in clients)
-    
-    assert total_sent == NUM_CLIENTS * MESSAGES_PER_CLIENT
+    assert total_sent == num_clients * messages_per_client
     assert total_received >= total_sent * 0.99, "Should receive at least 99% of messages"
     assert out_of_order_count == 0, f"Found {out_of_order_count} out-of-order messages"
-    
-    # Verify per-client ordering
+
+
+def _verify_per_client_ordering(clients: List[OrderedWebSocket]):
     for client in clients:
         for i, msg in enumerate(client.received_messages):
             assert msg['sequence'] == i, f"Client {client.client_id} has out-of-order messages"
+
+
+@pytest.mark.asyncio
+async def test_message_ordering_under_load():
+    """Test that messages maintain order even under heavy load"""
+    NUM_CLIENTS, MESSAGES_PER_CLIENT = 50, 100
+    clients = [OrderedWebSocket(f"client_{i}") for i in range(NUM_CLIENTS)]
+    message_queue: asyncio.Queue = asyncio.Queue()
+    
+    router_task = asyncio.create_task(_create_message_router(clients, message_queue))
+    sender_tasks = [_client_sender(client, message_queue, MESSAGES_PER_CLIENT) for client in clients]
+    await asyncio.gather(*sender_tasks)
+    await asyncio.sleep(2)
+    router_task.cancel()
+    
+    out_of_order_count = 0 if router_task.cancelled() else await router_task
+    _verify_message_results(clients, NUM_CLIENTS, MESSAGES_PER_CLIENT, out_of_order_count)
+    _verify_per_client_ordering(clients)
 
 
 @pytest.mark.asyncio

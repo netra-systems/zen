@@ -27,76 +27,58 @@ from sqlalchemy.ext.asyncio import AsyncSession
 class AgentE2ETestBase:
     """Base class for critical end-to-end agent tests"""
 
-    @pytest.fixture
-    def setup_agent_infrastructure(self):
-        """Setup complete agent infrastructure for testing"""
-        # Mock database session with proper async context manager support
+    def _create_mock_db_session(self):
+        """Create mock database session with async context manager support"""
         db_session = AsyncMock(spec=AsyncSession)
         db_session.commit = AsyncMock()
         db_session.rollback = AsyncMock()
         db_session.close = AsyncMock()
         
-        # Configure begin() to return an async context manager
         async_context_manager = AsyncMock()
         async_context_manager.__aenter__ = AsyncMock(return_value=db_session)
         async_context_manager.__aexit__ = AsyncMock(return_value=None)
         db_session.begin = AsyncMock(return_value=async_context_manager)
-        
-        # Mock LLM Manager with proper JSON response for ask_llm
+        return db_session
+
+    def _create_mock_llm_manager(self):
+        """Create mock LLM Manager with proper response structures"""
         llm_manager = Mock(spec=LLMManager)
-        llm_manager.call_llm = AsyncMock(return_value={
-            "content": "Test response",
-            "tool_calls": []
-        })
-        # ask_llm should return a JSON string for triage and other agents
-        llm_manager.ask_llm = AsyncMock(return_value=json.dumps({
-            "plan_steps": [
-                {
-                    "step_id": "step_1",
-                    "description": "Optimize GPU utilization",
-                    "estimated_duration": "2 hours",
-                    "dependencies": [],
-                    "resources_needed": ["GPU monitoring tools"],
-                    "status": "pending"
-                }
-            ],
-            "priority": "medium",
-            "estimated_duration": "4 hours",
+        llm_manager.call_llm = AsyncMock(return_value={"content": "Test response", "tool_calls": []})
+        llm_manager.ask_llm = AsyncMock(return_value=self._get_mock_llm_json_response())
+        llm_manager.ask_structured_llm = AsyncMock(return_value=self._get_mock_triage_result())
+        return llm_manager
+
+    def _get_mock_llm_json_response(self):
+        """Get mock JSON response for LLM ask_llm method"""
+        return json.dumps({
+            "plan_steps": [{
+                "step_id": "step_1", "description": "Optimize GPU utilization",
+                "estimated_duration": "2 hours", "dependencies": [],
+                "resources_needed": ["GPU monitoring tools"], "status": "pending"
+            }],
+            "priority": "medium", "estimated_duration": "4 hours",
             "required_resources": ["GPU monitoring tools", "Performance analytics"],
             "success_metrics": ["Improved throughput", "Reduced costs"]
-        }))
-        
-        # Mock ask_structured_llm for TriageSubAgent
+        })
+
+    def _get_mock_triage_result(self):
+        """Get mock triage result for structured LLM calls"""
         from app.agents.triage_sub_agent import (
             TriageResult, Priority, Complexity, UserIntent, 
             ExtractedEntities, TriageMetadata
         )
-        mock_triage_result = TriageResult(
-            category="Cost Optimization",
-            confidence_score=0.95,
-            priority=Priority.MEDIUM,
-            complexity=Complexity.MODERATE,
-            is_admin_mode=False,
-            extracted_entities=ExtractedEntities(
-                models_mentioned=[],
-                metrics_mentioned=[],
-                time_ranges=[]
-            ),
-            user_intent=UserIntent(
-                primary_intent="optimize",
-                secondary_intents=["analyze"]
-            ),
-            tool_recommendations=[],
-            metadata=TriageMetadata(
-                triage_duration_ms=100,
-                cache_hit=False,
-                fallback_used=False,
-                retry_count=0
+        return TriageResult(
+            category="Cost Optimization", confidence_score=0.95, priority=Priority.MEDIUM,
+            complexity=Complexity.MODERATE, is_admin_mode=False,
+            extracted_entities=ExtractedEntities(models_mentioned=[], metrics_mentioned=[], time_ranges=[]),
+            user_intent=UserIntent(primary_intent="optimize", secondary_intents=["analyze"]),
+            tool_recommendations=[], metadata=TriageMetadata(
+                triage_duration_ms=100, cache_hit=False, fallback_used=False, retry_count=0
             )
         )
-        llm_manager.ask_structured_llm = AsyncMock(return_value=mock_triage_result)
-        
-        # Mock WebSocket Manager
+
+    def _create_mock_websocket_manager(self):
+        """Create mock WebSocket Manager with all required methods"""
         websocket_manager = Mock()
         websocket_manager.send_message = AsyncMock()
         websocket_manager.send_to_thread = AsyncMock()
@@ -105,38 +87,50 @@ class AgentE2ETestBase:
         websocket_manager.send_error = AsyncMock()
         websocket_manager.send_sub_agent_update = AsyncMock()
         websocket_manager.active_connections = {}
-        
-        # Mock Tool Dispatcher
+        return websocket_manager
+
+    def _create_mock_tool_dispatcher(self):
+        """Create mock Tool Dispatcher with success response"""
         tool_dispatcher = Mock(spec=ApexToolSelector)
         tool_dispatcher.dispatch_tool = AsyncMock(return_value={
-            "status": "success",
-            "result": "Tool executed successfully"
+            "status": "success", "result": "Tool executed successfully"
         })
-        
-        # Mock state persistence service with proper async return values
+        return tool_dispatcher
+
+    def _create_supervisor_with_patches(self, db_session, llm_manager, websocket_manager, tool_dispatcher):
+        """Create supervisor with state persistence patches"""
         mock_save_state = AsyncMock(return_value=(True, "state_saved"))
-        mock_load_state = AsyncMock(return_value=None) 
+        mock_load_state = AsyncMock(return_value=None)
         mock_get_context = AsyncMock(return_value={})
         
         with patch.object(state_persistence_service, 'save_agent_state', mock_save_state):
             with patch.object(state_persistence_service, 'load_agent_state', mock_load_state):
                 with patch.object(state_persistence_service, 'get_thread_context', mock_get_context):
-                    # Create Supervisor
                     supervisor = Supervisor(db_session, llm_manager, websocket_manager, tool_dispatcher)
                     supervisor.thread_id = str(uuid.uuid4())
                     supervisor.user_id = str(uuid.uuid4())
-        
-        # Create Agent Service with Supervisor
+                    return supervisor
+
+    def _create_agent_service(self, supervisor, websocket_manager):
+        """Create Agent Service with Supervisor and WebSocket manager"""
         agent_service = AgentService(supervisor)
         agent_service.websocket_manager = websocket_manager
+        return agent_service
+
+    @pytest.fixture
+    def setup_agent_infrastructure(self):
+        """Setup complete agent infrastructure for testing"""
+        db_session = self._create_mock_db_session()
+        llm_manager = self._create_mock_llm_manager()
+        websocket_manager = self._create_mock_websocket_manager()
+        tool_dispatcher = self._create_mock_tool_dispatcher()
+        
+        supervisor = self._create_supervisor_with_patches(db_session, llm_manager, websocket_manager, tool_dispatcher)
+        agent_service = self._create_agent_service(supervisor, websocket_manager)
         
         return {
-            "supervisor": supervisor,
-            "agent_service": agent_service,
-            "db_session": db_session,
-            "llm_manager": llm_manager,
-            "websocket_manager": websocket_manager,
-            "tool_dispatcher": tool_dispatcher
+            "supervisor": supervisor, "agent_service": agent_service, "db_session": db_session,
+            "llm_manager": llm_manager, "websocket_manager": websocket_manager, "tool_dispatcher": tool_dispatcher
         }
 
     def create_test_request(self, query="Test optimization request"):

@@ -21,6 +21,16 @@ def safe_json_parse(value: Any, fallback: Any = None) -> Any:
 
 def _try_json_parse(value: str, fallback: Any) -> Any:
     """Helper to attempt JSON parsing with error handling."""
+    # Check if the string looks like complex descriptive text (contains commas but not JSON-like)
+    stripped = value.strip()
+    if (',' in stripped and 
+        not stripped.startswith(('{', '[', '"')) and 
+        not stripped.endswith(('}', ']', '"')) and
+        len(stripped.split(',')) > 1):
+        # This looks like comma-separated descriptive text, not JSON
+        logger.debug(f"String appears to be descriptive text, not JSON: {value[:100]}...")
+        return fallback if fallback is not None else {}
+    
     try:
         parsed = json.loads(value)
         logger.debug(f"Successfully parsed JSON string: {value[:100]}...")
@@ -81,10 +91,17 @@ def parse_string_list_field(value: Any) -> List[str]:
 
 def _parse_string_to_string_list(value: str) -> List[str]:
     """Helper to parse string to string list."""
-    if value.strip().startswith(('[', '{')):
+    stripped = value.strip()
+    if stripped.startswith(('[', '{')):
         parsed = safe_json_parse(value, None)
         if isinstance(parsed, list):
             return [str(item) for item in parsed]
+    
+    # Handle comma-separated values for descriptive text
+    if ',' in stripped and not stripped.startswith(('{', '[')):
+        items = [item.strip() for item in stripped.split(',')]
+        return [item for item in items if item]  # Filter out empty strings
+    
     return [value]
 
 
@@ -138,10 +155,6 @@ def _fix_dict_data(data: Dict[str, Any]) -> Dict[str, Any]:
     return data
 
 
-def _handle_unexpected_type(value: Any) -> List[str]:
-    """Helper to handle unexpected types in string list parsing."""
-    logger.warning(f"Expected list/string/dict, got {type(value)}")
-    return []
 def _handle_unexpected_type(value: Any) -> List[str]:
     """Helper to handle unexpected types in string list parsing."""
     logger.warning(f"Expected list/string/dict, got {type(value)}")

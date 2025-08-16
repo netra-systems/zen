@@ -333,6 +333,134 @@ class TriageErrorHandler:
             'intent': intent
         }
     
+    def _calculate_retry_delay(self, attempt: int) -> int:
+        """Calculate exponential backoff delay for retry attempt."""
+        return 2 ** attempt
+    
+    async def _log_retry_warning(
+        self, 
+        operation_name: str, 
+        attempt: int, 
+        max_retries: int, 
+        delay: int, 
+        error: Exception
+    ) -> None:
+        """Log warning for retry attempt."""
+        logger.warning(
+            f"Triage operation failed, retrying in {delay}s",
+            operation=operation_name,
+            attempt=attempt + 1,
+            max_retries=max_retries,
+            error=str(error)
+        )
+    
+    def _should_retry(self, attempt: int, max_retries: int) -> bool:
+        """Determine if operation should be retried."""
+        return attempt < max_retries
+    
+    async def _handle_intent_detection_fallback(
+        self, 
+        kwargs: Dict[str, Any], 
+        run_id: str, 
+        error: Exception
+    ) -> Dict[str, Any]:
+        """Handle intent detection error fallback."""
+        return await self.handle_intent_detection_error(
+            kwargs.get('user_input', ''),
+            run_id,
+            error
+        )
+    
+    async def _handle_entity_extraction_fallback(
+        self, 
+        kwargs: Dict[str, Any], 
+        run_id: str, 
+        error: Exception
+    ) -> Dict[str, Any]:
+        """Handle entity extraction error fallback."""
+        return await self.handle_entity_extraction_error(
+            kwargs.get('entities', []),
+            kwargs.get('user_input', ''),
+            run_id,
+            error
+        )
+    
+    async def _handle_tool_recommendation_fallback(
+        self, 
+        kwargs: Dict[str, Any], 
+        run_id: str, 
+        error: Exception
+    ) -> Dict[str, Any]:
+        """Handle tool recommendation error fallback."""
+        return await self.handle_tool_recommendation_error(
+            kwargs.get('intent', ''),
+            kwargs.get('entities', {}),
+            run_id,
+            error
+        )
+    
+    async def _handle_generic_error_fallback(
+        self, 
+        operation_name: str, 
+        run_id: str, 
+        error: Exception
+    ) -> None:
+        """Handle generic error fallback."""
+        context = ErrorContext(
+            agent_name="triage_sub_agent",
+            operation_name=operation_name,
+            run_id=run_id
+        )
+        await global_error_handler.handle_error(error, context)
+        raise error
+    
+    async def _handle_operation_specific_error(
+        self, 
+        operation_name: str, 
+        kwargs: Dict[str, Any], 
+        run_id: str, 
+        error: Exception
+    ) -> Any:
+        """Route to specific error handler based on operation type."""
+        if operation_name == 'intent_detection':
+            return await self._handle_intent_detection_fallback(kwargs, run_id, error)
+        elif operation_name == 'entity_extraction':
+            return await self._handle_entity_extraction_fallback(kwargs, run_id, error)
+        elif operation_name == 'tool_recommendation':
+            return await self._handle_tool_recommendation_fallback(kwargs, run_id, error)
+        else:
+            await self._handle_generic_error_fallback(operation_name, run_id, error)
+    
+    async def _handle_retry_attempt(
+        self, 
+        operation_name: str, 
+        attempt: int, 
+        max_retries: int, 
+        error: Exception
+    ) -> None:
+        """Handle retry delay and logging for failed attempt."""
+        delay = self._calculate_retry_delay(attempt)
+        await self._log_retry_warning(operation_name, attempt, max_retries, delay, error)
+        await asyncio.sleep(delay)
+    
+    async def _attempt_operation_with_retry_logic(
+        self, 
+        operation_func, 
+        operation_name: str, 
+        run_id: str, 
+        max_retries: int, 
+        **kwargs
+    ) -> Any:
+        """Perform single attempt with retry logic."""
+        for attempt in range(max_retries + 1):
+            try:
+                return await operation_func(**kwargs)
+            except Exception as error:
+                if self._should_retry(attempt, max_retries):
+                    await self._handle_retry_attempt(operation_name, attempt, max_retries, error)
+                else:
+                    return await self._handle_operation_specific_error(operation_name, kwargs, run_id, error)
+    
     async def handle_with_retry(
         self,
         operation_func,
@@ -342,59 +470,9 @@ class TriageErrorHandler:
         **kwargs
     ) -> Any:
         """Handle operation with automatic retry and error recovery."""
-        last_error = None
-        
-        for attempt in range(max_retries + 1):
-            try:
-                return await operation_func(**kwargs)
-                
-            except Exception as error:
-                last_error = error
-                
-                if attempt < max_retries:
-                    # Calculate retry delay
-                    delay = 2 ** attempt  # Exponential backoff
-                    
-                    logger.warning(
-                        f"Triage operation failed, retrying in {delay}s",
-                        operation=operation_name,
-                        attempt=attempt + 1,
-                        max_retries=max_retries,
-                        error=str(error)
-                    )
-                    
-                    await asyncio.sleep(delay)
-                else:
-                    # Last attempt failed, handle with specific error type
-                    if operation_name == 'intent_detection':
-                        return await self.handle_intent_detection_error(
-                            kwargs.get('user_input', ''),
-                            run_id,
-                            error
-                        )
-                    elif operation_name == 'entity_extraction':
-                        return await self.handle_entity_extraction_error(
-                            kwargs.get('entities', []),
-                            kwargs.get('user_input', ''),
-                            run_id,
-                            error
-                        )
-                    elif operation_name == 'tool_recommendation':
-                        return await self.handle_tool_recommendation_error(
-                            kwargs.get('intent', ''),
-                            kwargs.get('entities', {}),
-                            run_id,
-                            error
-                        )
-                    else:
-                        # Generic error handling
-                        context = ErrorContext(
-                            agent_name="triage_sub_agent",
-                            operation_name=operation_name,
-                            run_id=run_id
-                        )
-                        await global_error_handler.handle_error(last_error, context)
-                        raise last_error
+        return await self._attempt_operation_with_retry_logic(
+            operation_func, operation_name, run_id, max_retries, **kwargs
+        )
 
 
 # Global triage error handler instance

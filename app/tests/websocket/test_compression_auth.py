@@ -96,132 +96,155 @@ async def test_websocket_compression():
             assert ratio < 1.5, "Random data shouldn't compress well"
 
 
+class AuthenticatedWebSocket:
+    def __init__(self, token: str, token_lifetime: int = 3600):
+        self.token = token
+        self.token_expires_at = time.time() + token_lifetime
+        self.authenticated = True
+        self.connection_alive = True
+        self.messages_sent = 0
+        self.reauthentication_attempts = 0
+
+    def is_token_valid(self) -> bool:
+        return time.time() < self.token_expires_at
+
+    async def send_message(self, message: str) -> Dict:
+        if not self.is_token_valid():
+            return self._create_expired_token_response()
+        return self._create_success_response()
+
+    def _create_expired_token_response(self) -> Dict:
+        self.authenticated = False
+        return {
+            'error': 'token_expired',
+            'code': 401,
+            'message': 'Authentication token has expired'
+        }
+
+    def _create_success_response(self) -> Dict:
+        self.messages_sent += 1
+        return {
+            'success': True,
+            'message_id': self.messages_sent,
+            'timestamp': time.time()
+        }
+
+    async def refresh_token(self, new_token: str) -> bool:
+        """Attempt to refresh authentication without closing connection"""
+        self.reauthentication_attempts += 1
+        if new_token and len(new_token) > 10:
+            return self._apply_new_token(new_token)
+        return False
+
+    def _apply_new_token(self, new_token: str) -> bool:
+        self.token = new_token
+        self.token_expires_at = time.time() + 3600
+        self.authenticated = True
+        return True
+
+    async def handle_auth_expiry(self) -> str:
+        """Handle token expiry gracefully"""
+        if not self.is_token_valid():
+            return await self._attempt_reauthentication()
+        return 'still_valid'
+
+    async def _attempt_reauthentication(self) -> str:
+        new_token = f"refreshed_token_{uuid.uuid4()}"
+        success = await self.refresh_token(new_token)
+        if success:
+            return 'reauthenticated'
+        self.connection_alive = False
+        return 'connection_closed'
+
+
+class GracePeriodWebSocket(AuthenticatedWebSocket):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.grace_period = 30
+        self.in_grace_period = False
+
+    async def send_message(self, message: str) -> Dict:
+        if not self.is_token_valid():
+            return await self._handle_expired_token_with_grace()
+        return await super().send_message(message)
+
+    async def _handle_expired_token_with_grace(self) -> Dict:
+        if not self.in_grace_period:
+            return self._start_grace_period()
+        elif time.time() < self.grace_expires_at:
+            return self._create_grace_period_warning()
+        return {'error': 'grace_period_expired', 'code': 401}
+
+    def _start_grace_period(self) -> Dict:
+        self.in_grace_period = True
+        self.grace_expires_at = time.time() + self.grace_period
+        return {
+            'warning': 'token_expiring',
+            'grace_period_seconds': self.grace_period,
+            'action_required': 'refresh_token'
+        }
+
+    def _create_grace_period_warning(self) -> Dict:
+        return {
+            'warning': 'in_grace_period',
+            'expires_in': int(self.grace_expires_at - time.time())
+        }
+
+
 @pytest.mark.asyncio
 async def test_authentication_expiry_during_connection():
     """Test handling of authentication expiry while connection is active"""
-    
-    class AuthenticatedWebSocket:
-        def __init__(self, token: str, token_lifetime: int = 3600):
-            self.token = token
-            self.token_expires_at = time.time() + token_lifetime
-            self.authenticated = True
-            self.connection_alive = True
-            self.messages_sent = 0
-            self.reauthentication_attempts = 0
-            
-        def is_token_valid(self) -> bool:
-            return time.time() < self.token_expires_at
-        
-        async def send_message(self, message: str) -> Dict:
-            if not self.is_token_valid():
-                self.authenticated = False
-                return {
-                    'error': 'token_expired',
-                    'code': 401,
-                    'message': 'Authentication token has expired'
-                }
-            
-            self.messages_sent += 1
-            return {
-                'success': True,
-                'message_id': self.messages_sent,
-                'timestamp': time.time()
-            }
-        
-        async def refresh_token(self, new_token: str) -> bool:
-            """Attempt to refresh authentication without closing connection"""
-            self.reauthentication_attempts += 1
-            
-            # Simulate token validation
-            if new_token and len(new_token) > 10:
-                self.token = new_token
-                self.token_expires_at = time.time() + 3600
-                self.authenticated = True
-                return True
-            return False
-        
-        async def handle_auth_expiry(self) -> str:
-            """Handle token expiry gracefully"""
-            if not self.is_token_valid():
-                # Try to refresh
-                new_token = f"refreshed_token_{uuid.uuid4()}"
-                success = await self.refresh_token(new_token)
-                
-                if success:
-                    return 'reauthenticated'
-                else:
-                    self.connection_alive = False
-                    return 'connection_closed'
-            return 'still_valid'
-    
-    # Test immediate expiry
+    await _test_immediate_expiry()
+    await _test_refresh_mechanism()
+    await _test_longer_session()
+    await _test_grace_period_handling()
+
+
+async def _test_immediate_expiry():
     ws_short = AuthenticatedWebSocket('short_token', token_lifetime=1)
     await asyncio.sleep(1.1)
-    
     result = await ws_short.send_message('test')
     assert result['error'] == 'token_expired'
     assert not ws_short.is_token_valid()
-    
-    # Test refresh mechanism
+
+
+async def _test_refresh_mechanism():
+    ws_short = AuthenticatedWebSocket('short_token', token_lifetime=1)
+    await asyncio.sleep(1.1)
     reauth_result = await ws_short.handle_auth_expiry()
     assert reauth_result == 'reauthenticated'
     assert ws_short.authenticated
     assert ws_short.reauthentication_attempts == 1
-    
-    # Test with longer session
+
+
+async def _test_longer_session():
     ws_long = AuthenticatedWebSocket('long_token', token_lifetime=2)
-    
-    # Send messages over time
+    message_results = await _send_messages_over_time(ws_long)
+    _verify_message_results(message_results)
+
+
+async def _send_messages_over_time(ws_long) -> List[Dict]:
     message_results = []
     for i in range(5):
         result = await ws_long.send_message(f'Message {i}')
         message_results.append(result)
         await asyncio.sleep(0.5)
-    
-    # Check for auth expiry handling
+    return message_results
+
+
+def _verify_message_results(message_results: List[Dict]):
     expired_messages = [r for r in message_results if 'error' in r]
     successful_messages = [r for r in message_results if 'success' in r]
-    
     assert len(expired_messages) > 0, "Should have some expired messages"
     assert len(successful_messages) > 0, "Should have some successful messages"
-    
-    # Test grace period handling
-    class GracePeriodWebSocket(AuthenticatedWebSocket):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.grace_period = 30  # 30 seconds grace period
-            self.in_grace_period = False
-            
-        async def send_message(self, message: str) -> Dict:
-            if not self.is_token_valid():
-                if not self.in_grace_period:
-                    self.in_grace_period = True
-                    self.grace_expires_at = time.time() + self.grace_period
-                    
-                    return {
-                        'warning': 'token_expiring',
-                        'grace_period_seconds': self.grace_period,
-                        'action_required': 'refresh_token'
-                    }
-                elif time.time() < self.grace_expires_at:
-                    return {
-                        'warning': 'in_grace_period',
-                        'expires_in': int(self.grace_expires_at - time.time())
-                    }
-                else:
-                    return {'error': 'grace_period_expired', 'code': 401}
-            
-            return await super().send_message(message)
-    
+
+
+async def _test_grace_period_handling():
     ws_grace = GracePeriodWebSocket('grace_token', token_lifetime=1)
     await asyncio.sleep(1.1)
-    
-    # First message after expiry should trigger grace period
     result1 = await ws_grace.send_message('test1')
     assert result1['warning'] == 'token_expiring'
     assert ws_grace.in_grace_period
-    
-    # Subsequent messages in grace period
     result2 = await ws_grace.send_message('test2')
     assert result2['warning'] == 'in_grace_period'
     assert result2['expires_in'] > 0

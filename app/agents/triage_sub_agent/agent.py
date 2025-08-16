@@ -35,6 +35,7 @@ class TriageSubAgent(BaseSubAgent):
         self._init_core_components(tool_dispatcher, redis_manager)
         self._init_reliability_system()
         self._init_fallback_handler()
+        self._init_modular_components()
         
     def _init_base_triage_agent(self, llm_manager: LLMManager) -> None:
         """Initialize base agent with core parameters."""
@@ -56,286 +57,6 @@ class TriageSubAgent(BaseSubAgent):
         retry_config = RetryConfig(max_retries=2, base_delay=1.0, max_delay=10.0)
         self.reliability = get_reliability_wrapper("TriageSubAgent", circuit_config, retry_config)
 
-    async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
-        """Check if we have a user request to triage"""
-        if not state.user_request:
-            self.logger.warning(f"No user request provided for triage in run_id: {run_id}")
-            return False
-        
-        return await self._validate_user_request(state, run_id)
-    
-    async def _validate_user_request(self, state: DeepAgentState, run_id: str) -> bool:
-        """Validate user request using triage core."""
-        validation = self.triage_core.validator.validate_request(state.user_request)
-        return self._process_validation_result(validation, state, run_id)
-    
-    def _process_validation_result(self, validation, state: DeepAgentState, run_id: str) -> bool:
-        """Process validation result and handle errors."""
-        if not validation.is_valid:
-            self._handle_validation_error(state, run_id, validation)
-            return False
-        return True
-    
-    def _handle_validation_error(self, state: DeepAgentState, run_id: str, validation) -> None:
-        """Handle validation error by creating error result."""
-        self.logger.error(f"Invalid request for run_id {run_id}: {validation.validation_errors}")
-        error_result = self._create_validation_error_result(validation)
-        state.triage_result = error_result
-        state.step_count += 1
-    
-    def _create_validation_error_result(self, validation) -> TriageResult:
-        """Create validation error result."""
-        return TriageResult(
-            category="Validation Error",
-            confidence_score=0.0,
-            validation_status=validation
-        )
-    
-    def _ensure_triage_result(self, result) -> TriageResult:
-        """Ensure result is a proper TriageResult object."""
-        if isinstance(result, TriageResult):
-            return result
-        elif isinstance(result, dict):
-            return self._convert_dict_to_triage_result(result)
-        else:
-            return self._create_fallback_triage_result()
-    
-    def _convert_dict_to_triage_result(self, result_dict: dict) -> TriageResult:
-        """Convert dictionary to TriageResult with error handling."""
-        try:
-            return TriageResult(**result_dict)
-        except Exception as e:
-            logger.warning(f"Failed to convert dict to TriageResult: {e}")
-            return self._create_fallback_triage_result()
-    
-    def _create_fallback_triage_result(self) -> TriageResult:
-        """Create fallback TriageResult with default values."""
-        return TriageResult(
-            category="unknown",
-            confidence_score=0.5
-        )
-    
-    def _log_execution_start(self, run_id: str) -> None:
-        """Log the start of triage execution."""
-        self.logger.info(f"TriageSubAgent starting execution for run_id: {run_id}")
-
-    async def execute(self, state: DeepAgentState, run_id: str, 
-                     stream_updates: bool) -> None:
-        """Execute enhanced triage with comprehensive fallback handling."""
-        self._log_execution_start(run_id)
-        start_time = time.time()
-        
-        try:
-            await self._execute_triage_with_fallback_protection(state, run_id, stream_updates)
-        except Exception as e:
-            logger.error(f"Triage execution failed for run_id {run_id}: {e}")
-    
-    async def _execute_triage_with_fallback_protection(
-        self, state: DeepAgentState, run_id: str, stream_updates: bool
-    ) -> None:
-        """Execute triage with fallback protection."""
-        triage_operation = self._create_main_triage_operation(state, run_id, stream_updates)
-        result = await self._execute_with_fallback(triage_operation)
-        await self._process_triage_result(result, state, run_id, stream_updates)
-    
-    def _create_main_triage_operation(self, state: DeepAgentState, run_id: str, stream_updates: bool):
-        """Create main triage operation function."""
-        async def _main_triage_operation():
-            return await self._execute_triage_with_llm(state, run_id, stream_updates)
-        return _main_triage_operation
-    
-    async def _execute_with_fallback(self, triage_operation):
-        """Execute triage operation with fallback handling."""
-        return await self.llm_fallback_handler.execute_with_fallback(
-            triage_operation, "triage_analysis", "triage", "triage"
-        )
-    
-    async def _process_triage_result(
-        self, result: Any, state: DeepAgentState, run_id: str, stream_updates: bool
-    ) -> None:
-        """Process triage result based on type."""
-        if isinstance(result, dict):
-            await self._handle_successful_triage_result(result, state, run_id, stream_updates)
-        else:
-            await self._handle_fallback_triage_result(state, run_id, stream_updates)
-    
-    async def _handle_successful_triage_result(
-        self, result: dict, state: DeepAgentState, run_id: str, stream_updates: bool
-    ) -> None:
-        """Handle successful triage result."""
-        triage_result = self._ensure_triage_result(result)
-        self._update_state_with_result(state, triage_result)
-        
-        if stream_updates:
-            await self._send_completion_update(run_id, triage_result)
-    
-    def _update_state_with_result(self, state: DeepAgentState, triage_result) -> None:
-        """Update state with triage result."""
-        state.triage_result = triage_result
-        state.step_count += 1
-    
-    async def _handle_fallback_triage_result(
-        self, state: DeepAgentState, run_id: str, stream_updates: bool
-    ) -> None:
-        """Handle fallback triage result."""
-        fallback_result = await self._create_emergency_fallback(state, run_id)
-        self._update_state_with_result(state, fallback_result)
-        
-        if stream_updates:
-            await self._send_emergency_update(run_id, fallback_result)
-    
-    
-    def _build_enhanced_prompt(self, user_request):
-        """Build enhanced prompt for LLM processing"""
-        base_prompt = triage_prompt_template.format(user_request=user_request)
-        analysis_instructions = self._get_analysis_instructions()
-        category_options = self._get_category_options()
-        
-        return f"{base_prompt}\n\n{analysis_instructions}\n\n{category_options}"
-    
-    def _get_analysis_instructions(self) -> str:
-        """Get analysis instructions for the triage prompt."""
-        return """Consider the following in your analysis:
-1. Extract all mentioned models, metrics, and time ranges
-2. Determine the urgency and complexity of the request
-3. Suggest specific tools that would be helpful
-4. Identify any constraints or requirements mentioned"""
-    
-    def _get_category_options(self) -> str:
-        """Get category options for triage classification."""
-        categories = self._get_main_categories()
-        formatted_categories = self._format_category_list(categories)
-        return f"Categorize into one of these main categories:\n{formatted_categories}"
-    
-    
-    def _enrich_triage_result(self, triage_result, user_request):
-        """Enrich triage result with additional analysis"""
-        self._ensure_entities_extracted(triage_result, user_request)
-        self._ensure_intent_detected(triage_result, user_request)
-        self._handle_admin_mode_detection(triage_result, user_request)
-        self._ensure_tool_recommendations(triage_result)
-        return triage_result
-    
-    def _ensure_entities_extracted(self, triage_result: dict, user_request: str) -> None:
-        """Ensure entities are extracted from request."""
-        if not triage_result.get("extracted_entities"):
-            entities = self.triage_core.entity_extractor.extract_entities(user_request)
-            triage_result["extracted_entities"] = entities.model_dump()
-    
-    def _ensure_intent_detected(self, triage_result: dict, user_request: str) -> None:
-        """Ensure user intent is detected."""
-        if not triage_result.get("user_intent"):
-            intent = self.triage_core.intent_detector.detect_intent(user_request)
-            triage_result["user_intent"] = intent.model_dump()
-    
-    def _handle_admin_mode_detection(self, triage_result: dict, user_request: str) -> None:
-        """Handle admin mode detection and category adjustment."""
-        is_admin = self.triage_core.intent_detector.detect_admin_mode(user_request)
-        triage_result["is_admin_mode"] = is_admin
-        
-        if is_admin:
-            triage_result = self._adjust_admin_category(triage_result, user_request)
-    
-    def _ensure_tool_recommendations(self, triage_result: dict) -> None:
-        """Ensure tool recommendations are present."""
-        if not triage_result.get("tool_recommendations"):
-            tools = self.triage_core.tool_recommender.recommend_tools(
-                triage_result.get("category", "General Inquiry"),
-                ExtractedEntities(**triage_result.get("extracted_entities", {}))
-            )
-            triage_result["tool_recommendations"] = [t.model_dump() for t in tools]
-    
-    def _adjust_admin_category(self, triage_result, user_request):
-        """Adjust category for admin mode requests"""
-        if triage_result.get("category") not in ["Synthetic Data Generation", "Corpus Management"]:
-            if "synthetic" in user_request.lower() or "generate data" in user_request.lower():
-                triage_result["category"] = "Synthetic Data Generation"
-            elif "corpus" in user_request.lower():
-                triage_result["category"] = "Corpus Management"
-        return triage_result
-    
-    def _add_metadata(self, triage_result, start_time, retry_count):
-        """Add metadata to triage result"""
-        self._ensure_metadata_section(triage_result)
-        metadata_updates = self._build_metadata_updates(start_time, retry_count)
-        triage_result["metadata"].update(metadata_updates)
-        return triage_result
-    
-    def _ensure_metadata_section(self, triage_result: dict) -> None:
-        """Ensure metadata section exists in triage result."""
-        if not triage_result.get("metadata"):
-            triage_result["metadata"] = {}
-    
-    def _build_metadata_updates(self, start_time: float, retry_count: int) -> dict:
-        """Build metadata updates dictionary."""
-        return {
-            "triage_duration_ms": int((time.time() - start_time) * 1000),
-            "cache_hit": False,
-            "retry_count": retry_count,
-            "fallback_used": retry_count >= self.triage_core.max_retries
-        }
-    
-    def _log_performance_metrics(self, run_id, triage_result):
-        """Log performance metrics"""
-        metrics = self._extract_performance_metrics(triage_result)
-        log_message = self._format_performance_log_message(run_id, metrics)
-        self.logger.info(log_message)
-    
-    async def _send_final_update(self, run_id, triage_result):
-        """Send final update via WebSocket"""
-        await self._send_update(run_id, {
-            "status": "processed",
-            "message": f"Request categorized as: {triage_result.get('category', 'Unknown')} "
-                      f"with confidence {triage_result.get('confidence_score', 0):.2f}",
-            "result": triage_result
-        })
-
-    async def cleanup(self, state: DeepAgentState, run_id: str) -> None:
-        """Cleanup after execution"""
-        await super().cleanup(state, run_id)
-        
-        # Log final metrics if available
-        if state.triage_result and isinstance(state.triage_result, dict):
-            metadata = state.triage_result.get("metadata", {})
-            if metadata:
-                self.logger.debug(f"Triage metrics for run_id {run_id}: {metadata}")
-    
-    def get_health_status(self) -> dict:
-        """Get agent health status"""
-        return self.reliability.get_health_status()
-    
-    def get_circuit_breaker_status(self) -> dict:
-        """Get circuit breaker status"""
-        return self.reliability.circuit_breaker.get_status()
-    
-    def _validate_request(self, request: str):
-        """Validate request - delegate to triage core validator"""
-        return self.triage_core.validator.validate_request(request)
-    
-    def _extract_entities_from_request(self, request: str):
-        """Extract entities from request - delegate to entity extractor"""
-        return self.triage_core.entity_extractor.extract_entities(request)
-    
-    def _determine_intent(self, request: str):
-        """Determine user intent - delegate to intent detector"""
-        return self.triage_core.intent_detector.detect_intent(request)
-    
-    def _recommend_tools(self, category: str, entities):
-        """Recommend tools - delegate to tool recommender"""
-        return self.triage_core.tool_recommender.recommend_tools(category, entities)
-    
-    def _fallback_categorization(self, request: str):
-        """Fallback categorization - delegate to triage core"""
-        return self.triage_core.create_fallback_result(request)
-    
-    def _extract_and_validate_json(self, response: str):
-        """Extract and validate JSON - delegate to triage core"""
-        return self.triage_core.extract_and_validate_json(response)
-    
-    def _generate_request_hash(self, request: str):
-        """Generate request hash - delegate to triage core"""
-        return self.triage_core.generate_request_hash(request)
-    
     def _init_fallback_handler(self) -> None:
         """Initialize LLM fallback handler for triage operations."""
         fallback_config = self._create_fallback_config()
@@ -351,296 +72,85 @@ class TriageSubAgent(BaseSubAgent):
             use_circuit_breaker=True
         )
     
-    async def _execute_triage_with_llm(self, state: DeepAgentState, 
-                                     run_id: str, stream_updates: bool) -> dict:
-        """Main triage execution with LLM processing."""
-        start_time = time.time()
+    def _init_modular_components(self) -> None:
+        """Initialize modular components for delegation."""
+        self.executor = TriageExecutor(self)
+        self.llm_processor = TriageLLMProcessor(self)
+        self.result_processor = TriageResultProcessor(self)
+        self.prompt_builder = TriagePromptBuilder(self)
+
+    async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
+        """Check if we have a user request to triage."""
+        return await self.executor.check_entry_conditions(state, run_id)
+
+    async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+        """Execute enhanced triage with comprehensive fallback handling."""
+        await self.executor.execute_triage_workflow(state, run_id, stream_updates)
+
+    async def cleanup(self, state: DeepAgentState, run_id: str) -> None:
+        """Cleanup after execution."""
+        await super().cleanup(state, run_id)
         
-        await self._send_processing_status_update(run_id, stream_updates)
-        triage_result = await self._get_or_generate_triage_result(state, run_id, start_time)
-        result = self._finalize_triage_result(triage_result, state.user_request, run_id)
-        self._log_agent_completion(run_id)
-        
-        return result
+        # Log final metrics if available
+        if state.triage_result and isinstance(state.triage_result, dict):
+            metadata = state.triage_result.get("metadata", {})
+            if metadata:
+                self.logger.debug(f"Triage metrics for run_id {run_id}: {metadata}")
     
-    def _log_agent_completion(self, run_id: str, status: str = "completed") -> None:
-        """Log agent communication completion."""
-        log_agent_communication("TriageSubAgent", "Supervisor", run_id, "execute_response")
+    def get_health_status(self) -> dict:
+        """Get agent health status."""
+        return self.reliability.get_health_status()
     
-    async def _send_processing_status_update(self, run_id: str, stream_updates: bool) -> None:
-        """Send processing status update via WebSocket."""
-        if stream_updates:
-            await self._send_update(run_id, {
-                "status": "processing",
-                "message": "Analyzing user request with enhanced categorization..."
-            })
+    def get_circuit_breaker_status(self) -> dict:
+        """Get circuit breaker status."""
+        return self.reliability.circuit_breaker.get_status()
     
-    async def _get_or_generate_triage_result(
-        self, state: DeepAgentState, run_id: str, start_time: float
-    ) -> dict:
-        """Get cached result or generate new triage result."""
-        request_hash = self.triage_core.generate_request_hash(state.user_request)
-        cached_result = await self.triage_core.get_cached_result(request_hash)
-        
-        if cached_result:
-            return self._prepare_cached_result(cached_result, start_time)
-        
-        return await self._generate_new_triage_result(state, run_id, start_time, request_hash)
+    # Delegation methods for backward compatibility
+    def _validate_request(self, request: str):
+        """Validate request - delegate to triage core validator."""
+        return self.triage_core.validator.validate_request(request)
     
-    async def _generate_new_triage_result(self, state: DeepAgentState, run_id: str, 
-                                        start_time: float, request_hash: str) -> dict:
-        """Generate new triage result and cache it."""
-        triage_result = await self._process_with_enhanced_llm(state, run_id, start_time)
-        await self.triage_core.cache_result(request_hash, triage_result)
-        return triage_result
+    def _extract_entities_from_request(self, request: str):
+        """Extract entities from request - delegate to entity extractor."""
+        return self.triage_core.entity_extractor.extract_entities(request)
     
-    def _finalize_triage_result(self, triage_result: dict, user_request: str, run_id: str) -> dict:
-        """Enrich and finalize triage result."""
-        enriched_result = self._enrich_triage_result(triage_result, user_request)
-        self._log_performance_metrics(run_id, enriched_result)
-        return enriched_result
+    def _determine_intent(self, request: str):
+        """Determine user intent - delegate to intent detector."""
+        return self.triage_core.intent_detector.detect_intent(request)
     
-    def _prepare_cached_result(self, cached_result: dict, start_time: float) -> dict:
-        """Prepare cached result with updated metadata."""
-        triage_result = cached_result.copy()
-        self._ensure_metadata_exists(triage_result)
-        cache_metadata = self._build_cache_metadata(start_time)
-        triage_result["metadata"].update(cache_metadata)
-        return triage_result
+    def _recommend_tools(self, category: str, entities):
+        """Recommend tools - delegate to tool recommender."""
+        return self.triage_core.tool_recommender.recommend_tools(category, entities)
     
-    async def _process_with_enhanced_llm(self, state: DeepAgentState,
-                                       run_id: str, start_time: float) -> dict:
-        """Process with LLM using enhanced error handling."""
-        enhanced_prompt = self._build_enhanced_prompt(state.user_request)
-        llm_operation = self._create_llm_operation(enhanced_prompt, run_id)
-        result = await self._execute_llm_with_fallback_protection(llm_operation)
-        triage_result = self._convert_result_to_dict(result)
-        return self._add_metadata(triage_result, start_time, 0)
+    def _fallback_categorization(self, request: str):
+        """Fallback categorization - delegate to triage core."""
+        return self.triage_core.create_fallback_result(request)
     
-    async def _try_structured_then_fallback_llm(self, enhanced_prompt: str, run_id: str) -> dict:
-        """Try structured LLM first with retry for ValidationError, then fallback to regular LLM."""
-        correlation_id = generate_llm_correlation_id()
-        
-        start_llm_heartbeat(correlation_id, "TriageSubAgent")
-        
-        try:
-            return await self._execute_structured_llm_with_retries(enhanced_prompt, correlation_id)
-        except Exception as e:
-            return await self._handle_llm_execution_error(enhanced_prompt, run_id, correlation_id)
-        finally:
-            stop_llm_heartbeat(correlation_id)
+    def _extract_and_validate_json(self, response: str):
+        """Extract and validate JSON - delegate to triage core."""
+        return self.triage_core.extract_and_validate_json(response)
     
-    async def _execute_structured_llm_with_retries(self, enhanced_prompt: str, correlation_id: str) -> dict:
-        """Execute structured LLM with retry mechanism."""
-        log_agent_input("TriageSubAgent", "LLM", len(enhanced_prompt), correlation_id)
-        
-        max_retries = 2
-        for attempt in range(max_retries):
-            try:
-                return await self._attempt_structured_llm_call(enhanced_prompt, correlation_id)
-            except ValidationError as ve:
-                if not self._should_retry_validation_error(attempt, max_retries, ve):
-                    raise ve
+    def _generate_request_hash(self, request: str):
+        """Generate request hash - delegate to triage core."""
+        return self.triage_core.generate_request_hash(request)
     
-    async def _attempt_structured_llm_call(self, enhanced_prompt: str, correlation_id: str) -> dict:
-        """Attempt a single structured LLM call."""
-        validated_result = await self.llm_manager.ask_structured_llm(
-            enhanced_prompt, llm_config_name='triage', schema=TriageResult, use_cache=False
-        )
-        
-        log_agent_output("LLM", "TriageSubAgent", 
-                       len(str(validated_result)), "success", correlation_id)
-        
-        return validated_result.model_dump()
+    # Additional backward compatibility methods (delegated to modules)
+    def _build_enhanced_prompt(self, user_request: str) -> str:
+        """Build enhanced prompt - delegate to prompt builder."""
+        return self.prompt_builder.build_enhanced_prompt(user_request)
     
-    def _should_retry_validation_error(self, attempt: int, max_retries: int, ve: ValidationError) -> bool:
-        """Determine if validation error should be retried."""
-        if attempt < max_retries - 1:
-            logger.warning(f"ValidationError on attempt {attempt + 1}, retrying: {ve}")
-            return True
-        else:
-            logger.error(f"ValidationError after {max_retries} attempts: {ve}")
-            return False
+    def _enrich_triage_result(self, triage_result, user_request: str):
+        """Enrich triage result - delegate to result processor."""
+        return self.result_processor.enrich_triage_result(triage_result, user_request)
     
-    async def _handle_llm_execution_error(self, enhanced_prompt: str, run_id: str, correlation_id: str) -> dict:
-        """Handle LLM execution error and fallback."""
-        log_agent_output("LLM", "TriageSubAgent", 0, "error", correlation_id)
-        return await self._fallback_llm_processing(enhanced_prompt, run_id)
-    
-    async def _execute_llm_with_fallback_protection(self, _llm_operation) -> Any:
-        """Execute LLM operation with fallback protection."""
-        return await self.llm_fallback_handler.execute_structured_with_fallback(
-            _llm_operation, TriageResult, "triage_llm_call", "triage"
-        )
-    
-    def _convert_result_to_dict(self, result: Any) -> dict:
-        """Convert result to dictionary format."""
-        if isinstance(result, TriageResult):
-            return result.model_dump()
-        else:
-            return result
-    
-    async def _fallback_llm_processing(self, enhanced_prompt: str, run_id: str) -> dict:
-        """Enhanced fallback LLM processing with better error handling."""
-        try:
-            llm_response_str = await self._get_llm_response_with_json_instruction(enhanced_prompt)
-            extracted_json = self.triage_core.extract_and_validate_json(llm_response_str)
-            
-            return self._process_extracted_json(extracted_json)
-        except Exception as e:
-            logger.error(f"LLM fallback processing failed for {run_id}: {e}")
-            return self._create_basic_triage_fallback()
-    
-    async def _get_llm_response_with_json_instruction(self, enhanced_prompt: str) -> str:
-        """Get LLM response with JSON formatting instruction."""
-        correlation_id = generate_llm_correlation_id()
-        
-        # Start heartbeat for fallback LLM operation
-        start_llm_heartbeat(correlation_id, "TriageSubAgent-Fallback")
-        
-        try:
-            prompt = enhanced_prompt + "\n\nIMPORTANT: Return a properly formatted JSON object."
-            
-            # Log input to LLM
-            log_agent_input("TriageSubAgent-Fallback", "LLM", len(prompt), correlation_id)
-            
-            response = await self.llm_manager.ask_llm(prompt, llm_config_name='triage')
-            
-            # Log output from LLM
-            log_agent_output("LLM", "TriageSubAgent-Fallback", 
-                           len(response), "success", correlation_id)
-            
-            return response
-        finally:
-            # Stop heartbeat
-            stop_llm_heartbeat(correlation_id)
-    
-    def _process_extracted_json(self, extracted_json: Optional[dict]) -> dict:
-        """Process extracted JSON with validation attempt."""
-        if extracted_json:
-            try:
-                validated_result = TriageResult(**extracted_json)
-                return validated_result.model_dump()
-            except ValidationError:
-                return extracted_json
-        
-        return self._create_basic_triage_fallback()
-    
-    def _create_basic_triage_fallback(self) -> dict:
-        """Create basic triage fallback response."""
-        return {
-            "category": "General Inquiry",
-            "confidence_score": 0.3,
-            "priority": "medium",
-            "extracted_entities": {},
-            "tool_recommendations": [],
-            "metadata": {
-                "fallback_used": True,
-                "fallback_type": "basic_triage"
-            }
-        }
-    
-    async def _create_emergency_fallback(self, state: DeepAgentState, run_id: str) -> dict:
-        """Create emergency fallback when all else fails."""
-        logger.error(f"Emergency fallback activated for triage {run_id}")
-        
-        # Try to use triage core fallback first
-        try:
-            fallback_result = self.triage_core.create_fallback_result(state.user_request)
-            return fallback_result.model_dump()
-        except Exception:
-            return self._create_basic_triage_fallback()
-    
-    async def _send_completion_update(self, run_id: str, result) -> None:
-        """Send completion update with result details."""
-        result_dict, category = self._extract_result_data(result)
-        status = self._determine_completion_status(result_dict)
-        
-        await self._send_update(run_id, {
-            "status": status,
-            "message": f"Request categorized as: {category}",
-            "result": result_dict
-        })
-    
-    def _extract_result_data(self, result) -> tuple:
-        """Extract result dictionary and category from result object."""
-        if hasattr(result, 'model_dump'):
-            result_dict = result.model_dump()
-            category = result.category if hasattr(result, 'category') else 'Unknown'
-        else:
-            result_dict = result if isinstance(result, dict) else {}
-            category = result_dict.get('category', 'Unknown')
-        return result_dict, category
-    
-    def _determine_completion_status(self, result_dict: dict) -> str:
-        """Determine completion status based on result metadata."""
-        metadata = result_dict.get("metadata", {}) or {}
-        fallback_used = metadata.get("fallback_used", False)
-        return "completed_with_fallback" if fallback_used else "completed"
-    
-    async def _send_emergency_update(self, run_id: str, result: dict) -> None:
-        """Send emergency fallback update."""
-        await self._send_update(run_id, {
-            "status": "completed_with_emergency_fallback",
-            "message": "Triage completed using emergency fallback",
-            "result": result
-        })
-    
-    def _log_execution_start(self, run_id: str) -> None:
-        """Log agent communication start."""
-        log_agent_communication("Supervisor", "TriageSubAgent", run_id, "execute_request")
-    
-    def _handle_execution_error(self, error: Exception, state: 'DeepAgentState', run_id: str, stream_updates: bool) -> None:
-        """Handle execution error and re-raise."""
-        logger.error(f"Triage execution failed for run_id {run_id}: {error}")
-        # Call parent implementation to handle lifecycle properly
-        # Don't re-raise here as parent will handle it
+    def _ensure_triage_result(self, result):
+        """Ensure triage result - delegate to result processor."""
+        return self.result_processor._ensure_triage_result(result)
     
     def _get_main_categories(self) -> list:
-        """Get list of main triage categories."""
-        return [
-            "Cost Optimization", "Performance Optimization", "Workload Analysis",
-            "Configuration & Settings", "Monitoring & Reporting", "Model Selection",
-            "Supply Catalog Management", "Quality Optimization"
-        ]
+        """Get main categories - delegate to prompt builder."""
+        return self.prompt_builder._get_main_categories()
     
     def _format_category_list(self, categories: list) -> str:
-        """Format categories as bulleted list."""
-        return "\n".join([f"- {category}" for category in categories])
-    
-    def _extract_performance_metrics(self, triage_result: dict) -> dict:
-        """Extract performance metrics from triage result."""
-        metadata = triage_result.get('metadata', {})
-        return {
-            'category': triage_result.get('category'),
-            'confidence': triage_result.get('confidence_score', 0),
-            'duration_ms': metadata.get('triage_duration_ms'),
-            'cache_hit': metadata.get('cache_hit')
-        }
-    
-    def _format_performance_log_message(self, run_id: str, metrics: dict) -> str:
-        """Format performance log message."""
-        return (
-            f"Triage completed for run_id {run_id}: "
-            f"category={metrics['category']}, confidence={metrics['confidence']}, "
-            f"duration={metrics['duration_ms']}ms, cache_hit={metrics['cache_hit']}"
-        )
-    
-    def _ensure_metadata_exists(self, triage_result: dict) -> None:
-        """Ensure metadata section exists in triage result."""
-        if "metadata" not in triage_result:
-            triage_result["metadata"] = {}
-    
-    def _build_cache_metadata(self, start_time: float) -> dict:
-        """Build cache metadata dictionary."""
-        return {
-            "cache_hit": True,
-            "triage_duration_ms": int((time.time() - start_time) * 1000),
-            "fallback_used": False
-        }
-    
-    def _create_llm_operation(self, enhanced_prompt: str, run_id: str):
-        """Create LLM operation function."""
-        async def _llm_operation():
-            return await self._try_structured_then_fallback_llm(enhanced_prompt, run_id)
-        return _llm_operation
+        """Format category list - delegate to prompt builder."""
+        return self.prompt_builder._format_category_list(categories)

@@ -10,7 +10,7 @@ from app.services.supply_research_scheduler import (
     ScheduleFrequency,
     ResearchSchedule
 )
-from app.agents.supply_researcher_sub_agent import ResearchType
+from app.agents.supply_researcher.models import ResearchType
 
 
 class MockBackgroundTaskManager:

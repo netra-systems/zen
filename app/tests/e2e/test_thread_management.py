@@ -20,7 +20,7 @@ from app.tests.helpers.thread_test_helpers import (
 )
 
 
-class ThreadCreationTests:
+class TestThreadCreation:
     """Tests for thread creation with unique IDs."""
     
     @pytest.mark.asyncio
@@ -66,7 +66,7 @@ class ThreadCreationTests:
         assert thread.created_at > 0
 
 
-class ThreadSwitchingTests:
+class TestThreadSwitching:
     """Tests for thread switching and context maintenance."""
     
     @pytest.mark.asyncio
@@ -122,7 +122,7 @@ class ThreadSwitchingTests:
         assert messages2[0].thread_id == thread2_id
 
 
-class ThreadPersistenceTests:
+class TestThreadPersistence:
     """Tests for thread persistence to database."""
     
     @pytest.mark.asyncio
@@ -176,7 +176,7 @@ class ThreadPersistenceTests:
         assert snapshot_id is not None
 
 
-class ThreadExpirationTests:
+class TestThreadExpiration:
     """Tests for thread expiration and cleanup."""
     
     @pytest.mark.asyncio
@@ -208,7 +208,7 @@ class ThreadExpirationTests:
         assert thread.metadata_.get("expired_at") is not None
 
 
-class ConcurrentThreadTests:
+class TestConcurrentThread:
     """Tests for concurrent thread operations."""
     
     @pytest.mark.asyncio
@@ -263,7 +263,7 @@ class ConcurrentThreadTests:
         assert len(successful_messages) > 0
 
 
-class ThreadIsolationTests:
+class TestThreadIsolation:
     """Tests for thread isolation and cross-contamination prevention."""
     
     @pytest.mark.asyncio

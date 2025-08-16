@@ -64,6 +64,74 @@
                     </validation>
                     <key-learnings>
                         <learning>Always identify the most comprehensive implementation as the canonical source</learning>
+        <learning>Create re-export modules for backwards compatibility during consolidation</learning>
+        <learning>Use import redirects to break circular dependencies</learning>
+        <learning>Validate all imports work after consolidation to prevent import errors</learning>
+    </key-learnings>
+</learning>
+
+<learning id="research-type-circular-import-fix">
+    <title>ResearchType Circular Import and Duplication Fix</title>
+    <date>2025-08-16</date>
+    <category>Type Safety</category>
+    <description>
+        Successfully resolved circular import error by consolidating duplicate ResearchType 
+        definitions and updating all imports to use the canonical source, following the 
+        single source of truth principle.
+    </description>
+    <problem>
+        <summary>Circular import error due to duplicate ResearchType enum definitions</summary>
+        <error_message>ImportError: cannot import name 'ResearchType' from partially initialized module 'app.agents.supply_researcher_sub_agent'</error_message>
+        <circular_chain>
+            <step>supply_researcher_sub_agent.py imports from supply_researcher/__init__.py</step>
+            <step>supply_researcher/agent.py imports SupplyResearchService</step>
+            <step>supply_research_service.py imports from supply_research/ modules</step>
+            <step>supply_research/scheduler_models.py tried to import ResearchType from supply_researcher_sub_agent</step>
+        </circular_chain>
+        <duplicate_definitions>
+            <location>app/agents/supply_researcher/models.py (canonical - 13 values)</location>
+            <location>app/services/supply_research/scheduler_models.py (duplicate - 3 values)</location>
+        </duplicate_definitions>
+        <impact>
+            <item>Test modules failing to import due to circular dependency</item>
+            <item>Type safety violations due to duplicate enum definitions</item>
+            <item>Inconsistent enum values across different modules</item>
+            <item>Multiple import paths for the same type</item>
+        </impact>
+    </problem>
+    <solution>
+        <approach>Consolidate to canonical source and update all imports</approach>
+        <steps>
+            <step>Identified app/agents/supply_researcher/models.py as canonical source (most comprehensive)</step>
+            <step>Added legacy scheduler values to canonical ResearchType for backwards compatibility</step>
+            <step>Removed duplicate ResearchType from scheduler_models.py</step>
+            <step>Updated scheduler_models.py to import from canonical source</step>
+            <step>Updated schedule_manager.py import path</step>
+            <step>Updated all test files to import from canonical source</step>
+            <step>Verified no circular import errors remain</step>
+        </steps>
+        <files-changed>
+            <file>app/agents/supply_researcher/models.py - Added legacy enum values for compatibility</file>
+            <file>app/services/supply_research/scheduler_models.py - Removed duplicate, imported canonical</file>
+            <file>app/services/supply_research/schedule_manager.py - Updated import path</file>
+            <file>app/tests/services/test_supply_research_scheduler_jobs.py - Updated import path</file>
+            <file>app/tests/services/supply_research_scheduler/test_*.py - Updated import paths (5 files)</file>
+        </files-changed>
+    </solution>
+    <validation>
+        <test>python -c "from app.agents.supply_researcher_sub_agent import ResearchType" - Success</test>
+        <test>python -c "from app.services.supply_research.scheduler_models import ResearchType" - Success</test>
+        <test>python -c "import app.tests.agents.test_supply_researcher_agent_core" - Success</test>
+        <test>Verified all 13 enum values available including legacy scheduler values</test>
+    </validation>
+    <key-learnings>
+        <learning>Always check for duplicate type definitions before creating new ones</learning>
+        <learning>Import directly from canonical source to avoid circular dependencies</learning>
+        <learning>Add legacy values to canonical source for backwards compatibility</learning>
+        <learning>Update all import paths systematically when consolidating types</learning>
+        <learning>Test import chains after fixing to ensure no circular dependencies remain</learning>
+    </key-learnings>
+</learning>
 
     </learnings>
 </specification>

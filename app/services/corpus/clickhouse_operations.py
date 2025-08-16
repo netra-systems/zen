@@ -17,70 +17,111 @@ from app.logging_config import central_logger
 class ClickHouseOperations:
     """Handles ClickHouse-specific operations for corpus management"""
     
-    async def create_corpus_table(
-        self,
-        corpus_id: str,
-        table_name: str,
-        db: Session
+    def _get_table_columns(self) -> str:
+        """Get table column definitions"""
+        columns = [
+            "record_id UUID", "workload_type String", "prompt String",
+            "response String", "metadata String", "domain String",
+            "created_at DateTime64(3) DEFAULT now()", "version UInt32 DEFAULT 1"
+        ]
+        return ", ".join(columns)
+
+    def _get_table_engine_config(self) -> str:
+        """Get table engine and partitioning configuration"""
+        return (
+            "ENGINE = MergeTree() "
+            "PARTITION BY toYYYYMM(created_at) "
+            "ORDER BY (workload_type, created_at, record_id)"
+        )
+
+    def _build_create_table_query(self, table_name: str) -> str:
+        """Build CREATE TABLE SQL query for ClickHouse"""
+        columns = self._get_table_columns()
+        engine_config = self._get_table_engine_config()
+        return (
+            f"CREATE TABLE IF NOT EXISTS {table_name} ({columns}) "
+            f"{engine_config}"
+        )
+
+    async def _execute_table_creation(self, table_name: str, query: str):
+        """Execute table creation in ClickHouse"""
+        async with get_clickhouse_client() as client:
+            await client.execute(query)
+
+    def _update_corpus_status_success(self, corpus_id: str, db: Session):
+        """Update corpus status to AVAILABLE in PostgreSQL"""
+        db.query(models.Corpus).filter(
+            models.Corpus.id == corpus_id
+        ).update({"status": CorpusStatus.AVAILABLE.value})
+        db.commit()
+
+    def _build_success_payload(self, corpus_id: str, table_name: str) -> Dict:
+        """Build success notification payload"""
+        payload_data = {
+            "corpus_id": corpus_id, "table_name": table_name,
+            "status": CorpusStatus.AVAILABLE.value
+        }
+        return {"type": "corpus:created", "payload": payload_data}
+
+    async def _send_success_notification(self, corpus_id: str, table_name: str):
+        """Send WebSocket notification for successful corpus creation"""
+        payload = self._build_success_payload(corpus_id, table_name)
+        await manager.broadcasting.broadcast_to_all(payload)
+
+    def _log_creation_success(self, corpus_id: str, table_name: str):
+        """Log successful table creation"""
+        central_logger.info(
+            f"Created ClickHouse table {table_name} for corpus {corpus_id}"
+        )
+
+    def _update_corpus_status_failed(self, corpus_id: str, db: Session):
+        """Update corpus status to FAILED in PostgreSQL"""
+        db.query(models.Corpus).filter(
+            models.Corpus.id == corpus_id
+        ).update({"status": CorpusStatus.FAILED.value})
+        db.commit()
+
+    def _build_error_payload(self, corpus_id: str, error: Exception) -> Dict:
+        """Build error notification payload"""
+        payload_data = {"corpus_id": corpus_id, "error": str(error)}
+        return {"type": "corpus:error", "payload": payload_data}
+
+    async def _send_error_notification(self, corpus_id: str, error: Exception):
+        """Send WebSocket notification for corpus creation error"""
+        payload = self._build_error_payload(corpus_id, error)
+        await manager.broadcasting.broadcast_to_all(payload)
+
+    def _log_creation_error(self, corpus_id: str, error: Exception):
+        """Log table creation error"""
+        central_logger.error(
+            f"Failed to create ClickHouse table for corpus {corpus_id}: {str(error)}"
+        )
+
+    async def _handle_creation_error(
+        self, corpus_id: str, error: Exception, db: Session
     ):
+        """Handle corpus table creation error"""
+        self._log_creation_error(corpus_id, error)
+        self._update_corpus_status_failed(corpus_id, db)
+        await self._send_error_notification(corpus_id, error)
+        raise ClickHouseOperationError(f"Failed to create table: {str(error)}")
+
+    async def _execute_success_flow(
+        self, corpus_id: str, table_name: str, db: Session
+    ):
+        """Execute successful table creation flow"""
+        self._update_corpus_status_success(corpus_id, db)
+        await self._send_success_notification(corpus_id, table_name)
+        self._log_creation_success(corpus_id, table_name)
+
+    async def create_corpus_table(self, corpus_id: str, table_name: str, db: Session):
         """Create ClickHouse table for corpus content"""
         try:
-            async with get_clickhouse_client() as client:
-                # Create table with comprehensive schema
-                create_query = f"""
-                    CREATE TABLE IF NOT EXISTS {table_name} (
-                        record_id UUID,
-                        workload_type String,
-                        prompt String,
-                        response String,
-                        metadata String,
-                        domain String,
-                        created_at DateTime64(3) DEFAULT now(),
-                        version UInt32 DEFAULT 1
-                    ) ENGINE = MergeTree()
-                    PARTITION BY toYYYYMM(created_at)
-                    ORDER BY (workload_type, created_at, record_id)
-                """
-                
-                await client.execute(create_query)
-                
-                # Update status to available
-                db.query(models.Corpus).filter(
-                    models.Corpus.id == corpus_id
-                ).update({"status": CorpusStatus.AVAILABLE.value})
-                db.commit()
-                
-                # Send WebSocket notification
-                await manager.broadcasting.broadcast_to_all({
-                    "type": "corpus:created",
-                    "payload": {
-                        "corpus_id": corpus_id,
-                        "table_name": table_name,
-                        "status": CorpusStatus.AVAILABLE.value
-                    }
-                })
-                
-                central_logger.info(f"Created ClickHouse table {table_name} for corpus {corpus_id}")
-                
+            query = self._build_create_table_query(table_name)
+            await self._execute_table_creation(table_name, query)
+            await self._execute_success_flow(corpus_id, table_name, db)
         except Exception as e:
-            central_logger.error(f"Failed to create ClickHouse table for corpus {corpus_id}: {str(e)}")
-            
-            # Update status to failed
-            db.query(models.Corpus).filter(
-                models.Corpus.id == corpus_id
-            ).update({"status": CorpusStatus.FAILED.value})
-            db.commit()
-            
-            # Send error notification
-            await manager.broadcasting.broadcast_to_all({
-                "type": "corpus:error",
-                "payload": {
-                    "corpus_id": corpus_id,
-                    "error": str(e)
-                }
-            })
-            
-            raise ClickHouseOperationError(f"Failed to create table: {str(e)}")
+            await self._handle_creation_error(corpus_id, e, db)
     
     async def delete_corpus_table(
         self,

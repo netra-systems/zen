@@ -243,57 +243,58 @@ class SearchOperations:
         self,
         db_corpus
     ) -> Optional[Dict]:
-        """
-        Get detailed analytics by workload type
-        
-        Args:
-            db_corpus: Corpus database model
-            
-        Returns:
-            Analytics data by workload type
-        """
-        if db_corpus.status != "available":
-            raise CorpusNotAvailableError(f"Corpus {db_corpus.id} is not available")
-        
+        """Get detailed analytics by workload type"""
+        self._validate_corpus_availability(db_corpus)
         try:
             async with get_clickhouse_client() as client:
-                # Get analytics by workload type
-                analytics_query = f"""
-                    SELECT 
-                        workload_type,
-                        COUNT(*) as count,
-                        AVG(LENGTH(prompt)) as avg_prompt_length,
-                        AVG(LENGTH(response)) as avg_response_length,
-                        MIN(LENGTH(prompt)) as min_prompt_length,
-                        MAX(LENGTH(prompt)) as max_prompt_length,
-                        MIN(LENGTH(response)) as min_response_length,
-                        MAX(LENGTH(response)) as max_response_length,
-                        MIN(created_at) as earliest_record,
-                        MAX(created_at) as latest_record
-                    FROM {db_corpus.table_name}
-                    GROUP BY workload_type
-                    ORDER BY count DESC
-                """
-                
-                result = await client.execute(analytics_query)
-                
-                # Format analytics
-                analytics = {}
-                for row in result:
-                    analytics[row[0]] = {
-                        "count": row[1],
-                        "avg_prompt_length": float(row[2]) if row[2] else 0.0,
-                        "avg_response_length": float(row[3]) if row[3] else 0.0,
-                        "min_prompt_length": row[4],
-                        "max_prompt_length": row[5],
-                        "min_response_length": row[6],
-                        "max_response_length": row[7],
-                        "earliest_record": row[8].isoformat() if row[8] else None,
-                        "latest_record": row[9].isoformat() if row[9] else None
-                    }
-                
-                return analytics
-                
+                return await self._execute_workload_analytics_query(client, db_corpus.table_name)
         except Exception as e:
             central_logger.error(f"Failed to get workload analytics for corpus {db_corpus.id}: {str(e)}")
             raise ClickHouseOperationError(f"Analytics query failed: {str(e)}")
+    
+    async def _execute_workload_analytics_query(
+        self, client, table_name: str
+    ) -> Dict:
+        """Execute workload analytics query and format results."""
+        query = self._build_workload_analytics_query(table_name)
+        result = await client.execute(query)
+        return self._format_workload_analytics_results(result)
+    
+    def _build_workload_analytics_query(self, table_name: str) -> str:
+        """Build analytics query for workload type data."""
+        return f"""
+            SELECT workload_type, COUNT(*) as count,
+                   AVG(LENGTH(prompt)) as avg_prompt_length, AVG(LENGTH(response)) as avg_response_length,
+                   MIN(LENGTH(prompt)) as min_prompt_length, MAX(LENGTH(prompt)) as max_prompt_length,
+                   MIN(LENGTH(response)) as min_response_length, MAX(LENGTH(response)) as max_response_length,
+                   MIN(created_at) as earliest_record, MAX(created_at) as latest_record
+            FROM {table_name} GROUP BY workload_type ORDER BY count DESC
+        """
+    
+    def _format_workload_analytics_results(self, result) -> Dict:
+        """Format workload analytics results into dictionary."""
+        analytics = {}
+        for row in result:
+            analytics[row[0]] = self._build_workload_analytics_row(row)
+        return analytics
+    
+    def _build_workload_analytics_row(self, row) -> Dict:
+        """Build analytics data dictionary for a single workload type row."""
+        base_data = self._extract_workload_row_metrics(row)
+        timestamps = self._format_workload_timestamps(row[8], row[9])
+        return {**base_data, **timestamps}
+    
+    def _extract_workload_row_metrics(self, row) -> Dict:
+        """Extract numeric metrics from workload analytics row."""
+        return {
+            "count": row[1], "avg_prompt_length": float(row[2]) if row[2] else 0.0,
+            "avg_response_length": float(row[3]) if row[3] else 0.0, "min_prompt_length": row[4],
+            "max_prompt_length": row[5], "min_response_length": row[6], "max_response_length": row[7]
+        }
+    
+    def _format_workload_timestamps(self, earliest, latest) -> Dict:
+        """Format earliest and latest timestamps for workload analytics."""
+        return {
+            "earliest_record": earliest.isoformat() if earliest else None,
+            "latest_record": latest.isoformat() if latest else None
+        }
