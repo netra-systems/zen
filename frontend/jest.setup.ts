@@ -116,7 +116,9 @@ beforeAll(() => {
       typeof args[0] === 'string' &&
       (args[0].includes('Not implemented') ||
        args[0].includes('Warning:') ||
-       args[0].includes('ReactDOMTestUtils'))
+       args[0].includes('ReactDOMTestUtils') ||
+       args[0].includes('Error parsing WebSocket message') ||
+       args[0].includes('WebSocket error occurred'))
     ) {
       return;
     }

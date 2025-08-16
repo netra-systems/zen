@@ -115,6 +115,20 @@
                 <id>circuit-breaker-consolidation</id>
             </learning_ids>
         </category>
+        <category>
+            <name>Testing</name>
+            <file>learnings/testing.xml</file>
+            <path>SPEC/learnings/testing.xml</path>
+            <learning_count>6</learning_count>
+            <learning_ids>
+                <id>clickhouse-regex-deep-nested-fields</id>
+                <id>clickhouse-function-wrapper-preservation</id>
+                <id>frontend-test-bash-glob-pattern</id>
+                <id>test-runner-easy-commands</id>
+                <id>test-isolation-interceptor-reset</id>
+                <id>frontend-component-test-setup</id>
+            </learning_ids>
+        </category>
     </categories>
     
     <usage>
@@ -125,7 +139,7 @@
     </usage>
     
     <statistics>
-        <total_categories>10</total_categories>
-        <total_learnings>26</total_learnings>
+        <total_categories>11</total_categories>
+        <total_learnings>32</total_learnings>
     </statistics>
 </specification>

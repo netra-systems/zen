@@ -316,20 +316,20 @@ class TestClickHouseArraySyntaxFixer:
         edge_cases = [
             "SELECT data.items[0] FROM table",  # Zero index
             "SELECT a.b[variable_name] FROM t",   # Variable names
-            "SELECT nested.deep.array[i] FROM complex",  # Deeply nested (shouldn't match)
-            "SELECT simple[idx] FROM basic",     # No dot notation (shouldn't match)
+            "SELECT nested.deep.array[i] FROM complex",  # Deeply nested fields now supported
+            "SELECT simple[idx] FROM basic",     # Single field arrays now supported
         ]
         
         expected_results = [
-            "arrayElement(data.items, 0)",
+            "toFloat64OrZero(arrayElement(data.items, 0))",
             "arrayElement(a.b, variable_name)",
-            "arrayElement(deep.array, i)",  # Will match deep.array[i] part
-            "simple[idx]"  # Should remain unchanged (no dot notation)
+            "arrayElement(nested.deep.array, i)",  # Captures full path now
+            "arrayElement(simple, idx)"  # Now fixes even single field arrays
         ]
         
         for i, query in enumerate(edge_cases):
             fixed_query = fix_clickhouse_array_syntax(query)
-            if expected_results[i].startswith("arrayElement"):
+            if "arrayElement" in expected_results[i]:
                 assert expected_results[i] in fixed_query
             else:
                 # Should remain unchanged for unsupported patterns

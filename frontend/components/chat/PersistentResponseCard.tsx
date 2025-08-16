@@ -72,9 +72,10 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
   const adminType = getAdminType();
   const adminStatus = isProcessing ? 'in_progress' : slowLayerData ? 'completed' : 'pending';
   const adminMetadata = slowLayerData?.finalReport?.technical_details;
-  const showFastLayer = isProcessing || fastLayerData !== null;
-  const showMediumLayer = mediumLayerData !== null;
-  const showSlowLayer = slowLayerData !== null;
+  // Enhanced layer visibility logic
+  const showFastLayer = isProcessing || (fastLayerData !== null && fastLayerData.agentName);
+  const showMediumLayer = mediumLayerData !== null && (mediumLayerData.thought || mediumLayerData.partialContent);
+  const showSlowLayer = slowLayerData !== null && (slowLayerData.completedAgents?.length > 0 || slowLayerData.finalReport);
 
   const adminConfig = adminType ? ADMIN_TYPE_CONFIG[adminType] : null;
   const AdminIcon = adminConfig?.icon || Shield;
@@ -200,13 +201,14 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
       )}
 
       {/* Fast Layer */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {showFastLayer && (
           <motion.div
+            key="fast-layer"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 48 }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0 }}
+            transition={{ duration: 0.2 }}
           >
             <FastLayer 
               data={fastLayerData} 
@@ -217,9 +219,10 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
       </AnimatePresence>
 
       {/* Medium Layer */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {showMediumLayer && (
           <motion.div
+            key="medium-layer"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
@@ -231,9 +234,10 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
       </AnimatePresence>
 
       {/* Slow Layer */}
-      <AnimatePresence>
+      <AnimatePresence mode="wait">
         {showSlowLayer && (
           <motion.div
+            key="slow-layer"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}

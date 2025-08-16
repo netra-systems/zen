@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { screen, within } from '@testing-library/react';
+import { screen, within, waitFor } from '@testing-library/react';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { createTestSetup, renderWithProvider, sampleThreads } from './setup';
 
@@ -20,22 +20,31 @@ describe('ChatSidebar - Basic Functionality', () => {
   });
 
   describe('Thread List Display', () => {
-    it('should render thread list when threads are available', () => {
+    it('should render thread list when threads are available', async () => {
+      // Configure ThreadService to return sample threads
+      testSetup.configureThreadService({
+        listThreads: jest.fn().mockResolvedValue(sampleThreads)
+      });
+      
       testSetup.configureStore({
-        threads: sampleThreads,
-        currentThreadId: 'thread-2'
+        activeThreadId: 'thread-2'
       });
       
       renderWithProvider(<ChatSidebar />);
       
       expect(screen.getByTestId('thread-list')).toBeInTheDocument();
-      expect(screen.getByText('AI Optimization Discussion')).toBeInTheDocument();
+      
+      // Wait for the async loading to complete
+      await waitFor(() => {
+        expect(screen.getByText('AI Optimization Discussion')).toBeInTheDocument();
+      });
+      
       expect(screen.getByText('Performance Analysis')).toBeInTheDocument();
       expect(screen.getByText('Data Processing Pipeline')).toBeInTheDocument();
       
       // Active thread should be highlighted
       const activeThread = screen.getByTestId('thread-item-thread-2');
-      expect(activeThread).toHaveClass('bg-primary/10', 'border-primary');
+      expect(activeThread).toHaveClass('bg-emerald-50');
     });
 
     it('should display thread metadata correctly', () => {

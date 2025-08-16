@@ -28,14 +28,20 @@ class ThreadCreationTests:
         """Test that each new thread gets a unique ID."""
         service = ThreadService()
         user_ids = ["user1", "user2", "user3"]
-        created_threads = []
         
+        created_threads = await self._create_multiple_threads(service, user_ids, db_session)
+        self._assert_unique_thread_ids(created_threads)
+    
+    async def _create_multiple_threads(
+        self, service: ThreadService, user_ids: List[str], db_session: AsyncSession
+    ) -> List[Thread]:
+        """Create multiple threads for testing."""
+        created_threads = []
         for user_id in user_ids:
             thread = await service.get_or_create_thread(user_id, db_session)
             assert thread is not None
             created_threads.append(thread)
-        
-        self._assert_unique_thread_ids(created_threads)
+        return created_threads
     
     def _assert_unique_thread_ids(self, threads: List[Thread]) -> None:
         """Assert all thread IDs are unique."""
@@ -69,28 +75,32 @@ class ThreadSwitchingTests:
         service = ThreadService()
         user_id = "switch_test_user"
         
-        # Create multiple threads
+        threads = await self._create_test_thread_pair(service, user_id, db_session)
+        await self._verify_thread_context_separation(service, threads[0], threads[1], db_session)
+    
+    async def _create_test_thread_pair(
+        self, service: ThreadService, user_id: str, db_session: AsyncSession
+    ) -> List[Thread]:
+        """Create pair of threads for testing."""
         thread1 = await service.get_or_create_thread(user_id, db_session)
         thread2 = await service.get_or_create_thread(f"{user_id}_2", db_session)
-        
-        await self._verify_thread_context_separation(service, thread1, thread2, db_session)
+        return [thread1, thread2]
     
     async def _verify_thread_context_separation(
         self, service: ThreadService, thread1: Thread, 
         thread2: Thread, db_session: AsyncSession
     ) -> None:
         """Verify threads maintain separate contexts."""
-        # Add message to thread1
-        msg1 = await service.create_message(
-            thread1.id, "user", "Message in thread 1", db=db_session
-        )
-        
-        # Add message to thread2  
-        msg2 = await service.create_message(
-            thread2.id, "user", "Message in thread 2", db=db_session
-        )
-        
+        await self._add_messages_to_threads(service, thread1, thread2, db_session)
         await self._assert_context_isolation(service, thread1, thread2, db_session)
+    
+    async def _add_messages_to_threads(
+        self, service: ThreadService, thread1: Thread, 
+        thread2: Thread, db_session: AsyncSession
+    ) -> None:
+        """Add test messages to both threads."""
+        await service.create_message(thread1.id, "user", "Message in thread 1", db=db_session)
+        await service.create_message(thread2.id, "user", "Message in thread 2", db=db_session)
     
     async def _assert_context_isolation(
         self, service: ThreadService, thread1: Thread,
@@ -100,10 +110,16 @@ class ThreadSwitchingTests:
         messages1 = await service.get_thread_messages(thread1.id, db=db_session)
         messages2 = await service.get_thread_messages(thread2.id, db=db_session)
         
-        assert len(messages1) == 1
-        assert len(messages2) == 1
-        assert messages1[0].thread_id == thread1.id
-        assert messages2[0].thread_id == thread2.id
+        self._validate_message_isolation(messages1, messages2, thread1.id, thread2.id)
+    
+    def _validate_message_isolation(
+        self, messages1: List[Message], messages2: List[Message],
+        thread1_id: str, thread2_id: str
+    ) -> None:
+        """Validate message isolation between threads."""
+        assert len(messages1) == 1 and len(messages2) == 1
+        assert messages1[0].thread_id == thread1_id
+        assert messages2[0].thread_id == thread2_id
 
 
 class ThreadPersistenceTests:

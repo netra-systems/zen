@@ -42,59 +42,55 @@ class ResponseGenerator:
             Dict containing the fallback response and metadata
         """
         try:
-            # Get appropriate template
-            template = self.template_manager.get_template(
-                context.content_type,
-                context.failure_reason,
-                context.retry_count
-            )
-            
-            # Populate template with context
-            response_text = self.content_processor.populate_template(template, context)
-            
-            # Add quality-specific feedback if available
-            if context.quality_metrics:
-                quality_feedback = self.content_processor.generate_quality_feedback(
-                    context.quality_metrics
-                )
-                if quality_feedback:
-                    response_text += f"\n\n{quality_feedback}"
-            
-            # Add diagnostic tips
-            diagnostics = []
-            if include_diagnostics:
-                diagnostics = self.diagnostics_manager.get_diagnostic_tips(
-                    context.failure_reason
-                )
-            
-            # Add recovery suggestions
-            recovery_options = []
-            if include_recovery:
-                recovery_options = self.diagnostics_manager.get_recovery_suggestions(
-                    context.content_type
-                )
-            
-            # Build complete response
-            response = self._build_response(
-                response_text,
-                context,
-                diagnostics,
-                recovery_options
-            )
-            
-            # Log fallback generation
-            logger.info(
-                f"Generated fallback for {context.agent_name} - "
-                f"Reason: {context.failure_reason.value} - "
-                f"Type: {context.content_type.value}"
-            )
-            
+            response_text = await self._create_response_text(context)
+            diagnostics, recovery_options = self._collect_support_options(context, include_diagnostics, include_recovery)
+            response = self._build_response(response_text, context, diagnostics, recovery_options)
+            self._log_fallback_generation(context)
             return response
-            
         except Exception as e:
             logger.error(f"Error generating fallback response: {str(e)}")
-            # Return a safe default fallback
             return self._get_emergency_fallback(context)
+    
+    async def _create_response_text(self, context: FallbackContext) -> str:
+        """Create the main response text with template and quality feedback"""
+        template = self.template_manager.get_template(context.content_type, context.failure_reason, context.retry_count)
+        response_text = self.content_processor.populate_template(template, context)
+        quality_feedback = self._get_quality_feedback(context)
+        if quality_feedback:
+            response_text += f"\n\n{quality_feedback}"
+        return response_text
+    
+    def _get_quality_feedback(self, context: FallbackContext) -> Optional[str]:
+        """Get quality feedback if available"""
+        if not context.quality_metrics:
+            return None
+        return self.content_processor.generate_quality_feedback(context.quality_metrics)
+    
+    def _collect_support_options(self, context: FallbackContext, include_diagnostics: bool, include_recovery: bool) -> tuple[List[str], List[Dict[str, str]]]:
+        """Collect diagnostic tips and recovery suggestions"""
+        diagnostics = self._get_diagnostics(context, include_diagnostics)
+        recovery_options = self._get_recovery_options(context, include_recovery)
+        return diagnostics, recovery_options
+    
+    def _get_diagnostics(self, context: FallbackContext, include_diagnostics: bool) -> List[str]:
+        """Get diagnostic tips if requested"""
+        if not include_diagnostics:
+            return []
+        return self.diagnostics_manager.get_diagnostic_tips(context.failure_reason)
+    
+    def _get_recovery_options(self, context: FallbackContext, include_recovery: bool) -> List[Dict[str, str]]:
+        """Get recovery suggestions if requested"""
+        if not include_recovery:
+            return []
+        return self.diagnostics_manager.get_recovery_suggestions(context.content_type)
+    
+    def _log_fallback_generation(self, context: FallbackContext) -> None:
+        """Log fallback generation details"""
+        logger.info(
+            f"Generated fallback for {context.agent_name} - "
+            f"Reason: {context.failure_reason.value} - "
+            f"Type: {context.content_type.value}"
+        )
     
     def _build_response(
         self,

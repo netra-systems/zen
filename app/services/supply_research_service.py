@@ -30,6 +30,38 @@ class SupplyResearchService:
         except Exception as e:
             logger.warning(f"Redis not available for caching: {e}")
     
+    def _build_supply_items_base_query(self):
+        """Build base query for supply items"""
+        return self.db.query(AISupplyItem)
+    
+    def _apply_provider_filter_to_query(self, query, provider: Optional[str]):
+        """Apply provider filter to query"""
+        if provider:
+            return query.filter(AISupplyItem.provider == provider)
+        return query
+    
+    def _apply_model_name_filter(self, query, model_name: Optional[str]):
+        """Apply model name filter to query"""
+        if model_name:
+            return query.filter(AISupplyItem.model_name.ilike(f"%{model_name}%"))
+        return query
+    
+    def _apply_availability_filter(self, query, availability_status: Optional[str]):
+        """Apply availability status filter to query"""
+        if availability_status:
+            return query.filter(AISupplyItem.availability_status == availability_status)
+        return query
+    
+    def _apply_confidence_filter(self, query, min_confidence: Optional[float]):
+        """Apply confidence score filter to query"""
+        if min_confidence:
+            return query.filter(AISupplyItem.confidence_score >= min_confidence)
+        return query
+    
+    def _execute_supply_items_query(self, query):
+        """Execute and order supply items query"""
+        return query.order_by(desc(AISupplyItem.last_updated)).all()
+    
     def get_supply_items(
         self,
         provider: Optional[str] = None,
@@ -38,18 +70,12 @@ class SupplyResearchService:
         min_confidence: Optional[float] = None
     ) -> List[AISupplyItem]:
         """Get supply items with optional filters"""
-        query = self.db.query(AISupplyItem)
-        
-        if provider:
-            query = query.filter(AISupplyItem.provider == provider)
-        if model_name:
-            query = query.filter(AISupplyItem.model_name.ilike(f"%{model_name}%"))
-        if availability_status:
-            query = query.filter(AISupplyItem.availability_status == availability_status)
-        if min_confidence:
-            query = query.filter(AISupplyItem.confidence_score >= min_confidence)
-        
-        return query.order_by(desc(AISupplyItem.last_updated)).all()
+        query = self._build_supply_items_base_query()
+        query = self._apply_provider_filter_to_query(query, provider)
+        query = self._apply_model_name_filter(query, model_name)
+        query = self._apply_availability_filter(query, availability_status)
+        query = self._apply_confidence_filter(query, min_confidence)
+        return self._execute_supply_items_query(query)
     
     def get_supply_item_by_id(self, item_id: str) -> Optional[AISupplyItem]:
         """Get a specific supply item by ID"""
@@ -166,6 +192,26 @@ class SupplyResearchService:
         self._create_item_creation_log(new_item.id, research_session_id, updated_by)
         return new_item
     
+    def _build_research_sessions_base_query(self):
+        """Build base query for research sessions"""
+        return self.db.query(ResearchSession)
+    
+    def _apply_status_filter_to_sessions(self, query, status: Optional[str]):
+        """Apply status filter to research sessions query"""
+        if status:
+            return query.filter(ResearchSession.status == status)
+        return query
+    
+    def _apply_initiator_filter_to_sessions(self, query, initiated_by: Optional[str]):
+        """Apply initiator filter to research sessions query"""
+        if initiated_by:
+            return query.filter(ResearchSession.initiated_by == initiated_by)
+        return query
+    
+    def _execute_research_sessions_query(self, query, limit: int):
+        """Execute research sessions query with ordering and limit"""
+        return query.order_by(desc(ResearchSession.created_at)).limit(limit).all()
+    
     def get_research_sessions(
         self,
         status: Optional[str] = None,
@@ -173,14 +219,10 @@ class SupplyResearchService:
         limit: int = 100
     ) -> List[ResearchSession]:
         """Get research sessions with optional filters"""
-        query = self.db.query(ResearchSession)
-        
-        if status:
-            query = query.filter(ResearchSession.status == status)
-        if initiated_by:
-            query = query.filter(ResearchSession.initiated_by == initiated_by)
-        
-        return query.order_by(desc(ResearchSession.created_at)).limit(limit).all()
+        query = self._build_research_sessions_base_query()
+        query = self._apply_status_filter_to_sessions(query, status)
+        query = self._apply_initiator_filter_to_sessions(query, initiated_by)
+        return self._execute_research_sessions_query(query, limit)
     
     def get_research_session_by_id(self, session_id: str) -> Optional[ResearchSession]:
         """Get a specific research session"""
@@ -457,52 +499,64 @@ class SupplyResearchService:
     
     async def generate_market_report(self) -> Dict[str, Any]:
         """Generate comprehensive market report"""
-        report = {
+        report = self._initialize_report_structure()
+        await self._populate_report_sections(report)
+        return report
+    
+    def _initialize_report_structure(self) -> Dict[str, Any]:
+        """Initialize the base report structure."""
+        return {
             "generated_at": datetime.now(UTC).isoformat(),
             "sections": {}
         }
-        
-        # Provider comparison
+    
+    async def _populate_report_sections(self, report: Dict[str, Any]) -> None:
+        """Populate all report sections."""
         report["sections"]["provider_comparison"] = self.get_provider_comparison()
-        
-        # Recent price changes
-        report["sections"]["price_changes"] = {
+        report["sections"]["price_changes"] = self._generate_price_changes_section()
+        report["sections"]["anomalies"] = self.detect_anomalies()
+        report["sections"]["statistics"] = self._generate_statistics_section()
+        report["sections"]["recent_research"] = self._generate_research_section()
+    
+    def _generate_price_changes_section(self) -> Dict[str, Any]:
+        """Generate price changes section of the report."""
+        return {
             "weekly": self.calculate_price_changes(days_back=7),
             "monthly": self.calculate_price_changes(days_back=30)
         }
-        
-        # Anomalies
-        report["sections"]["anomalies"] = self.detect_anomalies()
-        
-        # Model statistics
+    
+    def _generate_statistics_section(self) -> Dict[str, Any]:
+        """Generate model statistics section."""
+        model_counts = self._get_model_counts()
+        providers_count = self._get_providers_count()
+        return {**model_counts, "providers_tracked": providers_count}
+    
+    def _get_model_counts(self) -> Dict[str, int]:
+        """Get various model counts for statistics."""
         total_models = self.db.query(AISupplyItem).count()
         available_models = self.db.query(AISupplyItem).filter(
-            AISupplyItem.availability_status == "available"
-        ).count()
+            AISupplyItem.availability_status == "available").count()
         deprecated_models = self.db.query(AISupplyItem).filter(
-            AISupplyItem.availability_status == "deprecated"
-        ).count()
-        
-        report["sections"]["statistics"] = {
-            "total_models": total_models,
-            "available_models": available_models,
-            "deprecated_models": deprecated_models,
-            "providers_tracked": len(set(item.provider for item in self.get_supply_items()))
-        }
-        
-        # Recent research sessions
+            AISupplyItem.availability_status == "deprecated").count()
+        return {"total_models": total_models, "available_models": available_models, "deprecated_models": deprecated_models}
+    
+    def _get_providers_count(self) -> int:
+        """Get count of unique providers tracked."""
+        all_items = self.get_supply_items()
+        return len(set(item.provider for item in all_items))
+    
+    def _generate_research_section(self) -> List[Dict[str, Any]]:
+        """Generate recent research sessions section."""
         recent_sessions = self.get_research_sessions(limit=10)
-        report["sections"]["recent_research"] = [
-            {
-                "id": str(session.id),
-                "query": session.query[:100] + "..." if len(session.query) > 100 else session.query,
-                "status": session.status,
-                "created_at": session.created_at.isoformat() if session.created_at else None
-            }
-            for session in recent_sessions
-        ]
-        
-        return report
+        return [self._format_session_summary(session) for session in recent_sessions]
+    
+    def _format_session_summary(self, session) -> Dict[str, Any]:
+        """Format a single research session for the report."""
+        query_summary = session.query[:100] + "..." if len(session.query) > 100 else session.query
+        return {
+            "id": str(session.id), "query": query_summary, "status": session.status,
+            "created_at": session.created_at.isoformat() if session.created_at else None
+        }
     
     def validate_supply_data(self, data: Dict[str, Any]) -> Tuple[bool, List[str]]:
         """Validate supply data before storage"""

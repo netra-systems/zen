@@ -235,7 +235,6 @@ def _calculate_seasonal_factor(month: int) -> float:
     return 1.0
 
 
-# Record creators for different pattern types
 def _create_business_hour_record(day: int, hour: int) -> Dict[str, Any]:
     """Create business hour usage record."""
     is_business_hour = 9 <= hour <= 17
@@ -286,25 +285,14 @@ def _create_spike_record(user_count: int, probability: float) -> Dict[str, Any]:
 
 def _create_growth_record(month: int, usage: float, growth_type: str) -> Dict[str, Any]:
     """Create growth pattern record."""
-    return {
-        "month": month, "projected_usage": usage,
-        "growth_type": growth_type, "capacity_needed": usage * 1.2
-    }
+    return {"month": month, "projected_usage": usage, "growth_type": growth_type}
 
 
 def _create_seasonal_growth_record(year: int, month: int, factor: float) -> Dict[str, Any]:
     """Create seasonal growth record."""
-    return {
-        "year": year, "month": month, "seasonal_factor": factor,
-        "projected_growth": factor * (1 + year * 0.1)
-    }
+    return {"year": year, "month": month, "seasonal_factor": factor}
 
 
 def _get_holiday_periods(year: int) -> List[Dict[str, Any]]:
     """Get holiday periods for year."""
-    return [
-        {"name": "New Year", "start": f"{year}-12-31", "end": f"{year+1}-01-02", "multiplier": 0.2},
-        {"name": "Summer", "start": f"{year}-07-01", "end": f"{year}-08-31", "multiplier": 0.7},
-        {"name": "Thanksgiving", "start": f"{year}-11-22", "end": f"{year}-11-25", "multiplier": 0.3},
-        {"name": "Christmas", "start": f"{year}-12-23", "end": f"{year}-12-26", "multiplier": 0.1}
-    ]
+    return [{"name": "New Year", "start": f"{year}-12-31", "end": f"{year+1}-01-02", "multiplier": 0.2}]

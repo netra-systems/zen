@@ -6,8 +6,10 @@ import { Zap } from 'lucide-react';
 import type { FastLayerProps } from '@/types/unified-chat';
 
 export const FastLayer: React.FC<FastLayerProps> = ({ data, isProcessing }) => {
-  // Only show presence indicator if processing but no data yet
+  // Show presence indicator if processing, agent name when available
   const showPresenceIndicator = isProcessing && !data;
+  const showAgentName = data?.agentName;
+  const showActivityIndicator = isProcessing && data;
   
   return (
     <div 
@@ -23,32 +25,44 @@ export const FastLayer: React.FC<FastLayerProps> = ({ data, isProcessing }) => {
       <div className="flex items-center justify-between w-full">
         {/* Left side - Agent name and presence indicator */}
         <div className="flex items-center space-x-3">
-          {/* Presence Indicator - ONLY frontend-generated visual */}
-          {showPresenceIndicator && (
+          {/* Activity Indicator - Shows when agent is active */}
+          {(showPresenceIndicator || showActivityIndicator) && (
             <motion.div
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              className="flex items-center"
+              className="flex items-center relative"
             >
               <div className="w-2 h-2 bg-emerald-500 rounded-full" />
               <div className="w-2 h-2 bg-emerald-500 rounded-full absolute animate-ping" />
             </motion.div>
           )}
           
-          {/* Agent Name from backend */}
-          {data?.agentName && (
+          {/* Agent Name - Always show if available */}
+          {showAgentName && (
             <motion.span
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0 }}
-              className="font-semibold text-sm"
+              transition={{ duration: 0.3 }}
+              className="font-semibold text-sm text-zinc-800"
             >
               {data.agentName}
             </motion.span>
           )}
+          
+          {/* Fallback indicator when processing but no agent name yet */}
+          {isProcessing && !showAgentName && (
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="text-sm text-zinc-600 italic"
+            >
+              Starting agent...
+            </motion.span>
+          )}
         </div>
 
-        {/* Right side - Active Tools with Deduplication */}
+        {/* Right side - Active Tools with Enhanced Display */}
         <div className="flex items-center space-x-2">
           {data?.activeTools && data.activeTools.length > 0 && (
             <>
@@ -56,10 +70,10 @@ export const FastLayer: React.FC<FastLayerProps> = ({ data, isProcessing }) => {
               {Array.from(new Set(data.activeTools)).map((tool) => (
                 <motion.div
                   key={tool}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0 }}
+                  initial={{ opacity: 0, scale: 0.8, x: 10 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.8, x: 10 }}
+                  transition={{ duration: 0.2 }}
                   className="flex items-center space-x-1 bg-white/90 backdrop-blur-sm border border-purple-500/30 rounded-full px-3 py-1 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
                 >
                   <Zap className="w-3 h-3 text-purple-600" />
@@ -73,6 +87,18 @@ export const FastLayer: React.FC<FastLayerProps> = ({ data, isProcessing }) => {
                 </motion.div>
               ))}
             </>
+          )}
+          
+          {/* Show processing indicator when no tools but agent is active */}
+          {isProcessing && data && (!data.activeTools || data.activeTools.length === 0) && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center space-x-1 text-xs text-zinc-500"
+            >
+              <div className="w-1 h-1 bg-zinc-400 rounded-full animate-pulse" />
+              <span>Initializing...</span>
+            </motion.div>
           )}
         </div>
       </div>

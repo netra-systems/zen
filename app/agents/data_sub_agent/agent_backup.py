@@ -68,64 +68,84 @@ class DataSubAgent(BaseSubAgent):
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool = False) -> None:
         """Execute advanced data analysis with ClickHouse integration"""
-        
         try:
-            # Send initial update
-            if stream_updates:
-                await self._send_update(run_id, {
-                    "status": "started",
-                    "message": "Starting advanced data analysis..."
-                })
-            
-            # Extract parameters from triage result
-            triage_result = state.triage_result or {}
-            
-            # Handle both object and dict for triage_result
-            if hasattr(triage_result, 'key_parameters'):
-                key_params = getattr(triage_result, 'key_parameters', {})
-            else:
-                key_params = triage_result.get("key_parameters", {}) if isinstance(triage_result, dict) else {}
-            
-            # Determine analysis parameters - handle both KeyParameters object and dict
-            if hasattr(key_params, '__dict__'):  # Pydantic model
-                user_id = getattr(key_params, "user_id", 1)
-                workload_id = getattr(key_params, "workload_id", None)
-                metric_names = getattr(key_params, "metrics", ["latency_ms", "throughput", "cost_cents"])
-                time_range_str = getattr(key_params, "time_range", "last_24_hours")
-            else:  # Dict
-                user_id = key_params.get("user_id", 1) if isinstance(key_params, dict) else 1
-                workload_id = key_params.get("workload_id") if isinstance(key_params, dict) else None
-                metric_names = key_params.get("metrics", ["latency_ms", "throughput", "cost_cents"]) if isinstance(key_params, dict) else ["latency_ms", "throughput", "cost_cents"]
-                time_range_str = key_params.get("time_range", "last_24_hours") if isinstance(key_params, dict) else "last_24_hours"
-            
-            # Parse time range
-            time_range = self._parse_time_range(time_range_str)
-            
-            # Perform analyses based on intent
-            intent = triage_result.get("intent", {})
-            primary_intent = intent.get("primary", "general")
-            
-            data_result = await self._perform_analysis(
-                primary_intent, user_id, workload_id, 
-                metric_names, time_range, run_id, stream_updates
-            )
-            
-            # Store result in state
-            state.data_result = data_result
-            
-            # Update with results
-            if stream_updates:
-                await self._send_update(run_id, {
-                    "status": "completed",
-                    "message": "Advanced data analysis completed successfully",
-                    "result": data_result
-                })
-            
-            logger.info(f"DataSubAgent completed analysis for run_id: {run_id}")
-            
+            await self._send_initial_update(run_id, stream_updates)
+            key_params = self._extract_triage_parameters(state)
+            analysis_params = self._determine_analysis_parameters(key_params)
+            data_result = await self._execute_analysis_workflow(state, analysis_params, run_id, stream_updates)
+            await self._finalize_execution_result(state, data_result, run_id, stream_updates)
         except Exception as e:
-            logger.error(f"DataSubAgent execution failed: {e}")
-            await self._handle_fallback(state, run_id, stream_updates, e)
+            await self._handle_execution_error(state, run_id, stream_updates, e)
+    
+    async def _send_initial_update(self, run_id: str, stream_updates: bool) -> None:
+        """Send initial execution update"""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "started",
+                "message": "Starting advanced data analysis..."
+            })
+    
+    def _extract_triage_parameters(self, state: DeepAgentState) -> Dict[str, Any]:
+        """Extract key parameters from triage result"""
+        triage_result = state.triage_result or {}
+        if hasattr(triage_result, 'key_parameters'):
+            return getattr(triage_result, 'key_parameters', {})
+        return triage_result.get("key_parameters", {}) if isinstance(triage_result, dict) else {}
+    
+    def _determine_analysis_parameters(self, key_params: Any) -> Dict[str, Any]:
+        """Determine analysis parameters from key_params"""
+        if hasattr(key_params, '__dict__'):  # Pydantic model
+            return self._extract_pydantic_parameters(key_params)
+        return self._extract_dict_parameters(key_params)
+    
+    def _extract_pydantic_parameters(self, key_params: Any) -> Dict[str, Any]:
+        """Extract parameters from Pydantic model"""
+        return {
+            "user_id": getattr(key_params, "user_id", 1),
+            "workload_id": getattr(key_params, "workload_id", None),
+            "metric_names": getattr(key_params, "metrics", ["latency_ms", "throughput", "cost_cents"]),
+            "time_range_str": getattr(key_params, "time_range", "last_24_hours")
+        }
+    
+    def _extract_dict_parameters(self, key_params: Any) -> Dict[str, Any]:
+        """Extract parameters from dictionary"""
+        is_dict = isinstance(key_params, dict)
+        return {
+            "user_id": key_params.get("user_id", 1) if is_dict else 1,
+            "workload_id": key_params.get("workload_id") if is_dict else None,
+            "metric_names": key_params.get("metrics", ["latency_ms", "throughput", "cost_cents"]) if is_dict else ["latency_ms", "throughput", "cost_cents"],
+            "time_range_str": key_params.get("time_range", "last_24_hours") if is_dict else "last_24_hours"
+        }
+    
+    async def _execute_analysis_workflow(self, state: DeepAgentState, analysis_params: Dict[str, Any], run_id: str, stream_updates: bool) -> Dict[str, Any]:
+        """Execute the main analysis workflow"""
+        time_range = self._parse_time_range(analysis_params["time_range_str"])
+        intent = state.triage_result.get("intent", {}) if state.triage_result else {}
+        primary_intent = intent.get("primary", "general")
+        return await self._perform_analysis(
+            primary_intent, analysis_params["user_id"], analysis_params["workload_id"],
+            analysis_params["metric_names"], time_range, run_id, stream_updates
+        )
+    
+    async def _finalize_execution_result(self, state: DeepAgentState, data_result: Dict[str, Any], run_id: str, stream_updates: bool) -> None:
+        """Finalize execution with result storage and updates"""
+        state.data_result = data_result
+        await self._send_completion_update(run_id, stream_updates, data_result)
+        logger.info(f"DataSubAgent completed analysis for run_id: {run_id}")
+    
+    async def _send_completion_update(self, run_id: str, stream_updates: bool, data_result: Dict[str, Any]) -> None:
+        """Send completion update with results"""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "completed",
+                "message": "Advanced data analysis completed successfully",
+                "result": data_result
+            })
+    
+    async def _handle_execution_error(self, state: DeepAgentState, run_id: str, stream_updates: bool, error: Exception) -> None:
+        """Handle execution error with logging and fallback"""
+        logger.error(f"DataSubAgent execution failed: {error}")
+        await self._handle_fallback(state, run_id, stream_updates, error)
     
     def _parse_time_range(self, time_range_str: str) -> Tuple[datetime, datetime]:
         """Parse time range string into datetime tuple"""
@@ -393,56 +413,97 @@ class DataSubAgent(BaseSubAgent):
     async def _analyze_performance_metrics(self, user_id: int, workload_id: Optional[str], 
                                          time_range: Tuple[datetime, datetime]) -> Dict[str, Any]:
         """Analyze performance metrics (test compatibility method)"""
-        data = await self._fetch_clickhouse_data(
+        data = await self._fetch_performance_data(user_id, workload_id)
+        data_validation_result = self._validate_performance_data(data)
+        if data_validation_result:
+            return data_validation_result
+        return self._build_performance_analysis(data, time_range)
+    
+    def _build_performance_analysis(self, data: List[Dict[str, Any]], time_range: Tuple[datetime, datetime]) -> Dict[str, Any]:
+        """Build complete performance analysis result"""
+        aggregation_level = self._determine_aggregation_level(time_range)
+        result = self._create_base_performance_result(data, time_range, aggregation_level)
+        self._add_trends_analysis(result, aggregation_level, data)
+        self._add_seasonality_analysis(result, aggregation_level, data)
+        self._add_outliers_analysis(result, data)
+        return result
+    
+    async def _fetch_performance_data(self, user_id: int, workload_id: Optional[str]) -> Optional[List[Dict[str, Any]]]:
+        """Fetch performance data from ClickHouse"""
+        return await self._fetch_clickhouse_data(
             f"SELECT * FROM workload_events WHERE user_id = {user_id}", 
             f"perf_metrics_{user_id}_{workload_id}"
         )
-        
+    
+    def _validate_performance_data(self, data: Optional[List[Dict[str, Any]]]) -> Optional[Dict[str, Any]]:
+        """Validate performance data and return error if invalid"""
         if not data:
             return {"status": "no_data", "message": "No performance data available"}
-        
-        # Determine aggregation level based on time range
+        return None
+    
+    def _determine_aggregation_level(self, time_range: Tuple[datetime, datetime]) -> str:
+        """Determine aggregation level based on time range duration"""
         duration = time_range[1] - time_range[0]
         if duration.total_seconds() < 3600:  # Less than 1 hour
-            aggregation_level = "minute"
+            return "minute"
         elif duration.total_seconds() < 86400:  # Less than 1 day
-            aggregation_level = "hour"
-        else:  # 1 day or more
-            aggregation_level = "day"
-        
-        # Calculate summary metrics
+            return "hour"
+        return "day"  # 1 day or more
+    
+    def _calculate_summary_metrics(self, data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Calculate summary metrics from data"""
         total_events = sum(item.get('event_count', 0) for item in data)
-        
-        result = {
-            "time_range": {
-                "start": time_range[0].isoformat(),
-                "end": time_range[1].isoformat(),
-                "aggregation_level": aggregation_level
-            },
-            "summary": {
-                "total_events": total_events,
-                "data_points": len(data)
-            },
-            "latency": {
-                "p50": data[0].get('latency_p50', 0) if data else 0,
-                "p95": data[0].get('latency_p95', 0) if data else 0,
-                "p99": data[0].get('latency_p99', 0) if data else 0
-            },
-            "throughput": {
-                "avg": data[0].get('avg_throughput', 0) if data else 0,
-                "peak": data[0].get('peak_throughput', 0) if data else 0
-            }
+        return {
+            "total_events": total_events,
+            "data_points": len(data)
         }
-        
-        # Add trends analysis for hour aggregation with sufficient data points
+    
+    def _create_base_performance_result(self, data: List[Dict[str, Any]], time_range: Tuple[datetime, datetime], aggregation_level: str) -> Dict[str, Any]:
+        """Create base performance result structure"""
+        summary = self._calculate_summary_metrics(data)
+        return {
+            "time_range": self._create_time_range_info(time_range, aggregation_level),
+            "summary": summary,
+            "latency": self._extract_latency_metrics(data),
+            "throughput": self._extract_throughput_metrics(data)
+        }
+    
+    def _create_time_range_info(self, time_range: Tuple[datetime, datetime], aggregation_level: str) -> Dict[str, Any]:
+        """Create time range information structure"""
+        return {
+            "start": time_range[0].isoformat(),
+            "end": time_range[1].isoformat(),
+            "aggregation_level": aggregation_level
+        }
+    
+    def _extract_latency_metrics(self, data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Extract latency metrics from data"""
+        first_item = data[0] if data else {}
+        return {
+            "p50": first_item.get('latency_p50', 0),
+            "p95": first_item.get('latency_p95', 0),
+            "p99": first_item.get('latency_p99', 0)
+        }
+    
+    def _extract_throughput_metrics(self, data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Extract throughput metrics from data"""
+        first_item = data[0] if data else {}
+        return {
+            "avg": first_item.get('avg_throughput', 0),
+            "peak": first_item.get('peak_throughput', 0)
+        }
+    
+    def _add_trends_analysis(self, result: Dict[str, Any], aggregation_level: str, data: List[Dict[str, Any]]) -> None:
+        """Add trends analysis to result if conditions are met"""
         if aggregation_level == "hour" and len(data) >= 12:
             result["trends"] = {
                 "latency_trend": "stable",
                 "throughput_trend": "increasing",
                 "error_rate_trend": "decreasing"
             }
-        
-        # Add seasonality analysis for day aggregation with sufficient data points
+    
+    def _add_seasonality_analysis(self, result: Dict[str, Any], aggregation_level: str, data: List[Dict[str, Any]]) -> None:
+        """Add seasonality analysis to result if conditions are met"""
         if aggregation_level == "day" and len(data) >= 24:
             result["seasonality"] = {
                 "pattern_detected": True,
@@ -450,21 +511,28 @@ class DataSubAgent(BaseSubAgent):
                 "low_hours": [2, 6, 23],   # 2am, 6am, 11pm
                 "confidence": 0.85
             }
-        
-        # Add outliers analysis for aggregations with sufficient data points
+    
+    def _add_outliers_analysis(self, result: Dict[str, Any], data: List[Dict[str, Any]]) -> None:
+        """Add outliers analysis to result if sufficient data points"""
         if len(data) >= 10:
-            result["outliers"] = {
-                "detected": True,
-                "count": 2,
-                "threshold": 2.5,
-                "outlier_indices": [5, 12] if len(data) > 12 else [2],
-                "latency_outliers": [
-                    {"index": 5, "value": 150.0, "z_score": 3.2} if len(data) > 12 else
-                    {"index": 2, "value": 120.0, "z_score": 2.8}
-                ]
-            }
-        
-        return result
+            result["outliers"] = self._create_outliers_structure(data)
+    
+    def _create_outliers_structure(self, data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Create outliers analysis structure"""
+        has_many_points = len(data) > 12
+        return {
+            "detected": True,
+            "count": 2,
+            "threshold": 2.5,
+            "outlier_indices": [5, 12] if has_many_points else [2],
+            "latency_outliers": [self._create_outlier_entry(has_many_points)]
+        }
+    
+    def _create_outlier_entry(self, has_many_points: bool) -> Dict[str, Any]:
+        """Create individual outlier entry"""
+        if has_many_points:
+            return {"index": 5, "value": 150.0, "z_score": 3.2}
+        return {"index": 2, "value": 120.0, "z_score": 2.8}
     
     async def process_batch_safe(self, batch: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Process batch of data items safely (test compatibility method)"""

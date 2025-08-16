@@ -85,58 +85,72 @@ class ClickHouseQueryInterceptor:
         self._initialize_state(client)
     
     async def execute_query(self, query: str, *args, **kwargs) -> Any:
-        """
-        Execute a query after fixing any syntax issues.
-        
-        Args:
-            query: The query to execute
-            *args: Additional positional arguments
-            **kwargs: Additional keyword arguments
-            
-        Returns:
-            Query results
-        """
+        """Execute a query after fixing any syntax issues."""
         self.queries_executed += 1
-        
-        # Fix the query if needed
-        if self.fix_enabled:
-            original_query = query
-            llm_was_fixed = False
-            
-            # First check if it's LLM-generated (lazy import to avoid circular dependency)
-            try:
-                from app.agents.data_sub_agent.llm_query_detector import LLMQueryDetector
-                query, metadata = LLMQueryDetector.validate_and_fix(query)
-                if metadata['is_llm_generated']:
-                    # Don't log here - LLMQueryDetector already logs
-                    if metadata['was_fixed']:
-                        llm_was_fixed = True
-                        self.queries_fixed += 1
-            except ImportError:
-                logger.debug("LLMQueryDetector not available, skipping LLM detection")
-            
-            # Then apply standard fixes (only if LLM didn't already fix it)
-            if not llm_was_fixed:
-                fixed_query = fix_clickhouse_array_syntax(query)
-                if fixed_query != query:
-                    query = fixed_query
-                    self.queries_fixed += 1
-            
-            if query != original_query and not llm_was_fixed:
-                logger.info(f"Fixed query #{self.queries_executed} (total fixed: {self.queries_fixed})")
-        
-        # Validate the query
+        processed_query = await self._process_query_pipeline(query)
+        self._validate_processed_query(processed_query)
+        return await self._execute_processed_query(processed_query, *args, **kwargs)
+    
+    async def _process_query_pipeline(self, query: str) -> str:
+        """Process query through the fixing pipeline."""
+        if not self.fix_enabled:
+            return query
+        return await self._apply_query_fixes(query)
+    
+    async def _apply_query_fixes(self, query: str) -> str:
+        """Apply LLM and standard query fixes."""
+        original_query = query
+        query, llm_was_fixed = await self._apply_llm_fixes(query)
+        query = self._apply_standard_fixes(query, llm_was_fixed)
+        self._log_query_changes(original_query, query, llm_was_fixed)
+        return query
+    
+    async def _apply_llm_fixes(self, query: str) -> Tuple[str, bool]:
+        """Apply LLM-specific query fixes."""
+        try:
+            from app.agents.data_sub_agent.llm_query_detector import LLMQueryDetector
+            fixed_query, metadata = LLMQueryDetector.validate_and_fix(query)
+            return self._process_llm_fix_result(fixed_query, metadata)
+        except ImportError:
+            logger.debug("LLMQueryDetector not available, skipping LLM detection")
+            return query, False
+    
+    def _process_llm_fix_result(self, query: str, metadata: Dict) -> Tuple[str, bool]:
+        """Process LLM fix results and update statistics."""
+        if metadata['is_llm_generated'] and metadata['was_fixed']:
+            self.queries_fixed += 1
+            return query, True
+        return query, False
+    
+    def _apply_standard_fixes(self, query: str, llm_was_fixed: bool) -> str:
+        """Apply standard query fixes if LLM didn't fix it."""
+        if llm_was_fixed:
+            return query
+        return self._fix_array_syntax_if_needed(query)
+    
+    def _fix_array_syntax_if_needed(self, query: str) -> str:
+        """Fix array syntax and update stats if changes made."""
+        fixed_query = fix_clickhouse_array_syntax(query)
+        if fixed_query != query:
+            self.queries_fixed += 1
+        return fixed_query
+    
+    def _log_query_changes(self, original: str, processed: str, llm_fixed: bool) -> None:
+        """Log query changes if any were made."""
+        if processed != original and not llm_fixed:
+            logger.info(f"Fixed query #{self.queries_executed} (total fixed: {self.queries_fixed})")
+    
+    def _validate_processed_query(self, query: str) -> None:
+        """Validate the processed query and log any issues."""
         is_valid, error_msg = validate_clickhouse_query(query)
         if not is_valid:
             logger.error(f"Query validation failed: {error_msg}")
-            # Still try to execute - ClickHouse will provide detailed error
-        
-        # Execute the fixed query
-        # Try to call execute_query if it exists, otherwise use execute
+    
+    async def _execute_processed_query(self, query: str, *args, **kwargs) -> Any:
+        """Execute the processed query using appropriate client method."""
         if hasattr(self.client, 'execute_query'):
             return await self.client.execute_query(query, *args, **kwargs)
-        else:
-            return await self.client.execute(query, *args, **kwargs)
+        return await self.client.execute(query, *args, **kwargs)
     
     def _calculate_fix_rate(self) -> float:
         """Calculate fix rate percentage."""

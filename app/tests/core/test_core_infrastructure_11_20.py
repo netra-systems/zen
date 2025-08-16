@@ -327,15 +327,18 @@ class TestStartupChecks:
         """Test database connectivity check."""
         from app.startup_checks.database_checks import DatabaseChecker
         
-        # Mock database session with proper async context manager
+        # Mock database session
         mock_session = AsyncMock()
         mock_session.execute.return_value.scalar_one.return_value = 1
         
-        # Mock table existence check to return True for critical tables
+        # Create an async context manager mock
+        async_context_manager = AsyncMock()
+        async_context_manager.__aenter__ = AsyncMock(return_value=mock_session)
+        async_context_manager.__aexit__ = AsyncMock(return_value=None)
+        
+        # Mock table existence check to return True for critical tables  
         with patch.object(DatabaseChecker, '_table_exists', return_value=True):
-            mock_app.state.db_session_factory = AsyncMock()
-            mock_app.state.db_session_factory.return_value.__aenter__ = AsyncMock(return_value=mock_session)
-            mock_app.state.db_session_factory.return_value.__aexit__ = AsyncMock(return_value=None)
+            mock_app.state.db_session_factory = Mock(return_value=async_context_manager)
             
             checker = DatabaseChecker(mock_app)
             result = await checker.check_database_connection()
@@ -362,7 +365,7 @@ class TestStartupChecks:
             assert result.name == "redis_connection"
         
         # Mock ClickHouse check
-        with patch('app.startup_checks.service_checks.get_clickhouse_client') as mock_ch:
+        with patch('app.db.clickhouse.get_clickhouse_client') as mock_ch:
             mock_client = AsyncMock()
             mock_client.ping.return_value = None
             mock_client.execute.return_value = [("workload_events",)]

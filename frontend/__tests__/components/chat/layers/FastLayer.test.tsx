@@ -48,12 +48,12 @@ describe('FastLayer', () => {
     expect(presenceIndicator).toBeInTheDocument();
   });
 
-  it('does not show presence indicator when data is available', () => {
+  it('shows activity indicator when processing with data', () => {
     const { container } = render(<FastLayer data={mockData} isProcessing={true} />);
     
-    // Should not have presence indicator when data is available
-    const presenceIndicator = container.querySelector('.bg-emerald-500.rounded-full');
-    expect(presenceIndicator).not.toBeInTheDocument();
+    // Should show activity indicator when processing with data
+    const activityIndicator = container.querySelector('.bg-emerald-500.rounded-full');
+    expect(activityIndicator).toBeInTheDocument();
   });
 
   it('renders empty tools list when activeTools is empty', () => {
@@ -97,5 +97,22 @@ describe('FastLayer', () => {
     expect(screen.getByText('tool2')).toBeInTheDocument();
     expect(screen.getByText('tool3')).toBeInTheDocument();
     expect(screen.getByText('tool4')).toBeInTheDocument();
+  });
+
+  it('shows fallback text when processing but no agent name', () => {
+    render(<FastLayer data={null} isProcessing={true} />);
+    
+    expect(screen.getByText('Starting agent...')).toBeInTheDocument();
+  });
+
+  it('shows initializing text when agent active but no tools', () => {
+    const dataWithNoTools: FastLayerData = {
+      ...mockData,
+      activeTools: [],
+    };
+    
+    render(<FastLayer data={dataWithNoTools} isProcessing={true} />);
+    
+    expect(screen.getByText('Initializing...')).toBeInTheDocument();
   });
 });

@@ -12,6 +12,8 @@ import type {
   ChatMessage,
   AgentResult,
   FinalReport,
+  AgentResultData,
+  AgentMetrics,
 } from '@/types/unified-chat';
 
 // Agent execution tracking for deduplication
@@ -171,7 +173,16 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             break;
             
           case 'agent_started': {
-            const agentName = event.payload.agent_id || event.payload.agent_type || 'Unknown Agent';
+            // Handle missing fields with fallback values
+            const payload = event.payload as any;
+            const agentId = payload.agent_id || payload.agent_type || `agent-${payload.run_id}` || 'unknown';
+            const agentType = payload.agent_type || payload.agent_id || 'generic';
+            const timestamp = payload.timestamp ? 
+              (typeof payload.timestamp === 'string' ? Date.parse(payload.timestamp) : payload.timestamp) : 
+              Date.now();
+            const runId = payload.run_id || generateUniqueId('run');
+            
+            const agentName = agentId;
             const executedAgents = new Map(state.executedAgents);
             const agentIterations = new Map(state.agentIterations);
             
@@ -200,18 +211,18 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
               timestamp: Date.now(),
               metadata: {
                 agentName: agentName,
-                runId: event.payload.run_id
+                runId: runId
               }
             };
             get().addMessage(startMessage);
             
             set({
               isProcessing: true,
-              currentRunId: event.payload.run_id,
+              currentRunId: runId,
               fastLayerData: {
                 agentName: displayName,
-                timestamp: event.payload.timestamp,
-                runId: event.payload.run_id,
+                timestamp: timestamp,
+                runId: runId,
                 activeTools: []
               },
               // Don't reset layers if same agent reruns
@@ -226,60 +237,79 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             break;
           }
             
-          case 'tool_executing':
+          case 'tool_executing': {
+            // Handle missing fields with fallback values
+            const payload = event.payload as any;
+            const toolName = payload.tool_name || 'unknown-tool';
+            const timestamp = payload.timestamp || Date.now();
+            
             if (state.fastLayerData) {
               const activeTools = state.fastLayerData.activeTools || [];
-              const toolName = event.payload.tool_name;
               
               // Add tool if not already active
               if (!activeTools.includes(toolName)) {
                 set({
                   fastLayerData: {
                     ...state.fastLayerData,
-                    activeTools: [...activeTools, toolName]
+                    activeTools: [...activeTools, toolName],
+                    timestamp: timestamp
                   }
                 }, false, 'tool_executing');
               }
             }
             break;
+          }
             
           case 'agent_thinking': {
+            // Handle missing fields with fallback values
+            const payload = event.payload as any;
+            const thought = payload.thought || 'Processing...';
+            const agentId = payload.agent_id || payload.agent_type || 'Agent';
+            const stepNumber = payload.step_number || 0;
+            const totalSteps = payload.total_steps || 0;
+            
             // Create thinking message for display
             const thinkingMessage: ChatMessage = {
               id: generateUniqueId('thinking'),
               role: 'assistant',
-              content: `🤔 ${event.payload.agent_id || event.payload.agent_type || 'Agent'}: ${event.payload.thought}`,
+              content: `🤔 ${agentId}: ${thought}`,
               timestamp: Date.now(),
               metadata: {
-                agentName: event.payload.agent_id || event.payload.agent_type || 'Agent'
+                agentName: agentId
               }
             };
             get().addMessage(thinkingMessage);
             
             set({
               mediumLayerData: {
-                thought: event.payload.thought,
+                thought: thought,
                 partialContent: state.mediumLayerData?.partialContent || '',
-                stepNumber: event.payload.step_number,
-                totalSteps: event.payload.total_steps,
-                agentName: event.payload.agent_id || event.payload.agent_type || 'Agent'
+                stepNumber: stepNumber,
+                totalSteps: totalSteps,
+                agentName: agentId
               }
             }, false, 'agent_thinking');
             break;
           }
             
           case 'partial_result': {
+            // Handle missing fields with fallback values
+            const payload = event.payload as any;
+            const content = payload.content || '';
+            const agentId = payload.agent_id || payload.agent_type || 'Agent';
+            const isComplete = payload.is_complete || false;
+            
             const currentMedium = state.mediumLayerData;
             
             // Create partial result message for display
-            if (event.payload.content) {
+            if (content) {
               const partialMessage: ChatMessage = {
                 id: generateUniqueId('partial'),
                 role: 'assistant',
-                content: event.payload.content,
+                content: content,
                 timestamp: Date.now(),
                 metadata: {
-                  agentName: event.payload.agent_id || event.payload.agent_type || 'Agent'
+                  agentName: agentId
                 }
               };
               get().addMessage(partialMessage);
@@ -288,20 +318,25 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             set({
               mediumLayerData: {
                 thought: currentMedium?.thought || '',
-                partialContent: event.payload.is_complete
-                  ? event.payload.content
-                  : (currentMedium?.partialContent || '') + event.payload.content,
+                partialContent: isComplete
+                  ? content
+                  : (currentMedium?.partialContent || '') + content,
                 stepNumber: currentMedium?.stepNumber || 0,
                 totalSteps: currentMedium?.totalSteps || 0,
-                agentName: event.payload.agent_id || event.payload.agent_type || 'Agent'
+                agentName: agentId
               }
             }, false, 'partial_result');
             break;
           }
             
           case 'agent_completed': {
-            const agentName = event.payload.agent_id || event.payload.agent_type || 'Unknown Agent';
-            const durationMs = event.payload.duration_ms || 0;
+            // Handle missing fields with fallback values
+            const payload = event.payload as any;
+            const agentName = payload.agent_id || payload.agent_type || 'Unknown Agent';
+            const durationMs = payload.duration_ms || 0;
+            const result = payload.result || {};
+            const metrics = payload.metrics || {};
+            
             const executedAgents = new Map(state.executedAgents);
             const execution = executedAgents.get(agentName);
             
@@ -309,7 +344,7 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             if (execution) {
               execution.status = 'completed';
               execution.endTime = Date.now();
-              execution.result = event.payload.result;
+              execution.result = result;
               executedAgents.set(agentName, execution);
             }
             
@@ -320,9 +355,9 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             const newAgentResult: AgentResult = {
               agentName: displayName,
               duration: durationMs,
-              result: event.payload.result,
-              metrics: event.payload.metrics,
-              iteration: (event.payload as any).iteration || iteration
+              result: result as AgentResultData,
+              metrics: metrics as AgentMetrics,
+              iteration: payload.iteration || iteration
             };
             
             // Create agent completed message
@@ -473,23 +508,33 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             get().addMessage(finalMessage);
             break;
             
-          case 'error':
+          case 'error': {
+            // Handle missing fields with fallback values
+            const payload = event.payload as any;
+            const errorMessage = payload.error_message || 'An error occurred';
+            const recoverable = payload.recoverable !== undefined ? payload.recoverable : true;
+            const agentId = payload.agent_id || payload.agent_type || 'Agent';
+            const errorCode = payload.error_code || 'unknown';
+            
             set({
-              isProcessing: !event.payload.recoverable ? false : state.isProcessing
+              isProcessing: !recoverable ? false : state.isProcessing
             }, false, 'error');
             
             // Add error message
-            const errorMessage: ChatMessage = {
+            const errorChatMessage: ChatMessage = {
               id: generateUniqueId('error'),
               role: 'system',
-              content: event.payload.error_message,
+              content: `❌ Error in ${agentId}: ${errorMessage}`,
               timestamp: Date.now(),
               metadata: {
-                agentName: event.payload.agent_id || event.payload.agent_type || 'Agent'
+                agentName: agentId,
+                errorCode: errorCode,
+                recoverable: recoverable
               }
             };
-            get().addMessage(errorMessage);
+            get().addMessage(errorChatMessage);
             break;
+          }
         }
       },
       

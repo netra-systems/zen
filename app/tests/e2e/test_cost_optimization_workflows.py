@@ -70,7 +70,7 @@ def _create_cost_quality_state() -> DeepAgentState:
     """Create state for cost-quality optimization test."""
     return DeepAgentState(
         user_request="I need to reduce costs but keep quality the same. For feature X, I can accept latency of 500ms. For feature Y, I need to maintain current latency of 200ms.",
-        metadata={'test_type': 'cost_quality', 'priority': 'high'}
+        metadata={'test_type': 'cost_quality', 'priority': 1}
     )
 
 
@@ -354,7 +354,7 @@ def _create_ep_001_state() -> DeepAgentState:
     """Create state for EP-001 example prompt test."""
     return DeepAgentState(
         user_request="I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.",
-        metadata={'test_type': 'ep_001', 'prompt_id': 'EP-001', 'priority': 'high'}
+        metadata={'test_type': 'ep_001', 'prompt_id': 'EP-001', 'priority': 1}
     )
 
 

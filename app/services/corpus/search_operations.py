@@ -14,62 +14,64 @@ from app.logging_config import central_logger
 class SearchOperations:
     """Handles search and analytical operations on corpus content"""
     
-    async def get_corpus_statistics(
-        self,
-        db_corpus
-    ) -> Optional[Dict]:
+    async def get_corpus_statistics(self, db_corpus) -> Optional[Dict]:
         """Get corpus statistics from ClickHouse"""
-        if db_corpus.status != "available":
-            raise CorpusNotAvailableError(f"Corpus {db_corpus.id} is not available")
-        
+        self._validate_corpus_availability(db_corpus)
         try:
             async with get_clickhouse_client() as client:
-                # Get basic statistics
-                stats_query = f"""
-                    SELECT 
-                        COUNT(*) as total_records,
-                        COUNT(DISTINCT workload_type) as unique_workload_types,
-                        AVG(LENGTH(prompt)) as avg_prompt_length,
-                        AVG(LENGTH(response)) as avg_response_length,
-                        MIN(created_at) as first_record,
-                        MAX(created_at) as last_record
-                    FROM {db_corpus.table_name}
-                """
-                
-                stats_result = await client.execute(stats_query)
-                
-                # Get workload distribution
-                dist_query = f"""
-                    SELECT workload_type, COUNT(*) as count
-                    FROM {db_corpus.table_name}
-                    GROUP BY workload_type
-                """
-                
-                dist_result = await client.execute(dist_query)
-                
-                # Format statistics
-                stats = {}
-                if stats_result:
-                    row = stats_result[0]
-                    stats = {
-                        "total_records": row[0],
-                        "unique_workload_types": row[1],
-                        "avg_prompt_length": float(row[2]) if row[2] else 0.0,
-                        "avg_response_length": float(row[3]) if row[3] else 0.0,
-                        "first_record": row[4].isoformat() if row[4] else None,
-                        "last_record": row[5].isoformat() if row[5] else None
-                    }
-                
-                # Add workload distribution
-                stats["workload_distribution"] = {
-                    row[0]: row[1] for row in dist_result
-                }
-                
-                return stats
-                
+                return await self._gather_corpus_statistics(client, db_corpus.table_name)
         except Exception as e:
             central_logger.error(f"Failed to get statistics for corpus {db_corpus.id}: {str(e)}")
             raise ClickHouseOperationError(f"Failed to retrieve statistics: {str(e)}")
+    
+    async def _gather_corpus_statistics(self, client, table_name: str) -> Dict:
+        """Gather all corpus statistics from ClickHouse."""
+        basic_stats = await self._get_basic_statistics(client, table_name)
+        workload_dist = await self._get_workload_distribution(client, table_name)
+        return self._combine_statistics(basic_stats, workload_dist)
+    
+    async def _get_basic_statistics(self, client, table_name: str) -> Dict:
+        """Get basic corpus statistics."""
+        stats_query = self._build_basic_stats_query(table_name)
+        result = await client.execute(stats_query)
+        return self._format_basic_stats(result)
+    
+    def _build_basic_stats_query(self, table_name: str) -> str:
+        """Build query for basic statistics."""
+        return f"""
+            SELECT COUNT(*) as total_records, COUNT(DISTINCT workload_type) as unique_workload_types,
+                   AVG(LENGTH(prompt)) as avg_prompt_length, AVG(LENGTH(response)) as avg_response_length,
+                   MIN(created_at) as first_record, MAX(created_at) as last_record
+            FROM {table_name}
+        """
+    
+    def _format_basic_stats(self, result) -> Dict:
+        """Format basic statistics from query result."""
+        if not result:
+            return {}
+        row = result[0]
+        return self._build_stats_dict(row)
+    
+    def _build_stats_dict(self, row) -> Dict:
+        """Build statistics dictionary from result row."""
+        return {
+            "total_records": row[0], "unique_workload_types": row[1],
+            "avg_prompt_length": float(row[2]) if row[2] else 0.0,
+            "avg_response_length": float(row[3]) if row[3] else 0.0,
+            "first_record": row[4].isoformat() if row[4] else None,
+            "last_record": row[5].isoformat() if row[5] else None
+        }
+    
+    async def _get_workload_distribution(self, client, table_name: str) -> Dict:
+        """Get workload type distribution."""
+        dist_query = f"SELECT workload_type, COUNT(*) as count FROM {table_name} GROUP BY workload_type"
+        result = await client.execute(dist_query)
+        return {row[0]: row[1] for row in result}
+    
+    def _combine_statistics(self, basic_stats: Dict, workload_dist: Dict) -> Dict:
+        """Combine basic statistics and workload distribution."""
+        basic_stats["workload_distribution"] = workload_dist
+        return basic_stats
     
     def _validate_corpus_availability(self, db_corpus) -> None:
         """Validate that corpus is available for searching"""
@@ -200,57 +202,42 @@ class SearchOperations:
             raise ClickHouseOperationError(f"Search failed: {str(e)}")
     
     async def get_corpus_sample(
-        self,
-        db_corpus,
-        sample_size: int = 10,
-        workload_type: Optional[str] = None
+        self, db_corpus, sample_size: int = 10, workload_type: Optional[str] = None
     ) -> Optional[List[Dict]]:
-        """
-        Get a random sample of corpus content
-        
-        Args:
-            db_corpus: Corpus database model
-            sample_size: Number of records to sample
-            workload_type: Optional workload type filter
-            
-        Returns:
-            Random sample of records
-        """
-        if db_corpus.status != "available":
-            raise CorpusNotAvailableError(f"Corpus {db_corpus.id} is not available")
-        
+        """Get a random sample of corpus content"""
+        self._validate_corpus_availability(db_corpus)
         try:
             async with get_clickhouse_client() as client:
-                # Build query with random sampling
-                query = f"""
-                    SELECT record_id, workload_type, prompt, response, metadata
-                    FROM {db_corpus.table_name}
-                """
-                
-                if workload_type:
-                    query += f" WHERE workload_type = '{workload_type}'"
-                
-                # Use SAMPLE for random sampling
-                query += f" ORDER BY rand() LIMIT {min(sample_size, 100)}"
-                
-                result = await client.execute(query)
-                
-                # Convert to list of dicts
-                sample = []
-                for row in result:
-                    sample.append({
-                        "record_id": str(row[0]),
-                        "workload_type": row[1],
-                        "prompt": row[2],
-                        "response": row[3],
-                        "metadata": json.loads(row[4]) if row[4] else {}
-                    })
-                
-                return sample
-                
+                return await self._execute_sample_query(client, db_corpus.table_name, sample_size, workload_type)
         except Exception as e:
             central_logger.error(f"Failed to sample corpus {db_corpus.id}: {str(e)}")
             raise ClickHouseOperationError(f"Sampling failed: {str(e)}")
+    
+    async def _execute_sample_query(
+        self, client, table_name: str, sample_size: int, workload_type: Optional[str]
+    ) -> List[Dict]:
+        """Execute sampling query and return formatted results."""
+        query = self._build_sample_query(table_name, sample_size, workload_type)
+        result = await client.execute(query)
+        return self._format_sample_results(result)
+    
+    def _build_sample_query(self, table_name: str, sample_size: int, workload_type: Optional[str]) -> str:
+        """Build random sampling query."""
+        base_query = f"SELECT record_id, workload_type, prompt, response, metadata FROM {table_name}"
+        where_clause = f" WHERE workload_type = '{workload_type}'" if workload_type else ""
+        limit_clause = f" ORDER BY rand() LIMIT {min(sample_size, 100)}"
+        return base_query + where_clause + limit_clause
+    
+    def _format_sample_results(self, result) -> List[Dict]:
+        """Format sampling results into list of dictionaries."""
+        return [self._format_sample_row(row) for row in result]
+    
+    def _format_sample_row(self, row) -> Dict:
+        """Format a single sample row."""
+        return {
+            "record_id": str(row[0]), "workload_type": row[1], "prompt": row[2],
+            "response": row[3], "metadata": self._parse_metadata(row[4])
+        }
     
     async def get_workload_type_analytics(
         self,

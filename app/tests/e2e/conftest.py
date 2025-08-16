@@ -47,11 +47,11 @@ def _parse_test_models(models_str: str) -> List[LLMTestModel]:
 def real_llm_manager(llm_test_config: LLMTestConfig):
     """Create real LLM manager with intelligent fallback."""
     from app.llm.llm_manager import LLMManager
-    from app.config import Config
+    from app.config import get_config
     
     # Try to create real LLM manager first
     try:
-        config = Config()
+        config = get_config()
         return LLMManager(config)
     except Exception:
         # Fallback to test manager
@@ -61,14 +61,25 @@ def real_llm_manager(llm_test_config: LLMTestConfig):
 @pytest.fixture(scope="function")
 def real_websocket_manager():
     """Create real WebSocket manager for testing."""
-    from app.ws_manager import WebSocketManager
-    return WebSocketManager()
+    from unittest.mock import AsyncMock, Mock
+    
+    # Create a mock that implements the interface agents expect
+    mock_ws = Mock()
+    mock_ws.send_message = AsyncMock(return_value=True)
+    mock_ws.send_to_thread = AsyncMock(return_value=True)
+    mock_ws.send_agent_log = AsyncMock(return_value=True)
+    mock_ws.send_error = AsyncMock(return_value=True)
+    mock_ws.send_agent_update = AsyncMock(return_value=None)
+    mock_ws.send_tool_call = AsyncMock(return_value=True)
+    mock_ws.send_tool_result = AsyncMock(return_value=True)
+    
+    return mock_ws
 
 @pytest.fixture(scope="function")
 def real_tool_dispatcher():
     """Create real tool dispatcher for testing."""
-    from app.agents.admin_tool_dispatcher.tool_dispatcher import AdminToolDispatcher
-    return AdminToolDispatcher()
+    from app.agents.tool_dispatcher import ToolDispatcher
+    return ToolDispatcher()
 
 @pytest.fixture(scope="function")
 def cached_llm_manager(llm_test_config: LLMTestConfig) -> LLMTestManager:

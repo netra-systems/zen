@@ -26,6 +26,8 @@ interface WebSocketProviderProps {
 }
 
 import { AuthContext } from '@/auth/context';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { UnifiedWebSocketEvent } from '@/types/unified-chat';
 
 export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const { token } = useContext(AuthContext)!;
@@ -34,8 +36,35 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const isConnectingRef = useRef(false);
   const cleanupRef = useRef<() => void>();
 
+  // Get unified store handler
+  const handleWebSocketEvent = useUnifiedChatStore(state => state.handleWebSocketEvent);
+
+  // Helper function to check if message is a UnifiedWebSocketEvent
+  const isUnifiedWebSocketEvent = (message: WebSocketMessage): message is UnifiedWebSocketEvent => {
+    const unifiedEventTypes = [
+      'agent_started', 'tool_executing', 'agent_thinking', 'partial_result',
+      'agent_completed', 'final_report', 'error', 'thread_created',
+      'thread_loading', 'thread_loaded', 'thread_renamed', 'step_created'
+    ];
+    return unifiedEventTypes.includes(message.type);
+  };
+
   // Memoized message handler to prevent unnecessary re-renders
   const handleMessage = useCallback((newMessage: WebSocketMessage) => {
+    // Check if this is a unified event and route to store
+    if (isUnifiedWebSocketEvent(newMessage)) {
+      try {
+        handleWebSocketEvent(newMessage as UnifiedWebSocketEvent);
+      } catch (error) {
+        logger.error('Error handling unified WebSocket event', error as Error, {
+          component: 'WebSocketProvider',
+          action: 'handle_unified_event',
+          metadata: { eventType: newMessage.type }
+        });
+      }
+    }
+
+    // Also update local state for context compatibility
     setMessages((prevMessages) => {
       // Prevent duplicate messages by checking if message already exists
       const messageExists = prevMessages.some(msg => 
@@ -51,7 +80,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       const updatedMessages = [...prevMessages, newMessage];
       return updatedMessages.length > 100 ? updatedMessages.slice(-100) : updatedMessages;
     });
-  }, []);
+  }, [handleWebSocketEvent]);
 
   // Memoized status handler
   const handleStatusChange = useCallback((newStatus: WebSocketStatus) => {
