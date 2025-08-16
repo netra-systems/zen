@@ -17,7 +17,7 @@ class TestResilientHTTPClientCircuit:
         """Test getting new circuit breaker."""
         with patch('app.services.external_api_client.circuit_registry') as mock_registry:
             mock_circuit = Mock()
-            mock_registry.get_circuit = AsyncMock(return_value=mock_circuit)
+            mock_registry.get_breaker = Mock(return_value=mock_circuit)
             
             circuit = await client._get_circuit("test_api")
             verify_new_circuit_creation(circuit, mock_circuit, client, mock_registry)

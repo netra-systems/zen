@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from app.main import app
 from app.db.testing import override_get_db
-from app.dependencies import get_async_db
+from app.db.postgres import get_async_db
 from app.schemas.Generation import ContentGenParams, LogGenParams, DataIngestionParams
 
 # Set testing flags to simplify startup

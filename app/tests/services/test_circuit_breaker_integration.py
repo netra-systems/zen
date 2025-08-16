@@ -24,8 +24,17 @@ class TestLLMClientCircuitBreaker:
     
     def setup_method(self):
         """Set up test LLM client."""
+        # Clean up any existing circuit breakers to ensure test isolation
+        from app.core.circuit_breaker import circuit_registry
+        circuit_registry.cleanup_all()
+        
         self.mock_llm_manager = MagicMock()
         self.llm_client = ResilientLLMClient(self.mock_llm_manager)
+    
+    def teardown_method(self):
+        """Clean up after test."""
+        from app.core.circuit_breaker import circuit_registry
+        circuit_registry.cleanup_all()
     
     async def test_successful_llm_call(self):
         """Test successful LLM call through circuit breaker."""
@@ -47,19 +56,32 @@ class TestLLMClientCircuitBreaker:
         circuit.config.failure_threshold = 2
         circuit.adaptive_failure_threshold = 2
         
+        # Check initial state
+        assert circuit.state.value == "closed"
+        assert circuit.failure_count == 0
+        
         # First failure
         with pytest.raises(Exception, match="LLM error"):
             await self.llm_client.ask_llm("test prompt", "test_config")
+        
+        # Check state after first failure
+        assert circuit.failure_count == 1
+        assert circuit.state.value == "closed"
         
         # Second failure should open circuit
         with pytest.raises(Exception, match="LLM error"):
             await self.llm_client.ask_llm("test prompt", "test_config")
         
-        # Third call should be blocked by circuit breaker
+        # Check state after second failure - circuit should be open
+        assert circuit.failure_count == 2
+        assert circuit.state.value == "open"
+        
+        # Third call should be blocked by circuit breaker and return fallback
         result = await self.llm_client.ask_llm("test prompt", "test_config")
         
         # Should return fallback response
         assert "Service temporarily unavailable" in result
+        assert "test_config" in result
     
     async def test_llm_structured_output_protection(self):
         """Test structured LLM output with circuit breaker."""
@@ -95,7 +117,16 @@ class TestDatabaseClientCircuitBreaker:
     
     def setup_method(self):
         """Set up test database client."""
+        # Clean up any existing circuit breakers to ensure test isolation
+        from app.core.circuit_breaker import circuit_registry
+        circuit_registry.cleanup_all()
+        
         self.db_client = ResilientDatabaseClient()
+    
+    def teardown_method(self):
+        """Clean up after test."""
+        from app.core.circuit_breaker import circuit_registry
+        circuit_registry.cleanup_all()
     
     @patch('app.db.client_postgres.async_session_factory')
     async def test_successful_db_query(self, mock_session_factory):
@@ -126,15 +157,19 @@ class TestDatabaseClientCircuitBreaker:
         """Test database circuit breaker fallback behavior."""
         mock_session_factory.side_effect = Exception("Database connection error")
         
-        # Configure circuit with low threshold
-        circuit = await self.db_client._get_read_circuit()
-        circuit.config.failure_threshold = 1
+        # Configure BOTH postgres and read circuits with low thresholds
+        # The postgres circuit protects session creation, read circuit protects read operations
+        postgres_circuit = await self.db_client._get_postgres_circuit()
+        read_circuit = await self.db_client._get_read_circuit()
         
-        # First call should fail with exception (not caught by execute_read_query)
+        postgres_circuit.config.failure_threshold = 1
+        read_circuit.config.failure_threshold = 1
+        
+        # First call should fail with exception (postgres circuit not open yet)
         with pytest.raises(Exception, match="Database connection error"):
             await self.db_client.execute_read_query("SELECT * FROM test")
         
-        # Second call should be blocked by circuit breaker and return empty result
+        # Second call should be blocked by postgres circuit breaker and return empty result
         result = await self.db_client.execute_read_query("SELECT * FROM test")
         
         # Should return empty result as fallback
@@ -157,7 +192,16 @@ class TestHTTPClientCircuitBreaker:
     
     def setup_method(self):
         """Set up test HTTP client."""
+        # Clean up any existing circuit breakers to ensure test isolation
+        from app.core.circuit_breaker import circuit_registry
+        circuit_registry.cleanup_all()
+        
         self.http_client = ResilientHTTPClient(base_url="https://api.example.com")
+    
+    def teardown_method(self):
+        """Clean up after test."""
+        from app.core.circuit_breaker import circuit_registry
+        circuit_registry.cleanup_all()
     
     @patch('aiohttp.ClientSession.request')
     async def test_successful_http_request(self, mock_request):

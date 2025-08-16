@@ -3,6 +3,7 @@
 /**
  * Windows-compatible Jest runner
  * Fixes Bus error by calling Jest directly through Node.js
+ * Handles extended glob patterns by converting to Jest project selection
  */
 
 const { spawn } = require('child_process');
@@ -15,6 +16,20 @@ const args = process.argv.slice(2);
 const hasConfig = args.some(arg => arg.includes('--config'));
 if (!hasConfig) {
   args.unshift('--config', 'jest.config.cjs');
+}
+
+// Handle the complex testMatch pattern for core test categories
+const testMatchIndex = args.findIndex(arg => 
+  arg.includes('--testMatch') && 
+  arg.includes('@(components|hooks|store|services|lib|utils)')
+);
+
+if (testMatchIndex !== -1) {
+  // Remove the problematic testMatch argument
+  args.splice(testMatchIndex, 1);
+  
+  // Add project selection for the core categories
+  args.push('--selectProjects=components,hooks,store,services,lib,utils');
 }
 
 // Path to Jest binary

@@ -29,7 +29,7 @@ async def test_get_corpus_from_clickhouse():
     mock_db_instance.is_connected = AsyncMock(return_value=True)
     mock_db_instance.disconnect = AsyncMock()
 
-    with patch('app.services.generation_service.ClickHouseDatabase') as mock_db_class:
+    with patch('app.services.generation_job_manager.ClickHouseDatabase') as mock_db_class:
         mock_db_class.return_value = mock_db_instance
 
         # Act
@@ -52,7 +52,7 @@ async def test_save_corpus_to_clickhouse():
     mock_db_instance.is_connected = AsyncMock(return_value=True)
     mock_db_instance.disconnect = AsyncMock()
 
-    with patch('app.services.generation_service.ClickHouseDatabase') as mock_db_class:
+    with patch('app.services.generation_job_manager.ClickHouseDatabase') as mock_db_class:
         mock_db_class.return_value = mock_db_instance
 
         # Act

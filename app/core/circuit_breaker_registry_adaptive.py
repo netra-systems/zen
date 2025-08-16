@@ -73,6 +73,15 @@ class CircuitBreakerRegistry:
     def get_breaker_names(self) -> list[str]:
         """Get list of all registered breaker names."""
         return list(self.breakers.keys())
+    
+    async def get_circuit(self, name: str, config: Optional[CircuitBreakerConfig] = None,
+                         health_checker: Optional[HealthChecker] = None) -> AdaptiveCircuitBreaker:
+        """Async alias for get_breaker for compatibility."""
+        return self.get_breaker(name, config, health_checker)
+    
+    async def get_all_status(self) -> Dict[str, Any]:
+        """Get status for all circuit breakers (async alias for get_all_metrics)."""
+        return self.get_all_metrics()
 
 
 # Global circuit breaker registry

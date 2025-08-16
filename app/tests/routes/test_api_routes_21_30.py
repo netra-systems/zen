@@ -9,6 +9,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from datetime import datetime
+from typing import Optional
 
 
 # Test 21: admin_route_authorization
@@ -121,20 +122,21 @@ class TestAgentRoute:
         # Create a mock agent service
         mock_agent_service = Mock(spec=AgentService)
         
-        async def mock_generator():
-            yield "Part 1"
-            yield "Part 2"
-            yield "Part 3"
+        async def mock_generate_stream(message: str, thread_id: Optional[str] = None):
+            """Mock async generator that yields properly typed chunks."""
+            yield {"type": "content", "data": "Part 1"}
+            yield {"type": "content", "data": "Part 2"}
+            yield {"type": "content", "data": "Part 3"}
         
-        mock_agent_service.generate_stream = AsyncMock(return_value=mock_generator())
+        mock_agent_service.generate_stream = mock_generate_stream
         
         # Mock the dependencies
         with patch('app.routes.agent_route.get_agent_service', return_value=mock_agent_service):
             chunks = []
-            async for chunk in stream_agent_response("test message"):
+            async for chunk in stream_agent_response("test message", agent_service=mock_agent_service):
                 chunks.append(chunk)
             
-            assert len(chunks) == 9  # Updated to match actual output from streaming service
+            assert len(chunks) == 4  # 3 content chunks + 1 completion chunk
     
     def test_agent_error_handling(self, client):
         """Test agent error handling."""
