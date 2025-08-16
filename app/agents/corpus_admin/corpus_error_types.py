@@ -21,14 +21,18 @@ class CorpusAdminError(AgentError):
         context: Optional[ErrorContext] = None
     ):
         """Initialize corpus admin error."""
+        self._init_parent_error(message, context)
+        self.operation = operation
+        self.resource_info = resource_info or {}
+    
+    def _init_parent_error(self, message: str, context: Optional[ErrorContext]):
+        """Initialize parent AgentError."""
         super().__init__(
             message=message,
             severity=ErrorSeverity.MEDIUM,
             context=context,
             recoverable=True
         )
-        self.operation = operation
-        self.resource_info = resource_info or {}
 
 
 class DocumentUploadError(CorpusAdminError):
@@ -42,18 +46,23 @@ class DocumentUploadError(CorpusAdminError):
         context: Optional[ErrorContext] = None
     ):
         """Initialize document upload error."""
-        super().__init__(
-            message=f"Document upload failed: {filename} ({error_details})",
-            operation="document_upload",
-            resource_info={
-                'filename': filename,
-                'file_size': file_size,
-                'error': error_details
-            },
-            context=context
+        message = f"Document upload failed: {filename} ({error_details})"
+        resource_info = self._build_upload_resource_info(
+            filename, file_size, error_details
         )
+        super().__init__(message, "document_upload", resource_info, context)
         self.filename = filename
         self.file_size = file_size
+    
+    def _build_upload_resource_info(
+        self, filename: str, file_size: int, error_details: str
+    ) -> Dict[str, any]:
+        """Build resource info for upload error."""
+        return {
+            'filename': filename,
+            'file_size': file_size,
+            'error': error_details
+        }
 
 
 class DocumentValidationError(CorpusAdminError):
@@ -66,17 +75,22 @@ class DocumentValidationError(CorpusAdminError):
         context: Optional[ErrorContext] = None
     ):
         """Initialize document validation error."""
-        super().__init__(
-            message=f"Document validation failed: {filename}",
-            operation="document_validation",
-            resource_info={
-                'filename': filename,
-                'validation_errors': validation_errors
-            },
-            context=context
+        message = f"Document validation failed: {filename}"
+        resource_info = self._build_validation_resource_info(
+            filename, validation_errors
         )
+        super().__init__(message, "document_validation", resource_info, context)
         self.filename = filename
         self.validation_errors = validation_errors
+    
+    def _build_validation_resource_info(
+        self, filename: str, validation_errors: List[str]
+    ) -> Dict[str, any]:
+        """Build resource info for validation error."""
+        return {
+            'filename': filename,
+            'validation_errors': validation_errors
+        }
 
 
 class IndexingError(CorpusAdminError):
@@ -89,14 +103,19 @@ class IndexingError(CorpusAdminError):
         context: Optional[ErrorContext] = None
     ):
         """Initialize indexing error."""
-        super().__init__(
-            message=f"Document indexing failed: {document_id}",
-            operation="document_indexing",
-            resource_info={
-                'document_id': document_id,
-                'index_type': index_type
-            },
-            context=context
+        message = f"Document indexing failed: {document_id}"
+        resource_info = self._build_indexing_resource_info(
+            document_id, index_type
         )
+        super().__init__(message, "document_indexing", resource_info, context)
         self.document_id = document_id
         self.index_type = index_type
+    
+    def _build_indexing_resource_info(
+        self, document_id: str, index_type: str
+    ) -> Dict[str, any]:
+        """Build resource info for indexing error."""
+        return {
+            'document_id': document_id,
+            'index_type': index_type
+        }

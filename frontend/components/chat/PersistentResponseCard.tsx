@@ -1,44 +1,15 @@
 "use client";
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronUp, ChevronDown, Shield, Database, Sparkles, Users, Settings, FileText, CheckCircle, Loader2 } from 'lucide-react';
-import { FastLayer } from '@/components/chat/layers/FastLayer';
-import { MediumLayer } from '@/components/chat/layers/MediumLayer';
-import { SlowLayer } from '@/components/chat/layers/SlowLayer';
-import type { PersistentResponseCardProps } from '@/types/unified-chat';
+import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-
-// Extended props for admin features are now part of the base PersistentResponseCardProps
-// Admin features are conditionally shown based on message metadata and user permissions
-
-const ADMIN_TYPE_CONFIG = {
-  corpus: {
-    icon: Database,
-    color: 'purple',
-    label: 'Corpus Management'
-  },
-  synthetic: {
-    icon: Sparkles,
-    color: 'indigo',
-    label: 'Synthetic Data'
-  },
-  users: {
-    icon: Users,
-    color: 'blue',
-    label: 'User Management'
-  },
-  config: {
-    icon: Settings,
-    color: 'gray',
-    label: 'System Configuration'
-  },
-  logs: {
-    icon: FileText,
-    color: 'green',
-    label: 'Log Analysis'
-  }
-};
+import type { PersistentResponseCardProps } from '@/types/component-props';
+import type { SlowLayerData } from '@/types/layer-types';
+import { AdminHeader, AdminResults } from '@/components/chat/features/AdminFeatures';
+import { CollapsedSummary, CollapseHeader, useAutoCollapse } from '@/components/chat/features/CollapseController';
+import { LayerManager } from '@/components/chat/features/LayerManager';
+import { DEFAULT_UNIFIED_CHAT_CONFIG } from '@/types/component-props';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 
 export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
   fastLayerData,
@@ -48,263 +19,166 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
   isCollapsed = false,
   onToggleCollapse,
 }) => {
-  // Admin features are now integrated through the agent system
-  // Check if this is an admin operation based on agent names
-  const adminAgents = ['corpus_manager', 'synthetic_generator', 'user_admin', 'system_configurator', 'log_analyzer'];
-  const isAdminAction = slowLayerData?.completedAgents?.some(agent => 
-    agent?.agentName && adminAgents.includes(agent.agentName.toLowerCase())
-  ) || false;
+  const { adminConfig, isAdminAction } = useAdminDetection(slowLayerData);
+  const hasCompletedAgents = Boolean(slowLayerData?.completedAgents?.length);
   
-  // Determine admin type from agent names
-  const getAdminType = () => {
-    if (!slowLayerData?.completedAgents) return undefined;
-    const agents = slowLayerData.completedAgents
-      .filter(a => a?.agentName)
-      .map(a => a.agentName.toLowerCase());
-    if (agents.includes('corpus_manager')) return 'corpus';
-    if (agents.includes('synthetic_generator')) return 'synthetic';
-    if (agents.includes('user_admin')) return 'users';
-    if (agents.includes('system_configurator')) return 'config';
-    if (agents.includes('log_analyzer')) return 'logs';
-    return undefined;
-  };
-  
-  const adminType = getAdminType();
-  const adminStatus = isProcessing ? 'in_progress' : slowLayerData ? 'completed' : 'pending';
-  const adminMetadata = slowLayerData?.finalReport?.technical_details;
-  const showFastLayer = isProcessing || fastLayerData !== null;
-  const showMediumLayer = mediumLayerData !== null;
-  const showSlowLayer = slowLayerData !== null;
+  // Auto-collapse with proper delay
+  useAutoCollapse(
+    isProcessing,
+    hasCompletedAgents,
+    () => onToggleCollapse?.(),
+    DEFAULT_UNIFIED_CHAT_CONFIG.autoCollapseDelay
+  );
 
-  const adminConfig = adminType ? ADMIN_TYPE_CONFIG[adminType] : null;
-  const AdminIcon = adminConfig?.icon || Shield;
-
-  // Summary view when collapsed
+  // Show collapsed summary when appropriate
   if (isCollapsed && slowLayerData?.finalReport) {
     return (
-      <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
-        transition={{ duration: 0.3 }}
-        className={cn(
-          "bg-white rounded-lg shadow-lg overflow-hidden border",
-          isAdminAction ? "border-purple-200" : "border-gray-200"
-        )}
-      >
-        <div 
-          className={cn(
-            "px-4 py-3 backdrop-blur-md cursor-pointer flex items-center justify-between transition-colors duration-200",
-            isAdminAction 
-              ? "glass-accent-purple hover:bg-purple-50/30 border-b border-purple-200"
-              : "bg-white/95 border-b border-emerald-500/20 hover:bg-emerald-50/50"
-          )}
-          onClick={onToggleCollapse}
-        >
-          <div className="flex items-center space-x-3">
-            {isAdminAction && (
-              <div className="flex items-center space-x-2 px-2 py-1 bg-purple-100 rounded-md">
-                <AdminIcon className="w-4 h-4 text-purple-600" />
-                <span className="text-xs font-medium text-purple-700">Admin</span>
-              </div>
-            )}
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="font-medium text-zinc-900">
-              {isAdminAction ? `${adminConfig?.label} Complete` : 'Analysis Complete'}
-            </span>
-            <span className="text-sm opacity-90">
-              {slowLayerData.completedAgents.length} agents • {Math.round(slowLayerData.totalDuration / 1000)}s
-            </span>
-          </div>
-          <ChevronDown className="w-5 h-5" />
-        </div>
-      </motion.div>
+      <CollapsedSummary
+        slowLayerData={slowLayerData}
+        isAdminAction={isAdminAction}
+        onToggleCollapse={onToggleCollapse!}
+      />
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3 }}
-      className={cn(
-        "bg-white rounded-lg shadow-lg overflow-hidden border",
-        isAdminAction ? "border-purple-200" : "border-gray-200"
-      )}
-    >
-      {/* Admin Header Badge */}
-      {isAdminAction && (
-        <div className="glass-accent-purple backdrop-blur-md text-purple-900 px-4 py-3 border-b border-purple-200">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-2 px-3 py-1 bg-white/20 rounded-full">
-                <AdminIcon className="w-4 h-4" />
-                <span className="text-sm font-medium">{adminConfig?.label}</span>
-              </div>
-              <Shield className="w-4 h-4 opacity-60" />
-              <span className="text-xs opacity-80">Admin Operation</span>
-            </div>
-            
-            {/* Status Indicator */}
-            <div className="flex items-center space-x-2">
-              {adminStatus === 'in_progress' && (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span className="text-sm">Processing...</span>
-                </>
-              )}
-              {adminStatus === 'completed' && (
-                <>
-                  <CheckCircle className="w-4 h-4" />
-                  <span className="text-sm">Completed</span>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Progress Bar for Admin Operations */}
-          {adminMetadata?.totalRecords && adminMetadata?.recordsProcessed && (
-            <div className="mt-3">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span>Progress</span>
-                <span>{adminMetadata.recordsProcessed} / {adminMetadata.totalRecords}</span>
-              </div>
-              <div className="w-full bg-white/20 rounded-full h-2">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${(adminMetadata.recordsProcessed / adminMetadata.totalRecords) * 100}%` }}
-                  transition={{ duration: 0.5 }}
-                  className="bg-white rounded-full h-2"
-                />
-              </div>
-              {adminMetadata.estimatedTime && (
-                <p className="text-xs mt-1 opacity-80">ETA: {adminMetadata.estimatedTime}</p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Collapse/Expand Header */}
-      {slowLayerData?.finalReport && onToggleCollapse && (
-        <div 
-          className="px-4 py-2 bg-gray-50 border-b border-gray-200 cursor-pointer flex items-center justify-between hover:bg-gray-100 transition-colors"
-          onClick={onToggleCollapse}
-        >
-          <span className="text-sm text-gray-600">
-            {isCollapsed ? 'Expand' : 'Collapse'} {isAdminAction ? 'Admin Operation' : 'Analysis'}
-          </span>
-          {isCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-        </div>
-      )}
-
-      {/* Fast Layer */}
-      <AnimatePresence>
-        {showFastLayer && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 48 }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0 }}
-          >
-            <FastLayer 
-              data={fastLayerData} 
-              isProcessing={isProcessing}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Medium Layer */}
-      <AnimatePresence>
-        {showMediumLayer && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
-          >
-            <MediumLayer data={mediumLayerData} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Slow Layer */}
-      <AnimatePresence>
-        {showSlowLayer && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4, ease: 'easeOut', delay: 0.1 }}
-          >
-            <SlowLayer 
-              data={slowLayerData} 
-              isCollapsed={isCollapsed}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Admin Action Results and Options */}
-      {isAdminAction && adminMetadata && adminStatus === 'completed' && (
-        <div className="p-4 bg-purple-50 border-t border-purple-200">
-          <div className="space-y-3">
-            {/* Audit Trail */}
-            {adminMetadata.auditInfo && (
-              <div className="text-xs text-purple-700">
-                <p>Performed by: {adminMetadata.auditInfo.user}</p>
-                <p>At: {adminMetadata.auditInfo.timestamp}</p>
-                <p>Action: {adminMetadata.auditInfo.action}</p>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-2">
-              {adminMetadata.rollbackAvailable && (
-                <button className="px-3 py-1 text-xs bg-white text-purple-600 border border-purple-300 rounded-md hover:bg-purple-50 transition-colors">
-                  Rollback
-                </button>
-              )}
-              <button className="px-3 py-1 text-xs bg-white text-purple-600 border border-purple-300 rounded-md hover:bg-purple-50 transition-colors">
-                View Details
-              </button>
-              <button className="px-3 py-1 text-xs bg-white text-purple-600 border border-purple-300 rounded-md hover:bg-purple-50 transition-colors">
-                Export Log
-              </button>
-            </div>
-
-            {/* Next Steps Suggestions */}
-            <div className="pt-2 border-t border-purple-200">
-              <p className="text-xs font-medium text-purple-900 mb-1">Suggested Next Steps:</p>
-              <ul className="text-xs text-purple-700 space-y-1">
-                {adminType === 'corpus' && (
-                  <>
-                    <li>• Validate corpus integrity</li>
-                    <li>• Generate test queries</li>
-                    <li>• Review corpus coverage</li>
-                  </>
-                )}
-                {adminType === 'synthetic' && (
-                  <>
-                    <li>• Analyze generated patterns</li>
-                    <li>• Run performance tests</li>
-                    <li>• Export data for analysis</li>
-                  </>
-                )}
-                {adminType === 'users' && (
-                  <>
-                    <li>• Send welcome emails</li>
-                    <li>• Review permission assignments</li>
-                    <li>• Generate access report</li>
-                  </>
-                )}
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
-    </motion.div>
+    <ResponseCardContainer isAdminAction={isAdminAction}>
+      <AdminSection
+        isAdminAction={isAdminAction}
+        adminConfig={adminConfig}
+        isProcessing={isProcessing}
+        slowLayerData={slowLayerData}
+      />
+      <CollapseSection
+        showHeader={Boolean(slowLayerData?.finalReport && onToggleCollapse)}
+        isCollapsed={isCollapsed}
+        isAdminAction={isAdminAction}
+        onToggleCollapse={onToggleCollapse!}
+      />
+      <LayersSection
+        fastLayerData={fastLayerData}
+        mediumLayerData={mediumLayerData}
+        slowLayerData={slowLayerData}
+        isProcessing={isProcessing}
+        isCollapsed={isCollapsed}
+      />
+    </ResponseCardContainer>
   );
+};
+
+const ResponseCardContainer: React.FC<{
+  isAdminAction: boolean;
+  children: React.ReactNode;
+}> = ({ isAdminAction, children }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.3 }}
+    className={cn(
+      "bg-white rounded-lg shadow-lg overflow-hidden border",
+      isAdminAction ? "border-purple-200" : "border-gray-200"
+    )}
+  >
+    {children}
+  </motion.div>
+);
+
+const AdminSection: React.FC<{
+  isAdminAction: boolean;
+  adminConfig: any;
+  isProcessing: boolean;
+  slowLayerData: any;
+}> = ({ isAdminAction, adminConfig, isProcessing, slowLayerData }) => {
+  if (!isAdminAction) return null;
+  
+  const adminStatus = getAdminStatus(isProcessing, slowLayerData);
+  const adminMetadata = getAdminMetadata(slowLayerData);
+  
+  return (
+    <>
+      <AdminHeader
+        adminType={adminConfig.type}
+        adminStatus={adminStatus}
+        adminMetadata={adminMetadata}
+      />
+      <AdminResults
+        adminType={adminConfig.type}
+        adminStatus={adminStatus}
+        adminMetadata={adminMetadata}
+      />
+    </>
+  );
+};
+
+const CollapseSection: React.FC<{
+  showHeader: boolean;
+  isCollapsed: boolean;
+  isAdminAction: boolean;
+  onToggleCollapse: () => void;
+}> = ({ showHeader, isCollapsed, isAdminAction, onToggleCollapse }) => (
+  <CollapseHeader
+    showHeader={showHeader}
+    isCollapsed={isCollapsed}
+    isAdminAction={isAdminAction}
+    onToggleCollapse={onToggleCollapse}
+  />
+);
+
+const LayersSection: React.FC<{
+  fastLayerData: any;
+  mediumLayerData: any;
+  slowLayerData: any;
+  isProcessing: boolean;
+  isCollapsed: boolean;
+}> = ({ fastLayerData, mediumLayerData, slowLayerData, isProcessing, isCollapsed }) => {
+  if (isCollapsed) return null;
+  
+  return (
+    <LayerManager
+      fastLayerData={fastLayerData}
+      mediumLayerData={mediumLayerData}
+      slowLayerData={slowLayerData}
+      isProcessing={isProcessing}
+      transitions={DEFAULT_UNIFIED_CHAT_CONFIG.layerTransitions}
+    />
+  );
+};
+
+// Custom hooks and utilities
+const useAdminDetection = (slowLayerData: any) => {
+  const adminAgents = ['corpus_manager', 'synthetic_generator', 'user_admin', 'system_configurator', 'log_analyzer'];
+  const isAdminAction = slowLayerData?.completedAgents?.some((agent: any) => 
+    agent?.agentName && adminAgents.includes(agent.agentName.toLowerCase())
+  ) || false;
+  
+  const adminConfig = determineAdminConfig(slowLayerData);
+  
+  return { adminConfig, isAdminAction };
+};
+
+const determineAdminConfig = (slowLayerData: any) => {
+  if (!slowLayerData?.completedAgents) return null;
+  
+  const agents = slowLayerData.completedAgents
+    .filter((a: any) => a?.agentName)
+    .map((a: any) => a.agentName.toLowerCase());
+    
+  if (agents.includes('corpus_manager')) return { type: 'corpus' };
+  if (agents.includes('synthetic_generator')) return { type: 'synthetic' };
+  if (agents.includes('user_admin')) return { type: 'users' };
+  if (agents.includes('system_configurator')) return { type: 'config' };
+  if (agents.includes('log_analyzer')) return { type: 'logs' };
+  
+  return null;
+};
+
+const getAdminStatus = (isProcessing: boolean, slowLayerData: any): string => {
+  if (isProcessing) return 'in_progress';
+  if (slowLayerData) return 'completed';
+  return 'pending';
+};
+
+const getAdminMetadata = (slowLayerData: any) => {
+  return slowLayerData?.finalReport?.technical_details || null;
 };

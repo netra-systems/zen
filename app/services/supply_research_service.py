@@ -2,12 +2,8 @@
 Supply Research Service - Business logic for AI supply research operations
 """
 
-import json
 from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timedelta, UTC
-from decimal import Decimal
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, desc
 
 from app.core.exceptions_base import NetraException
 from app.redis_manager import RedisManager
@@ -15,6 +11,12 @@ from app.db.models_postgres import AISupplyItem, ResearchSession, SupplyUpdateLo
 from app.services.permission_service import PermissionService
 from app.logging_config import central_logger as logger
 
+# Import modular operations
+from .supply_research.supply_item_operations import SupplyItemOperations
+from .supply_research.research_session_operations import ResearchSessionOperations
+from .supply_research.price_analysis_operations import PriceAnalysisOperations
+from .supply_research.market_operations import MarketOperations
+from .supply_research.supply_validation import SupplyValidation
 
 
 class SupplyResearchService:
@@ -25,11 +27,19 @@ class SupplyResearchService:
         self.redis_manager = None
         self.cache_ttl = 3600  # 1 hour cache
         
+        # Initialize modular operations
+        self.supply_ops = SupplyItemOperations(db)
+        self.research_ops = ResearchSessionOperations(db)
+        self.price_ops = PriceAnalysisOperations(db)
+        self.market_ops = MarketOperations(db)
+        self.validation = SupplyValidation()
+        
         try:
             self.redis_manager = RedisManager()
         except Exception as e:
             logger.warning(f"Redis not available for caching: {e}")
     
+    # Supply Item Operations - Delegate to SupplyItemOperations
     def get_supply_items(
         self,
         provider: Optional[str] = None,
@@ -38,103 +48,17 @@ class SupplyResearchService:
         min_confidence: Optional[float] = None
     ) -> List[AISupplyItem]:
         """Get supply items with optional filters"""
-        query = self.db.query(AISupplyItem)
-        
-        if provider:
-            query = query.filter(AISupplyItem.provider == provider)
-        if model_name:
-            query = query.filter(AISupplyItem.model_name.ilike(f"%{model_name}%"))
-        if availability_status:
-            query = query.filter(AISupplyItem.availability_status == availability_status)
-        if min_confidence:
-            query = query.filter(AISupplyItem.confidence_score >= min_confidence)
-        
-        return query.order_by(desc(AISupplyItem.last_updated)).all()
+        return self.supply_ops.get_supply_items(provider, model_name, availability_status, min_confidence)
     
     def get_supply_item_by_id(self, item_id: str) -> Optional[AISupplyItem]:
         """Get a specific supply item by ID"""
-        return self.db.query(AISupplyItem).filter(AISupplyItem.id == item_id).first()
+        return self.supply_ops.get_supply_item_by_id(item_id)
     
-    def create_or_update_supply_item(
-        self,
-        provider: str,
-        model_name: str,
-        data: Dict[str, Any],
-        research_session_id: Optional[str] = None,
-        updated_by: str = "system"
-    ) -> AISupplyItem:
+    def create_or_update_supply_item(self, provider: str, model_name: str, data: Dict[str, Any], research_session_id: Optional[str] = None, updated_by: str = "system") -> AISupplyItem:
         """Create or update a supply item"""
-        # Check for existing item
-        existing = self.db.query(AISupplyItem).filter(
-            and_(
-                AISupplyItem.provider == provider,
-                AISupplyItem.model_name == model_name
-            )
-        ).first()
-        
-        if existing:
-            # Track changes for update log
-            changes = []
-            
-            # Update fields if provided
-            for field in ['pricing_input', 'pricing_output', 'context_window', 
-                         'max_output_tokens', 'capabilities', 'availability_status',
-                         'api_endpoints', 'performance_metrics']:
-                if field in data and getattr(existing, field) != data[field]:
-                    old_value = getattr(existing, field)
-                    new_value = data[field]
-                    setattr(existing, field, new_value)
-                    
-                    # Create update log
-                    log = SupplyUpdateLog(
-                        supply_item_id=existing.id,
-                        field_updated=field,
-                        old_value=json.dumps(old_value, default=str),
-                        new_value=json.dumps(new_value, default=str),
-                        research_session_id=research_session_id,
-                        update_reason="Supply data update",
-                        updated_by=updated_by,
-                        updated_at=datetime.now(UTC)
-                    )
-                    self.db.add(log)
-                    changes.append(field)
-            
-            if changes:
-                existing.last_updated = datetime.now(UTC)
-                if 'confidence_score' in data:
-                    existing.confidence_score = data['confidence_score']
-                if 'research_source' in data:
-                    existing.research_source = data['research_source']
-            
-            self.db.commit()
-            return existing
-        else:
-            # Create new item
-            new_item = AISupplyItem(
-                provider=provider,
-                model_name=model_name,
-                **data,
-                last_updated=datetime.now(UTC)
-            )
-            self.db.add(new_item)
-            self.db.commit()
-            
-            # Create creation log
-            log = SupplyUpdateLog(
-                supply_item_id=new_item.id,
-                field_updated="*",
-                old_value=None,
-                new_value=json.dumps({"action": "created"}, default=str),
-                research_session_id=research_session_id,
-                update_reason="New supply item created",
-                updated_by=updated_by,
-                updated_at=datetime.now(UTC)
-            )
-            self.db.add(log)
-            self.db.commit()
-            
-            return new_item
+        return self.supply_ops.create_or_update_supply_item(provider, model_name, data, research_session_id, updated_by)
     
+    # Research Session Operations - Delegate to ResearchSessionOperations
     def get_research_sessions(
         self,
         status: Optional[str] = None,
@@ -142,392 +66,42 @@ class SupplyResearchService:
         limit: int = 100
     ) -> List[ResearchSession]:
         """Get research sessions with optional filters"""
-        query = self.db.query(ResearchSession)
-        
-        if status:
-            query = query.filter(ResearchSession.status == status)
-        if initiated_by:
-            query = query.filter(ResearchSession.initiated_by == initiated_by)
-        
-        return query.order_by(desc(ResearchSession.created_at)).limit(limit).all()
+        return self.research_ops.get_research_sessions(status, initiated_by, limit)
     
     def get_research_session_by_id(self, session_id: str) -> Optional[ResearchSession]:
         """Get a specific research session"""
-        return self.db.query(ResearchSession).filter(ResearchSession.id == session_id).first()
+        return self.research_ops.get_research_session_by_id(session_id)
     
     def get_update_logs(
         self,
         supply_item_id: Optional[str] = None,
         updated_by: Optional[str] = None,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
         limit: int = 100
     ) -> List[SupplyUpdateLog]:
         """Get supply update logs with filters"""
-        query = self.db.query(SupplyUpdateLog)
-        
-        if supply_item_id:
-            query = query.filter(SupplyUpdateLog.supply_item_id == supply_item_id)
-        if updated_by:
-            query = query.filter(SupplyUpdateLog.updated_by == updated_by)
-        if start_date:
-            query = query.filter(SupplyUpdateLog.updated_at >= start_date)
-        if end_date:
-            query = query.filter(SupplyUpdateLog.updated_at <= end_date)
-        
-        return query.order_by(desc(SupplyUpdateLog.updated_at)).limit(limit).all()
+        return self.research_ops.get_update_logs(supply_item_id, updated_by, start_date, end_date, limit)
     
-    def _calculate_cutoff_date(self, days_back: int) -> datetime:
-        """Calculate cutoff date for price change analysis"""
-        return datetime.now(UTC) - timedelta(days=days_back)
-    
-    def _build_date_filter(self, cutoff_date: datetime):
-        """Build date filter for price logs"""
-        return SupplyUpdateLog.updated_at >= cutoff_date
-    
-    def _build_field_filter(self):
-        """Build field filter for pricing fields"""
-        return or_(
-            SupplyUpdateLog.field_updated == "pricing_input",
-            SupplyUpdateLog.field_updated == "pricing_output"
-        )
-    
-    def _build_base_price_query(self, cutoff_date: datetime):
-        """Build base query for price change logs"""
-        date_filter = self._build_date_filter(cutoff_date)
-        field_filter = self._build_field_filter()
-        return self.db.query(SupplyUpdateLog).filter(and_(date_filter, field_filter))
-    
-    def _apply_provider_filter(self, query, provider: Optional[str]):
-        """Apply provider filter to query if specified"""
-        if provider:
-            return query.join(AISupplyItem).filter(AISupplyItem.provider == provider)
-        return query
-    
-    def _build_price_change_query(self, cutoff_date: datetime, provider: Optional[str]):
-        """Build query for price change logs"""
-        base_query = self._build_base_price_query(cutoff_date)
-        filtered_query = self._apply_provider_filter(base_query, provider)
-        return filtered_query.all()
-    
-    def _parse_price_values(self, log) -> Tuple[Decimal, Decimal]:
-        """Parse old and new price values from log"""
-        old_val = Decimal(json.loads(log.old_value)) if log.old_value else Decimal(0)
-        new_val = Decimal(json.loads(log.new_value)) if log.new_value else Decimal(0)
-        return old_val, new_val
-    
-    def _calculate_percent_change(self, old_val: Decimal, new_val: Decimal) -> float:
-        """Calculate percentage change between old and new values"""
-        if old_val <= 0:
-            return 0.0
-        return float(((new_val - old_val) / old_val) * 100)
-    
-    def _get_supply_item_info(self, supply_item_id: str) -> Tuple[str, str]:
-        """Get provider and model name for supply item"""
-        supply_item = self.db.query(AISupplyItem).filter(
-            AISupplyItem.id == supply_item_id
-        ).first()
-        provider = supply_item.provider if supply_item else "unknown"
-        model = supply_item.model_name if supply_item else "unknown"
-        return provider, model
-    
-    def _get_direction(self, percent_change: float) -> str:
-        """Get direction of price change"""
-        return "increase" if percent_change > 0 else "decrease"
-    
-    def _build_value_data(self, old_val: Decimal, new_val: Decimal, percent_change: float) -> Dict[str, Any]:
-        """Build value-related data"""
-        return {
-            "old_value": float(old_val),
-            "new_value": float(new_val),
-            "percent_change": percent_change,
-            "direction": self._get_direction(percent_change)
-        }
-    
-    def _build_change_record_data(self, log, old_val: Decimal, new_val: Decimal, percent_change: float) -> Dict[str, Any]:
-        """Build change record data structure"""
-        base_data = {
-            "field": log.field_updated,
-            "updated_at": log.updated_at.isoformat()
-        }
-        value_data = self._build_value_data(old_val, new_val, percent_change)
-        base_data.update(value_data)
-        return base_data
-    
-    def _create_change_record(self, log, old_val: Decimal, new_val: Decimal, percent_change: float) -> Dict[str, Any]:
-        """Create change record from log data"""
-        provider, model = self._get_supply_item_info(log.supply_item_id)
-        record_data = self._build_change_record_data(log, old_val, new_val, percent_change)
-        record_data.update({"provider": provider, "model": model})
-        return record_data
-    
-    def _extract_change_data(self, log) -> Tuple[Decimal, Decimal, float]:
-        """Extract change data from log"""
-        old_val, new_val = self._parse_price_values(log)
-        percent_change = self._calculate_percent_change(old_val, new_val)
-        return old_val, new_val, percent_change
-    
-    def _process_price_change_log(self, log) -> Optional[Dict[str, Any]]:
-        """Process individual price change log entry"""
-        try:
-            old_val, new_val, percent_change = self._extract_change_data(log)
-            if percent_change != 0.0:
-                return self._create_change_record(log, old_val, new_val, percent_change)
-        except Exception as e:
-            logger.error(f"Error processing price change log: {e}")
-        return None
-    
-    def _sort_changes_by_magnitude(self, changes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-        """Sort changes by percent change magnitude (highest first)"""
-        return sorted(changes, key=lambda x: abs(x["percent_change"]), reverse=True)
-    
-    def _categorize_changes(self, changes: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
-        """Categorize changes into increases and decreases"""
-        increases = [c for c in changes if c["direction"] == "increase"]
-        decreases = [c for c in changes if c["direction"] == "decrease"]
-        return increases, decreases
-    
-    def _calculate_averages(self, increases: List[Dict[str, Any]], decreases: List[Dict[str, Any]]) -> Tuple[float, float]:
-        """Calculate average percentage changes"""
-        avg_increase = sum(c["percent_change"] for c in increases) / len(increases) if increases else 0
-        avg_decrease = sum(c["percent_change"] for c in decreases) / len(decreases) if decreases else 0
-        return avg_increase, avg_decrease
-    
-    def _build_basic_stats(self, changes: List[Dict[str, Any]], increases: List[Dict[str, Any]], decreases: List[Dict[str, Any]], days_back: int) -> Dict[str, Any]:
-        """Build basic statistics structure"""
-        return {
-            "period": f"Last {days_back} days",
-            "total_changes": len(changes),
-            "increases": len(increases),
-            "decreases": len(decreases)
-        }
-    
-    def _add_averages_and_changes(self, base_stats: Dict[str, Any], avg_increase: float, avg_decrease: float, changes: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Add averages and change data to statistics"""
-        base_stats.update({
-            "average_increase_percent": avg_increase,
-            "average_decrease_percent": avg_decrease,
-            "largest_changes": changes[:10],
-            "all_changes": changes
-        })
-        return base_stats
-    
-    def _build_statistics_result(self, changes: List[Dict[str, Any]], increases: List[Dict[str, Any]], 
-                                decreases: List[Dict[str, Any]], avg_increase: float, avg_decrease: float, days_back: int) -> Dict[str, Any]:
-        """Build statistics result structure"""
-        base_stats = self._build_basic_stats(changes, increases, decreases, days_back)
-        return self._add_averages_and_changes(base_stats, avg_increase, avg_decrease, changes)
-    
-    def _calculate_change_statistics(self, changes: List[Dict[str, Any]], days_back: int) -> Dict[str, Any]:
-        """Calculate summary statistics for price changes"""
-        if not changes:
-            return self._create_empty_result(days_back)
-        increases, decreases = self._categorize_changes(changes)
-        avg_increase, avg_decrease = self._calculate_averages(increases, decreases)
-        return self._build_statistics_result(changes, increases, decreases, avg_increase, avg_decrease, days_back)
-    
-    def _create_empty_result(self, days_back: int) -> Dict[str, Any]:
-        """Create empty result when no price changes found"""
-        return {
-            "period": f"Last {days_back} days",
-            "total_changes": 0,
-            "message": "No price changes detected"
-        }
-    
-    def _process_logs_to_changes(self, logs) -> List[Dict[str, Any]]:
-        """Process logs into change records"""
-        return [change for log in logs if (change := self._process_price_change_log(log)) is not None]
-    
+    # Price Analysis Operations - Delegate to PriceAnalysisOperations
     def calculate_price_changes(self, provider: Optional[str] = None, days_back: int = 7) -> Dict[str, Any]:
         """Calculate price changes over a period"""
-        cutoff_date = self._calculate_cutoff_date(days_back)
-        logs = self._build_price_change_query(cutoff_date, provider)
-        changes = self._process_logs_to_changes(logs)
-        sorted_changes = self._sort_changes_by_magnitude(changes)
-        return self._calculate_change_statistics(sorted_changes, days_back)
+        return self.price_ops.calculate_price_changes(provider, days_back)
     
+    # Market Operations - Delegate to MarketOperations
     def get_provider_comparison(self) -> Dict[str, Any]:
         """Get pricing comparison across providers"""
-        providers = ["openai", "anthropic", "google", "mistral", "cohere"]
-        comparison = {}
-        
-        for provider in providers:
-            items = self.get_supply_items(provider=provider)
-            if items:
-                # Get flagship model (usually the first/latest)
-                flagship = items[0]
-                comparison[provider] = {
-                    "flagship_model": flagship.model_name,
-                    "input_price": float(flagship.pricing_input) if flagship.pricing_input else None,
-                    "output_price": float(flagship.pricing_output) if flagship.pricing_output else None,
-                    "context_window": flagship.context_window,
-                    "last_updated": flagship.last_updated.isoformat() if flagship.last_updated else None,
-                    "model_count": len(items)
-                }
-        
-        # Find cheapest and most expensive
-        valid_providers = [p for p, d in comparison.items() if d.get("input_price")]
-        if valid_providers:
-            cheapest_input = min(valid_providers, key=lambda p: comparison[p]["input_price"])
-            expensive_input = max(valid_providers, key=lambda p: comparison[p]["input_price"])
-            
-            return {
-                "providers": comparison,
-                "analysis": {
-                    "cheapest_input": {
-                        "provider": cheapest_input,
-                        "price": comparison[cheapest_input]["input_price"]
-                    },
-                    "most_expensive_input": {
-                        "provider": expensive_input,
-                        "price": comparison[expensive_input]["input_price"]
-                    },
-                    "price_spread": comparison[expensive_input]["input_price"] - comparison[cheapest_input]["input_price"]
-                }
-            }
-        
-        return {"providers": comparison, "analysis": {}}
+        return self.market_ops.get_provider_comparison()
     
     def detect_anomalies(self, threshold: float = 0.2) -> List[Dict[str, Any]]:
         """Detect pricing anomalies (significant deviations)"""
-        anomalies = []
-        
-        # Get recent price changes
-        changes = self.calculate_price_changes(days_back=30)
-        
-        for change in changes.get("all_changes", []):
-            if abs(change["percent_change"]) > threshold * 100:  # threshold is in decimal
-                anomalies.append({
-                    "type": "significant_price_change",
-                    "provider": change["provider"],
-                    "model": change["model"],
-                    "field": change["field"],
-                    "percent_change": change["percent_change"],
-                    "severity": "high" if abs(change["percent_change"]) > 50 else "medium",
-                    "detected_at": change["updated_at"]
-                })
-        
-        # Check for missing updates (models not updated in a while)
-        stale_cutoff = datetime.now(UTC) - timedelta(days=30)
-        stale_items = self.db.query(AISupplyItem).filter(
-            AISupplyItem.last_updated < stale_cutoff
-        ).all()
-        
-        for item in stale_items:
-            anomalies.append({
-                "type": "stale_data",
-                "provider": item.provider,
-                "model": item.model_name,
-                "last_updated": item.last_updated.isoformat() if item.last_updated else None,
-                "severity": "low"
-            })
-        
-        return anomalies
+        return self.market_ops.detect_anomalies(threshold)
     
     async def generate_market_report(self) -> Dict[str, Any]:
         """Generate comprehensive market report"""
-        report = {
-            "generated_at": datetime.now(UTC).isoformat(),
-            "sections": {}
-        }
-        
-        # Provider comparison
-        report["sections"]["provider_comparison"] = self.get_provider_comparison()
-        
-        # Recent price changes
-        report["sections"]["price_changes"] = {
-            "weekly": self.calculate_price_changes(days_back=7),
-            "monthly": self.calculate_price_changes(days_back=30)
-        }
-        
-        # Anomalies
-        report["sections"]["anomalies"] = self.detect_anomalies()
-        
-        # Model statistics
-        total_models = self.db.query(AISupplyItem).count()
-        available_models = self.db.query(AISupplyItem).filter(
-            AISupplyItem.availability_status == "available"
-        ).count()
-        deprecated_models = self.db.query(AISupplyItem).filter(
-            AISupplyItem.availability_status == "deprecated"
-        ).count()
-        
-        report["sections"]["statistics"] = {
-            "total_models": total_models,
-            "available_models": available_models,
-            "deprecated_models": deprecated_models,
-            "providers_tracked": len(set(item.provider for item in self.get_supply_items()))
-        }
-        
-        # Recent research sessions
-        recent_sessions = self.get_research_sessions(limit=10)
-        report["sections"]["recent_research"] = [
-            {
-                "id": str(session.id),
-                "query": session.query[:100] + "..." if len(session.query) > 100 else session.query,
-                "status": session.status,
-                "created_at": session.created_at.isoformat() if session.created_at else None
-            }
-            for session in recent_sessions
-        ]
-        
-        return report
+        return await self.market_ops.generate_market_report()
     
+    # Validation Operations - Delegate to SupplyValidation
     def validate_supply_data(self, data: Dict[str, Any]) -> Tuple[bool, List[str]]:
         """Validate supply data before storage"""
-        errors = []
-        
-        # Required fields
-        required = ["provider", "model_name"]
-        for field in required:
-            if field not in data or not data[field]:
-                errors.append(f"Missing required field: {field}")
-        
-        # Validate pricing (if provided)
-        if "pricing_input" in data:
-            try:
-                val = Decimal(str(data["pricing_input"]))
-                if val < 0:
-                    errors.append("Input pricing cannot be negative")
-                if val > 10000:  # Sanity check - $10,000 per 1M tokens seems unrealistic
-                    errors.append("Input pricing seems unrealistically high")
-            except:
-                errors.append("Invalid input pricing format")
-        
-        if "pricing_output" in data:
-            try:
-                val = Decimal(str(data["pricing_output"]))
-                if val < 0:
-                    errors.append("Output pricing cannot be negative")
-                if val > 10000:
-                    errors.append("Output pricing seems unrealistically high")
-            except:
-                errors.append("Invalid output pricing format")
-        
-        # Validate context window
-        if "context_window" in data:
-            try:
-                val = int(data["context_window"])
-                if val < 0:
-                    errors.append("Context window cannot be negative")
-                if val > 10000000:  # 10M tokens seems like a reasonable upper limit
-                    errors.append("Context window seems unrealistically large")
-            except:
-                errors.append("Invalid context window format")
-        
-        # Validate confidence score
-        if "confidence_score" in data:
-            try:
-                val = float(data["confidence_score"])
-                if val < 0 or val > 1:
-                    errors.append("Confidence score must be between 0 and 1")
-            except:
-                errors.append("Invalid confidence score format")
-        
-        # Validate availability status
-        if "availability_status" in data:
-            valid_statuses = ["available", "deprecated", "preview", "waitlist"]
-            if data["availability_status"] not in valid_statuses:
-                errors.append(f"Invalid availability status. Must be one of: {valid_statuses}")
-        
-        return len(errors) == 0, errors
+        return self.validation.validate_supply_data(data)

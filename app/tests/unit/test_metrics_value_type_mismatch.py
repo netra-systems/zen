@@ -59,8 +59,6 @@ class TestMetricsValueTypeMismatch:
         
         assert "metrics.value[idx]" not in fixed_query
         assert "arrayElement(metrics.value, idx)" in fixed_query
-    
-    @pytest.mark.asyncio
     async def test_query_interceptor_fixes_queries(self):
         """Test that the ClickHouseQueryInterceptor properly fixes queries"""
         # Mock client
@@ -114,8 +112,6 @@ class TestMetricsValueTypeMismatch:
         assert "metrics.value[idx + 1]" not in fixed_query
         assert "arrayElement(metrics.value, idx - 1)" in fixed_query
         assert "arrayElement(metrics.value, idx + 1)" in fixed_query
-    
-    @pytest.mark.asyncio
     async def test_interceptor_statistics(self):
         """Test that interceptor tracks statistics correctly"""
         mock_client = AsyncMock()

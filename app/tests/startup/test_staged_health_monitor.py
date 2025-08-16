@@ -191,14 +191,10 @@ class TestServiceRegistration:
 
 class TestMonitoringLifecycle:
     """Test monitoring lifecycle management."""
-    
-    @pytest.mark.asyncio
     async def test_start_monitoring_unregistered_service(self, health_monitor: StagedHealthMonitor) -> None:
         """Test starting monitoring for unregistered service."""
         with pytest.raises(ValueError, match="Service .* not registered"):
             await health_monitor.start_monitoring("unregistered_service")
-
-    @pytest.mark.asyncio
     async def test_start_monitoring_registered_service(self, health_monitor: StagedHealthMonitor,
                                                       mock_service_config: ServiceConfig) -> None:
         """Test starting monitoring for registered service."""
@@ -213,8 +209,6 @@ class TestMonitoringLifecycle:
             assert health_monitor._running is True
             assert "test_service" in health_monitor._monitoring_tasks
             mock_create_task.assert_called_once()
-
-    @pytest.mark.asyncio
     async def test_stop_monitoring(self, health_monitor: StagedHealthMonitor) -> None:
         """Test stopping all monitoring tasks."""
         mock_task1 = Mock()
@@ -235,8 +229,6 @@ class TestMonitoringLifecycle:
 
 class TestHealthChecks:
     """Test health check execution."""
-    
-    @pytest.mark.asyncio
     async def test_check_service_health_success(self, health_monitor: StagedHealthMonitor,
                                                mock_service_config: ServiceConfig) -> None:
         """Test successful health check."""
@@ -250,8 +242,6 @@ class TestHealthChecks:
             result = mock_process.call_args[0][1]
             assert result.success is True
             assert result.stage == HealthStage.INITIALIZATION
-
-    @pytest.mark.asyncio
     async def test_check_service_health_failure(self, health_monitor: StagedHealthMonitor) -> None:
         """Test health check with failing function."""
         failing_config = ServiceConfig(
@@ -265,8 +255,6 @@ class TestHealthChecks:
             
             result = mock_process.call_args[0][1]
             assert result.success is False
-
-    @pytest.mark.asyncio
     async def test_check_service_health_exception(self, health_monitor: StagedHealthMonitor) -> None:
         """Test health check with exception."""
         def raise_exception():
@@ -284,8 +272,6 @@ class TestHealthChecks:
             result = mock_process.call_args[0][1]
             assert result.success is False
             assert "Health check failed" in result.error_message
-
-    @pytest.mark.asyncio
     async def test_check_service_health_no_function(self, health_monitor: StagedHealthMonitor) -> None:
         """Test health check when no function is available."""
         no_check_config = ServiceConfig(name="no_check_service")
@@ -297,8 +283,6 @@ class TestHealthChecks:
 
 class TestCheckResultProcessing:
     """Test health check result processing."""
-    
-    @pytest.mark.asyncio
     async def test_process_check_result_success(self, health_monitor: StagedHealthMonitor,
                                                mock_service_config: ServiceConfig) -> None:
         """Test processing successful check result."""
@@ -310,8 +294,6 @@ class TestCheckResultProcessing:
         state = health_monitor._states["test_service"]
         assert state.failure_count == 0
         assert len(state.check_history) == 1
-
-    @pytest.mark.asyncio
     async def test_process_check_result_failure(self, health_monitor: StagedHealthMonitor,
                                                mock_service_config: ServiceConfig) -> None:
         """Test processing failed check result."""
@@ -324,8 +306,6 @@ class TestCheckResultProcessing:
             state = health_monitor._states["test_service"]
             assert state.failure_count == 1
             mock_handle.assert_called_once()
-
-    @pytest.mark.asyncio
     async def test_handle_failure_within_threshold(self, health_monitor: StagedHealthMonitor,
                                                   mock_service_config: ServiceConfig) -> None:
         """Test failure handling within threshold."""
@@ -334,8 +314,6 @@ class TestCheckResultProcessing:
         
         # Should log warning but not error
         await health_monitor._handle_failure("test_service", result)
-
-    @pytest.mark.asyncio
     async def test_handle_failure_exceeds_threshold(self, health_monitor: StagedHealthMonitor,
                                                    mock_service_config: ServiceConfig) -> None:
         """Test failure handling when exceeding threshold."""
@@ -352,8 +330,6 @@ class TestCheckResultProcessing:
 
 class TestStageProgression:
     """Test service stage progression."""
-    
-    @pytest.mark.asyncio
     async def test_update_service_stage_progression(self, health_monitor: StagedHealthMonitor,
                                                    mock_service_config: ServiceConfig) -> None:
         """Test service stage progression over time."""
@@ -393,8 +369,6 @@ class TestStageProgression:
 
 class TestAdaptiveRules:
     """Test adaptive monitoring rules."""
-    
-    @pytest.mark.asyncio
     async def test_apply_adaptive_rules_slow_startup(self, health_monitor: StagedHealthMonitor,
                                                     mock_service_config: ServiceConfig) -> None:
         """Test adaptive rules for slow startup."""
@@ -406,8 +380,6 @@ class TestAdaptiveRules:
         await health_monitor._apply_adaptive_rules("test_service")
         
         assert state.grace_multiplier == 1.5
-
-    @pytest.mark.asyncio
     async def test_apply_adaptive_rules_frequent_failures(self, health_monitor: StagedHealthMonitor,
                                                          mock_service_config: ServiceConfig) -> None:
         """Test adaptive rules for frequent failures."""

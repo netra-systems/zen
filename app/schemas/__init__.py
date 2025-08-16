@@ -45,6 +45,10 @@ from .Corpus import (
     CorpusInDBBase,
     Corpus,
     ContentCorpus,
+    DocumentBase,
+    DocumentCreate,
+    DocumentUpdate,
+    Document,
 )
 from .Generation import (
     ContentGenParams,
@@ -167,6 +171,10 @@ __all__ = [
     "CorpusInDBBase",
     "Corpus",
     "ContentCorpus",
+    "DocumentBase",
+    "DocumentCreate",
+    "DocumentUpdate",
+    "Document",
     "ContentGenParams",
     "LogGenParams",
     "SyntheticDataGenParams",

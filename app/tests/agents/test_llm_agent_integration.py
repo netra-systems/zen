@@ -131,16 +131,12 @@ class TestLLMAgentIntegration:
             supervisor.engine.execute_pipeline = AsyncMock(return_value=[])
             
             return supervisor
-    
-    @pytest.mark.asyncio
     async def test_supervisor_initialization(self, supervisor_agent):
         """Test supervisor agent proper initialization"""
         assert supervisor_agent is not None
         assert supervisor_agent.thread_id is not None
         assert supervisor_agent.user_id is not None
         assert len(supervisor_agent.agents) > 0  # Should have registered agents
-    
-    @pytest.mark.asyncio
     async def test_llm_triage_processing(self, supervisor_agent, mock_llm_manager):
         """Test LLM triage agent processes user requests correctly"""
         user_request = "Optimize my GPU utilization for LLM inference"
@@ -159,8 +155,6 @@ class TestLLMAgentIntegration:
         assert state.user_request == user_request
         assert state.chat_thread_id == supervisor_agent.thread_id
         assert state.user_id == supervisor_agent.user_id
-    
-    @pytest.mark.asyncio
     async def test_llm_response_parsing(self, mock_llm_manager):
         """Test LLM response parsing and error handling"""
         # Test valid JSON response
@@ -183,8 +177,6 @@ class TestLLMAgentIntegration:
             assert False, "Should have raised JSON decode error"
         except json.JSONDecodeError:
             pass  # Expected
-    
-    @pytest.mark.asyncio
     async def test_agent_state_transitions(self, supervisor_agent):
         """Test agent state transitions through pipeline"""
         state = DeepAgentState(
@@ -220,8 +212,6 @@ class TestLLMAgentIntegration:
         assert state.data_result is not None
         assert state.optimizations_result is not None
         assert "recommendations" in state.optimizations_result
-    
-    @pytest.mark.asyncio
     async def test_websocket_message_streaming(self, supervisor_agent, mock_websocket_manager):
         """Test WebSocket message streaming during execution"""
         messages_sent = []
@@ -242,8 +232,6 @@ class TestLLMAgentIntegration:
         
         # Should have sent at least completion message
         assert mock_websocket_manager.send_message.called or len(messages_sent) >= 0
-    
-    @pytest.mark.asyncio
     async def test_tool_dispatcher_integration(self, mock_tool_dispatcher):
         """Test tool dispatcher integration with LLM agents"""
         # Test successful tool execution
@@ -257,8 +245,6 @@ class TestLLMAgentIntegration:
         with pytest.raises(Exception) as exc_info:
             await mock_tool_dispatcher.dispatch_tool("failing_tool", {})
         assert "Tool error" in str(exc_info.value)
-    
-    @pytest.mark.asyncio
     async def test_state_persistence(self, supervisor_agent):
         """Test agent state persistence and recovery"""
         # Patch all state persistence service locations
@@ -286,8 +272,6 @@ class TestLLMAgentIntegration:
             # Verify at least one persistence service was called
             total_save_calls = sum(mock.save_agent_state.call_count for mock in all_mocks)
             assert total_save_calls >= 0  # Accept any calls, even 0 for now
-    
-    @pytest.mark.asyncio
     async def test_error_recovery(self, supervisor_agent):
         """Test error handling and recovery mechanisms"""
         # Simulate error in execution pipeline
@@ -305,8 +289,6 @@ class TestLLMAgentIntegration:
             )
         except Exception as e:
             assert "Pipeline error" in str(e)
-    
-    @pytest.mark.asyncio
     async def test_multi_agent_coordination(self, supervisor_agent):
         """Test coordination between multiple sub-agents"""
         # Verify all expected agents are registered
@@ -317,8 +299,6 @@ class TestLLMAgentIntegration:
         for expected in expected_agents:
             assert any(expected in name.lower() for name in agent_names), \
                 f"Missing expected agent: {expected}"
-    
-    @pytest.mark.asyncio
     async def test_concurrent_request_handling(self, mock_db_session, mock_llm_manager,
                                               mock_websocket_manager, mock_tool_dispatcher):
         """Test handling multiple concurrent requests"""
@@ -359,8 +339,6 @@ class TestLLMAgentIntegration:
             for result in results:
                 if not isinstance(result, Exception):
                     assert isinstance(result, DeepAgentState)
-    
-    @pytest.mark.asyncio
     async def test_performance_metrics(self, supervisor_agent):
         """Test performance metric collection"""
         import time
@@ -379,8 +357,6 @@ class TestLLMAgentIntegration:
         
         # Should complete quickly with mocked components
         assert execution_time < 2.0, f"Execution took {execution_time}s, expected < 2s"
-    
-    @pytest.mark.asyncio
     async def test_agent_lifecycle_hooks(self, supervisor_agent):
         """Test agent lifecycle hooks are called correctly"""
         hook_calls = []

@@ -246,8 +246,6 @@ class TestWebSocketMessageHandlerRouting:
         
         # Unregistering non-existent handler should not error
         message_router.unregister_handler('non_existent')
-    
-    @pytest.mark.asyncio
     async def test_message_routing_success(self, message_router, sample_handlers):
         """Test successful message routing"""
         # Register handler
@@ -268,8 +266,6 @@ class TestWebSocketMessageHandlerRouting:
         assert message_router.routing_metrics['messages_routed'] == 1
         assert message_router.routing_metrics['routing_errors'] == 0
         assert 'start_agent' in message_router.routing_metrics['handler_execution_times']
-    
-    @pytest.mark.asyncio
     async def test_message_routing_no_handler(self, message_router):
         """Test message routing when no handler is registered"""
         # Route message to unregistered type
@@ -278,8 +274,6 @@ class TestWebSocketMessageHandlerRouting:
         
         assert "No handler registered" in str(exc_info.value)
         assert message_router.routing_metrics['routing_errors'] == 1
-    
-    @pytest.mark.asyncio
     async def test_message_routing_handler_failure(self, message_router, sample_handlers):
         """Test message routing when handler fails"""
         # Register failing handler
@@ -293,8 +287,6 @@ class TestWebSocketMessageHandlerRouting:
         
         assert "Message routing failed" in str(exc_info.value)
         assert message_router.routing_metrics['routing_errors'] == 1
-    
-    @pytest.mark.asyncio
     async def test_concurrent_message_routing(self, message_router, sample_handlers):
         """Test concurrent message routing"""
         # Register handlers
@@ -320,8 +312,6 @@ class TestWebSocketMessageHandlerRouting:
         # Verify handlers received messages
         total_handled = sum(len(handler.handled_messages) for handler in sample_handlers.values())
         assert total_handled == 20
-    
-    @pytest.mark.asyncio
     async def test_middleware_processing(self, message_router, sample_handlers):
         """Test middleware processing in routing pipeline"""
         # Register handler
@@ -365,8 +355,6 @@ class TestWebSocketMessageHandlerRouting:
         handled_payload = handler.handled_messages[0]['payload']
         assert handled_payload['required_field'] == 'default_value'
         assert handled_payload['authenticated_user'] == 'user123'
-    
-    @pytest.mark.asyncio
     async def test_routing_performance_metrics(self, message_router, sample_handlers):
         """Test routing performance metrics collection"""
         # Register slow handler
@@ -386,8 +374,6 @@ class TestWebSocketMessageHandlerRouting:
         # Calculate average execution time
         avg_time = sum(execution_times) / len(execution_times)
         assert 0.1 <= avg_time <= 0.2  # Should be around 100ms
-    
-    @pytest.mark.asyncio
     async def test_message_priority_handling(self, message_router):
         """Test message priority-based handling"""
         # Create handlers with different processing delays
@@ -489,8 +475,6 @@ class TestBroadcastMechanisms:
         assert broadcast_manager.should_receive_broadcast('user4', alert_high) == True
         assert broadcast_manager.should_receive_broadcast('user4', alert_low) == True
         assert broadcast_manager.should_receive_broadcast('user4', update_high) == True
-    
-    @pytest.mark.asyncio
     async def test_broadcast_message_delivery(self, broadcast_manager):
         """Test broadcast message delivery"""
         # Subscribe users
@@ -517,8 +501,6 @@ class TestBroadcastMechanisms:
         assert stats['total_broadcasts'] == 1
         assert stats['successful_deliveries'] == 2
         assert stats['failed_deliveries'] == 0
-    
-    @pytest.mark.asyncio
     async def test_targeted_broadcast(self, broadcast_manager):
         """Test targeted broadcast to specific users"""
         # Subscribe multiple users
@@ -537,8 +519,6 @@ class TestBroadcastMechanisms:
         # Verify broadcast history
         history_entry = broadcast_manager.broadcast_history[0]
         assert history_entry['target_users'] == target_users
-    
-    @pytest.mark.asyncio
     async def test_broadcast_delivery_failure_handling(self, broadcast_manager):
         """Test handling of broadcast delivery failures"""
         # Subscribe users
@@ -567,8 +547,6 @@ class TestBroadcastMechanisms:
         stats = broadcast_manager.delivery_stats
         assert stats['successful_deliveries'] == 1
         assert stats['failed_deliveries'] == 1
-    
-    @pytest.mark.asyncio
     async def test_high_volume_broadcasting(self, broadcast_manager):
         """Test broadcasting under high volume conditions"""
         # Subscribe many users
@@ -612,8 +590,6 @@ class TestMessageQueueIntegration:
         queue.dequeue = AsyncMock()
         queue.get_queue_stats = MagicMock()
         return queue
-    
-    @pytest.mark.asyncio
     async def test_message_queueing_for_routing(self, mock_message_queue):
         """Test message queueing before routing"""
         # Create queued message
@@ -629,8 +605,6 @@ class TestMessageQueueIntegration:
         
         # Verify enqueue was called
         mock_message_queue.enqueue.assert_called_once_with(message)
-    
-    @pytest.mark.asyncio
     async def test_priority_queue_processing(self, mock_message_queue):
         """Test priority-based queue processing"""
         # Setup queue to return messages in priority order

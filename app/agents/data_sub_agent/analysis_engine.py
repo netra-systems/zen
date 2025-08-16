@@ -13,7 +13,11 @@ class AnalysisEngine:
         """Calculate comprehensive statistics for a metric"""
         if not values:
             return AnalysisEngine._empty_statistics()
-        
+        return AnalysisEngine._compute_comprehensive_stats(values)
+    
+    @staticmethod
+    def _compute_comprehensive_stats(values: List[float]) -> Dict[str, float]:
+        """Compute comprehensive statistics from values."""
         arr = np.array(values)
         std_value = float(np.std(arr))
         basic_stats = AnalysisEngine._calculate_basic_stats(arr, std_value, len(values))
@@ -25,11 +29,19 @@ class AnalysisEngine:
         """Detect trend in time series data"""
         if len(values) < 3:
             return {"has_trend": False, "reason": "insufficient_data"}
-        
+        return AnalysisEngine._perform_trend_analysis(values, timestamps)
+    
+    @staticmethod
+    def _perform_trend_analysis(values: List[float], timestamps: List[datetime]) -> Dict[str, Any]:
+        """Perform trend analysis on prepared data."""
         x_norm, y = AnalysisEngine._prepare_trend_data(values, timestamps)
         if x_norm is None:
             return {"has_trend": False, "reason": "no_time_variation"}
-        
+        return AnalysisEngine._compute_trend_parameters(x_norm, y)
+    
+    @staticmethod
+    def _compute_trend_parameters(x_norm, y) -> Dict[str, Any]:
+        """Compute trend parameters and build result."""
         slope, intercept, r_squared = AnalysisEngine._calculate_linear_regression(x_norm, y)
         return AnalysisEngine._build_trend_result(slope, intercept, r_squared, x_norm)
     
@@ -38,13 +50,20 @@ class AnalysisEngine:
         """Detect daily/hourly seasonality patterns"""
         if len(values) < 24:
             return {"has_seasonality": False, "reason": "insufficient_data"}
-        
+        return AnalysisEngine._perform_seasonality_analysis(values, timestamps)
+    
+    @staticmethod
+    def _perform_seasonality_analysis(values: List[float], timestamps: List[datetime]) -> Dict[str, Any]:
+        """Perform comprehensive seasonality analysis."""
         hourly_groups = AnalysisEngine._group_by_hour(values, timestamps)
         hourly_means = {h: np.mean(vals) for h, vals in hourly_groups.items()}
-        
+        return AnalysisEngine._validate_and_analyze_seasonality(hourly_means)
+    
+    @staticmethod
+    def _validate_and_analyze_seasonality(hourly_means: Dict[int, float]) -> Dict[str, Any]:
+        """Validate hourly coverage and analyze seasonality patterns."""
         if len(hourly_means) < 12:
             return {"has_seasonality": False, "reason": "insufficient_hourly_coverage"}
-        
         return AnalysisEngine._analyze_seasonality_patterns(hourly_means)
     
     @staticmethod
@@ -151,21 +170,42 @@ class AnalysisEngine:
     @staticmethod
     def _analyze_seasonality_patterns(hourly_means: Dict[int, float]) -> Dict[str, Any]:
         """Analyze seasonality patterns from hourly means."""
+        cv, has_daily_pattern = AnalysisEngine._calculate_daily_pattern_metrics(hourly_means)
+        peak_hour, low_hour = AnalysisEngine._find_peak_and_low_hours(hourly_means)
+        daily_pattern = AnalysisEngine._build_daily_pattern_info(peak_hour, low_hour, hourly_means, cv)
+        return AnalysisEngine._build_seasonality_result(has_daily_pattern, daily_pattern, hourly_means)
+    
+    @staticmethod
+    def _calculate_daily_pattern_metrics(hourly_means: Dict[int, float]) -> tuple:
+        """Calculate coefficient of variation and pattern detection."""
         overall_mean = np.mean(list(hourly_means.values()))
         hourly_variance = np.var(list(hourly_means.values()))
         cv = np.sqrt(hourly_variance) / overall_mean if overall_mean != 0 else 0
         has_daily_pattern = cv > 0.2
-        
+        return cv, has_daily_pattern
+    
+    @staticmethod
+    def _find_peak_and_low_hours(hourly_means: Dict[int, float]) -> tuple:
+        """Find peak and low hours from hourly means."""
         peak_hour = max(hourly_means, key=hourly_means.get)
         low_hour = min(hourly_means, key=hourly_means.get)
-        
+        return peak_hour, low_hour
+    
+    @staticmethod
+    def _build_daily_pattern_info(peak_hour: int, low_hour: int, hourly_means: Dict, cv: float) -> Dict[str, Any]:
+        """Build daily pattern information structure."""
+        return {
+            "peak_hour": peak_hour, "peak_value": hourly_means[peak_hour],
+            "low_hour": low_hour, "low_value": hourly_means[low_hour],
+            "coefficient_of_variation": float(cv)
+        }
+    
+    @staticmethod
+    def _build_seasonality_result(has_daily_pattern: bool, daily_pattern: Dict, hourly_means: Dict) -> Dict[str, Any]:
+        """Build complete seasonality analysis result."""
         return {
             "has_seasonality": has_daily_pattern,
-            "daily_pattern": {
-                "peak_hour": peak_hour, "peak_value": hourly_means[peak_hour],
-                "low_hour": low_hour, "low_value": hourly_means[low_hour],
-                "coefficient_of_variation": float(cv)
-            },
+            "daily_pattern": daily_pattern,
             "hourly_averages": hourly_means
         }
     

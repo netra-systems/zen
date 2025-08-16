@@ -1,0 +1,153 @@
+/* Connection Status Indicator Glassmorphic Styles */
+/* Following ui_ux_visual_design.xml specifications */
+
+/* Base glassmorphic card style for connection status */
+.glassmorphic-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Hover state for interactive cards */
+.glassmorphic-card:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+  transform: translateY(-1px);
+}
+
+/* Connection status specific variants */
+.connection-status-connected {
+  border-left: 3px solid #10B981; /* emerald-500 */
+}
+
+.connection-status-connecting {
+  border-left: 3px solid #71717A; /* zinc-500 */
+}
+
+.connection-status-reconnecting {
+  border-left: 3px solid #F59E0B; /* amber-500 */
+}
+
+.connection-status-disconnected {
+  border-left: 3px solid #6B7280; /* gray-500 */
+  background: rgba(248, 248, 248, 0.8);
+}
+
+.connection-status-error {
+  border-left: 3px solid #EF4444; /* red-500 */
+  background: rgba(254, 242, 242, 0.8);
+}
+
+/* Status dot animations */
+.status-dot {
+  position: relative;
+  display: inline-block;
+}
+
+.status-dot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.6;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Pulse animation for connecting states */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translate(-50%, -50%) scale(1.3);
+  }
+}
+
+/* Connection quality indicators */
+.quality-excellent {
+  color: #10B981; /* emerald-600 */
+}
+
+.quality-good {
+  color: #059669; /* emerald-500 */
+}
+
+.quality-fair {
+  color: #F59E0B; /* amber-500 */
+}
+
+.quality-poor {
+  color: #EF4444; /* red-500 */
+}
+
+/* Metrics grid layout */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  padding: 12px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .glassmorphic-card {
+    border-radius: 8px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  .connection-status-mobile {
+    padding: 8px 12px;
+  }
+  
+  .metrics-grid {
+    padding: 8px;
+    gap: 6px;
+  }
+}
+
+/* Dark mode adjustments (if needed in future) */
+@media (prefers-color-scheme: dark) {
+  .glassmorphic-card {
+    background: rgba(20, 20, 20, 0.85);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+  
+  .glassmorphic-card:hover {
+    background: rgba(20, 20, 20, 0.9);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+}
+
+/* Animation performance optimizations */
+.glassmorphic-card {
+  will-change: transform, box-shadow;
+  contain: layout style paint;
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .glassmorphic-card {
+    transition: none;
+  }
+  
+  .status-dot::before {
+    animation: none;
+  }
+  
+  .animate-spin {
+    animation: none;
+  }
+}

@@ -25,8 +25,6 @@ class TestStartupCheckerFileDb:
     def checker(self, mock_app):
         """Create a StartupChecker instance."""
         return StartupChecker(mock_app)
-    
-    @pytest.mark.asyncio
     async def test_check_file_permissions_success(self, checker):
         """Test file permissions check success."""
         tmpdir, original_cwd = setup_temp_directory_test()
@@ -40,8 +38,6 @@ class TestStartupCheckerFileDb:
         finally:
             os.chdir(original_cwd)
             tmpdir.cleanup()
-    
-    @pytest.mark.asyncio
     async def test_check_file_permissions_failure(self, checker):
         """Test file permissions check with write permission failure."""
         with patch('pathlib.Path.mkdir') as mock_mkdir:
@@ -51,8 +47,6 @@ class TestStartupCheckerFileDb:
             
             assert result.success == False
             assert "Permission issues" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_database_connection_success(self, mock_app, checker):
         """Test database connection check success."""
         db_session = create_mock_database_session(mock_app)
@@ -62,8 +56,6 @@ class TestStartupCheckerFileDb:
         
         assert result.success == True
         assert "PostgreSQL connected" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_database_connection_missing_table(self, mock_app, checker):
         """Test database connection check with missing table."""
         db_session = create_mock_database_session(mock_app)
@@ -73,8 +65,6 @@ class TestStartupCheckerFileDb:
         
         assert result.success == False
         assert "does not exist" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_database_connection_failure(self, mock_app, checker):
         """Test database connection check with connection failure."""
         db_session = create_mock_database_session(mock_app)

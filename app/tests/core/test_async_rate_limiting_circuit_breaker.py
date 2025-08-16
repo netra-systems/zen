@@ -18,8 +18,6 @@ from app.core.exceptions_service import ServiceTimeoutError, ServiceError
 
 class TestAsyncRateLimiterComplete:
     """Complete tests for AsyncRateLimiter."""
-    
-    @pytest.mark.asyncio
     async def test_rate_limiter_basic_functionality(self):
         """Test basic rate limiter functionality."""
         limiter = AsyncRateLimiter(rate=2, window=1.0)  # 2 requests per second
@@ -38,8 +36,6 @@ class TestAsyncRateLimiterComplete:
         delayed_time = time.time() - start_time
         
         assert delayed_time >= 0.5  # Should wait for window reset
-
-    @pytest.mark.asyncio
     async def test_rate_limiter_window_reset(self):
         """Test rate limiter window reset behavior."""
         limiter = AsyncRateLimiter(rate=3, window=0.5)  # 3 requests per 0.5 seconds
@@ -57,8 +53,6 @@ class TestAsyncRateLimiterComplete:
         reset_time = time.time() - start_time
         
         assert reset_time < 0.1  # Should be immediate after reset
-
-    @pytest.mark.asyncio
     async def test_rate_limiter_concurrent_requests(self):
         """Test rate limiter with concurrent requests."""
         limiter = AsyncRateLimiter(rate=2, window=1.0)
@@ -80,8 +74,6 @@ class TestAsyncRateLimiterComplete:
         
         assert len(fast_requests) >= 2
         assert len(slow_requests) >= 2
-
-    @pytest.mark.asyncio
     async def test_rate_limiter_different_rates(self):
         """Test rate limiter with different rate configurations."""
         # High rate limiter (10 requests per second)
@@ -104,8 +96,6 @@ class TestAsyncRateLimiterComplete:
         
         assert high_time < 0.5
         assert low_time >= 1.0
-
-    @pytest.mark.asyncio
     async def test_rate_limiter_burst_handling(self):
         """Test rate limiter burst handling."""
         limiter = AsyncRateLimiter(rate=3, window=1.0, burst=2)  # Allow 2 burst requests
@@ -124,8 +114,6 @@ class TestAsyncRateLimiterComplete:
 
 class TestAsyncCircuitBreakerComplete:
     """Complete tests for AsyncCircuitBreaker."""
-    
-    @pytest.mark.asyncio
     async def test_circuit_breaker_closed_state(self):
         """Test circuit breaker in closed (normal) state."""
         breaker = AsyncCircuitBreaker(failure_threshold=3, timeout=1.0)
@@ -137,8 +125,6 @@ class TestAsyncCircuitBreakerComplete:
         result = await breaker.call(successful_operation)
         assert result == "success"
         assert breaker.state == "closed"
-
-    @pytest.mark.asyncio
     async def test_circuit_breaker_failure_tracking(self):
         """Test circuit breaker failure tracking and state transitions."""
         breaker = AsyncCircuitBreaker(failure_threshold=2, timeout=0.5)
@@ -158,8 +144,6 @@ class TestAsyncCircuitBreakerComplete:
         with pytest.raises(ServiceError):
             await breaker.call(failing_operation)
         assert breaker.state == "open"
-
-    @pytest.mark.asyncio
     async def test_circuit_breaker_open_state(self):
         """Test circuit breaker in open state."""
         breaker = AsyncCircuitBreaker(failure_threshold=1, timeout=0.5)
@@ -177,8 +161,6 @@ class TestAsyncCircuitBreakerComplete:
         
         with pytest.raises(ServiceError, match="Circuit breaker is open"):
             await breaker.call(any_operation)
-
-    @pytest.mark.asyncio
     async def test_circuit_breaker_half_open_state(self):
         """Test circuit breaker half-open state and recovery."""
         breaker = AsyncCircuitBreaker(failure_threshold=1, timeout=0.2)
@@ -200,8 +182,6 @@ class TestAsyncCircuitBreakerComplete:
         result = await breaker.call(recovery_operation)
         assert result == "recovered"
         assert breaker.state == "closed"  # Should close after success
-
-    @pytest.mark.asyncio
     async def test_circuit_breaker_success_reset(self):
         """Test circuit breaker success counter reset."""
         breaker = AsyncCircuitBreaker(failure_threshold=3, success_threshold=2, timeout=0.5)
@@ -226,8 +206,6 @@ class TestAsyncCircuitBreakerComplete:
         
         # Should still be closed with reset counters
         assert breaker.state == "closed"
-
-    @pytest.mark.asyncio
     async def test_circuit_breaker_with_timeout_operation(self):
         """Test circuit breaker with timeout operations."""
         breaker = AsyncCircuitBreaker(failure_threshold=2, timeout=0.5)
@@ -243,8 +221,6 @@ class TestAsyncCircuitBreakerComplete:
         
         execution_time = time.time() - start_time
         assert execution_time <= 1.0  # Should timeout quickly
-
-    @pytest.mark.asyncio
     async def test_circuit_breaker_concurrent_operations(self):
         """Test circuit breaker with concurrent operations."""
         breaker = AsyncCircuitBreaker(failure_threshold=3, timeout=0.5)
@@ -276,8 +252,6 @@ class TestAsyncCircuitBreakerComplete:
         
         await asyncio.gather(*tasks, return_exceptions=True)
         assert len(results) == 4
-
-    @pytest.mark.asyncio
     async def test_circuit_breaker_state_persistence(self):
         """Test circuit breaker state persistence across operations."""
         breaker = AsyncCircuitBreaker(failure_threshold=2, timeout=1.0)

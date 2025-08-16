@@ -13,8 +13,6 @@ from .test_fixtures import *
 
 class TestWebSocketUpdates:
     """Test WebSocket real-time updates during generation"""
-
-    @pytest.mark.asyncio
     async def test_websocket_connection_management(self, ws_service, mock_websocket):
         """Test WebSocket connection lifecycle"""
         job_id = str(uuid.uuid4())
@@ -26,8 +24,6 @@ class TestWebSocketUpdates:
         # Disconnect
         await ws_service.disconnect(job_id)
         assert job_id not in ws_service.active_connections
-
-    @pytest.mark.asyncio
     async def test_generation_progress_broadcast(self, ws_service, mock_websocket):
         """Test broadcasting generation progress to connected clients"""
         job_id = str(uuid.uuid4())
@@ -59,8 +55,6 @@ class TestWebSocketUpdates:
         assert generation_message["progress_percentage"] == 50
         assert generation_message["records_generated"] == 500
         assert generation_message["records_ingested"] == 450
-
-    @pytest.mark.asyncio
     async def test_batch_completion_notifications(self, ws_service):
         """Test notifications for batch completion"""
         job_id = str(uuid.uuid4())
@@ -87,8 +81,6 @@ class TestWebSocketUpdates:
         batch_complete_notifications = [n for n in notifications if n["type"] == "batch_complete"]
         assert len(batch_complete_notifications) == 5
         assert all(n["type"] == "batch_complete" for n in batch_complete_notifications)
-
-    @pytest.mark.asyncio
     async def test_error_notification_handling(self, ws_service, mock_websocket):
         """Test error notification through WebSocket"""
         job_id = str(uuid.uuid4())
@@ -122,8 +114,6 @@ class TestWebSocketUpdates:
         assert error_message["error_message"] == "Failed to connect to ClickHouse"
         assert error_message["recoverable"] is True
         assert error_message["retry_after_seconds"] == 30
-
-    @pytest.mark.asyncio
     async def test_websocket_reconnection_handling(self, ws_service):
         """Test WebSocket reconnection and state recovery"""
         job_id = str(uuid.uuid4())
@@ -145,8 +135,6 @@ class TestWebSocketUpdates:
         # Should recover state
         state = ws_service.get_job_state(job_id)
         assert state["progress"] == 50
-
-    @pytest.mark.asyncio
     async def test_multiple_client_subscriptions(self, ws_service):
         """Test multiple clients subscribing to same job"""
         job_id = str(uuid.uuid4())
@@ -174,8 +162,6 @@ class TestWebSocketUpdates:
             sent_message = call_args
             assert sent_message["type"] == "generation_progress"
             assert sent_message["percentage"] == 75
-
-    @pytest.mark.asyncio
     async def test_websocket_message_queuing(self, ws_service):
         """Test message queuing for slow clients"""
         job_id = str(uuid.uuid4())
@@ -203,8 +189,6 @@ class TestWebSocketUpdates:
         
         # Complete all tasks
         await asyncio.gather(*tasks)
-
-    @pytest.mark.asyncio
     async def test_websocket_heartbeat(self, ws_service, mock_websocket):
         """Test WebSocket heartbeat/keepalive mechanism"""
         job_id = str(uuid.uuid4())
@@ -229,8 +213,6 @@ class TestWebSocketUpdates:
         
         # More lenient assertion - allow for timing variations
         assert len(ping_calls) >= 1, f"Expected at least 1 ping, got {len(ping_calls)}"
-
-    @pytest.mark.asyncio
     async def test_generation_completion_notification(self, ws_service, mock_websocket):
         """Test generation completion notification"""
         job_id = str(uuid.uuid4())
@@ -268,8 +250,6 @@ class TestWebSocketUpdates:
         assert completion_message["destination_table"] == "synthetic_data_20240110"
         assert completion_message["quality_metrics"]["distribution_accuracy"] == 0.95
         assert completion_message["quality_metrics"]["temporal_consistency"] == 0.98
-
-    @pytest.mark.asyncio
     @pytest.mark.skip(reason="Rate limiting not yet implemented in WebSocketManager")
     async def test_websocket_rate_limiting(self, ws_service):
         """Test WebSocket message rate limiting"""

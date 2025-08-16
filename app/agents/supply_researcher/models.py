@@ -20,6 +20,10 @@ class ResearchType(Enum):
     PROVIDER_COMPARISON = "provider_comparison"
     COST_ANALYSIS = "cost_analysis"
     PERFORMANCE_BENCHMARKS = "performance_benchmarks"
+    # Legacy scheduler values for backwards compatibility
+    PRICE_MONITORING = "price_monitoring"
+    CAPABILITY_ANALYSIS = "capability_analysis"
+    AVAILABILITY_CHECK = "availability_check"
 
 
 class ProviderPatterns:

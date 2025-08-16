@@ -12,9 +12,6 @@ from app.services.synthetic_data_service import SyntheticDataService
 def service():
     """Create fresh SyntheticDataService instance"""
     return SyntheticDataService()
-
-
-@pytest.mark.asyncio
 class TestCircuitBreakerAndErrorHandling:
     """Test circuit breaker and error handling functionality"""
     
@@ -57,9 +54,6 @@ class TestCircuitBreakerAndErrorHandling:
         
         # Circuit should now be open
         assert cb.is_open()
-
-
-@pytest.mark.asyncio
 class TestErrorScenarios:
     """Test various error scenarios and edge cases"""
     

@@ -13,11 +13,12 @@ from .checker import StartupChecker
 
 async def run_startup_checks(app: FastAPI) -> Dict[str, Any]:
     """Run all startup checks with improved error handling and reporting"""
-    import os
-    
     if _should_skip_startup_checks():
         return _create_skipped_result()
-    
+    return await _perform_startup_checks(app)
+
+async def _perform_startup_checks(app: FastAPI) -> Dict[str, Any]:
+    """Perform actual startup checks and handle results"""
     results = await _execute_startup_checks(app)
     _handle_startup_results(results)
     return results

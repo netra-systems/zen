@@ -20,16 +20,20 @@ class BatchingStrategyManager:
         """Determine if batch should be flushed based on strategy."""
         if not pending:
             return False
+        return self._evaluate_strategy_condition(pending)
+
+
+    def _evaluate_strategy_condition(self, pending: List[PendingMessage]) -> bool:
+        """Evaluate flush condition based on current strategy."""
+        strategy_checks = {
+            BatchingStrategy.SIZE_BASED: self._check_size_based_flush,
+            BatchingStrategy.TIME_BASED: self._check_time_based_flush,
+            BatchingStrategy.PRIORITY: self._check_priority_based_flush,
+            BatchingStrategy.ADAPTIVE: self._check_adaptive_flush
+        }
         
-        if self.config.strategy == BatchingStrategy.SIZE_BASED:
-            return self._check_size_based_flush(pending)
-        elif self.config.strategy == BatchingStrategy.TIME_BASED:
-            return self._check_time_based_flush(pending)
-        elif self.config.strategy == BatchingStrategy.PRIORITY:
-            return self._check_priority_based_flush(pending)
-        elif self.config.strategy == BatchingStrategy.ADAPTIVE:
-            return self._check_adaptive_flush(pending)
-        return False
+        check_function = strategy_checks.get(self.config.strategy)
+        return check_function(pending) if check_function else False
     
     def _check_size_based_flush(self, pending: List[PendingMessage]) -> bool:
         """Check size-based flush condition."""
@@ -44,8 +48,9 @@ class BatchingStrategyManager:
     def _check_priority_based_flush(self, pending: List[PendingMessage]) -> bool:
         """Check priority-based flush condition."""
         high_priority_count = self._count_high_priority_messages(pending)
-        has_high_priority_ready = self._has_priority_batch_ready(high_priority_count, pending)
-        return has_high_priority_ready or self._exceeds_max_batch_size(pending)
+        priority_ready = self._has_priority_batch_ready(high_priority_count, pending)
+        size_exceeded = self._exceeds_max_batch_size(pending)
+        return priority_ready or size_exceeded
     
     def _count_high_priority_messages(self, pending: List[PendingMessage]) -> int:
         """Count high priority messages in batch."""
@@ -61,15 +66,15 @@ class BatchingStrategyManager:
     
     def _check_adaptive_flush(self, pending: List[PendingMessage]) -> bool:
         """Check adaptive flush condition."""
-        size_condition = self._check_adaptive_size_condition(pending)
-        time_condition = self._check_time_based_flush(pending)
-        return size_condition or time_condition
+        size_ready = self._check_adaptive_size_condition(pending)
+        time_ready = self._check_time_based_flush(pending)
+        return size_ready or time_ready
     
     def _check_adaptive_size_condition(self, pending: List[PendingMessage]) -> bool:
         """Check adaptive size condition for flush."""
         current_load = self.load_monitor.get_current_load()
-        dynamic_batch_size = self._calculate_adaptive_batch_size(current_load)
-        return len(pending) >= dynamic_batch_size
+        dynamic_size = self._calculate_adaptive_batch_size(current_load)
+        return len(pending) >= dynamic_size
     
     def _calculate_adaptive_batch_size(self, load: float) -> int:
         """Calculate adaptive batch size based on current load."""
@@ -77,8 +82,7 @@ class BatchingStrategyManager:
             return self.config.adaptive_max_batch
         elif load > 0.5:
             return self._calculate_medium_load_batch_size()
-        else:
-            return self.config.adaptive_min_batch
+        return self.config.adaptive_min_batch
     
     def _calculate_medium_load_batch_size(self) -> int:
         """Calculate batch size for medium load conditions."""

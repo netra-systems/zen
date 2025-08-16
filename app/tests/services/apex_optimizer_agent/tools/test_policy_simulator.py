@@ -56,8 +56,6 @@ class TestPolicySimulator:
                 optimal_supply_option_name="gpt-4"
             )
         ]
-
-    @pytest.mark.asyncio
     async def test_policy_simulator_empty_policies(self, mock_db_session, mock_llm_manager, mock_policy_simulator_engine):
         """Test policy simulator with empty policies list"""
         result = await policy_simulator.arun({
@@ -69,8 +67,6 @@ class TestPolicySimulator:
         
         assert result == "No policies to simulate."
         mock_policy_simulator_engine.simulate.assert_not_called()
-
-    @pytest.mark.asyncio
     async def test_policy_simulator_single_policy(self, sample_learned_policy, mock_db_session, mock_llm_manager, mock_policy_simulator_engine):
         """Test policy simulator with single policy"""
         mock_policy_simulator_engine.simulate.return_value = {
@@ -88,8 +84,6 @@ class TestPolicySimulator:
         
         assert result == "Successfully simulated policy"
         mock_policy_simulator_engine.simulate.assert_called_once_with(sample_learned_policy)
-
-    @pytest.mark.asyncio
     async def test_policy_simulator_multiple_policies_only_simulates_first(self, multiple_learned_policies, mock_db_session, mock_llm_manager, mock_policy_simulator_engine):
         """Test that policy simulator only simulates the first policy (current implementation)"""
         mock_policy_simulator_engine.simulate.return_value = {
@@ -106,8 +100,6 @@ class TestPolicySimulator:
         assert result == "Successfully simulated policy"
         # Should only be called once with the first policy
         mock_policy_simulator_engine.simulate.assert_called_once_with(multiple_learned_policies[0])
-
-    @pytest.mark.asyncio
     async def test_policy_simulator_simulation_failure(self, sample_learned_policy, mock_db_session, mock_llm_manager, mock_policy_simulator_engine):
         """Test policy simulator when simulation engine fails"""
         mock_policy_simulator_engine.simulate.side_effect = Exception("Simulation engine error")
@@ -122,8 +114,6 @@ class TestPolicySimulator:
         
         assert "Simulation engine error" in str(exc_info.value)
         mock_policy_simulator_engine.simulate.assert_called_once_with(sample_learned_policy)
-
-    @pytest.mark.asyncio
     async def test_policy_simulator_with_complex_policy(self, mock_db_session, mock_llm_manager, mock_policy_simulator_engine):
         """Test policy simulator with complex policy names and patterns"""
         complex_policy = LearnedPolicy(
@@ -183,8 +173,6 @@ class TestPolicySimulator:
         json_str = policy.model_dump_json()
         assert "serialization_test" in json_str
         assert "gpt-4-turbo" in json_str
-
-    @pytest.mark.asyncio
     async def test_policy_simulator_async_behavior(self, sample_learned_policy, mock_db_session, mock_llm_manager, mock_policy_simulator_engine):
         """Test that policy simulator properly handles async operations"""
         import asyncio

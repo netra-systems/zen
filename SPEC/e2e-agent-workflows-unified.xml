@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>E2E Agent Workflows Unified Testing Specification</name>
+        <type>Testing</type>
+        <version>2.0</version>
+        <last-updated>2025-08-15</last-updated>
+        <scope>Complete Agent Workflow E2E Testing with Real LLMs</scope>
+        <coverage-target>100%</coverage-target>
+        <priority>CRITICAL</priority>
+    </metadata>
+    
+    <root-cause-analysis>
+        <issue id="RC-001" severity="CRITICAL">
+            <problem>Mock LLM responses instead of real agent behavior</problem>
+            <impact>Missing actual decision-making, prompt handling, and response generation</impact>
+            <solution>Use real LLM calls with configurable fallback to mocks</solution>
+        </issue>
+        
+        <issue id="RC-002" severity="HIGH">
+            <problem>Insufficient seeded test data</problem>
+            <impact>Tests don't reflect real-world complexity and edge cases</impact>
+            <solution>Expand seeded data with production-like scenarios</solution>
+        </issue>
+        
+        <issue id="RC-003" severity="HIGH">
+            <problem>Example prompts not fully tested</problem>
+            <impact>User-facing features untested, regression risk</impact>
+            <solution>Test all 9 example prompts with complete workflows</solution>
+        </issue>
+        
+        <issue id="RC-004" severity="MEDIUM">
+            <problem>Thread management untested</problem>
+            <impact>Chat thread operations may fail in production</impact>
+            <solution>Test new threads, switching, loading, persistence</solution>
+        </issue>
+        
+        <issue id="RC-005" severity="HIGH">
+            <problem>Superficial state validation</problem>
+            <impact>State corruption and data flow issues undetected</impact>
+            <solution>Deep validation at every stage with actual data</solution>
+        </issue>
+    </root-cause-analysis>
+    
+    <testing-requirements>
+        <requirement id="REQ-001" priority="CRITICAL">
+            <title>Real LLM Integration</title>
+            <description>All E2E tests MUST support real LLM calls</description>
+            <implementation>
+                - Environment flag ENABLE_REAL_LLM_TESTING=true
+                - Configurable LLM endpoints and models
+                - Fallback to intelligent mocks when disabled
+                - Response caching for deterministic testing
+            </implementation>
+            <validation>
+                - Verify actual LLM calls made
+                - Check response format and content quality
+                - Measure response times and token usage
+            </validation>
+        </requirement>
+        
+        <requirement id="REQ-002" priority="CRITICAL">
+            <title>Complete Data Flow Testing</title>
+            <description>Test actual data at every stage of agent processing</description>
+            <stages>
+                <stage name="input">User request parsing and validation</stage>
+                <stage name="triage">Request categorization and routing</stage>
+                <stage name="enrichment">Context and data gathering</stage>
+                <stage name="processing">Agent-specific operations</stage>
+                <stage name="handoff">Inter-agent communication</stage>
+                <stage name="output">Response generation and formatting</stage>
+                <stage name="persistence">State and result storage</stage>
+            </stages>
+            <validation-points>
+                <point>Input sanitization and normalization</point>
+                <point>State transitions correctness</point>
+                <point>Data transformation accuracy</point>
+                <point>Output completeness and formatting</point>
+            </validation-points>
+        </requirement>
+        
+        <requirement id="REQ-003" priority="HIGH">
+            <title>Example Prompts Coverage</title>
+            <description>All 9 example prompts MUST have dedicated E2E tests</description>
+            <prompts>
+                <prompt id="EP-001" category="cost-quality">
+                    <text>I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.</text>
+                    <expected-agents>["triage", "data", "actions", "reporting"]</expected-agents>
+                    <validation>Cost reduction plan with quality constraints</validation>
+                </prompt>
+                
+                <prompt id="EP-002" category="latency-cost">
+                    <text>My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money.</text>
+                    <expected-agents>["triage", "performance", "optimization"]</expected-agents>
+                    <validation>Latency optimization without cost increase</validation>
+                </prompt>
+                
+                <prompt id="EP-003" category="capacity-planning">
+                    <text>I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?</text>
+                    <expected-agents>["triage", "capacity", "forecasting"]</expected-agents>
+                    <validation>Impact analysis with projections</validation>
+                </prompt>
+                
+                <prompt id="EP-004" category="function-optimization">
+                    <text>I need to optimize the 'user_authentication' function. What advanced methods can I use?</text>
+                    <expected-agents>["triage", "code-analysis", "optimization"]</expected-agents>
+                    <validation>Specific optimization recommendations</validation>
+                </prompt>
+                
+                <prompt id="EP-005" category="model-selection">
+                    <text>I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?</text>
+                    <expected-agents>["triage", "model-evaluation", "comparison"]</expected-agents>
+                    <validation>Model effectiveness analysis</validation>
+                </prompt>
+                
+                <prompt id="EP-006" category="kv-cache-audit">
+                    <text>I want to audit all uses of KV caching in my system to find optimization opportunities.</text>
+                    <expected-agents>["triage", "audit", "cache-analysis"]</expected-agents>
+                    <validation>Complete KV cache audit report</validation>
+                </prompt>
+                
+                <prompt id="EP-007" category="multi-constraint">
+                    <text>I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?</text>
+                    <expected-agents>["triage", "multi-constraint", "planning"]</expected-agents>
+                    <validation>Multi-objective optimization plan</validation>
+                </prompt>
+                
+                <prompt id="EP-008" category="tool-upgrade">
+                    <text>@Netra which of our Agent tools should switch to GPT-5? Which versions? What to set the verbosity to?</text>
+                    <expected-agents>["triage", "tool-analysis", "upgrade-planning"]</expected-agents>
+                    <validation>Tool upgrade recommendations</validation>
+                </prompt>
+                
+                <prompt id="EP-009" category="rollback-analysis">
+                    <text>@Netra was the upgrade yesterday to GPT-5 worth it? Rollback anything where quality didn't improve much but cost was higher</text>
+                    <expected-agents>["triage", "change-analysis", "rollback"]</expected-agents>
+                    <validation>Upgrade analysis with rollback decisions</validation>
+                </prompt>
+            </prompts>
+        </requirement>
+        
+        <requirement id="REQ-004" priority="HIGH">
+            <title>Admin Operations Testing</title>
+            <description>Complete testing of admin corpus and synthetic data operations</description>
+            <operations>
+                <operation name="corpus-generation">
+                    <test>Create corpus with all workload types</test>
+                    <test>Generate domain-specific content</test>
+                    <test>Validate statistical properties</test>
+                </operation>
+                
+                <operation name="synthetic-data">
+                    <test>Generate traces with patterns</test>
+                    <test>Inject controlled errors</test>
+                    <test>Validate temporal distributions</test>
+                </operation>
+                
+                <operation name="configuration">
+                    <test>Discovery of all options</test>
+                    <test>Auto-completion functionality</test>
+                    <test>Validation of parameters</test>
+                </operation>
+            </operations>
+        </requirement>
+        
+        <requirement id="REQ-005" priority="HIGH">
+            <title>Thread Management Testing</title>
+            <description>Test all chat thread operations</description>
+            <scenarios>
+                <scenario name="new-thread">
+                    <test>Create new chat thread</test>
+                    <test>Initialize thread state</test>
+                    <test>Verify thread isolation</test>
+                </scenario>
+                
+                <scenario name="thread-switching">
+                    <test>Switch between threads</test>
+                    <test>Maintain thread context</test>
+                    <test>Load historical messages</test>
+                </scenario>
+                
+                <scenario name="thread-persistence">
+                    <test>Save thread state</test>
+                    <test>Resume interrupted threads</test>
+                    <test>Thread expiration handling</test>
+                </scenario>
+            </scenarios>
+        </requirement>
+        
+        <requirement id="REQ-006" priority="CRITICAL">
+            <title>Sub-Process Testing</title>
+            <description>Test all hooks, mixins, and intermediate processes</description>
+            <components>
+                <component name="hooks">
+                    <test>Pre-execution hooks</test>
+                    <test>Post-execution hooks</test>
+                    <test>Error hooks</test>
+                    <test>Cleanup hooks</test>
+                </component>
+                
+                <component name="mixins">
+                    <test>State management mixins</test>
+                    <test>Logging mixins</test>
+                    <test>Validation mixins</test>
+                    <test>Caching mixins</test>
+                </component>
+                
+                <component name="middleware">
+                    <test>Request validation</test>
+                    <test>Response transformation</test>
+                    <test>Error handling</test>
+                    <test>Rate limiting</test>
+                </component>
+            </components>
+        </requirement>
+    </testing-requirements>
+    
+    <test-data-expansion>
+        <seeded-data>
+            <dataset name="production-mirror">
+                <description>Production-like data patterns</description>
+                <size>100,000 records</size>
+                <characteristics>
+                    <characteristic>Real distribution patterns</characteristic>
+                    <characteristic>Edge cases included</characteristic>
+                    <characteristic>Error scenarios</characteristic>
+                </characteristics>
+            </dataset>
+            
+            <dataset name="stress-test">
+                <description>High-volume concurrent requests</description>
+                <size>1,000,000 records</size>
+                <characteristics>
+                    <characteristic>Burst patterns</characteristic>
+                    <characteristic>Sustained load</characteristic>
+                    <characteristic>Resource exhaustion scenarios</characteristic>
+                </characteristics>
+            </dataset>
+            
+            <dataset name="domain-specific">
+                <domains>
+                    <domain name="finance">Trading, portfolio, risk</domain>
+                    <domain name="healthcare">Patient data, diagnostics</domain>
+                    <domain name="retail">Inventory, pricing, recommendations</domain>
+                    <domain name="manufacturing">Supply chain, quality control</domain>
+                </domains>
+            </dataset>
+        </seeded-data>
+        
+        <default-plans>
+            <plan name="cost-optimization">
+                <steps>20</steps>
+                <complexity>high</complexity>
+                <validation>Measurable cost reduction</validation>
+            </plan>
+            
+            <plan name="performance-tuning">
+                <steps>15</steps>
+                <complexity>medium</complexity>
+                <validation>Latency improvement metrics</validation>
+            </plan>
+            
+            <plan name="capacity-planning">
+                <steps>25</steps>
+                <complexity>high</complexity>
+                <validation>Accurate projections</validation>
+            </plan>
+        </default-plans>
+    </test-data-expansion>
+    
+    <real-llm-testing>
+        <configuration>
+            <setting name="ENABLE_REAL_LLM_TESTING">true</setting>
+            <setting name="LLM_TEST_MODELS">["gpt-4", "claude-3-opus", "gpt-3.5-turbo"]</setting>
+            <setting name="LLM_RESPONSE_CACHE">true</setting>
+            <setting name="LLM_TIMEOUT_SECONDS">30</setting>
+        </configuration>
+        
+        <test-scenarios>
+            <scenario name="model-comparison">
+                <description>Compare responses across different models</description>
+                <validation>Consistency and quality metrics</validation>
+            </scenario>
+            
+            <scenario name="prompt-variations">
+                <description>Test prompt engineering effectiveness</description>
+                <validation>Response relevance and completeness</validation>
+            </scenario>
+            
+            <scenario name="error-recovery">
+                <description>Test LLM failure handling</description>
+                <validation>Graceful degradation and retries</validation>
+            </scenario>
+        </test-scenarios>
+    </real-llm-testing>
+    
+    <validation-framework>
+        <stage-validation>
+            <stage name="input">
+                <check>Schema compliance</check>
+                <check>Sanitization applied</check>
+                <check>Context preserved</check>
+            </stage>
+            
+            <stage name="processing">
+                <check>Agent entry conditions met</check>
+                <check>State transitions valid</check>
+                <check>Data transformations correct</check>
+            </stage>
+            
+            <stage name="output">
+                <check>Response format valid</check>
+                <check>All required fields present</check>
+                <check>Error handling appropriate</check>
+            </stage>
+        </stage-validation>
+        
+        <data-validation>
+            <check>Type safety maintained</check>
+            <check>No data loss or corruption</check>
+            <check>Referential integrity preserved</check>
+            <check>Audit trail complete</check>
+        </data-validation>
+        
+        <performance-validation>
+            <metric name="latency">P99 < 2 seconds</metric>
+            <metric name="throughput">1000 req/min sustained</metric>
+            <metric name="error-rate">< 0.1%</metric>
+            <metric name="resource-usage">< 80% capacity</metric>
+        </performance-validation>
+    </validation-framework>
+    
+    <implementation-strategy>
+        <phase id="1" name="Infrastructure">
+            <task>Setup real LLM testing framework</task>
+            <task>Expand test data generation</task>
+            <task>Create validation utilities</task>
+        </phase>
+        
+        <phase id="2" name="Core-Tests">
+            <task>Implement all example prompt tests</task>
+            <task>Add thread management tests</task>
+            <task>Create sub-process tests</task>
+        </phase>
+        
+        <phase id="3" name="Integration">
+            <task>Full workflow E2E tests</task>
+            <task>Admin operations tests</task>
+            <task>Performance benchmarks</task>
+        </phase>
+        
+        <phase id="4" name="Automation">
+            <task>CI/CD integration</task>
+            <task>Automated regression detection</task>
+            <task>Coverage reporting</task>
+        </phase>
+    </implementation-strategy>
+    
+    <success-metrics>
+        <metric name="coverage">100% of agent workflows tested</metric>
+        <metric name="example-prompts">All 9 prompts have passing E2E tests</metric>
+        <metric name="real-llm">90% tests use real LLM when enabled</metric>
+        <metric name="data-validation">Zero undetected data issues</metric>
+        <metric name="regression-detection">100% of regressions caught</metric>
+    </success-metrics>
+</specification>

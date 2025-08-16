@@ -81,8 +81,6 @@ def sample_corpus():
 
 class TestJobStatusManagement:
     """Test job status update functionality"""
-    
-    @pytest.mark.asyncio
     async def test_update_job_status_running(self):
         """Test updating job status to running"""
         with patch('app.services.generation_service.job_store') as mock_store:
@@ -100,8 +98,6 @@ class TestJobStatusManagement:
                 assert mock_store.update.call_args[1]["progress"] == 50
                 
                 mock_manager.broadcast_to_job.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_update_job_status_completed(self):
         """Test updating job status to completed"""
         with patch('app.services.generation_service.job_store') as mock_store:
@@ -123,8 +119,6 @@ class TestJobStatusManagement:
                 # Check keyword arguments
                 assert mock_store.update.call_args[1]["progress"] == 100
                 assert mock_store.update.call_args[1]["result"] == {"data": "test"}
-    
-    @pytest.mark.asyncio
     async def test_update_job_status_failed(self):
         """Test updating job status to failed"""
         with patch('app.services.generation_service.job_store') as mock_store:
@@ -144,8 +138,6 @@ class TestJobStatusManagement:
                 assert mock_store.update.call_args[0][1] == "failed"  # status
                 # Check keyword arguments
                 assert mock_store.update.call_args[1]["error"] == "Test error message"
-    
-    @pytest.mark.asyncio
     async def test_update_job_status_with_metadata(self):
         """Test updating job status with additional metadata"""
         with patch('app.services.generation_service.job_store') as mock_store:
@@ -175,8 +167,6 @@ class TestJobStatusManagement:
 
 class TestClickHouseOperations:
     """Test ClickHouse corpus operations"""
-    
-    @pytest.mark.asyncio
     async def test_get_corpus_from_clickhouse(self, mock_clickhouse):
         """Test retrieving corpus from ClickHouse"""
         mock_clickhouse.execute_query.return_value = [
@@ -194,8 +184,6 @@ class TestClickHouseOperations:
                 assert len(result["qa"]) == 2
                 assert len(result["generation"]) == 1
                 assert result["qa"][0] == ("Q1", "A1")
-    
-    @pytest.mark.asyncio
     async def test_get_corpus_empty_table(self, mock_clickhouse):
         """Test retrieving corpus from empty table"""
         mock_clickhouse.execute_query.return_value = []
@@ -205,8 +193,6 @@ class TestClickHouseOperations:
                 result = await get_corpus_from_clickhouse("empty_corpus")
                 
                 assert result == {}
-    
-    @pytest.mark.asyncio
     async def test_save_corpus_to_clickhouse(self, mock_clickhouse, sample_corpus):
         """Test saving corpus to ClickHouse"""
         with patch('app.services.generation_service.ClickHouseDatabase', return_value=mock_clickhouse):
@@ -226,8 +212,6 @@ class TestClickHouseOperations:
                 assert all(isinstance(row, list) for row in inserted_data)
                 # Each row should have the expected number of fields
                 assert all(len(row) > 0 for row in inserted_data)
-    
-    @pytest.mark.asyncio
     async def test_save_corpus_with_error(self, mock_clickhouse, sample_corpus):
         """Test corpus save error handling"""
         mock_clickhouse.command.side_effect = Exception("Database error")
@@ -277,8 +261,6 @@ class TestClickHouseOperations:
 
 class TestExistingFunctions:
     """Test the actual functions that exist in generation_service"""
-    
-    @pytest.mark.asyncio
     async def test_update_job_status_broadcasts_update(self):
         """Test that job status updates are broadcast via WebSocket"""
         with patch('app.services.generation_service.job_store') as mock_store:
@@ -293,8 +275,6 @@ class TestExistingFunctions:
                 assert broadcast_call["job_id"] == "test_job"
                 assert broadcast_call["status"] == "running"
                 assert broadcast_call["progress"] == 25
-    
-    @pytest.mark.asyncio
     async def test_corpus_operations_integration(self, mock_clickhouse):
         """Test corpus save and retrieve integration"""
         test_corpus = {

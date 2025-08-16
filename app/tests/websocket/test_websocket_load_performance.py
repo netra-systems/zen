@@ -20,7 +20,7 @@ from app.websocket.compression import WebSocketCompressor, CompressionConfig
 from app.websocket.performance_monitor import PerformanceMonitor
 from app.websocket.state_synchronizer import ConnectionStateSynchronizer
 from app.websocket.reconnection import WebSocketReconnectionManager, ReconnectionConfig
-from app.schemas.registry import WebSocketMessage
+from app.schemas.websocket_models import WebSocketMessage
 
 
 class LoadTestMetrics:
@@ -185,7 +185,6 @@ class WebSocketLoadTester:
         }
 
 
-@pytest.mark.asyncio
 class TestWebSocketPerformanceComponents:
     """Test individual performance components under load."""
     
@@ -410,7 +409,6 @@ class TestWebSocketPerformanceComponents:
             await synchronizer.stop_monitoring()
 
 
-@pytest.mark.asyncio
 class TestWebSocketLoadScenarios:
     """Test realistic load scenarios."""
     
@@ -462,92 +460,104 @@ class TestWebSocketLoadScenarios:
         assert results["metrics"]["message_times"]["p95_ms"] < 100  # 95th percentile < 100ms
 
 
-@pytest.mark.asyncio
-async def test_integrated_performance_improvements():
-    """Integration test of all performance improvements working together."""
-    
-    # Initialize all components
+async def _initialize_test_components():
+    """Initialize all test components"""
     memory_manager = WebSocketMemoryManager()
     performance_monitor = PerformanceMonitor()
-    
-    # Mock send callback for batcher
     sent_messages = []
     async def mock_send_callback(connection_id: str, batch_data: Dict[str, Any]):
         sent_messages.append((connection_id, batch_data))
-    
     batcher = WebSocketMessageBatcher()
     compressor = WebSocketCompressor()
-    
-    # Start monitoring
+    return memory_manager, performance_monitor, batcher, compressor, mock_send_callback, sent_messages
+
+
+async def _start_monitoring_services(memory_manager, performance_monitor, batcher, mock_send_callback):
+    """Start all monitoring services"""
     await memory_manager.start_monitoring()
     await performance_monitor.start_monitoring()
     await batcher.start(mock_send_callback)
+
+
+def _create_test_message(i: int) -> Dict[str, Any]:
+    """Create a test message with payload"""
+    return {
+        "type": "integrated_test",
+        "payload": {"data": "x" * 500, "id": i},
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+
+async def _process_single_message(i: int, memory_manager, compressor, batcher, performance_monitor):
+    """Process a single message through all components"""
+    connection_id = f"conn_{i % 10}"
+    memory_manager.register_connection(AsyncMock(connection_id=connection_id))
+    message_data = _create_test_message(i)
+    compressed_data, compression_result = compressor.compress_message(message_data)
+    memory_manager.track_message(connection_id, message_data)
+    ws_message = WebSocketMessage(type="pong", payload=message_data["payload"])
+    await batcher.add_message(connection_id, ws_message)
+    performance_monitor.record_message_response_time(connection_id, 25.0)
+    performance_monitor.record_message_throughput(1)
+
+
+def _verify_memory_management(memory_manager):
+    """Verify memory management stats"""
+    memory_stats = memory_manager.get_memory_stats()
+    assert memory_stats["monitoring_active"] is True
+
+
+def _verify_compression_stats(compressor):
+    """Verify compression statistics"""
+    compression_stats = compressor.get_compression_stats()
+    assert compression_stats["total_messages"] == 500
+
+
+def _verify_batching_stats(batcher):
+    """Verify batching statistics"""
+    batch_stats = batcher.get_stats()
+    assert batch_stats["metrics"]["total_messages_batched"] > 0
+
+
+def _verify_performance_stats(performance_monitor):
+    """Verify performance monitoring stats"""
+    perf_summary = performance_monitor.get_current_performance_summary()
+    assert perf_summary["response_time"]["average_ms"] < 100
+
+
+def _verify_throughput(test_duration: float):
+    """Verify overall throughput"""
+    throughput = 500 / test_duration
+    assert throughput > 500
+    print(f"Integrated test completed: {throughput:.1f} msg/s throughput")
+
+
+async def _cleanup_services(memory_manager, performance_monitor, batcher):
+    """Cleanup all services"""
+    await memory_manager.stop_monitoring()
+    await performance_monitor.stop_monitoring()
+    await batcher.stop()
+
+
+async def test_integrated_performance_improvements():
+    """Integration test of all performance improvements working together."""
+    memory_manager, performance_monitor, batcher, compressor, mock_send_callback, sent_messages = await _initialize_test_components()
+    await _start_monitoring_services(memory_manager, performance_monitor, batcher, mock_send_callback)
     
     try:
-        # Simulate integrated workload
         start_time = time.time()
-        
         for i in range(500):
-            connection_id = f"conn_{i % 10}"
-            
-            # Register with memory manager
-            memory_manager.register_connection(AsyncMock(connection_id=connection_id))
-            
-            # Create message
-            message_data = {
-                "type": "integrated_test",
-                "payload": {"data": "x" * 500, "id": i},
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            }
-            
-            # Compress message
-            compressed_data, compression_result = compressor.compress_message(message_data)
-            
-            # Track with memory manager
-            memory_manager.track_message(connection_id, message_data)
-            
-            # Add to batcher
-            ws_message = WebSocketMessage(type="pong", payload=message_data["payload"])
-            await batcher.add_message(connection_id, ws_message)
-            
-            # Record metrics
-            performance_monitor.record_message_response_time(connection_id, 25.0)  # 25ms response time
-            performance_monitor.record_message_throughput(1)
-        
-        # Wait for processing
+            await _process_single_message(i, memory_manager, compressor, batcher, performance_monitor)
         await asyncio.sleep(0.5)
-        
         test_duration = time.time() - start_time
         
-        # Verify integrated performance
-        
-        # Memory management
-        memory_stats = memory_manager.get_memory_stats()
-        assert memory_stats["monitoring_active"] is True
-        
-        # Compression
-        compression_stats = compressor.get_compression_stats()
-        assert compression_stats["total_messages"] == 500
-        
-        # Batching
-        batch_stats = batcher.get_stats()
-        assert batch_stats["metrics"]["total_messages_batched"] > 0
-        
-        # Performance monitoring
-        perf_summary = performance_monitor.get_current_performance_summary()
-        assert perf_summary["response_time"]["average_ms"] < 100
-        
-        # Overall throughput
-        throughput = 500 / test_duration
-        assert throughput > 500  # Should handle 500+ messages per second
-        
-        print(f"Integrated test completed: {throughput:.1f} msg/s throughput")
-        
+        _verify_memory_management(memory_manager)
+        _verify_compression_stats(compressor)
+        _verify_batching_stats(batcher)
+        _verify_performance_stats(performance_monitor)
+        _verify_throughput(test_duration)
     finally:
-        # Cleanup
-        await memory_manager.stop_monitoring()
-        await performance_monitor.stop_monitoring()
-        await batcher.stop()
+        await _cleanup_services(memory_manager, performance_monitor, batcher)
 
 
 if __name__ == "__main__":

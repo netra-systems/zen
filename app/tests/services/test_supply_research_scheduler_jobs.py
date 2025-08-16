@@ -15,7 +15,7 @@ from app.services.supply_research_scheduler import (
     ResearchSchedule,
     ScheduleFrequency
 )
-from app.agents.supply_researcher_sub_agent import ResearchType
+from app.agents.supply_researcher.models import ResearchType
 from app.background import BackgroundTaskManager
 from app.llm.llm_manager import LLMManager
 from app.redis_manager import RedisManager
@@ -50,8 +50,6 @@ class TestSupplyResearchSchedulerJobs:
                     )
                     scheduler.redis_manager = mock_dependencies['redis_manager']
                     return scheduler
-    
-    @pytest.mark.asyncio
     async def test_schedule_job_execution_success(self, scheduler, mock_dependencies):
         """Test successful job execution"""
         # Setup
@@ -70,8 +68,6 @@ class TestSupplyResearchSchedulerJobs:
         # Assert
         assert result != None
         mock_dependencies['background_manager'].add_task.assert_called_once()
-        
-    @pytest.mark.asyncio
     async def test_schedule_job_execution_with_retry(self, scheduler, mock_dependencies):
         """Test job execution with retry logic"""
         # Setup
@@ -97,8 +93,6 @@ class TestSupplyResearchSchedulerJobs:
         # Assert
         assert result == True
         assert scheduler._execute_research_job.call_count == 2
-    
-    @pytest.mark.asyncio
     async def test_schedule_job_execution_max_retries_exceeded(self, scheduler, mock_dependencies):
         """Test job execution when max retries exceeded"""
         # Setup
@@ -120,8 +114,6 @@ class TestSupplyResearchSchedulerJobs:
         # Assert
         assert result == False
         assert scheduler._execute_research_job.call_count == 3
-    
-    @pytest.mark.asyncio
     async def test_concurrent_job_execution(self, scheduler, mock_dependencies):
         """Test concurrent execution of multiple jobs"""
         # Setup
@@ -145,8 +137,6 @@ class TestSupplyResearchSchedulerJobs:
         # Assert
         assert all(result != None for result in results)
         assert mock_dependencies['background_manager'].add_task.call_count == 5
-    
-    @pytest.mark.asyncio
     async def test_job_execution_resource_cleanup(self, scheduler, mock_dependencies):
         """Test proper resource cleanup after job execution"""
         # Setup
@@ -171,8 +161,6 @@ class TestSupplyResearchSchedulerJobs:
         # Assert
         assert cleanup_called
         scheduler._cleanup_job_resources.assert_called_once_with(schedule)
-    
-    @pytest.mark.asyncio
     async def test_job_execution_timeout_handling(self, scheduler, mock_dependencies):
         """Test job execution timeout handling"""
         # Setup
@@ -195,8 +183,6 @@ class TestSupplyResearchSchedulerJobs:
                 scheduler._execute_research_job(schedule),
                 timeout=1.0
             )
-    
-    @pytest.mark.asyncio
     async def test_job_execution_error_logging(self, scheduler, mock_dependencies):
         """Test proper error logging during job execution"""
         # Setup
@@ -220,8 +206,6 @@ class TestSupplyResearchSchedulerJobs:
         # Verify error details in log
         error_call_args = mock_logger.error.call_args_list
         assert any("Test error message" in str(call) for call in error_call_args)
-    
-    @pytest.mark.asyncio
     async def test_job_execution_metrics_tracking(self, scheduler, mock_dependencies):
         """Test job execution metrics tracking"""
         # Setup
@@ -260,8 +244,6 @@ class TestSupplyResearchSchedulerRetryLogic:
             scheduler = SupplyResearchScheduler()
             scheduler.redis_manager = mock_redis
             return scheduler, mock_redis
-    
-    @pytest.mark.asyncio
     async def test_exponential_backoff_retry_timing(self, scheduler_with_redis):
         """Test exponential backoff timing in retry logic"""
         scheduler, mock_redis = scheduler_with_redis
@@ -291,8 +273,6 @@ class TestSupplyResearchSchedulerRetryLogic:
         assert sleep_times[1] == 2  # 2^1 = 2
         assert sleep_times[2] == 4  # 2^2 = 4
         assert result == False
-    
-    @pytest.mark.asyncio
     async def test_retry_state_persistence(self, scheduler_with_redis):
         """Test retry state persistence in Redis"""
         scheduler, mock_redis = scheduler_with_redis
@@ -318,8 +298,6 @@ class TestSupplyResearchSchedulerRetryLogic:
         mock_redis.get.assert_called_with(f"scheduler:retry:{schedule.name}")
         mock_redis.set.assert_called_with(f"scheduler:retry:{schedule.name}", "2")  # incremented
         mock_redis.expire.assert_called_with(f"scheduler:retry:{schedule.name}", 3600)  # 1 hour TTL
-    
-    @pytest.mark.asyncio
     async def test_retry_circuit_breaker(self, scheduler_with_redis):
         """Test circuit breaker pattern for failing jobs"""
         scheduler, mock_redis = scheduler_with_redis
@@ -345,8 +323,6 @@ class TestSupplyResearchSchedulerRetryLogic:
         # Assert circuit breaker prevents execution
         assert result == False
         scheduler._is_circuit_open.assert_called_once_with(schedule.name)
-    
-    @pytest.mark.asyncio
     async def test_retry_jitter_randomization(self, scheduler_with_redis):
         """Test jitter in retry timing to prevent thundering herd"""
         scheduler, mock_redis = scheduler_with_redis
@@ -385,8 +361,6 @@ class TestSupplyResearchSchedulerConcurrency:
         scheduler = SupplyResearchScheduler()
         scheduler._job_semaphore = asyncio.Semaphore(3)  # Limit concurrent jobs
         return scheduler
-    
-    @pytest.mark.asyncio
     async def test_concurrent_job_limit_enforcement(self, concurrent_scheduler):
         """Test enforcement of concurrent job limits"""
         # Setup
@@ -423,8 +397,6 @@ class TestSupplyResearchSchedulerConcurrency:
         # With 10 jobs, 3 concurrent, 0.1s each: should take ~0.4s (4 batches)
         assert total_time >= timedelta(seconds=0.3)  # At least 3 batches
         assert len(execution_times) == 10  # All jobs completed
-    
-    @pytest.mark.asyncio
     async def test_job_queue_management(self, concurrent_scheduler):
         """Test job queue management under load"""
         # Setup
@@ -450,8 +422,6 @@ class TestSupplyResearchSchedulerConcurrency:
         assert len(processed_jobs) == 20
         assert processed_jobs[0] == "queued_job_0"
         assert processed_jobs[-1] == "queued_job_19"
-    
-    @pytest.mark.asyncio
     async def test_deadlock_prevention(self, concurrent_scheduler):
         """Test deadlock prevention in job execution"""
         # Setup circular dependency scenario
@@ -499,8 +469,6 @@ class TestSupplyResearchSchedulerConcurrency:
 
 class TestSupplyResearchSchedulerPerformance:
     """Test performance and resource management"""
-    
-    @pytest.mark.asyncio
     async def test_memory_usage_under_load(self):
         """Test memory usage doesn't grow excessively under load"""
         import tracemalloc
@@ -533,8 +501,6 @@ class TestSupplyResearchSchedulerPerformance:
         
         # Assert reasonable memory usage (< 100MB for this test)
         assert peak < 100 * 1024 * 1024  # 100MB
-        
-    @pytest.mark.asyncio
     async def test_job_execution_performance_metrics(self):
         """Test job execution performance tracking"""
         scheduler = SupplyResearchScheduler()

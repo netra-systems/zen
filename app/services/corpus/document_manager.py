@@ -28,6 +28,81 @@ class DocumentManager:
         self.content_buffer: Dict[str, List[Dict]] = {}
         self.validation_manager = ValidationManager()
     
+    def _validate_corpus_availability(self, db_corpus) -> None:
+        """Validate that corpus is available for upload"""
+        if db_corpus.status != "available":
+            raise CorpusNotAvailableError(
+                f"Corpus {db_corpus.id} is not available for upload"
+            )
+
+    def _validate_upload_records(self, records: List[Dict]) -> Dict:
+        """Validate records and return validation result"""
+        validation_result = self.validation_manager.validate_records(records)
+        if not validation_result["valid"]:
+            return self._create_validation_error_result(validation_result["errors"])
+        return validation_result
+
+    def _create_validation_error_result(self, errors: List[str]) -> Dict:
+        """Create validation error result"""
+        return {
+            "records_uploaded": 0,
+            "records_validated": 0,
+            "validation_errors": errors
+        }
+
+    def _handle_batch_buffering(self, batch_id: str, records: List[Dict]) -> None:
+        """Handle batch buffering logic"""
+        if batch_id not in self.content_buffer:
+            self.content_buffer[batch_id] = []
+        self.content_buffer[batch_id].extend(records)
+
+    def _create_buffering_result(self, records: List[Dict], batch_id: str) -> Dict:
+        """Create buffering status result"""
+        return {
+            "records_buffered": len(records),
+            "batch_id": batch_id,
+            "status": "buffering"
+        }
+
+    def _get_buffered_records(self, batch_id: str) -> List[Dict]:
+        """Get and remove buffered records for batch"""
+        return self.content_buffer.pop(batch_id, [])
+
+    async def _perform_database_insertion(self, table_name: str, records: List[Dict]) -> None:
+        """Perform database insertion with error handling"""
+        try:
+            await self._insert_corpus_records(table_name, records)
+        except Exception as e:
+            central_logger.error(f"Failed to insert records: {str(e)}")
+            raise
+
+    async def _send_progress_notification(self, db_corpus, records: List[Dict], batch_id: Optional[str]) -> None:
+        """Send upload progress notification"""
+        await manager.broadcasting.broadcast_to_all({
+            "type": "corpus:upload_progress",
+            "payload": {
+                "corpus_id": db_corpus.id,
+                "records_uploaded": len(records),
+                "batch_id": batch_id
+            }
+        })
+
+    def _create_success_result(self, records: List[Dict]) -> Dict:
+        """Create successful upload result"""
+        return {
+            "records_uploaded": len(records),
+            "records_validated": len(records),
+            "validation_errors": []
+        }
+
+    def _create_error_result(self, records: List[Dict], error_msg: str) -> Dict:
+        """Create error upload result"""
+        return {
+            "records_uploaded": 0,
+            "records_validated": len(records),
+            "validation_errors": [error_msg]
+        }
+
     async def upload_content(
         self,
         db_corpus,
@@ -47,63 +122,47 @@ class DocumentManager:
         Returns:
             Upload result with validation info
         """
-        if db_corpus.status != "available":
-            raise CorpusNotAvailableError(f"Corpus {db_corpus.id} is not available for upload")
-        
-        # Validate records
-        validation_result = self.validation_manager.validate_records(records)
-        
-        if not validation_result["valid"]:
-            return {
-                "records_uploaded": 0,
-                "records_validated": 0,
-                "validation_errors": validation_result["errors"]
-            }
-        
-        # Buffer records if using batch upload
+        self._validate_corpus_availability(db_corpus)
+        validation_result = self._validate_upload_records(records)
+        if "validation_errors" in validation_result:
+            return validation_result
+        return await self._process_upload_flow(db_corpus, records, batch_id, is_final_batch)
+
+    async def _process_upload_flow(
+        self, 
+        db_corpus, 
+        records: List[Dict], 
+        batch_id: Optional[str], 
+        is_final_batch: bool
+    ) -> Dict:
+        """Process the main upload flow"""
         if batch_id:
-            if batch_id not in self.content_buffer:
-                self.content_buffer[batch_id] = []
-            self.content_buffer[batch_id].extend(records)
-            
-            if not is_final_batch:
-                return {
-                    "records_buffered": len(records),
-                    "batch_id": batch_id,
-                    "status": "buffering"
-                }
-            
-            # Process all buffered records
-            records = self.content_buffer.pop(batch_id, [])
-        
-        # Insert records to ClickHouse
+            return await self._handle_batch_upload(db_corpus, records, batch_id, is_final_batch)
+        return await self._handle_direct_upload(db_corpus, records, batch_id)
+
+    async def _handle_batch_upload(
+        self, 
+        db_corpus, 
+        records: List[Dict], 
+        batch_id: str, 
+        is_final_batch: bool
+    ) -> Dict:
+        """Handle batch upload logic"""
+        self._handle_batch_buffering(batch_id, records)
+        if not is_final_batch:
+            return self._create_buffering_result(records, batch_id)
+        buffered_records = self._get_buffered_records(batch_id)
+        return await self._handle_direct_upload(db_corpus, buffered_records, batch_id)
+
+    async def _handle_direct_upload(self, db_corpus, records: List[Dict], batch_id: Optional[str]) -> Dict:
+        """Handle direct upload to database"""
         try:
-            await self._insert_corpus_records(db_corpus.table_name, records)
-            
-            # Send progress notification
-            await manager.broadcasting.broadcast_to_all({
-                "type": "corpus:upload_progress",
-                "payload": {
-                    "corpus_id": db_corpus.id,
-                    "records_uploaded": len(records),
-                    "batch_id": batch_id
-                }
-            })
-            
-            return {
-                "records_uploaded": len(records),
-                "records_validated": len(records),
-                "validation_errors": []
-            }
-            
+            await self._perform_database_insertion(db_corpus.table_name, records)
+            await self._send_progress_notification(db_corpus, records, batch_id)
+            return self._create_success_result(records)
         except Exception as e:
-            central_logger.error(f"Failed to upload content to corpus {db_corpus.id}: {str(e)}")
-            # Return error info instead of raising exception for test compatibility
-            return {
-                "records_uploaded": 0,
-                "records_validated": len(records),
-                "validation_errors": [str(e)]
-            }
+            error_msg = f"Failed to upload content to corpus {db_corpus.id}: {str(e)}"
+            return self._create_error_result(records, error_msg)
     
     async def _insert_corpus_records(
         self,

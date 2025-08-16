@@ -34,6 +34,10 @@ class CorpusAdminTools:
     
     def _initialize_tool_registry(self) -> Dict[CorpusToolType, Callable]:
         """Initialize registry of corpus tools"""
+        return self._build_tool_mapping()
+    
+    def _build_tool_mapping(self) -> Dict[CorpusToolType, Callable]:
+        """Build the tool type to handler mapping"""
         return {
             CorpusToolType.CREATE: self.handlers.create_corpus_tool,
             CorpusToolType.GENERATE: self.handlers.generate_synthetic_data_tool,
@@ -50,13 +54,17 @@ class CorpusAdminTools:
         try:
             if request.tool_type not in self.tool_registry:
                 return self._create_error_response(request.tool_type, "Unknown tool type")
-            validation_result = await self._validate_request(request)
-            if not validation_result[0]:
-                return self._create_error_response(request.tool_type, validation_result[1])
-            return await self.tool_registry[request.tool_type](request)
+            return await self._execute_validated_tool(request)
         except Exception as e:
             logger.error(f"Tool execution error: {str(e)}")
             return self._create_error_response(request.tool_type, str(e))
+    
+    async def _execute_validated_tool(self, request: CorpusToolRequest) -> CorpusToolResponse:
+        """Execute tool after validation"""
+        validation_result = await self._validate_request(request)
+        if not validation_result[0]:
+            return self._create_error_response(request.tool_type, validation_result[1])
+        return await self.tool_registry[request.tool_type](request)
     
     async def _validate_request(self, request: CorpusToolRequest) -> tuple[bool, Optional[str]]:
         """Validate tool request parameters"""
@@ -77,15 +85,24 @@ class CorpusAdminTools:
         """Get list of available corpus tools"""
         tools = []
         for tool_type in CorpusToolType:
-            tools.append({
-                "type": tool_type.value,
-                "description": self._get_tool_description(tool_type)
-            })
+            tools.append(self._create_tool_info(tool_type))
         return tools
+    
+    def _create_tool_info(self, tool_type: CorpusToolType) -> Dict[str, str]:
+        """Create tool information dictionary"""
+        return {
+            "type": tool_type.value,
+            "description": self._get_tool_description(tool_type)
+        }
     
     def _get_tool_description(self, tool_type: CorpusToolType) -> str:
         """Get description for a tool type"""
-        descriptions = {
+        descriptions = self._build_tool_descriptions()
+        return descriptions.get(tool_type, "Unknown tool")
+    
+    def _build_tool_descriptions(self) -> Dict[CorpusToolType, str]:
+        """Build tool descriptions mapping"""
+        return {
             CorpusToolType.CREATE: "Create a new corpus",
             CorpusToolType.GENERATE: "Generate synthetic data",
             CorpusToolType.OPTIMIZE: "Optimize corpus performance",
@@ -95,4 +112,3 @@ class CorpusAdminTools:
             CorpusToolType.UPDATE: "Update corpus metadata",
             CorpusToolType.ANALYZE: "Analyze corpus statistics"
         }
-        return descriptions.get(tool_type, "Unknown tool")

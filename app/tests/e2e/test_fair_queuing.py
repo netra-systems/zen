@@ -13,9 +13,6 @@ from app.tests.e2e.concurrent_load_helpers import (
     create_priority_user_request, 
     validate_fair_queuing_results
 )
-
-
-@pytest.mark.asyncio
 class TestFairQueuing:
     """Test fair queuing mechanism"""
     

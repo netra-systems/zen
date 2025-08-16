@@ -369,6 +369,105 @@ class RetryManager:
 retry_manager = RetryManager()
 
 
+def _should_retry_exception(
+    exception: Exception, 
+    exception_classifier: Optional[Callable], 
+    retry_count: int, 
+    max_retries: int
+) -> bool:
+    """Check if exception should be retried."""
+    if exception_classifier and not exception_classifier(exception):
+        return False
+    return retry_count < max_retries
+
+
+def _calculate_retry_delay(retry_config: RetryConfig, retry_count: int) -> float:
+    """Calculate delay with exponential backoff."""
+    base_delay = retry_config.base_delay * (2 ** retry_count)
+    return min(base_delay, retry_config.max_delay)
+
+
+def _log_retry_attempt(
+    logger: Optional[Any], 
+    delay: float, 
+    retry_count: int, 
+    max_retries: int, 
+    exception: Exception
+) -> None:
+    """Log retry attempt information."""
+    if logger:
+        logger.warning(
+            f"Retrying after {delay}s (attempt {retry_count + 1}/{max_retries}): {exception}"
+        )
+
+
+def _log_max_retries_exceeded(logger: Optional[Any], max_retries: int, exception: Exception) -> None:
+    """Log when max retries are exceeded."""
+    if logger:
+        logger.error(f"Max retries ({max_retries}) exceeded: {exception}")
+
+
+def _log_non_retryable_exception(logger: Optional[Any], exception: Exception) -> None:
+    """Log non-retryable exception."""
+    if logger:
+        logger.error(f"Non-retryable exception: {exception}")
+
+
+def _add_retry_metadata_to_result(result: Any, retry_count: int) -> None:
+    """Add retry metadata to result if possible."""
+    if hasattr(result, '__dict__'):
+        result.retry_count = retry_count
+
+
+async def _execute_generator_with_metadata(
+    async_generator_func: AsyncGenerator, 
+    retry_count: int
+) -> AsyncGenerator:
+    """Execute generator and add retry metadata to results."""
+    async for result in async_generator_func:
+        _add_retry_metadata_to_result(result, retry_count)
+        yield result
+        return
+
+
+async def _handle_retryable_exception(
+    exception: Exception,
+    exception_classifier: Optional[Callable],
+    retry_count: int,
+    retry_config: RetryConfig,
+    logger: Optional[Any]
+) -> None:
+    """Handle retryable exception logic."""
+    if not _should_retry_exception(exception, exception_classifier, retry_count, retry_config.max_retries):
+        raise
+    if retry_count >= retry_config.max_retries:
+        _log_max_retries_exceeded(logger, retry_config.max_retries, exception)
+        raise
+    delay = _calculate_retry_delay(retry_config, retry_count)
+    _log_retry_attempt(logger, delay, retry_count, retry_config.max_retries, exception)
+    await asyncio.sleep(delay)
+
+
+async def _execute_retry_attempt(
+    async_generator_func: AsyncGenerator,
+    retry_count: int,
+    retry_config: RetryConfig,
+    retryable_exceptions: tuple,
+    exception_classifier: Optional[Callable],
+    logger: Optional[Any]
+) -> tuple[bool, Optional[Exception], Any]:
+    """Execute single retry attempt."""
+    try:
+        async for result in _execute_generator_with_metadata(async_generator_func, retry_count):
+            return True, None, result
+    except retryable_exceptions as e:
+        await _handle_retryable_exception(e, exception_classifier, retry_count, retry_config, logger)
+        return False, e, None
+    except Exception as e:
+        _log_non_retryable_exception(logger, e)
+        raise
+
+
 async def exponential_backoff_retry(
     async_generator_func: AsyncGenerator,
     retry_config: RetryConfig,
@@ -392,44 +491,15 @@ async def exponential_backoff_retry(
     last_exception = None
     
     while retry_count <= retry_config.max_retries:
-        try:
-            async for result in async_generator_func:
-                # Add retry metadata to result
-                if hasattr(result, '__dict__'):
-                    result.retry_count = retry_count
-                yield result
-                return
-        except retryable_exceptions as e:
-            last_exception = e
-            
-            # Check if we should retry
-            if exception_classifier and not exception_classifier(e):
-                raise
-                
-            if retry_count >= retry_config.max_retries:
-                if logger:
-                    logger.error(f"Max retries ({retry_config.max_retries}) exceeded: {e}")
-                raise
-                
-            # Calculate delay with exponential backoff
-            delay = min(
-                retry_config.base_delay * (2 ** retry_count),
-                retry_config.max_delay
-            )
-            
-            if logger:
-                logger.warning(
-                    f"Retrying after {delay}s (attempt {retry_count + 1}/{retry_config.max_retries}): {e}"
-                )
-                
-            await asyncio.sleep(delay)
-            retry_count += 1
-        except Exception as e:
-            # Non-retryable exception
-            if logger:
-                logger.error(f"Non-retryable exception: {e}")
-            raise
+        success, exception, result = await _execute_retry_attempt(
+            async_generator_func, retry_count, retry_config, 
+            retryable_exceptions, exception_classifier, logger
+        )
+        if success:
+            yield result
+            return
+        last_exception = exception
+        retry_count += 1
     
-    # If we get here, we exhausted retries
     if last_exception:
         raise last_exception

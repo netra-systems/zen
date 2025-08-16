@@ -143,8 +143,6 @@ class TestCriticalIntegration:
             })
         else:
             return json.dumps({"response": "Test response"})
-
-    @pytest.mark.asyncio
     async def test_1_full_agent_workflow_with_database_and_websocket(
         self, setup_real_database, setup_integration_infrastructure
     ):
@@ -156,104 +154,80 @@ class TestCriticalIntegration:
         - Persists state to database
         - Verifies final results in database
         """
-        db_setup = setup_real_database
-        infra = setup_integration_infrastructure
-        session = db_setup["session"]
-        
-        # Create repositories
-        thread_repo = ThreadRepository()
-        message_repo = MessageRepository()
-        run_repo = RunRepository()
-        
-        # Create test user
+        db_setup, infra = setup_real_database, setup_integration_infrastructure
+        test_entities = await self._create_test_entities_for_workflow(db_setup)
+        supervisor = self._setup_supervisor_with_database(db_setup, infra, test_entities)
+        mock_websocket = await self._setup_websocket_connection(infra, test_entities["user_id"])
+        result = await self._execute_agent_workflow_with_patches(supervisor, test_entities["message"])
+        await self._verify_workflow_results(result, mock_websocket, supervisor, test_entities)
+        await db_setup["session"].commit()
+
+    async def _create_test_entities_for_workflow(self, db_setup):
+        """Create test user, thread, and message entities"""
         user_id = str(uuid.uuid4())
-        user_data = {
-            "id": user_id,
-            "email": "test@example.com",
-            "username": "testuser"
-        }
-        
-        # Create thread using dict (mock)
-        thread = Mock(
-            id=str(uuid.uuid4()),
-            name="Test Integration Thread",
-            user_id=user_id
-        )
-        
-        # Create initial message (mock)
-        message = Mock(
-            id=str(uuid.uuid4()),
-            thread_id=thread.id,
-            role="user",
-            content="Optimize my GPU workload for better performance"
-        )
-        
-        # Setup supervisor with real database
-        supervisor = Supervisor(
-            session, 
-            infra["llm_manager"], 
-            infra["websocket_manager"],
-            Mock()  # tool_dispatcher
-        )
-        supervisor.thread_id = thread.id
-        supervisor.user_id = user_id
-        
-        # Mock WebSocket connection for streaming
+        thread = Mock(id=str(uuid.uuid4()), name="Test Integration Thread", user_id=user_id)
+        message = Mock(id=str(uuid.uuid4()), thread_id=thread.id, role="user", content="Optimize my GPU workload for better performance")
+        return {"user_id": user_id, "thread": thread, "message": message}
+
+    def _setup_supervisor_with_database(self, db_setup, infra, test_entities):
+        """Setup supervisor agent with database and infrastructure"""
+        supervisor = Supervisor(db_setup["session"], infra["llm_manager"], infra["websocket_manager"], Mock())
+        supervisor.thread_id = test_entities["thread"].id
+        supervisor.user_id = test_entities["user_id"]
+        return supervisor
+
+    async def _setup_websocket_connection(self, infra, user_id):
+        """Setup mock WebSocket connection for streaming"""
         mock_websocket = AsyncMock()
         mock_websocket.client_state = WebSocketState.CONNECTED
-        mock_websocket.send_json = AsyncMock()  # Mock the send_json method
-        mock_websocket.send_text = AsyncMock()  # Mock send_text for compatibility
-        
-        # Use the WebSocketManager's connect method to properly register the connection
-        conn_info = await infra["websocket_manager"].connect(user_id, mock_websocket)
-        
-        # Execute agent workflow
-        with patch('app.services.state_persistence_service.StatePersistenceService.save_agent_state', 
-                   AsyncMock()) as mock_save_state:
-            with patch('app.services.state_persistence_service.StatePersistenceService.load_agent_state',
-                       AsyncMock(return_value=None)):
-                
-                # Run the supervisor
-                result = await supervisor.run(
-                    user_request=message.content,
-                    run_id=str(uuid.uuid4()),
-                    stream_updates=True
-                )
-        
-        # Verify results
+        mock_websocket.send_json = AsyncMock()
+        mock_websocket.send_text = AsyncMock()
+        await infra["websocket_manager"].connect(user_id, mock_websocket)
+        return mock_websocket
+
+    async def _execute_agent_workflow_with_patches(self, supervisor, message):
+        """Execute agent workflow with state persistence patches"""
+        with patch('app.services.state_persistence_service.StatePersistenceService.save_agent_state', AsyncMock()) as mock_save_state:
+            with patch('app.services.state_persistence_service.StatePersistenceService.load_agent_state', AsyncMock(return_value=None)):
+                result = await supervisor.run(user_request=message.content, run_id=str(uuid.uuid4()), stream_updates=True)
+                self.mock_save_state = mock_save_state
+                return result
+
+    async def _verify_workflow_results(self, result, mock_websocket, supervisor, test_entities):
+        """Verify all workflow results and interactions"""
+        self._verify_agent_result(result)
+        self._verify_state_persistence()
+        self._verify_websocket_messages(mock_websocket)
+        self._verify_supervisor_configuration(supervisor, test_entities)
+
+    def _verify_agent_result(self, result):
+        """Verify the agent execution result"""
         assert result != None
         assert "optimization" in str(result).lower()
-        
-        # Verify state was saved
-        assert mock_save_state.called
-        save_calls = mock_save_state.call_args_list
+
+    def _verify_state_persistence(self):
+        """Verify state was saved correctly"""
+        assert self.mock_save_state.called
+        save_calls = self.mock_save_state.call_args_list
         assert len(save_calls) >= 3  # At least triage, data, and optimization agents
-        
-        # Verify WebSocket messages were sent
+
+    def _verify_websocket_messages(self, mock_websocket):
+        """Verify WebSocket messages were sent correctly"""
         assert mock_websocket.send_json.called, "WebSocket should have sent JSON messages"
-        ws_messages = [
-            call.args[0] for call in mock_websocket.send_json.call_args_list
-        ]
-        
-        # Check for agent lifecycle messages
+        ws_messages = [call.args[0] for call in mock_websocket.send_json.call_args_list]
+        self._verify_agent_lifecycle_messages(ws_messages)
+
+    def _verify_agent_lifecycle_messages(self, ws_messages):
+        """Verify agent lifecycle messages in WebSocket stream"""
         has_started = any("agent_started" in str(msg) for msg in ws_messages)
         has_updates = any("sub_agent_update" in str(msg) for msg in ws_messages)
         has_completed = any("agent_completed" in str(msg) for msg in ws_messages)
-        
-        assert has_started, "Should have agent started message"
-        assert has_updates, "Should have sub-agent updates"
-        assert has_completed, "Should have agent completed message"
-        
-        # Verify message repository was called
-        # In a real integration test, we would verify database state
-        # For now, we verify the mock interactions
-        assert supervisor.thread_id == thread.id
-        assert supervisor.user_id == user_id
-        
-        # Cleanup
-        await session.commit()
+        assert has_started and has_updates and has_completed, "Missing required lifecycle messages"
 
-    @pytest.mark.asyncio
+    def _verify_supervisor_configuration(self, supervisor, test_entities):
+        """Verify supervisor was configured correctly"""
+        assert supervisor.thread_id == test_entities["thread"].id
+        assert supervisor.user_id == test_entities["user_id"]
     async def test_2_websocket_authentication_and_message_flow(
         self, setup_integration_infrastructure
     ):
@@ -265,82 +239,51 @@ class TestCriticalIntegration:
         - Tests broadcast functionality
         - Tests connection lifecycle and cleanup
         """
-        infra = setup_integration_infrastructure
-        ws_manager = infra["websocket_manager"]
-        
-        # Create test user
+        ws_manager = setup_integration_infrastructure["websocket_manager"]
+        user_id, mock_websocket = await self._setup_websocket_test_user()
+        conn_info = await self._establish_websocket_connection(ws_manager, user_id, mock_websocket)
+        await self._test_authenticated_message_flow(ws_manager, user_id, mock_websocket)
+        await self._test_websocket_cleanup_and_security(ws_manager, user_id, mock_websocket)
+
+    async def _setup_websocket_test_user(self):
+        """Setup test user and mock WebSocket for testing"""
         user_id = str(uuid.uuid4())
-        user_data = {
-            "id": user_id,
-            "email": "websocket@test.com",
-            "username": "wsuser"
-        }
-        
-        # Mock WebSocket connection
         mock_websocket = AsyncMock()
         mock_websocket.client_state = WebSocketState.CONNECTED
-        mock_websocket.accept = AsyncMock()
-        mock_websocket.send_json = AsyncMock()  # WebSocketManager uses send_json
-        mock_websocket.send_text = AsyncMock()
-        mock_websocket.receive_text = AsyncMock()
-        mock_websocket.close = AsyncMock()
-        
-        # Simulate user connection
-        # Note: connection_id is generated internally by WebSocketManager
-        
-        # Add connection with user context
+        for method in ["accept", "send_json", "send_text", "receive_text", "close"]:
+            setattr(mock_websocket, method, AsyncMock())
+        return user_id, mock_websocket
+
+    async def _establish_websocket_connection(self, ws_manager, user_id, mock_websocket):
+        """Establish WebSocket connection and verify tracking"""
         conn_info = await ws_manager.connect(user_id, mock_websocket)
-        connection_id = conn_info.connection_id
-        
-        # Verify connection is tracked
         assert user_id in ws_manager.active_connections
-        assert connection_id in ws_manager.connection_registry
-        assert ws_manager.connection_registry[connection_id].user_id == user_id
-        
-        # Test sending authenticated message
-        test_message = WebSocketMessage(
-            type="agent_request",
-            payload={
-                "query": "Test authenticated request",
-                "thread_id": str(uuid.uuid4())
-            }
-        )
-        
-        # Send message through WebSocket
-        await ws_manager.send_message(
-            user_id,
-            test_message.model_dump()
-        )
-        
-        # Verify message was sent (WebSocketManager uses send_json)
+        assert conn_info.connection_id in ws_manager.connection_registry
+        assert ws_manager.connection_registry[conn_info.connection_id].user_id == user_id
+        return conn_info
+
+    async def _test_authenticated_message_flow(self, ws_manager, user_id, mock_websocket):
+        """Test sending authenticated messages through WebSocket"""
+        test_message = WebSocketMessage(type="agent_request", payload={"query": "Test authenticated request", "thread_id": str(uuid.uuid4())})
+        await ws_manager.send_message(user_id, test_message.model_dump())
+        await ws_manager.send_message(user_id, {"type": "notification", "message": "Test broadcast"})
+        self._verify_message_sending(mock_websocket)
+
+    def _verify_message_sending(self, mock_websocket):
+        """Verify messages were sent correctly through WebSocket"""
         mock_websocket.send_json.assert_called()
         sent_data = mock_websocket.send_json.call_args[0][0]
         assert sent_data["type"] == "agent_request"
         assert sent_data["payload"]["query"] == "Test authenticated request"
-        
-        # Test sending message to user's connections
-        await ws_manager.send_message(
-            user_id,
-            {"type": "notification", "message": "Test broadcast"}
-        )
-        
-        # Verify broadcast was sent
         assert mock_websocket.send_json.call_count >= 2
-        
-        # Test connection cleanup
+
+    async def _test_websocket_cleanup_and_security(self, ws_manager, user_id, mock_websocket):
+        """Test connection cleanup and unauthorized access handling"""
         await ws_manager.disconnect(user_id, mock_websocket)
         assert user_id not in ws_manager.active_connections
-        
-        # Test unauthorized access (no token)
-        unauthorized_user_id = None  # No user_id should cause failure
         with pytest.raises(Exception):
-            # This should fail without proper user_id (None)
-            await ws_manager.connect(unauthorized_user_id, mock_websocket)
-        
-        # Verify unauthorized connection was not added
-        assert unauthorized_user_id not in ws_manager.active_connections
-
-    @pytest.mark.asyncio
+            await ws_manager.connect(None, mock_websocket)
+        assert None not in ws_manager.active_connections
     async def test_3_database_state_persistence_and_recovery(
         self, setup_real_database, setup_integration_infrastructure
     ):

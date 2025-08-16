@@ -15,8 +15,6 @@ from app.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
 class TestAgentE2ECriticalCollaboration(AgentE2ETestBase):
     """Collaboration and authentication critical tests"""
-
-    @pytest.mark.asyncio
     async def test_7_authentication_and_authorization(self, setup_agent_infrastructure):
         """
         Test Case 7: Authentication and Authorization
@@ -87,7 +85,81 @@ class TestAgentE2ECriticalCollaboration(AgentE2ETestBase):
         # Verify viewer has restricted access
         assert len(allowed_agents) <= len(sub_agents)
 
-    @pytest.mark.asyncio
+    async def _track_concurrent_execution(self, concurrent_executions, execution_lock, state, agent_name):
+        """Track and log concurrent agent execution"""
+        async with execution_lock:
+            concurrent_executions.append({"agent": agent_name, "start": datetime.now()})
+        await asyncio.sleep(0.1)  # Simulate work
+        await self._update_state_with_results(state, agent_name)
+        async with execution_lock:
+            concurrent_executions.append({"agent": agent_name, "end": datetime.now()})
+        return state
+
+    async def _update_state_with_results(self, state, agent_name):
+        """Update state with agent-specific results"""
+        if agent_name == "Data":
+            state.data_result = {"metrics": "analyzed"}
+        elif agent_name == "OptimizationsCore":
+            state.optimizations_result = OptimizationsResult(
+                optimization_type="gpu", recommendations=["optimize"]
+            )
+
+    def _get_sub_agents(self, supervisor):
+        """Extract sub-agents from supervisor implementation"""
+        sub_agents = []
+        if hasattr(supervisor, '_impl') and supervisor._impl:
+            if hasattr(supervisor._impl, 'agents'):
+                sub_agents = list(supervisor._impl.agents.values())
+            elif hasattr(supervisor._impl, 'sub_agents'):
+                sub_agents = supervisor._impl.sub_agents
+        elif hasattr(supervisor, 'sub_agents'):
+            sub_agents = supervisor.sub_agents
+        return sub_agents
+
+    def _setup_mock_executions(self, sub_agents, concurrent_executions, execution_lock):
+        """Setup mock execution functions for agents"""
+        async def data_execute(s, r, st):
+            return await self._track_concurrent_execution(concurrent_executions, execution_lock, s, "Data")
+        
+        async def opt_execute(s, r, st):
+            return await self._track_concurrent_execution(concurrent_executions, execution_lock, s, "OptimizationsCore")
+        
+        if len(sub_agents) > 1:
+            sub_agents[1].execute = AsyncMock(side_effect=data_execute)
+        if len(sub_agents) > 2:
+            sub_agents[2].execute = AsyncMock(side_effect=opt_execute)
+
+    async def _execute_parallel_agents(self, agents, state, run_id, stream):
+        """Execute agents in parallel and merge results"""
+        tasks = [agent.execute(state, run_id, stream) for agent in agents]
+        results = await asyncio.gather(*tasks)
+        if results:
+            return results[-1]
+        return state
+
+    def _select_parallel_agents(self, sub_agents):
+        """Select agents for parallel execution"""
+        if len(sub_agents) > 2:
+            return [sub_agents[1], sub_agents[2]]
+        elif len(sub_agents) > 1:
+            return [sub_agents[0], sub_agents[1]]
+        return []
+
+    def _verify_collaboration_state(self, final_state):
+        """Verify that collaboration modified the state properly"""
+        assert final_state is not None
+        assert hasattr(final_state, 'data_result') or hasattr(final_state, 'optimizations_result')
+
+    def _verify_execution_overlap(self, concurrent_executions):
+        """Verify that agents executed with overlapping timing"""
+        data_events = [e for e in concurrent_executions if e.get("agent") == "Data" and "start" in e]
+        opt_events = [e for e in concurrent_executions if e.get("agent") == "OptimizationsCore" and "start" in e]
+        
+        if len(data_events) >= 1 and len(opt_events) >= 1:
+            data_start = data_events[0]["start"]
+            opt_start = opt_events[0]["start"]
+            time_diff = abs((data_start - opt_start).total_seconds())
+            assert time_diff < 1.0  # Started within 1 second of each other
     async def test_8_multi_agent_collaboration(self, setup_agent_infrastructure):
         """
         Test Case 8: Multi-agent Collaboration
@@ -97,97 +169,16 @@ class TestAgentE2ECriticalCollaboration(AgentE2ETestBase):
         """
         infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
-        
         run_id = str(uuid.uuid4())
-        
-        # Track concurrent executions
         concurrent_executions = []
         execution_lock = asyncio.Lock()
         
-        async def track_concurrent(state, rid, stream, agent_name):
-            async with execution_lock:
-                concurrent_executions.append({
-                    "agent": agent_name,
-                    "start": datetime.now()
-                })
-            
-            # Simulate work
-            await asyncio.sleep(0.1)
-            
-            # Share results through state using actual DeepAgentState fields
-            if agent_name == "Data":
-                state.data_result = {"metrics": "analyzed"}
-            elif agent_name == "OptimizationsCore":
-                state.optimizations_result = OptimizationsResult(
-                    optimization_type="gpu",
-                    recommendations=["optimize"]
-                )
-            
-            async with execution_lock:
-                concurrent_executions.append({
-                    "agent": agent_name,
-                    "end": datetime.now()
-                })
-            
-            return state
+        sub_agents = self._get_sub_agents(supervisor)
+        self._setup_mock_executions(sub_agents, concurrent_executions, execution_lock)
         
-        # Enable parallel execution for some agents
-        async def data_execute(s, r, st):
-            return await track_concurrent(s, r, st, "Data")
-        
-        async def opt_execute(s, r, st):
-            return await track_concurrent(s, r, st, "OptimizationsCore")
-        
-        # Handle both consolidated and legacy implementations
-        sub_agents = []
-        if hasattr(supervisor, '_impl') and supervisor._impl:
-            if hasattr(supervisor._impl, 'agents'):
-                sub_agents = list(supervisor._impl.agents.values())
-            elif hasattr(supervisor._impl, 'sub_agents'):
-                sub_agents = supervisor._impl.sub_agents
-        elif hasattr(supervisor, 'sub_agents'):
-            sub_agents = supervisor.sub_agents
-            
-        if len(sub_agents) > 1:
-            sub_agents[1].execute = AsyncMock(side_effect=data_execute)
-        if len(sub_agents) > 2:
-            sub_agents[2].execute = AsyncMock(side_effect=opt_execute)
-        
-        # Mock parallel execution capability
-        async def parallel_run(agents, state, rid, stream):
-            tasks = [agent.execute(state, rid, stream) for agent in agents]
-            results = await asyncio.gather(*tasks)
-            
-            # Merge states - use the last result as final state
-            # since DeepAgentState doesn't have an update method
-            if results:
-                return results[-1]
-            return state
-        
-        # Execute with collaboration
         state = DeepAgentState(user_request="Complex optimization requiring collaboration")
+        parallel_agents = self._select_parallel_agents(sub_agents)
+        final_state = await self._execute_parallel_agents(parallel_agents, state, run_id, False) if parallel_agents else state
         
-        # Run Data and Optimization agents in parallel
-        parallel_agents = []
-        if len(sub_agents) > 2:
-            parallel_agents = [sub_agents[1], sub_agents[2]]
-        elif len(sub_agents) > 1:
-            parallel_agents = [sub_agents[0], sub_agents[1]]
-        final_state = await parallel_run(parallel_agents, state, run_id, False) if parallel_agents else state
-        
-        # Verify collaboration - check that state was modified
-        assert final_state != None
-        # Check that the final state has the expected modifications
-        # The state should have been modified by the agents
-        assert hasattr(final_state, 'data_result') or hasattr(final_state, 'optimizations_result')
-        
-        # Check for overlapping execution times
-        data_events = [e for e in concurrent_executions if e.get("agent") == "Data" and "start" in e]
-        opt_events = [e for e in concurrent_executions if e.get("agent") == "OptimizationsCore" and "start" in e]
-        
-        if len(data_events) >= 1 and len(opt_events) >= 1:
-            # Verify overlap in execution
-            data_start = data_events[0]["start"]
-            opt_start = opt_events[0]["start"]
-            time_diff = abs((data_start - opt_start).total_seconds())
-            assert time_diff < 1.0  # Started within 1 second of each other
+        self._verify_collaboration_state(final_state)
+        self._verify_execution_overlap(concurrent_executions)

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any
 from pydantic import BaseModel, ConfigDict
 import uuid
 
@@ -33,4 +33,24 @@ class ContentCorpus(BaseModel):
     response: str
     created_at: datetime
 
+    model_config = ConfigDict(from_attributes=True, extra="allow")
+
+class DocumentBase(BaseModel):
+    title: str
+    content: str
+    metadata: Optional[dict] = None
+
+class DocumentCreate(DocumentBase):
+    pass
+
+class DocumentUpdate(DocumentBase):
+    title: Optional[str] = None
+    content: Optional[str] = None
+
+class Document(DocumentBase):
+    id: str
+    corpus_id: str
+    created_at: datetime
+    updated_at: datetime
+    
     model_config = ConfigDict(from_attributes=True, extra="allow")

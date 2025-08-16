@@ -162,88 +162,104 @@ def check_dependencies() -> dict:
 def build_pytest_args(args) -> List[str]:
     """Build pytest command arguments"""
     pytest_args = []
-    
-    # Add test paths based on category or specific paths
+    _add_test_paths(args, pytest_args)
+    _add_verbosity_args(args, pytest_args)
+    _add_parallel_args(args, pytest_args)
+    _add_execution_control_args(args, pytest_args)
+    _add_coverage_args(args, pytest_args)
+    _add_filter_args(args, pytest_args)
+    _add_output_args(args, pytest_args)
+    return [arg for arg in pytest_args if arg]
+
+def _add_test_paths(args, pytest_args):
+    """Add test paths based on category or specific paths"""
     if args.category:
-        if args.category in TEST_CATEGORIES:
-            test_paths = TEST_CATEGORIES[args.category]
-            pytest_args.extend(test_paths)
-        else:
-            print(f"Unknown category: {args.category}")
-            print(f"Available categories: {', '.join(TEST_CATEGORIES.keys())}")
-            sys.exit(1)
+        _handle_category_selection(args, pytest_args)
     elif args.tests:
         pytest_args.extend(args.tests)
     else:
-        # Default to all tests
         pytest_args.extend(["app/tests", "tests", "integration_tests"])
-    
-    # Verbosity
+
+def _handle_category_selection(args, pytest_args):
+    """Handle test category selection"""
+    if args.category in TEST_CATEGORIES:
+        test_paths = TEST_CATEGORIES[args.category]
+        pytest_args.extend(test_paths)
+    else:
+        _print_category_error(args.category)
+        sys.exit(1)
+
+def _print_category_error(category):
+    """Print error for unknown category"""
+    print(f"Unknown category: {category}")
+    print(f"Available categories: {', '.join(TEST_CATEGORIES.keys())}")
+
+def _add_verbosity_args(args, pytest_args):
+    """Add verbosity arguments"""
     if args.verbose:
         pytest_args.append("-vv")
     elif not args.quiet:
         pytest_args.append("-v")
-    
-    # Parallel execution
+
+def _add_parallel_args(args, pytest_args):
+    """Add parallel execution arguments"""
     if args.parallel == "auto":
         pytest_args.extend(["-n", "auto"])
     elif args.parallel and str(args.parallel).isdigit() and int(args.parallel) > 0:
         pytest_args.extend(["-n", str(args.parallel)])
-    
-    # Failed first
+
+def _add_execution_control_args(args, pytest_args):
+    """Add execution control arguments"""
+    _add_failed_first_args(args, pytest_args)
+    _add_fail_fast_args(args, pytest_args)
+    _add_common_options(args, pytest_args)
+
+def _add_failed_first_args(args, pytest_args):
+    """Add failed first arguments"""
     if args.failed_first:
         pytest_args.append("--failed-first")
         pytest_args.append("--ff")
-    
-    # Stop on first failure
+
+def _add_fail_fast_args(args, pytest_args):
+    """Add fail fast arguments"""
     if args.fail_fast:
         pytest_args.append("-x")
         pytest_args.append("--maxfail=1")
-    
-    # Coverage
+
+def _add_coverage_args(args, pytest_args):
+    """Add coverage arguments"""
     if args.coverage:
-        pytest_args.extend([
+        coverage_options = [
             "--cov=app",
             "--cov-report=html:reports/coverage/html",
             "--cov-report=term-missing",
             "--cov-report=json:reports/coverage/coverage.json",
-            f"--cov-fail-under={args.min_coverage}",
-        ])
-    
-    # Markers
+            f"--cov-fail-under={args.min_coverage}"
+        ]
+        pytest_args.extend(coverage_options)
+
+def _add_filter_args(args, pytest_args):
+    """Add filter arguments (markers and keywords)"""
     if args.markers:
         pytest_args.extend(["-m", args.markers])
-    
-    # Keywords
     if args.keyword:
         pytest_args.extend(["-k", args.keyword])
-    
-    # Duration profiling
     if args.profile:
         pytest_args.extend(["--durations=20"])
-    
-    # Output format
+
+def _add_output_args(args, pytest_args):
+    """Add output format arguments"""
     if args.json_output:
         pytest_args.extend(["--json-report", "--json-report-file=reports/tests/report.json"])
-    
     if args.html_output:
         pytest_args.extend(["--html=reports/tests/report.html", "--self-contained-html"])
-    
-    # Common options
-    pytest_args.extend([
-        "--tb=short",
-        "--asyncio-mode=auto",
-        "--color=yes",
-        "--strict-markers",
-        "--disable-warnings" if not args.show_warnings else "",
-        "-p" if not args.show_warnings else "",
-        "no:warnings" if not args.show_warnings else "",
-    ])
-    
-    # Remove empty strings
-    pytest_args = [arg for arg in pytest_args if arg]
-    
-    return pytest_args
+
+def _add_common_options(args, pytest_args):
+    """Add common pytest options"""
+    common_opts = ["--tb=short", "--asyncio-mode=auto", "--color=yes", "--strict-markers"]
+    pytest_args.extend(common_opts)
+    if not args.show_warnings:
+        pytest_args.extend(["--disable-warnings", "-p", "no:warnings"])
 
 
 def run_tests(pytest_args: List[str], args, isolation_manager=None) -> int:

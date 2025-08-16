@@ -28,8 +28,6 @@ class TestEnhancedErrorRecoverySystem:
     def mock_error(self):
         """Create mock error for testing."""
         return ConnectionError("Test connection error")
-    
-    @pytest.mark.asyncio
     async def test_handle_agent_error_success(self, recovery_system, mock_error):
         """Test successful agent error handling."""
         # Mock dependencies
@@ -48,8 +46,6 @@ class TestEnhancedErrorRecoverySystem:
         assert result == {'status': 'recovered'}
         recovery_system.error_aggregation.process_error.assert_called_once()
         recovery_system.circuit_breaker_registry.get_breaker.assert_called_with('agent_triage')
-    
-    @pytest.mark.asyncio
     async def test_handle_agent_error_degradation(self, recovery_system, mock_error):
         """Test agent error handling with degradation fallback."""
         # Mock circuit breaker to fail
@@ -70,8 +66,6 @@ class TestEnhancedErrorRecoverySystem:
         
         assert result == {'status': 'degraded'}
         recovery_system.degradation_manager.degrade_service.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_handle_database_error_success(self, recovery_system, mock_error):
         """Test successful database error handling."""
         # Mock dependencies
@@ -90,8 +84,6 @@ class TestEnhancedErrorRecoverySystem:
         assert result == {'status': 'recovered'}
         recovery_system.error_aggregation.process_error.assert_called_once()
         recovery_system.circuit_breaker_registry.get_breaker.assert_called_with('db_users')
-    
-    @pytest.mark.asyncio
     async def test_handle_api_error_with_retry(self, recovery_system, mock_error):
         """Test API error handling with retry strategy."""
         # Mock dependencies
@@ -113,8 +105,6 @@ class TestEnhancedErrorRecoverySystem:
         
         assert result == {'status': 'retried', 'delay': 1.0}
         recovery_system.retry_manager.get_strategy.assert_called_with(OperationType.EXTERNAL_API)
-    
-    @pytest.mark.asyncio
     async def test_handle_websocket_error(self, recovery_system, mock_error):
         """Test WebSocket error handling."""
         # Mock dependencies
@@ -130,8 +120,6 @@ class TestEnhancedErrorRecoverySystem:
         
         assert result == {'recovered_connections': 2}
         recovery_system.error_aggregation.process_error.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_handle_memory_exhaustion(self, recovery_system):
         """Test memory exhaustion handling."""
         # Mock dependencies
@@ -146,8 +134,6 @@ class TestEnhancedErrorRecoverySystem:
         assert result is True
         recovery_system.memory_monitor.take_snapshot.assert_called_once()
         recovery_system.memory_monitor.check_and_recover.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_startup_recovery_system(self, recovery_system):
         """Test recovery system startup."""
         # Mock all startup methods
@@ -161,8 +147,6 @@ class TestEnhancedErrorRecoverySystem:
         recovery_system.error_aggregation.start_processing.assert_called_once()
         recovery_system.memory_monitor.start_monitoring.assert_called_once()
         recovery_system.database_registry.start_all_monitoring.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_shutdown_recovery_system(self, recovery_system):
         """Test recovery system shutdown."""
         # Mock all shutdown methods
@@ -196,8 +180,6 @@ class TestEnhancedErrorRecoverySystem:
         assert result['user_id'] == 'user123'
         assert result['context'] == {'key': 'value'}
         assert isinstance(result['timestamp'], datetime)
-    
-    @pytest.mark.asyncio
     async def test_execute_agent_recovery(self, recovery_system, mock_error):
         """Test agent recovery execution."""
         # Mock agent registry
@@ -212,8 +194,6 @@ class TestEnhancedErrorRecoverySystem:
         
         assert result == {'recovery': 'success'}
         recovery_system.agent_registry.recover_agent_operation.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_execute_database_recovery(self, recovery_system, mock_error):
         """Test database recovery execution."""
         # Test with rollback data
@@ -222,8 +202,6 @@ class TestEnhancedErrorRecoverySystem:
         )
         
         assert result == {'status': 'rollback_queued', 'table': 'users'}
-    
-    @pytest.mark.asyncio
     async def test_execute_api_recovery_with_retry(self, recovery_system, mock_error):
         """Test API recovery execution with retry."""
         # Mock retry strategy
@@ -239,8 +217,6 @@ class TestEnhancedErrorRecoverySystem:
         
         assert result == {'status': 'retried', 'delay': 2.0}
         mock_sleep.assert_called_once_with(2.0)
-    
-    @pytest.mark.asyncio
     async def test_execute_api_recovery_no_retry(self, recovery_system, mock_error):
         """Test API recovery when retry not allowed."""
         # Mock retry strategy to not retry
@@ -302,8 +278,6 @@ class TestEnhancedErrorRecoverySystem:
 
 class TestConvenienceFunctions:
     """Test convenience functions for backward compatibility."""
-    
-    @pytest.mark.asyncio
     async def test_recover_agent_operation(self, mock_error):
         """Test convenience function for agent recovery."""
         with patch.object(enhanced_recovery_system, 'handle_agent_error') as mock_handle:
@@ -317,8 +291,6 @@ class TestConvenienceFunctions:
             mock_handle.assert_called_once_with(
                 'triage', 'classify', mock_error, {'test': 'data'}
             )
-    
-    @pytest.mark.asyncio
     async def test_recover_database_operation(self, mock_error):
         """Test convenience function for database recovery."""
         with patch.object(enhanced_recovery_system, 'handle_database_error') as mock_handle:
@@ -332,8 +304,6 @@ class TestConvenienceFunctions:
             mock_handle.assert_called_once_with(
                 'users', 'insert', mock_error, rollback_data={'id': 123}
             )
-    
-    @pytest.mark.asyncio
     async def test_recover_api_operation(self, mock_error):
         """Test convenience function for API recovery."""
         with patch.object(enhanced_recovery_system, 'handle_api_error') as mock_handle:
@@ -351,8 +321,6 @@ class TestConvenienceFunctions:
 
 class TestIntegrationScenarios:
     """Test realistic integration scenarios."""
-    
-    @pytest.mark.asyncio
     async def test_agent_error_with_memory_pressure(self):
         """Test agent error handling under memory pressure."""
         recovery_system = EnhancedErrorRecoverySystem()
@@ -382,8 +350,6 @@ class TestIntegrationScenarios:
         
         assert result['status'] == 'degraded'
         assert result['reason'] == 'memory_pressure'
-    
-    @pytest.mark.asyncio
     async def test_cascading_failure_scenario(self):
         """Test handling of cascading failures across components."""
         recovery_system = EnhancedErrorRecoverySystem()

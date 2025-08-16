@@ -120,6 +120,8 @@ Organized API endpoints:
 
 ```
 routes/
+├── auth/                  # Authentication module
+│   └── auth.py           # OAuth, JWT, and dev login endpoints
 ├── websockets.py          # WebSocket connections
 ├── agent_route.py         # Agent execution endpoints  
 ├── threads_route.py       # Thread management
@@ -135,6 +137,7 @@ routes/
 ├── health_extended.py     # Extended health monitoring
 ├── admin.py               # Admin functions
 ├── demo.py                # Demo endpoints
+├── demo_handlers.py       # Demo request handlers
 ├── demo_websocket.py      # Demo WebSocket handlers
 ├── monitoring.py          # System monitoring
 ├── database_monitoring.py # Database health monitoring
@@ -142,8 +145,26 @@ routes/
 ├── quality.py             # Quality validation endpoints
 ├── quality_handlers.py    # Quality processing handlers
 ├── quality_validators.py  # Quality validation logic
+├── quality_validation_utils.py # Quality validation utilities
 ├── unified_tools.py       # Unified tool interfaces
-└── mcp.py                 # MCP (Model Context Protocol) endpoints
+├── mcp.py                 # MCP (Model Context Protocol) endpoints
+├── mcp/                   # MCP module directory
+│   ├── main.py           # MCP main router
+│   ├── handlers.py       # MCP request handlers
+│   ├── models.py         # MCP data models
+│   ├── service_factory.py # MCP service factory
+│   └── websocket_handler.py # MCP WebSocket handling
+└── utils/                 # Route utilities
+    ├── circuit_helpers.py # Circuit breaker helpers
+    ├── error_handlers.py  # Error handling utilities
+    ├── generation_helpers.py # Generation utilities
+    ├── health_helpers.py  # Health check helpers
+    ├── response_builders.py # Response building utilities
+    ├── service_delegates.py # Service delegation
+    ├── synthetic_data_helpers.py # Synthetic data utilities
+    ├── thread_helpers.py  # Thread management utilities
+    ├── validators.py      # Request validators
+    └── websocket_helpers.py # WebSocket utilities
 ```
 
 #### 3. Service Layer (`app/services/`)

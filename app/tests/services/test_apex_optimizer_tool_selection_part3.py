@@ -164,8 +164,6 @@ class TestApexOptimizerToolChaining:
         context.session_id = "test_session"
         context.request_data = {"optimization_target": "cost_reduction"}
         return context
-    
-    @pytest.mark.asyncio
     async def test_simple_tool_chain_execution(self, tool_chain, mock_tool_context):
         """Test simple tool chain execution"""
         # Execute chain starting with cost analyzer
@@ -179,8 +177,6 @@ class TestApexOptimizerToolChaining:
         # Verify execution history
         assert len(tool_chain.execution_history) >= 2
         assert tool_chain.execution_history[0]['success'] == True
-    
-    @pytest.mark.asyncio
     async def test_conditional_tool_chaining(self, tool_chain, mock_tool_context, optimization_tools):
         """Test conditional tool chaining based on results"""
         # Make quality monitor return low confidence to trigger multi-objective
@@ -202,8 +198,6 @@ class TestApexOptimizerToolChaining:
         # Should trigger multi-objective due to low confidence
         assert len(results) == 3
         assert results[-1]['tool_name'] == "multi_objective"
-    
-    @pytest.mark.asyncio
     async def test_parallel_tool_execution(self, optimization_tools, mock_tool_context):
         """Test parallel execution of multiple optimization tools"""
         # Execute multiple tools concurrently
@@ -221,8 +215,6 @@ class TestApexOptimizerToolChaining:
         assert len(results) == 2
         assert results[0]['tool_name'] == "cost_analyzer"
         assert results[1]['tool_name'] == "latency_optimizer"
-    
-    @pytest.mark.asyncio
     async def test_tool_chain_error_handling(self, tool_chain, mock_tool_context, optimization_tools):
         """Test error handling in tool chains"""
         # Make second tool in chain fail
@@ -239,8 +231,6 @@ class TestApexOptimizerToolChaining:
         assert len(tool_chain.execution_history) == 2
         assert tool_chain.execution_history[0]['success'] == True
         assert tool_chain.execution_history[1]['success'] == False
-    
-    @pytest.mark.asyncio
     async def test_tool_chain_cycle_prevention(self, tool_chain, mock_tool_context):
         """Test prevention of cycles in tool chains"""
         # Add a rule that could create a cycle
@@ -255,8 +245,6 @@ class TestApexOptimizerToolChaining:
         # Should not execute the same tool twice
         executed_tools = [result['tool_name'] for result in results]
         assert len(executed_tools) == len(set(executed_tools))  # No duplicates
-    
-    @pytest.mark.asyncio
     async def test_dynamic_tool_chaining(self, tool_chain, mock_tool_context):
         """Test dynamic tool chaining based on runtime conditions"""
         # Create dynamic chaining logic

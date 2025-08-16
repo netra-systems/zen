@@ -27,7 +27,10 @@ class DatabaseChecker:
         """Check PostgreSQL database connection and schema"""
         if self.is_mock:
             return self._create_mock_result("database_connection")
-        
+        return await self._perform_database_connection_check()
+    
+    async def _perform_database_connection_check(self) -> StartupCheckResult:
+        """Perform actual database connection check"""
         try:
             await self._execute_database_tests()
             return self._create_db_success_result()
@@ -38,7 +41,10 @@ class DatabaseChecker:
         """Check if Netra assistant exists, create if not"""
         if self.is_mock:
             return self._create_mock_result("netra_assistant")
-        
+        return await self._perform_assistant_check()
+    
+    async def _perform_assistant_check(self) -> StartupCheckResult:
+        """Perform actual assistant check and creation"""
         try:
             return await self._handle_assistant_check()
         except Exception as e:
@@ -168,10 +174,23 @@ class DatabaseChecker:
     
     def _build_assistant_instance(self) -> Assistant:
         """Build assistant instance with all properties"""
-        return Assistant(
-            id="netra-assistant", object="assistant", created_at=int(time.time()),
-            name="Netra AI Optimization Assistant", model="gpt-4", file_ids=[],
-            description="The world's best AI workload optimization assistant",
-            instructions="You are Netra AI Workload Optimization Assistant. You help users optimize their AI workloads for cost, performance, and quality.",
-            tools=self._get_assistant_tools(), metadata_=self._get_assistant_metadata()
-        )
+        basic_props = self._get_assistant_basic_props()
+        advanced_props = self._get_assistant_advanced_props()
+        return Assistant(**{**basic_props, **advanced_props})
+    
+    def _get_assistant_basic_props(self) -> dict:
+        """Get basic assistant properties"""
+        return {
+            "id": "netra-assistant", "object": "assistant",
+            "created_at": int(time.time()), "name": "Netra AI Optimization Assistant",
+            "model": "gpt-4", "file_ids": []
+        }
+    
+    def _get_assistant_advanced_props(self) -> dict:
+        """Get advanced assistant properties"""
+        return {
+            "description": "The world's best AI workload optimization assistant",
+            "instructions": "You are Netra AI Workload Optimization Assistant. You help users optimize their AI workloads for cost, performance, and quality.",
+            "tools": self._get_assistant_tools(),
+            "metadata_": self._get_assistant_metadata()
+        }

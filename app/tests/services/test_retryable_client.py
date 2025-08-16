@@ -16,8 +16,6 @@ class TestRetryableHTTPClient:
     def test_retryable_client_inheritance(self, retryable_client):
         """Test RetryableHTTPClient inherits from ResilientHTTPClient."""
         assert isinstance(retryable_client, ResilientHTTPClient)
-    
-    @pytest.mark.asyncio
     async def test_get_with_retry(self, retryable_client):
         """Test GET with retry functionality."""
         with patch.object(retryable_client, 'get', return_value={"success": True}) as mock_get:
@@ -29,8 +27,6 @@ class TestRetryableHTTPClient:
         """Verify GET with retry execution."""
         assert result == {"success": True}
         mock_get.assert_called_once_with("/test", "test_api")
-    
-    @pytest.mark.asyncio
     async def test_post_with_retry(self, retryable_client):
         """Test POST with retry functionality."""
         with patch.object(retryable_client, 'post', return_value={"success": True}) as mock_post:

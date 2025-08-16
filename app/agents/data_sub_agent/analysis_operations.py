@@ -22,16 +22,29 @@ class AnalysisOperations:
         time_range: Tuple[datetime, datetime]
     ) -> Dict[str, Any]:
         """Analyze performance metrics from ClickHouse."""
+        return await self._execute_performance_analysis(user_id, workload_id, time_range)
+    
+    async def _execute_performance_analysis(
+        self, user_id: int, workload_id: Optional[str], time_range: Tuple[datetime, datetime]
+    ) -> Dict[str, Any]:
+        """Execute complete performance analysis workflow."""
         data = await self._fetch_metrics_data(user_id, workload_id, time_range)
         if not data:
             return self._create_no_data_response()
-        
+        return self._analyze_metrics_data(data, time_range)
+    
+    def _analyze_metrics_data(self, data: List[Dict], time_range: Tuple[datetime, datetime]) -> Dict[str, Any]:
+        """Analyze metrics data and add comprehensive analysis."""
         metric_values = self._extract_metric_values(data)
         result = self._build_base_result(time_range, data, metric_values)
+        self._add_all_analysis_components(result, data, metric_values)
+        return result
+    
+    def _add_all_analysis_components(self, result: Dict, data: List[Dict], metric_values: Dict) -> None:
+        """Add all analysis components to result."""
         self._add_trend_analysis(result, data, metric_values)
         self._add_seasonality_analysis(result, data, metric_values)
         self._add_outlier_analysis(result, data, metric_values)
-        return result
     
     async def detect_anomalies(
         self,
@@ -112,13 +125,23 @@ class AnalysisOperations:
         """Build base result structure with time range and statistics."""
         start_time, end_time = time_range
         aggregation = self._determine_aggregation_level(start_time, end_time)
+        time_range_info = self._create_time_range_info(start_time, end_time, aggregation)
+        statistics = self._compute_metric_statistics(data, metric_values)
+        return {**time_range_info, **statistics, "raw_data": data[:100]}
+    
+    def _create_time_range_info(self, start_time: datetime, end_time: datetime, aggregation: str) -> Dict[str, Any]:
+        """Create time range information structure."""
         return {
-            "time_range": {"start": start_time.isoformat(), "end": end_time.isoformat(), "aggregation_level": aggregation},
+            "time_range": {"start": start_time.isoformat(), "end": end_time.isoformat(), "aggregation_level": aggregation}
+        }
+    
+    def _compute_metric_statistics(self, data: List[Dict], metric_values: Dict) -> Dict[str, Any]:
+        """Compute statistics for all metrics."""
+        return {
             "summary": self._build_summary_stats(data, metric_values["costs"]),
             "latency": self.analysis_engine.calculate_statistics(metric_values["latencies"]),
             "throughput": self.analysis_engine.calculate_statistics(metric_values["throughputs"]),
-            "error_rate": self.analysis_engine.calculate_statistics(metric_values["error_rates"]),
-            "raw_data": data[:100]
+            "error_rate": self.analysis_engine.calculate_statistics(metric_values["error_rates"])
         }
     
     def _build_summary_stats(self, data: List[Dict], costs: List) -> Dict[str, Any]:
@@ -211,13 +234,22 @@ class AnalysisOperations:
         """Calculate pairwise correlations between metrics."""
         start_time, end_time = time_range
         correlations = {}
-        
-        for i in range(len(metrics)):
-            for j in range(i + 1, len(metrics)):
-                correlation = await self._calculate_single_correlation(user_id, metrics[i], metrics[j], start_time, end_time)
-                if correlation:
-                    correlations[f"{metrics[i]}_vs_{metrics[j]}"] = correlation
+        await self._process_metric_pairs(user_id, metrics, start_time, end_time, correlations)
         return correlations
+    
+    async def _process_metric_pairs(self, user_id: int, metrics: List[str], 
+                                  start_time: datetime, end_time: datetime, correlations: Dict) -> None:
+        """Process all metric pairs for correlation analysis."""
+        for i in range(len(metrics)):
+            await self._process_metric_pair_combinations(user_id, metrics, i, start_time, end_time, correlations)
+    
+    async def _process_metric_pair_combinations(self, user_id: int, metrics: List[str], i: int,
+                                              start_time: datetime, end_time: datetime, correlations: Dict) -> None:
+        """Process metric pair combinations for given index."""
+        for j in range(i + 1, len(metrics)):
+            correlation = await self._calculate_single_correlation(user_id, metrics[i], metrics[j], start_time, end_time)
+            if correlation:
+                correlations[f"{metrics[i]}_vs_{metrics[j]}"] = correlation
     
     async def _calculate_single_correlation(self, user_id: int, metric1: str, metric2: str, 
                                           start_time: datetime, end_time: datetime) -> Optional[Dict]:
@@ -233,12 +265,22 @@ class AnalysisOperations:
         """Format correlation data for response."""
         corr_coef = corr_data['correlation_coefficient']
         strength = self._interpret_correlation_strength(corr_coef)
-        
+        basic_info = self._create_correlation_basic_info(corr_coef, strength, corr_data)
+        stats_info = self._create_correlation_stats_info(corr_data)
+        return {**basic_info, **stats_info}
+    
+    def _create_correlation_basic_info(self, corr_coef: float, strength: str, corr_data: Dict) -> Dict[str, Any]:
+        """Create basic correlation information."""
         return {
             "coefficient": corr_coef,
             "strength": strength,
             "direction": "positive" if corr_coef > 0 else "negative",
-            "sample_size": corr_data['sample_size'],
+            "sample_size": corr_data['sample_size']
+        }
+    
+    def _create_correlation_stats_info(self, corr_data: Dict) -> Dict[str, Any]:
+        """Create correlation statistics information."""
+        return {
             "metric1_stats": {"mean": corr_data['metric1_avg'], "std": corr_data['metric1_std']},
             "metric2_stats": {"mean": corr_data['metric2_avg'], "std": corr_data['metric2_std']}
         }

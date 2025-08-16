@@ -33,7 +33,7 @@ def get_nested_array_patterns() -> list:
     """Get pattern pairs for nested array access test"""
     return [
         ('metrics.name[idx]', 'arrayElement(metrics.name, idx)'),
-        ('metrics.value[idx]', 'toFloat64OrZero(arrayElement(metrics.value, idx))'),
+        ('metrics.value[idx]', 'arrayElement(metrics.value, idx)'),
         ('metrics.unit[idx]', 'arrayElement(metrics.unit, idx)')
     ]
 
@@ -41,8 +41,8 @@ def get_nested_array_patterns() -> list:
 def assert_complex_query_fixes(fixed_query: str) -> None:
     """Assert complex query array fixes are correct"""
     expected_fixes = [
-        'toFloat64OrZero(arrayElement(metrics.value, position))',
-        'toFloat64OrZero(arrayElement(metrics.value, position-1))'
+        'arrayElement(metrics.value, position)',
+        'arrayElement(metrics.value, position-1)'
     ]
     preserved_structure = ['WITH filtered_metrics AS', 'ORDER BY timestamp DESC']
     
@@ -98,7 +98,7 @@ class QueryTestSuite:
         """Generate expected fixed versions of test queries"""
         return {
             'basic_array_access': """
-                SELECT toFloat64OrZero(arrayElement(metrics.value, 1)) as first_metric
+                SELECT arrayElement(metrics.value, 1) as first_metric
                 FROM performance_data
                 WHERE timestamp > '2023-01-01'
             """
@@ -116,7 +116,7 @@ class TestClickHouseArraySyntaxFixer:
     def _get_basic_query_and_expectation(self, query_test_suite):
         """Get basic query and expected pattern for testing"""
         query = query_test_suite.test_queries['basic_array_access']
-        expected_pattern = 'toFloat64OrZero(arrayElement(metrics.value, 1))'
+        expected_pattern = 'arrayElement(metrics.value, 1)'
         return query, expected_pattern
     
     def test_basic_array_access_fix(self, query_test_suite):
@@ -145,7 +145,7 @@ class TestClickHouseArraySyntaxFixer:
 
     def _get_correct_syntax_query(self):
         """Get query with already correct syntax"""
-        return "SELECT toFloat64OrZero(arrayElement(metrics.value, 1)) FROM table"
+        return "SELECT arrayElement(metrics.value, 1) FROM table"
 
     def test_no_changes_for_correct_syntax(self):
         """Test that correct syntax is not modified"""
@@ -187,8 +187,8 @@ class TestClickHouseArraySyntaxFixer:
         """Test array access with complex expressions"""
         expression_query = self._get_expression_array_query()
         fixed_query = fix_clickhouse_array_syntax(expression_query)
-        assert 'toFloat64OrZero(arrayElement(metrics.value, idx + 1))' in fixed_query
-        assert 'toFloat64OrZero(arrayElement(metrics.value, position * 2))' in fixed_query
+        assert 'arrayElement(metrics.value, idx + 1)' in fixed_query
+        assert 'arrayElement(metrics.value, position * 2)' in fixed_query
 
     def _get_edge_case_queries(self):
         """Get edge case queries for testing"""

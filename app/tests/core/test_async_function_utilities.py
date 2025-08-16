@@ -20,8 +20,6 @@ from app.core.exceptions_service import ServiceTimeoutError, ServiceError
 
 class TestTimeoutFunctionsComplete:
     """Complete tests for timeout functions."""
-    
-    @pytest.mark.asyncio
     async def test_async_timeout_context_manager(self):
         """Test async_timeout context manager."""
         # Should complete within timeout
@@ -32,8 +30,6 @@ class TestTimeoutFunctionsComplete:
         with pytest.raises(asyncio.TimeoutError):
             async with async_timeout(0.1):
                 await asyncio.sleep(0.5)
-
-    @pytest.mark.asyncio
     async def test_with_timeout_decorator(self):
         """Test with_timeout decorator."""
         @with_timeout(0.5)
@@ -53,8 +49,6 @@ class TestTimeoutFunctionsComplete:
         # Slow operation should timeout
         with pytest.raises(ServiceTimeoutError):
             await slow_operation()
-
-    @pytest.mark.asyncio
     async def test_timeout_with_custom_timeout_values(self):
         """Test timeout with various timeout values."""
         @with_timeout(0.2)
@@ -73,8 +67,6 @@ class TestTimeoutFunctionsComplete:
         
         assert result1 == "short_success"
         assert result2 == "long_success"
-
-    @pytest.mark.asyncio
     async def test_timeout_cancellation_behavior(self):
         """Test timeout cancellation behavior."""
         cancelled_operations = []
@@ -93,8 +85,6 @@ class TestTimeoutFunctionsComplete:
         
         # Should have been cancelled
         assert len(cancelled_operations) == 1
-
-    @pytest.mark.asyncio
     async def test_nested_timeout_operations(self):
         """Test nested timeout operations."""
         @with_timeout(0.5)
@@ -110,8 +100,6 @@ class TestTimeoutFunctionsComplete:
         
         result = await outer_operation()
         assert result == "outer_inner_success"
-
-    @pytest.mark.asyncio
     async def test_timeout_precision(self):
         """Test timeout precision and timing."""
         start_time = time.time()
@@ -131,8 +119,6 @@ class TestTimeoutFunctionsComplete:
 
 class TestRetryDecoratorComplete:
     """Complete tests for retry decorator."""
-    
-    @pytest.mark.asyncio
     async def test_retry_basic_functionality(self):
         """Test basic retry functionality."""
         attempt_count = 0
@@ -148,8 +134,6 @@ class TestRetryDecoratorComplete:
         result = await sometimes_failing_operation()
         assert result == "Success on attempt 3"
         assert attempt_count == 3
-
-    @pytest.mark.asyncio
     async def test_retry_max_attempts_exceeded(self):
         """Test retry when max attempts are exceeded."""
         attempt_count = 0
@@ -164,8 +148,6 @@ class TestRetryDecoratorComplete:
             await always_failing_operation()
         
         assert attempt_count == 2
-
-    @pytest.mark.asyncio
     async def test_retry_with_different_exceptions(self):
         """Test retry with different exception types."""
         attempt_count = 0
@@ -183,8 +165,6 @@ class TestRetryDecoratorComplete:
         result = await multi_exception_operation()
         assert result == "success"
         assert attempt_count == 3
-
-    @pytest.mark.asyncio
     async def test_retry_with_non_retryable_exception(self):
         """Test retry with non-retryable exceptions."""
         attempt_count = 0
@@ -202,8 +182,6 @@ class TestRetryDecoratorComplete:
             await mixed_exception_operation()
         
         assert attempt_count == 2  # Should retry ServiceError, then fail on TypeError
-
-    @pytest.mark.asyncio
     async def test_retry_exponential_backoff(self):
         """Test retry with exponential backoff."""
         attempt_times = []
@@ -224,8 +202,6 @@ class TestRetryDecoratorComplete:
             delay2 = attempt_times[2] - attempt_times[1]
             assert 0.08 <= delay1 <= 0.15  # ~0.1 seconds
             assert 0.18 <= delay2 <= 0.25  # ~0.2 seconds (2x backoff)
-
-    @pytest.mark.asyncio
     async def test_retry_immediate_success(self):
         """Test retry when operation succeeds immediately."""
         attempt_count = 0
@@ -239,8 +215,6 @@ class TestRetryDecoratorComplete:
         result = await immediate_success_operation()
         assert result == "Success on first attempt 1"
         assert attempt_count == 1
-
-    @pytest.mark.asyncio
     async def test_retry_timing_accuracy(self):
         """Test retry timing accuracy."""
         start_time = time.time()
@@ -263,8 +237,6 @@ class TestRetryDecoratorComplete:
 
 class TestGlobalFunctionsComplete:
     """Complete tests for global utility functions."""
-    
-    @pytest.mark.asyncio
     async def test_shutdown_async_utils(self):
         """Test shutdown_async_utils function."""
         # This should complete without errors
@@ -272,8 +244,6 @@ class TestGlobalFunctionsComplete:
         
         # Should be idempotent
         await shutdown_async_utils()
-
-    @pytest.mark.asyncio
     async def test_global_utilities_integration(self):
         """Test integration of global utilities."""
         # Test combining timeout and retry
@@ -292,8 +262,6 @@ class TestGlobalFunctionsComplete:
         result = await combined_operation()
         assert result == "combined_success"
         assert attempt_count == 2
-
-    @pytest.mark.asyncio
     async def test_utility_functions_with_exceptions(self):
         """Test utility functions with various exception scenarios."""
         @with_timeout(0.5)
@@ -318,8 +286,6 @@ class TestGlobalFunctionsComplete:
         # Test non-retryable error
         with pytest.raises(ValueError):
             await exception_test_operation("value_error")
-
-    @pytest.mark.asyncio
     async def test_decorator_composition_order(self):
         """Test different orders of decorator composition."""
         results = []
@@ -344,8 +310,6 @@ class TestGlobalFunctionsComplete:
         assert result1 == "timeout_outside_success"
         assert result2 == "retry_outside_success"
         assert len(results) == 2
-
-    @pytest.mark.asyncio
     async def test_concurrent_utility_operations(self):
         """Test concurrent operations using utilities."""
         @with_timeout(0.5)

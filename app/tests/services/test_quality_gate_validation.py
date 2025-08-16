@@ -110,8 +110,6 @@ class TestCachingMechanism:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
-        
-    @pytest.mark.asyncio
     async def test_cache_key_generation(self, quality_service):
         """Test cache key generation for different content"""
         content1 = "Test content 1"
@@ -129,8 +127,6 @@ class TestCachingMechanism:
         
         # Different content should have different cache keys
         assert len(quality_service.validation_cache) == 2
-        
-    @pytest.mark.asyncio
     async def test_cache_hit_performance(self, quality_service):
         """Test that cache hits are faster than calculations"""
         content = "Performance test content with some complexity"
@@ -170,13 +166,9 @@ class TestErrorHandling(SharedTestErrorHandling):
     def agent_or_service(self):
         """Provide agent_or_service fixture for shared test methods"""
         return QualityGateService(redis_manager=None)
-    
-    @pytest.mark.asyncio
     async def test_retry_on_failure(self, agent_or_service):
         """Override retry test - QualityGateService doesn't have retry mechanism"""
         pytest.skip("QualityGateService doesn't have retry mechanism")
-        
-    @pytest.mark.asyncio
     async def test_validate_content_calculation_error(self, quality_service):
         """Test error during metrics calculation"""
         with patch.object(
@@ -188,8 +180,6 @@ class TestErrorHandling(SharedTestErrorHandling):
             
             assert result.passed == False
             assert "Validation error" in result.metrics.issues[0]
-            
-    @pytest.mark.asyncio
     async def test_validate_content_threshold_error(self, quality_service):
         """Test error during threshold checking"""
         # The actual threshold checking is done in the validator component
@@ -201,8 +191,6 @@ class TestErrorHandling(SharedTestErrorHandling):
             result = await quality_service.validate_content("Test")
             
             assert result.passed == False
-            
-    @pytest.mark.asyncio
     async def test_store_metrics_error_handling(self, quality_service):
         """Test error handling in metrics storage"""
         metrics = QualityMetrics()

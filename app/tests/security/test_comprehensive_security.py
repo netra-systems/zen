@@ -40,8 +40,6 @@ class TestSecurityMiddleware:
         request.client.host = "127.0.0.1"
         request.body = AsyncMock(return_value=b'{"test": "data"}')
         return request
-    
-    @pytest.mark.asyncio
     async def test_request_size_validation(self, security_middleware, mock_request):
         """Test request size validation."""
         # Test oversized request
@@ -49,8 +47,6 @@ class TestSecurityMiddleware:
         
         with pytest.raises(Exception):  # Should raise HTTP 413
             await security_middleware._validate_request_size(mock_request)
-    
-    @pytest.mark.asyncio
     async def test_rate_limiting(self, security_middleware, mock_request):
         """Test rate limiting functionality."""
         # Simulate multiple requests from same IP
@@ -60,8 +56,6 @@ class TestSecurityMiddleware:
             else:
                 with pytest.raises(Exception):  # Should raise HTTP 429
                     await security_middleware._check_rate_limits(mock_request)
-    
-    @pytest.mark.asyncio
     async def test_input_validation(self, security_middleware, mock_request):
         """Test input validation for malicious content."""
         # Test SQL injection
@@ -526,8 +520,6 @@ class TestIntegratedSecurity:
         # Test malicious request (should be blocked)
         with pytest.raises(Exception):
             client.post("/api/test", json={"query": "'; DROP TABLE users; --"})
-    
-    @pytest.mark.asyncio
     async def test_performance_under_load(self, app_with_security):
         """Test security performance under load."""
         client = TestClient(app_with_security)

@@ -15,7 +15,21 @@ import { TestProviders } from '../../test-utils/providers';
 // Mock dependencies
 jest.mock('@/store/unified-chat');
 jest.mock('@/store/authStore');
-jest.mock('@/services/threadService');
+jest.mock('@/services/threadService', () => ({
+  ThreadService: {
+    listThreads: jest.fn().mockResolvedValue([]),
+    createThread: jest.fn().mockResolvedValue({ 
+      id: 'new-thread', 
+      created_at: Math.floor(Date.now() / 1000), 
+      updated_at: Math.floor(Date.now() / 1000),
+      message_count: 0
+    }),
+    getThread: jest.fn(),
+    deleteThread: jest.fn(),
+    updateThread: jest.fn(),
+    getThreadMessages: jest.fn().mockResolvedValue({ messages: [], thread_id: 'test', total: 0, limit: 50, offset: 0 })
+  }
+}));
 jest.mock('@/components/ui/button', () => ({
   Button: ({ children, onClick, variant, size, disabled }: any) => (
     <button onClick={onClick} data-variant={variant} data-size={size} disabled={disabled}>
@@ -60,37 +74,49 @@ export const mockThreadService = {
   updateThread: jest.fn()
 };
 
-// Sample thread data
+// Sample thread data matching Thread interface from threadService
 export const sampleThreads = [
   {
     id: 'thread-1',
     title: 'AI Optimization Discussion',
-    lastMessage: 'How can I optimize my model?',
-    lastActivity: new Date().toISOString(),
-    messageCount: 15,
-    isActive: false,
-    participants: ['user1', 'assistant'],
-    tags: ['optimization', 'ai']
+    created_at: Math.floor(Date.now() / 1000),
+    updated_at: Math.floor(Date.now() / 1000),
+    message_count: 15,
+    metadata: {
+      title: 'AI Optimization Discussion',
+      last_message: 'How can I optimize my model?',
+      lastActivity: new Date().toISOString(),
+      messageCount: 15,
+      tags: ['optimization', 'ai']
+    }
   },
   {
     id: 'thread-2', 
     title: 'Performance Analysis',
-    lastMessage: 'The results show 20% improvement',
-    lastActivity: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
-    messageCount: 8,
-    isActive: true,
-    participants: ['user1', 'assistant'],
-    tags: ['performance']
+    created_at: Math.floor((Date.now() - 3600000) / 1000), // 1 hour ago
+    updated_at: Math.floor((Date.now() - 3600000) / 1000),
+    message_count: 8,
+    metadata: {
+      title: 'Performance Analysis',
+      last_message: 'The results show 20% improvement',
+      lastActivity: new Date(Date.now() - 3600000).toISOString(),
+      messageCount: 8,
+      tags: ['performance']
+    }
   },
   {
     id: 'thread-3',
     title: 'Data Processing Pipeline',
-    lastMessage: 'Pipeline completed successfully',
-    lastActivity: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
-    messageCount: 32,
-    isActive: false,
-    participants: ['user1', 'assistant'],
-    tags: ['data', 'pipeline']
+    created_at: Math.floor((Date.now() - 7200000) / 1000), // 2 hours ago
+    updated_at: Math.floor((Date.now() - 7200000) / 1000),
+    message_count: 32,
+    metadata: {
+      title: 'Data Processing Pipeline',
+      last_message: 'Pipeline completed successfully',
+      lastActivity: new Date(Date.now() - 7200000).toISOString(),
+      messageCount: 32,
+      tags: ['data', 'pipeline']
+    }
   }
 ];
 
@@ -129,10 +155,10 @@ export class ChatSidebarTestSetup {
   }
 
   // Configure thread service responses
-  configureThreadService(overrides: Partial<typeof mockThreadService>) {
-    const serviceConfig = { ...mockThreadService, ...overrides };
-    (ThreadServiceModule.ThreadService as any) = serviceConfig;
-    return serviceConfig;
+  configureThreadService(overrides: any) {
+    const { ThreadService } = require('@/services/threadService');
+    Object.assign(ThreadService, overrides);
+    return ThreadService;
   }
 
   // Helper to create test threads

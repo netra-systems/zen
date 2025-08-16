@@ -1,15 +1,73 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChatHeader } from '@/components/chat/ChatHeader';
 import { MessageList } from '@/components/chat/MessageList';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { PersistentResponseCard } from '@/components/chat/PersistentResponseCard';
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { OverflowPanel } from '@/components/chat/OverflowPanel';
+import { EventDiagnosticsPanel } from '@/components/chat/EventDiagnosticsPanel';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { useLoadingState } from '@/hooks/useLoadingState';
+import { useEventProcessor } from '@/hooks/useEventProcessor';
+
+// Helper Functions (8 lines max each)
+const executeTestRun = async (
+  setIsRunningTests: (running: boolean) => void,
+  setTestResults: (results: any) => void
+): Promise<void> => {
+  setIsRunningTests(true);
+  try {
+    const { runEventQueueTests } = await import('@/lib/event-queue.test');
+    const results = await runEventQueueTests();
+    setTestResults(results);
+    console.log('Event Queue Test Results:', results);
+  } catch (error) {
+    handleTestExecutionError(error, setTestResults);
+  } finally {
+    setIsRunningTests(false);
+  }
+};
+
+const handleTestExecutionError = (
+  error: unknown,
+  setTestResults: (results: any) => void
+): void => {
+  console.error('Test execution failed:', error);
+  setTestResults({ error: (error as Error).message });
+};
+
+const handleOverflowToggle = (
+  e: KeyboardEvent,
+  setIsOverflowOpen: (open: boolean | ((prev: boolean) => boolean)) => void
+): void => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+    e.preventDefault();
+    setIsOverflowOpen(prev => !prev);
+  }
+};
+
+const handleDiagnosticsToggle = (
+  e: KeyboardEvent,
+  setShowEventDiagnostics: (show: boolean | ((prev: boolean) => boolean)) => void
+): void => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'E') {
+    e.preventDefault();
+    setShowEventDiagnostics(prev => !prev);
+  }
+};
+
+const createKeyboardHandler = (
+  setIsOverflowOpen: (open: boolean | ((prev: boolean) => boolean)) => void,
+  setShowEventDiagnostics: (show: boolean | ((prev: boolean) => boolean)) => void
+) => {
+  return (e: KeyboardEvent) => {
+    handleOverflowToggle(e, setIsOverflowOpen);
+    handleDiagnosticsToggle(e, setShowEventDiagnostics);
+  };
+};
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
@@ -22,37 +80,49 @@ const MainChat: React.FC = () => {
     slowLayerData,
     currentRunId,
     activeThreadId,
-    isThreadLoading
+    isThreadLoading,
+    handleWebSocketEvent
   } = useUnifiedChatStore();
   
-  const { status: wsStatus } = useWebSocket();
+  const { messages: wsMessages } = useWebSocket();
   const [isCardCollapsed, setIsCardCollapsed] = useState(false);
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [showEventDiagnostics, setShowEventDiagnostics] = useState(false);
+  const [testResults, setTestResults] = useState<any>(null);
+  const [isRunningTests, setIsRunningTests] = useState(false);
   
-  // Connect WebSocket messages to unified chat store
-  useChatWebSocket();
+  // Use new loading state hook for clean state management
+  const {
+    shouldShowLoading,
+    shouldShowEmptyState,
+    shouldShowExamplePrompts,
+    loadingMessage
+  } = useLoadingState();
+  
+  // Process WebSocket messages with race condition prevention
+  const eventProcessor = useEventProcessor(
+    wsMessages,
+    handleWebSocketEvent,
+    {
+      maxQueueSize: 500,
+      duplicateWindowMs: 3000,
+      processingTimeoutMs: 5000,
+      enableDeduplication: true
+    }
+  );
+
+  // Test runner function
+  const runTests = async () => {
+    await executeTestRun(setIsRunningTests, setTestResults);
+  };
 
   const hasMessages = messages.length > 0;
-  const isWebSocketConnected = wsStatus === 'OPEN';
-  const isLoading = !isInitialized || !isWebSocketConnected || isThreadLoading;
-  const isEmptyState = !activeThreadId && !hasMessages && !isLoading;
-  const hasThreadButNoMessages = activeThreadId && !hasMessages && !isLoading && !isProcessing;
   
   // Thread loading is now handled via WebSocket events in the store
   // The handleWebSocketEvent function in useUnifiedChatStore will process
   // 'thread_loaded' events and automatically update the messages
   const showResponseCard = currentRunId !== null || isProcessing;
-
-  // Initialize component when WebSocket is connected
-  useEffect(() => {
-    if (isWebSocketConnected && !isInitialized) {
-      setIsInitialized(true);
-    }
-  }, [isWebSocketConnected, isInitialized]);
-
-  // Thread loading is now managed through the unified store via WebSocket events
-  // The store handles 'thread_loading' and 'thread_loaded' events automatically
+  const isThreadSwitching = isThreadLoading && !isProcessing;
 
   // Auto-collapse card after completion
   useEffect(() => {
@@ -72,28 +142,21 @@ const MainChat: React.FC = () => {
     }
   }, [isProcessing]);
 
-  // Keyboard shortcut for overflow panel
+  // Keyboard shortcuts for panels and diagnostics
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-        e.preventDefault();
-        setIsOverflowOpen(prev => !prev);
-      }
-    };
-
+    const handleKeyDown = createKeyboardHandler(setIsOverflowOpen, setShowEventDiagnostics);
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   // Show loading state while initializing
-  if (isLoading) {
+  if (shouldShowLoading) {
     return (
       <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
           <div className="text-sm text-gray-600">
-            {!isWebSocketConnected ? 'Connecting to chat service...' : 
-             isThreadLoading ? 'Loading thread messages...' : 'Loading chat...'}
+            {loadingMessage}
           </div>
         </div>
       </div>
@@ -113,7 +176,7 @@ const MainChat: React.FC = () => {
           <div className="h-full overflow-y-auto">
             {/* Empty State - shown when no thread is selected */}
             <AnimatePresence mode="wait">
-              {isEmptyState && (
+              {shouldShowEmptyState && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -140,7 +203,7 @@ const MainChat: React.FC = () => {
             
             {/* Example Prompts - shown when thread selected but no messages */}
             <AnimatePresence mode="wait">
-              {hasThreadButNoMessages && (
+              {shouldShowExamplePrompts && (
                 <motion.div
                   initial={{ opacity: 1 }}
                   exit={{ opacity: 0, y: -20 }}
@@ -151,8 +214,29 @@ const MainChat: React.FC = () => {
               )}
             </AnimatePresence>
             
+            {/* Thread Loading Indicator */}
+            {isThreadSwitching && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="flex items-center justify-center h-32"
+              >
+                <div className="flex flex-col items-center gap-3 p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
+                  <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                  <div className="text-sm text-gray-600">Loading conversation...</div>
+                  {activeThreadId && (
+                    <div className="text-xs text-gray-400">
+                      Thread: {activeThreadId.slice(0, 8)}...
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+            
             {/* Message History */}
-            {!isEmptyState && <MessageList />}
+            {!shouldShowEmptyState && !isThreadSwitching && <MessageList />}
             
             {/* Persistent Response Card - Shows current processing */}
             <AnimatePresence>
@@ -193,6 +277,18 @@ const MainChat: React.FC = () => {
       
       {/* Overflow Debug Panel */}
       <OverflowPanel isOpen={isOverflowOpen} onClose={() => setIsOverflowOpen(false)} />
+      
+      {/* Event Processing Diagnostics Panel */}
+      <EventDiagnosticsPanel
+        showEventDiagnostics={showEventDiagnostics}
+        setShowEventDiagnostics={setShowEventDiagnostics}
+        eventProcessor={eventProcessor}
+        wsMessages={wsMessages}
+        testResults={testResults}
+        setTestResults={setTestResults}
+        isRunningTests={isRunningTests}
+        setIsRunningTests={setIsRunningTests}
+      />
     </div>
   );
 };

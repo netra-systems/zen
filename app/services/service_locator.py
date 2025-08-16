@@ -4,7 +4,7 @@ This module provides a centralized service locator to break circular dependencie
 and enable proper dependency injection throughout the application.
 """
 
-from typing import Dict, Type, Any, Optional, TypeVar, Generic, Callable
+from typing import Dict, Type, Any, Optional, TypeVar, Generic, Callable, List
 from functools import lru_cache
 import threading
 from abc import ABC, abstractmethod
@@ -249,6 +249,50 @@ class IWebSocketService(ABC):
         pass
 
 
+class IMCPClientService(ABC):
+    """Interface for MCP Client service."""
+    
+    @abstractmethod
+    async def register_server(self, server_config: Dict[str, Any]) -> bool:
+        """Register an external MCP server."""
+        pass
+    
+    @abstractmethod
+    async def connect_to_server(self, server_name: str) -> Dict[str, Any]:
+        """Connect to a specific MCP server."""
+        pass
+    
+    @abstractmethod
+    async def list_servers(self) -> List[Dict[str, Any]]:
+        """List all registered MCP servers."""
+        pass
+    
+    @abstractmethod
+    async def discover_tools(self, server_name: str) -> List[Dict[str, Any]]:
+        """Discover tools from an MCP server."""
+        pass
+    
+    @abstractmethod
+    async def execute_tool(self, server_name: str, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute a tool on an MCP server."""
+        pass
+    
+    @abstractmethod
+    async def get_resources(self, server_name: str) -> List[Dict[str, Any]]:
+        """Get resources from an MCP server."""
+        pass
+    
+    @abstractmethod
+    async def fetch_resource(self, server_name: str, uri: str) -> Dict[str, Any]:
+        """Fetch a specific resource from an MCP server."""
+        pass
+    
+    @abstractmethod
+    async def clear_cache(self, server_name: Optional[str] = None):
+        """Clear MCP client cache."""
+        pass
+
+
 # ============================================================================
 # SERVICE REGISTRATION HELPERS
 # ============================================================================
@@ -298,6 +342,11 @@ def _create_mcp_service():
         supply_catalog_service=supply_catalog_service
     )
 
+def _create_mcp_client_service():
+    """Create MCPClientService with proper dependencies."""
+    from app.services.mcp_client_service import MCPClientService
+    return MCPClientService()
+
 def register_core_services():
     """Register all core services with proper dependency injection."""
     from app.services.agent_service import AgentService
@@ -335,6 +384,12 @@ def register_core_services():
     service_locator.register(
         IWebSocketService,
         factory=lambda: WebSocketService(),
+        singleton=True
+    )
+    
+    service_locator.register(
+        IMCPClientService,
+        factory=lambda: _create_mcp_client_service(),
         singleton=True
     )
     
@@ -393,6 +448,7 @@ __all__ = [
     "IMessageHandlerService",
     "IMCPService",
     "IWebSocketService",
+    "IMCPClientService",
     "register_core_services",
     "get_service",
     "inject",

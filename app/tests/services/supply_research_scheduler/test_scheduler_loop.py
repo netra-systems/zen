@@ -12,7 +12,7 @@ from app.services.supply_research_scheduler import (
     ResearchSchedule,
     ScheduleFrequency
 )
-from app.agents.supply_researcher_sub_agent import ResearchType
+from app.agents.supply_researcher.models import ResearchType
 from app.tests.services.supply_research_scheduler.test_scheduler_initialization import (
     MockBackgroundTaskManager,
     MockLLMManager,
@@ -29,9 +29,6 @@ def scheduler():
     with patch('app.services.supply_research_scheduler.RedisManager') as mock_redis_class:
         mock_redis_class.return_value = MockRedisManager()
         return SupplyResearchScheduler(mock_background_manager, mock_llm_manager)
-
-
-@pytest.mark.asyncio
 class TestSchedulerLoop:
     """Test main scheduler loop functionality"""
     
@@ -130,9 +127,6 @@ class TestSchedulerLoop:
         
         # Should not have added any tasks (all disabled)
         assert len(scheduler.background_manager.tasks) == 0
-
-
-@pytest.mark.asyncio
 class TestManualExecution:
     """Test manual schedule execution"""
     

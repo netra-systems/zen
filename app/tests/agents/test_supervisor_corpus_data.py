@@ -96,8 +96,6 @@ class DemoAgent:
 
 class TestCorpusAdminDocumentManagement:
     """Test 5: Test document indexing and retrieval"""
-    
-    @pytest.mark.asyncio
     async def test_document_indexing_workflow(self):
         """Test document indexing workflow"""
         mocks = create_corpus_admin_mocks()
@@ -111,8 +109,6 @@ class TestCorpusAdminDocumentManagement:
         assert result["indexed"] == 5
         assert result["failed"] == 0
         corpus_admin.vector_store.add_documents.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_document_retrieval_with_similarity_search(self):
         """Test document retrieval using similarity search"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -134,8 +130,6 @@ class TestCorpusAdminDocumentManagement:
         assert len(results) == 2
         assert results[0]["score"] == 0.95
         assert results[0]["id"] == "doc1"
-    
-    @pytest.mark.asyncio
     async def test_corpus_update_operations(self):
         """Test corpus update operations"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -162,8 +156,6 @@ class TestCorpusAdminDocumentManagement:
 
 class TestSupplyResearcherDataCollection:
     """Test 6: Test supply chain data research capabilities"""
-    
-    @pytest.mark.asyncio
     async def test_supply_chain_data_collection(self):
         """Test supply chain data collection workflow"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -186,8 +178,6 @@ class TestSupplyResearcherDataCollection:
         
         assert len(result["suppliers"]) == 2
         assert result["inventory"]["gpu"] == 1000
-    
-    @pytest.mark.asyncio
     async def test_data_validation_and_enrichment(self):
         """Test data validation and enrichment process"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -220,8 +210,6 @@ class TestSupplyResearcherDataCollection:
 
 class TestDemoAgentWorkflow:
     """Test 7: Test demo scenario execution"""
-    
-    @pytest.mark.asyncio
     async def test_demo_scenario_execution(self):
         """Test execution of demo scenarios"""
         llm_manager = AsyncMock(spec=LLMManager)
@@ -241,8 +229,6 @@ class TestDemoAgentWorkflow:
         
         assert result["metrics"]["accuracy"] == 0.95
         assert len(result["recommendations"]) == 2
-    
-    @pytest.mark.asyncio
     async def test_demo_data_generation_variety(self):
         """Test variety in demo data generation"""
         llm_manager = AsyncMock(spec=LLMManager)

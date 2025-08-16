@@ -19,8 +19,6 @@ from app.db.models_clickhouse import get_content_corpus_schema
 
 class TestLargeDatasetPerformance:
     """Test query performance with large datasets"""
-    
-    @pytest.mark.asyncio
     async def test_corpus_bulk_insert_performance(self):
         """Test 1: Verify bulk insert handles 10K+ records efficiently"""
         service = CorpusService()
@@ -50,8 +48,6 @@ class TestLargeDatasetPerformance:
             
             # Should batch insert, not individual inserts
             assert mock_instance.execute.call_count == 1
-    
-    @pytest.mark.asyncio
     async def test_query_with_large_result_set(self):
         """Test 2: Verify queries handle large result sets with LIMIT"""
         query = QueryBuilder.build_performance_metrics_query(
@@ -64,8 +60,6 @@ class TestLargeDatasetPerformance:
         
         # Should have LIMIT to prevent memory issues
         assert "LIMIT 10000" in query
-    
-    @pytest.mark.asyncio
     async def test_statistics_query_on_million_records(self):
         """Test 3: Verify statistics queries use efficient aggregations"""
         service = CorpusService()
@@ -109,8 +103,6 @@ class TestLargeDatasetPerformance:
 
 class TestEdgeCaseHandling:
     """Test edge cases in query handling"""
-    
-    @pytest.mark.asyncio
     async def test_empty_corpus_handling(self):
         """Test 5: Verify handling of empty corpus tables"""
         service = CorpusService()
@@ -129,8 +121,6 @@ class TestEdgeCaseHandling:
             result = await service.get_corpus_content(db, "test_id")
             
             assert result == []
-    
-    @pytest.mark.asyncio
     async def test_null_values_in_nested_arrays(self):
         """Test 6: Verify handling of null values in nested arrays"""
         query = QueryBuilder.build_performance_metrics_query(
@@ -155,8 +145,6 @@ class TestEdgeCaseHandling:
         
         # Should use nullIf to prevent division by zero
         assert "nullIf(baseline_stats.std_value, 0)" in query
-    
-    @pytest.mark.asyncio
     async def test_malformed_record_validation(self):
         """Test 8: Verify validation catches malformed records"""
         service = CorpusService()
@@ -174,8 +162,6 @@ class TestEdgeCaseHandling:
         
         assert not result["valid"]
         assert len(result["errors"]) >= 5
-    
-    @pytest.mark.asyncio
     async def test_special_characters_in_queries(self):
         """Test 9: Verify proper escaping of special characters"""
         service = CorpusService()
@@ -213,8 +199,6 @@ class TestEdgeCaseHandling:
 
 class TestConcurrencyAndAsync:
     """Test concurrent query execution and async patterns"""
-    
-    @pytest.mark.asyncio
     async def test_concurrent_corpus_operations(self):
         """Test 11: Verify concurrent corpus operations don't conflict"""
         service = CorpusService()
@@ -240,8 +224,6 @@ class TestConcurrencyAndAsync:
             # All should complete without conflict
             assert len(results) == 10
             assert all(r.id for r in results)
-    
-    @pytest.mark.asyncio
     async def test_async_table_creation_timeout(self):
         """Test 12: Verify async table creation handles timeouts"""
         service = CorpusService()
@@ -357,8 +339,6 @@ class TestPatternDetection:
 
 class TestConnectionHandling:
     """Test database connection handling"""
-    
-    @pytest.mark.asyncio
     async def test_connection_cleanup_on_error(self):
         """Test 20: Verify connections are cleaned up on errors"""
         from app.services.generation_service import get_corpus_from_clickhouse

@@ -17,16 +17,12 @@ from app.tests.helpers.redis_test_helpers import (
 
 class TestRedisManagerConnectionPooling:
     """Test Redis connection pooling functionality"""
-    
-    @pytest.mark.asyncio
     async def test_connection_pool_creation(self, enhanced_redis_manager, connection_pool):
         """Test connection pool creation and setup"""
         enhanced_redis_manager.set_connection_pool(connection_pool)
         
         assert enhanced_redis_manager.connection_pool is connection_pool
         verify_connection_pool_state(connection_pool, 0, 5)
-    
-    @pytest.mark.asyncio
     async def test_connection_pool_get_connection(self, connection_pool):
         """Test getting connection from pool"""
         connection = await connection_pool.get_connection()
@@ -35,16 +31,12 @@ class TestRedisManagerConnectionPooling:
         assert isinstance(connection, MockRedisClient)
         assert connection_pool.active_connections == 1
         assert connection_pool.total_connections_created == 1
-    
-    @pytest.mark.asyncio
     async def test_connection_pool_return_connection(self, connection_pool):
         """Test returning connection to pool"""
         connection = await connection_pool.get_connection()
         await connection_pool.return_connection(connection)
         
         verify_connection_pool_state(connection_pool, 0, 5)
-    
-    @pytest.mark.asyncio
     async def test_connection_pool_max_connections(self, connection_pool):
         """Test connection pool max connections limit"""
         connections = []
@@ -55,8 +47,6 @@ class TestRedisManagerConnectionPooling:
         
         assert connection_pool.active_connections == connection_pool.max_connections
         assert len(connections) == connection_pool.max_connections
-    
-    @pytest.mark.asyncio
     async def test_concurrent_connection_usage(self, enhanced_redis_manager, connection_pool):
         """Test concurrent usage of pooled connections"""
         enhanced_redis_manager.set_connection_pool(connection_pool)
@@ -74,8 +64,6 @@ class TestRedisManagerConnectionPooling:
         
         assert len(results) == 10
         assert verify_concurrent_results(results, 10)
-    
-    @pytest.mark.asyncio
     async def test_connection_pool_cleanup(self, connection_pool):
         """Test connection pool cleanup"""
         connections = []

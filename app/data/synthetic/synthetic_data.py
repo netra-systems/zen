@@ -197,75 +197,108 @@ from .multi_turn_generator import generate_multi_turn_tool_trace
 # --- 4. ORCHESTRATION ---
 async def main(args):
     """Main function to generate synthetic logs. Can be called from other modules."""
-    console.print("[bold cyan]Starting High-Performance Synthetic Log Generation...[/bold cyan]")
     start_time = time.time()
+    config, content_corpus = await _setup_generation_environment(args)
+    all_logs = await _generate_all_logs(args, config, content_corpus)
+    await _finalize_generation(args, all_logs, start_time)
+    return all_logs
 
-    # Determine if running as a standalone script or called from another module
-    is_standalone = hasattr(args, 'output_file')
-
+async def _setup_generation_environment(args):
+    """Setup configuration and content corpus for generation"""
+    console.print("[bold cyan]Starting High-Performance Synthetic Log Generation...[/bold cyan]")
     config_path = args.config if hasattr(args, 'config') else "config.yaml"
     config = get_config(config_path)
+    content_corpus = await _load_content_corpus(args)
+    return config, content_corpus
 
-    # Use provided corpus if available, otherwise load from ClickHouse
+async def _load_content_corpus(args):
+    """Load content corpus from args or ClickHouse"""
     if hasattr(args, 'corpus') and args.corpus:
-        content_corpus = args.corpus
         console.print("[green]Using content corpus provided in arguments.[/green]")
+        return args.corpus
     else:
-        content_corpus = await load_content_corpus_from_clickhouse()
+        return await load_content_corpus_from_clickhouse()
 
+async def _generate_all_logs(args, config, content_corpus):
+    """Generate both simple and multi-turn logs"""
+    all_logs = []
+    num_simple_logs, num_multi_turn = _calculate_trace_distribution(args, config)
+    
+    if num_simple_logs > 0:
+        simple_logs = await _generate_simple_logs(args, config, content_corpus, num_simple_logs)
+        all_logs.extend(simple_logs)
+    
+    if num_multi_turn > 0:
+        multi_turn_logs = await _generate_multi_turn_logs(config, content_corpus, num_multi_turn)
+        all_logs.extend(multi_turn_logs)
+    
+    return all_logs
+
+def _calculate_trace_distribution(args, config):
+    """Calculate number of each trace type to generate"""
     total_traces = args.num_traces
-
-    # --- Calculate number of each trace type ---
     trace_dist = config['generation_settings']['trace_distribution']
     num_multi_turn = round(total_traces * trace_dist.get('multi_turn_tool_use', 0.0))
     num_simple_logs = total_traces - num_multi_turn
-
     console.print(f"Planning to generate [yellow]{num_simple_logs}[/yellow] simple logs and [yellow]{num_multi_turn}[/yellow] multi-turn traces.")
+    return num_simple_logs, num_multi_turn
 
-    # --- Generate Simple Logs in Parallel ---
-    all_logs = []
-    if num_simple_logs > 0:
-        max_cores = args.max_cores if hasattr(args, 'max_cores') else cpu_count()
-        num_processes = min(cpu_count(), max_cores)
-        chunk_size = num_simple_logs // num_processes
-        chunks = [chunk_size] * num_processes
-        remainder = num_simple_logs % num_processes
-        if remainder: chunks.append(remainder)
+async def _generate_simple_logs(args, config, content_corpus, num_simple_logs):
+    """Generate simple logs in parallel"""
+    max_cores = args.max_cores if hasattr(args, 'max_cores') else cpu_count()
+    num_processes = min(cpu_count(), max_cores)
+    chunks = _calculate_worker_chunks(num_simple_logs, num_processes)
+    
+    console.print(f"Using [yellow]{num_processes}[/yellow] cores to generate simple logs...")
+    with Pool(processes=num_processes) as pool:
+        worker_args = [(chunk, config, content_corpus) for chunk in chunks]
+        results = pool.map(generate_data_chunk, worker_args)
+    
+    combined_df = pd.concat(results, ignore_index=True)
+    return [format_log_entry(row) for _, row in combined_df.iterrows()]
 
-        console.print(f"Using [yellow]{num_processes}[/yellow] cores to generate simple logs...")
-        with Pool(processes=num_processes) as pool:
-            worker_args = [(chunk, config, content_corpus) for chunk in chunks]
-            results = pool.map(generate_data_chunk, worker_args)
-        
-        combined_df = pd.concat(results, ignore_index=True)
-        all_logs.extend([format_log_entry(row) for _, row in combined_df.iterrows()])
+def _calculate_worker_chunks(num_simple_logs, num_processes):
+    """Calculate chunks for parallel processing"""
+    chunk_size = num_simple_logs // num_processes
+    chunks = [chunk_size] * num_processes
+    remainder = num_simple_logs % num_processes
+    if remainder:
+        chunks.append(remainder)
+    return chunks
 
-    # --- Generate Complex Traces Sequentially ---
-    if num_multi_turn > 0:
-        console.print(f"Generating [yellow]{num_multi_turn}[/yellow] multi-turn traces...")
-        with Progress() as progress:
-            task = progress.add_task("[magenta]Generating complex traces...", total=num_multi_turn)
-            for _ in range(num_multi_turn):
-                all_logs.extend(generate_multi_turn_tool_trace(config, content_corpus))
-                progress.update(task, advance=1)
+async def _generate_multi_turn_logs(config, content_corpus, num_multi_turn):
+    """Generate multi-turn traces sequentially"""
+    console.print(f"Generating [yellow]{num_multi_turn}[/yellow] multi-turn traces...")
+    all_multi_turn_logs = []
+    with Progress() as progress:
+        task = progress.add_task("[magenta]Generating complex traces...", total=num_multi_turn)
+        for _ in range(num_multi_turn):
+            all_multi_turn_logs.extend(generate_multi_turn_tool_trace(config, content_corpus))
+            progress.update(task, advance=1)
+    return all_multi_turn_logs
 
-    # --- Finalize ---
+async def _finalize_generation(args, all_logs, start_time):
+    """Finalize generation with shuffling, stats, and optional output"""
     console.print("Shuffling all generated logs for realism...")
     random.shuffle(all_logs)
+    _print_generation_stats(all_logs, start_time)
+    await _save_output_if_standalone(args, all_logs)
 
+def _print_generation_stats(all_logs, start_time):
+    """Print generation performance statistics"""
     duration = time.time() - start_time
     logs_per_second = len(all_logs) / duration if duration > 0 else 0
-
     console.print(f"[bold green]Successfully generated {len(all_logs)} total log entries.[/bold green]")
     console.print(f"Total time: [yellow]{duration:.2f}s[/yellow]")
     console.print(f"Performance: [bold yellow]{logs_per_second:.2f} logs/second[/bold yellow]")
 
+async def _save_output_if_standalone(args, all_logs):
+    """Save output to file if running as standalone script"""
+    is_standalone = hasattr(args, 'output_file')
     if is_standalone:
         console.print(f"Saving output to [cyan]{args.output_file}[/cyan]...")
         with open(args.output_file, 'w') as f:
             json.dump(all_logs, f, indent=2)
-    
-    return all_logs
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="High-Performance Synthetic Log Generator")

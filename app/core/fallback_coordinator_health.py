@@ -60,7 +60,7 @@ class HealthMonitor:
         """Record failure in circuit breaker and update status."""
         cb = self.coordinator.agent_circuit_breakers.get(agent_name)
         if cb:
-            cb.record_failure()
+            cb.record_failure("agent_failure")
             status.circuit_breaker_open = cb.is_open()
     
     async def update_circuit_breaker_status(self, agent_name: str) -> None:

@@ -19,22 +19,16 @@ from app.tests.helpers.async_utils_helpers import (
 
 class TestAsyncTimeout:
     """Test async timeout functionality"""
-    
-    @pytest.mark.asyncio
     async def test_async_timeout_success(self):
         """Test successful operation within timeout"""
         async with async_timeout(1.0):
             result = await create_quick_operation()
         assert result == "success"
-    
-    @pytest.mark.asyncio
     async def test_async_timeout_failure(self):
         """Test operation exceeding timeout"""
         with pytest.raises(ServiceTimeoutError):
             async with async_timeout(0.01):
                 await create_slow_operation()
-    
-    @pytest.mark.asyncio
     async def test_with_timeout_decorator_success(self):
         """Test timeout decorator with successful operation"""
         @with_timeout(1.0, "test_operation")
@@ -42,8 +36,6 @@ class TestAsyncTimeout:
             return await create_quick_operation()
         result = await decorated_function()
         assert result == "success"
-    
-    @pytest.mark.asyncio
     async def test_with_timeout_decorator_failure(self):
         """Test timeout decorator with timeout"""
         @with_timeout(0.01, "slow_operation")
@@ -55,8 +47,6 @@ class TestAsyncTimeout:
 
 class TestWithRetry:
     """Test retry decorator functionality"""
-    
-    @pytest.mark.asyncio
     async def test_with_retry_success_first_attempt(self):
         """Test retry decorator with success on first attempt"""
         counter, increment = create_retry_counter()
@@ -67,8 +57,6 @@ class TestWithRetry:
         result = await successful_function()
         assert result == "success"
         assert counter['value'] == 1
-    
-    @pytest.mark.asyncio
     async def test_with_retry_success_after_failures(self):
         """Test retry decorator with success after failures"""
         counter, increment = create_retry_counter()
@@ -77,8 +65,6 @@ class TestWithRetry:
         result = await decorated()
         assert result == "success_after_retries"
         assert counter['value'] == 3
-    
-    @pytest.mark.asyncio
     async def test_with_retry_exhausts_attempts(self):
         """Test retry decorator when all attempts fail"""
         counter, increment = create_retry_counter()
@@ -89,8 +75,6 @@ class TestWithRetry:
         with pytest.raises(ValueError, match="Attempt 2 failed"):
             await always_fails()
         assert counter['value'] == 2
-    
-    @pytest.mark.asyncio
     async def test_with_retry_exponential_backoff(self):
         """Test retry decorator with exponential backoff"""
         call_times = []

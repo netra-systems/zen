@@ -11,9 +11,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from app.services.message_handlers import MessageHandlerService
 from app.services.thread_service import ThreadService
 from app.ws_manager import manager
-
-
-@pytest.mark.asyncio
 async def test_user_joins_thread_room_on_message():
     """Test that users join thread room when sending message with thread_id."""
     # Setup
@@ -42,9 +39,6 @@ async def test_user_joins_thread_room_on_message():
                 
                 # Verify room joining was called
                 join_room_mock.assert_called_once_with(user_id, thread_id)
-
-
-@pytest.mark.asyncio
 async def test_switch_thread_manages_room_membership():
     """Test that switch_thread properly manages room membership."""
     # Setup
@@ -65,9 +59,6 @@ async def test_switch_thread_manages_room_membership():
             # Verify room management
             leave_mock.assert_called_once_with(user_id)
             join_mock.assert_called_once_with(user_id, new_thread_id)
-
-
-@pytest.mark.asyncio
 async def test_switch_thread_requires_thread_id():
     """Test that switch_thread validates thread_id is provided."""
     # Setup
@@ -85,9 +76,6 @@ async def test_switch_thread_requires_thread_id():
         
         # Verify error was sent
         error_mock.assert_called_once_with(user_id, "Thread ID required")
-
-
-@pytest.mark.asyncio
 async def test_websocket_broadcasts_to_thread_room():
     """Test that WebSocket messages are broadcast to thread room members."""
     thread_id = "test-thread-123"
@@ -105,9 +93,6 @@ async def test_websocket_broadcasts_to_thread_room():
             # Verify both users received message
             assert result is True
             assert send_mock.call_count == 2
-
-
-@pytest.mark.asyncio
 async def test_thread_room_isolation():
     """Test that messages to one thread don't reach users in other threads."""
     thread1_id = "thread-1"

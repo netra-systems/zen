@@ -3,10 +3,12 @@
     <metadata>
         <name>Coding Conventions</name>
         <type>conventions</type>
-        <version>2.0</version>
+        <version>2.1</version>
+        <last_updated>2025-08-16</last_updated>
         <description>
             MANDATORY coding standards for the Netra AI platform.
             These conventions ensure consistency, maintainability, and prevent regressions.
+            Updated to reflect current architectural compliance status: 37.7% (6,433 violations).
         </description>
     </metadata>
     

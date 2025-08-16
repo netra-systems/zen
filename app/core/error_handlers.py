@@ -161,7 +161,7 @@ class ApiErrorHandler:
                 error_code=ErrorCode.DATABASE_CONSTRAINT_VIOLATION.value,
                 message="Database constraint violation",
                 user_message="The operation could not be completed due to data constraints",
-                details={"original_error": str(exc.orig) if hasattr(exc, 'orig') else str(exc)},
+                details={"error_type": "constraint_violation"},  # Don't expose DB structure
                 trace_id=trace_id,
                 timestamp=datetime.now(timezone.utc).isoformat(),
                 request_id=request_id
@@ -226,8 +226,7 @@ class ApiErrorHandler:
             message="An internal server error occurred",
             user_message="Something went wrong. Please try again later",
             details={
-                "exception_type": type(exc).__name__,
-                "exception_message": str(exc)
+                "error_id": trace_id  # Only expose trace ID for debugging
             },
             trace_id=trace_id,
             timestamp=datetime.now(timezone.utc).isoformat(),

@@ -54,8 +54,6 @@ from app.agents.admin_tool_dispatcher import AdminToolDispatcher
 
 class TestQualitySupervisorValidation:
     """Test 3: Test quality checks on agent responses"""
-    
-    @pytest.mark.asyncio
     async def test_validates_response_quality_score(self):
         """Test validation of response quality scores"""
         mocks = create_quality_supervisor_mocks()
@@ -72,8 +70,6 @@ class TestQualitySupervisorValidation:
         assert result["approved"]
         assert result["quality_score"] == 0.85
         assert len(result["issues"]) == 0
-    
-    @pytest.mark.asyncio
     async def test_rejects_low_quality_outputs(self):
         """Test rejection of low-quality outputs"""
         mocks = create_quality_supervisor_mocks()
@@ -90,8 +86,6 @@ class TestQualitySupervisorValidation:
         assert result["quality_score"] == 0.4
         assert len(result["issues"]) == 3
         assert "Incomplete analysis" in result["issues"]
-    
-    @pytest.mark.asyncio
     async def test_quality_check_with_retry_improvement(self):
         """Test quality improvement through retry"""
         mocks = create_quality_supervisor_mocks()
@@ -116,8 +110,6 @@ class TestQualitySupervisorValidation:
 
 class TestAdminToolDispatcherRouting:
     """Test 4: Test tool selection logic for admin operations"""
-    
-    @pytest.mark.asyncio
     async def test_routes_to_correct_admin_tool(self):
         """Test routing to correct admin tool based on operation"""
         mocks = create_admin_dispatcher_mocks()
@@ -130,8 +122,6 @@ class TestAdminToolDispatcherRouting:
         mocks['tool_dispatcher'].execute_tool.assert_called_with("admin_user_management", operation["params"])
         assert result["success"]
         assert result["result"] == "User created"
-    
-    @pytest.mark.asyncio
     async def test_validates_admin_permissions(self):
         """Test security checks for privileged operations"""
         mocks = create_admin_dispatcher_mocks()
@@ -142,8 +132,6 @@ class TestAdminToolDispatcherRouting:
             await admin_dispatcher.dispatch_admin_operation(operation)
         
         assert "Insufficient permissions" in str(exc.value)
-    
-    @pytest.mark.asyncio
     async def test_admin_tool_audit_logging(self):
         """Test audit logging for admin operations"""
         mocks = create_admin_dispatcher_mocks()

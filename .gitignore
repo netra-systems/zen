@@ -90,3 +90,4 @@ terraform-dev-postgres/backups/
 *.exe
 /app/app/data/generated/content_corpuses
 act.zip
+terraform/staging/tfplan

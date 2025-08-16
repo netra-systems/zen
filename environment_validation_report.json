@@ -1,0 +1,193 @@
+{
+  "validation_summary": {
+    "ready_for_launch": true,
+    "total_checks": 16,
+    "passed": 10,
+    "failed": 3,
+    "warnings": 3,
+    "skipped": 0,
+    "critical_failures": 0,
+    "total_validation_time_ms": 5974.39,
+    "timestamp": "2025-08-16T06:39:52.409544"
+  },
+  "environment_status": {
+    "env_files_found": 16,
+    "database_connectivity": "FAILED",
+    "clickhouse_connectivity": "FAILED",
+    "redis_connectivity": "NOT_CONFIGURED"
+  },
+  "security_assessment": {
+    "secrets_in_env_file": true,
+    "weak_secrets_detected": false,
+    "api_keys_configured": true
+  },
+  "detailed_results": [
+    {
+      "check": "env_file_existence",
+      "status": "PASS",
+      "message": "Found 16 .env files",
+      "details": {
+        "files": [
+          ".\\.env",
+          ".\\.env.backup",
+          ".\\.env.development",
+          ".\\.env.development.local",
+          ".\\.env.production",
+          ".\\.env.staging",
+          ".\\.env.test",
+          ".\\.env.testing",
+          ".\\app\\data\\synthetic\\.env",
+          ".\\config\\.env.example",
+          ".\\config\\.env.template",
+          ".\\frontend\\.env.local",
+          ".\\frontend\\.env.staging",
+          ".\\frontend\\node_modules\\jest-websocket-mock\\examples\\hooks\\.env",
+          ".\\frontend\\node_modules\\jest-websocket-mock\\examples\\redux-saga\\.env",
+          ".\\scripts\\.env"
+        ]
+      },
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:47.932961"
+    },
+    {
+      "check": "required_env_vars",
+      "status": "PASS",
+      "message": "All required environment variables present",
+      "details": {},
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:47.933962"
+    },
+    {
+      "check": "secret_strength",
+      "status": "PASS",
+      "message": "All secrets meet minimum length requirements",
+      "details": {},
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:47.933962"
+    },
+    {
+      "check": "postgres_connection",
+      "status": "FAIL",
+      "message": "PostgreSQL connection error: greenlet_spawn has not been called; can't call await_only() here. Was IO attempted in an unexpected place? (Background on this error at: https://sqlalche.me/e/20/xd2s)",
+      "details": {
+        "error_type": "MissingGreenlet"
+      },
+      "response_time_ms": 41.93854331970215,
+      "timestamp": "2025-08-16T06:39:47.975901"
+    },
+    {
+      "check": "clickhouse_connection",
+      "status": "FAIL",
+      "message": "ClickHouse connection failed: Code: 102. Unexpected packet from server xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443 (expected Hello or Exception, got Unknown packet)",
+      "details": {
+        "error_type": "UnexpectedPacketFromServerError"
+      },
+      "response_time_ms": 395.9171772003174,
+      "timestamp": "2025-08-16T06:39:48.371818"
+    },
+    {
+      "check": "redis_connection",
+      "status": "FAIL",
+      "message": "Redis connection failed: AUTH <password> called without any password configured for the default user. Are you sure your configuration is correct?",
+      "details": {
+        "error_type": "AuthenticationError"
+      },
+      "response_time_ms": 6.524562835693359,
+      "timestamp": "2025-08-16T06:39:48.378342"
+    },
+    {
+      "check": "google_oauth",
+      "status": "PASS",
+      "message": "Google OAuth credentials configured",
+      "details": {
+        "client_id_prefix": "8405600937..."
+      },
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:48.378342"
+    },
+    {
+      "check": "gemini_api",
+      "status": "PASS",
+      "message": "Gemini API key configured",
+      "details": {
+        "key_prefix": "AIzaSyCb8C..."
+      },
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:48.378342"
+    },
+    {
+      "check": "langfuse_keys",
+      "status": "PASS",
+      "message": "Langfuse keys configured",
+      "details": {},
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:48.378342"
+    },
+    {
+      "check": "port_5433",
+      "status": "PASS",
+      "message": "PostgreSQL port 5433 is available",
+      "details": {},
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:48.396149"
+    },
+    {
+      "check": "port_6379",
+      "status": "PASS",
+      "message": "Redis port 6379 is available",
+      "details": {},
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:48.396780"
+    },
+    {
+      "check": "port_8000",
+      "status": "WARNING",
+      "message": "Backend API port 8000 is not responding",
+      "details": {},
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:50.402393"
+    },
+    {
+      "check": "port_3000",
+      "status": "WARNING",
+      "message": "Frontend port 3000 is not responding",
+      "details": {},
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:52.409544"
+    },
+    {
+      "check": "env_file_security",
+      "status": "WARNING",
+      "message": ".env file contains secrets in plain text",
+      "details": {
+        "recommendation": "Use environment variables or secret management",
+        "risk_level": "HIGH"
+      },
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:52.409544"
+    },
+    {
+      "check": "fernet_key",
+      "status": "PASS",
+      "message": "Fernet encryption key properly configured",
+      "details": {},
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:52.409544"
+    },
+    {
+      "check": "development_security",
+      "status": "PASS",
+      "message": "Running in development environment",
+      "details": {},
+      "response_time_ms": 0,
+      "timestamp": "2025-08-16T06:39:52.409544"
+    }
+  ],
+  "critical_failures": [],
+  "recommendations": [
+    "Security: Move secrets to environment variables or secret manager",
+    "Database: Fix ClickHouse connectivity for analytics features",
+    "Cache: Configure Redis for improved performance",
+    "Environment appears ready for launch!"
+  ]
+}

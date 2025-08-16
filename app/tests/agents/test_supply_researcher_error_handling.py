@@ -48,8 +48,6 @@ class TestSupplyResearcherErrorHandling:
             db=mock_db,
             supply_service=mock_supply_service
         )
-
-    @pytest.mark.asyncio
     async def test_api_failure_handling(self, agent, mock_db):
         """Test handling Deep Research API failures"""
         state = DeepAgentState(

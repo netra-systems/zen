@@ -84,71 +84,119 @@ class StreamingService:
         self.chunk_delay_ms = chunk_delay_ms
         self.active_streams: Dict[str, Dict[str, Any]] = {}
     
+    def _generate_stream_id(self) -> str:
+        """Generate unique stream identifier."""
+        return str(uuid.uuid4())
+    
+    def _register_stream(
+        self,
+        stream_id: str,
+        protocol: StreamProtocol
+    ) -> None:
+        """Register new stream in active streams tracking."""
+        self.active_streams[stream_id] = {
+            "start_time": datetime.now(),
+            "protocol": protocol,
+            "chunk_count": 0
+        }
+    
+    def _create_start_chunk(
+        self,
+        stream_id: str,
+        protocol: StreamProtocol
+    ) -> StreamChunk:
+        """Create stream start notification chunk."""
+        return StreamChunk(
+            type="stream_start",
+            data={"stream_id": stream_id},
+            metadata={"protocol": protocol.value}
+        )
+    
+    async def _process_data_chunks(
+        self,
+        processor: StreamProcessor,
+        input_data: Any,
+        stream_id: str
+    ) -> AsyncGenerator[StreamChunk, None]:
+        """Process input data and yield data chunks with rate limiting."""
+        async for result in processor.process(input_data):
+            chunk = self._create_data_chunk(result, stream_id)
+            self._increment_chunk_count(stream_id)
+            yield chunk
+            await self._apply_rate_limiting()
+    
+    def _create_data_chunk(
+        self,
+        result: Any,
+        stream_id: str
+    ) -> StreamChunk:
+        """Create data chunk from processor result."""
+        return StreamChunk(
+            type="data",
+            data=result,
+            metadata={"stream_id": stream_id}
+        )
+    
+    def _increment_chunk_count(self, stream_id: str) -> None:
+        """Increment chunk counter for stream tracking."""
+        self.active_streams[stream_id]["chunk_count"] += 1
+    
+    async def _apply_rate_limiting(self) -> None:
+        """Apply rate limiting delay if configured."""
+        if self.chunk_delay_ms > 0:
+            await asyncio.sleep(self.chunk_delay_ms / 1000)
+    
+    def _create_completion_chunk(self, stream_id: str) -> StreamChunk:
+        """Create stream completion notification chunk."""
+        stream_info = self.active_streams[stream_id]
+        duration_ms = (
+            datetime.now() - stream_info["start_time"]
+        ).total_seconds() * 1000
+        return StreamChunk(
+            type="stream_end",
+            data={"stream_id": stream_id},
+            metadata={
+                "total_chunks": stream_info["chunk_count"],
+                "duration_ms": duration_ms
+            }
+        )
+    
+    def _create_error_chunk(
+        self,
+        stream_id: str,
+        error: Exception
+    ) -> StreamChunk:
+        """Create error notification chunk."""
+        return StreamChunk(
+            type="error",
+            data={"error": str(error)},
+            metadata={"stream_id": stream_id}
+        )
+    
+    def _cleanup_stream(self, stream_id: str) -> None:
+        """Remove stream from active streams tracking."""
+        if stream_id in self.active_streams:
+            del self.active_streams[stream_id]
+    
     async def create_stream(
         self,
         processor: StreamProcessor,
         input_data: Any,
         protocol: StreamProtocol = StreamProtocol.HTTP_STREAM
     ) -> AsyncGenerator[StreamChunk, None]:
-        """
-        Create a new stream with the specified processor.
-        """
-        stream_id = str(uuid.uuid4())
-        
+        """Create a new stream with the specified processor."""
+        stream_id = self._generate_stream_id()
         try:
-            # Register stream
-            self.active_streams[stream_id] = {
-                "start_time": datetime.now(),
-                "protocol": protocol,
-                "chunk_count": 0
-            }
-            
-            # Yield start chunk
-            yield StreamChunk(
-                type="stream_start",
-                data={"stream_id": stream_id},
-                metadata={"protocol": protocol.value}
-            )
-            
-            # Process and yield data chunks
-            async for result in processor.process(input_data):
-                chunk = StreamChunk(
-                    type="data",
-                    data=result,
-                    metadata={"stream_id": stream_id}
-                )
-                
-                self.active_streams[stream_id]["chunk_count"] += 1
+            self._register_stream(stream_id, protocol)
+            yield self._create_start_chunk(stream_id, protocol)
+            async for chunk in self._process_data_chunks(processor, input_data, stream_id):
                 yield chunk
-                
-                # Rate limiting
-                if self.chunk_delay_ms > 0:
-                    await asyncio.sleep(self.chunk_delay_ms / 1000)
-            
-            # Yield completion chunk
-            yield StreamChunk(
-                type="stream_end",
-                data={"stream_id": stream_id},
-                metadata={
-                    "total_chunks": self.active_streams[stream_id]["chunk_count"],
-                    "duration_ms": (
-                        datetime.now() - self.active_streams[stream_id]["start_time"]
-                    ).total_seconds() * 1000
-                }
-            )
-            
+            yield self._create_completion_chunk(stream_id)
         except Exception as e:
             logger.error(f"Stream {stream_id} error: {e}", exc_info=True)
-            yield StreamChunk(
-                type="error",
-                data={"error": str(e)},
-                metadata={"stream_id": stream_id}
-            )
-        
+            yield self._create_error_chunk(stream_id, e)
         finally:
-            # Cleanup
-            if stream_id in self.active_streams:
-                del self.active_streams[stream_id]
+            self._cleanup_stream(stream_id)
     
     async def buffer_stream(
         self,

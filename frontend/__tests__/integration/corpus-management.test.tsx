@@ -6,6 +6,7 @@ import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
+import { createWebSocketManager, WebSocketTestManager } from '../helpers/websocket-test-manager';
 
 import { AgentProvider } from '@/providers/AgentProvider';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
@@ -41,15 +42,16 @@ const corpusService = {
   searchDocuments: jest.fn().mockResolvedValue([]) 
 };
 
-// Mock WebSocket
-let mockWs: WS;
+// WebSocket test manager
+let wsManager: WebSocketTestManager;
 
 beforeEach(() => {
-  mockWs = new WS('ws://localhost:8000/ws');
+  wsManager = createWebSocketManager();
+  wsManager.setup();
 });
 
 afterEach(() => {
-  WS.clean();
+  wsManager.cleanup();
   jest.clearAllMocks();
 });
 

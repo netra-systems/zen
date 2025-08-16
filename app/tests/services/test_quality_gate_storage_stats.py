@@ -29,8 +29,6 @@ class TestMetricsStorage:
     @pytest.fixture
     def quality_service(self, mock_redis):
         return QualityGateService(redis_manager=mock_redis)
-        
-    @pytest.mark.asyncio
     async def test_store_metrics_memory_limit(self, quality_service):
         """Test that metrics history is limited properly"""
         # Pre-fill with 1000 entries
@@ -48,8 +46,6 @@ class TestMetricsStorage:
         assert len(quality_service.metrics_history[ContentType.OPTIMIZATION]) == 1000
         # Last one should be the new one
         assert quality_service.metrics_history[ContentType.OPTIMIZATION][-1]['overall_score'] == 0.9
-        
-    @pytest.mark.asyncio
     async def test_store_metrics_redis_with_ttl(self, quality_service, mock_redis):
         """Test Redis storage with TTL"""
         metrics = QualityMetrics(overall_score=0.75)
@@ -75,14 +71,10 @@ class TestQualityStats:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
-        
-    @pytest.mark.asyncio
     async def test_get_quality_stats_empty(self, quality_service):
         """Test stats when no metrics exist"""
         stats = await quality_service.get_quality_stats()
         assert stats == {}
-        
-    @pytest.mark.asyncio
     async def test_get_quality_stats_distribution(self, quality_service):
         """Test quality distribution in stats"""
         # Add metrics with different quality levels
@@ -113,8 +105,6 @@ class TestQualityStats:
         assert dist[QualityLevel.ACCEPTABLE.value] == 1
         assert dist[QualityLevel.POOR.value] == 1
         assert dist[QualityLevel.UNACCEPTABLE.value] == 1
-        
-    @pytest.mark.asyncio
     async def test_get_quality_stats_recent_only(self, quality_service):
         """Test that stats use only recent entries"""
         # Add 150 metrics
@@ -138,14 +128,10 @@ class TestBatchValidation:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
-        
-    @pytest.mark.asyncio
     async def test_validate_batch_empty(self, quality_service):
         """Test batch validation with empty list"""
         results = await quality_service.validate_batch([])
         assert results == []
-        
-    @pytest.mark.asyncio
     async def test_validate_batch_mixed_types(self, quality_service):
         """Test batch validation with mixed content types"""
         contents = [
@@ -162,8 +148,6 @@ class TestBatchValidation:
         
         assert len(results) == 7
         assert all(isinstance(r, ValidationResult) for r in results)
-        
-    @pytest.mark.asyncio
     async def test_validate_batch_parallel_execution(self, quality_service):
         """Test that batch validation runs in parallel"""
         # Mock validation to take time

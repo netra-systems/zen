@@ -16,9 +16,6 @@ from app.db.models_postgres import ResearchSession
 def service(db_session):
     """Create SupplyResearchService instance with real database"""
     return SupplyResearchService(db_session)
-
-
-@pytest.mark.asyncio
 class TestMarketReportGeneration:
     """Test comprehensive market report generation"""
     

@@ -7,9 +7,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.services.corpus_service import CorpusStatus
 from app.schemas import Corpus, CorpusCreate
-
-
-@pytest.mark.asyncio
 class TestCorpusService:
     """Test corpus service basic functionality."""
 

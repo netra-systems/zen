@@ -42,9 +42,6 @@ def service_with_redis(mock_redis):
 def sample_context():
     """Create sample tool execution context"""
     return create_sample_context()
-
-
-@pytest.mark.asyncio
 class TestRateLimiting:
     """Test rate limiting functionality"""
     
@@ -115,9 +112,6 @@ class TestRateLimiting:
         service_with_redis.redis.get = create_failing_redis_method("get")
         count = await service_with_redis._get_usage_count("user123", "tool_test", "day")
         assert_redis_usage_count(count, 0)
-
-
-@pytest.mark.asyncio
 class TestRecordToolUsage:
     """Test tool usage recording functionality"""
     
@@ -146,9 +140,6 @@ class TestRecordToolUsage:
         """Test recording tool usage when Redis raises error"""
         service_with_redis.redis.incr = create_failing_redis_method("incr")
         await service_with_redis.record_tool_usage("user123", "test_tool", 100, "success")
-
-
-@pytest.mark.asyncio
 class TestRateLimitEdgeCases:
     """Test rate limiting edge cases"""
     

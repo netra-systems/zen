@@ -37,8 +37,6 @@ install_supervisor_extensions()
 
 class TestSupervisorConsolidatedAgentRouting:
     """Test 1: Test multi-agent routing decisions based on message content"""
-    
-    @pytest.mark.asyncio
     async def test_routes_to_triage_for_classification(self):
         """Test routing to triage agent for message classification"""
         mocks = create_supervisor_mocks()
@@ -55,8 +53,6 @@ class TestSupervisorConsolidatedAgentRouting:
         assert result.success
         assert_agent_called(supervisor, "triage")
         assert result.state.triage_result.category == "optimization_query"
-    
-    @pytest.mark.asyncio
     async def test_routes_to_optimization_for_ai_workloads(self):
         """Test routing to optimization agent for AI workload queries"""
         mocks = create_supervisor_mocks()
@@ -80,8 +76,6 @@ class TestSupervisorConsolidatedAgentRouting:
         assert result.success
         assert_agent_called(supervisor, "optimization")
         assert len(result.state.optimizations_result.recommendations) == 2
-    
-    @pytest.mark.asyncio
     async def test_routes_to_data_for_analysis_queries(self):
         """Test routing to data agent for data analysis requests"""
         mocks = create_supervisor_mocks()
@@ -104,8 +98,6 @@ class TestSupervisorConsolidatedAgentRouting:
         assert result.success
         assert_agent_called(supervisor, "data")
         assert result.state.data_result.confidence_score == 0.95
-    
-    @pytest.mark.asyncio
     async def test_routing_with_conditional_pipeline(self):
         """Test conditional routing based on state conditions"""
         mocks = create_supervisor_mocks()
@@ -134,8 +126,6 @@ class TestSupervisorConsolidatedAgentRouting:
 
 class TestSupervisorErrorCascadePrevention:
     """Test 2: Test error handling when sub-agents fail"""
-    
-    @pytest.mark.asyncio
     async def test_prevents_cascade_on_single_agent_failure(self):
         """Test that supervisor prevents cascade when one agent fails"""
         mocks = create_supervisor_mocks()
@@ -158,8 +148,6 @@ class TestSupervisorErrorCascadePrevention:
         data_result = await supervisor._route_to_agent(state, context, "data")
         assert data_result.success
         assert data_result.state.data_result.confidence_score > 0
-    
-    @pytest.mark.asyncio
     async def test_retry_mechanism_on_transient_failures(self):
         """Test retry mechanism for transient failures"""
         mocks = create_supervisor_mocks()
@@ -176,8 +164,6 @@ class TestSupervisorErrorCascadePrevention:
         assert result.success
         assert agent.execute.call_count == 3
         assert result.state.triage_result.category == "success"
-    
-    @pytest.mark.asyncio
     async def test_circuit_breaker_after_multiple_failures(self):
         """Test circuit breaker pattern after multiple failures"""
         mocks = create_supervisor_mocks()

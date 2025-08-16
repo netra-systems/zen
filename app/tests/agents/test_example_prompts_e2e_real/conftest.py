@@ -43,101 +43,98 @@ EXAMPLE_PROMPTS = [
 ]
 
 
-@pytest.fixture
-def setup_real_infrastructure():
-    """Setup infrastructure with real LLM calls enabled"""
-    config = get_config()
-    
-    # Mock database session for testing with proper async context manager support
+def _create_mock_db_session():
+    """Create mock database session with async context manager support"""
     db_session = AsyncMock(spec=AsyncSession)
     db_session.commit = AsyncMock()
     db_session.rollback = AsyncMock()
     db_session.close = AsyncMock()
     
-    # Properly mock async context manager methods
     mock_transaction = AsyncMock()
     mock_transaction.__aenter__ = AsyncMock(return_value=mock_transaction)
     mock_transaction.__aexit__ = AsyncMock(return_value=None)
-    
-    # Create proper async context manager mock
     db_session.begin = AsyncMock(return_value=mock_transaction)
-    
-    # Create LLM Manager (can be mocked for test runs without API keys)
-    llm_manager = Mock(spec=LLMManager)
-    
-    # Create proper async mock that returns expected data structure
+    return db_session
+
+def _create_mock_llm_functions():
+    """Create mock LLM async functions"""
     async def mock_call_llm(*args, **kwargs):
-        return {
-            "content": "Based on analysis, reduce costs by switching to efficient models.",
-            "tool_calls": []
-        }
+        return {"content": "Based on analysis, reduce costs by switching to efficient models.", "tool_calls": []}
     
     async def mock_ask_llm(*args, **kwargs):
         return json.dumps({
-            "category": "optimization",
-            "analysis": "Cost optimization required",
+            "category": "optimization", "analysis": "Cost optimization required",
             "recommendations": ["Switch to GPT-3.5 for low-complexity tasks", "Implement caching"]
         })
     
     async def mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
         from app.schemas import TriageResult
-        # Return a mock instance of the requested schema
         if schema == TriageResult:
             return TriageResult(
-                category="optimization",
-                severity="medium",
+                category="optimization", severity="medium",
                 analysis="Cost optimization analysis for provided prompt",
                 requirements=["cost reduction", "performance maintenance"],
                 next_steps=["analyze_costs", "identify_optimization_opportunities"],
                 data_needed=["current_costs", "usage_patterns"],
                 suggested_tools=["cost_analyzer", "performance_monitor"]
             )
-        # For other schemas, try to create with default values
         try:
             return schema()
         except Exception:
-            # Return a mock object if schema instantiation fails
             return Mock(spec=schema)
     
-    # Use AsyncMock for async methods
+    return mock_call_llm, mock_ask_llm, mock_ask_structured_llm
+
+def _create_mock_llm_manager():
+    """Create mock LLM Manager with proper async methods"""
+    llm_manager = Mock(spec=LLMManager)
+    mock_call_llm, mock_ask_llm, mock_ask_structured_llm = _create_mock_llm_functions()
+    
     llm_manager.call_llm = AsyncMock(side_effect=mock_call_llm)
     llm_manager.ask_llm = AsyncMock(side_effect=mock_ask_llm)
     llm_manager.ask_structured_llm = AsyncMock(side_effect=mock_ask_structured_llm)
     llm_manager.get = Mock(return_value=Mock())  # Add get method for config access
-    
-    # Create real WebSocket Manager
-    websocket_manager = WebSocketManager()
-    
-    # Create Tool Dispatcher (mocked for testing)
+    return llm_manager
+
+def _create_mock_tool_dispatcher():
+    """Create mock tool dispatcher"""
     tool_dispatcher = Mock(spec=ApexToolSelector)
     tool_dispatcher.dispatch_tool = AsyncMock(return_value={
-        "status": "success",
-        "result": "Tool executed successfully"
+        "status": "success", "result": "Tool executed successfully"
     })
-    
-    # Create real services
+    return tool_dispatcher
+
+def _create_real_services():
+    """Create real service instances"""
     synthetic_service = SyntheticDataService()
     quality_service = QualityGateService()
     corpus_service = CorpusService()
-    
-    # Create Supervisor with real components
+    return synthetic_service, quality_service, corpus_service
+
+def _create_supervisor_and_agent_service(db_session, llm_manager, websocket_manager, tool_dispatcher):
+    """Create supervisor and agent service components"""
     supervisor = Supervisor(db_session, llm_manager, websocket_manager, tool_dispatcher)
     supervisor.thread_id = str(uuid.uuid4())
     supervisor.user_id = str(uuid.uuid4())
     
-    # Create Agent Service
     agent_service = AgentService(supervisor)
     agent_service.websocket_manager = websocket_manager
+    return supervisor, agent_service
+
+@pytest.fixture
+def setup_real_infrastructure():
+    """Setup infrastructure with real LLM calls enabled"""
+    config = get_config()
+    db_session = _create_mock_db_session()
+    llm_manager = _create_mock_llm_manager()
+    websocket_manager = WebSocketManager()
+    tool_dispatcher = _create_mock_tool_dispatcher()
+    
+    synthetic_service, quality_service, corpus_service = _create_real_services()
+    supervisor, agent_service = _create_supervisor_and_agent_service(db_session, llm_manager, websocket_manager, tool_dispatcher)
     
     return {
-        "supervisor": supervisor,
-        "agent_service": agent_service,
-        "db_session": db_session,
-        "llm_manager": llm_manager,
-        "websocket_manager": websocket_manager,
-        "tool_dispatcher": tool_dispatcher,
-        "synthetic_service": synthetic_service,
-        "quality_service": quality_service,
-        "corpus_service": corpus_service,
-        "config": config
+        "supervisor": supervisor, "agent_service": agent_service, "db_session": db_session,
+        "llm_manager": llm_manager, "websocket_manager": websocket_manager, "tool_dispatcher": tool_dispatcher,
+        "synthetic_service": synthetic_service, "quality_service": quality_service, "corpus_service": corpus_service, "config": config
     }

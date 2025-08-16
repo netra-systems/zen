@@ -8,9 +8,6 @@ import pytest
 import asyncio
 import aiohttp
 from app.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest, analyze_pool_exhaustion_results
-
-
-@pytest.mark.asyncio
 class TestResourceExhaustion:
     """Test resource pool exhaustion handling"""
     

@@ -11,8 +11,6 @@ from app.agents.data_sub_agent.agent import DataSubAgent
 
 class TestDataSubAgentProcessing:
     """Test DataSubAgent processing and utility methods"""
-    
-    @pytest.mark.asyncio
     async def test_process_data_valid(self, agent):
         """Test process_data with valid data"""
         data = {"valid": True, "content": "test"}
@@ -20,8 +18,6 @@ class TestDataSubAgentProcessing:
         
         assert result["status"] == "success"
         assert result["processed"] == True
-        
-    @pytest.mark.asyncio
     async def test_process_data_invalid(self, agent):
         """Test process_data with invalid data"""
         data = {"valid": False, "content": "test"}
@@ -29,8 +25,6 @@ class TestDataSubAgentProcessing:
         
         assert result["status"] == "error"
         assert result["message"] == "Invalid data"
-        
-    @pytest.mark.asyncio
     async def test_process_internal_success(self, agent):
         """Test _process_internal with successful processing"""
         data = {"content": "test"}
@@ -38,8 +32,6 @@ class TestDataSubAgentProcessing:
         
         assert result["success"] == True
         assert result["data"] == data
-        
-    @pytest.mark.asyncio
     async def test_process_with_retry_immediate_success(self, agent):
         """Test process_with_retry with immediate success"""
         agent.config = {'max_retries': 3}
@@ -47,8 +39,6 @@ class TestDataSubAgentProcessing:
         result = await agent.process_with_retry(data)
         
         assert result["success"] == True
-        
-    @pytest.mark.asyncio
     async def test_process_with_retry_success_after_failures(self, agent):
         """Test process_with_retry succeeds after failures"""
         agent.config = {'max_retries': 3}
@@ -65,8 +55,6 @@ class TestDataSubAgentProcessing:
             
         assert result["success"] == True
         assert mock_process.call_count == 3
-        
-    @pytest.mark.asyncio
     async def test_process_with_retry_all_failures(self, agent):
         """Test process_with_retry fails after max retries"""
         agent.config = {'max_retries': 2}
@@ -79,8 +67,6 @@ class TestDataSubAgentProcessing:
                 await agent.process_with_retry(data)
                 
         assert mock_process.call_count == 2
-        
-    @pytest.mark.asyncio
     async def test_process_batch_safe_mixed_results(self, agent):
         """Test process_batch_safe with mixed valid/invalid items"""
         batch = [
@@ -95,8 +81,6 @@ class TestDataSubAgentProcessing:
         assert results[0]["status"] == "success"
         assert results[1]["status"] == "error"
         assert results[2]["status"] == "success"
-        
-    @pytest.mark.asyncio
     async def test_process_batch_safe_with_exception(self, agent):
         """Test process_batch_safe handling exceptions"""
         batch = [{"id": 1, "data": "item1"}]
@@ -108,8 +92,6 @@ class TestDataSubAgentProcessing:
             
         assert results[0]["status"] == "error"
         assert "Processing failed" in results[0]["message"]
-        
-    @pytest.mark.asyncio
     async def test_process_with_cache_hit(self, agent):
         """Test process_with_cache with cache hit"""
         data = {"id": "test_cache"}
@@ -123,8 +105,6 @@ class TestDataSubAgentProcessing:
             
         assert result1 == result2
         mock_process.assert_not_called()
-        
-    @pytest.mark.asyncio
     async def test_process_with_cache_different_keys(self, agent):
         """Test process_with_cache with different cache keys"""
         data1 = {"id": "cache1"}
@@ -136,8 +116,6 @@ class TestDataSubAgentProcessing:
         # Different IDs should have different cache entries
         assert result1["data"]["id"] == "cache1"
         assert result2["data"]["id"] == "cache2"
-        
-    @pytest.mark.asyncio
     async def test_process_and_stream(self, agent):
         """Test process_and_stream method"""
         data = {"content": "stream test"}
@@ -150,8 +128,6 @@ class TestDataSubAgentProcessing:
         sent_data = mock_ws.send.call_args[0][0]
         parsed = json.loads(sent_data)
         assert parsed["processed"] == True
-        
-    @pytest.mark.asyncio
     async def test_process_and_persist(self, agent):
         """Test process_and_persist method"""
         data = {"content": "persist test"}
@@ -161,8 +137,6 @@ class TestDataSubAgentProcessing:
         assert result["processed"] == True
         assert result["persisted"] == True
         assert result["id"] == "saved_123"
-        
-    @pytest.mark.asyncio
     async def test_handle_supervisor_request_process_data(self, agent):
         """Test handle_supervisor_request with process_data action"""
         callback = AsyncMock()
@@ -176,8 +150,6 @@ class TestDataSubAgentProcessing:
         
         assert result["status"] == "completed"
         callback.assert_called_once()
-        
-    @pytest.mark.asyncio
     async def test_handle_supervisor_request_no_callback(self, agent):
         """Test handle_supervisor_request without callback"""
         request = {
@@ -188,8 +160,6 @@ class TestDataSubAgentProcessing:
         result = await agent.handle_supervisor_request(request)
         
         assert result["status"] == "completed"
-        
-    @pytest.mark.asyncio
     async def test_process_concurrent(self, agent):
         """Test process_concurrent method"""
         items = [{"id": i} for i in range(5)]
@@ -199,14 +169,10 @@ class TestDataSubAgentProcessing:
         assert len(results) == 5
         for i, result in enumerate(results):
             assert result["data"]["id"] == i
-            
-    @pytest.mark.asyncio
     async def test_process_concurrent_empty(self, agent):
         """Test process_concurrent with empty list"""
         results = await agent.process_concurrent([], max_concurrent=10)
         assert results == []
-        
-    @pytest.mark.asyncio
     async def test_process_stream(self, agent):
         """Test process_stream generator method"""
         dataset = range(250)
@@ -219,8 +185,6 @@ class TestDataSubAgentProcessing:
         assert len(chunks[0]) == 100
         assert len(chunks[1]) == 100
         assert len(chunks[2]) == 50
-        
-    @pytest.mark.asyncio
     async def test_process_stream_exact_chunks(self, agent):
         """Test process_stream with exact chunk size"""
         dataset = range(200)

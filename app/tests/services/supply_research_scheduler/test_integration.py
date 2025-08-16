@@ -12,7 +12,7 @@ from app.services.supply_research_scheduler import (
     ResearchSchedule,
     ScheduleFrequency
 )
-from app.agents.supply_researcher_sub_agent import ResearchType
+from app.agents.supply_researcher.models import ResearchType
 from app.tests.services.supply_research_scheduler.test_scheduler_initialization import (
     MockBackgroundTaskManager,
     MockLLMManager,
@@ -51,8 +51,6 @@ def agent_or_service(scheduler):
 
 class TestIntegrationScenarios(SharedTestIntegrationScenarios):
     """Test integration scenarios"""
-    
-    @pytest.mark.asyncio
     async def test_full_execution_cycle(self, scheduler):
         """Test full execution cycle from schedule to notification"""
         # Create schedule that should run immediately
@@ -96,8 +94,6 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         # Verify notifications were processed
         notifications = mock_redis.lists.get("supply_notifications", [])
         assert len(notifications) > 0  # Should have notifications for new models
-    
-    @pytest.mark.asyncio
     async def test_concurrent_schedule_execution(self, scheduler):
         """Test concurrent execution of multiple schedules"""
         # Create multiple schedules that should run
@@ -148,16 +144,12 @@ class TestErrorHandling(SharedTestErrorHandling):
         # Database access is handled through research_executor during execution
         # This test is covered by test_database_connection_failures below
         pass
-    
-    @pytest.mark.asyncio
     async def test_retry_on_failure(self, agent_or_service):
         """Override shared test - SupplyResearchScheduler doesn't have _process_internal"""
         # SupplyResearchScheduler doesn't have _process_internal method
         # Retry logic is handled at the research_executor level during schedule execution
         # This functionality is tested through other integration tests
         pass
-    
-    @pytest.mark.asyncio
     async def test_database_connection_failures(self, scheduler):
         """Test handling database connection failures"""
         schedule = scheduler.schedules[0]
@@ -167,8 +159,6 @@ class TestErrorHandling(SharedTestErrorHandling):
         
         assert result["status"] == "failed"
         assert "DB connection failed" in result["error"]
-    
-    @pytest.mark.asyncio
     async def test_agent_execution_failures(self, scheduler):
         """Test handling agent execution failures"""
         schedule = scheduler.schedules[0]
@@ -190,8 +180,6 @@ class TestErrorHandling(SharedTestErrorHandling):
         
         assert result["status"] == "failed"
         assert "Agent failed" in result["error"]
-    
-    @pytest.mark.asyncio
     async def test_redis_failures_during_execution(self, scheduler):
         """Test handling Redis failures during execution"""
         schedule = scheduler.schedules[0]

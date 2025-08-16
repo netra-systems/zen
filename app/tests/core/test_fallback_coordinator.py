@@ -137,8 +137,6 @@ class TestFallbackCoordinator:
         assert config.max_delay == 15.0
         assert config.timeout == 30.0
         assert config.use_circuit_breaker is True
-    
-    @pytest.mark.asyncio
     async def test_execute_with_coordination_success(self, coordinator):
         """Test successful operation execution with coordination."""
         # Setup
@@ -168,8 +166,6 @@ class TestFallbackCoordinator:
         
         # Verify success was recorded
         coordinator.health_monitor.record_success.assert_called_once_with(agent_name)
-    
-    @pytest.mark.asyncio
     async def test_execute_with_coordination_emergency_mode(self, coordinator):
         """Test execution during emergency mode."""
         # Setup emergency mode
@@ -191,8 +187,6 @@ class TestFallbackCoordinator:
         coordinator.emergency_manager.execute_emergency_fallback.assert_called_once_with(
             agent_name, operation_name, "critical"
         )
-    
-    @pytest.mark.asyncio
     async def test_execute_with_coordination_cascade_prevention(self, coordinator):
         """Test execution with cascade prevention active."""
         # Setup cascade prevention
@@ -214,8 +208,6 @@ class TestFallbackCoordinator:
         coordinator.emergency_manager.execute_limited_fallback.assert_called_once_with(
             agent_name, operation_name
         )
-    
-    @pytest.mark.asyncio
     async def test_execute_with_coordination_unregistered_agent(self, coordinator):
         """Test execution with unregistered agent."""
         agent_name = "UnregisteredAgent"
@@ -229,8 +221,6 @@ class TestFallbackCoordinator:
             await coordinator.execute_with_coordination(
                 agent_name, mock_operation, operation_name
             )
-    
-    @pytest.mark.asyncio
     async def test_execute_with_coordination_failure(self, coordinator):
         """Test execution with operation failure."""
         # Setup
@@ -263,8 +253,6 @@ class TestFallbackCoordinator:
         
         assert status == {"status": "healthy"}
         coordinator.health_monitor.get_system_status.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_reset_agent_status_success(self, coordinator):
         """Test resetting agent status successfully."""
         agent_name = "TestAgent"
@@ -302,14 +290,10 @@ class TestFallbackCoordinator:
                 health_score=1.0
             )
             assert coordinator.agent_statuses[agent_name] == mock_new_status
-    
-    @pytest.mark.asyncio
     async def test_reset_agent_status_unregistered(self, coordinator):
         """Test resetting status for unregistered agent."""
         result = await coordinator.reset_agent_status("UnregisteredAgent")
         assert result is False
-    
-    @pytest.mark.asyncio
     async def test_reset_system_status(self, coordinator):
         """Test resetting entire system status."""
         # Setup multiple agents
@@ -371,8 +355,6 @@ class TestFallbackCoordinator:
     def test_is_agent_registered_false(self, coordinator):
         """Test checking if agent is registered - negative case."""
         assert coordinator.is_agent_registered("NonExistentAgent") is False
-    
-    @pytest.mark.asyncio
     async def test_execute_with_coordination_custom_fallback_type(self, coordinator):
         """Test execution with custom fallback type."""
         agent_name = "TestAgent"
@@ -419,8 +401,6 @@ class TestFallbackCoordinator:
                 assert agent in coordinator.agent_handlers
                 assert agent in coordinator.agent_circuit_breakers
                 assert agent in coordinator.agent_statuses
-    
-    @pytest.mark.asyncio
     async def test_concurrent_operations(self, coordinator):
         """Test concurrent operations on different agents."""
         # Setup multiple agents
@@ -451,8 +431,6 @@ class TestFallbackCoordinator:
         for i, agent in enumerate(agents):
             assert results[i] == f"result_{agent}"
             handlers[agent].execute_with_fallback.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_reset_agent_status_partial_components(self, coordinator):
         """Test resetting agent status when some components don't exist."""
         agent_name = "TestAgent"
@@ -481,8 +459,6 @@ class TestFallbackCoordinator:
         assert coordinator.max_concurrent_fallbacks == 5
         assert coordinator.cascade_prevention_threshold == 0.6
         assert coordinator.emergency_mode_threshold == 0.8
-    
-    @pytest.mark.asyncio
     async def test_error_handling_in_health_monitoring(self, coordinator):
         """Test error handling when health monitoring fails."""
         agent_name = "TestAgent"
@@ -522,8 +498,6 @@ class TestFallbackCoordinatorIntegration:
             
             coordinator = FallbackCoordinator()
             return coordinator, mock_handler_class, mock_cb_class, mock_health_class, mock_emergency_class
-    
-    @pytest.mark.asyncio
     async def test_full_workflow_success(self, full_coordinator):
         """Test complete workflow from registration to execution."""
         coordinator, mock_handler_class, mock_cb_class, mock_health_class, mock_emergency_class = full_coordinator
@@ -558,8 +532,6 @@ class TestFallbackCoordinatorIntegration:
         
         # Verify health monitoring
         coordinator.health_monitor.record_success.assert_called_once_with(agent_name)
-    
-    @pytest.mark.asyncio
     async def test_full_workflow_with_failure_and_reset(self, full_coordinator):
         """Test workflow including failure handling and reset."""
         coordinator, mock_handler_class, mock_cb_class, mock_health_class, mock_emergency_class = full_coordinator

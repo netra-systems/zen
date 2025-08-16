@@ -31,8 +31,6 @@ class TestMemoryCache:
         """Create cache instance for testing."""
         cache = MemoryCache(max_size=100, default_ttl=60)
         yield cache
-    
-    @pytest.mark.asyncio
     async def test_cache_basic_operations(self, cache):
         """Test basic cache operations."""
         # Test set and get
@@ -43,8 +41,6 @@ class TestMemoryCache:
         # Test non-existent key
         result = await cache.get("nonexistent")
         assert result is None
-    
-    @pytest.mark.asyncio
     async def test_cache_ttl_expiration(self, cache):
         """Test TTL expiration functionality."""
         # Set with short TTL
@@ -60,8 +56,6 @@ class TestMemoryCache:
         # Should be expired
         result = await cache.get("temp_key")
         assert result is None
-    
-    @pytest.mark.asyncio
     async def test_cache_lru_eviction(self, cache):
         """Test LRU eviction when cache is full."""
         # Fill cache to capacity
@@ -78,8 +72,6 @@ class TestMemoryCache:
         # Last item should still exist
         result = await cache.get("overflow_key")
         assert result == "overflow_value"
-    
-    @pytest.mark.asyncio
     async def test_cache_performance(self, cache):
         """Test cache performance under load."""
         # Populate cache
@@ -116,8 +108,6 @@ class TestQueryOptimizer:
     def optimizer(self):
         """Create query optimizer for testing."""
         return QueryOptimizer(cache_size=100, cache_ttl=300)
-    
-    @pytest.mark.asyncio
     async def test_query_caching(self, optimizer):
         """Test query result caching."""
         query = "SELECT * FROM users WHERE id = %s"
@@ -136,8 +126,6 @@ class TestQueryOptimizer:
         result2 = await optimizer.execute_with_cache(query, params, executor)
         assert result2 == mock_result
         assert executor.call_count == 1  # Still 1, not called again
-    
-    @pytest.mark.asyncio
     async def test_query_metrics_tracking(self, optimizer):
         """Test query performance metrics tracking."""
         query = "SELECT * FROM test_table"
@@ -192,8 +180,6 @@ class TestBatchProcessor:
     def processor(self):
         """Create batch processor for testing."""
         return BatchProcessor(max_batch_size=5, flush_interval=0.1)
-    
-    @pytest.mark.asyncio
     async def test_batch_size_flushing(self, processor):
         """Test batch flushing when size limit is reached."""
         processed_batches = []
@@ -211,8 +197,6 @@ class TestBatchProcessor:
         # Should have processed one batch of 5 items
         assert len(processed_batches) == 1
         assert len(processed_batches[0]) == 5
-    
-    @pytest.mark.asyncio
     async def test_time_based_flushing(self, processor):
         """Test batch flushing based on time interval."""
         processed_batches = []
@@ -230,8 +214,6 @@ class TestBatchProcessor:
         # Should have processed one batch of 3 items
         assert len(processed_batches) == 1
         assert len(processed_batches[0]) == 3
-    
-    @pytest.mark.asyncio
     async def test_multiple_batch_keys(self, processor):
         """Test handling multiple batch keys."""
         processed_batches = {"batch1": [], "batch2": []}
@@ -279,8 +261,6 @@ class TestMessageBatcher:
         """Create message batcher for testing."""
         config = BatchConfig(max_batch_size=3, max_wait_time=0.1)
         return MessageBatcher(config, mock_connection_manager)
-    
-    @pytest.mark.asyncio
     async def test_message_batching_size_trigger(self, batcher, mock_connection_manager):
         """Test message batching triggered by size."""
         # Queue messages
@@ -293,8 +273,6 @@ class TestMessageBatcher:
         # Should have sent a batch
         conn_mock = mock_connection_manager.get_connection_by_id.return_value
         assert conn_mock.websocket.send_text.called
-    
-    @pytest.mark.asyncio
     async def test_priority_message_handling(self, batcher, mock_connection_manager):
         """Test high-priority message handling."""
         # Queue high-priority message
@@ -306,8 +284,6 @@ class TestMessageBatcher:
         # High-priority messages should be processed quickly
         conn_mock = mock_connection_manager.get_connection_by_id.return_value
         assert conn_mock.websocket.send_text.called
-    
-    @pytest.mark.asyncio
     async def test_adaptive_batching(self, batcher, mock_connection_manager):
         """Test adaptive batching strategy."""
         batcher.config.strategy = BatchingStrategy.ADAPTIVE
@@ -333,8 +309,6 @@ class TestPerformanceMonitoring:
     def metrics_collector(self):
         """Create metrics collector for testing."""
         return MetricsCollector(retention_period=60)
-    
-    @pytest.mark.asyncio
     async def test_metrics_collection(self, metrics_collector):
         """Test basic metrics collection."""
         # Record some metrics
@@ -349,8 +323,6 @@ class TestPerformanceMonitoring:
         assert len(memory_metrics) == 1
         assert cpu_metrics[0].value == 50.0
         assert memory_metrics[0].value == 75.0
-    
-    @pytest.mark.asyncio
     async def test_metric_summary_calculation(self, metrics_collector):
         """Test metric summary statistics."""
         # Record multiple values
@@ -366,8 +338,6 @@ class TestPerformanceMonitoring:
         assert summary["max"] == 50.0
         assert summary["avg"] == 30.0
         assert summary["current"] == 50.0
-    
-    @pytest.mark.asyncio
     async def test_alert_rule_evaluation(self, metrics_collector):
         """Test performance alert rule evaluation."""
         alert_manager = PerformanceAlertManager(metrics_collector)
@@ -435,8 +405,6 @@ class TestDatabaseIndexOptimization:
 @pytest.mark.integration
 class TestPerformanceOptimizationIntegration:
     """Integration tests for performance optimizations."""
-    
-    @pytest.mark.asyncio
     async def test_full_optimization_pipeline(self):
         """Test complete optimization pipeline."""
         # Initialize performance manager
@@ -480,8 +448,6 @@ class TestPerformanceOptimizationIntegration:
             
         finally:
             await perf_manager.shutdown()
-    
-    @pytest.mark.asyncio
     async def test_performance_monitoring_integration(self):
         """Test performance monitoring integration."""
         monitor = PerformanceMonitor()

@@ -177,6 +177,7 @@ export const ChatSidebar: React.FC = () => {
         <button
           onClick={handleNewChat}
           disabled={isCreatingThread || isProcessing}
+          data-testid="new-chat-button"
           className={cn(
             "w-full flex items-center justify-center space-x-2 px-4 py-3",
             "bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg",
@@ -257,13 +258,14 @@ export const ChatSidebar: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={showAllThreads ? "Search all system chats..." : "Search conversations..."}
+            data-testid="search-input"
             className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-200"
           />
         </div>
       </div>
 
       {/* Thread List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto" data-testid="thread-list">
         {loadError && (
           <div className="p-4 mx-4 mt-2 bg-red-50 border border-red-200 rounded-lg">
             <p className="text-sm text-red-600">{loadError}</p>
@@ -301,6 +303,7 @@ export const ChatSidebar: React.FC = () => {
                 <button
                   onClick={() => handleThreadClick(thread.id)}
                   disabled={isProcessing}
+                  data-testid={`thread-item-${thread.id}`}
                   className={cn(
                     "w-full p-4 text-left hover:bg-gray-50 transition-colors duration-200",
                     "border-b border-gray-100 group relative",

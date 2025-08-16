@@ -13,9 +13,6 @@ from app.services.synthetic_data_service import SyntheticDataService
 def service():
     """Create fresh SyntheticDataService instance"""
     return SyntheticDataService()
-
-
-@pytest.mark.asyncio
 class TestTableOperations:
     """Test ClickHouse table operations"""
     

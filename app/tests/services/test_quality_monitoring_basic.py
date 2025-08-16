@@ -24,8 +24,6 @@ from app.tests.helpers.quality_monitoring_helpers import (
 
 class TestQualityMonitoringServiceBasic:
     """Test basic functionality of QualityMonitoringService"""
-    
-    @pytest.mark.asyncio
     async def test_service_initialization(self, quality_monitoring_service):
         """Test service initialization with dependencies"""
         assert_service_initialization(quality_monitoring_service)
@@ -70,8 +68,6 @@ class TestQualityThresholds:
 
 class TestServiceSubscription:
     """Test subscription management"""
-    
-    @pytest.mark.asyncio
     async def test_subscribe_and_unsubscribe(self):
         """Test subscription lifecycle"""
         service = QualityMonitoringService()

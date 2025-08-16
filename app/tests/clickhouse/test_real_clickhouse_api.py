@@ -57,8 +57,6 @@ def real_clickhouse_client():
 
 class TestRealClickHouseConnection:
     """Test real ClickHouse connection and basic operations"""
-    
-    @pytest.mark.asyncio
     async def test_real_connection(self, real_clickhouse_client):
         """Test actual connection to ClickHouse Cloud"""
         # Test basic connection
@@ -71,8 +69,6 @@ class TestRealClickHouseConnection:
         assert len(version_result) == 1
         assert 'version' in version_result[0]
         logger.info(f"Connected to ClickHouse version: {version_result[0]['version']}")
-    
-    @pytest.mark.asyncio
     async def test_real_database_operations(self, real_clickhouse_client):
         """Test real database operations"""
         # Get current database
@@ -85,8 +81,6 @@ class TestRealClickHouseConnection:
         tables_result = await real_clickhouse_client.execute_query("SHOW TABLES")
         table_names = [row['name'] for row in tables_result if 'name' in row]
         logger.info(f"Available tables: {table_names}")
-    
-    @pytest.mark.asyncio
     async def test_real_system_queries(self, real_clickhouse_client):
         """Test system queries for monitoring"""
         # Check system metrics
@@ -132,98 +126,47 @@ class TestWorkloadEventsTable:
         event_loop.run_until_complete(_setup_table())
         yield
         # Cleanup test data (optional) - kept for analysis
-    
-    @pytest.mark.asyncio
     async def test_insert_workload_events(self, setup_workload_table):
         """Test inserting real workload events"""
         async with get_clickhouse_client() as client:
-            # Debug: Check current database and available tables
-            db_result = await client.execute_query("SELECT currentDatabase() as db")
-            current_db = db_result[0]['db'] if db_result else "unknown"
-            print(f"[DEBUG] Current database: {current_db}")
-            
-            tables_result = await client.execute_query("SHOW TABLES")
-            table_names = [row.get('name', '') for row in tables_result]
-            print(f"[DEBUG] Available tables: {table_names}")
-            
-            # Check if workload_events exists
-            workload_tables = [t for t in table_names if 'workload' in t.lower()]
-            print(f"[DEBUG] Workload-related tables: {workload_tables}")
-            
-            # Generate test workload events
-            test_events = []
-            base_time = datetime.now(UTC)
-            
-            for i in range(10):
-                event = {
-                    'trace_id': str(uuid.uuid4()),
-                    'span_id': str(uuid.uuid4()),
-                    'user_id': f'test_user_{i % 3}',
-                    'session_id': f'session_{i % 2}',
-                    'timestamp': base_time - timedelta(minutes=i),
-                    'workload_type': random.choice(['simple_chat', 'rag_pipeline', 'tool_use']),
-                    'status': random.choice(['completed', 'in_progress', 'failed']),
-                    'duration_ms': random.randint(100, 5000),
-                    'metrics.name': ['latency_ms', 'tokens_used', 'cost_cents'],
-                    'metrics.value': [
-                        random.uniform(50, 500),
-                        random.randint(100, 1000),
-                        random.uniform(0.01, 1.0)
-                    ],
-                    'metrics.unit': ['ms', 'tokens', 'cents'],
-                    'input_text': f'Test input {i}',
-                    'output_text': f'Test output {i}',
-                    'metadata': json.dumps({'test_id': i, 'test_run': True})
-                }
-                test_events.append(event)
-            
-            # Insert data
-            for event in test_events:
-                insert_query = """
-                INSERT INTO workload_events (
-                    trace_id, span_id, user_id, session_id, timestamp,
-                    workload_type, status, duration_ms, 
-                    metrics.name, metrics.value, metrics.unit,
-                    input_text, output_text, metadata
-                ) VALUES (
-                    %(trace_id)s, %(span_id)s, %(user_id)s, %(session_id)s, %(timestamp)s,
-                    %(workload_type)s, %(status)s, %(duration_ms)s,
-                    %(metrics_name)s, %(metrics_value)s, %(metrics_unit)s,
-                    %(input_text)s, %(output_text)s, %(metadata)s
-                )
-                """
-                
-                params = {
-                    'trace_id': event['trace_id'],
-                    'span_id': event['span_id'],
-                    'user_id': event['user_id'],
-                    'session_id': event['session_id'],
-                    'timestamp': event['timestamp'],
-                    'workload_type': event['workload_type'],
-                    'status': event['status'],
-                    'duration_ms': event['duration_ms'],
-                    'metrics_name': event['metrics.name'],
-                    'metrics_value': event['metrics.value'],
-                    'metrics_unit': event['metrics.unit'],
-                    'input_text': event['input_text'],
-                    'output_text': event['output_text'],
-                    'metadata': event['metadata']
-                }
-                
-                await client.execute_query(insert_query, params)
-            
-            # Verify insertion
-            count_result = await client.execute_query(
-                "SELECT count() as count FROM workload_events WHERE metadata LIKE '%test_run%'"
-            )
-            if not count_result:
-                pytest.fail("Query returned no results - table may not exist or query failed")
-            
-            count = count_result[0]['count']
-            assert count >= 10, f"Expected at least 10 inserted events, found {count}"
-            logger.info(f"Successfully inserted {count} test events")
-    
-    @pytest.mark.asyncio
+            await self._debug_database_state(client)
+            test_events = self._generate_test_workload_events()
+            await self._insert_workload_events(client, test_events)
+            await self._verify_workload_events_insertion(client)
+
+    async def _debug_database_state(self, client):
+        """Debug current database and table state"""
+        db_result = await client.execute_query("SELECT currentDatabase() as db")
+        current_db = db_result[0]['db'] if db_result else "unknown"
+        tables_result = await client.execute_query("SHOW TABLES")
+        table_names = [row.get('name', '') for row in tables_result]
+        workload_tables = [t for t in table_names if 'workload' in t.lower()]
+        print(f"[DEBUG] Current database: {current_db}, Available tables: {table_names}, Workload tables: {workload_tables}")
+
+    def _generate_test_workload_events(self):
+        """Generate test workload events for insertion"""
+        test_events = []
+        base_time = datetime.now(UTC)
+        for i in range(10):
+            event = {'trace_id': str(uuid.uuid4()), 'span_id': str(uuid.uuid4()), 'user_id': f'test_user_{i % 3}', 'session_id': f'session_{i % 2}', 'timestamp': base_time - timedelta(minutes=i), 'workload_type': random.choice(['simple_chat', 'rag_pipeline', 'tool_use']), 'status': random.choice(['completed', 'in_progress', 'failed']), 'duration_ms': random.randint(100, 5000), 'metrics.name': ['latency_ms', 'tokens_used', 'cost_cents'], 'metrics.value': [random.uniform(50, 500), random.randint(100, 1000), random.uniform(0.01, 1.0)], 'metrics.unit': ['ms', 'tokens', 'cents'], 'input_text': f'Test input {i}', 'output_text': f'Test output {i}', 'metadata': json.dumps({'test_id': i, 'test_run': True})}
+            test_events.append(event)
+        return test_events
+
+    async def _insert_workload_events(self, client, test_events):
+        """Insert workload events into ClickHouse"""
+        insert_query = """INSERT INTO workload_events (trace_id, span_id, user_id, session_id, timestamp, workload_type, status, duration_ms, metrics.name, metrics.value, metrics.unit, input_text, output_text, metadata) VALUES (%(trace_id)s, %(span_id)s, %(user_id)s, %(session_id)s, %(timestamp)s, %(workload_type)s, %(status)s, %(duration_ms)s, %(metrics_name)s, %(metrics_value)s, %(metrics_unit)s, %(input_text)s, %(output_text)s, %(metadata)s)"""
+        for event in test_events:
+            params = {k.replace('.', '_'): v for k, v in event.items()}
+            await client.execute_query(insert_query, params)
+
+    async def _verify_workload_events_insertion(self, client):
+        """Verify workload events were inserted correctly"""
+        count_result = await client.execute_query("SELECT count() as count FROM workload_events WHERE metadata LIKE '%test_run%'")
+        if not count_result:
+            pytest.fail("Query returned no results - table may not exist or query failed")
+        count = count_result[0]['count']
+        assert count >= 10, f"Expected at least 10 inserted events, found {count}"
+        logger.info(f"Successfully inserted {count} test events")
     async def test_query_with_array_syntax_fix(self, setup_workload_table):
         """Test querying with array syntax that needs fixing"""
         async with get_clickhouse_client() as client:
@@ -248,8 +191,6 @@ class TestWorkloadEventsTable:
             for row in result:
                 if row.get('first_metric_name'):
                     logger.info(f"Metric: {row['first_metric_name']} = {row['first_metric_value']} {row['first_metric_unit']}")
-    
-    @pytest.mark.asyncio
     async def test_complex_aggregation_queries(self, setup_workload_table):
         """Test complex aggregation queries with nested arrays"""
         async with get_clickhouse_client() as client:
@@ -286,8 +227,6 @@ class TestWorkloadEventsTable:
                           f"{row['request_count']} requests, "
                           f"avg latency {row['avg_latency_ms']:.2f}ms, "
                           f"total cost ${row['total_cost_cents']/100:.2f}")
-    
-    @pytest.mark.asyncio
     async def test_time_series_analysis(self, setup_workload_table):
         """Test time-series analysis queries"""
         async with get_clickhouse_client() as client:
@@ -318,8 +257,6 @@ class TestWorkloadEventsTable:
 
 class TestCorpusTableOperations:
     """Test corpus table creation and management"""
-    
-    @pytest.mark.asyncio
     async def test_create_dynamic_corpus_table(self):
         """Test creating a dynamic corpus table"""
         async with get_clickhouse_client() as client:
@@ -382,8 +319,6 @@ class TestCorpusTableOperations:
 
 class TestClickHousePerformance:
     """Test ClickHouse performance and optimization"""
-    
-    @pytest.mark.asyncio
     async def test_batch_insert_performance(self):
         """Test batch insert performance"""
         async with get_clickhouse_client() as client:
@@ -445,8 +380,6 @@ class TestClickHousePerformance:
                 "SELECT count() as count FROM workload_events WHERE metadata LIKE '%batch_test%'"
             )
             assert count_result[0]['count'] >= batch_size
-    
-    @pytest.mark.asyncio
     async def test_query_performance_with_indexes(self):
         """Test query performance with proper indexing"""
         async with get_clickhouse_client() as client:
@@ -492,8 +425,6 @@ class TestClickHousePerformance:
 
 class TestClickHouseErrorHandling:
     """Test error handling and recovery"""
-    
-    @pytest.mark.asyncio
     async def test_invalid_query_handling(self):
         """Test handling of invalid queries"""
         async with get_clickhouse_client() as client:
@@ -503,8 +434,6 @@ class TestClickHouseErrorHandling:
             
             error_msg = str(exc_info.value)
             logger.info(f"Expected error for non-existent table: {error_msg}")
-    
-    @pytest.mark.asyncio
     async def test_connection_recovery(self):
         """Test connection recovery after disconnect"""
         config = settings.clickhouse_https_dev if settings.environment == "development" else settings.clickhouse_https
@@ -548,8 +477,6 @@ class TestClickHouseErrorHandling:
 
 class TestClickHouseIntegration:
     """Integration tests for ClickHouse with the application"""
-    
-    @pytest.mark.asyncio
     async def test_full_initialization_flow(self):
         """Test the full ClickHouse initialization flow"""
         # Run initialization
@@ -568,8 +495,6 @@ class TestClickHouseIntegration:
                     logger.info(f"✓ Table {expected_table} exists")
                 else:
                     logger.warning(f"✗ Table {expected_table} not found")
-    
-    @pytest.mark.asyncio
     async def test_query_interceptor_statistics(self):
         """Test query interceptor statistics tracking"""
         async with get_clickhouse_client() as client:

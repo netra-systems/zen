@@ -21,8 +21,6 @@ class TestStartupCheckerClickHouse:
     def checker(self, mock_app):
         """Create a StartupChecker instance."""
         return StartupChecker(mock_app)
-    
-    @pytest.mark.asyncio
     async def test_check_clickhouse_success(self, checker):
         """Test ClickHouse check success."""
         tables = [{'name': 'workload_events'}, {'name': 'other_table'}]
@@ -37,8 +35,6 @@ class TestStartupCheckerClickHouse:
                 
                 assert result.success == True
                 assert "2 tables" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_clickhouse_missing_tables(self, checker):
         """Test ClickHouse check with missing required tables."""
         tables = [{'name': 'other_table'}]
@@ -53,8 +49,6 @@ class TestStartupCheckerClickHouse:
                 
                 assert result.success == False
                 assert "Missing ClickHouse tables" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_clickhouse_connection_failure(self, checker):
         """Test ClickHouse check with connection failure."""
         with patch('app.db.clickhouse.get_clickhouse_client') as mock_get_client:
@@ -67,8 +61,6 @@ class TestStartupCheckerClickHouse:
                 assert result.success == False
                 assert "Connection failed" in result.message
                 assert result.critical == False
-    
-    @pytest.mark.asyncio
     async def test_check_clickhouse_tuple_result(self, checker):
         """Test ClickHouse check with tuple result format."""
         tables = [('workload_events',), ('other_table',)]

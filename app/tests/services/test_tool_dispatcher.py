@@ -36,8 +36,6 @@ class ToolDispatcher:
                 "timestamp": time.time()
             }
         }
-
-@pytest.mark.asyncio
 class TestToolDispatcher:
     
     async def test_tool_registration(self):

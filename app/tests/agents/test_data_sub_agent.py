@@ -100,8 +100,6 @@ class TestDataSubAgentInitialization:
 
 class TestDataProcessing:
     """Test data processing capabilities"""
-    
-    @pytest.mark.asyncio
     async def test_process_data_success(self):
         """Test successful data processing"""
         mock_llm_manager = Mock()
@@ -120,8 +118,6 @@ class TestDataProcessing:
                 
         assert result != None
         assert result["processed"] == True
-        
-    @pytest.mark.asyncio
     async def test_process_data_validation_failure(self):
         """Test data processing with validation failure"""
         mock_llm_manager = Mock()
@@ -137,8 +133,6 @@ class TestDataProcessing:
         agent.execute = AsyncMock(side_effect=Exception("Invalid data"))
         with pytest.raises(Exception):
             await agent.execute(invalid_data)
-            
-    @pytest.mark.asyncio
     async def test_batch_processing(self):
         """Test batch data processing"""
         agent, _, _ = create_test_agent()
@@ -213,8 +207,6 @@ class TestDataValidation:
 
 class TestDataTransformation:
     """Test data transformation capabilities"""
-    
-    @pytest.mark.asyncio
     async def test_transform_text_data(self):
         """Test transformation of text data"""
         mock_llm_manager = Mock()
@@ -232,8 +224,6 @@ class TestDataTransformation:
         assert result != None
         assert "transformed" in result
         assert result["type"] == "text"
-        
-    @pytest.mark.asyncio
     async def test_transform_json_data(self):
         """Test transformation of JSON data"""
         mock_llm_manager = Mock()
@@ -251,8 +241,6 @@ class TestDataTransformation:
         assert result != None
         assert "parsed" in result
         assert result["parsed"]["key"] == "value"
-        
-    @pytest.mark.asyncio
     async def test_transform_with_pipeline(self):
         """Test transformation with processing pipeline"""
         mock_llm_manager = Mock()
@@ -280,8 +268,6 @@ class TestDataTransformation:
 
 class TestDataEnrichment:
     """Test data enrichment functionality"""
-    
-    @pytest.mark.asyncio
     async def test_enrich_with_metadata(self):
         """Test data enrichment with metadata"""
         mock_llm_manager = Mock()
@@ -299,8 +285,6 @@ class TestDataEnrichment:
         assert "timestamp" in enriched["metadata"]
         assert "source" in enriched["metadata"]
         assert enriched["metadata"]["source"] == "api"
-        
-    @pytest.mark.asyncio
     async def test_enrich_with_external_source(self):
         """Test enrichment with external data source"""
         mock_llm_manager = Mock()
@@ -332,8 +316,6 @@ class TestErrorHandling(SharedTestErrorHandling):
             service.clickhouse_ops.fetch_data("SELECT 1")
         
         assert "Database unavailable" in str(exc_info.value)
-    
-    @pytest.mark.asyncio
     async def test_retry_on_failure(self):
         """Test retry mechanism on processing failure"""
         mock_llm_manager = Mock()
@@ -353,8 +335,6 @@ class TestErrorHandling(SharedTestErrorHandling):
             
         assert result["success"] == True
         assert mock_process.call_count == 3
-        
-    @pytest.mark.asyncio
     async def test_max_retries_exceeded(self):
         """Test behavior when max retries exceeded"""
         mock_llm_manager = Mock()
@@ -370,8 +350,6 @@ class TestErrorHandling(SharedTestErrorHandling):
                 
         assert "Persistent error" in str(exc_info.value)
         assert mock_process.call_count == 2
-        
-    @pytest.mark.asyncio
     async def test_graceful_degradation(self):
         """Test graceful degradation on partial failure"""
         mock_llm_manager = Mock()
@@ -402,8 +380,6 @@ class TestErrorHandling(SharedTestErrorHandling):
 
 class TestCaching:
     """Test caching functionality"""
-    
-    @pytest.mark.asyncio
     async def test_cache_hit(self):
         """Test cache hit for repeated data"""
         mock_llm_manager = Mock()
@@ -421,8 +397,6 @@ class TestCaching:
             
         assert result1 == result2
         mock_process.assert_not_called()
-        
-    @pytest.mark.asyncio
     async def test_cache_expiration(self):
         """Test cache expiration"""
         mock_llm_manager = Mock()
@@ -453,8 +427,6 @@ class TestCaching:
 
 class TestIntegration(SharedTestIntegration):
     """Integration tests with other components"""
-    
-    @pytest.mark.asyncio
     async def test_integration_with_websocket(self):
         """Test integration with WebSocket for real-time updates"""
         mock_llm_manager = Mock()
@@ -468,8 +440,6 @@ class TestIntegration(SharedTestIntegration):
         await agent.process_and_stream(data, mock_ws)
         
         mock_ws.send.assert_called()
-        
-    @pytest.mark.asyncio
     async def test_integration_with_database(self):
         """Test integration with database persistence"""
         mock_llm_manager = Mock()
@@ -486,8 +456,6 @@ class TestIntegration(SharedTestIntegration):
         assert result["persisted"] == True
         assert result["id"] == "saved_123"
         assert result["status"] == "processed"
-        
-    @pytest.mark.asyncio
     async def test_integration_with_supervisor(self):
         """Test integration with supervisor agent"""
         mock_llm_manager = Mock()
@@ -508,8 +476,6 @@ class TestIntegration(SharedTestIntegration):
 
 class TestPerformance:
     """Performance and optimization tests"""
-    
-    @pytest.mark.asyncio
     async def test_concurrent_processing(self):
         """Test concurrent data processing"""
         mock_llm_manager = Mock()
@@ -525,8 +491,6 @@ class TestPerformance:
         
         assert len(results) == 100
         assert duration < 5.0  # Should complete within 5 seconds
-        
-    @pytest.mark.asyncio
     async def test_memory_efficiency(self):
         """Test memory efficiency with large datasets"""
         mock_llm_manager = Mock()
@@ -550,7 +514,6 @@ class TestStateManagement:
     """Test state management and persistence"""
     
     @pytest.mark.skip(reason="State persistence implementation conflicts with enum state")
-    @pytest.mark.asyncio
     async def test_state_persistence(self):
         """Test agent state persistence"""
         mock_llm_manager = Mock()
@@ -591,7 +554,6 @@ class TestStateManagement:
         assert new_agent.context["last_processed"] == "item_123"
         
     @pytest.mark.skip(reason="State persistence implementation conflicts with enum state")
-    @pytest.mark.asyncio
     async def test_state_recovery(self):
         """Test state recovery after failure"""
         mock_llm_manager = Mock()

@@ -29,9 +29,6 @@ def scheduler():
     with patch('app.services.supply_research_scheduler.RedisManager') as mock_redis_class:
         mock_redis_class.return_value = MockRedisManager()
         return SupplyResearchScheduler(mock_background_manager, mock_llm_manager)
-
-
-@pytest.mark.asyncio
 class TestScheduledResearchExecution:
     """Test scheduled research execution"""
     
@@ -132,9 +129,6 @@ class TestScheduledResearchExecution:
         
         # Should still succeed without Redis
         assert result["status"] == "completed"
-
-
-@pytest.mark.asyncio
 class TestChangeNotifications:
     """Test change detection and notification"""
     

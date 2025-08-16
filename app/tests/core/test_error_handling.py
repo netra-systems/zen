@@ -391,8 +391,6 @@ class TestApiErrorHandlerFunctions:
         """Test global get_http_status_code function."""
         status_code = get_http_status_code(ErrorCode.AUTHENTICATION_FAILED)
         assert status_code == 401
-    
-    @pytest.mark.asyncio
     async def test_netra_exception_handler(self):
         """Test FastAPI NetraException handler."""
         request = Mock(spec=Request)
@@ -404,8 +402,6 @@ class TestApiErrorHandlerFunctions:
         
         assert isinstance(response, JSONResponse)
         assert response.status_code == 401
-    
-    @pytest.mark.asyncio
     async def test_validation_exception_handler(self):
         """Test FastAPI validation exception handler."""
         request = Mock(spec=Request)
@@ -419,8 +415,6 @@ class TestApiErrorHandlerFunctions:
         
         assert isinstance(response, JSONResponse)
         assert response.status_code == 422
-    
-    @pytest.mark.asyncio
     async def test_http_exception_handler(self):
         """Test FastAPI HTTP exception handler."""
         request = Mock(spec=Request)
@@ -432,8 +426,6 @@ class TestApiErrorHandlerFunctions:
         
         assert isinstance(response, JSONResponse)
         assert response.status_code == 404
-    
-    @pytest.mark.asyncio
     async def test_general_exception_handler(self):
         """Test FastAPI general exception handler."""
         request = Mock(spec=Request)

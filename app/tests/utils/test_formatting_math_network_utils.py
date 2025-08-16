@@ -15,7 +15,6 @@ from app.tests.helpers.network_pagination_test_helpers import NetworkTestHelpers
 
 
 # Test 92: Formatting utils display
-@pytest.mark.asyncio
 class TestFormattingUtilsDisplay:
     """test_formatting_utils_display - Test data formatting and localization"""
     
@@ -78,7 +77,6 @@ class TestFormattingUtilsDisplay:
 
 
 # Test 93: Math utils calculations
-@pytest.mark.asyncio
 class TestMathUtilsCalculations:
     """test_math_utils_calculations - Test mathematical operations and precision handling"""
     
@@ -133,7 +131,6 @@ class TestMathUtilsCalculations:
 
 
 # Test 94: Network utils requests
-@pytest.mark.asyncio
 class TestNetworkUtilsRequests:
     """test_network_utils_requests - Test network utilities and retry logic"""
     

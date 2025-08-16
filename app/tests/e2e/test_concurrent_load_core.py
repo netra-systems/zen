@@ -7,9 +7,6 @@ Maximum 300 lines, functions ≤8 lines.
 import pytest
 import asyncio
 from app.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest
-
-
-@pytest.mark.asyncio
 class TestConcurrentLoadCore:
     """Core concurrent user load tests"""
     

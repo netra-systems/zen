@@ -8,9 +8,6 @@ import pytest
 import asyncio
 import websockets
 from app.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest
-
-
-@pytest.mark.asyncio
 class TestWebSocketLimits:
     """Test WebSocket connection limits"""
     

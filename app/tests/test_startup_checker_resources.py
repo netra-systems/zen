@@ -21,8 +21,6 @@ class TestStartupCheckerResources:
     def checker(self, mock_app):
         """Create a StartupChecker instance."""
         return StartupChecker(mock_app)
-    
-    @pytest.mark.asyncio
     async def test_check_memory_and_resources_ok(self, checker):
         """Test system resources check with adequate resources."""
         with patch('app.startup_checks.system_checks.psutil') as mock_psutil:
@@ -34,8 +32,6 @@ class TestStartupCheckerResources:
             
             assert result.success == True
             assert "Resources OK" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_memory_and_resources_warnings(self, checker):
         """Test system resources check with resource warnings."""
         with patch('app.startup_checks.system_checks.psutil') as mock_psutil:
@@ -50,8 +46,6 @@ class TestStartupCheckerResources:
             assert "Low memory" in result.message
             assert "Low disk space" in result.message
             assert "Low CPU count" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_memory_and_resources_exception(self, checker):
         """Test system resources check with exception."""
         with patch('app.startup_checks.system_checks.psutil.virtual_memory', 

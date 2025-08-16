@@ -45,7 +45,6 @@ def mock_tool_dispatcher():
     return AsyncMock()
 
 # @pytest.mark.skip(reason="Complex mock setup issues with coroutines - needs refactoring")
-@pytest.mark.asyncio
 async def test_subagent_workflow_end_to_end(mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher):
     # Arrange
     # Mock the state persistence to avoid the coroutine issue

@@ -142,8 +142,6 @@ class TestAgentReliabilityMixin:
         assert config.max_retries == 2
         assert config.base_delay == 1.0
         assert config.max_delay == 10.0
-    
-    @pytest.mark.asyncio
     async def test_execute_with_reliability_success(self, mock_agent):
         """Test successful operation execution."""
         # Setup
@@ -172,8 +170,6 @@ class TestAgentReliabilityMixin:
             fallback=None,
             timeout=10.0
         )
-    
-    @pytest.mark.asyncio
     async def test_execute_with_reliability_failure_no_recovery(self, mock_agent):
         """Test operation failure without recovery."""
         # Setup
@@ -201,8 +197,6 @@ class TestAgentReliabilityMixin:
         assert error_record.severity == ErrorSeverity.LOW
         assert error_record.recovery_attempted is False
         assert error_record.recovery_successful is False
-    
-    @pytest.mark.asyncio
     async def test_execute_with_reliability_failure_with_recovery(self, mock_agent):
         """Test operation failure with successful recovery."""
         # Setup
@@ -313,8 +307,6 @@ class TestAgentReliabilityMixin:
         mock_agent.register_recovery_strategy("custom_operation", custom_recovery)
         assert "custom_operation" in mock_agent.recovery_strategies
         assert mock_agent.recovery_strategies["custom_operation"] == custom_recovery
-    
-    @pytest.mark.asyncio
     async def test_default_llm_recovery(self, mock_agent):
         """Test default LLM recovery strategy."""
         error = ValueError("LLM failed")
@@ -326,8 +318,6 @@ class TestAgentReliabilityMixin:
         assert result["message"] == "Operation completed with limited functionality"
         assert result["error"] == "LLM failed"
         assert result["fallback_used"] is True
-    
-    @pytest.mark.asyncio
     async def test_default_db_recovery(self, mock_agent):
         """Test default database recovery strategy."""
         error = ConnectionError("Database unavailable")
@@ -339,8 +329,6 @@ class TestAgentReliabilityMixin:
         assert result["cached"] is True
         assert result["error"] == "Database unavailable"
         assert result["fallback_used"] is True
-    
-    @pytest.mark.asyncio
     async def test_default_api_recovery(self, mock_agent):
         """Test default API recovery strategy."""
         error = TimeoutError("API timeout")
@@ -506,8 +494,6 @@ class TestAgentReliabilityMixin:
         assert len(mock_agent.operation_times) == 0
         assert len(mock_agent.error_history) == 0
         mock_agent.reliability.circuit_breaker.reset.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_perform_health_check(self, mock_agent):
         """Test performing health check."""
         # Add some test data
@@ -534,15 +520,11 @@ class TestAgentReliabilityMixin:
         # After interval, should check again
         mock_agent.last_health_check = time.time() - 70  # More than 60 seconds ago
         assert mock_agent.should_perform_health_check() is True
-    
-    @pytest.mark.asyncio
     async def test_attempt_operation_recovery_no_strategy(self, mock_agent):
         """Test recovery attempt when no strategy exists."""
         error = ValueError("Test error")
         result = await mock_agent._attempt_operation_recovery("unknown_operation", error, {})
         assert result is None
-    
-    @pytest.mark.asyncio
     async def test_attempt_operation_recovery_strategy_fails(self, mock_agent):
         """Test recovery attempt when strategy itself fails."""
         async def failing_recovery(error, context):

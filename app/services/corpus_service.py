@@ -17,6 +17,22 @@ from .corpus import (
     CorpusStatus,
     ContentSource
 )
+from .corpus_service_helpers import (
+    validate_corpus_creation_params,
+    validate_content_upload_params,
+    validate_document_indexing_params,
+    check_modular_service_indexing,
+    try_document_manager_processing,
+    validate_batch_documents,
+    calculate_relevance_score,
+    prepare_ranked_result,
+    validate_search_parameters,
+    check_modular_keyword_search,
+    validate_filter_keys,
+    get_allowed_filter_types,
+    apply_modular_search_filters,
+    validate_document_creation_params
+)
 
 
 def get_clickhouse_client():
@@ -41,46 +57,19 @@ class CorpusService:
         """Initialize with modular service delegation"""
         self._modular_service = ModularCorpusService()
         self.query_expansion = None  # Mock attribute for tests
+        self._active_filters = {}  # Store active search filters
     
-    async def create_corpus(self, *args, **kwargs):
-        """Create corpus with test compatibility"""
-        if len(args) == 2 and not hasattr(args[0], 'execute'):
-            return self._create_test_corpus(args[0], args[1])
-        
-        db = args[0] if args else None
-        if db and hasattr(db, 'commit'):
-            db.commit()  # Test database operations
-        
-        try:
-            return await self._modular_service.create_corpus(*args, **kwargs)
-        except TypeError:
-            return self._create_fallback_corpus(args)
+    async def create_corpus(self, db: Session, corpus_data: schemas.CorpusCreate, user_id: str):
+        """Create corpus with proper type safety and validation"""
+        validate_corpus_creation_params(db, corpus_data, user_id)
+        return await self._modular_service.create_corpus(db, corpus_data, user_id)
     
-    def _create_test_corpus(self, corpus_data, user_id):
-        """Create test corpus without database"""
-        from app.db.models_postgres import Corpus
-        corpus = Corpus(
-            id=str(uuid.uuid4()),
-            name=corpus_data.name,
-            created_by_id=user_id
-        )
-        corpus.status = CorpusStatus.CREATING
-        return corpus
-    
-    def _create_fallback_corpus(self, args):
-        """Create fallback corpus for failed operations"""
-        if len(args) >= 1:
-            from app.db.models_postgres import Corpus
-            return Corpus(
-                id=str(uuid.uuid4()),
-                name="Test Corpus",
-                created_by_id="test_user"
-            )
     
     # Core CRUD operations - delegate to modular service
-    async def upload_content(self, *args, **kwargs):
-        """Upload content with flexible signature"""
-        return await self._modular_service.upload_content(*args, **kwargs)
+    async def upload_content(self, db: Session, corpus_id: str, content_data: Dict):
+        """Upload content with type safety"""
+        validate_content_upload_params(db, corpus_id, content_data)
+        return await self._modular_service.upload_content(db, corpus_id, content_data)
     
     async def get_corpus(self, db: Session, corpus_id: str):
         """Get corpus by ID"""
@@ -149,64 +138,56 @@ class CorpusService:
         if hasattr(self, 'rerank_model'):
             return await self.rerank_model()
         
-        ranked_results = []
         query_terms = query.lower().split()
+        ranked_results = []
         for result in results:
-            score = self._calculate_relevance_score(result, query_terms)
-            new_result = result.copy()
-            new_result['score'] = score * 0.1 + result.get('score', 0)
-            ranked_results.append(new_result)
-        
+            score = calculate_relevance_score(result, query_terms)
+            ranked_results.append(prepare_ranked_result(result, score))
         return sorted(ranked_results, key=lambda x: x.get('score', 0), reverse=True)
     
     def _calculate_relevance_score(self, result: Dict, query_terms: List[str]) -> int:
         """Calculate relevance score for search result"""
-        score = 0
-        content = str(result.get('content', '')).lower()
-        for term in query_terms:
-            score += content.count(term)
-        return score
+        return calculate_relevance_score(result, query_terms)
     
     # Mock operations for test compatibility
     async def index_document(self, document: Dict) -> Dict:
         """Index a single document with real vector processing."""
-        document_id = document.get("id")
-        if not document_id:
-            raise ValueError("Document must have an 'id' field")
-        
-        content = document.get("content", "")
-        if not content:
-            raise ValueError("Document must have non-empty 'content' field")
+        validate_document_indexing_params(document)
         
         # Check if modular service supports indexing
-        if hasattr(self._modular_service, 'index_document'):
-            return await self._modular_service.index_document(document)
+        result = await check_modular_service_indexing(self._modular_service, document)
+        if result:
+            return result
         
-        # Fallback to real implementation using document manager
+        # Fallback to document manager processing
         try:
-            document_manager = getattr(self._modular_service, 'document_manager', None)
-            if document_manager and hasattr(document_manager, 'process_document'):
-                return await document_manager.process_document(document)
+            result = await try_document_manager_processing(self._modular_service, document)
+            if result:
+                return result
         except Exception as e:
             logger.warning(f"Document indexing failed: {e}")
         
-        # Real indexing not available, return proper error
         raise RuntimeError("Document indexing service not available")
     
     async def batch_index_documents(self, documents: List[Dict], 
                                    progress_callback=None) -> Dict:
         """Index multiple documents in batch with real processing."""
-        if not documents:
-            raise ValueError("Documents list cannot be empty")
-        
-        # Use modular service for real batch indexing
+        validate_batch_documents(documents)
         result = await self._modular_service.batch_index_documents(documents)
         
-        # Call progress callback if provided
         if progress_callback:
             await progress_callback(len(documents), len(documents))
         
         return result
+    
+    async def _process_single_document(self, doc: Dict) -> tuple[bool, str]:
+        """Process single document and return success status and ID."""
+        doc_id = doc.get("id", "unknown")
+        try:
+            await self.index_document(doc)
+            return True, doc_id
+        except Exception:
+            return False, doc_id
     
     async def batch_index_with_recovery(self, documents: List[Dict]) -> Dict:
         """Index documents with recovery from partial failures"""
@@ -215,11 +196,10 @@ class CorpusService:
         failed_ids = []
         
         for doc in documents:
-            doc_id = doc.get("id", "unknown")
-            try:
-                await self.index_document(doc)
+            success, doc_id = await self._process_single_document(doc)
+            if success:
                 successful_count += 1
-            except Exception:
+            else:
                 failed_count += 1
                 failed_ids.append(doc_id)
         
@@ -235,8 +215,23 @@ class CorpusService:
         return f"improved_{original_query}"
     
     async def apply_filters(self, filters: Dict) -> None:
-        """Apply search filters"""
-        pass
+        """Apply search filters to corpus operations"""
+        if not filters:
+            logger.debug("No filters provided, skipping filter application")
+            return
+        
+        self._validate_filter_structure(filters)
+        
+        if hasattr(self._modular_service, 'apply_search_filters'):
+            await self._modular_service.apply_search_filters(filters)
+        else:
+            self._active_filters = filters
+            logger.info(f"Applied filters for next search: {list(filters.keys())}")
+    
+    def _validate_filter_structure(self, filters: Dict) -> None:
+        """Validate filter structure and types"""
+        allowed_filter_types = get_allowed_filter_types()
+        validate_filter_keys(filters, allowed_filter_types)
     
     async def reindex_corpus(self, corpus_id: str, model_version: str = None) -> Dict:
         """Reindex corpus with new embedding model"""
@@ -262,24 +257,21 @@ class CorpusService:
             return await self.keyword_search(corpus_id, query)
     
     async def keyword_search(self, corpus_id: str, query: str) -> List[Dict]:
-        """Keyword-based search fallback"""
-        return [
-            {"id": "fallback_doc1", "content": f"Keyword match for: {query}", 
-             "fallback_method": "keyword"},
-            {"id": "fallback_doc2", "content": f"Another match for: {query}",
-             "fallback_method": "keyword"}
-        ]
+        """Keyword-based search fallback using real search service"""
+        validate_search_parameters(corpus_id, query)
+        
+        result = await check_modular_keyword_search(self._modular_service, corpus_id, query)
+        if result:
+            return result
+        
+        raise RuntimeError("Keyword search service not available")
 
 
 # Legacy functions removed - migrate to async CorpusService methods
 # For backward compatibility in tests, create minimal implementations
 
-def create_document(document_data: Dict) -> Dict:
-    """Create a document in the corpus for test compatibility"""
-    return {
-        "id": "doc123",
-        "title": document_data.get("title", "Test Document"),
-        "content": document_data.get("content", "Test content"),
-        "metadata": document_data.get("metadata", {})
-    }
+async def create_document(db: Session, corpus_id: str, document_data: schemas.DocumentCreate) -> Dict:
+    """Create a document in the corpus with proper validation"""
+    validate_document_creation_params(db, corpus_id, document_data)
+    return await corpus_service.create_document(db, corpus_id, document_data)
 

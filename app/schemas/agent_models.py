@@ -42,10 +42,23 @@ class AgentMetadata(BaseModel):
     last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))
     execution_context: Dict[str, str] = Field(default_factory=dict)
     custom_fields: Dict[str, str] = Field(default_factory=dict)
-    priority: Optional[int] = Field(default=None, ge=0, le=10)
+    priority: Optional[int] = Field(default=None)
     retry_count: int = 0
     parent_agent_id: Optional[str] = None
     tags: List[str] = Field(default_factory=list)
+    
+    @field_validator('priority', mode='before')
+    @classmethod
+    def validate_priority(cls, v: Optional[Union[int, str]]) -> Optional[int]:
+        """Convert string priority to integer."""
+        if v is None:
+            return None
+        if isinstance(v, int):
+            return max(0, min(10, v))  # Clamp to 0-10 range
+        if isinstance(v, str):
+            priority_map = {'low': 3, 'medium': 5, 'high': 8, 'urgent': 10}
+            return priority_map.get(v.lower(), 5)  # Default to medium if unknown
+        return 5  # Default fallback
     
     def update_timestamp(self) -> 'AgentMetadata':
         """Update the last updated timestamp."""
@@ -82,6 +95,15 @@ class DeepAgentState(BaseModel):
     final_report: Optional[str] = None
     step_count: int = 0
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
+    quality_metrics: Dict[str, Any] = Field(default_factory=dict)
+    
+    @field_validator('metadata', mode='before')
+    @classmethod
+    def validate_metadata(cls, v: Union[Dict, AgentMetadata]) -> AgentMetadata:
+        """Convert dict metadata to AgentMetadata object."""
+        if isinstance(v, dict):
+            return AgentMetadata(**v)
+        return v if isinstance(v, AgentMetadata) else AgentMetadata()
     
     @field_validator('step_count')
     @classmethod

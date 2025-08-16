@@ -4,7 +4,7 @@ Handles CRUD operations for research schedules
 """
 
 from typing import List, Dict, Any
-from app.agents.supply_researcher_sub_agent import ResearchType
+from app.agents.supply_researcher.models import ResearchType
 from app.logging_config import central_logger as logger
 from .scheduler_models import ScheduleFrequency, ResearchSchedule
 

@@ -62,6 +62,24 @@ class WebSocketNotifier:
         message = WebSocketMessage(type="final_report", payload=payload)
         await self._send_websocket_message(context.thread_id, message)
     
+    async def send_agent_completed(self, context: AgentExecutionContext,
+                                  result: dict = None, duration_ms: float = 0) -> None:
+        """Send agent completed notification."""
+        if not self.websocket_manager:
+            return
+        payload = self._build_agent_completed_payload(context, result, duration_ms)
+        message = WebSocketMessage(type="agent_completed", payload=payload)
+        await self._send_websocket_message(context.thread_id, message)
+    
+    async def send_tool_completed(self, context: AgentExecutionContext,
+                                 tool_name: str, result: dict = None) -> None:
+        """Send tool completed notification."""
+        if not self.websocket_manager:
+            return
+        payload = self._build_tool_completed_payload(context, tool_name, result)
+        message = WebSocketMessage(type="tool_completed", payload=payload)
+        await self._send_websocket_message(context.thread_id, message)
+    
     async def send_fallback_notification(self, context: AgentExecutionContext,
                                         fallback_type: str) -> None:
         """Send notification about fallback usage."""
@@ -90,7 +108,8 @@ class WebSocketNotifier:
         """Build thinking notification payload."""
         return {
             "thought": thought, "agent_name": context.agent_name,
-            "step_number": step_number, "timestamp": self._get_timestamp()
+            "step_number": step_number, "total_steps": getattr(context, 'total_steps', 0),
+            "timestamp": self._get_timestamp()
         }
     
     def _build_partial_result_payload(self, context: AgentExecutionContext,
@@ -122,6 +141,23 @@ class WebSocketNotifier:
         """Build fallback notification message."""
         payload = self._create_fallback_payload(context, fallback_type)
         return WebSocketMessage(type="agent_fallback", payload=payload)
+    
+    def _build_agent_completed_payload(self, context: AgentExecutionContext,
+                                      result: dict, duration_ms: float) -> dict:
+        """Build agent completed payload."""
+        return {
+            "agent_name": context.agent_name, "run_id": context.run_id,
+            "duration_ms": duration_ms, "result": result or {},
+            "timestamp": self._get_timestamp()
+        }
+    
+    def _build_tool_completed_payload(self, context: AgentExecutionContext,
+                                     tool_name: str, result: dict) -> dict:
+        """Build tool completed payload."""
+        return {
+            "tool_name": tool_name, "agent_name": context.agent_name,
+            "result": result or {}, "timestamp": self._get_timestamp()
+        }
     
     def _create_fallback_payload(self, context: AgentExecutionContext,
                                 fallback_type: str) -> dict:

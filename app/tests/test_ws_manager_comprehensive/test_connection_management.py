@@ -15,8 +15,6 @@ from app.tests.test_ws_manager_comprehensive.conftest import MockWebSocket
 
 class TestConnectionManagement:
     """Test connection establishment and management"""
-    
-    @pytest.mark.asyncio
     async def test_connect_new_user(self, fresh_manager, connected_websocket):
         """Test connecting a new user"""
         user_id = "test_user_1"
@@ -42,8 +40,6 @@ class TestConnectionManagement:
         initial_msg = next((call[0][0] for call in calls if call[0][0].get("type") == "connection_established"), None)
         assert initial_msg != None
         assert initial_msg["connection_id"] == conn_info.connection_id
-    
-    @pytest.mark.asyncio
     async def test_connect_multiple_users(self, fresh_manager):
         """Test connecting multiple different users"""
         users = ["user1", "user2", "user3"]
@@ -62,8 +58,6 @@ class TestConnectionManagement:
             assert len(fresh_manager.active_connections[user_id]) == 1
         
         assert fresh_manager._stats["total_connections"] == 3
-    
-    @pytest.mark.asyncio
     async def test_connect_multiple_connections_same_user(self, fresh_manager):
         """Test multiple connections for same user (within limit)"""
         user_id = "multi_conn_user"
@@ -78,8 +72,6 @@ class TestConnectionManagement:
         
         assert len(fresh_manager.active_connections[user_id]) == WebSocketManager.MAX_CONNECTIONS_PER_USER
         assert fresh_manager._stats["total_connections"] == WebSocketManager.MAX_CONNECTIONS_PER_USER
-    
-    @pytest.mark.asyncio
     async def test_connect_exceeds_limit_removes_oldest(self, fresh_manager):
         """Test that exceeding connection limit removes oldest connection"""
         user_id = "limit_test_user"
@@ -114,8 +106,6 @@ class TestConnectionManagement:
         
         # Verify new connection is there
         assert new_ws in [conn.websocket for conn in fresh_manager.active_connections[user_id]]
-    
-    @pytest.mark.asyncio
     async def test_disconnect_existing_connection(self, fresh_manager, connected_websocket):
         """Test disconnecting an existing connection"""
         user_id = "disconnect_test"
@@ -134,14 +124,10 @@ class TestConnectionManagement:
         
         # Verify WebSocket was closed
         connected_websocket.close.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_disconnect_nonexistent_user(self, fresh_manager, connected_websocket):
         """Test disconnecting non-existent user doesn't error"""
         # Should not raise exception
         await fresh_manager.disconnect("nonexistent_user", connected_websocket)
-    
-    @pytest.mark.asyncio
     async def test_disconnect_nonexistent_websocket(self, fresh_manager):
         """Test disconnecting with non-existent websocket"""
         user_id = "test_user"
@@ -159,8 +145,6 @@ class TestConnectionManagement:
         # ws1 should still be connected
         assert user_id in fresh_manager.active_connections
         assert len(fresh_manager.active_connections[user_id]) == 1
-    
-    @pytest.mark.asyncio
     async def test_disconnect_with_close_error(self, fresh_manager, connected_websocket):
         """Test disconnect when websocket.close() raises exception"""
         user_id = "close_error_test"

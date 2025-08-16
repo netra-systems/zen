@@ -50,14 +50,49 @@ def extract_metrics(request: str, entities: ExtractedEntities) -> None:
 
 def classify_number(num: str, context: str) -> Dict[str, str]:
     """Classify a numerical value based on context."""
-    if 'ms' in context[:10] or num.endswith(('ms', 's')):
+    if _is_time_type(num, context):
         return {"type": "time", "value": num}
-    elif '%' in context[:5] or num.endswith('%'):
-        return {"type": "percentage", "value": num if num.endswith('%') else num + '%'}
-    elif 'token' in context[:20].lower():
+    elif _is_percentage_type(num, context):
+        return {"type": "percentage", "value": _format_percentage(num)}
+    return _classify_token_rate_or_numeric(num, context)
+
+
+def _classify_token_rate_or_numeric(num: str, context: str) -> Dict[str, str]:
+    """Classify as token, rate, or numeric type."""
+    if _is_token_type(context):
         return {"type": "tokens", "value": num}
-    elif 'RPS' in context[:10] or 'requests' in context[:20].lower():
+    elif _is_rate_type(context):
         return {"type": "rate", "value": num}
+    return _create_numeric_type(num)
+
+
+def _is_time_type(num: str, context: str) -> bool:
+    """Check if number represents time value."""
+    return 'ms' in context[:10] or num.endswith(('ms', 's'))
+
+
+def _is_percentage_type(num: str, context: str) -> bool:
+    """Check if number represents percentage."""
+    return '%' in context[:5] or num.endswith('%')
+
+
+def _format_percentage(num: str) -> str:
+    """Format percentage value correctly."""
+    return num if num.endswith('%') else num + '%'
+
+
+def _is_token_type(context: str) -> bool:
+    """Check if number represents tokens."""
+    return 'token' in context[:20].lower()
+
+
+def _is_rate_type(context: str) -> bool:
+    """Check if number represents rate."""
+    return 'RPS' in context[:10] or 'requests' in context[:20].lower()
+
+
+def _create_numeric_type(num: str) -> Dict[str, str]:
+    """Create generic numeric type classification."""
     return {"type": "numeric", "value": num}
 
 

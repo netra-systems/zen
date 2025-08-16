@@ -18,8 +18,6 @@ from app.services.quality_gate_service import ContentType
 
 class TestMetricsCollection:
     """Test metrics collection functionality"""
-    
-    @pytest.mark.asyncio
     async def test_record_quality_event(self, sample_quality_metrics):
         """Test recording quality events"""
         service = QualityMonitoringService()
@@ -40,8 +38,6 @@ class TestMetricsCollection:
 
 class TestDashboardData:
     """Test dashboard data generation"""
-    
-    @pytest.mark.asyncio
     async def test_get_dashboard_data(self, sample_quality_metrics):
         """Test getting dashboard data"""
         service = QualityMonitoringService()
@@ -62,8 +58,6 @@ class TestDashboardData:
 
 class TestAgentReports:
     """Test agent reporting functionality"""
-    
-    @pytest.mark.asyncio
     async def test_get_agent_report(self, sample_quality_metrics):
         """Test getting agent report"""
         service = QualityMonitoringService()
@@ -79,8 +73,6 @@ class TestAgentReports:
         
         # Should return report data or error structure
         assert isinstance(report, dict)
-    
-    @pytest.mark.asyncio
     async def test_get_agent_report_nonexistent(self):
         """Test getting report for non-existent agent"""
         service = QualityMonitoringService()
@@ -92,8 +84,6 @@ class TestAgentReports:
 
 class TestMonitoringLifecycle:
     """Test monitoring lifecycle management"""
-    
-    @pytest.mark.asyncio
     async def test_start_stop_monitoring(self):
         """Test starting and stopping monitoring"""
         service = QualityMonitoringService()

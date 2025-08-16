@@ -13,8 +13,6 @@ from app.tests.services.external_api_client_utils import (
 
 class TestIntegrationScenarios:
     """Integration test scenarios combining multiple components."""
-    
-    @pytest.mark.asyncio
     async def test_full_request_flow_success(self):
         """Test complete request flow from client creation to response."""
         mock_response = create_success_response_mock()
@@ -32,8 +30,6 @@ class TestIntegrationScenarios:
         """Execute the full request flow test."""
         client = ResilientHTTPClient(base_url="https://api.test.com")
         return await client.get("/endpoint", "test_api")
-    
-    @pytest.mark.asyncio
     async def test_error_handling_chain(self):
         """Test error handling through the entire chain."""
         mock_response = self._create_error_response_mock()

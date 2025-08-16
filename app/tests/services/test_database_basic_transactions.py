@@ -133,7 +133,6 @@ class TestDatabaseRepositoryTransactions:
         assert len(mock_repository.operation_log) == 1
         assert mock_repository.operation_log[0][0] == operation_type
 
-    @pytest.mark.asyncio
     async def test_successful_transaction_commit(self, mock_session, mock_repository):
         """Test successful transaction commit"""
         create_data = self._setup_successful_transaction_data()
@@ -152,7 +151,6 @@ class TestDatabaseRepositoryTransactions:
         mock_session.add.assert_called_once()
         mock_session.flush.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_transaction_rollback_on_integrity_error(self, mock_session, mock_repository):
         """Test transaction rollback on integrity constraint violation"""
         self._setup_integrity_error_mock(mock_session)
@@ -163,7 +161,6 @@ class TestDatabaseRepositoryTransactions:
         """Setup mock to simulate SQL error"""
         mock_session.flush.side_effect = SQLAlchemyError("database connection failed")
 
-    @pytest.mark.asyncio
     async def test_transaction_rollback_on_sql_error(self, mock_session, mock_repository):
         """Test transaction rollback on SQL error"""
         self._setup_sql_error_mock(mock_session)
@@ -175,7 +172,6 @@ class TestDatabaseRepositoryTransactions:
         """Setup mock to simulate unexpected error"""
         mock_session.add.side_effect = ValueError("unexpected error during add")
 
-    @pytest.mark.asyncio
     async def test_transaction_rollback_on_unexpected_error(self, mock_session, mock_repository):
         """Test transaction rollback on unexpected error"""
         self._setup_unexpected_error_mock(mock_session)
@@ -211,7 +207,6 @@ class TestDatabaseRepositoryTransactions:
         session1.flush.assert_called_once()
         session2.flush.assert_called_once()
 
-    @pytest.mark.asyncio
     async def test_concurrent_transaction_isolation(self, mock_repository):
         """Test transaction isolation under concurrent operations"""
         session1, session2 = self._create_concurrent_sessions()
@@ -227,7 +222,6 @@ class TestDatabaseRepositoryTransactions:
         await asyncio.sleep(2.0)
         return None
 
-    @pytest.mark.asyncio
     async def test_transaction_timeout_handling(self, mock_session, mock_repository):
         """Test handling of transaction timeouts"""
         mock_session.flush.side_effect = self._create_slow_flush

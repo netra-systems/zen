@@ -12,15 +12,11 @@ from app.tests.helpers.tool_dispatcher_helpers import (
 
 class TestToolDispatcherEdgeCases:
     """Test edge cases and error scenarios."""
-    
-    @pytest.mark.asyncio
     async def test_dispatch_with_none_parameters(self):
         """Test dispatch with None parameters."""
         dispatcher = ToolDispatcher()
         result = await dispatcher.dispatch("create_corpus")
         self._verify_dispatch_handles_none_parameters(result)
-    
-    @pytest.mark.asyncio
     async def test_dispatch_tool_with_empty_state(self):
         """Test dispatch_tool with minimal state."""
         tool, dispatcher = self._setup_dispatch_with_empty_state()

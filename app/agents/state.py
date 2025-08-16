@@ -129,6 +129,7 @@ class DeepAgentState(BaseModel):
     step_count: int = 0  # Added for agent tracking
     messages: List[Dict[str, Any]] = Field(default_factory=list)  # Added for E2E test compatibility
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
+    quality_metrics: Dict[str, Any] = Field(default_factory=dict)
     
     @field_validator('step_count')
     @classmethod

@@ -26,14 +26,10 @@ from starlette.websockets import WebSocketDisconnect
 
 class TestAgentServiceOrchestration:
     """Test agent service orchestration functionality."""
-    
-    @pytest.mark.asyncio
     async def test_agent_service_initialization(self, mock_supervisor):
         """Test agent service initialization."""
         service = AgentService(mock_supervisor)
         assert_agent_service_initialized(service, mock_supervisor)
-    
-    @pytest.mark.asyncio
     async def test_agent_run_execution(self, agent_service, mock_supervisor):
         """Test agent run execution."""
         request_model = setup_mock_request_model("Test user request", "test_run_123", "test_user")
@@ -44,8 +40,6 @@ class TestAgentServiceOrchestration:
         
         assert_agent_run_completed(result)
         assert_supervisor_called_correctly(mock_supervisor, "Test user request", "test_run_123", "test_user", run_id)
-    
-    @pytest.mark.asyncio
     async def test_agent_run_with_model_dump_fallback(self, agent_service, mock_supervisor):
         """Test agent run with model dump fallback."""
         request_model = setup_mock_request_model_with_dump({'query': 'test query'}, "test_run_456", "test_user2")
@@ -56,8 +50,6 @@ class TestAgentServiceOrchestration:
         
         assert_agent_run_completed(result)
         assert_supervisor_called_correctly(mock_supervisor, "{'query': 'test query'}", "test_run_456", "test_user2", run_id)
-    
-    @pytest.mark.asyncio
     async def test_websocket_message_handling_start_agent(self, agent_service):
         """Test WebSocket message handling for start_agent."""
         user_id = "user123"
@@ -70,8 +62,6 @@ class TestAgentServiceOrchestration:
             agent_service.message_handler, "handle_start_agent",
             (user_id, {"query": "start analysis"}, None)
         )
-    
-    @pytest.mark.asyncio
     async def test_websocket_message_handling_user_message(self, agent_service):
         """Test WebSocket message handling for user_message."""
         user_id = "user456"
@@ -84,8 +74,6 @@ class TestAgentServiceOrchestration:
             agent_service.message_handler, "handle_user_message",
             (user_id, {"content": "Hello agent"}, None)
         )
-    
-    @pytest.mark.asyncio
     async def test_websocket_message_handling_stop_agent(self, agent_service):
         """Test WebSocket message handling for stop_agent."""
         user_id = "user999"
@@ -95,8 +83,6 @@ class TestAgentServiceOrchestration:
         await agent_service.handle_websocket_message(user_id, message)
         
         agent_service.message_handler.handle_stop_agent.assert_called_once_with(user_id)
-    
-    @pytest.mark.asyncio
     async def test_websocket_message_handling_unknown_type(self, agent_service):
         """Test WebSocket message handling for unknown message type."""
         user_id = "user_unknown"
@@ -105,8 +91,6 @@ class TestAgentServiceOrchestration:
         await agent_service.handle_websocket_message(user_id, message)
         
         # Should handle gracefully without calling any specific handler
-    
-    @pytest.mark.asyncio
     async def test_websocket_disconnect_handling(self, agent_service):
         """Test handling of WebSocket disconnect."""
         user_id = "user_disconnect"
@@ -119,8 +103,6 @@ class TestAgentServiceOrchestration:
         await agent_service.handle_websocket_message(user_id, message)
         
         # Should handle disconnect gracefully
-    
-    @pytest.mark.asyncio
     async def test_concurrent_agent_execution(self, agent_service, mock_supervisor):
         """Test concurrent agent execution."""
         num_concurrent = 5
@@ -131,16 +113,12 @@ class TestAgentServiceOrchestration:
         
         assert_concurrent_execution_successful(results, num_concurrent)
         assert mock_supervisor.run.call_count == num_concurrent
-    
-    @pytest.mark.asyncio
     async def test_message_parsing_string_input(self, agent_service):
         """Test message parsing with string input."""
         json_string = '{"type": "start_agent", "payload": {"query": "test"}}'
         parsed = agent_service._parse_message(json_string)
         
         assert_websocket_message_parsed(parsed, "start_agent", {"query": "test"})
-    
-    @pytest.mark.asyncio
     async def test_message_parsing_dict_input(self, agent_service):
         """Test message parsing with dict input."""
         dict_message = {"type": "user_message", "payload": {"content": "hello"}}
@@ -151,8 +129,6 @@ class TestAgentServiceOrchestration:
 
 class TestAgentServiceBasic:
     """Basic agent service tests with complex RequestModel."""
-    
-    @pytest.mark.asyncio
     async def test_run_agent_with_request_model(self):
         """Test basic run method with RequestModel."""
         mock_supervisor = MagicMock()

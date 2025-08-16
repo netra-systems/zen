@@ -283,7 +283,7 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
                     request, context, recovery_result
                 )
         else:
-            circuit_breaker.record_failure()
+            circuit_breaker.record_failure("recovery_failure")
         
         return None
     
@@ -295,7 +295,7 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         circuit_breaker
     ) -> JSONResponse:
         """Handle final failure after all attempts exhausted."""
-        circuit_breaker.record_failure()
+        circuit_breaker.record_failure(type(error).__name__)
         return await self._create_error_response(request, error, operation_id)
     
     async def _log_error_with_context(

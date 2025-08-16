@@ -11,9 +11,10 @@ from typing import Dict, List, Optional, Any, Set
 from app.logging_config import central_logger
 from app.services.metrics.agent_metrics import AgentMetricsCollector, agent_metrics_collector
 from .alert_models import (
-    AlertRule, Alert, NotificationConfig, AlertLevel, NotificationChannel,
-    create_default_alert_rules, create_default_notification_configs
+    AlertRule, Alert, NotificationConfig, AlertLevel, NotificationChannel
 )
+from .alert_rules import create_default_alert_rules
+from .alert_notifications import create_default_notification_configs
 from .alert_evaluator import AlertEvaluator
 from .alert_notifications import NotificationDeliveryManager
 
@@ -59,8 +60,8 @@ class AlertManager:
         """Setup default rules and configurations."""
         # Setup default alert rules
         default_rules = create_default_alert_rules()
-        for rule in default_rules:
-            self.alert_rules[rule.rule_id] = rule
+        for rule_id, rule in default_rules.items():
+            self.alert_rules[rule_id] = rule
         
         # Setup default notification configs
         self.notification_configs = create_default_notification_configs()

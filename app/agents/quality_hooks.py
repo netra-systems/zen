@@ -196,7 +196,8 @@ class QualityHooksManager:
             'DataSubAgent': lambda s: s.data_result.get('data', '') if hasattr(s, 'data_result') else None,
             'OptimizationsCoreSubAgent': lambda s: s.optimizations_result.get('recommendations', '') if hasattr(s, 'optimizations_result') else None,
             'ActionsToMeetGoalsSubAgent': lambda s: s.actions_result.get('actions', '') if hasattr(s, 'actions_result') else None,
-            'ReportingSubAgent': lambda s: s.report_result.get('report', '') if hasattr(s, 'report_result') else None
+            'ReportingSubAgent': lambda s: s.report_result.get('report', '') if hasattr(s, 'report_result') else None,
+            'TestAgent': lambda s: s.triage_result.get('summary', '') if hasattr(s, 'triage_result') and s.triage_result else None
         }
     
     def _get_content_type_for_agent(self, agent_name: str) -> ContentType:

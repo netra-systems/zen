@@ -10,9 +10,6 @@ from sqlalchemy.exc import OperationalError, TimeoutError
 from app.db.session import get_db_session
 from app.db.postgres import async_engine, async_session_factory, get_async_db, Database
 from app.db.clickhouse import get_clickhouse_client
-
-
-@pytest.mark.asyncio
 class TestDatabaseConnectionPooling:
     """Test database connection pooling behavior."""
 
@@ -93,9 +90,6 @@ class TestDatabaseConnectionPooling:
         # Some queries may succeed
         successful_results = [r for r in results if r != None and not isinstance(r, Exception)]
         assert len(successful_results) >= 0  # At least allow for database not being available
-
-
-@pytest.mark.asyncio
 class TestSessionManagement:
     """Test database session lifecycle management."""
 
@@ -139,9 +133,6 @@ class TestSessionManagement:
             assert db.SessionLocal != None
         except Exception as e:
             pytest.skip(f"Cannot create database instance: {e}")
-
-
-@pytest.mark.asyncio
 class TestClickHouseConnection:
     """Test ClickHouse connection management."""
 

@@ -45,6 +45,75 @@ class WebSocketService {
   public onStatusChange: ((status: WebSocketStatus) => void) | null = null;
   public onMessage: ((message: WebSocketMessage) => void) | null = null;
 
+  // Type guards and validation
+  private isBasicWebSocketMessage(obj: any): obj is WebSocketMessage {
+    return obj && 
+           typeof obj === 'object' && 
+           typeof obj.type === 'string' && 
+           typeof obj.payload === 'object';
+  }
+
+  private isUnifiedWebSocketEvent(obj: any): obj is UnifiedWebSocketEvent {
+    const unifiedEventTypes = [
+      'agent_started', 'tool_executing', 'agent_thinking', 'partial_result',
+      'agent_completed', 'final_report', 'error', 'thread_created',
+      'thread_loading', 'thread_loaded', 'thread_renamed', 'step_created'
+    ];
+    return this.isBasicWebSocketMessage(obj) && 
+           unifiedEventTypes.includes(obj.type);
+  }
+
+  private validateWebSocketMessage(obj: any): WebSocketMessage | UnifiedWebSocketEvent | null {
+    if (!this.isBasicWebSocketMessage(obj)) {
+      return null;
+    }
+
+    // Additional validation based on message type
+    switch (obj.type) {
+      case 'agent_started':
+        // Basic structure validation - don't require all fields since we handle missing ones
+        return obj.payload && typeof obj.payload === 'object' ? obj : null;
+      
+      case 'tool_executing':
+        return obj.payload && typeof obj.payload === 'object' ? obj : null;
+      
+      case 'agent_thinking':
+        return obj.payload && typeof obj.payload === 'object' ? obj : null;
+      
+      case 'partial_result':
+        return obj.payload && typeof obj.payload === 'object' ? obj : null;
+      
+      case 'agent_completed':
+        return obj.payload && typeof obj.payload === 'object' ? obj : null;
+      
+      case 'final_report':
+        return obj.payload && typeof obj.payload === 'object' ? obj : null;
+      
+      case 'error':
+        return obj.payload && typeof obj.payload === 'object' ? obj : null;
+      
+      case 'thread_created':
+      case 'thread_loading':
+      case 'thread_loaded':
+      case 'thread_renamed':
+        return obj.payload && typeof obj.payload === 'object' ? obj : null;
+      
+      case 'auth':
+      case 'ping':
+      case 'pong':
+        return obj; // These have simpler structures
+      
+      default:
+        // Allow unknown message types but log them
+        logger.debug('Unknown WebSocket message type', undefined, {
+          component: 'WebSocketService',
+          action: 'unknown_message_type',
+          metadata: { type: obj.type }
+        });
+        return obj; // Pass through unknown types
+    }
+  }
+
   public connect(url: string, options: WebSocketOptions = {}) {
     this.url = url;
     this.options = options;
@@ -93,9 +162,28 @@ class WebSocketService {
         }
         
         try {
-          const message = JSON.parse(event.data);
-          this.onMessage?.(message as WebSocketMessage);
-          options.onMessage?.(message as WebSocketMessage | UnifiedWebSocketEvent);
+          const rawMessage = JSON.parse(event.data);
+          
+          // Validate message structure
+          const validatedMessage = this.validateWebSocketMessage(rawMessage);
+          if (!validatedMessage) {
+            logger.warn('Invalid WebSocket message received', undefined, {
+              component: 'WebSocketService',
+              action: 'invalid_message',
+              metadata: { message: rawMessage }
+            });
+            options.onError?.({
+              code: 1003,
+              message: 'Invalid message structure',
+              timestamp: Date.now(),
+              type: 'parse',
+              recoverable: true
+            });
+            return;
+          }
+          
+          this.onMessage?.(validatedMessage);
+          options.onMessage?.(validatedMessage);
         } catch (error) {
           logger.error('Error parsing WebSocket message', error as Error, {
             component: 'WebSocketService',

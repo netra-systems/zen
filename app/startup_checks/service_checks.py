@@ -57,12 +57,26 @@ class ServiceChecker:
     
     async def _test_redis_operations(self, redis_manager) -> None:
         """Test Redis read/write operations"""
-        test_key = "startup_check_test"
-        test_value = str(time.time())
-        await redis_manager.set(test_key, test_value, expire=10)
-        retrieved = await redis_manager.get(test_key)
-        if retrieved != test_value:
+        test_data = self._prepare_redis_test_data()
+        await self._execute_redis_test(redis_manager, test_data)
+        await self._cleanup_redis_test(redis_manager, test_data["key"])
+    
+    def _prepare_redis_test_data(self) -> dict:
+        """Prepare test data for Redis operations"""
+        return {
+            "key": "startup_check_test",
+            "value": str(time.time())
+        }
+    
+    async def _execute_redis_test(self, redis_manager, test_data: dict) -> None:
+        """Execute Redis read/write test operations"""
+        await redis_manager.set(test_data["key"], test_data["value"], expire=10)
+        retrieved = await redis_manager.get(test_data["key"])
+        if retrieved != test_data["value"]:
             raise ValueError("Redis read/write test failed")
+    
+    async def _cleanup_redis_test(self, redis_manager, test_key: str) -> None:
+        """Clean up Redis test data"""
         await redis_manager.delete(test_key)
     
     async def _check_clickhouse_tables(self) -> List[str]:
@@ -158,14 +172,26 @@ class ServiceChecker:
         """Test single LLM provider connection"""
         try:
             llm = llm_manager.get_llm(llm_name)
-            if llm is not None:
-                return llm_name, None
-            logger.info(f"LLM '{llm_name}' not available (optional provider without key)")
-            return None, None
+            return self._handle_llm_test_result(llm, llm_name)
         except Exception as e:
-            failed_msg = f"{llm_name}: {e}"
-            logger.info(f"LLM '{llm_name}' failed: {e}")
-            return None, failed_msg
+            return self._handle_llm_test_failure(llm_name, e)
+    
+    def _handle_llm_test_result(self, llm, llm_name: str) -> tuple:
+        """Handle LLM test result based on availability"""
+        if llm is not None:
+            return llm_name, None
+        return self._handle_llm_unavailable(llm_name)
+    
+    def _handle_llm_unavailable(self, llm_name: str) -> tuple:
+        """Handle unavailable LLM provider"""
+        logger.info(f"LLM '{llm_name}' not available (optional provider without key)")
+        return None, None
+    
+    def _handle_llm_test_failure(self, llm_name: str, error: Exception) -> tuple:
+        """Handle LLM test failure"""
+        failed_msg = f"{llm_name}: {error}"
+        logger.info(f"LLM '{llm_name}' failed: {error}")
+        return None, failed_msg
     
     def _create_llm_check_failure_result(self, error: Exception) -> StartupCheckResult:
         """Create failed LLM check result"""

@@ -20,8 +20,6 @@ from app.tests.helpers.shared_test_types import TestErrorHandling as SharedTestE
 
 class TestCorpusQueries:
     """Test corpus-related queries for correctness"""
-    
-    @pytest.mark.asyncio
     async def test_create_corpus_table_schema(self):
         """Test 1: Verify corpus table schema is valid SQL"""
         table_name = "test_corpus_123"
@@ -35,8 +33,6 @@ class TestCorpusQueries:
         assert "`response` String" in schema
         assert "ENGINE = MergeTree()" in schema
         assert "ORDER BY (created_at, workload_type)" in schema
-    
-    @pytest.mark.asyncio
     async def test_corpus_insert_query_structure(self):
         """Test 2: Verify INSERT query structure for corpus"""
         service = CorpusService()
@@ -62,8 +58,6 @@ class TestCorpusQueries:
             assert f"INSERT INTO {table_name}" in query
             assert "record_id, workload_type, prompt, response" in query
             assert "VALUES" in query
-    
-    @pytest.mark.asyncio 
     async def test_corpus_statistics_query(self):
         """Test 3: Verify corpus statistics query correctness"""
         service = CorpusService()
@@ -101,8 +95,6 @@ class TestCorpusQueries:
             # Check second query (distribution)
             dist_query = mock_instance.execute.call_args_list[1][0][0]
             assert "GROUP BY workload_type" in dist_query
-    
-    @pytest.mark.asyncio
     async def test_corpus_content_retrieval_query(self):
         """Test 4: Verify corpus content retrieval with filters"""
         service = CorpusService()
@@ -131,8 +123,6 @@ class TestCorpusQueries:
             assert "SELECT record_id, workload_type, prompt, response, metadata" in query
             assert "WHERE workload_type = 'rag_pipeline'" in query
             assert "LIMIT 50 OFFSET 100" in query
-    
-    @pytest.mark.asyncio
     async def test_clone_corpus_copy_query(self):
         """Test 5: Verify corpus cloning query"""
         service = CorpusService()
@@ -316,8 +306,6 @@ class TestCorrelationQueries:
 
 class TestGenerationServiceQueries:
     """Test generation service queries"""
-    
-    @pytest.mark.asyncio
     async def test_get_corpus_from_clickhouse_query(self):
         """Test 14: Verify corpus loading query from generation service"""
         from app.services.generation_service import get_corpus_from_clickhouse
@@ -338,8 +326,6 @@ class TestGenerationServiceQueries:
                 'simple_chat': [('p1', 'r1')],
                 'rag_pipeline': [('p2', 'r2')]
             }
-    
-    @pytest.mark.asyncio
     async def test_save_corpus_to_clickhouse_batch_insert(self):
         """Test 15: Verify batch insert for corpus saving"""
         from app.services.generation_service import save_corpus_to_clickhouse
@@ -367,8 +353,6 @@ class TestGenerationServiceQueries:
 
 class TestTableInitializationQueries:
     """Test table initialization queries"""
-    
-    @pytest.mark.asyncio
     async def test_initialize_clickhouse_tables(self):
         """Test 16: Verify all tables are created on initialization"""
         from app.db.clickhouse_init import initialize_clickhouse_tables
@@ -393,8 +377,6 @@ class TestTableInitializationQueries:
                 
                 # Verify SHOW TABLES was called
                 mock_instance.execute_query.assert_called_with("SHOW TABLES")
-    
-    @pytest.mark.asyncio
     async def test_verify_workload_events_table(self):
         """Test 17: Verify workload_events table verification"""
         from app.db.clickhouse_init import verify_workload_events_table

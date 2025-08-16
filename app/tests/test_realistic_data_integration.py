@@ -130,8 +130,6 @@ class TestRealisticDataIntegration:
             assert "p95_latency_ms" in summary
             assert "total_cost_usd" in summary
             assert summary["total_cost_usd"] > 0
-    
-    @pytest.mark.asyncio
     async def test_synthetic_agent_with_realistic_data(self, synthetic_agent):
         """Test synthetic data agent with realistic patterns"""
         state = DeepAgentState(user_request="Generate synthetic ecommerce workload data")
@@ -157,8 +155,6 @@ class TestRealisticDataIntegration:
             "inference_logs", "training_data", "performance_metrics", 
             "cost_data", "custom"
         ]
-    
-    @pytest.mark.asyncio
     async def test_corpus_agent_with_realistic_data(self, corpus_agent):
         """Test corpus admin agent with realistic operations"""
         state = DeepAgentState(user_request="Search the knowledge base for optimization strategies")
@@ -198,8 +194,6 @@ class TestRealisticDataIntegration:
         assert tool_dispatcher.has_tool("search_corpus")
         assert tool_dispatcher.has_tool("update_corpus")
         assert tool_dispatcher.has_tool("analyze_corpus")
-    
-    @pytest.mark.asyncio
     async def test_tool_execution(self, tool_dispatcher):
         """Test tool execution with realistic responses"""
         # Test synthetic data batch generation

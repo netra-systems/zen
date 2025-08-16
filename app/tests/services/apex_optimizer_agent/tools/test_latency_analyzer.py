@@ -63,8 +63,6 @@ class TestLatencyAnalyzer:
         context.performance_predictor.execute = AsyncMock()
         
         return context
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_basic_functionality(self, mock_context):
         """Test basic latency analysis with multiple logs"""
         # Setup mock responses
@@ -87,8 +85,6 @@ class TestLatencyAnalyzer:
         assert calls[0][0][0] == "Fast query"
         assert calls[1][0][0] == "Medium query"
         assert calls[2][0][0] == "Slow query"
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_empty_logs(self, mock_context):
         """Test latency analyzer with empty logs"""
         mock_context.logs = []
@@ -97,8 +93,6 @@ class TestLatencyAnalyzer:
         
         assert result == "Analyzed current latency. Average predicted latency: 0.00ms"
         assert mock_context.performance_predictor.execute.call_count == 0
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_single_log(self, mock_context):
         """Test latency analyzer with single log entry"""
         mock_context.logs = [mock_context.logs[0]]
@@ -108,8 +102,6 @@ class TestLatencyAnalyzer:
         
         assert result == "Analyzed current latency. Average predicted latency: 123.46ms"
         assert mock_context.performance_predictor.execute.call_count == 1
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_high_latency_values(self, mock_context):
         """Test latency analyzer with high latency values"""
         mock_context.performance_predictor.execute.side_effect = [
@@ -121,8 +113,6 @@ class TestLatencyAnalyzer:
         result = await latency_analyzer(mock_context)
         
         assert result == "Analyzed current latency. Average predicted latency: 10000.00ms"
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_zero_latency(self, mock_context):
         """Test latency analyzer when all latencies are zero"""
         mock_context.performance_predictor.execute.return_value = {"predicted_latency_ms": 0.0}
@@ -130,8 +120,6 @@ class TestLatencyAnalyzer:
         result = await latency_analyzer(mock_context)
         
         assert result == "Analyzed current latency. Average predicted latency: 0.00ms"
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_sub_millisecond_latency(self, mock_context):
         """Test latency analyzer with sub-millisecond values"""
         mock_context.performance_predictor.execute.side_effect = [
@@ -143,8 +131,6 @@ class TestLatencyAnalyzer:
         result = await latency_analyzer(mock_context)
         
         assert result == "Analyzed current latency. Average predicted latency: 0.20ms"
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_exception_handling(self, mock_context):
         """Test latency analyzer handles exceptions from performance_predictor"""
         mock_context.performance_predictor.execute.side_effect = Exception("API Error")
@@ -153,8 +139,6 @@ class TestLatencyAnalyzer:
             await latency_analyzer(mock_context)
         
         assert str(exc_info.value) == "API Error"
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_async_execution(self, mock_context):
         """Test that latency analyzer properly awaits async operations"""
         call_order = []
@@ -170,8 +154,6 @@ class TestLatencyAnalyzer:
         
         assert len(call_order) == 3
         assert "Average predicted latency" in result
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_large_dataset(self, mock_context):
         """Test latency analyzer with many logs to verify performance"""
         # Create 1000 mock logs
@@ -189,8 +171,6 @@ class TestLatencyAnalyzer:
         
         assert result == "Analyzed current latency. Average predicted latency: 100.00ms"
         assert mock_context.performance_predictor.execute.call_count == 1000
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_varied_latencies(self, mock_context):
         """Test latency analyzer with varied latency patterns"""
         # Simulate realistic latency distribution
@@ -212,8 +192,6 @@ class TestLatencyAnalyzer:
         
         expected_avg = sum(latencies) / len(latencies)
         assert result == f"Analyzed current latency. Average predicted latency: {expected_avg:.2f}ms"
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_partial_failure(self, mock_context):
         """Test latency analyzer when some predictions fail"""
         mock_context.performance_predictor.execute.side_effect = [
@@ -229,8 +207,6 @@ class TestLatencyAnalyzer:
         assert "Prediction service unavailable" in str(exc_info.value)
         # Verify it attempted to process the first log
         assert mock_context.performance_predictor.execute.call_count == 2
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_edge_case_rounding(self, mock_context):
         """Test latency analyzer rounding behavior at boundaries"""
         test_cases = [
@@ -247,8 +223,6 @@ class TestLatencyAnalyzer:
             result = await latency_analyzer(mock_context)
             assert f"{expected_avg:.2f}ms" in result, f"Failed for latencies {latencies}"
             mock_context.performance_predictor.execute.reset_mock()
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_negative_latencies(self, mock_context):
         """Test latency analyzer with negative latencies (should not happen but test robustness)"""
         mock_context.performance_predictor.execute.side_effect = [
@@ -261,8 +235,6 @@ class TestLatencyAnalyzer:
         
         # Average should still be calculated: (100 - 50 + 200) / 3 = 83.33
         assert result == "Analyzed current latency. Average predicted latency: 83.33ms"
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_mixed_response_formats(self, mock_context):
         """Test latency analyzer with different response formats"""
         # Test handling of different numeric types
@@ -275,8 +247,6 @@ class TestLatencyAnalyzer:
         # This should fail when trying to add string to numbers
         with pytest.raises(TypeError):
             await latency_analyzer(mock_context)
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_extreme_values(self, mock_context):
         """Test latency analyzer with extreme values"""
         mock_context.performance_predictor.execute.side_effect = [
@@ -291,8 +261,6 @@ class TestLatencyAnalyzer:
         expected_avg = (0.00001 + 999999999.99 + 100.0) / 3
         assert "Average predicted latency:" in result
         assert "ms" in result
-
-    @pytest.mark.asyncio
     async def test_latency_analyzer_concurrent_execution_timing(self, mock_context):
         """Test timing of sequential execution"""
         start_time = asyncio.get_event_loop().time()

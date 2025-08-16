@@ -6,7 +6,8 @@ Defines scheduling models and frequency enums for supply research tasks
 from typing import List, Optional
 from datetime import datetime, timedelta, UTC
 from enum import Enum
-from app.agents.supply_researcher_sub_agent import ResearchType
+# Import ResearchType from canonical source to avoid circular import
+from app.agents.supply_researcher.models import ResearchType
 
 
 class ScheduleFrequency(Enum):

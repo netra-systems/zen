@@ -55,74 +55,50 @@ class DiagnosticsManager:
     def _initialize_recovery_suggestions(self) -> Dict[ContentType, List[Dict[str, str]]]:
         """Initialize recovery suggestions by content type"""
         return {
-            ContentType.OPTIMIZATION: [
-                {
-                    "action": "Use Optimization Template",
-                    "description": "Provide specific optimization patterns and metrics",
-                    "link": "/templates/optimization"
-                },
-                {
-                    "action": "Run Diagnostics",
-                    "description": "Analyze your system to identify specific bottlenecks",
-                    "link": "/tools/diagnostics"
-                },
-                {
-                    "action": "Schedule Consultation",
-                    "description": "Get expert help with specific optimization requirements",
-                    "link": "/support/consultation"
-                }
-            ],
-            ContentType.DATA_ANALYSIS: [
-                {
-                    "action": "Data Validation Tool",
-                    "description": "Check and fix data format issues",
-                    "link": "/tools/data-validator"
-                },
-                {
-                    "action": "Sample Analysis",
-                    "description": "Try with a smaller data sample first",
-                    "link": "/tools/sample-analysis"
-                },
-                {
-                    "action": "Analysis Templates",
-                    "description": "Use pre-built analysis patterns",
-                    "link": "/templates/analysis"
-                }
-            ],
-            ContentType.ACTION_PLAN: [
-                {
-                    "action": "Planning Wizard",
-                    "description": "Guided process for action plan creation",
-                    "link": "/tools/planning-wizard"
-                },
-                {
-                    "action": "Best Practices",
-                    "description": "Review proven implementation patterns",
-                    "link": "/docs/best-practices"
-                },
-                {
-                    "action": "Example Plans",
-                    "description": "See successful optimization plans",
-                    "link": "/examples/action-plans"
-                }
-            ],
-            ContentType.REPORT: [
-                {
-                    "action": "Report Builder",
-                    "description": "Interactive report generation tool",
-                    "link": "/tools/report-builder"
-                },
-                {
-                    "action": "Metrics Dashboard",
-                    "description": "View real-time metrics and trends",
-                    "link": "/dashboard/metrics"
-                },
-                {
-                    "action": "Export Templates",
-                    "description": "Download report templates",
-                    "link": "/templates/reports"
-                }
-            ]
+            ContentType.OPTIMIZATION: self._create_optimization_suggestions(),
+            ContentType.DATA_ANALYSIS: self._create_data_analysis_suggestions(),
+            ContentType.ACTION_PLAN: self._create_action_plan_suggestions(),
+            ContentType.REPORT: self._create_report_suggestions()
+        }
+    
+    def _create_optimization_suggestions(self) -> List[Dict[str, str]]:
+        """Create recovery suggestions for optimization content"""
+        return [
+            self._create_suggestion("Use Optimization Template", "Provide specific optimization patterns and metrics", "/templates/optimization"),
+            self._create_suggestion("Run Diagnostics", "Analyze your system to identify specific bottlenecks", "/tools/diagnostics"),
+            self._create_suggestion("Schedule Consultation", "Get expert help with specific optimization requirements", "/support/consultation")
+        ]
+    
+    def _create_data_analysis_suggestions(self) -> List[Dict[str, str]]:
+        """Create recovery suggestions for data analysis content"""
+        return [
+            self._create_suggestion("Data Validation Tool", "Check and fix data format issues", "/tools/data-validator"),
+            self._create_suggestion("Sample Analysis", "Try with a smaller data sample first", "/tools/sample-analysis"),
+            self._create_suggestion("Analysis Templates", "Use pre-built analysis patterns", "/templates/analysis")
+        ]
+    
+    def _create_action_plan_suggestions(self) -> List[Dict[str, str]]:
+        """Create recovery suggestions for action plan content"""
+        return [
+            self._create_suggestion("Planning Wizard", "Guided process for action plan creation", "/tools/planning-wizard"),
+            self._create_suggestion("Best Practices", "Review proven implementation patterns", "/docs/best-practices"),
+            self._create_suggestion("Example Plans", "See successful optimization plans", "/examples/action-plans")
+        ]
+    
+    def _create_report_suggestions(self) -> List[Dict[str, str]]:
+        """Create recovery suggestions for report content"""
+        return [
+            self._create_suggestion("Report Builder", "Interactive report generation tool", "/tools/report-builder"),
+            self._create_suggestion("Metrics Dashboard", "View real-time metrics and trends", "/dashboard/metrics"),
+            self._create_suggestion("Export Templates", "Download report templates", "/templates/reports")
+        ]
+    
+    def _create_suggestion(self, action: str, description: str, link: str) -> Dict[str, str]:
+        """Create a single recovery suggestion"""
+        return {
+            "action": action,
+            "description": description,
+            "link": link
         }
     
     def get_diagnostic_tips(self, failure_reason: FailureReason) -> List[str]:

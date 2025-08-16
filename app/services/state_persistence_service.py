@@ -34,6 +34,68 @@ class StatePersistenceService:
         self.redis_manager = redis_manager
         self.redis_ttl = 3600  # 1 hour TTL for Redis cache
     
+    def _serialize_agent_state(self, state: DeepAgentState) -> tuple[Dict[str, Any], str]:
+        """Serialize agent state to dict and JSON"""
+        state_dict = state.model_dump()
+        state_json = json.dumps(state_dict, cls=DateTimeEncoder)
+        return state_dict, state_json
+    
+    async def _save_state_to_redis(self, redis_client, run_id: str, state_json: str) -> None:
+        """Save agent state to Redis"""
+        if not redis_client:
+            return
+        redis_key = f"agent_state:{run_id}"
+        await redis_client.set(redis_key, state_json, ex=self.redis_ttl)
+    
+    def _create_state_summary(self, state: DeepAgentState) -> Dict[str, bool]:
+        """Create state summary for thread context"""
+        return {
+            "has_triage": state.triage_result is not None,
+            "has_data": state.data_result is not None,
+            "has_optimizations": state.optimizations_result is not None,
+            "has_action_plan": state.action_plan_result is not None,
+            "has_report": state.report_result is not None
+        }
+    
+    def _create_thread_context(self, run_id: str, thread_id: str, user_id: str, state: DeepAgentState) -> Dict[str, Any]:
+        """Create thread context dictionary"""
+        return {
+            "current_run_id": run_id,
+            "user_id": user_id,
+            "last_updated": time.time(),
+            "state_summary": self._create_state_summary(state)
+        }
+    
+    async def _save_thread_context_to_redis(self, redis_client, thread_id: str, thread_context: Dict[str, Any]) -> None:
+        """Save thread context to Redis"""
+        if not redis_client:
+            return
+        thread_key = f"thread_context:{thread_id}"
+        context_json = json.dumps(thread_context, cls=DateTimeEncoder)
+        await redis_client.set(thread_key, context_json, ex=self.redis_ttl * 24)
+    
+    async def _get_run_from_db(self, db_session: AsyncSession, run_id: str) -> Optional[Run]:
+        """Get run from database by ID"""
+        result = await db_session.execute(select(Run).where(Run.id == run_id))
+        return result.scalar_one_or_none()
+    
+    async def _update_run_metadata(self, run: Run, state_dict: Dict[str, Any], thread_id: str, user_id: str) -> None:
+        """Update run metadata with state information"""
+        run.metadata_ = run.metadata_ or {}
+        run.metadata_["state"] = state_dict
+        run.metadata_["thread_id"] = thread_id
+        run.metadata_["user_id"] = user_id
+    
+    async def _update_postgresql_state(self, db_session: AsyncSession, run_id: str, state_dict: Dict[str, Any], thread_id: str, user_id: str) -> None:
+        """Update PostgreSQL with agent state"""
+        if not db_session:
+            return
+        run = await self._get_run_from_db(db_session, run_id)
+        if run:
+            await self._update_run_metadata(run, state_dict, thread_id, user_id)
+            await db_session.flush()
+            logger.info(f"Persisted state for run {run_id} to database")
+    
     async def save_agent_state(
         self,
         run_id: str,
@@ -44,59 +106,14 @@ class StatePersistenceService:
     ) -> bool:
         """Save agent state to both Redis and PostgreSQL"""
         try:
-            # Serialize state for storage
-            state_dict = state.model_dump()
-            state_json = json.dumps(state_dict, cls=DateTimeEncoder)
-            
-            # Save to Redis for fast access
-            redis_key = f"agent_state:{run_id}"
+            state_dict, state_json = self._serialize_agent_state(state)
             redis_client = await self.redis_manager.get_client()
-            if redis_client:
-                await redis_client.set(
-                    redis_key,
-                    state_json,
-                    ex=self.redis_ttl
-                )
-            
-            # Also save thread context
-            thread_key = f"thread_context:{thread_id}"
-            thread_context = {
-                "current_run_id": run_id,
-                "user_id": user_id,
-                "last_updated": time.time(),
-                "state_summary": {
-                    "has_triage": state.triage_result is not None,
-                    "has_data": state.data_result is not None,
-                    "has_optimizations": state.optimizations_result is not None,
-                    "has_action_plan": state.action_plan_result is not None,
-                    "has_report": state.report_result is not None
-                }
-            }
-            if redis_client:
-                await redis_client.set(
-                    thread_key,
-                    json.dumps(thread_context, cls=DateTimeEncoder),
-                    ex=self.redis_ttl * 24  # Keep thread context for 24 hours
-                )
-            
-            # Update Run metadata in PostgreSQL
-            if db_session:
-                result = await db_session.execute(
-                    select(Run).where(Run.id == run_id)
-                )
-                run = result.scalar_one_or_none()
-                if run:
-                    run.metadata_ = run.metadata_ or {}
-                    run.metadata_["state"] = state_dict
-                    run.metadata_["thread_id"] = thread_id
-                    run.metadata_["user_id"] = user_id
-                    # Don't commit here - let caller manage transaction
-                    await db_session.flush()
-                    logger.info(f"Persisted state for run {run_id} to database")
-            
+            await self._save_state_to_redis(redis_client, run_id, state_json)
+            thread_context = self._create_thread_context(run_id, thread_id, user_id, state)
+            await self._save_thread_context_to_redis(redis_client, thread_id, thread_context)
+            await self._update_postgresql_state(db_session, run_id, state_dict, thread_id, user_id)
             logger.info(f"Successfully saved agent state for run {run_id}")
             return True
-            
         except Exception as e:
             logger.error(f"Failed to save agent state for run {run_id}: {e}")
             return False

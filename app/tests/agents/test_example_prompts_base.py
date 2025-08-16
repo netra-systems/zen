@@ -44,64 +44,60 @@ EXAMPLE_PROMPTS = [
 ]
 
 
-def setup_real_infrastructure():
-    """Setup infrastructure with real LLM calls enabled"""
-    config = get_config()
-    
-    # Mock database session for testing
+def _create_mock_db_session():
+    """Create mock database session for testing"""
     db_session = AsyncMock(spec=AsyncSession)
     db_session.commit = AsyncMock()
     db_session.rollback = AsyncMock()
     db_session.close = AsyncMock()
-    
-    # Create LLM Manager (can be mocked for test runs without API keys)
+    return db_session
+
+def _create_mock_llm_manager():
+    """Create mock LLM Manager with proper async functions"""
     llm_manager = Mock(spec=LLMManager)
-    
-    # Create proper async mock that returns expected data structure
+    llm_manager.call_llm = _get_mock_call_llm()
+    llm_manager.ask_llm = _get_mock_ask_llm()
+    llm_manager.ask_structured_llm = _get_mock_ask_structured_llm()
+    llm_manager.get = Mock(return_value=Mock())  # Add get method for config access
+    return llm_manager
+
+def _get_mock_call_llm():
+    """Get mock call_llm async function"""
     async def mock_call_llm(*args, **kwargs):
-        return {
-            "content": "Based on analysis, reduce costs by switching to efficient models.",
-            "tool_calls": []
-        }
-    
+        return {"content": "Based on analysis, reduce costs by switching to efficient models.", "tool_calls": []}
+    return mock_call_llm
+
+def _get_mock_ask_llm():
+    """Get mock ask_llm async function"""
     async def mock_ask_llm(*args, **kwargs):
         return json.dumps({
-            "category": "optimization",
-            "analysis": "Cost optimization required",
+            "category": "optimization", "analysis": "Cost optimization required",
             "recommendations": ["Switch to GPT-3.5 for low-complexity tasks", "Implement caching"]
         })
-    
+    return mock_ask_llm
+
+def _get_mock_ask_structured_llm():
+    """Get mock ask_structured_llm async function"""
     async def mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
         from app.schemas import TriageResult
-        # Return a mock instance of the requested schema
         if schema == TriageResult:
             return TriageResult(
-                category="optimization",
-                severity="medium",
+                category="optimization", severity="medium",
                 analysis="Cost optimization analysis for provided prompt",
                 requirements=["cost reduction", "performance maintenance"],
                 next_steps=["analyze_costs", "identify_optimization_opportunities"],
                 data_needed=["current_costs", "usage_patterns"],
                 suggested_tools=["cost_analyzer", "performance_monitor"]
             )
-        # For other schemas, return a generic instance
         return schema()
-    
-    llm_manager.call_llm = mock_call_llm
-    llm_manager.ask_llm = mock_ask_llm
-    llm_manager.ask_structured_llm = mock_ask_structured_llm
-    llm_manager.get = Mock(return_value=Mock())  # Add get method for config access
-    
-    # Create real WebSocket Manager
-    websocket_manager = WebSocketManager()
-    
-    # Create real services with appropriate mocks
+    return mock_ask_structured_llm
+
+def _create_mock_services():
+    """Create mock services for testing infrastructure"""
     synthetic_data_service = Mock(spec=SyntheticDataService)
     synthetic_data_service.generate_workload = AsyncMock(return_value={
-        "workload_id": str(uuid.uuid4()),
-        "category": WorkloadCategory.RAG_PIPELINE.value,
-        "data": {"test": "data"},
-        "metadata": {"generated_at": datetime.now().isoformat()}
+        "workload_id": str(uuid.uuid4()), "category": WorkloadCategory.RAG_PIPELINE.value,
+        "data": {"test": "data"}, "metadata": {"generated_at": datetime.now().isoformat()}
     })
     
     quality_gate_service = Mock(spec=QualityGateService)
@@ -111,11 +107,12 @@ def setup_real_infrastructure():
     corpus_service.search = AsyncMock(return_value=[])
     corpus_service.ingest = AsyncMock(return_value={"success": True})
     
+    return synthetic_data_service, quality_gate_service, corpus_service
+
+def _create_additional_mocks():
+    """Create additional mock components"""
     agent_service = Mock(spec=AgentService)
-    agent_service.process_message = AsyncMock(return_value={
-        "response": "Test response",
-        "tool_calls": []
-    })
+    agent_service.process_message = AsyncMock(return_value={"response": "Test response", "tool_calls": []})
     
     apex_tool_selector = Mock(spec=ApexToolSelector)
     apex_tool_selector.select_best_tool = AsyncMock(return_value="cost_analyzer")
@@ -125,23 +122,26 @@ def setup_real_infrastructure():
     state_persistence_service_mock.load_state = AsyncMock(return_value=None)
     
     tool_dispatcher = Mock(spec=ToolDispatcher)
-    tool_dispatcher.dispatch = AsyncMock(return_value={
-        "response": "Tool executed successfully",
-        "success": True
-    })
+    tool_dispatcher.dispatch = AsyncMock(return_value={"response": "Tool executed successfully", "success": True})
+    
+    return agent_service, apex_tool_selector, state_persistence_service_mock, tool_dispatcher
+
+def setup_real_infrastructure():
+    """Setup infrastructure with real LLM calls enabled"""
+    config = get_config()
+    db_session = _create_mock_db_session()
+    llm_manager = _create_mock_llm_manager()
+    websocket_manager = WebSocketManager()
+    
+    synthetic_data_service, quality_gate_service, corpus_service = _create_mock_services()
+    agent_service, apex_tool_selector, state_persistence_service_mock, tool_dispatcher = _create_additional_mocks()
     
     return {
-        "config": config,
-        "db_session": db_session,
-        "llm_manager": llm_manager,
-        "websocket_manager": websocket_manager,
-        "tool_dispatcher": tool_dispatcher,
-        "synthetic_data_service": synthetic_data_service,
-        "quality_gate_service": quality_gate_service,
-        "corpus_service": corpus_service,
-        "agent_service": agent_service,
-        "apex_tool_selector": apex_tool_selector,
-        "state_persistence_service": state_persistence_service_mock
+        "config": config, "db_session": db_session, "llm_manager": llm_manager,
+        "websocket_manager": websocket_manager, "tool_dispatcher": tool_dispatcher,
+        "synthetic_data_service": synthetic_data_service, "quality_gate_service": quality_gate_service,
+        "corpus_service": corpus_service, "agent_service": agent_service,
+        "apex_tool_selector": apex_tool_selector, "state_persistence_service": state_persistence_service_mock
     }
 
 

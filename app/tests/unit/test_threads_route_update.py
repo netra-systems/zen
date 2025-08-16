@@ -33,8 +33,6 @@ def mock_user():
 
 class TestUpdateThread:
     """Test cases for PUT /{thread_id} endpoint"""
-    
-    @pytest.mark.asyncio
     @patch('app.routes.threads_route.time.time')
     async def test_update_thread_success(self, mock_time, mock_db, mock_user):
         """Test successful thread update"""
@@ -53,8 +51,6 @@ class TestUpdateThread:
         assert mock_thread.metadata_["new_field"] == "value"
         assert mock_thread.metadata_["updated_at"] == 1234567900
         mock_db.commit.assert_called_once()
-    
-    @pytest.mark.asyncio
     @patch('app.routes.threads_route.time.time')
     async def test_update_thread_empty_metadata(self, mock_time, mock_db, mock_user):
         """Test updating thread with empty initial metadata"""
@@ -79,8 +75,6 @@ class TestUpdateThread:
         assert mock_thread.metadata_ != None
         assert mock_thread.metadata_["title"] == "New Title"
         assert mock_thread.metadata_["updated_at"] == 1234567900
-    
-    @pytest.mark.asyncio
     async def test_update_thread_not_found(self, mock_db, mock_user):
         """Test updating non-existent thread"""
         with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo:
@@ -92,8 +86,6 @@ class TestUpdateThread:
                 await update_thread("nonexistent", thread_update, mock_db, mock_user)
             
             assert_http_exception(exc_info, 404, "Thread not found")
-    
-    @pytest.mark.asyncio
     async def test_update_thread_access_denied(self, mock_db, mock_user):
         """Test updating thread owned by another user"""
         mock_thread = create_access_denied_thread()
@@ -107,8 +99,6 @@ class TestUpdateThread:
                 await update_thread("thread_abc123", thread_update, mock_db, mock_user)
             
             assert_http_exception(exc_info, 403, "Access denied")
-    
-    @pytest.mark.asyncio
     async def test_update_thread_exception(self, mock_db, mock_user):
         """Test general exception in update_thread"""
         with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \

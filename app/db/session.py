@@ -7,9 +7,9 @@ from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-class SessionManager:
-    """Centralized session management with connection pooling and monitoring."""
-    _instance: Optional['SessionManager'] = None
+class DatabaseSessionManager:
+    """Centralized database session management with connection pooling and monitoring."""
+    _instance: Optional['DatabaseSessionManager'] = None
     _lock = asyncio.Lock()
     
     def __new__(cls):
@@ -55,7 +55,7 @@ class SessionManager:
         }
 
 # Global session manager instance
-session_manager = SessionManager()
+session_manager = DatabaseSessionManager()
 
 def _validate_session_factory():
     """Validate that session factory is initialized."""

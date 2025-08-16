@@ -44,8 +44,6 @@ class TestUnitOfWorkTransactions:
         assert uow.references != None
         assert uow.threads._session is mock_session
         assert uow.messages._session is mock_session
-
-    @pytest.mark.asyncio
     async def test_unit_of_work_successful_transaction(self, mock_async_session_factory):
         """Test successful Unit of Work transaction"""
         factory, mock_session = mock_async_session_factory
@@ -53,8 +51,6 @@ class TestUnitOfWorkTransactions:
             async with UnitOfWork() as uow:
                 self._assert_uow_repositories_initialized(uow, mock_session)
         mock_session.rollback.assert_not_called()
-
-    @pytest.mark.asyncio
     async def test_unit_of_work_rollback_on_exception(self, mock_async_session_factory):
         """Test Unit of Work rollback on exception"""
         factory, mock_session = mock_async_session_factory
@@ -72,15 +68,11 @@ class TestUnitOfWorkTransactions:
         assert uow._external_session == True
         external_session.close.assert_not_called()
         external_session.rollback.assert_not_called()
-
-    @pytest.mark.asyncio
     async def test_unit_of_work_with_external_session(self):
         """Test Unit of Work with externally provided session"""
         external_session = AsyncMock(spec=AsyncSession)
         async with UnitOfWork(external_session) as uow:
             self._assert_external_session_handling(external_session, uow)
-
-    @pytest.mark.asyncio
     async def test_unit_of_work_nested_transaction_handling(self, mock_async_session_factory):
         """Test nested Unit of Work transaction behavior"""
         factory, mock_session = mock_async_session_factory
@@ -90,8 +82,6 @@ class TestUnitOfWorkTransactions:
                 async with UnitOfWork(outer_uow._session) as inner_uow:
                     assert inner_uow._session is outer_uow._session
                     assert inner_uow._external_session == True
-
-    @pytest.mark.asyncio
     async def test_unit_of_work_repository_isolation(self, mock_async_session_factory):
         """Test repository isolation within Unit of Work"""
         factory, mock_session = mock_async_session_factory
@@ -102,8 +92,6 @@ class TestUnitOfWorkTransactions:
                 assert uow.messages._session is mock_session
                 assert uow.runs._session is mock_session
                 assert uow.references._session is mock_session
-
-    @pytest.mark.asyncio 
     async def test_unit_of_work_transaction_state_consistency(self, mock_async_session_factory):
         """Test transaction state consistency across operations"""
         factory, mock_session = mock_async_session_factory
@@ -116,8 +104,6 @@ class TestUnitOfWorkTransactions:
                 assert uow._session is mock_session
         # Should complete successfully without rollback
         mock_session.rollback.assert_not_called()
-
-    @pytest.mark.asyncio
     async def test_unit_of_work_exception_propagation(self, mock_async_session_factory):
         """Test exception propagation from Unit of Work context"""
         factory, mock_session = mock_async_session_factory
@@ -128,8 +114,6 @@ class TestUnitOfWorkTransactions:
                     raise test_exception
         # Should have attempted rollback
         mock_session.rollback.assert_called_once()
-
-    @pytest.mark.asyncio
     async def test_unit_of_work_session_cleanup_on_success(self, mock_async_session_factory):
         """Test proper session cleanup on successful completion"""
         factory, mock_session = mock_async_session_factory
@@ -140,8 +124,6 @@ class TestUnitOfWorkTransactions:
         mock_session.rollback.assert_not_called()
         # Session context should have been properly exited
         factory.return_value.__aexit__.assert_called_once()
-
-    @pytest.mark.asyncio
     async def test_unit_of_work_external_session_no_cleanup(self):
         """Test external session is not cleaned up by Unit of Work"""
         external_session = AsyncMock(spec=AsyncSession)

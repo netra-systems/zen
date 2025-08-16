@@ -17,8 +17,6 @@ from .test_fixtures import *
 
 class TestDataQualityValidation:
     """Test data quality and validation mechanisms"""
-
-    @pytest.mark.asyncio
     async def test_schema_validation(self, validation_service):
         """Test schema validation of generated records"""
         valid_record = {
@@ -38,8 +36,6 @@ class TestDataQualityValidation:
         
         assert validate_schema(valid_record) == True
         assert validate_schema(invalid_record) == False
-
-    @pytest.mark.asyncio
     async def test_statistical_distribution_validation(self, validation_service):
         """Test validation of statistical distributions"""
         # Generate sample records with latency values for distribution testing
@@ -64,8 +60,6 @@ class TestDataQualityValidation:
         assert validation_result.chi_square_p_value > 0.05
         assert validation_result.ks_test_p_value > 0.05
         assert validation_result.distribution_match == True
-
-    @pytest.mark.asyncio
     async def test_referential_integrity_validation(self, validation_service):
         """Test referential integrity in trace hierarchies"""
         # Create mock trace hierarchies with spans
@@ -89,8 +83,6 @@ class TestDataQualityValidation:
         assert validation_result.valid_parent_child_relationships == True
         assert validation_result.temporal_ordering_valid == True
         assert validation_result.orphaned_spans == 0
-
-    @pytest.mark.asyncio
     async def test_temporal_consistency_validation(self, validation_service):
         """Test temporal consistency of generated data"""
         # Generate sample records with timestamps
@@ -108,8 +100,6 @@ class TestDataQualityValidation:
         assert validation_result.all_within_window == True
         assert validation_result.chronological_order == True
         assert validation_result.no_future_timestamps == True
-
-    @pytest.mark.asyncio
     async def test_data_completeness_validation(self, validation_service):
         """Test data completeness and required fields"""
         # Generate sample records with all required fields
@@ -131,8 +121,6 @@ class TestDataQualityValidation:
         
         assert validation_result.all_required_fields_present == True
         assert validation_result.null_value_percentage < 0.01
-
-    @pytest.mark.asyncio
     async def test_anomaly_detection_in_generated_data(self, validation_service):
         """Test anomaly detection in generated data"""
         config = GenerationConfig(
@@ -156,8 +144,6 @@ class TestDataQualityValidation:
         # Increased tolerance to account for statistical variance in random generation
         anomaly_rate = len(detected_anomalies) / len(records)
         assert 0.030 <= anomaly_rate <= 0.070
-
-    @pytest.mark.asyncio
     async def test_correlation_preservation(self, validation_service):
         """Test preservation of correlations in generated data"""
         # Generate sample records with correlated fields
@@ -179,8 +165,6 @@ class TestDataQualityValidation:
         )
         
         assert correlation > 0.5  # Positive correlation expected
-
-    @pytest.mark.asyncio
     @pytest.mark.skip(reason="calculate_quality_metrics method not implemented in SyntheticDataService")
     async def test_quality_metrics_calculation(self, validation_service):
         """Test calculation of quality metrics"""
@@ -194,8 +178,6 @@ class TestDataQualityValidation:
         assert metrics.distribution_divergence < 0.1
         assert metrics.temporal_consistency > 0.98
         assert metrics.corpus_coverage > 0.5
-
-    @pytest.mark.asyncio
     @pytest.mark.skip(reason="calculate_diversity method not implemented in SyntheticDataService")
     async def test_data_diversity_validation(self, validation_service):
         """Test diversity of generated data"""
@@ -208,8 +190,6 @@ class TestDataQualityValidation:
         assert diversity_metrics.unique_traces == 1000
         assert diversity_metrics.workload_type_entropy > 1.0
         assert diversity_metrics.tool_usage_variety > 10
-
-    @pytest.mark.asyncio
     @pytest.mark.skip(reason="generate_validation_report method not implemented in SyntheticDataService")
     async def test_validation_report_generation(self, validation_service):
         """Test comprehensive validation report generation"""

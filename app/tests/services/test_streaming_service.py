@@ -13,9 +13,6 @@ from app.services.streaming_service import (
     TextStreamProcessor,
     get_streaming_service
 )
-
-
-@pytest.mark.asyncio
 class TestStreamingService:
     """Test streaming service."""
     

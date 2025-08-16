@@ -18,9 +18,15 @@ from typing import Any, Dict, Optional, Union, Literal
 from pydantic import BaseModel, Field
 from datetime import datetime
 
-# Import WebSocket base types from the main websocket message module
-from app.schemas.websocket_message_types import ServerMessage
+# Import WebSocket base types from registry to avoid circular imports
+from app.schemas.registry import WebSocketMessage
 from app.schemas.core_enums import WebSocketMessageType, AgentStatus
+
+
+# Base class for server messages
+class ServerMessage(WebSocketMessage):
+    """Base class for server-to-client messages."""
+    pass
 
 
 # Server-to-client message types
@@ -156,6 +162,12 @@ class ThreadRenamedMessage(ServerMessage):
     payload: Dict[str, Any] = Field(description="Thread rename data")
 
 
+class ThreadSwitchedMessage(ServerMessage):
+    """Message indicating thread has been switched."""
+    type: Literal[WebSocketMessageType.THREAD_SWITCHED] = WebSocketMessageType.THREAD_SWITCHED
+    payload: Dict[str, Any] = Field(description="Thread switch data")
+
+
 class StepCreatedMessage(ServerMessage):
     """Message indicating step has been created."""
     type: Literal[WebSocketMessageType.STEP_CREATED] = WebSocketMessageType.STEP_CREATED
@@ -186,6 +198,42 @@ class FinalReportMessage(ServerMessage):
     payload: Dict[str, Any] = Field(description="Final report data")
 
 
+class MessageReceivedMessage(ServerMessage):
+    """Message indicating a message has been received."""
+    type: Literal[WebSocketMessageType.MESSAGE_RECEIVED] = WebSocketMessageType.MESSAGE_RECEIVED
+    payload: Dict[str, Any] = Field(description="Message received confirmation data")
+
+
+class MCPToolDiscoveryMessage(ServerMessage):
+    """Message with MCP tool discovery results."""
+    type: Literal[WebSocketMessageType.MCP_TOOL_DISCOVERY] = WebSocketMessageType.MCP_TOOL_DISCOVERY
+    payload: Dict[str, Any] = Field(description="MCP tool discovery data with server_name, tools")
+
+
+class MCPToolExecutionMessage(ServerMessage):
+    """Message indicating MCP tool execution."""
+    type: Literal[WebSocketMessageType.MCP_TOOL_EXECUTION] = WebSocketMessageType.MCP_TOOL_EXECUTION
+    payload: Dict[str, Any] = Field(description="MCP tool execution data with server_name, tool_name, arguments")
+
+
+class MCPToolResultMessage(ServerMessage):
+    """Message with MCP tool execution result."""
+    type: Literal[WebSocketMessageType.MCP_TOOL_RESULT] = WebSocketMessageType.MCP_TOOL_RESULT
+    payload: Dict[str, Any] = Field(description="MCP tool result data with server_name, tool_name, result")
+
+
+class MCPServerConnectedMessage(ServerMessage):
+    """Message indicating MCP server connected."""
+    type: Literal[WebSocketMessageType.MCP_SERVER_CONNECTED] = WebSocketMessageType.MCP_SERVER_CONNECTED
+    payload: Dict[str, Any] = Field(description="MCP server connection data")
+
+
+class MCPServerDisconnectedMessage(ServerMessage):
+    """Message indicating MCP server disconnected."""
+    type: Literal[WebSocketMessageType.MCP_SERVER_DISCONNECTED] = WebSocketMessageType.MCP_SERVER_DISCONNECTED
+    payload: Dict[str, Any] = Field(description="MCP server disconnection data")
+
+
 # Union type for all server-to-client messages
 ServerMessageUnion = Union[
     AgentStartedMessage,
@@ -208,9 +256,16 @@ ServerMessageUnion = Union[
     ThreadDeletedMessage,
     ThreadLoadedMessage,
     ThreadRenamedMessage,
+    ThreadSwitchedMessage,
     StepCreatedMessage,
     PartialResultMessage,
     FinalReportMessage,
+    MessageReceivedMessage,
+    MCPToolDiscoveryMessage,
+    MCPToolExecutionMessage,
+    MCPToolResultMessage,
+    MCPServerConnectedMessage,
+    MCPServerDisconnectedMessage,
     ErrorMessage,
     ConnectionEstablishedMessage,
     StreamChunkMessage,
@@ -240,9 +295,16 @@ __all__ = [
     "ThreadDeletedMessage", 
     "ThreadLoadedMessage",
     "ThreadRenamedMessage",
+    "ThreadSwitchedMessage",
     "StepCreatedMessage",
     "PartialResultMessage",
     "FinalReportMessage",
+    "MessageReceivedMessage",
+    "MCPToolDiscoveryMessage",
+    "MCPToolExecutionMessage", 
+    "MCPToolResultMessage",
+    "MCPServerConnectedMessage",
+    "MCPServerDisconnectedMessage",
     "ErrorMessage",
     "ConnectionEstablishedMessage",
     "StreamChunkMessage",

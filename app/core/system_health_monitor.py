@@ -29,14 +29,22 @@ class SystemHealthMonitor:
     
     def __init__(self, check_interval: int = 30):
         self.check_interval = check_interval
+        self._initialize_core_components()
+        self._initialize_monitoring_state()
+        self._register_default_checkers()
+    
+    def _initialize_core_components(self) -> None:
+        """Initialize core health monitoring components."""
         self.component_health: Dict[str, ComponentHealth] = {}
         self.alert_manager = AlertManager()
         self.health_thresholds = {"healthy": 0.8, "degraded": 0.5, "unhealthy": 0.2}
+        self.component_checkers: Dict[str, Callable] = {}
+    
+    def _initialize_monitoring_state(self) -> None:
+        """Initialize monitoring state variables."""
         self._monitoring_task: Optional[asyncio.Task] = None
         self._running = False
         self.start_time = time.time()
-        self.component_checkers: Dict[str, Callable] = {}
-        self._register_default_checkers()
     
     def register_component_checker(self, component_name: str, checker_func: Callable) -> None:
         """Register a health checker for a component."""
@@ -72,25 +80,38 @@ class SystemHealthMonitor:
         """Main monitoring loop with enhanced error handling."""
         while self._running:
             try:
-                await self._perform_health_checks()
-                await self._evaluate_system_health()
-                await self._check_thresholds()
+                await self._execute_monitoring_cycle()
                 await asyncio.sleep(self.check_interval)
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"Error in health monitoring loop: {e}")
-                await asyncio.sleep(5)
+                await self._handle_monitoring_error(e)
+    
+    async def _execute_monitoring_cycle(self) -> None:
+        """Execute one complete monitoring cycle."""
+        await self._perform_health_checks()
+        await self._evaluate_system_health()
+        await self._check_thresholds()
+    
+    async def _handle_monitoring_error(self, error: Exception) -> None:
+        """Handle error in monitoring loop."""
+        logger.error(f"Error in health monitoring loop: {error}")
+        await asyncio.sleep(5)
     
     async def _perform_health_checks(self) -> None:
         """Perform health checks on all registered components."""
+        check_tasks = self._create_health_check_tasks()
+        if check_tasks:
+            results = await asyncio.gather(*check_tasks, return_exceptions=True)
+            await self._process_check_results(results)
+    
+    def _create_health_check_tasks(self) -> list:
+        """Create health check tasks for all components."""
         check_tasks = []
         for component_name, checker_func in self.component_checkers.items():
             task = asyncio.create_task(self._execute_health_check(component_name, checker_func))
             check_tasks.append(task)
-        if check_tasks:
-            results = await asyncio.gather(*check_tasks, return_exceptions=True)
-            await self._process_check_results(results)
+        return check_tasks
     
     async def _execute_health_check(self, component_name: str, checker_func: Callable) -> HealthCheckResult:
         """Execute health check for a specific component."""
@@ -98,8 +119,12 @@ class SystemHealthMonitor:
             result = await self._call_checker_function(checker_func)
             return self._process_check_result(component_name, result)
         except Exception as e:
-            logger.error(f"Health check failed for {component_name}: {e}")
-            return self._create_failed_health_result(component_name, e)
+            return self._handle_health_check_error(component_name, e)
+    
+    def _handle_health_check_error(self, component_name: str, error: Exception) -> HealthCheckResult:
+        """Handle health check error and create result."""
+        logger.error(f"Health check failed for {component_name}: {error}")
+        return self._create_failed_health_result(component_name, error)
     
     async def _call_checker_function(self, checker_func: Callable):
         """Call checker function handling both sync and async."""
@@ -125,11 +150,14 @@ class SystemHealthMonitor:
     async def _process_check_results(self, results: List[Any]) -> None:
         """Process health check results and update component health."""
         for result in results:
-            if isinstance(result, Exception):
-                logger.error(f"Health check exception: {result}")
-                continue
-            if isinstance(result, HealthCheckResult):
-                await self._update_component_from_result(result)
+            await self._process_individual_result(result)
+    
+    async def _process_individual_result(self, result: Any) -> None:
+        """Process individual health check result."""
+        if isinstance(result, Exception):
+            logger.error(f"Health check exception: {result}")
+        elif isinstance(result, HealthCheckResult):
+            await self._update_component_from_result(result)
     
     def _calculate_health_status(self, health_score: float) -> HealthStatus:
         """Calculate health status from health score."""
@@ -154,10 +182,21 @@ class SystemHealthMonitor:
         """Create ComponentHealth object from result."""
         return ComponentHealth(
             name=result.component_name, status=status, health_score=result.health_score,
-            last_check=datetime.now(UTC), error_count=1 if not result.success else 0,
-            uptime=time.time() - self.start_time,
-            metadata={**result.metadata, "response_time_ms": result.response_time_ms}
+            last_check=datetime.now(UTC), error_count=self._calculate_error_count(result),
+            uptime=self._calculate_uptime(), metadata=self._create_metadata(result)
         )
+    
+    def _calculate_error_count(self, result: HealthCheckResult) -> int:
+        """Calculate error count from result."""
+        return 1 if not result.success else 0
+    
+    def _calculate_uptime(self) -> float:
+        """Calculate system uptime in seconds."""
+        return time.time() - self.start_time
+    
+    def _create_metadata(self, result: HealthCheckResult) -> Dict[str, Any]:
+        """Create metadata dictionary from result."""
+        return {**result.metadata, "response_time_ms": result.response_time_ms}
     
     async def _check_for_status_change_alert(self, previous_health: Optional[ComponentHealth], 
                                            current_health: ComponentHealth) -> None:
@@ -202,23 +241,41 @@ class SystemHealthMonitor:
     def _calculate_health_statistics(self) -> Dict[str, Any]:
         """Calculate system health statistics."""
         total_components = len(self.component_health)
-        healthy_count = len([h for h in self.component_health.values() 
-                           if h.status == HealthStatus.HEALTHY])
-        critical_count = len([h for h in self.component_health.values() 
-                            if h.status == HealthStatus.CRITICAL])
+        healthy_count = self._count_components_with_status(HealthStatus.HEALTHY)
+        critical_count = self._count_components_with_status(HealthStatus.CRITICAL)
+        return self._create_health_stats_dict(total_components, healthy_count, critical_count)
+    
+    def _create_health_stats_dict(self, total: int, healthy: int, critical: int) -> Dict[str, Any]:
+        """Create health statistics dictionary."""
         return {
-            "total": total_components, "healthy": healthy_count,
-            "critical": critical_count, "health_pct": healthy_count / total_components
+            "total": total, "healthy": healthy, "critical": critical,
+            "health_pct": healthy / total if total > 0 else 0
         }
     
     async def _evaluate_and_alert_system_health(self, stats: Dict[str, Any]) -> None:
         """Evaluate health stats and trigger alerts."""
-        if stats["critical"] > 0 and stats["health_pct"] < 0.5:
-            message = f"System health critical: {stats['critical']} critical components, {stats['health_pct']:.1%} healthy"
-            await self._trigger_system_wide_alert("critical", message)
-        elif stats["health_pct"] < 0.7:
-            message = f"System health degraded: {stats['health_pct']:.1%} healthy components"
-            await self._trigger_system_wide_alert("warning", message)
+        if self._is_critical_system_health(stats):
+            await self._alert_critical_system_health(stats)
+        elif self._is_degraded_system_health(stats):
+            await self._alert_degraded_system_health(stats)
+    
+    def _is_critical_system_health(self, stats: Dict[str, Any]) -> bool:
+        """Check if system health is critical."""
+        return stats["critical"] > 0 and stats["health_pct"] < 0.5
+    
+    def _is_degraded_system_health(self, stats: Dict[str, Any]) -> bool:
+        """Check if system health is degraded."""
+        return stats["health_pct"] < 0.7
+    
+    async def _alert_critical_system_health(self, stats: Dict[str, Any]) -> None:
+        """Trigger critical system health alert."""
+        message = f"System health critical: {stats['critical']} critical components, {stats['health_pct']:.1%} healthy"
+        await self._trigger_system_wide_alert("critical", message)
+    
+    async def _alert_degraded_system_health(self, stats: Dict[str, Any]) -> None:
+        """Trigger degraded system health alert."""
+        message = f"System health degraded: {stats['health_pct']:.1%} healthy components"
+        await self._trigger_system_wide_alert("warning", message)
     
     async def _trigger_system_wide_alert(self, severity: str, message: str) -> None:
         """Trigger a system-wide alert."""
@@ -260,22 +317,31 @@ class SystemHealthMonitor:
     def _count_components_by_status(self) -> Dict[str, int]:
         """Count components by their health status."""
         return {
-            "healthy": len([h for h in self.component_health.values() if h.status == HealthStatus.HEALTHY]),
-            "degraded": len([h for h in self.component_health.values() if h.status == HealthStatus.DEGRADED]),
-            "unhealthy": len([h for h in self.component_health.values() if h.status == HealthStatus.UNHEALTHY]),
-            "critical": len([h for h in self.component_health.values() if h.status == HealthStatus.CRITICAL])
+            "healthy": self._count_components_with_status(HealthStatus.HEALTHY),
+            "degraded": self._count_components_with_status(HealthStatus.DEGRADED),
+            "unhealthy": self._count_components_with_status(HealthStatus.UNHEALTHY),
+            "critical": self._count_components_with_status(HealthStatus.CRITICAL)
         }
+    
+    def _count_components_with_status(self, status: HealthStatus) -> int:
+        """Count components with specific health status."""
+        return len([h for h in self.component_health.values() if h.status == status])
     
     def _build_system_overview_response(self, total_components: int, counts: Dict[str, int]) -> Dict[str, Any]:
         """Build comprehensive system overview response."""
         health_pct = counts["healthy"] / total_components
         overall_status = self._determine_system_status(health_pct, counts["critical"])
+        return self._create_overview_dict(overall_status, health_pct, total_components, counts)
+    
+    def _create_overview_dict(self, overall_status: str, health_pct: float, 
+                             total_components: int, counts: Dict[str, int]) -> Dict[str, Any]:
+        """Create system overview dictionary."""
         return {
             "overall_status": overall_status, "system_health_percentage": health_pct * 100,
             "total_components": total_components, "healthy_components": counts["healthy"],
             "degraded_components": counts["degraded"], "unhealthy_components": counts["unhealthy"],
             "critical_components": counts["critical"], "active_alerts": len(self.alert_manager.get_active_alerts()),
-            "uptime_seconds": time.time() - self.start_time
+            "uptime_seconds": self._calculate_uptime()
         }
     
     def _determine_system_status(self, health_pct: float, critical_count: int) -> str:

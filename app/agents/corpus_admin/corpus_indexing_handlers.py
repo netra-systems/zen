@@ -41,24 +41,28 @@ class IndexingErrorHandler:
         context = self._create_indexing_error_context(
             document_id, index_type, run_id, original_error
         )
-        
         error = IndexingError(document_id, index_type, context)
-        
+        return await self._execute_indexing_recovery(
+            document_id, index_type, run_id, error, context
+        )
+    
+    async def _execute_indexing_recovery(
+        self,
+        document_id: str,
+        index_type: str,
+        run_id: str,
+        error: IndexingError,
+        context: ErrorContext
+    ) -> Dict[str, Any]:
+        """Execute indexing recovery workflow."""
         try:
-            # Try indexing recovery strategies
             result = await self._attempt_indexing_recovery(
                 document_id, index_type, run_id
             )
-            if result:
-                return result
-            
-            # Queue for later indexing as fallback
-            queued_result = await self._queue_for_later_indexing(
+            return result or await self._queue_for_later_indexing(
                 document_id, index_type, run_id
             )
-            return queued_result
-            
-        except Exception as fallback_error:
+        except Exception:
             await global_error_handler.handle_error(error, context)
             raise error
     
@@ -70,16 +74,28 @@ class IndexingErrorHandler:
         original_error: Exception
     ) -> ErrorContext:
         """Create error context for indexing failures."""
+        additional_data = self._build_error_data(
+            document_id, index_type, original_error
+        )
         return ErrorContext(
             agent_name="corpus_admin_agent",
             operation_name="document_indexing",
             run_id=run_id,
-            additional_data={
-                'document_id': document_id,
-                'index_type': index_type,
-                'original_error': str(original_error)
-            }
+            additional_data=additional_data
         )
+    
+    def _build_error_data(
+        self,
+        document_id: str,
+        index_type: str,
+        original_error: Exception
+    ) -> Dict[str, Any]:
+        """Build additional data for error context."""
+        return {
+            'document_id': document_id,
+            'index_type': index_type,
+            'original_error': str(original_error)
+        }
     
     async def _attempt_indexing_recovery(
         self,
@@ -88,18 +104,12 @@ class IndexingErrorHandler:
         run_id: str
     ) -> Optional[Dict[str, Any]]:
         """Attempt indexing recovery strategies."""
-        # Try simplified indexing
         simplified_result = await self._try_simplified_indexing(
             document_id, index_type, run_id
         )
-        if simplified_result:
-            return simplified_result
-        
-        # Try alternative index type
-        alternative_result = await self._try_alternative_indexing(
+        return simplified_result or await self._try_alternative_indexing(
             document_id, index_type, run_id
         )
-        return alternative_result
     
     async def _try_simplified_indexing(
         self,
@@ -108,19 +118,31 @@ class IndexingErrorHandler:
         run_id: str
     ) -> Optional[Dict[str, Any]]:
         """Try simplified indexing approach."""
+        if not self._can_use_simplified_indexing(index_type):
+            return None
+        return await self._execute_simplified_indexing(
+            document_id, index_type, run_id
+        )
+    
+    def _can_use_simplified_indexing(self, index_type: str) -> bool:
+        """Check if simplified indexing can be used."""
+        return index_type == 'semantic' and self.search_engine is not None
+    
+    async def _execute_simplified_indexing(
+        self,
+        document_id: str,
+        index_type: str,
+        run_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """Execute simplified indexing workflow."""
         try:
-            # Use basic text indexing instead of advanced features
-            if index_type == 'semantic' and self.search_engine:
-                # Fall back to keyword indexing
-                result = await self.search_engine.index_document_simple(document_id)
-                if result:
-                    return self._create_simplified_success_response(
-                        document_id, index_type, run_id
-                    )
+            result = await self.search_engine.index_document_simple(document_id)
+            return result and self._create_simplified_success_response(
+                document_id, index_type, run_id
+            )
         except Exception as e:
             logger.debug(f"Simplified indexing failed: {e}")
-        
-        return None
+            return None
     
     def _create_simplified_success_response(
         self, document_id: str, index_type: str, run_id: str

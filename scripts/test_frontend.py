@@ -108,86 +108,96 @@ def check_dependencies() -> Dict[str, bool]:
 
 def run_jest_tests(args, isolation_manager=None) -> int:
     """Run Jest tests"""
+    jest_args = _build_base_jest_args()
+    _add_jest_coverage_args(args, jest_args, isolation_manager)
+    _add_jest_option_args(args, jest_args)
+    _add_isolation_args(isolation_manager, jest_args)
+    _add_test_selection_args(args, jest_args)
+    return _execute_jest_command(jest_args)
+
+def _build_base_jest_args():
+    """Build base Jest command arguments"""
     jest_args = ["npm", "run", "test"]
-    
-    # Always add force exit and detect open handles for Windows
     if "--" not in jest_args:
         jest_args.append("--")
     jest_args.extend(["--forceExit", "--detectOpenHandles"])
-    
-    # Add Jest-specific arguments
+    return jest_args
+
+def _add_jest_coverage_args(args, jest_args, isolation_manager):
+    """Add Jest coverage arguments"""
     if args.coverage:
         jest_args.extend(["--coverage"])
-        if isolation_manager and isolation_manager.directories:
-            coverage_dir = isolation_manager.directories.get('frontend_coverage')
-            jest_args.extend([f"--coverageDirectory={coverage_dir}"])
-        else:
-            jest_args.extend(["--coverageDirectory=../reports/frontend-coverage"])
-    
+        coverage_dir = _get_coverage_directory(isolation_manager)
+        jest_args.extend([f"--coverageDirectory={coverage_dir}"])
+
+def _get_coverage_directory(isolation_manager):
+    """Get coverage directory path"""
+    if isolation_manager and isolation_manager.directories:
+        return isolation_manager.directories.get('frontend_coverage')
+    return "../reports/frontend-coverage"
+
+def _add_jest_option_args(args, jest_args):
+    """Add Jest option arguments"""
     if args.watch:
         jest_args.extend(["--watch"])
-    
     if args.update_snapshots:
         jest_args.extend(["--updateSnapshot"])
-    
     if args.verbose:
         jest_args.extend(["--verbose"])
-    
     if args.keyword:
         jest_args.extend([f"--testNamePattern={args.keyword}"])
-    
-    # Add isolation-specific Jest arguments
+
+def _add_isolation_args(isolation_manager, jest_args):
+    """Add isolation-specific Jest arguments"""
     if isolation_manager:
         isolation_args = isolation_manager.get_jest_args()
-        # Only add cache directory arg as other args are already handled
         for arg in isolation_args:
             if "--cacheDirectory" in arg:
                 jest_args.extend([arg])
-    
+
+def _add_test_selection_args(args, jest_args):
+    """Add test selection arguments"""
     if args.tests:
         jest_args.extend(args.tests)
     elif args.category and args.category != "e2e":
-        patterns = TEST_CATEGORIES.get(args.category, [])
-        if patterns:
-            # Build testMatch patterns for the selected category
-            test_patterns = []
-            for pattern in patterns:
-                if pattern.endswith(".test.ts") or pattern.endswith(".test.tsx"):
-                    # Specific test file - add wildcard prefix
-                    test_patterns.append(f"**/{pattern}")
-                elif "/" in pattern:
-                    # Directory pattern
-                    test_patterns.append(f"**/{pattern}/**/*.test.[jt]s?(x)")
-                else:
-                    # Generic pattern
-                    test_patterns.append(f"**/{pattern}/**/*.test.[jt]s?(x)")
-            
-            # Jest can only handle one testMatch pattern at a time
-            # So we use the first pattern for directory-based categories
-            # or pass multiple test files directly
-            if len(test_patterns) == 1:
-                jest_args.extend(["--testMatch", test_patterns[0]])
-            elif args.category == "unit":
-                # For unit tests, create a combined pattern
-                jest_args.extend(["--testMatch", "**/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)"])
-            else:
-                # Pass the first pattern
-                jest_args.extend(["--testMatch", test_patterns[0]])
-    
-    # Run Jest
+        _add_category_patterns(args, jest_args)
+
+def _add_category_patterns(args, jest_args):
+    """Add test patterns for selected category"""
+    patterns = TEST_CATEGORIES.get(args.category, [])
+    if patterns:
+        test_patterns = _build_test_patterns(patterns)
+        _apply_test_patterns(args, jest_args, test_patterns)
+
+def _build_test_patterns(patterns):
+    """Build test patterns from category patterns"""
+    test_patterns = []
+    for pattern in patterns:
+        if pattern.endswith(".test.ts") or pattern.endswith(".test.tsx"):
+            test_patterns.append(f"**/{pattern}")
+        elif "/" in pattern:
+            test_patterns.append(f"**/{pattern}/**/*.test.[jt]s?(x)")
+        else:
+            test_patterns.append(f"**/{pattern}/**/*.test.[jt]s?(x)")
+    return test_patterns
+
+def _apply_test_patterns(args, jest_args, test_patterns):
+    """Apply test patterns to Jest arguments"""
+    if len(test_patterns) == 1:
+        jest_args.extend(["--testMatch", test_patterns[0]])
+    elif args.category == "unit":
+        jest_args.extend(["--testMatch", "**/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)"])
+    else:
+        jest_args.extend(["--testMatch", test_patterns[0]])
+
+def _execute_jest_command(jest_args):
+    """Execute Jest command and return exit code"""
     print(f"Running: {' '.join(jest_args)}")
     print("-" * 80)
-    
     result = subprocess.run(
-        jest_args,
-        cwd=FRONTEND_DIR,
-        capture_output=False,
-        text=True,
-        encoding='utf-8',
-        errors='replace',
-        shell=True  # Need shell=True on Windows for npm commands
+        jest_args, cwd=FRONTEND_DIR, capture_output=False,
+        text=True, encoding='utf-8', errors='replace', shell=True
     )
-    
     return result.returncode
 
 

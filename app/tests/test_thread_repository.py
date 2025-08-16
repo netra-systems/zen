@@ -26,9 +26,6 @@ def mock_db():
 def thread_repo():
     """Create a thread repository instance"""
     return ThreadRepository()
-
-
-@pytest.mark.asyncio
 async def test_create_thread_success(mock_db, thread_repo):
     """Test successful thread creation"""
     # Setup
@@ -55,9 +52,6 @@ async def test_create_thread_success(mock_db, thread_repo):
     assert result.metadata_['title'] == 'Test Thread'
     mock_db.add.assert_called_once()
     mock_db.flush.assert_called_once()  # Repository uses flush, not commit
-
-
-@pytest.mark.asyncio
 async def test_get_by_id_with_correct_parameter_order(mock_db, thread_repo):
     """Test get_by_id with correct parameter order (db first, then entity_id)"""
     # Setup
@@ -79,9 +73,6 @@ async def test_get_by_id_with_correct_parameter_order(mock_db, thread_repo):
     assert result != None
     assert result.id == 'thread_test123'
     mock_db.execute.assert_called_once()
-
-
-@pytest.mark.asyncio
 async def test_find_by_user(mock_db, thread_repo):
     """Test finding threads by user"""
     # Setup
@@ -106,9 +97,6 @@ async def test_find_by_user(mock_db, thread_repo):
     assert result[0].id == 'thread_1'
     assert result[1].id == 'thread_2'
     mock_db.execute.assert_called_once()
-
-
-@pytest.mark.asyncio
 async def test_archive_thread(mock_db, thread_repo):
     """Test archiving a thread"""
     # Setup
@@ -132,9 +120,6 @@ async def test_archive_thread(mock_db, thread_repo):
     assert mock_thread.metadata_['status'] == 'archived'
     assert 'archived_at' in mock_thread.metadata_
     mock_db.commit.assert_called_once()
-
-
-@pytest.mark.asyncio
 async def test_parameter_order_regression():
     """
     Regression test to ensure get_by_id parameter order is correct.

@@ -198,8 +198,6 @@ class TestSupervisorAgentProperties:
 
 class TestSupervisorAgentExecution:
     """Test execution methods."""
-    
-    @pytest.mark.asyncio
     async def test_execute_method(self):
         """Test execute method (BaseSubAgent compatibility)."""
         llm_manager = Mock(spec=LLMManager)
@@ -228,8 +226,6 @@ class TestSupervisorAgentExecution:
         supervisor.run.assert_called_once_with(
             "test query", "thread-123", "user-456", "run-789"
         )
-    
-    @pytest.mark.asyncio
     async def test_execute_method_with_defaults(self):
         """Test execute method with default values."""
         llm_manager = Mock(spec=LLMManager)
@@ -270,8 +266,6 @@ class TestSupervisorAgentExecution:
         assert context["thread_id"] == "thread-123"
         assert context["user_id"] == "user-456"
         assert context["run_id"] == "run-789"
-    
-    @pytest.mark.asyncio
     async def test_run_method_with_execution_lock(self):
         """Test run method uses execution lock."""
         llm_manager = Mock(spec=LLMManager)
@@ -305,8 +299,6 @@ class TestSupervisorAgentExecution:
         # Verify lock was used
         assert lock_acquired
         assert isinstance(result, DeepAgentState)
-    
-    @pytest.mark.asyncio
     async def test_execute_with_context(self):
         """Test _execute_with_context method."""
         llm_manager = Mock(spec=LLMManager)
@@ -337,8 +329,6 @@ class TestSupervisorAgentExecution:
 
 class TestSupervisorAgentHooks:
     """Test hook execution."""
-    
-    @pytest.mark.asyncio
     async def test_run_hooks_success(self):
         """Test successful hook execution."""
         llm_manager = Mock(spec=LLMManager)
@@ -364,8 +354,6 @@ class TestSupervisorAgentHooks:
         # Verify handlers called
         handler1.assert_called_once_with(state, extra_param="value")
         handler2.assert_called_once_with(state, extra_param="value")
-    
-    @pytest.mark.asyncio
     async def test_run_hooks_with_handler_failure(self):
         """Test hook execution with handler failure."""
         llm_manager = Mock(spec=LLMManager)
@@ -388,8 +376,6 @@ class TestSupervisorAgentHooks:
         
         # Verify first handler still called
         handler1.assert_called_once()
-    
-    @pytest.mark.asyncio
     async def test_run_hooks_error_event_reraises(self):
         """Test hook execution for error event re-raises exceptions."""
         llm_manager = Mock(spec=LLMManager)
@@ -408,8 +394,6 @@ class TestSupervisorAgentHooks:
         # Execute error hooks - should re-raise
         with pytest.raises(Exception, match="Error handler failed"):
             await supervisor._run_hooks("on_error", state)
-    
-    @pytest.mark.asyncio
     async def test_run_hooks_nonexistent_event(self):
         """Test hook execution for non-existent event."""
         llm_manager = Mock(spec=LLMManager)
@@ -462,8 +446,6 @@ class TestSupervisorAgentStats:
 
 class TestSupervisorAgentEdgeCases:
     """Test edge cases and error scenarios."""
-    
-    @pytest.mark.asyncio
     async def test_execute_with_state_merge(self):
         """Test execute method properly merges state results."""
         llm_manager = Mock(spec=LLMManager)
@@ -490,8 +472,6 @@ class TestSupervisorAgentEdgeCases:
             
             # Verify merge was attempted
             mock_merge.assert_called_once_with(updated_state)
-    
-    @pytest.mark.asyncio
     async def test_run_method_component_interaction(self):
         """Test run method properly coordinates all components."""
         llm_manager = Mock(spec=LLMManager)
@@ -539,8 +519,6 @@ class TestSupervisorAgentEdgeCases:
         assert supervisor.name == "Supervisor"
         assert hasattr(supervisor, '_execution_lock')
         assert isinstance(supervisor.hooks, dict)
-    
-    @pytest.mark.asyncio 
     async def test_concurrent_execution_locking(self):
         """Test that execution lock prevents concurrent runs."""
         llm_manager = Mock(spec=LLMManager)

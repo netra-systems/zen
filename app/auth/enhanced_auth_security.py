@@ -12,7 +12,7 @@ from .enhanced_auth_core import (
     AuthenticationResult, AuthenticationAttempt, SecurityMetrics, SecurityConfiguration
 )
 from .enhanced_auth_validator import AuthenticationValidator
-from .enhanced_auth_sessions import SessionManager
+from .enhanced_auth_sessions import AuthSessionManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -24,7 +24,7 @@ class EnhancedAuthSecurity:
         """Initialize authentication security with modular components."""
         self.config = SecurityConfiguration()
         self.validator = AuthenticationValidator(self.config)
-        self.session_manager = SessionManager(self.config)
+        self.session_manager = AuthSessionManager(self.config)
         self.metrics = SecurityMetrics()
         self.attempts_log: List[AuthenticationAttempt] = []
     

@@ -51,7 +51,6 @@ class TestAsyncResourceManager:
         resource_manager.register_resource(resource)
         assert resource not in resource_manager._resources
     
-    @pytest.mark.asyncio
     async def test_cleanup_all(self, resource_manager):
         """Test cleanup of all resources"""
         callback1, callback2, resource1, resource2 = create_mock_resources()
@@ -60,7 +59,6 @@ class TestAsyncResourceManager:
         assert_callbacks_called(callback1, callback2)
         assert_resource_manager_state(resource_manager)
     
-    @pytest.mark.asyncio
     async def test_cleanup_all_idempotent(self, resource_manager):
         """Test that cleanup_all is idempotent"""
         callback = AsyncMock()
@@ -71,7 +69,6 @@ class TestAsyncResourceManager:
         await resource_manager.cleanup_all()
         callback.assert_called_once()
     
-    @pytest.mark.asyncio
     async def test_cleanup_handles_exceptions(self, resource_manager):
         """Test that cleanup handles exceptions gracefully"""
         failing_callback = create_failing_callback()

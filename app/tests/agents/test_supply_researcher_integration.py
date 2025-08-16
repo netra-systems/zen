@@ -23,8 +23,6 @@ from app.background import BackgroundTaskManager
 
 class TestSupplyResearcherIntegration:
     """Integration tests for supply research system"""
-    
-    @pytest.mark.asyncio
     async def test_agent_database_integration(self):
         """Test agent integration with database models"""
         mock_db = Mock()
@@ -51,97 +49,99 @@ class TestSupplyResearcherIntegration:
             result = await agent.db_manager.update_database([update_data], "session_123")
             assert result["updates_count"] == 1
     
-    @pytest.mark.asyncio
-    async def test_e2e_admin_chat_supply_update(self):
-        """End-to-end test: Admin requests supply update via chat"""
-        # Setup
+    def _setup_test_infrastructure(self):
+        """Setup mock infrastructure for e2e test"""
         mock_db = Mock()
-        mock_user = User(
-            id="admin_123",
-            email="admin@test.com",
-            role="admin",
-            is_superuser=True
-        )
+        mock_user = User(id="admin_123", email="admin@test.com", role="admin", is_superuser=True)
         
-        # Mock WebSocket manager
         mock_ws_manager = AsyncMock()
         mock_ws_manager.send_agent_update = AsyncMock()
         mock_ws_manager.send_message = AsyncMock()
         
-        # Create agent
+        return mock_db, mock_user, mock_ws_manager
+
+    def _create_test_agent(self, mock_db, mock_ws_manager):
+        """Create agent with mocked dependencies"""
         llm_manager = Mock()
         supply_service = SupplyResearchService(mock_db)
         agent = SupplyResearcherAgent(llm_manager, mock_db, supply_service)
         agent.websocket_manager = mock_ws_manager
-        
-        # Admin request
+        return agent
+
+    def _create_test_state(self, mock_user):
+        """Create test state for admin request"""
         admin_request = "Add GPT-5 pricing: $40 per million input tokens, $120 per million output tokens"
-        
-        # Create state
-        state = DeepAgentState(
+        return DeepAgentState(
             user_request=admin_request,
             user_id=mock_user.id,
             chat_thread_id="test_thread"
         )
+
+    def _get_mock_api_response(self):
+        """Get mock response for deep research API"""
+        return {
+            "session_id": "admin_session_123",
+            "status": "completed",
+            "questions_answered": [
+                {
+                    "question": "What is GPT-5 pricing?",
+                    "answer": "GPT-5 costs $40 per million input tokens and $120 per million output tokens"
+                }
+            ],
+            "citations": [{"source": "OpenAI Pricing", "url": "https://openai.com/pricing"}],
+            "summary": "GPT-5 pricing confirmed"
+        }
+
+    def _setup_database_mocks(self, mock_db):
+        """Setup database mock expectations"""
+        mock_db.query().filter().first.return_value = None  # No existing GPT-5
+        mock_db.add = Mock()
+        mock_db.commit = Mock()
+
+    def _verify_research_results(self, state):
+        """Verify research processing results"""
+        assert hasattr(state, 'supply_research_result')
+        result = state.supply_research_result
+        assert result["research_type"] == "pricing"
+        assert result["confidence_score"] > 0.5
+        return result
+
+    def _verify_database_operations(self, mock_db):
+        """Verify database operations were performed"""
+        mock_db.add.assert_called()  # Research session added
+        mock_db.commit.assert_called()  # Changes committed
+
+    def _verify_websocket_updates(self, mock_ws_manager):
+        """Verify WebSocket updates were sent properly"""
+        assert mock_ws_manager.send_agent_update.called
+        calls = mock_ws_manager.send_agent_update.call_args_list
+        update_messages = [call[0][2] for call in calls]  # Get message content
+        statuses = [msg.get("status") for msg in update_messages if "status" in msg]
+        assert "parsing" in statuses or "researching" in statuses
+        assert "completed" in statuses or "processing" in statuses
+
+    def _verify_supply_updates(self, result):
+        """Verify supply update results"""
+        assert result.get("summary") or result.get("updates_made")
+        print(f"E2E Test Success: Admin request processed, GPT-5 pricing would be added to supply")
+        print(f"Research confidence: {result.get('confidence_score', 0):.2f}")
+        print(f"Citations: {len(result.get('citations', []))} sources")
+    async def test_e2e_admin_chat_supply_update(self):
+        """End-to-end test: Admin requests supply update via chat"""
+        mock_db, mock_user, mock_ws_manager = self._setup_test_infrastructure()
+        agent = self._create_test_agent(mock_db, mock_ws_manager)
+        state = self._create_test_state(mock_user)
         
-        # Mock Deep Research API response
         with patch.object(agent.research_engine, 'call_deep_research_api', new_callable=AsyncMock) as mock_api:
-            mock_api.return_value = {
-                "session_id": "admin_session_123",
-                "status": "completed",
-                "questions_answered": [
-                    {
-                        "question": "What is GPT-5 pricing?",
-                        "answer": "GPT-5 costs $40 per million input tokens and $120 per million output tokens"
-                    }
-                ],
-                "citations": [
-                    {"source": "OpenAI Pricing", "url": "https://openai.com/pricing"}
-                ],
-                "summary": "GPT-5 pricing confirmed"
-            }
+            mock_api.return_value = self._get_mock_api_response()
+            self._setup_database_mocks(mock_db)
             
-            # Mock database queries
-            mock_db.query().filter().first.return_value = None  # No existing GPT-5
-            mock_db.add = Mock()
-            mock_db.commit = Mock()
-            
-            # Execute
             await agent.execute(state, "admin_chat_123", stream_updates=True)
             
-            # Verify results
-            assert hasattr(state, 'supply_research_result')
-            result = state.supply_research_result
-            
-            # Check research was processed
-            assert result["research_type"] == "pricing"
-            assert result["confidence_score"] > 0.5
-            
-            # Check database operations
-            mock_db.add.assert_called()  # Research session added
-            mock_db.commit.assert_called()  # Changes committed
-            
-            # Check WebSocket updates were sent
-            assert mock_ws_manager.send_agent_update.called
-            
-            # Verify the update contains correct pricing
-            calls = mock_ws_manager.send_agent_update.call_args_list
-            update_messages = [call[0][2] for call in calls]  # Get message content
-            
-            # Should have status updates
-            statuses = [msg.get("status") for msg in update_messages if "status" in msg]
-            assert "parsing" in statuses or "researching" in statuses
-            assert "completed" in statuses or "processing" in statuses
-            
-            # Verify supply update would be available
-            # In real scenario, this would update supply options available in the system
-            assert result.get("summary") or result.get("updates_made")
-            
-            print(f"E2E Test Success: Admin request processed, GPT-5 pricing would be added to supply")
-            print(f"Research confidence: {result.get('confidence_score', 0):.2f}")
-            print(f"Citations: {len(result.get('citations', []))} sources")
-    
-    @pytest.mark.asyncio
+            result = self._verify_research_results(state)
+            self._verify_database_operations(mock_db)
+            self._verify_websocket_updates(mock_ws_manager)
+            self._verify_supply_updates(result)
     async def test_full_research_workflow(self):
         """Test complete research workflow from request to database update"""
         # This would be a full integration test with real components

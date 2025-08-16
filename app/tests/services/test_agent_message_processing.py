@@ -3,8 +3,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from app.services.agent_service import AgentService
 from app.schemas import AgentMessage, WebSocketMessage
 from datetime import datetime
-
-@pytest.mark.asyncio
 class TestAgentMessageProcessing:
     
     async def test_process_user_message(self):

@@ -239,7 +239,7 @@ describe('Offline Mode and Navigation Integration', () => {
       };
       
       // Test unauthenticated access
-      const { getByText, rerender } = render(<TestComponent />);
+      const { getByText, getByTestId, rerender } = render(<TestComponent />);
       
       expect(getByText('Redirecting to login...')).toBeInTheDocument();
       expect(sessionStorage.getItem('redirect_after_login')).toBe('/');
@@ -252,7 +252,7 @@ describe('Offline Mode and Navigation Integration', () => {
       rerender(<TestComponent />);
       
       await waitFor(() => {
-        expect(screen.getByTestId('protected-content')).toBeInTheDocument();
+        expect(getByTestId('protected-content')).toBeInTheDocument();
       });
     });
 
@@ -281,6 +281,7 @@ describe('Offline Mode and Navigation Integration', () => {
           <div>
             <div data-testid="query-string">{searchParams.toString()}</div>
             <select
+              data-testid="select"
               value={filters.category}
               onChange={(e) => updateFilter('category', e.target.value)}
             >
@@ -304,7 +305,7 @@ describe('Offline Mode and Navigation Integration', () => {
       fireEvent.change(getByTestId('select'), { target: { value: 'tech' } });
       
       await waitFor(() => {
-        expect(getByTestId('query-string')).toContain('category=tech');
+        expect(getByTestId('query-string').textContent).toContain('category=tech');
       });
     });
   });

@@ -59,8 +59,6 @@ class TestNetraMCPServer:
         assert server.agent_service == mock_services["agent_service"]
         assert server.thread_service == mock_services["thread_service"]
         assert server.corpus_service == mock_services["corpus_service"]
-    
-    @pytest.mark.asyncio
     async def test_list_agents_tool(self, mcp_server):
         """Test list_agents tool"""
         app = mcp_server.get_app()
@@ -76,8 +74,6 @@ class TestNetraMCPServer:
         assert isinstance(agents, list)
         assert len(agents) > 0
         assert any(a["name"] == "SupervisorAgent" for a in agents)
-    
-    @pytest.mark.asyncio
     async def test_run_agent_tool(self, mcp_server, mock_services):
         """Test run_agent tool execution"""
         # Setup mock response
@@ -102,8 +98,6 @@ class TestNetraMCPServer:
         assert result_data["status"] == "success"
         assert result_data["thread_id"] == "thread-123"
         assert result_data["run_id"] == "test-run-123"
-    
-    @pytest.mark.asyncio
     async def test_analyze_workload_tool(self, mcp_server, mock_services):
         """Test analyze_workload tool"""
         mock_services["agent_service"].analyze_workload.return_value = {
@@ -124,8 +118,6 @@ class TestNetraMCPServer:
         result_data = json.loads(result)
         assert "cost" in result_data
         assert result_data["cost"] == 100.0
-    
-    @pytest.mark.asyncio
     async def test_query_corpus_tool(self, mcp_server, mock_services):
         """Test query_corpus tool"""
         mock_services["corpus_service"].search.return_value = [
@@ -144,8 +136,6 @@ class TestNetraMCPServer:
         result_data = json.loads(result)
         assert isinstance(result_data, list)
         assert len(result_data) == 1
-    
-    @pytest.mark.asyncio
     async def test_resource_optimization_history(self, mcp_server):
         """Test optimization history resource"""
         app = mcp_server.get_app()
@@ -161,8 +151,6 @@ class TestNetraMCPServer:
         assert "optimizations" in history
         assert isinstance(history["optimizations"], list)
         assert "total_savings" in history
-    
-    @pytest.mark.asyncio
     async def test_resource_model_configs(self, mcp_server):
         """Test model configurations resource"""
         app = mcp_server.get_app()
@@ -176,8 +164,6 @@ class TestNetraMCPServer:
         assert "models" in configs
         assert "claude-3-opus" in configs["models"]
         assert "context_window" in configs["models"]["claude-3-opus"]
-    
-    @pytest.mark.asyncio
     async def test_prompt_optimization_request(self, mcp_server):
         """Test optimization request prompt"""
         app = mcp_server.get_app()
@@ -208,8 +194,6 @@ class TestMCPService:
         assert service.agent_service == mock_services["agent_service"]
         assert service.mcp_server is not None
         assert isinstance(service.active_sessions, dict)
-    
-    @pytest.mark.asyncio
     async def test_register_client(self, mcp_service, mock_services):
         """Test client registration"""
         mock_db = AsyncMock()
@@ -238,8 +222,6 @@ class TestMCPService:
         assert isinstance(client, MCPClient)
         assert client.name == "Test Client"
         assert client.client_type == "test"
-    
-    @pytest.mark.asyncio
     async def test_create_session(self, mcp_service):
         """Test session creation"""
         session_id = await mcp_service.create_session(
@@ -253,8 +235,6 @@ class TestMCPService:
         session = mcp_service.active_sessions[session_id]
         assert session["client_id"] == "client-123"
         assert session["metadata"]["test"] == "data"
-    
-    @pytest.mark.asyncio
     async def test_get_session(self, mcp_service):
         """Test getting session information"""
         # Create session
@@ -269,8 +249,6 @@ class TestMCPService:
         # Try non-existent session
         none_session = await mcp_service.get_session("non-existent")
         assert none_session is None
-    
-    @pytest.mark.asyncio
     async def test_update_session_activity(self, mcp_service):
         """Test updating session activity"""
         session_id = await mcp_service.create_session()
@@ -283,8 +261,6 @@ class TestMCPService:
         session = mcp_service.active_sessions[session_id]
         assert session["last_activity"] >= initial_activity
         assert session["request_count"] == initial_count + 1
-    
-    @pytest.mark.asyncio
     async def test_close_session(self, mcp_service):
         """Test closing session"""
         session_id = await mcp_service.create_session()
@@ -292,8 +268,6 @@ class TestMCPService:
         
         await mcp_service.close_session(session_id)
         assert session_id not in mcp_service.active_sessions
-    
-    @pytest.mark.asyncio
     async def test_cleanup_inactive_sessions(self, mcp_service):
         """Test cleaning up inactive sessions"""
         from datetime import timedelta
@@ -312,8 +286,6 @@ class TestMCPService:
         
         assert active_session in mcp_service.active_sessions
         assert inactive_session not in mcp_service.active_sessions
-    
-    @pytest.mark.asyncio
     async def test_get_server_info(self, mcp_service):
         """Test getting server information"""
         info = await mcp_service.get_server_info()
@@ -325,8 +297,6 @@ class TestMCPService:
         assert "tools_available" in info
         assert "resources_available" in info
         assert "prompts_available" in info
-    
-    @pytest.mark.asyncio
     async def test_record_tool_execution(self, mcp_service):
         """Test recording tool execution"""
         mock_db = AsyncMock()
@@ -355,8 +325,6 @@ class TestMCPService:
 
 class TestMCPIntegration:
     """Integration tests for MCP"""
-    
-    @pytest.mark.asyncio
     async def test_full_tool_execution_flow(self, mcp_service, mock_services):
         """Test complete tool execution flow"""
         # Setup mocks
@@ -389,8 +357,6 @@ class TestMCPIntegration:
         await mcp_service.update_session_activity(session_id)
         session = await mcp_service.get_session(session_id)
         assert session["request_count"] == 1
-    
-    @pytest.mark.asyncio
     async def test_error_handling(self, mcp_server, mock_services):
         """Test error handling in tools"""
         # Make service raise error
@@ -426,8 +392,6 @@ class TestMCPSmoke:
             service = MCPService(**mock_services)
             assert service is not None
             assert service.mcp_server is not None
-    
-    @pytest.mark.asyncio
     async def test_basic_tool_availability(self):
         """Test that basic tools are available"""
         server = NetraMCPServer()

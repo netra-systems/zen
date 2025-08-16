@@ -3,9 +3,6 @@ import os
 from fastapi.testclient import TestClient
 from app.main import app
 from app.config import settings
-
-
-@pytest.mark.asyncio
 async def test_login_redirect_in_production():
     """Test that login redirects properly in production mode."""
     # Set test environment variables

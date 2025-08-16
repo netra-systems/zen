@@ -33,6 +33,10 @@ class AdminToolDispatcher(ToolDispatcher):
                  user: Optional[User] = None) -> None:
         """Initialize the admin tool dispatcher with proper type annotations"""
         super().__init__(tools or [])
+        self._setup_dispatcher_components(llm_manager, tool_dispatcher, db, user)
+    
+    def _setup_dispatcher_components(self, llm_manager, tool_dispatcher, db, user) -> None:
+        """Setup dispatcher components and initialize access"""
         self._set_manager_properties(llm_manager, tool_dispatcher, db, user)
         self._initialize_admin_access()
     
@@ -86,9 +90,7 @@ class AdminToolDispatcher(ToolDispatcher):
                                         **kwargs) -> ToolResponse:
         """Safely dispatch admin tool with validation"""
         from .admin_tool_execution import dispatch_admin_tool
-        return await dispatch_admin_tool(
-            self, tool_name, tool_input, **kwargs
-        )
+        return await dispatch_admin_tool(self, tool_name, tool_input, **kwargs)
     
     async def _dispatch_base_tool(self, tool_name: str, **kwargs) -> ToolResponse:
         """Dispatch base tool and convert to typed response"""
@@ -117,20 +119,30 @@ class AdminToolDispatcher(ToolDispatcher):
                                  current_time: datetime,
                                  user_id: str) -> ToolSuccessResponse:
         """Create successful tool response"""
-        return ToolSuccessResponse(**self._build_success_response_params(
-            tool_name, base_result, current_time, user_id
-        ))
+        params = self._build_success_response_params(tool_name, base_result, current_time, user_id)
+        return ToolSuccessResponse(**params)
     
     def _build_success_response_params(self, tool_name: str, base_result: ToolResult,
                                       current_time: datetime, user_id: str) -> Dict[str, Any]:
         """Build parameters for success response."""
+        base_params = self._get_base_response_params(tool_name, current_time, user_id)
+        success_params = self._get_success_specific_params(base_result)
+        return {**base_params, **success_params}
+    
+    def _get_base_response_params(self, tool_name: str, current_time: datetime, user_id: str) -> Dict[str, Any]:
+        """Get base response parameters"""
         return {
             "tool_name": tool_name,
-            "status": AdminToolStatus.COMPLETED,
             "execution_time_ms": 0.0,
             "started_at": current_time,
             "completed_at": current_time,
-            "user_id": user_id,
+            "user_id": user_id
+        }
+    
+    def _get_success_specific_params(self, base_result: ToolResult) -> Dict[str, Any]:
+        """Get success-specific response parameters"""
+        return {
+            "status": AdminToolStatus.COMPLETED,
             "result": base_result.payload or {},
             "message": base_result.message
         }

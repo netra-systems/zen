@@ -36,6 +36,8 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
 
   // Memoized message handler to prevent unnecessary re-renders
   const handleMessage = useCallback((newMessage: WebSocketMessage) => {
+    // Only update local state - let useEventProcessor handle unified events
+    // This prevents duplicate processing and race conditions
     setMessages((prevMessages) => {
       // Prevent duplicate messages by checking if message already exists
       const messageExists = prevMessages.some(msg => 
@@ -44,8 +46,26 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       );
       
       if (messageExists) {
+        logger.debug('Duplicate WebSocket message ignored', {
+          component: 'WebSocketProvider',
+          action: 'duplicate_message',
+          metadata: { 
+            messageId: newMessage.payload?.message_id,
+            eventType: newMessage.type 
+          }
+        });
         return prevMessages;
       }
+      
+      logger.debug('WebSocket message received and queued', {
+        component: 'WebSocketProvider',
+        action: 'message_received',
+        metadata: { 
+          eventType: newMessage.type,
+          messageId: newMessage.payload?.message_id,
+          totalMessages: prevMessages.length + 1
+        }
+      });
       
       // Add new message and limit to last 100 messages for memory cleanup
       const updatedMessages = [...prevMessages, newMessage];

@@ -18,8 +18,6 @@ class TestSpecificityCalculationEdgeCases:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
-        
-    @pytest.mark.asyncio
     async def test_specificity_with_all_indicators(self, quality_service):
         """Test specificity with all positive indicators"""
         content = setup_specificity_test_content()
@@ -30,8 +28,6 @@ class TestSpecificityCalculationEdgeCases:
         )
         
         assert score > 0.8  # Should be very high
-        
-    @pytest.mark.asyncio
     async def test_specificity_with_vague_language_penalty(self, quality_service):
         """Test specificity penalty for vague language"""
         content = "You might want to consider optimizing your model perhaps."
@@ -57,8 +53,6 @@ class TestActionabilityEdgeCases:
             content,
             ContentType.ACTION_PLAN
         )
-        
-    @pytest.mark.asyncio
     async def test_actionability_with_file_paths(self, quality_service):
         """Test actionability with file paths and URLs"""
         content = setup_actionability_test_content()
@@ -73,8 +67,6 @@ class TestActionabilityEdgeCases:
             content,
             ContentType.ACTION_PLAN
         )
-        
-    @pytest.mark.asyncio
     async def test_actionability_code_blocks(self, quality_service):
         """Test actionability with code blocks"""
         content = setup_code_block_content()

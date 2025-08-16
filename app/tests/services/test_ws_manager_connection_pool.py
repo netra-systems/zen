@@ -161,8 +161,6 @@ class TestWebSocketManagerConnectionPooling:
             f"user_{i}": MockWebSocket(f"user_{i}")
             for i in range(1, 6)
         }
-    
-    @pytest.mark.asyncio
     async def test_websocket_manager_singleton_pattern(self):
         """Test WebSocket manager singleton pattern"""
         # Reset singleton
@@ -177,8 +175,6 @@ class TestWebSocketManagerConnectionPooling:
         assert manager1 is manager2
         assert manager2 is manager3
         assert id(manager1) == id(manager2) == id(manager3)
-    
-    @pytest.mark.asyncio
     async def test_connection_establishment(self, ws_manager, mock_websockets):
         """Test WebSocket connection establishment"""
         user_id = "user_1"
@@ -199,8 +195,6 @@ class TestWebSocketManagerConnectionPooling:
         
         # Verify connection registry
         assert conn_info.connection_id in ws_manager.connection_registry
-    
-    @pytest.mark.asyncio
     async def test_multiple_connections_same_user(self, ws_manager):
         """Test multiple connections for the same user"""
         user_id = "multi_conn_user"
@@ -219,8 +213,6 @@ class TestWebSocketManagerConnectionPooling:
         # Verify each connection has unique ID
         connection_ids = {conn.connection_id for conn in connections}
         assert len(connection_ids) == 3
-    
-    @pytest.mark.asyncio
     async def test_connection_limit_enforcement(self, ws_manager):
         """Test enforcement of connection limits per user"""
         user_id = "limited_user"
@@ -247,8 +239,6 @@ class TestWebSocketManagerConnectionPooling:
         oldest_ws = connections[0].websocket
         assert oldest_ws.state == WebSocketState.DISCONNECTED
         assert oldest_ws.close_code == 1008  # Connection limit exceeded
-    
-    @pytest.mark.asyncio
     async def test_connection_cleanup_on_disconnect(self, ws_manager, mock_websockets):
         """Test connection cleanup when WebSocket disconnects"""
         user_id = "cleanup_user"
@@ -269,8 +259,6 @@ class TestWebSocketManagerConnectionPooling:
         assert connection_id not in ws_manager.connection_registry
         assert len(ws_manager.active_connections[user_id]) == 0
         assert websocket.state == WebSocketState.DISCONNECTED
-    
-    @pytest.mark.asyncio
     async def test_heartbeat_mechanism(self, ws_manager):
         """Test WebSocket heartbeat mechanism"""
         user_id = "heartbeat_user"
@@ -298,8 +286,6 @@ class TestWebSocketManagerConnectionPooling:
         
         # Cleanup
         await ws_manager.disconnect(user_id, websocket)
-    
-    @pytest.mark.asyncio
     async def test_heartbeat_timeout_detection(self, ws_manager):
         """Test detection of heartbeat timeouts"""
         user_id = "timeout_user"
@@ -320,8 +306,6 @@ class TestWebSocketManagerConnectionPooling:
         
         # Cleanup
         await ws_manager.disconnect(user_id, websocket)
-    
-    @pytest.mark.asyncio
     async def test_concurrent_connection_management(self, ws_manager):
         """Test concurrent connection establishment and cleanup"""
         num_users = 20
@@ -357,8 +341,6 @@ class TestWebSocketManagerConnectionPooling:
         
         # Verify all connections cleaned up
         assert len(ws_manager.connection_registry) == 0
-    
-    @pytest.mark.asyncio
     async def test_message_broadcasting_to_multiple_connections(self, ws_manager):
         """Test broadcasting messages to multiple connections"""
         user_id = "broadcast_user"
@@ -386,8 +368,6 @@ class TestWebSocketManagerConnectionPooling:
         # Cleanup
         for websocket in websockets:
             await ws_manager.disconnect(user_id, websocket)
-    
-    @pytest.mark.asyncio
     async def test_connection_statistics_tracking(self, ws_manager):
         """Test connection statistics tracking"""
         # Initial statistics
@@ -433,8 +413,6 @@ class TestWebSocketManagerPerformanceAndScaling:
     def connection_pool(self):
         """Create mock connection pool"""
         return MockConnectionPool(max_connections=50)
-    
-    @pytest.mark.asyncio
     async def test_high_volume_connection_handling(self, performance_ws_manager):
         """Test handling high volume of connections"""
         num_connections = 100
@@ -471,8 +449,6 @@ class TestWebSocketManagerPerformanceAndScaling:
         # Cleanup
         for user_id, websocket, conn_info in connections:
             await performance_ws_manager.disconnect(user_id, websocket)
-    
-    @pytest.mark.asyncio
     async def test_connection_pool_utilization(self, connection_pool):
         """Test connection pool utilization and efficiency"""
         # Acquire connections up to pool limit
@@ -495,8 +471,6 @@ class TestWebSocketManagerPerformanceAndScaling:
         updated_stats = connection_pool.get_pool_stats()
         assert updated_stats['active_connections'] < connection_pool.max_connections
         assert updated_stats['utilization_rate'] < 1.0
-    
-    @pytest.mark.asyncio
     async def test_memory_usage_under_load(self, performance_ws_manager):
         """Test memory usage under connection load"""
         import tracemalloc
@@ -531,8 +505,6 @@ class TestWebSocketManagerPerformanceAndScaling:
         # Cleanup
         for user_id, websocket, conn_info in connections:
             await performance_ws_manager.disconnect(user_id, websocket)
-    
-    @pytest.mark.asyncio
     async def test_connection_recovery_after_failure(self, performance_ws_manager):
         """Test connection recovery after failures"""
         user_id = "recovery_user"
@@ -558,8 +530,6 @@ class TestWebSocketManagerPerformanceAndScaling:
         
         # Cleanup
         await performance_ws_manager.disconnect(user_id, websocket2)
-    
-    @pytest.mark.asyncio
     async def test_heartbeat_performance_under_load(self, performance_ws_manager):
         """Test heartbeat mechanism performance under load"""
         num_connections = 50
@@ -598,8 +568,6 @@ class TestWebSocketManagerPerformanceAndScaling:
             if not task.done()
         )
         assert remaining_tasks == 0
-    
-    @pytest.mark.asyncio
     async def test_broadcast_performance(self, performance_ws_manager):
         """Test broadcast message performance"""
         num_users = 20

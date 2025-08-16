@@ -19,8 +19,6 @@ from app.schemas.Generation import ContentGenParams
 
 class TestBenchmarkMetrics:
     """Test benchmarking and metrics collection"""
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_throughput_benchmarking(self):
         """Test generation throughput measurement"""
@@ -44,8 +42,6 @@ class TestBenchmarkMetrics:
         
         # Should achieve reasonable throughput
         assert throughput > 10  # At least 10 records/second
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_latency_measurement(self):
         """Test generation latency measurement"""
@@ -91,8 +87,6 @@ class TestBenchmarkMetrics:
         
         # Should show some CPU activity (either average or peak higher than baseline)
         assert max_cpu >= baseline_cpu or avg_cpu > 5.0  # At least 5% CPU usage
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_memory_usage_profiling(self):
         """Test memory usage during generation operations"""
@@ -117,8 +111,6 @@ class TestBenchmarkMetrics:
         
         assert len(results) == 50
         assert memory_growth < 500  # Should not grow excessively
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_resource_efficiency_metrics(self):
         """Test overall resource efficiency metrics"""
@@ -157,8 +149,6 @@ class TestBenchmarkMetrics:
         # Should maintain reasonable efficiency
         assert throughput > 100  # At least 100 records per second
         assert efficiency_score > 0.1  # At least 0.1 records per second per MB
-
-    @pytest.mark.asyncio
     @pytest.mark.performance
     async def test_scalability_benchmarks(self):
         """Test scalability benchmark across different loads"""

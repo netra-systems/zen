@@ -74,7 +74,7 @@ def try_parse_complex_value(value_str: str) -> Union[Dict[str, Any], List[Any], 
     from app.agents.utils_json_validators import fix_common_json_errors
     try:
         return json.loads(fix_common_json_errors(value_str))
-    except:
+    except (json.JSONDecodeError, TypeError, ValueError):
         return value_str
 
 
@@ -104,7 +104,7 @@ def try_close_truncated_array(content: str) -> Optional[List[Any]]:
     from app.agents.utils_json_validators import fix_common_json_errors
     try:
         return json.loads(fix_common_json_errors(array_str))
-    except:
+    except (json.JSONDecodeError, TypeError, ValueError):
         return []
 
 

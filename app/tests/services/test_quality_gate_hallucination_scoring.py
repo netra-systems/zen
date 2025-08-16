@@ -19,8 +19,6 @@ class TestHallucinationRisk:
     @pytest.fixture
     def quality_service(self):
         return QualityGateService(redis_manager=None)
-        
-    @pytest.mark.asyncio
     async def test_hallucination_specific_numbers_with_context(self, quality_service):
         """Test hallucination risk with specific numbers but with data source"""
         content = "The system processes exactly 12345.678 requests per second."
@@ -28,16 +26,12 @@ class TestHallucinationRisk:
         
         score = await quality_service.metrics_calculator.specialized_calculator.calculate_hallucination_risk(content, context)
         assert score < 0.2  # Should be low with data source
-        
-    @pytest.mark.asyncio
     async def test_hallucination_claims_with_evidence(self, quality_service):
         """Test hallucination risk for claims with evidence"""
         content = create_claims_with_evidence_content()
         
         score = await quality_service.metrics_calculator.specialized_calculator.calculate_hallucination_risk(content, None)
         assert score < 0.3  # Should be low with citations
-        
-    @pytest.mark.asyncio
     async def test_hallucination_multiple_impossible_claims(self, quality_service):
         """Test hallucination risk with multiple impossible claims"""
         content = create_multiple_impossible_claims_content()

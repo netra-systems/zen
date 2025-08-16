@@ -22,8 +22,6 @@ def admin_service():
 
 class TestAdminVisibility:
     """Test admin monitoring and visibility features"""
-
-    @pytest.mark.asyncio
     async def test_generation_job_monitoring(self, admin_service):
         """Test real-time job monitoring for admins"""
         job_id = str(uuid.uuid4())
@@ -45,8 +43,6 @@ class TestAdminVisibility:
         assert "estimated_completion" in status
         
         await generation_task
-
-    @pytest.mark.asyncio
     async def test_detailed_metrics_dashboard(self, admin_service):
         """Test detailed metrics dashboard for admins"""
         metrics = await admin_service.get_generation_metrics(
@@ -58,8 +54,6 @@ class TestAdminVisibility:
         assert "avg_generation_time" in metrics
         assert "records_per_second" in metrics
         assert "resource_utilization" in metrics
-
-    @pytest.mark.asyncio
     async def test_corpus_usage_analytics(self, admin_service):
         """Test corpus usage analytics for admins"""
         analytics = await admin_service.get_corpus_analytics()
@@ -68,8 +62,6 @@ class TestAdminVisibility:
         assert "corpus_coverage" in analytics
         assert "content_distribution" in analytics
         assert "access_patterns" in analytics
-
-    @pytest.mark.asyncio
     async def test_audit_log_generation(self, admin_service):
         """Test audit logging of generation activities"""
         job_id = str(uuid.uuid4())
@@ -86,8 +78,6 @@ class TestAdminVisibility:
         assert all("timestamp" in log for log in audit_logs)
         assert all("action" in log for log in audit_logs)
         assert all("user_id" in log for log in audit_logs)
-
-    @pytest.mark.asyncio
     async def test_performance_profiling(self, admin_service):
         """Test performance profiling for optimization"""
         profile = await admin_service.profile_generation(
@@ -98,8 +88,6 @@ class TestAdminVisibility:
         assert "bottlenecks" in profile
         assert "optimization_suggestions" in profile
         assert profile["generation_time_breakdown"]["total"] > 0
-
-    @pytest.mark.asyncio
     async def test_alert_configuration(self, admin_service):
         """Test alert configuration for admins"""
         alert_config = {
@@ -117,8 +105,6 @@ class TestAdminVisibility:
             )
             
             mock_alert.assert_called()
-
-    @pytest.mark.asyncio
     async def test_job_cancellation_by_admin(self, admin_service):
         """Test admin ability to cancel running jobs"""
         job_id = str(uuid.uuid4())
@@ -140,8 +126,6 @@ class TestAdminVisibility:
         assert result["records_completed"] < 100000
         
         generation_task.cancel()
-
-    @pytest.mark.asyncio
     async def test_resource_usage_tracking(self, admin_service):
         """Test tracking of resource usage during generation"""
         resource_tracker = await admin_service.start_resource_tracking()
@@ -156,8 +140,6 @@ class TestAdminVisibility:
         assert "avg_cpu_percent" in usage
         assert "total_io_operations" in usage
         assert "clickhouse_queries" in usage
-
-    @pytest.mark.asyncio
     async def test_admin_diagnostic_tools(self, admin_service):
         """Test diagnostic tools for troubleshooting"""
         diagnostics = await admin_service.run_diagnostics()
@@ -167,8 +149,6 @@ class TestAdminVisibility:
         assert diagnostics["websocket_status"] == "active"
         assert "worker_pool_status" in diagnostics
         assert "cache_hit_rate" in diagnostics
-
-    @pytest.mark.asyncio
     async def test_batch_job_management(self, admin_service):
         """Test batch job management interface for admins"""
         # Schedule multiple jobs

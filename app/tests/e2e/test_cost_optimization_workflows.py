@@ -18,6 +18,7 @@ from app.llm.llm_manager import LLMManager
 from app.ws_manager import WebSocketManager
 from app.schemas import SubAgentLifecycle
 from app.core.exceptions import NetraException
+from app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
 
 
 @pytest.fixture
@@ -69,7 +70,7 @@ def _create_cost_quality_state() -> DeepAgentState:
     """Create state for cost-quality optimization test."""
     return DeepAgentState(
         user_request="I need to reduce costs but keep quality the same. For feature X, I can accept latency of 500ms. For feature Y, I need to maintain current latency of 200ms.",
-        metadata={'test_type': 'cost_quality', 'priority': 'high'}
+        metadata={'test_type': 'cost_quality', 'priority': 1}
     )
 
 
@@ -328,3 +329,80 @@ def _validate_reporting_summarizes_results(result: Dict, state: DeepAgentState):
     assert result['agent_state'] == SubAgentLifecycle.COMPLETED
     assert result['state_updated']
     assert hasattr(state, 'user_request') or hasattr(state, 'messages')
+
+
+@pytest.mark.real_llm
+class TestExamplePromptsCostOptimization:
+    """Test specific example prompts EP-001 and EP-007 with real LLM validation."""
+    
+    async def test_ep_001_cost_quality_constraints_real_llm(self, cost_optimization_setup):
+        """Test EP-001: Cost reduction with quality preservation using real LLM."""
+        setup = cost_optimization_setup
+        state = _create_ep_001_state()
+        results = await _execute_cost_optimization_workflow(setup, state)
+        _validate_ep_001_results(results, state, setup)
+    
+    async def test_ep_007_multi_constraint_real_llm(self, cost_optimization_setup):
+        """Test EP-007: Multi-constraint optimization using real LLM."""
+        setup = cost_optimization_setup
+        state = _create_ep_007_state()
+        results = await _execute_cost_optimization_workflow(setup, state)
+        _validate_ep_007_results(results, state, setup)
+
+
+def _create_ep_001_state() -> DeepAgentState:
+    """Create state for EP-001 example prompt test."""
+    return DeepAgentState(
+        user_request="I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.",
+        metadata={'test_type': 'ep_001', 'prompt_id': 'EP-001', 'priority': 1}
+    )
+
+
+def _create_ep_007_state() -> DeepAgentState:
+    """Create state for EP-007 example prompt test."""
+    return DeepAgentState(
+        user_request="I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?",
+        metadata={'test_type': 'ep_007', 'prompt_id': 'EP-007', 'cost_target': '20%', 'latency_target': '2x', 'usage_increase': '30%'}
+    )
+
+
+def _validate_ep_001_results(results: List[Dict], state: DeepAgentState, setup: Dict):
+    """Validate EP-001 results with enhanced quality checks."""
+    assert len(results) == 5, "All 5 workflow steps must execute"
+    _validate_cost_quality_results(results, state)
+    _validate_response_quality_ep_001(results, setup)
+
+
+def _validate_ep_007_results(results: List[Dict], state: DeepAgentState, setup: Dict):
+    """Validate EP-007 results with enhanced quality checks."""
+    assert len(results) == 5, "All 5 workflow steps must execute"
+    _validate_multi_constraint_results(results, state)
+    _validate_response_quality_ep_007(results, setup)
+
+
+async def _validate_response_quality_ep_001(results: List[Dict], setup: Dict):
+    """Validate response quality for EP-001 using quality gate service."""
+    quality_service = QualityGateService()
+    final_result = results[-1]  # Reporting result
+    
+    if hasattr(final_result.get('workflow_state', {}), 'final_response'):
+        response_text = str(final_result['workflow_state'].final_response)
+        is_valid, score, feedback = await quality_service.validate_content(
+            content=response_text, content_type=ContentType.OPTIMIZATION_REPORT, quality_level=QualityLevel.MEDIUM
+        )
+        assert is_valid, f"EP-001 response quality validation failed: {feedback}"
+        assert score >= 70, f"EP-001 quality score too low: {score}"
+
+
+async def _validate_response_quality_ep_007(results: List[Dict], setup: Dict):
+    """Validate response quality for EP-007 using quality gate service."""
+    quality_service = QualityGateService()
+    final_result = results[-1]  # Reporting result
+    
+    if hasattr(final_result.get('workflow_state', {}), 'final_response'):
+        response_text = str(final_result['workflow_state'].final_response)
+        is_valid, score, feedback = await quality_service.validate_content(
+            content=response_text, content_type=ContentType.OPTIMIZATION_REPORT, quality_level=QualityLevel.MEDIUM
+        )
+        assert is_valid, f"EP-007 response quality validation failed: {feedback}"
+        assert score >= 70, f"EP-007 quality score too low: {score}"

@@ -223,8 +223,6 @@ class TestApexOptimizerToolSelection:
             request=request
         )
         return state
-    
-    @pytest.mark.asyncio
     async def test_tool_selection_cost_optimization(self, apex_tool_selector, sample_agent_state, mock_llm_connector):
         """Test tool selection for cost optimization requests"""
         # Execute tool selection

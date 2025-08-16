@@ -26,12 +26,17 @@ def extract_action_from_kwargs(kwargs: Dict[str, Any]) -> str:
 
 def build_execute_params(tool_name: str, user, db, action: str, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     """Build parameters for tool execution"""
+    base_params = _get_base_execute_params(tool_name, user, db, action)
+    return {**base_params, **kwargs}
+
+
+def _get_base_execute_params(tool_name: str, user, db, action: str) -> Dict[str, Any]:
+    """Get base execution parameters"""
     return {
         "tool_name": tool_name,
         "user": user,
         "db": db, 
-        "action": action,
-        **kwargs
+        "action": action
     }
 
 
@@ -52,7 +57,17 @@ def handle_execution_error(dispatcher, tool_name: str,
 def build_timing_metadata(start_time: datetime) -> Dict[str, Any]:
     """Build timing metadata for responses"""
     completed_time = datetime.now(UTC)
-    execution_time_ms = (completed_time - start_time).total_seconds() * 1000
+    execution_time_ms = _calculate_execution_time_ms(start_time, completed_time)
+    return _create_timing_dict(start_time, completed_time, execution_time_ms)
+
+
+def _calculate_execution_time_ms(start_time: datetime, completed_time: datetime) -> float:
+    """Calculate execution time in milliseconds"""
+    return (completed_time - start_time).total_seconds() * 1000
+
+
+def _create_timing_dict(start_time: datetime, completed_time: datetime, execution_time_ms: float) -> Dict[str, Any]:
+    """Create timing dictionary"""
     return {
         "completed_time": completed_time,
         "execution_time_ms": execution_time_ms,
@@ -63,14 +78,27 @@ def build_timing_metadata(start_time: datetime) -> Dict[str, Any]:
 def build_success_response_data(dispatcher, tool_name: str, timing: Dict[str, Any],
                                result: dict, kwargs: Dict[str, Any]) -> Dict[str, Any]:
     """Build success response data"""
-    from .admin_tool_execution import create_success_metadata
+    base_data = _build_base_response_data(tool_name, timing, dispatcher.user.id)
+    success_data = _build_success_specific_data(result, dispatcher, tool_name, kwargs)
+    return {**base_data, **success_data}
+
+
+def _build_base_response_data(tool_name: str, timing: Dict[str, Any], user_id: str) -> Dict[str, Any]:
+    """Build base response data common to success and error"""
     return {
         "tool_name": tool_name,
-        "status": "COMPLETED",
         "execution_time_ms": timing["execution_time_ms"],
         "started_at": timing.get("start_time"),
         "completed_at": timing["completed_time"],
-        "user_id": dispatcher.user.id,
+        "user_id": user_id
+    }
+
+
+def _build_success_specific_data(result: dict, dispatcher, tool_name: str, kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    """Build success-specific response data"""
+    from .admin_tool_execution import create_success_metadata
+    return {
+        "status": "COMPLETED",
         "result": result,
         "metadata": create_success_metadata(dispatcher, tool_name, kwargs)
     }
@@ -80,14 +108,17 @@ def build_error_response_data(dispatcher, tool_name: str, timing: Dict[str, Any]
                              error: Exception, start_time: datetime) -> Dict[str, Any]:
     """Build error response data"""
     from .admin_tool_execution import get_user_id_safe
+    base_data = _build_base_response_data(tool_name, timing, get_user_id_safe(dispatcher))
+    error_data = _build_error_specific_data(error, start_time, timing)
+    return {**base_data, **error_data}
+
+
+def _build_error_specific_data(error: Exception, start_time: datetime, timing: Dict[str, Any]) -> Dict[str, Any]:
+    """Build error-specific response data"""
     return {
-        "tool_name": tool_name,
-        "status": "FAILED", 
-        "execution_time_ms": timing["execution_time_ms"],
+        "status": "FAILED",
         "started_at": start_time,
-        "completed_at": timing["completed_time"],
         "error": str(error),
-        "user_id": get_user_id_safe(dispatcher),
         "is_recoverable": False
     }
 

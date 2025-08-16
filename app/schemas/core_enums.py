@@ -85,6 +85,7 @@ class WebSocketMessageType(str, Enum):
     THREAD_DELETED = "thread_deleted"
     THREAD_LOADED = "thread_loaded"
     THREAD_RENAMED = "thread_renamed"
+    THREAD_SWITCHED = "thread_switched"
     STEP_CREATED = "step_created"
     PARTIAL_RESULT = "partial_result"
     FINAL_REPORT = "final_report"
@@ -92,12 +93,20 @@ class WebSocketMessageType(str, Enum):
     CONNECTION_ESTABLISHED = "connection_established"
     STREAM_CHUNK = "stream_chunk"
     STREAM_COMPLETE = "stream_complete"
+    MESSAGE_RECEIVED = "message_received"
     
     # Synthetic data generation messages
     GENERATION_PROGRESS = "generation_progress"
     GENERATION_COMPLETE = "generation_complete"
     GENERATION_ERROR = "generation_error"
     BATCH_COMPLETE = "batch_complete"
+    
+    # MCP integration messages
+    MCP_TOOL_DISCOVERY = "mcp_tool_discovery"
+    MCP_TOOL_EXECUTION = "mcp_tool_execution" 
+    MCP_TOOL_RESULT = "mcp_tool_result"
+    MCP_SERVER_CONNECTED = "mcp_server_connected"
+    MCP_SERVER_DISCONNECTED = "mcp_server_disconnected"
 
 
 class WebSocketConnectionState(str, Enum):
@@ -212,6 +221,40 @@ class CircuitBreakerState(str, Enum):
     HALF_OPEN = "half_open"
 
 
+class MCPTransport(str, Enum):
+    """MCP transport types."""
+    STDIO = "stdio"
+    HTTP = "http"
+    WEBSOCKET = "websocket"
+
+
+class MCPServerStatus(str, Enum):
+    """MCP server status types."""
+    REGISTERED = "registered"
+    CONNECTED = "connected"
+    DISCONNECTED = "disconnected"
+    ERROR = "error"
+    HEALTHY = "healthy"
+    UNHEALTHY = "unhealthy"
+
+
+class MCPAuthType(str, Enum):
+    """MCP authentication types."""
+    NONE = "none"
+    API_KEY = "api_key"
+    OAUTH2 = "oauth2"
+    ENVIRONMENT = "environment"
+
+
+class MCPToolExecutionStatus(str, Enum):
+    """MCP tool execution status."""
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    TIMEOUT = "timeout"
+
+
 # Export all enums
 __all__ = [
     "MessageType",
@@ -222,5 +265,9 @@ __all__ = [
     "CorpusAuditStatus",
     "ErrorCategory",
     "CircuitBreakerState",
+    "MCPTransport",
+    "MCPServerStatus",
+    "MCPAuthType",
+    "MCPToolExecutionStatus",
     "MessageTypeLiteral"
 ]

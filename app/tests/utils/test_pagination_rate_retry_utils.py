@@ -15,7 +15,6 @@ from app.tests.helpers.rate_retry_monitoring_test_helpers import (
 
 
 # Test 95: Pagination utils cursors
-@pytest.mark.asyncio
 class TestPaginationUtilsCursors:
     """test_pagination_utils_cursors - Test cursor pagination and edge cases"""
     
@@ -72,7 +71,6 @@ class TestPaginationUtilsCursors:
 
 
 # Test 96: Rate limiter throttling
-@pytest.mark.asyncio
 class TestRateLimiterThrottling:
     """test_rate_limiter_throttling - Test rate limiting and bucket algorithms"""
     
@@ -108,7 +106,6 @@ class TestRateLimiterThrottling:
 
 
 # Test 97: Retry utils backoff
-@pytest.mark.asyncio
 class TestRetryUtilsBackoff:
     """test_retry_utils_backoff - Test retry strategies and exponential backoff"""
     

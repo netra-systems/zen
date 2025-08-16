@@ -40,8 +40,6 @@ class TestAgentErrorRecovery:
         orchestrator.max_retries = 3
         orchestrator.retry_delay = 0.01  # Fast retry for testing
         return orchestrator
-    
-    @pytest.mark.asyncio
     async def test_agent_failure_recovery(self, resilient_orchestrator):
         """Test recovery from agent failures with retry mechanism."""
         await self._setup_failing_agent(resilient_orchestrator, "user1")
@@ -79,8 +77,6 @@ class TestAgentErrorRecovery:
     def _verify_recovery_success(self, result):
         """Verify recovery was successful."""
         assert result['status'] == 'completed'
-    
-    @pytest.mark.asyncio
     async def test_agent_timeout_handling(self, resilient_orchestrator):
         """Test handling of agent timeouts."""
         agent = await self._setup_slow_agent(resilient_orchestrator, "user1")
@@ -100,8 +96,6 @@ class TestAgentErrorRecovery:
                 orchestrator.execute_agent_task("user1", "slow request", "run_slow"),
                 timeout=0.1  # 100ms timeout
             )
-    
-    @pytest.mark.asyncio
     async def test_agent_resource_cleanup_on_error(self, resilient_orchestrator):
         """Test resource cleanup when agent encounters errors."""
         await self._setup_failing_agent(resilient_orchestrator, "user1")
@@ -122,8 +116,6 @@ class TestAgentErrorRecovery:
         """Verify resources were cleaned up properly."""
         assert orchestrator.active_agents == initial_active - 1
         assert "user1" not in orchestrator.agents
-    
-    @pytest.mark.asyncio
     async def test_circuit_breaker_pattern(self, resilient_orchestrator):
         """Test circuit breaker pattern for failing agents."""
         circuit_state = self._initialize_circuit_breaker()
@@ -179,8 +171,6 @@ class TestAgentErrorRecovery:
             )
         
         assert "Circuit breaker open" in str(exc_info.value)
-    
-    @pytest.mark.asyncio
     async def test_graceful_degradation_under_load(self, resilient_orchestrator):
         """Test graceful degradation under high load conditions."""
         load_config = self._setup_load_test_config(resilient_orchestrator)
@@ -216,8 +206,6 @@ class TestAgentErrorRecovery:
         """Verify system degrades gracefully under load."""
         assert results['successes'] == config['expected_successes']
         assert results['failures'] == config['expected_failures']
-    
-    @pytest.mark.asyncio
     async def test_error_propagation_and_isolation(self, resilient_orchestrator):
         """Test error propagation and isolation between agents."""
         await self._setup_mixed_agent_states(resilient_orchestrator)

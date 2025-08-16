@@ -56,8 +56,6 @@ class TestStartupDiagnosticsInit:
 
 class TestSystemErrorCollection:
     """Test system error collection functionality."""
-    
-    @pytest.mark.asyncio
     @patch('scripts.startup_diagnostics.check_port_conflicts')
     @patch('scripts.startup_diagnostics.check_database_connection')
     @patch('scripts.startup_diagnostics.check_dependencies')
@@ -85,8 +83,6 @@ class TestSystemErrorCollection:
 
 class TestPortConflictChecking:
     """Test port conflict detection."""
-    
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.is_port_in_use')
     @patch('scripts.diagnostic_helpers.create_port_error')
     async def test_check_port_conflicts_none_in_use(self, mock_create_error: Mock,
@@ -97,8 +93,6 @@ class TestPortConflictChecking:
         errors = await check_port_conflicts()
         assert len(errors) == 0
         mock_create_error.assert_not_called()
-
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.is_port_in_use')
     @patch('scripts.diagnostic_helpers.create_port_error')
     async def test_check_port_conflicts_some_in_use(self, mock_create_error: Mock,
@@ -115,8 +109,6 @@ class TestPortConflictChecking:
 
 class TestDatabaseConnectionChecking:
     """Test database connection checking."""
-    
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     async def test_check_database_connection_success(self, mock_run_cmd: AsyncMock) -> None:
         """Test successful database connection check."""
@@ -124,8 +116,6 @@ class TestDatabaseConnectionChecking:
         
         errors = await check_database_connection()
         assert len(errors) == 0
-
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     @patch('scripts.diagnostic_helpers.create_db_error')
     async def test_check_database_connection_failure(self, mock_create_error: Mock,
@@ -137,8 +127,6 @@ class TestDatabaseConnectionChecking:
         
         errors = await check_database_connection()
         assert len(errors) == 1
-
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     @patch('scripts.diagnostic_helpers.create_db_error')
     async def test_check_database_connection_exception(self, mock_create_error: Mock,
@@ -154,8 +142,6 @@ class TestDatabaseConnectionChecking:
 
 class TestDependencyChecking:
     """Test dependency checking functionality."""
-    
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     @patch('pathlib.Path.exists')
     async def test_check_dependencies_success(self, mock_exists: Mock, mock_run_cmd: AsyncMock) -> None:
@@ -165,8 +151,6 @@ class TestDependencyChecking:
         
         errors = await check_dependencies()
         assert len(errors) == 0
-
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     @patch('scripts.diagnostic_helpers.create_dependency_error')
     async def test_check_dependencies_python_failure(self, mock_create_error: Mock,
@@ -179,8 +163,6 @@ class TestDependencyChecking:
         errors = await check_dependencies()
         assert len(errors) == 1
         mock_create_error.assert_called_with("Python")
-
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     @patch('pathlib.Path.exists')
     @patch('scripts.diagnostic_helpers.create_dependency_error')
@@ -199,8 +181,6 @@ class TestDependencyChecking:
 
 class TestEnvironmentVariableChecking:
     """Test environment variable checking."""
-    
-    @pytest.mark.asyncio
     @patch('os.getenv')
     async def test_check_environment_variables_all_present(self, mock_getenv: Mock) -> None:
         """Test environment variable check when all are present."""
@@ -208,8 +188,6 @@ class TestEnvironmentVariableChecking:
         
         errors = await check_environment_variables()
         assert len(errors) == 0
-
-    @pytest.mark.asyncio
     @patch('os.getenv')
     @patch('scripts.diagnostic_helpers.create_env_error')
     async def test_check_environment_variables_missing(self, mock_create_error: Mock,
@@ -225,8 +203,6 @@ class TestEnvironmentVariableChecking:
 
 class TestMigrationChecking:
     """Test migration status checking."""
-    
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     async def test_check_migrations_up_to_date(self, mock_run_cmd: AsyncMock) -> None:
         """Test migration check when up to date."""
@@ -234,8 +210,6 @@ class TestMigrationChecking:
         
         errors = await check_migrations()
         assert len(errors) == 0
-
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     @patch('scripts.diagnostic_helpers.create_migration_error')
     async def test_check_migrations_pending(self, mock_create_error: Mock,
@@ -247,8 +221,6 @@ class TestMigrationChecking:
         
         errors = await check_migrations()
         assert len(errors) == 1
-
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     @patch('scripts.diagnostic_helpers.create_migration_error')
     async def test_check_migrations_exception(self, mock_create_error: Mock,
@@ -264,22 +236,16 @@ class TestMigrationChecking:
 
 class TestFixApplication:
     """Test automatic fix application."""
-    
-    @pytest.mark.asyncio
     async def test_apply_fixes_empty_list(self) -> None:
         """Test applying fixes to empty error list."""
         fixes = await apply_fixes([])
         assert len(fixes) == 0
-
-    @pytest.mark.asyncio
     async def test_apply_fixes_no_auto_fixable(self, mock_diagnostic_error: DiagnosticError) -> None:
         """Test applying fixes when none are auto-fixable."""
         mock_diagnostic_error.can_auto_fix = False
         
         fixes = await apply_fixes([mock_diagnostic_error])
         assert len(fixes) == 0
-
-    @pytest.mark.asyncio
     @patch('scripts.startup_diagnostics.apply_single_fix')
     async def test_apply_fixes_with_auto_fixable(self, mock_apply_single: AsyncMock,
                                                 mock_diagnostic_error: DiagnosticError) -> None:
@@ -295,8 +261,6 @@ class TestFixApplication:
 
 class TestSingleFixApplication:
     """Test individual fix application."""
-    
-    @pytest.mark.asyncio
     @patch('scripts.startup_diagnostics.fix_port_conflict')
     async def test_apply_single_fix_port_error(self, mock_fix_port: AsyncMock,
                                               mock_diagnostic_error: DiagnosticError) -> None:
@@ -308,8 +272,6 @@ class TestSingleFixApplication:
         
         result = await apply_single_fix(mock_diagnostic_error)
         assert result.successful is True
-
-    @pytest.mark.asyncio
     @patch('scripts.startup_diagnostics.fix_dependencies')
     async def test_apply_single_fix_dependency_error(self, mock_fix_deps: AsyncMock,
                                                     mock_diagnostic_error: DiagnosticError) -> None:
@@ -321,8 +283,6 @@ class TestSingleFixApplication:
         
         result = await apply_single_fix(mock_diagnostic_error)
         assert result.successful is True
-
-    @pytest.mark.asyncio
     async def test_apply_single_fix_unknown_error(self, mock_diagnostic_error: DiagnosticError) -> None:
         """Test applying fix for unknown error type."""
         mock_diagnostic_error.message = "Unknown error"
@@ -330,8 +290,6 @@ class TestSingleFixApplication:
         result = await apply_single_fix(mock_diagnostic_error)
         assert result.attempted is False
         assert "no auto-fix available" in result.message.lower()
-
-    @pytest.mark.asyncio
     async def test_apply_single_fix_exception(self, mock_diagnostic_error: DiagnosticError) -> None:
         """Test fix application with exception."""
         mock_diagnostic_error.message = "Port conflict"
@@ -345,16 +303,12 @@ class TestSingleFixApplication:
 
 class TestSpecificFixes:
     """Test specific fix implementations."""
-    
-    @pytest.mark.asyncio
     async def test_fix_port_conflict(self, mock_diagnostic_error: DiagnosticError) -> None:
         """Test port conflict fix."""
         result = await fix_port_conflict(mock_diagnostic_error)
         assert result.attempted is True
         assert result.successful is True
         assert "port conflict resolved" in result.message.lower()
-
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     async def test_fix_dependencies_python_success(self, mock_run_cmd: AsyncMock,
                                                    mock_diagnostic_error: DiagnosticError) -> None:
@@ -364,8 +318,6 @@ class TestSpecificFixes:
         
         result = await fix_dependencies(mock_diagnostic_error)
         assert result.successful is True
-
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     async def test_fix_dependencies_failure(self, mock_run_cmd: AsyncMock,
                                            mock_diagnostic_error: DiagnosticError) -> None:
@@ -375,8 +327,6 @@ class TestSpecificFixes:
         
         result = await fix_dependencies(mock_diagnostic_error)
         assert result.successful is False
-
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     async def test_fix_migrations_success(self, mock_run_cmd: AsyncMock,
                                          mock_diagnostic_error: DiagnosticError) -> None:
@@ -386,8 +336,6 @@ class TestSpecificFixes:
         
         result = await fix_migrations(mock_diagnostic_error)
         assert result.successful is True
-
-    @pytest.mark.asyncio
     @patch('scripts.diagnostic_helpers.run_command_async')
     async def test_fix_migrations_failure(self, mock_run_cmd: AsyncMock,
                                          mock_diagnostic_error: DiagnosticError) -> None:
@@ -401,8 +349,6 @@ class TestSpecificFixes:
 
 class TestDiagnoseStartup:
     """Test main diagnosis functionality."""
-    
-    @pytest.mark.asyncio
     @patch('scripts.startup_diagnostics.collect_system_errors')
     @patch('scripts.diagnostic_helpers.get_system_state')
     @patch('scripts.diagnostic_helpers.get_configuration')
@@ -416,8 +362,6 @@ class TestDiagnoseStartup:
         result = await diagnose_startup()
         assert isinstance(result, DiagnosticResult)
         assert result.success is True
-
-    @pytest.mark.asyncio
     @patch('scripts.startup_diagnostics.collect_system_errors')
     @patch('scripts.diagnostic_helpers.get_system_state')
     @patch('scripts.diagnostic_helpers.get_configuration')
@@ -463,8 +407,6 @@ class TestRecommendationGeneration:
 
 class TestCLIInterface:
     """Test command-line interface."""
-    
-    @pytest.mark.asyncio
     @patch('scripts.startup_diagnostics.diagnose_startup')
     @patch('sys.argv', ['startup_diagnostics.py', '--diagnose'])
     async def test_main_diagnose_flag(self, mock_diagnose: AsyncMock) -> None:
@@ -476,8 +418,6 @@ class TestCLIInterface:
             await main()
             mock_diagnose.assert_called_once()
             mock_print.assert_called_once()
-
-    @pytest.mark.asyncio
     @patch('scripts.startup_diagnostics.diagnose_startup')
     @patch('scripts.startup_diagnostics.apply_fixes')
     @patch('sys.argv', ['startup_diagnostics.py', '--fix'])
@@ -491,8 +431,6 @@ class TestCLIInterface:
             await main()
             mock_diagnose.assert_called_once()
             mock_apply.assert_called_once()
-
-    @pytest.mark.asyncio
     @patch('scripts.startup_diagnostics.diagnose_startup')
     @patch('sys.argv', ['startup_diagnostics.py', '--verify'])
     async def test_main_verify_flag(self, mock_diagnose: AsyncMock) -> None:

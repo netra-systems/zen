@@ -24,8 +24,6 @@ def advanced_service():
 
 class TestAdvancedFeatures:
     """Test advanced and specialized features"""
-
-    @pytest.mark.asyncio
     async def test_ml_driven_pattern_generation(self, advanced_service):
         """Test ML-driven pattern learning and generation"""
         # Train on production patterns
@@ -45,8 +43,6 @@ class TestAdvancedFeatures:
         )
         
         assert similarity_score > 0.85
-
-    @pytest.mark.asyncio
     async def test_anomaly_injection_strategies(self, advanced_service):
         """Test various anomaly injection strategies"""
         config = GenerationConfig(
@@ -70,8 +66,6 @@ class TestAdvancedFeatures:
         # Check that anomaly types are in expected values
         expected_types = ['spike', 'degradation', 'failure']
         assert all(a["anomaly_type"] in expected_types for a in anomalies)
-
-    @pytest.mark.asyncio
     async def test_cross_correlation_generation(self, advanced_service):
         """Test generation with cross-correlations between metrics"""
         config = GenerationConfig(
@@ -103,8 +97,6 @@ class TestAdvancedFeatures:
         
         assert 0.5 <= corr1 <= 1.0  # Positive correlation expected
         assert -1.0 <= corr2 <= -0.3  # Negative correlation expected
-
-    @pytest.mark.asyncio
     async def test_temporal_event_sequences(self, advanced_service):
         """Test generation of complex temporal event sequences"""
         sequence_config = {
@@ -131,8 +123,6 @@ class TestAdvancedFeatures:
             # Verify temporal ordering
             for i in range(1, len(events)):
                 assert events[i]["timestamp"] > events[i-1]["timestamp"]
-
-    @pytest.mark.asyncio
     async def test_geo_distributed_simulation(self, advanced_service):
         """Test geo-distributed workload simulation"""
         geo_config = GenerationConfig(
@@ -162,8 +152,6 @@ class TestAdvancedFeatures:
         for region, expected_ratio in geo_config.geo_distribution.items():
             actual_ratio = region_counts.get(region, 0) / len(records)
             assert abs(actual_ratio - expected_ratio) < 0.05
-
-    @pytest.mark.asyncio
     async def test_adaptive_generation_feedback(self, advanced_service):
         """Test adaptive generation based on validation feedback"""
         target_metrics = {
@@ -182,8 +170,6 @@ class TestAdvancedFeatures:
         assert abs(actual_metrics["avg_latency"] - 100) < 10
         assert abs(actual_metrics["error_rate"] - 0.02) < 0.005
         assert abs(actual_metrics["throughput"] - 1000) < 50
-
-    @pytest.mark.asyncio
     async def test_multi_model_workload_generation(self, advanced_service):
         """Test generation for multi-model AI workloads"""
         model_config = {
@@ -210,8 +196,6 @@ class TestAdvancedFeatures:
             expected_count = model_cfg["weight"] * 1000
             actual_count = model_usage.get(model_cfg["name"], 0)
             assert abs(actual_count - expected_count) < 50
-
-    @pytest.mark.asyncio
     async def test_compliance_aware_generation(self, advanced_service):
         """Test generation with compliance constraints"""
         compliance_config = {
@@ -232,8 +216,6 @@ class TestAdvancedFeatures:
             assert "pii" not in record or record["pii"]["pseudonymized"] == True
             assert "audit_trail" in record
             assert record["compliance_standards"] == ["HIPAA", "GDPR"]
-
-    @pytest.mark.asyncio
     async def test_cost_optimized_generation(self, advanced_service):
         """Test cost-optimized data generation"""
         cost_constraints = {
@@ -250,8 +232,6 @@ class TestAdvancedFeatures:
         assert result["total_cost"] <= 1.0  # $0.10 per 1000 * 10
         assert result["storage_format"] == "compressed"
         assert result["compute_cost_saved"] > 0
-
-    @pytest.mark.asyncio
     async def test_versioned_corpus_generation(self, advanced_service):
         """Test generation with versioned corpus content"""
         # Create corpus versions

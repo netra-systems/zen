@@ -16,8 +16,6 @@ from app.schemas.agent_state import (
 
 class TestDateTimeSerialization:
     """Test datetime serialization in state persistence."""
-
-    @pytest.mark.asyncio
     async def test_datetime_encoder_handles_datetime_objects(self):
         """Test DateTimeEncoder properly serializes datetime objects."""
         data = {
@@ -42,8 +40,6 @@ class TestDateTimeSerialization:
         # Verify ISO format
         assert "T" in deserialized["timestamp"]
         assert deserialized["created_at"] == "2025-08-15T10:30:00+00:00"
-
-    @pytest.mark.asyncio
     async def test_save_agent_state_serializes_datetime_in_state_data(self):
         """Test save_agent_state properly serializes datetime objects in state_data."""
         service = StatePersistenceService()
@@ -103,8 +99,6 @@ class TestDateTimeSerialization:
                         assert isinstance(snapshot.state_data["metrics"]["last_update"], str)
                         assert isinstance(snapshot.state_data["checkpoint_time"], str)
                         assert snapshot.state_data["checkpoint_time"] == "2025-08-15T12:00:00+00:00"
-
-    @pytest.mark.asyncio
     async def test_state_persistence_handles_mixed_data_types(self):
         """Test state persistence handles mixed data types including datetime."""
         service = StatePersistenceService()

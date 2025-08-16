@@ -16,7 +16,6 @@ from app.tests.helpers.debug_migration_test_helpers import (
 
 
 # Test 98: Monitoring utils metrics
-@pytest.mark.asyncio
 class TestMonitoringUtilsMetrics:
     """test_monitoring_utils_metrics - Test metric collection and aggregation"""
     
@@ -67,7 +66,6 @@ class TestMonitoringUtilsMetrics:
 
 
 # Test 99: Debug utils profiling
-@pytest.mark.asyncio
 class TestDebugUtilsProfiling:
     """test_debug_utils_profiling - Test profiling utilities and performance metrics"""
     
@@ -139,7 +137,6 @@ class TestDebugUtilsProfiling:
 
 
 # Test 100: Migration utils scripts
-@pytest.mark.asyncio
 class TestMigrationUtilsScripts:
     """test_migration_utils_scripts - Test migration utilities and data transformation"""
     

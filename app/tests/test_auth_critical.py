@@ -72,8 +72,6 @@ class TestAuthenticationCritical:
         # Should raise InvalidSignatureError
         with pytest.raises(jwt.InvalidSignatureError):
             jwt.decode(token, wrong_key, algorithms=[algorithm])
-    
-    @pytest.mark.asyncio
     async def test_user_authentication_flow(self):
         """Test complete user authentication flow"""
         # Mock user data
@@ -91,8 +89,6 @@ class TestAuthenticationCritical:
         # Test invalid credentials
         wrong_password = "wrongpassword"
         assert not bcrypt.checkpw(wrong_password.encode('utf-8'), mock_user["hashed_password"])
-    
-    @pytest.mark.asyncio
     async def test_token_refresh(self):
         """Test token refresh mechanism"""
         secret_key = "test-secret-key"
@@ -148,8 +144,6 @@ class TestAuthenticationCritical:
             assert len(pwd) >= 8
             assert any(c.isdigit() for c in pwd)
             assert any(c.isalpha() for c in pwd)
-    
-    @pytest.mark.asyncio
     async def test_oauth_token_validation(self):
         """Test OAuth token validation"""
         # Mock OAuth token
@@ -181,8 +175,6 @@ class TestAuthenticationCritical:
         assert session_data["expires_at"] > datetime.now(timezone.utc)
         assert session_data["session_id"]
         assert session_data["user_id"]
-    
-    @pytest.mark.asyncio
     async def test_role_based_access_control(self):
         """Test RBAC functionality"""
         # Define roles and permissions

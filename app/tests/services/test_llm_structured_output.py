@@ -49,8 +49,6 @@ class TestLLMManagerStructuredOutput:
         for client in providers:
             provider_enum = LLMProvider(client.provider.value)
             manager.register_provider_client(provider_enum, client.model_name, client)
-    
-    @pytest.mark.asyncio
     async def test_structured_output_with_failover(self, structured_llm_manager):
         """Test structured output with provider failover"""
         prompt = "Analyze this text and provide structured output"
@@ -59,8 +57,6 @@ class TestLLMManagerStructuredOutput:
         
         assert result != None
         assert isinstance(result.content, str)
-    
-    @pytest.mark.asyncio
     async def test_structured_output_provider_switching(self, structured_llm_manager):
         """Test structured output with multiple providers"""
         prompt = "Structured output test"
@@ -95,8 +91,6 @@ class TestLLMManagerStructuredOutput:
         elif '[google]' in content:
             return 'google'
         return None
-    
-    @pytest.mark.asyncio
     async def test_structured_output_schema_validation(self, structured_llm_manager):
         """Test that structured output can work with schema validation"""
         # This would test structured output with schema in a real implementation
@@ -113,8 +107,6 @@ class TestLLMManagerStructuredOutput:
         assert hasattr(result, 'content')
         assert isinstance(result.content, str)
         assert len(result.content) > 0
-    
-    @pytest.mark.asyncio
     async def test_structured_output_concurrent_requests(self, structured_llm_manager):
         """Test concurrent structured output requests"""
         prompt = "Concurrent structured output test"
@@ -135,8 +127,6 @@ class TestLLMManagerStructuredOutput:
         for result in successful_results:
             assert hasattr(result, 'content')
             assert len(result.content) > 10  # Non-trivial content
-    
-    @pytest.mark.asyncio
     async def test_structured_output_failover_behavior(self, structured_llm_manager):
         """Test failover behavior with structured output"""
         prompt = "Test structured failover"
@@ -165,8 +155,6 @@ class TestLLMManagerStructuredOutput:
             assert result != None
             assert hasattr(result, 'content')
             assert "Response to:" in result.content
-    
-    @pytest.mark.asyncio
     async def test_structured_output_load_balancing(self, structured_llm_manager):
         """Test load balancing with structured output"""
         structured_llm_manager.load_balancing['strategy'] = 'round_robin'

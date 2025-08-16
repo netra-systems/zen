@@ -7,6 +7,7 @@ import WS from 'jest-websocket-mock';
 import { useAuthStore } from '@/store/authStore';
 import { useChatStore } from '@/store/chatStore';
 import { useThreadStore } from '@/store/threadStore';
+import { createWebSocketManager } from './websocket-test-manager';
 
 export const setupTestEnvironment = () => {
   process.env.NEXT_PUBLIC_API_URL = 'http://localhost:8000';
@@ -15,7 +16,11 @@ export const setupTestEnvironment = () => {
 };
 
 export const cleanupTestEnvironment = () => {
-  WS.clean();
+  try {
+    WS.clean();
+  } catch (error) {
+    // Ignore cleanup errors for non-existent servers
+  }
   jest.restoreAllMocks();
 };
 
@@ -31,7 +36,12 @@ export const resetTestStores = () => {
 };
 
 export const setupMockServer = () => {
-  return new WS('ws://localhost:8000/ws');
+  const wsManager = createWebSocketManager();
+  return wsManager.setup();
+};
+
+export const createWebSocketTestManager = () => {
+  return createWebSocketManager();
 };
 
 export const setupMockFetch = () => {

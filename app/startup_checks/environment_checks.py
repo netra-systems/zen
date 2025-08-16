@@ -20,14 +20,23 @@ class EnvironmentChecker:
     
     async def check_environment_variables(self) -> StartupCheckResult:
         """Check required environment variables are set"""
+        check_data = self._prepare_environment_check_data()
+        return self._evaluate_environment_variables(check_data)
+    
+    def _prepare_environment_check_data(self) -> dict:
+        """Prepare data for environment variable checks"""
         required_vars = self._get_required_vars()
         optional_vars = self._get_optional_vars()
-        missing_required = self._check_missing_vars(required_vars)
-        missing_optional = self._check_missing_vars(optional_vars)
-        
-        if missing_required:
-            return self._create_missing_vars_result(missing_required)
-        return self._create_success_result(missing_optional)
+        return {
+            "missing_required": self._check_missing_vars(required_vars),
+            "missing_optional": self._check_missing_vars(optional_vars)
+        }
+    
+    def _evaluate_environment_variables(self, check_data: dict) -> StartupCheckResult:
+        """Evaluate environment variable check results"""
+        if check_data["missing_required"]:
+            return self._create_missing_vars_result(check_data["missing_required"])
+        return self._create_success_result(check_data["missing_optional"])
     
     async def check_configuration(self) -> StartupCheckResult:
         """Validate application configuration"""
@@ -44,13 +53,17 @@ class EnvironmentChecker:
     
     def _get_optional_vars(self) -> List[str]:
         """Get optional environment variables"""
-        return [
-            "REDIS_URL",
-            "CLICKHOUSE_URL",
-            "ANTHROPIC_API_KEY",
-            "GOOGLE_CLIENT_ID",
-            "GOOGLE_CLIENT_SECRET"
-        ]
+        service_vars = self._get_optional_service_vars()
+        auth_vars = self._get_optional_auth_vars()
+        return service_vars + auth_vars
+    
+    def _get_optional_service_vars(self) -> List[str]:
+        """Get optional service environment variables"""
+        return ["REDIS_URL", "CLICKHOUSE_URL", "ANTHROPIC_API_KEY"]
+    
+    def _get_optional_auth_vars(self) -> List[str]:
+        """Get optional authentication environment variables"""
+        return ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]
     
     def _check_missing_vars(self, vars_list: List[str]) -> List[str]:
         """Check for missing variables"""

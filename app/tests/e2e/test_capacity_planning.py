@@ -7,6 +7,8 @@ Maximum 300 lines, functions ≤8 lines.
 import pytest
 from app.agents.triage_sub_agent.agent import TriageSubAgent
 from app.agents.data_sub_agent.agent import DataSubAgent
+from app.agents.state import DeepAgentState
+from app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
 
 from app.tests.e2e.scaling_test_helpers import (
     create_scaling_setup, execute_scaling_workflow,
@@ -41,3 +43,58 @@ class TestCapacityPlanningWorkflows:
         state = create_traffic_spike_state()
         results = await execute_scaling_workflow(setup, state)
         validate_spike_handling_strategy(results)
+
+
+@pytest.mark.real_llm
+class TestExamplePromptsCapacityPlanning:
+    """Test specific example prompt EP-003 with real LLM validation."""
+    
+    async def test_ep_003_usage_increase_impact_real_llm(self, scaling_analysis_setup):
+        """Test EP-003: Usage increase impact analysis using real LLM."""
+        setup = scaling_analysis_setup
+        state = _create_ep_003_state()
+        results = await execute_scaling_workflow(setup, state)
+        await _validate_ep_003_results(results, state, setup)
+
+
+def _create_ep_003_state() -> DeepAgentState:
+    """Create state for EP-003 example prompt test."""
+    return DeepAgentState(
+        user_request="I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?",
+        metadata={'test_type': 'ep_003', 'prompt_id': 'EP-003', 'usage_increase': '50%', 'timeframe': 'next_month'}
+    )
+
+
+async def _validate_ep_003_results(results, state: DeepAgentState, setup):
+    """Validate EP-003 results with enhanced quality checks."""
+    _validate_capacity_planning_results(results, state)
+    await _validate_response_quality_ep_003(results, setup)
+
+
+def _validate_capacity_planning_results(results, state: DeepAgentState):
+    """Validate capacity planning workflow results."""
+    assert len(results) > 0, "No results returned from workflow"
+    assert '50%' in state.user_request
+    assert any('usage' in str(result).lower() for result in results)
+    assert any('cost' in str(result).lower() or 'rate limit' in str(result).lower() for result in results)
+
+
+async def _validate_response_quality_ep_003(results, setup):
+    """Validate response quality for EP-003 using quality gate service."""
+    quality_service = QualityGateService()
+    final_result = results[-1] if results else None
+    
+    if final_result:
+        response_text = _extract_response_text(final_result)
+        is_valid, score, feedback = await quality_service.validate_content(
+            content=response_text, content_type=ContentType.CAPACITY_ANALYSIS, quality_level=QualityLevel.MEDIUM
+        )
+        assert is_valid, f"EP-003 response quality validation failed: {feedback}"
+        assert score >= 70, f"EP-003 quality score too low: {score}"
+
+
+def _extract_response_text(result) -> str:
+    """Extract response text from workflow result."""
+    if isinstance(result, dict):
+        return str(result.get('execution_result', result.get('response', str(result))))
+    return str(result)

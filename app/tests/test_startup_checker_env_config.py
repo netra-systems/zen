@@ -22,8 +22,6 @@ class TestStartupCheckerEnvConfig:
     def checker(self, mock_app):
         """Create a StartupChecker instance."""
         return StartupChecker(mock_app)
-    
-    @pytest.mark.asyncio
     async def test_check_environment_variables_dev_mode(self, mock_app, monkeypatch):
         """Test environment variable check in development mode."""
         setup_env_vars_development(monkeypatch)
@@ -38,8 +36,6 @@ class TestStartupCheckerEnvConfig:
         
         assert result.success == True
         assert "Development mode - using default configs" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_environment_variables_production_missing(self, mock_app, monkeypatch):
         """Test environment variable check in production with missing required vars."""
         monkeypatch.setenv("ENVIRONMENT", "production")
@@ -53,8 +49,6 @@ class TestStartupCheckerEnvConfig:
         assert result.success == False
         assert "Missing required" in result.message
         assert result.critical == True
-    
-    @pytest.mark.asyncio
     async def test_check_environment_variables_with_optional(self, mock_app, monkeypatch):
         """Test environment variable check with optional variables missing."""
         setup_env_vars_production(monkeypatch)
@@ -67,8 +61,6 @@ class TestStartupCheckerEnvConfig:
         
         assert result.success == True
         assert "Optional missing" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_configuration_success(self, checker):
         """Test configuration validation success."""
         with patch('app.startup_checks.environment_checks.settings') as mock_settings:
@@ -79,8 +71,6 @@ class TestStartupCheckerEnvConfig:
             result = await checker.env_checker.check_configuration()
             
             assert result.success == True
-    
-    @pytest.mark.asyncio
     async def test_check_configuration_missing_database(self, checker):
         """Test configuration validation with missing database URL."""
         with patch('app.startup_checks.environment_checks.settings') as mock_settings:
@@ -90,8 +80,6 @@ class TestStartupCheckerEnvConfig:
             
             assert result.success == False
             assert "DATABASE_URL" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_configuration_short_secret_production(self, checker):
         """Test configuration validation with short secret key in production."""
         with patch('app.startup_checks.environment_checks.settings') as mock_settings:
@@ -103,8 +91,6 @@ class TestStartupCheckerEnvConfig:
             
             assert result.success == False
             assert "SECRET_KEY" in result.message
-    
-    @pytest.mark.asyncio
     async def test_check_configuration_invalid_environment(self, checker):
         """Test configuration validation with invalid environment."""
         with patch('app.startup_checks.environment_checks.settings') as mock_settings:

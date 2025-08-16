@@ -1,0 +1,289 @@
+name: AI Factory Status Report
+
+on:
+  schedule:
+    # Run every 4 hours
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+    inputs:
+      hours_to_analyze:
+        description: 'Number of hours to analyze'
+        required: false
+        default: '24'
+        type: choice
+        options:
+          - '1'
+          - '6'
+          - '12'
+          - '24'
+          - '48'
+          - '168'
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  generate-report:
+    name: Generate Factory Status Report
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Set report parameters
+        id: params
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "hours=${{ inputs.hours_to_analyze }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event_name }}" == "push" ]; then
+            echo "hours=1" >> $GITHUB_OUTPUT
+          else
+            echo "hours=24" >> $GITHUB_OUTPUT
+          fi
+          echo "timestamp=$(date -u +%Y%m%d_%H%M%S)" >> $GITHUB_OUTPUT
+          
+      - name: Generate Factory Status Report
+        id: report
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          python -c "
+          import sys
+          import json
+          from datetime import datetime
+          from app.services.factory_status.report_builder import ReportBuilder
+          
+          hours = int('${{ steps.params.outputs.hours }}')
+          print(f'Analyzing last {hours} hours of activity...')
+          
+          builder = ReportBuilder()
+          report = builder.build_report(hours)
+          
+          # Save full report
+          with open('factory_status_report.json', 'w') as f:
+              f.write(builder.export_json(report))
+          
+          # Save summary
+          with open('factory_status_summary.txt', 'w') as f:
+              f.write(builder.export_summary(report))
+          
+          # Output key metrics for GitHub Actions
+          print(f'::notice title=Productivity Score::{report.executive_summary.productivity_score}/10')
+          print(f'::notice title=Business Value Score::{report.executive_summary.business_value_score}/10')
+          print(f'::notice title=Status::{report.executive_summary.overall_status.upper()}')
+          
+          # Set outputs for next steps
+          with open('$GITHUB_OUTPUT', 'a') as f:
+              f.write(f'productivity_score={report.executive_summary.productivity_score}\\n')
+              f.write(f'business_value_score={report.executive_summary.business_value_score}\\n')
+              f.write(f'status={report.executive_summary.overall_status}\\n')
+              f.write(f'report_id={report.report_id}\\n')
+          "
+          
+      - name: Upload report artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: factory-status-report-${{ steps.params.outputs.timestamp }}
+          path: |
+            factory_status_report.json
+            factory_status_summary.txt
+          retention-days: 30
+          
+      - name: Check compliance violations
+        id: compliance
+        run: |
+          python -c "
+          import json
+          with open('factory_status_report.json', 'r') as f:
+              report = json.load(f)
+          
+          violations = report['quality_metrics']['architecture_compliance']['violations']
+          if violations > 0:
+              files_over = report['quality_metrics']['architecture_compliance']['files_over_limit']
+              funcs_over = report['quality_metrics']['architecture_compliance']['functions_over_limit']
+              print(f'::warning title=Architecture Violations::Found {violations} violations')
+              if files_over:
+                  print(f'::warning::Files exceeding 300 lines: {files_over}')
+              if funcs_over:
+                  print(f'::warning::Functions exceeding 8 lines: {funcs_over}')
+          "
+          
+      - name: Create issue for action items
+        if: steps.report.outputs.status == 'needs_improvement'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('factory_status_summary.txt', 'utf8');
+            
+            const issueBody = `## AI Factory Status Report - Action Required
+            
+            **Report ID**: ${{ steps.report.outputs.report_id }}
+            **Generated**: ${{ steps.params.outputs.timestamp }}
+            **Productivity Score**: ${{ steps.report.outputs.productivity_score }}/10
+            **Business Value Score**: ${{ steps.report.outputs.business_value_score }}/10
+            **Status**: ${{ steps.report.outputs.status }}
+            
+            ### Report Summary
+            \`\`\`
+            ${summary}
+            \`\`\`
+            
+            ### Next Steps
+            Please review the action items and recommendations in the report.
+            
+            [View Full Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Factory Status] Action Required - ${new Date().toISOString().split('T')[0]}`,
+              body: issueBody,
+              labels: ['factory-status', 'action-required']
+            });
+            
+      - name: Post to Slack (if configured)
+        if: env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK_URL" ]; then
+            SUMMARY=$(cat factory_status_summary.txt | head -20)
+            curl -X POST $SLACK_WEBHOOK_URL \
+              -H 'Content-Type: application/json' \
+              -d @- << EOF
+          {
+            "text": "AI Factory Status Report Generated",
+            "blocks": [
+              {
+                "type": "header",
+                "text": {
+                  "type": "plain_text",
+                  "text": "🏭 AI Factory Status Report"
+                }
+              },
+              {
+                "type": "section",
+                "fields": [
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Productivity Score:*\n${{ steps.report.outputs.productivity_score }}/10"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Business Value:*\n${{ steps.report.outputs.business_value_score }}/10"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Status:*\n${{ steps.report.outputs.status }}"
+                  },
+                  {
+                    "type": "mrkdwn",
+                    "text": "*Period:*\nLast ${{ steps.params.outputs.hours }} hours"
+                  }
+                ]
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "*Summary:*\n\`\`\`${SUMMARY}\`\`\`"
+                }
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View Full Report"
+                    },
+                    "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                ]
+              }
+            ]
+          }
+          EOF
+          fi
+          
+      - name: Cache report for API
+        run: |
+          # In production, this would save to Redis or database
+          # For now, we'll create a simple cache file
+          mkdir -p .factory-status-cache
+          cp factory_status_report.json .factory-status-cache/latest.json
+          echo "${{ steps.report.outputs.report_id }}" > .factory-status-cache/latest_id.txt
+          
+      - name: Generate trend analysis
+        if: github.event_name == 'schedule'
+        run: |
+          python -c "
+          import json
+          import os
+          from datetime import datetime, timedelta
+          
+          # Load current report
+          with open('factory_status_report.json', 'r') as f:
+              current = json.load(f)
+          
+          # Calculate weekly trend
+          print('## Weekly Trend Analysis')
+          print(f'Current Productivity: {current[\"executive_summary\"][\"productivity_score\"]}/10')
+          print(f'Current Business Value: {current[\"executive_summary\"][\"business_value_score\"]}/10')
+          
+          # Identify patterns
+          velocity_trend = current['velocity_metrics']['velocity_trend']
+          if velocity_trend > 0:
+              print(f'✅ Development velocity increasing by {velocity_trend:.1%}')
+          elif velocity_trend < 0:
+              print(f'⚠️ Development velocity decreasing by {abs(velocity_trend):.1%}')
+          else:
+              print('➡️ Development velocity stable')
+          "
+          
+      - name: Summary
+        run: |
+          echo "## Factory Status Report Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Report ID | ${{ steps.report.outputs.report_id }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Productivity Score | ${{ steps.report.outputs.productivity_score }}/10 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Business Value Score | ${{ steps.report.outputs.business_value_score }}/10 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Overall Status | ${{ steps.report.outputs.status }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Analysis Period | ${{ steps.params.outputs.hours }} hours |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Report Summary" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat factory_status_summary.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
