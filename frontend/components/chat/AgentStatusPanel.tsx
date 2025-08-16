@@ -5,7 +5,6 @@ import {
   CheckCircle2, Loader2, ChevronRight,
   Settings, Eye
 } from 'lucide-react';
-import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 
 interface StatusZone {
@@ -18,12 +17,21 @@ interface StatusZone {
 }
 
 const AgentStatusPanel: React.FC = () => {
-  const { subAgentName, isProcessing } = useUnifiedChatStore();
   const { 
-    workflowProgress, 
-    activeTools,
-    toolExecutionStatus
-  } = useChatWebSocket();
+    subAgentName, 
+    isProcessing, 
+    fastLayerData, 
+    mediumLayerData, 
+    slowLayerData 
+  } = useUnifiedChatStore();
+  
+  // Derive data that was previously from the legacy hook
+  const activeTools = fastLayerData?.activeTools || [];
+  const toolExecutionStatus = activeTools.length > 0 ? 'executing' : 'idle';
+  const workflowProgress = {
+    current_step: fastLayerData ? (mediumLayerData ? (slowLayerData ? 3 : 2) : 1) : 0,
+    total_steps: 3
+  };
 
   const [statusZones, setStatusZones] = useState<StatusZone[]>([]);
   const [expandedPreview, setExpandedPreview] = useState<string | null>(null);

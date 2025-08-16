@@ -6,6 +6,8 @@ Maximum 300 lines, functions ≤8 lines.
 
 import pytest
 import time
+from app.agents.state import DeepAgentState
+from app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
 
 from app.tests.e2e.latency_optimization_helpers import (
     create_latency_optimization_setup, execute_latency_workflow,
@@ -79,3 +81,92 @@ class TestWorkflowPerformance:
         state = create_bottleneck_analysis_state()
         results = await execute_latency_workflow(setup, state)
         validate_timing_consistency(results)
+
+
+@pytest.mark.real_llm
+class TestExamplePromptsPerformanceOptimization:
+    """Test specific example prompts EP-002 and EP-004 with real LLM validation."""
+    
+    async def test_ep_002_latency_budget_constraint_real_llm(self, latency_optimization_setup):
+        """Test EP-002: Latency optimization with budget constraints using real LLM."""
+        setup = latency_optimization_setup
+        state = _create_ep_002_state()
+        results = await execute_latency_workflow(setup, state)
+        await _validate_ep_002_results(results, state, setup)
+    
+    async def test_ep_004_function_optimization_real_llm(self, latency_optimization_setup):
+        """Test EP-004: Function optimization methods using real LLM."""
+        setup = latency_optimization_setup
+        state = _create_ep_004_state()
+        results = await execute_latency_workflow(setup, state)
+        await _validate_ep_004_results(results, state, setup)
+
+
+def _create_ep_002_state() -> DeepAgentState:
+    """Create state for EP-002 example prompt test."""
+    return DeepAgentState(
+        user_request="My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money.",
+        metadata={'test_type': 'ep_002', 'prompt_id': 'EP-002', 'latency_target': '3x', 'budget_constraint': 'zero'}
+    )
+
+
+def _create_ep_004_state() -> DeepAgentState:
+    """Create state for EP-004 example prompt test."""
+    return DeepAgentState(
+        user_request="I need to optimize the 'user_authentication' function. What advanced methods can I use?",
+        metadata={'test_type': 'ep_004', 'prompt_id': 'EP-004', 'target_function': 'user_authentication'}
+    )
+
+
+async def _validate_ep_002_results(results, state: DeepAgentState, setup):
+    """Validate EP-002 results with enhanced quality checks."""
+    await validate_3x_latency_results(results, state)
+    await _validate_response_quality_ep_002(results, setup)
+
+
+async def _validate_ep_004_results(results, state: DeepAgentState, setup):
+    """Validate EP-004 results with enhanced quality checks."""
+    _validate_function_optimization_results(results, state)
+    await _validate_response_quality_ep_004(results, setup)
+
+
+def _validate_function_optimization_results(results, state: DeepAgentState):
+    """Validate function optimization workflow results."""
+    assert len(results) > 0, "No results returned from workflow"
+    assert 'user_authentication' in state.user_request
+    assert any('function' in str(result).lower() for result in results)
+
+
+async def _validate_response_quality_ep_002(results, setup):
+    """Validate response quality for EP-002 using quality gate service."""
+    quality_service = QualityGateService()
+    final_result = results[-1] if results else None
+    
+    if final_result and hasattr(final_result, 'get'):
+        response_text = _extract_response_text(final_result)
+        is_valid, score, feedback = await quality_service.validate_content(
+            content=response_text, content_type=ContentType.PERFORMANCE_ANALYSIS, quality_level=QualityLevel.MEDIUM
+        )
+        assert is_valid, f"EP-002 response quality validation failed: {feedback}"
+        assert score >= 70, f"EP-002 quality score too low: {score}"
+
+
+async def _validate_response_quality_ep_004(results, setup):
+    """Validate response quality for EP-004 using quality gate service."""
+    quality_service = QualityGateService()
+    final_result = results[-1] if results else None
+    
+    if final_result and hasattr(final_result, 'get'):
+        response_text = _extract_response_text(final_result)
+        is_valid, score, feedback = await quality_service.validate_content(
+            content=response_text, content_type=ContentType.OPTIMIZATION_REPORT, quality_level=QualityLevel.MEDIUM
+        )
+        assert is_valid, f"EP-004 response quality validation failed: {feedback}"
+        assert score >= 70, f"EP-004 quality score too low: {score}"
+
+
+def _extract_response_text(result) -> str:
+    """Extract response text from workflow result."""
+    if isinstance(result, dict):
+        return str(result.get('execution_result', result.get('response', str(result))))
+    return str(result)

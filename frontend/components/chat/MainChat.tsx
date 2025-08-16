@@ -8,7 +8,6 @@ import { PersistentResponseCard } from '@/components/chat/PersistentResponseCard
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { OverflowPanel } from '@/components/chat/OverflowPanel';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
@@ -30,8 +29,7 @@ const MainChat: React.FC = () => {
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // Connect WebSocket messages to unified chat store
-  useChatWebSocket();
+  // WebSocket events are automatically processed through the unified store
 
   const hasMessages = messages.length > 0;
   const isWebSocketConnected = wsStatus === 'OPEN';

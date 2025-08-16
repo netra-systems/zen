@@ -71,86 +71,130 @@ class SearchOperations:
             central_logger.error(f"Failed to get statistics for corpus {db_corpus.id}: {str(e)}")
             raise ClickHouseOperationError(f"Failed to retrieve statistics: {str(e)}")
     
+    def _validate_corpus_availability(self, db_corpus) -> None:
+        """Validate that corpus is available for searching"""
+        if db_corpus.status != "available":
+            raise CorpusNotAvailableError(
+                f"Corpus {db_corpus.id} is not available"
+            )
+    
+    def _build_base_query(self, table_name: str) -> str:
+        """Build the base SELECT query"""
+        return f"""
+            SELECT record_id, workload_type, prompt, response, metadata, created_at
+            FROM {table_name}
+        """
+    
+    def _add_workload_type_filter(
+        self, conditions: List[str], search_params: Dict
+    ) -> None:
+        """Add workload type filter to conditions list"""
+        if search_params.get("workload_type"):
+            conditions.append(
+                f"workload_type = '{search_params['workload_type']}'"
+            )
+    
+    def _add_date_range_filters(
+        self, conditions: List[str], search_params: Dict
+    ) -> None:
+        """Add date range filters to conditions list"""
+        if search_params.get("start_date"):
+            conditions.append(f"created_at >= '{search_params['start_date']}'")
+        if search_params.get("end_date"):
+            conditions.append(f"created_at <= '{search_params['end_date']}'")
+    
+    def _escape_text_search(self, text: str) -> str:
+        """Escape text search string for SQL safety"""
+        return text.replace("'", "''")
+    
+    def _add_text_search_filter(
+        self, conditions: List[str], search_params: Dict
+    ) -> None:
+        """Add text search filter to conditions list"""
+        if search_params.get("text_search"):
+            escaped_text = self._escape_text_search(search_params["text_search"])
+            filter_clause = f"(prompt LIKE '%{escaped_text}%' OR response LIKE '%{escaped_text}%')"
+            conditions.append(filter_clause)
+    
+    def _add_domain_filter(
+        self, conditions: List[str], search_params: Dict
+    ) -> None:
+        """Add domain filter to conditions list"""
+        if search_params.get("domain"):
+            conditions.append(f"domain = '{search_params['domain']}'")
+    
+    def _build_where_conditions(self, search_params: Dict) -> List[str]:
+        """Build all WHERE conditions from search parameters"""
+        conditions = []
+        self._add_workload_type_filter(conditions, search_params)
+        self._add_date_range_filters(conditions, search_params)
+        self._add_text_search_filter(conditions, search_params)
+        self._add_domain_filter(conditions, search_params)
+        return conditions
+    
+    def _build_order_clause(self, search_params: Dict) -> str:
+        """Build ORDER BY clause from search parameters"""
+        order_by = search_params.get("order_by", "created_at")
+        order_dir = search_params.get("order_direction", "DESC")
+        return f" ORDER BY {order_by} {order_dir}"
+    
+    def _build_pagination_clause(self, search_params: Dict) -> str:
+        """Build LIMIT and OFFSET clause from search parameters"""
+        limit = min(search_params.get("limit", 100), 1000)  # Cap at 1000
+        offset = search_params.get("offset", 0)
+        return f" LIMIT {limit} OFFSET {offset}"
+    
+    def _parse_metadata(self, metadata_raw) -> Dict:
+        """Parse metadata JSON or return empty dict"""
+        return json.loads(metadata_raw) if metadata_raw else {}
+    
+    def _format_timestamp(self, timestamp) -> Optional[str]:
+        """Format timestamp to ISO string or None"""
+        return timestamp.isoformat() if timestamp else None
+    
+    def _build_result_dict(self, row) -> Dict:
+        """Build result dictionary from row data"""
+        return {
+            "record_id": str(row[0]),
+            "workload_type": row[1],
+            "prompt": row[2],
+            "response": row[3]
+        }
+    
+    def _format_result_row(self, row) -> Dict:
+        """Format a single result row to dictionary"""
+        result = self._build_result_dict(row)
+        result["metadata"] = self._parse_metadata(row[4])
+        result["created_at"] = self._format_timestamp(row[5])
+        return result
+    
+    def _process_search_results(self, result) -> List[Dict]:
+        """Convert ClickHouse result rows to list of dictionaries"""
+        return [self._format_result_row(row) for row in result]
+    
+    async def _execute_search_query(
+        self, query: str, db_corpus
+    ) -> List[Dict]:
+        """Execute the complete search query and return processed results"""
+        async with get_clickhouse_client() as client:
+            result = await client.execute(query)
+            return self._process_search_results(result)
+    
     async def search_corpus_content(
         self,
         db_corpus,
         search_params: Dict
     ) -> Optional[List[Dict]]:
-        """
-        Search corpus content with advanced filtering
-        
-        Args:
-            db_corpus: Corpus database model
-            search_params: Search parameters including filters, sorting, etc.
-            
-        Returns:
-            List of matching records
-        """
-        if db_corpus.status != "available":
-            raise CorpusNotAvailableError(f"Corpus {db_corpus.id} is not available")
-        
+        """Search corpus content with advanced filtering"""
+        self._validate_corpus_availability(db_corpus)
         try:
-            async with get_clickhouse_client() as client:
-                # Build base query
-                query = f"""
-                    SELECT record_id, workload_type, prompt, response, metadata, created_at
-                    FROM {db_corpus.table_name}
-                """
-                
-                # Build WHERE clause
-                where_conditions = []
-                
-                # Filter by workload type
-                if search_params.get("workload_type"):
-                    where_conditions.append(f"workload_type = '{search_params['workload_type']}'")
-                
-                # Filter by date range
-                if search_params.get("start_date"):
-                    where_conditions.append(f"created_at >= '{search_params['start_date']}'")
-                if search_params.get("end_date"):
-                    where_conditions.append(f"created_at <= '{search_params['end_date']}'")
-                
-                # Text search in prompt/response
-                if search_params.get("text_search"):
-                    text_search = search_params["text_search"].replace("'", "''")
-                    where_conditions.append(
-                        f"(prompt LIKE '%{text_search}%' OR response LIKE '%{text_search}%')"
-                    )
-                
-                # Domain filter
-                if search_params.get("domain"):
-                    where_conditions.append(f"domain = '{search_params['domain']}'")
-                
-                # Add WHERE clause if conditions exist
-                if where_conditions:
-                    query += " WHERE " + " AND ".join(where_conditions)
-                
-                # Add ORDER BY
-                order_by = search_params.get("order_by", "created_at")
-                order_dir = search_params.get("order_direction", "DESC")
-                query += f" ORDER BY {order_by} {order_dir}"
-                
-                # Add LIMIT and OFFSET
-                limit = min(search_params.get("limit", 100), 1000)  # Cap at 1000
-                offset = search_params.get("offset", 0)
-                query += f" LIMIT {limit} OFFSET {offset}"
-                
-                result = await client.execute(query)
-                
-                # Convert to list of dicts
-                content = []
-                for row in result:
-                    content.append({
-                        "record_id": str(row[0]),
-                        "workload_type": row[1],
-                        "prompt": row[2],
-                        "response": row[3],
-                        "metadata": json.loads(row[4]) if row[4] else {},
-                        "created_at": row[5].isoformat() if row[5] else None
-                    })
-                
-                return content
-                
+            query = self._build_base_query(db_corpus.table_name)
+            conditions = self._build_where_conditions(search_params)
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+            query += self._build_order_clause(search_params)
+            query += self._build_pagination_clause(search_params)
+            return await self._execute_search_query(query, db_corpus)
         except Exception as e:
             central_logger.error(f"Failed to search corpus {db_corpus.id}: {str(e)}")
             raise ClickHouseOperationError(f"Search failed: {str(e)}")

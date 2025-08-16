@@ -213,7 +213,7 @@ class TestRegexPatternCoverage:
         for pattern in case_patterns:
             query = f"SELECT {pattern} FROM table"
             fixed = fix_clickhouse_array_syntax(query)
-            assert 'arrayElement(' in fixed.lower()
+            assert 'arrayelement(' in fixed.lower()
             assert pattern not in fixed
 
     def _get_boundary_condition_patterns(self):
@@ -238,7 +238,7 @@ class TestRegexPatternCoverage:
     def test_regex_pattern_consistency(self):
         """Test consistency of regex pattern application"""
         test_query = "SELECT field[1], field[2], field[3] FROM table"
-        fixed = fix_clickhouse_array_syntax(query)
+        fixed = fix_clickhouse_array_syntax(test_query)
         
         # All instances should be transformed consistently
         assert fixed.count('arrayElement(') == 3

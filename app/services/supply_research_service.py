@@ -55,85 +55,116 @@ class SupplyResearchService:
         """Get a specific supply item by ID"""
         return self.db.query(AISupplyItem).filter(AISupplyItem.id == item_id).first()
     
-    def create_or_update_supply_item(
-        self,
-        provider: str,
-        model_name: str,
-        data: Dict[str, Any],
-        research_session_id: Optional[str] = None,
-        updated_by: str = "system"
-    ) -> AISupplyItem:
-        """Create or update a supply item"""
-        # Check for existing item
-        existing = self.db.query(AISupplyItem).filter(
+    def _find_existing_supply_item(self, provider: str, model_name: str) -> Optional[AISupplyItem]:
+        """Find existing supply item by provider and model name"""
+        return self.db.query(AISupplyItem).filter(
             and_(
                 AISupplyItem.provider == provider,
                 AISupplyItem.model_name == model_name
             )
         ).first()
-        
+    
+    def _get_updatable_fields(self) -> List[str]:
+        """Get list of updatable fields for supply items"""
+        return [
+            'pricing_input', 'pricing_output', 'context_window',
+            'max_output_tokens', 'capabilities', 'availability_status',
+            'api_endpoints', 'performance_metrics'
+        ]
+    
+    def _prepare_log_values(self, old_value: Any, new_value: Any) -> Tuple[str, str]:
+        """Prepare old and new values for logging"""
+        old_json = json.dumps(old_value, default=str)
+        new_json = json.dumps(new_value, default=str)
+        return old_json, new_json
+    
+    def _create_field_update_log(self, item_id: str, field: str, old_value: Any, new_value: Any, research_session_id: Optional[str], updated_by: str) -> SupplyUpdateLog:
+        """Create update log for a field change"""
+        old_json, new_json = self._prepare_log_values(old_value, new_value)
+        return SupplyUpdateLog(supply_item_id=item_id, field_updated=field, old_value=old_json, new_value=new_json,
+                              research_session_id=research_session_id, update_reason="Supply data update",
+                              updated_by=updated_by, updated_at=datetime.now(UTC))
+    
+    def _apply_field_change(self, item: AISupplyItem, field: str, new_value: Any) -> Any:
+        """Apply field change and return old value"""
+        old_value = getattr(item, field)
+        setattr(item, field, new_value)
+        return old_value
+    
+    def _process_field_update(self, item: AISupplyItem, field: str, new_value: Any, research_session_id: Optional[str], updated_by: str) -> bool:
+        """Process update for a single field"""
+        old_value = getattr(item, field)
+        if old_value == new_value:
+            return False
+        self._apply_field_change(item, field, new_value)
+        self.db.add(self._create_field_update_log(item.id, field, old_value, new_value, research_session_id, updated_by))
+        return True
+    
+    def _check_and_update_field(self, item: AISupplyItem, field: str, data: Dict[str, Any], research_session_id: Optional[str], updated_by: str) -> bool:
+        """Check if field needs update and apply it"""
+        if field in data:
+            return self._process_field_update(item, field, data[field], research_session_id, updated_by)
+        return False
+    
+    def _process_all_field_updates(self, item: AISupplyItem, data: Dict[str, Any], research_session_id: Optional[str], updated_by: str) -> List[str]:
+        """Process all field updates"""
+        changes = []
+        for field in self._get_updatable_fields():
+            if self._check_and_update_field(item, field, data, research_session_id, updated_by):
+                changes.append(field)
+        return changes
+    
+    def _update_metadata_fields(self, existing_item: AISupplyItem, data: Dict[str, Any]) -> None:
+        """Update metadata fields if changes were made"""
+        existing_item.last_updated = datetime.now(UTC)
+        if 'confidence_score' in data:
+            existing_item.confidence_score = data['confidence_score']
+        if 'research_source' in data:
+            existing_item.research_source = data['research_source']
+    
+    def _update_existing_supply_item(self, item: AISupplyItem, data: Dict[str, Any], research_session_id: Optional[str], updated_by: str) -> AISupplyItem:
+        """Update existing supply item"""
+        changes = self._process_all_field_updates(item, data, research_session_id, updated_by)
+        if changes:
+            self._update_metadata_fields(item, data)
+        self.db.commit()
+        return item
+    
+    def _build_new_item(self, provider: str, model_name: str, data: Dict[str, Any]) -> AISupplyItem:
+        """Build new supply item instance"""
+        return AISupplyItem(
+            provider=provider, model_name=model_name,
+            **data, last_updated=datetime.now(UTC)
+        )
+    
+    def _create_new_supply_item(self, provider: str, model_name: str, data: Dict[str, Any]) -> AISupplyItem:
+        """Create new supply item"""
+        new_item = self._build_new_item(provider, model_name, data)
+        self.db.add(new_item)
+        self.db.commit()
+        return new_item
+    
+    def _build_creation_log(self, item_id: str, research_session_id: Optional[str], updated_by: str) -> SupplyUpdateLog:
+        """Build creation log entry"""
+        return SupplyUpdateLog(supply_item_id=item_id, field_updated="*", old_value=None,
+                              new_value=json.dumps({"action": "created"}, default=str),
+                              research_session_id=research_session_id, update_reason="New supply item created",
+                              updated_by=updated_by, updated_at=datetime.now(UTC))
+    
+    def _create_item_creation_log(self, item_id: str, research_session_id: Optional[str], updated_by: str) -> None:
+        """Create log entry for new item creation"""
+        log = self._build_creation_log(item_id, research_session_id, updated_by)
+        self.db.add(log)
+        self.db.commit()
+    
+    def create_or_update_supply_item(self, provider: str, model_name: str, data: Dict[str, Any], research_session_id: Optional[str] = None, updated_by: str = "system") -> AISupplyItem:
+        """Create or update a supply item"""
+        existing = self._find_existing_supply_item(provider, model_name)
         if existing:
-            # Track changes for update log
-            changes = []
-            
-            # Update fields if provided
-            for field in ['pricing_input', 'pricing_output', 'context_window', 
-                         'max_output_tokens', 'capabilities', 'availability_status',
-                         'api_endpoints', 'performance_metrics']:
-                if field in data and getattr(existing, field) != data[field]:
-                    old_value = getattr(existing, field)
-                    new_value = data[field]
-                    setattr(existing, field, new_value)
-                    
-                    # Create update log
-                    log = SupplyUpdateLog(
-                        supply_item_id=existing.id,
-                        field_updated=field,
-                        old_value=json.dumps(old_value, default=str),
-                        new_value=json.dumps(new_value, default=str),
-                        research_session_id=research_session_id,
-                        update_reason="Supply data update",
-                        updated_by=updated_by,
-                        updated_at=datetime.now(UTC)
-                    )
-                    self.db.add(log)
-                    changes.append(field)
-            
-            if changes:
-                existing.last_updated = datetime.now(UTC)
-                if 'confidence_score' in data:
-                    existing.confidence_score = data['confidence_score']
-                if 'research_source' in data:
-                    existing.research_source = data['research_source']
-            
-            self.db.commit()
-            return existing
-        else:
-            # Create new item
-            new_item = AISupplyItem(
-                provider=provider,
-                model_name=model_name,
-                **data,
-                last_updated=datetime.now(UTC)
-            )
-            self.db.add(new_item)
-            self.db.commit()
-            
-            # Create creation log
-            log = SupplyUpdateLog(
-                supply_item_id=new_item.id,
-                field_updated="*",
-                old_value=None,
-                new_value=json.dumps({"action": "created"}, default=str),
-                research_session_id=research_session_id,
-                update_reason="New supply item created",
-                updated_by=updated_by,
-                updated_at=datetime.now(UTC)
-            )
-            self.db.add(log)
-            self.db.commit()
-            
-            return new_item
+            return self._update_existing_supply_item(existing, data, research_session_id, updated_by)
+        new_item = self._create_new_supply_item(provider, model_name, data)
+        self._create_item_creation_log(new_item.id, research_session_id, updated_by)
+        return new_item
     
     def get_research_sessions(
         self,

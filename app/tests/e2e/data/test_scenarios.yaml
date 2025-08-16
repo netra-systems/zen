@@ -1,0 +1,452 @@
+# E2E Test Scenarios: Complete Example Prompts Testing
+# 
+# This file defines all test scenarios from the 9 example prompts with:
+# - Expected outcomes for each scenario
+# - Validation criteria and success metrics
+# - Error injection scenarios
+# - Agent workflow expectations
+#
+# ARCHITECTURAL COMPLIANCE:
+# - Single source of truth for test scenarios
+# - Strong typing through schema validation
+# - Comprehensive coverage of all example prompts
+# - Modular scenario definitions
+
+version: "2.0"
+metadata:
+  created: "2025-08-16"
+  purpose: "E2E Agent Workflow Testing Scenarios"
+  coverage_target: "100% example prompts"
+  reference: "SPEC/e2e-agent-workflows-unified.xml"
+
+# Core Example Prompt Scenarios (EP-001 through EP-009)
+example_prompts:
+  
+  EP-001:
+    category: "cost-quality"
+    description: "Cost reduction with quality constraints"
+    prompt: "I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms."
+    
+    expected_agents:
+      - "triage"
+      - "data"
+      - "actions" 
+      - "reporting"
+    
+    expected_outcomes:
+      primary: "Cost reduction plan with quality constraints preserved"
+      secondary: "Feature-specific latency requirements captured"
+      tertiary: "Multi-constraint optimization strategy"
+    
+    validation_criteria:
+      response_time_ms: 2000
+      cost_reduction_percentage: ">= 10"
+      quality_preservation: "maintained"
+      feature_x_latency: "<= 500"
+      feature_y_latency: "<= 200"
+      plan_completeness: "100%"
+    
+    success_metrics:
+      agent_chain_complete: true
+      all_constraints_addressed: true
+      actionable_recommendations: ">= 5"
+      cost_impact_quantified: true
+    
+    error_scenarios:
+      - name: "invalid_latency_constraint"
+        injection: "latency: -100ms"
+        expected_handling: "validation_error_with_suggestion"
+      - name: "conflicting_constraints"
+        injection: "cost_increase_required_for_quality"
+        expected_handling: "constraint_conflict_resolution"
+
+  EP-002:
+    category: "latency-cost"
+    description: "Latency optimization without cost increase"
+    prompt: "My tools are too slow. I need to reduce the latency by 3x, but I can't spend more money."
+    
+    expected_agents:
+      - "triage"
+      - "performance"
+      - "optimization"
+    
+    expected_outcomes:
+      primary: "Latency optimization plan within cost constraints"
+      secondary: "3x latency reduction strategy"
+      tertiary: "Performance bottleneck identification"
+    
+    validation_criteria:
+      response_time_ms: 2000
+      latency_improvement_factor: ">= 3.0"
+      cost_impact: "neutral_or_negative"
+      optimization_techniques: ">= 5"
+      feasibility_assessment: "provided"
+    
+    success_metrics:
+      performance_analysis_complete: true
+      cost_neutral_solutions: ">= 3"
+      latency_bottlenecks_identified: ">= 2"
+      implementation_roadmap: "detailed"
+    
+    error_scenarios:
+      - name: "impossible_latency_target"
+        injection: "100x_improvement_requested"
+        expected_handling: "realistic_expectation_setting"
+      - name: "insufficient_baseline_data"
+        injection: "no_current_metrics"
+        expected_handling: "baseline_measurement_plan"
+
+  EP-003:
+    category: "capacity-planning"
+    description: "Usage increase impact analysis"
+    prompt: "I'm expecting a 50% increase in agent usage next month. How will this impact my costs and rate limits?"
+    
+    expected_agents:
+      - "triage"
+      - "capacity"
+      - "forecasting"
+    
+    expected_outcomes:
+      primary: "Capacity impact analysis with cost projections"
+      secondary: "Rate limit impact assessment"
+      tertiary: "Scaling recommendations"
+    
+    validation_criteria:
+      response_time_ms: 2000
+      usage_increase_factor: "1.5x"
+      cost_projection_accuracy: "detailed"
+      rate_limit_analysis: "comprehensive"
+      scaling_timeline: "provided"
+    
+    success_metrics:
+      cost_projection_complete: true
+      rate_limit_impact_calculated: true
+      scaling_options_provided: ">= 3"
+      risk_assessment_included: true
+    
+    error_scenarios:
+      - name: "unrealistic_growth_projection"
+        injection: "1000x_usage_increase"
+        expected_handling: "growth_validation_and_planning"
+      - name: "missing_current_usage_data"
+        injection: "no_baseline_metrics"
+        expected_handling: "data_collection_plan"
+
+  EP-004:
+    category: "function-optimization"
+    description: "Specific function optimization recommendations"
+    prompt: "I need to optimize the 'user_authentication' function. What advanced methods can I use?"
+    
+    expected_agents:
+      - "triage"
+      - "code-analysis"
+      - "optimization"
+    
+    expected_outcomes:
+      primary: "Function-specific optimization recommendations"
+      secondary: "Advanced optimization techniques"
+      tertiary: "Performance improvement estimates"
+    
+    validation_criteria:
+      response_time_ms: 2000
+      function_analysis_depth: "comprehensive"
+      optimization_techniques: ">= 5"
+      implementation_complexity: "assessed"
+      performance_estimates: "quantified"
+    
+    success_metrics:
+      code_analysis_complete: true
+      optimization_recommendations: ">= 5"
+      implementation_priorities: "ranked"
+      risk_assessment: "included"
+    
+    error_scenarios:
+      - name: "function_not_found"
+        injection: "nonexistent_function_name"
+        expected_handling: "function_discovery_assistance"
+      - name: "insufficient_code_access"
+        injection: "no_code_visibility"
+        expected_handling: "code_analysis_plan"
+
+  EP-005:
+    category: "model-selection"
+    description: "Model effectiveness analysis for current setup"
+    prompt: "I'm considering using the new 'gpt-4o' and 'claude-3-sonnet' models. How effective would they be in my current setup?"
+    
+    expected_agents:
+      - "triage"
+      - "model-evaluation"
+      - "comparison"
+    
+    expected_outcomes:
+      primary: "Model effectiveness analysis for current setup"
+      secondary: "Comparative model performance assessment"
+      tertiary: "Integration recommendations"
+    
+    validation_criteria:
+      response_time_ms: 2000
+      model_analysis_depth: "comprehensive"
+      current_setup_assessment: "detailed"
+      performance_comparisons: "quantified"
+      integration_complexity: "assessed"
+    
+    success_metrics:
+      model_compatibility_assessed: true
+      performance_comparisons: ">= 3"
+      cost_benefit_analysis: "complete"
+      implementation_roadmap: "provided"
+    
+    error_scenarios:
+      - name: "unsupported_model"
+        injection: "fictional_model_name"
+        expected_handling: "model_availability_check"
+      - name: "insufficient_setup_information"
+        injection: "no_current_configuration"
+        expected_handling: "setup_discovery_plan"
+
+  EP-006:
+    category: "kv-cache-audit"
+    description: "Complete KV cache audit and optimization"
+    prompt: "I want to audit all uses of KV caching in my system to find optimization opportunities."
+    
+    expected_agents:
+      - "triage"
+      - "audit"
+      - "cache-analysis"
+    
+    expected_outcomes:
+      primary: "Complete KV cache audit report"
+      secondary: "Optimization opportunities identification"
+      tertiary: "Cache efficiency improvements"
+    
+    validation_criteria:
+      response_time_ms: 2000
+      audit_completeness: "100%"
+      optimization_opportunities: ">= 3"
+      cache_efficiency_analysis: "detailed"
+      implementation_priorities: "ranked"
+    
+    success_metrics:
+      full_system_audit: true
+      cache_usage_patterns: "analyzed"
+      optimization_recommendations: ">= 5"
+      impact_estimates: "quantified"
+    
+    error_scenarios:
+      - name: "no_cache_usage_found"
+        injection: "system_without_caching"
+        expected_handling: "caching_implementation_suggestions"
+      - name: "cache_access_restricted"
+        injection: "insufficient_permissions"
+        expected_handling: "audit_scope_planning"
+
+  EP-007:
+    category: "multi-constraint"
+    description: "Multi-objective optimization with usage growth"
+    prompt: "I need to reduce costs by 20% and improve latency by 2x. I'm also expecting a 30% increase in usage. What should I do?"
+    
+    expected_agents:
+      - "triage"
+      - "multi-constraint"
+      - "planning"
+    
+    expected_outcomes:
+      primary: "Multi-objective optimization plan"
+      secondary: "Constraint resolution strategy"
+      tertiary: "Implementation prioritization"
+    
+    validation_criteria:
+      response_time_ms: 2000
+      cost_reduction_target: "20%"
+      latency_improvement_target: "2x"
+      usage_growth_accommodation: "30%"
+      constraint_conflict_resolution: "addressed"
+    
+    success_metrics:
+      all_constraints_addressed: true
+      optimization_plan_feasibility: "validated"
+      implementation_sequence: "prioritized"
+      risk_mitigation: "included"
+    
+    error_scenarios:
+      - name: "impossible_constraint_combination"
+        injection: "contradictory_requirements"
+        expected_handling: "constraint_negotiation"
+      - name: "insufficient_optimization_headroom"
+        injection: "already_optimal_system"
+        expected_handling: "realistic_target_setting"
+
+  EP-008:
+    category: "tool-upgrade"
+    description: "Tool upgrade recommendations with configuration"
+    prompt: "@Netra which of our Agent tools should switch to GPT-5? Which versions? What to set the verbosity to?"
+    
+    expected_agents:
+      - "triage"
+      - "tool-analysis"
+      - "upgrade-planning"
+    
+    expected_outcomes:
+      primary: "Tool upgrade recommendations"
+      secondary: "Version selection guidance"
+      tertiary: "Configuration optimization"
+    
+    validation_criteria:
+      response_time_ms: 2000
+      tool_analysis_completeness: "100%"
+      upgrade_recommendations: "specific"
+      version_specifications: "detailed"
+      configuration_guidance: "provided"
+    
+    success_metrics:
+      all_tools_analyzed: true
+      upgrade_priorities: "ranked"
+      configuration_recommendations: "specific"
+      migration_plan: "detailed"
+    
+    error_scenarios:
+      - name: "model_not_available"
+        injection: "gpt5_unavailable"
+        expected_handling: "alternative_recommendations"
+      - name: "tool_compatibility_issues"
+        injection: "incompatible_tool_versions"
+        expected_handling: "compatibility_analysis"
+
+  EP-009:
+    category: "rollback-analysis"
+    description: "Upgrade analysis with selective rollback"
+    prompt: "@Netra was the upgrade yesterday to GPT-5 worth it? Rollback anything where quality didn't improve much but cost was higher"
+    
+    expected_agents:
+      - "triage"
+      - "change-analysis"
+      - "rollback"
+    
+    expected_outcomes:
+      primary: "Upgrade analysis with rollback decisions"
+      secondary: "Quality vs cost assessment"
+      tertiary: "Selective rollback plan"
+    
+    validation_criteria:
+      response_time_ms: 2000
+      upgrade_impact_analysis: "comprehensive"
+      quality_assessment: "quantified"
+      cost_impact_analysis: "detailed"
+      rollback_recommendations: "specific"
+    
+    success_metrics:
+      change_impact_measured: true
+      quality_metrics_compared: true
+      cost_benefit_calculated: true
+      rollback_plan_actionable: true
+    
+    error_scenarios:
+      - name: "insufficient_baseline_data"
+        injection: "no_pre_upgrade_metrics"
+        expected_handling: "baseline_reconstruction"
+      - name: "partial_upgrade_data"
+        injection: "incomplete_rollout"
+        expected_handling: "partial_analysis_approach"
+
+# Error Injection Scenarios for System Testing
+error_injection_scenarios:
+  
+  timeout_scenarios:
+    - name: "llm_timeout"
+      description: "LLM response timeout"
+      timeout_ms: 30000
+      expected_handling: "graceful_degradation_to_fallback"
+    
+    - name: "database_timeout"
+      description: "Database query timeout"
+      timeout_ms: 5000
+      expected_handling: "cached_response_or_error"
+    
+    - name: "agent_processing_timeout"
+      description: "Agent processing timeout"
+      timeout_ms: 10000
+      expected_handling: "partial_results_with_continuation"
+  
+  data_corruption_scenarios:
+    - name: "malformed_input"
+      description: "Malformed user input"
+      injection: "invalid_json_structure"
+      expected_handling: "input_validation_error"
+    
+    - name: "missing_required_fields"
+      description: "Missing required data fields"
+      injection: "incomplete_request_data"
+      expected_handling: "field_validation_error"
+    
+    - name: "data_type_mismatch"
+      description: "Incorrect data types"
+      injection: "string_instead_of_number"
+      expected_handling: "type_validation_error"
+  
+  resource_exhaustion_scenarios:
+    - name: "memory_pressure"
+      description: "High memory usage"
+      injection: "large_dataset_processing"
+      expected_handling: "memory_optimization_or_batching"
+    
+    - name: "rate_limit_exceeded"
+      description: "API rate limits exceeded"
+      injection: "rapid_successive_requests"
+      expected_handling: "rate_limiting_with_queuing"
+    
+    - name: "concurrent_user_limit"
+      description: "Maximum concurrent users"
+      injection: "excess_simultaneous_connections"
+      expected_handling: "connection_queuing_or_rejection"
+
+# Temporal Pattern Testing
+temporal_patterns:
+  
+  usage_patterns:
+    - name: "business_hours_peak"
+      description: "Peak usage during business hours"
+      pattern: "9am-5pm_weekdays_2x_baseline"
+      validation: "system_handles_peak_load"
+    
+    - name: "weekend_low_usage"
+      description: "Reduced weekend usage"
+      pattern: "weekends_0.3x_baseline"
+      validation: "resource_scaling_down"
+    
+    - name: "month_end_spike"
+      description: "Month-end reporting spike"
+      pattern: "last_3_days_month_5x_baseline"
+      validation: "burst_capacity_handling"
+  
+  seasonal_patterns:
+    - name: "quarterly_planning"
+      description: "Quarterly business planning"
+      pattern: "quarter_end_planning_spike"
+      validation: "capacity_planning_accuracy"
+    
+    - name: "holiday_reduced_usage"
+      description: "Holiday period reduced usage"
+      pattern: "holiday_weeks_0.2x_baseline"
+      validation: "cost_optimization_activation"
+
+# Validation Framework Configuration
+validation_framework:
+  
+  performance_thresholds:
+    response_time_p50_ms: 500
+    response_time_p95_ms: 1500
+    response_time_p99_ms: 2000
+    throughput_min_rps: 10
+    error_rate_max_percent: 0.1
+  
+  quality_metrics:
+    agent_chain_completion_rate: 0.95
+    constraint_satisfaction_rate: 0.98
+    recommendation_relevance_score: 0.85
+    plan_actionability_score: 0.90
+  
+  coverage_requirements:
+    example_prompt_coverage: 1.0
+    agent_workflow_coverage: 1.0
+    error_scenario_coverage: 0.8
+    temporal_pattern_coverage: 0.7

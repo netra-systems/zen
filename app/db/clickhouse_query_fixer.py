@@ -9,24 +9,23 @@ from app.logging_config import central_logger as logger
 
 
 
-def _create_array_replacement(nested_field: str, array_field: str, index_expr: str) -> str:
+def _create_array_replacement(field_path: str, index_expr: str) -> str:
     """Create appropriate replacement for array access."""
-    if nested_field == 'metrics' and array_field == 'value':
-        return f"toFloat64OrZero(arrayElement({nested_field}.{array_field}, {index_expr}))"
-    return f"arrayElement({nested_field}.{array_field}, {index_expr})"
+    if field_path.startswith(('metrics.', 'data.')):
+        return f"toFloat64OrZero(arrayElement({field_path}, {index_expr}))"
+    return f"arrayElement({field_path}, {index_expr})"
 
 def _replace_array_access(match):
     """Replace array[index] with arrayElement(array, index)."""
-    nested_field = match.group(1)
-    array_field = match.group(2)
-    index_expr = match.group(3)
-    replacement = _create_array_replacement(nested_field, array_field, index_expr)
+    field_path = match.group(1)
+    index_expr = match.group(2)
+    replacement = _create_array_replacement(field_path, index_expr)
     logger.debug(f"Fixed array access: {match.group(0)} -> {replacement}")
     return replacement
 
 def _get_array_pattern() -> str:
     """Get regex pattern for array access syntax."""
-    return r'(\w+)\.(\w+)\[([^\]]+)\]'
+    return r'([\w\.]+)\[([^\]]+)\]'
 
 def _log_query_fix(query: str, fixed_query: str):
     """Log query fix information."""
@@ -45,7 +44,7 @@ def fix_clickhouse_array_syntax(query: str) -> str:
 
 def _has_invalid_array_syntax(query: str) -> bool:
     """Check if query has invalid array access syntax."""
-    return bool(re.search(r'\w+\.\w+\[[^\]]+\]', query))
+    return bool(re.search(r'[\w\.]+\[[^\]]+\]', query))
 
 def _has_metrics_access(query: str) -> bool:
     """Check if query accesses metrics fields."""
