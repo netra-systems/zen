@@ -202,13 +202,38 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
-          name  = "GOOGLE_OAUTH_CLIENT_ID"
-          value = "dummy-client-id"
+          name  = "GCP_PROJECT_ID_NUMERICAL_STAGING"
+          value = var.project_id_numerical != "" ? var.project_id_numerical : var.project_id
         }
         
         env {
-          name  = "GOOGLE_OAUTH_CLIENT_SECRET"
-          value = "dummy-client-secret"
+          name  = "SECRET_MANAGER_PROJECT_ID"
+          value = var.project_id_numerical != "" ? var.project_id_numerical : var.project_id
+        }
+        
+        env {
+          name  = "LOAD_SECRETS"
+          value = "true"  # Explicitly enable secret loading for staging
+        }
+        
+        env {
+          name  = "GOOGLE_CLIENT_ID"  # Changed to match expected env var
+          value_from {
+            secret_key_ref {
+              name = "google-client-id-staging"
+              key  = "latest"
+            }
+          }
+        }
+        
+        env {
+          name  = "GOOGLE_CLIENT_SECRET"  # Changed to match expected env var
+          value_from {
+            secret_key_ref {
+              name = "google-client-secret-staging"
+              key  = "latest"
+            }
+          }
         }
         
         env {
@@ -242,18 +267,33 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
-          name  = "GOOGLE_GEMINI_API_KEY"
-          value = "dummy-api-key"
+          name  = "GEMINI_API_KEY"  # Changed from GOOGLE_GEMINI_API_KEY to match expected env var
+          value_from {
+            secret_key_ref {
+              name = "gemini-api-key-staging"
+              key  = "latest"
+            }
+          }
         }
         
         env {
           name  = "FERNET_KEY"
-          value = "YlJvdE1BczB1eUtleUZvckVuY3J5cHRpb24xMjM0NTY3ODkwMTIzNDU2Nzg5MA=="
+          value_from {
+            secret_key_ref {
+              name = "fernet-key-staging"
+              key  = "latest"
+            }
+          }
         }
         
         env {
-          name  = "SECRET_KEY"
-          value = random_password.jwt_secret.result
+          name  = "JWT_SECRET_KEY"  # Changed from SECRET_KEY to match expected env var
+          value_from {
+            secret_key_ref {
+              name = "jwt-secret-key-staging"
+              key  = "latest"
+            }
+          }
         }
         
         env {

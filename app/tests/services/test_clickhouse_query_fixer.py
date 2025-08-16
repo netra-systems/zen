@@ -155,7 +155,7 @@ class QueryTestSuite:
         """Generate expected fixed versions of test queries"""
         return {
             'basic_array_access': """
-                SELECT arrayElement(metrics.value, 1) as first_metric
+                SELECT toFloat64OrZero(arrayElement(metrics.value, 1)) as first_metric
                 FROM performance_data
                 WHERE timestamp > '2023-01-01'
             """,
@@ -163,7 +163,7 @@ class QueryTestSuite:
             'nested_array_access': """
                 SELECT 
                     arrayElement(metrics.name, idx) as metric_name,
-                    arrayElement(metrics.value, idx) as metric_value,
+                    toFloat64OrZero(arrayElement(metrics.value, idx)) as metric_value,
                     arrayElement(metrics.unit, idx) as metric_unit
                 FROM performance_logs
                 WHERE arrayExists(x -> x > 100, metrics.value)
@@ -173,8 +173,8 @@ class QueryTestSuite:
                 WITH filtered_metrics AS (
                     SELECT 
                         timestamp,
-                        arrayElement(metrics.value, position) as current_value,
-                        arrayElement(metrics.value, position-1) as previous_value
+                        toFloat64OrZero(arrayElement(metrics.value, position)) as current_value,
+                        toFloat64OrZero(arrayElement(metrics.value, position-1)) as previous_value
                     FROM system_metrics
                     WHERE position > 0
                 )
@@ -202,9 +202,9 @@ class TestClickHouseArraySyntaxFixer:
         
         fixed_query = fix_clickhouse_array_syntax(original_query)
         
-        # Should replace metrics.value[1] with arrayElement(metrics.value, 1)
+        # Should replace metrics.value[1] with toFloat64OrZero(arrayElement(metrics.value, 1))
         assert 'metrics.value[1]' not in fixed_query
-        assert 'arrayElement(metrics.value, 1)' in fixed_query
+        assert 'toFloat64OrZero(arrayElement(metrics.value, 1))' in fixed_query
         
         # Rest of query should remain unchanged
         assert 'SELECT' in fixed_query
@@ -223,7 +223,7 @@ class TestClickHouseArraySyntaxFixer:
         assert 'metrics.unit[idx]' not in fixed_query
         
         assert 'arrayElement(metrics.name, idx)' in fixed_query
-        assert 'arrayElement(metrics.value, idx)' in fixed_query
+        assert 'toFloat64OrZero(arrayElement(metrics.value, idx))' in fixed_query
         assert 'arrayElement(metrics.unit, idx)' in fixed_query
         
         # Existing array functions should remain unchanged
@@ -236,8 +236,8 @@ class TestClickHouseArraySyntaxFixer:
         fixed_query = fix_clickhouse_array_syntax(original_query)
         
         # Should fix array access in WITH clause
-        assert 'arrayElement(metrics.value, position)' in fixed_query
-        assert 'arrayElement(metrics.value, position-1)' in fixed_query
+        assert 'toFloat64OrZero(arrayElement(metrics.value, position))' in fixed_query
+        assert 'toFloat64OrZero(arrayElement(metrics.value, position-1))' in fixed_query
         
         # Should not break WITH clause structure
         assert 'WITH filtered_metrics AS' in fixed_query
@@ -247,7 +247,7 @@ class TestClickHouseArraySyntaxFixer:
         """Test that correctly written queries remain unchanged"""
         correct_query = """
             SELECT 
-                arrayElement(metrics.value, 1) as first_metric,
+                toFloat64OrZero(arrayElement(metrics.value, 1)) as first_metric,
                 arrayFirstIndex(x -> x > 100, metrics.value) as high_value_index
             FROM performance_data
             WHERE timestamp > '2023-01-01'
@@ -271,7 +271,7 @@ class TestClickHouseArraySyntaxFixer:
         fixed_query = fix_clickhouse_array_syntax(mixed_query)
         
         # Should fix incorrect syntax
-        assert 'arrayElement(metrics.value, 1)' in fixed_query
+        assert 'toFloat64OrZero(arrayElement(metrics.value, 1))' in fixed_query
         assert 'arrayElement(performance.cpu, idx)' in fixed_query
         
         # Should preserve correct syntax
@@ -290,8 +290,8 @@ class TestClickHouseArraySyntaxFixer:
         fixed_query = fix_clickhouse_array_syntax(expression_query)
         
         # Should handle complex index expressions
-        assert 'arrayElement(metrics.value, idx + 1)' in fixed_query
-        assert 'arrayElement(metrics.value, position * 2)' in fixed_query
+        assert 'toFloat64OrZero(arrayElement(metrics.value, idx + 1))' in fixed_query
+        assert 'toFloat64OrZero(arrayElement(metrics.value, position * 2))' in fixed_query
         assert 'arrayElement(logs.message, arrayLength(logs.message) - 1)' in fixed_query
     
     def test_edge_case_array_patterns(self):
@@ -354,7 +354,7 @@ class TestClickHouseQueryValidator:
     def test_valid_query_validation(self):
         """Test validation of syntactically correct queries"""
         valid_queries = [
-            "SELECT arrayElement(metrics.value, 1) FROM table",
+            "SELECT toFloat64OrZero(arrayElement(metrics.value, 1)) FROM table",
             "SELECT * FROM table WHERE id = 123",
             "SELECT count(*) FROM table GROUP BY category",
             """
@@ -459,7 +459,7 @@ class TestClickHouseQueryInterceptor:
     async def test_interceptor_fixes_and_executes_query(self, interceptor, mock_client):
         """Test that interceptor fixes query and executes it"""
         original_query = "SELECT metrics.value[1] FROM test_table"
-        expected_fixed = "SELECT arrayElement(metrics.value, 1) FROM test_table"
+        expected_fixed = "SELECT toFloat64OrZero(arrayElement(metrics.value, 1)) FROM test_table"
         
         # Execute query through interceptor
         result = await interceptor.execute_query(original_query)
@@ -476,7 +476,7 @@ class TestClickHouseQueryInterceptor:
     @pytest.mark.asyncio
     async def test_interceptor_passes_through_correct_queries(self, interceptor, mock_client):
         """Test that correct queries pass through unchanged"""
-        correct_query = "SELECT arrayElement(metrics.value, 1) FROM test_table"
+        correct_query = "SELECT toFloat64OrZero(arrayElement(metrics.value, 1)) FROM test_table"
         
         # Execute correct query
         await interceptor.execute_query(correct_query)
@@ -562,7 +562,7 @@ class TestClickHouseQueryInterceptor:
         # Should fix query and pass parameters
         executed_queries = mock_client.get_executed_queries()
         assert len(executed_queries) == 1
-        assert 'arrayElement(metrics.value, ?)' in executed_queries[0]
+        assert 'toFloat64OrZero(arrayElement(metrics.value, ?))' in executed_queries[0]
     
     @pytest.mark.asyncio
     async def test_concurrent_interceptor_usage(self, interceptor, mock_client):
@@ -634,7 +634,7 @@ class TestClickHouseQueryFixerIntegration:
         
         # Set expected result
         expected_result = [{"metric_value": 150, "timestamp": "2023-01-01"}]
-        fixed_query = "SELECT arrayElement(metrics.value, 1) as metric_value, timestamp FROM performance_data"
+        fixed_query = "SELECT toFloat64OrZero(arrayElement(metrics.value, 1)) as metric_value, timestamp FROM performance_data"
         mock_client.set_query_result(fixed_query, expected_result)
         
         # Execute problematic query
@@ -648,7 +648,7 @@ class TestClickHouseQueryFixerIntegration:
         # Verify correct query was executed
         executed = mock_client.get_executed_queries()
         assert len(executed) == 1
-        assert "arrayElement(metrics.value, 1)" in executed[0]
+        assert "toFloat64OrZero(arrayElement(metrics.value, 1))" in executed[0]
     
     @pytest.mark.asyncio
     async def test_batch_query_processing(self):
@@ -725,7 +725,7 @@ class TestClickHouseQueryFixerIntegration:
         """Test logging and debugging features"""
         with patch('app.db.clickhouse_query_fixer.logger') as mock_logger:
             query_with_fix = "SELECT metrics.value[1] FROM test_table"
-            query_without_fix = "SELECT arrayElement(metrics.value, 1) FROM test_table"
+            query_without_fix = "SELECT toFloat64OrZero(arrayElement(metrics.value, 1)) FROM test_table"
             
             # Query that needs fixing should log
             fix_clickhouse_array_syntax(query_with_fix)

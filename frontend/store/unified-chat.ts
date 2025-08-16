@@ -163,7 +163,7 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
         
         switch (event.type) {
           case 'agent_started': {
-            const agentName = event.payload.agent_name;
+            const agentName = event.payload.agent_name || 'Unknown Agent';
             const executedAgents = new Map(state.executedAgents);
             const agentIterations = new Map(state.agentIterations);
             
@@ -292,7 +292,8 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
           }
             
           case 'agent_completed': {
-            const agentName = event.payload.agent_name;
+            const agentName = event.payload.agent_name || 'Unknown Agent';
+            const durationMs = event.payload.duration_ms || 0;
             const executedAgents = new Map(state.executedAgents);
             const execution = executedAgents.get(agentName);
             
@@ -310,21 +311,22 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
             
             const newAgentResult: AgentResult = {
               agentName: displayName,
-              duration: event.payload.duration_ms,
+              duration: durationMs,
               result: event.payload.result,
               metrics: event.payload.metrics,
               iteration: (event.payload as any).iteration || iteration
             };
             
             // Create agent completed message
+            const durationInSeconds = durationMs > 0 ? (durationMs / 1000).toFixed(2) : '0.00';
             const completedMessage: ChatMessage = {
               id: generateUniqueId('agent-complete'),
               role: 'assistant',
-              content: `✅ ${displayName} completed in ${(event.payload.duration_ms / 1000).toFixed(2)}s`,
+              content: `✅ ${displayName} completed in ${durationInSeconds}s`,
               timestamp: Date.now(),
               metadata: {
                 agentName: agentName,
-                duration: event.payload.duration_ms
+                duration: durationMs
               }
             };
             get().addMessage(completedMessage);
@@ -388,8 +390,19 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
           case 'thread_loaded':
             // Handle thread loading event - load messages from thread
             if (event.payload.messages && Array.isArray(event.payload.messages)) {
+              // Ensure messages are in correct ChatMessage format
+              const formattedMessages: ChatMessage[] = event.payload.messages.map((msg: any) => ({
+                id: msg.id || generateUniqueId('msg'),
+                role: msg.role || 'assistant',
+                content: msg.content || '',
+                timestamp: typeof msg.timestamp === 'number' ? msg.timestamp : 
+                          typeof msg.created_at === 'number' ? msg.created_at * 1000 : Date.now(),
+                threadId: event.payload.thread_id,
+                metadata: msg.metadata
+              }));
+              
               set({
-                messages: event.payload.messages,
+                messages: formattedMessages,
                 activeThreadId: event.payload.thread_id
               }, false, 'thread_loaded');
             }

@@ -9,7 +9,9 @@ import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { OverflowPanel } from '@/components/chat/OverflowPanel';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
 const MainChat: React.FC = () => {
   const { 
@@ -18,21 +20,50 @@ const MainChat: React.FC = () => {
     fastLayerData,
     mediumLayerData,
     slowLayerData,
-    currentRunId
+    currentRunId,
+    activeThreadId
   } = useUnifiedChatStore();
   
+  const { status: wsStatus } = useWebSocket();
   const [isCardCollapsed, setIsCardCollapsed] = useState(false);
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   
   // Connect WebSocket messages to unified chat store
   useChatWebSocket();
 
   const hasMessages = messages.length > 0;
+  const isWebSocketConnected = wsStatus === 'OPEN';
+  const isLoading = !isInitialized || !isWebSocketConnected || isLoadingMessages;
+  const isEmptyState = !activeThreadId && !hasMessages && !isLoading;
+  const hasThreadButNoMessages = activeThreadId && !hasMessages && !isLoading && !isProcessing;
   
   // Thread loading is now handled via WebSocket events in the store
   // The handleWebSocketEvent function in useUnifiedChatStore will process
   // 'thread_loaded' events and automatically update the messages
   const showResponseCard = currentRunId !== null || isProcessing;
+
+  // Initialize component when WebSocket is connected
+  useEffect(() => {
+    if (isWebSocketConnected && !isInitialized) {
+      setIsInitialized(true);
+    }
+  }, [isWebSocketConnected, isInitialized]);
+
+  // Track message loading state
+  useEffect(() => {
+    const handleThreadLoading = () => setIsLoadingMessages(true);
+    const handleThreadLoaded = () => setIsLoadingMessages(false);
+    
+    window.addEventListener('threadLoading', handleThreadLoading);
+    window.addEventListener('threadLoaded', handleThreadLoaded);
+    
+    return () => {
+      window.removeEventListener('threadLoading', handleThreadLoading);
+      window.removeEventListener('threadLoaded', handleThreadLoaded);
+    };
+  }, []);
 
   // Auto-collapse card after completion
   useEffect(() => {
@@ -65,6 +96,20 @@ const MainChat: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Show loading state while initializing
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <div className="text-sm text-gray-600">
+            {!isWebSocketConnected ? 'Connecting to chat service...' : 'Loading chat...'}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-full bg-gradient-to-br from-gray-50 via-white to-gray-50">
       {/* Sidebar removed - handled by AppWithLayout */}
@@ -76,9 +121,36 @@ const MainChat: React.FC = () => {
         {/* Main Content Area */}
         <div className="flex-grow overflow-hidden relative">
           <div className="h-full overflow-y-auto">
-            {/* Example Prompts - shown when no messages */}
+            {/* Empty State - shown when no thread is selected */}
             <AnimatePresence mode="wait">
-              {!hasMessages && (
+              {isEmptyState && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-col items-center justify-center h-full text-center px-6"
+                >
+                  <div className="max-w-md">
+                    <div className="mb-6">
+                      <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Welcome to Netra AI</h3>
+                      <p className="text-gray-600 mb-4">
+                        Create a new conversation or select an existing one from the sidebar to get started with AI-powered optimization.
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
+            {/* Example Prompts - shown when thread selected but no messages */}
+            <AnimatePresence mode="wait">
+              {hasThreadButNoMessages && (
                 <motion.div
                   initial={{ opacity: 1 }}
                   exit={{ opacity: 0, y: -20 }}
@@ -90,7 +162,7 @@ const MainChat: React.FC = () => {
             </AnimatePresence>
             
             {/* Message History */}
-            <MessageList />
+            {!isEmptyState && <MessageList />}
             
             {/* Persistent Response Card - Shows current processing */}
             <AnimatePresence>
