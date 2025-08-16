@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Learnings - Infrastructure/Cloud Run</name>
+        <type>learnings</type>
+        <category>Infrastructure/Cloud Run</category>
+        <version>1.0</version>
+        <last_updated>2025-08-16</last_updated>
+        <description>Learnings and fixes for Infrastructure/Cloud Run</description>
+    </metadata>
+    
+    <learnings>
+        <learning id="staging-secret-reference-cloud-run">
+                    <title>Cloud Run Secret Reference Configuration for Staging</title>
+                    <date>2025-08-15</date>
+                    <category>Infrastructure/Cloud Run</category>
+                    <description>
+                        Cloud Run services in staging must use the correct secret naming convention with -staging suffix.
+                        Secrets must be referenced using secret_key_ref in Terraform, not hardcoded values.
+                        Service account must have explicit IAM bindings on each secret.
+                    </description>
+                    <symptoms>
+                        <symptom>CONFIGURATION_ERROR: Failed to load configuration: LLM configuration errors: Gemini API key is not configured</symptom>
+                        <symptom>Cloud Run container failing to start with PORT=8080 timeout</symptom>
+                        <symptom>Logs showing "No secrets loaded from Google Secret Manager"</symptom>
+                        <symptom>Critical secrets not found: gemini-api-key, jwt-secret-key, fernet-key</symptom>
+                    </symptoms>
+                    <root-causes>
+                        <cause>Application expects secrets with base names but staging uses -staging suffix</cause>
+                        <cause>Cloud Run secret references in Terraform not using value_from.secret_key_ref</cause>
+                        <cause>Service account lacks IAM bindings on individual secrets</cause>
+                        <cause>Project-level secretAccessor role insufficient for Cloud Run secret injection</cause>
+                    </root-causes>
+                    <solution>
+                        <step>Update Terraform to use value_from.secret_key_ref for all secrets</step>
+                        <step>Reference staging-specific secret names (e.g., gemini-api-key-staging)</step>
+                        <step>Grant explicit IAM bindings on each secret to service account</step>
+                        <step>Map secret to expected environment variable name in Cloud Run config</step>
+                    </solution>
+                    <terraform-example>
+                        env {
+                          name  = "GOOGLE_GEMINI_API_KEY"
+                          value_from {
+                            secret_key_ref {
+                              name = "gemini-api-key-staging"
+                              key  = "latest"
+                            }
+                          }
+                        }
+                    </terraform-example>
+                    <commands>
+                        <command>gcloud secrets add-iam-policy-binding gemini-api-key-staging --member="serviceAccount:netra-cloudrun@netra-staging.iam.gserviceaccount.com" --role="roles/secretmanager.secretAccessor" --project=netra-staging</command>
+                        <command>gcloud secrets add-iam-policy-binding fernet-key-staging --member="serviceAccount:netra-cloudrun@netra-staging.iam.gserviceaccount.com" --role="roles/secretmanager.secretAccessor" --project=netra-staging</command>
+                        <command>gcloud secrets add-iam-policy-binding jwt-secret-key-staging --member="serviceAccount:netra-cloudrun@netra-staging.iam.gserviceaccount.com" --role="roles/secretmanager.secretAccessor" --project=netra-staging</command>
+                    </commands>
+                    <files-modified>
+                        <file>terraform-gcp/main.tf - Updated secret references to use staging suffix with value_from</file>
+                    </files-modified>
+                    <prevention>
+                        <item>Always use -staging suffix for staging environment secrets</item>
+                        <item>Grant explicit IAM bindings per secret, not just project-level</item>
+                        <item>Test secret access before deploying Cloud Run services</item>
+                        <item>Verify secret names match between Secret Manager and application expectations</item>
+                    </prevention>
+                </learning>
+
+        <learning id="cloud-run-deployment-issues">
+                    <title>Cloud Run Deployment Common Issues</title>
+                    <date>2025-08-15</date>
+                    <category>Infrastructure/Cloud Run</category>
+                    <description>
+                        Common issues encountered when deploying to Cloud Run in staging environment.
+                    </description>
+                    <issues>
+                        <issue id="port-reserved">
+                            <symptom>Error: The following reserved env names were provided: PORT</symptom>
+                            <cause>PORT environment variable is reserved by Cloud Run</cause>
+                            <solution>Remove PORT from env configuration - Cloud Run sets it automatically</solution>
+                        </issue>
+                        <issue id="api-name">
+                            <symptom>Error enabling service: cloudrun.googleapis.com not found</symptom>
+                            <cause>Incorrect API service name</cause>
+                            <solution>Use run.googleapis.com instead of cloudrun.googleapis.com</solution>
+                        </issue>
+                        <issue id="storage-bucket">
+                            <symptom>Error: uniformBucketLevelAccess constraint</symptom>
+                            <cause>Storage bucket configuration incompatible with constraints</cause>
+                            <solution>Comment out storage bucket resource or use compatible configuration</solution>
+                        </issue>
+                        <issue id="database-connection">
+                            <symptom>Cloud SQL connection failed... database system is starting up</symptom>
+                            <cause>Trying to use Cloud SQL Proxy with incorrect connection name</cause>
+                            <solution>Use direct IP connection instead of proxy for simplicity</solution>
+                        </issue>
+                    </issues>
+                </learning>
+
+    </learnings>
+</specification>

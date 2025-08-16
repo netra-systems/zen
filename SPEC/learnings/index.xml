@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Learnings Index</name>
+        <type>index</type>
+        <version>1.0</version>
+        <last_updated>2025-08-16</last_updated>
+        <description>Index of all learning modules organized by category</description>
+    </metadata>
+    
+    <categories>
+        <category>
+            <name>Configuration/Secrets</name>
+            <file>learnings/configuration_secrets.xml</file>
+            <path>SPEC/learnings/configuration_secrets.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>staging-env-var-suffix-handling</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Database/AsyncIO</name>
+            <file>learnings/database_asyncio.xml</file>
+            <path>SPEC/learnings/database_asyncio.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>async-context-manager-dependency-injection</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Demo Readiness</name>
+            <file>learnings/demo_readiness.xml</file>
+            <path>SPEC/learnings/demo_readiness.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>demo-preparation-comprehensive</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Development/Git</name>
+            <file>learnings/development_git.xml</file>
+            <path>SPEC/learnings/development_git.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>branch-management</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Infrastructure</name>
+            <file>learnings/infrastructure.xml</file>
+            <path>SPEC/learnings/infrastructure.xml</path>
+            <learning_count>2</learning_count>
+            <learning_ids>
+                <id>staging-project-name</id>
+                <id>staging-secrets-zero-load</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Infrastructure/Cloud Run</name>
+            <file>learnings/infrastructure_cloud_run.xml</file>
+            <path>SPEC/learnings/infrastructure_cloud_run.xml</path>
+            <learning_count>2</learning_count>
+            <learning_ids>
+                <id>staging-secret-reference-cloud-run</id>
+                <id>cloud-run-deployment-issues</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Infrastructure/Secret Management</name>
+            <file>learnings/infrastructure_secret_management.xml</file>
+            <path>SPEC/learnings/infrastructure_secret_management.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>staging-secrets-loading-configuration</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Type Safety</name>
+            <file>learnings/type_safety.xml</file>
+            <path>SPEC/learnings/type_safety.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>circuit-breaker-consolidation</id>
+            </learning_ids>
+        </category>
+    </categories>
+    
+    <usage>
+        <instruction>Each category file contains related learnings and troubleshooting patterns</instruction>
+        <instruction>Search specific category files for targeted fixes and solutions</instruction>
+        <instruction>Check index.xml for complete category listing and learning IDs</instruction>
+        <instruction>Use learning IDs to quickly find specific fixes across categories</instruction>
+    </usage>
+    
+    <statistics>
+        <total_categories>8</total_categories>
+        <total_learnings>10</total_learnings>
+    </statistics>
+</specification>
