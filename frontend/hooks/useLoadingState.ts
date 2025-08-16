@@ -67,6 +67,20 @@ export const useLoadingState = (): UseLoadingStateResult => {
   const context = createContextFromData(storeData, wsStatus, isInitialized);
   const newState = determineLoadingState(context);
   
+  // Debug logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[useLoadingState] Debug:', {
+      wsStatus,
+      isInitialized,
+      activeThreadId,
+      isThreadLoading,
+      messageCount: messages.length,
+      currentState,
+      newState,
+      context
+    });
+  }
+  
   useStateTransition(currentState, newState, setCurrentState, previousStateRef);
   useInitializationEffect(wsStatus, isInitialized, setIsInitialized);
   
