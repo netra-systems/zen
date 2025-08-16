@@ -286,6 +286,14 @@ class ResilientDatabaseClient:
         """Execute multiple queries in transaction with protection."""
         return await TransactionExecutor.execute_transaction(queries)
 
+    async def _get_read_circuit(self):
+        """Get read circuit breaker for testing."""
+        return await CircuitBreakerManager.get_read_circuit()
+
+    async def _test_connection(self) -> Dict[str, Any]:
+        """Test database connection for health checks."""
+        return await PostgresHealthChecker.test_connection()
+
     async def health_check(self) -> Dict[str, Any]:
         """Comprehensive database health check."""
         return await PostgresHealthChecker.health_check()

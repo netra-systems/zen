@@ -9,6 +9,9 @@ from typing import Dict, Any
 from unittest.mock import AsyncMock
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DisconnectionError
 
+from app.db.transaction_core import with_deadlock_retry
+from app.core.exceptions import DatabaseError
+
 from .database_transaction_test_helpers import (
     create_mock_session,
     configure_mock_query_results,
@@ -90,7 +93,16 @@ class TestDatabaseRepositoryTransactions:
         """Test deadlock detection and retry logic"""
         transaction_manager.simulate_deadlock(mock_session)
         
-        # Should handle deadlock appropriately
+        # Execute repository operation that should trigger deadlock
+        result = await mock_repository.create(mock_session, name='Deadlock Test')
+        
+        # Should return None when deadlock occurs (error was handled)
+        assert result is None
+        
+        # Verify session.rollback was called due to deadlock
+        mock_session.rollback.assert_called()
+        
+        # Verify deadlock was detected and tracked
         stats = transaction_manager.get_transaction_stats()
         assert stats['deadlocks'] >= 1
     

@@ -45,6 +45,7 @@ class TestLLMClientCircuitBreaker:
         # Configure circuit with low threshold for testing
         circuit = await self.llm_client._get_circuit("test_config")
         circuit.config.failure_threshold = 2
+        circuit.adaptive_failure_threshold = 2
         
         # First failure
         with pytest.raises(Exception, match="LLM error"):
@@ -96,7 +97,7 @@ class TestDatabaseClientCircuitBreaker:
         """Set up test database client."""
         self.db_client = ResilientDatabaseClient()
     
-    @patch('app.db.client.async_session_factory')
+    @patch('app.db.client_postgres.async_session_factory')
     async def test_successful_db_query(self, mock_session_factory):
         """Test successful database query through circuit breaker."""
         mock_session = AsyncMock()
@@ -112,15 +113,15 @@ class TestDatabaseClientCircuitBreaker:
         mock_session.rollback = AsyncMock()
         mock_session.close = AsyncMock()
         
-        # Mock the session factory to return the session directly
-        mock_session_factory.return_value = mock_session
+        # Mock the session factory to be a callable that returns the session when called
+        mock_session_factory.side_effect = lambda: mock_session
         
         result = await self.db_client.execute_read_query("SELECT * FROM test")
         
         assert len(result) == 1
         assert result[0]["name"] == "test"
     
-    @patch('app.db.client.async_session_factory')
+    @patch('app.db.client_postgres.async_session_factory')
     async def test_db_circuit_breaker_fallback(self, mock_session_factory):
         """Test database circuit breaker fallback behavior."""
         mock_session_factory.side_effect = Exception("Database connection error")

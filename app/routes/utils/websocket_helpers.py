@@ -121,15 +121,24 @@ async def parse_json_message(data: str, user_id_str: str, manager):
         return None
 
 
-async def validate_and_handle_message(user_id_str: str, websocket: WebSocket, message, manager) -> bool:
-    """Validate message and handle with manager."""
-    # Handle ping messages specifically
+async def _handle_ping_message(message, websocket: WebSocket) -> bool:
+    """Handle ping message and return True if handled."""
     if isinstance(message, dict) and message.get("type") == "ping":
         await _send_pong_response(websocket)
         return True
+    return False
+
+async def _handle_with_manager(user_id_str: str, websocket: WebSocket, message, manager) -> bool:
+    """Handle message with manager."""
     if not await manager.handle_message(user_id_str, websocket, message):
         return False
     return True
+
+async def validate_and_handle_message(user_id_str: str, websocket: WebSocket, message, manager) -> bool:
+    """Validate message and handle with manager."""
+    if await _handle_ping_message(message, websocket):
+        return True
+    return await _handle_with_manager(user_id_str, websocket, message, manager)
 
 
 async def _send_pong_response(websocket: WebSocket) -> None:

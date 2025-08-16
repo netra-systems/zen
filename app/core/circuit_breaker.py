@@ -23,9 +23,10 @@ from .circuit_breaker_core import (
     CircuitBreaker
 )
 
-from .circuit_breaker_registry import (
+from .circuit_breaker_registry_adaptive import (
     CircuitBreakerRegistry,
-    circuit_registry,
+    circuit_breaker_registry as circuit_registry,
+    get_circuit_breaker,
     circuit_breaker
 )
 
@@ -43,5 +44,6 @@ __all__ = [
     # Registry and utilities
     'CircuitBreakerRegistry',
     'circuit_registry',
+    'get_circuit_breaker',
     'circuit_breaker'
 ]

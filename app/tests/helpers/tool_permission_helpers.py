@@ -139,7 +139,7 @@ async def setup_redis_usage(redis_client, user_id, tool_name, usage_count, perio
 
 def create_failing_redis_method(method_name, error_message="Redis connection failed"):
     """Create failing Redis method for error testing"""
-    async def failing_method(*args, **kwargs):
+    async def failing_method(*method_args, **method_kwargs):
         raise Exception(error_message)
     return failing_method
 

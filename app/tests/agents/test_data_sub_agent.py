@@ -40,20 +40,8 @@ def db_session():
     return db_mock
 
 # Import the module under test
-try:
-    from app.agents.data_sub_agent.agent import DataSubAgent
-    from app.agents.data_sub_agent.query_builder import QueryBuilder
-except ImportError:
-    # Create mock classes if imports fail
-    class DataSubAgent:
-        def __init__(self, *args, **kwargs):
-            self.name = "DataSubAgent"
-            self.state = {}
-            self.config = kwargs.get('config', {})
-            self.redis_client = None
-            
-    class QueryBuilder:
-        pass
+from app.agents.data_sub_agent.agent import DataSubAgent
+from app.agents.data_sub_agent.query_builder import QueryBuilder
 
 # Helper function to create DataSubAgent with mocks
 def create_test_agent():

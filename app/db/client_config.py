@@ -51,7 +51,7 @@ class CircuitBreakerManager:
     async def get_postgres_circuit():
         """Get PostgreSQL circuit breaker."""
         from app.core.circuit_breaker import circuit_registry
-        return await circuit_registry.get_circuit(
+        return circuit_registry.get_breaker(
             "postgres", DatabaseClientConfig.POSTGRES_CONFIG
         )
 
@@ -59,7 +59,7 @@ class CircuitBreakerManager:
     async def get_read_circuit():
         """Get read operations circuit breaker."""
         from app.core.circuit_breaker import circuit_registry
-        return await circuit_registry.get_circuit(
+        return circuit_registry.get_breaker(
             "db_read", DatabaseClientConfig.READ_CONFIG
         )
 
@@ -67,7 +67,7 @@ class CircuitBreakerManager:
     async def get_write_circuit():
         """Get write operations circuit breaker."""
         from app.core.circuit_breaker import circuit_registry
-        return await circuit_registry.get_circuit(
+        return circuit_registry.get_breaker(
             "db_write", DatabaseClientConfig.WRITE_CONFIG
         )
 
@@ -75,7 +75,7 @@ class CircuitBreakerManager:
     async def get_clickhouse_circuit():
         """Get ClickHouse circuit breaker."""
         from app.core.circuit_breaker import circuit_registry
-        return await circuit_registry.get_circuit(
+        return circuit_registry.get_breaker(
             "clickhouse", DatabaseClientConfig.CLICKHOUSE_CONFIG
         )
 

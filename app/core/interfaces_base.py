@@ -1,7 +1,7 @@
 """Base service interfaces and mixins."""
 
 import asyncio
-from typing import Dict
+from typing import Dict, Any
 from datetime import datetime, UTC
 
 from .exceptions import ServiceError
@@ -152,23 +152,27 @@ class BaseService(BaseServiceMixin):
     
     def _create_health_response(self, status: str, dependencies: Dict[str, str]) -> ServiceHealth:
         """Create healthy service health response."""
-        return ServiceHealth(
-            service_name=self._service_name,
-            status=status,
-            timestamp=datetime.now(UTC),
-            dependencies=dependencies,
-            metrics=self._metrics.model_dump()
-        )
+        health_data = self._build_health_response_data(status, dependencies)
+        return ServiceHealth(**health_data)
+    
+    def _build_health_response_data(self, status: str, dependencies: Dict[str, str]) -> Dict[str, Any]:
+        """Build health response data dictionary."""
+        return {
+            "service_name": self._service_name, "status": status, "timestamp": datetime.now(UTC),
+            "dependencies": dependencies, "metrics": self._metrics.model_dump()
+        }
     
     def _create_unhealthy_response(self, error: Exception) -> ServiceHealth:
         """Create unhealthy service health response."""
-        return ServiceHealth(
-            service_name=self._service_name,
-            status="unhealthy",
-            timestamp=datetime.now(UTC),
-            dependencies={},
-            metrics={"error": str(error)}
-        )
+        error_data = self._build_unhealthy_response_data(error)
+        return ServiceHealth(**error_data)
+    
+    def _build_unhealthy_response_data(self, error: Exception) -> Dict[str, Any]:
+        """Build unhealthy response data dictionary."""
+        return {
+            "service_name": self._service_name, "status": "unhealthy", "timestamp": datetime.now(UTC),
+            "dependencies": {}, "metrics": {"error": str(error)}
+        }
     
     async def _check_dependencies(self) -> Dict[str, str]:
         """Check service dependencies - override in subclasses."""

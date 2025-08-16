@@ -396,7 +396,7 @@ jobs:
       needs.determine-strategy.outputs.should_run == 'true' &&
       needs.determine-strategy.outputs.skip_tests != 'true' &&
       contains(fromJSON('["test", "pr-validation", "main-deploy", "branch-test", "health-check", "act-local"]'), needs.determine-strategy.outputs.execution_path)
-    uses: ./.github/workflows/reusable/test-runner.yml
+    uses: ./.github/workflows/test-runner.yml
     with:
       test_level: ${{ needs.determine-strategy.outputs.test_scope }}
       changed_areas: ${{ needs.determine-strategy.outputs.changed_areas }}
@@ -418,7 +418,7 @@ jobs:
       contains(fromJSON('["deploy", "pr-validation", "main-deploy"]'), needs.determine-strategy.outputs.execution_path) &&
       (needs.run-tests.result == 'success' || needs.run-tests.result == 'skipped') &&
       needs.determine-strategy.outputs.target_environment == 'staging'
-    uses: ./.github/workflows/reusable/deploy-staging.yml
+    uses: ./.github/workflows/deploy-staging.yml
     with:
       environment: staging
       trigger_context: ${{ needs.determine-strategy.outputs.execution_path }}
@@ -436,7 +436,7 @@ jobs:
       needs.determine-strategy.outputs.target_environment == 'production' &&
       github.ref == 'refs/heads/main' &&
       (needs.run-tests.result == 'success' || needs.run-tests.result == 'skipped')
-    uses: ./.github/workflows/reusable/deploy-production.yml
+    uses: ./.github/workflows/deploy-production.yml
     with:
       environment: production
       requires_approval: true
@@ -454,7 +454,7 @@ jobs:
       always() &&
       (needs.determine-strategy.outputs.execution_path == 'cleanup' ||
        (github.event_name == 'pull_request' && github.event.action == 'closed'))
-    uses: ./.github/workflows/reusable/cleanup.yml
+    uses: ./.github/workflows/cleanup.yml
     with:
       cleanup_type: ${{ github.event.action == 'closed' && 'pr-closed' || 'manual' }}
       pr_number: ${{ github.event.pull_request.number }}
@@ -472,7 +472,7 @@ jobs:
       needs.determine-strategy.outputs.should_run == 'true' &&
       contains(fromJSON('["main-deploy", "deploy"]'), needs.determine-strategy.outputs.execution_path) &&
       needs.determine-strategy.outputs.act_mode != 'true'
-    uses: ./.github/workflows/reusable/security-scan.yml
+    uses: ./.github/workflows/security-scan.yml
     with:
       scan_level: ${{ needs.determine-strategy.outputs.risk_level == 'high' && 'comprehensive' || 'standard' }}
     secrets: inherit
@@ -483,7 +483,7 @@ jobs:
     if: |
       needs.determine-strategy.outputs.should_run == 'true' &&
       contains(fromJSON('["pr-validation", "main-deploy"]'), needs.determine-strategy.outputs.execution_path)
-    uses: ./.github/workflows/reusable/code-quality.yml
+    uses: ./.github/workflows/code-quality.yml
     with:
       changed_areas: ${{ needs.determine-strategy.outputs.changed_areas }}
       act_mode: ${{ needs.determine-strategy.outputs.act_mode }}
@@ -497,9 +497,9 @@ jobs:
     name: Send Notifications
     needs: [determine-strategy, run-tests, deploy-staging, deploy-production, cleanup-resources, security-scan, code-quality]
     if: always() && needs.determine-strategy.outputs.should_run == 'true'
-    uses: ./.github/workflows/reusable/notification-handler.yml
+    uses: ./.github/workflows/notification-handler.yml
     with:
-      workflow_status: ${{ job.status }}
+      workflow_status: ${{ contains(needs.*.result, 'failure') && 'failure' || contains(needs.*.result, 'cancelled') && 'cancelled' || 'success' }}
       execution_path: ${{ needs.determine-strategy.outputs.execution_path }}
       test_result: ${{ needs.run-tests.result || 'skipped' }}
       deploy_result: ${{ needs.deploy-staging.result || needs.deploy-production.result || 'skipped' }}

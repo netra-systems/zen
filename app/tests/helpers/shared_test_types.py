@@ -185,12 +185,8 @@ class TestErrorContext:
     @pytest.fixture
     def error_context(self):
         """Provide error context for testing"""
-        try:
-            from app.core.error_context import AsyncAsyncErrorContext as ErrorContext
-            return ErrorContext()
-        except ImportError:
-            # Fallback mock if ErrorContext doesn't exist
-            return MagicMock()
+        from app.core.error_context import AsyncErrorContext as ErrorContext
+        return ErrorContext()
     
     def test_trace_id_management(self, error_context):
         """Test trace ID generation and retrieval"""

@@ -1,5 +1,6 @@
-from pydantic import BaseModel
-from typing import Dict
+from pydantic import BaseModel, Field
+from typing import Dict, Any
+from enum import Enum
 
 class FinOps(BaseModel):
     attribution: Dict[str, str]
@@ -8,3 +9,20 @@ class FinOps(BaseModel):
 
 class CostComparison(BaseModel):
     data: Dict[str, str]
+
+class DataGenerationType(str, Enum):
+    """Types of synthetic data generation"""
+    INFERENCE_LOGS = "inference_logs"
+    TRAINING_DATA = "training_data"
+    PERFORMANCE_METRICS = "performance_metrics"
+    COST_DATA = "cost_data"
+    CUSTOM = "custom"
+
+class WorkloadProfile(BaseModel):
+    """Profile for synthetic workload generation"""
+    workload_type: DataGenerationType
+    volume: int = Field(ge=100, le=1000000, default=1000)
+    time_range_days: int = Field(ge=1, le=365, default=30)
+    distribution: str = Field(default="normal")
+    noise_level: float = Field(ge=0.0, le=0.5, default=0.1)
+    custom_parameters: Dict[str, Any] = Field(default_factory=dict)

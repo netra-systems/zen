@@ -101,16 +101,25 @@ async def _create_enabled_client():
     base_client = _create_base_client(config)
     return _wrap_client_with_interceptor(base_client)
 
-@asynccontextmanager
-async def get_clickhouse_client():
-    """Dependency provider for ClickHouse client with proper connection management."""
-    if _is_clickhouse_disabled():
-        async for client in _create_disabled_client():
-            yield client
-        return
-    
+async def _handle_disabled_client():
+    """Handle disabled client creation and management."""
+    async for client in _create_disabled_client():
+        yield client
+
+async def _handle_enabled_client():
+    """Handle enabled client creation and cleanup."""
     client = await _create_enabled_client()
     try:
         yield client
     finally:
         await _cleanup_client(client)
+
+@asynccontextmanager
+async def get_clickhouse_client():
+    """Dependency provider for ClickHouse client with proper connection management."""
+    if _is_clickhouse_disabled():
+        async for client in _handle_disabled_client():
+            yield client
+    else:
+        async for client in _handle_enabled_client():
+            yield client

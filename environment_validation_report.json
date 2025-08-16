@@ -1,193 +1,257 @@
 {
-  "validation_summary": {
-    "ready_for_launch": true,
-    "total_checks": 16,
-    "passed": 10,
-    "failed": 3,
-    "warnings": 3,
-    "skipped": 0,
-    "critical_failures": 0,
-    "total_validation_time_ms": 5974.39,
-    "timestamp": "2025-08-16T06:39:52.409544"
-  },
-  "environment_status": {
-    "env_files_found": 16,
-    "database_connectivity": "FAILED",
-    "clickhouse_connectivity": "FAILED",
-    "redis_connectivity": "NOT_CONFIGURED"
-  },
-  "security_assessment": {
-    "secrets_in_env_file": true,
-    "weak_secrets_detected": false,
-    "api_keys_configured": true
-  },
-  "detailed_results": [
-    {
-      "check": "env_file_existence",
-      "status": "PASS",
-      "message": "Found 16 .env files",
-      "details": {
-        "files": [
-          ".\\.env",
-          ".\\.env.backup",
-          ".\\.env.development",
-          ".\\.env.development.local",
-          ".\\.env.production",
-          ".\\.env.staging",
-          ".\\.env.test",
-          ".\\.env.testing",
-          ".\\app\\data\\synthetic\\.env",
-          ".\\config\\.env.example",
-          ".\\config\\.env.template",
-          ".\\frontend\\.env.local",
-          ".\\frontend\\.env.staging",
-          ".\\frontend\\node_modules\\jest-websocket-mock\\examples\\hooks\\.env",
-          ".\\frontend\\node_modules\\jest-websocket-mock\\examples\\redux-saga\\.env",
-          ".\\scripts\\.env"
-        ]
+  "timestamp": "2025-08-16T11:26:59.207116",
+  "validation_results": {
+    "env_vars": {
+      "status": "warning",
+      "env_files": {
+        "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env": {
+          "exists": true,
+          "readable": true,
+          "size": 1313,
+          "variables_count": 18
+        },
+        "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.development": {
+          "exists": true,
+          "readable": true,
+          "size": 346,
+          "variables_count": 2
+        },
+        "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.staging": {
+          "exists": true,
+          "readable": true,
+          "size": 1054,
+          "variables_count": 21
+        },
+        "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.production": {
+          "exists": true,
+          "readable": true,
+          "size": 932,
+          "variables_count": 21
+        }
       },
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:47.932961"
-    },
-    {
-      "check": "required_env_vars",
-      "status": "PASS",
-      "message": "All required environment variables present",
-      "details": {},
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:47.933962"
-    },
-    {
-      "check": "secret_strength",
-      "status": "PASS",
-      "message": "All secrets meet minimum length requirements",
-      "details": {},
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:47.933962"
-    },
-    {
-      "check": "postgres_connection",
-      "status": "FAIL",
-      "message": "PostgreSQL connection error: greenlet_spawn has not been called; can't call await_only() here. Was IO attempted in an unexpected place? (Background on this error at: https://sqlalche.me/e/20/xd2s)",
-      "details": {
-        "error_type": "MissingGreenlet"
+      "variables": {
+        "DATABASE_URL": {
+          "exists": true,
+          "value_length": 54,
+          "valid_format": true,
+          "critical": true,
+          "description": "PostgreSQL connection string"
+        },
+        "GEMINI_API_KEY": {
+          "exists": true,
+          "value_length": 39,
+          "valid_format": true,
+          "critical": true,
+          "description": "Google Gemini API key"
+        },
+        "GOOGLE_CLIENT_ID": {
+          "exists": true,
+          "value_length": 71,
+          "valid_format": true,
+          "critical": true,
+          "description": "Google OAuth client ID"
+        },
+        "GOOGLE_CLIENT_SECRET": {
+          "exists": true,
+          "value_length": 35,
+          "valid_format": true,
+          "critical": true,
+          "description": "Google OAuth client secret"
+        },
+        "JWT_SECRET_KEY": {
+          "exists": true,
+          "value_length": 63,
+          "valid_format": true,
+          "critical": true,
+          "description": "JWT signing secret (32+ chars)"
+        },
+        "FERNET_KEY": {
+          "exists": true,
+          "value_length": 44,
+          "valid_format": true,
+          "critical": true,
+          "description": "Fernet encryption key"
+        },
+        "CLICKHOUSE_HOST": {
+          "exists": true,
+          "value_length": 43,
+          "valid_format": true,
+          "critical": false,
+          "description": "ClickHouse server host"
+        },
+        "LANGFUSE_PUBLIC_KEY": {
+          "exists": true,
+          "value_length": 42,
+          "valid_format": true,
+          "critical": false,
+          "description": "Langfuse public key"
+        },
+        "ENVIRONMENT": {
+          "exists": true,
+          "value_length": 11,
+          "valid_format": true,
+          "critical": true,
+          "description": "Application environment"
+        }
       },
-      "response_time_ms": 41.93854331970215,
-      "timestamp": "2025-08-16T06:39:47.975901"
+      "missing": [],
+      "recommendations": [
+        "JWT_SECRET_KEY appears to be a development key"
+      ],
+      "summary": "1 recommendations"
     },
-    {
-      "check": "clickhouse_connection",
-      "status": "FAIL",
-      "message": "ClickHouse connection failed: Code: 102. Unexpected packet from server xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443 (expected Hello or Exception, got Unknown packet)",
-      "details": {
-        "error_type": "UnexpectedPacketFromServerError"
+    "databases": {
+      "status": "success",
+      "databases": {
+        "postgresql": {
+          "type": "PostgreSQL",
+          "status": "success",
+          "connection_time": 3.074359,
+          "version": "14.19",
+          "error": null
+        },
+        "clickhouse": {
+          "type": "ClickHouse",
+          "status": "success",
+          "connection_time": 0.613905,
+          "version": "25.6.2.5781",
+          "error": null
+        }
       },
-      "response_time_ms": 395.9171772003174,
-      "timestamp": "2025-08-16T06:39:48.371818"
+      "summary": "All 2 databases connected successfully",
+      "recommendations": []
     },
-    {
-      "check": "redis_connection",
-      "status": "FAIL",
-      "message": "Redis connection failed: AUTH <password> called without any password configured for the default user. Are you sure your configuration is correct?",
-      "details": {
-        "error_type": "AuthenticationError"
+    "ports": {
+      "status": "error",
+      "ports": {
+        "3000": {
+          "port": 3000,
+          "service": "Frontend (Next.js)",
+          "available": true,
+          "listening": false,
+          "process_info": null,
+          "alternatives": [
+            3001,
+            3002,
+            3010
+          ],
+          "critical": true
+        },
+        "8000": {
+          "port": 8000,
+          "service": "Backend (FastAPI)",
+          "available": true,
+          "listening": false,
+          "process_info": null,
+          "alternatives": [
+            8001,
+            8002,
+            8080
+          ],
+          "critical": true
+        },
+        "5432": {
+          "port": 5432,
+          "service": "PostgreSQL",
+          "available": false,
+          "listening": true,
+          "process_info": null,
+          "alternatives": [
+            5433,
+            5434
+          ],
+          "critical": true
+        },
+        "5433": {
+          "port": 5433,
+          "service": "PostgreSQL Dev",
+          "available": true,
+          "listening": true,
+          "process_info": null,
+          "alternatives": [
+            5432,
+            5434
+          ],
+          "critical": false
+        },
+        "8443": {
+          "port": 8443,
+          "service": "ClickHouse HTTPS",
+          "available": true,
+          "listening": false,
+          "process_info": null,
+          "alternatives": [
+            8123,
+            9000
+          ],
+          "critical": false
+        },
+        "6379": {
+          "port": 6379,
+          "service": "Redis",
+          "available": true,
+          "listening": true,
+          "process_info": null,
+          "alternatives": [
+            6380,
+            6381
+          ],
+          "critical": false
+        },
+        "9000": {
+          "port": 9000,
+          "service": "ClickHouse Native",
+          "available": true,
+          "listening": true,
+          "process_info": null,
+          "alternatives": [
+            8443,
+            8123
+          ],
+          "critical": false
+        }
       },
-      "response_time_ms": 6.524562835693359,
-      "timestamp": "2025-08-16T06:39:48.378342"
+      "conflicts": [
+        {
+          "port": 5432,
+          "service": "PostgreSQL",
+          "alternatives": [
+            5433,
+            5434
+          ]
+        }
+      ],
+      "recommendations": [
+        "Port 5432 (PostgreSQL) in use",
+        "Try alternative ports: 5433, 5434",
+        "Use --dynamic flag with dev_launcher.py"
+      ],
+      "summary": "1 critical port conflicts"
     },
-    {
-      "check": "google_oauth",
-      "status": "PASS",
-      "message": "Google OAuth credentials configured",
-      "details": {
-        "client_id_prefix": "8405600937..."
+    "dependencies": {
+      "status": "success",
+      "python": {
+        "version": "3.12.4",
+        "executable": "C:\\Users\\antho\\miniconda3\\python.exe",
+        "virtual_env": false,
+        "compatible": true,
+        "installed_packages": 325
       },
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:48.378342"
-    },
-    {
-      "check": "gemini_api",
-      "status": "PASS",
-      "message": "Gemini API key configured",
-      "details": {
-        "key_prefix": "AIzaSyCb8C..."
+      "nodejs": {
+        "version": "24.4.1",
+        "npm_version": null,
+        "compatible": true,
+        "frontend_deps_installed": true
       },
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:48.378342"
-    },
-    {
-      "check": "langfuse_keys",
-      "status": "PASS",
-      "message": "Langfuse keys configured",
-      "details": {},
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:48.378342"
-    },
-    {
-      "check": "port_5433",
-      "status": "PASS",
-      "message": "PostgreSQL port 5433 is available",
-      "details": {},
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:48.396149"
-    },
-    {
-      "check": "port_6379",
-      "status": "PASS",
-      "message": "Redis port 6379 is available",
-      "details": {},
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:48.396780"
-    },
-    {
-      "check": "port_8000",
-      "status": "WARNING",
-      "message": "Backend API port 8000 is not responding",
-      "details": {},
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:50.402393"
-    },
-    {
-      "check": "port_3000",
-      "status": "WARNING",
-      "message": "Frontend port 3000 is not responding",
-      "details": {},
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:52.409544"
-    },
-    {
-      "check": "env_file_security",
-      "status": "WARNING",
-      "message": ".env file contains secrets in plain text",
-      "details": {
-        "recommendation": "Use environment variables or secret management",
-        "risk_level": "HIGH"
+      "packages": {
+        "python_requirements": 47,
+        "missing_python": [],
+        "nodejs_dependencies": 88,
+        "missing_nodejs": []
       },
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:52.409544"
-    },
-    {
-      "check": "fernet_key",
-      "status": "PASS",
-      "message": "Fernet encryption key properly configured",
-      "details": {},
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:52.409544"
-    },
-    {
-      "check": "development_security",
-      "status": "PASS",
-      "message": "Running in development environment",
-      "details": {},
-      "response_time_ms": 0,
-      "timestamp": "2025-08-16T06:39:52.409544"
+      "recommendations": [],
+      "summary": "All dependencies validated"
     }
-  ],
-  "critical_failures": [],
-  "recommendations": [
-    "Security: Move secrets to environment variables or secret manager",
-    "Database: Fix ClickHouse connectivity for analytics features",
-    "Cache: Configure Redis for improved performance",
-    "Environment appears ready for launch!"
-  ]
+  },
+  "overall_status": "error"
 }

@@ -29,6 +29,10 @@ class MockClickHouseClient:
         
         return self._get_query_result(query)
     
+    async def execute_query(self, query: str, *args, **kwargs):
+        """Mock query execution (alternative method name)"""
+        return await self.execute(query, *args, **kwargs)
+    
     def _get_query_result(self, query: str) -> List[Dict[str, Any]]:
         """Get result for query"""
         if query in self.query_results:

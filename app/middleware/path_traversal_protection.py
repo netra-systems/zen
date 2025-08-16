@@ -51,97 +51,153 @@ BLOCKED_EXTENSIONS = {
 
 async def path_traversal_protection_middleware(request: Request, call_next):
     """Protect against path traversal attacks."""
+    path, query = _extract_path_and_query(request)
+    path_check_response = _check_path_traversal(request, path, query)
+    if path_check_response:
+        return path_check_response
+    extension_check_response = _check_blocked_extensions(request, path)
+    if extension_check_response:
+        return extension_check_response
+    header_check_response = _check_suspicious_headers(request)
+    if header_check_response:
+        return header_check_response
+    return await call_next(request)
+
+def _extract_path_and_query(request: Request) -> tuple[str, str]:
+    """Extract path and query from request."""
     path = request.url.path
     query = str(request.url.query) if request.url.query else ""
-    
-    # Check path for suspicious patterns
+    return path, query
+
+def _check_path_traversal(request: Request, path: str, query: str) -> JSONResponse:
+    """Check path and query for suspicious patterns."""
     if is_suspicious_path(path) or is_suspicious_path(query):
-        logger.warning(
-            f"Blocked potential path traversal attempt from {request.client.host}: "
-            f"Path: {path}, Query: {query}"
-        )
-        return JSONResponse(
-            status_code=403,
-            content={"detail": "Forbidden"}
-        )
-    
-    # Check for blocked file extensions
+        _log_path_traversal_attempt(request, path, query)
+        return _create_forbidden_response()
+    return None
+
+def _check_blocked_extensions(request: Request, path: str) -> JSONResponse:
+    """Check for blocked file extensions."""
     if has_blocked_extension(path):
-        logger.warning(
-            f"Blocked access to restricted file type from {request.client.host}: {path}"
-        )
-        return JSONResponse(
-            status_code=403,
-            content={"detail": "Access to this file type is not allowed"}
-        )
-    
-    # Check headers for path injection
+        _log_blocked_file_access(request, path)
+        return _create_file_type_blocked_response()
+    return None
+
+def _check_suspicious_headers(request: Request) -> JSONResponse:
+    """Check headers for path injection."""
     for header_name, header_value in request.headers.items():
         if is_suspicious_path(str(header_value)):
-            logger.warning(
-                f"Blocked suspicious header from {request.client.host}: "
-                f"{header_name}: {header_value}"
-            )
-            return JSONResponse(
-                status_code=400,
-                content={"detail": "Bad request"}
-            )
-    
-    response = await call_next(request)
-    return response
+            _log_suspicious_header(request, header_name, header_value)
+            return _create_bad_request_response()
+    return None
+
+def _log_path_traversal_attempt(request: Request, path: str, query: str) -> None:
+    """Log path traversal attempt."""
+    logger.warning(
+        f"Blocked potential path traversal attempt from {request.client.host}: "
+        f"Path: {path}, Query: {query}"
+    )
+
+def _log_blocked_file_access(request: Request, path: str) -> None:
+    """Log blocked file access attempt."""
+    logger.warning(
+        f"Blocked access to restricted file type from {request.client.host}: {path}"
+    )
+
+def _log_suspicious_header(request: Request, header_name: str, header_value: str) -> None:
+    """Log suspicious header attempt."""
+    logger.warning(
+        f"Blocked suspicious header from {request.client.host}: "
+        f"{header_name}: {header_value}"
+    )
+
+def _create_forbidden_response() -> JSONResponse:
+    """Create forbidden response."""
+    return JSONResponse(
+        status_code=403,
+        content={"detail": "Forbidden"}
+    )
+
+def _create_file_type_blocked_response() -> JSONResponse:
+    """Create file type blocked response."""
+    return JSONResponse(
+        status_code=403,
+        content={"detail": "Access to this file type is not allowed"}
+    )
+
+def _create_bad_request_response() -> JSONResponse:
+    """Create bad request response."""
+    return JSONResponse(
+        status_code=400,
+        content={"detail": "Bad request"}
+    )
 
 
 def is_suspicious_path(path: str) -> bool:
     """Check if path contains suspicious patterns."""
     if not path:
         return False
-    
-    # Normalize path
     normalized = os.path.normpath(path)
-    
-    # Check for any compiled patterns
+    return (_has_suspicious_patterns(path) or
+            _has_null_bytes(path) or
+            _has_excessive_depth(path))
+
+def _has_suspicious_patterns(path: str) -> bool:
+    """Check for suspicious patterns in path."""
     for pattern in COMPILED_PATTERNS:
         if pattern.search(path):
             return True
-    
-    # Check for null bytes (path truncation attack)
-    if '\x00' in path or '%00' in path:
-        return True
-    
-    # Check for excessive depth (too many slashes)
-    if path.count('/') > 10 or path.count('\\') > 10:
-        return True
-    
     return False
+
+def _has_null_bytes(path: str) -> bool:
+    """Check for null bytes (path truncation attack)."""
+    return '\x00' in path or '%00' in path
+
+def _has_excessive_depth(path: str) -> bool:
+    """Check for excessive path depth."""
+    return path.count('/') > 10 or path.count('\\') > 10
 
 
 def has_blocked_extension(path: str) -> bool:
     """Check if path has a blocked file extension."""
     path_lower = path.lower()
-    
-    # Check each blocked extension
+    return _check_extensions_against_path(path_lower)
+
+def _check_extensions_against_path(path_lower: str) -> bool:
+    """Check blocked extensions against lowercase path."""
     for ext in BLOCKED_EXTENSIONS:
-        if path_lower.endswith(ext):
+        if _extension_matches_path(path_lower, ext):
             return True
-        # Also check with URL encoding
-        if path_lower.endswith(ext.replace('.', '%2e')):
-            return True
-    
     return False
+
+def _extension_matches_path(path_lower: str, ext: str) -> bool:
+    """Check if extension matches path (including URL encoded)."""
+    if path_lower.endswith(ext):
+        return True
+    encoded_ext = ext.replace('.', '%2e')
+    return path_lower.endswith(encoded_ext)
 
 
 def sanitize_path(path: str) -> str:
     """Sanitize a path to remove dangerous elements."""
-    # Remove null bytes
-    path = path.replace('\x00', '').replace('%00', '')
-    
-    # Normalize path
-    path = os.path.normpath(path)
-    
-    # Remove any parent directory references
-    path = path.replace('..', '')
-    
-    # Remove leading slashes to prevent absolute paths
-    path = path.lstrip('/')
-    
+    path = _remove_null_bytes(path)
+    path = _normalize_path(path)
+    path = _remove_parent_references(path)
+    path = _remove_leading_slashes(path)
     return path
+
+def _remove_null_bytes(path: str) -> str:
+    """Remove null bytes from path."""
+    return path.replace('\x00', '').replace('%00', '')
+
+def _normalize_path(path: str) -> str:
+    """Normalize path using os.path.normpath."""
+    return os.path.normpath(path)
+
+def _remove_parent_references(path: str) -> str:
+    """Remove parent directory references."""
+    return path.replace('..', '')
+
+def _remove_leading_slashes(path: str) -> str:
+    """Remove leading slashes to prevent absolute paths."""
+    return path.lstrip('/')

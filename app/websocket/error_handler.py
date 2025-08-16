@@ -193,48 +193,71 @@ class WebSocketErrorHandler:
     async def _attempt_recovery(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None) -> bool:
         """Attempt to recover from an error with rate limiting."""
         error.retry_count += 1
-        
-        # Implement rate limiting with exponential backoff
-        recovery_key = f"{error.error_type}:{error.connection_id or error.user_id}"
+        recovery_key = self._create_recovery_key(error)
+        if not await self._check_recovery_rate_limit(recovery_key):
+            return False
+        self._update_recovery_tracking(recovery_key)
+        return await self._execute_recovery_strategy(error, conn_info, recovery_key)
+
+    def _create_recovery_key(self, error: WebSocketErrorInfo) -> str:
+        """Create recovery key for rate limiting."""
+        return f"{error.error_type}:{error.connection_id or error.user_id}"
+
+    async def _check_recovery_rate_limit(self, recovery_key: str) -> bool:
+        """Check if recovery is rate limited."""
         current_time = time.time()
-        
-        # Check if we're attempting recovery too soon
-        if recovery_key in self.recovery_timestamps:
-            last_attempt = self.recovery_timestamps[recovery_key]
-            backoff_delay = self.recovery_backoff.get(recovery_key, 1.0)
-            
-            time_since_last = current_time - last_attempt
-            if time_since_last < backoff_delay:
-                logger.debug(f"Recovery rate limited for {recovery_key}, waiting {backoff_delay - time_since_last:.1f}s")
-                return False
-        
-        # Update recovery tracking
+        if recovery_key not in self.recovery_timestamps:
+            return True
+        return self._evaluate_rate_limit_timing(recovery_key, current_time)
+
+    def _evaluate_rate_limit_timing(self, recovery_key: str, current_time: float) -> bool:
+        """Evaluate rate limit timing for recovery key."""
+        last_attempt = self.recovery_timestamps[recovery_key]
+        backoff_delay = self.recovery_backoff.get(recovery_key, 1.0)
+        time_since_last = current_time - last_attempt
+        if time_since_last < backoff_delay:
+            logger.debug(f"Recovery rate limited for {recovery_key}, waiting {backoff_delay - time_since_last:.1f}s")
+            return False
+        return True
+
+    def _update_recovery_tracking(self, recovery_key: str) -> None:
+        """Update recovery tracking timestamps and backoff."""
+        current_time = time.time()
         self.recovery_timestamps[recovery_key] = current_time
-        
-        # Calculate exponential backoff (max 60 seconds)
         current_backoff = self.recovery_backoff.get(recovery_key, 1.0)
         next_backoff = min(current_backoff * 2, 60.0)
         self.recovery_backoff[recovery_key] = next_backoff
-        
+
+    async def _execute_recovery_strategy(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo], recovery_key: str) -> bool:
+        """Execute recovery strategy based on error type."""
         try:
-            # Add delay before recovery attempt
-            await asyncio.sleep(min(error.retry_count * 0.5, 5.0))
-            
-            # Implement recovery strategies based on error type
-            if error.error_type == "connection_error":
-                return await self._recover_connection_error(error, conn_info)
-            elif error.error_type == "rate_limit_error":
-                return await self._recover_rate_limit_error(error, conn_info)
-            elif error.error_type == "heartbeat_error":
-                return await self._recover_heartbeat_error(error, conn_info)
-            else:
-                # Generic recovery with delay
-                logger.info(f"Generic recovery attempted for error {error.error_id} after {current_backoff:.1f}s backoff")
-                return False  # Don't auto-recover unknown errors
-                
+            await self._apply_recovery_delay(error)
+            return await self._apply_type_specific_recovery(error, conn_info, recovery_key)
         except Exception as recovery_error:
             logger.error(f"Error during recovery attempt for {error.error_id}: {recovery_error}")
             return False
+
+    async def _apply_recovery_delay(self, error: WebSocketErrorInfo) -> None:
+        """Apply delay before recovery attempt."""
+        delay = min(error.retry_count * 0.5, 5.0)
+        await asyncio.sleep(delay)
+
+    async def _apply_type_specific_recovery(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo], recovery_key: str) -> bool:
+        """Apply recovery strategy based on error type."""
+        if error.error_type == "connection_error":
+            return await self._recover_connection_error(error, conn_info)
+        elif error.error_type == "rate_limit_error":
+            return await self._recover_rate_limit_error(error, conn_info)
+        elif error.error_type == "heartbeat_error":
+            return await self._recover_heartbeat_error(error, conn_info)
+        else:
+            return self._handle_unknown_error_recovery(error, recovery_key)
+
+    def _handle_unknown_error_recovery(self, error: WebSocketErrorInfo, recovery_key: str) -> bool:
+        """Handle recovery for unknown error types."""
+        current_backoff = self.recovery_backoff.get(recovery_key, 1.0)
+        logger.info(f"Generic recovery attempted for error {error.error_id} after {current_backoff:.1f}s backoff")
+        return False
     
     async def _recover_connection_error(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None) -> bool:
         """Attempt to recover from a connection error."""

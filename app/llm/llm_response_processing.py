@@ -60,22 +60,31 @@ def parse_nested_json_recursive(data: Any) -> Any:
     return data
 
 
-async def create_cached_llm_response(cached_content: str, config: Any, 
-                                   llm_config_name: str) -> LLMResponse:
-    """Create LLM response from cached content."""
-    provider = LLMProvider(config.provider) if config else LLMProvider.LOCAL
+def _build_cached_choices(cached_content: str) -> list:
+    """Build choices array for cached response."""
+    return [{
+        "message": {"content": cached_content},
+        "finish_reason": "stop",
+        "index": 0
+    }]
+
+def _create_cached_response_object(provider: LLMProvider, model: str, cached_content: str) -> LLMResponse:
+    """Create cached LLMResponse object."""
     return LLMResponse(
         provider=provider,
-        model=config.model_name if config else llm_config_name,
-        choices=[{
-            "message": {"content": cached_content},
-            "finish_reason": "stop",
-            "index": 0
-        }],
+        model=model,
+        choices=_build_cached_choices(cached_content),
         usage=TokenUsage(),
         response_time_ms=0,
         cached=True
     )
+
+async def create_cached_llm_response(cached_content: str, config: Any, 
+                                   llm_config_name: str) -> LLMResponse:
+    """Create LLM response from cached content."""
+    provider = LLMProvider(config.provider) if config else LLMProvider.LOCAL
+    model = config.model_name if config else llm_config_name
+    return _create_cached_response_object(provider, model, cached_content)
 
 
 def extract_response_content(response: Any) -> str:
@@ -116,18 +125,25 @@ def get_finish_reason(response: Any) -> str:
     return finish_reason if isinstance(finish_reason, str) else 'stop'
 
 
+def _build_llm_response_object(provider: LLMProvider, model: str, choices_data: list,
+                              token_usage: Any, execution_time_ms: float) -> LLMResponse:
+    """Build LLMResponse object with all components."""
+    return LLMResponse(
+        provider=provider,
+        model=model,
+        choices=choices_data,
+        usage=token_usage,
+        response_time_ms=execution_time_ms
+    )
+
 async def create_llm_response(response: Any, config: Any, llm_config_name: str,
                             execution_time_ms: float) -> LLMResponse:
     """Create standardized LLM response object."""
     provider = LLMProvider(config.provider) if config else LLMProvider.LOCAL
     choices_data = _build_response_choices(response)
-    return LLMResponse(
-        provider=provider,
-        model=get_response_model_name(response, config, llm_config_name),
-        choices=choices_data,
-        usage=create_token_usage(response),
-        response_time_ms=execution_time_ms
-    )
+    model = get_response_model_name(response, config, llm_config_name)
+    token_usage = create_token_usage(response)
+    return _build_llm_response_object(provider, model, choices_data, token_usage, execution_time_ms)
 
 
 def _build_response_choices(response: Any) -> list:

@@ -19,11 +19,7 @@ class TestDiscovery:
         """Discover all tests in the project"""
         path = path or self.project_root
         discovered = defaultdict(list)
-        
-        self._discover_backend_tests_into(path, discovered)
-        self._discover_frontend_tests_into(path, discovered)
-        self._discover_cypress_tests_into(path, discovered)
-        
+        self._populate_discovered_tests(path, discovered)
         return dict(discovered)
     
     def discover_backend_tests(self, path: Path = None) -> Dict[str, List[str]]:
@@ -39,40 +35,28 @@ class TestDiscovery:
         """Discover frontend tests"""
         path = path or self.project_root
         frontend_tests = []
-        
-        self._add_jest_tests(path, frontend_tests)
-        self._add_colocated_tests(path, frontend_tests)
-        
+        self._collect_frontend_tests(path, frontend_tests)
         return frontend_tests
     
     def discover_e2e_tests(self, path: Path = None) -> List[str]:
         """Discover E2E tests"""
         path = path or self.project_root
         e2e_tests = []
-        
-        self._add_cypress_tests(path, e2e_tests)
-        self._add_playwright_tests(path, e2e_tests)
-        
+        self._collect_e2e_tests(path, e2e_tests)
         return e2e_tests
     
     def _categorize_test(self, test_path: Path) -> str:
         """Categorize a test based on its path and name"""
         path_str = str(test_path).lower()
-        
-        category = self._check_primary_categories(path_str)
-        if category:
-            return category
-        
+        primary_category = self._check_primary_categories(path_str)
+        if primary_category:
+            return primary_category
         return self._check_secondary_categories(path_str)
     
     def get_test_categories(self) -> Dict[str, Dict[str, str]]:
         """Get available test categories with descriptions"""
         categories = {}
-        categories.update(self._get_critical_categories())
-        categories.update(self._get_standard_categories())
-        categories.update(self._get_specialized_categories())
-        categories.update(self._get_real_llm_categories())
-        
+        self._populate_all_categories(categories)
         return categories
     
     def get_tests_by_category(self, category: str) -> List[str]:
@@ -84,10 +68,8 @@ class TestDiscovery:
         """Find tests matching a pattern"""
         all_tests = self.discover_tests()
         matching_tests = []
-        
         pattern_lower = pattern.lower()
         self._collect_matching_tests(all_tests, pattern_lower, matching_tests)
-        
         return matching_tests
     
     def get_test_count_by_category(self) -> Dict[str, int]:
@@ -99,25 +81,13 @@ class TestDiscovery:
         """Validate that tests follow expected structure"""
         issues = defaultdict(list)
         all_tests = self.discover_tests()
-        
-        for category, tests in all_tests.items():
-            self._validate_category_tests(category, tests, issues)
-        
+        self._validate_all_test_categories(all_tests, issues)
         return dict(issues)
     
     def _discover_backend_tests_into(self, path: Path, discovered: defaultdict):
         """Discover backend tests and add to discovered dict."""
-        backend_test_dirs = [
-            path / "app" / "tests",
-            path / "tests",
-            path / "integration_tests"
-        ]
-        
-        for test_dir in backend_test_dirs:
-            if test_dir.exists():
-                for test_file in test_dir.rglob("test_*.py"):
-                    category = self._categorize_test(test_file)
-                    discovered[category].append(str(test_file))
+        backend_test_dirs = self._get_backend_test_directories(path)
+        self._scan_backend_test_directories(backend_test_dirs, discovered)
     
     def _discover_frontend_tests_into(self, path: Path, discovered: defaultdict):
         """Discover frontend tests and add to discovered dict."""

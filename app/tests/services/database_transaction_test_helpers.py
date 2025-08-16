@@ -9,6 +9,8 @@ from datetime import datetime, UTC
 from typing import List, Any
 from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import Column, String, DateTime
+from app.db.base import Base
 
 
 def create_mock_session() -> AsyncMock:
@@ -38,9 +40,11 @@ def configure_mock_query_results(session: AsyncMock) -> None:
 
 def _setup_result_methods(mock_result: MagicMock) -> None:
     """Setup mock result methods"""
-    mock_result.scalar_one_or_none.return_value = None
+    # Return a default mock entity for get operations
+    mock_entity = MockDatabaseModel(id="test_id", name="Test Entity")
+    mock_result.scalar_one_or_none.return_value = mock_entity
     mock_result.scalars.return_value.all.return_value = []
-    mock_result.scalars.return_value.first.return_value = None
+    mock_result.scalars.return_value.first.return_value = mock_entity
 
 
 def create_mock_session_factory() -> tuple[MagicMock, AsyncMock]:
@@ -103,24 +107,27 @@ def assert_all_sessions_closed(created_sessions: List[Any]) -> None:
         session.close.assert_called_once()
 
 
-class MockDatabaseModel:
-    """Mock database model for testing"""
+class MockDatabaseModel(Base):
+    """Mock database model for testing - SQLAlchemy compatible"""
+    
+    __tablename__ = "mock_test_table"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = Column(String, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
+    updated_at = Column(DateTime, default=lambda: datetime.now(UTC))
     
     def __init__(self, id: str = None, name: str = None, **kwargs):
-        self.id = id or str(uuid.uuid4())
+        if id:
+            self.id = id
         self.name = name
-        self._set_timestamps()
         self._set_additional_attrs(kwargs)
-    
-    def _set_timestamps(self) -> None:
-        """Set timestamp attributes"""
-        self.created_at = datetime.now(UTC)
-        self.updated_at = datetime.now(UTC)
     
     def _set_additional_attrs(self, kwargs: dict) -> None:
         """Set additional attributes from kwargs"""
         for key, value in kwargs.items():
-            setattr(self, key, value)
+            if hasattr(self, key):
+                setattr(self, key, value)
     
     def __repr__(self) -> str:
         """String representation"""

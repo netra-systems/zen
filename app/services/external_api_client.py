@@ -100,7 +100,7 @@ class ResilientHTTPClient:
         """Get circuit breaker for API."""
         if api_name not in self._circuits:
             config = self._select_config(api_name)
-            self._circuits[api_name] = await circuit_registry.get_circuit(
+            self._circuits[api_name] = circuit_registry.get_breaker(
                 f"http_{api_name}", config
             )
         return self._circuits[api_name]

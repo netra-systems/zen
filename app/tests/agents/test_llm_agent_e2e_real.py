@@ -460,6 +460,89 @@ async def test_tool_execution_with_llm():
     assert len(tool_results) == 2
     assert tool_results[0]["tool"] == "analyze_workload"
     assert tool_results[1]["tool"] == "optimize_batch_size"
+
+
+def _create_mock_infrastructure():
+    """Create mock infrastructure for e2e testing"""
+    db_session = AsyncMock(spec=AsyncSession)
+    llm_manager = Mock(spec=LLMManager)
+    ws_manager = Mock()
+    return db_session, llm_manager, ws_manager
+
+
+def _setup_llm_responses(llm_manager):
+    """Setup LLM responses for full optimization flow"""
+    responses = [
+        {"category": "optimization", "requires_analysis": True},
+        {"bottleneck": "memory", "utilization": 0.95},
+        {"recommendations": ["Use gradient checkpointing", "Reduce batch size"]}
+    ]
+    response_index = 0
+    async def mock_structured_llm(*args, **kwargs):
+        nonlocal response_index
+        result = responses[response_index]
+        response_index += 1
+        return result
+    llm_manager.ask_structured_llm = AsyncMock(side_effect=mock_structured_llm)
+    llm_manager.call_llm = AsyncMock(return_value={"content": "Optimization complete"})
+
+
+def _setup_websocket_manager(ws_manager):
+    """Setup websocket manager for testing"""
+    ws_manager.send_message = AsyncMock()
+
+
+def _create_mock_persistence():
+    """Create mock persistence service"""
+    mock_persistence = AsyncMock()
+    async def mock_save_agent_state(*args, **kwargs):
+        if len(args) == 2:
+            return (True, "test_id")
+        elif len(args) == 5:
+            return True
+        else:
+            return (True, "test_id")
+    mock_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
+    mock_persistence.load_agent_state = AsyncMock(return_value=None)
+    mock_persistence.get_thread_context = AsyncMock(return_value=None)
+    mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
+    return mock_persistence
+
+
+def _create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence):
+    """Create supervisor with all mocked dependencies"""
+    from app.agents.tool_dispatcher import ToolDispatcher
+    from app.agents.supervisor.execution_context import AgentExecutionResult
+    dispatcher = Mock(spec=ToolDispatcher)
+    dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
+    supervisor = SupervisorAgent(db_session, llm_manager, ws_manager, dispatcher)
+    supervisor.thread_id = str(uuid.uuid4())
+    supervisor.user_id = str(uuid.uuid4())
+    supervisor.state_persistence = mock_persistence
+    supervisor.engine.execute_pipeline = AsyncMock(return_value=[
+        AgentExecutionResult(success=True, state=None),
+        AgentExecutionResult(success=True, state=None),
+        AgentExecutionResult(success=True, state=None)
+    ])
+    return supervisor
+
+
+async def _execute_optimization_flow(supervisor):
+    """Execute the optimization flow and return result"""
+    return await supervisor.run(
+        "Optimize my LLM workload for better memory usage",
+        supervisor.thread_id,
+        supervisor.user_id,
+        str(uuid.uuid4())
+    )
+
+
+def _verify_optimization_flow(state, supervisor):
+    """Verify the optimization flow completed successfully"""
+    assert state is not None
+    assert supervisor.engine.execute_pipeline.called
+
+
 async def test_end_to_end_optimization_flow():
     """Test complete end-to-end optimization flow"""
     # Create full mock infrastructure

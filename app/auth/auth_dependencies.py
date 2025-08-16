@@ -22,19 +22,7 @@ async def get_current_user(
         logger.error("Token not found")
         return None
     try:
-        payload = security_service.decode_access_token(token)
-        if payload is None:
-            logger.error("Token payload is invalid")
-            return None
-        user_id = payload.get("sub")
-        if user_id is None:
-            logger.error("User ID not found in token payload")
-            return None
-        user = await security_service.get_user_by_id(db_session, user_id)
-        if user is None:
-            logger.error(f"User with ID {user_id} not found")
-            return None
-        return user
+        return await _process_user_token(token, db_session, security_service)
     except Exception as e:
         logger.error(f"Error decoding token or fetching user: {e}")
         return None

@@ -34,13 +34,17 @@ class ToolPermissionMiddleware:
         """Process request with tool permission checking"""
         start_time = time.time()
         try:
-            await self._handle_tool_permission_check(request)
-            response = await call_next(request)
-            await self._handle_tool_execution_logging(request, response, start_time)
-            return response
+            return await self._process_tool_request(request, call_next, start_time)
         except Exception as e:
             logger.error(f"Tool permission middleware error: {e}", exc_info=True)
             return await call_next(request)
+    
+    async def _process_tool_request(self, request: Request, call_next: Callable, start_time: float):
+        """Process tool request with permission checking and logging."""
+        await self._handle_tool_permission_check(request)
+        response = await call_next(request)
+        await self._handle_tool_execution_logging(request, response, start_time)
+        return response
     
     async def _handle_tool_permission_check(self, request: Request) -> None:
         """Handle tool permission checking for tool endpoints."""
@@ -54,12 +58,9 @@ class ToolPermissionMiddleware:
     async def _verify_tool_permissions(self, request: Request, tool_info: dict, user) -> None:
         """Verify tool permissions and set request state."""
         permission_result = await self._check_tool_permissions(tool_info, user, request)
-        
         if not permission_result.allowed:
             raise HTTPException(status_code=403, detail=self._permission_denied_response(permission_result))
-        
-        request.state.permission_check = permission_result
-        request.state.tool_info = tool_info
+        self._set_request_permission_state(request, permission_result, tool_info)
     
     async def _handle_tool_execution_logging(self, request: Request, response, start_time: float) -> None:
         """Handle tool execution logging if needed."""
@@ -83,19 +84,21 @@ class ToolPermissionMiddleware:
     async def _extract_tool_info(self, request: Request) -> Optional[dict]:
         """Extract tool information from request"""
         try:
-            # Try different extraction methods
             tool_info = await self._extract_from_post_body(request)
             if tool_info:
                 return tool_info
-            
-            return self._extract_from_url_path(request) or await self._extract_from_mcp_endpoint(request)
+            return self._extract_from_alternative_sources(request)
         except Exception as e:
             logger.error(f"Error extracting tool info: {e}")
             return None
     
+    async def _extract_from_alternative_sources(self, request: Request) -> Optional[dict]:
+        """Extract tool info from URL path or MCP endpoint."""
+        return self._extract_from_url_path(request) or await self._extract_from_mcp_endpoint(request)
+    
     async def _extract_from_post_body(self, request: Request) -> Optional[dict]:
         """Extract tool info from POST request body."""
-        if not (request.method == "POST" and hasattr(request, "_body")):
+        if not self._is_post_request_with_body(request):
             return None
         body = await request.body()
         if not body:
@@ -117,11 +120,7 @@ class ToolPermissionMiddleware:
         """Extract tool info from URL path."""
         path_parts = request.url.path.split("/")
         if len(path_parts) >= 4 and path_parts[2] == "tools":
-            return {
-                "name": path_parts[3],
-                "action": path_parts[4] if len(path_parts) > 4 else "execute",
-                "arguments": dict(request.query_params)
-            }
+            return self._build_tool_info_from_path(path_parts, request.query_params)
         return None
     
     async def _extract_from_mcp_endpoint(self, request: Request) -> Optional[dict]:
@@ -130,11 +129,7 @@ class ToolPermissionMiddleware:
             body = await request.body()
             if body:
                 data = json.loads(body)
-                return {
-                    "name": data.get("method", "unknown"),
-                    "arguments": data.get("params", {}),
-                    "action": "execute"
-                }
+                return self._build_mcp_tool_info(data)
         return None
     
     async def _get_user_from_request(self, request: Request) -> Optional[User]:
@@ -304,43 +299,49 @@ def create_tool_permission_dependency(
     ):
         """Dependency to check tool permissions"""
         try:
-            # Create execution context
-            context = ToolExecutionContext(
-                user_id=str(current_user.id),
-                tool_name=tool_name,
-                requested_action=action,
-                user_plan=getattr(current_user, 'plan_tier', 'free'),
-                user_roles=getattr(current_user, 'roles', []),
-                feature_flags=getattr(current_user, 'feature_flags', {}),
-                is_developer=getattr(current_user, 'is_developer', False),
-            )
-            
-            # Check permissions
+            context = _create_execution_context_for_dependency(current_user, tool_name, action)
             permission_result = await permission_service.check_tool_permission(context)
-            
-            if not permission_result.allowed:
-                raise HTTPException(
-                    status_code=403,
-                    detail={
-                        "error": "permission_denied",
-                        "message": permission_result.reason,
-                        "required_permissions": permission_result.required_permissions,
-                        "upgrade_path": permission_result.upgrade_path
-                    }
-                )
-            
+            _validate_permission_result(permission_result)
             return permission_result
-            
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Tool permission dependency error: {e}")
-            raise HTTPException(
-                status_code=500,
-                detail="Permission check failed"
-            )
+            _handle_dependency_error(e)
     
     return check_tool_permission
+
+def _create_execution_context_for_dependency(current_user: User, tool_name: str, action: str) -> ToolExecutionContext:
+    """Create execution context for dependency check."""
+    return ToolExecutionContext(
+        user_id=str(current_user.id),
+        tool_name=tool_name,
+        requested_action=action,
+        user_plan=getattr(current_user, 'plan_tier', 'free'),
+        user_roles=getattr(current_user, 'roles', []),
+        feature_flags=getattr(current_user, 'feature_flags', {}),
+        is_developer=getattr(current_user, 'is_developer', False),
+    )
+
+def _validate_permission_result(permission_result) -> None:
+    """Validate permission result and raise exception if denied."""
+    if not permission_result.allowed:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "permission_denied",
+                "message": permission_result.reason,
+                "required_permissions": permission_result.required_permissions,
+                "upgrade_path": permission_result.upgrade_path
+            }
+        )
+
+def _handle_dependency_error(error: Exception) -> None:
+    """Handle dependency error."""
+    logger.error(f"Tool permission dependency error: {error}")
+    raise HTTPException(
+        status_code=500,
+        detail="Permission check failed"
+    )
 
 
 # Convenience function to create the middleware

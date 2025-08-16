@@ -88,9 +88,9 @@ def validate_provider_key(provider: LLMProvider, api_key: Optional[str]) -> bool
     return True
 
 
-def get_provider_handler(provider: LLMProvider):
-    """Get provider-specific LLM creation handler."""
-    handlers = {
+def _get_provider_handlers_map():
+    """Get mapping of providers to their handler functions."""
+    return {
         LLMProvider.GOOGLE: create_google_llm,
         LLMProvider.OPENAI: create_openai_llm,
         LLMProvider.ANTHROPIC: create_anthropic_llm,
@@ -98,6 +98,10 @@ def get_provider_handler(provider: LLMProvider):
         LLMProvider.VERTEXAI: create_vertexai_llm,
         "mistral": create_mistral_llm
     }
+
+def get_provider_handler(provider: LLMProvider):
+    """Get provider-specific LLM creation handler."""
+    handlers = _get_provider_handlers_map()
     return handlers.get(provider)
 
 

@@ -255,7 +255,7 @@ class TestActionsSubAgent:
         await actions_agent.execute(state, "test_run_id", False)
         
         assert state.action_plan_result != None
-        assert len(state.action_plan_result["action_plan"]) == 3
+        assert len(state.action_plan_result.actions) == 3
     async def test_action_priority_ordering(self):
         """Test 14: Verify Actions are prioritized correctly"""
         mock_llm = Mock(spec=LLMManager)
@@ -272,7 +272,7 @@ class TestActionsSubAgent:
         
         await actions_agent.execute(state, "test_run_id", False)
         
-        assert state.action_plan_result["action_plan"][0]["priority"] == "high"
+        assert state.action_plan_result.actions[0]["priority"] == "high"
 
 
 class TestReportingSubAgent:

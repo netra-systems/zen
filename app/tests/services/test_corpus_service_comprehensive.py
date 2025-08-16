@@ -411,7 +411,7 @@ class TestErrorHandling(SharedTestErrorHandling):
     async def test_database_connection_failure(self, corpus_service):
         """Test handling of database connection failures."""
         corpus_service.db.commit = MagicMock(side_effect=Exception("Connection lost"))
-        with pytest.raises(Exception, match="Connection lost"):
+        with pytest.raises(NetraException, match="Database connection failure during corpus creation"):
             await corpus_service.create_corpus(
                 corpus_service.db, CorpusCreate(name="Test", description="Test"), "user123"
             )

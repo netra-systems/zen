@@ -336,7 +336,7 @@ def create_mixed_content_batch():
 
 def setup_slow_validation_mock():
     """Setup mock for slow validation testing"""
-    async def slow_validate(*args, **kwargs):
+    async def slow_validate(content: str, content_type=None, context=None):
         await asyncio.sleep(0.1)
         return ValidationResult(
             passed=True,

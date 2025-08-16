@@ -85,19 +85,22 @@ export const handleToolExecutingEnhanced = (
   set: (partial: Partial<UnifiedChatState>) => void
 ): void => {
   const { toolName, timestamp } = extractToolData(event.payload as any);
-  if (!state.fastLayerData) return;
+  const currentFastLayer = state.fastLayerData || {
+    agentName: '', runId: '', timestamp: Date.now(),
+    activeTools: [], toolStatuses: []
+  };
   
   const toolTracker = getGlobalToolTracker();
   toolTracker.startTool(toolName);
   
   const newToolStatus = createToolStatus(toolName, timestamp);
   const updatedStatuses = updateToolStatuses(
-    state.fastLayerData.toolStatuses || [], 
+    currentFastLayer.toolStatuses || [], 
     newToolStatus
   );
   
   updateFastLayerWithEnhancedTools(
-    state.fastLayerData, 
+    currentFastLayer, 
     updatedStatuses, 
     timestamp, 
     set
@@ -131,18 +134,21 @@ export const handleToolCompletedEnhanced = (
   set: (partial: Partial<UnifiedChatState>) => void
 ): void => {
   const toolName = extractCompletedToolName(event.payload as any);
-  if (!state.fastLayerData) return;
+  const currentFastLayer = state.fastLayerData || {
+    agentName: '', runId: '', timestamp: Date.now(),
+    activeTools: [], toolStatuses: []
+  };
   
   const toolTracker = getGlobalToolTracker();
   toolTracker.completeTool(toolName);
   
   const updatedStatuses = removeToolFromStatuses(
-    state.fastLayerData.toolStatuses || [], 
+    currentFastLayer.toolStatuses || [], 
     toolName
   );
   
   updateFastLayerWithEnhancedTools(
-    state.fastLayerData, 
+    currentFastLayer, 
     updatedStatuses, 
     Date.now(), 
     set

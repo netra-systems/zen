@@ -54,11 +54,21 @@ class AgentMetadata(BaseModel):
         if v is None:
             return None
         if isinstance(v, int):
-            return max(0, min(10, v))  # Clamp to 0-10 range
-        if isinstance(v, str):
+            return cls._clamp_priority(v)
+        return cls._parse_string_priority(v)
+    
+    @classmethod
+    def _clamp_priority(cls, value: int) -> int:
+        """Clamp integer priority to valid range."""
+        return max(0, min(10, value))
+    
+    @classmethod
+    def _parse_string_priority(cls, value: Union[str, Any]) -> int:
+        """Parse string priority to integer."""
+        if isinstance(value, str):
             priority_map = {'low': 3, 'medium': 5, 'high': 8, 'urgent': 10}
-            return priority_map.get(v.lower(), 5)  # Default to medium if unknown
-        return 5  # Default fallback
+            return priority_map.get(value.lower(), 5)
+        return 5
     
     def update_timestamp(self) -> 'AgentMetadata':
         """Update the last updated timestamp."""
@@ -201,18 +211,24 @@ class DeepAgentState(BaseModel):
         return {
             'triage_result': other_state.triage_result or self.triage_result,
             'data_result': other_state.data_result or self.data_result,
-            'optimizations_result': other_state.optimizations_result or self.optimizations_result,
-            'action_plan_result': other_state.action_plan_result or self.action_plan_result
+            'optimizations_result': self._merge_field('optimizations_result', other_state),
+            'action_plan_result': self._merge_field('action_plan_result', other_state)
         }
     
     def _get_data_field_mappings(self, other_state: 'DeepAgentState') -> Dict[str, Any]:
         """Get data field mappings for merge operation."""
         return {
-            'report_result': other_state.report_result or self.report_result,
-            'synthetic_data_result': other_state.synthetic_data_result or self.synthetic_data_result,
-            'supply_research_result': other_state.supply_research_result or self.supply_research_result,
-            'final_report': other_state.final_report or self.final_report
+            'report_result': self._merge_field('report_result', other_state),
+            'synthetic_data_result': self._merge_field('synthetic_data_result', other_state),
+            'supply_research_result': self._merge_field('supply_research_result', other_state),
+            'final_report': self._merge_field('final_report', other_state)
         }
+    
+    def _merge_field(self, field_name: str, other_state: 'DeepAgentState') -> Any:
+        """Merge a single field from other state."""
+        other_value = getattr(other_state, field_name, None)
+        self_value = getattr(self, field_name, None)
+        return other_value or self_value
     
     def _prepare_merge_components(self, other_state: 'DeepAgentState') -> tuple:
         """Prepare components needed for merge operation."""

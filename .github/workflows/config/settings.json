@@ -1,6 +1,6 @@
 {
   "test_runner": {
-    "default_level": "unit",
+    "default_level": "integration",
     "timeout_minutes": 30,
     "retry_failed": true,
     "max_retries": 2,

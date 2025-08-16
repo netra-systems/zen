@@ -35,6 +35,8 @@ class MockRepository(BaseRepository[MockDatabaseModel]):
             db.add(entity)
             await db.flush()  # Use flush instead of commit to match BaseRepository
             return entity
+        except DisconnectionError:
+            raise  # Let DisconnectionError propagate
         except (IntegrityError, SQLAlchemyError):
             await self._handle_create_error(db)
             return None
@@ -85,7 +87,8 @@ class TransactionTestManager:
     def simulate_deadlock(self, session: AsyncSession) -> None:
         """Simulate database deadlock"""
         self.deadlock_simulations += 1
-        raise SQLAlchemyError("deadlock detected")
+        # Configure session to raise deadlock error when used
+        session.flush.side_effect = SQLAlchemyError("deadlock detected")
     
     def simulate_connection_loss(self, session: AsyncSession) -> None:
         """Simulate connection loss"""

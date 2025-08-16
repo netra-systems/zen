@@ -86,7 +86,12 @@ def validate_uuid_format(value: str, field_name: str) -> str:
         uuid.UUID(value)
         return value
     except ValueError:
-        raise ValueError(f'{field_name} must be valid UUID format')
+        _raise_uuid_error(field_name)
+
+
+def _raise_uuid_error(field_name: str) -> None:
+    """Raise UUID validation error."""
+    raise ValueError(f'{field_name} must be valid UUID format')
 
 
 def sanitize_input_string(value: str, max_length: Optional[int] = None) -> str:
@@ -112,7 +117,12 @@ def validate_json_serializable(value: Any, field_name: str) -> Any:
         json.dumps(value)
         return value
     except (TypeError, ValueError):
-        raise ValueError(f'{field_name} must be JSON serializable')
+        _raise_json_error(field_name)
+
+
+def _raise_json_error(field_name: str) -> None:
+    """Raise JSON serialization error."""
+    raise ValueError(f'{field_name} must be JSON serializable')
 
 
 def create_field_validator(validator_func, **kwargs):

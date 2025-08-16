@@ -12,7 +12,7 @@ from .enhanced_auth_core import (
     AuthenticationResult, AuthenticationAttempt, SecurityMetrics, SecurityConfiguration
 )
 from .enhanced_auth_validator import AuthenticationValidator
-from .enhanced_auth_sessions import AuthSessionManager
+from .enhanced_auth_sessions_modular import AuthSessionManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -41,21 +41,26 @@ class EnhancedAuthSecurity:
     def _execute_authentication_flow(self, user_id: str, password: str, ip_address: str,
                                    user_agent: str, additional_factors: Optional[Dict]) -> Tuple[AuthenticationResult, Optional[str]]:
         """Execute the complete authentication flow."""
-        # Pre-authentication security checks
         preauth_result = self._perform_preauth_checks(user_id, ip_address, user_agent)
         if preauth_result != AuthenticationResult.SUCCESS:
             return preauth_result, None
-        
-        # Validate credentials
+        credentials_result = self._check_credentials_flow(user_id, password, ip_address, user_agent)
+        if credentials_result != AuthenticationResult.SUCCESS:
+            return credentials_result, None
+        return self._complete_authentication_flow(user_id, ip_address, user_agent, additional_factors)
+    
+    def _check_credentials_flow(self, user_id: str, password: str, ip_address: str, user_agent: str) -> AuthenticationResult:
+        """Check user credentials in the flow."""
         if not self._validate_user_credentials(user_id, password, ip_address, user_agent):
-            return AuthenticationResult.FAILED, None
-        
-        # Handle MFA if required
+            return AuthenticationResult.FAILED
+        return AuthenticationResult.SUCCESS
+    
+    def _complete_authentication_flow(self, user_id: str, ip_address: str, user_agent: str, 
+                                    additional_factors: Optional[Dict]) -> Tuple[AuthenticationResult, Optional[str]]:
+        """Complete the authentication flow with MFA and session creation."""
         mfa_result = self._handle_mfa_validation(user_id, ip_address, user_agent, additional_factors)
         if mfa_result != AuthenticationResult.SUCCESS:
             return mfa_result, None
-        
-        # Create session and finalize
         return self._finalize_successful_authentication(user_id, ip_address, user_agent)
     
     def _perform_preauth_checks(self, user_id: str, ip_address: str, user_agent: str) -> AuthenticationResult:
@@ -109,8 +114,10 @@ class EnhancedAuthSecurity:
         """Handle failed authentication attempt."""
         self._log_authentication_attempt(user_id, ip_address, user_agent, AuthenticationResult.FAILED)
         self.metrics.failed_login_attempts += 1
-        
-        # Check if user is approaching max failed attempts
+        self._check_failure_threshold(user_id)
+    
+    def _check_failure_threshold(self, user_id: str) -> None:
+        """Check if user is approaching max failed attempts."""
         failed_attempts = self.validator._get_failed_attempts_for_user(user_id)
         if len(failed_attempts) >= self.config.max_failed_attempts - 1:
             logger.warning(f"User {user_id} approaching max failed attempts")
@@ -123,19 +130,25 @@ class EnhancedAuthSecurity:
     def _log_authentication_attempt(self, user_id: str, ip_address: str, user_agent: str, 
                                    result: AuthenticationResult, failure_reason: Optional[str] = None):
         """Log authentication attempt."""
-        attempt = AuthenticationAttempt(
-            user_id=user_id,
-            ip_address=ip_address,
-            user_agent=user_agent,
-            timestamp=datetime.now(timezone.utc),
-            result=result,
-            failure_reason=failure_reason
+        attempt = self._create_auth_attempt(user_id, ip_address, user_agent, result, failure_reason)
+        self._store_auth_attempt(attempt)
+        self._cleanup_old_attempts()
+    
+    def _create_auth_attempt(self, user_id: str, ip_address: str, user_agent: str,
+                           result: AuthenticationResult, failure_reason: Optional[str]) -> AuthenticationAttempt:
+        """Create authentication attempt object."""
+        return AuthenticationAttempt(
+            user_id=user_id, ip_address=ip_address, user_agent=user_agent,
+            timestamp=datetime.now(timezone.utc), result=result, failure_reason=failure_reason
         )
-        
+    
+    def _store_auth_attempt(self, attempt: AuthenticationAttempt) -> None:
+        """Store authentication attempt in logs."""
         self.attempts_log.append(attempt)
         self.validator.attempts_log.append(attempt)
-        
-        # Keep only last 10000 attempts
+    
+    def _cleanup_old_attempts(self) -> None:
+        """Keep only last 10000 attempts."""
         if len(self.attempts_log) > 10000:
             self.attempts_log = self.attempts_log[-10000:]
     

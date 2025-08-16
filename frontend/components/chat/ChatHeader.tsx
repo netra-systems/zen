@@ -1,11 +1,14 @@
 import React from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useMCPTools } from '@/hooks/useMCPTools';
 import { Bot, Zap, Activity, Shield, Database, Cpu, Brain } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectionStatusIndicator } from './ConnectionStatusIndicator';
+import { MCPServerStatus } from './MCPServerStatus';
 
 export const ChatHeader: React.FC = () => {
   const { subAgentName, subAgentStatus, isProcessing } = useUnifiedChatStore();
+  const { servers, executions } = useMCPTools();
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -89,6 +92,16 @@ export const ChatHeader: React.FC = () => {
           <div className="flex items-center space-x-4">
             {/* Connection Status Indicator */}
             <ConnectionStatusIndicator className="shrink-0" />
+            
+            {/* MCP Server Status */}
+            {servers.length > 0 && (
+              <MCPServerStatus 
+                servers={servers}
+                connections={[]}
+                compact={true}
+                className="shrink-0"
+              />
+            )}
             
             <AnimatePresence>
               {subAgentStatus && (

@@ -202,7 +202,12 @@ class TestSuccessfulExecution:
         
         await actions_agent.execute(sample_state_with_prerequisites, "test-run-id", True)
         
-        assert sample_state_with_prerequisites.action_plan_result == expected_result
+        result = sample_state_with_prerequisites.action_plan_result
+        assert result is not None
+        # Compare the key fields that should match the expected result
+        assert result.action_plan_summary == expected_result["action_plan_summary"]
+        assert result.total_estimated_time == expected_result["total_estimated_time"]
+        assert result.actions == expected_result["actions"]
         actions_agent._send_update.assert_called()
 
     @patch('app.agents.actions_to_meet_goals_sub_agent.extract_json_from_response')
@@ -220,7 +225,12 @@ class TestSuccessfulExecution:
         
         await actions_agent.execute(sample_state_with_prerequisites, "test-run-id", False)
         
-        assert sample_state_with_prerequisites.action_plan_result == expected_result
+        result = sample_state_with_prerequisites.action_plan_result
+        assert result is not None
+        # Compare the key fields that should match the expected result
+        assert result.action_plan_summary == expected_result["action_plan_summary"]
+        assert result.total_estimated_time == expected_result["total_estimated_time"]
+        assert result.actions == expected_result["actions"]
 
 
 class TestJSONExtractionAndFallbacks:
@@ -252,8 +262,8 @@ class TestJSONExtractionAndFallbacks:
         
         result = sample_state_with_prerequisites.action_plan_result
         assert result is not None
-        assert result["partial_extraction"] is True
-        assert "action_plan_summary" in result["extracted_fields"]
+        assert result.partial_extraction is True
+        assert "action_plan_summary" in result.extracted_fields
 
     @patch('app.agents.actions_to_meet_goals_sub_agent.extract_json_from_response')
     @patch('app.agents.actions_to_meet_goals_sub_agent.extract_partial_json')
@@ -275,8 +285,8 @@ class TestJSONExtractionAndFallbacks:
         
         result = sample_state_with_prerequisites.action_plan_result
         assert result is not None
-        assert result["error"] == "JSON extraction failed - using default structure"
-        assert result["action_plan_summary"] == "Failed to generate action plan from LLM response"
+        assert result.error == "JSON extraction failed - using default structure"
+        assert result.action_plan_summary == "Failed to generate action plan from LLM response"
 
     @patch('app.agents.actions_to_meet_goals_sub_agent.extract_json_from_response')
     @patch('app.agents.actions_to_meet_goals_sub_agent.extract_partial_json')
@@ -298,8 +308,8 @@ class TestJSONExtractionAndFallbacks:
         await actions_agent.execute(sample_state_with_prerequisites, "test-run-id", False)
         
         result = sample_state_with_prerequisites.action_plan_result
-        assert result["partial_extraction"] is True
-        assert len(result["extracted_fields"]) == 1
+        assert result.partial_extraction is True
+        assert len(result.extracted_fields) == 1
 
 
 class TestPromptSizeHandling:
@@ -352,7 +362,7 @@ class TestDefaultStructures:
     """Test default structure generation"""
     
     def test_get_base_action_plan_structure(self, actions_agent):
-        structure = actions_agent._get_base_action_plan_structure()
+        structure = actions_agent._get_base_action_plan_data()
         
         # Verify all required fields are present
         required_fields = [
@@ -372,9 +382,9 @@ class TestDefaultStructures:
         
         result = actions_agent._build_action_plan_from_partial(partial_data)
         
-        assert result["partial_extraction"] is True
-        assert result["extracted_fields"] == list(partial_data.keys())
-        assert result["action_plan_summary"] == "Partial summary"
+        assert result.partial_extraction is True
+        assert result.extracted_fields == list(partial_data.keys())
+        assert result.action_plan_summary == "Partial summary"
 
     def test_get_default_post_implementation(self, actions_agent):
         post_impl = actions_agent._get_default_post_implementation()
@@ -395,8 +405,8 @@ class TestDefaultStructures:
     def test_get_default_action_plan(self, actions_agent):
         default_plan = actions_agent._get_default_action_plan()
         
-        assert default_plan["action_plan_summary"] == "Failed to generate action plan from LLM response"
-        assert default_plan["total_estimated_time"] == "Unknown"
+        assert default_plan.action_plan_summary == "Failed to generate action plan from LLM response"
+        assert default_plan.total_estimated_time == "Unknown"
 
 
 class TestFallbackStrategy:
@@ -430,9 +440,10 @@ class TestFallbackStrategy:
         # Access the fallback function indirectly by triggering it through execute_with_fallback
         async def trigger_fallback():
             # This simulates what happens when the primary function fails
+            default_plan = actions_agent._get_default_action_plan()
             fallback_result_local = actions_agent.fallback_strategy.create_default_fallback_result(
                 "action_plan_generation",
-                **actions_agent._get_default_action_plan()
+                **default_plan.model_dump()
             )
             state.action_plan_result = fallback_result_local
             return fallback_result_local

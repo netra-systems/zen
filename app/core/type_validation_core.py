@@ -138,14 +138,18 @@ def _validate_single_backend_schema(
     """Validate a single backend schema against frontend types."""
     if schema_name not in frontend_types:
         return [_create_missing_schema_mismatch(schema_name, "frontend")]
-    
+    return _validate_existing_frontend_schema(schema_name, backend_schema, frontend_types, compat_checker)
+
+
+def _validate_existing_frontend_schema(
+    schema_name: str, backend_schema: Dict[str, Any],
+    frontend_types: Dict[str, Dict[str, Any]], compat_checker: TypeCompatibilityChecker
+) -> List[TypeMismatch]:
+    """Validate schema when frontend type exists."""
     frontend_type = frontend_types[schema_name]
     if frontend_type.get('type') != 'interface':
         return []
-    
-    return _validate_schema_fields(
-        schema_name, backend_schema, frontend_type, compat_checker
-    )
+    return _validate_schema_fields(schema_name, backend_schema, frontend_type, compat_checker)
 
 
 def _perform_all_field_checks(
@@ -153,15 +157,16 @@ def _perform_all_field_checks(
     frontend_fields: Dict[str, Any], compat_checker: TypeCompatibilityChecker
 ) -> List[TypeMismatch]:
     """Perform all field validation checks."""
-    missing_checks = _check_missing_frontend_fields(
-        schema_name, backend_properties, frontend_fields
-    )
-    compat_checks = _check_field_type_compatibility(
-        schema_name, backend_properties, frontend_fields, compat_checker
-    )
-    extra_checks = _check_extra_frontend_fields(
-        schema_name, backend_properties, frontend_fields
-    )
+    missing_checks = _check_missing_frontend_fields(schema_name, backend_properties, frontend_fields)
+    compat_checks = _check_field_type_compatibility(schema_name, backend_properties, frontend_fields, compat_checker)
+    extra_checks = _check_extra_frontend_fields(schema_name, backend_properties, frontend_fields)
+    return _combine_validation_results(missing_checks, compat_checks, extra_checks)
+
+
+def _combine_validation_results(
+    missing_checks: List[TypeMismatch], compat_checks: List[TypeMismatch], extra_checks: List[TypeMismatch]
+) -> List[TypeMismatch]:
+    """Combine all validation check results."""
     return missing_checks + compat_checks + extra_checks
 
 
@@ -172,12 +177,14 @@ def _create_missing_field_mismatch(
     field_path = f"{schema_name}.{field_name}"
     backend_type = field_schema.get('type', 'unknown')
     message = f"Field {field_name} exists in backend but not in {missing_in}"
+    return _build_missing_field_type_mismatch(field_path, backend_type, message)
+
+
+def _build_missing_field_type_mismatch(field_path: str, backend_type: str, message: str) -> TypeMismatch:
+    """Build TypeMismatch object for missing field."""
     return TypeMismatch(
-        field_path=field_path,
-        backend_type=backend_type,
-        frontend_type="missing",
-        severity=TypeMismatchSeverity.WARNING,
-        message=message
+        field_path=field_path, backend_type=backend_type, frontend_type="missing",
+        severity=TypeMismatchSeverity.WARNING, message=message
     )
 
 
@@ -188,11 +195,14 @@ def _check_single_field_compatibility(
     """Check compatibility for a single field."""
     field_path = f"{schema_name}.{field_name}"
     backend_field_type = get_backend_field_type(field_schema)
+    frontend_field_type = _extract_frontend_field_type(frontend_fields, field_name)
+    return compat_checker.check_field_compatibility(backend_field_type, frontend_field_type, field_path)
+
+
+def _extract_frontend_field_type(frontend_fields: Dict[str, Any], field_name: str) -> str:
+    """Extract frontend field type from fields dictionary."""
     frontend_field = frontend_fields[field_name]
-    frontend_field_type = frontend_field.get('type', 'unknown')
-    return compat_checker.check_field_compatibility(
-        backend_field_type, frontend_field_type, field_path
-    )
+    return frontend_field.get('type', 'unknown')
 
 
 def _create_extra_field_mismatch(
@@ -202,12 +212,14 @@ def _create_extra_field_mismatch(
     field_path = f"{schema_name}.{field_name}"
     frontend_type = frontend_field.get('type', 'unknown')
     message = f"Field {field_name} exists in frontend but not in backend"
+    return _build_extra_field_type_mismatch(field_path, frontend_type, message)
+
+
+def _build_extra_field_type_mismatch(field_path: str, frontend_type: str, message: str) -> TypeMismatch:
+    """Build TypeMismatch object for extra field."""
     return TypeMismatch(
-        field_path=field_path,
-        backend_type="missing",
-        frontend_type=frontend_type,
-        severity=TypeMismatchSeverity.INFO,
-        message=message
+        field_path=field_path, backend_type="missing", frontend_type=frontend_type,
+        severity=TypeMismatchSeverity.INFO, message=message
     )
 
 
@@ -226,24 +238,26 @@ def _perform_validation_checks(
 def _create_frontend_missing_mismatch(schema_name: str) -> TypeMismatch:
     """Create mismatch for schema missing in frontend."""
     message = f"Schema {schema_name} exists in backend but not in frontend"
+    return _build_schema_missing_type_mismatch(
+        schema_name, "schema", "missing", TypeMismatchSeverity.ERROR, message
+    )
+
+
+def _build_schema_missing_type_mismatch(
+    field_path: str, backend_type: str, frontend_type: str, severity: TypeMismatchSeverity, message: str
+) -> TypeMismatch:
+    """Build TypeMismatch object for missing schema."""
     return TypeMismatch(
-        field_path=schema_name,
-        backend_type="schema",
-        frontend_type="missing",
-        severity=TypeMismatchSeverity.ERROR,
-        message=message
+        field_path=field_path, backend_type=backend_type, frontend_type=frontend_type,
+        severity=severity, message=message
     )
 
 
 def _create_backend_missing_mismatch(schema_name: str) -> TypeMismatch:
     """Create mismatch for schema missing in backend."""
     message = f"Schema {schema_name} exists in frontend but not in backend"
-    return TypeMismatch(
-        field_path=schema_name,
-        backend_type="missing",
-        frontend_type="schema",
-        severity=TypeMismatchSeverity.INFO,
-        message=message
+    return _build_schema_missing_type_mismatch(
+        schema_name, "missing", "schema", TypeMismatchSeverity.INFO, message
     )
 
 

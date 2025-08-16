@@ -12,85 +12,94 @@ import zlib
 import random
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock
-async def test_websocket_compression():
-    """Test WebSocket compression with permessage-deflate extension"""
-    
-    # Test data that compresses well
-    compressible_data = json.dumps({
+def _create_compressible_test_data() -> str:
+    """Create test data that compresses well"""
+    return json.dumps({
         'repeated_field': 'A' * 1000,
         'array': [i % 10 for i in range(1000)],
         'nested': {'level1': {'level2': {'level3': 'value' * 100}}}
     })
-    
-    # Test compression ratios
-    original_size = len(compressible_data.encode())
-    compressed = zlib.compress(compressible_data.encode())
+
+
+def _verify_compression_ratio(data: str) -> None:
+    """Verify compression achieves expected ratio"""
+    original_size = len(data.encode())
+    compressed = zlib.compress(data.encode())
     compressed_size = len(compressed)
     compression_ratio = original_size / compressed_size
-    
     assert compression_ratio > 5, f"Should achieve >5x compression, got {compression_ratio:.2f}x"
-    
-    # Simulate WebSocket with compression
-    class CompressedWebSocket:
-        def __init__(self, enable_compression=True):
-            self.enable_compression = enable_compression
-            self.bytes_sent = 0
-            self.bytes_sent_raw = 0
-            
-        async def send(self, data: str):
-            raw_bytes = data.encode()
-            self.bytes_sent_raw += len(raw_bytes)
-            
-            if self.enable_compression:
-                compressed = zlib.compress(raw_bytes)
-                self.bytes_sent += len(compressed)
-                return compressed
-            else:
-                self.bytes_sent += len(raw_bytes)
-                return raw_bytes
-        
-        async def recv(self, data: bytes) -> str:
-            if self.enable_compression:
-                decompressed = zlib.decompress(data)
-                return decompressed.decode()
-            else:
-                return data.decode()
-    
-    # Test with and without compression
-    ws_compressed = CompressedWebSocket(enable_compression=True)
-    ws_uncompressed = CompressedWebSocket(enable_compression=False)
-    
-    # Send multiple messages
-    messages = [compressible_data] * 100
-    
+
+
+class CompressedWebSocket:
+    def __init__(self, enable_compression=True):
+        self.enable_compression = enable_compression
+        self.bytes_sent = 0
+        self.bytes_sent_raw = 0
+
+    async def send(self, data: str):
+        raw_bytes = data.encode()
+        self.bytes_sent_raw += len(raw_bytes)
+        if self.enable_compression:
+            compressed = zlib.compress(raw_bytes)
+            self.bytes_sent += len(compressed)
+            return compressed
+        else:
+            self.bytes_sent += len(raw_bytes)
+            return raw_bytes
+
+    async def recv(self, data: bytes) -> str:
+        if self.enable_compression:
+            decompressed = zlib.decompress(data)
+            return decompressed.decode()
+        else:
+            return data.decode()
+
+
+async def _send_test_messages(ws_compressed: CompressedWebSocket, ws_uncompressed: CompressedWebSocket, data: str) -> None:
+    """Send test messages to both compressed and uncompressed websockets"""
+    messages = [data] * 100
     for msg in messages:
         await ws_compressed.send(msg)
         await ws_uncompressed.send(msg)
-    
-    # Compare bandwidth usage
+
+
+def _verify_bandwidth_savings(ws_compressed: CompressedWebSocket, ws_uncompressed: CompressedWebSocket) -> None:
+    """Verify bandwidth savings meet expectations"""
     compression_savings = 1 - (ws_compressed.bytes_sent / ws_uncompressed.bytes_sent)
     assert compression_savings > 0.7, f"Should save >70% bandwidth, saved {compression_savings:.1%}"
-    
-    # Test compression with different data types
-    test_payloads = [
-        # Already compressed data (shouldn't compress well)
+
+
+def _create_test_payloads() -> List[bytes]:
+    """Create different types of test payloads"""
+    return [
         bytes(random.getrandbits(8) for _ in range(1000)),
-        # Highly repetitive data (should compress very well)
         b'0' * 10000,
-        # JSON with repeated structure
         json.dumps([{'id': i, 'type': 'event', 'status': 'active'} for i in range(100)]).encode(),
     ]
-    
+
+
+def _verify_payload_compression(payload: bytes) -> None:
+    """Verify payload compression ratios"""
+    original = len(payload)
+    compressed = len(zlib.compress(payload))
+    ratio = original / compressed if compressed > 0 else float('inf')
+    if payload == b'0' * 10000:
+        assert ratio > 100, "Highly repetitive data should compress >100x"
+    elif isinstance(payload, bytes) and len(set(payload)) > 200:
+        assert ratio < 1.5, "Random data shouldn't compress well"
+
+
+async def test_websocket_compression():
+    """Test WebSocket compression with permessage-deflate extension"""
+    compressible_data = _create_compressible_test_data()
+    _verify_compression_ratio(compressible_data)
+    ws_compressed = CompressedWebSocket(enable_compression=True)
+    ws_uncompressed = CompressedWebSocket(enable_compression=False)
+    await _send_test_messages(ws_compressed, ws_uncompressed, compressible_data)
+    _verify_bandwidth_savings(ws_compressed, ws_uncompressed)
+    test_payloads = _create_test_payloads()
     for payload in test_payloads:
-        original = len(payload)
-        compressed = len(zlib.compress(payload))
-        ratio = original / compressed if compressed > 0 else float('inf')
-        
-        # Different expectations based on data type
-        if payload == b'0' * 10000:
-            assert ratio > 100, "Highly repetitive data should compress >100x"
-        elif isinstance(payload, bytes) and len(set(payload)) > 200:
-            assert ratio < 1.5, "Random data shouldn't compress well"
+        _verify_payload_compression(payload)
 
 
 class AuthenticatedWebSocket:

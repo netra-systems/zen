@@ -190,7 +190,7 @@ class TestConfigManager:
         """Test ConfigManager initialization."""
         manager = ConfigManager()
         assert manager._config == None
-        assert manager._secret_manager != None
+        assert manager._secrets_manager != None
         assert manager._validator != None
     
     @patch.dict(os.environ, {'ENVIRONMENT': 'development'}, clear=False)
@@ -329,7 +329,7 @@ class TestConfigurationIntegration:
             def mock_load_secrets(config):
                 # Load secrets from environment
                 try:
-                    secrets = manager._secret_manager.load_secrets()
+                    secrets = manager._secrets_manager.load_secrets()
                     manager._apply_secrets_to_config(config, secrets)
                 except Exception:
                     pass

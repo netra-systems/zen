@@ -15,10 +15,13 @@ class WorkloadCategory(Enum):
     CUSTOM_DOMAIN = "custom_domain"
 
 
-class GenerationStatus(Enum):
-    """Status of a generation job"""
+class GenerationJobStatus(Enum):
+    """Status of a generation job - renamed to avoid conflict with GenerationStatus model"""
     INITIATED = "initiated"
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
+
+# Backward compatibility alias - will be removed after import updates
+GenerationStatus = GenerationJobStatus

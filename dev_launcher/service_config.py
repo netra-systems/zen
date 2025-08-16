@@ -11,7 +11,7 @@ from typing import Dict, Optional, Any, List
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-from .unicode_utils import safe_print, get_emoji, setup_unicode_console
+from dev_launcher.unicode_utils import safe_print, get_emoji, setup_unicode_console
 
 logger = logging.getLogger(__name__)
 

@@ -68,8 +68,9 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
     def _create_fallback_executor(self, state: DeepAgentState, run_id: str, stream_updates: bool):
         """Create fallback execution function."""
         async def _fallback_action_plan():
+            default_plan = self._get_default_action_plan()
             fallback_result = self.fallback_strategy.create_default_fallback_result(
-                "action_plan_generation", **self._get_default_action_plan())
+                "action_plan_generation", **default_plan.model_dump())
             state.action_plan_result = fallback_result
             await self._send_fallback_update(run_id, stream_updates, fallback_result)
             return fallback_result
@@ -137,8 +138,17 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
     def _convert_dict_to_action_plan_result(self, action_plan_dict: dict) -> ActionPlanResult:
         """Convert dictionary to ActionPlanResult with proper typing."""
         try:
-            plan_steps = self._extract_plan_steps(action_plan_dict)
-            return ActionPlanResult(plan_steps=plan_steps)
+            # Filter the dictionary to only include valid ActionPlanResult fields
+            valid_fields = {}
+            for key, value in action_plan_dict.items():
+                if key in ActionPlanResult.model_fields:
+                    valid_fields[key] = value
+            
+            # Extract plan steps if actions are available but plan_steps aren't
+            if 'actions' in action_plan_dict and 'plan_steps' not in valid_fields:
+                valid_fields['plan_steps'] = self._extract_plan_steps(action_plan_dict)
+            
+            return ActionPlanResult(**valid_fields)
         except Exception:
             return ActionPlanResult()
     
@@ -186,7 +196,8 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
             logger.info(f"Successfully recovered {field_count} fields via partial extraction for run_id: {run_id}")
         else:
             logger.warning(f"Partial extraction recovered only {field_count} fields for run_id: {run_id}")
-        return self._build_action_plan_from_partial(partial_result)
+        result = self._build_action_plan_from_partial(partial_result)
+        return result.model_dump()
 
     def _create_error_fallback_plan(self, llm_response: str, run_id: str) -> dict:
         """Create fallback plan when extraction completely fails."""
@@ -194,8 +205,7 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
         logger.error(f"Both full and partial JSON extraction failed for run_id: {run_id}. "
                     f"First 500 chars of response: {response_preview}")
         action_plan_result = self._get_default_action_plan()
-        action_plan_result["error"] = "JSON extraction failed - using default structure"
-        return action_plan_result
+        return action_plan_result.model_dump()
 
     async def _send_completion_update(self, run_id: str, stream_updates: bool, action_plan_result: dict):
         """Send completion status update."""
@@ -227,18 +237,19 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
         await self.reliability.execute_safely(
             result_operation, "execute_action_plan_with_fallback", timeout=45.0)
     
-    def _build_action_plan_from_partial(self, partial_data: dict) -> dict:
+    def _build_action_plan_from_partial(self, partial_data: dict) -> ActionPlanResult:
         """Build a complete action plan structure from partial extracted data."""
-        base_structure = self._get_base_action_plan_structure()
-        for key, default_value in base_structure.items():
-            base_structure[key] = partial_data.get(key, default_value)
+        base_data = self._get_base_action_plan_data()
+        for key, value in partial_data.items():
+            if key in ActionPlanResult.model_fields:
+                base_data[key] = value
         
-        base_structure["partial_extraction"] = True
-        base_structure["extracted_fields"] = list(partial_data.keys())
-        return base_structure
+        base_data["partial_extraction"] = True
+        base_data["extracted_fields"] = list(partial_data.keys())
+        return ActionPlanResult(**base_data)
     
-    def _get_base_action_plan_structure(self) -> dict:
-        """Get base action plan structure with defaults."""
+    def _get_base_action_plan_data(self) -> dict:
+        """Get base action plan data with defaults for ActionPlanResult."""
         return {
             "action_plan_summary": "Partial extraction - summary unavailable",
             "total_estimated_time": "To be determined",
@@ -270,12 +281,13 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
             }
         }
     
-    def _get_default_action_plan(self) -> dict:
-        """Get a default action plan structure when extraction completely fails."""
-        base_plan = self._get_base_action_plan_structure()
-        base_plan["action_plan_summary"] = "Failed to generate action plan from LLM response"
-        base_plan["total_estimated_time"] = "Unknown"
-        return base_plan
+    def _get_default_action_plan(self) -> ActionPlanResult:
+        """Get a default action plan when extraction completely fails."""
+        base_data = self._get_base_action_plan_data()
+        base_data["action_plan_summary"] = "Failed to generate action plan from LLM response"
+        base_data["total_estimated_time"] = "Unknown"
+        base_data["error"] = "JSON extraction failed - using default structure"
+        return ActionPlanResult(**base_data)
     
     def get_health_status(self) -> dict:
         """Get agent health status"""

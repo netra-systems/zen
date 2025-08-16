@@ -24,7 +24,7 @@ class NetworkTestHelpers:
         """Create request that fails then succeeds."""
         call_count = 0
         
-        async def failing_get(*args, **kwargs):
+        async def failing_get(url: str, **request_kwargs):
             nonlocal call_count
             call_count += 1
             if call_count < max_attempts:

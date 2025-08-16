@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from ...db import models_postgres as models
 from ... import schemas
 from ...core.exceptions_base import NetraException
+from ...core.error_codes import ErrorCode
 from .base import ContentSource, CorpusStatus
 from .base_service import BaseCorpusService
 
@@ -19,6 +20,13 @@ from .base_service import BaseCorpusService
 class CorpusCreationService(BaseCorpusService):
     """Service for corpus creation operations"""
     
+    def _prepare_and_create_corpus_model(self, corpus_data: schemas.CorpusCreate, 
+                                        user_id: str, content_source: ContentSource) -> tuple[models.Corpus, str, str]:
+        """Prepare identifiers and create corpus model."""
+        corpus_id, table_name = self._prepare_corpus_identifiers(corpus_data)
+        db_corpus = self._create_corpus_model(corpus_data, corpus_id, table_name, user_id, content_source)
+        return db_corpus, corpus_id, table_name
+
     async def create_corpus(
         self,
         db: Session,
@@ -28,8 +36,7 @@ class CorpusCreationService(BaseCorpusService):
     ) -> models.Corpus:
         """Create a new corpus with ClickHouse table"""
         self._validate_corpus_data(corpus_data)
-        corpus_id, table_name = self._prepare_corpus_identifiers(corpus_data)
-        db_corpus = self._create_corpus_model(corpus_data, corpus_id, table_name, user_id, content_source)
+        db_corpus, corpus_id, table_name = self._prepare_and_create_corpus_model(corpus_data, user_id, content_source)
         self._persist_and_schedule_creation(db, db_corpus, corpus_data.name, user_id, corpus_id, table_name)
         return db_corpus
     
@@ -86,7 +93,7 @@ class CorpusCreationService(BaseCorpusService):
         """Create persistence error exception"""
         return NetraException(
             message=f"Database connection failure during corpus creation",
-            error_code="DB_CORPUS_CREATE_FAILED",
+            code=ErrorCode.DATABASE_CONNECTION_FAILED,
             context={"corpus_name": corpus_name, "user_id": user_id, "error": error}
         )
     

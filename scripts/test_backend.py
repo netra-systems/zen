@@ -13,7 +13,7 @@ import asyncio
 import argparse
 import subprocess
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent
@@ -262,26 +262,26 @@ def _add_common_options(args, pytest_args):
         pytest_args.extend(["--disable-warnings", "-p", "no:warnings"])
 
 
-def run_tests(pytest_args: List[str], args, isolation_manager=None) -> int:
-    """Run tests with pytest"""
-    import pytest
+def setup_reports_directory(args, isolation_manager=None) -> Path:
+    """Setup reports directory structure."""
+    if not (args.coverage or args.json_output or args.html_output):
+        return None
     
-    # Create reports directory if needed
-    if args.coverage or args.json_output or args.html_output:
-        if isolation_manager and isolation_manager.directories:
-            # Use isolated directories
-            reports_dir = isolation_manager.directories.get('reports', PROJECT_ROOT / "reports")
-        else:
-            reports_dir = PROJECT_ROOT / "reports"
-            reports_dir.mkdir(exist_ok=True)
-            (reports_dir / "tests").mkdir(exist_ok=True)
-            (reports_dir / "coverage").mkdir(exist_ok=True)
-    
+    if isolation_manager and isolation_manager.directories:
+        reports_dir = isolation_manager.directories.get('reports', PROJECT_ROOT / "reports")
+    else:
+        reports_dir = PROJECT_ROOT / "reports"
+        reports_dir.mkdir(exist_ok=True)
+        (reports_dir / "tests").mkdir(exist_ok=True)
+        (reports_dir / "coverage").mkdir(exist_ok=True)
+    return reports_dir
+
+def display_test_header_and_deps(args):
+    """Display test runner header and check dependencies."""
     print("=" * 80)
     print("NETRA AI PLATFORM - BACKEND TEST RUNNER")
     print("=" * 80)
     
-    # Check dependencies
     if args.check_deps:
         print("\nChecking dependencies...")
         deps = check_dependencies()
@@ -289,38 +289,43 @@ def run_tests(pytest_args: List[str], args, isolation_manager=None) -> int:
             status = "[OK]" if available else "[MISSING]"
             print(f"  {status} {dep}")
         print()
+
+def display_test_configuration(args, pytest_args):
+    """Display test configuration and command."""
+    parallel_status = (args.parallel if str(args.parallel).isdigit() and int(args.parallel) > 0 
+                      else args.parallel if args.parallel == 'auto' else 'disabled')
     
-    # Display test configuration
     print("Test Configuration:")
     print(f"  Category: {args.category or 'all'}")
-    print(f"  Parallel: {args.parallel if str(args.parallel).isdigit() and int(args.parallel) > 0 else args.parallel if args.parallel == 'auto' else 'disabled'}")
+    print(f"  Parallel: {parallel_status}")
     print(f"  Coverage: {'enabled' if args.coverage else 'disabled'}")
     print(f"  Fail Fast: {'enabled' if args.fail_fast else 'disabled'}")
     print(f"  Environment: {os.environ.get('ENVIRONMENT', 'testing')}")
-    print()
-    
-    # Display command
-    print("Running command:")
-    print(f"  pytest {' '.join(pytest_args)}")
+    print(f"\nRunning command:\n  pytest {' '.join(pytest_args)}")
     print("=" * 80)
-    
-    # Record start time
+
+def execute_pytest_with_timing(pytest_args) -> Tuple[int, float]:
+    """Execute pytest and return exit code and duration."""
+    import pytest
     start_time = time.time()
-    
-    # Run tests
     exit_code = pytest.main(pytest_args)
-    
-    # Calculate duration
     duration = time.time() - start_time
-    
-    # Display results
+    return exit_code, duration
+
+def display_test_results(exit_code: int, duration: float, args):
+    """Display test results, coverage, and report locations."""
     print("=" * 80)
     if exit_code == 0:
         print(f"[PASS] ALL TESTS PASSED in {duration:.2f}s")
     else:
         print(f"[FAIL] TESTS FAILED with exit code {exit_code} after {duration:.2f}s")
     
-    # Show coverage summary if enabled
+    _show_coverage_summary(args, exit_code)
+    _show_report_locations(args)
+    print("=" * 80)
+
+def _show_coverage_summary(args, exit_code: int):
+    """Show coverage summary if enabled and tests passed."""
     if args.coverage and exit_code == 0:
         coverage_file = PROJECT_ROOT / "reports" / "coverage" / "coverage.json"
         if coverage_file.exists():
@@ -328,14 +333,22 @@ def run_tests(pytest_args: List[str], args, isolation_manager=None) -> int:
                 coverage_data = json.load(f)
                 total_coverage = coverage_data.get("totals", {}).get("percent_covered", 0)
                 print(f"\n[Coverage] Total Coverage: {total_coverage:.2f}%")
-    
-    # Show report locations
+
+def _show_report_locations(args):
+    """Show locations of generated reports."""
     if args.html_output:
         print(f"\n[Report] HTML Report: reports/tests/report.html")
     if args.coverage:
         print(f"[Coverage] Coverage Report: reports/coverage/html/index.html")
+
+def run_tests(pytest_args: List[str], args, isolation_manager=None) -> int:
+    """Run tests with pytest"""
+    setup_reports_directory(args, isolation_manager)
+    display_test_header_and_deps(args)
+    display_test_configuration(args, pytest_args)
     
-    print("=" * 80)
+    exit_code, duration = execute_pytest_with_timing(pytest_args)
+    display_test_results(exit_code, duration, args)
     
     return exit_code
 

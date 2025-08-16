@@ -49,17 +49,20 @@ jobs:
       
     steps:
       - name: Checkout Repository
+        uses: actions/checkout@v4
+        if: env.ACT != 'true'
+      
+      - name: Verify Repository
         run: |
-          # ACT automatically mounts the repository, GitHub Actions needs checkout
+          # ACT automatically mounts the repository, GitHub Actions uses checkout
           if [ "${ACT:-false}" = "true" ]; then
             echo "🧪 Running in ACT mode - repository already mounted"
             echo "Repository path: $(pwd)"
             ls -la
           else
-            echo "☁️ Running in GitHub Actions - need to checkout"
-            # In real GitHub Actions, this would use actions/checkout@v4
-            # For now, we'll simulate it
-            echo "Would checkout repository here"
+            echo "☁️ Running in GitHub Actions - repository checked out"
+            echo "Repository path: $(pwd)"
+            ls -la
           fi
           
       - name: Detect Environment
