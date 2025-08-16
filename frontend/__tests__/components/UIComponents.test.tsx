@@ -7,6 +7,24 @@ import { ErrorFallback } from '@/components/ErrorFallback';
 import { Header } from '@/components/Header';
 import { NavLinks } from '@/components/NavLinks';
 
+// Mock authService
+jest.mock('@/auth', () => ({
+  authService: {
+    useAuth: jest.fn(() => ({
+      user: {
+        id: 'test-user',
+        email: 'test@example.com',
+        name: 'Test User'
+      },
+      login: jest.fn(),
+      logout: jest.fn(),
+      loading: false,
+      authConfig: null,
+      token: 'mock-token'
+    }))
+  }
+}));
+
 // Test 62: ErrorFallback recovery
 describe('test_ErrorFallback_recovery', () => {
   it('should display error boundary correctly', () => {

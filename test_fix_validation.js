@@ -2,7 +2,7 @@
 // This script manually tests the message structure without Jest setup issues
 
 // Mock WebSocket hook
-const mockSendMessage = jest.fn ? jest.fn() : function(message) {
+const mockSendMessage = function(message) {
   console.log('Mock sendMessage called with:', JSON.stringify(message, null, 2));
   mockSendMessage.lastCall = message;
 };
