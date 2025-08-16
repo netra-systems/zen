@@ -226,19 +226,14 @@ class TestClickHouseArraySyntaxFixer:
     def test_multiple_array_access_fix(self, query_test_suite):
         """Test fixing multiple array access patterns in single query"""
         original_query = query_test_suite.test_queries['nested_array_access']
-        
         fixed_query = fix_clickhouse_array_syntax(original_query)
         
-        # Should fix all three array accesses
-        assert 'metrics.name[idx]' not in fixed_query
-        assert 'metrics.value[idx]' not in fixed_query
-        assert 'metrics.unit[idx]' not in fixed_query
-        
-        assert 'arrayElement(metrics.name, idx)' in fixed_query
-        assert 'toFloat64OrZero(arrayElement(metrics.value, idx))' in fixed_query
-        assert 'arrayElement(metrics.unit, idx)' in fixed_query
-        
-        # Existing array functions should remain unchanged
+        patterns = [
+            ('metrics.name[idx]', 'arrayElement(metrics.name, idx)'),
+            ('metrics.value[idx]', 'toFloat64OrZero(arrayElement(metrics.value, idx))'),
+            ('metrics.unit[idx]', 'arrayElement(metrics.unit, idx)')
+        ]
+        assert_multiple_replacements(fixed_query, patterns)
         assert 'arrayExists(x -> x > 100, metrics.value)' in fixed_query
     
     def test_complex_query_array_fix(self, query_test_suite):

@@ -49,12 +49,27 @@ class CorpusAuditRepository(BaseRepository[CorpusAuditLog]):
             return list(result.scalars().all())
         except Exception as e:
             self._handle_search_error(e, filters)
+    
+    def _handle_search_error(self, error: Exception, filters: CorpusAuditSearchFilter) -> None:
+        """Handle search query errors."""
+        logger.error(f"Error searching audit records: {error}")
+        raise DatabaseError("Failed to search audit records", context={"filters": filters.model_dump()})
 
     def _build_search_query(self, filters: CorpusAuditSearchFilter):
         """Build search query with all filters applied."""
         query = select(CorpusAuditLog).order_by(desc(CorpusAuditLog.timestamp))
         query = self._apply_basic_filters(query, filters)
         return self._apply_additional_filters(query, filters)
+    
+    def _apply_basic_filters(self, query, filters: CorpusAuditSearchFilter):
+        """Apply basic filters to query."""
+        if filters.user_id:
+            query = query.where(CorpusAuditLog.user_id == filters.user_id)
+        if filters.action:
+            query = query.where(CorpusAuditLog.action == filters.action.value)
+        if filters.status:
+            query = query.where(CorpusAuditLog.status == filters.status.value)
+        return query
 
     def _apply_additional_filters(self, query, filters: CorpusAuditSearchFilter):
         """Apply additional search filters to query."""
