@@ -216,3 +216,17 @@ async def handle_auto_rename_request(db: AsyncSession, thread_id: str, user_id: 
     await update_thread_with_title(db, thread, title)
     await send_thread_rename_notification(user_id, thread_id, title)
     return await create_final_thread_response(db, thread, title)
+
+# Error handling wrapper
+async def handle_route_with_error_logging(handler_func, error_context: str):
+    """Handle route with standardized error logging."""
+    try:
+        return await handler_func()
+    except HTTPException:
+        raise
+    except Exception as e:
+        from app.logging_config import central_logger
+        logger = central_logger.get_logger(__name__)
+        logger.error(f"Error {error_context}: {e}", exc_info=True if "creating" in error_context else False)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"Failed to {error_context.lower()}")
