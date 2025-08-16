@@ -45,11 +45,28 @@ const baseConfig = {
   testTimeout: 10000,
 };
 
-const config = {
-  ...baseConfig,
-  projects: [
+const config = async () => {
+  const nextJestConfig = await createJestConfig(baseConfig)();
+  
+  // Extract only the necessary fields for each project
+  const projectBase = {
+    testEnvironment: nextJestConfig.testEnvironment,
+    testEnvironmentOptions: nextJestConfig.testEnvironmentOptions,
+    setupFilesAfterEnv: nextJestConfig.setupFilesAfterEnv,
+    moduleNameMapper: nextJestConfig.moduleNameMapper,
+    transform: nextJestConfig.transform,
+    transformIgnorePatterns: nextJestConfig.transformIgnorePatterns,
+    clearMocks: nextJestConfig.clearMocks,
+    restoreMocks: nextJestConfig.restoreMocks,
+    resetModules: nextJestConfig.resetModules,
+  };
+  
+  return {
+    ...nextJestConfig,
+    projects: [
     // Components Unit Tests - Fast
     {
+      ...projectBase,
       displayName: 'components',
       testMatch: [
         '**/__tests__/components/**/!(*.integration|*.e2e).test.[jt]s?(x)',
@@ -60,6 +77,7 @@ const config = {
     
     // Chat Components Suite
     {
+      ...projectBase,
       displayName: 'chat',
       testMatch: [
         '**/__tests__/components/chat/**/*.test.[jt]s?(x)',
@@ -71,6 +89,7 @@ const config = {
     
     // Hooks Unit Tests
     {
+      ...projectBase,
       displayName: 'hooks',
       testMatch: [
         '**/__tests__/hooks/**/*.test.[jt]s?(x)',
@@ -81,6 +100,7 @@ const config = {
     
     // Auth Tests
     {
+      ...projectBase,
       displayName: 'auth',
       testMatch: [
         '**/__tests__/auth/**/*.test.[jt]s?(x)',
@@ -91,6 +111,7 @@ const config = {
     
     // Integration Tests - Basic
     {
+      ...projectBase,
       displayName: 'integration-basic',
       testMatch: [
         '**/__tests__/integration/basic-*.test.[jt]s?(x)',
@@ -105,6 +126,7 @@ const config = {
     
     // Integration Tests - Advanced
     {
+      ...projectBase,
       displayName: 'integration-advanced',
       testMatch: [
         '**/__tests__/integration/advanced-integration/**/*.test.[jt]s?(x)',
@@ -116,6 +138,7 @@ const config = {
     
     // Integration Tests - Comprehensive
     {
+      ...projectBase,
       displayName: 'integration-comprehensive',
       testMatch: [
         '**/__tests__/integration/comprehensive/**/*.test.[jt]s?(x)',
@@ -127,6 +150,7 @@ const config = {
     
     // Integration Tests - Critical
     {
+      ...projectBase,
       displayName: 'integration-critical',
       testMatch: [
         '**/__tests__/integration/critical/**/*.test.[jt]s?(x)',
@@ -137,6 +161,7 @@ const config = {
     
     // System Tests
     {
+      ...projectBase,
       displayName: 'system',
       testMatch: [
         '**/__tests__/system/**/*.test.[jt]s?(x)',
@@ -148,6 +173,7 @@ const config = {
     
     // Import Tests - Sequential
     {
+      ...projectBase,
       displayName: 'imports',
       testMatch: [
         '**/__tests__/imports/**/*.test.[jt]s?(x)',
@@ -158,6 +184,7 @@ const config = {
     
     // Unified/Core Tests
     {
+      ...projectBase,
       displayName: 'core',
       testMatch: [
         '**/__tests__/unified-*.test.[jt]s?(x)',
@@ -175,6 +202,7 @@ const config = {
       outputName: 'suite-results.json'
     }]
   ],
+  };
 };
 
-module.exports = createJestConfig(config);
+module.exports = config;

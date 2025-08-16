@@ -127,11 +127,11 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
     });
 
     test('3. Should handle logout action', async () => {
-      const mockAuthStore.logout = jest.fn();
+      const mockLogout = jest.fn();
       (useAuthStore as jest.Mock).mockReturnValueOnce({
         user: { name: 'Test User' },
         isAuthenticated: true,
-        logout: mockAuthStore.logout
+        logout: mockLogout
       });
       
       render(<ChatHeader />);
@@ -187,11 +187,11 @@ describe('Core Chat UI/UX Experience - Working Test Suite', () => {
     });
 
     test('6. Should create new thread', async () => {
-      const mockThreadStore.addThread = jest.fn();
+      const mockAddThread = jest.fn();
       
       (useThreadStore as jest.Mock).mockReturnValueOnce({
         threads: [],
-        addThread: mockThreadStore.addThread
+        addThread: mockAddThread
       });
       
       render(<ThreadSidebar />);

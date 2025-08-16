@@ -63,6 +63,7 @@ export const determineLoadingState = (context: ChatStateContext): ChatLoadingSta
   if (context.thread.isLoading) return ChatLoadingState.LOADING_THREAD;
   if (context.processing.isProcessing) return ChatLoadingState.PROCESSING;
   if (!context.thread.hasActiveThread) return ChatLoadingState.READY;
+  // Thread is active and not loading - show thread ready state
   return ChatLoadingState.THREAD_READY;
 };
 
@@ -84,7 +85,12 @@ export const validateStateTransition = (
  */
 const getValidTransitions = (state: ChatLoadingState): ChatLoadingState[] => {
   const transitions: Record<ChatLoadingState, ChatLoadingState[]> = {
-    [ChatLoadingState.INITIALIZING]: [ChatLoadingState.CONNECTING, ChatLoadingState.ERROR],
+    [ChatLoadingState.INITIALIZING]: [
+      ChatLoadingState.CONNECTING, 
+      ChatLoadingState.ERROR,
+      ChatLoadingState.READY,  // Allow direct to READY if already connected
+      ChatLoadingState.THREAD_READY  // Allow direct to THREAD_READY if thread exists
+    ],
     [ChatLoadingState.CONNECTING]: [ChatLoadingState.READY, ChatLoadingState.CONNECTION_FAILED],
     [ChatLoadingState.CONNECTION_FAILED]: [ChatLoadingState.CONNECTING, ChatLoadingState.ERROR],
     [ChatLoadingState.READY]: [ChatLoadingState.LOADING_THREAD, ChatLoadingState.CONNECTION_FAILED],
@@ -119,6 +125,7 @@ const isLoadingState = (state: ChatLoadingState): boolean => {
     ChatLoadingState.CONNECTING,
     ChatLoadingState.LOADING_THREAD
   ];
+  // THREAD_READY should NOT show loading - it should show content or example prompts
   return loadingStates.includes(state);
 };
 

@@ -272,5 +272,83 @@ export const useLoadingState = () => {
                 <reference>Zustand performance best practices</reference>
             </references>
         </learning>
+        
+        <learning>
+            <id>websocket-loading-state-transitions</id>
+            <date>2025-08-16</date>
+            <category>WebSocket/State Management</category>
+            <severity>high</severity>
+            <title>WebSocket Loading State Machine Transition Rules</title>
+            
+            <problem>
+                <description>Chat UI stuck on "Loading chat..." even though WebSocket connected and backend sending data</description>
+                <symptoms>
+                    <symptom>WebSocket successfully connects to backend</symptom>
+                    <symptom>Backend logs show successful connection and data transmission</symptom>
+                    <symptom>Frontend receives WebSocket status OPEN</symptom>
+                    <symptom>Chat UI remains stuck showing loading spinner with "Loading chat..." message</symptom>
+                </symptoms>
+                <root_cause>State machine transition rules too restrictive - INITIALIZING state could not transition directly to THREAD_READY when WebSocket already connected with active thread</root_cause>
+                <impact>Users cannot interact with chat even though system fully operational</impact>
+            </problem>
+            
+            <solution>
+                <description>Allow direct state transitions from INITIALIZING to READY/THREAD_READY states when appropriate conditions met</description>
+                <implementation>
+                    <step>Modified getValidTransitions in loading-state-machine.ts to allow INITIALIZING -> THREAD_READY transition</step>
+                    <step>Added INITIALIZING -> READY transition for when WebSocket already connected</step>
+                    <step>Ensures state machine can handle hot-reload and pre-connected scenarios</step>
+                </implementation>
+                <code_example>
+// BEFORE - Too restrictive transitions
+const getValidTransitions = (state: ChatLoadingState): ChatLoadingState[] => {
+  const transitions: Record<ChatLoadingState, ChatLoadingState[]> = {
+    [ChatLoadingState.INITIALIZING]: [ChatLoadingState.CONNECTING, ChatLoadingState.ERROR],
+    // Could not go directly to THREAD_READY from INITIALIZING
+    // ...
+  };
+};
+
+// AFTER - Flexible transitions for real-world scenarios
+const getValidTransitions = (state: ChatLoadingState): ChatLoadingState[] => {
+  const transitions: Record<ChatLoadingState, ChatLoadingState[]> = {
+    [ChatLoadingState.INITIALIZING]: [
+      ChatLoadingState.CONNECTING, 
+      ChatLoadingState.ERROR,
+      ChatLoadingState.READY,  // Allow direct to READY if already connected
+      ChatLoadingState.THREAD_READY  // Allow direct to THREAD_READY if thread exists
+    ],
+    // ...
+  };
+};
+                </code_example>
+            </solution>
+            
+            <debugging_approach>
+                <step>Added console logging to useLoadingState hook to track state values</step>
+                <step>Monitored WebSocket connection status in browser DevTools</step>
+                <step>Traced state machine transitions to identify blocked transition</step>
+                <step>Compared currentState vs newState to find stuck state</step>
+            </debugging_approach>
+            
+            <prevention>
+                <rule>State machines should account for all possible initial conditions</rule>
+                <rule>Consider hot-reload scenarios where components reinitialize with existing connections</rule>
+                <rule>Allow flexible transitions for initialization states</rule>
+                <rule>Add comprehensive logging for state transitions during development</rule>
+            </prevention>
+            
+            <affected_files>
+                <file>frontend/utils/loading-state-machine.ts</file>
+                <file>frontend/hooks/useLoadingState.ts</file>
+                <file>frontend/components/chat/MainChat.tsx</file>
+            </affected_files>
+            
+            <related_patterns>
+                <pattern>WebSocket reconnection handling</pattern>
+                <pattern>Component initialization with existing state</pattern>
+                <pattern>State machine design for async operations</pattern>
+            </related_patterns>
+        </learning>
     </learnings>
 </specification>

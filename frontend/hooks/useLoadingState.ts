@@ -77,14 +77,44 @@ export const useLoadingState = (): UseLoadingStateResult => {
       messageCount: messages.length,
       currentState,
       newState,
-      context
+      context,
+      shouldShowLoading: isLoadingState(currentState),
+      shouldShowExamplePrompts: isReadyForPrompts(currentState, context)
     });
+  }
+  
+  // Helper functions for debug
+  function isLoadingState(state: ChatLoadingState): boolean {
+    return [
+      ChatLoadingState.INITIALIZING,
+      ChatLoadingState.CONNECTING,
+      ChatLoadingState.LOADING_THREAD
+    ].includes(state);
+  }
+  
+  function isReadyForPrompts(state: ChatLoadingState, ctx: ChatStateContext): boolean {
+    return state === ChatLoadingState.THREAD_READY && 
+           !ctx.thread.hasMessages && 
+           !ctx.processing.isProcessing;
   }
   
   useStateTransition(currentState, newState, setCurrentState, previousStateRef);
   useInitializationEffect(wsStatus, isInitialized, setIsInitialized);
   
   const result = createLoadingResult(currentState, context);
+  
+  // Debug the final result
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[useLoadingState] Final result:', {
+      currentState,
+      loadingState: result.state,
+      shouldShowLoading: result.shouldShowLoading,
+      shouldShowEmptyState: result.shouldShowEmptyState,
+      shouldShowExamplePrompts: result.shouldShowExamplePrompts,
+      loadingMessage: result.loadingMessage
+    });
+  }
+  
   return createHookResult(result, isInitialized);
 };
 

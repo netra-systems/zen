@@ -166,12 +166,22 @@
             <name>Frontend</name>
             <file>learnings/frontend.xml</file>
             <path>SPEC/learnings/frontend.xml</path>
-            <learning_count>4</learning_count>
+            <learning_count>5</learning_count>
             <learning_ids>
                 <id>zustand-selector-infinite-loop</id>
                 <id>zustand-hook-selector-inline</id>
                 <id>zustand-selector-memoization</id>
                 <id>zustand-individual-selectors-pattern</id>
+                <id>websocket-loading-state-transitions</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>React Content Handling</name>
+            <file>learnings/react-content-handling.xml</file>
+            <path>SPEC/learnings/react-content-handling.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>react-child-object-error</id>
             </learning_ids>
         </category>
     </categories>
@@ -184,7 +194,7 @@
     </usage>
     
     <statistics>
-        <total_categories>14</total_categories>
-        <total_learnings>51</total_learnings>
+        <total_categories>15</total_categories>
+        <total_learnings>53</total_learnings>
     </statistics>
 </specification>
