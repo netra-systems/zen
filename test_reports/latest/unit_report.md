@@ -1,15 +1,15 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-15T21:27:00.273999  
+**Generated:** 2025-08-15T22:27:13.099631  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
 ## Test Summary
 
-**Total Tests:** 0  
-**Passed:** 0  
-**Failed:** 0  
-**Skipped:** 0  
+**Total Tests:** 327  
+**Passed:** 309  
+**Failed:** 3  
+**Skipped:** 15  
 **Errors:** 0  
 **Overall Status:** [FAILED]
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 4.18s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.25s | [FAILED] |
+| Backend   | 327 | 309 | 3 | 15 | 0 | 68.98s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.23s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,7 +27,7 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 4.43s
+- **Total Duration:** 69.22s
 - **Exit Code:** 255
 
 ### Backend Configuration
@@ -58,42 +58,79 @@ Test Configuration:
 Running command:
   pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
 ================================================================================
-Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
-Loaded .env.development file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development
-Loaded .env.development.local file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development.local
-================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 3.70s
-[Coverage] Coverage Report: reports/coverage/html/index.html
-================================================================================
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO
+created: 4/4 workers
+4 workers [2444 items]
 
-ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py'.
-app\tests\conftest.py:52: in <module>
-    from app.main import app
-app\main.py:46: in <module>
-    from app.core.app_factory import create_app
-app\core\app_factory.py:9: in <module>
-    from app.core.lifespan_manager import lifespan
-app\core\lifespan_manager.py:8: in <module>
-    from app.startup_module import run_complete_startup
-app\startup_module.py:16: in <module>
-    from app.config import settings
-app\config.py:6: in <module>
-    from app.config_manager import ConfigManager
-app\config_manager.py:18: in <module>
-    from app.config_environment import ConfigEnvironment
-app\config_environment.py:7: in <module>
-    from typing import Dict, type
-E   ImportError: cannot import name 'type' from 'typing' (C:\Users\antho\miniconda3\Lib\typing.py). Did you mean: 'Type'?
---- Logging error in Loguru Handler #1 ---
-Record was: {'elapsed': datetime.timedelta(seconds=1, microseconds=84133), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=28892, name='MainProcess'), 'thread': (id=27108, name='MainThread'), 'time': datetime(2025, 8, 15, 21, 26, 59, 787337, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
-Traceback (most recent call last):
-  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
-    self._sink.write(message)
-  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_simple_sinks.py", line 16, in write
-    self._stream.write(message)
-ValueError: I/O operation on closed file.
---- End of logging error ---
+scheduling tests via LoadScheduling
 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_agent_run_execution 
+app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_geo_distributed_simulation 
+app\tests\services\test_clickhouse_regex_patterns.py::TestRegexPatternCoverage::test_advanced_regex_patterns 
+[gw2][36m [  0%] [0m[33mSKIPPED[0m app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_geo_distributed_simulation 
+app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_adaptive_generation_feedback 
+[gw2][36m [  0%] [0m[33mSKIPPED[0m app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_adaptive_generation_feedback 
+app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_multi_model_workload_generation 
+[gw2][36m [  0%] [0m[33mSKIPPED[0m app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_multi_model_workload_generation 
+app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_compliance_aware_generation 
+[gw2][36m [  0%] [0m[33mSKIPPED[0m app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_compliance_aware_generation 
+app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_cost_optimized_generation 
+[gw2][36m [  0%] [0m[33mSKIPPED[0m app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_cost_optimized_generation 
+app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_versioned_corpus_generation 
+[gw2][36m [  0%] [0m[33mSKIPPED[0m app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_versioned_corpus_generation 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_temporal_patterns 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_agent_run_execution 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_agent_run_with_model_dump_fallback 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_agent_run_with_model_dump_fallback 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_websocket_message_handling_start_agent 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_temporal_patterns 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_tool_invocations 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_websocket_message_handling_start_agent 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_tool_invocations 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_websocket_message_handling_user_message 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_errors 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_errors 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_websocket_message_handling_user_message 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_trace_hierarchies 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_websocket_message_handling_stop_agent 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_trace_hierarchies 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_domain_specific 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_domain_specific 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_websocket_message_handling_stop_agent 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_distribution 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_websocket_message_handling_unknown_type 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_distribution 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_custom_tools 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_custom_tools 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_websocket_message_handling_unknown_type 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_incremental 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_websocket_disconnect_handling 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_websocket_disconnect_handling 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_concurrent_agent_execution 
+[gw3][36m [  0%] [0m[31mFAILED[0m app\tests\services\test_clickhouse_regex_patterns.py::TestRegexPatternCoverage::test_advanced_regex_patterns 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
+app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_concurrent_agent_execution 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_message_parsing_string_input 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_full 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_...(truncated)
 ```
 
 ### Frontend Output
@@ -118,5 +155,18 @@ Cleaning up test processes...
 operable program or batch file.
 
 ```
+
+## Error Summary
+
+### Backend Errors
+- [gw3][36m [  0%] [0m[31mFAILED[0m app\tests\services\test_clickhouse_regex_patterns.py::TestRegexPatternCoverage::test_advanced_regex_patterns
+- [gw0][36m [  6%] [0m[31mFAILED[0m app\tests\services\apex_optimizer_agent\tools\test_policy_simulator.py::TestPolicySimulator::test_policy_simulator_async_behavior
+- [gw1][36m [  8%] [0m[31mFAILED[0m app\tests\services\test_clickhouse_array_syntax.py::TestClickHouseArraySyntaxFixer::test_mixed_correct_and_incorrect_syntax
+- [31mFAILED[0m app\tests\services\test_clickhouse_regex_patterns.py::[1mTestRegexPatternCoverage::test_advanced_regex_patterns[0m - AssertionError: assert 'arrayElement(nested.very.deep.field, complex_expr)' in 'SELECT nested.very.arrayElement(deep.field, complex_expr) FROM table'
+- [31mFAILED[0m app\tests\services\apex_optimizer_agent\tools\test_policy_simulator.py::[1mTestPolicySimulator::test_policy_simulator_async_behavior[0m - assert 0.0 >= 0.009
+- [31mFAILED[0m app\tests\services\test_clickhouse_array_syntax.py::[1mTestClickHouseArraySyntaxFixer::test_mixed_correct_and_incorrect_syntax[0m - AssertionError: assert 'toFloat64OrZero(arrayElement(metrics.incorrect, 2))' in '\n            SELECT \n                toFloat64OrZero(arrayElement(metrics.correct, 1)) as correct_field,\n                arrayElement(metrics.incorrect, 2) as incorrect_field\n            FROM test_table\n        '
+- [FAIL] TESTS FAILED with exit code 2 after 68.30s
+
+
 ---
 *Generated by Netra AI Unified Test Runner v3.0*

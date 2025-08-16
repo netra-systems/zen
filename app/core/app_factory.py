@@ -45,9 +45,20 @@ def register_error_handlers(app: FastAPI) -> None:
 
 def setup_middleware(app: FastAPI) -> None:
     """Setup all middleware for the application."""
-    # IP blocking should be first to reject bad IPs early
+    # Security middleware should be first to reject malicious requests early
     from app.middleware.ip_blocking import ip_blocking_middleware
+    from app.middleware.path_traversal_protection import path_traversal_protection_middleware
+    from app.middleware.security_headers import SecurityHeadersMiddleware
+    from app.config import settings
+    
+    # Block malicious IPs first
     app.middleware("http")(ip_blocking_middleware)
+    
+    # Block path traversal attempts
+    app.middleware("http")(path_traversal_protection_middleware)
+    
+    # Add security headers middleware
+    app.add_middleware(SecurityHeadersMiddleware, environment=settings.environment)
     
     setup_cors_middleware(app)
     app.middleware("http")(create_cors_redirect_middleware())
