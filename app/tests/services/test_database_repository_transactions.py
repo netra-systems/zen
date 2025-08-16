@@ -22,6 +22,88 @@ from app.services.database.run_repository import RunRepository
 from app.core.exceptions_base import NetraException
 
 
+def create_mock_session() -> AsyncMock:
+    """Create a mock database session with standard configuration"""
+    session = AsyncMock(spec=AsyncSession)
+    _configure_session_methods(session)
+    return session
+
+
+def _configure_session_methods(session: AsyncMock) -> None:
+    """Configure session methods for mocking"""
+    session.add = MagicMock()
+    session.commit = AsyncMock()
+    session.flush = AsyncMock()
+    session.rollback = AsyncMock()
+    session.refresh = AsyncMock()
+    session.execute = AsyncMock()
+    session.close = AsyncMock()
+
+
+def configure_mock_query_results(session: AsyncMock) -> None:
+    """Configure mock query results for session"""
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = None
+    mock_result.scalars.return_value.all.return_value = []
+    mock_result.scalars.return_value.first.return_value = None
+    session.execute.return_value = mock_result
+
+
+def create_mock_session_factory() -> tuple[MagicMock, AsyncMock]:
+    """Create mock async session factory with context manager"""
+    session = create_mock_session()
+    session.begin = AsyncMock()
+    session_context = _create_session_context(session)
+    factory = _create_factory(session_context)
+    return factory, session
+
+
+def _create_session_context(session: AsyncMock) -> AsyncMock:
+    """Create session context manager"""
+    context = AsyncMock()
+    context.__aenter__ = AsyncMock(return_value=session)
+    context.__aexit__ = AsyncMock(return_value=None)
+    return context
+
+
+def _create_factory(session_context: AsyncMock) -> MagicMock:
+    """Create session factory"""
+    factory = MagicMock()
+    factory.return_value = session_context
+    return factory
+
+
+def create_tracked_session_factory(created_sessions: list) -> callable:
+    """Create session factory that tracks created sessions"""
+    def factory():
+        session = create_mock_session()
+        created_sessions.append(session)
+        return session
+    return factory
+
+
+async def run_transaction_cycle(repository, session_factory) -> None:
+    """Run a single transaction cycle with proper cleanup"""
+    session = session_factory()
+    try:
+        await repository.create(session, name='Cleanup Test')
+    finally:
+        await session.close()
+
+
+async def run_multiple_transaction_cycles(repository, session_factory, count: int = 10) -> None:
+    """Run multiple transaction cycles concurrently"""
+    tasks = [run_transaction_cycle(repository, session_factory) for _ in range(count)]
+    await asyncio.gather(*tasks)
+
+
+def assert_all_sessions_closed(created_sessions: list) -> None:
+    """Assert all sessions were properly closed"""
+    assert len(created_sessions) > 0, "No sessions were created"
+    for session in created_sessions:
+        session.close.assert_called_once()
+
+
 class MockDatabaseModel:
     """Mock database model for testing"""
     
@@ -123,22 +205,8 @@ class TestDatabaseRepositoryTransactions:
     @pytest.fixture
     def mock_session(self):
         """Create mock database session"""
-        session = AsyncMock(spec=AsyncSession)
-        session.add = MagicMock()
-        session.commit = AsyncMock()
-        session.flush = AsyncMock()  # Add flush mock
-        session.rollback = AsyncMock()
-        session.refresh = AsyncMock()
-        session.execute = AsyncMock()
-        session.close = AsyncMock()
-        
-        # Mock query results
-        mock_result = MagicMock()
-        mock_result.scalar_one_or_none.return_value = None
-        mock_result.scalars.return_value.all.return_value = []
-        mock_result.scalars.return_value.first.return_value = None
-        session.execute.return_value = mock_result
-        
+        session = create_mock_session()
+        configure_mock_query_results(session)
         return session
     
     @pytest.fixture
@@ -444,23 +512,7 @@ class TestUnitOfWorkTransactions:
     @pytest.fixture
     def mock_async_session_factory(self):
         """Mock async session factory"""
-        session = AsyncMock(spec=AsyncSession)
-        session.add = MagicMock()
-        session.begin = AsyncMock()  # Add missing begin method
-        session.commit = AsyncMock()
-        session.rollback = AsyncMock()
-        session.close = AsyncMock()
-        session.refresh = AsyncMock()
-        session.execute = AsyncMock()
-        
-        # Create a context manager that returns the session
-        session_context = AsyncMock()
-        session_context.__aenter__ = AsyncMock(return_value=session)
-        session_context.__aexit__ = AsyncMock(return_value=None)
-        
-        factory = MagicMock()
-        factory.return_value = session_context
-        return factory, session
+        return create_mock_session_factory()
     
     @pytest.mark.asyncio
     async def test_unit_of_work_successful_transaction(self, mock_async_session_factory):
@@ -707,37 +759,10 @@ class TestTransactionPerformanceAndScaling:
     
     def test_transaction_resource_cleanup(self, performance_repository):
         """Test proper resource cleanup after transactions"""
-        # Track resource usage
         created_sessions = []
+        session_factory = create_tracked_session_factory(created_sessions)
         
-        def mock_session_factory():
-            session = AsyncMock(spec=AsyncSession)
-            session.add = MagicMock()
-            session.commit = AsyncMock()
-            session.rollback = AsyncMock()
-            session.close = AsyncMock()
-            session.refresh = AsyncMock()
-            created_sessions.append(session)
-            return session
+        asyncio.run(run_multiple_transaction_cycles(performance_repository, session_factory))
         
-        # Simulate multiple transaction cycles
-        async def transaction_cycle():
-            session = mock_session_factory()
-            try:
-                await performance_repository.create(session, name='Cleanup Test')
-            finally:
-                await session.close()
-        
-        # Run multiple cycles
-        import asyncio
-        
-        async def run_cycles():
-            tasks = [transaction_cycle() for _ in range(10)]
-            await asyncio.gather(*tasks)
-        
-        asyncio.run(run_cycles())
-        
-        # Assert all sessions were properly closed
         assert len(created_sessions) == 10
-        for session in created_sessions:
-            session.close.assert_called_once()
+        assert_all_sessions_closed(created_sessions)

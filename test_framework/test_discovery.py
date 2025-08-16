@@ -20,30 +20,9 @@ class TestDiscovery:
         path = path or self.project_root
         discovered = defaultdict(list)
         
-        # Backend tests
-        backend_test_dirs = [
-            path / "app" / "tests",
-            path / "tests",
-            path / "integration_tests"
-        ]
-        
-        for test_dir in backend_test_dirs:
-            if test_dir.exists():
-                for test_file in test_dir.rglob("test_*.py"):
-                    category = self._categorize_test(test_file)
-                    discovered[category].append(str(test_file))
-        
-        # Frontend tests
-        frontend_test_dir = path / "frontend" / "__tests__"
-        if frontend_test_dir.exists():
-            for test_file in frontend_test_dir.rglob("*.test.{ts,tsx,js,jsx}"):
-                discovered["frontend"].append(str(test_file))
-        
-        # Cypress tests
-        cypress_dir = path / "frontend" / "cypress" / "e2e"
-        if cypress_dir.exists():
-            for test_file in cypress_dir.rglob("*.cy.{ts,js}"):
-                discovered["e2e"].append(str(test_file))
+        self._discover_backend_tests_into(path, discovered)
+        self._discover_frontend_tests_into(path, discovered)
+        self._discover_cypress_tests_into(path, discovered)
         
         return dict(discovered)
     
@@ -52,17 +31,7 @@ class TestDiscovery:
         path = path or self.project_root
         discovered = defaultdict(list)
         
-        backend_test_dirs = [
-            path / "app" / "tests",
-            path / "tests",
-            path / "integration_tests"
-        ]
-        
-        for test_dir in backend_test_dirs:
-            if test_dir.exists():
-                for test_file in test_dir.rglob("test_*.py"):
-                    category = self._categorize_test(test_file)
-                    discovered[category].append(str(test_file))
+        self._discover_backend_tests_into(path, discovered)
         
         return dict(discovered)
     
@@ -71,18 +40,8 @@ class TestDiscovery:
         path = path or self.project_root
         frontend_tests = []
         
-        # Jest/React tests
-        frontend_test_dir = path / "frontend" / "__tests__"
-        if frontend_test_dir.exists():
-            for test_file in frontend_test_dir.rglob("*.test.{ts,tsx,js,jsx}"):
-                frontend_tests.append(str(test_file))
-        
-        # Tests co-located with components
-        frontend_src_dir = path / "frontend"
-        if frontend_src_dir.exists():
-            for test_file in frontend_src_dir.rglob("*.test.{ts,tsx,js,jsx}"):
-                if "__tests__" not in str(test_file):  # Avoid duplicates
-                    frontend_tests.append(str(test_file))
+        self._add_jest_tests(path, frontend_tests)
+        self._add_colocated_tests(path, frontend_tests)
         
         return frontend_tests
     
@@ -91,17 +50,8 @@ class TestDiscovery:
         path = path or self.project_root
         e2e_tests = []
         
-        # Cypress tests
-        cypress_dir = path / "frontend" / "cypress" / "e2e"
-        if cypress_dir.exists():
-            for test_file in cypress_dir.rglob("*.cy.{ts,js}"):
-                e2e_tests.append(str(test_file))
-        
-        # Playwright tests (if they exist)
-        playwright_dir = path / "tests" / "e2e"
-        if playwright_dir.exists():
-            for test_file in playwright_dir.rglob("*.spec.{ts,js}"):
-                e2e_tests.append(str(test_file))
+        self._add_cypress_tests(path, e2e_tests)
+        self._add_playwright_tests(path, e2e_tests)
         
         return e2e_tests
     
@@ -109,101 +59,20 @@ class TestDiscovery:
         """Categorize a test based on its path and name"""
         path_str = str(test_path).lower()
         
-        # Check for specific patterns
-        if "unit" in path_str or "app/tests/core" in path_str:
-            return "unit"
-        elif "integration" in path_str:
-            return "integration"
-        elif "e2e" in path_str or "cypress" in path_str:
-            return "e2e"
-        elif "smoke" in path_str:
-            return "smoke"
-        elif "performance" in path_str or "perf" in path_str:
-            return "performance"
-        elif "security" in path_str or "auth" in path_str:
-            return "security"
-        elif "websocket" in path_str or "ws_" in path_str:
-            return "websocket"
-        elif "database" in path_str or "db" in path_str:
-            return "database"
-        elif "api" in path_str or "route" in path_str:
-            return "api"
-        elif "agent" in path_str:
-            return "agent"
-        elif "llm" in path_str:
-            return "llm"
-        else:
-            return "other"
+        category = self._check_primary_categories(path_str)
+        if category:
+            return category
+        
+        return self._check_secondary_categories(path_str)
     
     def get_test_categories(self) -> Dict[str, Dict[str, str]]:
         """Get available test categories with descriptions"""
-        return {
-            "smoke": {
-                "description": "Quick validation tests for pre-commit checks",
-                "priority": "critical",
-                "timeout": "30s"
-            },
-            "unit": {
-                "description": "Unit tests for individual components", 
-                "priority": "high",
-                "timeout": "2m"
-            },
-            "integration": {
-                "description": "Integration tests for feature validation",
-                "priority": "medium",
-                "timeout": "5m"
-            },
-            "e2e": {
-                "description": "End-to-end user journey tests",
-                "priority": "medium", 
-                "timeout": "10m"
-            },
-            "performance": {
-                "description": "Performance and load tests",
-                "priority": "low",
-                "timeout": "30m"
-            },
-            "security": {
-                "description": "Security and authentication tests",
-                "priority": "high",
-                "timeout": "5m"
-            },
-            "websocket": {
-                "description": "WebSocket communication tests",
-                "priority": "medium",
-                "timeout": "2m"
-            },
-            "database": {
-                "description": "Database and data persistence tests",
-                "priority": "high",
-                "timeout": "5m"
-            },
-            "api": {
-                "description": "API endpoint and route tests",
-                "priority": "high",
-                "timeout": "5m"
-            },
-            "agent": {
-                "description": "AI agent and workflow tests",
-                "priority": "medium",
-                "timeout": "10m"
-            },
-            "llm": {
-                "description": "LLM integration and prompt tests",
-                "priority": "medium",
-                "timeout": "5m"
-            },
-            "frontend": {
-                "description": "React component and UI tests",
-                "priority": "medium",
-                "timeout": "5m"
-            },
-            "other": {
-                "description": "Miscellaneous tests",
-                "priority": "low",
-                "timeout": "5m"
-            }
-        }
+        categories = {}
+        categories.update(self._get_critical_categories())
+        categories.update(self._get_standard_categories())
+        categories.update(self._get_specialized_categories())
+        
+        return categories
     
     def get_tests_by_category(self, category: str) -> List[str]:
         """Get all tests in a specific category"""
@@ -215,10 +84,8 @@ class TestDiscovery:
         all_tests = self.discover_tests()
         matching_tests = []
         
-        for category, tests in all_tests.items():
-            for test in tests:
-                if pattern.lower() in test.lower():
-                    matching_tests.append(test)
+        pattern_lower = pattern.lower()
+        self._collect_matching_tests(all_tests, pattern_lower, matching_tests)
         
         return matching_tests
     
@@ -233,19 +100,6 @@ class TestDiscovery:
         all_tests = self.discover_tests()
         
         for category, tests in all_tests.items():
-            for test_path in tests:
-                path = Path(test_path)
-                
-                # Check naming conventions
-                if category != "frontend" and category != "e2e":
-                    if not path.name.startswith("test_"):
-                        issues["naming"].append(f"{test_path}: Should start with 'test_'")
-                
-                # Check for empty test files
-                try:
-                    if path.stat().st_size == 0:
-                        issues["empty_files"].append(test_path)
-                except FileNotFoundError:
-                    issues["missing_files"].append(test_path)
+            self._validate_category_tests(category, tests, issues)
         
         return dict(issues)

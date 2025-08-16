@@ -118,8 +118,7 @@ class CorpusAuditLogger:
                 user_id, None, resource_id, None, None, metadata
             )
         except Exception as e:
-            logger.error(f"Failed to track user action: {e}")
-            raise NetraException(f"User action tracking failed: {str(e)}")
+            self._handle_user_action_error(e)
 
     async def record_configuration(
         self, db: AsyncSession, config_data: Dict[str, Any],
@@ -133,8 +132,7 @@ class CorpusAuditLogger:
                 CorpusAuditStatus.SUCCESS, user_id, None, operation_name, None, config_data, metadata
             )
         except Exception as e:
-            logger.error(f"Failed to record configuration: {e}")
-            raise NetraException(f"Configuration recording failed: {str(e)}")
+            self._handle_configuration_error(e)
 
     async def search_audit_logs(
         self,
@@ -194,6 +192,16 @@ class CorpusAuditLogger:
         except Exception as e:
             logger.error(f"Failed to generate audit report: {e}")
             raise NetraException(f"Audit report generation failed: {str(e)}")
+    
+    def _handle_user_action_error(self, error: Exception) -> None:
+        """Handle user action tracking errors."""
+        logger.error(f"Failed to track user action: {error}")
+        raise NetraException(f"User action tracking failed: {str(error)}")
+    
+    def _handle_configuration_error(self, error: Exception) -> None:
+        """Handle configuration recording errors."""
+        logger.error(f"Failed to record configuration: {error}")
+        raise NetraException(f"Configuration recording failed: {str(error)}")
 
 
 async def create_audit_logger(db: AsyncSession) -> CorpusAuditLogger:

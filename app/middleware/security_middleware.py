@@ -99,6 +99,10 @@ class InputValidator:
         """Validate input for security threats."""
         if not data:
             return
+        self._validate_all_injection_types(data, field_name)
+
+    def _validate_all_injection_types(self, data: str, field_name: str) -> None:
+        """Validate all injection attack types."""
         self.validators.validate_sql_injection(data, field_name)
         self.validators.validate_xss_attack(data, field_name)
         self.validators.validate_command_injection(data, field_name)
@@ -310,10 +314,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         """Track authentication attempts for enhanced security."""
         current_time = time.time()
         self._track_attempt_time(ip_address, current_time)
-        if not success:
-            self._handle_failed_auth(ip_address)
+        if success:
+            self._handle_successful_auth(ip_address)
         else:
-            self.failed_auth_ips[ip_address] = AuthAttemptTracker.reset_failed_count()
+            self._handle_failed_auth(ip_address)
     
     def _track_attempt_time(self, ip_address: str, current_time: float) -> None:
         """Track authentication attempt time."""
@@ -332,6 +336,10 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         )
         self.auth_attempt_tracker[ip_address].append(current_time)
     
+    def _handle_successful_auth(self, ip_address: str) -> None:
+        """Handle successful authentication attempt."""
+        self.failed_auth_ips[ip_address] = AuthAttemptTracker.reset_failed_count()
+
     def _handle_failed_auth(self, ip_address: str) -> None:
         """Handle failed authentication attempt."""
         self.failed_auth_ips[ip_address] = self.failed_auth_ips.get(ip_address, 0) + 1

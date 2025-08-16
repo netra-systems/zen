@@ -26,18 +26,21 @@ class BaseRepository(Generic[T], ABC):
         self.model = model
         self._session: Optional[AsyncSession] = None
     
-    async def create(self, db: Optional[AsyncSession] = None, **kwargs) -> T:
-        """Create a new entity"""
-        session = self._validate_session(db)
+    async def _execute_create_with_error_handling(self, session: AsyncSession, kwargs: Dict[str, Any]) -> T:
+        """Execute create operation with comprehensive error handling."""
         try:
-            entity = await self._create_entity(session, kwargs)
-            return entity
+            return await self._create_entity(session, kwargs)
         except IntegrityError as e:
             raise self._handle_integrity_error(e, kwargs)
         except SQLAlchemyError as e:
             raise self._handle_sqlalchemy_error(e, kwargs)
         except Exception as e:
             raise self._handle_unexpected_error(e, kwargs)
+
+    async def create(self, db: Optional[AsyncSession] = None, **kwargs) -> T:
+        """Create a new entity"""
+        session = self._validate_session(db)
+        return await self._execute_create_with_error_handling(session, kwargs)
     
     def _validate_session(self, db: Optional[AsyncSession]) -> AsyncSession:
         """Validate and return database session."""
@@ -122,16 +125,21 @@ class BaseRepository(Generic[T], ABC):
         """Alias for get_by_id for backward compatibility"""
         return await self.get_by_id(db, entity_id)
     
+    async def _execute_get_all_query(self, db: AsyncSession, filters: Optional[Dict[str, Any]], 
+                                     limit: int, offset: int) -> List[T]:
+        """Execute get all query with filters and pagination."""
+        query = self._build_filtered_query(filters)
+        query = query.limit(limit).offset(offset)
+        result = await db.execute(query)
+        return list(result.scalars().all())
+
     async def get_all(self, db: AsyncSession, 
                       filters: Optional[Dict[str, Any]] = None,
                       limit: int = 100, 
                       offset: int = 0) -> List[T]:
         """Get all entities with optional filtering"""
         try:
-            query = self._build_filtered_query(filters)
-            query = query.limit(limit).offset(offset)
-            result = await db.execute(query)
-            return list(result.scalars().all())
+            return await self._execute_get_all_query(db, filters, limit, offset)
         except SQLAlchemyError as e:
             raise self._handle_get_all_error(e, filters)
     
@@ -154,14 +162,18 @@ class BaseRepository(Generic[T], ABC):
             context={"repository": self.model.__name__, "filters": filters, "error": str(e)}
         )
     
+    async def _execute_update_operation(self, db: AsyncSession, entity_id: str, kwargs: Dict[str, Any]) -> T:
+        """Execute the core update operation."""
+        entity = await self._get_entity_for_update(db, entity_id)
+        self._apply_updates(entity, kwargs)
+        await db.flush()  # Flush changes but don't commit
+        logger.info(f"Updated {self.model.__name__} with id: {entity_id}")
+        return entity
+
     async def update(self, db: AsyncSession, entity_id: str, **kwargs) -> Optional[T]:
         """Update an entity"""
         try:
-            entity = await self._get_entity_for_update(db, entity_id)
-            self._apply_updates(entity, kwargs)
-            await db.flush()  # Flush changes but don't commit
-            logger.info(f"Updated {self.model.__name__} with id: {entity_id}")
-            return entity
+            return await self._execute_update_operation(db, entity_id, kwargs)
         except NetraException:
             raise
         except SQLAlchemyError as e:
@@ -265,22 +277,24 @@ class BaseRepository(Generic[T], ABC):
             context={"repository": self.model.__name__, "entity_id": entity_id, "error": str(e)}
         )
     
-    async def bulk_create(self, data: List[Dict[str, Any]], db: Optional[AsyncSession] = None) -> List[T]:
-        """Create multiple entities in bulk"""
-        session = self._validate_session(db)
-        
+    async def _execute_bulk_create_with_error_handling(self, session: AsyncSession, data: List[Dict[str, Any]]) -> List[T]:
+        """Execute bulk create operation with comprehensive error handling."""
         try:
-            entities = await self._create_bulk_entities(session, data)
-            return entities
+            return await self._create_bulk_entities(session, data)
         except IntegrityError as e:
             raise self._handle_bulk_integrity_error(e, data)
         except SQLAlchemyError as e:
             raise self._handle_bulk_sqlalchemy_error(e, data)
         except Exception as e:
             raise self._handle_bulk_unexpected_error(e, data)
+
+    async def bulk_create(self, data: List[Dict[str, Any]], db: Optional[AsyncSession] = None) -> List[T]:
+        """Create multiple entities in bulk"""
+        session = self._validate_session(db)
+        return await self._execute_bulk_create_with_error_handling(session, data)
     
-    async def _create_bulk_entities(self, session: AsyncSession, data: List[Dict[str, Any]]) -> List[T]:
-        """Create and persist multiple entities."""
+    def _create_entity_instances(self, session: AsyncSession, data: List[Dict[str, Any]]) -> List[T]:
+        """Create entity instances and add to session."""
         entities = []
         for item in data:
             if 'id' not in item and hasattr(self.model, 'id'):
@@ -288,7 +302,11 @@ class BaseRepository(Generic[T], ABC):
             entity = self.model(**item)
             session.add(entity)
             entities.append(entity)
-        
+        return entities
+
+    async def _create_bulk_entities(self, session: AsyncSession, data: List[Dict[str, Any]]) -> List[T]:
+        """Create and persist multiple entities."""
+        entities = self._create_entity_instances(session, data)
         await session.flush()  # Flush to get IDs but don't commit
         logger.info(f"Bulk created {len(entities)} {self.model.__name__} entities")
         return entities

@@ -21,11 +21,7 @@ class SchemaValidator:
     ) -> List[TypeMismatch]:
         """Validate schemas for consistency."""
         frontend_types = self.ts_parser.parse_typescript_file(frontend_types_file)
-        backend_mismatches = _validate_backend_schemas(
-            backend_schemas, frontend_types, self.compat_checker
-        )
-        frontend_mismatches = _validate_frontend_schemas(frontend_types, backend_schemas)
-        return backend_mismatches + frontend_mismatches
+        return _perform_validation_checks(self, backend_schemas, frontend_types)
 
 
 def validate_type_consistency(
@@ -108,8 +104,7 @@ def _check_field_type_compatibility(
             mismatch = _check_single_field_compatibility(
                 schema_name, field_name, field_schema, frontend_fields, compat_checker
             )
-            if mismatch:
-                mismatches.append(mismatch)
+            _append_mismatch_if_exists(mismatches, mismatch)
     return mismatches
 
 
@@ -131,21 +126,9 @@ def _check_extra_frontend_fields(
 def _create_missing_schema_mismatch(schema_name: str, missing_in: str) -> TypeMismatch:
     """Create mismatch for missing schema."""
     if missing_in == "frontend":
-        return TypeMismatch(
-            field_path=schema_name,
-            backend_type="schema",
-            frontend_type="missing",
-            severity=TypeMismatchSeverity.ERROR,
-            message=f"Schema {schema_name} exists in backend but not in frontend"
-        )
+        return _create_frontend_missing_mismatch(schema_name)
     else:
-        return TypeMismatch(
-            field_path=schema_name,
-            backend_type="missing",
-            frontend_type="schema",
-            severity=TypeMismatchSeverity.INFO,
-            message=f"Schema {schema_name} exists in frontend but not in backend"
-        )
+        return _create_backend_missing_mismatch(schema_name)
 
 
 def _validate_single_backend_schema(
@@ -170,17 +153,16 @@ def _perform_all_field_checks(
     frontend_fields: Dict[str, Any], compat_checker: TypeCompatibilityChecker
 ) -> List[TypeMismatch]:
     """Perform all field validation checks."""
-    mismatches = []
-    mismatches.extend(_check_missing_frontend_fields(
+    missing_checks = _check_missing_frontend_fields(
         schema_name, backend_properties, frontend_fields
-    ))
-    mismatches.extend(_check_field_type_compatibility(
+    )
+    compat_checks = _check_field_type_compatibility(
         schema_name, backend_properties, frontend_fields, compat_checker
-    ))
-    mismatches.extend(_check_extra_frontend_fields(
+    )
+    extra_checks = _check_extra_frontend_fields(
         schema_name, backend_properties, frontend_fields
-    ))
-    return mismatches
+    )
+    return missing_checks + compat_checks + extra_checks
 
 
 def _create_missing_field_mismatch(
@@ -188,12 +170,14 @@ def _create_missing_field_mismatch(
 ) -> TypeMismatch:
     """Create mismatch for missing field."""
     field_path = f"{schema_name}.{field_name}"
+    backend_type = field_schema.get('type', 'unknown')
+    message = f"Field {field_name} exists in backend but not in {missing_in}"
     return TypeMismatch(
         field_path=field_path,
-        backend_type=field_schema.get('type', 'unknown'),
+        backend_type=backend_type,
         frontend_type="missing",
         severity=TypeMismatchSeverity.WARNING,
-        message=f"Field {field_name} exists in backend but not in {missing_in}"
+        message=message
     )
 
 
@@ -216,10 +200,54 @@ def _create_extra_field_mismatch(
 ) -> TypeMismatch:
     """Create mismatch for extra field in frontend."""
     field_path = f"{schema_name}.{field_name}"
+    frontend_type = frontend_field.get('type', 'unknown')
+    message = f"Field {field_name} exists in frontend but not in backend"
     return TypeMismatch(
         field_path=field_path,
         backend_type="missing",
-        frontend_type=frontend_field.get('type', 'unknown'),
+        frontend_type=frontend_type,
         severity=TypeMismatchSeverity.INFO,
-        message=f"Field {field_name} exists in frontend but not in backend"
+        message=message
     )
+
+
+def _perform_validation_checks(
+    validator_instance, backend_schemas: Dict[str, Dict[str, Any]],
+    frontend_types: Dict[str, Dict[str, Any]]
+) -> List[TypeMismatch]:
+    """Perform both backend and frontend validation checks."""
+    backend_mismatches = _validate_backend_schemas(
+        backend_schemas, frontend_types, validator_instance.compat_checker
+    )
+    frontend_mismatches = _validate_frontend_schemas(frontend_types, backend_schemas)
+    return backend_mismatches + frontend_mismatches
+
+
+def _create_frontend_missing_mismatch(schema_name: str) -> TypeMismatch:
+    """Create mismatch for schema missing in frontend."""
+    message = f"Schema {schema_name} exists in backend but not in frontend"
+    return TypeMismatch(
+        field_path=schema_name,
+        backend_type="schema",
+        frontend_type="missing",
+        severity=TypeMismatchSeverity.ERROR,
+        message=message
+    )
+
+
+def _create_backend_missing_mismatch(schema_name: str) -> TypeMismatch:
+    """Create mismatch for schema missing in backend."""
+    message = f"Schema {schema_name} exists in frontend but not in backend"
+    return TypeMismatch(
+        field_path=schema_name,
+        backend_type="missing",
+        frontend_type="schema",
+        severity=TypeMismatchSeverity.INFO,
+        message=message
+    )
+
+
+def _append_mismatch_if_exists(mismatches: List[TypeMismatch], mismatch) -> None:
+    """Append mismatch to list if it exists."""
+    if mismatch:
+        mismatches.append(mismatch)

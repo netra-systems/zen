@@ -21,12 +21,12 @@ class TypeScriptParser:
         """Parse TypeScript file and extract type definitions."""
         try:
             content = _read_file_content(file_path)
-            types = _parse_typescript_content(content, self.interface_pattern, 
+            return _parse_typescript_content(content, self.interface_pattern, 
                                             self.type_pattern, self._parse_interface_fields)
-            return types
         except Exception as e:
+            error_msg = f"Failed to parse TypeScript file {file_path}: {e}"
             raise NetraValidationError(
-                message=f"Failed to parse TypeScript file {file_path}: {e}",
+                message=error_msg,
                 context=ErrorContext.get_all_context()
             )
     
@@ -36,10 +36,7 @@ class TypeScriptParser:
         cleaned_body = _clean_interface_body(interface_body)
         for match in self.field_pattern.finditer(cleaned_body):
             field_data = _extract_field_data(match)
-            fields[field_data['name']] = {
-                'type': field_data['type'],
-                'optional': field_data['optional']
-            }
+            fields[field_data['name']] = _create_field_dict(field_data)
         return fields
 
 
@@ -93,13 +90,7 @@ def get_backend_field_type(field_schema: Dict[str, Any]) -> str:
     field_type = field_schema.get('type')
     if field_type:
         return field_type
-    if '$ref' in field_schema:
-        return _handle_ref_type(field_schema['$ref'])
-    if 'items' in field_schema:
-        return _handle_array_type(field_schema['items'])
-    if 'anyOf' in field_schema:
-        return _handle_union_types(field_schema['anyOf'])
-    return 'unknown'
+    return _extract_complex_field_type(field_schema)
 
 
 def _handle_union_types(union_schemas: list) -> str:
@@ -116,9 +107,11 @@ def _parse_typescript_content(
     type_pattern: re.Pattern, field_parser
 ) -> Dict[str, Dict[str, Any]]:
     """Parse TypeScript content and return type definitions."""
+    interfaces = _parse_interfaces(content, interface_pattern, field_parser)
+    aliases = _parse_type_aliases(content, type_pattern)
     types = {}
-    types.update(_parse_interfaces(content, interface_pattern, field_parser))
-    types.update(_parse_type_aliases(content, type_pattern))
+    types.update(interfaces)
+    types.update(aliases)
     return types
 
 
@@ -133,3 +126,22 @@ def _handle_array_type(items_schema: Dict[str, Any]) -> str:
     """Handle array type extraction."""
     item_type = get_backend_field_type(items_schema)
     return f"List[{item_type}]"
+
+
+def _create_field_dict(field_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Create field dictionary from parsed field data."""
+    return {
+        'type': field_data['type'],
+        'optional': field_data['optional']
+    }
+
+
+def _extract_complex_field_type(field_schema: Dict[str, Any]) -> str:
+    """Extract type information from complex field schemas."""
+    if '$ref' in field_schema:
+        return _handle_ref_type(field_schema['$ref'])
+    if 'items' in field_schema:
+        return _handle_array_type(field_schema['items'])
+    if 'anyOf' in field_schema:
+        return _handle_union_types(field_schema['anyOf'])
+    return 'unknown'

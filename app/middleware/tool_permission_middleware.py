@@ -251,6 +251,44 @@ class ToolPermissionMiddleware:
         except Exception as e:
             logger.error(f"Error logging tool execution: {e}")
 
+    async def _handle_middleware_error(self, error: Exception, request: Request, call_next: Callable):
+        """Handle middleware errors."""
+        logger.error(f"Tool permission middleware error: {error}", exc_info=True)
+        return await call_next(request)
+
+    def _set_request_permission_state(self, request: Request, permission_result, tool_info: dict) -> None:
+        """Set permission state on request."""
+        request.state.permission_check = permission_result
+        request.state.tool_info = tool_info
+
+    def _is_post_request_with_body(self, request: Request) -> bool:
+        """Check if request is POST with body."""
+        return request.method == "POST" and hasattr(request, "_body")
+
+    def _build_tool_info_dict(self, data: dict) -> dict:
+        """Build tool info dictionary from data."""
+        return {
+            "name": data["tool_name"],
+            "arguments": data.get("arguments", {}),
+            "action": data.get("action", "execute")
+        }
+
+    def _build_tool_info_from_path(self, path_parts: list, query_params) -> dict:
+        """Build tool info from URL path parts."""
+        return {
+            "name": path_parts[3],
+            "action": path_parts[4] if len(path_parts) > 4 else "execute",
+            "arguments": dict(query_params)
+        }
+
+    def _build_mcp_tool_info(self, data: dict) -> dict:
+        """Build tool info from MCP data."""
+        return {
+            "name": data.get("method", "unknown"),
+            "arguments": data.get("params", {}),
+            "action": "execute"
+        }
+
 
 def create_tool_permission_dependency(
     permission_service: ToolPermissionService,

@@ -38,11 +38,22 @@ class LLMStructuredOperations:
         """Ask an LLM and get a structured response as a Pydantic model instance."""
         cache_key = create_structured_cache_key(prompt, llm_config_name, schema.__name__)
         
-        if use_cache:
-            cached_result = await get_cached_structured_response(cache_key, llm_config_name, schema)
-            if cached_result:
-                return cached_result
+        cached_result = await self._try_get_cached_result(cache_key, llm_config_name, schema, use_cache)
+        if cached_result:
+            return cached_result
         
+        return await self._generate_or_fallback(prompt, llm_config_name, schema, cache_key, use_cache, **kwargs)
+    
+    async def _try_get_cached_result(self, cache_key: str, llm_config_name: str, 
+                                   schema: Type[T], use_cache: bool) -> Optional[T]:
+        """Try to get cached result if caching is enabled."""
+        if use_cache:
+            return await get_cached_structured_response(cache_key, llm_config_name, schema)
+        return None
+    
+    async def _generate_or_fallback(self, prompt: str, llm_config_name: str, schema: Type[T], 
+                                  cache_key: str, use_cache: bool, **kwargs) -> T:
+        """Generate structured response or use fallback parsing."""
         try:
             return await self._generate_structured_response(prompt, llm_config_name, schema, 
                                                           cache_key, use_cache, **kwargs)

@@ -57,14 +57,17 @@ class ClickHouseDatabase:
         except Exception as e:
             return False
 
+    async def _execute_connection_test_query(self) -> bool:
+        """Execute connection test query."""
+        await self.execute_query("SELECT 1")
+        return True
+
     async def test_connection(self) -> bool:
         """Test if the ClickHouse connection is working."""
         try:
             if not self.client:
                 return False
-            # Run a simple query to test the connection
-            await self.execute_query("SELECT 1")
-            return True
+            return await self._execute_connection_test_query()
         except Exception:
             return False
 

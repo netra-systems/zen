@@ -17,6 +17,25 @@ from app.db.clickhouse_query_fixer import (
 )
 
 
+def assert_array_syntax_fixed(original_query: str, fixed_query: str, original_pattern: str, expected_pattern: str) -> None:
+    """Assert that array syntax was properly fixed"""
+    assert original_pattern not in fixed_query
+    assert expected_pattern in fixed_query
+
+
+def assert_query_structure_preserved(fixed_query: str, required_elements: list) -> None:
+    """Assert that query structure is preserved after fixing"""
+    for element in required_elements:
+        assert element in fixed_query
+
+
+def assert_multiple_replacements(fixed_query: str, pattern_pairs: list) -> None:
+    """Assert multiple pattern replacements occurred"""
+    for original_pattern, expected_pattern in pattern_pairs:
+        assert original_pattern not in fixed_query
+        assert expected_pattern in fixed_query
+
+
 class MockClickHouseClient:
     """Mock ClickHouse client for testing"""
     
@@ -199,17 +218,10 @@ class TestClickHouseArraySyntaxFixer:
     def test_basic_array_access_fix(self, query_test_suite):
         """Test fixing basic array access syntax"""
         original_query = query_test_suite.test_queries['basic_array_access']
-        
         fixed_query = fix_clickhouse_array_syntax(original_query)
         
-        # Should replace metrics.value[1] with toFloat64OrZero(arrayElement(metrics.value, 1))
-        assert 'metrics.value[1]' not in fixed_query
-        assert 'toFloat64OrZero(arrayElement(metrics.value, 1))' in fixed_query
-        
-        # Rest of query should remain unchanged
-        assert 'SELECT' in fixed_query
-        assert 'FROM performance_data' in fixed_query
-        assert "timestamp > '2023-01-01'" in fixed_query
+        assert_array_syntax_fixed(original_query, fixed_query, 'metrics.value[1]', 'toFloat64OrZero(arrayElement(metrics.value, 1))')
+        assert_query_structure_preserved(fixed_query, ['SELECT', 'FROM performance_data', "timestamp > '2023-01-01'"])
     
     def test_multiple_array_access_fix(self, query_test_suite):
         """Test fixing multiple array access patterns in single query"""

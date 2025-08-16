@@ -108,8 +108,11 @@ class LLMCoreOperations:
         """Create new LLM instance for given configuration."""
         config = self._get_and_validate_config(name)
         self._validate_provider_requirements(config, name)
-        
         final_config = self._merge_generation_config(config, generation_config)
+        return self._build_llm_instance(config, final_config)
+    
+    def _build_llm_instance(self, config: Any, final_config: Dict[str, Any]) -> Optional[Any]:
+        """Build LLM instance using provider and configuration."""
         return create_llm_for_provider(
             LLMProvider(config.provider), 
             config.model_name, 
@@ -158,32 +161,52 @@ class LLMCoreOperations:
     async def _execute_llm_request(self, prompt: str, llm_config_name: str, use_cache: bool) -> LLMResponse:
         """Execute the actual LLM request with heartbeat and data logging."""
         correlation_id = generate_llm_correlation_id()
-        if self.settings.llm_heartbeat_enabled:
-            start_llm_heartbeat(correlation_id, llm_config_name)
+        self._start_heartbeat_if_enabled(correlation_id, llm_config_name)
         
         try:
-            start_time = time.time()
-            llm = self.get_llm(llm_config_name)
-            
-            # Log input data if enabled
-            if self.settings.llm_data_logging_enabled:
-                self._log_llm_input(llm_config_name, correlation_id, prompt, llm)
-            
-            response = await llm.ainvoke(prompt)
-            execution_time_ms = (time.time() - start_time) * 1000
-            
-            config = self.settings.llm_configs.get(llm_config_name)
-            llm_response = await create_llm_response(response, config, llm_config_name, execution_time_ms)
-            
-            # Log output data if enabled
-            if self.settings.llm_data_logging_enabled:
-                self._log_llm_output(llm_config_name, correlation_id, response, llm_response)
-            
-            await self._cache_response_if_needed(use_cache, prompt, response.content, llm_config_name)
+            start_time, llm = await self._prepare_llm_execution(llm_config_name, correlation_id, prompt)
+            response, execution_time_ms = await self._execute_llm_call(llm, prompt, start_time)
+            llm_response = await self._create_response_object(response, llm_config_name, execution_time_ms)
+            await self._log_output_and_cache(llm_config_name, correlation_id, response, llm_response, use_cache, prompt)
             return llm_response
         finally:
-            if self.settings.llm_heartbeat_enabled:
-                stop_llm_heartbeat(correlation_id)
+            self._stop_heartbeat_if_enabled(correlation_id)
+    
+    def _start_heartbeat_if_enabled(self, correlation_id: str, llm_config_name: str) -> None:
+        """Start heartbeat logging if enabled."""
+        if self.settings.llm_heartbeat_enabled:
+            start_llm_heartbeat(correlation_id, llm_config_name)
+    
+    def _stop_heartbeat_if_enabled(self, correlation_id: str) -> None:
+        """Stop heartbeat logging if enabled."""
+        if self.settings.llm_heartbeat_enabled:
+            stop_llm_heartbeat(correlation_id)
+    
+    async def _prepare_llm_execution(self, llm_config_name: str, correlation_id: str, prompt: str) -> tuple:
+        """Prepare LLM execution by getting LLM instance and logging input."""
+        start_time = time.time()
+        llm = self.get_llm(llm_config_name)
+        if self.settings.llm_data_logging_enabled:
+            self._log_llm_input(llm_config_name, correlation_id, prompt, llm)
+        return start_time, llm
+    
+    async def _execute_llm_call(self, llm: Any, prompt: str, start_time: float) -> tuple:
+        """Execute the actual LLM call and calculate execution time."""
+        response = await llm.ainvoke(prompt)
+        execution_time_ms = (time.time() - start_time) * 1000
+        return response, execution_time_ms
+    
+    async def _create_response_object(self, response: Any, llm_config_name: str, execution_time_ms: float) -> Any:
+        """Create LLM response object from raw response."""
+        config = self.settings.llm_configs.get(llm_config_name)
+        return await create_llm_response(response, config, llm_config_name, execution_time_ms)
+    
+    async def _log_output_and_cache(self, llm_config_name: str, correlation_id: str, response: Any, 
+                                  llm_response: Any, use_cache: bool, prompt: str) -> None:
+        """Log output data and cache response if needed."""
+        if self.settings.llm_data_logging_enabled:
+            self._log_llm_output(llm_config_name, correlation_id, response, llm_response)
+        await self._cache_response_if_needed(use_cache, prompt, response.content, llm_config_name)
     
     def _log_llm_input(self, agent_name: str, correlation_id: str, prompt: str, llm: Any) -> None:
         """Log LLM input data for debugging."""
@@ -230,26 +253,27 @@ class LLMCoreOperations:
     async def stream_llm(self, prompt: str, llm_config_name: str) -> AsyncIterator[str]:
         """Stream LLM response content with heartbeat and data logging."""
         correlation_id = generate_llm_correlation_id()
-        if self.settings.llm_heartbeat_enabled:
-            start_llm_heartbeat(correlation_id, llm_config_name)
+        self._start_heartbeat_if_enabled(correlation_id, llm_config_name)
         
         try:
-            llm = self.get_llm(llm_config_name)
-            
-            # Log input data if enabled
-            if self.settings.llm_data_logging_enabled:
-                self._log_llm_input(llm_config_name, correlation_id, prompt, llm)
-            
+            llm = await self._prepare_streaming_llm(llm_config_name, correlation_id, prompt)
             response_chunks = []
             async for chunk in stream_llm_response(llm, prompt):
                 response_chunks.append(chunk)
                 yield chunk
-            
-            # Log output data if enabled
-            if self.settings.llm_data_logging_enabled:
-                full_response = "".join(response_chunks)
-                log_llm_output(llm_config_name, correlation_id, full_response, None)
-                
+            await self._log_streaming_output_if_enabled(llm_config_name, correlation_id, response_chunks)
         finally:
-            if self.settings.llm_heartbeat_enabled:
-                stop_llm_heartbeat(correlation_id)
+            self._stop_heartbeat_if_enabled(correlation_id)
+    
+    async def _prepare_streaming_llm(self, llm_config_name: str, correlation_id: str, prompt: str) -> Any:
+        """Prepare LLM for streaming by getting instance and logging input."""
+        llm = self.get_llm(llm_config_name)
+        if self.settings.llm_data_logging_enabled:
+            self._log_llm_input(llm_config_name, correlation_id, prompt, llm)
+        return llm
+    
+    async def _log_streaming_output_if_enabled(self, llm_config_name: str, correlation_id: str, response_chunks: list) -> None:
+        """Log streaming output data if logging is enabled."""
+        if self.settings.llm_data_logging_enabled:
+            full_response = "".join(response_chunks)
+            log_llm_output(llm_config_name, correlation_id, full_response, None)
