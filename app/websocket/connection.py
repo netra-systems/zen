@@ -33,6 +33,7 @@ class ConnectionInfo:
     last_message_time: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     rate_limit_count: int = 0
     rate_limit_window_start: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    is_closing: bool = False  # Track if connection is in closing state
 
 
 class ConnectionManager:
@@ -130,11 +131,16 @@ class ConnectionManager:
     
     async def _close_websocket_safely(self, websocket: WebSocket, code: int, reason: str) -> None:
         """Close websocket connection safely with error handling."""
-        if websocket.client_state == WebSocketState.CONNECTED:
-            try:
+        # Only attempt to close if WebSocket is in CONNECTED state
+        # Check both client_state and application_state to be safe
+        try:
+            if (hasattr(websocket, 'client_state') and 
+                websocket.client_state == WebSocketState.CONNECTED and
+                hasattr(websocket, 'application_state') and
+                websocket.application_state != WebSocketState.DISCONNECTED):
                 await websocket.close(code=code, reason=reason)
-            except Exception as e:
-                logger.debug(f"Error closing WebSocket: {e}")
+        except Exception as e:
+            logger.debug(f"Error closing WebSocket: {e}")
     
     def _log_disconnection_stats(self, user_id: str, conn_info: ConnectionInfo) -> None:
         """Log disconnection with statistics."""

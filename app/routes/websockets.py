@@ -1,4 +1,5 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from starlette.websockets import WebSocketState
 from app.ws_manager import manager
 from app.logging_config import central_logger
 from app.routes.utils.websocket_helpers import (
@@ -84,7 +85,10 @@ async def _handle_websocket_disconnect(e: WebSocketDisconnect, user_id_str: str,
 async def _handle_websocket_error(e: Exception, user_id_str: str, websocket: WebSocket):
     """Handle WebSocket error."""
     logger.error(f"WebSocket error for user {user_id_str}: {e}", exc_info=True)
-    await manager.disconnect_user(user_id_str, websocket, code=1011, reason="Server error")
+    # Only try to disconnect if WebSocket is in a valid state
+    if (hasattr(websocket, 'application_state') and 
+        websocket.application_state != WebSocketState.CONNECTING):
+        await manager.disconnect_user(user_id_str, websocket, code=1011, reason="Server error")
 
 async def _setup_websocket_auth(websocket: WebSocket):
     """Setup WebSocket authentication."""
