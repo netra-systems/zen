@@ -88,13 +88,17 @@ class Database:
         """Close database session."""
         db.close()
 
+    def _execute_db_transaction(self, db: Session):
+        """Execute database transaction."""
+        yield db
+        self._commit_session(db)
+
     @contextmanager
     def get_db(self) -> Generator[Session, None, None]:
         """Provide a transactional scope around a series of operations."""
         db = self._create_session()
         try:
-            yield db
-            self._commit_session(db)
+            yield from self._execute_db_transaction(db)
         except Exception as e:
             self._handle_transaction_error(db, e)
         finally:
@@ -231,14 +235,18 @@ def _create_and_setup_engine(async_db_url: str, engine_args: dict):
     _setup_global_engine_objects(engine)
     logger.info("PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling")
 
+def _initialize_engine_with_url(db_url: str):
+    """Initialize engine with validated URL."""
+    async_db_url, engine_args = _create_engine_components(db_url)
+    _create_and_setup_engine(async_db_url, engine_args)
+
 def _initialize_async_engine():
     """Initialize the async PostgreSQL engine."""
     try:
         db_url = _validate_database_url()
         if not db_url:
             return
-        async_db_url, engine_args = _create_engine_components(db_url)
-        _create_and_setup_engine(async_db_url, engine_args)
+        _initialize_engine_with_url(db_url)
     except Exception as e:
         _handle_engine_creation_error(e)
 
