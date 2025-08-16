@@ -133,7 +133,17 @@ withRouter(<NavLinks />)
   });
 
   it('should render login link when user is not authenticated', () => {
-    // This test assumes the user is not authenticated in the test environment
+    // Mock authService to return no user
+    const { authService } = require('@/auth');
+    authService.useAuth.mockReturnValue({
+      user: null,
+      login: jest.fn(),
+      logout: jest.fn(),
+      loading: false,
+      authConfig: null,
+      token: null
+    });
+    
     renderWithProviders(
 withRouter(<NavLinks />)
     );

@@ -85,7 +85,7 @@ MockWebSocket.OPEN = 1;
 MockWebSocket.CLOSING = 2;
 MockWebSocket.CLOSED = 3;
 
-(global as any).WebSocket = MockWebSocket;
+global.WebSocket = MockWebSocket;
 
 // Mock localStorage
 const localStorageMock = {
@@ -94,7 +94,7 @@ const localStorageMock = {
   removeItem: jest.fn(),
   clear: jest.fn(),
 };
-global.localStorage = localStorageMock as any;
+global.localStorage = localStorageMock;
 
 // Mock sessionStorage
 const sessionStorageMock = {
@@ -103,13 +103,13 @@ const sessionStorageMock = {
   removeItem: jest.fn(),
   clear: jest.fn(),
 };
-global.sessionStorage = sessionStorageMock as any;
+global.sessionStorage = sessionStorageMock;
 
 // Suppress console errors in tests
 const originalError = console.error;
 const originalWarn = console.warn;
 beforeAll(() => {
-  console.error = (...args: any[]) => {
+  console.error = (...args) => {
     if (
       typeof args[0] === 'string' &&
       (args[0].includes('Not implemented') ||
@@ -123,7 +123,7 @@ beforeAll(() => {
     originalError.call(console, ...args);
   };
   
-  console.warn = (...args: any[]) => {
+  console.warn = (...args) => {
     if (
       typeof args[0] === 'string' &&
       args[0].includes('Warning:')
@@ -176,7 +176,7 @@ jest.mock('@/hooks/useWebSocket', () => ({
 
 // Mock the WebSocketProvider context
 jest.mock('@/providers/WebSocketProvider', () => ({
-  WebSocketProvider: ({ children }: { children: React.ReactNode }) => children,
+  WebSocketProvider: ({ children }) => children,
   WebSocketContext: React.createContext(null),
   useWebSocketContext: () => ({
     sendMessage: jest.fn(),
