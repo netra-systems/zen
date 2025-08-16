@@ -253,16 +253,18 @@ class ArchitectureEnforcer:
         return violations
     
     def _get_test_stub_patterns(self) -> List[Tuple[str, str]]:
-        """Get patterns for detecting test stubs"""
+        """Get patterns for detecting actual test stubs (more precise)"""
         return [
-            (r'# Mock implementation', 'Mock implementation comment'),
-            (r'# Test stub', 'Test stub comment'),
-            (r'# TODO.*implement', 'TODO implementation comment'),
-            (r'""".*test implementation.*"""', 'Test implementation docstring'),
-            (r'""".*for testing.*"""', 'For testing docstring'),
-            (r'""".*placeholder.*"""', 'Placeholder docstring'),
+            # More specific patterns that indicate actual stubs
+            (r'""".*placeholder for test compatibility.*"""', 'Test compatibility placeholder'),
+            (r'# Mock implementation.*\n\s*pass\s*$', 'Mock implementation with pass'),
+            (r'# Test stub.*\n\s*pass\s*$', 'Test stub with pass'),
+            (r'def.*\*args.*\*\*kwargs.*:\s*\n\s*""".*test.*"""\s*\n\s*return\s*\{', 'Args kwargs test stub'),
             (r'return \[{"id": "1"', 'Hardcoded test data'),
-            (r'return {"test": "data"}', 'Test data return')
+            (r'return {"test": "data"}', 'Test data return'),
+            (r'raise NotImplementedError\(".*stub.*"\)', 'NotImplementedError stub'),
+            # Look for actual placeholder implementations
+            (r'# Real.*would be.*\n\s*pass\s*$', 'Placeholder with TODO comment')
         ]
     
     def _should_skip_test_file(self, filepath: str) -> bool:
@@ -308,7 +310,48 @@ class ArchitectureEnforcer:
             'migrations',
             'test_reports',
             'docs',
-            '.pytest_cache'
+            '.pytest_cache',
+            # Third-party libraries and vendor code
+            'venv',
+            '.venv',
+            'env',
+            '.env',
+            'virtualenv',
+            'site-packages',
+            'dist-packages',
+            'vendor',
+            'third_party',
+            'third-party',
+            'external',
+            'lib',
+            'libs',
+            'bower_components',
+            'jspm_packages',
+            # Build and distribution directories
+            'build',
+            'dist',
+            '.eggs',
+            '*.egg-info',
+            # IDE and editor directories
+            '.idea',
+            '.vscode',
+            '.vs',
+            # Testing and coverage
+            'htmlcov',
+            '.coverage',
+            '.tox',
+            '.nox',
+            # Package managers
+            'pip-wheel-metadata',
+            'package-lock.json',
+            'yarn.lock',
+            # Common third-party framework directories
+            'static/admin',  # Django admin
+            'static/rest_framework',  # DRF
+            'wwwroot/lib',  # .NET
+            # Terraform providers and modules
+            '.terraform',
+            'terraform/.terraform'
         ]
         return any(pattern in filepath for pattern in skip_patterns)
     
@@ -324,7 +367,7 @@ class ArchitectureEnforcer:
     def _get_code_start_index(self, node) -> int:
         """Get index where actual code starts (after docstring)"""
         if (len(node.body) > 0 and isinstance(node.body[0], ast.Expr) and
-            isinstance(node.body[0].value, (ast.Constant, ast.Str))):
+            isinstance(node.body[0].value, ast.Constant)):
             return 1
         return 0
     

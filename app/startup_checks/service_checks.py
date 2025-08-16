@@ -116,8 +116,7 @@ class ServiceChecker:
     def _create_redis_failure_result(self, error: Exception) -> StartupCheckResult:
         """Create failed Redis check result"""
         critical = self.environment == "production"
-        if not critical:
-            logger.warning("Redis not available - caching disabled")
+        self._log_redis_warning_if_needed(critical)
         return StartupCheckResult(
             name="redis_connection", success=False, critical=critical,
             message=f"Redis connection failed: {error}"
@@ -127,10 +126,7 @@ class ServiceChecker:
         """Validate ClickHouse connection and tables"""
         timeout = 5 if self.is_staging else 30
         tables = await asyncio.wait_for(self._check_clickhouse_tables(), timeout=timeout)
-        required_tables = ['workload_events']
-        missing_tables = [t for t in required_tables if t not in tables]
-        if missing_tables:
-            raise ValueError(f"Missing ClickHouse tables: {missing_tables}")
+        self._validate_required_tables(tables)
         return tables
     
     def _create_clickhouse_success_result(self, tables: List[str]) -> StartupCheckResult:
@@ -143,8 +139,7 @@ class ServiceChecker:
     def _create_clickhouse_failure_result(self, error: Exception) -> StartupCheckResult:
         """Create failed ClickHouse check result"""
         critical = self.environment == "production"
-        if not critical:
-            logger.warning("ClickHouse not available - analytics features limited")
+        self._log_clickhouse_warning_if_needed(critical)
         return StartupCheckResult(
             name="clickhouse_connection", success=False, critical=critical,
             message=f"ClickHouse check failed: {error}"
@@ -153,14 +148,10 @@ class ServiceChecker:
     async def _test_all_llm_providers(self) -> tuple:
         """Test all LLM provider connections"""
         llm_manager = self.app.state.llm_manager
-        available_providers = []
-        failed_providers = []
+        available_providers, failed_providers = [], []
         for llm_name in settings.llm_configs:
             available, failed = self._test_single_llm_provider(llm_manager, llm_name)
-            if available:
-                available_providers.append(llm_name)
-            if failed:
-                failed_providers.append(failed)
+            self._process_llm_test_result(available_providers, failed_providers, available, failed)
         return available_providers, failed_providers
     
     def _test_single_llm_provider(self, llm_manager, llm_name: str) -> tuple:
@@ -199,8 +190,31 @@ class ServiceChecker:
     def _create_all_providers_result(self, available_providers: List[str]) -> StartupCheckResult:
         """Create result when all providers are available"""
         return StartupCheckResult(
-            name="llm_providers",
-            success=True,
-            message=f"All {len(available_providers)} LLM providers configured",
-            critical=False
+            name="llm_providers", success=True, critical=False,
+            message=f"All {len(available_providers)} LLM providers configured"
         )
+    
+    def _log_redis_warning_if_needed(self, critical: bool) -> None:
+        """Log Redis warning if not critical"""
+        if not critical:
+            logger.warning("Redis not available - caching disabled")
+    
+    def _validate_required_tables(self, tables: List[str]) -> None:
+        """Validate required ClickHouse tables exist"""
+        required_tables = ['workload_events']
+        missing_tables = [t for t in required_tables if t not in tables]
+        if missing_tables:
+            raise ValueError(f"Missing ClickHouse tables: {missing_tables}")
+    
+    def _log_clickhouse_warning_if_needed(self, critical: bool) -> None:
+        """Log ClickHouse warning if not critical"""
+        if not critical:
+            logger.warning("ClickHouse not available - analytics features limited")
+    
+    def _process_llm_test_result(self, available_providers: List[str], failed_providers: List[str], 
+                                available: str, failed: str) -> None:
+        """Process single LLM test result"""
+        if available:
+            available_providers.append(available)
+        if failed:
+            failed_providers.append(failed)

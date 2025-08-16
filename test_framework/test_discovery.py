@@ -71,6 +71,7 @@ class TestDiscovery:
         categories.update(self._get_critical_categories())
         categories.update(self._get_standard_categories())
         categories.update(self._get_specialized_categories())
+        categories.update(self._get_real_llm_categories())
         
         return categories
     
@@ -120,17 +121,32 @@ class TestDiscovery:
     
     def _discover_frontend_tests_into(self, path: Path, discovered: defaultdict):
         """Discover frontend tests and add to discovered dict."""
+        # Check __tests__ directory
         frontend_test_dir = path / "frontend" / "__tests__"
         if frontend_test_dir.exists():
-            for test_file in frontend_test_dir.rglob("*.test.{ts,tsx,js,jsx}"):
-                discovered["frontend"].append(str(test_file))
+            for ext in ["ts", "tsx", "js", "jsx"]:
+                for test_file in frontend_test_dir.rglob(f"*.test.{ext}"):
+                    discovered["frontend"].append(str(test_file))
+                for test_file in frontend_test_dir.rglob(f"*.spec.{ext}"):
+                    discovered["frontend"].append(str(test_file))
+        
+        # Check for co-located tests in frontend directory
+        frontend_dir = path / "frontend"
+        if frontend_dir.exists():
+            for ext in ["ts", "tsx", "js", "jsx"]:
+                for test_file in frontend_dir.rglob(f"*.test.{ext}"):
+                    if "__tests__" not in str(test_file) and "node_modules" not in str(test_file):
+                        discovered["frontend"].append(str(test_file))
     
     def _discover_cypress_tests_into(self, path: Path, discovered: defaultdict):
         """Discover Cypress tests and add to discovered dict."""
         cypress_dir = path / "frontend" / "cypress" / "e2e"
         if cypress_dir.exists():
-            for test_file in cypress_dir.rglob("*.cy.{ts,js}"):
-                discovered["e2e"].append(str(test_file))
+            for ext in ["ts", "js"]:
+                for test_file in cypress_dir.rglob(f"*.cy.{ext}"):
+                    discovered["e2e"].append(str(test_file))
+                for test_file in cypress_dir.rglob(f"*.spec.{ext}"):
+                    discovered["e2e"].append(str(test_file))
     
     def _add_jest_tests(self, path: Path, frontend_tests: List[str]):
         """Add Jest/React tests to frontend tests list."""
@@ -163,7 +179,9 @@ class TestDiscovery:
     
     def _check_primary_categories(self, path_str: str) -> str:
         """Check for primary test categories."""
-        if "unit" in path_str or "app/tests/core" in path_str:
+        if "real_" in path_str or "_real" in path_str:
+            return "real_e2e"
+        elif "unit" in path_str or "app/tests/core" in path_str:
             return "unit"
         elif "integration" in path_str:
             return "integration"
@@ -269,6 +287,23 @@ class TestDiscovery:
                 "description": "Miscellaneous tests",
                 "priority": "low",
                 "timeout": "5m"
+            }
+        }
+    
+    def _get_real_llm_categories(self) -> Dict[str, Dict[str, str]]:
+        """Get real LLM/service test categories."""
+        return {
+            "real_e2e": {
+                "description": "[REAL E2E] Tests with actual LLM calls and services",
+                "priority": "critical",
+                "timeout": "15m",
+                "requires_llm": True
+            },
+            "real_services": {
+                "description": "[REAL] Service integration tests",
+                "priority": "high",
+                "timeout": "10m",
+                "requires_services": True
             }
         }
     

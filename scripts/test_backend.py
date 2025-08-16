@@ -324,11 +324,19 @@ def run_tests(pytest_args: List[str], args, isolation_manager=None) -> int:
     return exit_code
 
 
-def main():
+def create_backend_argument_parser():
+    """Create and configure backend argument parser"""
     parser = argparse.ArgumentParser(
         description="Comprehensive backend test runner for Netra AI Platform",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
+        epilog=get_backend_usage_examples()
+    )
+    return parser
+
+
+def get_backend_usage_examples():
+    """Get backend usage examples string"""
+    return """
 Examples:
   # Run all tests
   python scripts/test_backend.py
@@ -352,128 +360,79 @@ Examples:
   # Full CI/CD run
   python scripts/test_backend.py --coverage --html-output --json-output --parallel auto
         """
-    )
-    
-    # Test selection
-    parser.add_argument(
-        "tests",
-        nargs="*",
-        help="Specific test files or directories to run"
-    )
-    parser.add_argument(
-        "--category", "-c",
-        choices=list(TEST_CATEGORIES.keys()),
-        help="Run tests from a specific category"
-    )
-    parser.add_argument(
-        "--keyword", "-k",
-        help="Only run tests matching the given keyword expression"
-    )
-    parser.add_argument(
-        "--markers", "-m",
-        help="Only run tests matching given mark expression"
-    )
-    
-    # Execution options
-    parser.add_argument(
-        "--parallel", "-p",
-        default=0,
-        help="Number of parallel workers (0=sequential, auto=auto, or number)"
-    )
-    parser.add_argument(
-        "--fail-fast", "-x",
-        action="store_true",
-        help="Stop on first test failure"
-    )
-    parser.add_argument(
-        "--failed-first", "--ff",
-        action="store_true",
-        help="Run previously failed tests first"
-    )
-    
-    # Coverage options
-    parser.add_argument(
-        "--coverage", "--cov",
-        action="store_true",
-        help="Enable coverage reporting"
-    )
-    parser.add_argument(
-        "--min-coverage",
-        type=int,
-        default=70,
-        help="Minimum coverage percentage required (default: 70)"
-    )
-    
-    # Output options
-    parser.add_argument(
-        "--verbose", "-v",
-        action="store_true",
-        help="Verbose output"
-    )
-    parser.add_argument(
-        "--quiet", "-q",
-        action="store_true",
-        help="Minimal output"
-    )
-    parser.add_argument(
-        "--json-output",
-        action="store_true",
-        help="Generate JSON test report"
-    )
-    parser.add_argument(
-        "--html-output",
-        action="store_true",
-        help="Generate HTML test report"
-    )
-    parser.add_argument(
-        "--profile",
-        action="store_true",
-        help="Show slowest tests"
-    )
-    
-    # Environment options
-    parser.add_argument(
-        "--check-deps",
-        action="store_true",
-        help="Check test dependencies before running"
-    )
-    parser.add_argument(
-        "--show-warnings",
-        action="store_true",
-        help="Show warning messages"
-    )
-    
-    # Isolation options
-    parser.add_argument(
-        "--isolation",
-        action="store_true",
-        help="Use test isolation for concurrent execution"
-    )
-    
-    args = parser.parse_args()
-    
-    # Setup test isolation if requested
-    isolation_manager = None
-    if args.isolation and TestIsolationManager:
-        isolation_manager = TestIsolationManager()
-        isolation_manager.setup_environment()
-        isolation_manager.apply_environment()
-        isolation_manager.register_cleanup()
-    
-    # Setup environment
-    setup_test_environment(isolation_manager)
-    
-    # Build pytest arguments
+
+
+def add_backend_test_selection_args(parser):
+    """Add test selection arguments to backend parser"""
+    parser.add_argument("tests", nargs="*", help="Specific test files or directories to run")
+    parser.add_argument("--category", "-c", choices=list(TEST_CATEGORIES.keys()), help="Run tests from a specific category")
+    parser.add_argument("--keyword", "-k", help="Only run tests matching the given keyword expression")
+    parser.add_argument("--markers", "-m", help="Only run tests matching given mark expression")
+
+
+def add_backend_execution_args(parser):
+    """Add execution arguments to backend parser"""
+    parser.add_argument("--parallel", "-p", default=0, help="Number of parallel workers (0=sequential, auto=auto, or number)")
+    parser.add_argument("--fail-fast", "-x", action="store_true", help="Stop on first test failure")
+    parser.add_argument("--failed-first", "--ff", action="store_true", help="Run previously failed tests first")
+
+
+def add_backend_coverage_args(parser):
+    """Add coverage arguments to backend parser"""
+    parser.add_argument("--coverage", "--cov", action="store_true", help="Enable coverage reporting")
+    parser.add_argument("--min-coverage", type=int, default=70, help="Minimum coverage percentage required (default: 70)")
+
+
+def add_backend_output_args(parser):
+    """Add output arguments to backend parser"""
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
+    parser.add_argument("--quiet", "-q", action="store_true", help="Minimal output")
+    parser.add_argument("--json-output", action="store_true", help="Generate JSON test report")
+    parser.add_argument("--html-output", action="store_true", help="Generate HTML test report")
+    parser.add_argument("--profile", action="store_true", help="Show slowest tests")
+
+
+def add_backend_env_args(parser):
+    """Add environment arguments to backend parser"""
+    parser.add_argument("--check-deps", action="store_true", help="Check test dependencies before running")
+    parser.add_argument("--show-warnings", action="store_true", help="Show warning messages")
+    parser.add_argument("--isolation", action="store_true", help="Use test isolation for concurrent execution")
+
+
+def setup_backend_isolation_manager(args):
+    """Setup backend test isolation manager if requested"""
+    if not (args.isolation and TestIsolationManager):
+        return None
+    manager = TestIsolationManager()
+    manager.setup_environment()
+    manager.apply_environment()
+    manager.register_cleanup()
+    return manager
+
+
+def prepare_pytest_args(args, isolation_manager):
+    """Prepare pytest arguments with isolation if needed"""
     pytest_args = build_pytest_args(args)
-    
-    # Add isolation-specific pytest arguments
     if isolation_manager:
         isolation_args = isolation_manager.get_pytest_args()
         pytest_args.extend(isolation_args)
+    return pytest_args
+
+
+def main():
+    """Main entry point for backend test runner"""
+    parser = create_backend_argument_parser()
+    add_backend_test_selection_args(parser)
+    add_backend_execution_args(parser)
+    add_backend_coverage_args(parser)
+    add_backend_output_args(parser)
+    add_backend_env_args(parser)
+    args = parser.parse_args()
     
-    # Run tests
+    isolation_manager = setup_backend_isolation_manager(args)
+    setup_test_environment(isolation_manager)
+    pytest_args = prepare_pytest_args(args, isolation_manager)
     exit_code = run_tests(pytest_args, args, isolation_manager)
-    
     sys.exit(exit_code)
 
 

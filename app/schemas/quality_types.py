@@ -1,9 +1,14 @@
 """Strong type definitions for Quality Routes and monitoring services."""
 
-from typing import Any, Dict, Optional, List, Union, Literal
+from typing import Any, Dict, Optional, List, Union, Literal, TYPE_CHECKING
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime, UTC
 from enum import Enum
+from abc import ABC, abstractmethod
+
+# Import types only for type checking to avoid circular dependencies  
+if TYPE_CHECKING:
+    pass
 
 
 class QualityLevel(str, Enum):
@@ -244,3 +249,23 @@ class QualityTrendData(BaseModel):
     data: QualityDashboardData = Field(description="Dashboard data for this date")
     comparison_previous: Optional[Dict[str, float]] = Field(default=None, description="Comparison with previous period")
     notable_changes: List[str] = Field(default_factory=list, description="Notable changes from previous period")
+
+
+# Quality Validator Interface (Single Source of Truth)
+class QualityValidatorInterface(ABC):
+    """Interface for all quality validator implementations - prevents duplicate validator classes"""
+    
+    @abstractmethod
+    async def validate_content(
+        self, 
+        content: str, 
+        content_type: Optional[str] = None,
+        context: Optional[Dict[str, Any]] = None
+    ) -> QualityValidationResult:
+        """Validate content and return detailed quality results"""
+        pass
+    
+    @abstractmethod
+    def get_validation_stats(self) -> Dict[str, Any]:
+        """Get validation statistics"""
+        pass

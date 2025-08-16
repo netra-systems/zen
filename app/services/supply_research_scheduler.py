@@ -164,9 +164,17 @@ class SupplyResearchScheduler:
             return False
     
     async def _cleanup_job_resources(self, schedule: ResearchSchedule):
-        """Cleanup job resources - placeholder for test compatibility"""
-        # Real cleanup logic would be in specific components
-        pass
+        """Cleanup job resources after execution"""
+        try:
+            # Clear any temporary cache entries for this schedule
+            cache_key = f"schedule_{schedule.name}"
+            if hasattr(self, 'cache') and self.cache:
+                await self.cache.delete(cache_key)
+            
+            # Log cleanup completion
+            self.logger.debug(f"Cleaned up resources for schedule: {schedule.name}")
+        except Exception as e:
+            self.logger.warning(f"Resource cleanup failed for {schedule.name}: {e}")
     
     async def _execute_job_with_metrics(self, schedule: ResearchSchedule) -> bool:
         """Execute job with metrics tracking - simplified wrapper"""
@@ -186,9 +194,27 @@ class SupplyResearchScheduler:
             return False
     
     async def _record_job_metrics(self, job_name: str, execution_time: Any, success: bool):
-        """Record job metrics - placeholder for test compatibility"""
-        # Real metrics logic would be in metrics component
-        pass
+        """Record job metrics for monitoring and analysis"""
+        try:
+            from datetime import datetime, UTC
+            
+            metrics_data = {
+                "job_name": job_name,
+                "execution_time_seconds": execution_time.total_seconds() if hasattr(execution_time, 'total_seconds') else float(execution_time),
+                "success": success,
+                "timestamp": datetime.now(UTC).isoformat(),
+                "scheduler_type": "supply_research"
+            }
+            
+            # Log metrics for observability
+            self.logger.info(f"Job metrics recorded", extra=metrics_data)
+            
+            # Store in result manager if available
+            if hasattr(self, 'result_manager') and self.result_manager:
+                await self.result_manager.store_metrics(job_name, metrics_data)
+                
+        except Exception as e:
+            self.logger.error(f"Failed to record metrics for {job_name}: {e}")
     
     async def get_recent_results(
         self,

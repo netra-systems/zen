@@ -52,598 +52,216 @@ from test_framework.test_config import configure_staging_environment, configure_
 def handle_test_discovery(args):
     """Handle test discovery and listing."""
     discovery = TestDiscovery(PROJECT_ROOT)
-    
-    # Gather test data
+    all_tests, categories, test_counts = _gather_test_data(discovery)
+    all_tests = _filter_tests_by_category(args, all_tests)
+    _validate_test_level(args)
+    return _format_discovery_output(args, all_tests, categories, test_counts)
+
+def _gather_test_data(discovery):
+    """Gather test data from discovery"""
     all_tests = discovery.discover_tests()
     categories = discovery.get_test_categories()
     test_counts = discovery.get_test_count_by_category()
-    
-    # Filter by category if specified
+    return all_tests, categories, test_counts
+
+def _filter_tests_by_category(args, all_tests):
+    """Filter tests by category if specified"""
     if args.list_category:
         filtered_tests = {args.list_category: all_tests.get(args.list_category, [])}
-        all_tests = filtered_tests
-    
-    # Filter by level if specified
+        return filtered_tests
+    return all_tests
+
+def _validate_test_level(args):
+    """Validate test level if specified"""
     if args.list_level:
         level_config = TEST_LEVELS.get(args.list_level)
         if not level_config:
             print(f"[ERROR] Unknown test level: {args.list_level}")
             return 1
-    
-    # Format output based on requested format
-    if args.list_format == "json":
-        output = {
-            "test_levels": {},
-            "test_categories": {},
-            "discovered_tests": {},
-            "statistics": {
-                "total_levels": len(TEST_LEVELS),
-                "total_categories": len(test_counts),
-                "total_tests": sum(test_counts.values())
-            }
-        }
-        
-        # Add test levels info
-        for level, config in TEST_LEVELS.items():
-            if not args.list_level or level == args.list_level:
-                output["test_levels"][level] = {
-                    "description": config["description"],
-                    "purpose": config["purpose"],
-                    "timeout": config["timeout"],
-                    "runs_coverage": config.get("run_coverage", False),
-                    "runs_both": config.get("run_both", False)
-                }
-        
-        # Add categories info
-        for cat, info in categories.items():
-            if not args.list_category or cat == args.list_category:
-                output["test_categories"][cat] = {
-                    **info,
-                    "test_count": test_counts.get(cat, 0)
-                }
-        
-        # Add discovered tests
-        for cat, tests in all_tests.items():
-            output["discovered_tests"][cat] = [str(t) for t in tests]
-        
-        print(json.dumps(output, indent=2))
-    
-    elif args.list_format == "markdown":
-        print("# Netra AI Platform Test Discovery Report\n")
-        print(f"**Total Test Levels:** {len(TEST_LEVELS)}")
-        print(f"**Total Test Categories:** {len(test_counts)}")
-        print(f"**Total Tests Found:** {sum(test_counts.values())}\n")
-        
-        print("## Available Test Levels\n")
-        for level, config in TEST_LEVELS.items():
-            if not args.list_level or level == args.list_level:
-                print(f"### `{level}`")
-                print(f"- **Description:** {config['description']}")
-                print(f"- **Purpose:** {config['purpose']}")
-                print(f"- **Timeout:** {config['timeout']}s")
-                print(f"- **Coverage:** {'Yes' if config.get('run_coverage') else 'No'}")
-                print(f"- **Runs Both:** {'Backend & Frontend' if config.get('run_both') else 'Backend Only'}")
-                print()
-        
-        print("## Test Categories\n")
-        print("| Category | Description | Priority | Timeout | Count |")
-        print("|----------|-------------|----------|---------|-------|")
-        for cat, info in categories.items():
-            if not args.list_category or cat == args.list_category:
-                count = test_counts.get(cat, 0)
-                print(f"| {cat} | {info['description']} | {info['priority']} | {info['timeout']} | {count} |")
-        
-        if args.list_category or args.list_level:
-            print(f"\n## Tests in Selected Categories\n")
-            for cat, tests in all_tests.items():
-                if tests:
-                    print(f"### {cat} ({len(tests)} tests)")
-                    for test in tests[:5]:  # Show first 5 tests
-                        print(f"- `{Path(test).relative_to(PROJECT_ROOT)}`")
-                    if len(tests) > 5:
-                        print(f"  ... and {len(tests) - 5} more")
-                    print()
-    
-    else:  # text format (default)
-        print("=" * 80)
-        print("TEST DISCOVERY REPORT")
-        print("=" * 80)
-        print(f"Total Test Levels: {len(TEST_LEVELS)}")
-        print(f"Total Test Categories: {len(test_counts)}")
-        print(f"Total Tests Found: {sum(test_counts.values())}")
-        print()
-        
-        print("AVAILABLE TEST LEVELS:")
-        print("-" * 40)
-        for level, config in TEST_LEVELS.items():
-            if not args.list_level or level == args.list_level:
-                print(f"{level:24} - {config['description']}")
-                print(f"{'':24}   Purpose: {config['purpose']}")
-                print(f"{'':24}   Timeout: {config['timeout']}s")
-        print()
-        
-        print("TEST CATEGORIES:")
-        print("-" * 40)
-        for cat, info in categories.items():
-            if not args.list_category or cat == args.list_category:
-                count = test_counts.get(cat, 0)
-                print(f"{cat:20} - {count:4} tests - {info['description']}")
-        print()
-        
-        if args.list_category:
-            print(f"TESTS IN CATEGORY '{args.list_category}':")
-            print("-" * 40)
-            tests = all_tests.get(args.list_category, [])
-            for test in tests:
-                print(f"  {Path(test).relative_to(PROJECT_ROOT)}")
-            if not tests:
-                print("  No tests found in this category")
-    
     return 0
 
+def _format_discovery_output(args, all_tests, categories, test_counts):
+    """Format output based on requested format"""
+    if args.list_format == "json":
+        return _format_json_output(args, all_tests, categories, test_counts)
+    elif args.list_format == "markdown":
+        return _format_markdown_output(args, all_tests, categories, test_counts)
+    else:
+        return _format_text_output(args, all_tests, categories, test_counts)
+
+def _format_json_output(args, all_tests, categories, test_counts):
+    """Format discovery output as JSON"""
+    output = _create_json_structure(test_counts)
+    _add_test_levels_to_json(args, output)
+    _add_categories_to_json(args, categories, test_counts, output)
+    _add_discovered_tests_to_json(all_tests, output)
+    print(json.dumps(output, indent=2))
+    return 0
+
+def _create_json_structure(test_counts):
+    """Create basic JSON structure"""
+    return {
+        "test_levels": {},
+        "test_categories": {},
+        "discovered_tests": {},
+        "statistics": {
+            "total_levels": len(TEST_LEVELS),
+            "total_categories": len(test_counts),
+            "total_tests": sum(test_counts.values())
+        }
+    }
+
+def _add_test_levels_to_json(args, output):
+    """Add test levels info to JSON output"""
+    for level, config in TEST_LEVELS.items():
+        if not args.list_level or level == args.list_level:
+            output["test_levels"][level] = {
+                "description": config["description"],
+                "purpose": config["purpose"],
+                "timeout": config["timeout"],
+                "runs_coverage": config.get("run_coverage", False),
+                "runs_both": config.get("run_both", False)
+            }
+
+def _add_categories_to_json(args, categories, test_counts, output):
+    """Add categories info to JSON output"""
+    for cat, info in categories.items():
+        if not args.list_category or cat == args.list_category:
+            output["test_categories"][cat] = {
+                **info,
+                "test_count": test_counts.get(cat, 0)
+            }
+
+def _add_discovered_tests_to_json(all_tests, output):
+    """Add discovered tests to JSON output"""
+    for cat, tests in all_tests.items():
+        output["discovered_tests"][cat] = [str(t) for t in tests]
+
+def _format_markdown_output(args, all_tests, categories, test_counts):
+    """Format discovery output as Markdown"""
+    _print_markdown_header(test_counts)
+    _print_markdown_test_levels(args)
+    _print_markdown_categories(args, categories, test_counts)
+    _print_markdown_selected_tests(args, all_tests)
+    return 0
+
+def _print_markdown_header(test_counts):
+    """Print Markdown header"""
+    print("# Netra AI Platform Test Discovery Report\n")
+    print(f"**Total Test Levels:** {len(TEST_LEVELS)}")
+    print(f"**Total Test Categories:** {len(test_counts)}")
+    print(f"**Total Tests Found:** {sum(test_counts.values())}\n")
+
+def _print_markdown_test_levels(args):
+    """Print Markdown test levels section"""
+    print("## Available Test Levels\n")
+    for level, config in TEST_LEVELS.items():
+        if not args.list_level or level == args.list_level:
+            print(f"### `{level}`")
+            print(f"- **Description:** {config['description']}")
+            print(f"- **Purpose:** {config['purpose']}")
+            print(f"- **Timeout:** {config['timeout']}s")
+            print(f"- **Coverage:** {'Yes' if config.get('run_coverage') else 'No'}")
+            print(f"- **Runs Both:** {'Backend & Frontend' if config.get('run_both') else 'Backend Only'}")
+            print()
+
+def _print_markdown_categories(args, categories, test_counts):
+    """Print Markdown categories table"""
+    print("## Test Categories\n")
+    print("| Category | Description | Priority | Timeout | Count |")
+    print("|----------|-------------|----------|---------|-------|")
+    for cat, info in categories.items():
+        if not args.list_category or cat == args.list_category:
+            count = test_counts.get(cat, 0)
+            print(f"| {cat} | {info['description']} | {info['priority']} | {info['timeout']} | {count} |")
+
+def _print_markdown_selected_tests(args, all_tests):
+    """Print Markdown selected tests section"""
+    if args.list_category or args.list_level:
+        print(f"\n## Tests in Selected Categories\n")
+        for cat, tests in all_tests.items():
+            if tests:
+                print(f"### {cat} ({len(tests)} tests)")
+                for test in tests[:5]:  # Show first 5 tests
+                    print(f"- `{Path(test).relative_to(PROJECT_ROOT)}`")
+                if len(tests) > 5:
+                    print(f"  ... and {len(tests) - 5} more")
+                print()
+
+def _format_text_output(args, all_tests, categories, test_counts):
+    """Format discovery output as text"""
+    _print_text_header(test_counts)
+    _print_text_test_levels(args)
+    _print_text_categories(args, categories, test_counts)
+    _print_text_selected_category(args, all_tests)
+    return 0
+
+def _print_text_header(test_counts):
+    """Print text format header"""
+    print("=" * 80)
+    print("TEST DISCOVERY REPORT")
+    print("=" * 80)
+    print(f"Total Test Levels: {len(TEST_LEVELS)}")
+    print(f"Total Test Categories: {len(test_counts)}")
+    print(f"Total Tests Found: {sum(test_counts.values())}")
+    print()
+
+def _print_text_test_levels(args):
+    """Print text format test levels"""
+    print("AVAILABLE TEST LEVELS:")
+    print("-" * 40)
+    for level, config in TEST_LEVELS.items():
+        if not args.list_level or level == args.list_level:
+            highlight = config.get('highlight', False)
+            if highlight:
+                print(f"\033[91m{level:24} - {config['description']}\033[0m")
+            else:
+                print(f"{level:24} - {config['description']}")
+            print(f"{'':24}   Purpose: {config['purpose']}")
+            print(f"{'':24}   Timeout: {config['timeout']}s")
+    print()
+
+def _print_text_categories(args, categories, test_counts):
+    """Print text format categories"""
+    print("TEST CATEGORIES:")
+    print("-" * 40)
+    for cat, info in categories.items():
+        if not args.list_category or cat == args.list_category:
+            count = test_counts.get(cat, 0)
+            print(f"{cat:20} - {count:4} tests - {info['description']}")
+    print()
+
+def _print_text_selected_category(args, all_tests):
+    """Print text format selected category tests"""
+    if args.list_category:
+        print(f"TESTS IN CATEGORY '{args.list_category}':")
+        print("-" * 40)
+        tests = all_tests.get(args.list_category, [])
+        for test in tests:
+            print(f"  {Path(test).relative_to(PROJECT_ROOT)}")
+        if not tests:
+            print("  No tests found in this category")
+
 def main():
-    parser = argparse.ArgumentParser(
-        description="Unified Test Runner for Netra AI Platform",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=f"""
-Test Levels:
-{chr(10).join([f"  {level:<24} - {config['description']}" for level, config in TEST_LEVELS.items()])}
-
-Usage Examples:
-  # Quick smoke tests (recommended for pre-commit)
-  python test_runner.py --level smoke
-  
-  # Unit tests for development
-  python test_runner.py --level unit
-  
-  # Full comprehensive testing
-  python test_runner.py --level comprehensive
-  
-  # Modular comprehensive testing (faster, more focused)
-  python test_runner.py --level comprehensive-backend
-  python test_runner.py --level comprehensive-agents
-  python test_runner.py --level comprehensive-database
-  
-  # Backend only testing
-  python test_runner.py --level unit --backend-only
-  
-  # Use simple test runner
-  python test_runner.py --simple
-  
-  # Run ALL tests (backend, frontend, E2E) - comprehensive validation
-  python test_runner.py --level all
-  
-  # Real LLM testing examples:
-  # Unit tests with real LLM calls
-  python test_runner.py --level unit --real-llm
-  
-  # Integration tests with specific model
-  python test_runner.py --level integration --real-llm --llm-model gemini-2.5-pro
-  
-  # Critical tests sequentially to avoid rate limits
-  python test_runner.py --level critical --real-llm --parallel 1
-  
-  # Comprehensive with extended timeout
-  python test_runner.py --level comprehensive --real-llm --llm-timeout 120
-
-Purpose Guide:
-  - smoke:         Use before committing code, quick validation (never uses real LLM)
-  - unit:          Use during development, test individual components  
-  - integration:   Use when testing feature interactions
-  - comprehensive: Use before releases, full system validation
-  - critical:      Use to verify essential functionality only
-  - all:           Complete validation including backend, frontend, and E2E tests
-  
-Real LLM Testing:
-  - Adds --real-llm flag to use actual API calls instead of mocks
-  - Increases test duration 3-5x and incurs API costs
-  - Use gemini-2.5-flash (default) for cost efficiency
-  - Run sequentially (--parallel 1) with production keys to avoid rate limits
-        """
-    )
-    
-    # Main test level selection
-    parser.add_argument(
-        "--level", "-l",
-        choices=list(TEST_LEVELS.keys()),
-        default="smoke",
-        help="Test level to run (default: smoke)"
-    )
-    
-    # Alternative runners
-    parser.add_argument(
-        "--simple",
-        action="store_true", 
-        help="Use simple test runner (overrides --level)"
-    )
-    
-    # Component selection
-    parser.add_argument(
-        "--backend-only",
-        action="store_true",
-        help="Run only backend tests"
-    )
-    parser.add_argument(
-        "--frontend-only", 
-        action="store_true",
-        help="Run only frontend tests"
-    )
-    
-    # Output options
-    parser.add_argument(
-        "--quiet", "-q",
-        action="store_true",
-        help="Minimal output"
-    )
-    parser.add_argument(
-        "--verbose", "-v",
-        action="store_true", 
-        help="Verbose output"
-    )
-    parser.add_argument(
-        "--no-report",
-        action="store_true",
-        help="Skip generating test reports"
-    )
-    
-    # Real LLM testing options
-    parser.add_argument(
-        "--real-llm",
-        action="store_true",
-        help="Use real LLM API calls instead of mocks (increases test duration and cost)"
-    )
-    parser.add_argument(
-        "--llm-model",
-        type=str,
-        default="gemini-2.5-flash",
-        choices=["gemini-2.5-flash", "gemini-2.5-pro", "gpt-4", "gpt-3.5-turbo", "claude-3-sonnet"],
-        help="LLM model to use for real tests (default: gemini-2.5-flash for cost efficiency)"
-    )
-    parser.add_argument(
-        "--llm-timeout",
-        type=int,
-        default=30,
-        help="Timeout in seconds for individual LLM calls (default: 30, recommended: 30-120)"
-    )
-    parser.add_argument(
-        "--parallel",
-        type=str,
-        default="auto",
-        help="Parallelism for tests: auto, 1 (sequential), or number of workers"
-    )
-    
-    # Staging environment support
-    parser.add_argument(
-        "--staging",
-        action="store_true",
-        help="Run tests against staging environment (uses STAGING_URL and STAGING_API_URL env vars)"
-    )
-    parser.add_argument(
-        "--staging-url",
-        type=str,
-        help="Override staging frontend URL"
-    )
-    parser.add_argument(
-        "--staging-api-url",
-        type=str,
-        help="Override staging API URL"
-    )
-    parser.add_argument(
-        "--report-format",
-        type=str,
-        choices=["text", "json", "markdown"],
-        default="markdown",
-        help="Format for test report output (default: markdown)"
-    )
-    parser.add_argument(
-        "--output",
-        type=str,
-        help="Output file for test results (for CI/CD integration)"
-    )
-    
-    # CI/CD specific arguments for compatibility with GitHub workflows
-    parser.add_argument(
-        "--shard",
-        type=str,
-        choices=["core", "agents", "websocket", "database", "api", "frontend"],
-        help="Run a specific shard of tests for parallel execution"
-    )
-    parser.add_argument(
-        "--json-output",
-        type=str,
-        help="Path to save JSON test results (alias for --output with JSON format)"
-    )
-    parser.add_argument(
-        "--coverage-output", 
-        type=str,
-        help="Path to save coverage XML report"
-    )
-    
-    # Test discovery options
-    parser.add_argument(
-        "--list", "--discover",
-        action="store_true",
-        dest="list_tests",
-        help="List all available tests with categories and information"
-    )
-    parser.add_argument(
-        "--list-format",
-        type=str,
-        choices=["text", "json", "markdown"],
-        default="text",
-        help="Format for test listing output (default: text)"
-    )
-    parser.add_argument(
-        "--list-level",
-        type=str,
-        choices=list(TEST_LEVELS.keys()),
-        help="List tests for a specific test level only"
-    )
-    parser.add_argument(
-        "--list-category",
-        type=str,
-        help="List tests for a specific category only (e.g., unit, integration, api)"
-    )
-    
-    # Failing test management options
-    parser.add_argument(
-        "--show-failing",
-        action="store_true",
-        help="Display currently failing tests from the log"
-    )
-    parser.add_argument(
-        "--run-failing",
-        action="store_true",
-        help="Run only the currently failing tests"
-    )
-    parser.add_argument(
-        "--fix-failing",
-        action="store_true",
-        help="Attempt to automatically fix failing tests (experimental)"
-    )
-    parser.add_argument(
-        "--max-fixes",
-        type=int,
-        default=None,
-        help="Maximum number of tests to attempt fixing (default: all)"
-    )
-    parser.add_argument(
-        "--clear-failing",
-        action="store_true",
-        help="Clear the failing tests log"
-    )
-    
+    """Main entry point"""
+    parser = create_argument_parser()
     args = parser.parse_args()
-    
-    # Handle test discovery/listing first
     if args.list_tests:
         return handle_test_discovery(args)
-    
-    # Handle CI/CD specific argument aliases
-    if args.json_output:
-        args.output = args.json_output
-        args.report_format = "json"
-    
-    # Print header
-    print("=" * 80)
-    print("NETRA AI PLATFORM - UNIFIED TEST RUNNER")
-    print("=" * 80)
-    
-    # Configure staging environment if requested
-    if args.staging or args.staging_url or args.staging_api_url:
-        staging_url = args.staging_url or os.getenv("STAGING_URL")
-        staging_api_url = args.staging_api_url or os.getenv("STAGING_API_URL")
-        
-        if not staging_url or not staging_api_url:
-            print("[ERROR] Staging mode requires STAGING_URL and STAGING_API_URL")
-            print("  Set via environment variables or --staging-url and --staging-api-url flags")
-            sys.exit(1)
-        
-        print(f"[STAGING MODE] Testing against staging environment:")
-        print(f"  Frontend: {staging_url}")
-        print(f"  API: {staging_api_url}")
-        
-        configure_staging_environment(staging_url, staging_api_url)
-    
-    # Initialize test runner
-    runner = UnifiedTestRunner()
-    runner.results["overall"]["start_time"] = time.time()
-    
-    # Add staging flag to runner if needed
-    if args.staging:
-        runner.staging_mode = True
-    
-    # Handle failing test management commands
-    if args.show_failing:
-        runner.show_failing_tests()
-        sys.exit(0)
-    
-    elif args.clear_failing:
-        runner.clear_failing_tests()
-        sys.exit(0)
-    
-    elif args.run_failing:
-        print("\n" + "=" * 80)
-        print("RUNNING FAILING TESTS")
-        print("=" * 80)
-        
-        exit_code = runner.run_failing_tests(
-            max_fixes=args.max_fixes,
-            backend_only=args.backend_only,
-            frontend_only=args.frontend_only
-        )
-        
-        print("\n" + "=" * 80)
-        sys.exit(exit_code)
-    
-    elif args.fix_failing:
-        # This would be where automatic fixing logic would go
-        # For now, just inform that it's not yet implemented
-        print("\n[INFO] Automatic test fixing is not yet implemented")
-        print("Use --run-failing to run only failing tests")
-        sys.exit(0)
-    
-    # Determine test configuration
-    if args.simple:
-        print(f"Running simple test validation...")
-        exit_code, output = runner.run_simple_tests()
-        config = {"description": "Simple test validation", "purpose": "Basic functionality check"}
-        level = "simple"
-    else:
-        config = TEST_LEVELS[args.level]
-        level = args.level
-        
-        # Handle shard filtering if specified
-        if args.shard:
-            print(f"[SHARD] Running only {args.shard} shard for {level} tests")
-            
-            # Modify backend args to include only shard-specific tests
-            if args.shard in SHARD_MAPPINGS and args.shard != "frontend":
-                shard_patterns = SHARD_MAPPINGS[args.shard]
-                # Add pattern matching to backend args
-                pattern_args = []
-                for pattern in shard_patterns:
-                    pattern_args.extend(["-k", pattern])
-                config['backend_args'] = config.get('backend_args', []) + pattern_args
-                print(f"[SHARD] Test patterns: {', '.join(shard_patterns)}")
-            elif args.shard == "frontend":
-                # Frontend shard runs only frontend tests
-                args.frontend_only = True
-                args.backend_only = False
-        
-        print(f"Running {level} tests: {config['description']}")
-        print(f"Purpose: {config['purpose']}")
-        print(f"Timeout: {config.get('timeout', 300)}s")
-        
-        # Prepare real LLM configuration if requested
-        real_llm_config = None
-        if args.real_llm:
-            # Smoke tests should never use real LLM for speed
-            if level == "smoke":
-                print("[WARNING] Real LLM testing disabled for smoke tests (use unit or higher)")
-            else:
-                real_llm_config = configure_real_llm(args.llm_model, args.llm_timeout, args.parallel)
-                print(f"[INFO] Real LLM testing enabled")
-                print(f"  - Model: {args.llm_model}")
-                print(f"  - Timeout: {args.llm_timeout}s per call")
-                print(f"  - Parallelism: {args.parallel}")
-                
-                # Adjust test timeout for real LLM tests
-                adjusted_timeout = config.get('timeout', 300) * 3  # Triple timeout for real LLM
-                config['timeout'] = adjusted_timeout
-                print(f"  - Adjusted test timeout: {adjusted_timeout}s")
-        
-        # Run tests based on selection
-        backend_exit = 0
-        frontend_exit = 0
-        
-        if args.backend_only:
-            backend_exit, _ = runner.run_backend_tests(
-                config['backend_args'], 
-                config.get('timeout', 300),
-                real_llm_config
-            )
-            runner.results["frontend"]["status"] = "skipped"
-            exit_code = backend_exit
-        elif args.frontend_only:
-            frontend_exit, _ = runner.run_frontend_tests(
-                config['frontend_args'],
-                config.get('timeout', 300)  
-            )
-            runner.results["backend"]["status"] = "skipped"
-            exit_code = frontend_exit
-        else:
-            # Run both if config specifies it, or if it's a comprehensive level
-            if config.get('run_both', True):
-                backend_exit, _ = runner.run_backend_tests(
-                    config['backend_args'],
-                    config.get('timeout', 300),
-                    real_llm_config
-                )
-                frontend_exit, _ = runner.run_frontend_tests(
-                    config['frontend_args'], 
-                    config.get('timeout', 300)
-                )
-                exit_code = max(backend_exit, frontend_exit)
-                
-                # Run E2E tests if specified
-                if config.get('run_e2e', False):
-                    e2e_exit, _ = runner.run_e2e_tests(
-                        [],  # E2E tests don't need additional args
-                        config.get('timeout', 600)
-                    )
-                    exit_code = max(exit_code, e2e_exit)
-            else:
-                # Backend only for critical tests
-                backend_exit, _ = runner.run_backend_tests(
-                    config['backend_args'],
-                    config.get('timeout', 300),
-                    real_llm_config
-                )
-                runner.results["frontend"]["status"] = "skipped"
-                exit_code = backend_exit
-    
-    # Record end time
-    runner.results["overall"]["end_time"] = time.time()
-    runner.results["overall"]["status"] = "passed" if exit_code == 0 else "failed"
-    
-    # Generate and save report
-    if not args.no_report:
-        runner.save_test_report(level, config, "", exit_code)
-        
-        # Save in additional formats if requested
-        if args.output:
-            if args.report_format == "json":
-                # Generate JSON report for CI/CD
-                json_report = runner.generate_json_report(level, config, exit_code)
-                with open(args.output, "w", encoding='utf-8') as f:
-                    json.dump(json_report, f, indent=2)
-                print(f"[REPORT] JSON report saved to: {args.output}")
-            elif args.report_format == "text":
-                # Generate text report
-                text_report = runner.generate_text_report(level, config, exit_code)
-                with open(args.output, "w", encoding='utf-8') as f:
-                    f.write(text_report)
-                print(f"[REPORT] Text report saved to: {args.output}")
-        
-        # Generate coverage report if requested
-        if args.coverage_output:
-            try:
-                # Try to generate coverage XML report
-                coverage_cmd = [sys.executable, "-m", "coverage", "xml", "-o", args.coverage_output]
-                subprocess.run(coverage_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
-                if Path(args.coverage_output).exists():
-                    print(f"[COVERAGE] Coverage report saved to: {args.coverage_output}")
-                else:
-                    print(f"[WARNING] Coverage report generation failed - file not created")
-            except Exception as e:
-                print(f"[WARNING] Could not generate coverage report: {e}")
-    
-    # Print summary
-    runner.print_summary()
-    
-    # Exit with appropriate code
-    sys.exit(exit_code)
+    return execute_test_run(parser, args)
 
-def _create_argument_parser():
-    """Create and configure the argument parser."""
+def create_argument_parser():
+    """Create and configure argument parser"""
     parser = argparse.ArgumentParser(
         description="Unified Test Runner for Netra AI Platform",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog=_get_parser_epilog()
+        epilog=get_parser_epilog()
     )
-    _add_main_arguments(parser)
-    _add_component_arguments(parser)
-    _add_output_arguments(parser)
-    _add_llm_arguments(parser)
-    _add_staging_arguments(parser)
-    _add_discovery_arguments(parser)
-    _add_failing_test_arguments(parser)
+    add_all_arguments(parser)
     return parser
 
-
-def _get_parser_epilog():
-    """Get the epilog text for the argument parser."""
+def get_parser_epilog():
+    """Get parser epilog with test levels and examples"""
     level_descriptions = chr(10).join([
         f"  {level:<24} - {config['description']}" 
         for level, config in TEST_LEVELS.items()
@@ -662,229 +280,432 @@ Usage Examples:
   # Full comprehensive testing
   python test_runner.py --level comprehensive
   
-  # Modular comprehensive testing (faster, more focused)
-  python test_runner.py --level comprehensive-backend
-  python test_runner.py --level comprehensive-agents
-  python test_runner.py --level comprehensive-database
-  
   # Backend only testing
   python test_runner.py --level unit --backend-only
   
-  # Use simple test runner
-  python test_runner.py --simple
-  
-  # Run ALL tests (backend, frontend, E2E) - comprehensive validation
-  python test_runner.py --level all
-  
   # Real LLM testing examples:
-  # Unit tests with real LLM calls
   python test_runner.py --level unit --real-llm
-  
-  # Integration tests with specific model
   python test_runner.py --level integration --real-llm --llm-model gemini-2.5-pro
-  
-  # Critical tests sequentially to avoid rate limits
-  python test_runner.py --level critical --real-llm --parallel 1
-  
-  # Comprehensive with extended timeout
-  python test_runner.py --level comprehensive --real-llm --llm-timeout 120
-
-Purpose Guide:
-  - smoke:         Use before committing code, quick validation (never uses real LLM)
-  - unit:          Use during development, test individual components  
-  - integration:   Use when testing feature interactions
-  - comprehensive: Use before releases, full system validation
-  - critical:      Use to verify essential functionality only
-  - all:           Complete validation including backend, frontend, and E2E tests
-  
-Real LLM Testing:
-  - Adds --real-llm flag to use actual API calls instead of mocks
-  - Increases test duration 3-5x and incurs API costs
-  - Use gemini-2.5-flash (default) for cost efficiency
-  - Run sequentially (--parallel 1) with production keys to avoid rate limits
         """
 
+def add_all_arguments(parser):
+    """Add all argument groups to parser"""
+    add_main_test_arguments(parser)
+    add_component_arguments(parser)
+    add_output_arguments(parser)
+    add_llm_arguments(parser)
+    add_staging_arguments(parser)
+    add_cicd_arguments(parser)
+    add_discovery_arguments(parser)
+    add_failing_test_arguments(parser)
 
-def _add_main_arguments(parser):
-    """Add main test level selection arguments."""
+def add_main_test_arguments(parser):
+    """Add main test level selection arguments"""
     parser.add_argument(
-        "--level", "-l",
-        choices=list(TEST_LEVELS.keys()),
-        default="smoke",
+        "--level", "-l", choices=list(TEST_LEVELS.keys()), default="smoke",
         help="Test level to run (default: smoke)"
     )
     parser.add_argument(
-        "--simple",
-        action="store_true", 
+        "--simple", action="store_true", 
         help="Use simple test runner (overrides --level)"
     )
 
-
-def _add_component_arguments(parser):
-    """Add component selection arguments."""
+def add_component_arguments(parser):
+    """Add component selection arguments"""
     parser.add_argument(
-        "--backend-only",
-        action="store_true",
+        "--backend-only", action="store_true",
         help="Run only backend tests"
     )
     parser.add_argument(
-        "--frontend-only", 
-        action="store_true",
+        "--frontend-only", action="store_true",
         help="Run only frontend tests"
     )
 
-
-def _add_output_arguments(parser):
-    """Add output options arguments."""
+def add_output_arguments(parser):
+    """Add output options arguments"""
     parser.add_argument(
-        "--quiet", "-q",
-        action="store_true",
-        help="Minimal output"
+        "--quiet", "-q", action="store_true", help="Minimal output"
     )
     parser.add_argument(
-        "--verbose", "-v",
-        action="store_true", 
-        help="Verbose output"
+        "--verbose", "-v", action="store_true", help="Verbose output"
     )
     parser.add_argument(
-        "--no-report",
-        action="store_true",
-        help="Skip generating test reports"
+        "--no-report", action="store_true", help="Skip generating test reports"
     )
 
-
-def _add_llm_arguments(parser):
-    """Add real LLM testing arguments."""
+def add_llm_arguments(parser):
+    """Add real LLM testing arguments"""
     parser.add_argument(
-        "--real-llm",
-        action="store_true",
+        "--real-llm", action="store_true",
         help="Use real LLM API calls instead of mocks (increases test duration and cost)"
     )
     parser.add_argument(
-        "--llm-model",
-        type=str,
-        default="gemini-2.5-flash",
+        "--llm-model", type=str, default="gemini-2.5-flash",
         choices=["gemini-2.5-flash", "gemini-2.5-pro", "gpt-4", "gpt-3.5-turbo", "claude-3-sonnet"],
         help="LLM model to use for real tests (default: gemini-2.5-flash for cost efficiency)"
     )
     parser.add_argument(
-        "--llm-timeout",
-        type=int,
-        default=30,
+        "--llm-timeout", type=int, default=30,
         help="Timeout in seconds for individual LLM calls (default: 30, recommended: 30-120)"
     )
     parser.add_argument(
-        "--parallel",
-        type=str,
-        default="auto",
+        "--parallel", type=str, default="auto",
         help="Parallelism for tests: auto, 1 (sequential), or number of workers"
     )
 
-
-def _add_staging_arguments(parser):
-    """Add staging environment arguments."""
+def add_staging_arguments(parser):
+    """Add staging environment arguments"""
     parser.add_argument(
-        "--staging",
-        action="store_true",
+        "--staging", action="store_true",
         help="Run tests against staging environment (uses STAGING_URL and STAGING_API_URL env vars)"
     )
     parser.add_argument(
-        "--staging-url",
-        type=str,
-        help="Override staging frontend URL"
+        "--staging-url", type=str, help="Override staging frontend URL"
     )
     parser.add_argument(
-        "--staging-api-url",
-        type=str,
-        help="Override staging API URL"
-    )
-    parser.add_argument(
-        "--report-format",
-        type=str,
-        choices=["text", "json", "markdown"],
-        default="markdown",
-        help="Format for test report output (default: markdown)"
-    )
-    parser.add_argument(
-        "--output",
-        type=str,
-        help="Output file for test results (for CI/CD integration)"
+        "--staging-api-url", type=str, help="Override staging API URL"
     )
 
-
-def _add_discovery_arguments(parser):
-    """Add test discovery arguments."""
+def add_cicd_arguments(parser):
+    """Add CI/CD specific arguments"""
     parser.add_argument(
-        "--shard",
-        type=str,
+        "--report-format", type=str, choices=["text", "json", "markdown"],
+        default="markdown", help="Format for test report output (default: markdown)"
+    )
+    parser.add_argument(
+        "--output", type=str, help="Output file for test results (for CI/CD integration)"
+    )
+
+def add_discovery_arguments(parser):
+    """Add test discovery arguments"""
+    parser.add_argument(
+        "--shard", type=str,
         choices=["core", "agents", "websocket", "database", "api", "frontend"],
         help="Run a specific shard of tests for parallel execution"
     )
     parser.add_argument(
-        "--json-output",
-        type=str,
+        "--json-output", type=str,
         help="Path to save JSON test results (alias for --output with JSON format)"
     )
     parser.add_argument(
-        "--coverage-output", 
-        type=str,
-        help="Path to save coverage XML report"
+        "--coverage-output", type=str, help="Path to save coverage XML report"
     )
+    add_discovery_listing_arguments(parser)
+
+def add_discovery_listing_arguments(parser):
+    """Add discovery listing specific arguments"""
     parser.add_argument(
-        "--list", "--discover",
-        action="store_true",
-        dest="list_tests",
+        "--list", "--discover", action="store_true", dest="list_tests",
         help="List all available tests with categories and information"
     )
     parser.add_argument(
-        "--list-format",
-        type=str,
-        choices=["text", "json", "markdown"],
-        default="text",
-        help="Format for test listing output (default: text)"
+        "--list-format", type=str, choices=["text", "json", "markdown"],
+        default="text", help="Format for test listing output (default: text)"
     )
     parser.add_argument(
-        "--list-level",
-        type=str,
-        choices=list(TEST_LEVELS.keys()),
+        "--list-level", type=str, choices=list(TEST_LEVELS.keys()),
         help="List tests for a specific test level only"
     )
     parser.add_argument(
-        "--list-category",
-        type=str,
+        "--list-category", type=str,
         help="List tests for a specific category only (e.g., unit, integration, api)"
     )
 
-
-def _add_failing_test_arguments(parser):
-    """Add failing test management arguments."""
+def add_failing_test_arguments(parser):
+    """Add failing test management arguments"""
     parser.add_argument(
-        "--show-failing",
-        action="store_true",
+        "--show-failing", action="store_true",
         help="Display currently failing tests from the log"
     )
     parser.add_argument(
-        "--run-failing",
-        action="store_true",
+        "--run-failing", action="store_true",
         help="Run only the currently failing tests"
     )
     parser.add_argument(
-        "--fix-failing",
-        action="store_true",
+        "--fix-failing", action="store_true",
         help="Attempt to automatically fix failing tests (experimental)"
     )
     parser.add_argument(
-        "--max-fixes",
-        type=int,
-        default=None,
+        "--max-fixes", type=int, default=None,
         help="Maximum number of tests to attempt fixing (default: all)"
     )
     parser.add_argument(
-        "--clear-failing",
-        action="store_true",
+        "--clear-failing", action="store_true",
         help="Clear the failing tests log"
     )
 
+def execute_test_run(parser, args):
+    """Execute the main test run"""
+    handle_cicd_aliases(args)
+    print_header()
+    configure_staging_if_requested(args)
+    runner = initialize_test_runner()
+    handle_failing_test_commands(args, runner)
+    return run_tests_with_configuration(args, runner)
+
+def handle_cicd_aliases(args):
+    """Handle CI/CD specific argument aliases"""
+    if args.json_output:
+        args.output = args.json_output
+        args.report_format = "json"
+
+def print_header():
+    """Print test runner header"""
+    print("=" * 80)
+    print("NETRA AI PLATFORM - UNIFIED TEST RUNNER")
+    print("=" * 80)
+
+def configure_staging_if_requested(args):
+    """Configure staging environment if requested"""
+    if args.staging or args.staging_url or args.staging_api_url:
+        staging_url = args.staging_url or os.getenv("STAGING_URL")
+        staging_api_url = args.staging_api_url or os.getenv("STAGING_API_URL")
+        validate_staging_configuration(staging_url, staging_api_url)
+        print_staging_configuration(staging_url, staging_api_url)
+        configure_staging_environment(staging_url, staging_api_url)
+
+def validate_staging_configuration(staging_url, staging_api_url):
+    """Validate staging configuration"""
+    if not staging_url or not staging_api_url:
+        print("[ERROR] Staging mode requires STAGING_URL and STAGING_API_URL")
+        print("  Set via environment variables or --staging-url and --staging-api-url flags")
+        sys.exit(1)
+
+def print_staging_configuration(staging_url, staging_api_url):
+    """Print staging configuration info"""
+    print(f"[STAGING MODE] Testing against staging environment:")
+    print(f"  Frontend: {staging_url}")
+    print(f"  API: {staging_api_url}")
+
+def initialize_test_runner():
+    """Initialize test runner and set start time"""
+    runner = UnifiedTestRunner()
+    runner.results["overall"]["start_time"] = time.time()
+    return runner
+
+def handle_failing_test_commands(args, runner):
+    """Handle failing test management commands"""
+    if args.show_failing:
+        runner.show_failing_tests()
+        sys.exit(0)
+    elif args.clear_failing:
+        runner.clear_failing_tests()
+        sys.exit(0)
+    elif args.run_failing:
+        exit_code = execute_failing_tests(args, runner)
+        sys.exit(exit_code)
+    elif args.fix_failing:
+        handle_fix_failing_command()
+
+def execute_failing_tests(args, runner):
+    """Execute failing tests run"""
+    print("\n" + "=" * 80)
+    print("RUNNING FAILING TESTS")
+    print("=" * 80)
+    exit_code = runner.run_failing_tests(
+        max_fixes=args.max_fixes,
+        backend_only=args.backend_only,
+        frontend_only=args.frontend_only
+    )
+    print("\n" + "=" * 80)
+    return exit_code
+
+def handle_fix_failing_command():
+    """Handle automatic test fixing command"""
+    print("\n[INFO] Automatic test fixing is not yet implemented")
+    print("Use --run-failing to run only failing tests")
+    sys.exit(0)
+
+def run_tests_with_configuration(args, runner):
+    """Run tests with the specified configuration"""
+    if args.staging:
+        runner.staging_mode = True
+    
+    if args.simple:
+        return run_simple_tests(runner)
+    else:
+        return run_level_based_tests(args, runner)
+
+def run_simple_tests(runner):
+    """Run simple test validation"""
+    print(f"Running simple test validation...")
+    exit_code, output = runner.run_simple_tests()
+    config = {"description": "Simple test validation", "purpose": "Basic functionality check"}
+    level = "simple"
+    return finalize_test_run(runner, level, config, "", exit_code)
+
+def run_level_based_tests(args, runner):
+    """Run tests based on specified level"""
+    config = TEST_LEVELS[args.level]
+    level = args.level
+    apply_shard_filtering(args, config)
+    print_test_configuration(level, config)
+    real_llm_config = configure_real_llm_if_requested(args, level, config)
+    exit_code = execute_test_suite(args, config, runner, real_llm_config)
+    return finalize_test_run(runner, level, config, "", exit_code)
+
+def apply_shard_filtering(args, config):
+    """Apply shard filtering if specified"""
+    if args.shard:
+        print(f"[SHARD] Running only {args.shard} shard for {args.level} tests")
+        if args.shard in SHARD_MAPPINGS and args.shard != "frontend":
+            shard_patterns = SHARD_MAPPINGS[args.shard]
+            pattern_args = []
+            for pattern in shard_patterns:
+                pattern_args.extend(["-k", pattern])
+            config['backend_args'] = config.get('backend_args', []) + pattern_args
+            print(f"[SHARD] Test patterns: {', '.join(shard_patterns)}")
+        elif args.shard == "frontend":
+            args.frontend_only = True
+            args.backend_only = False
+
+def print_test_configuration(level, config):
+    """Print test configuration details"""
+    print(f"Running {level} tests: {config['description']}")
+    print(f"Purpose: {config['purpose']}")
+    print(f"Timeout: {config.get('timeout', 300)}s")
+
+def configure_real_llm_if_requested(args, level, config):
+    """Configure real LLM testing if requested"""
+    if not args.real_llm:
+        return None
+    if level == "smoke":
+        print("[WARNING] Real LLM testing disabled for smoke tests (use unit or higher)")
+        return None
+    real_llm_config = configure_real_llm(args.llm_model, args.llm_timeout, args.parallel)
+    print_real_llm_configuration(args, config)
+    return real_llm_config
+
+def print_real_llm_configuration(args, config):
+    """Print real LLM configuration details"""
+    print(f"[INFO] Real LLM testing enabled")
+    print(f"  - Model: {args.llm_model}")
+    print(f"  - Timeout: {args.llm_timeout}s per call")
+    print(f"  - Parallelism: {args.parallel}")
+    adjusted_timeout = config.get('timeout', 300) * 3
+    config['timeout'] = adjusted_timeout
+    print(f"  - Adjusted test timeout: {adjusted_timeout}s")
+
+def execute_test_suite(args, config, runner, real_llm_config):
+    """Execute the test suite based on configuration"""
+    if args.backend_only:
+        return execute_backend_only_tests(config, runner, real_llm_config)
+    elif args.frontend_only:
+        return execute_frontend_only_tests(config, runner)
+    else:
+        return execute_full_test_suite(config, runner, real_llm_config)
+
+def execute_backend_only_tests(config, runner, real_llm_config):
+    """Execute backend-only tests"""
+    backend_exit, _ = runner.run_backend_tests(
+        config['backend_args'], 
+        config.get('timeout', 300),
+        real_llm_config
+    )
+    runner.results["frontend"]["status"] = "skipped"
+    return backend_exit
+
+def execute_frontend_only_tests(config, runner):
+    """Execute frontend-only tests"""
+    frontend_exit, _ = runner.run_frontend_tests(
+        config['frontend_args'],
+        config.get('timeout', 300)  
+    )
+    runner.results["backend"]["status"] = "skipped"
+    return frontend_exit
+
+def execute_full_test_suite(config, runner, real_llm_config):
+    """Execute full test suite (backend + frontend + E2E)"""
+    if config.get('run_both', True):
+        backend_exit, _ = runner.run_backend_tests(
+            config['backend_args'],
+            config.get('timeout', 300),
+            real_llm_config
+        )
+        frontend_exit, _ = runner.run_frontend_tests(
+            config['frontend_args'], 
+            config.get('timeout', 300)
+        )
+        exit_code = max(backend_exit, frontend_exit)
+        if config.get('run_e2e', False):
+            e2e_exit, _ = runner.run_e2e_tests([], config.get('timeout', 600))
+            exit_code = max(exit_code, e2e_exit)
+        return exit_code
+    else:
+        return execute_backend_only_tests(config, runner, real_llm_config)
+
+def finalize_test_run(runner, level, config, output, exit_code):
+    """Finalize test run with reporting and cleanup"""
+    runner.results["overall"]["end_time"] = time.time()
+    runner.results["overall"]["status"] = "passed" if exit_code == 0 else "failed"
+    generate_test_reports(runner, level, config, output, exit_code)
+    runner.print_summary()
+    return exit_code
+
+def generate_test_reports(runner, level, config, output, exit_code):
+    """Generate test reports in requested formats"""
+    if not hasattr(sys.modules[__name__], '_no_report') or not _no_report:
+        runner.save_test_report(level, config, output, exit_code)
+        save_additional_reports(runner, level, config, exit_code)
+        generate_coverage_report()
+
+def save_additional_reports(runner, level, config, exit_code):
+    """Save additional report formats if requested"""
+    args = sys.modules[__name__].__dict__.get('_current_args')
+    if not args:
+        return
+    
+    if args.output:
+        if args.report_format == "json":
+            save_json_report(runner, level, config, exit_code, args.output)
+        elif args.report_format == "text":
+            save_text_report(runner, level, config, exit_code, args.output)
+
+def save_json_report(runner, level, config, exit_code, output_file):
+    """Save JSON report to file"""
+    json_report = runner.generate_json_report(level, config, exit_code)
+    with open(output_file, "w", encoding='utf-8') as f:
+        json.dump(json_report, f, indent=2)
+    print(f"[REPORT] JSON report saved to: {output_file}")
+
+def save_text_report(runner, level, config, exit_code, output_file):
+    """Save text report to file"""
+    text_report = runner.generate_text_report(level, config, exit_code)
+    with open(output_file, "w", encoding='utf-8') as f:
+        f.write(text_report)
+    print(f"[REPORT] Text report saved to: {output_file}")
+
+def generate_coverage_report():
+    """Generate coverage report if requested"""
+    args = sys.modules[__name__].__dict__.get('_current_args')
+    if not args or not args.coverage_output:
+        return
+    
+    try:
+        coverage_cmd = [sys.executable, "-m", "coverage", "xml", "-o", args.coverage_output]
+        subprocess.run(coverage_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+        if Path(args.coverage_output).exists():
+            print(f"[COVERAGE] Coverage report saved to: {args.coverage_output}")
+        else:
+            print(f"[WARNING] Coverage report generation failed - file not created")
+    except Exception as e:
+        print(f"[WARNING] Could not generate coverage report: {e}")
+
 
 if __name__ == "__main__":
-    main()
+    # Store args globally for helper functions
+    import sys
+    sys.modules[__name__]._current_args = None
+    try:
+        parser = create_argument_parser()
+        args = parser.parse_args()
+        sys.modules[__name__]._current_args = args
+        sys.modules[__name__]._no_report = getattr(args, 'no_report', False)
+        exit_code = main()
+        sys.exit(exit_code)
+    except KeyboardInterrupt:
+        print("\n[INTERRUPTED] Test run cancelled by user")
+        sys.exit(130)
+    except Exception as e:
+        print(f"[ERROR] Unexpected error: {e}")
+        sys.exit(1)

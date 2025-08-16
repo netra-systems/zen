@@ -14,10 +14,16 @@ Usage:
     from app.schemas.agent_models import DeepAgentState, AgentResult, AgentMetadata
 """
 
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Union, Any, TYPE_CHECKING
 from datetime import datetime, UTC
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 import uuid
+
+# Import types only for type checking to avoid circular dependencies  
+if TYPE_CHECKING:
+    from app.agents.triage_sub_agent.models import TriageResult
+    from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+    from app.schemas.Generation import SyntheticDataResult
 
 
 class ToolResultData(BaseModel):
@@ -62,20 +68,30 @@ class DeepAgentState(BaseModel):
     chat_thread_id: Optional[str] = None
     user_id: Optional[str] = None
     
-    # Results from different agent types
-    triage_result: Optional[Any] = None
-    data_result: Optional[Any] = None
-    optimizations_result: Optional[Any] = None
-    action_plan_result: Optional[Any] = None
-    report_result: Optional[Any] = None
-    synthetic_data_result: Optional[Any] = None
-    supply_research_result: Optional[Any] = None
+    # Strongly typed result fields with proper type unions
+    triage_result: Optional["TriageResult"] = None
+    data_result: Optional[Union["DataAnalysisResponse", "AnomalyDetectionResponse"]] = None
+    optimizations_result: Optional[Any] = None  # Will be strongly typed when OptimizationsResult is moved to schemas
+    action_plan_result: Optional[Any] = None    # Will be strongly typed when ActionPlanResult is moved to schemas
+    report_result: Optional[Any] = None         # Will be strongly typed when ReportResult is moved to schemas
+    synthetic_data_result: Optional["SyntheticDataResult"] = None
+    supply_research_result: Optional[Any] = None # Will be strongly typed when SupplyResearchResult is moved to schemas
     corpus_admin_result: Optional[Any] = None
     
     # Execution tracking
     final_report: Optional[str] = None
     step_count: int = 0
     metadata: AgentMetadata = Field(default_factory=AgentMetadata)
+    
+    @field_validator('step_count')
+    @classmethod
+    def validate_step_count(cls, v: int) -> int:
+        """Validate step count is within reasonable bounds."""
+        if v < 0:
+            raise ValueError('Step count must be non-negative')
+        if v > 10000:  # Reasonable upper bound
+            raise ValueError('Step count exceeds maximum allowed value (10000)')
+        return v
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert state to dictionary."""
@@ -196,6 +212,18 @@ class DeepAgentState(BaseModel):
 # Backward compatibility alias  
 AgentState = DeepAgentState
 
+
+# Model rebuild for forward reference resolution
+def rebuild_model() -> None:
+    """Rebuild the model after imports are complete."""
+    try:
+        DeepAgentState.model_rebuild()
+    except Exception:
+        # Safe to ignore - model will rebuild when needed
+        pass
+
+# Initialize model rebuild
+rebuild_model()
 
 # Export all agent models
 __all__ = [

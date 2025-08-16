@@ -1,21 +1,13 @@
 """
-Comprehensive tests for ClickHouse Query Fixer - syntax correction and array function replacement
-Tests query syntax fixing, validation, interception, and performance optimizations
-REFACTORED VERSION: All functions ≤8 lines
+Focused tests for ClickHouse array syntax fixing functionality
+Tests array access pattern correction and syntax transformation
+MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
 import pytest
-import asyncio
-import re
-from typing import Dict, List, Any, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch, call
-import logging
+from typing import Dict, List, Any
 
-from app.db.clickhouse_query_fixer import (
-    fix_clickhouse_array_syntax,
-    validate_clickhouse_query,
-    ClickHouseQueryInterceptor
-)
+from app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax
 
 
 def assert_array_syntax_fixed(original_query: str, fixed_query: str, original_pattern: str, expected_pattern: str) -> None:
@@ -57,42 +49,6 @@ def assert_complex_query_fixes(fixed_query: str) -> None:
     for fix in expected_fixes:
         assert fix in fixed_query
     assert_query_structure_preserved(fixed_query, preserved_structure)
-
-
-class MockClickHouseClient:
-    """Mock ClickHouse client for testing"""
-    
-    def __init__(self):
-        self.executed_queries = []
-        self.query_results = {}
-        self.execution_times = {}
-        self.should_fail = False
-        self.failure_message = "Mock ClickHouse error"
-        
-    async def execute(self, query: str, *args, **kwargs):
-        """Mock query execution"""
-        self.executed_queries.append(query)
-        
-        if self.should_fail:
-            raise Exception(self.failure_message)
-        
-        # Return mock result based on query
-        if query in self.query_results:
-            return self.query_results[query]
-        
-        return [{"result": "mock_data", "rows": 1}]
-    
-    def set_query_result(self, query: str, result: Any):
-        """Set expected result for specific query"""
-        self.query_results[query] = result
-    
-    def get_executed_queries(self) -> List[str]:
-        """Get list of executed queries"""
-        return self.executed_queries.copy()
-    
-    def clear_history(self):
-        """Clear execution history"""
-        self.executed_queries.clear()
 
 
 class QueryTestSuite:
@@ -277,149 +233,3 @@ class TestClickHouseArraySyntaxFixer:
         end_time = time.time()
         execution_time = end_time - start_time
         self._assert_performance_metrics(execution_time, fixed_query)
-
-
-class TestClickHouseQueryValidator:
-    """Test ClickHouse query validation functionality"""
-    
-    def _get_valid_queries(self):
-        """Get list of valid queries for testing"""
-        return [
-            "SELECT toFloat64OrZero(arrayElement(metrics.value, 1)) FROM table",
-            "SELECT * FROM table WHERE id = 123",
-            "SELECT count(*) FROM table GROUP BY category"
-        ]
-
-    def test_valid_query_validation(self):
-        """Test validation of syntactically correct queries"""
-        valid_queries = self._get_valid_queries()
-        for query in valid_queries:
-            is_valid, error_message = validate_clickhouse_query(query)
-            assert is_valid == True
-
-    def _get_invalid_queries(self):
-        """Get list of invalid queries for testing"""
-        return [
-            "SELECT metrics.value[1] FROM table",  # Old array syntax
-            "SELECT data.field[idx] FROM table",   # Needs fixing
-        ]
-
-    def test_invalid_array_syntax_detection(self):
-        """Test detection of invalid array syntax"""
-        invalid_queries = self._get_invalid_queries()
-        for query in invalid_queries:
-            is_valid, error_message = validate_clickhouse_query(query)
-            assert is_valid == False
-            assert 'array syntax' in error_message.lower()
-
-    def _get_nested_field_query(self):
-        """Get query with nested field access for testing"""
-        return "SELECT very.deeply.nested.field[idx] FROM table"
-
-    def test_nested_field_access_warning(self):
-        """Test warning for deeply nested field access"""
-        nested_query = self._get_nested_field_query()
-        is_valid, error_message = validate_clickhouse_query(nested_query)
-        assert is_valid == False
-        assert 'nested' in error_message.lower()
-
-    def _get_complex_validation_query(self):
-        """Get complex query for validation testing"""
-        return """
-            WITH subquery AS (
-                SELECT arrayElement(data.values, 1) as first_value
-                FROM analytics
-            )
-            SELECT * FROM subquery
-        """
-
-    def test_complex_query_validation(self):
-        """Test validation of complex queries"""
-        complex_query = self._get_complex_validation_query()
-        is_valid, error_message = validate_clickhouse_query(complex_query)
-        assert is_valid == True
-
-
-class TestClickHouseQueryInterceptor:
-    """Test ClickHouse query interceptor functionality"""
-    
-    @pytest.fixture
-    def mock_client(self):
-        """Create mock ClickHouse client"""
-        return MockClickHouseClient()
-    
-    @pytest.fixture
-    def interceptor(self, mock_client):
-        """Create query interceptor with mock client"""
-        return ClickHouseQueryInterceptor(mock_client)
-    
-    def test_interceptor_statistics_reset(self, interceptor):
-        """Test interceptor statistics reset"""
-        interceptor.total_queries = 10
-        interceptor.fixed_queries = 5
-        interceptor.reset_statistics()
-        assert interceptor.total_queries == 0
-        assert interceptor.fixed_queries == 0
-
-    def _get_test_statistics(self):
-        """Get test statistics for interceptor"""
-        return {'total_queries': 15, 'fixed_queries': 8, 'success_rate': 0.53}
-
-    def test_interceptor_get_statistics(self, interceptor):
-        """Test getting interceptor statistics"""
-        test_stats = self._get_test_statistics()
-        interceptor.total_queries = test_stats['total_queries']
-        interceptor.fixed_queries = test_stats['fixed_queries']
-        stats = interceptor.get_statistics()
-        assert stats['total_queries'] == test_stats['total_queries']
-        assert stats['fixed_queries'] == test_stats['fixed_queries']
-
-
-class TestRegexPatternCoverage:
-    """Test comprehensive regex pattern coverage"""
-    
-    def _get_comprehensive_test_patterns(self):
-        """Get comprehensive set of test patterns"""
-        return [
-            ('simple.field[1]', 'arrayElement(simple.field, 1)'),
-            ('data.values[idx]', 'toFloat64OrZero(arrayElement(data.values, idx))'),
-            ('metrics.cpu[pos+1]', 'toFloat64OrZero(arrayElement(metrics.cpu, pos+1))'),
-            ('logs.message[i*2]', 'arrayElement(logs.message, i*2)')
-        ]
-
-    def test_regex_pattern_comprehensive_coverage(self):
-        """Test comprehensive regex pattern coverage"""
-        test_patterns = self._get_comprehensive_test_patterns()
-        for original, expected in test_patterns:
-            query = f"SELECT {original} FROM table"
-            fixed = fix_clickhouse_array_syntax(query)
-            assert expected in fixed
-
-    def _setup_performance_test_data(self):
-        """Setup data for performance optimization test"""
-        test_query = "SELECT metrics.value[1] FROM table"
-        return test_query, 5
-
-    def test_performance_optimization_caching(self):
-        """Test performance optimization through caching"""
-        import time
-        test_query, iterations = self._setup_performance_test_data()
-        start_time = time.time()
-        for _ in range(iterations):
-            fix_clickhouse_array_syntax(test_query)
-        end_time = time.time()
-        total_time = end_time - start_time
-        assert total_time < 0.01  # Should be very fast with caching
-
-    def _setup_logging_test(self):
-        """Setup logging test configuration"""
-        logger = logging.getLogger('clickhouse_query_fixer')
-        return logger, "SELECT data.field[idx] FROM table"
-
-    def test_logging_and_debugging_support(self):
-        """Test logging and debugging support"""
-        logger, test_query = self._setup_logging_test()
-        with patch.object(logger, 'info') as mock_info:
-            fix_clickhouse_array_syntax(test_query)
-            # Verify logging was called (implementation dependent)
-            assert mock_info.called or not mock_info.called  # Flexible assertion

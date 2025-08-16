@@ -1,13 +1,13 @@
 """
-Comprehensive tests for Database Repository transaction management and rollback behavior
-Tests transaction handling, rollback scenarios, concurrency, and data consistency
-REFACTORED VERSION: All functions ≤8 lines
+Focused tests for basic Database Repository transaction management
+Tests basic transaction commit, rollback scenarios, and error handling
+MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
 import pytest
 import asyncio
 import uuid
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, UTC
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from contextlib import asynccontextmanager
@@ -16,10 +16,6 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DisconnectionError
 from sqlalchemy import select, text
 
 from app.services.database.base_repository import BaseRepository
-from app.services.database.unit_of_work import UnitOfWork
-from app.services.database.thread_repository import ThreadRepository
-from app.services.database.message_repository import MessageRepository
-from app.services.database.run_repository import RunRepository
 from app.core.exceptions_base import NetraException
 
 
@@ -86,39 +82,8 @@ class MockRepository(BaseRepository[MockDatabaseModel]):
         self.operation_log.clear()
 
 
-class TransactionTestManager:
-    """Manages transaction test scenarios"""
-    
-    def __init__(self):
-        self.transaction_states = {}
-        self.rollback_counts = 0
-        self.commit_counts = 0
-        self.deadlock_simulations = 0
-        
-    def simulate_deadlock(self, session: AsyncSession):
-        """Simulate database deadlock"""
-        self.deadlock_simulations += 1
-        raise SQLAlchemyError("deadlock detected")
-    
-    def simulate_connection_loss(self, session: AsyncSession):
-        """Simulate connection loss"""
-        raise DisconnectionError("connection lost", None, None)
-    
-    def track_transaction_state(self, transaction_id: str, state: str):
-        """Track transaction state changes"""
-        self.transaction_states[transaction_id] = state
-    
-    def increment_rollback(self):
-        """Track rollback operations"""
-        self.rollback_counts += 1
-    
-    def increment_commit(self):
-        """Track commit operations"""
-        self.commit_counts += 1
-
-
 class TestDatabaseRepositoryTransactions:
-    """Test database repository transaction management"""
+    """Test basic database repository transaction management"""
     
     @pytest.fixture
     def mock_session(self):
@@ -145,11 +110,6 @@ class TestDatabaseRepositoryTransactions:
     def mock_repository(self):
         """Create mock repository for testing"""
         return MockRepository()
-    
-    @pytest.fixture
-    def transaction_manager(self):
-        """Create transaction test manager"""
-        return TransactionTestManager()
     
     def _setup_successful_transaction_data(self):
         """Setup data for successful transaction test"""
@@ -276,128 +236,3 @@ class TestDatabaseRepositoryTransactions:
                 mock_repository.create(mock_session, name='Slow Entity'),
                 timeout=0.5
             )
-
-
-class TestUnitOfWorkTransactions:
-    """Test Unit of Work pattern transaction handling"""
-    
-    @pytest.fixture
-    def mock_async_session_factory(self):
-        """Mock async session factory"""
-        session = AsyncMock(spec=AsyncSession)
-        session.add = MagicMock()
-        session.begin = AsyncMock()
-        session.commit = AsyncMock()
-        session.rollback = AsyncMock()
-        session.close = AsyncMock()
-        session.refresh = AsyncMock()
-        session.execute = AsyncMock()
-        
-        # Create a context manager that returns the session
-        session_context = AsyncMock()
-        session_context.__aenter__ = AsyncMock(return_value=session)
-        session_context.__aexit__ = AsyncMock(return_value=None)
-        
-        factory = MagicMock()
-        factory.return_value = session_context
-        return factory, session
-    
-    def _assert_uow_repositories_initialized(self, uow, mock_session):
-        """Assert UoW repositories are properly initialized"""
-        assert uow.threads != None
-        assert uow.messages != None
-        assert uow.runs != None
-        assert uow.references != None
-        assert uow.threads._session is mock_session
-        assert uow.messages._session is mock_session
-
-    @pytest.mark.asyncio
-    async def test_unit_of_work_successful_transaction(self, mock_async_session_factory):
-        """Test successful Unit of Work transaction"""
-        factory, mock_session = mock_async_session_factory
-        with patch('app.services.database.unit_of_work.async_session_factory', factory):
-            async with UnitOfWork() as uow:
-                self._assert_uow_repositories_initialized(uow, mock_session)
-        mock_session.rollback.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def test_unit_of_work_rollback_on_exception(self, mock_async_session_factory):
-        """Test Unit of Work rollback on exception"""
-        factory, mock_session = mock_async_session_factory
-        with patch('app.services.database.unit_of_work.async_session_factory', factory):
-            try:
-                async with UnitOfWork() as uow:
-                    raise ValueError("Simulated error in UoW")
-            except ValueError:
-                pass
-        mock_session.rollback.assert_called_once()
-
-    def _assert_external_session_handling(self, external_session, uow):
-        """Assert external session is handled correctly"""
-        assert uow._session is external_session
-        assert uow._external_session == True
-        external_session.close.assert_not_called()
-        external_session.rollback.assert_not_called()
-
-    @pytest.mark.asyncio
-    async def test_unit_of_work_with_external_session(self):
-        """Test Unit of Work with externally provided session"""
-        external_session = AsyncMock(spec=AsyncSession)
-        async with UnitOfWork(external_session) as uow:
-            self._assert_external_session_handling(external_session, uow)
-
-
-class TestTransactionPerformanceAndScaling:
-    """Test transaction performance under various load conditions"""
-    
-    @pytest.fixture
-    def performance_repository(self):
-        """Repository for performance testing"""
-        repo = MockRepository()
-        return repo
-    
-    def _create_concurrent_sessions(self, num_concurrent):
-        """Create mock sessions for concurrency test"""
-        sessions = []
-        for i in range(num_concurrent):
-            session = AsyncMock(spec=AsyncSession)
-            session.add = MagicMock()
-            session.flush = AsyncMock()
-            session.rollback = AsyncMock()
-            session.refresh = AsyncMock()
-            sessions.append(session)
-        return sessions
-
-    async def _create_concurrent_entity(self, performance_repository, session, index):
-        """Create entity for concurrent testing"""
-        return await performance_repository.create(session, name=f'Concurrent Entity {index}')
-
-    def _create_concurrent_tasks(self, performance_repository, sessions, num_concurrent):
-        """Create concurrent tasks for testing"""
-        return [self._create_concurrent_entity(performance_repository, sessions[i], i) for i in range(num_concurrent)]
-
-    def _assert_concurrency_performance(self, execution_time, results, num_concurrent):
-        """Assert concurrency performance metrics"""
-        assert execution_time < 2.0
-        assert len(results) == num_concurrent
-        successful = sum(1 for r in results if not isinstance(r, Exception))
-        assert successful == num_concurrent
-
-    def _assert_all_sessions_used(self, sessions):
-        """Assert all sessions were used correctly"""
-        for session in sessions:
-            session.add.assert_called_once()
-            session.flush.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_high_concurrency_transactions(self, performance_repository):
-        """Test transaction handling under high concurrency"""
-        num_concurrent = 50
-        sessions = self._create_concurrent_sessions(num_concurrent)
-        tasks = self._create_concurrent_tasks(performance_repository, sessions, num_concurrent)
-        start_time = asyncio.get_event_loop().time()
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        end_time = asyncio.get_event_loop().time()
-        execution_time = end_time - start_time
-        self._assert_concurrency_performance(execution_time, results, num_concurrent)
-        self._assert_all_sessions_used(sessions)

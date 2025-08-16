@@ -1,5 +1,9 @@
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, TYPE_CHECKING
 from pydantic import BaseModel, Field
+
+# Import types only for type checking to avoid circular dependencies  
+if TYPE_CHECKING:
+    from app.schemas.FinOps import WorkloadProfile
 
 class ContentGenParams(BaseModel):
     samples_per_type: int = Field(10, gt=0, le=100, description="Number of samples to generate for each workload type.")
@@ -32,3 +36,39 @@ class ContentCorpusGenParams(BaseModel):
     top_k: Optional[int] = Field(None, ge=0, description="Top-k sampling control.")
     max_cores: int = Field(4, ge=1, description="Max CPU cores to use.")
     clickhouse_table: str = Field('content_corpus', description="The name of the ClickHouse table to store the corpus in.")
+
+
+# Generation Status and Result Models (Single Source of Truth)
+class GenerationStatus(BaseModel):
+    """Status of synthetic data generation - consolidated from duplicate definitions"""
+    status: str = Field(default="pending", description="pending, generating, completed, failed")
+    records_generated: int = Field(default=0, ge=0)
+    total_records: int = Field(default=0, ge=0)
+    progress_percentage: float = Field(default=0.0, ge=0.0, le=100.0)
+    estimated_time_remaining: Optional[int] = Field(default=None, ge=0)
+    table_name: Optional[str] = None
+    errors: List[str] = Field(default_factory=list)
+
+
+class SyntheticDataResult(BaseModel):
+    """Result of synthetic data generation - consolidated from duplicate definitions"""
+    success: bool
+    workload_profile: "WorkloadProfile"
+    generation_status: GenerationStatus
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    sample_data: Optional[List[Dict[str, Any]]] = None
+    requires_approval: bool = False
+    approval_message: Optional[str] = None
+
+
+# Model rebuild for forward reference resolution
+def rebuild_generation_models() -> None:
+    """Rebuild generation models after imports are complete."""
+    try:
+        SyntheticDataResult.model_rebuild()
+    except Exception:
+        # Safe to ignore - model will rebuild when needed
+        pass
+
+# Initialize model rebuild
+rebuild_generation_models()

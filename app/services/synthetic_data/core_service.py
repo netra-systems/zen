@@ -85,21 +85,11 @@ class SyntheticDataService(RecoveryMixin):
         job_id: Optional[str] = None
     ) -> Dict:
         """Generate synthetic data based on configuration"""
-        # Check alert conditions before starting
         await self._check_alert_conditions(config)
-        
-        job_id = self._generate_job_id(job_id)
-        table_name = self._create_table_name(job_id)
-        
-        job_info = await self._create_job_record(
-            job_id, config, corpus_id, user_id, table_name, db
-        )
-        
-        await self._start_generation_worker(
-            job_id, config, corpus_id, db, job_info.get("synthetic_data_id")
-        )
-        
-        return self._build_job_response(job_id, table_name)
+        job_params = self._prepare_job_parameters(job_id)
+        job_info = await self._create_job_record(job_params["job_id"], config, corpus_id, user_id, job_params["table_name"], db)
+        await self._start_generation_worker(job_params["job_id"], config, corpus_id, db, job_info.get("synthetic_data_id"))
+        return self._build_job_response(job_params["job_id"], job_params["table_name"])
 
     async def _check_alert_conditions(self, config: schemas.LogGenParams) -> None:
         """Check if generation config triggers any alert conditions"""
@@ -108,6 +98,12 @@ class SyntheticDataService(RecoveryMixin):
             num_traces = getattr(config, 'num_logs', getattr(config, 'num_traces', 0))
             if num_traces >= 10000:  # Large job threshold
                 await self.send_alert("Large generation job detected", "warning")
+
+    def _prepare_job_parameters(self, job_id: Optional[str]) -> Dict:
+        """Prepare job ID and table name parameters"""
+        generated_job_id = job_id or str(uuid.uuid4())
+        table_name = f"netra_synthetic_data_{generated_job_id.replace('-', '_')}"
+        return {'job_id': generated_job_id, 'table_name': table_name}
 
     def _generate_job_id(self, job_id: Optional[str]) -> str:
         """Generate unique job ID"""
@@ -120,7 +116,7 @@ class SyntheticDataService(RecoveryMixin):
     async def _create_job_record(
         self,
         job_id: str,
-        config: schemas.LogGenParams, 
+        config: schemas.LogGenParams,
         corpus_id: Optional[str],
         user_id: Optional[str],
         table_name: str,
@@ -130,16 +126,20 @@ class SyntheticDataService(RecoveryMixin):
         job_data = self.job_manager.create_job(
             job_id, config, corpus_id, user_id, table_name
         )
-        
+        job_data = await self._enhance_job_with_database_record(job_data, job_id, db, table_name, user_id)
+        self.active_jobs[job_id] = job_data
+        return job_data
+
+    async def _enhance_job_with_database_record(
+        self, job_data: Dict, job_id: str, db: Optional[Session], table_name: str, user_id: Optional[str]
+    ) -> Dict:
+        """Enhance job data with database record if available"""
         if db is not None:
             synthetic_data_id = await self._create_database_record(
                 db, table_name, job_id, user_id
             )
             job_data["synthetic_data_id"] = synthetic_data_id
-        
-        self.active_jobs[job_id] = job_data
         return job_data
-
     async def _create_database_record(
         self,
         db: Session,
@@ -148,13 +148,19 @@ class SyntheticDataService(RecoveryMixin):
         user_id: Optional[str]
     ) -> str:
         """Create database record for job"""
-        db_synthetic_data = models.Corpus(
+        db_synthetic_data = self._build_corpus_model(table_name, job_id, user_id)
+        return self._persist_corpus_model(db, db_synthetic_data)
+
+    def _build_corpus_model(self, table_name: str, job_id: str, user_id: Optional[str]) -> models.Corpus:
+        """Build corpus model for database insertion"""
+        return models.Corpus(
             name=f"Synthetic Data {datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}",
             description=f"Synthetic data generation job {job_id}",
-            table_name=table_name,
-            status="pending",
-            created_by_id=user_id
+            table_name=table_name, status="pending", created_by_id=user_id
         )
+
+    def _persist_corpus_model(self, db: Session, db_synthetic_data: models.Corpus) -> str:
+        """Persist corpus model to database and return ID"""
         db.add(db_synthetic_data)
         db.commit()
         db.refresh(db_synthetic_data)
@@ -212,15 +218,19 @@ class SyntheticDataService(RecoveryMixin):
     ) -> None:
         """Run the generation pipeline"""
         await self.job_manager.start_job(job_id, self.active_jobs)
-        
-        corpus_content = await self._load_corpus(corpus_id, db)
-        await self._setup_destination(job_id)
-        
+        corpus_content = await self._prepare_generation_environment(job_id, corpus_id, db)
         await self.generation_engine.execute_batch_generation(
             job_id, config, corpus_content, self.active_jobs, self.ingestion_manager
         )
-        
         await self.job_manager.complete_job(job_id, self.active_jobs, db, synthetic_data_id)
+    
+    async def _prepare_generation_environment(
+        self, job_id: str, corpus_id: Optional[str], db: Optional[Session]
+    ) -> Optional[List[Dict]]:
+        """Prepare generation environment with corpus and destination"""
+        corpus_content = await self._load_corpus(corpus_id, db)
+        await self._setup_destination(job_id)
+        return corpus_content
 
     async def _load_corpus(
         self,
@@ -245,13 +255,16 @@ class SyntheticDataService(RecoveryMixin):
         """Get job status with admin-friendly format"""
         status = self.job_manager.get_job_status(job_id, self.active_jobs)
         if status:
-            # Transform to expected admin format  
-            return {
-                "state": status.get("status", "unknown").lower(),
-                "progress_percentage": 50.0,
-                "estimated_completion": "2 minutes"
-            }
+            return self._transform_status_to_admin_format(status)
         return None
+
+    def _transform_status_to_admin_format(self, status: Dict) -> Dict:
+        """Transform job status to admin-friendly format"""
+        return {
+            "state": status.get("status", "unknown").lower(),
+            "progress_percentage": 50.0,
+            "estimated_completion": "2 minutes"
+        }
 
     async def cancel_job(self, job_id: str, reason: str = None) -> Dict:
         """Cancel generation job"""
@@ -410,32 +423,39 @@ class SyntheticDataService(RecoveryMixin):
     def _generate_tool_invocations(self, pattern: str) -> List[Dict]:
         """Generate tool invocations for specific patterns"""
         if pattern == "error_scenarios":
-            return [{
-                "name": "error_test_tool",
-                "type": "query",
-                "latency_ms": 150,
-                "status": "failed",
-                "error": "Simulated error"
-            }]
+            return [self._create_error_test_tool()]
         return []
+
+    def _create_error_test_tool(self) -> Dict:
+        """Create error test tool invocation"""
+        return {
+            "name": "error_test_tool", "type": "query", "latency_ms": 150,
+            "status": "failed", "error": "Simulated error"
+        }
 
     def _create_tool_invocation(self, tool: Dict) -> Dict:
         """Create individual tool invocation from tool definition"""
+        latency_ms = self._calculate_tool_latency(tool)
+        is_failed = self._determine_tool_failure(tool)
+        return self._build_tool_invocation_record(tool, latency_ms, is_failed)
+
+    def _calculate_tool_latency(self, tool: Dict) -> int:
+        """Calculate random latency for tool invocation"""
         latency_range = tool.get("latency_ms_range", (50, 200))
-        latency_ms = random.randint(latency_range[0], latency_range[1])
-        
+        return random.randint(latency_range[0], latency_range[1])
+
+    def _determine_tool_failure(self, tool: Dict) -> bool:
+        """Determine if tool invocation should fail based on failure rate"""
         failure_rate = tool.get("failure_rate", 0.0)
-        is_failed = random.random() < failure_rate
-        
-        invocation = {
-            "name": tool["name"],
-            "type": tool["type"],
-            "latency_ms": latency_ms,
+        return random.random() < failure_rate
+
+    def _build_tool_invocation_record(self, tool: Dict, latency_ms: int, is_failed: bool) -> Dict:
+        """Build complete tool invocation record"""
+        return {
+            "name": tool["name"], "type": tool["type"], "latency_ms": latency_ms,
             "status": "failed" if is_failed else "success",
             "error": "Tool execution failed" if is_failed else None
         }
-        
-        return invocation
 
 
 # Create singleton instance

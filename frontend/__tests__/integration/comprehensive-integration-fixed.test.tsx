@@ -18,6 +18,10 @@ import { useThreadStore } from '@/store/threadStore';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
 import { TestProviders } from '../test-utils/providers';
+import { setupTestEnvironment, cleanupTestEnvironment, resetTestStores, clearTestStorage, setupMockFetch } from '../helpers/test-setup-helpers';
+import { createMockDocument, createMockSearchResults, createMockGenerationJob, createMockExportData, createMockHealthStatus, createMockDegradedHealth } from '../helpers/test-mock-helpers';
+import { simulateFileUpload, simulateCorpusSearch, simulateGenerationProcess, simulateHealthCheck, simulateExportData } from '../helpers/test-async-helpers';
+import { assertElementText, assertStoreState, assertFetchWasCalled, waitForElementText } from '../helpers/test-assertion-helpers';
 
 // Mock stores and services that don't exist yet
 const useCorpusStore = Object.assign(
@@ -116,70 +120,35 @@ describe('Comprehensive Frontend Integration Tests', () => {
   let server: WS;
   
   beforeEach(() => {
-    process.env.NEXT_PUBLIC_API_URL = 'http://localhost:8000';
-    process.env.NEXT_PUBLIC_WS_URL = 'ws://localhost:8000';
+    setupTestEnvironment();
     server = new WS('ws://localhost:8000/ws');
-    jest.clearAllMocks();
-    localStorage.clear();
-    sessionStorage.clear();
-    
-    // Reset all stores
-    useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
-    useChatStore.setState({ messages: [], currentRunId: null });
-    useThreadStore.setState({ threads: [], currentThread: null, currentThreadId: null });
-    
+    clearTestStorage();
+    resetTestStores();
+    setupMockFetch();
     global.fetch = jest.fn();
   });
 
   afterEach(() => {
-    WS.clean();
-    jest.restoreAllMocks();
+    cleanupTestEnvironment();
   });
 
   describe('1. Corpus Management Integration', () => {
     it('should upload documents to corpus and process with embeddings', async () => {
-      const mockDocument = {
-        id: 'doc-123',
-        title: 'Test Document',
-        content: 'Document content for testing',
-        embeddings: [0.1, 0.2, 0.3],
-        created_at: new Date().toISOString()
-      };
-      
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockDocument
-      });
-      
-      const uploadDocument = async (file: File) => {
-        const result = await corpusService.uploadDocument(file);
-        useCorpusStore.getState().addDocument(mockDocument);
-        return result;
-      };
+      const mockDocument = createMockDocument();
+      (fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => mockDocument });
       
       const file = new File(['test content'], 'test.txt');
-      await uploadDocument(file);
+      await simulateFileUpload(corpusService, file, mockDocument);
       
-      expect(useCorpusStore.getState().documents).toHaveLength(1);
+      assertStoreState(useCorpusStore, 'documents', expect.arrayContaining([mockDocument]));
     });
 
     it('should search corpus with semantic similarity', async () => {
-      const mockResults = [
-        { id: 'doc-1', score: 0.95, content: 'relevant content' },
-        { id: 'doc-2', score: 0.87, content: 'related content' }
-      ];
+      const mockResults = createMockSearchResults();
+      (fetch as jest.Mock).mockResolvedValueOnce({ ok: true, json: async () => mockResults });
       
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResults
-      });
+      await simulateCorpusSearch(corpusService, 'test query');
       
-      const searchCorpus = async (query: string) => {
-        const results = await corpusService.searchDocuments(query);
-        return results;
-      };
-      
-      const results = await searchCorpus('test query');
       expect(corpusService.searchDocuments).toHaveBeenCalledWith('test query');
     });
   });

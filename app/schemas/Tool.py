@@ -1,7 +1,12 @@
 import enum
 import time
-from typing import List, Any, Optional, Dict, Union, TypeVar, Generic
+from typing import List, Any, Optional, Dict, Union, TypeVar, Generic, TYPE_CHECKING
 from pydantic import BaseModel, Field, ConfigDict
+from abc import ABC, abstractmethod
+
+# Import types only for type checking to avoid circular dependencies  
+if TYPE_CHECKING:
+    from app.schemas.agent_models import DeepAgentState
 
 class ToolStatus(str, enum.Enum):
     SUCCESS = "success"
@@ -78,3 +83,75 @@ class ToolCompleted(BaseModel):
     result: Union[ToolCompletionData, str, dict]
     status: ToolStatus
     execution_time_ms: Optional[float] = None
+
+
+# Tool System Core Types (Single Source of Truth)
+class ToolExecuteResponse(BaseModel):
+    """Typed response for tool execution - consolidated from duplicates"""
+    success: bool
+    data: Optional[Any] = None
+    message: Optional[str] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ToolDispatchResponse(BaseModel):
+    """Typed response for tool dispatch - consolidated from duplicates"""
+    success: bool
+    result: Optional[Any] = None
+    error: Optional[str] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+# Tool System Interface Definitions
+class BaseTool(ABC):
+    """Base interface for all tools"""
+    
+    @abstractmethod
+    async def execute(
+        self, 
+        parameters: Dict[str, Any], 
+        state: Optional["DeepAgentState"], 
+        run_id: Optional[str]
+    ) -> Dict[str, Any]:
+        """Execute the tool with given parameters"""
+        pass
+
+
+class ToolRegistryInterface(ABC):
+    """Interface for tool registry implementations"""
+    
+    @abstractmethod
+    def register_tool(self, tool: BaseTool) -> None:
+        """Register a single tool"""
+        pass
+    
+    @abstractmethod
+    def get_tool(self, name: str) -> Optional[BaseTool]:
+        """Get a tool by name"""
+        pass
+
+
+class ToolExecutionEngineInterface(ABC):
+    """Interface for tool execution engine implementations"""
+    
+    @abstractmethod
+    async def execute_tool(
+        self, 
+        tool_name: str, 
+        parameters: Dict[str, Any]
+    ) -> ToolExecuteResponse:
+        """Execute a tool by name with parameters"""
+        pass
+
+
+class ToolDispatcherInterface(ABC):
+    """Interface for tool dispatcher implementations"""
+    
+    @abstractmethod
+    async def dispatch(
+        self, 
+        tool_name: str, 
+        parameters: Dict[str, Any]
+    ) -> ToolDispatchResponse:
+        """Dispatch a tool execution request"""
+        pass
