@@ -158,16 +158,26 @@ class TestDatabaseClientCircuitBreaker:
         mock_session_factory.side_effect = Exception("Database connection error")
         
         # Configure BOTH postgres and read circuits with low thresholds
-        # The postgres circuit protects session creation, read circuit protects read operations
         postgres_circuit = await self.db_client._get_postgres_circuit()
         read_circuit = await self.db_client._get_read_circuit()
         
         postgres_circuit.config.failure_threshold = 1
         read_circuit.config.failure_threshold = 1
+        # For AdaptiveCircuitBreaker, also set the adaptive threshold
+        postgres_circuit.adaptive_failure_threshold = 1
+        read_circuit.adaptive_failure_threshold = 1
         
-        # First call should fail with exception (postgres circuit not open yet)
+        # Verify initial state
+        assert postgres_circuit.state.value == "closed"
+        assert postgres_circuit.failure_count == 0
+        
+        # First call should fail with exception and record failure
         with pytest.raises(Exception, match="Database connection error"):
             await self.db_client.execute_read_query("SELECT * FROM test")
+        
+        # Verify postgres circuit recorded the failure and opened
+        assert postgres_circuit.failure_count == 1
+        assert postgres_circuit.state.value == "open"
         
         # Second call should be blocked by postgres circuit breaker and return empty result
         result = await self.db_client.execute_read_query("SELECT * FROM test")
@@ -221,18 +231,32 @@ class TestHTTPClientCircuitBreaker:
         """Test HTTP circuit breaker opens after failures."""
         mock_request.side_effect = Exception("Network error")
         
-        # Configure circuit with low threshold
+        # Configure circuit with low threshold for testing
         circuit = await self.http_client._get_circuit("test_api")
         circuit.config.failure_threshold = 2
+        circuit.adaptive_failure_threshold = 2
         
-        # Multiple failures should open circuit
-        with pytest.raises(Exception):
+        # Check initial state
+        assert circuit.state.value == "closed"
+        assert circuit.failure_count == 0
+        
+        # First failure
+        with pytest.raises(Exception, match="Network error"):
             await self.http_client.get("/test", "test_api")
         
-        with pytest.raises(Exception):
+        # Check state after first failure
+        assert circuit.failure_count == 1
+        assert circuit.state.value == "closed"
+        
+        # Second failure should open circuit
+        with pytest.raises(Exception, match="Network error"):
             await self.http_client.get("/test", "test_api")
         
-        # Next call should return fallback
+        # Check state after second failure - circuit should be open
+        assert circuit.failure_count == 2
+        assert circuit.state.value == "open"
+        
+        # Third call should return fallback response
         result = await self.http_client.get("/test", "test_api")
         
         assert result["fallback"] is True

@@ -13,8 +13,8 @@ class TestJobStatusManagement:
     """Test job status update functionality"""
     async def test_update_job_status_running(self):
         """Test updating job status to running"""
-        with patch('app.services.generation_service.job_store') as mock_store:
-            with patch('app.services.generation_service.manager') as mock_manager:
+        with patch('app.services.generation_job_manager.job_store') as mock_store:
+            with patch('app.services.generation_job_manager.manager') as mock_manager:
                 mock_store.update = AsyncMock()
                 mock_manager.broadcast_to_job = AsyncMock()
                 
@@ -29,8 +29,8 @@ class TestJobStatusManagement:
                 mock_manager.broadcast_to_job.assert_called_once()
     async def test_update_job_status_completed(self):
         """Test updating job status to completed"""
-        with patch('app.services.generation_service.job_store') as mock_store:
-            with patch('app.services.generation_service.manager') as mock_manager:
+        with patch('app.services.generation_job_manager.job_store') as mock_store:
+            with patch('app.services.generation_job_manager.manager') as mock_manager:
                 mock_store.update = AsyncMock()
                 mock_manager.broadcast_to_job = AsyncMock()
                 
@@ -49,8 +49,8 @@ class TestJobStatusManagement:
                 assert mock_store.update.call_args[1]["result"] == {"data": "test"}
     async def test_update_job_status_failed(self):
         """Test updating job status to failed"""
-        with patch('app.services.generation_service.job_store') as mock_store:
-            with patch('app.services.generation_service.manager') as mock_manager:
+        with patch('app.services.generation_job_manager.job_store') as mock_store:
+            with patch('app.services.generation_job_manager.manager') as mock_manager:
                 mock_store.update = AsyncMock()
                 mock_manager.broadcast_to_job = AsyncMock()
                 
@@ -67,8 +67,8 @@ class TestJobStatusManagement:
                 assert mock_store.update.call_args[1]["error"] == "Test error message"
     async def test_update_job_status_broadcasts_update(self):
         """Test that job status updates are broadcast via WebSocket"""
-        with patch('app.services.generation_service.job_store') as mock_store:
-            with patch('app.services.generation_service.manager') as mock_manager:
+        with patch('app.services.generation_job_manager.job_store') as mock_store:
+            with patch('app.services.generation_job_manager.manager') as mock_manager:
                 mock_store.update = AsyncMock()
                 mock_manager.broadcast_to_job = AsyncMock()
                 
@@ -95,8 +95,8 @@ class TestClickHouseOperationsMocked:
         ])
         mock_db.disconnect = AsyncMock()
         
-        with patch('app.services.generation_service.ClickHouseDatabase') as mock_ch_class:
-            with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor:
+        with patch('app.services.generation_job_manager.ClickHouseDatabase') as mock_ch_class:
+            with patch('app.services.generation_job_manager.ClickHouseQueryInterceptor') as mock_interceptor:
                 mock_interceptor.return_value = mock_db
                 
                 result = await get_corpus_from_clickhouse("test_corpus")
@@ -120,8 +120,8 @@ class TestClickHouseOperationsMocked:
         mock_db.insert_data = AsyncMock()
         mock_db.disconnect = AsyncMock()
         
-        with patch('app.services.generation_service.ClickHouseDatabase') as mock_ch_class:
-            with patch('app.services.generation_service.ClickHouseQueryInterceptor') as mock_interceptor:
+        with patch('app.services.generation_job_manager.ClickHouseDatabase') as mock_ch_class:
+            with patch('app.services.generation_job_manager.ClickHouseQueryInterceptor') as mock_interceptor:
                 mock_interceptor.return_value = mock_db
                 
                 await save_corpus_to_clickhouse(sample_corpus, "new_corpus", "job123")

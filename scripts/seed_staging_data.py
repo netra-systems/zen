@@ -79,70 +79,69 @@ class StagingDataSeeder:
     async def seed_users(self, db: AsyncSession, config: Dict):
         """Create test users with various roles"""
         user_count = config.get("count", 10)
-        roles = config.get("roles", {
-            "admin": 1,
-            "manager": 2,
-            "user": 7
-        })
-        
+        roles = config.get("roles", {"admin": 1, "manager": 2, "user": 7})
         print(f"Creating {user_count} test users...")
-        
-        # Create admin users
-        for i in range(roles.get("admin", 1)):
-            user_data = {
-                "email": f"admin{i+1}.pr{self.pr_number}@staging.netrasystems.ai",
-                "username": f"admin{i+1}_pr{self.pr_number}",
-                "full_name": fake.name(),
-                "hashed_password": get_password_hash("TestPassword123!"),
-                "is_active": True,
-                "is_superuser": True,
-                "role": "admin",
-                "created_at": datetime.utcnow() - timedelta(days=random.randint(30, 365)),
-                "plan_tier": "enterprise",
-                "usage_quota": 100000,
-                "usage_current": random.randint(0, 50000)
-            }
+        await self._create_admin_users(db, roles.get("admin", 1))
+        await self._create_manager_users(db, roles.get("manager", 2))
+        await self._create_regular_users(db, roles.get("user", 7))
+    
+    async def _create_admin_users(self, db: AsyncSession, count: int):
+        """Create admin users."""
+        for i in range(count):
+            user_data = self._build_admin_user_data(i)
             user = await self.user_repo.create(db, user_data)
             self.created_data["users"].append(user.id)
             print(f"  Created admin user: {user.username}")
-        
-        # Create manager users
-        for i in range(roles.get("manager", 2)):
-            user_data = {
-                "email": f"manager{i+1}.pr{self.pr_number}@staging.netrasystems.ai",
-                "username": f"manager{i+1}_pr{self.pr_number}",
-                "full_name": fake.name(),
-                "hashed_password": get_password_hash("TestPassword123!"),
-                "is_active": True,
-                "is_superuser": False,
-                "role": "manager",
-                "created_at": datetime.utcnow() - timedelta(days=random.randint(30, 180)),
-                "plan_tier": "professional",
-                "usage_quota": 50000,
-                "usage_current": random.randint(0, 25000)
-            }
+    
+    async def _create_manager_users(self, db: AsyncSession, count: int):
+        """Create manager users."""
+        for i in range(count):
+            user_data = self._build_manager_user_data(i)
             user = await self.user_repo.create(db, user_data)
             self.created_data["users"].append(user.id)
             print(f"  Created manager user: {user.username}")
-        
-        # Create regular users
-        for i in range(roles.get("user", 7)):
-            user_data = {
-                "email": f"user{i+1}.pr{self.pr_number}@staging.netrasystems.ai",
-                "username": f"user{i+1}_pr{self.pr_number}",
-                "full_name": fake.name(),
-                "hashed_password": get_password_hash("TestPassword123!"),
-                "is_active": True,
-                "is_superuser": False,
-                "role": "user",
-                "created_at": datetime.utcnow() - timedelta(days=random.randint(1, 90)),
-                "plan_tier": random.choice(["free", "starter", "professional"]),
-                "usage_quota": random.choice([1000, 10000, 50000]),
-                "usage_current": random.randint(0, 1000)
-            }
+    
+    async def _create_regular_users(self, db: AsyncSession, count: int):
+        """Create regular users."""
+        for i in range(count):
+            user_data = self._build_regular_user_data(i)
             user = await self.user_repo.create(db, user_data)
             self.created_data["users"].append(user.id)
             print(f"  Created regular user: {user.username}")
+    
+    def _build_admin_user_data(self, index: int) -> Dict:
+        """Build admin user data."""
+        return {
+            "email": f"admin{index+1}.pr{self.pr_number}@staging.netrasystems.ai",
+            "username": f"admin{index+1}_pr{self.pr_number}", "full_name": fake.name(),
+            "hashed_password": get_password_hash("TestPassword123!"), "is_active": True,
+            "is_superuser": True, "role": "admin", "plan_tier": "enterprise",
+            "created_at": datetime.utcnow() - timedelta(days=random.randint(30, 365)),
+            "usage_quota": 100000, "usage_current": random.randint(0, 50000)
+        }
+    
+    def _build_manager_user_data(self, index: int) -> Dict:
+        """Build manager user data."""
+        return {
+            "email": f"manager{index+1}.pr{self.pr_number}@staging.netrasystems.ai",
+            "username": f"manager{index+1}_pr{self.pr_number}", "full_name": fake.name(),
+            "hashed_password": get_password_hash("TestPassword123!"), "is_active": True,
+            "is_superuser": False, "role": "manager", "plan_tier": "professional",
+            "created_at": datetime.utcnow() - timedelta(days=random.randint(30, 180)),
+            "usage_quota": 50000, "usage_current": random.randint(0, 25000)
+        }
+    
+    def _build_regular_user_data(self, index: int) -> Dict:
+        """Build regular user data."""
+        return {
+            "email": f"user{index+1}.pr{self.pr_number}@staging.netrasystems.ai",
+            "username": f"user{index+1}_pr{self.pr_number}", "full_name": fake.name(),
+            "hashed_password": get_password_hash("TestPassword123!"), "is_active": True,
+            "is_superuser": False, "role": "user",
+            "created_at": datetime.utcnow() - timedelta(days=random.randint(1, 90)),
+            "plan_tier": random.choice(["free", "starter", "professional"]),
+            "usage_quota": random.choice([1000, 10000, 50000]), "usage_current": random.randint(0, 1000)
+        }
     
     async def seed_threads_and_messages(self, db: AsyncSession, config: Dict):
         """Create threads with messages for each user"""

@@ -18,23 +18,29 @@ def shutdown_cleanup(logger: logging.Logger) -> None:
     cleanup_multiprocessing()
 
 
+async def _stop_performance_monitoring(app: FastAPI, logger: logging.Logger) -> None:
+    """Stop performance monitoring service."""
+    if hasattr(app.state, 'performance_monitor'):
+        await app.state.performance_monitor.stop_monitoring()
+        logger.info("Performance monitoring stopped")
+
+async def _stop_performance_manager(app: FastAPI, logger: logging.Logger) -> None:
+    """Stop performance optimization manager."""
+    if hasattr(app.state, 'performance_manager'):
+        await app.state.performance_manager.shutdown()
+        logger.info("Performance optimization manager stopped")
+
+async def _stop_database_monitoring(app: FastAPI, logger: logging.Logger) -> None:
+    """Stop database monitoring task."""
+    if hasattr(app.state, 'monitoring_task'):
+        await _stop_monitoring_task(app, logger)
+
 async def stop_monitoring(app: FastAPI, logger: logging.Logger) -> None:
     """Stop comprehensive monitoring and optimization gracefully."""
     try:
-        # Stop performance monitoring
-        if hasattr(app.state, 'performance_monitor'):
-            await app.state.performance_monitor.stop_monitoring()
-            logger.info("Performance monitoring stopped")
-        
-        # Stop performance optimization manager
-        if hasattr(app.state, 'performance_manager'):
-            await app.state.performance_manager.shutdown()
-            logger.info("Performance optimization manager stopped")
-        
-        # Stop database monitoring
-        if hasattr(app.state, 'monitoring_task'):
-            await _stop_monitoring_task(app, logger)
-            
+        await _stop_performance_monitoring(app, logger)
+        await _stop_performance_manager(app, logger)
+        await _stop_database_monitoring(app, logger)
     except Exception as e:
         logger.error(f"Error stopping monitoring and optimizations: {e}")
 

@@ -107,12 +107,10 @@ class FallbackManager:
     
     def _create_fallback_mapping(self) -> dict:
         """Create agent fallback type mapping."""
-        return {
-            "TriageSubAgent": "triage",
-            "DataSubAgent": "data_analysis",
-            "SupplyResearcherAgent": "data_analysis",
-            "SyntheticDataGenerator": "data_analysis"
-        }
+        base_mapping = {"TriageSubAgent": "triage", "DataSubAgent": "data_analysis"}
+        extended_mapping = {"SupplyResearcherAgent": "data_analysis"}
+        synthetic_mapping = {"SyntheticDataGenerator": "data_analysis"}
+        return {**base_mapping, **extended_mapping, **synthetic_mapping}
     
     def _wrap_fallback_response(self, fallback_data: dict,
                               context: AgentExecutionContext) -> AgentExecutionResult:
@@ -175,9 +173,7 @@ class FallbackManager:
                                     fallback_data: dict) -> AgentExecutionResult:
         """Build final fallback result."""
         metadata = self._create_final_fallback_metadata(context.agent_name, fallback_data)
-        return AgentExecutionResult(
-            success=False, state=state, duration=0.01,
-            error=str(error), metadata=metadata)
+        return self._create_final_result_with_metadata(state, error, metadata)
     
     def _create_final_fallback_metadata(self, agent_name: str, 
                                        fallback_data: dict) -> dict:
@@ -262,6 +258,13 @@ class FallbackManager:
         all_status = await circuit_registry.get_all_status()
         return all_status
     
+    def _create_final_result_with_metadata(self, state: DeepAgentState, 
+                                          error: Exception, metadata: dict) -> AgentExecutionResult:
+        """Create final result with metadata."""
+        return AgentExecutionResult(
+            success=False, state=state, duration=0.01,
+            error=str(error), metadata=metadata)
+
     async def reset_fallback_mechanisms(self) -> None:
         """Reset all fallback mechanisms."""
         self.fallback_handler.reset_circuit_breakers()

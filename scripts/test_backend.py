@@ -46,94 +46,87 @@ TEST_CATEGORIES = {
 
 def setup_test_environment(isolation_manager=None):
     """Setup test environment variables"""
-    # If using isolation manager, it will have already set up the environment
     if isolation_manager:
-        # Just ensure asyncio is configured for Windows
-        if sys.platform == "win32":
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+        _configure_windows_asyncio()
         return
-    
-    # Try to load from .env.test file first
+    _setup_dotenv_test_config()
+    _apply_standard_test_environment()
+    _configure_windows_asyncio()
+
+def _configure_windows_asyncio():
+    """Configure asyncio for Windows platform"""
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+def _setup_dotenv_test_config():
+    """Setup test configuration from .env.test file"""
     env_test_file = PROJECT_ROOT / ".env.test"
-    if env_test_file.exists():
-        try:
-            from dotenv import load_dotenv
-            load_dotenv(env_test_file, override=True)
-            print(f"Loaded test environment from {env_test_file}")
-        except ImportError:
-            print("Warning: python-dotenv not installed, using default test environment")
-    
-    # Standard test environment setup (when not using isolation)
-    test_env = {
-        "TESTING": "1",
-        "ENVIRONMENT": "testing",
+    if not env_test_file.exists():
+        return
+    _load_dotenv_file(env_test_file)
+
+def _load_dotenv_file(env_test_file):
+    """Load environment from dotenv file"""
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(env_test_file, override=True)
+        print(f"Loaded test environment from {env_test_file}")
+    except ImportError:
+        print("Warning: python-dotenv not installed, using default test environment")
+
+def _create_test_environment_dict():
+    """Create standard test environment dictionary"""
+    return {
+        "TESTING": "1", "ENVIRONMENT": "testing",
         "DATABASE_URL": "postgresql://test:test@localhost:5432/netra_test",
         "CLICKHOUSE_URL": "clickhouse://localhost:9000/test",
         "REDIS_URL": "redis://localhost:6379/1",
         "JWT_SECRET_KEY": "test-secret-key-for-testing-only-must-be-at-least-32-chars",
         "FERNET_KEY": "test-fernet-key-for-testing-only-base64encode=",
-        "ANTHROPIC_API_KEY": os.getenv("ANTHROPIC_API_KEY", "test-api-key"),
+        "ANTHROPIC_API_KEY": os.getenv("ANTHROPIC_API_KEY", "test-api-key")
+    }
+
+def _add_additional_test_env_vars(test_env):
+    """Add additional test environment variables"""
+    additional_vars = {
         "OPENAI_API_KEY": os.getenv("OPENAI_API_KEY", "test-api-key"),
         "GEMINI_API_KEY": os.getenv("GEMINI_API_KEY", "test-api-key"),
-        "LOG_LEVEL": "WARNING",
-        "GOOGLE_CLIENT_ID": "test-google-client",
-        "GOOGLE_CLIENT_SECRET": "test-google-secret",
-        "FRONTEND_URL": "http://localhost:3000",
+        "LOG_LEVEL": "WARNING", "GOOGLE_CLIENT_ID": "test-google-client",
+        "GOOGLE_CLIENT_SECRET": "test-google-secret", "FRONTEND_URL": "http://localhost:3000"
     }
-    
+    test_env.update(additional_vars)
+
+def _apply_standard_test_environment():
+    """Apply standard test environment when not using isolation"""
+    test_env = _create_test_environment_dict()
+    _add_additional_test_env_vars(test_env)
+    _apply_environment_variables(test_env)
+
+def _apply_environment_variables(test_env):
+    """Apply environment variables to os.environ"""
     for key, value in test_env.items():
-        if key not in os.environ or os.environ.get("OVERRIDE_TEST_ENV") == "1":
+        should_override = key not in os.environ or os.environ.get("OVERRIDE_TEST_ENV") == "1"
+        if should_override:
             os.environ[key] = value
-    
-    # Configure asyncio for Windows
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
-def check_dependencies() -> dict:
-    """Check if required test dependencies are available"""
-    status = {
-        "pytest": False,
-        "pytest-asyncio": False,
-        "pytest-mock": False,
-        "pytest-cov": False,
-        "pytest-xdist": False,
-        "redis": False,
-        "postgresql": False,
+def _initialize_dependency_status():
+    """Initialize dependency status dictionary"""
+    return {
+        "pytest": False, "pytest-asyncio": False, "pytest-mock": False,
+        "pytest-cov": False, "pytest-xdist": False, "redis": False, "postgresql": False
     }
-    
-    # Check Python packages
+
+def _check_python_package(package_name, status_key, status):
+    """Check if a Python package is available"""
     try:
-        import pytest
-        status["pytest"] = True
+        __import__(package_name)
+        status[status_key] = True
     except ImportError:
         pass
-    
-    try:
-        import pytest_asyncio
-        status["pytest-asyncio"] = True
-    except ImportError:
-        pass
-    
-    try:
-        import pytest_mock
-        status["pytest-mock"] = True
-    except ImportError:
-        pass
-    
-    try:
-        import pytest_cov
-        status["pytest-cov"] = True
-    except ImportError:
-        pass
-    
-    try:
-        import xdist
-        status["pytest-xdist"] = True
-    except ImportError:
-        pass
-    
-    # Check external services (optional)
+
+def _check_redis_service(status):
+    """Check Redis service availability"""
     try:
         import redis
         r = redis.Redis(host='localhost', port=6379, socket_connect_timeout=1)
@@ -141,21 +134,38 @@ def check_dependencies() -> dict:
         status["redis"] = True
     except:
         pass
-    
+
+def _check_postgresql_service(status):
+    """Check PostgreSQL service availability"""
     try:
         import psycopg2
         conn = psycopg2.connect(
-            host="localhost",
-            port=5432,
-            user="postgres",
-            password="postgres",
-            connect_timeout=1
+            host="localhost", port=5432, user="postgres",
+            password="postgres", connect_timeout=1
         )
         conn.close()
         status["postgresql"] = True
     except:
         pass
-    
+
+def _check_all_python_packages(status):
+    """Check all required Python packages"""
+    packages = [("pytest", "pytest"), ("pytest_asyncio", "pytest-asyncio"),
+                ("pytest_mock", "pytest-mock"), ("pytest_cov", "pytest-cov"),
+                ("xdist", "pytest-xdist")]
+    for pkg_name, status_key in packages:
+        _check_python_package(pkg_name, status_key, status)
+
+def _check_external_services(status):
+    """Check external service availability"""
+    _check_redis_service(status)
+    _check_postgresql_service(status)
+
+def check_dependencies() -> dict:
+    """Check if required test dependencies are available"""
+    status = _initialize_dependency_status()
+    _check_all_python_packages(status)
+    _check_external_services(status)
     return status
 
 
@@ -228,15 +238,18 @@ def _add_fail_fast_args(args, pytest_args):
 
 def _add_coverage_args(args, pytest_args):
     """Add coverage arguments"""
-    if args.coverage:
-        coverage_options = [
-            "--cov=app",
-            "--cov-report=html:reports/coverage/html",
-            "--cov-report=term-missing",
-            "--cov-report=json:reports/coverage/coverage.json",
-            f"--cov-fail-under={args.min_coverage}"
-        ]
-        pytest_args.extend(coverage_options)
+    if not args.coverage:
+        return
+    coverage_options = _get_coverage_options(args)
+    pytest_args.extend(coverage_options)
+
+def _get_coverage_options(args):
+    """Get coverage configuration options"""
+    return [
+        "--cov=app", "--cov-report=html:reports/coverage/html",
+        "--cov-report=term-missing", "--cov-report=json:reports/coverage/coverage.json",
+        f"--cov-fail-under={args.min_coverage}"
+    ]
 
 def _add_filter_args(args, pytest_args):
     """Add filter arguments (markers and keywords)"""
@@ -264,43 +277,78 @@ def _add_common_options(args, pytest_args):
 
 def setup_reports_directory(args, isolation_manager=None) -> Path:
     """Setup reports directory structure."""
-    if not (args.coverage or args.json_output or args.html_output):
+    if not _should_create_reports(args):
         return None
-    
-    if isolation_manager and isolation_manager.directories:
-        reports_dir = isolation_manager.directories.get('reports', PROJECT_ROOT / "reports")
-    else:
-        reports_dir = PROJECT_ROOT / "reports"
-        reports_dir.mkdir(exist_ok=True)
-        (reports_dir / "tests").mkdir(exist_ok=True)
-        (reports_dir / "coverage").mkdir(exist_ok=True)
+    reports_dir = _get_reports_directory(isolation_manager)
+    _ensure_report_subdirectories(reports_dir, isolation_manager)
     return reports_dir
+
+def _should_create_reports(args):
+    """Check if any report generation is enabled"""
+    return args.coverage or args.json_output or args.html_output
+
+def _get_reports_directory(isolation_manager):
+    """Get the reports directory path"""
+    if isolation_manager and isolation_manager.directories:
+        return isolation_manager.directories.get('reports', PROJECT_ROOT / "reports")
+    return PROJECT_ROOT / "reports"
+
+def _ensure_report_subdirectories(reports_dir, isolation_manager):
+    """Ensure report subdirectories exist"""
+    if isolation_manager and isolation_manager.directories:
+        return
+    reports_dir.mkdir(exist_ok=True)
+    (reports_dir / "tests").mkdir(exist_ok=True)
+    (reports_dir / "coverage").mkdir(exist_ok=True)
 
 def display_test_header_and_deps(args):
     """Display test runner header and check dependencies."""
+    _print_test_runner_header()
+    if args.check_deps:
+        _check_and_display_dependencies()
+
+def _print_test_runner_header():
+    """Print the test runner header"""
     print("=" * 80)
     print("NETRA AI PLATFORM - BACKEND TEST RUNNER")
     print("=" * 80)
-    
-    if args.check_deps:
-        print("\nChecking dependencies...")
-        deps = check_dependencies()
-        for dep, available in deps.items():
-            status = "[OK]" if available else "[MISSING]"
-            print(f"  {status} {dep}")
-        print()
+
+def _check_and_display_dependencies():
+    """Check and display dependency status"""
+    print("\nChecking dependencies...")
+    deps = check_dependencies()
+    _display_dependency_statuses(deps)
+    print()
+
+def _display_dependency_statuses(deps):
+    """Display status for each dependency"""
+    for dep, available in deps.items():
+        status = "[OK]" if available else "[MISSING]"
+        print(f"  {status} {dep}")
 
 def display_test_configuration(args, pytest_args):
     """Display test configuration and command."""
-    parallel_status = (args.parallel if str(args.parallel).isdigit() and int(args.parallel) > 0 
-                      else args.parallel if args.parallel == 'auto' else 'disabled')
-    
+    parallel_status = _get_parallel_status(args)
+    _print_test_config_details(args, parallel_status)
+    _print_pytest_command(pytest_args)
+
+def _get_parallel_status(args):
+    """Get parallel execution status string"""
+    if str(args.parallel).isdigit() and int(args.parallel) > 0:
+        return args.parallel
+    return args.parallel if args.parallel == 'auto' else 'disabled'
+
+def _print_test_config_details(args, parallel_status):
+    """Print test configuration details"""
     print("Test Configuration:")
     print(f"  Category: {args.category or 'all'}")
     print(f"  Parallel: {parallel_status}")
     print(f"  Coverage: {'enabled' if args.coverage else 'disabled'}")
     print(f"  Fail Fast: {'enabled' if args.fail_fast else 'disabled'}")
     print(f"  Environment: {os.environ.get('ENVIRONMENT', 'testing')}")
+
+def _print_pytest_command(pytest_args):
+    """Print the pytest command being executed"""
     print(f"\nRunning command:\n  pytest {' '.join(pytest_args)}")
     print("=" * 80)
 
@@ -315,24 +363,33 @@ def execute_pytest_with_timing(pytest_args) -> Tuple[int, float]:
 def display_test_results(exit_code: int, duration: float, args):
     """Display test results, coverage, and report locations."""
     print("=" * 80)
-    if exit_code == 0:
-        print(f"[PASS] ALL TESTS PASSED in {duration:.2f}s")
-    else:
-        print(f"[FAIL] TESTS FAILED with exit code {exit_code} after {duration:.2f}s")
-    
+    _print_test_outcome(exit_code, duration)
     _show_coverage_summary(args, exit_code)
     _show_report_locations(args)
     print("=" * 80)
 
+def _print_test_outcome(exit_code: int, duration: float):
+    """Print test outcome message"""
+    if exit_code == 0:
+        print(f"[PASS] ALL TESTS PASSED in {duration:.2f}s")
+    else:
+        print(f"[FAIL] TESTS FAILED with exit code {exit_code} after {duration:.2f}s")
+
 def _show_coverage_summary(args, exit_code: int):
     """Show coverage summary if enabled and tests passed."""
-    if args.coverage and exit_code == 0:
-        coverage_file = PROJECT_ROOT / "reports" / "coverage" / "coverage.json"
-        if coverage_file.exists():
-            with open(coverage_file) as f:
-                coverage_data = json.load(f)
-                total_coverage = coverage_data.get("totals", {}).get("percent_covered", 0)
-                print(f"\n[Coverage] Total Coverage: {total_coverage:.2f}%")
+    if not (args.coverage and exit_code == 0):
+        return
+    coverage_file = PROJECT_ROOT / "reports" / "coverage" / "coverage.json"
+    _display_coverage_from_file(coverage_file)
+
+def _display_coverage_from_file(coverage_file):
+    """Display coverage percentage from coverage file"""
+    if not coverage_file.exists():
+        return
+    with open(coverage_file) as f:
+        coverage_data = json.load(f)
+        total_coverage = coverage_data.get("totals", {}).get("percent_covered", 0)
+        print(f"\n[Coverage] Total Coverage: {total_coverage:.2f}%")
 
 def _show_report_locations(args):
     """Show locations of generated reports."""
@@ -346,10 +403,8 @@ def run_tests(pytest_args: List[str], args, isolation_manager=None) -> int:
     setup_reports_directory(args, isolation_manager)
     display_test_header_and_deps(args)
     display_test_configuration(args, pytest_args)
-    
     exit_code, duration = execute_pytest_with_timing(pytest_args)
     display_test_results(exit_code, duration, args)
-    
     return exit_code
 
 
@@ -365,14 +420,23 @@ def create_backend_argument_parser():
 
 def get_backend_usage_examples():
     """Get backend usage examples string"""
-    return """
-Examples:
+    basic_examples = _get_basic_usage_examples()
+    advanced_examples = _get_advanced_usage_examples()
+    return f"\n{basic_examples}{advanced_examples}"
+
+def _get_basic_usage_examples():
+    """Get basic usage examples"""
+    return """Examples:
   # Run all tests
   python scripts/test_backend.py
   
   # Run specific category
   python scripts/test_backend.py --category unit
-  python scripts/test_backend.py --category agent
+  python scripts/test_backend.py --category agent"""
+
+def _get_advanced_usage_examples():
+    """Get advanced usage examples"""
+    return """
   
   # Run with coverage
   python scripts/test_backend.py --coverage --min-coverage 80
@@ -432,6 +496,10 @@ def setup_backend_isolation_manager(args):
     """Setup backend test isolation manager if requested"""
     if not (args.isolation and TestIsolationManager):
         return None
+    return _create_configured_isolation_manager()
+
+def _create_configured_isolation_manager():
+    """Create and configure isolation manager"""
     manager = TestIsolationManager()
     manager.setup_environment()
     manager.apply_environment()
@@ -450,19 +518,23 @@ def prepare_pytest_args(args, isolation_manager):
 
 def main():
     """Main entry point for backend test runner"""
+    parser = _create_configured_parser()
+    args = parser.parse_args()
+    isolation_manager = setup_backend_isolation_manager(args)
+    setup_test_environment(isolation_manager)
+    pytest_args = prepare_pytest_args(args, isolation_manager)
+    exit_code = run_tests(pytest_args, args, isolation_manager)
+    sys.exit(exit_code)
+
+def _create_configured_parser():
+    """Create and configure argument parser with all options"""
     parser = create_backend_argument_parser()
     add_backend_test_selection_args(parser)
     add_backend_execution_args(parser)
     add_backend_coverage_args(parser)
     add_backend_output_args(parser)
     add_backend_env_args(parser)
-    args = parser.parse_args()
-    
-    isolation_manager = setup_backend_isolation_manager(args)
-    setup_test_environment(isolation_manager)
-    pytest_args = prepare_pytest_args(args, isolation_manager)
-    exit_code = run_tests(pytest_args, args, isolation_manager)
-    sys.exit(exit_code)
+    return parser
 
 
 if __name__ == "__main__":

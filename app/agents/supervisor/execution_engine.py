@@ -64,12 +64,7 @@ class ExecutionEngine:
         logger.error(f"Agent {context.agent_name} failed: {error}")
         if self._can_retry(context):
             return await self._retry_execution(context, state)
-        
-        # Log fallback trigger if flow_id is available
-        flow_id = getattr(context, 'flow_id', None)
-        if flow_id:
-            self.flow_logger.log_fallback_triggered(flow_id, context.agent_name, "fallback_agent")
-        
+        self._log_fallback_trigger(context)
         return await self.fallback_manager.create_fallback_result(context, state, error, start_time)
     
     def _can_retry(self, context: AgentExecutionContext) -> bool:
@@ -81,12 +76,7 @@ class ExecutionEngine:
         """Retry agent execution."""
         context.retry_count += 1
         logger.info(f"Retrying {context.agent_name} ({context.retry_count}/{context.max_retries})")
-        
-        # Log retry attempt if flow_id is available
-        flow_id = getattr(context, 'flow_id', None)
-        if flow_id:
-            self.flow_logger.log_retry_attempt(flow_id, context.agent_name, context.retry_count)
-        
+        self._log_retry_attempt(context)
         await asyncio.sleep(2 ** context.retry_count)
         return await self.execute_agent(context, state)
     
@@ -220,6 +210,18 @@ class ExecutionEngine:
         """Send final report notification."""
         await self.websocket_notifier.send_final_report(context, report, duration_ms)
     
+    def _log_fallback_trigger(self, context: AgentExecutionContext) -> None:
+        """Log fallback trigger if flow_id is available."""
+        flow_id = getattr(context, 'flow_id', None)
+        if flow_id:
+            self.flow_logger.log_fallback_triggered(flow_id, context.agent_name, "fallback_agent")
+    
+    def _log_retry_attempt(self, context: AgentExecutionContext) -> None:
+        """Log retry attempt if flow_id is available."""
+        flow_id = getattr(context, 'flow_id', None)
+        if flow_id:
+            self.flow_logger.log_retry_attempt(flow_id, context.agent_name, context.retry_count)
+
     # Fallback management delegation
     async def get_fallback_health_status(self) -> Dict[str, any]:
         """Get health status of fallback mechanisms."""

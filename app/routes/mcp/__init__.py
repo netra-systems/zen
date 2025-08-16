@@ -14,7 +14,7 @@ from .models import (
     MCPPromptGetRequest
 )
 from .service_factory import get_mcp_service
-from .handlers import MCPHandlers
+from .handlers import MCPHandlers, execute_tool
 
 __all__ = [
     "router",
@@ -24,5 +24,6 @@ __all__ = [
     "MCPResourceReadRequest",
     "MCPPromptGetRequest",
     "get_mcp_service",
-    "MCPHandlers"
+    "MCPHandlers",
+    "execute_tool"
 ]

@@ -202,11 +202,9 @@ def _create_streaming_response(
     request_model: RequestModel, agent_service: AgentService
 ) -> StreamingResponse:
     """Create streaming response with headers."""
-    return StreamingResponse(
-        _get_sse_generator(request_model, agent_service),
-        media_type="text/event-stream",
-        headers=_build_streaming_headers()
-    )
+    generator = _get_sse_generator(request_model, agent_service)
+    headers = _build_streaming_headers()
+    return StreamingResponse(generator, media_type="text/event-stream", headers=headers)
 
 @router.post("/stream")
 async def stream_response(

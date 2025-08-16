@@ -37,13 +37,23 @@ def _load_local_development_env_file(root_path: Path) -> None:
         print(f"Loaded .env.development.local file from {env_local_path}")
 
 
+def _get_project_root() -> Path:
+    """Get the project root path."""
+    return Path(__file__).parent.parent
+
+
+def _load_all_env_files(root_path: Path) -> None:
+    """Load all environment files in order."""
+    _load_base_env_file(root_path)
+    _load_development_env_file(root_path)
+    _load_local_development_env_file(root_path)
+
+
 def _setup_environment_files() -> None:
     """Load environment files in the correct order of precedence."""
     try:
-        root_path = Path(__file__).parent.parent
-        _load_base_env_file(root_path)
-        _load_development_env_file(root_path)
-        _load_local_development_env_file(root_path)
+        root_path = _get_project_root()
+        _load_all_env_files(root_path)
     except ImportError: pass
 
 
@@ -61,14 +71,19 @@ from app.core.app_factory import create_app
 app = create_app()
 
 
+def _get_uvicorn_config() -> dict:
+    """Get uvicorn server configuration."""
+    return {
+        "host": "0.0.0.0", "port": 8000, "reload": True,
+        "reload_dirs": ["app"], "reload_excludes": ["*/tests/*", "*/.pytest_cache/*"]
+    }
+
+
 def _run_development_server() -> None:
     """Run the FastAPI development server with uvicorn."""
     import uvicorn
-    uvicorn.run(
-        "main:app", host="0.0.0.0", port=8000,
-        reload=True, reload_dirs=["app"],
-        reload_excludes=["*/tests/*", "*/.pytest_cache/*"]
-    )
+    config = _get_uvicorn_config()
+    uvicorn.run("main:app", **config)
 
 
 if __name__ == "__main__":

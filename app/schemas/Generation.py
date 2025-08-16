@@ -65,10 +65,18 @@ class SyntheticDataResult(BaseModel):
 def rebuild_generation_models() -> None:
     """Rebuild generation models after imports are complete."""
     try:
-        SyntheticDataResult.model_rebuild()
+        _execute_generation_rebuild()
     except Exception:
-        # Safe to ignore - model will rebuild when needed
-        pass
+        _handle_generation_rebuild_failure()
+
+def _execute_generation_rebuild() -> None:
+    """Execute the generation model rebuild operation."""
+    SyntheticDataResult.model_rebuild()
+
+def _handle_generation_rebuild_failure() -> None:
+    """Handle generation model rebuild failure gracefully."""
+    # Safe to ignore - model will rebuild when needed
+    pass
 
 # Initialize model rebuild
 rebuild_generation_models()

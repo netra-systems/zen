@@ -11,10 +11,14 @@ logger = logging.getLogger(__name__)
 def rebuild_base_models():
     """Rebuild base LLM models to resolve forward references"""
     try:
-        base_models = _import_base_models()
-        _rebuild_base_model_list(base_models)
+        _execute_base_model_rebuild()
     except Exception as e:
         logger.warning(f"Base model rebuild failed: {e}")
+
+def _execute_base_model_rebuild():
+    """Execute base model rebuild process."""
+    base_models = _import_base_models()
+    _rebuild_base_model_list(base_models)
 
 
 def _import_base_models():
@@ -23,6 +27,11 @@ def _import_base_models():
         LLMMessage, LLMMetrics, LLMProviderStatus, LLMError,
         LLMHealthCheck, LLMConfigInfo, LLMManagerStats
     )
+    return _create_base_model_list()
+
+def _create_base_model_list():
+    """Create list of base model classes."""
+    from app.schemas.llm_types import LLMMessage, LLMMetrics, LLMProviderStatus, LLMError, LLMHealthCheck, LLMConfigInfo, LLMManagerStats
     return [LLMMessage, LLMMetrics, LLMProviderStatus, LLMError, 
             LLMHealthCheck, LLMConfigInfo, LLMManagerStats]
 
@@ -36,21 +45,35 @@ def _rebuild_base_model_list(models):
 def rebuild_response_models():
     """Rebuild response-related LLM models"""
     try:
-        modules, response_models = _import_response_components()
-        rebuild_ns = _create_combined_namespace(modules)
-        _rebuild_response_model_list(response_models, rebuild_ns)
+        _execute_response_model_rebuild()
     except Exception as e:
         logger.warning(f"Response model rebuild failed: {e}")
+
+def _execute_response_model_rebuild():
+    """Execute response model rebuild process."""
+    modules, response_models = _import_response_components()
+    rebuild_ns = _create_combined_namespace(modules)
+    _rebuild_response_model_list(response_models, rebuild_ns)
 
 
 def _import_response_components():
     """Import response model modules and classes."""
+    modules = _import_response_modules()
+    models = _import_response_models()
+    return modules, models
+
+def _import_response_modules():
+    """Import response-related modules."""
     import app.schemas.llm_types as llm_types
     import app.schemas.llm_request_types as request_types
+    return (llm_types, request_types)
+
+def _import_response_models():
+    """Import response model classes."""
     from app.schemas.llm_response_types import (
         LLMResponse, LLMStreamChunk, LLMCache, BatchLLMResponse
     )
-    return (llm_types, request_types), [LLMResponse, LLMStreamChunk, LLMCache, BatchLLMResponse]
+    return [LLMResponse, LLMStreamChunk, LLMCache, BatchLLMResponse]
 
 
 def _create_combined_namespace(modules):
@@ -69,20 +92,26 @@ def _rebuild_response_model_list(models, rebuild_ns):
 def rebuild_request_models():
     """Rebuild request-related LLM models"""
     try:
-        llm_types, request_models = _import_request_components()
-        _rebuild_request_model_list(request_models, llm_types.__dict__)
+        _execute_request_model_rebuild()
     except Exception as e:
         logger.warning(f"Request model rebuild failed: {e}")
+
+def _execute_request_model_rebuild():
+    """Execute request model rebuild process."""
+    llm_types, request_models = _import_request_components()
+    _rebuild_request_model_list(request_models, llm_types.__dict__)
 
 
 def _import_request_components():
     """Import request model modules and classes."""
     import app.schemas.llm_types as llm_types
-    from app.schemas.llm_request_types import (
-        LLMRequest, BatchLLMRequest, StructuredOutputSchema,
-        LLMFunction, LLMTool
-    )
-    return llm_types, [LLMRequest, BatchLLMRequest, StructuredOutputSchema, LLMFunction, LLMTool]
+    request_models = _get_request_model_list()
+    return llm_types, request_models
+
+def _get_request_model_list():
+    """Get list of request model classes."""
+    from app.schemas.llm_request_types import LLMRequest, BatchLLMRequest, StructuredOutputSchema, LLMFunction, LLMTool
+    return [LLMRequest, BatchLLMRequest, StructuredOutputSchema, LLMFunction, LLMTool]
 
 
 def _rebuild_request_model_list(models, types_namespace):
@@ -95,10 +124,14 @@ def _rebuild_request_model_list(models, types_namespace):
 def rebuild_config_models():
     """Rebuild configuration-related LLM models"""
     try:
-        llm_types, config_models = _import_config_components()
-        _rebuild_config_model_list(config_models, llm_types.__dict__)
+        _execute_config_model_rebuild()
     except Exception as e:
         logger.warning(f"Config model rebuild failed: {e}")
+
+def _execute_config_model_rebuild():
+    """Execute config model rebuild process."""
+    llm_types, config_models = _import_config_components()
+    _rebuild_config_model_list(config_models, llm_types.__dict__)
 
 
 def _import_config_components():

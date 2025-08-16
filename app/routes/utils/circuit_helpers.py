@@ -3,6 +3,11 @@
 from typing import Dict, Any, List
 
 
+def _circuit_matches_keywords(name: str, keywords: List[str]) -> bool:
+    """Check if circuit name matches any keyword."""
+    return any(keyword in name.lower() for keyword in keywords)
+
+
 def filter_circuits_by_keywords(
     all_circuits: Dict[str, Dict[str, Any]], 
     keywords: List[str]
@@ -10,7 +15,7 @@ def filter_circuits_by_keywords(
     """Filter circuits by keywords."""
     return {
         name: status for name, status in all_circuits.items()
-        if any(keyword in name.lower() for keyword in keywords)
+        if _circuit_matches_keywords(name, keywords)
     }
 
 
@@ -35,25 +40,40 @@ def filter_api_circuits(all_status: Dict[str, Dict[str, Any]]) -> Dict[str, Dict
     )
 
 
-def categorize_circuits(all_status: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
-    """Categorize circuits by service type."""
-    service_health = {
+def _get_categorized_circuit_names(service_health: Dict[str, Dict[str, Any]]) -> set:
+    """Extract all categorized circuit names."""
+    categorized_names = set()
+    for circuits in service_health.values():
+        categorized_names.update(circuits.keys())
+    return categorized_names
+
+
+def _get_uncategorized_circuits(
+    all_status: Dict[str, Dict[str, Any]], 
+    categorized_names: set
+) -> Dict[str, Any]:
+    """Get circuits not in any category."""
+    return {
+        name: status for name, status in all_status.items()
+        if name not in categorized_names
+    }
+
+
+def _build_initial_categories(all_status: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    """Build initial service categories."""
+    return {
         "llm": filter_llm_circuits(all_status),
         "database": filter_database_circuits(all_status),
         "external_apis": filter_api_circuits(all_status),
         "other": {}
     }
-    
-    # Find uncategorized circuits
-    categorized_names = set()
-    for circuits in service_health.values():
-        categorized_names.update(circuits.keys())
-    
-    service_health["other"] = {
-        name: status for name, status in all_status.items()
-        if name not in categorized_names
-    }
-    
+
+
+def categorize_circuits(all_status: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    """Categorize circuits by service type."""
+    service_health = _build_initial_categories(all_status)
+    categorized_names = _get_categorized_circuit_names(service_health)
+    service_health["other"] = _get_uncategorized_circuits(all_status, categorized_names)
     return service_health
 
 

@@ -46,6 +46,23 @@ class ServiceLocator:
             self._initializing: set = set()
             self._initialized = True
     
+    def _validate_registration_params(self, implementation: Optional[T], factory: Optional[Callable[[], T]]) -> None:
+        """Validate registration parameters."""
+        if implementation and factory:
+            raise ValueError("Cannot provide both implementation and factory")
+        if not implementation and not factory:
+            raise ValueError("Must provide either implementation or factory")
+    
+    def _register_implementation(self, service_type: Type[T], implementation: T, singleton: bool) -> None:
+        """Register a service implementation."""
+        self._services[service_type] = implementation
+        if singleton:
+            self._singletons[service_type] = implementation
+    
+    def _register_factory(self, service_type: Type[T], factory: Callable[[], T]) -> None:
+        """Register a service factory."""
+        self._factories[service_type] = factory
+    
     def register(
         self,
         service_type: Type[T],
@@ -53,73 +70,57 @@ class ServiceLocator:
         factory: Optional[Callable[[], T]] = None,
         singleton: bool = True
     ) -> None:
-        """Register a service implementation or factory.
-        
-        Args:
-            service_type: The type/interface of the service
-            implementation: An instance of the service (optional)
-            factory: A factory function that creates the service (optional)
-            singleton: Whether to cache the service instance
-        """
-        if implementation and factory:
-            raise ValueError("Cannot provide both implementation and factory")
-        
+        """Register a service implementation or factory."""
+        self._validate_registration_params(implementation, factory)
         if implementation:
-            self._services[service_type] = implementation
-            if singleton:
-                self._singletons[service_type] = implementation
-        elif factory:
-            self._factories[service_type] = factory
+            self._register_implementation(service_type, implementation, singleton)
         else:
-            raise ValueError("Must provide either implementation or factory")
-        
+            self._register_factory(service_type, factory)
         logger.debug(f"Registered service: {service_type.__name__}")
     
-    def get(self, service_type: Type[T]) -> T:
-        """Get a service instance.
-        
-        Args:
-            service_type: The type of service to retrieve
-            
-        Returns:
-            The service instance
-            
-        Raises:
-            ServiceNotFoundError: If the service is not registered
-            CircularDependencyError: If a circular dependency is detected
-        """
-        # Check for circular dependencies
+    def _check_circular_dependency(self, service_type: Type[T]) -> None:
+        """Check for circular dependencies."""
         if service_type in self._initializing:
             raise CircularDependencyError(
                 f"Circular dependency detected for {service_type.__name__}"
             )
-        
-        # Check if we have a cached instance
+    
+    def _get_cached_service(self, service_type: Type[T]) -> Optional[T]:
+        """Get cached service instance if available."""
         if service_type in self._services:
             return self._services[service_type]
-        
-        # Check if we have a singleton
         if service_type in self._singletons:
             return self._singletons[service_type]
-        
-        # Check if we have a factory
-        if service_type in self._factories:
-            try:
-                self._initializing.add(service_type)
-                factory = self._factories[service_type]
-                instance = factory()
-                
-                # Cache if singleton
-                if service_type not in self._services:
-                    self._singletons[service_type] = instance
-                
-                return instance
-            finally:
-                self._initializing.discard(service_type)
-        
-        raise ServiceNotFoundError(
-            f"Service {service_type.__name__} is not registered"
-        )
+        return None
+    
+    def _execute_factory_with_tracking(self, service_type: Type[T]) -> T:
+        """Execute factory with circular dependency tracking."""
+        self._initializing.add(service_type)
+        try:
+            factory = self._factories[service_type]
+            instance = factory()
+            if service_type not in self._services:
+                self._singletons[service_type] = instance
+            return instance
+        finally:
+            self._initializing.discard(service_type)
+    
+    def _create_from_factory(self, service_type: Type[T]) -> Optional[T]:
+        """Create service instance from factory if available."""
+        if service_type not in self._factories:
+            return None
+        return self._execute_factory_with_tracking(service_type)
+    
+    def get(self, service_type: Type[T]) -> T:
+        """Get a service instance."""
+        self._check_circular_dependency(service_type)
+        cached = self._get_cached_service(service_type)
+        if cached is not None:
+            return cached
+        factory_instance = self._create_from_factory(service_type)
+        if factory_instance is not None:
+            return factory_instance
+        raise ServiceNotFoundError(f"Service {service_type.__name__} is not registered")
     
     def get_optional(self, service_type: Type[T]) -> Optional[T]:
         """Get a service instance if available, None otherwise."""
@@ -315,84 +316,94 @@ def _create_message_handler_service():
     thread_service = ThreadService()
     return MessageHandlerService(supervisor, thread_service)
 
-def _create_mcp_service():
-    """Create MCPService with proper dependencies."""
-    from app.services.mcp_service import MCPService
-    from app.services.agent_service import AgentService
+def _create_core_services() -> dict:
+    """Create core service instances."""
     from app.services.thread_service import ThreadService
     from app.services.corpus_service import CorpusService
+    return {
+        'agent_service': _create_agent_service(),
+        'thread_service': ThreadService(),
+        'corpus_service': CorpusService()
+    }
+
+def _create_data_services() -> dict:
+    """Create data service instances."""
     from app.services.synthetic_data_service import SyntheticDataService
     from app.services.security_service import SecurityService
     from app.services.supply_catalog_service import SupplyCatalogService
-    
-    # Create minimal dependencies - these will be properly initialized when used
-    agent_service = _create_agent_service()
-    thread_service = ThreadService()
-    corpus_service = CorpusService()
-    synthetic_data_service = SyntheticDataService()
-    security_service = SecurityService()
-    supply_catalog_service = SupplyCatalogService()
-    
-    return MCPService(
-        agent_service=agent_service,
-        thread_service=thread_service,
-        corpus_service=corpus_service,
-        synthetic_data_service=synthetic_data_service,
-        security_service=security_service,
-        supply_catalog_service=supply_catalog_service
-    )
+    return {
+        'synthetic_data_service': SyntheticDataService(),
+        'security_service': SecurityService(),
+        'supply_catalog_service': SupplyCatalogService()
+    }
+
+def _create_mcp_dependencies() -> dict:
+    """Create MCP service dependencies."""
+    core_services = _create_core_services()
+    data_services = _create_data_services()
+    return {**core_services, **data_services}
+
+def _create_mcp_service():
+    """Create MCPService with proper dependencies."""
+    from app.services.mcp_service import MCPService
+    dependencies = _create_mcp_dependencies()
+    return MCPService(**dependencies)
 
 def _create_mcp_client_service():
     """Create MCPClientService with proper dependencies."""
     from app.services.mcp_client_service import MCPClientService
     return MCPClientService()
 
-def register_core_services():
-    """Register all core services with proper dependency injection."""
-    from app.services.agent_service import AgentService
-    from app.services.thread_service import ThreadService
-    from app.services.message_handlers import MessageHandlerService
-    from app.services.mcp_service import MCPService
-    from app.services.websocket_service import WebSocketService
-    
-    # Register services with factories to delay initialization
+def _register_agent_services() -> None:
+    """Register agent and message handler services."""
     service_locator.register(
         IAgentService,
         factory=lambda: _create_agent_service(),
         singleton=True
     )
-    
-    service_locator.register(
-        IThreadService,
-        factory=lambda: ThreadService(),
-        singleton=True
-    )
-    
     service_locator.register(
         IMessageHandlerService,
         factory=lambda: _create_message_handler_service(),
         singleton=True
     )
-    
-    # Note: MCPService registration disabled due to complex repository dependencies
-    # service_locator.register(
-    #     IMCPService,
-    #     factory=lambda: _create_mcp_service(),
-    #     singleton=True
-    # )
-    
+
+def _register_thread_service() -> None:
+    """Register thread service."""
+    from app.services.thread_service import ThreadService
+    service_locator.register(
+        IThreadService,
+        factory=lambda: ThreadService(),
+        singleton=True
+    )
+
+def _register_websocket_service() -> None:
+    """Register WebSocket service."""
+    from app.services.websocket_service import WebSocketService
     service_locator.register(
         IWebSocketService,
         factory=lambda: WebSocketService(),
         singleton=True
     )
-    
+
+def _register_communication_services() -> None:
+    """Register communication and thread services."""
+    _register_thread_service()
+    _register_websocket_service()
+
+def _register_client_services() -> None:
+    """Register MCP client services."""
     service_locator.register(
         IMCPClientService,
         factory=lambda: _create_mcp_client_service(),
         singleton=True
     )
-    
+
+def register_core_services() -> None:
+    """Register all core services with proper dependency injection."""
+    _register_agent_services()
+    _register_communication_services()
+    _register_client_services()
+    # Note: MCPService registration disabled due to complex repository dependencies
     logger.info("Core services registered successfully")
 
 
@@ -405,32 +416,35 @@ def get_service(service_type: Type[T]) -> T:
 # DECORATORS
 # ============================================================================
 
+def _get_injected_services(service_types: tuple) -> list:
+    """Get list of service instances for injection."""
+    return [service_locator.get(st) for st in service_types]
+
+def _create_sync_wrapper(func: Callable, service_types: tuple) -> Callable:
+    """Create wrapper for synchronous functions."""
+    def wrapper(*args, **kwargs):
+        services = _get_injected_services(service_types)
+        return func(*services, *args, **kwargs)
+    return wrapper
+
+def _create_async_wrapper(func: Callable, service_types: tuple) -> Callable:
+    """Create wrapper for asynchronous functions."""
+    async def async_wrapper(*args, **kwargs):
+        services = _get_injected_services(service_types)
+        return await func(*services, *args, **kwargs)
+    return async_wrapper
+
+def _select_wrapper(func: Callable, service_types: tuple) -> Callable:
+    """Select appropriate wrapper based on function type."""
+    import asyncio
+    if asyncio.iscoroutinefunction(func):
+        return _create_async_wrapper(func, service_types)
+    return _create_sync_wrapper(func, service_types)
+
 def inject(*service_types: Type) -> Callable:
-    """Decorator to inject services into a function or method.
-    
-    Example:
-        @inject(IAgentService, IThreadService)
-        async def my_function(agent_service, thread_service, other_arg):
-            # agent_service and thread_service are automatically injected
-            pass
-    """
+    """Decorator to inject services into a function or method."""
     def decorator(func: Callable) -> Callable:
-        def wrapper(*args, **kwargs):
-            # Inject services at the beginning of args
-            services = [service_locator.get(st) for st in service_types]
-            return func(*services, *args, **kwargs)
-        
-        async def async_wrapper(*args, **kwargs):
-            # Inject services at the beginning of args
-            services = [service_locator.get(st) for st in service_types]
-            return await func(*services, *args, **kwargs)
-        
-        # Return appropriate wrapper based on function type
-        import asyncio
-        if asyncio.iscoroutinefunction(func):
-            return async_wrapper
-        return wrapper
-    
+        return _select_wrapper(func, service_types)
     return decorator
 
 

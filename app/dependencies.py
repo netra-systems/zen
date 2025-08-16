@@ -15,13 +15,18 @@ if TYPE_CHECKING:
 
 logger = central_logger.get_logger(__name__)
 
+def _validate_session_type(session) -> None:
+    """Validate session is AsyncSession type."""
+    if not isinstance(session, AsyncSession):
+        logger.error(f"Invalid session type: {type(session)}")
+        raise RuntimeError(f"Expected AsyncSession, got {type(session)}")
+    logger.debug(f"Dependency injected session type: {type(session).__name__}")
+
+
 async def get_db_dependency() -> AsyncGenerator[AsyncSession, None]:
     """Wrapper for database dependency with validation."""
     async with _get_async_db() as session:
-        if not isinstance(session, AsyncSession):
-            logger.error(f"Invalid session type: {type(session)}")
-            raise RuntimeError(f"Expected AsyncSession, got {type(session)}")
-        logger.debug(f"Dependency injected session type: {type(session).__name__}")
+        _validate_session_type(session)
         yield session
 
 DbDep = Annotated[AsyncSession, Depends(get_db_dependency)]

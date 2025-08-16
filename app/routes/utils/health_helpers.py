@@ -54,23 +54,33 @@ def build_database_health_response(
     }
 
 
+def _get_memory_metrics() -> Dict[str, Any]:
+    """Get memory metrics."""
+    memory = psutil.virtual_memory()
+    return {
+        "total": memory.total,
+        "available": memory.available,
+        "percent": memory.percent
+    }
+
+
+def _get_disk_metrics() -> Dict[str, Any]:
+    """Get disk metrics."""
+    disk = psutil.disk_usage('/')
+    return {
+        "total": disk.total,
+        "free": disk.free,
+        "percent": disk.percent
+    }
+
+
 def get_system_metrics() -> Dict[str, Any]:
     """Get system resource metrics."""
     cpu_percent = psutil.cpu_percent(interval=0.1)
-    memory = psutil.virtual_memory()
-    disk = psutil.disk_usage('/')
     return {
         "cpu_percent": cpu_percent,
-        "memory": {
-            "total": memory.total,
-            "available": memory.available,
-            "percent": memory.percent
-        },
-        "disk": {
-            "total": disk.total,
-            "free": disk.free,
-            "percent": disk.percent
-        }
+        "memory": _get_memory_metrics(),
+        "disk": _get_disk_metrics()
     }
 
 

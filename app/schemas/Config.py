@@ -284,11 +284,19 @@ class DevelopmentConfig(AppConfig):
     
     def _log_mock_services(self, logger, service_modes: dict) -> None:
         """Log which services are running in mock mode."""
-        mock_messages = {
+        mock_messages = self._get_mock_messages()
+        self._log_services_in_mock_mode(logger, service_modes, mock_messages)
+    
+    def _get_mock_messages(self) -> dict:
+        """Get dictionary of mock service messages."""
+        return {
             'redis': "Redis running in MOCK mode",
             'clickhouse': "ClickHouse running in MOCK mode",
             'llm': "LLM running in MOCK mode"
         }
+    
+    def _log_services_in_mock_mode(self, logger, service_modes: dict, mock_messages: dict) -> None:
+        """Log each service that is in mock mode."""
         for service, mode in service_modes.items():
             if mode == "mock":
                 logger.info(mock_messages[service])

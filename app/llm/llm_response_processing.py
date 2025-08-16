@@ -27,12 +27,17 @@ def parse_nested_json_value(value: str) -> Any:
     """Parse JSON string value with error handling."""
     try:
         trimmed = value.strip()
-        if _is_json_like(trimmed):
-            parsed = json.loads(trimmed)
-            return parse_nested_json_recursive(parsed)
+        return _parse_json_if_valid(trimmed)
     except (json.JSONDecodeError, ValueError) as e:
         logger.debug(f"Could not parse nested JSON: {e}")
-    return value
+        return value
+
+def _parse_json_if_valid(trimmed: str) -> Any:
+    """Parse JSON if string looks like valid JSON."""
+    if _is_json_like(trimmed):
+        parsed = json.loads(trimmed)
+        return parse_nested_json_recursive(parsed)
+    return trimmed
 
 
 def _is_json_like(trimmed: str) -> bool:
@@ -186,12 +191,16 @@ def create_structured_cache_key(prompt: str, llm_config_name: str,
 async def get_cached_structured_response(cache_key: str, llm_config_name: str,
                                        schema: Type[T]) -> Optional[T]:
     """Get and parse cached structured response."""
-    cached_response = await llm_cache_service.get_cached_response(
-        cache_key, llm_config_name
-    )
+    cached_response = await _fetch_cached_response(cache_key, llm_config_name)
     if cached_response:
         return _parse_cached_response_safely(cached_response, schema)
     return None
+
+async def _fetch_cached_response(cache_key: str, llm_config_name: str) -> Optional[str]:
+    """Fetch cached response from cache service."""
+    return await llm_cache_service.get_cached_response(
+        cache_key, llm_config_name
+    )
 
 
 def _parse_cached_response_safely(cached_response: str, schema: Type[T]) -> Optional[T]:

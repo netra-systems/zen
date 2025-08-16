@@ -30,15 +30,18 @@ def test_live_endpoint(client: TestClient):
     assert response.json() == {"status": "healthy", "service": "netra-ai-platform"}
 
 def test_ready_endpoint_success(client: TestClient):
+    import asyncio
+    from unittest.mock import AsyncMock
+    
     # Mock successful database connection
     mock_result = MagicMock()
     mock_result.scalar_one_or_none.return_value = 1
     
-    mock_session = MagicMock()
+    mock_session = AsyncMock()
     mock_session.execute.return_value = mock_result
     
     async def mock_get_db_success():
-        yield mock_session
+        return mock_session
     
     app.dependency_overrides[get_async_db] = mock_get_db_success
     

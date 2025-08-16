@@ -3,7 +3,7 @@
 Provides real implementations for fallback data sources when primary systems fail.
 """
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 from app.logging_config import central_logger
 
@@ -99,25 +99,48 @@ class FallbackDataProvider:
     
     def _analyze_patterns_from_activity(self, activity_data: List[Dict]) -> Dict[str, Any]:
         """Analyze usage patterns from activity data."""
+        hourly_distribution = self._extract_hourly_distribution(activity_data)
+        peak_hour = self._calculate_peak_hour(hourly_distribution)
+        patterns = self._build_pattern_data(peak_hour, hourly_distribution, activity_data)
+        return self._create_activity_analysis_result(patterns)
+    
+    def _extract_hourly_distribution(self, activity_data: List[Dict]) -> Dict[int, int]:
+        """Extract hourly distribution from activity data."""
         hourly_distribution = {}
-        
         for activity in activity_data:
-            timestamp_str = activity.get('timestamp')
-            if timestamp_str:
-                try:
-                    hour = datetime.fromisoformat(timestamp_str).hour
-                    hourly_distribution[hour] = hourly_distribution.get(hour, 0) + 1
-                except (ValueError, TypeError):
-                    continue
-        
-        peak_hour = max(hourly_distribution, key=hourly_distribution.get) if hourly_distribution else 0
-        
+            hour = self._extract_hour_from_activity(activity)
+            if hour is not None:
+                hourly_distribution[hour] = hourly_distribution.get(hour, 0) + 1
+        return hourly_distribution
+    
+    def _extract_hour_from_activity(self, activity: Dict) -> Optional[int]:
+        """Extract hour from single activity entry."""
+        timestamp_str = activity.get('timestamp')
+        if not timestamp_str:
+            return None
+        try:
+            return datetime.fromisoformat(timestamp_str).hour
+        except (ValueError, TypeError):
+            return None
+    
+    def _calculate_peak_hour(self, hourly_distribution: Dict[int, int]) -> int:
+        """Calculate peak hour from distribution."""
+        if not hourly_distribution:
+            return 0
+        return max(hourly_distribution, key=hourly_distribution.get)
+    
+    def _build_pattern_data(self, peak_hour: int, hourly_distribution: Dict, activity_data: List) -> Dict:
+        """Build pattern data dictionary."""
         return {
-            'patterns': {
-                'peak_hour': peak_hour,
-                'hourly_distribution': hourly_distribution,
-                'total_activities': len(activity_data)
-            },
+            'peak_hour': peak_hour,
+            'hourly_distribution': hourly_distribution,
+            'total_activities': len(activity_data)
+        }
+    
+    def _create_activity_analysis_result(self, patterns: Dict) -> Dict[str, Any]:
+        """Create activity analysis result structure."""
+        return {
+            'patterns': patterns,
             'method': 'activity_analysis',
             'data_source': 'cached_activity'
         }
@@ -164,22 +187,41 @@ class FallbackDataProvider:
     
     def _summarize_error_data(self, errors: List[Dict]) -> Dict[str, Any]:
         """Summarize error data for analysis."""
+        error_types, severity_counts = self._count_error_categories(errors)
+        error_summary = self._build_error_summary(error_types, severity_counts, errors)
+        return self._create_error_analysis_result(error_summary, errors)
+    
+    def _count_error_categories(self, errors: List[Dict]) -> tuple:
+        """Count errors by type and severity."""
         error_types = {}
         severity_counts = {}
-        
         for error in errors:
-            error_type = error.get('type', 'unknown')
-            severity = error.get('severity', 'medium')
-            
-            error_types[error_type] = error_types.get(error_type, 0) + 1
-            severity_counts[severity] = severity_counts.get(severity, 0) + 1
-        
+            self._increment_error_type_count(error_types, error)
+            self._increment_severity_count(severity_counts, error)
+        return error_types, severity_counts
+    
+    def _increment_error_type_count(self, error_types: Dict, error: Dict) -> None:
+        """Increment count for error type."""
+        error_type = error.get('type', 'unknown')
+        error_types[error_type] = error_types.get(error_type, 0) + 1
+    
+    def _increment_severity_count(self, severity_counts: Dict, error: Dict) -> None:
+        """Increment count for error severity."""
+        severity = error.get('severity', 'medium')
+        severity_counts[severity] = severity_counts.get(severity, 0) + 1
+    
+    def _build_error_summary(self, error_types: Dict, severity_counts: Dict, errors: List) -> Dict:
+        """Build error summary dictionary."""
         return {
-            'error_summary': {
-                'by_type': error_types,
-                'by_severity': severity_counts,
-                'total_errors': len(errors)
-            },
+            'by_type': error_types,
+            'by_severity': severity_counts,
+            'total_errors': len(errors)
+        }
+    
+    def _create_error_analysis_result(self, error_summary: Dict, errors: List) -> Dict[str, Any]:
+        """Create error analysis result structure."""
+        return {
+            'error_summary': error_summary,
             'error_count': len(errors),
             'method': 'log_analysis',
             'data_source': 'application_logs'

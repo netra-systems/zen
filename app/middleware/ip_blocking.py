@@ -14,8 +14,7 @@ def load_blocked_ips() -> tuple[Set[str], Set[ipaddress.IPv4Network]]:
     config_path = _get_config_path()
     try:
         config = _load_config_file(config_path)
-        blocked_ips, blocked_networks = _parse_blocked_config(config)
-        return blocked_ips, blocked_networks
+        return _parse_blocked_config(config)
     except Exception as e:
         return _handle_config_load_error(e)
 
@@ -62,13 +61,16 @@ BLOCKED_IPS, BLOCKED_NETWORKS = load_blocked_ips()
 async def ip_blocking_middleware(request: Request, call_next):
     """Block requests from specific IPs."""
     client_ip = _extract_client_ip(request)
-    ip_block_response = _check_ip_blocking(client_ip)
-    if ip_block_response:
-        return ip_block_response
-    network_block_response = _check_network_blocking(client_ip)
-    if network_block_response:
-        return network_block_response
+    blocking_response = _check_all_ip_blocking(client_ip)
+    if blocking_response:
+        return blocking_response
     return await call_next(request)
+
+def _check_all_ip_blocking(client_ip: str):
+    """Check all IP blocking rules and return response if blocked."""
+    ip_block_response = _check_ip_blocking(client_ip)
+    network_block_response = _check_network_blocking(client_ip)
+    return ip_block_response or network_block_response
 
 def _extract_client_ip(request: Request) -> str:
     """Extract client IP from Cloud Run headers."""

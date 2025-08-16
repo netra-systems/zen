@@ -3,7 +3,7 @@
 Provides centralized error handling, logging, and recovery mechanisms.
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List, Callable
 import asyncio
 import time
 
@@ -25,13 +25,13 @@ class WebSocketErrorHandler:
         self.connection_errors: Dict[str, int] = {}  # Track errors per connection
         self.recovery_timestamps: Dict[str, float] = {}  # Track last recovery attempt time
         self.recovery_backoff: Dict[str, float] = {}  # Track backoff delays
-        self._stats = {
-            "total_errors": 0,
-            "critical_errors": 0,
-            "recovered_errors": 0,
-            "connection_errors": 0,
-            "validation_errors": 0,
-            "rate_limit_errors": 0
+        self._stats = self._initialize_stats()
+
+    def _initialize_stats(self) -> Dict[str, int]:
+        """Initialize error statistics dictionary."""
+        return {
+            "total_errors": 0, "critical_errors": 0, "recovered_errors": 0,
+            "connection_errors": 0, "validation_errors": 0, "rate_limit_errors": 0
         }
     
     async def handle_error(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None) -> bool:
@@ -69,126 +69,129 @@ class WebSocketErrorHandler:
 
     async def _attempt_error_recovery(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo]) -> bool:
         """Attempt error recovery if conditions are met."""
-        if not (error.recoverable and error.retry_count < error.max_retries):
+        if not self._can_attempt_recovery(error):
             return False
-        
         recovered = await self._attempt_recovery(error, conn_info)
+        self._update_recovery_stats(recovered)
+        return recovered
+
+    def _update_recovery_stats(self, recovered: bool) -> None:
+        """Update recovery statistics."""
         if recovered:
             self._stats["recovered_errors"] += 1
-        
-        return recovered
+
+    def _can_attempt_recovery(self, error: WebSocketErrorInfo) -> bool:
+        """Check if error recovery can be attempted."""
+        return error.recoverable and error.retry_count < error.max_retries
     
     async def handle_connection_error(self, conn_info: ConnectionInfo, error_message: str, 
                                     error_type: str = "connection_error", 
                                     severity: ErrorSeverity = ErrorSeverity.MEDIUM) -> WebSocketErrorInfo:
-        """Handle a connection-specific error.
-        
-        Args:
-            conn_info: Connection that experienced the error
-            error_message: Error message
-            error_type: Type of error
-            severity: Error severity
-            
-        Returns:
-            The created WebSocketError
-        """
-        error = WebSocketErrorInfo(
-            connection_id=conn_info.connection_id,
-            user_id=conn_info.user_id,
-            error_type=error_type,
-            message=error_message,
-            severity=severity,
-            context={
-                "connected_at": conn_info.connected_at.isoformat(),
-                "message_count": conn_info.message_count,
-                "error_count": conn_info.error_count,
-                "last_ping": conn_info.last_ping.isoformat()
-            }
-        )
-        
+        """Handle a connection-specific error."""
+        error = self._create_connection_error_info(conn_info, error_message, error_type, severity)
         self._stats["connection_errors"] += 1
         await self.handle_error(error, conn_info)
         return error
+
+    def _create_connection_error_info(self, conn_info: ConnectionInfo, error_message: str,
+                                    error_type: str, severity: ErrorSeverity) -> WebSocketErrorInfo:
+        """Create WebSocketErrorInfo for connection error."""
+        context = self._build_connection_error_context(conn_info)
+        return self._build_websocket_error_info(conn_info, error_message, error_type, severity, context)
+
+    def _build_websocket_error_info(self, conn_info: ConnectionInfo, error_message: str,
+                                  error_type: str, severity: ErrorSeverity, context: Dict[str, Any]) -> WebSocketErrorInfo:
+        """Build WebSocketErrorInfo object."""
+        return WebSocketErrorInfo(
+            connection_id=conn_info.connection_id, user_id=conn_info.user_id,
+            error_type=error_type, message=error_message, severity=severity, context=context
+        )
+
+    def _build_connection_error_context(self, conn_info: ConnectionInfo) -> Dict[str, Any]:
+        """Build context information for connection error."""
+        return {
+            "connected_at": conn_info.connected_at.isoformat(),
+            "message_count": conn_info.message_count,
+            "error_count": conn_info.error_count,
+            "last_ping": conn_info.last_ping.isoformat()
+        }
     
     async def handle_validation_error(self, user_id: str, message: str, 
                                     validation_details: Dict[str, Any]) -> WebSocketErrorInfo:
-        """Handle a message validation error.
-        
-        Args:
-            user_id: User who sent the invalid message
-            message: Error message
-            validation_details: Details about the validation failure
-            
-        Returns:
-            The created WebSocketError
-        """
-        error = WebSocketErrorInfo(
-            user_id=user_id,
-            error_type="validation_error",
-            message=message,
-            severity=ErrorSeverity.LOW,
-            context=validation_details,
-            recoverable=False  # Validation errors are not recoverable
-        )
-        
+        """Handle a message validation error."""
+        error = self._create_validation_error_info(user_id, message, validation_details)
         self._stats["validation_errors"] += 1
         await self.handle_error(error)
         return error
+
+    def _create_validation_error_info(self, user_id: str, message: str, 
+                                    validation_details: Dict[str, Any]) -> WebSocketErrorInfo:
+        """Create WebSocketErrorInfo for validation error."""
+        return WebSocketErrorInfo(
+            user_id=user_id, error_type="validation_error", message=message,
+            severity=ErrorSeverity.LOW, context=validation_details, recoverable=False
+        )
     
     async def handle_rate_limit_error(self, conn_info: ConnectionInfo, limit_info: Dict[str, Any]) -> WebSocketErrorInfo:
-        """Handle a rate limiting error.
-        
-        Args:
-            conn_info: Connection that was rate limited
-            limit_info: Rate limit information
-            
-        Returns:
-            The created WebSocketError
-        """
-        error = WebSocketErrorInfo(
-            connection_id=conn_info.connection_id,
-            user_id=conn_info.user_id,
-            error_type="rate_limit_error",
-            message="Rate limit exceeded",
-            severity=ErrorSeverity.LOW,
-            context=limit_info,
-            recoverable=True
-        )
-        
+        """Handle a rate limiting error."""
+        error = self._create_rate_limit_error_info(conn_info, limit_info)
         self._stats["rate_limit_errors"] += 1
         await self.handle_error(error, conn_info)
         return error
+
+    def _create_rate_limit_error_info(self, conn_info: ConnectionInfo, limit_info: Dict[str, Any]) -> WebSocketErrorInfo:
+        """Create WebSocketErrorInfo for rate limit error."""
+        return WebSocketErrorInfo(
+            connection_id=conn_info.connection_id, user_id=conn_info.user_id,
+            error_type="rate_limit_error", message="Rate limit exceeded",
+            severity=ErrorSeverity.LOW, context=limit_info, recoverable=True
+        )
     
     def _log_error(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None):
         """Log error with appropriate level and context."""
-        log_context = {
-            "error_id": error.error_id,
-            "error_type": error.error_type,
-            "severity": error.severity.value,
-            "user_id": error.user_id,
-            "connection_id": error.connection_id,
-            "recoverable": error.recoverable,
-            "retry_count": error.retry_count
-        }
-        
+        log_context = self._build_error_log_context(error)
         if conn_info:
-            from datetime import datetime, timezone
-            log_context.update({
-                "message_count": conn_info.message_count,
-                "error_count": conn_info.error_count,
-                "connection_duration": (datetime.now(timezone.utc) - conn_info.connected_at).total_seconds()
-            })
-        
+            log_context.update(self._build_connection_log_context(conn_info))
         log_message = f"WebSocket error: {error.message}"
-        
-        if error.severity == ErrorSeverity.CRITICAL:
-            logger.critical(log_message, extra=log_context)
-        elif error.severity == ErrorSeverity.HIGH:
-            logger.error(log_message, extra=log_context)
-        elif error.severity == ErrorSeverity.MEDIUM:
-            logger.warning(log_message, extra=log_context)
-        else:
-            logger.info(log_message, extra=log_context)
+        self._log_with_appropriate_level(error.severity, log_message, log_context)
+
+    def _build_error_log_context(self, error: WebSocketErrorInfo) -> Dict[str, Any]:
+        """Build base log context for error."""
+        base_context = self._get_error_base_context(error)
+        recovery_context = self._get_error_recovery_context(error)
+        return {**base_context, **recovery_context}
+
+    def _get_error_base_context(self, error: WebSocketErrorInfo) -> Dict[str, Any]:
+        """Get base error context."""
+        return {"error_id": error.error_id, "error_type": error.error_type,
+               "severity": error.severity.value, "user_id": error.user_id}
+
+    def _get_error_recovery_context(self, error: WebSocketErrorInfo) -> Dict[str, Any]:
+        """Get error recovery context."""
+        return {"connection_id": error.connection_id, "recoverable": error.recoverable,
+               "retry_count": error.retry_count}
+
+    def _build_connection_log_context(self, conn_info: ConnectionInfo) -> Dict[str, Any]:
+        """Build connection-specific log context."""
+        from datetime import datetime, timezone
+        return {
+            "message_count": conn_info.message_count, "error_count": conn_info.error_count,
+            "connection_duration": (datetime.now(timezone.utc) - conn_info.connected_at).total_seconds()
+        }
+
+    def _log_with_appropriate_level(self, severity: ErrorSeverity, message: str, context: Dict[str, Any]) -> None:
+        """Log message with severity-appropriate level."""
+        log_methods = self._get_log_methods()
+        log_method = log_methods.get(severity, logger.info)
+        log_method(message, extra=context)
+
+    def _get_log_methods(self) -> Dict[ErrorSeverity, Callable]:
+        """Get logging methods mapped to severity levels."""
+        return {
+            ErrorSeverity.CRITICAL: logger.critical,
+            ErrorSeverity.HIGH: logger.error,
+            ErrorSeverity.MEDIUM: logger.warning
+        }
     
     async def _attempt_recovery(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None) -> bool:
         """Attempt to recover from an error with rate limiting."""
@@ -215,6 +218,10 @@ class WebSocketErrorHandler:
         last_attempt = self.recovery_timestamps[recovery_key]
         backoff_delay = self.recovery_backoff.get(recovery_key, 1.0)
         time_since_last = current_time - last_attempt
+        return self._check_backoff_timing(recovery_key, time_since_last, backoff_delay)
+
+    def _check_backoff_timing(self, recovery_key: str, time_since_last: float, backoff_delay: float) -> bool:
+        """Check if enough time has passed since last recovery attempt."""
         if time_since_last < backoff_delay:
             logger.debug(f"Recovery rate limited for {recovery_key}, waiting {backoff_delay - time_since_last:.1f}s")
             return False
@@ -234,8 +241,12 @@ class WebSocketErrorHandler:
             await self._apply_recovery_delay(error)
             return await self._apply_type_specific_recovery(error, conn_info, recovery_key)
         except Exception as recovery_error:
-            logger.error(f"Error during recovery attempt for {error.error_id}: {recovery_error}")
-            return False
+            return self._handle_recovery_error(error, recovery_error)
+
+    def _handle_recovery_error(self, error: WebSocketErrorInfo, recovery_error: Exception) -> bool:
+        """Handle recovery error."""
+        logger.error(f"Error during recovery attempt for {error.error_id}: {recovery_error}")
+        return False
 
     async def _apply_recovery_delay(self, error: WebSocketErrorInfo) -> None:
         """Apply delay before recovery attempt."""
@@ -244,14 +255,19 @@ class WebSocketErrorHandler:
 
     async def _apply_type_specific_recovery(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo], recovery_key: str) -> bool:
         """Apply recovery strategy based on error type."""
-        if error.error_type == "connection_error":
-            return await self._recover_connection_error(error, conn_info)
-        elif error.error_type == "rate_limit_error":
-            return await self._recover_rate_limit_error(error, conn_info)
-        elif error.error_type == "heartbeat_error":
-            return await self._recover_heartbeat_error(error, conn_info)
-        else:
-            return self._handle_unknown_error_recovery(error, recovery_key)
+        recovery_handlers = self._get_recovery_handlers()
+        handler = recovery_handlers.get(error.error_type)
+        if handler:
+            return await handler(error, conn_info)
+        return self._handle_unknown_error_recovery(error, recovery_key)
+
+    def _get_recovery_handlers(self) -> Dict[str, Callable]:
+        """Get dictionary of recovery handlers."""
+        return {
+            "connection_error": self._recover_connection_error,
+            "rate_limit_error": self._recover_rate_limit_error,
+            "heartbeat_error": self._recover_heartbeat_error
+        }
 
     def _handle_unknown_error_recovery(self, error: WebSocketErrorInfo, recovery_key: str) -> bool:
         """Handle recovery for unknown error types."""
@@ -263,9 +279,7 @@ class WebSocketErrorHandler:
         """Attempt to recover from a connection error."""
         if not conn_info:
             return False
-        
         # For connection errors, we typically can't recover the same connection
-        # The connection manager should handle cleanup
         logger.info(f"Connection error recovery: marking connection {conn_info.connection_id} for cleanup")
         return False  # Connection needs to be cleaned up
     
@@ -279,27 +293,35 @@ class WebSocketErrorHandler:
         """Attempt to recover from a heartbeat error."""
         if not conn_info:
             return False
-        
-        # For heartbeat errors, check if connection is truly dead
+        connection_alive = self._check_heartbeat_connection_state(conn_info)
+        self._log_heartbeat_recovery_result(conn_info.connection_id, connection_alive)
+        return connection_alive
+
+    def _check_heartbeat_connection_state(self, conn_info: ConnectionInfo) -> bool:
+        """Check if connection is still alive for heartbeat recovery."""
         from starlette.websockets import WebSocketState
-        if conn_info.websocket.client_state != WebSocketState.CONNECTED:
-            logger.info(f"Heartbeat error: connection {conn_info.connection_id} is closed, cannot recover")
-            return False
-        
-        logger.info(f"Heartbeat error recovery: connection {conn_info.connection_id} may continue")
-        return True
+        return conn_info.websocket.client_state == WebSocketState.CONNECTED
+
+    def _log_heartbeat_recovery_result(self, connection_id: str, connection_alive: bool) -> None:
+        """Log heartbeat recovery attempt result."""
+        if connection_alive:
+            logger.info(f"Heartbeat error recovery: connection {connection_id} may continue")
+        else:
+            logger.info(f"Heartbeat error: connection {connection_id} is closed, cannot recover")
     
     def get_error_stats(self) -> Dict[str, Any]:
         """Get error statistics."""
+        basic_stats = self._get_basic_error_stats()
+        recovery_rate = self._stats["recovered_errors"] / max(1, self._stats["total_errors"])
+        top_patterns = dict(sorted(self.error_patterns.items(), key=lambda x: x[1], reverse=True)[:10])
+        return {**basic_stats, "recovery_rate": recovery_rate, "top_error_patterns": top_patterns}
+
+    def _get_basic_error_stats(self) -> Dict[str, Any]:
+        """Get basic error statistics."""
         return {
-            "total_errors": self._stats["total_errors"],
-            "critical_errors": self._stats["critical_errors"],
-            "recovered_errors": self._stats["recovered_errors"],
-            "connection_errors": self._stats["connection_errors"],
-            "validation_errors": self._stats["validation_errors"],
-            "rate_limit_errors": self._stats["rate_limit_errors"],
-            "recovery_rate": self._stats["recovered_errors"] / max(1, self._stats["total_errors"]),
-            "top_error_patterns": dict(sorted(self.error_patterns.items(), key=lambda x: x[1], reverse=True)[:10])
+            "total_errors": self._stats["total_errors"], "critical_errors": self._stats["critical_errors"],
+            "recovered_errors": self._stats["recovered_errors"], "connection_errors": self._stats["connection_errors"],
+            "validation_errors": self._stats["validation_errors"], "rate_limit_errors": self._stats["rate_limit_errors"]
         }
     
     def get_connection_error_count(self, connection_id: str) -> int:
@@ -312,30 +334,61 @@ class WebSocketErrorHandler:
     
     def cleanup_old_errors(self, max_age_hours: int = 24):
         """Clean up old error records."""
+        cutoff_time = self._calculate_cutoff_time(max_age_hours)
+        errors_removed = self._cleanup_old_error_records(cutoff_time)
+        recovery_keys_removed = self._cleanup_old_recovery_tracking(cutoff_time)
+        self._log_cleanup_results(errors_removed, recovery_keys_removed)
+
+    def _calculate_cutoff_time(self, max_age_hours: int) -> float:
+        """Calculate cutoff timestamp for cleanup."""
         from datetime import datetime, timezone
-        cutoff_time = datetime.now(timezone.utc).timestamp() - (max_age_hours * 3600)
-        
-        errors_to_remove = []
-        for error_id, error in self.error_history.items():
-            if error.timestamp.timestamp() < cutoff_time:
-                errors_to_remove.append(error_id)
-        
-        for error_id in errors_to_remove:
+        return datetime.now(timezone.utc).timestamp() - (max_age_hours * 3600)
+
+    def _cleanup_old_error_records(self, cutoff_time: float) -> List[str]:
+        """Clean up old error records and return removed error IDs."""
+        errors_to_remove = self._identify_old_errors(cutoff_time)
+        self._remove_old_errors(errors_to_remove)
+        return errors_to_remove
+
+    def _identify_old_errors(self, cutoff_time: float) -> List[str]:
+        """Identify old error records for removal."""
+        return [
+            error_id for error_id, error in self.error_history.items()
+            if error.timestamp.timestamp() < cutoff_time
+        ]
+
+    def _remove_old_errors(self, error_ids: List[str]) -> None:
+        """Remove old error records from history."""
+        for error_id in error_ids:
             del self.error_history[error_id]
-        
-        # Clean up old recovery tracking
-        recovery_keys_to_remove = []
-        for key, timestamp in self.recovery_timestamps.items():
-            if timestamp < cutoff_time:
-                recovery_keys_to_remove.append(key)
-        
-        for key in recovery_keys_to_remove:
+
+    def _cleanup_old_recovery_tracking(self, cutoff_time: float) -> List[str]:
+        """Clean up old recovery tracking and return removed keys."""
+        recovery_keys_to_remove = self._find_old_recovery_keys(cutoff_time)
+        self._remove_recovery_keys(recovery_keys_to_remove)
+        return recovery_keys_to_remove
+
+    def _find_old_recovery_keys(self, cutoff_time: float) -> List[str]:
+        """Find old recovery keys for removal."""
+        return [
+            key for key, timestamp in self.recovery_timestamps.items()
+            if timestamp < cutoff_time
+        ]
+
+    def _remove_recovery_keys(self, keys_to_remove: List[str]) -> None:
+        """Remove recovery keys from tracking structures."""
+        for key in keys_to_remove:
             del self.recovery_timestamps[key]
             if key in self.recovery_backoff:
                 del self.recovery_backoff[key]
-        
-        if errors_to_remove or recovery_keys_to_remove:
-            logger.info(f"Cleaned up {len(errors_to_remove)} old error records and {len(recovery_keys_to_remove)} recovery trackers")
+
+    def _log_cleanup_results(self, errors_removed: List[str], recovery_keys_removed: List[str]) -> None:
+        """Log cleanup operation results."""
+        if errors_removed or recovery_keys_removed:
+            logger.info(
+                f"Cleaned up {len(errors_removed)} old error records and "
+                f"{len(recovery_keys_removed)} recovery trackers"
+            )
 
 
 # Default error handler instance

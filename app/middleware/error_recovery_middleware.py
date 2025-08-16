@@ -98,7 +98,16 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
     ) -> Response:
         """Execute retry loop for request."""
         max_attempts = 3
-        last_error = None
+        last_error = await self._execute_all_retry_attempts(
+            request, call_next, operation_id, operation_type, max_attempts, circuit_breaker
+        )
+        return await self._handle_final_failure(request, last_error, operation_id, circuit_breaker)
+    
+    async def _execute_all_retry_attempts(
+        self, request: Request, call_next: Callable, operation_id: str,
+        operation_type: OperationType, max_attempts: int, circuit_breaker
+    ):
+        """Execute all retry attempts and return last error or successful response."""
         for attempt in range(max_attempts):
             result = await self._try_single_attempt(
                 request, call_next, operation_id, operation_type, 
@@ -106,10 +115,7 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
             )
             if isinstance(result, Response):
                 return result
-            last_error = result
-        return await self._handle_final_failure(
-            request, last_error, operation_id, circuit_breaker
-        )
+        return result
     
     async def _try_single_attempt(
         self, request: Request, call_next: Callable, operation_id: str, 

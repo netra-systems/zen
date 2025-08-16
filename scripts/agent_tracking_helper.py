@@ -259,83 +259,86 @@ class AgentTrackingHelper:
         
         return history_section
     
-    def add_tracking_header(
-        self,
-        file_path: str,
-        agent: str,
-        model: str,
-        task_id: str,
-        prompt_summary: str,
-        changes: str,
-        dry_run: bool = False
-    ) -> bool:
-        """Add or update tracking header in a file."""
+    def _validate_and_prepare_file(self, file_path):
+        """Validate file path and determine language"""
         path = Path(file_path)
-        
-        # Check if file should be excluded
         if self._should_exclude(path):
             print(f"Skipping excluded file: {file_path}")
-            return False
-        
-        # Determine language
-        language = self._get_language(path)
-        if not language:
+            return None, None
+        language = self._get_language(path) or 'default'
+        if not self._get_language(path):
             print(f"Unknown file type, using default format: {file_path}")
-            language = 'default'
-        
-        # Read file content
+        return path, language
+
+    def _read_file_content(self, path, file_path):
+        """Read file content safely"""
         try:
             with open(path, 'r', encoding='utf-8') as f:
-                content = f.read()
+                return f.read()
         except Exception as e:
             print(f"Error reading file {file_path}: {e}")
-            return False
-        
-        # Extract existing header and history
+            return None
+
+    def _extract_header_and_history(self, content, language):
+        """Extract existing header and history"""
         existing_header, content_without_header = self._extract_existing_header(content, language)
-        history = []
-        
-        if existing_header:
-            history = self._extract_history(existing_header, language)
-        
-        # Create new header
-        metadata = {
-            'agent': agent,
-            'model': model,
-            'task_id': task_id,
-            'prompt_summary': prompt_summary,
-            'changes': changes
+        history = self._extract_history(existing_header, language) if existing_header else []
+        return existing_header, content_without_header, history
+
+    def _create_tracking_metadata(self, agent, model, task_id, prompt_summary, changes):
+        """Create metadata dictionary for tracking header"""
+        return {
+            'agent': agent, 'model': model, 'task_id': task_id,
+            'prompt_summary': prompt_summary, 'changes': changes
         }
-        
-        new_header = self._format_header(language, metadata)
-        
-        # Create history entry for current modification
+
+    def _generate_new_header(self, language, metadata):
+        """Generate new tracking header"""
+        return self._format_header(language, metadata)
+
+    def _create_history_entry(self, agent, changes):
+        """Create history entry for current modification"""
         timestamp = datetime.now().astimezone().isoformat()
-        current_entry = f"{timestamp} - {agent} - {changes[:50]}"
-        
-        # Add history section if there are previous modifications
+        return f"{timestamp} - {agent} - {changes[:50]}"
+
+    def _add_history_section(self, new_header, history, existing_header, current_entry, language):
+        """Add history section if needed"""
         if history or existing_header:
             history_section = self._format_history(history, current_entry, language)
-            new_header += history_section
-        
-        # Combine header with content
+            return new_header + history_section
+        return new_header
+
+    def _finalize_content(self, new_header, content_without_header, dry_run, path, file_path):
+        """Finalize and write content"""
         new_content = new_header + "\n" + content_without_header
-        
-        # Write or display result
         if dry_run:
             print(f"=== DRY RUN for {file_path} ===")
-            print(new_content[:500])  # Show first 500 chars
-            print("...")
+            print(new_content[:500] + "...")
             return True
-        else:
-            try:
-                with open(path, 'w', encoding='utf-8') as f:
-                    f.write(new_content)
-                print(f"Updated tracking header in: {file_path}")
-                return True
-            except Exception as e:
-                print(f"Error writing file {file_path}: {e}")
-                return False
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(new_content)
+            print(f"Updated tracking header in: {file_path}")
+            return True
+        except Exception as e:
+            print(f"Error writing file {file_path}: {e}")
+            return False
+
+    def add_tracking_header(
+        self, file_path: str, agent: str, model: str, task_id: str,
+        prompt_summary: str, changes: str, dry_run: bool = False
+    ) -> bool:
+        """Add or update tracking header in a file."""
+        path, language = self._validate_and_prepare_file(file_path)
+        if not path: return False
+        content = self._read_file_content(path, file_path)
+        if not content: return False
+        existing_header, content_without_header, history = self._extract_header_and_history(content, language)
+        metadata = self._create_tracking_metadata(agent, model, task_id, prompt_summary, changes)
+        new_header = self._generate_new_header(language, metadata)
+        current_entry = self._create_history_entry(agent, changes)
+        new_header = self._add_history_section(new_header, history, existing_header, current_entry, language)
+        return self._finalize_content(new_header, content_without_header, dry_run, path, file_path)
     
     def create_audit_log_entry(
         self,

@@ -33,9 +33,13 @@ class CachedQueryStrategy(QueryExecutionStrategy):
         self.query_cache = query_cache
         self.cache_tags = cache_tags
     
+    async def _check_cache_for_result(self, query: str, params: Optional[Dict]) -> Any:
+        """Check cache for existing result."""
+        return await self.query_cache.get_cached_result(query, params)
+
     async def execute(self, session: AsyncSession, query: str, params: Optional[Dict] = None) -> Any:
         """Execute query with caching using template method."""
-        cached_result = await self.query_cache.get_cached_result(query, params)
+        cached_result = await self._check_cache_for_result(query, params)
         if cached_result is not None:
             return cached_result
         
@@ -65,13 +69,16 @@ class FreshQueryStrategy(QueryExecutionStrategy):
 class QueryExecutor:
     """Handles query execution with timing and result processing."""
     
+    def _calculate_execution_duration(self, start_time: float) -> float:
+        """Calculate query execution duration."""
+        return time.time() - start_time
+
     async def execute_with_timing(self, session: AsyncSession, query: str, 
                                 params: Optional[Dict], query_cache) -> Any:
         """Execute query with timing and metrics collection."""
         start_time = time.time()
         result_data = await self._execute_database_query(session, query, params)
-        duration = time.time() - start_time
-        
+        duration = self._calculate_execution_duration(start_time)
         self._update_query_metrics(query_cache, duration)
         return result_data
     

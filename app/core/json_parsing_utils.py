@@ -22,32 +22,37 @@ def safe_json_parse(value: Any, fallback: Any = None) -> Any:
 def _try_json_parse(value: str, fallback: Any) -> Any:
     """Helper to attempt JSON parsing with error handling."""
     stripped = value.strip()
-    
-    # Check for command-line style arguments (like --full-scan, --batch-size, etc.)
-    if (stripped.startswith('--') or 
-        ' --' in stripped or 
-        '-' in stripped.split()[0] if stripped.split() else False):
-        logger.debug(f"String appears to be command-line arguments, not JSON: {value[:100]}...")
-        return fallback if fallback is not None else value
-    
-    # Check for key-value pair strings like "workload_type=batch" or "optimization_focus=cost"
-    if ('=' in stripped and 
-        not stripped.startswith(('{', '[', '"')) and 
-        not stripped.endswith(('}', ']', '"')) and
-        not ',' in stripped):
-        # This looks like a single key-value pair, not JSON
-        logger.debug(f"String appears to be key-value pair, not JSON: {value[:100]}...")
-        return fallback if fallback is not None else value
-    
-    # Check if the string looks like complex descriptive text (contains commas but not JSON-like)
-    if (',' in stripped and 
-        not stripped.startswith(('{', '[', '"')) and 
-        not stripped.endswith(('}', ']', '"')) and
-        len(stripped.split(',')) > 1):
-        # This looks like comma-separated descriptive text, not JSON
-        logger.debug(f"String appears to be descriptive text, not JSON: {value[:100]}...")
-        return fallback if fallback is not None else value
-    
+    if _is_non_json_format(stripped):
+        return _handle_detected_non_json_format(value, fallback, stripped)
+    return _attempt_json_parsing(value, fallback)
+
+def _is_command_line_format(stripped: str) -> bool:
+    """Check if string appears to be command-line arguments."""
+    return (stripped.startswith('--') or 
+            ' --' in stripped or 
+            ('-' in stripped.split()[0] if stripped.split() else False))
+
+def _is_key_value_pair_format(stripped: str) -> bool:
+    """Check if string appears to be a single key-value pair."""
+    return ('=' in stripped and 
+            not stripped.startswith(('{', '[', '"')) and 
+            not stripped.endswith(('}', ']', '"')) and
+            ',' not in stripped)
+
+def _is_descriptive_text_format(stripped: str) -> bool:
+    """Check if string appears to be descriptive text with commas."""
+    return (',' in stripped and 
+            not stripped.startswith(('{', '[', '"')) and 
+            not stripped.endswith(('}', ']', '"')) and
+            len(stripped.split(',')) > 1)
+
+def _handle_non_json_format(value: str, fallback: Any, format_type: str) -> Any:
+    """Handle non-JSON format strings."""
+    logger.debug(f"String appears to be {format_type}, not JSON: {value[:100]}...")
+    return fallback if fallback is not None else value
+
+def _attempt_json_parsing(value: str, fallback: Any) -> Any:
+    """Attempt to parse string as JSON."""
     try:
         parsed = json.loads(value)
         logger.debug(f"Successfully parsed JSON string: {value[:100]}...")
@@ -110,15 +115,9 @@ def _parse_string_to_string_list(value: str) -> List[str]:
     """Helper to parse string to string list."""
     stripped = value.strip()
     if stripped.startswith(('[', '{')):
-        parsed = safe_json_parse(value, None)
-        if isinstance(parsed, list):
-            return [str(item) for item in parsed]
-    
-    # Handle comma-separated values for descriptive text
+        return _parse_json_array_to_string_list(value)
     if ',' in stripped and not stripped.startswith(('{', '[')):
-        items = [item.strip() for item in stripped.split(',')]
-        return [item for item in items if item]  # Filter out empty strings
-    
+        return _parse_comma_separated_values(stripped)
     return [value]
 
 
@@ -156,13 +155,13 @@ def fix_list_recommendations(data: Dict[str, Any]) -> Dict[str, Any]:
 
 def comprehensive_json_fix(data: Any) -> Any:
     """Apply comprehensive JSON string parsing fixes to data."""
-    if isinstance(data, dict):
-        return _fix_dict_data(data)
-    elif isinstance(data, list):
-        return [comprehensive_json_fix(item) for item in data]
-    elif isinstance(data, str):
-        return _fix_string_response_to_json(data)
-    return data
+    type_handlers = {
+        dict: _fix_dict_data,
+        list: lambda x: [comprehensive_json_fix(item) for item in x],
+        str: _fix_string_response_to_json
+    }
+    handler = type_handlers.get(type(data))
+    return handler(data) if handler else data
 
 
 def _fix_dict_data(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -189,51 +188,105 @@ def _handle_json_error(value: str, error: Exception, fallback: Any) -> Any:
 def _fix_string_response_to_json(data: str) -> Dict[str, Any]:
     """Fix string responses that should be JSON objects."""
     stripped = data.strip()
-    
-    # If it's command-line arguments, wrap in a result object
-    if stripped.startswith('--') or ' --' in stripped:
-        return {
-            "type": "command_result",
-            "raw_response": stripped,
-            "parsed": False,
-            "message": "Response contains command-line arguments instead of JSON"
-        }
-    
-    # If it's a simple descriptive string, wrap it
-    if not stripped.startswith(('{', '[')):
-        return {
-            "type": "text_response", 
-            "content": stripped,
-            "parsed": False,
-            "message": "Response is plain text instead of JSON"
-        }
-    
-    # Try to parse as JSON, return wrapped version if it fails
+    if _is_command_response(stripped):
+        return _create_command_result_wrapper(stripped)
+    if _is_plain_text_response(stripped):
+        return _create_text_response_wrapper(stripped)
+    return _parse_or_wrap_json_response(stripped)
+
+def _is_command_response(stripped: str) -> bool:
+    """Check if response contains command-line arguments."""
+    return stripped.startswith('--') or ' --' in stripped
+
+def _is_plain_text_response(stripped: str) -> bool:
+    """Check if response is plain text (not JSON format)."""
+    return not stripped.startswith(('{', '['))
+
+def _create_command_result_wrapper(stripped: str) -> Dict[str, Any]:
+    """Create wrapper for command-line argument responses."""
+    return {
+        "type": "command_result",
+        "raw_response": stripped,
+        "parsed": False,
+        "message": "Response contains command-line arguments instead of JSON"
+    }
+
+def _create_text_response_wrapper(stripped: str) -> Dict[str, Any]:
+    """Create wrapper for plain text responses."""
+    return {
+        "type": "text_response", 
+        "content": stripped,
+        "parsed": False,
+        "message": "Response is plain text instead of JSON"
+    }
+
+def _parse_or_wrap_json_response(stripped: str) -> Dict[str, Any]:
+    """Parse JSON or create malformed JSON wrapper."""
     try:
         parsed = json.loads(stripped)
         return parsed if isinstance(parsed, dict) else {"content": parsed}
     except (json.JSONDecodeError, TypeError):
-        return {
-            "type": "malformed_json",
-            "raw_response": stripped,
-            "parsed": False,
-            "message": "Response contains malformed JSON"
-        }
+        return _create_malformed_json_wrapper(stripped)
+
+def _create_malformed_json_wrapper(stripped: str) -> Dict[str, Any]:
+    """Create wrapper for malformed JSON responses."""
+    return {
+        "type": "malformed_json",
+        "raw_response": stripped,
+        "parsed": False,
+        "message": "Response contains malformed JSON"
+    }
 
 
 def ensure_agent_response_is_json(response: Any) -> Dict[str, Any]:
     """Ensure agent response is a proper JSON object."""
-    if isinstance(response, dict):
-        return response
-    elif isinstance(response, str):
-        return _fix_string_response_to_json(response)
-    elif isinstance(response, list):
-        return {"items": response, "type": "list_response"}
-    else:
-        return {
-            "type": "unknown_response",
-            "content": str(response),
-            "parsed": False,
-            "message": f"Response type {type(response)} is not JSON serializable"
-        }
+    response_handlers = {
+        dict: lambda x: x,
+        str: _fix_string_response_to_json,
+        list: lambda x: {"items": x, "type": "list_response"}
+    }
+    handler = response_handlers.get(type(response))
+    if handler:
+        return handler(response)
+    return _create_unknown_response_wrapper(response)
+
+
+def _is_non_json_format(stripped: str) -> bool:
+    """Check if string appears to be non-JSON format."""
+    return (_is_command_line_format(stripped) or 
+            _is_key_value_pair_format(stripped) or 
+            _is_descriptive_text_format(stripped))
+
+
+def _handle_detected_non_json_format(value: str, fallback: Any, stripped: str) -> Any:
+    """Handle detected non-JSON format string."""
+    if _is_command_line_format(stripped):
+        return _handle_non_json_format(value, fallback, "command-line arguments")
+    if _is_key_value_pair_format(stripped):
+        return _handle_non_json_format(value, fallback, "key-value pair")
+    return _handle_non_json_format(value, fallback, "descriptive text")
+
+
+def _parse_json_array_to_string_list(value: str) -> List[str]:
+    """Parse JSON array string to string list."""
+    parsed = safe_json_parse(value, None)
+    if isinstance(parsed, list):
+        return [str(item) for item in parsed]
+    return [value]
+
+
+def _parse_comma_separated_values(stripped: str) -> List[str]:
+    """Parse comma-separated values to string list."""
+    items = [item.strip() for item in stripped.split(',')]
+    return [item for item in items if item]  # Filter out empty strings
+
+
+def _create_unknown_response_wrapper(response: Any) -> Dict[str, Any]:
+    """Create wrapper for unknown response types."""
+    return {
+        "type": "unknown_response",
+        "content": str(response),
+        "parsed": False,
+        "message": f"Response type {type(response)} is not JSON serializable"
+    }
 

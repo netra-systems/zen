@@ -83,8 +83,8 @@ class TestJobStatusManagement:
     """Test job status update functionality"""
     async def test_update_job_status_running(self):
         """Test updating job status to running"""
-        with patch('app.services.generation_service.job_store') as mock_store:
-            with patch('app.services.generation_service.manager') as mock_manager:
+        with patch('app.services.generation_job_manager.job_store') as mock_store:
+            with patch('app.services.generation_job_manager.manager') as mock_manager:
                 mock_store.update = AsyncMock()
                 mock_manager.broadcast_to_job = AsyncMock()
                 
@@ -100,8 +100,8 @@ class TestJobStatusManagement:
                 mock_manager.broadcast_to_job.assert_called_once()
     async def test_update_job_status_completed(self):
         """Test updating job status to completed"""
-        with patch('app.services.generation_service.job_store') as mock_store:
-            with patch('app.services.generation_service.manager') as mock_manager:
+        with patch('app.services.generation_job_manager.job_store') as mock_store:
+            with patch('app.services.generation_job_manager.manager') as mock_manager:
                 mock_store.update = AsyncMock()
                 mock_manager.broadcast_to_job = AsyncMock()
                 
@@ -121,8 +121,8 @@ class TestJobStatusManagement:
                 assert mock_store.update.call_args[1]["result"] == {"data": "test"}
     async def test_update_job_status_failed(self):
         """Test updating job status to failed"""
-        with patch('app.services.generation_service.job_store') as mock_store:
-            with patch('app.services.generation_service.manager') as mock_manager:
+        with patch('app.services.generation_job_manager.job_store') as mock_store:
+            with patch('app.services.generation_job_manager.manager') as mock_manager:
                 mock_store.update = AsyncMock()
                 mock_manager.broadcast_to_job = AsyncMock()
                 
@@ -140,8 +140,8 @@ class TestJobStatusManagement:
                 assert mock_store.update.call_args[1]["error"] == "Test error message"
     async def test_update_job_status_with_metadata(self):
         """Test updating job status with additional metadata"""
-        with patch('app.services.generation_service.job_store') as mock_store:
-            with patch('app.services.generation_service.manager') as mock_manager:
+        with patch('app.services.generation_job_manager.job_store') as mock_store:
+            with patch('app.services.generation_job_manager.manager') as mock_manager:
                 mock_store.update = AsyncMock()
                 mock_manager.broadcast_to_job = AsyncMock()
                 
@@ -175,8 +175,8 @@ class TestClickHouseOperations:
             {"workload_type": "generation", "prompt": "G1", "response": "R1"}
         ]
         
-        with patch('app.services.generation_service.ClickHouseDatabase', return_value=mock_clickhouse):
-            with patch('app.services.generation_service.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
+        with patch('app.services.generation_job_manager.ClickHouseDatabase', return_value=mock_clickhouse):
+            with patch('app.services.generation_job_manager.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
                 result = await get_corpus_from_clickhouse("test_corpus")
                 
                 assert "qa" in result
@@ -188,15 +188,15 @@ class TestClickHouseOperations:
         """Test retrieving corpus from empty table"""
         mock_clickhouse.execute_query.return_value = []
         
-        with patch('app.services.generation_service.ClickHouseDatabase', return_value=mock_clickhouse):
-            with patch('app.services.generation_service.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
+        with patch('app.services.generation_job_manager.ClickHouseDatabase', return_value=mock_clickhouse):
+            with patch('app.services.generation_job_manager.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
                 result = await get_corpus_from_clickhouse("empty_corpus")
                 
                 assert result == {}
     async def test_save_corpus_to_clickhouse(self, mock_clickhouse, sample_corpus):
         """Test saving corpus to ClickHouse"""
-        with patch('app.services.generation_service.ClickHouseDatabase', return_value=mock_clickhouse):
-            with patch('app.services.generation_service.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
+        with patch('app.services.generation_job_manager.ClickHouseDatabase', return_value=mock_clickhouse):
+            with patch('app.services.generation_job_manager.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
                 await save_corpus_to_clickhouse(sample_corpus, "new_corpus", "job123")
                 
                 # Verify table creation
@@ -216,8 +216,8 @@ class TestClickHouseOperations:
         """Test corpus save error handling"""
         mock_clickhouse.command.side_effect = Exception("Database error")
         
-        with patch('app.services.generation_service.ClickHouseDatabase', return_value=mock_clickhouse):
-            with patch('app.services.generation_service.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
+        with patch('app.services.generation_job_manager.ClickHouseDatabase', return_value=mock_clickhouse):
+            with patch('app.services.generation_job_manager.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
                 with pytest.raises(Exception) as exc:
                     await save_corpus_to_clickhouse(sample_corpus, "error_corpus", "job_error")
                 
@@ -263,8 +263,8 @@ class TestExistingFunctions:
     """Test the actual functions that exist in generation_service"""
     async def test_update_job_status_broadcasts_update(self):
         """Test that job status updates are broadcast via WebSocket"""
-        with patch('app.services.generation_service.job_store') as mock_store:
-            with patch('app.services.generation_service.manager') as mock_manager:
+        with patch('app.services.generation_job_manager.job_store') as mock_store:
+            with patch('app.services.generation_job_manager.manager') as mock_manager:
                 mock_store.update = AsyncMock()
                 mock_manager.broadcast_to_job = AsyncMock()
                 
@@ -288,8 +288,8 @@ class TestExistingFunctions:
             {"workload_type": "generation", "prompt": "Generate", "response": "Response"}
         ]
         
-        with patch('app.services.generation_service.ClickHouseDatabase', return_value=mock_clickhouse):
-            with patch('app.services.generation_service.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
+        with patch('app.services.generation_job_manager.ClickHouseDatabase', return_value=mock_clickhouse):
+            with patch('app.services.generation_job_manager.ClickHouseQueryInterceptor', return_value=mock_clickhouse):
                 # Save corpus
                 await save_corpus_to_clickhouse(test_corpus, "integration_corpus", "int_job")
                 

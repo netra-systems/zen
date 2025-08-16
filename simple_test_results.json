@@ -4,44 +4,44 @@
     "passed": 1,
     "failed": 0,
     "errors": 0,
-    "duration": 11.218623638153076,
+    "duration": 5.329768419265747,
     "exit_code": 0,
-    "output": "============================= test session starts =============================\ncollected 1 item\n\napp\\tests\\core\\test_error_handling.py::TestNetraExceptions::test_configuration_error PASSED [100%]\n\n============================== 1 passed in 0.13s ==============================\n"
+    "output": "============================= test session starts =============================\ncollected 1 item\n\napp\\tests\\core\\test_error_handling.py::TestNetraExceptions::test_configuration_error PASSED [100%]\n\n============================== 1 passed in 0.12s ==============================\n"
   },
   {
     "path": "app/tests/core/test_config_manager.py::TestConfigManager::test_initialization",
-    "passed": 0,
-    "failed": 1,
+    "passed": 1,
+    "failed": 0,
     "errors": 0,
-    "duration": 10.55150318145752,
-    "exit_code": 1,
-    "output": "============================= test session starts =============================\ncollected 1 item\n\napp\\tests\\core\\test_config_manager.py::TestConfigManager::test_initialization FAILED [100%]\n\n============================== 1 failed in 0.14s ==============================\n"
+    "duration": 6.123181343078613,
+    "exit_code": 0,
+    "output": "============================= test session starts =============================\ncollected 1 item\n\napp\\tests\\core\\test_config_manager.py::TestConfigManager::test_initialization PASSED [100%]\n\n============================== 1 passed in 0.16s ==============================\n"
   },
   {
     "path": "app/tests/services/test_security_service.py::test_encrypt_and_decrypt",
-    "passed": 0,
-    "failed": 1,
+    "passed": 1,
+    "failed": 0,
     "errors": 0,
-    "duration": 10.020243167877197,
-    "exit_code": 4,
-    "output": "Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env\nLoaded .env.development file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.development\nLoaded .env.development.local file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.development.local\n"
+    "duration": 6.3565943241119385,
+    "exit_code": 0,
+    "output": "============================= test session starts =============================\ncollected 1 item\n\napp\\tests\\services\\test_security_service.py::test_encrypt_and_decrypt PASSED [100%]\n\n============================== 1 passed in 0.21s ==============================\n"
   },
   {
     "path": "app/tests/routes/test_health_route.py::test_live_endpoint",
     "passed": 1,
     "failed": 0,
     "errors": 0,
-    "duration": 11.137526512145996,
+    "duration": 7.0020341873168945,
     "exit_code": 0,
-    "output": "============================= test session starts =============================\ncollected 1 item\n\napp\\tests\\routes\\test_health_route.py::test_live_endpoint PASSED         [100%]\n\n============================== 1 passed in 0.15s ==============================\n"
+    "output": "============================= test session starts =============================\ncollected 1 item\n\napp\\tests\\routes\\test_health_route.py::test_live_endpoint PASSED         [100%]\n\n============================== 1 passed in 0.21s ==============================\n"
   },
   {
     "path": "tests/test_system_startup.py::TestSystemStartup::test_configuration_loading",
     "passed": 1,
     "failed": 0,
     "errors": 0,
-    "duration": 6.2392964363098145,
+    "duration": 3.441650867462158,
     "exit_code": 0,
-    "output": "============================= test session starts =============================\ncollected 1 item\n\ntests/test_system_startup.py::TestSystemStartup::test_configuration_loading PASSED [100%]\n\n============================== 1 passed in 1.33s ==============================\n"
+    "output": "============================= test session starts =============================\ncollected 1 item\n\ntests/test_system_startup.py::TestSystemStartup::test_configuration_loading PASSED [100%]\n\n============================== 1 passed in 0.66s ==============================\n"
   }
 ]

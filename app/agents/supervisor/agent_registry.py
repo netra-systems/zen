@@ -63,12 +63,9 @@ class AgentRegistry:
     
     def _register_auxiliary_agents(self) -> None:
         """Register auxiliary agents."""
-        self.register("reporting", ReportingSubAgent(
-            self.llm_manager, self.tool_dispatcher))
-        self.register("synthetic_data", SyntheticDataSubAgent(
-            self.llm_manager, self.tool_dispatcher))
-        self.register("corpus_admin", CorpusAdminSubAgent(
-            self.llm_manager, self.tool_dispatcher))
+        self._register_reporting_agent()
+        self._register_synthetic_data_agent()
+        self._register_corpus_admin_agent()
     
     def register(self, name: str, agent: BaseSubAgent) -> None:
         """Register a sub-agent"""
@@ -89,6 +86,21 @@ class AgentRegistry:
         """Get all registered agents"""
         return list(self.agents.values())
     
+    def _register_reporting_agent(self) -> None:
+        """Register reporting agent."""
+        self.register("reporting", ReportingSubAgent(
+            self.llm_manager, self.tool_dispatcher))
+    
+    def _register_synthetic_data_agent(self) -> None:
+        """Register synthetic data agent."""
+        self.register("synthetic_data", SyntheticDataSubAgent(
+            self.llm_manager, self.tool_dispatcher))
+    
+    def _register_corpus_admin_agent(self) -> None:
+        """Register corpus admin agent."""
+        self.register("corpus_admin", CorpusAdminSubAgent(
+            self.llm_manager, self.tool_dispatcher))
+
     def set_websocket_manager(self, manager: 'WebSocketManager') -> None:
         """Set websocket manager for all agents"""
         self.websocket_manager = manager

@@ -64,77 +64,80 @@ def check_github_secrets() -> Dict[str, bool]:
     
     return secrets
 
-def check_database_connection() -> bool:
-    """Test PostgreSQL database connection."""
-    print_section("PostgreSQL Connection Test")
-    
+def _validate_database_url():
+    """Validate DATABASE_URL environment variable exists"""
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
         print(f"{Fore.RED}✗ DATABASE_URL not set{Style.RESET_ALL}")
-        return False
-    
+        return None
+    return db_url
+
+def _parse_database_url(db_url):
+    """Parse and normalize DATABASE_URL"""
+    if db_url.startswith("postgresql://"):
+        return db_url[13:]  # Remove postgresql://
+    return db_url
+
+def _handle_cloud_sql_connection(db_url):
+    """Handle Cloud SQL socket format connection"""
+    parts = db_url.split("?host=/cloudsql/")
+    creds_and_db = parts[0]
+    socket_path = f"/cloudsql/{parts[1]}"
+    if "@" not in creds_and_db:
+        print(f"{Fore.RED}✗ Invalid DATABASE_URL format{Style.RESET_ALL}")
+        return None
+    creds, db = creds_and_db.split("@")[0], creds_and_db.split("/")[-1]
+    user, password = creds.split(":")
+    print(f"  User: {user}\n  Database: {db}\n  Socket: {socket_path}")
+    return psycopg2.connect(host=socket_path, database=db, user=user, password=password)
+
+def _create_standard_connection(db_url):
+    """Create standard PostgreSQL connection"""
+    return psycopg2.connect(db_url)
+
+def _get_database_version(conn):
+    """Get and display database version"""
+    cursor = conn.cursor()
+    cursor.execute("SELECT version()")
+    version = cursor.fetchone()[0]
+    print(f"{Fore.GREEN}✓ PostgreSQL connected: {version[:50]}...{Style.RESET_ALL}")
+    return cursor
+
+def _check_database_tables(cursor):
+    """Check and display database tables"""
+    cursor.execute("""SELECT table_name FROM information_schema.tables 
+                     WHERE table_schema = 'public' ORDER BY table_name LIMIT 10""")
+    tables = cursor.fetchall()
+    if tables:
+        print(f"  Tables found: {len(tables)}")
+        for table in tables[:5]: print(f"    - {table[0]}")
+    else:
+        print(f"{Fore.YELLOW}  ⚠ No tables found (run migrations){Style.RESET_ALL}")
+
+def _close_database_connection(cursor, conn):
+    """Close database cursor and connection"""
+    cursor.close()
+    conn.close()
+
+def _handle_database_error(e):
+    """Handle database connection errors"""
+    print(f"{Fore.RED}✗ PostgreSQL connection failed: {e}{Style.RESET_ALL}")
+    return False
+
+def check_database_connection() -> bool:
+    """Test PostgreSQL database connection."""
+    print_section("PostgreSQL Connection Test")
+    db_url = _validate_database_url()
+    if not db_url: return False
     try:
-        # Parse DATABASE_URL
-        if db_url.startswith("postgresql://"):
-            db_url = db_url[13:]  # Remove postgresql://
-        
-        # Handle Cloud SQL socket format
-        if "?host=/cloudsql/" in db_url:
-            parts = db_url.split("?host=/cloudsql/")
-            creds_and_db = parts[0]
-            socket_path = f"/cloudsql/{parts[1]}"
-            
-            # Parse credentials and database
-            if "@" in creds_and_db:
-                creds, db = creds_and_db.split("@")[0], creds_and_db.split("/")[-1]
-                user, password = creds.split(":")
-            else:
-                print(f"{Fore.RED}✗ Invalid DATABASE_URL format{Style.RESET_ALL}")
-                return False
-            
-            print(f"  User: {user}")
-            print(f"  Database: {db}")
-            print(f"  Socket: {socket_path}")
-            
-            # Test connection via Cloud SQL proxy
-            conn = psycopg2.connect(
-                host=socket_path,
-                database=db,
-                user=user,
-                password=password
-            )
-        else:
-            # Standard connection format
-            conn = psycopg2.connect(db_url)
-        
-        cursor = conn.cursor()
-        cursor.execute("SELECT version()")
-        version = cursor.fetchone()[0]
-        print(f"{Fore.GREEN}✓ PostgreSQL connected: {version[:50]}...{Style.RESET_ALL}")
-        
-        # Check tables
-        cursor.execute("""
-            SELECT table_name 
-            FROM information_schema.tables 
-            WHERE table_schema = 'public' 
-            ORDER BY table_name
-            LIMIT 10
-        """)
-        tables = cursor.fetchall()
-        if tables:
-            print(f"  Tables found: {len(tables)}")
-            for table in tables[:5]:
-                print(f"    - {table[0]}")
-        else:
-            print(f"{Fore.YELLOW}  ⚠ No tables found (run migrations){Style.RESET_ALL}")
-        
-        cursor.close()
-        conn.close()
+        db_url = _parse_database_url(db_url)
+        conn = _handle_cloud_sql_connection(db_url) if "?host=/cloudsql/" in db_url else _create_standard_connection(db_url)
+        cursor = _get_database_version(conn)
+        _check_database_tables(cursor)
+        _close_database_connection(cursor, conn)
         return True
-        
     except Exception as e:
-        print(f"{Fore.RED}✗ PostgreSQL connection failed: {e}{Style.RESET_ALL}")
-        return False
+        return _handle_database_error(e)
 
 def check_redis_connection() -> bool:
     """Test Redis connection."""

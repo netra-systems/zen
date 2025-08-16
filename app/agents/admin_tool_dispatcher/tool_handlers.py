@@ -47,11 +47,9 @@ async def handle_corpus_create(user: User,
                               db: Session, 
                               **kwargs) -> Dict[str, Any]:
     """Handle corpus creation"""
-    from app.services import corpus_service
-    from .tool_handler_helpers import create_corpus_success_response
     params = extract_corpus_create_params(kwargs, user)
-    result = await corpus_service.create_corpus(**params, db=db)
-    return create_corpus_success_response(result)
+    result = await _execute_corpus_creation(params, db)
+    return _create_corpus_response(result)
 
 
 def extract_corpus_create_params(kwargs: Dict[str, Any], user: User) -> Dict[str, Any]:
@@ -102,12 +100,10 @@ async def handle_synthetic_generate(user: User,
                                    db: Session, 
                                    **kwargs) -> Dict[str, Any]:
     """Handle synthetic data generation"""
-    from app.services.synthetic_data_service import SyntheticDataService
-    from .tool_handler_helpers import create_synthetic_success_response
-    synthetic_service = SyntheticDataService(db)
+    synthetic_service = _create_synthetic_service(db)
     params = extract_synthetic_params(kwargs, user)
     result = await synthetic_service.generate_synthetic_data(**params)
-    return create_synthetic_success_response(result)
+    return _create_synthetic_response(result)
 
 
 def extract_synthetic_params(kwargs: Dict[str, Any], user: User) -> Dict[str, Any]:
@@ -149,25 +145,21 @@ def get_user_admin_handlers() -> Dict[str, Callable]:
 
 async def handle_user_create(db: Session, **kwargs) -> Dict[str, Any]:
     """Handle user creation"""
-    from app.services import user_service
-    from .tool_handler_helpers import check_email_required, build_user_create_params, create_user_success_response
+    from .tool_handler_helpers import check_email_required
     email = kwargs.get('email')
     check_email_required(email)
-    params = build_user_create_params(kwargs)
-    params["db"] = db
-    result = await user_service.create_user(**params)
-    return create_user_success_response(result)
+    params = _prepare_user_create_params(kwargs, db)
+    result = await _execute_user_creation(params)
+    return _create_user_response(result)
 
 
 async def handle_user_grant_permission(db: Session, **kwargs) -> Dict[str, Any]:
     """Handle granting user permissions"""
-    from app.services.permission_service import PermissionService
-    from .tool_handler_helpers import check_user_permission_params, create_permission_grant_response
-    user_email = kwargs.get('user_email')
-    permission = kwargs.get('permission')
+    from .tool_handler_helpers import check_user_permission_params
+    user_email, permission = _extract_permission_params(kwargs)
     check_user_permission_params(user_email, permission)
-    success = await PermissionService.grant_permission(user_email, permission, db)
-    return create_permission_grant_response(success)
+    success = await _grant_user_permission(user_email, permission, db)
+    return _create_permission_response(success)
 
 
 async def execute_system_configurator(action: str, 
@@ -205,13 +197,10 @@ async def handle_log_analyze(user: User,
                             db: Session, 
                             **kwargs) -> Dict[str, Any]:
     """Handle log analysis"""
-    from app.services.debug_service import DebugService
-    from .tool_handler_helpers import extract_log_analysis_params, build_debug_service_params, create_log_analysis_result
+    from .tool_handler_helpers import extract_log_analysis_params
     query, time_range = extract_log_analysis_params(kwargs)
-    debug_service = DebugService(db)
-    service_params = build_debug_service_params(user)
-    result = await debug_service.get_debug_info(**service_params)
-    return create_log_analysis_result(query, time_range, result)
+    result = await _execute_debug_analysis(db, user)
+    return _create_log_analysis_response(query, time_range, result)
 
 
 def extract_log_params(kwargs: Dict[str, Any]) -> tuple:
@@ -248,3 +237,86 @@ async def execute_admin_tool(tool_name: str,
     executor = get_tool_executor(tool_name)
     check_tool_executor_exists(executor)
     return await executor(action, user, db, **kwargs)
+
+
+# Helper functions for corpus operations
+async def _execute_corpus_creation(params: Dict[str, Any], db: Session) -> Any:
+    """Execute corpus creation with service"""
+    from app.services import corpus_service
+    return await corpus_service.create_corpus(**params, db=db)
+
+
+def _create_corpus_response(result: Any) -> Dict[str, Any]:
+    """Create corpus success response"""
+    from .tool_handler_helpers import create_corpus_success_response
+    return create_corpus_success_response(result)
+
+
+# Helper functions for synthetic operations
+def _create_synthetic_service(db: Session):
+    """Create synthetic data service instance"""
+    from app.services.synthetic_data_service import SyntheticDataService
+    return SyntheticDataService(db)
+
+
+def _create_synthetic_response(result: Any) -> Dict[str, Any]:
+    """Create synthetic success response"""
+    from .tool_handler_helpers import create_synthetic_success_response
+    return create_synthetic_success_response(result)
+
+
+# Helper functions for user operations
+def _prepare_user_create_params(kwargs: Dict[str, Any], db: Session) -> Dict[str, Any]:
+    """Prepare user creation parameters"""
+    from .tool_handler_helpers import build_user_create_params
+    params = build_user_create_params(kwargs)
+    params["db"] = db
+    return params
+
+
+async def _execute_user_creation(params: Dict[str, Any]) -> Any:
+    """Execute user creation with service"""
+    from app.services import user_service
+    return await user_service.create_user(**params)
+
+
+def _create_user_response(result: Any) -> Dict[str, Any]:
+    """Create user success response"""
+    from .tool_handler_helpers import create_user_success_response
+    return create_user_success_response(result)
+
+
+# Helper functions for permission operations
+def _extract_permission_params(kwargs: Dict[str, Any]) -> tuple:
+    """Extract permission parameters"""
+    user_email = kwargs.get('user_email')
+    permission = kwargs.get('permission')
+    return user_email, permission
+
+
+async def _grant_user_permission(user_email: str, permission: str, db: Session) -> bool:
+    """Grant user permission via service"""
+    from app.services.permission_service import PermissionService
+    return await PermissionService.grant_permission(user_email, permission, db)
+
+
+def _create_permission_response(success: bool) -> Dict[str, Any]:
+    """Create permission grant response"""
+    from .tool_handler_helpers import create_permission_grant_response
+    return create_permission_grant_response(success)
+
+
+# Helper functions for log analysis operations
+async def _execute_debug_analysis(db: Session, user: User) -> dict:
+    """Execute debug analysis with service"""
+    from app.services.debug_service import DebugService
+    from .tool_handler_helpers import build_debug_service_params
+    service = DebugService(db)
+    service_params = build_debug_service_params(user)
+    return await service.get_debug_info(**service_params)
+
+
+def _create_log_analysis_response(query: str, time_range: str, result: dict) -> Dict[str, Any]:
+    """Create log analysis response"""
+    from .tool_handler_helpers import create_log_analysis_result
+    return create_log_analysis_result(query, time_range, result)

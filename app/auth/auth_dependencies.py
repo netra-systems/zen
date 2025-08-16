@@ -13,19 +13,29 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/token")
 
 logger = central_logger.get_logger(__name__)
 
-async def get_current_user(
-    token: str,
-    db_session: AsyncSession = Depends(get_db_session),
-    security_service: SecurityService = Depends(get_security_service),
-) -> Optional[User]:
+def _validate_token_presence(token: str) -> bool:
+    """Validate token is present."""
     if not token:
         logger.error("Token not found")
-        return None
+        return False
+    return True
+
+async def _safe_process_user_token(token: str, db_session: AsyncSession, security_service: SecurityService) -> Optional[User]:
+    """Safely process user token with error handling."""
     try:
         return await _process_user_token(token, db_session, security_service)
     except Exception as e:
         logger.error(f"Error decoding token or fetching user: {e}")
         return None
+
+async def get_current_user(
+    token: str,
+    db_session: AsyncSession = Depends(get_db_session),
+    security_service: SecurityService = Depends(get_security_service),
+) -> Optional[User]:
+    if not _validate_token_presence(token):
+        return None
+    return await _safe_process_user_token(token, db_session, security_service)
 
 async def get_current_user_ws(
     token: Annotated[str, Query()],
@@ -40,72 +50,74 @@ async def get_current_active_user(
     security_service: SecurityService = Depends(get_security_service),
 ) -> Optional[User]:
     user = await get_current_user(token, db_session, security_service)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    
-    # Auto-detect and update developer status
-    # Note: This is using sync Session, may need adjustment for async
-    # For now, we'll skip auto-update in async context and rely on login-time detection
-    
+    _validate_user_authentication(user)
+    _validate_user_is_active(user)
+    # Auto-detect and update developer status skipped for async context
     return user
+
+def _create_permission_error(permission: str) -> HTTPException:
+    """Create permission denied error."""
+    return HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail=f"Permission denied. Required permission: {permission}"
+    )
 
 def require_permission(permission: str):
     """Dependency to require a specific permission"""
-    async def permission_checker(
-        user: User = Depends(get_current_active_user)
-    ) -> User:
+    async def permission_checker(user: User = Depends(get_current_active_user)) -> User:
         if not PermissionService.has_permission(user, permission):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Permission denied. Required permission: {permission}"
-            )
+            raise _create_permission_error(permission)
         return user
     return permission_checker
+
+def _create_any_permission_error(permissions: List[str]) -> HTTPException:
+    """Create any permission denied error."""
+    return HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail=f"Permission denied. Required one of: {', '.join(permissions)}"
+    )
 
 def require_any_permission(permissions: List[str]):
     """Dependency to require any of the specified permissions"""
-    async def permission_checker(
-        user: User = Depends(get_current_active_user)
-    ) -> User:
+    async def permission_checker(user: User = Depends(get_current_active_user)) -> User:
         if not PermissionService.has_any_permission(user, permissions):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Permission denied. Required one of: {', '.join(permissions)}"
-            )
+            raise _create_any_permission_error(permissions)
         return user
     return permission_checker
 
+def _create_developer_error() -> HTTPException:
+    """Create developer access denied error."""
+    return HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Developer access required"
+    )
+
 def require_developer():
     """Dependency to require developer role or higher"""
-    async def developer_checker(
-        user: User = Depends(get_current_active_user)
-    ) -> User:
+    async def developer_checker(user: User = Depends(get_current_active_user)) -> User:
         if not PermissionService.is_developer_or_higher(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Developer access required"
-            )
+            raise _create_developer_error()
         return user
     return developer_checker
 
+def _create_admin_error() -> HTTPException:
+    """Create admin access denied error."""
+    return HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Admin access required"
+    )
+
 def require_admin():
     """Dependency to require admin role or higher"""
-    async def admin_checker(
-        user: User = Depends(get_current_active_user)
-    ) -> User:
+    async def admin_checker(user: User = Depends(get_current_active_user)) -> User:
         if not PermissionService.is_admin_or_higher(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Admin access required"
-            )
+            raise _create_admin_error()
         return user
     return admin_checker
+
+def _handle_optional_auth_failure(error: Exception) -> None:
+    """Handle optional authentication failure."""
+    logger.warning(f"Optional user authentication failed: {error}")
 
 async def get_current_user_optional(
     token: Optional[str] = Depends(oauth2_scheme),
@@ -118,16 +130,23 @@ async def get_current_user_optional(
     try:
         return await get_current_user(token, db_session, security_service)
     except Exception as e:
-        logger.warning(f"Optional user authentication failed: {e}")
+        _handle_optional_auth_failure(e)
         return None
+
+def _validate_token_payload(payload: Optional[dict]) -> Optional[dict]:
+    """Validate token payload and return if valid."""
+    if payload is None:
+        logger.error("Token payload is invalid")
+        return None
+    return payload
 
 async def _process_user_token(token: str, db_session: AsyncSession, security_service: SecurityService) -> Optional[User]:
     """Process user token and return user if valid."""
     payload = security_service.decode_access_token(token)
-    if payload is None:
-        logger.error("Token payload is invalid")
+    validated_payload = _validate_token_payload(payload)
+    if validated_payload is None:
         return None
-    user_id = _extract_user_id_from_payload(payload)
+    user_id = _extract_user_id_from_payload(validated_payload)
     if user_id is None:
         return None
     return await _fetch_user_by_id(db_session, security_service, user_id)
@@ -146,14 +165,18 @@ async def _fetch_user_by_id(db_session: AsyncSession, security_service: Security
         logger.error(f"User with ID {user_id} not found")
     return user
 
+def _create_unauthorized_error() -> HTTPException:
+    """Create unauthorized access error."""
+    return HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid authentication credentials",
+        headers={"WWW-Authenticate": "Bearer"}
+    )
+
 def _validate_user_authentication(user: Optional[User]) -> None:
     """Validate user authentication."""
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise _create_unauthorized_error()
 
 def _validate_user_is_active(user: User) -> None:
     """Validate user is active."""

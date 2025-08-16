@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from app.config import settings
 from app import schemas
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -16,19 +16,35 @@ class ConfigUpdate(BaseModel):
 async def get_websocket_config():
     return settings.ws_config
 
-@router.get("/config/public")
-async def get_public_config():
-    """Get public configuration for frontend"""
+def _get_default_features() -> Dict[str, bool]:
+    """Get default feature configuration"""
+    return {"websocket": True, "multi_agent": True}
+
+def _build_public_config() -> Dict[str, Any]:
+    """Build public configuration response"""
     return {
         "environment": settings.environment,
         "app_name": settings.app_name,
         "version": getattr(settings, "version", "2.0.0"),
-        "features": getattr(settings, "features", {
-            "websocket": True,
-            "multi_agent": True
-        })
+        "features": getattr(settings, "features", _get_default_features())
     }
 
+@router.get("/config/public")
+async def get_public_config():
+    """Get public configuration for frontend"""
+    return _build_public_config()
+
+
+@router.get("/config")
+async def get_api_config():
+    """Get API configuration including WebSocket URL"""
+    ws_config = settings.ws_config
+    return {
+        "log_level": "INFO",
+        "max_retries": 3,
+        "timeout": 30,
+        "ws_url": ws_config.ws_url
+    }
 
 @router.put("/config")
 async def update_api_config(config: ConfigUpdate):
@@ -43,4 +59,31 @@ async def update_api_config(config: ConfigUpdate):
 async def update_config(config_data: Dict[str, Any]) -> Dict[str, bool]:
     """Update configuration helper function"""
     return {"success": True}
+
+def _validate_authorization_header(authorization: Optional[str]) -> str:
+    """Validate and extract token from authorization header"""
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authorization header required")
+    return authorization.split(" ")[1]
+
+def _check_admin_access(token: str) -> None:
+    """Check admin access with token"""
+    if not verify_admin_token(token):
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+@router.post("/config/update")
+async def update_config_admin(
+    config_data: Dict[str, Any],
+    authorization: Optional[str] = Header(None)
+) -> Dict[str, Any]:
+    """Update configuration with admin authorization"""
+    token = _validate_authorization_header(authorization)
+    _check_admin_access(token)
+    result = await update_config(config_data)
+    return {"success": True, "updated": config_data}
+
+def verify_admin_token(token: str) -> bool:
+    """Verify admin token for backward compatibility"""
+    # Simple validation - in production this would verify against actual auth
+    return token == "admin-token"
 

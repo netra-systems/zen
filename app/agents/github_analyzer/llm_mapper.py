@@ -147,23 +147,30 @@ class LLMCallMapper:
     
     def _extract_model(self, content: str) -> Optional[str]:
         """Extract model name from content."""
-        # Direct model patterns
-        model_patterns = [
+        direct_model = self._extract_direct_model(content)
+        if direct_model:
+            return direct_model
+        return self._find_known_model(content)
+    
+    def _extract_direct_model(self, content: str) -> Optional[str]:
+        """Extract model from direct patterns."""
+        patterns = [
             r"model\s*[:=]\s*['\"]([^'\"]+)['\"]",
             r"engine\s*[:=]\s*['\"]([^'\"]+)['\"]",
             r"model_name\s*[:=]\s*['\"]([^'\"]+)['\"]"
         ]
-        
-        for pattern in model_patterns:
+        for pattern in patterns:
             match = re.search(pattern, content, re.IGNORECASE)
             if match:
                 return match.group(1)
-        
-        # Check for known model names
+        return None
+    
+    def _find_known_model(self, content: str) -> Optional[str]:
+        """Find known model names in content."""
+        content_lower = content.lower()
         for model_prefix in self.model_patterns:
-            if model_prefix in content.lower():
+            if model_prefix in content_lower:
                 return model_prefix
-        
         return None
     
     def _extract_parameters(self, content: str) -> Dict[str, Any]:

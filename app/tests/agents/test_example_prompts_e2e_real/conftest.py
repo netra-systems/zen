@@ -121,8 +121,47 @@ def _create_supervisor_and_agent_service(db_session, llm_manager, websocket_mana
     agent_service.websocket_manager = websocket_manager
     return supervisor, agent_service
 
-@pytest.fixture
-def setup_real_infrastructure():
+async def _cleanup_infrastructure(infrastructure: Dict[str, Any]) -> None:
+    """Cleanup all async resources properly to prevent pending task warnings"""
+    try:
+        # Shutdown WebSocket manager and its async components
+        websocket_manager = infrastructure.get("websocket_manager")
+        if websocket_manager:
+            await websocket_manager.shutdown()
+        
+        # Close mock database session
+        db_session = infrastructure.get("db_session")
+        if db_session and hasattr(db_session, 'close'):
+            await db_session.close()
+        
+        # Cancel any remaining async tasks
+        await _cancel_pending_tasks()
+        
+    except Exception as e:
+        # Log cleanup errors but don't fail the test
+        print(f"Warning: Error during infrastructure cleanup: {e}")
+
+async def _cancel_pending_tasks() -> None:
+    """Cancel any remaining pending tasks to prevent warnings"""
+    try:
+        # Get all pending tasks in the current event loop
+        pending_tasks = [task for task in asyncio.all_tasks() 
+                        if not task.done() and task != asyncio.current_task()]
+        
+        if pending_tasks:
+            # Cancel all pending tasks
+            for task in pending_tasks:
+                task.cancel()
+            
+            # Wait briefly for cancellations to complete
+            await asyncio.gather(*pending_tasks, return_exceptions=True)
+            
+    except Exception:
+        # Silently handle any cancellation errors
+        pass
+
+@pytest.fixture(scope="function")
+def setup_real_infrastructure(event_loop):
     """Setup infrastructure with real LLM calls enabled"""
     config = get_config()
     db_session = _create_mock_db_session()
@@ -133,8 +172,13 @@ def setup_real_infrastructure():
     synthetic_service, quality_service, corpus_service = _create_real_services()
     supervisor, agent_service = _create_supervisor_and_agent_service(db_session, llm_manager, websocket_manager, tool_dispatcher)
     
-    return {
+    infrastructure = {
         "supervisor": supervisor, "agent_service": agent_service, "db_session": db_session,
         "llm_manager": llm_manager, "websocket_manager": websocket_manager, "tool_dispatcher": tool_dispatcher,
         "synthetic_service": synthetic_service, "quality_service": quality_service, "corpus_service": corpus_service, "config": config
     }
+    
+    yield infrastructure
+    
+    # Cleanup async resources using event loop
+    event_loop.run_until_complete(_cleanup_infrastructure(infrastructure))

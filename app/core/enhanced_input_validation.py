@@ -146,43 +146,51 @@ class EnhancedInputValidator:
     def _compile_patterns(self) -> Dict[SecurityThreat, List[re.Pattern]]:
         """Compile regex patterns for threat detection."""
         patterns = {}
-        
+        self._compile_injection_patterns(patterns)
+        self._compile_web_attack_patterns(patterns)
+        self._compile_system_attack_patterns(patterns)
+        self._compile_data_attack_patterns(patterns)
+        return patterns
+    
+    def _compile_injection_patterns(self, patterns: Dict[SecurityThreat, List[re.Pattern]]) -> None:
+        """Compile SQL and command injection patterns."""
         patterns[SecurityThreat.SQL_INJECTION] = [
             re.compile(pattern, re.IGNORECASE | re.MULTILINE)
             for pattern in ThreatPattern.SQL_PATTERNS
         ]
-        
-        patterns[SecurityThreat.XSS] = [
-            re.compile(pattern, re.IGNORECASE | re.MULTILINE)
-            for pattern in ThreatPattern.XSS_PATTERNS
-        ]
-        
-        patterns[SecurityThreat.SCRIPT_INJECTION] = [
-            re.compile(pattern, re.IGNORECASE | re.MULTILINE)
-            for pattern in ThreatPattern.SCRIPT_PATTERNS
-        ]
-        
-        patterns[SecurityThreat.PATH_TRAVERSAL] = [
-            re.compile(pattern, re.IGNORECASE)
-            for pattern in ThreatPattern.PATH_TRAVERSAL_PATTERNS
-        ]
-        
         patterns[SecurityThreat.COMMAND_INJECTION] = [
             re.compile(pattern, re.IGNORECASE)
             for pattern in ThreatPattern.COMMAND_PATTERNS
         ]
-        
+    
+    def _compile_web_attack_patterns(self, patterns: Dict[SecurityThreat, List[re.Pattern]]) -> None:
+        """Compile XSS and script injection patterns."""
+        patterns[SecurityThreat.XSS] = [
+            re.compile(pattern, re.IGNORECASE | re.MULTILINE)
+            for pattern in ThreatPattern.XSS_PATTERNS
+        ]
+        patterns[SecurityThreat.SCRIPT_INJECTION] = [
+            re.compile(pattern, re.IGNORECASE | re.MULTILINE)
+            for pattern in ThreatPattern.SCRIPT_PATTERNS
+        ]
+    
+    def _compile_system_attack_patterns(self, patterns: Dict[SecurityThreat, List[re.Pattern]]) -> None:
+        """Compile path traversal and LDAP injection patterns."""
+        patterns[SecurityThreat.PATH_TRAVERSAL] = [
+            re.compile(pattern, re.IGNORECASE)
+            for pattern in ThreatPattern.PATH_TRAVERSAL_PATTERNS
+        ]
         patterns[SecurityThreat.LDAP_INJECTION] = [
             re.compile(pattern, re.IGNORECASE)
             for pattern in ThreatPattern.LDAP_PATTERNS
         ]
-        
+    
+    def _compile_data_attack_patterns(self, patterns: Dict[SecurityThreat, List[re.Pattern]]) -> None:
+        """Compile XML injection patterns."""
         patterns[SecurityThreat.XML_INJECTION] = [
             re.compile(pattern, re.IGNORECASE)
             for pattern in ThreatPattern.XML_PATTERNS
         ]
-        
-        return patterns
     
     def _get_max_length(self) -> int:
         """Get maximum input length based on validation level."""
@@ -199,44 +207,102 @@ class EnhancedInputValidator:
         """Comprehensive input validation."""
         try:
             if not input_value:
-                return BaseValidationResult(
-                    is_valid=True,
-                    sanitized_value="",
-                    confidence_score=1.0
-                )
-            
-            result = BaseValidationResult(is_valid=True, sanitized_value=input_value)
-            
-            # Basic checks
-            self._check_length(input_value, result)
-            self._check_encoding(input_value, result)
-            
-            # Threat detection
-            threats = self._detect_threats(input_value)
-            result.threats_detected.extend(threats)
-            
-            # Determine if input is valid based on threats
-            if threats:
-                result.is_valid = False
-                result.errors.append(f"Security threats detected in {field_name}: {[t.value for t in threats]}")
-                result.confidence_score = 0.0
-            
-            # Sanitization - always sanitize input regardless of validity
-            result.sanitized_value = self._sanitize_input(input_value, threats)
-            
-            # Additional context-based validation
-            if context:
-                self._validate_context(input_value, context, result)
-            
-            return result
-            
+                return self._create_empty_input_result()
+            return self._perform_comprehensive_validation(input_value, field_name, context)
         except Exception as e:
-            logger.error(f"Input validation error for {field_name}: {e}")
-            return BaseValidationResult(
-                is_valid=False,
-                errors=[f"Validation error: {str(e)}"],
-                confidence_score=0.0
-            )
+            return self._create_error_result(field_name, e)
+    
+    def _create_empty_input_result(self) -> BaseValidationResult:
+        """Create result for empty input."""
+        return BaseValidationResult(
+            is_valid=True,
+            sanitized_value="",
+            confidence_score=1.0
+        )
+    
+    def _create_base_validation_result(self, input_value: str) -> BaseValidationResult:
+        """Create base validation result object."""
+        return BaseValidationResult(is_valid=True, sanitized_value=input_value)
+    
+    def _perform_basic_validation_checks(self, input_value: str, result: BaseValidationResult) -> None:
+        """Perform basic validation checks."""
+        self._check_length(input_value, result)
+        self._check_encoding(input_value, result)
+    
+    def _detect_and_process_threats(self, input_value: str, result: BaseValidationResult, field_name: str) -> List[SecurityThreat]:
+        """Detect threats and update result validity."""
+        threats = self._detect_threats(input_value)
+        result.threats_detected.extend(threats)
+        if threats:
+            self._mark_result_as_invalid(result, field_name, threats)
+        return threats
+    
+    def _mark_result_as_invalid(self, result: BaseValidationResult, field_name: str, threats: List[SecurityThreat]) -> None:
+        """Mark validation result as invalid due to threats."""
+        result.is_valid = False
+        result.errors.append(f"Security threats detected in {field_name}: {[t.value for t in threats]}")
+        result.confidence_score = 0.0
+    
+    def _apply_context_validation(self, input_value: str, context: Optional[Dict[str, Any]], result: BaseValidationResult) -> None:
+        """Apply context-specific validation if provided."""
+        if context:
+            self._validate_context(input_value, context, result)
+    
+    def _create_error_result(self, field_name: str, error: Exception) -> BaseValidationResult:
+        """Create validation result for error cases."""
+        logger.error(f"Input validation error for {field_name}: {error}")
+        return BaseValidationResult(
+            is_valid=False,
+            errors=[f"Validation error: {str(error)}"],
+            confidence_score=0.0
+        )
+    
+    def _perform_comprehensive_validation(self, input_value: str, field_name: str, 
+                                        context: Optional[Dict[str, Any]]) -> BaseValidationResult:
+        """Perform comprehensive validation on input value."""
+        result = self._create_base_validation_result(input_value)
+        self._perform_basic_validation_checks(input_value, result)
+        threats = self._detect_and_process_threats(input_value, result, field_name)
+        result.sanitized_value = self._sanitize_input(input_value, threats)
+        self._apply_context_validation(input_value, context, result)
+        return result
+    
+    def _check_threat_patterns(self, patterns: List[re.Pattern], normalized_input: str, 
+                             threat_type: SecurityThreat, input_value: str) -> bool:
+        """Check if any pattern matches the normalized input."""
+        for pattern in patterns:
+            if pattern.search(normalized_input):
+                logger.warning(f"Detected {threat_type.value} in input: {input_value[:100]}...")
+                return True
+        return False
+    
+    def _has_dangerous_protocol(self, url: str) -> bool:
+        """Check if URL has dangerous protocol."""
+        return bool(re.match(r'^(javascript|data|vbscript|file):', url, re.IGNORECASE))
+    
+    def _has_valid_url_format(self, url: str) -> bool:
+        """Check if URL has valid format."""
+        url_pattern = r'^https?://[^\s/$.?#].[^\s]*$'
+        return bool(re.match(url_pattern, url, re.IGNORECASE))
+    
+    def _has_path_traversal(self, filename: str) -> bool:
+        """Check if filename contains path traversal."""
+        return '..' in filename or '/' in filename or '\\' in filename
+    
+    def _has_dangerous_extension(self, filename: str) -> bool:
+        """Check if filename has dangerous extension."""
+        dangerous_extensions = {'.exe', '.bat', '.cmd', '.scr', '.pif', '.com'}
+        file_ext = '.' + filename.split('.')[-1].lower() if '.' in filename else ''
+        return file_ext in dangerous_extensions
+    
+    def _is_double_encoded(self, input_value: str, decoded: str) -> bool:
+        """Check if input is double URL encoded."""
+        return decoded != input_value and urllib.parse.unquote(decoded) != decoded
+    
+    def _has_suspicious_base64_content(self, input_value: str) -> bool:
+        """Check if base64 content contains suspicious characters."""
+        decoded_b64 = base64.b64decode(input_value).decode('utf-8', errors='ignore')
+        return any(char in decoded_b64 for char in self.suspicious_chars)
     
     def _check_length(self, input_value: str, result: BaseValidationResult) -> None:
         """Check input length."""
@@ -247,92 +313,91 @@ class EnhancedInputValidator:
     def _check_encoding(self, input_value: str, result: BaseValidationResult) -> None:
         """Check for encoding issues."""
         try:
-            # Check for double encoding
-            decoded = urllib.parse.unquote(input_value)
-            if decoded != input_value and urllib.parse.unquote(decoded) != decoded:
-                result.warnings.append("Potential double URL encoding detected")
-                result.confidence_score *= 0.9
-            
-            # Check for base64 encoding
-            if re.match(r'^[A-Za-z0-9+/]*={0,2}$', input_value) and len(input_value) % 4 == 0:
-                try:
-                    decoded_b64 = base64.b64decode(input_value).decode('utf-8', errors='ignore')
-                    if any(char in decoded_b64 for char in self.suspicious_chars):
-                        result.warnings.append("Suspicious base64 encoded content")
-                        result.confidence_score *= 0.7
-                except Exception:
-                    pass
-                    
+            self._check_double_url_encoding(input_value, result)
+            self._check_base64_encoding(input_value, result)
         except Exception as e:
             result.warnings.append(f"Encoding check failed: {e}")
+    
+    def _check_double_url_encoding(self, input_value: str, result: BaseValidationResult) -> None:
+        """Check for double URL encoding."""
+        decoded = urllib.parse.unquote(input_value)
+        if self._is_double_encoded(input_value, decoded):
+            result.warnings.append("Potential double URL encoding detected")
+            result.confidence_score *= 0.9
+    
+    def _check_base64_encoding(self, input_value: str, result: BaseValidationResult) -> None:
+        """Check for suspicious base64 encoded content."""
+        if not self._is_valid_base64_format(input_value):
+            return
+        try:
+            if self._has_suspicious_base64_content(input_value):
+                result.warnings.append("Suspicious base64 encoded content")
+                result.confidence_score *= 0.7
+        except Exception:
+            pass
+    
+    def _is_valid_base64_format(self, input_value: str) -> bool:
+        """Check if string matches base64 format."""
+        pattern_match = re.match(r'^[A-Za-z0-9+/]*={0,2}$', input_value)
+        correct_length = len(input_value) % 4 == 0
+        return bool(pattern_match and correct_length)
     
     def _detect_threats(self, input_value: str) -> List[SecurityThreat]:
         """Detect security threats in input."""
         threats = []
-        
-        # Normalize input for better detection
         normalized_input = self._normalize_for_detection(input_value)
         
         for threat_type, patterns in self.threat_patterns.items():
-            for pattern in patterns:
-                if pattern.search(normalized_input):
-                    threats.append(threat_type)
-                    logger.warning(f"Detected {threat_type.value} in input: {input_value[:100]}...")
-                    break  # Only record each threat type once
-        
+            if self._check_threat_patterns(patterns, normalized_input, threat_type, input_value):
+                threats.append(threat_type)
         return threats
     
     def _normalize_for_detection(self, input_value: str) -> str:
         """Normalize input for better threat detection."""
-        # URL decode
         normalized = urllib.parse.unquote(input_value)
-        
-        # HTML decode
         normalized = html.unescape(normalized)
-        
-        # Remove whitespace variations
         normalized = re.sub(r'\s+', ' ', normalized)
-        
-        # Handle case variations
         normalized = normalized.lower()
-        
         return normalized
     
     def _sanitize_input(self, input_value: str, threats: List[SecurityThreat]) -> str:
         """Sanitize input based on detected threats."""
         sanitized = input_value
-        
-        # HTML escape for XSS protection
+        sanitized = self._sanitize_web_threats(sanitized, threats)
+        sanitized = self._sanitize_injection_threats(sanitized, threats)
+        sanitized = self._sanitize_system_threats(sanitized, threats)
+        return sanitized
+    
+    def _sanitize_web_threats(self, sanitized: str, threats: List[SecurityThreat]) -> str:
+        """Sanitize XSS and script injection threats."""
         if SecurityThreat.XSS in threats or SecurityThreat.SCRIPT_INJECTION in threats:
             sanitized = html.escape(sanitized, quote=True)
-        
-        # Remove dangerous characters for SQL injection
+        return sanitized
+    
+    def _sanitize_injection_threats(self, sanitized: str, threats: List[SecurityThreat]) -> str:
+        """Sanitize SQL and command injection threats."""
         if SecurityThreat.SQL_INJECTION in threats:
             sanitized = re.sub(r'[;\'\"\\]', '', sanitized)
-        
-        # Encode path traversal sequences
-        if SecurityThreat.PATH_TRAVERSAL in threats:
-            sanitized = sanitized.replace('../', '').replace('..\\', '')
-        
-        # Remove command injection characters
         if SecurityThreat.COMMAND_INJECTION in threats:
             sanitized = re.sub(r'[;&|`$()]', '', sanitized)
-        
+        return sanitized
+    
+    def _sanitize_system_threats(self, sanitized: str, threats: List[SecurityThreat]) -> str:
+        """Sanitize path traversal threats."""
+        if SecurityThreat.PATH_TRAVERSAL in threats:
+            sanitized = sanitized.replace('../', '').replace('..\\', '')
         return sanitized
     
     def _validate_context(self, input_value: str, context: Dict[str, Any], 
                          result: BaseValidationResult) -> None:
         """Perform context-specific validation."""
         input_type = context.get('type', 'general')
-        
-        if input_type == 'email':
-            self._validate_email(input_value, result)
-        elif input_type == 'url':
-            self._validate_url(input_value, result)
-        elif input_type == 'filename':
-            self._validate_filename(input_value, result)
-        elif input_type == 'json':
-            self._validate_json(input_value, result)
+        validation_map = {
+            'email': self._validate_email, 'url': self._validate_url,
+            'filename': self._validate_filename, 'json': self._validate_json
+        }
+        if input_type in validation_map:
+            validation_map[input_type](input_value, result)
     
     def _validate_email(self, email: str, result: BaseValidationResult) -> None:
         """Validate email format."""
@@ -343,30 +408,21 @@ class EnhancedInputValidator:
     
     def _validate_url(self, url: str, result: BaseValidationResult) -> None:
         """Validate URL format and security."""
-        # Check for suspicious protocols
-        if re.match(r'^(javascript|data|vbscript|file):', url, re.IGNORECASE):
+        if self._has_dangerous_protocol(url):
             result.is_valid = False
             result.errors.append("Dangerous URL protocol detected")
             return
-        
-        # Basic URL validation
-        url_pattern = r'^https?://[^\s/$.?#].[^\s]*$'
-        if not re.match(url_pattern, url, re.IGNORECASE):
+        if not self._has_valid_url_format(url):
             result.warnings.append("Invalid URL format")
             result.confidence_score *= 0.8
     
     def _validate_filename(self, filename: str, result: BaseValidationResult) -> None:
         """Validate filename security."""
-        # Check for path traversal
-        if '..' in filename or '/' in filename or '\\' in filename:
+        if self._has_path_traversal(filename):
             result.is_valid = False
             result.errors.append("Path traversal in filename")
             return
-        
-        # Check for dangerous extensions
-        dangerous_extensions = {'.exe', '.bat', '.cmd', '.scr', '.pif', '.com'}
-        file_ext = '.' + filename.split('.')[-1].lower() if '.' in filename else ''
-        if file_ext in dangerous_extensions:
+        if self._has_dangerous_extension(filename):
             result.warnings.append("Potentially dangerous file extension")
             result.confidence_score *= 0.5
     
@@ -382,11 +438,9 @@ class EnhancedInputValidator:
                      contexts: Optional[Dict[str, Dict[str, Any]]] = None) -> Dict[str, BaseValidationResult]:
         """Validate multiple inputs efficiently."""
         results = {}
-        
         for field_name, input_value in inputs.items():
             context = contexts.get(field_name) if contexts else None
             results[field_name] = self.validate_input(input_value, field_name, context)
-        
         return results
 
 
@@ -396,28 +450,33 @@ def validate_input_data(validation_level: ValidationLevel = ValidationLevel.MODE
     def decorator(func):
         def wrapper(*args, **kwargs):
             validator = EnhancedInputValidator(validation_level)
-            
-            # Validate string arguments
-            for i, arg in enumerate(args):
-                if isinstance(arg, str):
-                    result = validator.validate_input(arg, f"arg_{i}")
-                    if not result.is_valid:
-                        raise NetraSecurityException(
-                            message=f"Invalid input in argument {i}: {result.errors}"
-                        )
-            
-            # Validate string keyword arguments
-            for key, value in kwargs.items():
-                if isinstance(value, str):
-                    result = validator.validate_input(value, key)
-                    if not result.is_valid:
-                        raise NetraSecurityException(
-                            message=f"Invalid input in parameter {key}: {result.errors}"
-                        )
-            
+            _validate_positional_arguments(validator, args)
+            _validate_keyword_arguments(validator, kwargs)
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+def _validate_positional_arguments(validator: EnhancedInputValidator, args: tuple) -> None:
+    """Validate positional string arguments."""
+    for i, arg in enumerate(args):
+        if isinstance(arg, str):
+            result = validator.validate_input(arg, f"arg_{i}")
+            if not result.is_valid:
+                _raise_validation_exception(f"argument {i}", result.errors)
+
+def _validate_keyword_arguments(validator: EnhancedInputValidator, kwargs: dict) -> None:
+    """Validate keyword string arguments."""
+    for key, value in kwargs.items():
+        if isinstance(value, str):
+            result = validator.validate_input(value, key)
+            if not result.is_valid:
+                _raise_validation_exception(f"parameter {key}", result.errors)
+
+def _raise_validation_exception(location: str, errors: list) -> None:
+    """Raise NetraSecurityException for validation failures."""
+    raise NetraSecurityException(
+        message=f"Invalid input in {location}: {errors}"
+    )
 
 
 # Global validator instances

@@ -31,31 +31,52 @@ async def update_job_status(job_id: str, status: str, **kwargs):
     await manager.broadcast_to_job(job_id, {"job_id": job_id, "status": status, **kwargs})
 
 
+def _build_clickhouse_config() -> dict:
+    """Build ClickHouse connection configuration."""
+    return {
+        'host': settings.clickhouse_https.host,
+        'port': settings.clickhouse_https.port,
+        'user': settings.clickhouse_https.user,
+        'password': settings.clickhouse_https.password,
+        'database': settings.clickhouse_https.database
+    }
+
+def _create_clickhouse_connection():
+    """Create ClickHouse database connection."""
+    config = _build_clickhouse_config()
+    base_db = ClickHouseDatabase(**config)
+    return ClickHouseQueryInterceptor(base_db)
+
+async def _fetch_corpus_data(db, table_name: str) -> list:
+    """Fetch corpus data from ClickHouse table."""
+    query = f"SELECT workload_type, prompt, response FROM {table_name}"
+    results = await db.execute_query(query)
+    logger.info(f"Successfully loaded {len(results)} records from corpus table {table_name}")
+    return results
+
+def _process_corpus_results(results: list) -> dict:
+    """Process corpus results into dictionary format."""
+    corpus = defaultdict(list)
+    for row in results:
+        corpus[row['workload_type']].append((row['prompt'], row['response']))
+    return dict(corpus)
+
+async def _execute_corpus_fetch(table_name: str) -> dict:
+    """Execute corpus fetch with connection management."""
+    db = _create_clickhouse_connection()
+    try:
+        results = await _fetch_corpus_data(db, table_name)
+        return _process_corpus_results(results)
+    finally:
+        await db.disconnect()
+
 async def get_corpus_from_clickhouse(table_name: str) -> dict:
     """Fetches the content corpus from a specified ClickHouse table."""
-    db = None
     try:
-        base_db = ClickHouseDatabase(
-            host=settings.clickhouse_https.host,
-            port=settings.clickhouse_https.port,
-            user=settings.clickhouse_https.user,
-            password=settings.clickhouse_https.password,
-            database=settings.clickhouse_https.database
-        )
-        db = ClickHouseQueryInterceptor(base_db)
-        query = f"SELECT workload_type, prompt, response FROM {table_name}"
-        results = await db.execute_query(query)
-        corpus = defaultdict(list)
-        for row in results:
-            corpus[row['workload_type']].append((row['prompt'], row['response']))
-        logger.info(f"Successfully loaded {len(results)} records from corpus table {table_name}")
-        return dict(corpus)
+        return await _execute_corpus_fetch(table_name)
     except Exception as e:
         logger.exception(f"Failed to load corpus from ClickHouse table {table_name}")
         raise
-    finally:
-        if 'db' in locals() and db:
-            await db.disconnect()
 
 
 def load_corpus_from_file(corpus_id: str) -> dict:
@@ -100,20 +121,31 @@ async def finalize_job_completion(job_id: str, result_path: str, summary: Dict[s
     )
 
 
-def _process_sample_record(w_type: str, sample, timestamp):
-    """Process a single sample record efficiently."""
+def _normalize_sample_format(sample):
+    """Normalize sample to consistent format."""
     actual_sample = sample
     if isinstance(actual_sample, list) and len(actual_sample) == 1 and isinstance(actual_sample[0], tuple):
         actual_sample = actual_sample[0]
+    return actual_sample
+
+
+def _create_corpus_record(w_type: str, prompt_text: str, response_text: str, timestamp) -> ContentCorpus:
+    """Create ContentCorpus record from validated data."""
+    return ContentCorpus(
+        workload_type=w_type,
+        prompt=prompt_text,
+        response=response_text,
+        record_id=uuid.uuid4(),
+        created_at=timestamp
+    )
+
+
+def _process_sample_record(w_type: str, sample, timestamp):
+    """Process a single sample record efficiently."""
+    actual_sample = _normalize_sample_format(sample)
     if isinstance(actual_sample, (list, tuple)) and len(actual_sample) == 2:
         prompt_text, response_text = actual_sample
-        return ContentCorpus(
-            workload_type=w_type,
-            prompt=prompt_text,
-            response=response_text,
-            record_id=uuid.uuid4(),
-            created_at=timestamp
-        )
+        return _create_corpus_record(w_type, prompt_text, response_text, timestamp)
     logger.warning(f"Skipping malformed sample for workload '{w_type}': {sample}")
     return None
 
@@ -127,46 +159,72 @@ async def _insert_record_batch(db, table_name: str, records):
     await db.insert_data(table_name, record_data, field_names)
 
 
-async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str = None):
-    """Saves the generated content corpus to a specified ClickHouse table."""
+def _save_corpus_to_file(corpus: dict, job_id: str) -> None:
+    """Save corpus to file if job_id is provided."""
     if job_id:
         output_dir = create_output_directory(job_id, "content_corpuses")
         save_job_result_to_file(output_dir, "content_corpus.json", corpus)
-    db = None
+
+async def _setup_corpus_table(db, table_name: str) -> None:
+    """Setup ClickHouse table schema."""
+    table_schema = get_content_corpus_schema(table_name)
+    await db.command(table_schema)
+
+async def _execute_corpus_save(corpus: dict, table_name: str) -> None:
+    """Execute corpus save with connection management."""
+    db = _create_clickhouse_connection()
     try:
-        base_db = ClickHouseDatabase(
-            host=settings.clickhouse_https.host,
-            port=settings.clickhouse_https.port,
-            user=settings.clickhouse_https.user,
-            password=settings.clickhouse_https.password,
-            database=settings.clickhouse_https.database
-        )
-        db = ClickHouseQueryInterceptor(base_db)
-        table_schema = get_content_corpus_schema(table_name)
-        await db.command(table_schema)
+        await _setup_corpus_table(db, table_name)
         await _process_corpus_records(db, table_name, corpus)
         logger.info(f"Successfully saved corpus to ClickHouse table: {table_name}")
+    finally:
+        await db.disconnect()
+
+async def save_corpus_to_clickhouse(corpus: dict, table_name: str, job_id: str = None):
+    """Saves the generated content corpus to a specified ClickHouse table."""
+    _save_corpus_to_file(corpus, job_id)
+    try:
+        await _execute_corpus_save(corpus, table_name)
     except Exception as e:
         logger.exception(f"Failed to save corpus to ClickHouse table {table_name}")
         raise
-    finally:
-        if 'db' in locals() and db:
-            await db.disconnect()
 
+
+def _calculate_optimal_batch_size(corpus: dict) -> int:
+    """Calculate optimal batch size for corpus processing."""
+    total_samples = sum(len(samples) for samples in corpus.values())
+    return min(1000, max(100, total_samples // 10))
+
+
+async def _process_batch_when_full(db, table_name: str, records: list, batch_size: int) -> list:
+    """Process batch when it reaches capacity."""
+    if len(records) >= batch_size:
+        await _insert_record_batch(db, table_name, records)
+        return []
+    return records
+
+
+async def _initialize_batch_processing(corpus: dict) -> tuple:
+    """Initialize batch processing parameters."""
+    records = []
+    batch_timestamp = pd.Timestamp.now().to_pydatetime()
+    batch_size = _calculate_optimal_batch_size(corpus)
+    return records, batch_timestamp, batch_size
+
+async def _process_sample_collection(db, table_name: str, w_type: str, samples: list, 
+                                   batch_timestamp, batch_size: int, records: list) -> list:
+    """Process all samples for a workload type."""
+    for sample in samples:
+        processed_record = _process_sample_record(w_type, sample, batch_timestamp)
+        if processed_record:
+            records.append(processed_record)
+        records = await _process_batch_when_full(db, table_name, records, batch_size)
+    return records
 
 async def _process_corpus_records(db, table_name: str, corpus: dict):
     """Process and insert corpus records in batches."""
-    records = []
-    batch_timestamp = pd.Timestamp.now().to_pydatetime()
-    total_samples = sum(len(samples) for samples in corpus.values())
-    batch_size = min(1000, max(100, total_samples // 10))
+    records, batch_timestamp, batch_size = await _initialize_batch_processing(corpus)
     for w_type, samples in corpus.items():
-        for sample in samples:
-            processed_record = _process_sample_record(w_type, sample, batch_timestamp)
-            if processed_record:
-                records.append(processed_record)
-            if len(records) >= batch_size:
-                await _insert_record_batch(db, table_name, records)
-                records = []
+        records = await _process_sample_collection(db, table_name, w_type, samples, batch_timestamp, batch_size, records)
     if records:
         await _insert_record_batch(db, table_name, records)

@@ -8,7 +8,7 @@ secrets or using provided values.
 import subprocess
 import sys
 import json
-from typing import Dict, Optional
+from typing import Dict, Optional, List, Tuple
 
 # Required secrets for staging environment
 REQUIRED_SECRETS = [
@@ -107,52 +107,62 @@ def get_production_secret(project_id: str, secret_name: str) -> Optional[str]:
 
 def main():
     """Main function."""
+    project_id = _validate_arguments()
+    missing_required, created_secrets = _check_existing_secrets(project_id)
+    if missing_required:
+        created_secrets = _create_missing_secrets(project_id, missing_required, created_secrets)
+    _print_summary(missing_required, created_secrets)
+    _print_next_steps()
+
+def _validate_arguments() -> str:
+    """Validate command line arguments and return project ID."""
     if len(sys.argv) < 2:
         print("Usage: python create_staging_secrets.py <project-id>")
         print("Example: python create_staging_secrets.py netra-staging")
         sys.exit(1)
-    
-    project_id = sys.argv[1]
-    
+    return sys.argv[1]
+
+def _check_existing_secrets(project_id: str) -> Tuple[List[str], List[str]]:
+    """Check which secrets exist and return missing ones."""
     print(f"Creating staging secrets in project: {project_id}")
     print("=" * 60)
-    
-    # Check and create required secrets
     missing_required = []
-    created_secrets = []
-    
     for secret_name in REQUIRED_SECRETS:
         if check_secret_exists(project_id, secret_name):
             print(f"✓ {secret_name} already exists")
         else:
             print(f"✗ {secret_name} is missing")
             missing_required.append(secret_name)
-    
-    if missing_required:
-        print("\n" + "=" * 60)
-        print("Creating missing required secrets...")
-        print("Attempting to copy from production secrets...")
-        
-        for secret_name in missing_required:
-            # Try to get from production
-            prod_value = get_production_secret(project_id, secret_name)
-            
-            if prod_value:
-                if create_secret(project_id, secret_name, prod_value):
-                    print(f"✓ Created {secret_name} from production")
-                    created_secrets.append(secret_name)
-                else:
-                    print(f"✗ Failed to create {secret_name}")
+    return missing_required, []
+
+def _create_missing_secrets(project_id: str, missing_required: List[str], created_secrets: List[str]) -> List[str]:
+    """Create missing secrets from production or provide instructions."""
+    print("\n" + "=" * 60)
+    print("Creating missing required secrets...")
+    print("Attempting to copy from production secrets...")
+    for secret_name in missing_required:
+        prod_value = get_production_secret(project_id, secret_name)
+        if prod_value:
+            if create_secret(project_id, secret_name, prod_value):
+                print(f"✓ Created {secret_name} from production")
+                created_secrets.append(secret_name)
             else:
-                # For critical secrets, provide instructions
-                if "jwt-secret-key" in secret_name:
-                    print(f"⚠ {secret_name}: Generate with: python -c \"import secrets; print(secrets.token_urlsafe(32))\"")
-                elif "fernet-key" in secret_name:
-                    print(f"⚠ {secret_name}: Generate with: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\"")
-                else:
-                    print(f"⚠ {secret_name}: Must be manually configured")
-    
-    # Summary
+                print(f"✗ Failed to create {secret_name}")
+        else:
+            _provide_manual_instructions(secret_name)
+    return created_secrets
+
+def _provide_manual_instructions(secret_name: str):
+    """Provide manual instructions for critical secrets."""
+    if "jwt-secret-key" in secret_name:
+        print(f"⚠ {secret_name}: Generate with: python -c \"import secrets; print(secrets.token_urlsafe(32))\"")
+    elif "fernet-key" in secret_name:
+        print(f"⚠ {secret_name}: Generate with: python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\"")
+    else:
+        print(f"⚠ {secret_name}: Must be manually configured")
+
+def _print_summary(missing_required: List[str], created_secrets: List[str]):
+    """Print summary of created secrets."""
     print("\n" + "=" * 60)
     print("Summary:")
     print(f"Created {len(created_secrets)} secrets")
@@ -166,7 +176,9 @@ def main():
             print("echo 'YOUR_SECRET_VALUE' | gcloud secrets create SECRET_NAME --data-file=- --project PROJECT_ID")
     else:
         print("All required secrets are configured!")
-    
+
+def _print_next_steps():
+    """Print next steps for deployment."""
     print("\nNext steps:")
     print("1. Apply terraform changes: cd terraform/staging/shared-infrastructure && terraform apply")
     print("2. Redeploy Cloud Run service to pick up IAM changes")

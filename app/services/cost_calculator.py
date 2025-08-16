@@ -55,10 +55,9 @@ class CostCalculatorService:
         completion_tokens = int(token_count * 0.3)
         return self._calculate_total_cost(prompt_tokens, completion_tokens, pricing)
     
-    def _initialize_pricing(self) -> Dict[str, ModelCostInfo]:
-        """Initialize model pricing database"""
+    def _get_openai_pricing(self) -> Dict[str, ModelCostInfo]:
+        """Get OpenAI model pricing configuration."""
         return {
-            # OpenAI pricing (per 1k tokens)
             "openai_gpt-4": ModelCostInfo(
                 provider=LLMProvider.OPENAI, model_name="gpt-4",
                 prompt_cost_per_1k=Decimal("0.03"), completion_cost_per_1k=Decimal("0.06"),
@@ -73,8 +72,12 @@ class CostCalculatorService:
                 provider=LLMProvider.OPENAI, model_name="gpt-3.5-turbo",
                 prompt_cost_per_1k=Decimal("0.0015"), completion_cost_per_1k=Decimal("0.002"),
                 cost_tier=CostTier.ECONOMY, performance_score=75.0
-            ),
-            # Anthropic pricing
+            )
+        }
+    
+    def _get_anthropic_pricing(self) -> Dict[str, ModelCostInfo]:
+        """Get Anthropic model pricing configuration."""
+        return {
             "anthropic_claude-3-opus": ModelCostInfo(
                 provider=LLMProvider.ANTHROPIC, model_name="claude-3-opus",
                 prompt_cost_per_1k=Decimal("0.015"), completion_cost_per_1k=Decimal("0.075"),
@@ -89,8 +92,12 @@ class CostCalculatorService:
                 provider=LLMProvider.ANTHROPIC, model_name="claude-3-haiku",
                 prompt_cost_per_1k=Decimal("0.00025"), completion_cost_per_1k=Decimal("0.00125"),
                 cost_tier=CostTier.ECONOMY, performance_score=70.0
-            ),
-            # Google/Gemini pricing
+            )
+        }
+    
+    def _get_google_pricing(self) -> Dict[str, ModelCostInfo]:
+        """Get Google/Gemini model pricing configuration."""
+        return {
             "google_gemini-2.5-pro": ModelCostInfo(
                 provider=LLMProvider.GOOGLE, model_name="gemini-2.5-pro",
                 prompt_cost_per_1k=Decimal("0.0035"), completion_cost_per_1k=Decimal("0.0105"),
@@ -100,8 +107,16 @@ class CostCalculatorService:
                 provider=LLMProvider.GOOGLE, model_name="gemini-2.5-flash",
                 prompt_cost_per_1k=Decimal("0.000075"), completion_cost_per_1k=Decimal("0.0003"),
                 cost_tier=CostTier.ECONOMY, performance_score=72.0
-            ),
+            )
         }
+    
+    def _initialize_pricing(self) -> Dict[str, ModelCostInfo]:
+        """Initialize model pricing database"""
+        pricing = {}
+        pricing.update(self._get_openai_pricing())
+        pricing.update(self._get_anthropic_pricing())
+        pricing.update(self._get_google_pricing())
+        return pricing
     
     def _get_default_costs(self) -> ModelCostInfo:
         """Get default cost structure for unknown models"""
@@ -173,9 +188,13 @@ class BudgetManager:
         """Get remaining budget amount"""
         return max(Decimal("0"), self.daily_budget - self.current_spending)
     
+    def _calculate_remaining_ratio(self) -> Decimal:
+        """Calculate remaining budget ratio."""
+        return self.get_remaining_budget() / self.daily_budget
+    
     def recommend_cost_tier(self) -> CostTier:
         """Recommend cost tier based on remaining budget"""
-        remaining_ratio = self.get_remaining_budget() / self.daily_budget
+        remaining_ratio = self._calculate_remaining_ratio()
         if remaining_ratio > Decimal("0.5"):
             return CostTier.BALANCED
         elif remaining_ratio > Decimal("0.2"):

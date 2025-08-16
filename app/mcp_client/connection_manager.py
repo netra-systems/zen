@@ -102,19 +102,24 @@ class MCPConnectionManager:
         """Create new MCP connection from server config."""
         connection_id = str(uuid.uuid4())
         transport = await self._create_transport(config)
-        connection = MCPConnection(
-            id=connection_id,
-            server_name=config.name,
-            transport=transport,
-            status=ConnectionStatus.CONNECTING,
-            created_at=datetime.now()
-        )
+        connection = self._build_connection_object(connection_id, config, transport)
         return await self._establish_connection(connection, config)
+
+    def _build_connection_object(self, connection_id: str, config: MCPServerConfig, transport: Any) -> MCPConnection:
+        """Build connection object with configuration."""
+        return MCPConnection(
+            id=connection_id, server_name=config.name, transport=transport,
+            status=ConnectionStatus.CONNECTING, created_at=datetime.now()
+        )
 
     async def get_connection(self, server_name: str) -> Optional[MCPConnection]:
         """Get available connection from pool with load balancing."""
         if server_name not in self._pools:
             return None
+        return await self._get_pooled_connection(server_name)
+
+    async def _get_pooled_connection(self, server_name: str) -> Optional[MCPConnection]:
+        """Get connection from pool and update usage timestamp."""
         try:
             connection = self._pools[server_name].get_nowait()
             connection.last_used = datetime.now()
@@ -152,38 +157,57 @@ class MCPConnectionManager:
 
     async def close_all_connections(self) -> None:
         """Close all connections and cleanup resources."""
+        await self._cancel_health_check()
+        await self._drain_all_pools()
+        await self._close_all_active_connections()
+
+    async def _cancel_health_check(self) -> None:
+        """Cancel health check task if running."""
         if self._health_check_task:
             self._health_check_task.cancel()
-        
+
+    async def _drain_all_pools(self) -> None:
+        """Drain all connection pools."""
         for server_pools in self._pools.values():
             await self._drain_pool(server_pools)
-        
+
+    async def _close_all_active_connections(self) -> None:
+        """Close all active connections."""
         for connections in self._active_connections.values():
             await self._close_connections(connections)
 
     async def _create_transport(self, config: MCPServerConfig) -> Any:
         """Create transport instance based on config type."""
-        if config.transport == MCPTransport.STDIO:
-            return await self._create_stdio_transport(config)
-        elif config.transport == MCPTransport.HTTP:
-            return await self._create_http_transport(config)
-        elif config.transport == MCPTransport.WEBSOCKET:
-            return await self._create_websocket_transport(config)
-        else:
+        transport_map = self._get_transport_factory_map()
+        factory = transport_map.get(config.transport)
+        if not factory:
             raise NetraException(f"Unsupported transport: {config.transport}")
+        return await factory(config)
+
+    def _get_transport_factory_map(self) -> Dict[MCPTransport, Any]:
+        """Get mapping of transport types to factory functions."""
+        return {
+            MCPTransport.STDIO: self._create_stdio_transport,
+            MCPTransport.HTTP: self._create_http_transport,
+            MCPTransport.WEBSOCKET: self._create_websocket_transport
+        }
 
     async def _establish_connection(self, connection: MCPConnection, config: MCPServerConfig) -> MCPConnection:
         """Establish and validate connection."""
         try:
-            await self._connect_transport(connection.transport, config)
-            connection.status = ConnectionStatus.CONNECTED
-            connection.session_id = await self._negotiate_session(connection)
-            await self._initialize_pool(config.name)
-            self._update_metrics(config.name, "created")
-            return connection
+            return await self._perform_connection_setup(connection, config)
         except Exception as e:
             connection.status = ConnectionStatus.FAILED
             raise NetraException(f"Connection failed: {e}")
+
+    async def _perform_connection_setup(self, connection: MCPConnection, config: MCPServerConfig) -> MCPConnection:
+        """Perform the actual connection setup steps."""
+        await self._connect_transport(connection.transport, config)
+        connection.status = ConnectionStatus.CONNECTED
+        connection.session_id = await self._negotiate_session(connection)
+        await self._initialize_pool(config.name)
+        self._update_metrics(config.name, "created")
+        return connection
 
     async def _ping_connection(self, connection: MCPConnection) -> bool:
         """Send ping to test connection health."""
@@ -279,9 +303,13 @@ class MCPConnectionManager:
         """Get status of all connection pools."""
         status = {}
         for server_name, pool in self._pools.items():
-            status[server_name] = {
-                "pool_size": pool.qsize(),
-                "max_size": self._max_connections,
-                "metrics": self._metrics.get(server_name)
-            }
+            status[server_name] = self._build_pool_status_entry(server_name, pool)
         return status
+
+    def _build_pool_status_entry(self, server_name: str, pool: asyncio.Queue) -> Dict[str, Any]:
+        """Build status entry for single pool."""
+        return {
+            "pool_size": pool.qsize(),
+            "max_size": self._max_connections,
+            "metrics": self._metrics.get(server_name)
+        }

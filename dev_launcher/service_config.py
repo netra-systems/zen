@@ -143,51 +143,68 @@ class ServicesConfiguration:
     
     def get_all_env_vars(self) -> Dict[str, str]:
         """Get all environment variables for all services."""
+        env_vars = self._get_service_env_vars()
+        self._add_redis_url(env_vars)
+        self._add_clickhouse_url(env_vars)
+        self._add_postgres_url(env_vars)
+        self._add_service_flags(env_vars)
+        return env_vars
+    
+    def _get_service_env_vars(self) -> Dict[str, str]:
+        """Get service-specific environment variables."""
         env_vars = {}
-        
-        # Add service-specific environment variables
         for service in [self.redis, self.clickhouse, self.postgres, self.llm]:
             env_vars.update(service.get_env_vars())
-        
-        # Build connection URLs based on modes
-        if self.redis.mode != ResourceMode.DISABLED:
-            redis_config = self.redis.get_config()
-            if self.redis.mode == ResourceMode.SHARED and redis_config.get("password"):
-                env_vars["REDIS_URL"] = f"redis://:{redis_config['password']}@{redis_config['host']}:{redis_config['port']}/{redis_config.get('db', 0)}"
-            elif self.redis.mode == ResourceMode.LOCAL:
-                env_vars["REDIS_URL"] = f"redis://{redis_config['host']}:{redis_config['port']}/{redis_config.get('db', 0)}"
-        
-        if self.clickhouse.mode != ResourceMode.DISABLED:
-            ch_config = self.clickhouse.get_config()
-            if self.clickhouse.mode == ResourceMode.SHARED:
-                protocol = "clickhouse+https" if ch_config.get("secure") else "clickhouse"
-                env_vars["CLICKHOUSE_URL"] = f"{protocol}://{ch_config['user']}:{ch_config['password']}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
-            elif self.clickhouse.mode == ResourceMode.LOCAL:
-                env_vars["CLICKHOUSE_URL"] = f"clickhouse://{ch_config['user']}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
-        
-        if self.postgres.mode != ResourceMode.DISABLED:
-            # Check if DATABASE_URL is already set in environment
-            existing_db_url = os.environ.get("DATABASE_URL")
-            if existing_db_url:
-                # Use existing DATABASE_URL from environment
-                env_vars["DATABASE_URL"] = existing_db_url
-                logger.info(f"Using existing DATABASE_URL from environment")
-            elif self.postgres.mode == ResourceMode.MOCK:
-                env_vars["DATABASE_URL"] = "postgresql://mock:mock@localhost:5432/mock"
-            elif self.postgres.mode == ResourceMode.LOCAL:
-                pg_config = self.postgres.get_config()
-                env_vars["DATABASE_URL"] = f"postgresql://{pg_config['user']}:{pg_config['password']}@{pg_config['host']}:{pg_config['port']}/{pg_config['database']}"
-            elif self.postgres.mode == ResourceMode.SHARED:
-                # For shared mode, require DATABASE_URL to be set in environment
-                logger.warning("PostgreSQL is in SHARED mode but DATABASE_URL not found in environment")
-                logger.warning("Please set DATABASE_URL environment variable for shared PostgreSQL")
-                # Don't set a default with example.com - this will cause connection errors
-        
-        # IMPORTANT: Remove all DEV_MODE_DISABLE flags - all services are enabled by default
-        # Users should explicitly choose mock or disabled mode if needed
-        env_vars["ENABLE_ALL_SERVICES"] = "true"
-        
         return env_vars
+    
+    def _add_redis_url(self, env_vars: Dict[str, str]):
+        """Add Redis URL to environment variables."""
+        if self.redis.mode == ResourceMode.DISABLED:
+            return
+        redis_config = self.redis.get_config()
+        if self.redis.mode == ResourceMode.SHARED and redis_config.get("password"):
+            env_vars["REDIS_URL"] = f"redis://:{redis_config['password']}@{redis_config['host']}:{redis_config['port']}/{redis_config.get('db', 0)}"
+        elif self.redis.mode == ResourceMode.LOCAL:
+            env_vars["REDIS_URL"] = f"redis://{redis_config['host']}:{redis_config['port']}/{redis_config.get('db', 0)}"
+    
+    def _add_clickhouse_url(self, env_vars: Dict[str, str]):
+        """Add ClickHouse URL to environment variables."""
+        if self.clickhouse.mode == ResourceMode.DISABLED:
+            return
+        ch_config = self.clickhouse.get_config()
+        if self.clickhouse.mode == ResourceMode.SHARED:
+            protocol = "clickhouse+https" if ch_config.get("secure") else "clickhouse"
+            env_vars["CLICKHOUSE_URL"] = f"{protocol}://{ch_config['user']}:{ch_config['password']}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
+        elif self.clickhouse.mode == ResourceMode.LOCAL:
+            env_vars["CLICKHOUSE_URL"] = f"clickhouse://{ch_config['user']}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
+    
+    def _add_postgres_url(self, env_vars: Dict[str, str]):
+        """Add PostgreSQL URL to environment variables."""
+        if self.postgres.mode == ResourceMode.DISABLED:
+            return
+        existing_db_url = os.environ.get("DATABASE_URL")
+        if existing_db_url:
+            env_vars["DATABASE_URL"] = existing_db_url
+        elif self.postgres.mode == ResourceMode.MOCK:
+            env_vars["DATABASE_URL"] = "postgresql://mock:mock@localhost:5432/mock"
+        elif self.postgres.mode == ResourceMode.LOCAL:
+            self._add_local_postgres_url(env_vars)
+        elif self.postgres.mode == ResourceMode.SHARED:
+            self._handle_shared_postgres_warning()
+    
+    def _add_local_postgres_url(self, env_vars: Dict[str, str]):
+        """Add local PostgreSQL URL."""
+        pg_config = self.postgres.get_config()
+        env_vars["DATABASE_URL"] = f"postgresql://{pg_config['user']}:{pg_config['password']}@{pg_config['host']}:{pg_config['port']}/{pg_config['database']}"
+    
+    def _handle_shared_postgres_warning(self):
+        """Handle shared PostgreSQL mode warnings."""
+        logger.warning("PostgreSQL is in SHARED mode but DATABASE_URL not found in environment")
+        logger.warning("Please set DATABASE_URL environment variable for shared PostgreSQL")
+    
+    def _add_service_flags(self, env_vars: Dict[str, str]):
+        """Add service configuration flags."""
+        env_vars["ENABLE_ALL_SERVICES"] = "true"
     
     def validate(self) -> List[str]:
         """Validate the configuration and return any warnings."""

@@ -22,8 +22,6 @@ class FileNotFoundError(FileError):
     def __init__(self, message: str = None, **kwargs):
         super().__init__(
             message=message or "File not found",
-            code=ErrorCode.FILE_NOT_FOUND,
-            severity=ErrorSeverity.MEDIUM,
             user_message="The requested file was not found",
             **kwargs
         )

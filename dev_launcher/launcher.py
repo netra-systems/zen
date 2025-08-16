@@ -366,8 +366,7 @@ class DevLauncher:
     
     def _start_backend_process(self, cmd: list, env: dict, port: int) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """Start backend process."""
-        self.config.log_dir.mkdir(exist_ok=True)
-        log_file = self._create_backend_log_file()
+        self._prepare_backend_logging()
         try:
             process = create_subprocess(cmd, env=env)
             log_streamer = self._create_backend_log_streamer(process)
@@ -375,6 +374,10 @@ class DevLauncher:
         except Exception as e:
             self._handle_backend_startup_exception(e)
             return None, None
+    
+    def _prepare_backend_logging(self):
+        """Prepare backend logging setup."""
+        self.config.log_dir.mkdir(exist_ok=True)
     
     def _create_backend_log_file(self) -> Path:
         """Create backend log file."""
@@ -456,16 +459,24 @@ class DevLauncher:
         logger.info(f"Backend API URL: http://localhost:{port}")
         logger.info(f"Backend WebSocket URL: ws://localhost:{port}/ws")
     
-    def start_frontend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
-        """Start the frontend server."""
-        self._print("🚀", "FRONTEND", "Starting frontend server...")
+    def _prepare_frontend_startup(self) -> Optional[Tuple[dict, int, Path]]:
+        """Prepare frontend startup parameters."""
         backend_info = self._get_backend_info()
         if not backend_info:
-            return None, None
+            return None
         port = self._determine_frontend_port()
         frontend_path = self._get_frontend_path()
         if not frontend_path:
+            return None
+        return backend_info, port, frontend_path
+    
+    def start_frontend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
+        """Start the frontend server."""
+        self._print("🚀", "FRONTEND", "Starting frontend server...")
+        startup_params = self._prepare_frontend_startup()
+        if not startup_params:
             return None, None
+        backend_info, port, frontend_path = startup_params
         return self._start_frontend_process(backend_info, port, frontend_path)
     
     def _get_backend_info(self) -> Optional[dict]:
@@ -557,15 +568,27 @@ class DevLauncher:
         env["NEXT_DISABLE_FAST_REFRESH"] = "true"
         logger.info("Frontend hot reload: DISABLED")
     
-    def _execute_frontend_startup(self, cmd: list, env: dict, frontend_path: Path, port: int) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
-        """Execute frontend startup."""
+    def _log_frontend_startup_info(self, cmd: list, frontend_path: Path):
+        """Log frontend startup information."""
         logger.debug(f"Frontend command: {' '.join(cmd)}")
         logger.debug(f"Frontend working directory: {frontend_path}")
+    
+    def _prepare_frontend_logging(self):
+        """Prepare frontend logging setup."""
         self.config.log_dir.mkdir(exist_ok=True)
+    
+    def _create_and_verify_frontend_process(self, cmd: list, env: dict, frontend_path: Path, port: int) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
+        """Create and verify frontend process."""
+        process = create_subprocess(cmd, cwd=frontend_path, env=env)
+        log_streamer = self._create_frontend_log_streamer(process)
+        return self._verify_frontend_startup(process, port, log_streamer)
+    
+    def _execute_frontend_startup(self, cmd: list, env: dict, frontend_path: Path, port: int) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
+        """Execute frontend startup."""
+        self._log_frontend_startup_info(cmd, frontend_path)
+        self._prepare_frontend_logging()
         try:
-            process = create_subprocess(cmd, cwd=frontend_path, env=env)
-            log_streamer = self._create_frontend_log_streamer(process)
-            return self._verify_frontend_startup(process, port, log_streamer)
+            return self._create_and_verify_frontend_process(cmd, env, frontend_path, port)
         except Exception as e:
             self._handle_frontend_startup_exception(e)
             return None, None
@@ -825,13 +848,8 @@ class DevLauncher:
     
     def _print_config_options(self):
         """Print configuration options."""
-        self._print_dynamic_ports_config()
-        self._print_backend_reload_config()
-        self._print_frontend_reload_config()
-        self._print_logging_config()
-        self._print_turbopack_config()
-        self._print_secrets_config()
-        self._print_verbose_config()
+        self._print_port_and_reload_configs()
+        self._print_feature_configs()
         print()
     
     def _print_dynamic_ports_config(self):
@@ -861,6 +879,19 @@ class DevLauncher:
     def _print_verbose_config(self):
         """Print verbose configuration."""
         print(f"  • Verbose output: {'YES' if self.config.verbose else 'NO'}")
+    
+    def _print_port_and_reload_configs(self):
+        """Print port and reload configuration options."""
+        self._print_dynamic_ports_config()
+        self._print_backend_reload_config()
+        self._print_frontend_reload_config()
+        self._print_logging_config()
+    
+    def _print_feature_configs(self):
+        """Print feature configuration options."""
+        self._print_turbopack_config()
+        self._print_secrets_config()
+        self._print_verbose_config()
     
     def _show_env_var_debug_info(self):
         """Show debug information about environment variables."""

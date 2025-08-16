@@ -12,7 +12,7 @@ import os
 import json
 import time
 import secrets
-from typing import Dict, Any, Optional, TypedDict
+from typing import Dict, Any, Optional, TypedDict, Tuple
 from urllib.parse import urlencode, quote, unquote
 
 from fastapi import FastAPI, Request, HTTPException, Response, status
@@ -74,6 +74,16 @@ app.add_middleware(
 
 
 # Service startup
+def _handle_redis_connection_error(error: ConnectionError) -> None:
+    """Handle Redis connection errors during startup."""
+    logger.error(f"Failed to connect to Redis during startup: {str(error)}")
+    # Continue startup without Redis - some features may be degraded
+
+def _handle_critical_startup_error(error: Exception) -> None:
+    """Handle critical startup errors."""
+    logger.critical(f"Critical startup failure: {str(error)}")
+    raise  # Re-raise critical startup errors
+
 @app.on_event("startup")
 async def startup_event():
     """Initialize auth service dependencies with error handling."""
@@ -81,11 +91,9 @@ async def startup_event():
         await redis_service.connect()
         logger.info("Auth service started successfully")
     except ConnectionError as e:
-        logger.error(f"Failed to connect to Redis during startup: {str(e)}")
-        # Continue startup without Redis - some features may be degraded
+        _handle_redis_connection_error(e)
     except Exception as e:
-        logger.critical(f"Critical startup failure: {str(e)}")
-        raise  # Re-raise critical startup errors
+        _handle_critical_startup_error(e)
 
 
 class AuthTokenService:
@@ -96,19 +104,27 @@ class AuthTokenService:
         self.jwt_secret = self._get_secure_jwt_secret()
         self.token_expiry = 3600  # 1 hour
         
-    def _get_secure_jwt_secret(self) -> str:
-        """Get JWT secret with security validation."""
-        secret = os.getenv("JWT_SECRET_KEY")
+    def _validate_jwt_secret_exists(self, secret: Optional[str]) -> None:
+        """Validate JWT secret exists."""
         if not secret:
             raise HTTPException(
                 status_code=500, 
                 detail="JWT_SECRET_KEY environment variable must be set"
             )
+    
+    def _validate_jwt_secret_length(self, secret: str) -> None:
+        """Validate JWT secret meets minimum length requirement."""
         if len(secret) < 32:
             raise HTTPException(
                 status_code=500,
                 detail="JWT_SECRET_KEY must be at least 32 characters long"
             )
+    
+    def _get_secure_jwt_secret(self) -> str:
+        """Get JWT secret with security validation."""
+        secret = os.getenv("JWT_SECRET_KEY")
+        self._validate_jwt_secret_exists(secret)
+        self._validate_jwt_secret_length(secret)
         return secret
         
     def generate_jwt(self, user_info: UserInfo) -> str:
@@ -126,15 +142,23 @@ class AuthTokenService:
             "iss": "netra-auth-service", "aud": "netra-api"
         }
     
+    def _handle_jwt_expired(self) -> None:
+        """Handle expired JWT token."""
+        logger.warning("JWT token expired")
+    
+    def _handle_jwt_invalid(self, error: jwt.InvalidTokenError) -> None:
+        """Handle invalid JWT token."""
+        logger.error(f"JWT validation failed: {error}")
+
     def validate_jwt(self, token: str) -> Optional[Dict[str, Any]]:
         """Validate JWT token and return claims."""
         try:
             return jwt.decode(token, self.jwt_secret, algorithms=["HS256"])
         except jwt.ExpiredSignatureError:
-            logger.warning("JWT token expired")
+            self._handle_jwt_expired()
             return None
         except jwt.InvalidTokenError as e:
-            logger.error(f"JWT validation failed: {e}")
+            self._handle_jwt_invalid(e)
             return None
 
 
@@ -154,13 +178,10 @@ class AuthSessionManager:
     
     def _build_state_data(self, pr_number: Optional[str], return_url: str, csrf_token: str) -> StateData:
         """Build OAuth state data."""
-        data: StateData = {
-            "csrf_token": csrf_token, 
-            "return_url": return_url, 
-            "timestamp": int(time.time()),
-            "pr_number": pr_number
+        return {
+            "csrf_token": csrf_token, "return_url": return_url,
+            "timestamp": int(time.time()), "pr_number": pr_number
         }
-        return data
     
     async def _store_state_data(self, state_data: StateData) -> str:
         """Store state data in Redis and return state ID."""
@@ -217,44 +238,58 @@ def _get_default_return_url() -> str:
     return config["javascript_origins"][0]
 
 
-def _validate_return_url_security(url: str) -> None:
-    """Validate return URL for security with enhanced checks."""
-    # Check for malicious URL patterns
+def _check_malicious_url_patterns(url: str) -> None:
+    """Check for malicious URL patterns."""
     malicious_patterns = ["javascript:", "data:", "vbscript:", "file:", "ftp:"]
     if any(url.lower().startswith(pattern) for pattern in malicious_patterns):
         raise HTTPException(status_code=400, detail="Malicious URL scheme detected")
-    
-    # Check for URL length to prevent DoS
+
+def _validate_url_length(url: str) -> None:
+    """Validate URL length to prevent DoS attacks."""
     if len(url) > 2048:
         raise HTTPException(status_code=400, detail="URL too long")
-    
-    # Validate against allowed origins
+
+def _validate_allowed_origins(url: str) -> None:
+    """Validate URL against allowed origins."""
     config = auth_env_config.get_oauth_config()
     allowed_origins = config.javascript_origins
     if not any(url.startswith(origin) for origin in allowed_origins):
         raise HTTPException(status_code=400, detail="Invalid return URL origin")
 
+def _validate_return_url_security(url: str) -> None:
+    """Validate return URL for security with enhanced checks."""
+    _check_malicious_url_patterns(url)
+    _validate_url_length(url)
+    _validate_allowed_origins(url)
 
-def _build_google_oauth_url(oauth_config, state_id: str) -> str:
-    """Build Google OAuth authorization URL."""
-    redirect_uri = _get_oauth_redirect_uri()
-    params = {
-        "client_id": oauth_config.client_id, "redirect_uri": redirect_uri,
+
+def _build_oauth_params(oauth_config, state_id: str) -> Dict[str, str]:
+    """Build OAuth authorization parameters."""
+    return {
+        "client_id": oauth_config.client_id, "redirect_uri": _get_oauth_redirect_uri(),
         "response_type": "code", "scope": "openid email profile",
         "state": state_id, "access_type": "online"
     }
+
+def _build_google_oauth_url(oauth_config, state_id: str) -> str:
+    """Build Google OAuth authorization URL."""
+    params = _build_oauth_params(oauth_config, state_id)
     return f"https://accounts.google.com/o/oauth2/v2/auth?{urlencode(params)}"
 
 
+def _get_environment_redirect_map() -> Dict[str, str]:
+    """Get environment to redirect URI mapping."""
+    return {
+        "development": "http://localhost:8001/auth/callback",
+        "staging": "https://auth.staging.netrasystems.ai/auth/callback",
+        "production": "https://auth.netrasystems.ai/auth/callback"
+    }
+
 def _get_oauth_redirect_uri() -> str:
     """Get OAuth redirect URI based on environment."""
-    if auth_env_config.environment.value == "development":
-        return "http://localhost:8001/auth/callback"
-    elif auth_env_config.environment.value == "staging":
-        return "https://auth.staging.netrasystems.ai/auth/callback"
-    elif auth_env_config.environment.value == "production":
-        return "https://auth.netrasystems.ai/auth/callback"
-    return "http://localhost:8001/auth/callback"
+    redirect_map = _get_environment_redirect_map()
+    env_value = auth_env_config.environment.value
+    return redirect_map.get(env_value, "http://localhost:8001/auth/callback")
 
 
 @app.get("/auth/callback")
@@ -268,59 +303,91 @@ async def handle_oauth_callback(request: Request, code: str, state: str):
     return _build_oauth_callback_response(state_data, jwt_token, user_info)
 
 
+def _build_token_exchange_data(code: str, oauth_config) -> Dict[str, str]:
+    """Build token exchange request data."""
+    return {
+        "code": code, "client_id": oauth_config.client_id,
+        "client_secret": oauth_config.client_secret, "redirect_uri": _get_oauth_redirect_uri(),
+        "grant_type": "authorization_code"
+    }
+
 async def _exchange_code_for_tokens(code: str, oauth_config) -> OAuthTokenData:
     """Exchange authorization code for access tokens."""
     token_url = "https://oauth2.googleapis.com/token"
-    redirect_uri = _get_oauth_redirect_uri()
-    data = {
-        "code": code, "client_id": oauth_config.client_id,
-        "client_secret": oauth_config.client_secret, "redirect_uri": redirect_uri,
-        "grant_type": "authorization_code"
-    }
+    data = _build_token_exchange_data(code, oauth_config)
     return await _perform_token_exchange_request(token_url, data)
 
 
+def _validate_token_exchange_response(response: httpx.Response) -> OAuthTokenData:
+    """Validate and process token exchange response."""
+    if response.status_code != 200:
+        logger.error(f"Token exchange failed: {response.text}")
+        raise HTTPException(status_code=400, detail="OAuth token exchange failed")
+    return response.json()
+
+def _handle_token_exchange_timeout() -> None:
+    """Handle token exchange timeout errors."""
+    logger.error("Token exchange request timed out")
+    raise HTTPException(status_code=503, detail="OAuth service temporarily unavailable")
+
+def _create_exchange_timeout() -> httpx.Timeout:
+    """Create timeout for token exchange requests."""
+    return httpx.Timeout(10.0, connect=5.0)
+
 async def _perform_token_exchange_request(url: str, data: Dict[str, str]) -> OAuthTokenData:
     """Perform HTTP request for token exchange with timeout and security."""
-    timeout = httpx.Timeout(10.0, connect=5.0)
+    timeout = _create_exchange_timeout()
     async with httpx.AsyncClient(timeout=timeout) as client:
         try:
             response = await client.post(url, data=data)
-            if response.status_code != 200:
-                logger.error(f"Token exchange failed: {response.text}")
-                raise HTTPException(status_code=400, detail="OAuth token exchange failed")
-            return response.json()
+            return _validate_token_exchange_response(response)
         except httpx.TimeoutException:
-            logger.error("Token exchange request timed out")
-            raise HTTPException(status_code=503, detail="OAuth service temporarily unavailable")
+            _handle_token_exchange_timeout()
 
 
-async def _get_user_info_from_google(access_token: str) -> UserInfo:
-    """Get user information from Google API with timeout and security."""
+def _build_user_info_request_config(access_token: str) -> Tuple[str, Dict[str, str], httpx.Timeout]:
+    """Build user info request configuration."""
     user_info_url = "https://www.googleapis.com/oauth2/v2/userinfo"
     headers = {"Authorization": f"Bearer {access_token}"}
     timeout = httpx.Timeout(10.0, connect=5.0)
+    return user_info_url, headers, timeout
+
+def _handle_user_info_response(response: httpx.Response) -> UserInfo:
+    """Handle and validate user info response."""
+    if response.status_code != 200:
+        logger.error(f"Failed to get user info: {response.text}")
+        raise HTTPException(status_code=400, detail="Failed to retrieve user information")
+    return response.json()
+
+def _handle_user_info_timeout() -> None:
+    """Handle user info request timeout."""
+    logger.error("User info request timed out")
+    raise HTTPException(status_code=503, detail="User info service temporarily unavailable")
+
+async def _get_user_info_from_google(access_token: str) -> UserInfo:
+    """Get user information from Google API with timeout and security."""
+    url, headers, timeout = _build_user_info_request_config(access_token)
     async with httpx.AsyncClient(timeout=timeout) as client:
         try:
-            response = await client.get(user_info_url, headers=headers)
-            if response.status_code != 200:
-                logger.error(f"Failed to get user info: {response.text}")
-                raise HTTPException(status_code=400, detail="Failed to retrieve user information")
-            return response.json()
+            response = await client.get(url, headers=headers)
+            return _handle_user_info_response(response)
         except httpx.TimeoutException:
-            logger.error("User info request timed out")
-            raise HTTPException(status_code=503, detail="User info service temporarily unavailable")
+            _handle_user_info_timeout()
 
+
+def _build_standard_callback_response(return_url: str, jwt_token: str) -> RedirectResponse:
+    """Build standard callback response."""
+    redirect_url = f"{return_url}/auth/complete"
+    response = RedirectResponse(url=redirect_url)
+    _set_auth_cookies(response, jwt_token)
+    return response
 
 def _build_oauth_callback_response(state_data: StateData, jwt_token: str, user_info: UserInfo):
     """Build OAuth callback response with redirect."""
     return_url = state_data["return_url"]
     if state_data["pr_number"]:
         return _build_pr_environment_response(return_url, jwt_token, user_info, state_data["pr_number"])
-    redirect_url = f"{return_url}/auth/complete"
-    response = RedirectResponse(url=redirect_url)
-    _set_auth_cookies(response, jwt_token)
-    return response
+    return _build_standard_callback_response(return_url, jwt_token)
 
 
 def _build_pr_environment_response(return_url: str, jwt_token: str, user_info: UserInfo, pr_number: str):
@@ -331,6 +398,12 @@ def _build_pr_environment_response(return_url: str, jwt_token: str, user_info: U
     return response
 
 
+def _set_standard_security_headers(response: Response) -> None:
+    """Set standard security headers."""
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
 def _set_auth_cookies(response: Response, jwt_token: str) -> None:
     """Set secure authentication cookies with enhanced security."""
     response.set_cookie(
@@ -338,50 +411,62 @@ def _set_auth_cookies(response: Response, jwt_token: str) -> None:
         secure=True, httponly=True, samesite="strict", path="/",
         domain=None  # Restrict to exact domain for security
     )
-    # Add security headers
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    _set_standard_security_headers(response)
 
+
+def _set_pr_security_headers(response: Response) -> None:
+    """Set security headers for PR environment."""
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'"
 
 def _set_pr_auth_cookies(response: Response, jwt_token: str, pr_number: str) -> None:
     """Set authentication cookies for PR environment with enhanced security."""
     response.set_cookie(
         key="netra_auth_token", value=jwt_token, max_age=3600,
         secure=True, httponly=True, samesite="none", path="/",
-        domain=f"pr-{pr_number}.staging.netrasystems.ai"  # More specific domain
+        domain=f"pr-{pr_number}.staging.netrasystems.ai"
     )
-    # Add security headers for PR environment
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "SAMEORIGIN"  # Allow framing within same origin for PR
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'"
+    _set_pr_security_headers(response)
 
 
 @app.post("/auth/token")
+def _validate_exchange_request(code: Optional[str]) -> None:
+    """Validate token exchange request."""
+    if not code:
+        raise HTTPException(status_code=400, detail="Authorization code required")
+
+def _build_token_response(jwt_token: str, user_info: UserInfo) -> Dict[str, Any]:
+    """Build token exchange response."""
+    return {"access_token": jwt_token, "token_type": "Bearer", "expires_in": 3600, "user_info": user_info}
+
 async def exchange_token(request: Request):
     """Exchange OAuth code for JWT token (alternative flow)."""
     body = await request.json()
     code = body.get("code")
-    if not code:
-        raise HTTPException(status_code=400, detail="Authorization code required")
+    _validate_exchange_request(code)
     oauth_config = auth_env_config.get_oauth_config()
     token_data = await _exchange_code_for_tokens(code, oauth_config)
     user_info = await _get_user_info_from_google(token_data["access_token"])
     jwt_token = auth_token_service.generate_jwt(user_info)
-    return {"access_token": jwt_token, "token_type": "Bearer", "expires_in": 3600, "user_info": user_info}
+    return _build_token_response(jwt_token, user_info)
 
 
 @app.post("/auth/logout")
-async def logout_user(request: Request):
-    """Revoke authentication tokens and logout."""
-    auth_header = request.headers.get("Authorization")
+async def _process_logout_token(auth_header: Optional[str]) -> None:
+    """Process logout token if present."""
     if auth_header and auth_header.startswith("Bearer "):
         token = auth_header[7:]
         claims = auth_token_service.validate_jwt(token)
         if claims:
             await _revoke_user_sessions(claims.get("sub"))
             logger.info(f"User {claims.get('email')} logged out successfully")
+
+async def logout_user(request: Request):
+    """Revoke authentication tokens and logout."""
+    auth_header = request.headers.get("Authorization")
+    await _process_logout_token(auth_header)
     response = JSONResponse({"message": "Logout successful"})
     _clear_auth_cookies(response)
     return response
@@ -403,15 +488,19 @@ def _clear_auth_cookies(response: Response) -> None:
 
 
 @app.get("/auth/status")
-async def get_auth_service_status():
-    """Get authentication service health status."""
-    redis_status = await _check_redis_connection()
+def _build_service_status(redis_status: bool) -> Dict[str, Any]:
+    """Build service status response."""
     return {
         "status": "healthy", "environment": auth_env_config.environment.value,
         "is_pr_environment": auth_env_config.is_pr_environment,
         "pr_number": auth_env_config.pr_number, "redis_connected": redis_status,
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
+
+async def get_auth_service_status():
+    """Get authentication service health status."""
+    redis_status = await _check_redis_connection()
+    return _build_service_status(redis_status)
 
 
 async def _check_redis_connection() -> bool:
@@ -424,27 +513,35 @@ async def _check_redis_connection() -> bool:
 
 
 @app.get("/auth/config")
-async def get_frontend_auth_config():
-    """Get frontend authentication configuration."""
-    config = auth_env_config.get_frontend_config()
-    auth_service_url = _get_auth_service_url()
+def _add_auth_urls(config: Dict[str, Any], auth_service_url: str) -> None:
+    """Add authentication URLs to config."""
     config.update({
         "auth_service_url": auth_service_url,
         "login_url": f"{auth_service_url}/auth/login",
         "logout_url": f"{auth_service_url}/auth/logout"
     })
+
+async def get_frontend_auth_config():
+    """Get frontend authentication configuration."""
+    config = auth_env_config.get_frontend_config()
+    auth_service_url = _get_auth_service_url()
+    _add_auth_urls(config, auth_service_url)
     return config
 
 
+def _get_auth_service_url_map() -> Dict[str, str]:
+    """Get auth service URL mapping."""
+    return {
+        "development": "http://localhost:8001",
+        "staging": "https://auth.staging.netrasystems.ai",
+        "production": "https://auth.netrasystems.ai"
+    }
+
 def _get_auth_service_url() -> str:
     """Get auth service URL based on environment."""
-    if auth_env_config.environment.value == "development":
-        return "http://localhost:8001"
-    elif auth_env_config.environment.value == "staging":
-        return "https://auth.staging.netrasystems.ai"
-    elif auth_env_config.environment.value == "production":
-        return "https://auth.netrasystems.ai"
-    return "http://localhost:8001"
+    url_map = _get_auth_service_url_map()
+    env_value = auth_env_config.environment.value
+    return url_map.get(env_value, "http://localhost:8001")
 
 
 # Health check endpoint
