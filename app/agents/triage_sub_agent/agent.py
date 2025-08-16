@@ -139,7 +139,7 @@ class TriageSubAgent(BaseSubAgent):
         try:
             await self._execute_triage_with_fallback_protection(state, run_id, stream_updates)
         except Exception as e:
-            self._handle_execution_error(run_id, e)
+            logger.error(f"Triage execution failed for run_id {run_id}: {e}")
     
     async def _execute_triage_with_fallback_protection(
         self, state: DeepAgentState, run_id: str, stream_updates: bool
@@ -374,7 +374,7 @@ class TriageSubAgent(BaseSubAgent):
         
         return result
     
-    def _log_agent_completion(self, run_id: str) -> None:
+    def _log_agent_completion(self, run_id: str, status: str = "completed") -> None:
         """Log agent communication completion."""
         log_agent_communication("TriageSubAgent", "Supervisor", run_id, "execute_response")
     
@@ -601,10 +601,11 @@ class TriageSubAgent(BaseSubAgent):
         """Log agent communication start."""
         log_agent_communication("Supervisor", "TriageSubAgent", run_id, "execute_request")
     
-    def _handle_execution_error(self, run_id: str, error: Exception) -> None:
+    def _handle_execution_error(self, error: Exception, state: 'DeepAgentState', run_id: str, stream_updates: bool) -> None:
         """Handle execution error and re-raise."""
         logger.error(f"Triage execution failed for run_id {run_id}: {error}")
-        raise error
+        # Call parent implementation to handle lifecycle properly
+        # Don't re-raise here as parent will handle it
     
     def _get_main_categories(self) -> list:
         """Get list of main triage categories."""
