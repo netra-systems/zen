@@ -201,20 +201,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Add security headers to all responses."""
         start_time = time.time()
-        try:
-            nonce = self.nonce_generator.generate_nonce()
-            request.state.csp_nonce = nonce
-            response = await call_next(request)
-            return self._process_response_headers(request, response, nonce, start_time)
-        except Exception as e:
-            logger.error(f"Error in security headers middleware: {e}")
-            return await self._handle_dispatch_error(call_next, request)
-    
-    async def _handle_dispatch_error(self, call_next: Callable, request: Request) -> Response:
-        """Handle dispatch errors by adding basic headers."""
+        nonce = self.nonce_generator.generate_nonce()
+        request.state.csp_nonce = nonce
+        
         response = await call_next(request)
-        self._add_base_headers(response)
-        return response
+        return self._process_response_headers(request, response, nonce, start_time)
     
     def _process_response_headers(self, request: Request, response: Response, nonce: str, start_time: float) -> Response:
         """Process and add all security headers to response."""
