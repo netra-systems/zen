@@ -136,6 +136,8 @@ class BroadcastManager:
     async def _cleanup_broadcast_dead_connections(self, connections_to_remove: List[Tuple[str, ConnectionInfo]]) -> None:
         """Clean up dead connections identified during broadcast."""
         for user_id, conn_info in connections_to_remove:
+            # Mark connection as closing before cleanup
+            conn_info.is_closing = True
             await self.connection_manager._disconnect_internal(
                 user_id, conn_info.websocket, code=1001, reason="Connection lost during broadcast"
             )
@@ -182,6 +184,8 @@ class BroadcastManager:
     async def _cleanup_user_dead_connections(self, user_id: str, connections_to_remove: List[ConnectionInfo]) -> None:
         """Clean up dead connections for user."""
         for conn_info in connections_to_remove:
+            # Mark connection as closing before cleanup
+            conn_info.is_closing = True
             await self.connection_manager._disconnect_internal(
                 user_id, conn_info.websocket, code=1001, reason="Connection lost"
             )
@@ -250,6 +254,11 @@ class BroadcastManager:
 
     def _is_connection_ready(self, conn_info: ConnectionInfo) -> bool:
         """Check if connection is ready for sending."""
+        # Check if connection is marked as closing
+        if conn_info.is_closing:
+            logger.debug(f"Connection {conn_info.connection_id} is closing, skipping send")
+            return False
+            
         ws_state = conn_info.websocket.client_state
         app_state = conn_info.websocket.application_state
         

@@ -104,3 +104,25 @@ class SubAgentStatus(BaseModel):
     status: AgentStatus
     lifecycle: SubAgentLifecycle
     metrics: Dict[str, Union[int, float]] = Field(default_factory=dict)
+
+
+# Model rebuild for forward reference resolution
+def rebuild_models() -> None:
+    """Rebuild models after imports are complete to resolve forward references."""
+    try:
+        # Import TriageResult to ensure it's defined
+        from app.agents.triage_sub_agent.models import TriageResult
+        # Import and rebuild DeepAgentState/AgentResult which reference TriageResult
+        from app.schemas.agent_models import DeepAgentState, AgentResult
+        DeepAgentState.model_rebuild()
+        AgentResult.model_rebuild()
+        # Rebuild AgentCompleted since it uses AgentResult
+        AgentCompleted.model_rebuild()
+        # Also rebuild SubAgentUpdate which has forward reference to SubAgentState
+        SubAgentUpdate.model_rebuild()
+    except Exception:
+        # Safe to ignore - models will rebuild when needed
+        pass
+
+# Initialize model rebuild
+rebuild_models()

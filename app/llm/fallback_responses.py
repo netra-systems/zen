@@ -95,9 +95,12 @@ class FallbackResponseFactory:
     
     def _enhance_response_with_error(self, fallback_type: str, error: Optional[Exception]) -> Any:
         """Enhance response with error information."""
-        response = self.default_responses[fallback_type].copy()
-        if isinstance(response, dict) and "metadata" in response:
-            self._add_error_metadata(response, error)
+        response = self.default_responses[fallback_type]
+        # Only copy if response is a dict, not a string
+        if isinstance(response, dict):
+            response = response.copy()
+            if "metadata" in response:
+                self._add_error_metadata(response, error)
         return response
     
     def _add_error_metadata(self, response: Dict[str, Any], error: Optional[Exception]) -> None:

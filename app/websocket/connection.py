@@ -106,6 +106,8 @@ class ConnectionManager:
     async def _execute_disconnection(self, user_id: str, conn_info: ConnectionInfo, 
                                    websocket: WebSocket, code: int, reason: str) -> None:
         """Execute disconnection cleanup steps."""
+        # Mark connection as closing to prevent further sends
+        conn_info.is_closing = True
         self._remove_from_registry(user_id, conn_info)
         self._cleanup_empty_user_list(user_id)
         await self._close_websocket_safely(websocket, code, reason)
