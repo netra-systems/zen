@@ -44,7 +44,7 @@ class MockWebSocket {
     this.onerror = null;
     this.onmessage = null;
     this.send = jest.fn();
-    this.close = jest.fn((code?: number, reason?: string) => {
+    this.close = jest.fn((code, reason) => {
       this.readyState = MockWebSocket.CLOSING;
       setTimeout(() => {
         this.readyState = MockWebSocket.CLOSED;
@@ -53,11 +53,11 @@ class MockWebSocket {
         }
       }, 0);
     });
-    this.addEventListener = jest.fn((event: string, handler: Function) => {
-      if (event === 'open') this.onopen = handler as any;
-      if (event === 'close') this.onclose = handler as any;
-      if (event === 'error') this.onerror = handler as any;
-      if (event === 'message') this.onmessage = handler as any;
+    this.addEventListener = jest.fn((event, handler) => {
+      if (event === 'open') this.onopen = handler;
+      if (event === 'close') this.onclose = handler;
+      if (event === 'error') this.onerror = handler;
+      if (event === 'message') this.onmessage = handler;
     });
     this.removeEventListener = jest.fn();
     
@@ -71,7 +71,7 @@ class MockWebSocket {
   }
 
   // Helper method for tests to simulate messages
-  simulateMessage(data: any) {
+  simulateMessage(data) {
     if (this.onmessage && this.readyState === MockWebSocket.OPEN) {
       const messageData = typeof data === 'string' ? data : JSON.stringify(data);
       this.onmessage(new MessageEvent('message', { data: messageData }));
