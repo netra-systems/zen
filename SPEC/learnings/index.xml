@@ -13,9 +13,10 @@
             <name>Configuration/Secrets</name>
             <file>learnings/configuration_secrets.xml</file>
             <path>SPEC/learnings/configuration_secrets.xml</path>
-            <learning_count>1</learning_count>
+            <learning_count>2</learning_count>
             <learning_ids>
                 <id>staging-env-var-suffix-handling</id>
+                <id>cors-devlauncher-middleware-configuration</id>
             </learning_ids>
         </category>
         <category>
@@ -169,6 +170,6 @@
     
     <statistics>
         <total_categories>13</total_categories>
-        <total_learnings>45</total_learnings>
+        <total_learnings>46</total_learnings>
     </statistics>
 </specification>

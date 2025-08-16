@@ -20,8 +20,8 @@ class User(Base):
     full_name = Column(String, index=True)
     hashed_password = Column(String, nullable=True)
     picture = Column(String, nullable=True)
-    created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
-    updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
     # Admin permission fields
@@ -36,7 +36,7 @@ class User(Base):
     tool_permissions = Column(JSON, default=dict)  # Per-tool permission overrides
     
     # Plan billing fields
-    plan_started_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
+    plan_started_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     auto_renew = Column(Boolean(), default=False)  # Auto-renewal enabled
     payment_status = Column(String, default="active")  # active, suspended, cancelled
     trial_period = Column(Boolean(), default=False)  # Is in trial period
@@ -51,8 +51,8 @@ class Secret(Base):
     user_id = Column(String, ForeignKey("userbase.id"), nullable=False)
     key = Column(String, nullable=False)
     encrypted_value = Column(String, nullable=False)
-    created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
-    updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
     user = relationship("User", back_populates="secrets")
 
 
@@ -69,6 +69,6 @@ class ToolUsageLog(Base):
     plan_tier = Column(String, nullable=False)  # User's plan at time of usage
     permission_check_result = Column(JSON, nullable=True)  # Permission check details
     arguments = Column(JSON, nullable=True)  # Tool arguments (for analytics)
-    created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), index=True)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), index=True)
     
     user = relationship("User")
