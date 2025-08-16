@@ -34,14 +34,15 @@ def _get_staging_cors_origins() -> list[str]:
     cors_origins_env = os.environ.get("CORS_ORIGINS", "")
     if cors_origins_env:
         return cors_origins_env.split(",")
-    # Staging origins - will be handled by custom middleware
+    # Staging origins - will be handled by custom middleware for wildcards
     return [
         "https://staging.netrasystems.ai",
         "https://app.staging.netrasystems.ai",
         "https://auth.staging.netrasystems.ai",
         "https://backend.staging.netrasystems.ai",
         "http://localhost:3000",
-        "http://localhost:3001"
+        "http://localhost:3001",
+        "*"  # Will use pattern matching in is_origin_allowed
     ]
 
 
@@ -51,7 +52,7 @@ def _get_development_cors_origins() -> list[str]:
     if cors_origins_env:
         return cors_origins_env.split(",")
     # Allow all localhost origins in development (any port)
-    return ["*"]  # Will be handled by custom middleware for port flexibility
+    return ["http://localhost:3000", "http://localhost:8000", "*"]
 
 
 def setup_cors_middleware(app: FastAPI) -> None:
@@ -108,23 +109,37 @@ def is_origin_allowed(origin: str, allowed_origins: List[str]) -> bool:
     if not origin:
         return False
     
+    # Direct match first
+    if origin in allowed_origins:
+        return True
+    
     # Allow all origins if wildcard is specified
     if "*" in allowed_origins:
-        # In development, only allow localhost/127.0.0.1 with any port
+        # In development, allow any localhost/127.0.0.1 with any port
         if settings.environment == "development":
             localhost_pattern = r'^https?://(localhost|127\.0\.0\.1)(:\d+)?$'
             return bool(re.match(localhost_pattern, origin))
-        return True
-    
-    # Direct match
-    if origin in allowed_origins:
-        return True
+        # In staging, check patterns below instead of allowing all
+        if settings.environment == "staging":
+            pass  # Continue to pattern matching below
+        else:
+            return True
     
     # Check wildcard patterns for staging
     if settings.environment == "staging":
         # Allow any subdomain of staging.netrasystems.ai
-        pattern = r'^https://[a-zA-Z0-9\-]+\.staging\.netrasystems\.ai$'
-        if re.match(pattern, origin):
+        staging_pattern = r'^https://[a-zA-Z0-9\-]+\.staging\.netrasystems\.ai$'
+        if re.match(staging_pattern, origin):
+            return True
+        
+        # Allow Google Cloud Run URLs (backend services)
+        cloud_run_pattern = r'^https://[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-]+\.a\.run\.app$'
+        if re.match(cloud_run_pattern, origin):
+            return True
+        
+        # Allow localhost for local development against staging
+        localhost_pattern = r'^https?://(localhost|127\.0\.0\.1)(:\d+)?$'
+        if re.match(localhost_pattern, origin):
             return True
     
     return False
