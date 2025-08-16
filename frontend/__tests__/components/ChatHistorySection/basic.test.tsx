@@ -20,24 +20,6 @@ describe('ChatHistorySection - Basic Functionality', () => {
   });
 
   describe('History item rendering', () => {
-    it('should verify authentication state before testing', () => {
-      const authState = useAuthStore();
-      const threadState = useThreadStore();
-      console.log('Auth state in test:', authState);
-      console.log('Thread state in test:', threadState);
-      
-      render(<ChatHistorySection />);
-      
-      // First check if we can see "Chat History" or "Sign in to view chats"
-      if (screen.queryByText('Sign in to view chats')) {
-        console.log('Component is in unauthenticated state');
-        expect(screen.getByText('Sign in to view chats')).toBeInTheDocument();
-      } else {
-        console.log('Component is in authenticated state');
-        expect(screen.getByText('Chat History')).toBeInTheDocument();
-      }
-    });
-
     it('should render all conversation threads', () => {
       render(<ChatHistorySection />);
       
