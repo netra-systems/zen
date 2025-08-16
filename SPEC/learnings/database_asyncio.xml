@@ -47,5 +47,45 @@
                     <test-case>test_database_connection_pooling.py</test-case>
                 </learning>
 
+        <learning id="trial-period-type-mismatch">
+            <title>Database Column Type Mismatch - trial_period Boolean vs Integer</title>
+            <date>2025-08-16</date>
+            <category>Database/AsyncIO</category>
+            <description>
+                SQLAlchemy model defined trial_period as Boolean but Alembic migration created it as Integer,
+                causing "column 'trial_period' is of type integer but expression is of type boolean" error.
+            </description>
+            <symptoms>
+                <symptom>Error: asyncpg.exceptions.DatatypeMismatchError: column "trial_period" is of type integer but expression is of type boolean</symptom>
+                <symptom>Database expects integer but model passes boolean value</symptom>
+                <symptom>Migration script and model definition have different types</symptom>
+            </symptoms>
+            <root-causes>
+                <cause>Alembic migration defined trial_period as sa.Integer()</cause>
+                <cause>SQLAlchemy model defined trial_period as Boolean()</cause>
+                <cause>Pydantic schema also defined trial_period as bool</cause>
+                <cause>Type mismatch between migration and model definitions</cause>
+            </root-causes>
+            <solution>
+                <step>Update Alembic migration to use sa.Boolean() instead of sa.Integer()</step>
+                <step>Add server_default='false' to migration for consistency</step>
+                <step>Ensure model uses Boolean() with default=False</step>
+                <step>Verify Pydantic schema uses bool type</step>
+            </solution>
+            <files-modified>
+                <file>app/alembic/versions/bb39e1c49e2d_add_missing_tables_and_columns.py - Changed trial_period from Integer to Boolean</file>
+                <file>app/db/models_user.py - Confirmed trial_period as Boolean</file>
+                <file>app/schemas/UserPlan.py - Confirmed trial_period as bool</file>
+            </files-modified>
+            <prevention>
+                <item>Always ensure migration types match model definitions</item>
+                <item>Create schema consistency tests to verify type alignment</item>
+                <item>Test both model creation and database operations</item>
+                <item>Use consistent type definitions across migrations, models, and schemas</item>
+            </prevention>
+            <test-case>tests/database/test_schema_consistency.py</test-case>
+            <test-case>tests/unit/test_user_plan_schema.py</test-case>
+        </learning>
+
     </learnings>
 </specification>
