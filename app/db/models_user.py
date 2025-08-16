@@ -39,7 +39,7 @@ class User(Base):
     plan_started_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     auto_renew = Column(Boolean(), default=False)  # Auto-renewal enabled
     payment_status = Column(String, default="active")  # active, suspended, cancelled
-    trial_period = Column(Boolean(), default=False)  # Is in trial period
+    trial_period = Column(Integer(), default=0)  # Trial period days (0 = not in trial)
     
     # Relationships
     secrets = relationship("Secret", back_populates="user", cascade="all, delete-orphan")
