@@ -53,16 +53,19 @@ def _check_session_none(session: Any) -> str:
     """Check if session is None and return error."""
     return "Session is None" if session is None else ""
 
+def _get_session_type_error(session: Any) -> str:
+    """Get error for session type."""
+    actual_type = type(session).__name__
+    if 'Mock' in actual_type:
+        return _get_mock_error_details(session, actual_type)
+    return _get_standard_error_details(actual_type)
+
 def get_session_validation_error(session: Any) -> str:
     """Get descriptive error for invalid session type."""
     none_error = _check_session_none(session)
     if none_error:
         return none_error
-    
-    actual_type = type(session).__name__
-    if 'Mock' in actual_type:
-        return _get_mock_error_details(session, actual_type)
-    return _get_standard_error_details(actual_type)
+    return _get_session_type_error(session)
 
 
 def _validate_async_session_factory():

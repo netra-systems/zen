@@ -243,6 +243,60 @@
                 <item>Commit history preserved across branches</item>
             </details>
         </learning>
+        
+        <learning id="staging-env-var-suffix-handling">
+            <title>Staging Environment Variables Suffix Handling</title>
+            <date>2025-08-16</date>
+            <category>Configuration/Secrets</category>
+            <description>
+                Staging deployment scripts pass environment variables with _STAGING suffix (e.g., GEMINI_API_KEY_STAGING),
+                but the application was only looking for regular names (e.g., GEMINI_API_KEY) when loading from environment.
+                This caused secrets to not be found when Google Secret Manager was unavailable.
+            </description>
+            <symptoms>
+                <symptom>Gemini API key not being loaded in staging environment</symptom>
+                <symptom>Deployment scripts setting GEMINI_API_KEY_STAGING but app looking for GEMINI_API_KEY</symptom>
+                <symptom>Secret Manager fallback to environment variables failing in staging</symptom>
+            </symptoms>
+            <root-causes>
+                <cause>Deployment scripts (deploy_staging_remote.sh/ps1) use _STAGING suffix for env vars</cause>
+                <cause>GitHub Actions workflow uses secrets with _STAGING suffix</cause>
+                <cause>SecretManager._load_from_environment() only checked regular env var names</cause>
+            </root-causes>
+            <solution>
+                <step>Updated SecretManager._load_from_environment() to check for _STAGING suffix when in staging</step>
+                <step>Logic: In staging environment, first try env_var + "_STAGING", then fall back to regular env_var</step>
+                <step>This allows both patterns to work: direct env vars and staging-suffixed vars</step>
+            </solution>
+            <files-modified>
+                <file>app/core/secret_manager.py - Updated _load_from_environment() to handle staging suffix</file>
+            </files-modified>
+            <code-example>
+                # Check if we're in staging environment
+                environment = os.environ.get("ENVIRONMENT", "development").lower()
+                k_service = os.environ.get("K_SERVICE")
+                is_staging = environment == "staging" or (k_service and "staging" in k_service.lower())
+                
+                secrets = {}
+                for secret_name, env_var in env_mapping.items():
+                    # Try staging-suffixed env var first if in staging
+                    if is_staging:
+                        staging_env_var = f"{env_var}_STAGING"
+                        value = os.environ.get(staging_env_var)
+                        if value:
+                            secrets[secret_name] = value
+                            continue
+                    # Fall back to regular env var
+                    value = os.environ.get(env_var)
+                    if value:
+                        secrets[secret_name] = value
+            </code-example>
+            <prevention>
+                <item>Always test secret loading in staging environment with actual deployment patterns</item>
+                <item>Ensure consistency between deployment scripts and application expectations</item>
+                <item>Document expected environment variable names clearly</item>
+            </prevention>
+        </learning>
     </gcp-project-configuration>
 
     <database-connection-issues>

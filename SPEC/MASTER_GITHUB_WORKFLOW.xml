@@ -14,6 +14,7 @@
             NO DUPLICATE LOGIC: Reusable jobs defined once, referenced everywhere
             CONFIGURATION-DRIVEN: Enable/disable features via config, not code changes
             ACT COMPATIBLE: All workflows must run locally with act tool
+            API Verify: All workflows must be verified to completion success via Github Python Workflow Status script.
         </principle>
     </critical_principles>
 

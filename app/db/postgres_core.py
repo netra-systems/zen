@@ -93,16 +93,24 @@ class Database:
         yield db
         self._commit_session(db)
 
-    @contextmanager
-    def get_db(self) -> Generator[Session, None, None]:
-        """Provide a transactional scope around a series of operations."""
+    def _handle_db_session_error(self, db: Session, e: Exception):
+        """Handle database session error."""
+        self._handle_transaction_error(db, e)
+        self._close_session(db)
+
+    def _manage_db_session(self):
+        """Manage database session lifecycle."""
         db = self._create_session()
         try:
             yield from self._execute_db_transaction(db)
         except Exception as e:
-            self._handle_transaction_error(db, e)
-        finally:
-            self._close_session(db)
+            self._handle_db_session_error(db, e)
+        else: self._close_session(db)
+
+    @contextmanager
+    def get_db(self) -> Generator[Session, None, None]:
+        """Provide a transactional scope around a series of operations."""
+        yield from self._manage_db_session()
 
     def close(self):
         """Close all database connections."""
@@ -128,26 +136,40 @@ def _convert_sqlite_url(db_url: str) -> str:
     """Convert sqlite:// URL to async format."""
     return db_url.replace("sqlite://", "sqlite+aiosqlite://", 1)
 
+def _is_postgresql_url(db_url: str) -> bool:
+    """Check if URL is postgresql type."""
+    return db_url.startswith("postgresql://")
+
+def _is_postgres_url(db_url: str) -> bool:
+    """Check if URL is postgres type."""
+    return db_url.startswith("postgres://")
+
+def _is_sqlite_url(db_url: str) -> bool:
+    """Check if URL is sqlite type."""
+    return db_url.startswith("sqlite://")
+
 def _check_url_type(db_url: str) -> str:
-    """Determine URL type and return conversion function name."""
-    if db_url.startswith("postgresql://"):
-        return "postgresql"
-    elif db_url.startswith("postgres://"):
-        return "postgres"
-    elif db_url.startswith("sqlite://"):
-        return "sqlite"
+    """Determine URL type."""
+    if _is_postgresql_url(db_url): return "postgresql"
+    if _is_postgres_url(db_url): return "postgres"
+    if _is_sqlite_url(db_url): return "sqlite"
     return "none"
+
+def _apply_url_conversion(db_url: str, url_type: str) -> str:
+    """Apply URL conversion based on type."""
+    if url_type == "postgresql": return _convert_postgresql_url(db_url)
+    if url_type == "postgres": return _convert_postgres_url(db_url)
+    if url_type == "sqlite": return _convert_sqlite_url(db_url)
+    return db_url
+
+def _convert_by_type(db_url: str, url_type: str) -> str:
+    """Convert URL based on type."""
+    return _apply_url_conversion(db_url, url_type)
 
 def _get_async_db_url(db_url: str) -> str:
     """Convert sync database URL to async format."""
     url_type = _check_url_type(db_url)
-    if url_type == "postgresql":
-        return _convert_postgresql_url(db_url)
-    elif url_type == "postgres":
-        return _convert_postgres_url(db_url)
-    elif url_type == "sqlite":
-        return _convert_sqlite_url(db_url)
-    return db_url
+    return _convert_by_type(db_url, url_type)
 
 
 def _get_pool_class_for_async(async_db_url: str):
@@ -244,9 +266,8 @@ def _initialize_async_engine():
     """Initialize the async PostgreSQL engine."""
     try:
         db_url = _validate_database_url()
-        if not db_url:
-            return
-        _initialize_engine_with_url(db_url)
+        if db_url:
+            _initialize_engine_with_url(db_url)
     except Exception as e:
         _handle_engine_creation_error(e)
 

@@ -138,26 +138,47 @@ class TriageProcessor:
     
     def _add_metadata(self, triage_result, start_time, retry_count):
         """Add metadata to triage result"""
+        self._ensure_metadata_section(triage_result)
+        metadata_updates = self._build_metadata_updates(start_time, retry_count)
+        triage_result["metadata"].update(metadata_updates)
+        return triage_result
+    
+    def _ensure_metadata_section(self, triage_result):
+        """Ensure metadata section exists in triage result."""
         if not triage_result.get("metadata"):
             triage_result["metadata"] = {}
-        
-        triage_result["metadata"].update({
+    
+    def _build_metadata_updates(self, start_time, retry_count):
+        """Build metadata updates dictionary."""
+        return {
             "triage_duration_ms": int((time.time() - start_time) * 1000),
             "cache_hit": False,
             "retry_count": retry_count,
             "fallback_used": retry_count >= self.triage_core.max_retries
-        })
-        
-        return triage_result
+        }
     
     def log_performance_metrics(self, run_id, triage_result):
         """Log performance metrics"""
-        self.logger.info(
+        metrics = self._extract_performance_metrics(triage_result)
+        log_message = self._format_performance_log_message(run_id, metrics)
+        self.logger.info(log_message)
+    
+    def _extract_performance_metrics(self, triage_result):
+        """Extract performance metrics from triage result."""
+        metadata = triage_result.get('metadata', {})
+        return {
+            'category': triage_result.get('category'),
+            'confidence': triage_result.get('confidence_score', 0),
+            'duration_ms': metadata.get('triage_duration_ms'),
+            'cache_hit': metadata.get('cache_hit')
+        }
+    
+    def _format_performance_log_message(self, run_id, metrics):
+        """Format performance log message."""
+        return (
             f"Triage completed for run_id {run_id}: "
-            f"category={triage_result.get('category')}, "
-            f"confidence={triage_result.get('confidence_score', 0)}, "
-            f"duration={triage_result['metadata']['triage_duration_ms']}ms, "
-            f"cache_hit={triage_result['metadata']['cache_hit']}"
+            f"category={metrics['category']}, confidence={metrics['confidence']}, "
+            f"duration={metrics['duration_ms']}ms, cache_hit={metrics['cache_hit']}"
         )
 
 
