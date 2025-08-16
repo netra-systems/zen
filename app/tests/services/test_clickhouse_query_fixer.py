@@ -36,6 +36,28 @@ def assert_multiple_replacements(fixed_query: str, pattern_pairs: list) -> None:
         assert expected_pattern in fixed_query
 
 
+def get_nested_array_patterns() -> list:
+    """Get pattern pairs for nested array access test"""
+    return [
+        ('metrics.name[idx]', 'arrayElement(metrics.name, idx)'),
+        ('metrics.value[idx]', 'toFloat64OrZero(arrayElement(metrics.value, idx))'),
+        ('metrics.unit[idx]', 'arrayElement(metrics.unit, idx)')
+    ]
+
+
+def assert_complex_query_fixes(fixed_query: str) -> None:
+    """Assert complex query array fixes are correct"""
+    expected_fixes = [
+        'toFloat64OrZero(arrayElement(metrics.value, position))',
+        'toFloat64OrZero(arrayElement(metrics.value, position-1))'
+    ]
+    preserved_structure = ['WITH filtered_metrics AS', 'ORDER BY timestamp DESC']
+    
+    for fix in expected_fixes:
+        assert fix in fixed_query
+    assert_query_structure_preserved(fixed_query, preserved_structure)
+
+
 class MockClickHouseClient:
     """Mock ClickHouse client for testing"""
     
@@ -228,27 +250,15 @@ class TestClickHouseArraySyntaxFixer:
         original_query = query_test_suite.test_queries['nested_array_access']
         fixed_query = fix_clickhouse_array_syntax(original_query)
         
-        patterns = [
-            ('metrics.name[idx]', 'arrayElement(metrics.name, idx)'),
-            ('metrics.value[idx]', 'toFloat64OrZero(arrayElement(metrics.value, idx))'),
-            ('metrics.unit[idx]', 'arrayElement(metrics.unit, idx)')
-        ]
-        assert_multiple_replacements(fixed_query, patterns)
+        assert_multiple_replacements(fixed_query, get_nested_array_patterns())
         assert 'arrayExists(x -> x > 100, metrics.value)' in fixed_query
     
     def test_complex_query_array_fix(self, query_test_suite):
         """Test fixing complex queries with nested array access"""
         original_query = query_test_suite.test_queries['complex_query_with_arrays']
-        
         fixed_query = fix_clickhouse_array_syntax(original_query)
         
-        # Should fix array access in WITH clause
-        assert 'toFloat64OrZero(arrayElement(metrics.value, position))' in fixed_query
-        assert 'toFloat64OrZero(arrayElement(metrics.value, position-1))' in fixed_query
-        
-        # Should not break WITH clause structure
-        assert 'WITH filtered_metrics AS' in fixed_query
-        assert 'ORDER BY timestamp DESC' in fixed_query
+        assert_complex_query_fixes(fixed_query)
     
     def test_no_changes_for_correct_syntax(self):
         """Test that correctly written queries remain unchanged"""

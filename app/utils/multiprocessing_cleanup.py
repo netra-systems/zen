@@ -60,51 +60,11 @@ class MultiprocessingResourceManager:
     
     def cleanup_all(self) -> None:
         """Clean up all registered multiprocessing resources."""
-        # Clean up processes
-        for process in self.processes:
-            try:
-                if process.is_alive():
-                    process.terminate()
-                    process.join(timeout=1)
-                    if process.is_alive():
-                        process.kill()
-                        process.join(timeout=1)
-            except Exception as e:
-                logger.warning(f"Error cleaning up process: {e}")
-        
-        # Clean up pools
-        for pool in self.pools:
-            try:
-                pool.close()
-                pool.terminate()
-                pool.join(timeout=1)
-            except Exception as e:
-                logger.warning(f"Error cleaning up pool: {e}")
-        
-        # Clean up queues
-        for queue in self.queues:
-            try:
-                while not queue.empty():
-                    queue.get_nowait()
-                queue.close()
-                queue.join_thread()
-            except Exception as e:
-                logger.warning(f"Error cleaning up queue: {e}")
-        
-        # Clean up locks
-        for lock in self.locks:
-            try:
-                if hasattr(lock, 'release'):
-                    lock.release()
-            except Exception as e:
-                logger.warning(f"Error cleaning up lock: {e}")
-        
-        # Clear all lists
-        self.processes.clear()
-        self.pools.clear()
-        self.queues.clear()
-        self.locks.clear()
-        
+        _cleanup_processes(self)
+        _cleanup_pools(self)
+        _cleanup_queues(self)
+        _cleanup_locks(self)
+        _clear_all_lists(self)
         logger.info("Multiprocessing resources cleaned up")
 
 
@@ -118,28 +78,99 @@ def setup_multiprocessing() -> None:
     This should be called early in the application startup.
     """
     # Set start method based on platform
-    if sys.platform == 'darwin':  # macOS
-        # Use 'spawn' to avoid issues with fork() on macOS
-        try:
-            multiprocessing.set_start_method('spawn', force=True)
-        except RuntimeError:
-            pass  # Already set
-    elif sys.platform == 'win32':  # Windows
-        # Windows only supports 'spawn'
-        try:
-            multiprocessing.set_start_method('spawn', force=True)
-        except RuntimeError:
-            pass  # Already set
-    else:  # Linux/Unix
-        # Use 'forkserver' for better safety
-        try:
-            multiprocessing.set_start_method('forkserver', force=True)
-        except RuntimeError:
-            pass  # Already set
-    
+    start_method = _get_platform_start_method()
+    _set_multiprocessing_method(start_method)
     logger.info(f"Multiprocessing configured with method: {multiprocessing.get_start_method()}")
 
 
 def cleanup_multiprocessing() -> None:
     """Manually trigger cleanup of all multiprocessing resources."""
     mp_resource_manager.cleanup_all()
+
+
+def _cleanup_processes(self) -> None:
+    """Clean up all registered processes."""
+    for process in self.processes:
+        try:
+            if process.is_alive():
+                _terminate_process_safely(process)
+        except Exception as e:
+            logger.warning(f"Error cleaning up process: {e}")
+
+
+def _cleanup_pools(self) -> None:
+    """Clean up all registered process pools."""
+    for pool in self.pools:
+        try:
+            _close_pool_safely(pool)
+        except Exception as e:
+            logger.warning(f"Error cleaning up pool: {e}")
+
+
+def _cleanup_queues(self) -> None:
+    """Clean up all registered queues."""
+    for queue in self.queues:
+        try:
+            _empty_and_close_queue(queue)
+        except Exception as e:
+            logger.warning(f"Error cleaning up queue: {e}")
+
+
+def _cleanup_locks(self) -> None:
+    """Clean up all registered locks."""
+    for lock in self.locks:
+        try:
+            if hasattr(lock, 'release'):
+                lock.release()
+        except Exception as e:
+            logger.warning(f"Error cleaning up lock: {e}")
+
+
+def _clear_all_lists(self) -> None:
+    """Clear all resource lists."""
+    self.processes.clear()
+    self.pools.clear()
+    self.queues.clear()
+    self.locks.clear()
+
+
+def _terminate_process_safely(process) -> None:
+    """Safely terminate a process with fallback to kill."""
+    process.terminate()
+    process.join(timeout=1)
+    if process.is_alive():
+        process.kill()
+        process.join(timeout=1)
+
+
+def _close_pool_safely(pool) -> None:
+    """Safely close and terminate a process pool."""
+    pool.close()
+    pool.terminate()
+    pool.join(timeout=1)
+
+
+def _empty_and_close_queue(queue) -> None:
+    """Empty and close a queue safely."""
+    while not queue.empty():
+        queue.get_nowait()
+    queue.close()
+    queue.join_thread()
+
+
+def _get_platform_start_method() -> str:
+    """Get the appropriate start method for the platform."""
+    if sys.platform == 'darwin':  # macOS
+        return 'spawn'  # Avoid issues with fork() on macOS
+    elif sys.platform == 'win32':  # Windows
+        return 'spawn'  # Windows only supports 'spawn'
+    else:  # Linux/Unix
+        return 'forkserver'  # Better safety
+
+
+def _set_multiprocessing_method(method: str) -> None:
+    """Set multiprocessing start method with error handling."""
+    try:
+        multiprocessing.set_start_method(method, force=True)
+    except RuntimeError:
+        pass  # Already set

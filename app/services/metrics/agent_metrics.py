@@ -103,10 +103,9 @@ class AgentMetricsCollector:
         """Extract time series points from operation records."""
         points = []
         for record in operations:
-            if record.end_time:
-                value = self._extract_metric_value(record, metric_type)
-                if value is not None:
-                    points.append(self._create_time_series_point(record, value, agent_name))
+            point = self._create_point_from_record(record, agent_name, metric_type)
+            if point:
+                points.append(point)
         return points
     
     def _create_time_series_point(self, record: AgentOperationRecord, value: float, agent_name: str) -> TimeSeriesPoint:
@@ -125,13 +124,9 @@ class AgentMetricsCollector:
     
     def _get_basic_metric_values(self, record: AgentOperationRecord) -> Dict[AgentMetricType, float]:
         """Get basic metric values from record."""
-        return {
-            AgentMetricType.EXECUTION_TIME: record.execution_time_ms,
-            AgentMetricType.SUCCESS_RATE: 1.0 if record.success else 0.0,
-            AgentMetricType.ERROR_RATE: 0.0 if record.success else 1.0,
-            AgentMetricType.MEMORY_USAGE: record.memory_usage_mb,
-            AgentMetricType.CPU_USAGE: record.cpu_usage_percent
-        }
+        execution_metrics = self._get_execution_metrics(record)
+        resource_metrics = self._get_resource_metrics(record)
+        return {**execution_metrics, **resource_metrics}
     
     def _get_advanced_metric_values(self, record: AgentOperationRecord) -> Dict[AgentMetricType, float]:
         """Get advanced metric values from record."""
@@ -151,6 +146,29 @@ class AgentMetricsCollector:
     async def cleanup_old_data(self, hours: int = 24) -> None:
         """Clean up old operation records."""
         await self._core.cleanup_old_data(hours)
+    
+    def _create_point_from_record(self, record: AgentOperationRecord, agent_name: str, metric_type: AgentMetricType) -> Optional[TimeSeriesPoint]:
+        """Create time series point from record if valid."""
+        if record.end_time:
+            value = self._extract_metric_value(record, metric_type)
+            if value is not None:
+                return self._create_time_series_point(record, value, agent_name)
+        return None
+    
+    def _get_execution_metrics(self, record: AgentOperationRecord) -> Dict[AgentMetricType, float]:
+        """Get execution-related metrics."""
+        return {
+            AgentMetricType.EXECUTION_TIME: record.execution_time_ms,
+            AgentMetricType.SUCCESS_RATE: 1.0 if record.success else 0.0,
+            AgentMetricType.ERROR_RATE: 0.0 if record.success else 1.0
+        }
+    
+    def _get_resource_metrics(self, record: AgentOperationRecord) -> Dict[AgentMetricType, float]:
+        """Get resource-related metrics."""
+        return {
+            AgentMetricType.MEMORY_USAGE: record.memory_usage_mb,
+            AgentMetricType.CPU_USAGE: record.cpu_usage_percent
+        }
 
 
 # Global agent metrics collector instance

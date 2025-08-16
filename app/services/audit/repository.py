@@ -101,6 +101,11 @@ class CorpusAuditRepository(BaseRepository[CorpusAuditLog]):
             return result.scalar() or 0
         except Exception as e:
             self._handle_count_error(e, filters)
+    
+    def _handle_count_error(self, error: Exception, filters: CorpusAuditSearchFilter) -> None:
+        """Handle count query errors."""
+        logger.error(f"Error counting audit records: {error}")
+        raise DatabaseError("Failed to count audit records", context={"filters": filters.model_dump()})
 
     def _build_count_query(self, filters: CorpusAuditSearchFilter):
         """Build count query with filters applied."""

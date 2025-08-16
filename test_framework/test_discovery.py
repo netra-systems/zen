@@ -103,3 +103,200 @@ class TestDiscovery:
             self._validate_category_tests(category, tests, issues)
         
         return dict(issues)
+    
+    def _discover_backend_tests_into(self, path: Path, discovered: defaultdict):
+        """Discover backend tests and add to discovered dict."""
+        backend_test_dirs = [
+            path / "app" / "tests",
+            path / "tests",
+            path / "integration_tests"
+        ]
+        
+        for test_dir in backend_test_dirs:
+            if test_dir.exists():
+                for test_file in test_dir.rglob("test_*.py"):
+                    category = self._categorize_test(test_file)
+                    discovered[category].append(str(test_file))
+    
+    def _discover_frontend_tests_into(self, path: Path, discovered: defaultdict):
+        """Discover frontend tests and add to discovered dict."""
+        frontend_test_dir = path / "frontend" / "__tests__"
+        if frontend_test_dir.exists():
+            for test_file in frontend_test_dir.rglob("*.test.{ts,tsx,js,jsx}"):
+                discovered["frontend"].append(str(test_file))
+    
+    def _discover_cypress_tests_into(self, path: Path, discovered: defaultdict):
+        """Discover Cypress tests and add to discovered dict."""
+        cypress_dir = path / "frontend" / "cypress" / "e2e"
+        if cypress_dir.exists():
+            for test_file in cypress_dir.rglob("*.cy.{ts,js}"):
+                discovered["e2e"].append(str(test_file))
+    
+    def _add_jest_tests(self, path: Path, frontend_tests: List[str]):
+        """Add Jest/React tests to frontend tests list."""
+        frontend_test_dir = path / "frontend" / "__tests__"
+        if frontend_test_dir.exists():
+            for test_file in frontend_test_dir.rglob("*.test.{ts,tsx,js,jsx}"):
+                frontend_tests.append(str(test_file))
+    
+    def _add_colocated_tests(self, path: Path, frontend_tests: List[str]):
+        """Add co-located component tests to frontend tests list."""
+        frontend_src_dir = path / "frontend"
+        if frontend_src_dir.exists():
+            for test_file in frontend_src_dir.rglob("*.test.{ts,tsx,js,jsx}"):
+                if "__tests__" not in str(test_file):  # Avoid duplicates
+                    frontend_tests.append(str(test_file))
+    
+    def _add_cypress_tests(self, path: Path, e2e_tests: List[str]):
+        """Add Cypress tests to e2e tests list."""
+        cypress_dir = path / "frontend" / "cypress" / "e2e"
+        if cypress_dir.exists():
+            for test_file in cypress_dir.rglob("*.cy.{ts,js}"):
+                e2e_tests.append(str(test_file))
+    
+    def _add_playwright_tests(self, path: Path, e2e_tests: List[str]):
+        """Add Playwright tests to e2e tests list."""
+        playwright_dir = path / "tests" / "e2e"
+        if playwright_dir.exists():
+            for test_file in playwright_dir.rglob("*.spec.{ts,js}"):
+                e2e_tests.append(str(test_file))
+    
+    def _check_primary_categories(self, path_str: str) -> str:
+        """Check for primary test categories."""
+        if "unit" in path_str or "app/tests/core" in path_str:
+            return "unit"
+        elif "integration" in path_str:
+            return "integration"
+        elif "e2e" in path_str or "cypress" in path_str:
+            return "e2e"
+        elif "smoke" in path_str:
+            return "smoke"
+        return ""
+    
+    def _check_secondary_categories(self, path_str: str) -> str:
+        """Check for secondary test categories."""
+        if "performance" in path_str or "perf" in path_str:
+            return "performance"
+        elif "security" in path_str or "auth" in path_str:
+            return "security"
+        elif "websocket" in path_str or "ws_" in path_str:
+            return "websocket"
+        elif "database" in path_str or "db" in path_str:
+            return "database"
+        elif "api" in path_str or "route" in path_str:
+            return "api"
+        elif "agent" in path_str:
+            return "agent"
+        elif "llm" in path_str:
+            return "llm"
+        else:
+            return "other"
+    
+    def _get_critical_categories(self) -> Dict[str, Dict[str, str]]:
+        """Get critical test categories."""
+        return {
+            "smoke": {
+                "description": "Quick validation tests for pre-commit checks",
+                "priority": "critical",
+                "timeout": "30s"
+            },
+            "unit": {
+                "description": "Unit tests for individual components", 
+                "priority": "high",
+                "timeout": "2m"
+            }
+        }
+    
+    def _get_standard_categories(self) -> Dict[str, Dict[str, str]]:
+        """Get standard test categories."""
+        return {
+            "integration": {
+                "description": "Integration tests for feature validation",
+                "priority": "medium",
+                "timeout": "5m"
+            },
+            "e2e": {
+                "description": "End-to-end user journey tests",
+                "priority": "medium", 
+                "timeout": "10m"
+            },
+            "frontend": {
+                "description": "React component and UI tests",
+                "priority": "medium",
+                "timeout": "5m"
+            }
+        }
+    
+    def _get_specialized_categories(self) -> Dict[str, Dict[str, str]]:
+        """Get specialized test categories."""
+        return {
+            "performance": {
+                "description": "Performance and load tests",
+                "priority": "low",
+                "timeout": "30m"
+            },
+            "security": {
+                "description": "Security and authentication tests",
+                "priority": "high",
+                "timeout": "5m"
+            },
+            "websocket": {
+                "description": "WebSocket communication tests",
+                "priority": "medium",
+                "timeout": "2m"
+            },
+            "database": {
+                "description": "Database and data persistence tests",
+                "priority": "high",
+                "timeout": "5m"
+            },
+            "api": {
+                "description": "API endpoint and route tests",
+                "priority": "high",
+                "timeout": "5m"
+            },
+            "agent": {
+                "description": "AI agent and workflow tests",
+                "priority": "medium",
+                "timeout": "10m"
+            },
+            "llm": {
+                "description": "LLM integration and prompt tests",
+                "priority": "medium",
+                "timeout": "5m"
+            },
+            "other": {
+                "description": "Miscellaneous tests",
+                "priority": "low",
+                "timeout": "5m"
+            }
+        }
+    
+    def _collect_matching_tests(self, all_tests: Dict, pattern_lower: str, matching_tests: List[str]):
+        """Collect tests matching the pattern."""
+        for category, tests in all_tests.items():
+            for test in tests:
+                if pattern_lower in test.lower():
+                    matching_tests.append(test)
+    
+    def _validate_category_tests(self, category: str, tests: List[str], issues: defaultdict):
+        """Validate tests in a specific category."""
+        for test_path in tests:
+            path = Path(test_path)
+            
+            self._check_naming_conventions(category, path, test_path, issues)
+            self._check_file_existence(path, test_path, issues)
+    
+    def _check_naming_conventions(self, category: str, path: Path, test_path: str, issues: defaultdict):
+        """Check test file naming conventions."""
+        if category not in ["frontend", "e2e"]:
+            if not path.name.startswith("test_"):
+                issues["naming"].append(f"{test_path}: Should start with 'test_'")
+    
+    def _check_file_existence(self, path: Path, test_path: str, issues: defaultdict):
+        """Check if test file exists and is not empty."""
+        try:
+            if path.stat().st_size == 0:
+                issues["empty_files"].append(test_path)
+        except FileNotFoundError:
+            issues["missing_files"].append(test_path)

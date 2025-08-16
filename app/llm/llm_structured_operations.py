@@ -67,14 +67,16 @@ class LLMStructuredOperations:
         """Generate structured response using LLM."""
         structured_llm = self.get_structured_llm(llm_config_name, schema, **kwargs)
         response = await structured_llm.ainvoke(prompt)
-        
-        response_data = response.model_dump()
-        parsed_data = parse_nested_json_recursive(response_data)
-        final_response = schema(**parsed_data)
-        
+        final_response = self._process_llm_response(response, schema)
         await self._cache_structured_if_needed(use_cache, prompt, final_response, 
                                              cache_key, llm_config_name)
         return final_response
+    
+    def _process_llm_response(self, response: Any, schema: Type[T]) -> T:
+        """Process LLM response and convert to structured format."""
+        response_data = response.model_dump()
+        parsed_data = parse_nested_json_recursive(response_data)
+        return schema(**parsed_data)
     
     async def _fallback_structured_parse(self, prompt: str, llm_config_name: str, 
                                        schema: Type[T], use_cache: bool, 
