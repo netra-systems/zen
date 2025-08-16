@@ -32,21 +32,12 @@ class AgentMetricsCollector:
         """Start tracking an agent operation."""
         return await self._core.start_operation(agent_name, operation_type, metadata)
 
-    async def end_operation(
-        self,
-        operation_id: str,
-        success: bool = True,
-        failure_type: Optional[FailureType] = None,
-        error_message: Optional[str] = None,
-        memory_usage_mb: float = 0.0,
-        cpu_usage_percent: float = 0.0,
-        metadata: Optional[Dict[str, Any]] = None
-    ) -> Optional[AgentOperationRecord]:
+    async def end_operation(self, operation_id: str, success: bool = True, failure_type: Optional[FailureType] = None,
+                          error_message: Optional[str] = None, memory_usage_mb: float = 0.0, 
+                          cpu_usage_percent: float = 0.0, metadata: Optional[Dict[str, Any]] = None) -> Optional[AgentOperationRecord]:
         """End operation tracking and record metrics."""
-        return await self._core.end_operation(
-            operation_id, success, failure_type, error_message,
-            memory_usage_mb, cpu_usage_percent, metadata
-        )
+        return await self._core.end_operation(operation_id, success, failure_type, error_message,
+                                            memory_usage_mb, cpu_usage_percent, metadata)
 
     async def record_timeout(
         self, 

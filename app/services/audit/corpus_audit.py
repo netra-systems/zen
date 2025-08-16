@@ -177,12 +177,15 @@ class CorpusAuditLogger:
         summary_stats: Dict[str, int], time_range: Dict[str, Any]
     ) -> CorpusAuditReport:
         """Create CorpusAuditReport object."""
-        return CorpusAuditReport(
-            total_records=total_count,
-            records=audit_records,
-            summary=summary_stats,
-            time_range=time_range
-        )
+        report_data = self._build_report_data(total_count, audit_records, summary_stats, time_range)
+        return CorpusAuditReport(**report_data)
+
+    def _build_report_data(self, total_count: int, audit_records: List[CorpusAuditRecord], summary_stats: Dict[str, int], time_range: Dict[str, Any]) -> Dict[str, Any]:
+        """Build report data dictionary."""
+        return {
+            "total_records": total_count, "records": audit_records,
+            "summary": summary_stats, "time_range": time_range
+        }
 
     async def generate_audit_report(
         self, db: AsyncSession, filters: CorpusAuditSearchFilter

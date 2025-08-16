@@ -40,16 +40,23 @@ class CircuitFallbackStrategy(ExecutionStrategy):
 class RetryExecutionStrategy(ExecutionStrategy):
     """Strategy for retry execution with fallback."""
     
-    def __init__(self, handler: 'LLMFallbackHandler', llm_operation, 
-                 operation_name: str, circuit_breaker: CircuitBreaker, 
-                 provider: str, fallback_type: str):
-        """Initialize retry execution strategy."""
+    def _set_strategy_properties(self, handler: 'LLMFallbackHandler', llm_operation,
+                                operation_name: str, circuit_breaker: CircuitBreaker, 
+                                provider: str, fallback_type: str) -> None:
+        """Set all strategy properties."""
         self.handler = handler
         self.llm_operation = llm_operation
         self.operation_name = operation_name
         self.circuit_breaker = circuit_breaker
         self.provider = provider
         self.fallback_type = fallback_type
+    
+    def __init__(self, handler: 'LLMFallbackHandler', llm_operation, 
+                 operation_name: str, circuit_breaker: CircuitBreaker, 
+                 provider: str, fallback_type: str):
+        """Initialize retry execution strategy."""
+        self._set_strategy_properties(handler, llm_operation, operation_name, 
+                                    circuit_breaker, provider, fallback_type)
     
     async def execute(self) -> Any:
         """Execute retry strategy with fallback."""
@@ -80,14 +87,18 @@ class RetryExecutor:
         if self.handler.config.use_circuit_breaker:
             circuit_breaker.record_failure(failure_type)
     
-    async def wait_before_retry(self, attempt: int, error: Exception, operation_name: str):
-        """Wait before retry with exponential backoff."""
-        failure_type = self.handler._classify_error(error)
-        delay = self.handler._calculate_delay(attempt, failure_type)
+    def _log_retry_warning(self, operation_name: str, attempt: int, error: Exception, delay: float) -> None:
+        """Log retry warning message."""
         logger.warning(
             f"LLM operation {operation_name} failed (attempt {attempt}/{self.handler.config.max_retries}): {error}. "
             f"Retrying in {delay:.2f}s"
         )
+    
+    async def wait_before_retry(self, attempt: int, error: Exception, operation_name: str):
+        """Wait before retry with exponential backoff."""
+        failure_type = self.handler._classify_error(error)
+        delay = self.handler._calculate_delay(attempt, failure_type)
+        self._log_retry_warning(operation_name, attempt, error, delay)
         await asyncio.sleep(delay)
 
 

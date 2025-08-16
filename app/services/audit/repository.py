@@ -44,11 +44,15 @@ class CorpusAuditRepository(BaseRepository[CorpusAuditLog]):
     async def search_records(self, db: AsyncSession, filters: CorpusAuditSearchFilter) -> List[CorpusAuditLog]:
         """Search audit records with comprehensive filtering."""
         try:
-            query = self._build_search_query(filters)
-            result = await db.execute(query.limit(filters.limit).offset(filters.offset))
-            return list(result.scalars().all())
+            return await self._execute_search_query(db, filters)
         except Exception as e:
             self._handle_search_error(e, filters)
+
+    async def _execute_search_query(self, db: AsyncSession, filters: CorpusAuditSearchFilter) -> List[CorpusAuditLog]:
+        """Execute search query with pagination."""
+        query = self._build_search_query(filters)
+        result = await db.execute(query.limit(filters.limit).offset(filters.offset))
+        return list(result.scalars().all())
     
     def _handle_search_error(self, error: Exception, filters: CorpusAuditSearchFilter) -> None:
         """Handle search query errors."""
@@ -63,8 +67,18 @@ class CorpusAuditRepository(BaseRepository[CorpusAuditLog]):
     
     def _apply_basic_filters(self, query, filters: CorpusAuditSearchFilter):
         """Apply basic filters to query."""
+        query = self._apply_user_filter(query, filters)
+        query = self._apply_action_status_filters(query, filters)
+        return query
+
+    def _apply_user_filter(self, query, filters: CorpusAuditSearchFilter):
+        """Apply user ID filter to query."""
         if filters.user_id:
             query = query.where(CorpusAuditLog.user_id == filters.user_id)
+        return query
+
+    def _apply_action_status_filters(self, query, filters: CorpusAuditSearchFilter):
+        """Apply action and status filters to query."""
         if filters.action:
             query = query.where(CorpusAuditLog.action == filters.action.value)
         if filters.status:
@@ -96,11 +110,15 @@ class CorpusAuditRepository(BaseRepository[CorpusAuditLog]):
     async def count_records(self, db: AsyncSession, filters: CorpusAuditSearchFilter) -> int:
         """Count total records matching search filters."""
         try:
-            query = self._build_count_query(filters)
-            result = await db.execute(query)
-            return result.scalar() or 0
+            return await self._execute_count_query(db, filters)
         except Exception as e:
             self._handle_count_error(e, filters)
+
+    async def _execute_count_query(self, db: AsyncSession, filters: CorpusAuditSearchFilter) -> int:
+        """Execute count query and return result."""
+        query = self._build_count_query(filters)
+        result = await db.execute(query)
+        return result.scalar() or 0
     
     def _handle_count_error(self, error: Exception, filters: CorpusAuditSearchFilter) -> None:
         """Handle count query errors."""
@@ -189,22 +207,3 @@ class CorpusAuditRepository(BaseRepository[CorpusAuditLog]):
             stats[key] = count
         return stats
     
-    def _apply_basic_filters(self, query, filters: CorpusAuditSearchFilter):
-        """Apply basic search filters to query."""
-        if filters.user_id:
-            query = query.where(CorpusAuditLog.user_id == filters.user_id)
-        if filters.action:
-            query = query.where(CorpusAuditLog.action == filters.action.value)
-        if filters.status:
-            query = query.where(CorpusAuditLog.status == filters.status.value)
-        return query
-    
-    def _handle_search_error(self, error: Exception, filters: CorpusAuditSearchFilter) -> None:
-        """Handle search operation errors."""
-        logger.error(f"Error searching audit records: {error}")
-        raise DatabaseError("Failed to search audit records", context={"filters": filters.model_dump()})
-    
-    def _handle_count_error(self, error: Exception, filters: CorpusAuditSearchFilter) -> None:
-        """Handle count operation errors."""
-        logger.error(f"Error counting audit records: {error}")
-        raise DatabaseError("Failed to count audit records", context={"filters": filters.model_dump()})

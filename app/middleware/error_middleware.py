@@ -197,11 +197,17 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
                 request, call_next, operation_id, attempt, circuit_breaker
             )
         except Exception as error:
-            recovery_response = await self._handle_request_error(
-                request, error, operation_id, operation_type, 
-                attempt, max_attempts, circuit_breaker
+            return await self._handle_attempt_error(
+                request, error, operation_id, operation_type, attempt, max_attempts, circuit_breaker
             )
-            return recovery_response if recovery_response else error
+    
+    async def _handle_attempt_error(self, request: Request, error: Exception, operation_id: str, operation_type: OperationType, attempt: int, max_attempts: int, circuit_breaker):
+        """Handle error during single attempt."""
+        recovery_response = await self._handle_request_error(
+            request, error, operation_id, operation_type, 
+            attempt, max_attempts, circuit_breaker
+        )
+        return recovery_response if recovery_response else error
     
     async def _handle_request_attempt(
         self,
@@ -240,9 +246,7 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         context = self._create_recovery_context(
             operation_id, operation_type, error, attempt, max_attempts, request
         )
-        
         await self._log_error_with_context(error, context, request)
-        
         return await self._attempt_error_recovery(
             request, context, attempt, max_attempts, circuit_breaker
         )
@@ -274,17 +278,29 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         """Attempt error recovery and return response if needed."""
         if attempt >= max_attempts - 1:
             return None
-        
         recovery_result = await self.recovery_executor.attempt_recovery(context)
-        
+        return self._process_recovery_result(
+            request, context, recovery_result, circuit_breaker
+        )
+    
+    def _process_recovery_result(
+        self, request: Request, context: RecoveryContext, recovery_result, circuit_breaker
+    ) -> Optional[JSONResponse]:
+        """Process recovery result and return appropriate response."""
         if recovery_result.success:
-            if recovery_result.action_taken.value == "compensate":
-                return self._create_recovery_response(
-                    request, context, recovery_result
-                )
+            return self._handle_successful_recovery(request, context, recovery_result)
         else:
             circuit_breaker.record_failure("recovery_failure")
-        
+            return None
+    
+    def _handle_successful_recovery(
+        self, request: Request, context: RecoveryContext, recovery_result
+    ) -> Optional[JSONResponse]:
+        """Handle successful recovery attempt."""
+        if recovery_result.action_taken.value == "compensate":
+            return self._create_recovery_response(
+                request, context, recovery_result
+            )
         return None
     
     async def _handle_final_failure(
@@ -306,9 +322,13 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
     ) -> None:
         """Log error with comprehensive context."""
         error_data = self._build_error_data(error, context, request)
+        self._enhance_error_data(error_data, request, context)
+        self._log_by_severity(context.severity, error_data)
+    
+    def _enhance_error_data(self, error_data: dict, request: Request, context: RecoveryContext) -> None:
+        """Enhance error data with additional context."""
         self._add_user_context_to_error_data(error_data, request)
         self._add_stack_trace_if_critical(error_data, context)
-        self._log_by_severity(context.severity, error_data)
     
     def _build_error_data(self, error: Exception, context: RecoveryContext, request: Request) -> Dict[str, Any]:
         """Build base error data dictionary."""
@@ -378,10 +398,15 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
     ) -> JSONResponse:
         """Create final error response after all recovery attempts failed."""
         status_code = self._determine_error_status_code(error)
-        error_response = self._build_error_response_content(error, operation_id, request)
-        self._add_optional_error_ids(error_response, request)
+        error_response = self._build_complete_error_response(error, operation_id, request)
         headers = self._build_error_response_headers(operation_id, error)
         return JSONResponse(status_code=status_code, content=error_response, headers=headers)
+    
+    def _build_complete_error_response(self, error: Exception, operation_id: str, request: Request) -> dict:
+        """Build complete error response with all fields."""
+        error_response = self._build_error_response_content(error, operation_id, request)
+        self._add_optional_error_ids(error_response, request)
+        return error_response
     
     def _determine_error_status_code(self, error: Exception) -> int:
         """Determine HTTP status code for error type."""

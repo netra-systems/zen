@@ -258,16 +258,19 @@ async def _handle_generation_error(job_id: str, error: Exception, context: str):
     error_msg = f"A worker process failed: {error}" if "generation" in context else f"Failed to save to ClickHouse: {error}"
     await update_job_status(job_id, "failed", error=error_msg)
 
+async def _execute_content_generation_workflow(job_id: str, params: dict):
+    """Execute the core content generation workflow."""
+    generation_config, total_tasks = await _prepare_generation_config(job_id, params)
+    tasks, corpus, num_processes = await _create_generation_tasks(params, generation_config)
+    await _execute_generation_pool(job_id, tasks, num_processes, corpus)
+    await _save_generation_results(job_id, params, corpus)
+
 async def run_content_generation_job(job_id: str, params: dict):
     """The core worker process for generating a content corpus."""
     if not await _validate_job_params(job_id, params):
         return
-    
     try:
-        generation_config, total_tasks = await _prepare_generation_config(job_id, params)
-        tasks, corpus, num_processes = await _create_generation_tasks(params, generation_config)
-        await _execute_generation_pool(job_id, tasks, num_processes, corpus)
-        await _save_generation_results(job_id, params, corpus)
+        await _execute_content_generation_workflow(job_id, params)
     except Exception as e:
         await _handle_generation_error(job_id, e, "content generation")
 

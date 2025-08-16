@@ -57,17 +57,28 @@ def calculate_progress(status: Dict) -> float:
     return (generated / total * 100) if total > 0 else 0
 
 
-def extract_status_fields(status: Dict) -> Dict:
-    """Extract status fields for response building."""
+def _extract_basic_status_fields(status: Dict) -> Dict:
+    """Extract basic status fields."""
     return {
         "status": status["status"],
         "progress_percentage": calculate_progress(status),
         "records_generated": status["records_generated"],
-        "records_ingested": status["records_ingested"],
+        "records_ingested": status["records_ingested"]
+    }
+
+def _extract_timing_and_error_fields(status: Dict) -> Dict:
+    """Extract timing and error fields."""
+    return {
         "errors": status["errors"],
         "started_at": status["start_time"],
         "completed_at": status.get("end_time")
     }
+
+def extract_status_fields(status: Dict) -> Dict:
+    """Extract status fields for response building."""
+    basic_fields = _extract_basic_status_fields(status)
+    timing_fields = _extract_timing_and_error_fields(status)
+    return {**basic_fields, **timing_fields}
 
 
 async def cancel_job_safely(job_id: str) -> None:

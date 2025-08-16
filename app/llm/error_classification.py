@@ -146,16 +146,27 @@ class ErrorClassificationChain:
         handlers = self._create_handler_instances()
         return self._chain_handlers_in_priority_order(handlers)
     
-    def _create_handler_instances(self) -> Dict[str, ErrorClassificationHandler]:
-        """Create all handler instances with strong typing."""
+    def _create_core_handlers(self) -> Dict[str, ErrorClassificationHandler]:
+        """Create core error handlers (timeout, rate limit, auth)."""
         return {
             'timeout': TimeoutErrorHandler(),
             'rate_limit': RateLimitErrorHandler(), 
-            'auth': AuthenticationErrorHandler(),
+            'auth': AuthenticationErrorHandler()
+        }
+    
+    def _create_additional_handlers(self) -> Dict[str, ErrorClassificationHandler]:
+        """Create additional error handlers (network, validation, api)."""
+        return {
             'network': NetworkErrorHandler(),
             'validation': ValidationErrorHandler(),
             'api': APIErrorHandler()
         }
+    
+    def _create_handler_instances(self) -> Dict[str, ErrorClassificationHandler]:
+        """Create all handler instances with strong typing."""
+        handlers = self._create_core_handlers()
+        handlers.update(self._create_additional_handlers())
+        return handlers
     
     def _chain_handlers_in_priority_order(self, handlers: Dict[str, ErrorClassificationHandler]) -> ErrorClassificationHandler:
         """Chain handlers in priority order and return first handler."""

@@ -34,13 +34,17 @@ class ToolPermissionMiddleware:
         """Process request with tool permission checking"""
         start_time = time.time()
         try:
-            await self._handle_tool_permission_check(request)
-            response = await call_next(request)
-            await self._handle_tool_execution_logging(request, response, start_time)
-            return response
+            return await self._process_tool_request(request, call_next, start_time)
         except Exception as e:
             logger.error(f"Tool permission middleware error: {e}", exc_info=True)
             return await call_next(request)
+    
+    async def _process_tool_request(self, request: Request, call_next: Callable, start_time: float):
+        """Process tool request with permission checking and logging."""
+        await self._handle_tool_permission_check(request)
+        response = await call_next(request)
+        await self._handle_tool_execution_logging(request, response, start_time)
+        return response
     
     async def _handle_tool_permission_check(self, request: Request) -> None:
         """Handle tool permission checking for tool endpoints."""
@@ -54,12 +58,9 @@ class ToolPermissionMiddleware:
     async def _verify_tool_permissions(self, request: Request, tool_info: dict, user) -> None:
         """Verify tool permissions and set request state."""
         permission_result = await self._check_tool_permissions(tool_info, user, request)
-        
         if not permission_result.allowed:
             raise HTTPException(status_code=403, detail=self._permission_denied_response(permission_result))
-        
-        request.state.permission_check = permission_result
-        request.state.tool_info = tool_info
+        self._set_request_permission_state(request, permission_result, tool_info)
     
     async def _handle_tool_execution_logging(self, request: Request, response, start_time: float) -> None:
         """Handle tool execution logging if needed."""

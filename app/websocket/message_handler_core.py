@@ -137,13 +137,25 @@ class ReliableMessageHandler:
 
     async def _execute_fallback_handling(self, conn_info: ConnectionInfo) -> bool:
         """Execute fallback message handling steps."""
+        self._log_fallback_usage(conn_info)
+        await self._send_fallback_error_response(conn_info)
+        self._increment_fallback_stats()
+        return False
+
+    def _log_fallback_usage(self, conn_info: ConnectionInfo) -> None:
+        """Log fallback handler usage."""
         logger.warning(f"Using fallback message handling for connection {conn_info.connection_id}")
+
+    async def _send_fallback_error_response(self, conn_info: ConnectionInfo) -> None:
+        """Send fallback error response to client."""
         await self._send_error_response(
             conn_info, "MESSAGE_PROCESSING_FAILED", 
             "Message could not be processed. Please try again."
         )
+
+    def _increment_fallback_stats(self) -> None:
+        """Increment fallback usage statistics."""
         self.stats["fallback_used"] += 1
-        return False
 
     async def _execute_message_processing(self, process_func, fallback_func) -> bool:
         """Execute message processing with reliability protection."""
@@ -257,13 +269,19 @@ class ReliableMessageHandler:
 
     async def _handle_unexpected_error(self, conn_info: ConnectionInfo, error: Exception):
         """Handle unexpected errors during message processing."""
+        await self._log_unexpected_error_to_handler(conn_info, error)
+        await self._send_unexpected_error_response(conn_info)
+
+    async def _log_unexpected_error_to_handler(self, conn_info: ConnectionInfo, error: Exception) -> None:
+        """Log unexpected error to error handler."""
         await self.error_handler.handle_connection_error(
             conn_info,
             f"Unexpected error during message processing: {str(error)}",
             "unexpected_error"
         )
-        
-        # Send generic error response
+
+    async def _send_unexpected_error_response(self, conn_info: ConnectionInfo) -> None:
+        """Send unexpected error response to client."""
         await self._send_error_response(
             conn_info,
             "INTERNAL_ERROR",
@@ -282,13 +300,22 @@ class ReliableMessageHandler:
 
     def _create_error_response(self, error_code: str, error_message: str) -> Dict[str, Any]:
         """Create error response structure."""
+        error_payload = self._create_error_payload(error_code, error_message)
+        return self._create_response_structure(error_payload)
+
+    def _create_error_payload(self, error_code: str, error_message: str) -> Dict[str, Any]:
+        """Create error payload with timestamp."""
+        return {
+            "error_code": error_code,
+            "message": error_message,
+            "timestamp": datetime.now(UTC).isoformat()
+        }
+
+    def _create_response_structure(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Create response structure with type and sender."""
         return {
             "type": "error",
-            "payload": {
-                "error_code": error_code,
-                "message": error_message,
-                "timestamp": datetime.now(UTC).isoformat()
-            },
+            "payload": payload,
             "sender": "system"
         }
 
@@ -318,13 +345,17 @@ class ReliableMessageHandler:
 
     def _build_message_handler_stats(self) -> Dict[str, Any]:
         """Build message handler statistics."""
+        base_stats = self._get_base_message_stats()
         success_rate = self._calculate_success_rate()
+        return {**base_stats, "success_rate": success_rate}
+
+    def _get_base_message_stats(self) -> Dict[str, int]:
+        """Get base message processing statistics."""
         return {
             "messages_processed": self.stats["messages_processed"],
             "messages_failed": self.stats["messages_failed"],
             "validation_failures": self.stats["validation_failures"],
-            "fallback_used": self.stats["fallback_used"],
-            "success_rate": success_rate
+            "fallback_used": self.stats["fallback_used"]
         }
 
     def _calculate_success_rate(self) -> float:
@@ -341,10 +372,21 @@ class ReliableMessageHandler:
 
     def _build_health_status_response(self, overall_health: float, status: str, stats: Dict[str, Any]) -> Dict[str, Any]:
         """Build health status response dictionary."""
+        core_status = self._get_core_health_status(overall_health, status, stats)
+        system_status = self._get_system_health_status(stats)
+        return {**core_status, **system_status}
+
+    def _get_core_health_status(self, overall_health: float, status: str, stats: Dict[str, Any]) -> Dict[str, Any]:
+        """Get core health status information."""
         return {
             "overall_health": overall_health,
             "status": status,
-            "message_processing": stats["message_handler"],
+            "message_processing": stats["message_handler"]
+        }
+
+    def _get_system_health_status(self, stats: Dict[str, Any]) -> Dict[str, Any]:
+        """Get system health status information."""
+        return {
             "circuit_breaker_status": self.reliability.circuit_breaker.get_status(),
             "validation_status": self._build_validation_status(stats)
         }
@@ -366,10 +408,13 @@ class ReliableMessageHandler:
 
     def _build_validation_status(self, stats: Dict[str, Any]) -> Dict[str, Any]:
         """Build validation status information."""
+        failures = stats["message_handler"]["validation_failures"]
+        limits = self._get_validator_limits()
+        return {"validation_failures": failures, "validator_limits": limits}
+
+    def _get_validator_limits(self) -> Dict[str, int]:
+        """Get validator limits configuration."""
         return {
-            "validation_failures": stats["message_handler"]["validation_failures"],
-            "validator_limits": {
-                "max_message_size": self.validator.max_message_size,
-                "max_text_length": self.validator.max_text_length
-            }
+            "max_message_size": self.validator.max_message_size,
+            "max_text_length": self.validator.max_text_length
         }

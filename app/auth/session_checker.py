@@ -78,7 +78,15 @@ class SessionChecker:
     
     def _get_recent_ip_attempts(self, ip_address: str, minutes: int) -> List[AuthenticationAttempt]:
         """Get recent attempts from IP."""
-        cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=minutes)
+        cutoff_time = self._calculate_cutoff_time(minutes)
+        return self._filter_ip_attempts(ip_address, cutoff_time)
+    
+    def _calculate_cutoff_time(self, minutes: int) -> datetime:
+        """Calculate cutoff time for filtering attempts."""
+        return datetime.now(timezone.utc) - timedelta(minutes=minutes)
+    
+    def _filter_ip_attempts(self, ip_address: str, cutoff_time: datetime) -> List[AuthenticationAttempt]:
+        """Filter attempts by IP and time."""
         return [
             attempt for attempt in self.attempts_log
             if self._is_recent_ip_attempt(attempt, ip_address, cutoff_time)
@@ -103,7 +111,11 @@ class SessionChecker:
     
     def _get_user_failed_attempts(self, user_id: str, minutes: int) -> List[AuthenticationAttempt]:
         """Get user's failed attempts."""
-        cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=minutes)
+        cutoff_time = self._calculate_cutoff_time(minutes)
+        return self._filter_user_failed_attempts(user_id, cutoff_time)
+    
+    def _filter_user_failed_attempts(self, user_id: str, cutoff_time: datetime) -> List[AuthenticationAttempt]:
+        """Filter user failed attempts by time."""
         return [
             attempt for attempt in self.attempts_log
             if self._is_user_failed_attempt(attempt, user_id, cutoff_time)
@@ -166,8 +178,16 @@ class SessionChecker:
     
     def _cleanup_old_attempts(self):
         """Clean up old attempts from log."""
-        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=24)
-        self.attempts_log = [
+        cutoff_time = self._calculate_cleanup_cutoff()
+        self.attempts_log = self._filter_valid_attempts(cutoff_time)
+    
+    def _calculate_cleanup_cutoff(self) -> datetime:
+        """Calculate cutoff time for cleanup (24 hours)."""
+        return datetime.now(timezone.utc) - timedelta(hours=24)
+    
+    def _filter_valid_attempts(self, cutoff_time: datetime) -> List[AuthenticationAttempt]:
+        """Filter attempts that are still valid."""
+        return [
             attempt for attempt in self.attempts_log 
             if attempt.timestamp > cutoff_time
         ]
