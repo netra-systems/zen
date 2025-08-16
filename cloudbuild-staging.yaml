@@ -16,6 +16,8 @@ steps:
   # Build frontend image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build-frontend'
+    env:
+      - 'DOCKER_BUILDKIT=1'
     args:
       - 'build'
       - '-f'
