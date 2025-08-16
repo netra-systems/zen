@@ -23,6 +23,7 @@ import {
   handleMCPToolFailed,
   handleMCPServerError
 } from './websocket-mcp-handlers';
+import { handleError } from './websocket-error-handlers';
 import type { 
   UnifiedWebSocketEvent
 } from '@/types/websocket-event-types';
@@ -44,6 +45,8 @@ export const getEventHandlers = () => ({
   'agent_thinking': handleAgentThinking,
   'partial_result': handlePartialResult,
   'stream_chunk': handlePartialResult,
+  // Error event handlers
+  'error': handleError,
   // MCP event handlers
   'mcp_server_connected': handleMCPServerConnected,
   'mcp_server_disconnected': handleMCPServerDisconnected,

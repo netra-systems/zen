@@ -72,8 +72,25 @@ export const useThreadSwitching = (): UseThreadSwitchingResult => {
   const timeoutManagerRef = useRef(createTimeoutManager());
   const currentOperationRef = useRef<string | null>(null);
   
-  // Use shallow comparison for actions selector to prevent re-renders
-  const storeActions = useUnifiedChatStore(storeActionsSelector, shallow);
+  // Select individual actions to prevent re-renders
+  const setActiveThread = useUnifiedChatStore(state => state.setActiveThread);
+  const setThreadLoading = useUnifiedChatStore(state => state.setThreadLoading);
+  const startThreadLoading = useUnifiedChatStore(state => state.startThreadLoading);
+  const completeThreadLoading = useUnifiedChatStore(state => state.completeThreadLoading);
+  const clearMessages = useUnifiedChatStore(state => state.clearMessages);
+  const loadMessages = useUnifiedChatStore(state => state.loadMessages);
+  const handleWebSocketEvent = useUnifiedChatStore(state => state.handleWebSocketEvent);
+  
+  // Create store actions object
+  const storeActions = {
+    setActiveThread,
+    setThreadLoading,
+    startThreadLoading,
+    completeThreadLoading,
+    clearMessages,
+    loadMessages,
+    handleWebSocketEvent
+  };
   
   // Cleanup on unmount
   useEffect(() => {
@@ -144,18 +161,6 @@ const createTimeoutManager = () => {
   });
 };
 
-/**
- * Selector for store actions with stable reference
- */
-const storeActionsSelector = (state: UnifiedChatState) => ({
-  setActiveThread: state.setActiveThread,
-  setThreadLoading: state.setThreadLoading,
-  startThreadLoading: state.startThreadLoading,
-  completeThreadLoading: state.completeThreadLoading,
-  clearMessages: state.clearMessages,
-  loadMessages: state.loadMessages,
-  handleWebSocketEvent: state.handleWebSocketEvent
-});
 
 /**
  * Performs thread switch operation
