@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from app.dependencies import DbDep
 from app.logging_config import central_logger
-from app.auth.auth_dependencies import get_current_active_user
+from app.auth_integration.auth import get_current_active_user
 from app.routes.utils.thread_helpers import (
     handle_list_threads_request, handle_create_thread_request, handle_get_thread_request,
     handle_update_thread_request, handle_delete_thread_request, handle_get_messages_request,

@@ -53,6 +53,18 @@ class TypeCompatibilityChecker:
         """Normalize frontend type for comparison."""
         # Remove extra whitespace
         return frontend_type.strip()
+    
+    def _determine_mismatch_severity(self, backend_type: str, frontend_type: str) -> TypeMismatchSeverity:
+        """Determine the severity of a type mismatch."""
+        return _determine_mismatch_severity(backend_type, frontend_type)
+    
+    def _are_types_compatible(self, backend_type: str, frontend_type: str) -> bool:
+        """Check if two normalized types are compatible."""
+        return _are_types_compatible(backend_type, frontend_type)
+    
+    def _generate_type_suggestion(self, backend_type: str, frontend_type: str) -> Optional[str]:
+        """Generate a suggestion for fixing the type mismatch."""
+        return _generate_type_suggestion(backend_type, frontend_type)
 
 
 def _are_types_compatible(backend_type: str, frontend_type: str) -> bool:

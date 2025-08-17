@@ -1,29 +1,26 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { User } from '@/types/registry';
 
-interface User {
-  id: string;
-  email: string;
-  name?: string;
+interface ExtendedUser extends User {
   role?: 'standard_user' | 'power_user' | 'developer' | 'admin' | 'super_admin';
   permissions?: string[];
   is_developer?: boolean;
-  is_superuser?: boolean;
 }
 
 interface AuthState {
   isAuthenticated: boolean;
-  user: User | null;
+  user: ExtendedUser | null;
   token: string | null;
   loading: boolean;
   error: string | null;
   
   // Actions
-  login: (user: User, token: string) => void;
+  login: (user: ExtendedUser, token: string) => void;
   logout: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  updateUser: (user: Partial<User>) => void;
+  updateUser: (user: Partial<ExtendedUser>) => void;
   reset: () => void;
   
   // Permission helpers
@@ -44,26 +41,14 @@ export const useAuthStore = create<AuthState>()(
 
     login: (user, token) =>
       set((state) => {
-        state.isAuthenticated = true;
-        state.user = user;
-        state.token = token;
-        state.error = null;
-        // Store token in localStorage
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('jwt_token', token);
-        }
+        setUserLoginState(state, user, token);
+        storeTokenInLocalStorage(token);
       }),
 
     logout: () =>
       set((state) => {
-        state.isAuthenticated = false;
-        state.user = null;
-        state.token = null;
-        state.error = null;
-        // Remove token from localStorage
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('jwt_token');
-        }
+        clearUserAuthState(state);
+        removeTokenFromLocalStorage();
       }),
 
     setLoading: (loading) =>
@@ -85,14 +70,8 @@ export const useAuthStore = create<AuthState>()(
 
     reset: () =>
       set((state) => {
-        state.isAuthenticated = false;
-        state.user = null;
-        state.token = null;
-        state.loading = false;
-        state.error = null;
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('jwt_token');
-        }
+        resetAuthState(state);
+        removeTokenFromLocalStorage();
       }),
 
     hasPermission: (permission) => {
@@ -129,3 +108,38 @@ export const useAuthStore = create<AuthState>()(
     },
   }))
 );
+
+// Helper functions for auth state updates (≤8 lines each)
+const setUserLoginState = (state: any, user: User, token: string): void => {
+  state.isAuthenticated = true;
+  state.user = user;
+  state.token = token;
+  state.error = null;
+};
+
+const clearUserAuthState = (state: any): void => {
+  state.isAuthenticated = false;
+  state.user = null;
+  state.token = null;
+  state.error = null;
+};
+
+const resetAuthState = (state: any): void => {
+  state.isAuthenticated = false;
+  state.user = null;
+  state.token = null;
+  state.loading = false;
+  state.error = null;
+};
+
+const storeTokenInLocalStorage = (token: string): void => {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('jwt_token', token);
+  }
+};
+
+const removeTokenFromLocalStorage = (): void => {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('jwt_token');
+  }
+};

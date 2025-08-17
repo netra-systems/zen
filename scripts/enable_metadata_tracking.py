@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-AI Agent Metadata Tracking Enabler - Refactored Modular Version
-Enables and configures comprehensive metadata tracking for AI modifications
-Now uses focused modules under 300 lines each
+AI Agent Metadata Tracking Enabler - Modular Enterprise-Ready Version
+Enables comprehensive metadata tracking for AI modifications with enterprise audit compliance.
+Supports modular command execution following 8-line function architecture.
 """
 
 import argparse
@@ -51,10 +51,11 @@ def _handle_default_command(enabler: MetadataTrackingEnabler) -> None:
 
 
 def main():
-    """Main entry point - now lightweight and modular"""
+    """Main entry point - lightweight and modular"""
     parser = _get_argument_parser()
     args = parser.parse_args()
     
+    # Initialize enabler
     enabler = MetadataTrackingEnabler()
     
     if args.activate:

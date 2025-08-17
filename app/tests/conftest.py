@@ -53,6 +53,12 @@ from app.main import app
 from fastapi.testclient import TestClient
 from app.db.session import get_db_session
 from app.config import settings
+from app.tests.conftest_helpers import (
+    _setup_basic_llm_mocks, _setup_performance_llm_mocks,
+    _setup_websocket_interface_compatibility, _setup_websocket_test_mocks,
+    _create_real_tool_dispatcher, _create_mock_tool_dispatcher,
+    _import_agent_classes, _instantiate_agents
+)
 
 # Temporarily disabled to fix test hanging issue
 # @pytest.fixture(scope="function")
@@ -77,6 +83,7 @@ async def db_session(test_engine):
     async_session = sessionmaker(test_engine, expire_on_commit=False, class_=AsyncSession)
     async with async_session() as session:
         yield session
+
 
 @pytest.fixture(scope="function")
 def client(db_session):
@@ -105,14 +112,8 @@ def _create_mock_llm_manager():
     """Create properly configured async mock LLM manager."""
     from unittest.mock import AsyncMock, MagicMock
     mock_manager = MagicMock()
-    # Mock all expected async methods to return proper responses
-    mock_manager.get_response = AsyncMock(return_value="Mock LLM response")
-    mock_manager.get_structured_response = AsyncMock(return_value={"analysis": "mock analysis", "recommendations": []})
-    mock_manager.generate = AsyncMock(return_value="Mock generated content")
-    mock_manager.stream_response = AsyncMock()
-    # Add latency-specific mocking for performance testing
-    mock_manager.generate_structured = AsyncMock(return_value={"optimizations": ["cache optimization", "parallel processing"], "confidence": 0.85})
-    mock_manager.analyze_performance = AsyncMock(return_value={"latency_ms": 250, "throughput": 1000, "bottlenecks": ["database", "api calls"]})
+    _setup_basic_llm_mocks(mock_manager)
+    _setup_performance_llm_mocks(mock_manager)
     return mock_manager
 
 
@@ -120,15 +121,9 @@ def _create_mock_llm_manager():
 def real_websocket_manager():
     """Create real WebSocket manager for E2E tests with interface compatibility."""
     from app.ws_manager import WebSocketManager
-    from unittest.mock import AsyncMock
     manager = WebSocketManager()
-    # Add interface compatibility for agents expecting send_message
-    if not hasattr(manager, 'send_message'):
-        manager.send_message = manager.send_message_to_user
-    # Mock methods to prevent actual WebSocket operations in tests
-    manager.send_message = AsyncMock(return_value=True)
-    manager.send_to_thread = AsyncMock(return_value=True)
-    manager.send_message_to_user = AsyncMock(return_value=True)
+    _setup_websocket_interface_compatibility(manager)
+    _setup_websocket_test_mocks(manager)
     return manager
 
 
@@ -136,17 +131,8 @@ def real_websocket_manager():
 def real_tool_dispatcher():
     """Create real tool dispatcher when needed, otherwise proper mock."""
     if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
-        from app.agents.tool_dispatcher import ToolDispatcher
-        dispatcher = ToolDispatcher()
-        return dispatcher
-    else:
-        from unittest.mock import AsyncMock, MagicMock
-        mock_dispatcher = MagicMock()
-        # Mock expected methods for tool dispatch
-        mock_dispatcher.execute = AsyncMock(return_value={"result": "mock tool execution", "success": True})
-        mock_dispatcher.dispatch_tool = AsyncMock(return_value={"output": "mock output"})
-        mock_dispatcher.get_available_tools = MagicMock(return_value=[])
-        return mock_dispatcher
+        return _create_real_tool_dispatcher()
+    return _create_mock_tool_dispatcher()
 
 
 @pytest.fixture(scope="function")
@@ -158,16 +144,8 @@ def real_agent_setup(real_llm_manager, real_websocket_manager, real_tool_dispatc
 
 def _create_real_agents(llm_manager, tool_dispatcher):
     """Create real agent instances with proper dependencies."""
-    from app.agents.triage_sub_agent.agent import TriageSubAgent
-    from app.agents.data_sub_agent.agent import DataSubAgent
-    from app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-    from app.agents.reporting_sub_agent import ReportingSubAgent
-    return {
-        'triage': TriageSubAgent(llm_manager, tool_dispatcher),
-        'data': DataSubAgent(llm_manager, tool_dispatcher),
-        'optimization': OptimizationsCoreSubAgent(llm_manager, tool_dispatcher),
-        'reporting': ReportingSubAgent(llm_manager, tool_dispatcher)
-    }
+    agent_classes = _import_agent_classes()
+    return _instantiate_agents(agent_classes, llm_manager, tool_dispatcher)
 
 
 def _build_real_setup_dict(agents, llm_manager, websocket_manager, tool_dispatcher):

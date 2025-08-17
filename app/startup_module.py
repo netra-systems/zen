@@ -26,7 +26,7 @@ from app.db.migration_utils import (
     log_migration_status, should_continue_on_error, validate_database_url
 )
 from app.core.performance_optimization_manager import performance_manager
-from app.monitoring.performance_monitor import performance_monitor
+from app.monitoring import performance_monitor
 from app.db.index_optimizer import index_manager
 
 
@@ -320,7 +320,8 @@ async def _create_monitoring_task(app: FastAPI, logger: logging.Logger) -> None:
 async def _start_connection_monitoring(app: FastAPI) -> None:
     """Start database connection monitoring."""
     from app.services.database.connection_monitor import start_connection_monitoring
-    app.state.monitoring_task = asyncio.create_task(start_connection_monitoring())
+    await start_connection_monitoring()
+    # Monitoring task is now created internally in health_checker
 
 
 async def _start_performance_monitoring(app: FastAPI) -> None:

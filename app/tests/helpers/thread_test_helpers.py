@@ -82,11 +82,11 @@ def setup_repos_with_patches(
 ) -> list:
     """Setup repository patches for tests"""
     patches = [
-        patch('app.routes.threads_route.ThreadRepository', return_value=thread_repo),
-        patch('app.routes.threads_route.MessageRepository', return_value=message_repo)
+        patch('app.routes.utils.thread_helpers.ThreadRepository', return_value=thread_repo),
+        patch('app.routes.utils.thread_helpers.MessageRepository', return_value=message_repo)
     ]
     if llm_manager:
-        patches.append(patch('app.routes.threads_route.LLMManager', return_value=llm_manager))
+        patches.append(patch('app.routes.utils.thread_helpers.LLMManager', return_value=llm_manager))
     return patches
 
 

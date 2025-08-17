@@ -22,7 +22,7 @@ from .failing_tests_manager import (
 
 # Try to import enhanced reporter if available
 try:
-    from scripts.enhanced_test_reporter import EnhancedTestReporter
+    from .enhanced_reporter import EnhancedReporter as EnhancedTestReporter
     ENHANCED_REPORTER_AVAILABLE = True
 except ImportError:
     ENHANCED_REPORTER_AVAILABLE = False
@@ -45,20 +45,20 @@ class UnifiedTestRunner:
     
     def __init__(self):
         self.test_categories = defaultdict(list)
-        self.enhanced_reporter = self._setup_enhanced_reporter()
         self.results = self._initialize_results_structure()
         self._setup_directories()
+        self.enhanced_reporter = self._setup_enhanced_reporter()
         self.staging_mode = False
     
-    def run_backend_tests(self, args: List[str], timeout: int = 300, real_llm_config: Optional[Dict] = None) -> Tuple[int, str]:
+    def run_backend_tests(self, args: List[str], timeout: int = 300, real_llm_config: Optional[Dict] = None, speed_opts: Optional[Dict] = None) -> Tuple[int, str]:
         """Run backend tests and update results."""
-        exit_code, output = run_backend_tests(args, timeout, real_llm_config, self.results)
+        exit_code, output = run_backend_tests(args, timeout, real_llm_config, self.results, speed_opts)
         self._handle_test_failures(exit_code, output, "backend")
         return exit_code, output
     
-    def run_frontend_tests(self, args: List[str], timeout: int = 300) -> Tuple[int, str]:
+    def run_frontend_tests(self, args: List[str], timeout: int = 300, speed_opts: Optional[Dict] = None) -> Tuple[int, str]:
         """Run frontend tests and update results."""
-        exit_code, output = run_frontend_tests(args, timeout, self.results)
+        exit_code, output = run_frontend_tests(args, timeout, self.results, speed_opts)
         self._handle_test_failures(exit_code, output, "frontend")
         return exit_code, output
     
@@ -85,6 +85,10 @@ class UnifiedTestRunner:
     
     def _try_enhanced_report(self, level: str, config: Dict, exit_code: int) -> bool:
         """Try to use enhanced reporter, return success status."""
+        return self._execute_safe_enhanced_report(level, config, exit_code)
+    
+    def _execute_safe_enhanced_report(self, level: str, config: Dict, exit_code: int) -> bool:
+        """Execute enhanced report with error handling."""
         try:
             self._execute_enhanced_reporting_workflow(level, config, exit_code)
             return True
@@ -103,13 +107,26 @@ class UnifiedTestRunner:
     
     def _calculate_test_metrics(self) -> Dict:
         """Calculate test metrics for enhanced reporter."""
-        backend_counts = self.results["backend"]["test_counts"]
-        frontend_counts = self.results["frontend"]["test_counts"]
+        backend_counts = self._get_backend_counts()
+        frontend_counts = self._get_frontend_counts()
+        totals = self._aggregate_test_counts(backend_counts, frontend_counts)
+        coverage = self._get_coverage_data()
+        return {**totals, "coverage": coverage}
+    
+    def _get_backend_counts(self) -> Dict:
+        """Get backend test counts."""
+        return self.results["backend"]["test_counts"]
+    
+    def _get_frontend_counts(self) -> Dict:
+        """Get frontend test counts."""
+        return self.results["frontend"]["test_counts"]
+    
+    def _aggregate_test_counts(self, backend_counts: Dict, frontend_counts: Dict) -> Dict:
+        """Aggregate test counts from backend and frontend."""
         total_tests = backend_counts["total"] + frontend_counts["total"]
         passed = backend_counts["passed"] + frontend_counts["passed"]
         failed = backend_counts["failed"] + frontend_counts["failed"]
-        coverage = self._get_coverage_data()
-        return {"total_tests": total_tests, "passed": passed, "failed": failed, "coverage": coverage}
+        return {"total_tests": total_tests, "passed": passed, "failed": failed}
     
     def _save_enhanced_report(self, level: str, report_content: str, metrics: Dict):
         """Save report using enhanced reporter."""
@@ -160,26 +177,55 @@ class UnifiedTestRunner:
         """Initialize enhanced reporter if available."""
         if not ENHANCED_REPORTER_AVAILABLE:
             return None
+        return self._create_enhanced_reporter_instance()
+    
+    def _create_enhanced_reporter_instance(self) -> Optional['EnhancedTestReporter']:
+        """Create enhanced reporter instance with error handling."""
         try:
-            reporter = EnhancedTestReporter()
-            print("[INFO] Enhanced Test Reporter enabled")
-            return reporter
+            return self._build_enhanced_reporter()
         except Exception as e:
-            print(f"[WARNING] Could not initialize Enhanced Reporter: {e}")
+            self._log_enhanced_reporter_failure(e)
             return None
+    
+    def _build_enhanced_reporter(self) -> 'EnhancedTestReporter':
+        """Build and configure enhanced reporter."""
+        reporter = EnhancedTestReporter(self.reports_dir)
+        self._log_enhanced_reporter_success()
+        return reporter
+    
+    def _log_enhanced_reporter_success(self):
+        """Log successful enhanced reporter initialization."""
+        print("[INFO] Enhanced Test Reporter enabled")
+    
+    def _log_enhanced_reporter_failure(self, error: Exception):
+        """Log enhanced reporter initialization failure."""
+        print(f"[WARNING] Could not initialize Enhanced Reporter: {error}")
     
     def _initialize_results_structure(self) -> Dict:
         """Initialize results dictionary structure."""
-        component_template = {
+        component_template = self._create_component_template()
+        overall_template = self._create_overall_template()
+        return self._build_results_structure(component_template, overall_template)
+    
+    def _create_component_template(self) -> Dict:
+        """Create template for test component results."""
+        return {
             "status": "pending", "duration": 0, "exit_code": None, "output": "",
             "test_counts": {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0},
             "coverage": None
         }
+    
+    def _create_overall_template(self) -> Dict:
+        """Create template for overall test results."""
+        return {"status": "pending", "start_time": None, "end_time": None}
+    
+    def _build_results_structure(self, component_template: Dict, overall_template: Dict) -> Dict:
+        """Build complete results structure from templates."""
         return {
             "backend": component_template.copy(),
             "frontend": component_template.copy(),
             "e2e": component_template.copy(),
-            "overall": {"status": "pending", "start_time": None, "end_time": None}
+            "overall": overall_template
         }
     
     def _setup_directories(self):

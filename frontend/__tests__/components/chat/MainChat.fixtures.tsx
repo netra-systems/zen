@@ -1,13 +1,43 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useUnifiedChatStore } from '@/store/unified-chat';
-import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { TestProviders } from '../../test-utils/providers';
 
-// Mock dependencies
-jest.mock('@/store/unified-chat');
-jest.mock('@/hooks/useChatWebSocket', () => ({
-  useChatWebSocket: jest.fn()
+// Mock dependencies with dynamic jest.Mock functions
+const mockUseUnifiedChatStore = jest.fn();
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
+
+// Export mock functions for test control
+export { mockUseUnifiedChatStore, mockUseWebSocket, mockUseLoadingState, mockUseEventProcessor };
+
+// Export default mock store data for test use
+export const mockStore = {
+  isProcessing: false,
+  messages: [],
+  fastLayerData: null,
+  mediumLayerData: null,
+  slowLayerData: null,
+  currentRunId: null,
+  activeThreadId: null,
+  isThreadLoading: false,
+  handleWebSocketEvent: jest.fn(),
+  addMessage: jest.fn(),
+  setProcessing: jest.fn(),
+  clearMessages: jest.fn(),
+  updateLayerData: jest.fn(),
+};
+const mockUseWebSocket = jest.fn();
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: mockUseWebSocket
+}));
+const mockUseLoadingState = jest.fn();
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+const mockUseEventProcessor = jest.fn();
+jest.mock('@/hooks/useEventProcessor', () => ({
+  useEventProcessor: mockUseEventProcessor
 }));
 jest.mock('@/components/chat/ChatHeader', () => ({
   ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
@@ -29,23 +59,26 @@ jest.mock('@/components/chat/PersistentResponseCard', () => ({
 jest.mock('@/components/chat/ExamplePrompts', () => ({
   ExamplePrompts: () => <div data-testid="example-prompts">Example Prompts</div>
 }));
+jest.mock('@/components/chat/OverflowPanel', () => ({
+  OverflowPanel: () => <div data-testid="overflow-panel">Overflow Panel</div>
+}));
+jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
+  EventDiagnosticsPanel: () => <div data-testid="event-diagnostics">Event Diagnostics</div>
+}));
 
-// Mock store with all properties
-export const mockStore = {
-  isProcessing: false,
-  messages: [],
-  fastLayerData: null,
-  mediumLayerData: null,
-  slowLayerData: null,
-  currentRunId: null,
-  addMessage: jest.fn(),
-  setProcessing: jest.fn(),
-  clearMessages: jest.fn(),
-  updateLayerData: jest.fn(),
-};
+// Mock framer-motion to avoid animation issues
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: 'div',
+  },
+  AnimatePresence: ({ children }: any) => children,
+}));
 
 // Common test setup function
 export const setupMocks = () => {
+  // Clear all mocks first
+  jest.clearAllMocks();
+  
   // Mock fetch for config
   global.fetch = jest.fn().mockResolvedValue({
     json: jest.fn().mockResolvedValue({
@@ -53,14 +86,43 @@ export const setupMocks = () => {
     })
   });
 
-  jest.clearAllMocks();
-  jest.useFakeTimers();
-  (useUnifiedChatStore as jest.Mock).mockReturnValue(mockStore);
-  const { useChatWebSocket } = require('@/hooks/useChatWebSocket');
-  useChatWebSocket.mockReturnValue({
+  // Set up fresh default mock return values for each test
+  mockUseUnifiedChatStore.mockReturnValue({
+    isProcessing: false,
+    messages: [],
+    fastLayerData: null,
+    mediumLayerData: null,
+    slowLayerData: null,
+    currentRunId: null,
+    activeThreadId: null,
+    isThreadLoading: false,
+    handleWebSocketEvent: jest.fn(),
+    addMessage: jest.fn(),
+    setProcessing: jest.fn(),
+    clearMessages: jest.fn(),
+    updateLayerData: jest.fn(),
+  });
+  
+  mockUseWebSocket.mockReturnValue({
+    messages: [],
     connected: true,
     error: null
   });
+  
+  mockUseLoadingState.mockReturnValue({
+    shouldShowLoading: false,
+    shouldShowEmptyState: false,
+    shouldShowExamplePrompts: false,
+    loadingMessage: ''
+  });
+  
+  mockUseEventProcessor.mockReturnValue({
+    processedEvents: [],
+    isProcessing: false,
+    stats: { processed: 0, failed: 0 }
+  });
+
+  jest.useFakeTimers();
 };
 
 // Common cleanup function

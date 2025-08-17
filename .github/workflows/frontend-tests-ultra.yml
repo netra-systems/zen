@@ -1,0 +1,334 @@
+name: Frontend Tests - Ultra Performance
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths: [ 'frontend/**' ]
+  pull_request:
+    branches: [ main, develop ]
+    paths: [ 'frontend/**' ]
+  workflow_dispatch:
+    inputs:
+      test_level:
+        description: 'Test execution level'
+        required: false
+        default: 'smart'
+        type: choice
+        options:
+        - smart
+        - fast
+        - comprehensive
+        - sharded
+
+env:
+  NODE_VERSION: '20'
+  CACHE_VERSION: v1
+
+jobs:
+  # Job 1: Fast changed-files only execution for quick feedback
+  quick-feedback:
+    name: 🚀 Quick Feedback (Changed Files)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Get changed files
+      id: changed-files
+      uses: tj-actions/changed-files@v42
+      with:
+        files: |
+          frontend/**/*.ts
+          frontend/**/*.tsx
+          frontend/**/*.js
+          frontend/**/*.jsx
+
+    - name: Install dependencies (optimized)
+      if: steps.changed-files.outputs.any_changed == 'true'
+      working-directory: frontend
+      run: |
+        npm ci --prefer-offline --no-audit --progress=false
+        
+    - name: Run tests for changed files only
+      if: steps.changed-files.outputs.any_changed == 'true'
+      working-directory: frontend
+      run: |
+        echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
+        npm run test:optimize -- --bail --silent
+      env:
+        JEST_ULTRA_SILENT: true
+
+  # Job 2: Smart test execution with optimization
+  smart-execution:
+    name: 🧠 Smart Test Execution
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: inputs.test_level == 'smart' || (github.event_name != 'workflow_dispatch' && github.event_name == 'push')
+    
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4]
+      fail-fast: false
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js with caching
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Cache Jest cache
+      uses: actions/cache@v3
+      with:
+        path: frontend/.jest-cache*
+        key: jest-cache-${{ env.CACHE_VERSION }}-${{ hashFiles('frontend/package-lock.json', 'frontend/jest.config*.cjs') }}
+        restore-keys: |
+          jest-cache-${{ env.CACHE_VERSION }}-
+
+    - name: Install dependencies (ultra-fast)
+      working-directory: frontend
+      run: |
+        npm ci --prefer-offline --no-audit --progress=false --ignore-scripts
+
+    - name: Run sharded tests
+      working-directory: frontend
+      run: npm run test:shard -- --silent
+      env:
+        JEST_SHARD_INDEX: ${{ matrix.shard }}
+        JEST_SHARD_TOTAL: 4
+        JEST_ULTRA_SILENT: true
+        CI: true
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-shard-${{ matrix.shard }}
+        path: frontend/test-results/
+        retention-days: 7
+
+    - name: Upload coverage
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-shard-${{ matrix.shard }}
+        path: frontend/coverage/shard-${{ matrix.shard }}/
+        retention-days: 7
+
+  # Job 3: Aggregate results from sharded execution
+  aggregate-results:
+    name: 📊 Aggregate Test Results
+    runs-on: ubuntu-latest
+    needs: smart-execution
+    if: always()
+    timeout-minutes: 5
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies (minimal)
+      working-directory: frontend
+      run: npm ci --prefer-offline --no-audit --progress=false
+
+    - name: Download all test results
+      uses: actions/download-artifact@v4
+      with:
+        pattern: test-results-shard-*
+        path: frontend/test-results/
+        merge-multiple: true
+
+    - name: Download all coverage reports
+      uses: actions/download-artifact@v4
+      with:
+        pattern: coverage-shard-*
+        path: frontend/coverage/
+        merge-multiple: true
+
+    - name: Aggregate results
+      working-directory: frontend
+      run: npm run test:shard:aggregate
+
+    - name: Upload merged coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-merged
+        path: frontend/coverage/merged-coverage.json
+        retention-days: 30
+
+  # Job 4: Fast execution for quick validation
+  fast-execution:
+    name: ⚡ Fast Execution
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    if: inputs.test_level == 'fast'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Cache Jest cache
+      uses: actions/cache@v3
+      with:
+        path: frontend/.jest-cache*
+        key: jest-cache-fast-${{ env.CACHE_VERSION }}-${{ hashFiles('frontend/package-lock.json') }}
+
+    - name: Install dependencies
+      working-directory: frontend
+      run: npm ci --prefer-offline --no-audit --progress=false
+
+    - name: Run ultra-fast tests
+      working-directory: frontend
+      run: npm run test:ultra -- --bail
+      env:
+        JEST_ULTRA_SILENT: true
+
+  # Job 5: Comprehensive execution with full coverage
+  comprehensive-execution:
+    name: 🔍 Comprehensive Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    if: inputs.test_level == 'comprehensive' || github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: frontend
+      run: npm ci --prefer-offline --no-audit --progress=false
+
+    - name: Run comprehensive tests with coverage
+      working-directory: frontend
+      run: npm run test:optimize:coverage
+
+    - name: Upload comprehensive coverage
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-comprehensive
+        path: frontend/coverage/
+        retention-days: 30
+
+    - name: Comment coverage on PR
+      if: github.event_name == 'pull_request'
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        header: coverage
+        path: frontend/coverage/coverage-summary.txt
+
+  # Job 6: Performance monitoring
+  performance-monitoring:
+    name: 📈 Performance Monitoring
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.ref == 'refs/heads/main' || inputs.test_level == 'comprehensive'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: frontend
+      run: npm ci --prefer-offline --no-audit --progress=false
+
+    - name: Benchmark test execution
+      working-directory: frontend
+      run: |
+        echo "🏁 Benchmarking different configurations..."
+        
+        echo "⚡ Ultra config:"
+        time npm run test:ultra
+        
+        echo "🧠 Optimized config:"
+        time npm run test:optimize
+        
+        echo "📊 Performance config:"
+        time npm run test:fast
+      env:
+        JEST_ULTRA_SILENT: true
+
+    - name: Store benchmark results
+      run: |
+        echo "Benchmark completed at $(date)" >> benchmark-results.txt
+        echo "Node version: $(node --version)" >> benchmark-results.txt
+        echo "CPU info: $(lscpu | grep 'Model name')" >> benchmark-results.txt
+        echo "Memory: $(free -h | grep 'Mem:')" >> benchmark-results.txt
+
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v4
+      with:
+        name: benchmark-results
+        path: benchmark-results.txt
+        retention-days: 30
+
+# Summary job for status checks
+  test-summary:
+    name: 📋 Test Summary
+    runs-on: ubuntu-latest
+    needs: [quick-feedback, smart-execution, aggregate-results]
+    if: always()
+    timeout-minutes: 2
+    
+    steps:
+    - name: Check test results
+      run: |
+        echo "Test execution summary:"
+        echo "Quick feedback: ${{ needs.quick-feedback.result }}"
+        echo "Smart execution: ${{ needs.smart-execution.result }}"
+        echo "Result aggregation: ${{ needs.aggregate-results.result }}"
+        
+        # Determine overall result
+        if [[ "${{ needs.smart-execution.result }}" == "failure" ]]; then
+          echo "❌ Tests failed"
+          exit 1
+        elif [[ "${{ needs.smart-execution.result }}" == "success" ]]; then
+          echo "✅ All tests passed"
+          exit 0
+        else
+          echo "⚠️ Tests were skipped or cancelled"
+          exit 0
+        fi

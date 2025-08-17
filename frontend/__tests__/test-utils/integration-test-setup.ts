@@ -6,6 +6,7 @@
  */
 
 import WS from 'jest-websocket-mock';
+import { safeWebSocketCleanup } from '../helpers/websocket-test-manager';
 import { useAuthStore } from '@/store/authStore';
 import { useChatStore } from '@/store/chatStore';
 import { useThreadStore } from '@/store/threadStore';
@@ -111,7 +112,7 @@ export const expectWebSocketConnection = async (server: WS) => {
 
 // Cleanup utilities
 export const cleanupWebSocketServer = (server: WS) => {
-  WS.clean();
+  safeWebSocketCleanup();
   server.close();
 };
 

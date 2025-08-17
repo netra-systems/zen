@@ -1,19 +1,53 @@
-# Netra Platform Architecture
+# Netra Apex Architecture - Revenue-Driven Design
 
-Comprehensive architecture documentation for the Netra AI Optimization Platform, detailing system design, components, data flow, and technical decisions.
+## 🔴 CRITICAL: 300-Line Module Architecture
+
+**MANDATORY**: Every file ≤300 lines, every function ≤08 lines. No exceptions.
 
 ## Table of Contents
 
-1. [System Overview](#system-overview)
-2. [Architecture Principles](#architecture-principles)
-3. [System Components](#system-components)
-4. [Data Flow Architecture](#data-flow-architecture)
-5. [Multi-Agent System](#multi-agent-system)
-6. [Database Architecture](#database-architecture)
-7. [WebSocket Architecture](#websocket-architecture)
-8. [Security Architecture](#security-architecture)
-9. [Deployment Architecture](#deployment-architecture)
+1. [Business Architecture](#business-architecture) **← Value Creation Flow**
+2. [System Overview](#system-overview)
+3. [Architecture Principles](#architecture-principles) **← 300/8 Rule**
+4. [Module Architecture](#module-architecture) **← Modular Design**
+5. [System Components](#system-components)
+6. [Multi-Agent System](#multi-agent-system)
+7. [Database Architecture](#database-architecture)
+8. [WebSocket Architecture](#websocket-architecture)
+9. [Security Architecture](#security-architecture)
 10. [Technology Stack](#technology-stack)
+
+## Business Architecture
+
+### Value Creation Pipeline
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    CUSTOMER VALUE FLOW                          │
+│                                                                  │
+│  1. Customer AI Spend → 2. Optimization → 3. Savings Capture   │
+│       ($100K/mo)           (30% reduction)    (20% fee = $6K)   │
+│                                                                  │
+│  ┌─────────────┐   ┌─────────────┐   ┌─────────────┐     │
+│  │   INTAKE    │→→→│  OPTIMIZE  │→→→│   CAPTURE   │     │
+│  │             │   │             │   │             │     │
+│  │ - Workload  │   │ - Routing   │   │ - Measure   │     │
+│  │ - Volume    │   │ - Caching   │   │ - Report    │     │
+│  │ - Patterns  │   │ - Batching  │   │ - Invoice   │     │
+│  └─────────────┘   └─────────────┘   └─────────────┘     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Revenue Architecture by Tier
+
+| Component | Free Tier | Early ($1K-10K) | Mid ($10K-100K) | Enterprise (>$100K) |
+|-----------|-----------|-----------------|-----------------|--------------------|
+| **API Calls** | 100/hr | 1000/hr | 10000/hr | Unlimited |
+| **Models** | Basic | Standard | Advanced | All + Custom |
+| **Analytics** | Daily | Real-time | Real-time + ML | Custom Dashboards |
+| **Support** | Community | Email | Priority | Dedicated |
+| **SLA** | None | 99.5% | 99.9% | 99.99% |
+| **Value Capture** | $0 | 20% savings | 20% + platform | Negotiated |
 
 ## System Overview
 
@@ -66,16 +100,41 @@ The Netra AI Optimization Platform is a sophisticated, production-ready system d
 
 ### Design Principles
 
-1. **Microservices-Inspired**: Loosely coupled services with clear boundaries
-2. **Async-First**: Non-blocking I/O for maximum scalability
-3. **Event-Driven**: Real-time updates via WebSocket events
-4. **State Management**: Persistent state with recovery mechanisms
-5. **Security by Design**: OAuth 2.0, JWT, encrypted secrets
-6. **Observability**: Comprehensive logging and monitoring
-7. **Fault Tolerance**: Retry logic, circuit breakers, graceful degradation
-8. **Scalability**: Horizontal scaling with connection pooling
-9. **MODULE-BASED ARCHITECTURE**: **CRITICAL** - 300 lines max per file, 8 lines max per function
-10. **Ultra Deep Think**: Required 3x deep analysis before implementation
+1. **🔴 MODULE-BASED (300/8 RULE)**: **MANDATORY** - Files ≤300 lines, functions ≤08 lines
+2. **Revenue-Driven**: Every component must justify business value
+3. **Customer Segment Focus**: Design for Free→Paid conversion
+4. **Async-First**: Non-blocking I/O for cost efficiency
+5. **Event-Driven**: Real-time optimization events
+6. **State Persistence**: Never lose customer optimization data
+7. **Security by Design**: Enterprise-grade OAuth 2.0, JWT
+8. **Observability**: Track every dollar saved
+9. **Fault Tolerance**: Zero downtime for paying customers
+10. **Ultra Deep Think**: 3x analysis for revenue impact
+
+### Module Architecture Rules
+
+```python
+# MANDATORY COMPLIANCE
+MAX_FILE_LINES = 300      # Hard limit, no exceptions
+MAX_FUNCTION_LINES = 8    # Hard limit, no exceptions
+
+# Module Organization Example
+optimization/
+├── cost_analyzer.py      # 298 lines
+├── model_router.py       # 295 lines
+├── cache_optimizer.py    # 289 lines
+└── batch_processor.py    # 292 lines
+
+# Function Example (8 lines max)
+def calculate_savings(current: float, optimized: float) -> Dict:
+    """Calculate customer savings and Netra fee."""
+    savings = current - optimized
+    percentage = (savings / current) * 100 if current > 0 else 0
+    netra_fee = savings * 0.20  # 20% performance fee
+    net_benefit = savings - netra_fee
+    return {"savings": savings, "percentage": percentage, 
+            "fee": netra_fee, "net": net_benefit}
+```
 
 ### Architectural Patterns
 
@@ -122,6 +181,7 @@ Organized API endpoints:
 routes/
 ├── auth/                  # Authentication module
 │   └── auth.py           # OAuth, JWT, and dev login endpoints
+│   # IMPORTANT: All auth endpoints use app/auth_integration/ for dependencies
 ├── websockets.py          # WebSocket connections
 ├── agent_route.py         # Agent execution endpoints  
 ├── threads_route.py       # Thread management
@@ -194,7 +254,26 @@ services/
     └── service_container.py  # Service registry
 ```
 
-#### 4. Database Models (`app/db/`)
+#### 4. Authentication Integration (`app/auth_integration/`)
+
+**CRITICAL**: Shared authentication service used throughout the entire system:
+
+```
+auth_integration/              # SHARED AUTH SERVICE (MANDATORY USE)
+├── __init__.py               # Auth exports
+└── auth.py                   # Centralized auth dependencies
+    ├── get_current_user()    # User authentication (ALL routes MUST use)
+    ├── get_current_user_optional() # Optional auth (ALL routes MUST use)
+    └── validate_token()      # Token validation (ALL WebSocket MUST use)
+```
+
+**IMPORTANT**: ALL authentication MUST go through `app/auth_integration/`. No duplicate auth logic allowed anywhere in the system. This ensures:
+- Consistent authentication across all endpoints
+- Single source of truth for auth logic
+- Centralized security updates
+- Uniform error handling
+
+#### 5. Database Models (`app/db/`)
 
 Data persistence layer:
 
@@ -1000,14 +1079,46 @@ async def validate_user_input(data: dict) -> bool:
 
 ```bash
 # Run compliance check (should be part of CI/CD)
-python scripts/check_architecture_compliance.py --strict
+python scripts/check_architecture_compliance.py --fail-on-violation
 
-# Check specific directory
-python scripts/check_architecture_compliance.py --path app/agents/
+# Check specific directory with custom limits
+python scripts/check_architecture_compliance.py --path app/agents/ --violation-limit 5
 
-# Generate compliance report
-python scripts/check_architecture_compliance.py --report
+# Generate compliance report with all violations
+python scripts/check_architecture_compliance.py --show-all
+
+# Generate JSON report for CI/CD
+python scripts/check_architecture_compliance.py --json-output compliance.json --fail-on-violation
+
+# Run with text markers (for Windows/CI environments)
+python scripts/check_architecture_compliance.py --no-emoji --violation-limit 10
 ```
+
+### Compliance System Architecture
+
+The compliance system is modularly designed with the following components:
+
+```
+scripts/compliance/
+├── __init__.py          # Package exports
+├── core.py              # Core data structures (Violation, ComplianceResults)
+├── orchestrator.py      # ArchitectureEnforcer orchestration
+├── reporter.py          # Report generation (273 lines)
+├── reporter_stats.py    # Statistics calculation (61 lines)
+├── reporter_utils.py    # Utilities & helpers (47 lines)
+├── cli.py               # CLI argument handling
+├── file_checker.py      # 300-line limit enforcement
+├── function_checker.py  # 8-line limit enforcement
+├── type_checker.py      # Duplicate type detection
+└── stub_checker.py      # Test stub detection
+```
+
+**Key Features:**
+- **Smart Violation Limits**: Adaptive display based on violation count
+- **Severity Prioritization**: High → Medium → Low with visual markers
+- **Accurate Statistics**: Detailed counts by type and severity
+- **Modular Design**: Each component under 300 lines
+- **Type Definition Focus**: Only checks type definitions, not usage
 
 ## Future Enhancements
 

@@ -1,0 +1,145 @@
+"""
+Auth Configuration Handler
+"""
+import os
+from typing import Optional
+from fastapi import Request
+from app.clients.auth_client import auth_client
+from app.schemas.Auth import AuthConfigResponse, AuthEndpoints
+
+
+def normalize_base_url(request: Request) -> str:
+    """Normalize base URL for HTTPS in production environments."""
+    base_url = str(request.base_url).rstrip('/')
+    if auth_client.detect_environment().value in ["staging", "production"]:
+        base_url = base_url.replace("http://", "https://")
+    return base_url
+
+
+def build_auth_endpoints(base_url: str, oauth_config) -> AuthEndpoints:
+    """Build authentication endpoints configuration."""
+    base_endpoints = get_base_endpoints(base_url)
+    dev_login_endpoint = get_dev_login_endpoint(base_url, oauth_config)
+    return AuthEndpoints(**base_endpoints, dev_login=dev_login_endpoint)
+
+
+def get_base_endpoints(base_url: str) -> dict:
+    """Get base authentication endpoints."""
+    return {
+        "login": f"{base_url}/api/auth/login",
+        "logout": f"{base_url}/api/auth/logout",
+        "callback": f"{base_url}/api/auth/callback",
+        "token": f"{base_url}/api/auth/token",
+        "user": f"{base_url}/api/users/me"
+    }
+
+
+def get_dev_login_endpoint(base_url: str, oauth_config) -> Optional[str]:
+    """Get dev login endpoint if allowed."""
+    if oauth_config.allow_dev_login:
+        return f"{base_url}/api/auth/dev_login"
+    return None
+
+
+def build_base_auth_response(oauth_config, endpoints: AuthEndpoints) -> AuthConfigResponse:
+    """Build base authentication configuration response."""
+    return AuthConfigResponse(
+        development_mode=auth_client.detect_environment().value == "development",
+        google_client_id=oauth_config.client_id,
+        endpoints=endpoints,
+        authorized_javascript_origins=oauth_config.javascript_origins,
+        authorized_redirect_uris=oauth_config.redirect_uris
+    )
+
+
+def add_pr_configuration(response: AuthConfigResponse, oauth_config) -> None:
+    """Add PR-specific configuration to auth response."""
+    is_pr_environment = bool(os.getenv("PR_NUMBER"))
+    if is_pr_environment:
+        response.pr_number = os.getenv("PR_NUMBER")
+        response.use_proxy = oauth_config.use_proxy
+        response.proxy_url = oauth_config.proxy_url
+
+
+def determine_environment_urls() -> tuple[str, str]:
+    """Determine auth service and frontend URLs based on environment."""
+    environment = auth_client.detect_environment()
+    if environment.value == 'staging':
+        return 'https://auth.staging.netrasystems.ai', 'https://staging.netrasystems.ai'
+    elif environment.value == 'production':
+        return 'https://auth.netrasystems.ai', 'https://netrasystems.ai'
+    return os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081'), 'http://localhost:3000'
+
+
+def build_environment_endpoints(auth_service_url: str, frontend_url: str, oauth_config) -> AuthEndpoints:
+    """Build authentication endpoints for the current environment."""
+    dev_login = f"{auth_service_url}/auth/dev_login" if oauth_config.allow_dev_login else None
+    return AuthEndpoints(
+        login=f"{auth_service_url}/auth/login",
+        logout=f"{auth_service_url}/auth/logout",
+        callback=f"{frontend_url}/auth/callback",
+        token=f"{auth_service_url}/auth/token",
+        user=f"{auth_service_url}/auth/me",
+        dev_login=dev_login
+    )
+
+
+def create_auth_response(endpoints: AuthEndpoints, oauth_config) -> AuthConfigResponse:
+    """Create authentication configuration response."""
+    environment = auth_client.detect_environment()
+    response = AuthConfigResponse(
+        development_mode=environment.value == "development",
+        google_client_id=oauth_config.client_id or os.getenv('GOOGLE_CLIENT_ID', ''),
+        endpoints=endpoints,
+        authorized_javascript_origins=oauth_config.javascript_origins,
+        authorized_redirect_uris=oauth_config.redirect_uris
+    )
+    return response
+
+
+def build_fallback_endpoints() -> AuthEndpoints:
+    """Build fallback authentication endpoints."""
+    auth_service_url = 'https://auth.staging.netrasystems.ai'
+    frontend_url = 'https://staging.netrasystems.ai'
+    return AuthEndpoints(
+        login=f"{auth_service_url}/auth/login",
+        logout=f"{auth_service_url}/auth/logout",
+        callback=f"{frontend_url}/auth/callback",
+        token=f"{auth_service_url}/auth/token",
+        user=f"{auth_service_url}/auth/me",
+        dev_login=None
+    )
+
+
+def create_fallback_response() -> AuthConfigResponse:
+    """Create fallback authentication configuration response."""
+    fallback_endpoints = build_fallback_endpoints()
+    frontend_url = 'https://staging.netrasystems.ai'
+    return AuthConfigResponse(
+        development_mode=False,
+        google_client_id=os.getenv('GOOGLE_CLIENT_ID', ''),
+        endpoints=fallback_endpoints,
+        authorized_javascript_origins=[frontend_url],
+        authorized_redirect_uris=[f"{frontend_url}/auth/callback"]
+    )
+
+
+def log_auth_config_error(error: Exception) -> None:
+    """Log authentication configuration error."""
+    from app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+    logger.error(f"Failed to build auth config response: {str(error)}", exc_info=True)
+
+
+def build_auth_config_response(request: Request) -> AuthConfigResponse:
+    """Build complete authentication configuration response."""
+    try:
+        auth_service_url, frontend_url = determine_environment_urls()
+        oauth_config = auth_client.get_oauth_config()
+        endpoints = build_environment_endpoints(auth_service_url, frontend_url, oauth_config)
+        response = create_auth_response(endpoints, oauth_config)
+        add_pr_configuration(response, oauth_config)
+        return response
+    except Exception as e:
+        log_auth_config_error(e)
+        return create_fallback_response()

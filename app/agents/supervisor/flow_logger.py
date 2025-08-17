@@ -162,11 +162,22 @@ class SupervisorFlowLogger:
 
     def _build_flow_completion_data(self, success: bool, total_steps: int, failed_steps: int) -> Dict[str, Any]:
         """Build flow completion data structure."""
-        duration = time.time() - self.start_time
+        base_data = self._create_completion_base_data(success, total_steps, failed_steps)
+        timing_data = self._create_completion_timing_data()
+        return {**base_data, **timing_data}
+
+    def _create_completion_base_data(self, success: bool, total_steps: int, failed_steps: int) -> Dict[str, Any]:
+        """Create completion base data fields."""
         return {
             "success": success,
             "total_steps": total_steps,
-            "failed_steps": failed_steps,
+            "failed_steps": failed_steps
+        }
+
+    def _create_completion_timing_data(self) -> Dict[str, Any]:
+        """Create completion timing data fields."""
+        duration = time.time() - self.start_time
+        return {
             "total_duration_seconds": round(duration, 2),
             "final_state": self.flow_state.value
         }
@@ -177,12 +188,27 @@ class SupervisorFlowLogger:
 
     def _build_flow_summary(self) -> Dict[str, Any]:
         """Build comprehensive flow summary."""
-        duration = time.time() - self.start_time
+        base_data = self._create_summary_base_data()
+        timing_data = self._create_summary_timing_data()
+        count_data = self._create_summary_count_data()
+        return {**base_data, **timing_data, **count_data}
+
+    def _create_summary_base_data(self) -> Dict[str, Any]:
+        """Create summary base identification data."""
         return {
             "correlation_id": self.correlation_id,
             "run_id": self.run_id,
-            "current_state": self.flow_state.value,
-            "duration_seconds": round(duration, 2),
+            "current_state": self.flow_state.value
+        }
+
+    def _create_summary_timing_data(self) -> Dict[str, Any]:
+        """Create summary timing data."""
+        duration = time.time() - self.start_time
+        return {"duration_seconds": round(duration, 2)}
+
+    def _create_summary_count_data(self) -> Dict[str, Any]:
+        """Create summary count data."""
+        return {
             "todo_count": len(self.todos),
             "agent_execution_count": len(self.agent_executions)
         }

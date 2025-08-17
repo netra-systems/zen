@@ -23,7 +23,7 @@ from app.core.error_handlers import (
     http_exception_handler,
     general_exception_handler,
 )
-from app.auth.auth import oauth_client
+# OAuth now handled by auth service
 
 
 def create_fastapi_app() -> FastAPI:
@@ -45,12 +45,28 @@ def register_error_handlers(app: FastAPI) -> None:
 
 def _setup_security_middleware(app: FastAPI) -> None:
     """Setup security middleware components."""
+    _add_ip_blocking_middleware(app)
+    _add_path_traversal_middleware(app)
+    _add_security_headers_middleware(app)
+
+
+def _add_ip_blocking_middleware(app: FastAPI) -> None:
+    """Add IP blocking middleware."""
     from app.middleware.ip_blocking import ip_blocking_middleware
+    app.middleware("http")(ip_blocking_middleware)
+
+
+def _add_path_traversal_middleware(app: FastAPI) -> None:
+    """Add path traversal protection middleware."""
     from app.middleware.path_traversal_protection import path_traversal_protection_middleware
+    app.middleware("http")(path_traversal_protection_middleware)
+
+
+def _add_security_headers_middleware(app: FastAPI) -> None:
+    """Add security headers middleware."""
     from app.middleware.security_headers import SecurityHeadersMiddleware
     from app.config import settings
-    app.middleware("http")(ip_blocking_middleware)
-    app.middleware("http")(path_traversal_protection_middleware); app.add_middleware(SecurityHeadersMiddleware, environment=settings.environment)
+    app.add_middleware(SecurityHeadersMiddleware, environment=settings.environment)
 
 
 def _setup_request_middleware(app: FastAPI) -> None:
@@ -70,7 +86,8 @@ def setup_middleware(app: FastAPI) -> None:
 
 def initialize_oauth(app: FastAPI) -> None:
     """Initialize OAuth client."""
-    oauth_client.init_app(app)
+    # OAuth now handled by auth service - no initialization needed
+    pass
 
 
 def register_api_routes(app: FastAPI) -> None:
@@ -87,8 +104,21 @@ def _import_and_register_routes(app: FastAPI) -> None:
 
 def _import_basic_route_modules() -> dict:
     """Import basic route modules."""
+    route_imports = _import_core_routes()
+    return _create_basic_modules_dict_from_imports(route_imports)
+
+
+def _import_core_routes() -> tuple:
+    """Import core route modules as tuple."""
     from app.routes import (supply, generation, admin, references, health, 
         corpus, synthetic_data, config, demo, unified_tools, quality)
+    return (supply, generation, admin, references, health, corpus,
+            synthetic_data, config, demo, unified_tools, quality)
+
+
+def _create_basic_modules_dict_from_imports(imports: tuple) -> dict:
+    """Create basic modules dict from imported tuple."""
+    supply, generation, admin, references, health, corpus, synthetic_data, config, demo, unified_tools, quality = imports
     return _create_basic_modules_dict(
         supply, generation, admin, references, health, corpus,
         synthetic_data, config, demo, unified_tools, quality
@@ -132,12 +162,25 @@ def _import_extended_routers() -> dict:
 
 def _import_factory_routers() -> dict:
     """Import factory and analyzer router modules."""
-    from app.routes.factory_status import router as factory_status_router; from app.routes.factory_status_simple import router as factory_status_simple_router
-    from app.routes.factory_compliance import router as factory_compliance_router; from app.routes.github_analyzer import router as github_analyzer_router
+    status_routers = _import_factory_status_routers()
+    analyzer_routers = _import_factory_analyzer_routers()
+    return {**status_routers, **analyzer_routers}
+
+
+def _import_factory_status_routers() -> dict:
+    """Import factory status router modules."""
+    from app.routes.factory_status import router as factory_status_router
+    from app.routes.factory_status_simple import router as factory_status_simple_router
     return {"factory_status_router": factory_status_router,
-        "factory_status_simple_router": factory_status_simple_router,
-        "factory_compliance_router": factory_compliance_router,
-        "github_analyzer_router": github_analyzer_router}
+            "factory_status_simple_router": factory_status_simple_router}
+
+
+def _import_factory_analyzer_routers() -> dict:
+    """Import factory analyzer router modules."""
+    from app.routes.factory_compliance import router as factory_compliance_router
+    from app.routes.github_analyzer import router as github_analyzer_router
+    return {"factory_compliance_router": factory_compliance_router,
+            "github_analyzer_router": github_analyzer_router}
 
 
 def _import_route_modules() -> dict:
@@ -160,20 +203,48 @@ def _get_core_route_configs(modules: dict) -> dict:
 
 def _get_business_route_configs(modules: dict) -> dict:
     """Get business logic route configurations."""
+    core_business = _get_core_business_configs(modules)
+    extended_business = _get_extended_business_configs(modules)
+    return {**core_business, **extended_business}
+
+
+def _get_core_business_configs(modules: dict) -> dict:
+    """Get core business route configurations."""
     return {"supply": (modules["supply"].router, "/api/supply", ["supply"]),
-        "generation": (modules["generation"].router, "/api/generation", ["generation"]),
-        "admin": (modules["admin"].router, "/api", ["admin"]), "references": (modules["references"].router, "/api", ["references"]),
-        "health": (modules["health"].router, "/health", ["health"]), "health_extended": (modules["health_extended_router"], "", ["monitoring"]),
-        "monitoring": (modules["monitoring_router"], "/api", ["database-monitoring"]), "corpus": (modules["corpus"].router, "/api/corpus", ["corpus"])}
+            "generation": (modules["generation"].router, "/api/generation", ["generation"]),
+            "admin": (modules["admin"].router, "/api", ["admin"]),
+            "references": (modules["references"].router, "/api", ["references"])}
+
+
+def _get_extended_business_configs(modules: dict) -> dict:
+    """Get extended business route configurations."""
+    return {"health": (modules["health"].router, "/health", ["health"]),
+            "health_extended": (modules["health_extended_router"], "", ["monitoring"]),
+            "monitoring": (modules["monitoring_router"], "/api", ["database-monitoring"]),
+            "corpus": (modules["corpus"].router, "/api/corpus", ["corpus"])}
 
 
 def _get_utility_route_configs(modules: dict) -> dict:
     """Get utility and factory route configurations."""
+    utility_configs = _get_utility_configs(modules)
+    factory_configs = _get_factory_configs(modules)
+    return {**utility_configs, **factory_configs}
+
+
+def _get_utility_configs(modules: dict) -> dict:
+    """Get utility route configurations."""
     return {"synthetic_data": (modules["synthetic_data"].router, "", ["synthetic_data"]),
-        "config": (modules["config"].router, "/api", ["config"]), "demo": (modules["demo"].router, "", ["demo"]),
-        "unified_tools": (modules["unified_tools"].router, "/api/tools", ["unified-tools"]), "factory_status": (modules["factory_status_router"], "", ["factory-status"]),
-        "factory_status_simple": (modules["factory_status_simple_router"], "", ["factory-status-simple"]), "factory_compliance": (modules["factory_compliance_router"], "", ["factory-compliance"]),
-        "github_analyzer": (modules["github_analyzer_router"], "", ["github-analyzer"])}
+            "config": (modules["config"].router, "/api", ["config"]),
+            "demo": (modules["demo"].router, "", ["demo"]),
+            "unified_tools": (modules["unified_tools"].router, "/api/tools", ["unified-tools"])}
+
+
+def _get_factory_configs(modules: dict) -> dict:
+    """Get factory route configurations."""
+    return {"factory_status": (modules["factory_status_router"], "", ["factory-status"]),
+            "factory_status_simple": (modules["factory_status_simple_router"], "", ["factory-status-simple"]),
+            "factory_compliance": (modules["factory_compliance_router"], "", ["factory-compliance"]),
+            "github_analyzer": (modules["github_analyzer_router"], "", ["github-analyzer"])}
 
 
 def _get_route_configurations(modules: dict) -> dict:
@@ -202,8 +273,19 @@ def setup_root_endpoint(app: FastAPI) -> None:
 def create_app() -> FastAPI:
     """Create and fully configure the FastAPI application."""
     app = create_fastapi_app()
+    _configure_app_handlers(app)
+    _configure_app_routes(app)
+    return app
+
+
+def _configure_app_handlers(app: FastAPI) -> None:
+    """Configure error handlers and middleware."""
     register_error_handlers(app)
     setup_middleware(app)
     initialize_oauth(app)
-    register_api_routes(app); setup_root_endpoint(app)
-    return app
+
+
+def _configure_app_routes(app: FastAPI) -> None:
+    """Configure application routes."""
+    register_api_routes(app)
+    setup_root_endpoint(app)

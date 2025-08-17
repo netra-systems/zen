@@ -10,6 +10,8 @@ import type {
   ExecutionMetrics
 } from '@/types/unified-chat';
 import type { WebSocketEventBuffer } from '@/lib/circular-buffer';
+import type { ConnectionState, ConnectionActions } from '@/types/store-types';
+import type { PerformanceMetrics } from '@/types/performance-metrics';
 
 // Agent execution tracking
 export interface AgentExecution {
@@ -19,14 +21,6 @@ export interface AgentExecution {
   startTime: number;
   endTime?: number;
   result?: any;
-}
-
-// Performance metrics
-export interface PerformanceMetrics {
-  renderCount: number;
-  lastRenderTime: number;
-  averageResponseTime: number;
-  memoryUsage: number;
 }
 
 // Layer data slice state
@@ -66,15 +60,11 @@ export interface ThreadState {
   setThreadLoading: (isLoading: boolean) => void;
 }
 
-// Connection state slice
-export interface ConnectionState {
-  isConnected: boolean;
-  connectionError: string | null;
-  setConnectionStatus: (isConnected: boolean, error?: string) => void;
-}
+// Connection state slice - import from consolidated types
+export interface ConnectionSlice extends ConnectionState, ConnectionActions {}
 
-// Sub-agent compatibility slice state
-export interface SubAgentState {
+// Sub-agent UI slice state (frontend-specific, different from backend SubAgentState)
+export interface SubAgentUIState {
   subAgentName: string | null;
   subAgentStatus: string | null;
   subAgentTools: string[];

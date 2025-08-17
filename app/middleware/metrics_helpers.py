@@ -115,7 +115,7 @@ class FailureClassifier:
         return "connection" in message or "network" in message
 
 
-class PerformanceMonitor:
+class PerformanceUtils:
     """Functions for performance monitoring."""
     
     @staticmethod

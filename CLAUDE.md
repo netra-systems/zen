@@ -56,6 +56,8 @@ MANAGE SCOPE
 - Keep architecture limited in complexity.
 - Spend extra thinking energy to find elegant and "simple" solutions
 - Modular code ALWAY.
+- Avoid creating duplicate files with suffixes like `_enhanced, _fixed, _backup` or similar. 
+Always edit the existing file or create a new file and delete the old if it's now legacy.
 
 300-LINE MODULE 
 **CRITICAL**: No file exceeds 300 lines - enforce through modular design:
@@ -71,6 +73,13 @@ Generate a monetization-focused product and engineering value for Netra Apex.
 Ensures every feature directly creates and captures value proportional to a customer's AI spend,
 prioritizing the conversion of free users to paid tiers.
 
+## 🗺️ NAVIGATION: LLM Master Index
+**CRITICAL**: Before searching for files or functionality, consult [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md)
+- Resolves common file confusion (config.py vs config_setup_core.py, multiple auth.py files, etc.)
+- Quick reference for locating functionality
+- Organized by business domains and technical areas
+- Common pitfalls and solutions
+
 ## Project Directory Structure
 
 ```
@@ -84,6 +93,7 @@ root/
 │   │   ├── supply_researcher/       # Supply research agents
 │   │   └── triage_sub_agent/        # Triage sub-agent modules
 │   ├── auth/                # Authentication & authorization
+│   ├── auth_integration/    # SHARED AUTH SERVICE (MANDATORY USE)
 │   ├── core/                # Core utilities & exceptions
 │   │   ├── exceptions_*.py         # Categorized exception handlers
 │   │   ├── interfaces_*.py         # Interface definitions

@@ -1,37 +1,6 @@
 import { apiClient } from '@/services/apiClientWrapper';
-
-export interface ThreadMetadata {
-  userId?: string;
-  createdAt?: string;
-  lastActivity?: string;
-  messageCount?: number;
-  tags?: string[];
-  priority?: 'low' | 'medium' | 'high';
-  archived?: boolean;
-  [key: string]: string | number | boolean | string[] | undefined;
-}
-
-export interface MessageMetadata {
-  references?: string[];
-  attachments?: Array<{
-    id: string;
-    filename: string;
-    mimeType: string;
-    size: number;
-  }>;
-  editedAt?: string;
-  [key: string]: unknown;
-}
-
-export interface Thread {
-  id: string;
-  object?: string;
-  title?: string;
-  created_at: number;
-  updated_at?: number;
-  metadata?: ThreadMetadata;
-  message_count: number;
-}
+import { Thread, ThreadMetadata } from '@/types/registry';
+import type { MessageMetadata } from '@/types/chat';
 
 export interface ThreadMessage {
   id: string;
@@ -65,7 +34,7 @@ export class ThreadService {
 
   static async createThread(title?: string, metadata?: ThreadMetadata): Promise<Thread> {
     const response = await apiClient.post<Thread>('/api/threads', {
-      title,
+      name: title, // Map title to name for registry compatibility
       metadata
     });
     return response.data;
@@ -73,7 +42,7 @@ export class ThreadService {
 
   static async updateThread(threadId: string, title?: string, metadata?: ThreadMetadata): Promise<Thread> {
     const response = await apiClient.put<Thread>(`/api/threads/${threadId}`, {
-      title,
+      name: title, // Map title to name for registry compatibility
       metadata
     });
     return response.data;

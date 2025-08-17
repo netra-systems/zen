@@ -16,12 +16,41 @@ class AgentError(NetraException):
     and agent lifecycle problems.
     """
     
-    def __init__(self, agent_name: str = None, message: str = None, **kwargs):
+    def __init__(self, message: str = None, agent_name: str = None, severity: ErrorSeverity = None, **kwargs):
+        if message is None and agent_name is not None:
+            # Handle old pattern where first arg was agent_name
+            message = f"Agent error in {agent_name}"
+        
         agent_msg = self._build_agent_message(agent_name, message)
+        final_severity = severity or ErrorSeverity.HIGH
         super().__init__(
-            message=agent_msg, code=ErrorCode.AGENT_EXECUTION_FAILED, severity=ErrorSeverity.HIGH,
+            message=agent_msg, code=ErrorCode.AGENT_EXECUTION_FAILED, severity=final_severity,
             details={"agent": agent_name}, **kwargs
         )
+    
+    @property
+    def severity(self):
+        """Get error severity from error details."""
+        severity_value = self.error_details.severity
+        if isinstance(severity_value, str):
+            # Convert string back to enum if needed
+            from app.core.error_codes import ErrorSeverity
+            for severity_enum in ErrorSeverity:
+                if severity_enum.value == severity_value:
+                    return severity_enum
+            return ErrorSeverity.MEDIUM  # Default if not found
+        return severity_value
+    
+    @property
+    def category(self):
+        """Get error category - default to PROCESSING for agent errors."""
+        from app.schemas.core_enums import ErrorCategory
+        return getattr(self, '_category', ErrorCategory.PROCESSING)
+    
+    @category.setter
+    def category(self, value):
+        """Set error category."""
+        self._category = value
     
     def _build_agent_message(self, agent_name: str, message: str) -> str:
         """Build error message with agent name if provided."""

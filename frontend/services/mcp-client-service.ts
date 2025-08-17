@@ -19,10 +19,17 @@ import type {
 
 const MCP_API_BASE = '/api/mcp';
 
-const createHeaders = (): HeadersInit => ({
-  'Content-Type': 'application/json',
-  'Accept': 'application/json'
-});
+const createHeaders = (): HeadersInit => {
+  const token = typeof window !== 'undefined' 
+    ? localStorage.getItem('jwt_token') || sessionStorage.getItem('jwt_token')
+    : null;
+  
+  return {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` })
+  };
+};
 
 const handleApiResponse = async <T>(response: Response): Promise<T> => {
   if (!response.ok) {

@@ -218,6 +218,13 @@ class ExecutionEngine:
         flow_id = self._get_context_flow_id(context)
         if flow_id:
             self.flow_logger.log_retry_attempt(flow_id, context.agent_name, context.retry_count)
+    
+    async def _execute_fallback_strategy(self, context: AgentExecutionContext,
+                                       state: DeepAgentState, error: Exception,
+                                       start_time: float) -> AgentExecutionResult:
+        """Execute fallback strategy for failed execution."""
+        self._log_fallback_trigger(context)
+        return await self.fallback_manager.create_fallback_result(context, state, error, start_time)
 
     # Fallback management delegation
     async def get_fallback_health_status(self) -> Dict[str, any]:

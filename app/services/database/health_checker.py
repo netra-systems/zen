@@ -20,12 +20,14 @@ class ConnectionHealthChecker:
         self.metrics = metrics
         self._running = False
         self._check_interval = 60  # 1 minute
+        self._monitoring_task = None
         
     async def start_monitoring(self) -> None:
         """Start periodic monitoring"""
         self._running = True
         logger.info("Starting database connection monitoring")
-        await self._monitoring_loop()
+        self._monitoring_task = asyncio.create_task(self._monitoring_loop())
+        # Return immediately instead of awaiting the loop
     
     async def _monitoring_loop(self) -> None:
         """Main monitoring loop"""
@@ -43,6 +45,8 @@ class ConnectionHealthChecker:
     def stop_monitoring(self) -> None:
         """Stop periodic monitoring"""
         self._running = False
+        if self._monitoring_task:
+            self._monitoring_task.cancel()
         logger.info("Stopping database connection monitoring")
     
     async def perform_health_check(self) -> Dict[str, Any]:

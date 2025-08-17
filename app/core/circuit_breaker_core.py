@@ -58,26 +58,44 @@ class CircuitBreaker:
         return await self._can_execute()
     
     def record_failure(self, error_type: str) -> None:
-        """Record failure and update circuit breaker state."""
+        """Record failure synchronously for testing."""
+        self._update_failure_counters()
+        self._update_failure_metrics_sync(error_type)
+        self._check_failure_threshold_sync()
+    
+    def _update_failure_counters(self) -> None:
+        """Update failure counters and timestamps."""
         self._failure_count += 1
         self._last_failure_time = time.time()
+    
+    def _update_failure_metrics_sync(self, error_type: str) -> None:
+        """Update failure metrics synchronously."""
         self.metrics.total_calls += 1
         self.metrics.failed_calls += 1
         self.metrics.last_failure_time = time.time()
         current_count = self.metrics.failure_types.get(error_type, 0)
         self.metrics.failure_types[error_type] = current_count + 1
-        
+    
+    def _check_failure_threshold_sync(self) -> None:
+        """Check failure threshold and transition if needed."""
         if self._failure_count >= self.config.failure_threshold:
             self._transition_to_open_sync()
         elif self.state == CircuitState.HALF_OPEN:
             self._transition_to_open_sync()
     
     def record_success(self) -> None:
-        """Record successful execution and update metrics."""
+        """Record success synchronously for testing."""
+        self._update_success_metrics_sync()
+        self._handle_half_open_success()
+    
+    def _update_success_metrics_sync(self) -> None:
+        """Update success metrics synchronously."""
         self.metrics.total_calls += 1
         self.metrics.successful_calls += 1
         self.metrics.last_success_time = time.time()
-        
+    
+    def _handle_half_open_success(self) -> None:
+        """Handle success during half-open state."""
         if self.state == CircuitState.HALF_OPEN:
             self._transition_to_closed_sync()
             self._failure_count = 0
@@ -247,11 +265,22 @@ class CircuitBreaker:
     
     def _build_status_dict(self) -> Dict[str, Any]:
         """Build status dictionary with all circuit breaker information."""
+        base_status = self._get_base_status_info()
+        extended_status = self._get_extended_status_info()
+        return {**base_status, **extended_status}
+    
+    def _get_base_status_info(self) -> Dict[str, Any]:
+        """Get base status information."""
         return {
             "name": self.config.name,
             "state": self.state.value,
             "failure_count": self._failure_count,
-            "success_rate": self._calculate_success_rate(),
+            "success_rate": self._calculate_success_rate()
+        }
+    
+    def _get_extended_status_info(self) -> Dict[str, Any]:
+        """Get extended status information."""
+        return {
             "config": self._get_config_status(),
             "metrics": self._get_metrics_status(),
             "health": self._get_health_status()

@@ -1,6 +1,7 @@
 """
 Helper functions for core infrastructure tests.
 Provides reusable setup, assertions, and mock creation.
+Security and logging helpers moved to core_test_security_helpers.py to maintain 300-line limit.
 """
 
 import json
@@ -49,16 +50,9 @@ def _set_auth_configs(config):
 
 def create_failing_async_func(fail_count: int, success_result: str = "success"):
     """Create async function that fails N times then succeeds."""
-    call_count = 0
-    
-    async def failing_func():
-        nonlocal call_count
-        call_count += 1
-        if call_count < fail_count:
-            raise ConnectionError("Transient error")
-        return success_result
-    
-    return failing_func, lambda: call_count
+    call_count = [0]
+    failing_func = _create_failing_func(call_count, fail_count, success_result)
+    return failing_func, lambda: call_count[0]
 
 
 def create_mock_database():
@@ -80,15 +74,16 @@ def _setup_mock_database_results(mock_db):
 
 def create_log_record(name: str, level: int, message: str):
     """Create a log record for testing formatters."""
-    return logging.LogRecord(
-        name=name,
-        level=level,
-        pathname="test.py",
-        lineno=10,
-        msg=message,
-        args=(),
-        exc_info=None
-    )
+    log_params = _create_log_record_params(name, level, message)
+    return logging.LogRecord(**log_params)
+
+
+def _create_log_record_params(name: str, level: int, message: str):
+    """Create parameters for log record."""
+    return {
+        'name': name, 'level': level, 'pathname': "test.py",
+        'lineno': 10, 'msg': message, 'args': (), 'exc_info': None
+    }
 
 
 def assert_json_log_format(formatted_log: str, expected_fields: List[str]):
@@ -108,13 +103,27 @@ def create_mock_services_dict():
 
 def create_schema_comparison_data():
     """Create test data for schema comparison."""
-    expected_schema = {
+    expected_schema = _create_expected_schema()
+    actual_schema = _create_actual_schema_with_differences()
+    return expected_schema, actual_schema
+
+
+def _create_failing_func(call_count, fail_count, success_result):
+    """Create the actual failing function."""
+    async def failing_func():
+        call_count[0] += 1
+        if call_count[0] < fail_count:
+            raise ConnectionError("Transient error")
+        return success_result
+    return failing_func
+
+
+def _create_expected_schema():
+    """Create expected schema for comparison."""
+    return {
         "users": ["id", "email", "created_at"],
         "posts": ["id", "user_id", "content"]
     }
-    actual_schema = _create_actual_schema_with_differences()
-    
-    return expected_schema, actual_schema
 
 
 def _create_actual_schema_with_differences():
@@ -125,11 +134,16 @@ def _create_actual_schema_with_differences():
     }
 
 
+def _assert_table_field_changes(changes, expected_missing, expected_extra):
+    """Assert table field changes are correct."""
+    _assert_missing_fields(changes, expected_missing)
+    _assert_extra_fields(changes, expected_extra)
+
+
 def assert_schema_diff_results(diff: Dict, expected_missing: List[str], expected_extra: List[str]):
     """Assert schema diff contains expected differences."""
     for table, changes in diff.items():
-        _assert_missing_fields(changes, expected_missing)
-        _assert_extra_fields(changes, expected_extra)
+        _assert_table_field_changes(changes, expected_missing, expected_extra)
 
 
 def _assert_missing_fields(changes: Dict, expected_missing: List[str]):
@@ -146,109 +160,10 @@ def _assert_extra_fields(changes: Dict, expected_extra: List[str]):
             assert field in changes["extra"]
 
 
-def create_mock_secret_manager_with_rotation():
-    """Create secret manager that supports key rotation."""
-    from cryptography.fernet import Fernet
-    
-    class MockSecretManager:
-        def __init__(self, key):
-            self.fernet = Fernet(key)
-            self.old_keys = []
-    
-    _add_secret_manager_methods(MockSecretManager)
-    
-    return MockSecretManager
-
-
-def _add_secret_manager_methods(cls):
-    """Add methods to MockSecretManager class."""
-    def encrypt_secret(self, secret: str) -> str:
-        return self.fernet.encrypt(secret.encode()).decode()
-    
-    def decrypt_secret(self, encrypted: str) -> str:
-        return self._try_decrypt_with_current_and_old_keys(encrypted)
-    
-    def rotate_key(self, new_key):
-        self.old_keys.append(self.fernet)
-        self.fernet = Fernet(new_key)
-    
-    def store_secrets(self, secrets: Dict, path: str):
-        pass  # Mock implementation
-    
-    def load_secrets(self, path: str) -> Dict:
-        return {"api_key": "secret_key_123", "db_password": "password_456"}
-    
-    def _try_decrypt_with_current_and_old_keys(self, encrypted: str) -> str:
-        try:
-            return self.fernet.decrypt(encrypted.encode()).decode()
-        except:
-            for old_fernet in self.old_keys:
-                try:
-                    return old_fernet.decrypt(encrypted.encode()).decode()
-                except:
-                    continue
-            raise
-    
-    cls.encrypt_secret = encrypt_secret
-    cls.decrypt_secret = decrypt_secret
-    cls.rotate_key = rotate_key
-    cls.store_secrets = store_secrets
-    cls.load_secrets = load_secrets
-    cls._try_decrypt_with_current_and_old_keys = _try_decrypt_with_current_and_old_keys
-
-
-def create_unified_logger_with_context():
-    """Create unified logger with context management."""
-    class MockUnifiedLogger:
-        def __init__(self):
-            self.correlation_id = None
-            self.context = {}
-            self.logs = []
-    
-    _add_logger_methods(MockUnifiedLogger)
-    
-    return MockUnifiedLogger
-
-
-def _add_logger_methods(cls):
-    """Add methods to MockUnifiedLogger class."""
-    def set_correlation_id(self, correlation_id: str):
-        self.correlation_id = correlation_id
-    
-    def add_context(self, context: Dict):
-        self.context.update(context)
-    
-    def log(self, level: str, message: str, **kwargs) -> Dict:
-        log_entry = {
-            "level": level,
-            "message": message,
-            "correlation_id": self.correlation_id,
-            **self.context,
-            **kwargs
-        }
-        self.logs.append(log_entry)
-        return log_entry
-    
-    def get_aggregated_logs(self) -> List[Dict]:
-        return self.logs
-    
-    cls.set_correlation_id = set_correlation_id
-    cls.add_context = add_context
-    cls.log = log
-    cls.get_aggregated_logs = get_aggregated_logs
-
-
-def create_startup_check_results():
-    """Create standard startup check results for testing."""
-    return {
-        "database": True,
-        "auth": True,
-        "cache": False,
-        "metrics": False
-    }
-
-
-def assert_service_categorization(can_start: bool, critical_services: List[str]):
-    """Assert that service categorization works correctly."""
-    if all(service in ["database", "auth"] for service in critical_services):
-        assert can_start  # Should start with critical services up
+# Security and logging helpers moved to core_test_security_helpers.py
+from .core_test_security_helpers import (
+    create_mock_secret_manager_with_rotation,
+    create_unified_logger_with_context,
+    create_startup_check_results,
+    assert_service_categorization
+)

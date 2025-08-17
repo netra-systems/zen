@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 
 from app.core.exceptions import NetraException, ErrorCode, ErrorSeverity
 from app.core.async_retry_logic import _retry_with_backoff
-from app.mcp_client.models import MCPResource, MCPResourceList, MCPConnection
+from app.mcp_client.models import MCPResource, MCPConnection
 
 
 class MCPResourceProxy:
@@ -70,22 +70,22 @@ class MCPResourceProxy:
         return resources
     
     async def _fetch_and_cache_resource(self, connection: MCPConnection, uri: str, cache_key: str) -> MCPResource:
-        \"\"\"Fetch resource and cache it.\"\"\"
+        """Fetch resource and cache it."""
         resource = await self._fetch_resource_with_retry(connection, uri)
         self._content_cache[cache_key] = resource
         return resource
     
     def _is_valid_parsed_uri(self, parsed_uri) -> bool:
-        \"\"\"Check if parsed URI is valid.\"\"\"
+        """Check if parsed URI is valid."""
         return bool(parsed_uri.scheme and (parsed_uri.netloc or parsed_uri.path))
     
     def _get_mime_type_parsers(self) -> Dict[str, Any]:
-        \"\"\"Get MIME type to parser mapping.\"\"\"
+        """Get MIME type to parser mapping."""
         return {
-            \"application/json\": self._parse_json_content,
-            \"text/plain\": self._parse_text_content,
-            \"text/markdown\": self._parse_text_content,
-            \"text/html\": self._parse_text_content
+            "application/json": self._parse_json_content,
+            "text/plain": self._parse_text_content,
+            "text/markdown": self._parse_text_content,
+            "text/html": self._parse_text_content
         }
     
     async def _fetch_resources_from_server(self, connection: MCPConnection) -> List[MCPResource]:
@@ -180,16 +180,31 @@ class MCPResourceProxy:
     def clear_cache(self, server_name: Optional[str] = None) -> None:
         """Clear resource and content caches."""
         if server_name:
-            keys_to_remove = [k for k in self._resource_cache.keys() if k.startswith(f"{server_name}:")]
-            for key in keys_to_remove:
-                self._resource_cache.pop(key, None)
-            
-            content_keys_to_remove = [k for k in self._content_cache.keys() if k.startswith(f"{server_name}:")]
-            for key in content_keys_to_remove:
-                self._content_cache.pop(key, None)
+            self._clear_server_cache(server_name)
         else:
-            self._resource_cache.clear()
-            self._content_cache.clear()
+            self._clear_all_caches()
+    
+    def _clear_server_cache(self, server_name: str) -> None:
+        """Clear cache for specific server."""
+        self._clear_server_resource_cache(server_name)
+        self._clear_server_content_cache(server_name)
+    
+    def _clear_server_resource_cache(self, server_name: str) -> None:
+        """Clear resource cache for specific server."""
+        keys_to_remove = [k for k in self._resource_cache.keys() if k.startswith(f"{server_name}:")]
+        for key in keys_to_remove:
+            self._resource_cache.pop(key, None)
+    
+    def _clear_server_content_cache(self, server_name: str) -> None:
+        """Clear content cache for specific server."""
+        keys_to_remove = [k for k in self._content_cache.keys() if k.startswith(f"{server_name}:")]
+        for key in keys_to_remove:
+            self._content_cache.pop(key, None)
+    
+    def _clear_all_caches(self) -> None:
+        """Clear all caches."""
+        self._resource_cache.clear()
+        self._content_cache.clear()
     
     def get_cache_stats(self) -> Dict[str, int]:
         """Get cache statistics."""

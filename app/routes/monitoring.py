@@ -11,7 +11,7 @@ from app.services.database.connection_monitor import (
     connection_metrics,
     health_checker
 )
-from app.auth.auth_dependencies import get_current_user
+from app.auth_integration.auth import get_current_user
 from app.logging_config import central_logger
 from pydantic import BaseModel, Field
 from datetime import datetime

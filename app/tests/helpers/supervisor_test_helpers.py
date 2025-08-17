@@ -43,14 +43,17 @@ def create_supervisor_agent(mocks: Dict[str, Any]) -> SupervisorAgent:
 
 def create_execution_context(run_id: str, **kwargs) -> AgentExecutionContext:
     """Create execution context with defaults."""
-    return AgentExecutionContext(
-        run_id=run_id,
-        thread_id=kwargs.get('thread_id', 'thread-1'),
-        user_id=kwargs.get('user_id', 'user-1'),
-        agent_name=kwargs.get('agent_name', 'Supervisor'),
-        max_retries=kwargs.get('max_retries', 3),
-        started_at=kwargs.get('started_at', datetime.now(timezone.utc))
-    )
+    context_params = _build_execution_context_params(run_id, kwargs)
+    return AgentExecutionContext(**context_params)
+
+
+def _build_execution_context_params(run_id: str, kwargs: dict) -> dict:
+    """Build execution context parameters with defaults."""
+    return {
+        'run_id': run_id, 'thread_id': kwargs.get('thread_id', 'thread-1'),
+        'user_id': kwargs.get('user_id', 'user-1'), 'agent_name': kwargs.get('agent_name', 'Supervisor'),
+        'max_retries': kwargs.get('max_retries', 3), 'started_at': kwargs.get('started_at', datetime.now(timezone.utc))
+    }
 
 
 def create_agent_state(user_request: str, **kwargs) -> DeepAgentState:
@@ -63,79 +66,25 @@ def create_agent_state(user_request: str, **kwargs) -> DeepAgentState:
 
 def setup_triage_agent_mock(supervisor: SupervisorAgent, return_data: Dict[str, Any]):
     """Setup triage agent mock with return data."""
-    from app.agents.triage_sub_agent.models import TriageResult
     triage_agent = supervisor.agents.get("triage")
-    
-    # Convert dict to TriageResult model
-    triage_dict = return_data.get('triage_result', {'message_type': 'query'})
-    if isinstance(triage_dict, dict):
-        triage_result = TriageResult(
-            category=triage_dict.get('message_type', 'query'),
-            confidence_score=triage_dict.get('confidence', 0.8)
-        )
-    else:
-        triage_result = triage_dict
-    
-    # Create mock that preserves existing state and adds triage result
-    async def mock_execute(state, run_id, stream_updates=True):
-        state.triage_result = triage_result
-        return state
-    
+    triage_result = _create_triage_result(return_data)
+    mock_execute = _create_triage_execute_func(triage_result)
     triage_agent.execute = mock_execute
 
 
 def setup_optimization_agent_mock(supervisor: SupervisorAgent, return_data: Dict[str, Any]):
     """Setup optimization agent mock with return data."""
-    from app.agents.state import OptimizationsResult
     opt_agent = supervisor.agents.get("optimization")
-    
-    # Ensure optimizations_result has required optimization_type field
-    opt_dict = return_data.get('optimizations_result', {
-        'optimization_type': 'performance',
-        'recommendations': []
-    })
-    if 'optimization_type' not in opt_dict:
-        opt_dict['optimization_type'] = 'performance'
-    
-    optimizations_result = OptimizationsResult(**opt_dict)
-    
-    # Create mock that preserves existing state and adds optimization result
-    async def mock_execute(state, run_id, stream_updates=True):
-        state.optimizations_result = optimizations_result
-        return state
-    
+    optimizations_result = _create_optimizations_result(return_data)
+    mock_execute = _create_optimization_execute_func(optimizations_result)
     opt_agent.execute = mock_execute
 
 
 def setup_data_agent_mock(supervisor: SupervisorAgent, return_data: Dict[str, Any]):
     """Setup data agent mock with return data."""
-    from app.schemas.shared_types import AnomalyDetectionResponse
     data_agent = supervisor.agents.get("data")
-    
-    # Convert dict to appropriate model
-    data_dict = return_data.get('data_result', {'processed': True})
-    if isinstance(data_dict, dict):
-        if 'analysis' in data_dict:
-            confidence_score = data_dict.get('analysis', {}).get('metrics', {}).get('accuracy', 0.95)
-        elif data_dict.get('processed') is True:
-            confidence_score = 0.95
-        else:
-            confidence_score = 0.8
-            
-        data_result = AnomalyDetectionResponse(
-            summary=f"Analysis complete: {data_dict.get('analysis', {}).get('trends', 'processed')}",
-            anomalies=[],
-            confidence_score=confidence_score,
-            processing_time_ms=100
-        )
-    else:
-        data_result = data_dict
-    
-    # Create mock that preserves existing state and adds data result
-    async def mock_execute(state, run_id, stream_updates=True):
-        state.data_result = data_result
-        return state
-    
+    data_result = _create_data_result(return_data)
+    mock_execute = _create_data_execute_func(data_result)
     data_agent.execute = mock_execute
 
 
@@ -147,26 +96,9 @@ def setup_failing_agent_mock(supervisor: SupervisorAgent, agent_name: str, error
 
 def setup_retry_agent_mock(supervisor: SupervisorAgent, agent_name: str, failures: List[str], success_data: Dict[str, Any]):
     """Setup agent mock with retry behavior."""
-    from app.agents.triage_sub_agent.models import TriageResult
     agent = supervisor.agents.get(agent_name)
-    agent.execute = AsyncMock()
-    side_effects = [Exception(err) for err in failures]
-    
-    # Create proper success state
-    if agent_name == "triage" and 'triage_result' in success_data:
-        triage_dict = success_data['triage_result']
-        if isinstance(triage_dict, dict):
-            # If dict contains success=True, set category to "success"
-            if triage_dict.get('success') is True:
-                category = "success"
-            else:
-                category = triage_dict.get('message_type', 'query')
-            triage_result = TriageResult(category=category)
-            success_data = success_data.copy()
-            success_data['triage_result'] = triage_result
-    
-    side_effects.append(DeepAgentState(**success_data))
-    agent.execute.side_effect = side_effects
+    side_effects = _create_retry_side_effects(failures, agent_name, success_data)
+    agent.execute = AsyncMock(side_effect=side_effects)
 
 
 def assert_agent_called(supervisor: SupervisorAgent, agent_name: str):
@@ -184,11 +116,8 @@ def assert_agent_not_called(supervisor: SupervisorAgent, agent_name: str):
 def assert_routing_result(result: AgentExecutionResult, expected_success: bool, **kwargs):
     """Assert routing result properties."""
     assert result.success == expected_success
-    if 'error' in kwargs:
-        assert result.error == kwargs['error']
-    if 'state_attr' in kwargs and 'state_value' in kwargs:
-        attr_value = getattr(result.state, kwargs['state_attr'], None)
-        assert attr_value == kwargs['state_value']
+    _assert_optional_error(result, kwargs)
+    _assert_optional_state_attr(result, kwargs)
 
 
 def setup_circuit_breaker(supervisor: SupervisorAgent, threshold: int = 3):
@@ -206,10 +135,8 @@ def create_pipeline_config(agents: List[str], strategies: List[ExecutionStrategy
 async def execute_pipeline(supervisor: SupervisorAgent, state: DeepAgentState, context: AgentExecutionContext, pipeline: List[tuple]):
     """Execute agent pipeline with conditional logic."""
     for agent_name, strategy in pipeline:
-        if strategy == ExecutionStrategy.CONDITIONAL:
-            if state.triage_result and state.triage_result.get("requires_data"):
-                await supervisor._route_to_agent(state, context, agent_name)
-        else:
+        should_execute = _should_execute_agent(strategy, state)
+        if should_execute:
             await supervisor._route_to_agent(state, context, agent_name)
 
 
@@ -283,14 +210,11 @@ def create_test_documents(count: int = 5) -> List[Dict[str, str]]:
 def setup_vector_store_mock(vector_store: AsyncMock, operation: str, return_data: Any):
     """Setup vector store mock for specific operation."""
     if operation == "add_documents":
-        vector_store.add_documents = AsyncMock()
-        vector_store.add_documents.return_value = return_data
+        _setup_add_documents_mock(vector_store, return_data)
     elif operation == "similarity_search":
-        vector_store.similarity_search = AsyncMock()
-        vector_store.similarity_search.return_value = return_data
+        _setup_similarity_search_mock(vector_store, return_data)
     elif operation == "update_document":
-        vector_store.update_document = AsyncMock()
-        vector_store.update_document.return_value = return_data
+        _setup_update_document_mock(vector_store, return_data)
 
 
 # Supply researcher testing helpers
@@ -342,12 +266,9 @@ def create_demo_data(metrics: Dict[str, Any], recommendations: List[str]) -> Dic
 async def run_concurrent_tasks(tasks: List, max_concurrent: int = 5) -> List[Any]:
     """Run tasks concurrently with limit."""
     semaphore = asyncio.Semaphore(max_concurrent)
-    
-    async def run_with_semaphore(task):
-        async with semaphore:
-            return await task
-    
-    return await asyncio.gather(*[run_with_semaphore(task) for task in tasks])
+    run_with_semaphore = _create_semaphore_task_runner(semaphore)
+    wrapped_tasks = [run_with_semaphore(task) for task in tasks]
+    return await asyncio.gather(*wrapped_tasks)
 
 
 def assert_call_count(mock_obj: AsyncMock, expected_count: int):
@@ -358,6 +279,168 @@ def assert_call_count(mock_obj: AsyncMock, expected_count: int):
 def assert_contains_error(error_message: str, expected_substring: str):
     """Assert error message contains expected substring."""
     assert expected_substring in error_message
+
+
+def _create_triage_result(return_data: Dict[str, Any]):
+    """Create triage result from return data."""
+    from app.agents.triage_sub_agent.models import TriageResult
+    triage_dict = return_data.get('triage_result', {'message_type': 'query'})
+    if isinstance(triage_dict, dict):
+        return _build_triage_result_from_dict(TriageResult, triage_dict)
+    return triage_dict
+
+
+def _build_triage_result_from_dict(result_class, triage_dict: Dict[str, Any]):
+    """Build TriageResult from dictionary."""
+    return result_class(
+        category=triage_dict.get('message_type', 'query'),
+        confidence_score=triage_dict.get('confidence', 0.8)
+    )
+
+
+def _create_triage_execute_func(triage_result):
+    """Create triage execute function."""
+    async def mock_execute(state, run_id, stream_updates=True):
+        state.triage_result = triage_result
+        return state
+    return mock_execute
+
+
+def _create_optimizations_result(return_data: Dict[str, Any]):
+    """Create optimizations result from return data."""
+    from app.agents.state import OptimizationsResult
+    opt_dict = _prepare_optimizations_dict(return_data)
+    return OptimizationsResult(**opt_dict)
+
+
+def _prepare_optimizations_dict(return_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Prepare optimizations dictionary with defaults."""
+    opt_dict = return_data.get('optimizations_result', {
+        'optimization_type': 'performance', 'recommendations': []
+    })
+    if 'optimization_type' not in opt_dict:
+        opt_dict['optimization_type'] = 'performance'
+    return opt_dict
+
+
+def _create_optimization_execute_func(optimizations_result):
+    """Create optimization execute function."""
+    async def mock_execute(state, run_id, stream_updates=True):
+        state.optimizations_result = optimizations_result
+        return state
+    return mock_execute
+
+
+def _create_data_result(return_data: Dict[str, Any]):
+    """Create data result from return data."""
+    from app.schemas.shared_types import AnomalyDetectionResponse
+    data_dict = return_data.get('data_result', {'processed': True})
+    if isinstance(data_dict, dict):
+        confidence_score = _get_data_confidence_score(data_dict)
+        return _create_anomaly_detection_response(data_dict, confidence_score)
+    return data_dict
+
+
+def _get_data_confidence_score(data_dict: Dict[str, Any]) -> float:
+    """Get confidence score from data dict."""
+    if 'analysis' in data_dict:
+        return data_dict.get('analysis', {}).get('metrics', {}).get('accuracy', 0.95)
+    elif data_dict.get('processed') is True:
+        return 0.95
+    return 0.8
+
+
+def _create_anomaly_detection_response(data_dict: Dict[str, Any], confidence_score: float):
+    """Create anomaly detection response."""
+    from app.schemas.shared_types import AnomalyDetectionResponse
+    summary = f"Analysis complete: {data_dict.get('analysis', {}).get('trends', 'processed')}"
+    return AnomalyDetectionResponse(
+        summary=summary,
+        anomalies=[],
+        confidence_score=confidence_score,
+        processing_time_ms=100
+    )
+
+
+def _create_data_execute_func(data_result):
+    """Create data execute function."""
+    async def mock_execute(state, run_id, stream_updates=True):
+        state.data_result = data_result
+        return state
+    return mock_execute
+
+
+def _create_retry_side_effects(failures: List[str], agent_name: str, success_data: Dict[str, Any]):
+    """Create side effects for retry behavior."""
+    side_effects = [Exception(err) for err in failures]
+    success_state = _create_success_state(agent_name, success_data)
+    side_effects.append(success_state)
+    return side_effects
+
+
+def _create_success_state(agent_name: str, success_data: Dict[str, Any]):
+    """Create success state for retry mock."""
+    if agent_name == "triage" and 'triage_result' in success_data:
+        success_data = _process_triage_success_data(success_data)
+    return DeepAgentState(**success_data)
+
+
+def _process_triage_success_data(success_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Process triage success data."""
+    from app.agents.triage_sub_agent.models import TriageResult
+    triage_dict = success_data['triage_result']
+    if isinstance(triage_dict, dict):
+        category = "success" if triage_dict.get('success') else triage_dict.get('message_type', 'query')
+        triage_result = TriageResult(category=category)
+        success_data = success_data.copy()
+        success_data['triage_result'] = triage_result
+    return success_data
+
+
+def _assert_optional_error(result, kwargs):
+    """Assert optional error in result."""
+    if 'error' in kwargs:
+        assert result.error == kwargs['error']
+
+
+def _assert_optional_state_attr(result, kwargs):
+    """Assert optional state attribute in result."""
+    if 'state_attr' in kwargs and 'state_value' in kwargs:
+        attr_value = getattr(result.state, kwargs['state_attr'], None)
+        assert attr_value == kwargs['state_value']
+
+
+def _should_execute_agent(strategy, state) -> bool:
+    """Check if agent should be executed based on strategy."""
+    if strategy == ExecutionStrategy.CONDITIONAL:
+        return state.triage_result and state.triage_result.get("requires_data")
+    return True
+
+
+def _setup_add_documents_mock(vector_store: AsyncMock, return_data: Any):
+    """Setup add documents mock."""
+    vector_store.add_documents = AsyncMock()
+    vector_store.add_documents.return_value = return_data
+
+
+def _setup_similarity_search_mock(vector_store: AsyncMock, return_data: Any):
+    """Setup similarity search mock."""
+    vector_store.similarity_search = AsyncMock()
+    vector_store.similarity_search.return_value = return_data
+
+
+def _setup_update_document_mock(vector_store: AsyncMock, return_data: Any):
+    """Setup update document mock."""
+    vector_store.update_document = AsyncMock()
+    vector_store.update_document.return_value = return_data
+
+
+def _create_semaphore_task_runner(semaphore):
+    """Create task runner with semaphore."""
+    async def run_with_semaphore(task):
+        async with semaphore:
+            return await task
+    return run_with_semaphore
 
 
 def create_timestamp_data() -> Dict[str, Any]:

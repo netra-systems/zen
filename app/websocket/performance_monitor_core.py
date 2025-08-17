@@ -13,7 +13,7 @@ from collections import deque, defaultdict
 from app.logging_config import central_logger
 from .performance_monitor_types import PerformanceThresholds, AlertSeverity
 from .performance_monitor_collector import MetricCollector
-from .performance_monitor_alerts import AlertManager
+from .performance_monitor_alerts import PerformanceAlertManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -24,7 +24,7 @@ class PerformanceMonitor:
     def __init__(self, thresholds: Optional[PerformanceThresholds] = None):
         self.thresholds = thresholds or PerformanceThresholds()
         self.metric_collector = MetricCollector()
-        self.alert_manager = AlertManager()
+        self.alert_manager = PerformanceAlertManager()
         self._init_monitoring_state()
         self._init_performance_tracking()
     
@@ -306,7 +306,7 @@ class PerformanceMonitor:
     def reset_metrics(self) -> None:
         """Reset all metrics and alerts."""
         self.metric_collector = MetricCollector()
-        self.alert_manager = AlertManager()
+        self.alert_manager = PerformanceAlertManager()
         self._reset_tracking_structures()
         logger.info("Performance metrics reset")
     

@@ -56,6 +56,10 @@ export interface ConnectionState {
   connectionError: string | null;
 }
 
+export interface ConnectionActions {
+  setConnectionStatus: (isConnected: boolean, error?: string) => void;
+}
+
 export interface AgentTrackingState {
   executedAgents: Map<string, AgentExecution>;
   agentIterations: Map<string, number>;

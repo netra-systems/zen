@@ -5,9 +5,9 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from app.services.llm_cache_service import LLMCacheService
 async def test_llm_cache_service_initialization():
     cache_service = LLMCacheService()
-    assert cache_service.default_ttl == 3600
+    assert cache_service.cache_core.default_ttl == 3600
     assert cache_service.enabled == True
-    assert cache_service.cache_prefix == "llm_cache:"
+    assert cache_service.cache_core.cache_prefix == "llm_cache:"
 async def test_cache_set_and_get():
     with patch('app.services.llm_cache_service.redis_manager') as mock_redis_manager:
         # Create mock Redis client
@@ -37,7 +37,7 @@ async def test_cache_set_and_get():
         assert retrieved_value == value["response"]
 async def test_cache_expiration():
     cache_service = LLMCacheService()
-    cache_service.default_ttl = 1
+    cache_service.cache_core.default_ttl = 1
     
     key = "test_prompt_hash"
     value = {"response": "Test LLM response", "tokens": 100}

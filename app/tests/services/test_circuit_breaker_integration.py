@@ -52,7 +52,7 @@ class TestLLMClientCircuitBreaker:
         self.mock_llm_manager.ask_llm = AsyncMock(side_effect=Exception("LLM error"))
         
         # Configure circuit with low threshold for testing
-        circuit = await self.llm_client._get_circuit("test_config")
+        circuit = await self.llm_client.core_client.circuit_manager.get_circuit("test_config")
         circuit.config.failure_threshold = 2
         circuit.adaptive_failure_threshold = 2
         

@@ -11,13 +11,12 @@ import WS from 'jest-websocket-mock';
 // Import stores
 import { useAuthStore } from '@/store/authStore';
 
-// Import test utilities
-import { TestProviders, WebSocketContext, mockWebSocketContextValue } from '../../test-utils/providers';
-import { setupTestEnvironment, cleanupTestEnvironment, resetTestStores, clearTestStorage, createTestUser, createMockToken, setAuthenticatedState } from '../../helpers/test-setup-helpers';
-import { createMockOAuthResponse, createExpiredToken } from '../../helpers/test-mock-helpers';
-import { simulateOAuthCallback, simulateSessionRestore } from '../../helpers/test-async-helpers';
+// Import unified test utilities
+import { renderWithProviders, waitForElement, safeAsync, resetAllMocks } from '../../shared/unified-test-utilities';
+import { safeAct, waitForCondition, flushPromises } from '../../helpers/test-timing-utilities';
+import { TestProviders, mockWebSocketContextValue } from '../../setup/test-providers';
+import { createTestUser, createMockToken, setAuthenticatedState, setupMockFetchForConfig } from '../../helpers/test-setup-helpers';
 import { WebSocketStatusComponent, AuthenticatedWebSocketComponent, AuthStatusComponent } from '../../helpers/test-component-helpers';
-import { assertWebSocketStatus, assertUserIsAuthenticated, assertElementText } from '../../helpers/test-assertion-helpers';
 
 // Mock environment
 const mockEnv = {
@@ -30,45 +29,35 @@ describe('WebSocket and Authentication Integration', () => {
   
   beforeEach(() => {
     process.env = { ...process.env, ...mockEnv };
-    setupTestEnvironment();
     server = new WS('ws://localhost:8000/ws');
-    clearTestStorage();
-    resetTestStores();
+    resetAllMocks();
     setupMockFetchForConfig();
   });
 
   afterEach(() => {
-    cleanupTestEnvironment();
+    server.close();
+    resetAllMocks();
   });
 
   describe('WebSocket Provider Integration', () => {
     it('should integrate WebSocket with authentication state', async () => {
-      setAuthenticatedState();
+      await safeAsync(() => {
+        setAuthenticatedState();
+      });
       
-      const { rerender } = render(
-        <TestProviders wsValue={{ ...mockWebSocketContextValue, status: 'CLOSED' }}>
-          <WebSocketStatusComponent />
-        </TestProviders>
-      );
-      
-      assertWebSocketStatus('Disconnected');
-      rerender(
-        <TestProviders wsValue={{ ...mockWebSocketContextValue, status: 'OPEN' }}>
-          <WebSocketStatusComponent />
-        </TestProviders>
-      );
-      assertWebSocketStatus('Connected');
+      renderWithProviders(<WebSocketStatusComponent />);
+      const statusElement = await waitForElement('ws-status');
+      expect(statusElement).toHaveTextContent('Connected');
     });
 
     it('should reconnect WebSocket when authentication changes', async () => {
-      const { getByText } = render(
-        <TestProviders>
-          <AuthenticatedWebSocketComponent />
-        </TestProviders>
-      );
+      renderWithProviders(<AuthenticatedWebSocketComponent />);
       
-      fireEvent.click(getByText('Login'));
+      await safeAsync(async () => {
+        fireEvent.click(screen.getByText('Login'));
+      });
       
+      await flushPromises();
       expect(useAuthStore.getState().token).toBe('new-token');
     });
   });

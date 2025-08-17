@@ -28,40 +28,62 @@ def print_section(title: str):
     print(f"{Fore.CYAN}{title:^60}")
     print(f"{Fore.CYAN}{'=' * 60}{Style.RESET_ALL}")
 
+def get_env_var_value(var_name: str) -> str:
+    """Get environment variable value."""
+    return os.getenv(var_name, "")
+
+def format_env_display_value(value: str, sensitive: bool) -> str:
+    """Format environment variable for display."""
+    if not value:
+        return ""
+    if sensitive:
+        return "***"
+    return value[:20] + "..." if len(value) > 20 else value
+
 def check_env_var(var_name: str, required: bool = True, sensitive: bool = False) -> Tuple[bool, str]:
     """Check if an environment variable is set."""
-    value = os.getenv(var_name)
+    value = get_env_var_value(var_name)
     if value:
-        display_value = "***" if sensitive else value[:20] + "..." if len(value) > 20 else value
+        display_value = format_env_display_value(value, sensitive)
         return True, display_value
-    elif required:
-        return False, "NOT SET"
-    else:
-        return True, "NOT SET (optional)"
+    return (False, "NOT SET") if required else (True, "NOT SET (optional)")
 
-def check_github_secrets() -> Dict[str, bool]:
-    """Check if required GitHub secrets are available."""
-    print_section("GitHub Secrets Check")
-    
-    secrets = {
+def get_required_github_secrets() -> Dict[str, bool]:
+    """Get list of required GitHub secrets."""
+    return {
         "GCP_STAGING_SA_KEY": False,
         "STAGING_DB_PASSWORD": False,
         "CLICKHOUSE_PASSWORD": False,
         "GOOGLE_OAUTH_CLIENT_ID_STAGING": False,
         "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": False,
     }
-    
-    # In GitHub Actions, secrets are passed as env vars
+
+def is_optional_secret(secret_name: str) -> bool:
+    """Check if a secret is optional."""
+    optional_secrets = ["GOOGLE_OAUTH_CLIENT_ID_STAGING", "GOOGLE_OAUTH_CLIENT_SECRET_STAGING"]
+    return secret_name in optional_secrets
+
+def print_secret_status(secret_name: str, is_set: bool):
+    """Print the status of a GitHub secret."""
+    if is_set:
+        print(f"{Fore.GREEN}✓ {secret_name}: Configured{Style.RESET_ALL}")
+    elif is_optional_secret(secret_name):
+        print(f"{Fore.YELLOW}⚠ {secret_name}: Not set (optional){Style.RESET_ALL}")
+    else:
+        print(f"{Fore.RED}✗ {secret_name}: Not configured{Style.RESET_ALL}")
+
+def check_single_github_secret(secret_name: str, secrets: Dict[str, bool]):
+    """Check and update status for a single GitHub secret."""
+    is_set = bool(os.getenv(secret_name))
+    secrets[secret_name] = is_set
+    print_secret_status(secret_name, is_set)
+
+def check_github_secrets() -> Dict[str, bool]:
+    """Check if required GitHub secrets are available."""
+    print_section("GitHub Secrets Check")
+    secrets = get_required_github_secrets()
     for secret_name in secrets:
-        if os.getenv(secret_name):
-            print(f"{Fore.GREEN}✓ {secret_name}: Configured{Style.RESET_ALL}")
-            secrets[secret_name] = True
-        else:
-            if secret_name in ["GOOGLE_OAUTH_CLIENT_ID_STAGING", "GOOGLE_OAUTH_CLIENT_SECRET_STAGING"]:
-                print(f"{Fore.YELLOW}⚠ {secret_name}: Not set (optional){Style.RESET_ALL}")
-            else:
-                print(f"{Fore.RED}✗ {secret_name}: Not configured{Style.RESET_ALL}")
-    
+        check_single_github_secret(secret_name, secrets)
     return secrets
 
 def parse_database_url(db_url: str) -> Tuple[str, Dict[str, str]]:
@@ -74,17 +96,29 @@ def parse_database_url(db_url: str) -> Tuple[str, Dict[str, str]]:
     else:
         return "standard", {"url": db_url}
 
-def _parse_cloudsql_url(db_url: str) -> Dict[str, str]:
-    """Parse Cloud SQL socket format URL."""
+def split_cloudsql_url_parts(db_url: str) -> Tuple[str, str]:
+    """Split Cloud SQL URL into main parts."""
     parts = db_url.split("?host=/cloudsql/")
     creds_and_db = parts[0]
     socket_path = f"/cloudsql/{parts[1]}"
-    
+    return creds_and_db, socket_path
+
+def validate_cloudsql_format(creds_and_db: str):
+    """Validate Cloud SQL URL format."""
     if "@" not in creds_and_db:
         raise ValueError("Invalid DATABASE_URL format")
-    
+
+def extract_cloudsql_credentials(creds_and_db: str) -> Tuple[str, str, str]:
+    """Extract credentials and database from Cloud SQL URL."""
     creds, db = creds_and_db.split("@")[0], creds_and_db.split("/")[-1]
     user, password = creds.split(":")
+    return user, password, db
+
+def _parse_cloudsql_url(db_url: str) -> Dict[str, str]:
+    """Parse Cloud SQL socket format URL."""
+    creds_and_db, socket_path = split_cloudsql_url_parts(db_url)
+    validate_cloudsql_format(creds_and_db)
+    user, password, db = extract_cloudsql_credentials(creds_and_db)
     return {"user": user, "password": password, "database": db, "socket": socket_path}
 
 def create_db_connection(conn_type: str, params: Dict[str, str]):
@@ -106,8 +140,8 @@ def test_db_connection(conn) -> str:
     print(f"{Fore.GREEN}✓ PostgreSQL connected: {version[:50]}...{Style.RESET_ALL}")
     return version
 
-def check_database_tables(conn) -> bool:
-    """Check for existing tables in database."""
+def query_database_tables(conn) -> List[Tuple]:
+    """Query database for existing tables."""
     cursor = conn.cursor()
     cursor.execute("""
         SELECT table_name FROM information_schema.tables 
@@ -115,24 +149,33 @@ def check_database_tables(conn) -> bool:
     """)
     tables = cursor.fetchall()
     cursor.close()
-    
+    return tables
+
+def print_table_results(tables: List[Tuple]):
+    """Print database table results."""
     if tables:
         print(f"  Tables found: {len(tables)}")
         for table in tables[:5]:
             print(f"    - {table[0]}")
     else:
         print(f"{Fore.YELLOW}  ⚠ No tables found (run migrations){Style.RESET_ALL}")
+
+def check_database_tables(conn) -> bool:
+    """Check for existing tables in database."""
+    tables = query_database_tables(conn)
+    print_table_results(tables)
     return bool(tables)
 
-def check_database_connection() -> bool:
-    """Test PostgreSQL database connection."""
-    print_section("PostgreSQL Connection Test")
-    
+def validate_database_url() -> str:
+    """Validate DATABASE_URL environment variable."""
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
         print(f"{Fore.RED}✗ DATABASE_URL not set{Style.RESET_ALL}")
-        return False
-    
+        return ""
+    return db_url
+
+def perform_database_connection_test(db_url: str) -> bool:
+    """Perform database connection and testing."""
     try:
         conn_type, params = parse_database_url(db_url)
         conn = create_db_connection(conn_type, params)
@@ -143,6 +186,14 @@ def check_database_connection() -> bool:
     except Exception as e:
         print(f"{Fore.RED}✗ PostgreSQL connection failed: {e}{Style.RESET_ALL}")
         return False
+
+def check_database_connection() -> bool:
+    """Test PostgreSQL database connection."""
+    print_section("PostgreSQL Connection Test")
+    db_url = validate_database_url()
+    if not db_url:
+        return False
+    return perform_database_connection_test(db_url)
 
 def check_redis_connection() -> bool:
     """Test Redis connection."""
@@ -326,66 +377,78 @@ def check_gcp_configuration() -> bool:
         print(f"{Fore.YELLOW}⚠ GCP check skipped: {e}{Style.RESET_ALL}")
         return False
 
-def main():
-    """Run all validation checks."""
+def print_validator_header():
+    """Print the main validator header."""
     print(f"{Fore.MAGENTA}╔{'═' * 58}╗")
     print(f"║{'Staging Environment Configuration Validator':^58}║")
     print(f"╚{'═' * 58}╝{Style.RESET_ALL}")
-    
-    # Track results
-    results = {
-        "github_secrets": False,
-        "environment_vars": False,
-        "postgresql": False,
-        "redis": False,
-        "clickhouse": False,
-        "gcp": False,
+
+def initialize_results_tracking() -> Dict[str, bool]:
+    """Initialize the results tracking dictionary."""
+    return {
+        "github_secrets": False, "environment_vars": False,
+        "postgresql": False, "redis": False,
+        "clickhouse": False, "gcp": False
     }
-    
-    # Run checks
-    if os.getenv("GITHUB_ACTIONS"):
-        print(f"\n{Fore.BLUE}Running in GitHub Actions environment{Style.RESET_ALL}")
-        secrets = check_github_secrets()
-        results["github_secrets"] = all([
-            secrets.get("GCP_STAGING_SA_KEY", False),
-            secrets.get("STAGING_DB_PASSWORD", False),
-            secrets.get("CLICKHOUSE_PASSWORD", False)
-        ])
-    else:
-        print(f"\n{Fore.BLUE}Running in local environment{Style.RESET_ALL}")
-    
+
+def run_github_actions_checks(results: Dict[str, bool]):
+    """Run checks specific to GitHub Actions environment."""
+    print(f"\n{Fore.BLUE}Running in GitHub Actions environment{Style.RESET_ALL}")
+    secrets = check_github_secrets()
+    results["github_secrets"] = all([
+        secrets.get("GCP_STAGING_SA_KEY", False),
+        secrets.get("STAGING_DB_PASSWORD", False),
+        secrets.get("CLICKHOUSE_PASSWORD", False)
+    ])
+
+def run_local_environment_checks():
+    """Run checks for local environment."""
+    print(f"\n{Fore.BLUE}Running in local environment{Style.RESET_ALL}")
+
+def run_core_validation_checks(results: Dict[str, bool]):
+    """Run core validation checks for all environments."""
     env_results = check_environment_variables()
     results["environment_vars"] = all([
         v for k, v in env_results.items() 
         if k in ["DATABASE_URL", "REDIS_URL", "CLICKHOUSE_PASSWORD", "PR_NUMBER"]
     ])
-    
     results["postgresql"] = check_database_connection()
     results["redis"] = check_redis_connection()
     results["clickhouse"] = check_clickhouse_connection()
     results["gcp"] = check_gcp_configuration()
-    
-    # Summary
+
+def print_validation_results(results: Dict[str, bool]):
+    """Print the validation results summary."""
     print_section("Validation Summary")
-    
+    for check, check_passed in results.items():
+        status = f"{Fore.GREEN}✓ PASS" if check_passed else f"{Fore.RED}✗ FAIL"
+        print(f"  {check.replace('_', ' ').title():30} {status}{Style.RESET_ALL}")
+
+def determine_final_result(results: Dict[str, bool]) -> int:
+    """Determine and print the final result."""
     total = len(results)
     passed = sum(1 for v in results.values() if v)
-    
-    for check, passed in results.items():
-        status = f"{Fore.GREEN}✓ PASS" if passed else f"{Fore.RED}✗ FAIL"
-        print(f"  {check.replace('_', ' ').title():30} {status}{Style.RESET_ALL}")
-    
     print(f"\n{Fore.CYAN}{'─' * 60}{Style.RESET_ALL}")
-    
     if passed == total:
         print(f"{Fore.GREEN}✓ All checks passed! ({passed}/{total}){Style.RESET_ALL}")
         print(f"{Fore.GREEN}Your staging environment is properly configured.{Style.RESET_ALL}")
         return 0
+    print(f"{Fore.YELLOW}⚠ Some checks failed ({passed}/{total}){Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Please review the errors above and update your configuration.{Style.RESET_ALL}")
+    print(f"\nRefer to docs/STAGING_SECRETS_GUIDE.md for setup instructions.")
+    return 1
+
+def main():
+    """Run all validation checks."""
+    print_validator_header()
+    results = initialize_results_tracking()
+    if os.getenv("GITHUB_ACTIONS"):
+        run_github_actions_checks(results)
     else:
-        print(f"{Fore.YELLOW}⚠ Some checks failed ({passed}/{total}){Style.RESET_ALL}")
-        print(f"{Fore.YELLOW}Please review the errors above and update your configuration.{Style.RESET_ALL}")
-        print(f"\nRefer to docs/STAGING_SECRETS_GUIDE.md for setup instructions.")
-        return 1
+        run_local_environment_checks()
+    run_core_validation_checks(results)
+    print_validation_results(results)
+    return determine_final_result(results)
 
 if __name__ == "__main__":
     sys.exit(main())

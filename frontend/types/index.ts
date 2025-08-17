@@ -5,42 +5,8 @@ export * from './backend_schema_config';
 export * from './backend_schema_auth';
 export * from './backend_schema_tools';
 
-// Export from backend_schema_base but exclude types that conflict with agent-types
-export type {
-  MessageType,
-  SubAgentLifecycle,
-  ToolStatus,
-  AgentMessage,
-  BaseMessage,
-  AgentState,
-  SubAgentState,
-  SubAgentStatus,
-  StreamEvent,
-  RunComplete,
-  Message,
-  MessageToUser,
-  UserMessage,
-  StartAgentMessage,
-  StartAgentPayload,
-  Settings,
-  AnalysisRequest,
-  RequestModel,
-  Workload,
-  DataSource,
-  TimeRange,
-  AnalysisResult,
-  WebSocketError,
-  Response,
-  UnifiedLogEntry,
-  Performance,
-  BaselineMetrics,
-  EnrichedMetrics,
-  CostComparison,
-  EventMetadata,
-  FinOps,
-  TraceContext,
-  ModelIdentifier
-} from './backend_schema_base';
+// Export core backend schema types (AUTHORITATIVE SOURCE)
+export * from './backend_schema_base';
 
 // Export consolidated agent types (SINGLE SOURCE OF TRUTH)
 export * from './agent-types';
@@ -55,6 +21,9 @@ export type {
 export { 
   ToolStatus as ChatToolStatus
 } from './chat';
+
+// Export performance metrics unified types
+export * from './performance-metrics';
 
 // Only export from other files if they have unique types not in backend_schema_auto_generated
 // Most types are already defined in backend_schema_auto_generated

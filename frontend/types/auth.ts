@@ -2,21 +2,11 @@
 /* eslint-disable */
 /**
  * Authentication-related type definitions
- * Auto-generated from pydantic models - do not modify by hand
+ * DEPRECATED: Import from @/types/registry instead for consolidated types
+ * Keeping only unique types not available in registry
  */
 
-export interface AuthConfigResponse {
-  google_client_id: string;
-  google_redirect_uri: string;
-  dev_mode: boolean;
-}
-
-export interface AuthEndpoints {
-  login_url: string;
-  logout_url: string;
-  user_info_url: string;
-  refresh_url: string;
-}
+import { User } from '@/types/registry';
 
 export interface DevLoginRequest {
   username: string;
@@ -61,17 +51,6 @@ export interface TokenPayload {
   iat: number;
 }
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  full_name?: string | null;
-  is_active: boolean;
-  is_admin: boolean;
-  created_at: string;
-  updated_at?: string | null;
-}
-
 export interface UserBase {
   email: string;
   name: string;
@@ -107,3 +86,6 @@ export interface UserUpdate {
   is_active?: boolean | null;
   is_admin?: boolean | null;
 }
+
+// Re-export User from registry for backward compatibility
+export type { User };

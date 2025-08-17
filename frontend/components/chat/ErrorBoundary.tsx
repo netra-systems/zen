@@ -1,27 +1,23 @@
-import React, { Component, ReactNode } from 'react';
-import { AlertCircle, RefreshCcw, Home, Bug } from 'lucide-react';
-import { motion } from 'framer-motion';
+import React, { Component } from 'react';
+import type { 
+  ErrorBoundaryProps, 
+  ErrorBoundaryState 
+} from './error-boundary-types';
+import { RetryManager } from './retry-manager';
+import { ErrorReporter } from './error-reporter';
+import { 
+  ErrorContainer,
+  ErrorHeader,
+  ErrorDetails,
+  ActionButtons,
+  AutoRetryIndicator
+} from './error-boundary-ui';
 
-interface Props {
-  children: ReactNode;
-  fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
-}
-
-interface State {
-  hasError: boolean;
-  error: Error | null;
-  errorInfo: React.ErrorInfo | null;
-  errorCount: number;
-  lastErrorTime: number;
-}
-
-export class ChatErrorBoundary extends Component<Props, State> {
-  private retryTimeouts: Set<NodeJS.Timeout> = new Set();
+export class ChatErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  private retryManager: RetryManager;
   private readonly MAX_RETRIES = 3;
-  private readonly RETRY_DELAY = 1000;
 
-  constructor(props: Props) {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
       hasError: false,
@@ -30,9 +26,10 @@ export class ChatErrorBoundary extends Component<Props, State> {
       errorCount: 0,
       lastErrorTime: 0
     };
+    this.retryManager = new RetryManager();
   }
 
-  static getDerivedStateFromError(error: Error): Partial<State> {
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return {
       hasError: true,
       error,
@@ -41,90 +38,42 @@ export class ChatErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    const { onError } = this.props;
-    const { errorCount } = this.state;
+    this.updateErrorState(errorInfo);
+    this.callErrorHandler(error, errorInfo);
+    this.reportError(error, errorInfo);
+    this.handleAutoRetry(error);
+  }
 
-    // Update error count
+  componentWillUnmount() {
+    this.retryManager.clearAllRetries();
+  }
+
+  private updateErrorState(errorInfo: React.ErrorInfo): void {
     this.setState(prevState => ({
       errorInfo,
       errorCount: prevState.errorCount + 1
     }));
+  }
 
-    // Log to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Chat Error Boundary caught:', error, errorInfo);
-    }
-
-    // Call error handler if provided
+  private callErrorHandler(error: Error, errorInfo: React.ErrorInfo): void {
+    const { onError } = this.props;
     if (onError) {
       onError(error, errorInfo);
     }
+  }
 
-    // Send error to monitoring service
-    this.reportError(error, errorInfo);
+  private reportError(error: Error, errorInfo: React.ErrorInfo): void {
+    ErrorReporter.reportError(error, errorInfo, this.state.errorCount);
+  }
 
-    // Auto-retry for transient errors
-    if (this.shouldAutoRetry(error) && errorCount < this.MAX_RETRIES) {
-      this.scheduleRetry();
+  private handleAutoRetry(error: Error): void {
+    const { errorCount } = this.state;
+    if (this.retryManager.shouldRetry(error, errorCount)) {
+      this.retryManager.scheduleRetry(this.handleReset, errorCount);
     }
   }
 
-  componentWillUnmount() {
-    // Clear any pending retries
-    this.retryTimeouts.forEach(timeout => clearTimeout(timeout));
-    this.retryTimeouts.clear();
-  }
-
-  private shouldAutoRetry(error: Error): boolean {
-    // Identify transient errors that might resolve with a retry
-    const transientErrors = [
-      'ChunkLoadError',
-      'NetworkError',
-      'TimeoutError',
-      'WebSocketError'
-    ];
-
-    return transientErrors.some(errorType => 
-      error.name.includes(errorType) || 
-      error.message.includes(errorType)
-    );
-  }
-
-  private scheduleRetry() {
-    const timeout = setTimeout(() => {
-      this.handleReset();
-      this.retryTimeouts.delete(timeout);
-    }, this.RETRY_DELAY * Math.pow(2, this.state.errorCount)); // Exponential backoff
-
-    this.retryTimeouts.add(timeout);
-  }
-
-  private reportError(error: Error, errorInfo: React.ErrorInfo) {
-    // Send to error tracking service
-    const errorReport = {
-      message: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
-      timestamp: new Date().toISOString(),
-      userAgent: navigator.userAgent,
-      url: window.location.href,
-      errorCount: this.state.errorCount
-    };
-
-    // In production, send to monitoring service
-    if (process.env.NODE_ENV === 'production') {
-      // Example: send to Sentry, LogRocket, etc.
-      console.error('Error Report:', errorReport);
-    }
-
-    // Store in localStorage for debugging
-    const errors = JSON.parse(localStorage.getItem('chat_errors') || '[]');
-    errors.push(errorReport);
-    if (errors.length > 10) errors.shift(); // Keep only last 10 errors
-    localStorage.setItem('chat_errors', JSON.stringify(errors));
-  }
-
-  private handleReset = () => {
+  private handleReset = (): void => {
     this.setState({
       hasError: false,
       error: null,
@@ -133,172 +82,111 @@ export class ChatErrorBoundary extends Component<Props, State> {
     });
   };
 
-  private handleReload = () => {
+  private handleReload = (): void => {
     window.location.reload();
   };
 
-  private handleGoHome = () => {
+  private handleGoHome = (): void => {
     window.location.href = '/';
+  }
+
+  private downloadErrorReport = (): void => {
+    const { error, errorInfo } = this.state;
+    if (error) {
+      this.createAndDownloadReport(error, errorInfo);
+    }
   };
 
-  private downloadErrorReport = () => {
-    const { error, errorInfo } = this.state;
-    const report = {
-      error: {
-        message: error?.message,
-        stack: error?.stack
-      },
+  private createAndDownloadReport(error: Error, errorInfo: React.ErrorInfo | null): void {
+    const report = this.buildErrorReport(error, errorInfo);
+    this.downloadReport(report);
+  }
+
+  private buildErrorReport(error: Error, errorInfo: React.ErrorInfo | null) {
+    return {
+      error: { message: error.message, stack: error.stack },
       errorInfo: errorInfo?.componentStack,
       timestamp: new Date().toISOString(),
       localStorage: { ...localStorage },
       sessionStorage: { ...sessionStorage }
     };
+  }
 
+  private downloadReport(report: object): void {
     const blob = new Blob([JSON.stringify(report, null, 2)], {
       type: 'application/json'
     });
+    this.downloadBlob(blob, `error-report-${Date.now()}.json`);
+  }
+
+  private downloadBlob(blob: Blob, filename: string): void {
     const url = URL.createObjectURL(blob);
+    this.triggerDownload(url, filename);
+    URL.revokeObjectURL(url);
+  }
+
+  private triggerDownload(url: string, filename: string): void {
     const a = document.createElement('a');
     a.href = url;
-    a.download = `error-report-${Date.now()}.json`;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  }
 
   render() {
+    return this.renderErrorBoundary();
+  }
+
+  private renderErrorBoundary() {
     const { hasError, error, errorCount } = this.state;
     const { children, fallback } = this.props;
 
     if (hasError && error) {
-      if (fallback) {
-        return <>{fallback}</>;
-      }
-
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="max-w-2xl w-full"
-          >
-            <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-xl border border-red-100 overflow-hidden">
-              {/* Header */}
-              <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 border-b border-red-100">
-                <div className="flex items-center space-x-3">
-                  <div className="p-3 bg-red-100 rounded-full">
-                    <AlertCircle className="w-6 h-6 text-red-600" />
-                  </div>
-                  <div>
-                    <h1 className="text-xl font-bold text-gray-900">
-                      Oops! Something went wrong
-                    </h1>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {errorCount > 1 && `Retry attempt ${errorCount} of ${this.MAX_RETRIES} • `}
-                      The application encountered an unexpected error
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Error Details */}
-              <div className="p-6 space-y-4">
-                <div className="bg-red-50 rounded-lg p-4 border border-red-200">
-                  <h2 className="text-sm font-semibold text-red-900 mb-2">
-                    Error Message
-                  </h2>
-                  <p className="text-sm text-red-800 font-mono">
-                    {error.message}
-                  </p>
-                </div>
-
-                {process.env.NODE_ENV === 'development' && (
-                  <details className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <summary className="cursor-pointer text-sm font-semibold text-gray-700 hover:text-gray-900">
-                      Technical Details (Development Only)
-                    </summary>
-                    <pre className="mt-3 text-xs text-gray-600 overflow-auto max-h-48">
-                      {error.stack}
-                    </pre>
-                  </details>
-                )}
-
-                {/* Actions */}
-                <div className="flex flex-wrap gap-3 pt-2">
-                  <button
-                    onClick={this.handleReset}
-                    className="flex items-center space-x-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors"
-                  >
-                    <RefreshCcw className="w-4 h-4" />
-                    <span>Try Again</span>
-                  </button>
-
-                  <button
-                    onClick={this.handleReload}
-                    className="flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
-                  >
-                    <RefreshCcw className="w-4 h-4" />
-                    <span>Reload Page</span>
-                  </button>
-
-                  <button
-                    onClick={this.handleGoHome}
-                    className="flex items-center space-x-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
-                  >
-                    <Home className="w-4 h-4" />
-                    <span>Go Home</span>
-                  </button>
-
-                  <button
-                    onClick={this.downloadErrorReport}
-                    className="flex items-center space-x-2 px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors"
-                  >
-                    <Bug className="w-4 h-4" />
-                    <span>Download Report</span>
-                  </button>
-                </div>
-
-                {/* Auto-retry indicator */}
-                {this.shouldAutoRetry(error) && errorCount < this.MAX_RETRIES && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex items-center space-x-2 text-sm text-amber-600 bg-amber-50 rounded-lg p-3"
-                  >
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                    >
-                      <RefreshCcw className="w-4 h-4" />
-                    </motion.div>
-                    <span>Automatically retrying...</span>
-                  </motion.div>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      );
+      return this.renderErrorUI(error, errorCount, fallback);
     }
-
     return children;
+  }
+
+  private renderErrorUI(error: Error, errorCount: number, fallback?: React.ReactNode) {
+    if (fallback) {
+      return <>{fallback}</>;
+    }
+    return this.renderFullErrorDisplay(error, errorCount);
+  }
+
+  private renderFullErrorDisplay(error: Error, errorCount: number) {
+    const shouldShowRetry = this.retryManager.shouldRetry(error, errorCount);
+    
+    return (
+      <ErrorContainer>
+        {this.renderErrorContent(error, errorCount)}
+        <AutoRetryIndicator shouldShow={shouldShowRetry} />
+      </ErrorContainer>
+    );
+  }
+
+  private renderErrorContent(error: Error, errorCount: number) {
+    return (
+      <>
+        <ErrorHeader errorCount={errorCount} maxRetries={this.MAX_RETRIES} />
+        <ErrorDetails error={error} />
+        {this.renderActionButtons()}
+      </>
+    );
+  }
+
+  private renderActionButtons() {
+    return (
+      <ActionButtons
+        onReset={this.handleReset}
+        onReload={this.handleReload}
+        onGoHome={this.handleGoHome}
+        onDownloadReport={this.downloadErrorReport}
+      />
+    );
   }
 }
 
-// Wrapper hook for functional components
-export const useErrorHandler = () => {
-  const [error, setError] = React.useState<Error | null>(null);
-
-  React.useEffect(() => {
-    if (error) {
-      throw error;
-    }
-  }, [error]);
-
-  const resetError = () => setError(null);
-  const throwError = (error: Error) => setError(error);
-
-  return { throwError, resetError };
-};
+// Re-export hooks for backwards compatibility
+export { useErrorHandler } from './error-boundary-hooks';

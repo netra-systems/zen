@@ -89,16 +89,28 @@ export interface User {
   token_type?: string;
 }
 
-export interface MessageMetadata {
-  model?: string;
-  tokens_used?: number;
-  processing_time?: number;
-  agent_name?: string;
-  run_id?: string;
-  step_id?: string;
-  tool_calls?: Array<Record<string, unknown>>;
-  custom_fields?: Record<string, string | number | boolean>;
+export interface AuthEndpoints {
+  login: string;
+  logout: string;
+  token: string;
+  user: string;
+  dev_login: string;
 }
+
+export interface AuthConfigResponse {
+  google_client_id: string;
+  endpoints: AuthEndpoints;
+  development_mode: boolean;
+  user?: User | null;
+  authorized_javascript_origins: string[];
+  authorized_redirect_uris: string[];
+  google_login_url?: string;
+  logout_url?: string;
+}
+
+// Import MessageMetadata from consolidated chat types
+import type { MessageMetadata } from './chat';
+export type { MessageMetadata };
 
 export interface Message {
   id: string;
@@ -246,7 +258,9 @@ export interface WebSocketMessage {
 // UTILITY TYPES
 // ============================================================================
 
-export type MessageRole = MessageType;
+// Import MessageRole from consolidated chat types
+import type { MessageRole } from './chat';
+export type { MessageRole };
 export type MessageStatus = 'pending' | 'sent' | 'delivered' | 'read' | 'failed';
 
 export interface MessageAttachment {
@@ -313,34 +327,8 @@ export function createWebSocketError(
 // EXPORTS - All unified types available from single import
 // ============================================================================
 
-export type {
-  // Core domain types
-  User,
-  Message,
-  MessageMetadata,
-  Thread,
-  ThreadMetadata,
-  
-  // Agent types
-  AgentState,
-  AgentResult,
-  AgentMetadata,
-  ToolResultData,
-  
-  // WebSocket types  
-  WebSocketMessage,
-  WebSocketError,
-  BaseWebSocketPayload,
-  UserMessagePayload,
-  AgentUpdatePayload,
-  
-  // Utility types
-  MessageAttachment,
-  MessageReaction,
-  MessageRole,
-  MessageStatus,
-  RegisteredTypeName
-};
+// Note: Types are automatically exported via interface declarations above
+// This export statement is removed to avoid conflicts
 
 // Default export for convenience
 export default {

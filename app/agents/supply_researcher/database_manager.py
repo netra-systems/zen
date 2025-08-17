@@ -121,22 +121,43 @@ class SupplyDatabaseManager:
     ) -> List[Dict[str, Any]]:
         """Detect changes between existing and new data"""
         changes = []
-        
-        if self._pricing_input_changed(existing, item_data):
-            changes.append({
-                "field": "pricing_input",
-                "old": str(existing.pricing_input),
-                "new": str(item_data["pricing_input"])
-            })
-        
-        if self._pricing_output_changed(existing, item_data):
-            changes.append({
-                "field": "pricing_output",
-                "old": str(existing.pricing_output),
-                "new": str(item_data["pricing_output"])
-            })
-        
+        self._check_pricing_input_change(changes, existing, item_data)
+        self._check_pricing_output_change(changes, existing, item_data)
         return changes
+    
+    def _check_pricing_input_change(
+        self, 
+        changes: List[Dict[str, Any]], 
+        existing: AISupplyItem, 
+        item_data: Dict[str, Any]
+    ) -> None:
+        """Check and record pricing input changes"""
+        if self._pricing_input_changed(existing, item_data):
+            change_record = self._create_change_record(
+                "pricing_input", existing.pricing_input, item_data["pricing_input"]
+            )
+            changes.append(change_record)
+    
+    def _check_pricing_output_change(
+        self, 
+        changes: List[Dict[str, Any]], 
+        existing: AISupplyItem, 
+        item_data: Dict[str, Any]
+    ) -> None:
+        """Check and record pricing output changes"""
+        if self._pricing_output_changed(existing, item_data):
+            change_record = self._create_change_record(
+                "pricing_output", existing.pricing_output, item_data["pricing_output"]
+            )
+            changes.append(change_record)
+    
+    def _create_change_record(self, field: str, old_value: Any, new_value: Any) -> Dict[str, Any]:
+        """Create a change record dictionary"""
+        return {
+            "field": field,
+            "old": str(old_value),
+            "new": str(new_value)
+        }
     
     def _build_update_result(
         self, 
@@ -176,17 +197,37 @@ class SupplyDatabaseManager:
     ) -> None:
         """Create update logs for changes"""
         for change in changes:
-            log = SupplyUpdateLog(
-                supply_item_id=existing.id,
-                field_updated=change["field"],
-                old_value=change["old"],
-                new_value=change["new"],
-                research_session_id=research_session_id,
-                update_reason="Research update",
-                updated_by="SupplyResearcherAgent",
-                updated_at=datetime.now(UTC)
-            )
+            log = self._build_update_log(existing, change, research_session_id)
             self.db.add(log)
+    
+    def _build_update_log(
+        self, 
+        existing: AISupplyItem, 
+        change: Dict[str, Any], 
+        research_session_id: str
+    ) -> SupplyUpdateLog:
+        """Build a single update log entry"""
+        log_data = self._get_log_base_data(existing, research_session_id)
+        log_data.update(self._get_change_data(change))
+        return SupplyUpdateLog(**log_data)
+    
+    def _get_log_base_data(self, existing: AISupplyItem, research_session_id: str) -> Dict[str, Any]:
+        """Get base data for update log"""
+        return {
+            "supply_item_id": existing.id,
+            "research_session_id": research_session_id,
+            "update_reason": "Research update",
+            "updated_by": "SupplyResearcherAgent",
+            "updated_at": datetime.now(UTC)
+        }
+    
+    def _get_change_data(self, change: Dict[str, Any]) -> Dict[str, Any]:
+        """Get change-specific data for update log"""
+        return {
+            "field_updated": change["field"],
+            "old_value": change["old"],
+            "new_value": change["new"]
+        }
     
     def _pricing_input_changed(
         self,

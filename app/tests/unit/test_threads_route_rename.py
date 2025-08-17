@@ -38,7 +38,7 @@ def mock_user():
 
 class TestAutoRenameThread:
     """Test cases for POST /{thread_id}/auto-rename endpoint"""
-    @patch('app.routes.threads_route.time.time')
+    @patch('app.routes.utils.thread_helpers.time.time')
     async def test_auto_rename_success(self, mock_time, mock_db, mock_user):
         """Test successful auto-rename with LLM"""
         create_thread_update_scenario(mock_time)
@@ -49,10 +49,10 @@ class TestAutoRenameThread:
         llm_manager = setup_llm_manager_mock()
         mock_ws = setup_ws_manager_mock()
         
-        with patch('app.routes.threads_route.ThreadRepository', return_value=thread_repo), \
-             patch('app.routes.threads_route.MessageRepository', return_value=message_repo), \
-             patch('app.routes.threads_route.LLMManager', return_value=llm_manager), \
-             patch('app.routes.threads_route.ws_manager', mock_ws):
+        with patch('app.routes.utils.thread_helpers.ThreadRepository', return_value=thread_repo), \
+             patch('app.routes.utils.thread_helpers.MessageRepository', return_value=message_repo), \
+             patch('app.routes.utils.thread_helpers.LLMManager', return_value=llm_manager), \
+             patch('app.routes.utils.thread_helpers.ws_manager', mock_ws):
             
             result = await auto_rename_thread("thread_abc123", mock_db, mock_user)
             
@@ -62,7 +62,7 @@ class TestAutoRenameThread:
         assert mock_thread.metadata_["updated_at"] == 1234567900
         mock_db.commit.assert_called_once()
         assert_ws_notification(mock_ws, "test_user_123", "thread_abc123", "Generated Title")
-    @patch('app.routes.threads_route.time.time')
+    @patch('app.routes.utils.thread_helpers.time.time')
     async def test_auto_rename_llm_failure_fallback(self, mock_time, mock_db, mock_user):
         """Test auto-rename with LLM failure, using fallback"""
         create_thread_update_scenario(mock_time)
@@ -71,11 +71,11 @@ class TestAutoRenameThread:
         thread_repo = setup_thread_repo_mock(mock_thread)
         message_repo = setup_message_repo_mock(1, [mock_message])
         
-        with patch('app.routes.threads_route.ThreadRepository', return_value=thread_repo), \
-             patch('app.routes.threads_route.MessageRepository', return_value=message_repo), \
-             patch('app.routes.threads_route.LLMManager') as MockLLMManager, \
-             patch('app.routes.threads_route.ws_manager') as mock_ws, \
-             patch('app.routes.threads_route.logger') as mock_logger:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository', return_value=thread_repo), \
+             patch('app.routes.utils.thread_helpers.MessageRepository', return_value=message_repo), \
+             patch('app.routes.utils.thread_helpers.LLMManager') as MockLLMManager, \
+             patch('app.routes.utils.thread_helpers.ws_manager') as mock_ws, \
+             patch('app.routes.utils.thread_helpers.logger') as mock_logger:
             
             llm_manager = MockLLMManager.return_value
             llm_manager.ask_llm = AsyncMock(side_effect=Exception("LLM error"))
@@ -101,7 +101,7 @@ class TestAutoRenameThread:
         assert_http_exception(exc_info, 400, "No user message found to generate title from")
     async def test_auto_rename_thread_not_found(self, mock_db, mock_user):
         """Test auto-rename for non-existent thread"""
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(return_value=None)
             
@@ -113,7 +113,7 @@ class TestAutoRenameThread:
         """Test auto-rename for thread owned by another user"""
         mock_thread = create_access_denied_thread()
         
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
             
@@ -121,17 +121,17 @@ class TestAutoRenameThread:
                 await auto_rename_thread("thread_abc123", mock_db, mock_user)
             
             assert_http_exception(exc_info, 403, "Access denied")
-    @patch('app.routes.threads_route.time.time')
+    @patch('app.routes.utils.thread_helpers.time.time')
     async def test_auto_rename_empty_metadata(self, mock_time, mock_db, mock_user):
         """Test auto-rename when thread has no metadata"""
         create_thread_update_scenario(mock_time)
         mock_thread = setup_thread_with_special_metadata()
         mock_message = create_mock_message()
         
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \
-             patch('app.routes.threads_route.MessageRepository') as MockMessageRepo, \
-             patch('app.routes.threads_route.LLMManager') as MockLLMManager, \
-             patch('app.routes.threads_route.ws_manager') as mock_ws:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             patch('app.routes.utils.thread_helpers.MessageRepository') as MockMessageRepo, \
+             patch('app.routes.utils.thread_helpers.LLMManager') as MockLLMManager, \
+             patch('app.routes.utils.thread_helpers.ws_manager') as mock_ws:
             
             thread_repo = MockThreadRepo.return_value
             def get_thread(db, thread_id):
@@ -158,10 +158,10 @@ class TestAutoRenameThread:
         mock_message = create_mock_message()
         raw_title = '  "Generated Title with lots of extra characters that should be truncated"  '
         
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \
-             patch('app.routes.threads_route.MessageRepository') as MockMessageRepo, \
-             patch('app.routes.threads_route.LLMManager') as MockLLMManager, \
-             patch('app.routes.threads_route.ws_manager') as mock_ws:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             patch('app.routes.utils.thread_helpers.MessageRepository') as MockMessageRepo, \
+             patch('app.routes.utils.thread_helpers.LLMManager') as MockLLMManager, \
+             patch('app.routes.utils.thread_helpers.ws_manager') as mock_ws:
             
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
@@ -179,8 +179,8 @@ class TestAutoRenameThread:
         assert len(result.title) == 50
     async def test_auto_rename_exception(self, mock_db, mock_user):
         """Test general exception in auto_rename_thread"""
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \
-             patch('app.routes.threads_route.logger') as mock_logger:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(side_effect=Exception("Database error"))
@@ -189,4 +189,5 @@ class TestAutoRenameThread:
                 await auto_rename_thread("thread_abc123", mock_db, mock_user)
             
             assert_http_exception(exc_info, 500, "Failed to auto-rename thread")
+            mock_logger = mock_get_logger.return_value
             mock_logger.error.assert_called_once()

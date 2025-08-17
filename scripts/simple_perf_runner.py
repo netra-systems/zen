@@ -8,6 +8,7 @@ import sys
 import subprocess
 import os
 from pathlib import Path
+from typing import List, Dict, Any
 
 def _setup_environment():
     """Setup Python paths and environment variables"""

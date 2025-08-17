@@ -141,19 +141,39 @@ class ServicesConfiguration:
         mock_config={"mock": True, "response": "Mock LLM response"}
     ))
     
+    auth_service: ServiceResource = field(default_factory=lambda: ServiceResource(
+        name="auth_service",
+        mode=ResourceMode.LOCAL,  # Auth service runs locally
+        local_config={
+            "host": "localhost",
+            "port": 8081,
+            "health_endpoint": "/health",
+            "enabled": True
+        },
+        shared_config={
+            # For production/staging
+            "host": "auth.netrasystems.ai",
+            "port": 443,
+            "health_endpoint": "/health",
+            "enabled": True
+        },
+        mock_config={"mock": True, "enabled": False}
+    ))
+    
     def get_all_env_vars(self) -> Dict[str, str]:
         """Get all environment variables for all services."""
         env_vars = self._get_service_env_vars()
         self._add_redis_url(env_vars)
         self._add_clickhouse_url(env_vars)
         self._add_postgres_url(env_vars)
+        self._add_auth_service_url(env_vars)
         self._add_service_flags(env_vars)
         return env_vars
     
     def _get_service_env_vars(self) -> Dict[str, str]:
         """Get service-specific environment variables."""
         env_vars = {}
-        for service in [self.redis, self.clickhouse, self.postgres, self.llm]:
+        for service in [self.redis, self.clickhouse, self.postgres, self.llm, self.auth_service]:
             env_vars.update(service.get_env_vars())
         return env_vars
     
@@ -201,6 +221,25 @@ class ServicesConfiguration:
         """Handle shared PostgreSQL mode warnings."""
         logger.warning("PostgreSQL is in SHARED mode but DATABASE_URL not found in environment")
         logger.warning("Please set DATABASE_URL environment variable for shared PostgreSQL")
+    
+    def _add_auth_service_url(self, env_vars: Dict[str, str]):
+        """Add Auth Service URL to environment variables."""
+        if self.auth_service.mode == ResourceMode.DISABLED:
+            env_vars["AUTH_SERVICE_ENABLED"] = "false"
+            return
+        
+        auth_config = self.auth_service.get_config()
+        if auth_config.get("enabled", True):
+            env_vars["AUTH_SERVICE_ENABLED"] = "true"
+            host = auth_config.get("host", "localhost")
+            port = auth_config.get("port", 8081)
+            
+            if self.auth_service.mode == ResourceMode.SHARED:
+                env_vars["AUTH_SERVICE_URL"] = f"https://{host}"
+            else:
+                env_vars["AUTH_SERVICE_URL"] = f"http://{host}:{port}"
+        else:
+            env_vars["AUTH_SERVICE_ENABLED"] = "false"
     
     def _add_service_flags(self, env_vars: Dict[str, str]):
         """Add service configuration flags."""

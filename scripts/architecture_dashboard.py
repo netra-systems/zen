@@ -42,17 +42,20 @@ class ArchitectureDashboard:
                             scan_timestamp: datetime) -> str:
         """Build comprehensive HTML dashboard"""
         js_data = self._prepare_javascript_data(metrics, violations, scan_timestamp)
-        
+        sections = self._generate_dashboard_sections(metrics, violations, scan_timestamp)
+        javascript = self._generate_javascript(js_data)
+        return self._combine_dashboard_sections(*sections, javascript)
+
+    def _generate_dashboard_sections(self, metrics: Dict[str, Any], violations: Dict[str, Any], 
+                                   scan_timestamp: datetime) -> tuple:
+        """Generate all dashboard sections."""
         header = DashboardHTMLComponents.generate_dashboard_header(scan_timestamp)
         metrics_section = DashboardHTMLComponents.generate_metrics_section(metrics)
         charts_section = DashboardHTMLComponents.generate_charts_section()
         violations_section = self.generate_violations_table(violations)
         recommendations = self._render_recommendations_section(metrics)
         footer = DashboardHTMLComponents.generate_footer()
-        javascript = self._generate_javascript(js_data)
-        
-        return self._combine_dashboard_sections(header, metrics_section, charts_section, 
-                                              violations_section, recommendations, footer, javascript)
+        return (header, metrics_section, charts_section, violations_section, recommendations, footer)
     
     def _prepare_javascript_data(self, metrics: Dict[str, Any], violations: Dict[str, Any], 
                                scan_timestamp: datetime) -> Dict[str, Any]:

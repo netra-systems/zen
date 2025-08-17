@@ -12,7 +12,7 @@ from datetime import datetime
 from app import schemas
 from app.services.synthetic_data_service import synthetic_data_service
 from app.dependencies import get_db_session, get_db_dependency, DbDep
-from app.auth.auth_dependencies import get_current_user
+from app.auth_integration.auth import get_current_user
 from app.schemas.shared_types import BaseAgentConfig
 from app.db.models_postgres import User
 from sqlalchemy.ext.asyncio import AsyncSession

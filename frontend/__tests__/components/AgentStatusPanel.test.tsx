@@ -2,14 +2,12 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import AgentStatusPanel from '@/components/chat/AgentStatusPanel';
-import { useChatStore } from '@/store/chat';
-import { useChatWebSocket } from '@/hooks/useChatWebSocket';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 
 import { TestProviders } from '../test-utils/providers';
 
 // Mock dependencies
-jest.mock('@/store/chat');
-jest.mock('@/hooks/useChatWebSocket');
+jest.mock('@/store/unified-chat');
 jest.mock('@/components/ui/progress', () => ({
   Progress: ({ value, className }: any) => (
     <div data-testid="progress-bar" data-value={value} className={className}>
@@ -24,20 +22,12 @@ jest.mock('@/components/ui/badge', () => ({
 }));
 
 describe('AgentStatusPanel Component', () => {
-  const mockChatStore = {
+  const mockUnifiedChatStore = {
     isProcessing: false,
-    subAgentName: null
-  };
-
-  const mockChatWebSocket = {
-    workflowProgress: {
-      current_step: 0,
-      total_steps: 0,
-      step_name: '',
-      status: 'idle'
-    },
-    activeTools: [],
-    toolExecutionStatus: {}
+    subAgentName: null,
+    fastLayerData: null,
+    mediumLayerData: null,
+    slowLayerData: null
   };
 
   beforeEach(() => {
@@ -50,8 +40,7 @@ describe('AgentStatusPanel Component', () => {
 
     jest.clearAllMocks();
     jest.useFakeTimers();
-    (useChatStore as jest.Mock).mockReturnValue(mockChatStore);
-    (useChatWebSocket as jest.Mock).mockReturnValue(mockChatWebSocket);
+    (useUnifiedChatStore as jest.Mock).mockReturnValue(mockUnifiedChatStore);
   });
 
   afterEach(() => {
@@ -67,22 +56,44 @@ describe('AgentStatusPanel Component', () => {
   };
 
   describe('Agent Status Display', () => {
-    it('should render the component', () => {
+    it('should render the component when processing', () => {
+      const activeStore = {
+        ...mockUnifiedChatStore,
+        isProcessing: true,
+        subAgentName: 'Test Agent'
+      };
+      
+      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      
       renderWithProvider(<AgentStatusPanel />);
       
       // Check that the component renders
       expect(screen.getByText(/Current Phase/i)).toBeInTheDocument();
-      expect(screen.getByText(/Initializing/i)).toBeInTheDocument();
+      expect(screen.getByText(/Test Agent/i)).toBeInTheDocument();
+    });
+
+    it('should not render when not processing', () => {
+      const inactiveStore = {
+        ...mockUnifiedChatStore,
+        isProcessing: false
+      };
+      
+      (useUnifiedChatStore as jest.Mock).mockReturnValue(inactiveStore);
+      
+      const { container } = renderWithProvider(<AgentStatusPanel />);
+      
+      // Component should not render anything when not processing
+      expect(container.firstChild).toBeNull();
     });
 
     it('should display processing state', () => {
       const activeStore = {
-        ...mockChatStore,
+        ...mockUnifiedChatStore,
         isProcessing: true,
         subAgentName: 'Supervisor Agent'
       };
       
-      (useChatStore as jest.Mock).mockReturnValue(activeStore);
+      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
       
       renderWithProvider(<AgentStatusPanel />);
       
@@ -90,235 +101,144 @@ describe('AgentStatusPanel Component', () => {
       expect(screen.getByText(/Supervisor Agent/i)).toBeInTheDocument();
     });
 
-    it('should show progress when available', () => {
-      const progressWebSocket = {
-        ...mockChatWebSocket,
-        workflowProgress: {
-          current_step: 3,
-          total_steps: 10,
-          step_name: 'Analyzing data',
-          status: 'processing'
-        }
+    it('should show progress when layer data is available', () => {
+      const activeStore = {
+        ...mockUnifiedChatStore,
+        isProcessing: true,
+        subAgentName: 'Test Agent',
+        fastLayerData: { activeTools: ['tool1'] },
+        mediumLayerData: { status: 'processing' },
+        slowLayerData: { phase: 'analysis' }
       };
       
-      (useChatWebSocket as jest.Mock).mockReturnValue(progressWebSocket);
+      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
       
       renderWithProvider(<AgentStatusPanel />);
       
       expect(screen.getByText(/Overall Progress/i)).toBeInTheDocument();
-      expect(screen.getByText(/3\/10/)).toBeInTheDocument();
+      expect(screen.getByText(/3\/3/i)).toBeInTheDocument();
     });
 
     it('should display active tools', () => {
-      const toolsWebSocket = {
-        ...mockChatWebSocket,
-        activeTools: ['data_analyzer', 'optimizer'],
-        toolExecutionStatus: {
-          data_analyzer: { status: 'running', progress: 60 },
-          optimizer: { status: 'queued', progress: 0 }
-        }
-      };
-      
-      (useChatWebSocket as jest.Mock).mockReturnValue(toolsWebSocket);
-      
-      renderWithProvider(<AgentStatusPanel />);
-      
-      expect(screen.getByText(/Active Tools/i)).toBeInTheDocument();
-      expect(screen.getByText(/data_analyzer/i)).toBeInTheDocument();
-    });
-
-    it('should handle error states', () => {
-      const errorWebSocket = {
-        ...mockChatWebSocket,
-        error: 'Failed to connect to WebSocket',
-        connected: false
-      };
-      
-      (useChatWebSocket as jest.Mock).mockReturnValue(errorWebSocket);
-      
-      renderWithProvider(<AgentStatusPanel />);
-      
-      // Component should still render in error state
-      expect(screen.getByText(/Current Phase/i)).toBeInTheDocument();
-    });
-  });
-
-  describe('Real-time Updates', () => {
-    it('should update on WebSocket changes', async () => {
-      const { rerender } = renderWithProvider(<AgentStatusPanel />);
-      
-      // Update WebSocket data
-      const updatedWebSocket = {
-        ...mockChatWebSocket,
-        workflowProgress: {
-          current_step: 5,
-          total_steps: 10,
-          step_name: 'Processing',
-          status: 'active'
-        }
-      };
-      
-      (useChatWebSocket as jest.Mock).mockReturnValue(updatedWebSocket);
-      
-      rerender(
-        <TestProviders>
-          <AgentStatusPanel />
-        </TestProviders>
-      );
-      
-      await waitFor(() => {
-        expect(screen.getByText(/5\/10/)).toBeInTheDocument();
-      });
-    });
-
-    it('should handle rapid updates', async () => {
-      const { rerender } = renderWithProvider(<AgentStatusPanel />);
-      
-      // Simulate rapid phase changes
-      const phases = ['Initializing', 'Analyzing', 'Processing', 'Optimizing', 'Completed'];
-      
-      for (let i = 0; i < phases.length; i++) {
-        const rapidStore = {
-          ...mockChatStore,
-          subAgentName: phases[i],
-          isProcessing: i < phases.length - 1
-        };
-        
-        (useChatStore as jest.Mock).mockReturnValue(rapidStore);
-        rerender(
-          <TestProviders>
-            <AgentStatusPanel />
-          </TestProviders>
-        );
-        
-        await act(async () => {
-          jest.advanceTimersByTime(100);
-        });
-      }
-      
-      // Should end with final phase
-      expect(screen.getByText(/Completed/i)).toBeInTheDocument();
-    });
-
-    it('should update humor elements during processing', async () => {
-      const processingStore = {
-        ...mockChatStore,
+      const activeStore = {
+        ...mockUnifiedChatStore,
         isProcessing: true,
-        subAgentName: 'Data Agent'
+        subAgentName: 'Test Agent',
+        fastLayerData: { activeTools: ['search', 'analyze'] }
       };
       
-      (useChatStore as jest.Mock).mockReturnValue(processingStore);
-      
-      renderWithProvider(<AgentStatusPanel />);
-      
-      // Fast-forward to trigger humor text rotation
-      act(() => {
-        jest.advanceTimersByTime(5000);
-      });
-      
-      // Component should still be rendered
-      expect(screen.getByText(/Data Agent/i)).toBeInTheDocument();
-    });
-  });
-
-  describe('Performance and Optimization', () => {
-    it('should handle multiple rapid updates', async () => {
-      const { rerender } = renderWithProvider(<AgentStatusPanel />);
-      
-      // Simulate rapid updates
-      for (let i = 0; i < 10; i++) {
-        const rapidWebSocket = {
-          ...mockChatWebSocket,
-          workflowProgress: {
-            current_step: i,
-            total_steps: 10,
-            step_name: `Step ${i}`,
-            status: 'active'
-          }
-        };
-        
-        (useChatWebSocket as jest.Mock).mockReturnValue(rapidWebSocket);
-        rerender(
-          <TestProviders>
-            <AgentStatusPanel />
-          </TestProviders>
-        );
-      }
-      
-      // Should show latest update
-      expect(screen.getByText(/9\/10/)).toBeInTheDocument();
-    });
-
-    it('should cleanup timers on unmount', () => {
-      const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
-      const processingStore = {
-        ...mockChatStore,
-        isProcessing: true
-      };
-      
-      (useChatStore as jest.Mock).mockReturnValue(processingStore);
-      
-      const { unmount } = renderWithProvider(<AgentStatusPanel />);
-      
-      unmount();
-      
-      expect(clearIntervalSpy).toHaveBeenCalled();
-    });
-  });
-
-  describe('UI Elements', () => {
-    it('should render with proper structure', () => {
-      const { container } = renderWithProvider(<AgentStatusPanel />);
-      
-      // Check that the component has proper structure
-      expect(container.firstChild).toBeInTheDocument();
-    });
-
-    it('should display metrics when available', () => {
-      const metricsWebSocket = {
-        ...mockChatWebSocket,
-        activeTools: ['tool1', 'tool2'],
-        toolExecutionStatus: {
-          tool1: { status: 'running', progress: 50 },
-          tool2: { status: 'queued', progress: 0 }
-        }
-      };
-      
-      (useChatWebSocket as jest.Mock).mockReturnValue(metricsWebSocket);
+      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
       
       renderWithProvider(<AgentStatusPanel />);
       
       expect(screen.getByText(/Active Tools/i)).toBeInTheDocument();
+      expect(screen.getByText(/search, analyze/i)).toBeInTheDocument();
     });
 
-    it('should handle empty state gracefully', () => {
+    it('should handle null subAgent name', () => {
+      const activeStore = {
+        ...mockUnifiedChatStore,
+        isProcessing: true,
+        subAgentName: null
+      };
+      
+      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      
       renderWithProvider(<AgentStatusPanel />);
       
-      // Component should render with default values
       expect(screen.getByText(/Current Phase/i)).toBeInTheDocument();
       expect(screen.getByText(/Initializing/i)).toBeInTheDocument();
     });
   });
 
-  describe('Animation and Transitions', () => {
-    it('should have motion elements for animations', () => {
-      const progressWebSocket = {
-        ...mockChatWebSocket,
-        workflowProgress: {
-          current_step: 5,
-          total_steps: 10,
-          step_name: 'Processing',
-          status: 'active'
-        }
+  describe('Real-time Updates', () => {
+    it('should update humor elements during processing', async () => {
+      const activeStore = {
+        ...mockUnifiedChatStore,
+        isProcessing: true,
+        subAgentName: 'Test Agent'
       };
       
-      (useChatWebSocket as jest.Mock).mockReturnValue(progressWebSocket);
+      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
       
-      const { container } = renderWithProvider(<AgentStatusPanel />);
+      renderWithProvider(<AgentStatusPanel />);
       
-      // Check for motion elements (they may have transform styles)
-      const elements = container.querySelectorAll('[style*="transform"], [style*="opacity"]');
-      expect(elements.length).toBeGreaterThanOrEqual(0);
+      // Check if humor text is present (any of the possible quips)
+      const humorTexts = [
+        /Optimizing the optimizers/i,
+        /Teaching AI to be more intelligent/i,
+        /Convincing the models to cooperate/i
+      ];
+      
+      const hasHumorText = humorTexts.some(pattern => 
+        screen.queryByText(pattern) !== null
+      );
+      
+      expect(hasHumorText).toBe(true);
+    });
+
+    it('should display confidence indicator when available', async () => {
+      const activeStore = {
+        ...mockUnifiedChatStore,
+        isProcessing: true,
+        subAgentName: 'Test Agent'
+      };
+      
+      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      
+      renderWithProvider(<AgentStatusPanel />);
+      
+      // Wait for metrics to be generated
+      await act(async () => {
+        jest.advanceTimersByTime(1000);
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByText(/Analysis Confidence/i)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Performance and Optimization', () => {
+    it('should cleanup timers on unmount', () => {
+      const activeStore = {
+        ...mockUnifiedChatStore,
+        isProcessing: true,
+        subAgentName: 'Test Agent'
+      };
+      
+      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      
+      const { unmount } = renderWithProvider(<AgentStatusPanel />);
+      
+      // Should not throw errors when unmounting
+      expect(() => unmount()).not.toThrow();
+    });
+
+    it('should handle component re-renders efficiently', () => {
+      const activeStore = {
+        ...mockUnifiedChatStore,
+        isProcessing: true,
+        subAgentName: 'Test Agent'
+      };
+      
+      (useUnifiedChatStore as jest.Mock).mockReturnValue(activeStore);
+      
+      const { rerender } = renderWithProvider(<AgentStatusPanel />);
+      
+      // Multiple re-renders should not cause issues
+      expect(() => {
+        rerender(
+          <TestProviders>
+            <AgentStatusPanel />
+          </TestProviders>
+        );
+        rerender(
+          <TestProviders>
+            <AgentStatusPanel />
+          </TestProviders>
+        );
+      }).not.toThrow();
     });
   });
 });

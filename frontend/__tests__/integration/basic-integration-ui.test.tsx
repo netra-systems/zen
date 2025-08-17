@@ -7,7 +7,7 @@ import React from 'react';
 import { render, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
-
+import { TestProviders } from '../test-utils/providers';
 import { setupTestEnvironment, clearStorages, resetStores, cleanupWebSocket } from './helpers/test-setup';
 import { assertTextContent } from './helpers/test-assertions';
 
@@ -66,7 +66,11 @@ describe('UI Interaction Integration Tests', () => {
         );
       };
       
-      const { getByText, getByTestId } = render(<NavigationComponent />);
+      const { getByText, getByTestId } = render(
+        <TestProviders>
+          <NavigationComponent />
+        </TestProviders>
+      );
       
       await assertTextContent(getByTestId('current-view'), 'home');
       
@@ -116,7 +120,11 @@ describe('UI Interaction Integration Tests', () => {
         );
       };
       
-      const { getByTestId } = render(<DebouncedSearch />);
+      const { getByTestId } = render(
+        <TestProviders>
+          <DebouncedSearch />
+        </TestProviders>
+      );
       const input = getByTestId('search-input');
       
       fireEvent.change(input, { target: { value: 't' } });
@@ -172,7 +180,11 @@ describe('UI Interaction Integration Tests', () => {
         );
       };
       
-      const { getByTestId } = render(<VirtualList />);
+      const { getByTestId } = render(
+        <TestProviders>
+          <VirtualList />
+        </TestProviders>
+      );
       
       const visibleCount = parseInt(getByTestId('visible-count').textContent || '0');
       expect(visibleCount).toBeLessThan(20);
@@ -226,7 +238,11 @@ describe('UI Interaction Integration Tests', () => {
         );
       };
       
-      const { getByText, getByTestId } = render(<FormComponent />);
+      const { getByText, getByTestId } = render(
+        <TestProviders>
+          <FormComponent />
+        </TestProviders>
+      );
       
       fireEvent.click(getByText('Submit'));
       await assertTextContent(getByTestId('errors'), 'Email is required');
@@ -266,7 +282,11 @@ describe('UI Interaction Integration Tests', () => {
         );
       };
       
-      const { getByTestId } = render(<KeyboardComponent />);
+      const { getByTestId } = render(
+        <TestProviders>
+          <KeyboardComponent />
+        </TestProviders>
+      );
       const input = getByTestId('keyboard-input');
       
       fireEvent.keyDown(input, { key: 'a' });

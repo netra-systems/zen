@@ -6,7 +6,7 @@ import datetime
 
 from app.main import app
 from app.schemas import User
-from app.auth.auth_dependencies import ActiveUserWsDep
+from app.auth_integration.auth import ActiveUserWsDep
 from app.config import settings
 
 @pytest.fixture(scope="function", autouse=True)

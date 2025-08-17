@@ -74,12 +74,16 @@ class TestJWTTokenOperations:
     async def test_refresh_jwt_success(self, jwt_manager):
         """Test successful JWT token refresh."""
         with patch.object(jwt_manager, 'generate_jwt', return_value="new_token") as mock_gen, \
-             patch.object(jwt_manager, 'validate_jwt') as mock_validate:
+             patch.object(jwt_manager, 'validate_jwt') as mock_validate, \
+             patch.object(jwt_manager, 'get_jwt_claims') as mock_get_claims:
             
-            mock_validate.return_value = TokenClaims(
+            expected_claims = TokenClaims(
                 user_id="user_123", email="test@example.com", environment="dev",
                 iat=123, exp=456, jti="test_jti"
             )
+            mock_validate.return_value = expected_claims
+            mock_get_claims.return_value = expected_claims
+            
             new_token = await jwt_manager.refresh_jwt("old_token")
             assert new_token == "new_token"
 

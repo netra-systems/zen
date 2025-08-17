@@ -38,7 +38,7 @@ class TestKeyParametersAccess:
         intent = {"primary": "optimization", "secondary": "cost_reduction"}
         
         # Call method - should not raise AttributeError
-        result = execution_engine._build_analysis_params_dict(key_params, intent)
+        result = execution_engine.parameter_processor._build_analysis_params_dict(key_params, intent)
         
         # Verify it uses defaults when fields don't exist
         assert result["user_id"] == 1  # Default
@@ -60,7 +60,7 @@ class TestKeyParametersAccess:
         intent = {"primary": "analysis"}
         
         # Call method
-        result = execution_engine._build_analysis_params_dict(key_params, intent)
+        result = execution_engine.parameter_processor._build_analysis_params_dict(key_params, intent)
         
         # Verify correct extraction
         assert result["user_id"] == 456
@@ -75,7 +75,7 @@ class TestKeyParametersAccess:
         intent = {}
         
         # Call method
-        result = execution_engine._build_analysis_params_dict(key_params, intent)
+        result = execution_engine.parameter_processor._build_analysis_params_dict(key_params, intent)
         
         # Verify defaults
         assert result["user_id"] == 1
@@ -96,7 +96,7 @@ class TestKeyParametersAccess:
         intent = {"primary": "monitoring"}
         
         # Call method
-        result = execution_engine._build_analysis_params_dict(key_params, intent)
+        result = execution_engine.parameter_processor._build_analysis_params_dict(key_params, intent)
         
         # Verify defaults for non-existent fields
         assert result["user_id"] == 1  # Default
@@ -133,7 +133,7 @@ class TestKeyParametersAccess:
         state.triage_result = triage_result
         
         # Call method
-        result = execution_engine._extract_analysis_params(state)
+        result = execution_engine.parameter_processor.extract_analysis_params(state)
         
         # Verify extraction through the chain - should use defaults since KeyParameters doesn't have those fields
         assert result["user_id"] == 1  # Default
@@ -153,7 +153,7 @@ class TestKeyParametersAccess:
         state.triage_result = None
         
         # Call method
-        result = execution_engine._extract_analysis_params(state)
+        result = execution_engine.parameter_processor.extract_analysis_params(state)
         
         # Should return defaults
         assert result["user_id"] == 1
@@ -181,7 +181,7 @@ class TestKeyParametersAccess:
             
             # Should not raise AttributeError: 'KeyParameters' object has no attribute 'get'
             try:
-                result = execution_engine._build_analysis_params_dict(key_params, {})
+                result = execution_engine.parameter_processor._build_analysis_params_dict(key_params, {})
                 assert "user_id" in result
                 assert "metric_names" in result
             except AttributeError as e:

@@ -61,33 +61,42 @@ class CacheEntry:
         """Mark entry as accessed."""
         self.access_count += 1
         self.last_accessed = time.time()
+    
+    def _build_entry_dict(self) -> Dict[str, Any]:
+        """Build dictionary representation of cache entry."""
+        return {
+            'key': self.key, 'value': self.value, 'created_at': self.created_at,
+            'expires_at': self.expires_at, 'access_count': self.access_count,
+            'last_accessed': self.last_accessed, 'query_duration': self.query_duration,
+            'tags': list(self.tags)
+        }
+    
+    @classmethod
+    def _extract_core_fields(cls, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract core fields from dictionary data."""
+        return {
+            'key': data['key'], 'value': data['value'],
+            'created_at': data['created_at'], 'expires_at': data['expires_at']
+        }
+    
+    @classmethod
+    def _extract_metadata_fields(cls, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract metadata fields from dictionary data."""
+        return {
+            'access_count': data['access_count'], 'last_accessed': data['last_accessed'],
+            'query_duration': data['query_duration'], 'tags': set(data.get('tags', []))
+        }
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
-        return {
-            'key': self.key,
-            'value': self.value,
-            'created_at': self.created_at,
-            'expires_at': self.expires_at,
-            'access_count': self.access_count,
-            'last_accessed': self.last_accessed,
-            'query_duration': self.query_duration,
-            'tags': list(self.tags)
-        }
+        return self._build_entry_dict()
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'CacheEntry':
         """Create from dictionary."""
-        return cls(
-            key=data['key'],
-            value=data['value'],
-            created_at=data['created_at'],
-            expires_at=data['expires_at'],
-            access_count=data['access_count'],
-            last_accessed=data['last_accessed'],
-            query_duration=data['query_duration'],
-            tags=set(data.get('tags', []))
-        )
+        core_fields = cls._extract_core_fields(data)
+        metadata_fields = cls._extract_metadata_fields(data)
+        return cls(**core_fields, **metadata_fields)
 
 
 @dataclass
@@ -131,17 +140,22 @@ class CacheKeyGenerator:
     """Generate cache keys for queries."""
     
     @staticmethod
+    def _build_key_data(query: str, params: Optional[Dict]) -> Dict[str, Any]:
+        """Build key data structure for hashing."""
+        return {'query': query.strip(), 'params': params or {}}
+    
+    @staticmethod
+    def _hash_key_string(key_string: str) -> str:
+        """Generate hash from key string."""
+        import hashlib
+        return hashlib.sha256(key_string.encode()).hexdigest()
+    
+    @staticmethod
     def generate_cache_key(query: str, params: Optional[Dict], prefix: str) -> str:
         """Generate cache key for query."""
-        key_data = {
-            'query': query.strip(),
-            'params': params or {}
-        }
-        
+        key_data = CacheKeyGenerator._build_key_data(query, params)
         key_string = json.dumps(key_data, sort_keys=True)
-        import hashlib
-        key_hash = hashlib.sha256(key_string.encode()).hexdigest()
-        
+        key_hash = CacheKeyGenerator._hash_key_string(key_string)
         return f"{prefix}{key_hash[:32]}"
 
 
@@ -149,19 +163,20 @@ class QueryPatternAnalyzer:
     """Analyze query patterns for frequency tracking."""
     
     @staticmethod
+    def _apply_pattern_normalization(pattern: str) -> str:
+        """Apply regex substitutions for pattern normalization."""
+        import re
+        substitutions = [(r'\$\d+', '?'), (r':\w+', '?'), (r"'[^']*'", "'?'"),
+                        (r'"[^"]*"', '"?"'), (r'\d+', '?')]
+        for regex, replacement in substitutions:
+            pattern = re.sub(regex, replacement, pattern)
+        return pattern
+    
+    @staticmethod
     def normalize_query_pattern(query: str) -> str:
         """Extract query pattern for frequency tracking."""
         pattern = query.strip().upper()
-        
-        # Remove parameter placeholders
-        import re
-        pattern = re.sub(r'\$\d+', '?', pattern)
-        pattern = re.sub(r':\w+', '?', pattern)
-        pattern = re.sub(r"'[^']*'", "'?'", pattern)
-        pattern = re.sub(r'"[^"]*"', '"?"', pattern)
-        pattern = re.sub(r'\d+', '?', pattern)
-        
-        return pattern
+        return QueryPatternAnalyzer._apply_pattern_normalization(pattern)
 
     @staticmethod
     def is_time_sensitive_query(query: str) -> bool:
@@ -179,6 +194,18 @@ class CacheabilityChecker:
     ]
     
     @staticmethod
+    def _is_empty_result(result: Any) -> bool:
+        """Check if result is empty."""
+        return isinstance(result, (list, tuple)) and len(result) == 0
+    
+    @staticmethod
+    def _validate_all_cache_conditions(query: str, result: Any) -> bool:
+        """Validate all caching conditions."""
+        return (CacheabilityChecker.is_query_cacheable(query) and 
+                CacheabilityChecker.is_result_cacheable(result) and 
+                CacheabilityChecker.is_result_size_acceptable(result))
+    
+    @staticmethod
     def is_query_cacheable(query: str) -> bool:
         """Check if query type is cacheable."""
         query_lower = query.lower().strip()
@@ -190,15 +217,9 @@ class CacheabilityChecker:
     @staticmethod
     def is_result_cacheable(result: Any) -> bool:
         """Check if result should be cached."""
-        # Don't cache None results
         if result is None:
             return False
-        
-        # Don't cache empty results
-        if isinstance(result, (list, tuple)) and len(result) == 0:
-            return False
-        
-        return True
+        return not CacheabilityChecker._is_empty_result(result)
 
     @staticmethod
     def is_result_size_acceptable(result: Any, max_size: int = 1_000_000) -> bool:
@@ -214,21 +235,30 @@ class CacheabilityChecker:
         """Determine if query result should be cached."""
         if not config.enabled:
             return False
-        
-        if not CacheabilityChecker.is_query_cacheable(query):
-            return False
-        
-        if not CacheabilityChecker.is_result_cacheable(result):
-            return False
-        
-        if not CacheabilityChecker.is_result_size_acceptable(result):
-            return False
-        
-        return True
+        return CacheabilityChecker._validate_all_cache_conditions(query, result)
 
 
 class AdaptiveTTLCalculator:
     """Calculate adaptive TTL based on query characteristics."""
+    
+    @staticmethod
+    def _compute_adaptive_ttl(
+        query: str, duration: float, query_patterns: Dict[str, int], config: QueryCacheConfig
+    ) -> int:
+        """Compute final adaptive TTL value."""
+        base_ttl = config.default_ttl
+        pattern = QueryPatternAnalyzer.normalize_query_pattern(query)
+        multipliers = AdaptiveTTLCalculator._calculate_multipliers(pattern, duration, query_patterns, config)
+        adjusted_ttl = int(base_ttl * multipliers)
+        final_ttl = AdaptiveTTLCalculator.apply_time_sensitivity_limit(query, adjusted_ttl)
+        return max(final_ttl, 30)
+    
+    @staticmethod
+    def _calculate_multipliers(pattern: str, duration: float, query_patterns: Dict[str, int], config: QueryCacheConfig) -> float:
+        """Calculate combined frequency and performance multipliers."""
+        freq_mult = AdaptiveTTLCalculator.calculate_frequency_multiplier(pattern, query_patterns, config)
+        perf_mult = AdaptiveTTLCalculator.calculate_performance_multiplier(duration, config)
+        return freq_mult * perf_mult
     
     @staticmethod
     def calculate_frequency_multiplier(pattern: str, query_patterns: Dict[str, int], config: QueryCacheConfig) -> float:
@@ -254,27 +284,9 @@ class AdaptiveTTLCalculator:
 
     @staticmethod
     def calculate_adaptive_ttl(
-        query: str, 
-        duration: float, 
-        query_patterns: Dict[str, int], 
-        config: QueryCacheConfig
+        query: str, duration: float, query_patterns: Dict[str, int], config: QueryCacheConfig
     ) -> int:
         """Calculate adaptive TTL based on query characteristics."""
         if config.strategy != CacheStrategy.ADAPTIVE:
             return config.default_ttl
-        
-        base_ttl = config.default_ttl
-        pattern = QueryPatternAnalyzer.normalize_query_pattern(query)
-        
-        # Apply frequency multiplier
-        freq_multiplier = AdaptiveTTLCalculator.calculate_frequency_multiplier(pattern, query_patterns, config)
-        base_ttl = int(base_ttl * freq_multiplier)
-        
-        # Apply performance multiplier
-        perf_multiplier = AdaptiveTTLCalculator.calculate_performance_multiplier(duration, config)
-        base_ttl = int(base_ttl * perf_multiplier)
-        
-        # Apply time sensitivity limits
-        base_ttl = AdaptiveTTLCalculator.apply_time_sensitivity_limit(query, base_ttl)
-        
-        return max(base_ttl, 30)  # Minimum 30 seconds
+        return AdaptiveTTLCalculator._compute_adaptive_ttl(query, duration, query_patterns, config)

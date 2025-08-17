@@ -9,7 +9,7 @@
  */
 
 import { ThreadService, ThreadMessagesResponse } from './threadService';
-import type { ChatMessage } from '@/types/unified-chat';
+import type { ChatMessage } from '@/types/chat';
 
 /**
  * Thread loading result interface

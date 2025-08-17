@@ -33,7 +33,7 @@ def mock_user():
 
 class TestUpdateThread:
     """Test cases for PUT /{thread_id} endpoint"""
-    @patch('app.routes.threads_route.time.time')
+    @patch('app.routes.utils.thread_helpers.time.time')
     async def test_update_thread_success(self, mock_time, mock_db, mock_user):
         """Test successful thread update"""
         create_thread_update_scenario(mock_time)
@@ -51,14 +51,14 @@ class TestUpdateThread:
         assert mock_thread.metadata_["new_field"] == "value"
         assert mock_thread.metadata_["updated_at"] == 1234567900
         mock_db.commit.assert_called_once()
-    @patch('app.routes.threads_route.time.time')
+    @patch('app.routes.utils.thread_helpers.time.time')
     async def test_update_thread_empty_metadata(self, mock_time, mock_db, mock_user):
         """Test updating thread with empty initial metadata"""
         create_thread_update_scenario(mock_time)
         mock_thread = setup_thread_with_special_metadata()
         
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \
-             patch('app.routes.threads_route.MessageRepository') as MockMessageRepo:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             patch('app.routes.utils.thread_helpers.MessageRepository') as MockMessageRepo:
             
             thread_repo = MockThreadRepo.return_value
             def get_thread(db, thread_id):
@@ -77,7 +77,7 @@ class TestUpdateThread:
         assert mock_thread.metadata_["updated_at"] == 1234567900
     async def test_update_thread_not_found(self, mock_db, mock_user):
         """Test updating non-existent thread"""
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(return_value=None)
             thread_update = ThreadUpdate(title="Update")
@@ -90,7 +90,7 @@ class TestUpdateThread:
         """Test updating thread owned by another user"""
         mock_thread = create_access_denied_thread()
         
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
             thread_update = ThreadUpdate(title="Update")
@@ -101,8 +101,8 @@ class TestUpdateThread:
             assert_http_exception(exc_info, 403, "Access denied")
     async def test_update_thread_exception(self, mock_db, mock_user):
         """Test general exception in update_thread"""
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \
-             patch('app.routes.threads_route.logger') as mock_logger:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(side_effect=Exception("Database error"))
@@ -112,4 +112,5 @@ class TestUpdateThread:
                 await update_thread("thread_abc123", thread_update, mock_db, mock_user)
             
             assert_http_exception(exc_info, 500, "Failed to update thread")
+            mock_logger = mock_get_logger.return_value
             mock_logger.error.assert_called_once()

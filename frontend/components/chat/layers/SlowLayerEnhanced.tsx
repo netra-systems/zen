@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { SlowLayerProps } from '@/types/unified-chat';
-import type { ReportData } from './slow-layer-types';
+import type { ReportData } from '@/types/report-data';
 import { ExecutiveSummary, ExportControls, TechnicalDetails } from './slow-layer-components';
 import { CostAnalysis, PerformanceMetrics } from './slow-layer-sections';
 import { EnhancedRecommendations, ActionPlanStepper, AgentTimeline } from './slow-layer-recommendations';

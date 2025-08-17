@@ -179,6 +179,7 @@ def build_pytest_args(args) -> List[str]:
     _add_coverage_args(args, pytest_args)
     _add_filter_args(args, pytest_args)
     _add_output_args(args, pytest_args)
+    _add_bad_test_detection_args(args, pytest_args)
     return [arg for arg in pytest_args if arg]
 
 def _add_test_paths(args, pytest_args):
@@ -273,6 +274,18 @@ def _add_common_options(args, pytest_args):
     pytest_args.extend(common_opts)
     if not args.show_warnings:
         pytest_args.extend(["--disable-warnings", "-p", "no:warnings"])
+
+def _add_bad_test_detection_args(args, pytest_args):
+    """Add bad test detection plugin arguments"""
+    # Add the plugin
+    pytest_args.extend(["-p", "test_framework.pytest_bad_test_plugin"])
+    
+    # Add component info
+    pytest_args.extend(["--test-component", "backend"])
+    
+    # Disable if requested
+    if hasattr(args, 'no_bad_test_detection') and args.no_bad_test_detection:
+        pytest_args.append("--no-bad-test-detection")
 
 
 def setup_reports_directory(args, isolation_manager=None) -> Path:
@@ -490,6 +503,7 @@ def add_backend_env_args(parser):
     parser.add_argument("--check-deps", action="store_true", help="Check test dependencies before running")
     parser.add_argument("--show-warnings", action="store_true", help="Show warning messages")
     parser.add_argument("--isolation", action="store_true", help="Use test isolation for concurrent execution")
+    parser.add_argument("--no-bad-test-detection", action="store_true", help="Disable bad test detection")
 
 
 def setup_backend_isolation_manager(args):

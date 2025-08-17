@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas import AppConfig
-from app.auth.auth_dependencies import ActiveUserDep, DeveloperDep, AdminDep, require_permission
+from app.auth_integration.auth import ActiveUserDep, DeveloperDep, AdminDep, require_permission
 from app import schemas
 from app.config import settings
 from app.services.permission_service import PermissionService
@@ -147,17 +147,3 @@ async def remove_default_log_table_for_context(
     _remove_context_default_table(data.context)
     return {"message": f"Default log table for context '{data.context}' removed."}
 
-def verify_admin_role(user: dict) -> bool:
-    """Verify if user has admin role"""
-    return user.get("role") == "admin"
-
-async def get_all_users() -> list:
-    """Get all users for admin"""
-    return [
-        {"id": "1", "email": "user1@test.com"},
-        {"id": "2", "email": "user2@test.com"}
-    ]
-
-async def update_user_role(user_id: str, role: str) -> dict:
-    """Update user role"""
-    return {"success": True, "user_id": user_id, "role": role}

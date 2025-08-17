@@ -59,80 +59,114 @@ class SystemManagementHandlers:
         """Handler for user_admin tool"""
         from app.services.user_service import UserService
         
-        # Check admin permissions
         if not user.is_admin:
-            return {
-                "type": "text",
-                "text": "Admin privileges required",
-                "error": True
-            }
+            return _create_permission_error_response()
         
         user_service = UserService(self.db)
         action = arguments['action']
-        
-        if action == 'create':
-            new_user = await user_service.create_user(
-                email=arguments['email'],
-                username=arguments.get('username'),
-                role=arguments.get('role', 'user')
-            )
-            return {
-                "type": "text",
-                "text": f"Created user: {new_user.email}",
-                "user_id": new_user.id
-            }
-        elif action == 'update':
-            await user_service.update_user(
-                user_id=arguments['user_id'],
-                updates=arguments.get('updates', {})
-            )
-            return {
-                "type": "text",
-                "text": f"Updated user: {arguments['user_id']}"
-            }
-        elif action == 'delete':
-            await user_service.delete_user(user_id=arguments['user_id'])
-            return {
-                "type": "text",
-                "text": f"Deleted user: {arguments['user_id']}"
-            }
-        elif action == 'list':
-            users = await user_service.list_users(
-                filters=arguments.get('filters', {})
-            )
-            return {
-                "type": "text",
-                "text": f"Found {len(users)} users",
-                "users": users
-            }
-        else:
-            return {
-                "type": "text",
-                "text": f"Unknown action: {action}"
-            }
+        return await _execute_user_admin_action(user_service, action, arguments)
+
+
+def _create_permission_error_response() -> Dict[str, Any]:
+    """Create permission error response for non-admin users."""
+    return {
+        "type": "text",
+        "text": "Admin privileges required",
+        "error": True
+    }
+
+
+async def _execute_user_admin_action(
+    user_service: 'UserService', 
+    action: str, 
+    arguments: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Execute user admin action based on type."""
+    if action == 'create':
+        return await _handle_user_create_action(user_service, arguments)
+    elif action == 'update':
+        return await _handle_user_update_action(user_service, arguments)
+    elif action == 'delete':
+        return await _handle_user_delete_action(user_service, arguments)
+    elif action == 'list':
+        return await _handle_user_list_action(user_service, arguments)
+    else:
+        return _create_unknown_action_response(action)
+
+
+async def _handle_user_create_action(
+    user_service: 'UserService', 
+    arguments: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Handle user creation action."""
+    new_user = await user_service.create_user(
+        email=arguments['email'],
+        username=arguments.get('username'),
+        role=arguments.get('role', 'user')
+    )
+    return {
+        "type": "text",
+        "text": f"Created user: {new_user.email}",
+        "user_id": new_user.id
+    }
+
+
+async def _handle_user_update_action(
+    user_service: 'UserService', 
+    arguments: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Handle user update action."""
+    await user_service.update_user(
+        user_id=arguments['user_id'],
+        updates=arguments.get('updates', {})
+    )
+    return {
+        "type": "text",
+        "text": f"Updated user: {arguments['user_id']}"
+    }
+
+
+async def _handle_user_delete_action(
+    user_service: 'UserService', 
+    arguments: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Handle user deletion action."""
+    await user_service.delete_user(user_id=arguments['user_id'])
+    return {
+        "type": "text",
+        "text": f"Deleted user: {arguments['user_id']}"
+    }
+
+
+async def _handle_user_list_action(
+    user_service: 'UserService', 
+    arguments: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Handle user listing action."""
+    users = await user_service.list_users(
+        filters=arguments.get('filters', {})
+    )
+    return {
+        "type": "text",
+        "text": f"Found {len(users)} users",
+        "users": users
+    }
+
+
+def _create_unknown_action_response(action: str) -> Dict[str, Any]:
+    """Create response for unknown action."""
+    return {
+        "type": "text",
+        "text": f"Unknown action: {action}"
+    }
     
     async def _log_analyzer_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for log_analyzer tool"""
         from app.services.log_analysis_service import LogAnalysisService
         
         log_service = LogAnalysisService(self.db)
-        
-        analysis = await log_service.analyze_logs(
-            query=arguments.get('query', ''),
-            time_range=arguments.get('time_range', '1h'),
-            log_level=arguments.get('log_level'),
-            service=arguments.get('service'),
-            user_id=user.id
-        )
-        
-        return {
-            "type": "text",
-            "text": f"Log analysis completed",
-            "analysis": analysis,
-            "total_logs": analysis.get('total_count', 0),
-            "error_count": analysis.get('error_count', 0),
-            "warning_count": analysis.get('warning_count', 0)
-        }
+        analysis = await _perform_log_analysis(log_service, arguments, user)
+        return _create_log_analysis_response(analysis)
     
     async def _debug_panel_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for debug_panel tool"""
@@ -140,18 +174,54 @@ class SystemManagementHandlers:
         
         debug_service = DebugService(self.db)
         component = arguments.get('component', 'system')
-        
-        debug_info = await debug_service.get_debug_info(
-            component=component,
-            include_metrics=arguments.get('include_metrics', True),
-            include_logs=arguments.get('include_logs', False),
-            user_id=user.id
-        )
-        
-        return {
-            "type": "text",
-            "text": f"Debug info for {component}",
-            "debug_info": debug_info,
-            "timestamp": debug_info.get('timestamp'),
-            "health_status": debug_info.get('health_status', 'unknown')
-        }
+        debug_info = await _get_component_debug_info(debug_service, component, arguments, user)
+        return _create_debug_info_response(component, debug_info)
+
+
+async def _perform_log_analysis(log_service: 'LogAnalysisService', arguments: Dict[str, Any], user: User) -> Dict[str, Any]:
+    """Perform log analysis with given parameters."""
+    return await log_service.analyze_logs(
+        query=arguments.get('query', ''),
+        time_range=arguments.get('time_range', '1h'),
+        log_level=arguments.get('log_level'),
+        service=arguments.get('service'),
+        user_id=user.id
+    )
+
+
+def _create_log_analysis_response(analysis: Dict[str, Any]) -> Dict[str, Any]:
+    """Create response for log analysis results."""
+    return {
+        "type": "text",
+        "text": f"Log analysis completed",
+        "analysis": analysis,
+        "total_logs": analysis.get('total_count', 0),
+        "error_count": analysis.get('error_count', 0),
+        "warning_count": analysis.get('warning_count', 0)
+    }
+
+
+async def _get_component_debug_info(
+    debug_service: 'DebugService', 
+    component: str, 
+    arguments: Dict[str, Any], 
+    user: User
+) -> Dict[str, Any]:
+    """Get debug information for a component."""
+    return await debug_service.get_debug_info(
+        component=component,
+        include_metrics=arguments.get('include_metrics', True),
+        include_logs=arguments.get('include_logs', False),
+        user_id=user.id
+    )
+
+
+def _create_debug_info_response(component: str, debug_info: Dict[str, Any]) -> Dict[str, Any]:
+    """Create response for debug information."""
+    return {
+        "type": "text",
+        "text": f"Debug info for {component}",
+        "debug_info": debug_info,
+        "timestamp": debug_info.get('timestamp'),
+        "health_status": debug_info.get('health_status', 'unknown')
+    }

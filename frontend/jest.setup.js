@@ -86,12 +86,21 @@ MockWebSocket.CLOSED = 3;
 
 global.WebSocket = MockWebSocket;
 
-// Mock localStorage
+// Mock localStorage with quota handling
+const localStorageData = new Map();
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: jest.fn((key) => localStorageData.get(key) || null),
+  setItem: jest.fn((key, value) => {
+    // Prevent quota exceeded errors by limiting storage
+    if (localStorageData.size > 100) {
+      localStorageData.clear();
+    }
+    localStorageData.set(key, String(value));
+  }),
+  removeItem: jest.fn((key) => localStorageData.delete(key)),
+  clear: jest.fn(() => localStorageData.clear()),
+  get length() { return localStorageData.size; },
+  key: jest.fn((index) => Array.from(localStorageData.keys())[index] || null)
 };
 global.localStorage = localStorageMock;
 
@@ -173,21 +182,19 @@ jest.mock('@/hooks/useWebSocket', () => ({
   })
 }));
 
-// Mock the WebSocketProvider context
-jest.mock('@/providers/WebSocketProvider', () => ({
-  WebSocketProvider: ({ children }) => children,
-  WebSocketContext: null,
-  useWebSocketContext: () => ({
+// Mock the WebSocketProvider context with factory function
+jest.mock('@/providers/WebSocketProvider', () => {
+  const React = require('react');
+  const mockWebSocketContextValue = {
     sendMessage: jest.fn(),
-    connect: jest.fn(),
-    disconnect: jest.fn(),
-    isConnected: true,
-    connectionState: 'connected',
-    error: null,
-    lastMessage: null,
-    reconnectAttempts: 0,
-    messageQueue: [],
     status: 'OPEN',
     messages: [],
-  })
-}));
+  };
+  const MockWebSocketContext = React.createContext(mockWebSocketContextValue);
+  
+  return {
+    WebSocketProvider: ({ children }) => React.createElement(MockWebSocketContext.Provider, { value: mockWebSocketContextValue }, children),
+    WebSocketContext: MockWebSocketContext,
+    useWebSocketContext: () => mockWebSocketContextValue
+  };
+});

@@ -2,7 +2,8 @@
 // Core routing and logging functions
 
 import { logger } from '@/lib/logger';
-import type { UnifiedWebSocketEvent, ChatMessage } from '@/types/websocket-event-types';
+import type { UnifiedWebSocketEvent } from '@/types/websocket-event-types';
+import type { ChatMessage } from '@/types/chat';
 import type { UnifiedChatState } from '@/types/store-types';
 
 /**

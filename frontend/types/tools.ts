@@ -5,19 +5,15 @@
  * Auto-generated from pydantic models - do not modify by hand
  */
 
-export type ToolStatus = "success" | "error" | "partial_success" | "in_progress" | "complete";
+import { ToolStatus, ToolInput, ToolResult } from './backend_schema_tools';
+
+// Re-export canonical types
+export { ToolStatus, ToolInput, ToolResult };
 
 export interface ToolCompleted {
   tool_name: string;
   result: unknown;
   run_id: string;
-}
-
-export interface ToolInput {
-  tool_name: string;
-  parameters: {
-    [k: string]: unknown;
-  };
 }
 
 export interface ToolInvocation {
@@ -26,17 +22,6 @@ export interface ToolInvocation {
     [k: string]: unknown;
   };
   run_id: string;
-}
-
-export interface ToolResult {
-  tool_name: string;
-  result: unknown;
-  status: ToolStatus;
-  error?: string | null;
-  execution_time?: number | null;
-  metadata?: {
-    [k: string]: unknown;
-  } | null;
 }
 
 export interface ToolStarted {

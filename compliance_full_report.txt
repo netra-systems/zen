@@ -1,0 +1,146 @@
+
+================================================================================
+ARCHITECTURE COMPLIANCE REPORT
+================================================================================
+
+[COMPLIANCE BY CATEGORY]
+----------------------------------------
+  Real System: 57.6% compliant (1589 files)
+    - 2001 violations in 674 files
+  Test Files: 30.2% compliant (796 files)
+    - 3418 violations in 556 files
+  Other: 100.0% compliant (0 files)
+
+[FILE SIZE VIOLATIONS] (>300 lines)
+----------------------------------------
+  🔴  699 lines: frontend\utils\exportService.ts
+  🔴  625 lines: app\tests\agents\test_llm_agent_e2e_real.py
+  🔴  613 lines: app\tests\test_frontend_backend_type_safety.py
+  🔴  611 lines: frontend\cypress\e2e\user-profile-settings.cy.ts
+  🔴  605 lines: app\tests\clickhouse\test_real_clickhouse_api.py
+  🔴  605 lines: frontend\__tests__\system\startup.test.tsx
+  🔴  604 lines: app\tests\services\test_tool_registry_registration.py
+  🔴  603 lines: frontend\cypress\e2e\critical-tests-4-10.cy.ts
+  🔴  600 lines: frontend\cypress\e2e\synthetic-data-generator-component.cy.ts
+  🔴  599 lines: app\tests\agents\test_data_sub_agent.py
+  🔴  597 lines: frontend\cypress\e2e\critical-state-synchronization.cy.ts
+  🔴  589 lines: frontend\__tests__\integration\comprehensive\performance-memory.test.tsx
+  🔴  583 lines: app\tests\security\test_comprehensive_security.py
+  🔴  581 lines: app\tests\test_startup_checks_robust.py
+  🔴  580 lines: app\tests\helpers\quality_gate_comprehensive_helpers.py
+  🔴  578 lines: app\tests\clickhouse\test_realistic_clickhouse_operations.py
+  🔴  572 lines: app\tests\core\test_fallback_coordinator.py
+  🔴  572 lines: app\tests\e2e\test_model_selection_workflows.py
+  🔴  572 lines: frontend\app\ingestion\page.tsx
+  🔴  570 lines: frontend\__tests__\chat\chatUIUXCore.test.tsx
+  🔴  565 lines: app\tests\websocket\test_websocket_load_performance.py
+  🔴  559 lines: app\tests\core\test_agent_reliability_mixin.py
+  🔴  556 lines: app\tests\agents\test_supervisor_consolidated_unit.py
+  🔴  554 lines: frontend\__tests__\auth\service.test.ts
+  🔴  552 lines: app\monitoring\performance_monitor.py
+  🔴  549 lines: app\tests\services\test_supply_research_scheduler_jobs.py
+  🔴  544 lines: app\tests\test_agents_comprehensive.py
+  🔴  544 lines: app\tests\test_websocket_type_safety.py
+  🔴  542 lines: frontend\__tests__\integration\infrastructure.test.tsx
+  🔴  542 lines: frontend\cypress\e2e\file-upload-references.cy.ts
+  ... and 276 more (use --show-all to see all)
+
+  Total violations: 306
+
+[FUNCTION COMPLEXITY VIOLATIONS] (>8 lines)
+----------------------------------------
+  VIOLATIONS (must fix):
+     55 lines: upgrade() in app\alembic\versions\bb39e1c49e2d_add_missing_tables_and_columns.py
+     52 lines: main() in app\data\synthetic\content_generator.py
+     52 lines: decode_access_token() in app\services\security_service.py
+     51 lines: generate_data_chunk() in app\data\synthetic\synthetic_data.py
+     50 lines: run() in app\services\apex_optimizer_agent\tools\log_pattern_identifier.py
+    ... and 1836 more violations
+
+  WARNINGS (example/demo files):
+     73 lines: test_end_to_end_optimization_flow() in app\tests\agents\test_llm_agent_e2e_flows.py
+     73 lines: test_end_to_end_optimization_flow() in app\tests\agents\test_llm_agent_e2e_real.py
+     72 lines: test_fan_out_fan_in_pattern() in app\tests\agents\test_supervisor_orchestration.py
+     70 lines: test_6_error_handling_and_recovery() in app\tests\agents\test_agent_e2e_critical_tools.py
+     70 lines: test_supervisor_circuit_breaker_recovery() in app\tests\agents\test_supervisor_advanced.py
+    ... and 3064 more warnings
+
+  Total: 1841 violations, 3069 warnings
+
+[DUPLICATE TYPE DEFINITIONS]
+----------------------------------------
+  Type 'WebSocketMessage' defined in 6 files
+    Files: frontend\components\chat\ChatSidebarHandlers.ts, frontend\components\chat\admin\types.ts, frontend\types\backend_schema_auto_generated.ts...
+  Type 'Thread' defined in 6 files
+    Files: frontend\hooks\useThreads.ts, frontend\services\messageService.ts, frontend\services\threadService.ts...
+  Type 'SubAgentState' defined in 6 files
+    Files: frontend\store\slices\types.ts, frontend\types\agents.ts, frontend\types\Assistant.ts...
+  Type 'AlertManager' defined in 5 files
+    Files: app\core\alert_manager.py, app\monitoring\alert_manager_compact.py, app\monitoring\alert_manager_core.py...
+  Type 'WebSocketError' defined in 5 files
+    Files: frontend\hooks\useWebSocketResilience.ts, frontend\services\webSocketService.ts, frontend\types\backend_schema_auto_generated.ts...
+  Type 'LearnedPolicy' defined in 4 files
+    Files: app\services\apex_optimizer_agent\tools\cost_impact_simulator.py, app\services\apex_optimizer_agent\tools\performance_gains_simulator.py, app\services\apex_optimizer_agent\tools\policy_simulator.py...
+  Type 'AuthEndpoints' defined in 4 files
+    Files: frontend\auth\types.ts, frontend\types\auth.ts, frontend\types\backend_schema_auth.ts...
+  Type 'ReportData' defined in 4 files
+    Files: frontend\components\chat\layers\slow-layer\types.ts, frontend\types\layer-types.ts, frontend\utils\exportService.ts...
+  Type 'ThreadState' defined in 4 files
+    Files: frontend\services\messageService.ts, frontend\store\threadStore.ts, frontend\store\slices\types.ts...
+  Type 'User' defined in 4 files
+    Files: frontend\store\authStore.ts, frontend\types\auth.ts, frontend\types\backend_schema_auth.ts...
+  Type 'SubAgentStatus' defined in 4 files
+    Files: frontend\types\agents.ts, frontend\types\Assistant.ts, frontend\types\backend_schema_base.ts...
+  Type 'BaseMessage' defined in 4 files
+    Files: frontend\types\agents.ts, frontend\types\backend_schema_base.ts, frontend\types\chat-store.ts...
+  Type 'ReferenceItem' defined in 4 files
+    Files: frontend\types\agents.ts, frontend\types\backend_schema_tools.ts, frontend\types\messages.ts...
+  Type 'Message' defined in 4 files
+    Files: frontend\types\backend_schema_base.ts, frontend\types\chat.ts, frontend\types\messages.ts...
+  Type 'ToolStatus' defined in 4 files
+    Files: frontend\types\backend_schema_base.ts, frontend\types\layer-types.ts, frontend\types\Tool.ts...
+  Type 'ToolInput' defined in 4 files
+    Files: frontend\types\backend_schema_tools.ts, frontend\types\chat.ts, frontend\types\Tool.ts...
+  Type 'ToolResult' defined in 4 files
+    Files: frontend\types\backend_schema_tools.ts, frontend\types\chat.ts, frontend\types\Tool.ts...
+  Type 'CircuitBreaker' defined in 3 files
+    Files: app\clients\auth_client.py, app\core\circuit_breaker_core.py, app\core\error_recovery.py
+  Type 'DatabaseMetrics' defined in 3 files
+    Files: app\db\observability_metrics.py, app\monitoring\metrics_collector.py, app\monitoring\performance_monitor.py
+  Type 'PerformanceMonitor' defined in 3 files
+    Files: app\middleware\metrics_helpers.py, app\monitoring\performance_monitor.py, app\websocket\performance_monitor_core.py
+
+  ... and 181 more duplicate types
+
+  Total duplicate types: 201
+
+[TEST STUBS IN PRODUCTION]
+----------------------------------------
+  app\tests\agents\test_helpers.py (line 14): Test stub detected: Args kwargs test stub
+  app\tests\test_business_value_fixtures.py (line 25): Test stub detected: Args kwargs test stub
+
+  Total suspicious files: 2
+
+================================================================================
+SUMMARY
+================================================================================
+
+Violation Statistics:
+----------------------------------------
+  File Size: 306 files
+  Functions: 1841 errors, 3069 warnings
+  Duplicates: 201 types
+  Test Stubs: 2 instances
+
+  Total Violations: 5419
+[FAIL] VIOLATIONS FOUND: 2350 issues requiring fixes
+       WARNINGS: 3069 issues in example/demo files
+Compliance Score: 48.4%
+
+Required Actions:
+  - Split 306 oversized files
+  - Refactor 1841 complex functions
+  - Deduplicate 201 type definitions
+  - Remove 2 test stubs from production
+
+Refer to ALIGNMENT_ACTION_PLAN.md for remediation steps

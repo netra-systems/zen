@@ -27,7 +27,7 @@ export interface ToolExecutingEvent {
   };
 }
 
-export interface ToolStatus {
+export interface ToolExecutionStatus {
   name: string;
   startTime: number;
   isActive: boolean;
@@ -37,7 +37,7 @@ export interface ToolStatus {
 export interface FastLayerData {
   agentName: string;        // From agent_started event
   activeTools: string[];    // From tool_executing events (legacy)
-  toolStatuses: ToolStatus[]; // Enhanced tool tracking with lifecycle
+  toolStatuses: ToolExecutionStatus[]; // Enhanced tool tracking with lifecycle
   timestamp: number;        // From backend
   runId: string;           // From backend
 }
@@ -126,7 +126,7 @@ export interface AgentResult {
 }
 
 export interface FinalReport {
-  report: ReportData;                        // Complete report object
+  report: import('@/types/report-data').ReportData;  // Complete report object from canonical location
   recommendations: Recommendation[];   // From backend
   actionPlan: ActionStep[];           // From backend
   agentMetrics: AgentMetric[];       // From backend
@@ -255,20 +255,6 @@ export interface AgentMetrics {
   };
 }
 
-export interface ReportData {
-  summary: string;
-  findings: {
-    [category: string]: unknown[];
-  };
-  data: {
-    [key: string]: unknown;
-  };
-  metadata: {
-    generatedAt: string;
-    version: string;
-    [key: string]: unknown;
-  };
-}
 
 // ============================================
 // Layer Update Event

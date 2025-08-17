@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DollarSign, Activity } from 'lucide-react';
-import type { ReportData } from './slow-layer-types';
+import type { ReportData } from '@/types/report-data';
 import { 
   SectionHeader, CostSection, SavingsSummary, PerformanceCard 
 } from './slow-layer-components';

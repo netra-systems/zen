@@ -192,11 +192,14 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
 
 def setup_session_middleware(app: FastAPI) -> None:
     """Setup session middleware."""
-    # Import auth config to get actual environment
-    from app.auth.environment_config import auth_env_config
+    # Import auth client to get actual environment
+    from app.clients.auth_client import auth_client
+    
+    # Get current environment using shared auth service
+    current_environment = auth_client.detect_environment()
     
     # Determine if we're actually in production/staging (deployed)
-    is_deployed = auth_env_config.environment.value in ["production", "staging"]
+    is_deployed = current_environment.value in ["production", "staging"]
     is_localhost = any([
         "localhost" in os.getenv("FRONTEND_URL", ""),
         "localhost" in os.getenv("API_URL", ""),
@@ -218,7 +221,7 @@ def setup_session_middleware(app: FastAPI) -> None:
     logger = logging.getLogger(__name__)
     logger.info(
         f"Session middleware config: same_site={same_site}, "
-        f"https_only={https_only}, environment={auth_env_config.environment.value}"
+        f"https_only={https_only}, environment={current_environment.value}"
     )
     
     app.add_middleware(

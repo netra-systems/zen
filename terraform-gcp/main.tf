@@ -132,20 +132,7 @@ resource "google_secret_manager_secret_version" "db_password" {
   secret_data = random_password.db_password.result
 }
 
-resource "google_secret_manager_secret" "jwt_secret" {
-  secret_id = "netra-jwt-secret"
-  
-  replication {
-    auto {}
-  }
-  
-  depends_on = [google_project_service.apis]
-}
-
-resource "google_secret_manager_secret_version" "jwt_secret" {
-  secret = google_secret_manager_secret.jwt_secret.id
-  secret_data = random_password.jwt_secret.result
-}
+# JWT secret is defined in auth_service.tf
 
 # Service Account for Cloud Run
 resource "google_service_account" "cloudrun" {

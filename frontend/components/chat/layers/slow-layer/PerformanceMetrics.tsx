@@ -6,7 +6,7 @@ import {
   Activity, ChevronDown, ChevronRight, Zap, Gauge, Brain,
   ArrowDownRight, ArrowUpRight
 } from 'lucide-react';
-import type { ReportData } from './types';
+import type { ReportData } from '@/types/report-data';
 
 interface PerformanceMetricsProps {
   data: ReportData;

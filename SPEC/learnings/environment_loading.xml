@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <metadata>
+    <category>Environment Loading</category>
+    <version>1.0</version>
+    <last_updated>2025-01-17</last_updated>
+  </metadata>
+
+  <learning id="simplified-single-source-loading">
+    <date>2025-01-17</date>
+    <category>Environment Loading</category>
+    <title>Simplified Single-Source Environment Loading</title>
+    
+    <problem>
+      <description>Environment loader was too complex with multiple file sources</description>
+      <symptoms>
+        <symptom>Loading from .env, .env.development, .env.development.local</symptom>
+        <symptom>Confusing precedence rules</symptom>
+        <symptom>System could overwrite user configurations</symptom>
+        <symptom>All secrets fetched from remote even if available locally</symptom>
+      </symptoms>
+      <impact>
+        <item>User confusion about which file takes precedence</item>
+        <item>Loss of user control over configurations</item>
+        <item>Unnecessary remote API calls</item>
+        <item>Complex debugging when values come from multiple sources</item>
+      </impact>
+    </problem>
+
+    <solution>
+      <description>Simplified to single .env file with optional remote fallback</description>
+      <implementation>
+        <step>Load ONLY from user-controlled .env file</step>
+        <step>Never auto-generate or modify .env file</step>
+        <step>Use remote secrets only for missing variables</step>
+        <step>Clear priority: OS > .env > Remote > Defaults</step>
+      </implementation>
+      <code_changes>
+        <file>dev_launcher/env_file_loader.py</file>
+        <file>dev_launcher/secret_loader.py</file>
+      </code_changes>
+    </solution>
+
+    <result>
+      <outcome>Cleaner, simpler environment loading</outcome>
+      <benefits>
+        <benefit>User maintains full control of .env file</benefit>
+        <benefit>Clear, predictable priority order</benefit>
+        <benefit>Reduced remote API calls</benefit>
+        <benefit>Better observability of variable sources</benefit>
+      </benefits>
+    </result>
+
+    <prevention>
+      <practice>Keep loading logic simple - one primary source</practice>
+      <practice>Make user files strictly user-controlled</practice>
+      <practice>Use remote services only as fallback</practice>
+      <practice>Provide clear logging of sources</practice>
+    </prevention>
+
+    <related>
+      <spec>SPEC/environment_loading.xml</spec>
+      <doc>docs/ENVIRONMENT_LOADER.md</doc>
+    </related>
+  </learning>
+
+  <learning id="env-file-user-control">
+    <date>2025-01-17</date>
+    <category>Environment Loading</category>
+    <title>User Control Over Environment Files</title>
+    
+    <problem>
+      <description>System could overwrite or auto-generate user .env files</description>
+      <symptoms>
+        <symptom>.env files being modified by system</symptom>
+        <symptom>User changes being overwritten</symptom>
+        <symptom>Auto-generated markers in files</symptom>
+      </symptoms>
+      <impact>
+        <item>Loss of user configuration</item>
+        <item>Confusion about file ownership</item>
+        <item>Difficulty maintaining local development settings</item>
+      </impact>
+    </problem>
+
+    <solution>
+      <description>Made .env files strictly user-controlled</description>
+      <implementation>
+        <step>Never modify existing .env files</step>
+        <step>Detect and warn about auto-generated files</step>
+        <step>Provide help for creating .env files</step>
+        <step>Support copying from .env.example or .env.local</step>
+      </implementation>
+    </solution>
+
+    <result>
+      <outcome>Users maintain full control of their environment</outcome>
+      <benefits>
+        <benefit>No unexpected configuration changes</benefit>
+        <benefit>Clear ownership of .env file</benefit>
+        <benefit>Predictable local development</benefit>
+      </benefits>
+    </result>
+
+    <prevention>
+      <practice>Never programmatically modify user configuration files</practice>
+      <practice>Provide templates but let users create actual files</practice>
+      <practice>Validate that user files are user-controlled</practice>
+    </prevention>
+  </learning>
+
+  <learning id="remote-fallback-optimization">
+    <date>2025-01-17</date>
+    <category>Environment Loading</category>
+    <title>Optimized Remote Secret Fallback</title>
+    
+    <problem>
+      <description>All secrets fetched from remote even when available locally</description>
+      <symptoms>
+        <symptom>Slow startup due to remote API calls</symptom>
+        <symptom>Unnecessary network dependencies</symptom>
+        <symptom>Fetching secrets already in .env file</symptom>
+      </symptoms>
+      <impact>
+        <item>Slower application startup</item>
+        <item>Unnecessary cloud API usage</item>
+        <item>Requires network for local development</item>
+      </impact>
+    </problem>
+
+    <solution>
+      <description>Fetch only missing secrets from remote</description>
+      <implementation>
+        <step>Check what's already loaded from .env and OS</step>
+        <step>Identify missing required secrets</step>
+        <step>Fetch ONLY missing secrets from Google Secret Manager</step>
+        <step>Make remote fallback optional via parameter</step>
+      </implementation>
+    </solution>
+
+    <result>
+      <outcome>Efficient secret loading with minimal remote calls</outcome>
+      <benefits>
+        <benefit>Faster startup times</benefit>
+        <benefit>Reduced API usage and costs</benefit>
+        <benefit>Works offline when all secrets in .env</benefit>
+        <benefit>Optional complete offline mode</benefit>
+      </benefits>
+    </result>
+
+    <prevention>
+      <practice>Always check local sources first</practice>
+      <practice>Only fetch what's missing from remote</practice>
+      <practice>Make remote dependencies optional</practice>
+      <practice>Cache remote results when appropriate</practice>
+    </prevention>
+  </learning>
+
+  <learning id="observability-in-loading">
+    <date>2025-01-17</date>
+    <category>Environment Loading</category>
+    <title>Comprehensive Loading Observability</title>
+    
+    <problem>
+      <description>Unclear where environment variables were coming from</description>
+      <symptoms>
+        <symptom>Difficult to debug configuration issues</symptom>
+        <symptom>Unknown source of variable values</symptom>
+        <symptom>No visibility into loading process</symptom>
+      </symptoms>
+      <impact>
+        <item>Hard to troubleshoot configuration problems</item>
+        <item>Confusion about value precedence</item>
+        <item>Time wasted debugging</item>
+      </impact>
+    </problem>
+
+    <solution>
+      <description>Added comprehensive logging and tracking</description>
+      <implementation>
+        <step>Log each step of loading process</step>
+        <step>Track and display source of each variable</step>
+        <step>Show summary statistics by source</step>
+        <step>Mask sensitive values in logs</step>
+        <step>Organize variables by category</step>
+      </implementation>
+    </solution>
+
+    <result>
+      <outcome>Full visibility into environment loading</outcome>
+      <benefits>
+        <benefit>Easy to see where each value comes from</benefit>
+        <benefit>Clear understanding of precedence</benefit>
+        <benefit>Quick identification of missing variables</benefit>
+        <benefit>Safe logging with masked values</benefit>
+      </benefits>
+    </result>
+
+    <prevention>
+      <practice>Always provide detailed logging for configuration</practice>
+      <practice>Track source of each configuration value</practice>
+      <practice>Mask sensitive values in all logs</practice>
+      <practice>Provide summary statistics for overview</practice>
+    </prevention>
+  </learning>
+</learnings>

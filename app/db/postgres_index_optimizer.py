@@ -1,168 +1,23 @@
 """PostgreSQL index optimization and management.
 
-This module provides PostgreSQL-specific database index optimization
-with proper async/await handling and modular architecture.
+Main PostgreSQL index optimizer with modular architecture.
 """
 
-from typing import Dict, List, Optional, Set, Any, Tuple
+from typing import Dict, List, Any
 from sqlalchemy import text
-from sqlalchemy.exc import ProgrammingError
 
 from app.logging_config import central_logger
 from app.db.postgres import get_async_db, async_engine
 from app.db.index_optimizer_core import (
     IndexRecommendation,
-    IndexCreationResult, 
     DatabaseValidation,
     IndexNameGenerator,
-    QueryAnalyzer,
-    IndexExistenceChecker,
-    PerformanceMetrics,
     DatabaseErrorHandler
 )
+from .postgres_index_creator import PostgreSQLIndexCreator
+from .postgres_index_loader import PostgreSQLIndexLoader, PostgreSQLPerformanceAnalyzer
 
 logger = central_logger.get_logger(__name__)
-
-
-class PostgreSQLConnectionManager:
-    """Manage PostgreSQL async connections safely."""
-    
-    @staticmethod
-    async def get_raw_connection():
-        """Get raw connection with proper validation."""
-        if not DatabaseValidation.validate_async_engine(async_engine):
-            return None
-        if not DatabaseValidation.validate_raw_connection_method(async_engine):
-            logger.error("async_engine missing raw_connection method")
-            return None
-        try:
-            return await async_engine.raw_connection()
-        except Exception as e:
-            logger.error(f"Failed to get raw connection: {e}")
-            return None
-    
-    @staticmethod
-    async def execute_on_raw_connection(conn, query: str):
-        """Execute query on raw connection."""
-        async_conn = conn.driver_connection
-        await async_conn.execute(query)
-    
-    @staticmethod
-    async def close_connection_safely(conn):
-        """Close connection with error handling."""
-        try:
-            await conn.close()
-        except Exception as e:
-            logger.debug(f"Error closing connection: {e}")
-
-
-class PostgreSQLIndexCreator:
-    """Handle PostgreSQL index creation operations."""
-    
-    def __init__(self):
-        self.connection_manager = PostgreSQLConnectionManager()
-        self.index_checker = IndexExistenceChecker()
-    
-    async def _build_create_index_query(self, table_name: str, columns: List[str],
-                                      index_name: str, index_type: str) -> str:
-        """Build CREATE INDEX query."""
-        column_list = ", ".join(columns)
-        return f"""
-            CREATE INDEX CONCURRENTLY IF NOT EXISTS {index_name} 
-            ON {table_name} USING {index_type} ({column_list})
-        """
-    
-    async def _execute_index_creation(self, query: str) -> bool:
-        """Execute index creation with proper connection handling."""
-        conn = await self.connection_manager.get_raw_connection()
-        if conn is None:
-            return False
-        
-        try:
-            await self.connection_manager.execute_on_raw_connection(conn, query)
-            return True
-        finally:
-            await self.connection_manager.close_connection_safely(conn)
-    
-    async def _handle_existing_index(self, index_name: str) -> IndexCreationResult:
-        """Handle case where index already exists."""
-        return IndexCreationResult(index_name, True, "", True)
-    
-    async def _handle_creation_success(self, index_name: str) -> IndexCreationResult:
-        """Handle successful index creation."""
-        self.index_checker.add_existing_index(index_name)
-        return IndexCreationResult(index_name, True)
-    
-    async def _handle_creation_failure(self, index_name: str) -> IndexCreationResult:
-        """Handle index creation failure."""
-        return IndexCreationResult(index_name, False, "Connection failed")
-    
-    async def _handle_creation_exception(self, e: Exception, index_name: str) -> IndexCreationResult:
-        """Handle exception during index creation."""
-        if DatabaseErrorHandler.is_already_exists_error(e):
-            self.index_checker.add_existing_index(index_name)
-            return IndexCreationResult(index_name, True, "", True)
-        else:
-            error_msg = str(e)
-            DatabaseErrorHandler.log_index_creation_error(index_name, e)
-            return IndexCreationResult(index_name, False, error_msg)
-    
-    async def create_single_index(self, table_name: str, columns: List[str],
-                                index_name: str, index_type: str = "btree") -> IndexCreationResult:
-        """Create a single database index."""
-        if self.index_checker.index_exists(index_name):
-            return await self._handle_existing_index(index_name)
-        
-        try:
-            query = await self._build_create_index_query(table_name, columns, index_name, index_type)
-            success = await self._execute_index_creation(query)
-            return await self._handle_creation_success(index_name) if success else await self._handle_creation_failure(index_name)
-        except Exception as e:
-            return await self._handle_creation_exception(e, index_name)
-
-
-class PostgreSQLIndexLoader:
-    """Load existing PostgreSQL indexes."""
-    
-    async def _execute_index_query(self, session) -> Set[str]:
-        """Execute query to get existing indexes."""
-        query = text("""
-            SELECT indexname 
-            FROM pg_indexes 
-            WHERE schemaname = 'public'
-        """)
-        result = await session.execute(query)
-        return {row[0] for row in result.fetchall()}
-    
-    async def load_existing_indexes(self, session) -> Set[str]:
-        """Load existing database indexes."""
-        try:
-            indexes = await self._execute_index_query(session)
-            logger.debug(f"Loaded {len(indexes)} existing indexes")
-            return indexes
-        except Exception as e:
-            logger.error(f"Error loading existing indexes: {e}")
-            return set()
-
-
-class PostgreSQLPerformanceAnalyzer:
-    """Analyze PostgreSQL query performance."""
-    
-    def __init__(self):
-        from app.db.postgres_query_analyzer import (
-            PostgreSQLSlowQueryAnalyzer,
-            PostgreSQLRecommendationProvider
-        )
-        self.slow_query_analyzer = PostgreSQLSlowQueryAnalyzer()
-        self.recommendation_provider = PostgreSQLRecommendationProvider()
-    
-    async def get_slow_queries(self, session) -> List[Tuple]:
-        """Get slow queries from pg_stat_statements."""
-        return await self.slow_query_analyzer.get_slow_queries(session)
-    
-    def analyze_query_for_recommendations(self, query_data: Tuple) -> List[IndexRecommendation]:
-        """Analyze query and generate recommendations."""
-        return self.slow_query_analyzer.analyze_single_query(query_data)
 
 
 class PostgreSQLIndexOptimizer:

@@ -3,7 +3,7 @@
 
 import type { UnifiedWebSocketEvent } from '@/types/websocket-event-types';
 import type { UnifiedChatState } from '@/types/store-types';
-import type { ChatMessage } from '@/types/websocket-event-types';
+import type { ChatMessage } from '@/types/chat';
 
 /**
  * Handles error events - sets processing to false and adds error message

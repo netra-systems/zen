@@ -148,7 +148,7 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
     "real_e2e": {
         "description": "[REAL E2E] Tests with actual LLM calls and services (15-20 minutes)",
         "purpose": "End-to-end validation with real LLM and service integrations",
-        "backend_args": ["-k", "real_ or _real", "-v", "--fail-fast", "--tb=short"],
+        "backend_args": ["-k", "real_ or _real", "-v", "--fail-fast"],
         "frontend_args": [],
         "timeout": 1200,  # 20 minutes for real e2e tests
         "run_coverage": False,

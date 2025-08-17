@@ -80,57 +80,68 @@ class FallbackCoordinator:
             use_circuit_breaker=True
         )
     
-    async def execute_with_coordination(
-        self,
-        agent_name: str,
-        operation: Callable,
-        operation_name: str,
-        fallback_type: str = "general"
-    ) -> Any:
-        """Execute operation with coordinated fallback handling"""
-        
-        # Check if system is in emergency mode
+    async def _check_emergency_mode(self, agent_name: str, operation_name: str, fallback_type: str) -> Any:
+        """Check if system is in emergency mode and handle accordingly."""
         if await self.health_monitor.is_emergency_mode_active():
             logger.warning(f"System in emergency mode, using emergency fallback for {agent_name}")
             return await self.emergency_manager.execute_emergency_fallback(
                 agent_name, operation_name, fallback_type
             )
-        
-        # Check if too many agents are in fallback mode
+        return None
+
+    async def _check_cascade_prevention(self, agent_name: str, operation_name: str) -> Any:
+        """Check if cascade prevention should be applied."""
         if await self.health_monitor.should_prevent_cascade(agent_name):
             logger.warning(f"Cascade prevention active, limiting fallback for {agent_name}")
             return await self.emergency_manager.execute_limited_fallback(agent_name, operation_name)
-        
-        # Get agent's fallback handler
+        return None
+
+    def _validate_agent_handler(self, agent_name: str):
+        """Validate that agent has a registered handler."""
         handler = self.agent_handlers.get(agent_name)
         if not handler:
             logger.error(f"No fallback handler registered for agent {agent_name}")
             raise ValueError(f"Agent {agent_name} not registered with fallback coordinator")
-        
-        # Execute with coordination
+        return handler
+
+    async def _execute_operation_with_handler(self, handler, operation, operation_name, agent_name, fallback_type):
+        """Execute operation using the fallback handler."""
+        return await handler.execute_with_fallback(
+            operation, operation_name, agent_name, fallback_type
+        )
+
+    async def _handle_operation_success(self, agent_name: str, result: Any) -> Any:
+        """Handle successful operation execution."""
+        await self.health_monitor.record_success(agent_name)
+        return result
+
+    async def _handle_operation_failure(self, agent_name: str, exception: Exception) -> None:
+        """Handle operation failure and update monitoring."""
+        await self.health_monitor.record_failure(agent_name, exception)
+        await self.health_monitor.update_circuit_breaker_status(agent_name)
+        await self.health_monitor.update_system_health()
+
+    async def _execute_with_error_handling(self, handler, operation, operation_name, agent_name, fallback_type) -> Any:
+        """Execute operation with error handling and monitoring updates."""
         try:
-            result = await handler.execute_with_fallback(
-                operation,
-                operation_name,
-                agent_name,
-                fallback_type
-            )
-            
-            # Record successful operation
-            await self.health_monitor.record_success(agent_name)
-            return result
-            
+            result = await self._execute_operation_with_handler(handler, operation, operation_name, agent_name, fallback_type)
+            return await self._handle_operation_success(agent_name, result)
         except Exception as e:
-            # Record failure and update status
-            await self.health_monitor.record_failure(agent_name, e)
-            
-            # Check if circuit breaker should open
-            await self.health_monitor.update_circuit_breaker_status(agent_name)
-            
-            # Update system health
-            await self.health_monitor.update_system_health()
-            
+            await self._handle_operation_failure(agent_name, e)
             raise e
+
+    async def execute_with_coordination(
+        self, agent_name: str, operation: Callable, operation_name: str, fallback_type: str = "general"
+    ) -> Any:
+        """Execute operation with coordinated fallback handling"""
+        emergency_result = await self._check_emergency_mode(agent_name, operation_name, fallback_type)
+        if emergency_result is not None:
+            return emergency_result
+        cascade_result = await self._check_cascade_prevention(agent_name, operation_name)
+        if cascade_result is not None:
+            return cascade_result
+        handler = self._validate_agent_handler(agent_name)
+        return await self._execute_with_error_handling(handler, operation, operation_name, agent_name, fallback_type)
     
     def get_system_status(self) -> Dict[str, Any]:
         """Get comprehensive system fallback status"""

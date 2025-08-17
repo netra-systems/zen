@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 from .test_config import RUNNERS
 from .test_parser import parse_test_counts, parse_coverage, parse_cypress_counts, extract_test_details
+from .bad_test_detector import BadTestDetector
 
 # Load environment variables
 load_dotenv()
@@ -71,15 +72,20 @@ def print_output(stdout: str, stderr: str):
             print(cleaned_stderr, file=sys.stderr)
 
 
-def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Optional[Dict[str, Any]] = None, results: Dict[str, Any] = None) -> Tuple[int, str]:
+def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Optional[Dict[str, Any]] = None, results: Dict[str, Any] = None, speed_opts: Optional[Dict[str, bool]] = None) -> Tuple[int, str]:
     """Run backend tests with specified arguments."""
     print(f"\n{'='*60}")
     print("RUNNING BACKEND TESTS")
+    if speed_opts and speed_opts.get('enabled'):
+        print("[SPEED] Speed optimizations active")
     print(f"{'='*60}")
     
     start_time = time.time()
     if results:
         results["backend"]["status"] = "running"
+    
+    # Initialize bad test detector
+    bad_test_detector = BadTestDetector()
     
     # Use backend test runner
     backend_script = PROJECT_ROOT / RUNNERS["backend"]
@@ -88,6 +94,10 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
         return 1, "Backend test runner not found"
     
     cmd = [sys.executable, str(backend_script)] + args
+    
+    # Apply speed optimizations if requested
+    if speed_opts:
+        cmd = _apply_speed_optimizations(cmd, speed_opts)
     
     # Prepare environment with real LLM configuration if provided
     env = os.environ.copy()
@@ -143,6 +153,16 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
             test_details = extract_test_details(result.stdout + result.stderr, "backend")
             results["backend"]["test_details"] = test_details
             
+            # Track bad tests
+            for test in test_details:
+                bad_test_detector.record_test_result(
+                    test_name=test["name"],
+                    component="backend",
+                    status=test["status"],
+                    error_type=test.get("error", "").split(":")[0] if test.get("error") else None,
+                    error_message=test.get("error")
+                )
+            
             # Parse coverage
             coverage = parse_coverage(result.stdout + result.stderr)
             if coverage is not None:
@@ -152,6 +172,19 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
         print_output(result.stdout, result.stderr)
         
         print(f"[{'PASS' if result.returncode == 0 else 'FAIL'}] Backend tests completed in {duration:.2f}s")
+        
+        # Finalize bad test detection and show report if needed
+        if results and "test_counts" in results["backend"]:
+            bad_tests = bad_test_detector.finalize_run(
+                total_tests=results["backend"]["test_counts"]["total"],
+                passed=results["backend"]["test_counts"]["passed"],
+                failed=results["backend"]["test_counts"]["failed"]
+            )
+            
+            # Show warning if bad tests detected
+            if bad_tests["consistently_failing"]:
+                print(f"\n⚠️  WARNING: {len(bad_tests['consistently_failing'])} tests are consistently failing!")
+                print("Run 'python -m test_framework.bad_test_reporter' for detailed report")
         
         return result.returncode, result.stdout + result.stderr
         
@@ -167,12 +200,14 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
         return -1, f"Tests timed out after {timeout}s"
 
 
-def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, Any] = None) -> Tuple[int, str]:
+def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, Any] = None, speed_opts: Optional[Dict[str, bool]] = None) -> Tuple[int, str]:
     """Run frontend tests with specified arguments."""
     global _active_processes
     
     print(f"\n{'='*60}")
     print("RUNNING FRONTEND TESTS")
+    if speed_opts and speed_opts.get('enabled'):
+        print("[SPEED] Speed optimizations active")
     print(f"{'='*60}")
     
     start_time = time.time()
@@ -191,6 +226,10 @@ def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, A
         return 1, "Frontend test runner not found"
         
     cmd = [sys.executable, str(frontend_script)] + args
+    
+    # Apply speed optimizations if requested
+    if speed_opts:
+        cmd = _apply_speed_optimizations(cmd, speed_opts)
     
     # Add cleanup flag for frontend tests only if script supports it
     if "test_frontend.py" in str(frontend_script):
@@ -408,3 +447,60 @@ def run_simple_tests(results: Dict[str, Any] = None) -> Tuple[int, str]:
     except subprocess.TimeoutExpired:
         print(f"[TIMEOUT] Simple tests timed out after 60s")
         return -1, "Tests timed out after 60s"
+
+
+def _apply_speed_optimizations(cmd: List[str], speed_opts: Dict[str, bool]) -> List[str]:
+    """Apply speed optimizations to test command.
+    
+    SAFETY ANALYSIS:
+    - no_warnings: Safe - only suppresses deprecation warnings
+    - no_coverage: Safe - skips coverage but doesn't affect test results
+    - fast_fail: Safe - stops on first failure, useful for quick feedback
+    - parallel: Safe with caveats - may hide race conditions
+    - skip_slow: RISKY - may skip important tests, requires explicit flag
+    """
+    optimized_cmd = cmd.copy()
+    
+    # Check if we're using the backend test runner
+    is_backend_runner = any('test_backend.py' in str(c) for c in cmd)
+    
+    if is_backend_runner:
+        # Backend runner has specific flags
+        if speed_opts.get('fast_fail', False):
+            optimized_cmd.append('--fail-fast')
+        
+        if speed_opts.get('parallel', False):
+            # Backend runner uses --parallel flag with number
+            optimized_cmd.extend(['--parallel', 'auto'])
+        
+        if speed_opts.get('no_warnings', False):
+            # Backend runner doesn't show warnings by default
+            pass  # No specific flag needed
+        
+        # Backend runner doesn't have direct skip slow support
+        # Would need to use --markers flag
+    else:
+        # Standard pytest flags for other runners
+        if speed_opts.get('no_warnings', False):
+            optimized_cmd.extend(['-W', 'ignore::DeprecationWarning'])
+            optimized_cmd.extend(['-W', 'ignore::PendingDeprecationWarning'])
+        
+        if speed_opts.get('no_coverage', False):
+            # Skip coverage collection
+            optimized_cmd.extend(['--no-cov'])
+        
+        if speed_opts.get('fast_fail', False):
+            # Stop on first failure
+            optimized_cmd.extend(['-x', '--maxfail=1'])
+        
+        # Potentially risky optimizations (require explicit flag)
+        if speed_opts.get('skip_slow', False):
+            # Skip tests marked as slow - REQUIRES WARNING
+            print("[WARNING] Skipping slow tests - may miss important edge cases!")
+            optimized_cmd.extend(['-m', 'not slow'])
+        
+        if speed_opts.get('parallel', False) and '-n' not in ' '.join(optimized_cmd):
+            # Auto-detect CPU count for parallel execution
+            optimized_cmd.extend(['-n', 'auto'])
+    
+    return optimized_cmd

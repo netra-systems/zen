@@ -1,24 +1,47 @@
-# Boundary Enforcement Pre-commit Configuration
+# Elite Enforcement Pre-commit Configuration for Netra Apex
+# MANDATORY: 300-line file limit, 8-line function limit
 repos:
   - repo: local
     hooks:
-      - id: boundary-enforcer
-        name: System Boundary Enforcer
-        entry: python scripts/boundary_enforcer.py --enforce --fail-on-critical
+      # CRITICAL: Architecture Compliance Check (blocks commits on violations)
+      - id: architecture-compliance
+        name: Architecture Compliance Enforcer
+        entry: python scripts/enforce_limits.py --mode strict --fail-fast
         language: system
-        files: '^(app|frontend|scripts)/'
+        files: '^(app|frontend|scripts).*\.(py|ts|tsx)$'
         stages: [commit]
+        description: 'Enforces 300-line file and 8-line function limits'
         
-      - id: file-size-check
-        name: File Size Boundary Check
-        entry: python scripts/boundary_enforcer.py --check-file-boundaries
+      # File Size Enforcement (300-line limit)
+      - id: file-size-limit
+        name: File Size Limit (300 lines)
+        entry: python scripts/enforce_limits.py --check-files-only --max-lines 300
+        language: system
+        files: '\.(py|ts|tsx)$'
+        stages: [commit]
+        pass_filenames: true
+        
+      # Function Complexity Enforcement (8-line limit)  
+      - id: function-complexity-limit
+        name: Function Complexity Limit (8 lines)
+        entry: python scripts/enforce_limits.py --check-functions-only --max-function-lines 8
+        language: system
+        files: '\.py$'
+        stages: [commit]
+        pass_filenames: true
+        
+      # Type Safety and Duplicate Prevention
+      - id: type-safety-check
+        name: Type Safety and Duplicate Prevention
+        entry: python scripts/enforce_limits.py --check-types --prevent-duplicates
         language: system
         files: '\.(py|ts|tsx)$'
         stages: [commit]
         
-      - id: function-complexity-check
-        name: Function Complexity Boundary Check
-        entry: python scripts/boundary_enforcer.py --check-function-boundaries
+      # Test Stub Detection (prevents production stubs)
+      - id: test-stub-prevention
+        name: Test Stub Prevention
+        entry: python scripts/enforce_limits.py --check-stubs --fail-on-stubs
         language: system
         files: '\.py$'
         stages: [commit]

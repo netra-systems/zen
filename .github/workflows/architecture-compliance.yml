@@ -1,0 +1,246 @@
+name: Architecture Compliance Enforcer
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'app/**/*.py'
+      - 'frontend/**/*.ts'
+      - 'frontend/**/*.tsx'
+      - 'scripts/**/*.py'
+  push:
+    branches: [main, business-*]
+    paths:
+      - 'app/**/*.py'
+      - 'frontend/**/*.ts'
+      - 'frontend/**/*.tsx'
+      - 'scripts/**/*.py'
+
+jobs:
+  architectural-limits-enforcement:
+    name: Enforce 300-Line & 8-Line Limits
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ast-tools
+      
+      - name: Run Architecture Compliance Check
+        id: compliance-check
+        run: |
+          python scripts/enforce_limits.py --mode strict --json > compliance-report.json
+          echo "COMPLIANCE_STATUS=$(cat compliance-report.json | jq -r '.compliance_status')" >> $GITHUB_OUTPUT
+        continue-on-error: true
+      
+      - name: Generate Compliance Report
+        if: always()
+        run: |
+          echo "## 🏗️ Architecture Compliance Report" >> compliance-summary.md
+          echo "" >> compliance-summary.md
+          
+          if [ -f compliance-report.json ]; then
+            VIOLATIONS=$(cat compliance-report.json | jq '.total_violations')
+            STATUS=$(cat compliance-report.json | jq -r '.compliance_status')
+            
+            if [ "$STATUS" = "PASS" ]; then
+              echo "✅ **All files comply with architectural limits**" >> compliance-summary.md
+              echo "" >> compliance-summary.md
+              echo "- ✅ File limit: 300 lines maximum" >> compliance-summary.md
+              echo "- ✅ Function limit: 8 lines maximum" >> compliance-summary.md
+            else
+              echo "🔴 **Architectural violations detected: $VIOLATIONS**" >> compliance-summary.md
+              echo "" >> compliance-summary.md
+              echo "### Violations by Type:" >> compliance-summary.md
+              
+              # Extract and format violations
+              cat compliance-report.json | jq -r '.violations[] | "- **\(.type)**: \(.file) (Line \(.line // "N/A")) - \(.message)"' >> compliance-summary.md
+              
+              echo "" >> compliance-summary.md
+              echo "### Fix Suggestions:" >> compliance-summary.md
+              cat compliance-report.json | jq -r '.violations[] | "- \(.file): \(.fix_suggestion)"' >> compliance-summary.md
+            fi
+          else
+            echo "❌ **Error running compliance check**" >> compliance-summary.md
+          fi
+          
+          echo "" >> compliance-summary.md
+          echo "### Business Impact:" >> compliance-summary.md
+          echo "- Prevents \$3,500/month context waste" >> compliance-summary.md
+          echo "- Maintains code quality for customer retention" >> compliance-summary.md
+          echo "- Enforces Elite Engineering standards" >> compliance-summary.md
+      
+      - name: Comment PR with Compliance Report
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              const report = fs.readFileSync('compliance-summary.md', 'utf8');
+              
+              // Find existing compliance comment
+              const comments = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+              
+              const existingComment = comments.data.find(comment => 
+                comment.body.includes('🏗️ Architecture Compliance Report')
+              );
+              
+              if (existingComment) {
+                // Update existing comment
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existingComment.id,
+                  body: report
+                });
+              } else {
+                // Create new comment
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: report
+                });
+              }
+            } catch (error) {
+              console.error('Error posting compliance report:', error);
+            }
+      
+      - name: Upload Compliance Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: architecture-compliance-report
+          path: |
+            compliance-report.json
+            compliance-summary.md
+          retention-days: 30
+      
+      - name: Block Merge on Violations
+        if: steps.compliance-check.outputs.COMPLIANCE_STATUS == 'FAIL'
+        run: |
+          echo "🔴 Architecture compliance violations detected!"
+          echo "This PR cannot be merged until all violations are resolved."
+          echo ""
+          echo "Business Impact:"
+          echo "- Violations lead to context waste costing $3,500/month"
+          echo "- Code quality degradation affects customer retention"
+          echo "- Breaks Elite Engineering standards"
+          echo ""
+          echo "Required Actions:"
+          echo "1. Fix all file size violations (300-line limit)"
+          echo "2. Fix all function size violations (8-line limit)"
+          echo "3. Re-run checks until compliance is achieved"
+          exit 1
+
+  file-size-detailed-check:
+    name: Detailed File Size Analysis
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Analyze Large Files
+        run: |
+          echo "## 📊 File Size Analysis" > file-analysis.md
+          echo "" >> file-analysis.md
+          
+          echo "### Files Approaching Limits (>250 lines):" >> file-analysis.md
+          find app frontend scripts -name "*.py" -o -name "*.ts" -o -name "*.tsx" | while read file; do
+            if [ -f "$file" ]; then
+              lines=$(wc -l < "$file")
+              if [ $lines -gt 250 ]; then
+                echo "- \`$file\`: $lines lines" >> file-analysis.md
+              fi
+            fi
+          done
+          
+          echo "" >> file-analysis.md
+          echo "### Recommendations:" >> file-analysis.md
+          echo "- Files >250 lines should be split before reaching 300" >> file-analysis.md
+          echo "- Use modular design patterns" >> file-analysis.md
+          echo "- Extract reusable components" >> file-analysis.md
+      
+      - name: Upload File Analysis
+        uses: actions/upload-artifact@v3
+        with:
+          name: file-size-analysis
+          path: file-analysis.md
+          retention-days: 7
+
+  function-complexity-check:
+    name: Function Complexity Analysis
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Analyze Function Complexity
+        run: |
+          python scripts/enforce_limits.py --check-functions-only --json > function-report.json
+          
+          echo "## 🔧 Function Complexity Report" > function-analysis.md
+          echo "" >> function-analysis.md
+          
+          if [ -f function-report.json ]; then
+            FUNCTION_VIOLATIONS=$(cat function-report.json | jq '.total_violations')
+            
+            if [ "$FUNCTION_VIOLATIONS" -eq 0 ]; then
+              echo "✅ **All functions comply with 8-line limit**" >> function-analysis.md
+            else
+              echo "🔴 **Functions exceeding 8-line limit: $FUNCTION_VIOLATIONS**" >> function-analysis.md
+              echo "" >> function-analysis.md
+              echo "### Violations:" >> function-analysis.md
+              cat function-report.json | jq -r '.violations[] | "- **\(.function)** in \(.file) (Line \(.line)): \(.actual_lines) lines"' >> function-analysis.md
+              
+              echo "" >> function-analysis.md
+              echo "### Refactoring Suggestions:" >> function-analysis.md
+              cat function-report.json | jq -r '.violations[] | "- \(.function): \(.fix_suggestion)"' >> function-analysis.md
+            fi
+          fi
+          
+          echo "" >> function-analysis.md
+          echo "### Elite Engineering Standard:" >> function-analysis.md
+          echo "- Maximum 8 lines per function" >> function-analysis.md
+          echo "- Single responsibility principle" >> function-analysis.md
+          echo "- Composable, testable units" >> function-analysis.md
+      
+      - name: Upload Function Analysis
+        uses: actions/upload-artifact@v3
+        with:
+          name: function-complexity-analysis
+          path: |
+            function-report.json
+            function-analysis.md
+          retention-days: 7

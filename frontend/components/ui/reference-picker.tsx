@@ -14,7 +14,12 @@ const ReferencePicker: React.FC<ReferencePickerProps> = ({ onSelect }) => {
   useEffect(() => {
     const fetchReferences = async () => {
       try {
-        const response = await fetch('/api/references');
+        const token = localStorage.getItem('jwt_token') || sessionStorage.getItem('jwt_token');
+        const response = await fetch('/api/references', {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          }
+        });
         const data = await response.json();
         setReferences(data.references);
       } catch (error) {

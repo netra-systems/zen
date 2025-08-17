@@ -1,11 +1,11 @@
 import type { StateCreator } from 'zustand';
-import type { SubAgentState } from './types';
+import type { SubAgentUIState } from './types';
 
 export const createSubAgentSlice: StateCreator<
-  SubAgentState,
+  SubAgentUIState,
   [],
   [],
-  SubAgentState
+  SubAgentUIState
 > = (set, get) => ({
   subAgentName: null,
   subAgentStatus: null,

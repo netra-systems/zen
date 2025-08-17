@@ -20,9 +20,12 @@ function generateUniqueUrl(): string {
  */
 function safeCleanup(): void {
   try {
-    WS.clean();
+    // Check if WS exists and has the clean method
+    if (typeof WS !== 'undefined' && WS && typeof WS.clean === 'function') {
+      WS.clean();
+    }
   } catch (error) {
-    // Ignore cleanup errors for non-existent servers
+    // Silently ignore all cleanup errors - they're not critical for tests
   }
 }
 
@@ -114,10 +117,27 @@ export function createWebSocketManager(customUrl?: string): WebSocketTestManager
 }
 
 /**
+ * Enhanced safe WebSocket cleanup utility - handles all edge cases
+ * Use this in afterEach/afterAll hooks instead of WS.clean() directly
+ */
+export function safeWebSocketCleanup(): void {
+  try {
+    // Check if WS exists and has the clean method
+    if (typeof WS !== 'undefined' && WS && typeof WS.clean === 'function') {
+      WS.clean();
+    }
+  } catch (error) {
+    // Silently ignore all cleanup errors - they're not critical for tests
+    // Common errors: "Cannot read properties of undefined", connection issues
+  }
+}
+
+/**
  * Global cleanup utility for afterAll hooks
+ * @deprecated Use safeWebSocketCleanup() instead
  */
 export function globalWebSocketCleanup(): void {
-  safeCleanup();
+  safeWebSocketCleanup();
 }
 
 export default WebSocketTestManager;

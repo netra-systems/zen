@@ -13,7 +13,7 @@ from app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class ValidationErrorHandler:
+class DocumentValidationErrorHandler:
     """Handles document validation failures with recovery strategies."""
     
     def __init__(self):
@@ -31,26 +31,44 @@ class ValidationErrorHandler:
         context = self._create_validation_error_context(
             filename, validation_errors, run_id, original_error
         )
-        
-        error = DocumentValidationError(filename, validation_errors, context)
-        
+        error = self._create_validation_error(filename, validation_errors, context)
+        return await self._process_validation_error(filename, validation_errors, run_id, error, context)
+    
+    def _create_validation_error(
+        self, filename: str, validation_errors: List[str], context: ErrorContext
+    ) -> DocumentValidationError:
+        """Create document validation error instance"""
+        return DocumentValidationError(filename, validation_errors, context)
+    
+    async def _process_validation_error(
+        self,
+        filename: str,
+        validation_errors: List[str],
+        run_id: str,
+        error: DocumentValidationError,
+        context: ErrorContext
+    ) -> Dict[str, Any]:
+        """Process validation error with recovery strategies"""
         try:
-            # Try validation recovery strategies
-            result = await self._attempt_validation_recovery(
-                filename, validation_errors, run_id
-            )
-            if result:
-                return result
-            
-            # Create validation report for manual review
-            report_result = await self._create_validation_report(
-                filename, validation_errors, run_id
-            )
-            return report_result
-            
+            return await self._execute_recovery_strategies(filename, validation_errors, run_id)
         except Exception as fallback_error:
-            await global_error_handler.handle_error(error, context)
-            raise error
+            await self._handle_recovery_failure(error, context)
+    
+    async def _execute_recovery_strategies(
+        self, filename: str, validation_errors: List[str], run_id: str
+    ) -> Dict[str, Any]:
+        """Execute validation recovery strategies"""
+        result = await self._attempt_validation_recovery(filename, validation_errors, run_id)
+        if result:
+            return result
+        return await self._create_validation_report(filename, validation_errors, run_id)
+    
+    async def _handle_recovery_failure(
+        self, error: DocumentValidationError, context: ErrorContext
+    ) -> None:
+        """Handle recovery strategy failure"""
+        await global_error_handler.handle_error(error, context)
+        raise error
     
     def _create_validation_error_context(
         self,
@@ -60,16 +78,23 @@ class ValidationErrorHandler:
         original_error: Exception
     ) -> ErrorContext:
         """Create error context for validation failures."""
+        additional_data = self._build_context_data(filename, validation_errors, original_error)
         return ErrorContext(
             agent_name="corpus_admin_agent",
             operation_name="document_validation",
             run_id=run_id,
-            additional_data={
-                'filename': filename,
-                'validation_errors': validation_errors,
-                'original_error': str(original_error)
-            }
+            additional_data=additional_data
         )
+    
+    def _build_context_data(
+        self, filename: str, validation_errors: List[str], original_error: Exception
+    ) -> Dict[str, Any]:
+        """Build additional data for error context"""
+        return {
+            'filename': filename,
+            'validation_errors': validation_errors,
+            'original_error': str(original_error)
+        }
     
     async def _attempt_validation_recovery(
         self,
@@ -236,5 +261,5 @@ class ValidationErrorHandler:
 
 # Factory function for creating validation handlers
 def create_validation_handler():
-    """Create validation error handler instance."""
-    return ValidationErrorHandler()
+    """Create document validation error handler instance."""
+    return DocumentValidationErrorHandler()

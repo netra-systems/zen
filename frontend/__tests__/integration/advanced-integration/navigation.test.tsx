@@ -5,6 +5,7 @@
 import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
+import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { setupTestEnvironment } from './test-setup';
 import { useAuthStore } from '@/store/authStore';
 
@@ -18,7 +19,7 @@ describe('Advanced Frontend Integration Tests - Navigation', () => {
   });
 
   afterEach(() => {
-    WS.clean();
+    safeWebSocketCleanup();
   });
 
   describe('20. Complex Navigation Flows', () => {

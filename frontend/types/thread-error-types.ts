@@ -114,6 +114,39 @@ export interface ThreadErrorNotification {
 }
 
 /**
+ * Extracts error message from Error object or unknown value
+ */
+const extractErrorMessage = (error: Error | unknown): string => {
+  return error instanceof Error ? error.message : String(error);
+};
+
+/**
+ * Creates error details for Error instances
+ */
+const createErrorDetails = (error: Error | unknown): Record<string, unknown> | undefined => {
+  return error instanceof Error ? { stack: error.stack } : undefined;
+};
+
+/**
+ * Builds ThreadError object with categorized error information
+ */
+const buildThreadError = (
+  threadId: string,
+  message: string,
+  category: ThreadErrorCategory
+): ThreadError => {
+  return {
+    id: generateErrorId(),
+    threadId,
+    message,
+    category,
+    severity: determineSeverity(category),
+    timestamp: Date.now(),
+    retryable: isRetryableError(category)
+  };
+};
+
+/**
  * Creates thread error from Error object
  */
 export const createThreadError = (
@@ -121,19 +154,52 @@ export const createThreadError = (
   error: Error | unknown,
   category?: ThreadErrorCategory
 ): ThreadError => {
-  const message = error instanceof Error ? error.message : String(error);
+  const message = extractErrorMessage(error);
   const errorCategory = category || categorizeError(message);
-  
-  return {
-    id: generateErrorId(),
-    threadId,
-    message,
-    category: errorCategory,
-    severity: determineSeverity(errorCategory),
-    timestamp: Date.now(),
-    retryable: isRetryableError(errorCategory),
-    details: error instanceof Error ? { stack: error.stack } : undefined
-  };
+  const threadError = buildThreadError(threadId, message, errorCategory);
+  return { ...threadError, details: createErrorDetails(error) };
+};
+
+/**
+ * Checks timeout error patterns
+ */
+const isTimeoutError = (message: string): boolean => {
+  return message.includes('timeout');
+};
+
+/**
+ * Checks network error patterns
+ */
+const isNetworkError = (message: string): boolean => {
+  return message.includes('network') || message.includes('fetch');
+};
+
+/**
+ * Checks abort error patterns
+ */
+const isAbortError = (message: string): boolean => {
+  return message.includes('abort') || message.includes('cancel');
+};
+
+/**
+ * Checks permission error patterns
+ */
+const isPermissionError = (message: string): boolean => {
+  return message.includes('permission') || message.includes('auth');
+};
+
+/**
+ * Checks validation error patterns
+ */
+const isValidationError = (message: string): boolean => {
+  return message.includes('validation') || message.includes('invalid');
+};
+
+/**
+ * Checks server error patterns
+ */
+const isServerError = (message: string): boolean => {
+  return message.includes('server') || message.includes('5');
 };
 
 /**
@@ -142,14 +208,42 @@ export const createThreadError = (
 const categorizeError = (message: string): ThreadErrorCategory => {
   const lowerMessage = message.toLowerCase();
   
-  if (lowerMessage.includes('timeout')) return 'timeout';
-  if (lowerMessage.includes('network') || lowerMessage.includes('fetch')) return 'network';
-  if (lowerMessage.includes('abort') || lowerMessage.includes('cancel')) return 'abort';
-  if (lowerMessage.includes('permission') || lowerMessage.includes('auth')) return 'permission';
-  if (lowerMessage.includes('validation') || lowerMessage.includes('invalid')) return 'validation';
-  if (lowerMessage.includes('server') || lowerMessage.includes('5')) return 'server';
+  if (isTimeoutError(lowerMessage)) return 'timeout';
+  if (isNetworkError(lowerMessage)) return 'network';
+  if (isAbortError(lowerMessage)) return 'abort';
+  if (isPermissionError(lowerMessage)) return 'permission';
+  if (isValidationError(lowerMessage)) return 'validation';
+  if (isServerError(lowerMessage)) return 'server';
   
   return 'unknown';
+};
+
+/**
+ * Gets severity for low-level categories
+ */
+const getLowSeverity = (): ThreadErrorSeverity => {
+  return 'low';
+};
+
+/**
+ * Gets severity for medium-level categories
+ */
+const getMediumSeverity = (): ThreadErrorSeverity => {
+  return 'medium';
+};
+
+/**
+ * Gets severity for high-level categories
+ */
+const getHighSeverity = (): ThreadErrorSeverity => {
+  return 'high';
+};
+
+/**
+ * Gets severity for critical-level categories
+ */
+const getCriticalSeverity = (): ThreadErrorSeverity => {
+  return 'critical';
 };
 
 /**
@@ -158,18 +252,18 @@ const categorizeError = (message: string): ThreadErrorCategory => {
 const determineSeverity = (category: ThreadErrorCategory): ThreadErrorSeverity => {
   switch (category) {
     case 'abort':
-      return 'low';
+      return getLowSeverity();
     case 'timeout':
     case 'network':
-      return 'medium';
+      return getMediumSeverity();
     case 'permission':
     case 'server':
-      return 'high';
+      return getHighSeverity();
     case 'validation':
     case 'unknown':
-      return 'critical';
+      return getCriticalSeverity();
     default:
-      return 'medium';
+      return getMediumSeverity();
   }
 };
 

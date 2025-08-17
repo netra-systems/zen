@@ -69,10 +69,19 @@ class AnalysisEngine:
     @staticmethod
     def identify_outliers(values: List[float], method: str = "iqr") -> List[int]:
         """Identify outliers using IQR or Z-score method"""
-        if len(values) < 4:
+        if not AnalysisEngine._has_sufficient_data_for_outliers(values):
             return []
-        
         arr = np.array(values)
+        return AnalysisEngine._apply_outlier_detection_method(arr, method)
+    
+    @staticmethod
+    def _has_sufficient_data_for_outliers(values: List[float]) -> bool:
+        """Check if there is sufficient data for outlier detection."""
+        return len(values) >= 4
+    
+    @staticmethod
+    def _apply_outlier_detection_method(arr, method: str) -> List[int]:
+        """Apply the specified outlier detection method."""
         if method == "iqr":
             return AnalysisEngine._identify_iqr_outliers(arr)
         elif method == "zscore":
@@ -92,12 +101,32 @@ class AnalysisEngine:
     @staticmethod
     def _calculate_basic_stats(arr, std_value: float, count: int) -> Dict[str, float]:
         """Calculate basic statistics."""
+        central_stats = AnalysisEngine._calculate_central_tendency(arr, count)
+        spread_stats = AnalysisEngine._calculate_spread_measures(std_value)
+        range_stats = AnalysisEngine._calculate_range_measures(arr)
+        return {**central_stats, **spread_stats, **range_stats}
+    
+    @staticmethod
+    def _calculate_central_tendency(arr, count: int) -> Dict[str, float]:
+        """Calculate central tendency statistics."""
         return {
             "count": count,
             "mean": float(np.mean(arr)),
-            "median": float(np.median(arr)),
+            "median": float(np.median(arr))
+        }
+    
+    @staticmethod
+    def _calculate_spread_measures(std_value: float) -> Dict[str, float]:
+        """Calculate measures of spread."""
+        return {
             "std_dev": std_value,
-            "std": std_value,
+            "std": std_value
+        }
+    
+    @staticmethod
+    def _calculate_range_measures(arr) -> Dict[str, float]:
+        """Calculate range-based measures."""
+        return {
             "min": float(np.min(arr)),
             "max": float(np.max(arr))
         }
@@ -116,15 +145,24 @@ class AnalysisEngine:
     @staticmethod
     def _prepare_trend_data(values: List[float], timestamps: List[datetime]):
         """Prepare data for trend analysis."""
-        time_numeric = [(t - timestamps[0]).total_seconds() for t in timestamps]
-        x = np.array(time_numeric)
-        y = np.array(values)
-        
+        x, y = AnalysisEngine._convert_to_numeric_arrays(values, timestamps)
         x_std = np.std(x)
         if x_std == 0:
             return None, None
-        
-        x_norm = (x - np.mean(x)) / x_std
+        return AnalysisEngine._normalize_time_data(x, y)
+    
+    @staticmethod
+    def _convert_to_numeric_arrays(values: List[float], timestamps: List[datetime]):
+        """Convert values and timestamps to numeric arrays."""
+        time_numeric = [(t - timestamps[0]).total_seconds() for t in timestamps]
+        x = np.array(time_numeric)
+        y = np.array(values)
+        return x, y
+    
+    @staticmethod
+    def _normalize_time_data(x, y):
+        """Normalize time data for trend analysis."""
+        x_norm = (x - np.mean(x)) / np.std(x)
         return x_norm, y
     
     @staticmethod

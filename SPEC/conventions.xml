@@ -276,14 +276,26 @@
 
     <boundary-enforcement>
         <enforcement id="automated-compliance">
-            <description>Automated enforcement of 300/8 limits</description>
+            <description>Automated enforcement of 300/8 limits with enhanced reporting</description>
             <tool>scripts/check_architecture_compliance.py</tool>
             <frequency>Every commit, every PR</frequency>
             <threshold>0 violations allowed</threshold>
+            <features>
+                <feature>Smart violation limits (adaptive display)</feature>
+                <feature>Severity-based prioritization</feature>
+                <feature>Accurate violation statistics</feature>
+                <feature>Visual severity markers</feature>
+            </features>
+            <cli-options>
+                <option>--violation-limit N: Set display limit</option>
+                <option>--show-all: Show all violations</option>
+                <option>--no-smart-limits: Disable adaptive limits</option>
+                <option>--no-emoji: Use text markers for compatibility</option>
+            </cli-options>
             <integration>
                 <pre-commit>Run compliance check before commit</pre-commit>
                 <ci-cd>Block merges on violations</ci-cd>
-                <monitoring>Weekly compliance reports</monitoring>
+                <monitoring>Weekly compliance reports with statistics</monitoring>
             </integration>
         </enforcement>
 
@@ -365,4 +377,64 @@
             <reference>SPEC/growth_control.xml</reference>
         </health-indicator>
     </architectural-health>
+    
+    <testing-conventions>
+        <convention id="bad-test-detection" priority="HIGH">
+            <title>Automatic Bad Test Detection</title>
+            <description>All test runs automatically track and report consistently failing tests</description>
+            <enabled-by-default>true</enabled-by-default>
+            <disable-flag>--no-bad-test-detection</disable-flag>
+            
+            <tracking>
+                <description>Track test failures with {test}:{failure_count} pattern</description>
+                <storage>test_reports/bad_tests.json</storage>
+                <persistence>Maintains history across test runs</persistence>
+            </tracking>
+            
+            <detection-thresholds>
+                <threshold type="consecutive_failures" value="5">
+                    <action>Mark for immediate fix</action>
+                    <priority>HIGH</priority>
+                </threshold>
+                <threshold type="failure_rate" value="70%" runs="10+">
+                    <action>Consider refactoring</action>
+                    <priority>MEDIUM</priority>
+                </threshold>
+                <threshold type="failure_rate" value="90%">
+                    <action>Recommend deletion/rewrite</action>
+                    <priority>CRITICAL</priority>
+                </threshold>
+            </detection-thresholds>
+            
+            <reporting>
+                <command>python -m test_framework.bad_test_reporter</command>
+                <options>
+                    <option>--summary: View statistics only</option>
+                    <option>--details: Include test histories</option>
+                    <option>--test NAME: View specific test history</option>
+                    <option>--reset: Clear bad test data</option>
+                    <option>--export FILE: Export report to file</option>
+                </options>
+            </reporting>
+            
+            <best-practices>
+                <practice>Review bad test report weekly</practice>
+                <practice>Fix consistently failing tests immediately</practice>
+                <practice>Delete tests with 90%+ failure rate after review</practice>
+                <practice>Refactor tests with high failure rates (70-90%)</practice>
+                <practice>Use test history to identify flaky test patterns</practice>
+            </best-practices>
+        </convention>
+        
+        <convention id="test-maintenance" priority="HIGH">
+            <title>Test Health Maintenance</title>
+            <description>Regular maintenance of test suite health</description>
+            <actions>
+                <action>Fix tests that test non-existent SUT (System Under Test)</action>
+                <action>Update tests when code changes</action>
+                <action>Remove obsolete tests promptly</action>
+                <action>Maintain test coverage above 97% for revenue paths</action>
+            </actions>
+        </convention>
+    </testing-conventions>
 </specification>

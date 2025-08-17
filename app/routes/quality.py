@@ -7,7 +7,7 @@ Refactored to comply with 300-line architectural limit.
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from typing import Dict, Any, Optional, List
 
-from app.auth.auth_dependencies import get_current_user
+from app.auth_integration.auth import get_current_user
 from app.services.quality_gate_service import QualityGateService
 from app.services.quality_monitoring_service import QualityMonitoringService
 from app.services.fallback_response_service import FallbackResponseService

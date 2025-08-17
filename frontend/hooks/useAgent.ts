@@ -1,7 +1,8 @@
 
 import { useCallback } from 'react';
 import { useWebSocket } from './useWebSocket';
-import { UserMessage, StopAgent } from '../types';
+import { UserMessage } from '../types';
+import { StopAgent } from '../types/agent-types';
 
 export const useAgent = () => {
   const webSocket = useWebSocket();

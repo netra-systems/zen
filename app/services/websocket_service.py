@@ -29,16 +29,22 @@ class WebSocketService(IWebSocketService):
     async def broadcast(self, message: Dict[str, Any], exclude_user_ids: list = None):
         """Broadcast a message to all connected users, optionally excluding some."""
         try:
-            if exclude_user_ids:
-                # Use the broadcasting manager to send to specific users
-                connected_users = list(self.manager.active_connections.keys())
-                target_users = [uid for uid in connected_users if uid not in exclude_user_ids]
-                for user_id in target_users:
-                    await self.manager.send_message(user_id, message)
-            else:
-                # Broadcast to all connected users
-                await self.manager.broadcast_message(message)
+            await self._execute_broadcast(message, exclude_user_ids)
             logger.debug(f"Broadcasted message: {message.get('type', 'unknown')}")
         except Exception as e:
             logger.error(f"Failed to broadcast message: {e}")
             raise
+
+    async def _execute_broadcast(self, message: Dict[str, Any], exclude_user_ids: list) -> None:
+        """Execute broadcast logic based on exclusion criteria."""
+        if exclude_user_ids:
+            await self._broadcast_selective(message, exclude_user_ids)
+        else:
+            await self.manager.broadcast_message(message)
+
+    async def _broadcast_selective(self, message: Dict[str, Any], exclude_user_ids: list) -> None:
+        """Broadcast to specific users excluding certain user IDs."""
+        connected_users = list(self.manager.active_connections.keys())
+        target_users = [uid for uid in connected_users if uid not in exclude_user_ids]
+        for user_id in target_users:
+            await self.manager.send_message(user_id, message)

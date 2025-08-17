@@ -28,9 +28,9 @@ async def build_thread_response(thread, message_count: int, title: Optional[str]
     return ThreadResponse(
         id=thread.id,
         object=thread.object,
-        title=title or thread.metadata_.get("title"),
+        title=title or (thread.metadata_.get("title") if thread.metadata_ else None),
         created_at=thread.created_at,
-        updated_at=thread.metadata_.get("updated_at"),
+        updated_at=thread.metadata_.get("updated_at") if thread.metadata_ else None,
         metadata=thread.metadata_,
         message_count=message_count
     )
@@ -220,6 +220,7 @@ async def handle_auto_rename_request(db: AsyncSession, thread_id: str, user_id: 
 # Error handling wrapper
 async def handle_route_with_error_logging(handler_func, error_context: str):
     """Handle route with standardized error logging."""
+    from fastapi import HTTPException
     try:
         return await handler_func()
     except HTTPException:
@@ -228,5 +229,31 @@ async def handle_route_with_error_logging(handler_func, error_context: str):
         from app.logging_config import central_logger
         logger = central_logger.get_logger(__name__)
         logger.error(f"Error {error_context}: {e}", exc_info=True if "creating" in error_context else False)
-        from fastapi import HTTPException
-        raise HTTPException(status_code=500, detail=f"Failed to {error_context.lower()}")
+        # Convert context to base form for cleaner error messages
+        clean_context = error_context.lower()
+        
+        # Handle specific context patterns that tests expect
+        context_mappings = {
+            "creating thread": "create thread",
+            "deleting thread": "delete thread",
+            "listing threads": "list threads",
+            "updating thread": "update thread",
+            "auto-renaming thread": "auto-rename thread"
+        }
+        
+        # Handle thread-specific contexts (remove thread IDs)
+        if clean_context.startswith("getting thread "):
+            clean_context = "get thread"
+        elif clean_context.startswith("getting messages for thread "):
+            clean_context = "get thread messages"
+        elif clean_context.startswith("auto-renaming thread "):
+            clean_context = "auto-rename thread"
+        elif clean_context.startswith("updating thread "):
+            clean_context = "update thread"
+        elif clean_context.startswith("deleting thread "):
+            clean_context = "delete thread"
+        else:
+            # Use direct mapping for other cases
+            clean_context = context_mappings.get(clean_context, clean_context)
+            
+        raise HTTPException(status_code=500, detail=f"Failed to {clean_context}")

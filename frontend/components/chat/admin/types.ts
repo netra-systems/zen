@@ -23,7 +23,7 @@ export interface CorpusDiscoveryPanelProps {
   className?: string;
 }
 
-export interface WebSocketMessage {
+export interface AdminWebSocketMessage {
   message_type: string;
   intent?: string;
   query?: string;

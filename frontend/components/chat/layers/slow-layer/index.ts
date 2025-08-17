@@ -8,10 +8,10 @@ export { AgentTimeline } from './AgentTimeline';
 export { ExportControls } from './ExportControls';
 export { TechnicalDetails } from './TechnicalDetails';
 
-// Export types
+// Export types from canonical location
 export type {
   ReportData,
   RecommendationItem,
   ActionPlanItem,
   AgentTimelineItem
-} from './types';
+} from '@/types/report-data';

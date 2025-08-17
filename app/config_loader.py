@@ -27,17 +27,26 @@ def set_clickhouse_host(config: 'Settings', value: str) -> None:
     logger.debug(f"Set ClickHouse host: {value}")
 
 
-def set_clickhouse_port(config: 'Settings', value: str) -> None:
-    """Set ClickHouse port in config."""
+def _validate_port_value(value: str) -> int:
+    """Validate and convert port value to integer."""
     try:
-        port = int(value)
-        if hasattr(config, 'clickhouse_native'):
-            config.clickhouse_native.port = port
-        if hasattr(config, 'clickhouse_https'):
-            config.clickhouse_https.port = port
-        logger.debug(f"Set ClickHouse port: {value}")
+        return int(value)
     except ValueError:
         logger.warning(f"Invalid CLICKHOUSE_PORT: {value}")
+        raise
+
+def _set_port_on_config(config: 'Settings', port: int) -> None:
+    """Set port on ClickHouse configuration objects."""
+    if hasattr(config, 'clickhouse_native'):
+        config.clickhouse_native.port = port
+    if hasattr(config, 'clickhouse_https'):
+        config.clickhouse_https.port = port
+
+def set_clickhouse_port(config: 'Settings', value: str) -> None:
+    """Set ClickHouse port in config."""
+    port = _validate_port_value(value)
+    _set_port_on_config(config, port)
+    logger.debug(f"Set ClickHouse port: {value}")
 
 
 def set_clickhouse_password(config: 'Settings', value: str) -> None:
@@ -91,30 +100,49 @@ def get_critical_vars_mapping() -> Dict[str, str]:
     }
 
 
-def apply_single_secret(config: 'Settings', path: str, field: str, value: str) -> None:
-    """Apply a single secret to config at the given path."""
-    parts = path.split('.')
+def _navigate_to_parent_object(config: 'Settings', path_parts: list) -> object:
+    """Navigate to parent object in config path."""
     obj = config
-    for part in parts[:-1]:
+    for part in path_parts[:-1]:
         if hasattr(obj, part):
             obj = getattr(obj, part)
         else:
-            return
-    if hasattr(obj, parts[-1]):
-        target = getattr(obj, parts[-1])
+            return None
+    return obj
+
+def _set_field_on_target(parent_obj: object, target_name: str, field: str, value: str) -> None:
+    """Set field on target object if it exists."""
+    if hasattr(parent_obj, target_name):
+        target = getattr(parent_obj, target_name)
         if hasattr(target, field):
             setattr(target, field, value)
 
+def apply_single_secret(config: 'Settings', path: str, field: str, value: str) -> None:
+    """Apply a single secret to config at the given path."""
+    parts = path.split('.')
+    parent_obj = _navigate_to_parent_object(config, parts)
+    if parent_obj:
+        _set_field_on_target(parent_obj, parts[-1], field, value)
 
-def detect_cloud_run_environment() -> str:
-    """Detect if running in Cloud Run and determine environment."""
+
+def _check_k_service_for_staging() -> str:
+    """Check K_SERVICE environment variable for staging."""
     k_service = os.environ.get("K_SERVICE")
-    k_revision = os.environ.get("K_REVISION")
-    
     if k_service and "staging" in k_service.lower():
         logger.debug(f"Staging from K_SERVICE: {k_service}")
         return "staging"
+    return ""
+
+def _check_pr_number_for_staging() -> str:
+    """Check PR_NUMBER environment variable for staging."""
     if os.environ.get("PR_NUMBER"):
         logger.debug(f"Staging from PR_NUMBER")
         return "staging"
     return ""
+
+def detect_cloud_run_environment() -> str:
+    """Detect if running in Cloud Run and determine environment."""
+    env = _check_k_service_for_staging()
+    if env:
+        return env
+    return _check_pr_number_for_staging()

@@ -33,15 +33,15 @@ def mock_user():
 
 class TestCreateThread:
     """Test cases for POST / endpoint"""
-    @patch('app.routes.threads_route.uuid.uuid4')
-    @patch('app.routes.threads_route.time.time')
+    @patch('app.routes.utils.thread_helpers.uuid.uuid4')
+    @patch('app.routes.utils.thread_helpers.time.time')
     async def test_create_thread_success(self, mock_time, mock_uuid, mock_db, mock_user):
         """Test successful thread creation"""
         create_thread_update_scenario(mock_time, 1234567890)
         create_uuid_scenario(mock_uuid)
         mock_thread = create_mock_thread(title="New Thread")
         
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
             thread_repo.create = AsyncMock(return_value=mock_thread)
             thread_data = ThreadCreate(title="New Thread", metadata={"custom": "data"})
@@ -57,7 +57,7 @@ class TestCreateThread:
         mock_thread = create_mock_thread()
         mock_thread.metadata_ = {"user_id": "test_user_123", "status": "active"}
         
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
             thread_repo.create = AsyncMock(return_value=mock_thread)
             thread_data = ThreadCreate()
@@ -69,8 +69,8 @@ class TestCreateThread:
             assert "title" not in call_args[1]["metadata_"] or call_args[1]["metadata_"].get("title") == None
     async def test_create_thread_exception(self, mock_db, mock_user):
         """Test error handling in create_thread"""
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \
-             patch('app.routes.threads_route.logger') as mock_logger:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             thread_repo = MockThreadRepo.return_value
             thread_repo.create = AsyncMock(side_effect=Exception("Database error"))
@@ -80,4 +80,5 @@ class TestCreateThread:
                 await create_thread(thread_data=thread_data, db=mock_db, current_user=mock_user)
             
             assert_http_exception(exc_info, 500, "Failed to create thread")
+            mock_logger = mock_get_logger.return_value
             mock_logger.error.assert_called_once()

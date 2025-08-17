@@ -1,56 +1,37 @@
-export interface SubAgentUpdate {
-    sub_agent_name: string;
-    state: SubAgentState;
-}
+/**
+ * DEPRECATED: Assistant-related type definitions
+ * 
+ * This file now re-exports from the consolidated agent-types.ts
+ * Use @/types/agent-types instead for new code.
+ * 
+ * This file exists only for backward compatibility during migration.
+ */
 
-export interface AgentStarted {
-    run_id: string;
-}
+import type { SubAgentStatus } from './backend_schema_base';
 
-export interface AgentCompleted {
-    run_id: string;
-    result: AgentCompletionResult;
-}
+// Import from consolidated agent types (single source of truth)
+import type {
+  AgentStarted,
+  AgentCompleted,
+  AgentErrorMessage,
+  SubAgentUpdate,
+  StopAgent,
+  FrontendAgentState,
+  AgentCompletionResult
+} from './agent-types';
 
-export interface AgentErrorMessage {
-    run_id: string;
-    message: string;
-}
+// Re-export consolidated types for backward compatibility
+export type { 
+  AgentStarted,
+  AgentCompleted,
+  AgentErrorMessage,
+  SubAgentUpdate,
+  StopAgent,
+  AgentCompletionResult
+};
 
-export interface StopAgent {
-    run_id: string;
-}
+// Frontend UI-specific SubAgent state (now in consolidated types)
+export type FrontendSubAgentState = FrontendAgentState;
 
-export interface SubAgentStatus {
-  agent_name: string;
-  tools: string[];
-  status: string;
-}
-
-export interface SubAgentState {
-  status: 'idle' | 'thinking' | 'executing' | 'completed' | 'error';
-  currentStep?: string;
-  progress?: {
-    current: number;
-    total: number;
-  };
-  tools?: string[];
-  metadata?: {
-    [key: string]: unknown;
-  };
-}
-
-export interface AgentCompletionResult {
-  output: string;
-  data?: {
-    [key: string]: unknown;
-  };
-  metrics?: {
-    executionTime: number;
-    tokensUsed?: number;
-    toolsExecuted?: number;
-  };
-  artifacts?: {
-    [key: string]: unknown;
-  };
-}
+// Re-export backend type for compatibility
+export type { SubAgentStatus };

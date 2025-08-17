@@ -7,6 +7,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { createTestSetup, mockThreads, useThreadStore, useAuthStore } from './setup';
+import { AuthenticatedChatHistorySection, renderWithAuth } from './testWrapper';
 
 describe('ChatHistorySection - Basic Functionality', () => {
   const testSetup = createTestSetup();
@@ -21,7 +22,7 @@ describe('ChatHistorySection - Basic Functionality', () => {
 
   describe('History item rendering', () => {
     it('should render all conversation threads', () => {
-      render(<ChatHistorySection />);
+      renderWithAuth();
       
       expect(screen.getByText('First Conversation')).toBeInTheDocument();
       expect(screen.getByText('Second Conversation')).toBeInTheDocument();
@@ -122,13 +123,21 @@ describe('ChatHistorySection - Basic Functionality', () => {
     });
 
     it('should render threads in chronological order', () => {
+      // Create threads with specific order
+      const orderedThreads = [
+        { ...mockThreads[0], title: 'Newest Thread', created_at: Math.floor(Date.now() / 1000) },
+        { ...mockThreads[1], title: 'Middle Thread', created_at: Math.floor(Date.now() / 1000) - 3600 },
+        { ...mockThreads[2], title: 'Oldest Thread', created_at: Math.floor(Date.now() / 1000) - 7200 },
+      ];
+      
+      testSetup.configureStoreMocks({ threads: orderedThreads });
+      
       render(<ChatHistorySection />);
       
-      const historyContainer = screen.getByText('Chat History').closest('.flex-col');
-      const threadElements = Array.from(historyContainer?.querySelectorAll('[data-testid*="thread"]') || []);
-      
-      // Verify that threads are rendered (exact order checking depends on component implementation)
-      expect(threadElements.length).toBeGreaterThanOrEqual(3);
+      // Verify all threads are rendered
+      expect(screen.getByText('Newest Thread')).toBeInTheDocument();
+      expect(screen.getByText('Middle Thread')).toBeInTheDocument();
+      expect(screen.getByText('Oldest Thread')).toBeInTheDocument();
     });
 
     it('should handle missing timestamps gracefully', () => {
@@ -142,6 +151,7 @@ describe('ChatHistorySection - Basic Functionality', () => {
       
       // Should still render the thread even without timestamps
       expect(screen.getByText('First Conversation')).toBeInTheDocument();
+      expect(screen.getByText('Unknown date')).toBeInTheDocument();
     });
   });
 

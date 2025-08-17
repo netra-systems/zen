@@ -56,15 +56,19 @@ class IndexingErrorHandler:
     ) -> Dict[str, Any]:
         """Execute indexing recovery workflow."""
         try:
-            result = await self._attempt_indexing_recovery(
-                document_id, index_type, run_id
-            )
-            return result or await self._queue_for_later_indexing(
-                document_id, index_type, run_id
-            )
+            return await self._try_recovery_or_queue(document_id, index_type, run_id)
         except Exception:
-            await global_error_handler.handle_error(error, context)
-            raise error
+            return await self._handle_recovery_failure(error, context)
+    
+    async def _try_recovery_or_queue(self, document_id: str, index_type: str, run_id: str) -> Dict[str, Any]:
+        """Try recovery strategies or queue for later."""
+        result = await self._attempt_indexing_recovery(document_id, index_type, run_id)
+        return result or await self._queue_for_later_indexing(document_id, index_type, run_id)
+    
+    async def _handle_recovery_failure(self, error: IndexingError, context: ErrorContext) -> Dict[str, Any]:
+        """Handle recovery failure."""
+        await global_error_handler.handle_error(error, context)
+        raise error
     
     def _create_indexing_error_context(
         self,

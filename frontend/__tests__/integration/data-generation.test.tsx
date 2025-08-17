@@ -6,6 +6,7 @@ import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
+import { safeWebSocketCleanup } from '../helpers/websocket-test-manager';
 
 import { TestProviders } from '../test-utils/providers';
 
@@ -40,7 +41,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  WS.clean();
+  safeWebSocketCleanup();
   jest.clearAllMocks();
 });
 

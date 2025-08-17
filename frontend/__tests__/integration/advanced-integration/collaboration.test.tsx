@@ -5,6 +5,7 @@
 import React from 'react';
 import { render, waitFor, screen, fireEvent } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
+import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { setupTestEnvironment } from './test-setup';
 
 describe('Advanced Frontend Integration Tests - Collaboration', () => {
@@ -17,7 +18,7 @@ describe('Advanced Frontend Integration Tests - Collaboration', () => {
   });
 
   afterEach(() => {
-    WS.clean();
+    safeWebSocketCleanup();
   });
 
   describe('18. Collaborative Features Integration', () => {

@@ -265,6 +265,14 @@ export interface ReferenceCreateRequest {}
 
 export interface ReferenceGetResponse {}
 
-export interface ReferenceItem {}
+export interface ReferenceItem {
+  id: string;
+  title: string;
+  content: string;
+  type: string;
+  metadata?: {
+    [k: string]: unknown;
+  } | null;
+}
 
 export interface ReferenceUpdateRequest {}

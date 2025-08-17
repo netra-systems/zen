@@ -12,7 +12,7 @@ from app.services.quality_gate_service import QualityMetrics
 logger = central_logger.get_logger(__name__)
 
 
-class AlertManager:
+class QualityAlertManager:
     """Manages quality alerts and thresholds"""
     
     ALERT_THRESHOLDS = {

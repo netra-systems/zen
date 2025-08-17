@@ -1,21 +1,26 @@
-# Deployment & Operations Guide
+# Netra Apex Deployment & Operations - SLA-Driven Architecture
 
-Comprehensive guide for deploying and operating the Netra AI Optimization Platform in production environments.
+## 🔴 CRITICAL: SLA Requirements by Customer Tier
+
+| Tier | Monthly AI Spend | SLA | Max Downtime/Month | Support |
+|------|-----------------|-----|-------------------|----------|
+| **Free** | <$1K | None | N/A | Community |
+| **Early** | $1K-10K | 99.5% | 3.6 hours | Email (24hr) |
+| **Mid** | $10K-100K | 99.9% | 43 minutes | Priority (4hr) |
+| **Enterprise** | >$100K | 99.99% | 4.3 minutes | Dedicated (15min) |
 
 ## Table of Contents
 
+- [SLA-Driven Architecture](#sla-driven-architecture) **← Revenue Protection**
 - [Deployment Overview](#deployment-overview)
-- [Infrastructure Requirements](#infrastructure-requirements)
+- [Infrastructure by Tier](#infrastructure-by-tier) **← Cost Optimization**
 - [Docker Deployment](#docker-deployment)
 - [Kubernetes Deployment](#kubernetes-deployment)
-- [Cloud Deployments](#cloud-deployments)
-- [CI/CD Pipeline](#cicd-pipeline)
-- [Monitoring & Observability](#monitoring--observability)
-- [Backup & Recovery](#backup--recovery)
+- [Monitoring & Alerting](#monitoring--alerting) **← Revenue Tracking**
+- [Disaster Recovery](#disaster-recovery) **← 99.99% SLA**
 - [Scaling Strategies](#scaling-strategies)
-- [Security Hardening](#security-hardening)
-- [Operational Procedures](#operational-procedures)
-- [Troubleshooting Guide](#troubleshooting-guide)
+- [Security & Compliance](#security--compliance)
+- [Operational Runbooks](#operational-runbooks)
 
 ## Deployment Overview
 
@@ -46,14 +51,35 @@ Comprehensive guide for deploying and operating the Netra AI Optimization Platfo
       └─────────────────────────────────────────────┘
 ```
 
-### Deployment Environments
+### Deployment Tiers by Customer Segment
 
-| Environment | Purpose | Configuration |
-|------------|---------|---------------|
-| **Development** | Local development | Docker Compose, local DBs |
-| **Staging** | Pre-production testing | Kubernetes, scaled down |
-| **Production** | Live system | Kubernetes, full scale |
-| **DR** | Disaster recovery | Cross-region standby |
+| Customer Tier | Infrastructure | Redundancy | Monitoring | Cost/Month |
+|--------------|---------------|------------|------------|------------|
+| **Free** | Shared, single region | None | Basic | $0 |
+| **Early** | Shared, multi-AZ | Active-passive | Standard | $500 |
+| **Mid** | Dedicated, multi-AZ | Active-active | Advanced | $2,500 |
+| **Enterprise** | Dedicated, multi-region | Active-active + DR | Premium + Custom | $10,000+ |
+
+### SLA-Driven Architecture
+
+```yaml
+# Revenue Protection Requirements
+enterprise_tier:
+  availability: 99.99%  # 4.3 min downtime/month
+  response_time_p99: 200ms
+  data_durability: 99.999999999%  # 11 nines
+  rpo: 1_minute  # Recovery Point Objective
+  rto: 5_minutes  # Recovery Time Objective
+  revenue_impact_per_minute: $1000  # Track financial impact
+
+mid_tier:
+  availability: 99.9%  # 43 min downtime/month
+  response_time_p99: 500ms
+  data_durability: 99.99999%  # 7 nines
+  rpo: 5_minutes
+  rto: 30_minutes
+  revenue_impact_per_hour: $500
+```
 
 ## Infrastructure Requirements
 

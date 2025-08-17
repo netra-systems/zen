@@ -23,19 +23,91 @@ from app.core.error_recovery import RecoveryContext, OperationType
 from app.core.error_codes import ErrorSeverity
 
 
+# Helper functions for 8-line compliance
+def assert_default_config_values(config):
+    """Assert default configuration values."""
+    assert config.max_retries == 3
+    assert config.base_delay == 1.0
+    assert config.max_delay == 300.0
+    assert config.backoff_strategy == BackoffStrategy.EXPONENTIAL
+    assert config.jitter_type == JitterType.FULL
+    assert config.timeout_seconds == 600
+
+
+def assert_custom_config_values(config):
+    """Assert custom configuration values."""
+    assert config.max_retries == 5
+    assert config.base_delay == 2.0
+    assert config.backoff_strategy == BackoffStrategy.LINEAR
+    assert config.jitter_type == JitterType.NONE
+
+
+def assert_exponential_delays(strategy):
+    """Assert exponential backoff delay calculations."""
+    delay_0 = strategy.get_retry_delay(0)
+    delay_1 = strategy.get_retry_delay(1)
+    delay_2 = strategy.get_retry_delay(2)
+    assert delay_0 == 0.5  # base_delay * 2^0
+    assert delay_1 == 1.0  # base_delay * 2^1
+    assert delay_2 == 2.0  # base_delay * 2^2
+
+
+def assert_linear_delays(strategy):
+    """Assert linear backoff delay calculations."""
+    delay_0 = strategy.get_retry_delay(0)
+    delay_1 = strategy.get_retry_delay(1)
+    delay_2 = strategy.get_retry_delay(2)
+    assert delay_0 == 0.5  # base_delay * (0 + 1)
+    assert delay_1 == 1.0  # base_delay * (1 + 1)
+    assert delay_2 == 1.5  # base_delay * (2 + 1)
+
+
+def assert_jitter_delays_properties(delays, max_expected):
+    """Assert jitter delay properties."""
+    assert len(set(delays)) > 1  # All delays should be different
+    assert all(delay <= max_expected for delay in delays)
+
+
+def get_expected_operation_configs():
+    """Get expected operation types for config validation."""
+    return [
+        OperationType.DATABASE_READ,
+        OperationType.DATABASE_WRITE,
+        OperationType.EXTERNAL_API,
+        OperationType.LLM_REQUEST,
+        OperationType.WEBSOCKET_SEND,
+        OperationType.AGENT_EXECUTION
+    ]
+
+
+def assert_retry_metrics_structure(metrics):
+    """Assert retry metrics have expected structure."""
+    assert 'total_metrics' in metrics
+    assert 'active_strategies' in metrics
+    assert 'strategy_types' in metrics
+
+
+def assert_retry_metrics_values(metrics):
+    """Assert specific retry metrics values."""
+    assert metrics['total_metrics']['database_read']['attempts'] == 1
+    assert metrics['total_metrics']['external_api']['failures'] == 1
+
+
+def setup_high_failure_pattern(strategy, recovery_context):
+    """Setup high failure rate pattern for adaptive testing."""
+    error_pattern = strategy._extract_error_pattern(recovery_context.error)
+    strategy.failure_patterns[error_pattern] = 9
+    strategy.success_patterns[error_pattern] = 1
+    return strategy.config.max_retries
+
+
 class TestRetryConfig:
     """Test retry configuration."""
     
     def test_default_config(self):
         """Test default retry configuration."""
         config = RetryConfig()
-        
-        assert config.max_retries == 3
-        assert config.base_delay == 1.0
-        assert config.max_delay == 300.0
-        assert config.backoff_strategy == BackoffStrategy.EXPONENTIAL
-        assert config.jitter_type == JitterType.FULL
-        assert config.timeout_seconds == 600
+        assert_default_config_values(config)
     
     def test_custom_config(self):
         """Test custom retry configuration."""
@@ -46,10 +118,7 @@ class TestRetryConfig:
             jitter_type=JitterType.NONE
         )
         
-        assert config.max_retries == 5
-        assert config.base_delay == 2.0
-        assert config.backoff_strategy == BackoffStrategy.LINEAR
-        assert config.jitter_type == JitterType.NONE
+        assert_custom_config_values(config)
 
 
 class TestDatabaseRetryStrategy:
@@ -107,40 +176,22 @@ class TestDatabaseRetryStrategy:
         strategy.config.backoff_strategy = BackoffStrategy.EXPONENTIAL
         strategy.config.jitter_type = JitterType.NONE
         
-        delay_0 = strategy.get_retry_delay(0)
-        delay_1 = strategy.get_retry_delay(1)
-        delay_2 = strategy.get_retry_delay(2)
-        
-        assert delay_0 == 0.5  # base_delay * 2^0
-        assert delay_1 == 1.0  # base_delay * 2^1
-        assert delay_2 == 2.0  # base_delay * 2^2
+        assert_exponential_delays(strategy)
     
     def test_get_retry_delay_linear(self, strategy):
         """Test linear backoff delay calculation."""
         strategy.config.backoff_strategy = BackoffStrategy.LINEAR
         strategy.config.jitter_type = JitterType.NONE
         
-        delay_0 = strategy.get_retry_delay(0)
-        delay_1 = strategy.get_retry_delay(1)
-        delay_2 = strategy.get_retry_delay(2)
-        
-        assert delay_0 == 0.5  # base_delay * (0 + 1)
-        assert delay_1 == 1.0  # base_delay * (1 + 1)
-        assert delay_2 == 1.5  # base_delay * (2 + 1)
+        assert_linear_delays(strategy)
     
     def test_get_retry_delay_with_jitter(self, strategy):
         """Test delay calculation with jitter."""
         strategy.config.jitter_type = JitterType.FULL
         
-        # Jitter should make delays random but within bounds
         delays = [strategy.get_retry_delay(1) for _ in range(10)]
-        
-        # All delays should be different (high probability)
-        assert len(set(delays)) > 1
-        
-        # All delays should be <= calculated delay without jitter
         max_expected = strategy._calculate_base_delay(1)
-        assert all(delay <= max_expected for delay in delays)
+        assert_jitter_delays_properties(delays, max_expected)
     
     def test_get_retry_delay_max_cap(self, strategy):
         """Test delay is capped at max_delay."""
@@ -315,15 +366,8 @@ class TestAdaptiveRetryStrategy:
     
     def test_adaptive_max_retries_adjustment(self, strategy, recovery_context):
         """Test adaptive adjustment of max retries."""
-        # Simulate high failure rate pattern
-        error_pattern = strategy._extract_error_pattern(recovery_context.error)
-        strategy.failure_patterns[error_pattern] = 9
-        strategy.success_patterns[error_pattern] = 1
-        
-        # Should reduce max retries
-        original_max = strategy.config.max_retries
+        original_max = setup_high_failure_pattern(strategy, recovery_context)
         strategy.should_retry(recovery_context)
-        
         assert strategy.config.max_retries <= original_max
 
 
@@ -409,14 +453,9 @@ class TestRetryManager:
         """Test getting retry metrics."""
         manager.record_retry_attempt(OperationType.DATABASE_READ, True)
         manager.record_retry_attempt(OperationType.EXTERNAL_API, False)
-        
         metrics = manager.get_retry_metrics()
-        
-        assert 'total_metrics' in metrics
-        assert 'active_strategies' in metrics
-        assert 'strategy_types' in metrics
-        assert metrics['total_metrics']['database_read']['attempts'] == 1
-        assert metrics['total_metrics']['external_api']['failures'] == 1
+        assert_retry_metrics_structure(metrics)
+        assert_retry_metrics_values(metrics)
 
 
 class TestDefaultConfigurations:
@@ -424,15 +463,7 @@ class TestDefaultConfigurations:
     
     def test_default_configs_exist(self):
         """Test that default configs exist for all operation types."""
-        expected_operations = [
-            OperationType.DATABASE_READ,
-            OperationType.DATABASE_WRITE,
-            OperationType.EXTERNAL_API,
-            OperationType.LLM_REQUEST,
-            OperationType.WEBSOCKET_SEND,
-            OperationType.AGENT_EXECUTION
-        ]
-        
+        expected_operations = get_expected_operation_configs()
         for operation in expected_operations:
             assert operation in DEFAULT_RETRY_CONFIGS
     

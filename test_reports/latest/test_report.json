@@ -1,0 +1,57 @@
+{
+  "timestamp": "2025-08-17T15:33:17.073238",
+  "level": "unit",
+  "components": {
+    "backend": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "errors": 0,
+      "import_errors": 2,
+      "duration": 7.56709098815918,
+      "status": "import_error",
+      "exit_code": 4,
+      "pass_rate": 0.0,
+      "has_issues": true,
+      "status_icon": "\ud83d\udd34",
+      "summary_text": "Import errors (2)"
+    },
+    "frontend": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "errors": 0,
+      "import_errors": 0,
+      "duration": 0.11509299278259277,
+      "status": "collection_failed",
+      "exit_code": 2,
+      "pass_rate": 0.0,
+      "has_issues": false,
+      "status_icon": "\u26ab",
+      "summary_text": "No tests ran"
+    },
+    "e2e": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "errors": 0,
+      "import_errors": 0,
+      "duration": 0,
+      "status": "collection_failed",
+      "exit_code": null,
+      "pass_rate": 0.0,
+      "has_issues": false,
+      "status_icon": "\u26ab",
+      "summary_text": "No tests ran"
+    }
+  },
+  "overall_status": "\ud83d\udd34 Import Errors - Tests Cannot Run",
+  "issues": [
+    "backend: 2 import error(s)",
+    "frontend: Test collection failed",
+    "e2e: Test collection failed"
+  ]
+}

@@ -131,19 +131,56 @@ class SupplyResearchScheduler:
         except Exception:
             return False
     
+    async def _get_retry_count_from_redis(self, retry_key: str) -> int:
+        """Get current retry count from Redis"""
+        if not self.redis_manager:
+            return 0
+        try:
+            current_count = await self.redis_manager.get(retry_key)
+            return int(current_count) if current_count else 0
+        except Exception:
+            return 0
+    
+    async def _update_retry_count_in_redis(self, retry_key: str, retry_count: int) -> None:
+        """Update retry count in Redis with TTL"""
+        if not self.redis_manager:
+            return
+        try:
+            new_count = retry_count + 1
+            await self.redis_manager.set(retry_key, str(new_count))
+            await self.redis_manager.expire(retry_key, 3600)  # 1 hour TTL
+        except Exception as e:
+            logger.warning(f"Failed to update retry state in Redis: {e}")
+    
+    async def _log_retry_attempt(self, schedule: ResearchSchedule, attempt: int, max_retries: int, error: Exception) -> None:
+        """Log retry attempt information"""
+        logger.error(f"Job execution failed for {schedule.name} (attempt {attempt + 1}/{max_retries}): {error}")
+        if attempt == max_retries - 1:
+            logger.error(f"Job {schedule.name} failed after {max_retries} attempts")
+    
+    async def _attempt_job_execution(self, schedule: ResearchSchedule, attempt: int, max_retries: int, retry_key: str) -> bool:
+        """Attempt to execute job once with error handling"""
+        retry_count = await self._get_retry_count_from_redis(retry_key)
+        if not self.redis_manager:
+            retry_count = attempt
+        
+        try:
+            result = await self._execute_research_job(schedule)
+            return result if result else False
+        except Exception as e:
+            await self._log_retry_attempt(schedule, attempt, max_retries, e)
+            return False
+    
     async def _execute_with_retry(self, schedule: ResearchSchedule, max_retries: int = 3) -> bool:
         """Execute with retry logic - calls _execute_research_job with retry"""
         import asyncio
+        retry_key = f"scheduler:retry:{schedule.name}"
         
         for attempt in range(max_retries):
-            try:
-                result = await self._execute_research_job(schedule)
-                if result:
-                    return True
-            except Exception:
-                pass
+            if await self._attempt_job_execution(schedule, attempt, max_retries, retry_key):
+                return True
             
-            # Add delay between retries (exponential backoff)
+            await self._update_retry_count_in_redis(retry_key, attempt)
             if attempt < max_retries - 1:
                 await asyncio.sleep(2 ** attempt)
         
@@ -172,9 +209,9 @@ class SupplyResearchScheduler:
                 await self.cache.delete(cache_key)
             
             # Log cleanup completion
-            self.logger.debug(f"Cleaned up resources for schedule: {schedule.name}")
+            logger.debug(f"Cleaned up resources for schedule: {schedule.name}")
         except Exception as e:
-            self.logger.warning(f"Resource cleanup failed for {schedule.name}: {e}")
+            logger.warning(f"Resource cleanup failed for {schedule.name}: {e}")
     
     async def _execute_job_with_metrics(self, schedule: ResearchSchedule) -> bool:
         """Execute job with metrics tracking - simplified wrapper"""
@@ -207,14 +244,14 @@ class SupplyResearchScheduler:
             }
             
             # Log metrics for observability
-            self.logger.info(f"Job metrics recorded", extra=metrics_data)
+            logger.info(f"Job metrics recorded", extra=metrics_data)
             
             # Store in result manager if available
             if hasattr(self, 'result_manager') and self.result_manager:
                 await self.result_manager.store_metrics(job_name, metrics_data)
                 
         except Exception as e:
-            self.logger.error(f"Failed to record metrics for {job_name}: {e}")
+            logger.error(f"Failed to record metrics for {job_name}: {e}")
     
     async def get_recent_results(
         self,

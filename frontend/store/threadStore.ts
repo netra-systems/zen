@@ -1,16 +1,8 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { Thread } from '@/types/registry';
 
-interface Thread {
-  id: string;
-  title?: string;
-  created_at: number;
-  updated_at?: number;
-  metadata?: any;
-  message_count?: number;
-}
-
-interface ThreadState {
+interface ThreadStoreState {
   threads: Thread[];
   currentThreadId: string | null;
   currentThread: Thread | null;
@@ -29,7 +21,7 @@ interface ThreadState {
   reset: () => void;
 }
 
-export const useThreadStore = create<ThreadState>()(
+export const useThreadStore = create<ThreadStoreState>()(
   immer((set) => ({
     threads: [],
     currentThreadId: null,
@@ -54,7 +46,7 @@ export const useThreadStore = create<ThreadState>()(
           state.threads[threadIndex] = {
             ...state.threads[threadIndex],
             ...updates,
-            updated_at: Date.now(),
+            updated_at: new Date().toISOString(),
           };
           
           // Update current thread if it's the one being updated

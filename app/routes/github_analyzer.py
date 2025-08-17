@@ -8,7 +8,7 @@ from datetime import datetime
 import uuid
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 
-from app.auth.auth_dependencies import get_current_user
+from app.auth_integration.auth import get_current_user
 from app.schemas.github_analyzer import (
     AnalysisRequest,
     AnalysisResponse,
@@ -157,61 +157,82 @@ async def run_analysis(
     db: AsyncSession
 ) -> None:
     """Run repository analysis in background."""
-    
     try:
-        # Update status
-        analysis_store[analysis_id]["status"] = "running"
-        analysis_store[analysis_id]["progress"] = 10
-        analysis_store[analysis_id]["message"] = "Initializing agent"
-        
-        # Initialize components
-        llm_manager = LLMManager()
-        tool_dispatcher = ToolDispatcher()
-        
-        # Create analyzer agent
-        analyzer = GitHubAnalyzerAgent(llm_manager, tool_dispatcher)
-        
-        # Update progress
-        analysis_store[analysis_id]["progress"] = 20
-        analysis_store[analysis_id]["message"] = "Starting analysis"
-        
-        # Execute analysis
-        from app.agents.state import DeepAgentState
-        
-        state = DeepAgentState()
-        context = {
-            "repository_url": request.repository_url,
-            "output_format": request.output_format,
-            "scan_depth": request.scan_depth,
-            "include_security": request.include_security
-        }
-        
-        # Run analysis
-        result = await analyzer.execute(state, context)
-        
-        # Update final status
-        analysis_store[analysis_id]["status"] = "completed"
-        analysis_store[analysis_id]["progress"] = 100
-        analysis_store[analysis_id]["message"] = "Analysis completed"
-        analysis_store[analysis_id]["completed_at"] = datetime.utcnow()
-        
-        if result.success:
-            analysis_store[analysis_id]["result"] = result.data
-        else:
-            analysis_store[analysis_id]["status"] = "failed"
-            analysis_store[analysis_id]["error"] = result.error
-        
-        # Cleanup
-        await analyzer.github_client.cleanup()
-        
+        analyzer = await _initialize_analysis_components(analysis_id)
+        result = await _execute_repository_analysis(analysis_id, request, analyzer)
+        await _finalize_analysis_result(analysis_id, result)
+        await _cleanup_analysis_resources(analyzer)
         logger.info(f"Analysis {analysis_id} completed successfully")
-        
     except Exception as e:
-        logger.error(f"Analysis {analysis_id} failed: {str(e)}")
-        
-        analysis_store[analysis_id]["status"] = "failed"
-        analysis_store[analysis_id]["error"] = str(e)
-        analysis_store[analysis_id]["completed_at"] = datetime.utcnow()
+        await _handle_analysis_error(analysis_id, e)
+
+
+async def _initialize_analysis_components(analysis_id: str) -> GitHubAnalyzerAgent:
+    """Initialize analysis components and update progress."""
+    _update_analysis_status(analysis_id, "running", 10, "Initializing agent")
+    llm_manager = LLMManager()
+    tool_dispatcher = ToolDispatcher()
+    analyzer = GitHubAnalyzerAgent(llm_manager, tool_dispatcher)
+    _update_analysis_status(analysis_id, "running", 20, "Starting analysis")
+    return analyzer
+
+
+async def _execute_repository_analysis(
+    analysis_id: str, 
+    request: AnalysisRequest, 
+    analyzer: GitHubAnalyzerAgent
+) -> Any:
+    """Execute the repository analysis with proper context."""
+    from app.agents.state import DeepAgentState
+    state = DeepAgentState()
+    context = _build_analysis_context(request)
+    result = await analyzer.execute(state, context)
+    return result
+
+
+def _build_analysis_context(request: AnalysisRequest) -> Dict[str, Any]:
+    """Build analysis context from request parameters."""
+    return {
+        "repository_url": request.repository_url,
+        "output_format": request.output_format,
+        "scan_depth": request.scan_depth,
+        "include_security": request.include_security
+    }
+
+
+async def _finalize_analysis_result(analysis_id: str, result: Any) -> None:
+    """Update final analysis status based on result."""
+    _update_analysis_status(analysis_id, "completed", 100, "Analysis completed")
+    analysis_store[analysis_id]["completed_at"] = datetime.utcnow()
+    if result.success:
+        analysis_store[analysis_id]["result"] = result.data
+    else:
+        _mark_analysis_failed(analysis_id, result.error)
+
+
+async def _cleanup_analysis_resources(analyzer: GitHubAnalyzerAgent) -> None:
+    """Clean up analysis resources."""
+    await analyzer.github_client.cleanup()
+
+
+async def _handle_analysis_error(analysis_id: str, error: Exception) -> None:
+    """Handle analysis errors and update status."""
+    logger.error(f"Analysis {analysis_id} failed: {str(error)}")
+    _mark_analysis_failed(analysis_id, str(error))
+    analysis_store[analysis_id]["completed_at"] = datetime.utcnow()
+
+
+def _update_analysis_status(analysis_id: str, status: str, progress: int, message: str) -> None:
+    """Update analysis status with progress information."""
+    analysis_store[analysis_id]["status"] = status
+    analysis_store[analysis_id]["progress"] = progress
+    analysis_store[analysis_id]["message"] = message
+
+
+def _mark_analysis_failed(analysis_id: str, error: str) -> None:
+    """Mark analysis as failed with error information."""
+    analysis_store[analysis_id]["status"] = "failed"
+    analysis_store[analysis_id]["error"] = error
 
 
 @router.get("/analyses", response_model=List[Dict[str, Any]])

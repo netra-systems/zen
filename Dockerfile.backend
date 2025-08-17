@@ -56,5 +56,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 
 EXPOSE 8080
 
-# Run without uvloop (use default asyncio)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
+# Run with Cloud Run startup wrapper
+CMD ["python", "app/cloud_run_startup.py"]

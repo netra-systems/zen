@@ -1,14 +1,48 @@
-# Netra AI Platform - Development Setup Guide
+# Netra Apex Development Setup - Revenue-Driven Development
+
+## 🔴 CRITICAL: Business-First Development
+
+**Every feature must justify its Business Value (BVJ) before implementation.**
 
 ## Table of Contents
+- [Development Philosophy](#development-philosophy) **← READ FIRST**
 - [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
-- [Detailed Setup](#detailed-setup)
+- [Module Development (300/8 Rule)](#module-development) **← MANDATORY**
 - [Configuration](#configuration)
-- [Staging Environment](#staging-environment)
 - [Development Workflow](#development-workflow)
+- [Testing Requirements](#testing-requirements) **← 97% Coverage**
 - [Troubleshooting](#troubleshooting)
-- [IDE Setup](#ide-setup)
+
+## Development Philosophy
+
+### Business Value Justification (BVJ) Template
+
+**REQUIRED for every feature/PR:**
+
+```markdown
+## Business Value Justification
+
+1. **Customer Segment**: [Free/Early/Mid/Enterprise]
+2. **Business Goal**: [Increase savings/conversion/retention]
+3. **Value Impact**: [Estimated % improvement]
+4. **Revenue Impact**: [Estimated MRR increase]
+5. **Implementation Cost**: [Dev hours]
+6. **ROI**: [Revenue Impact / Implementation Cost]
+```
+
+### Module Development (300/8 Rule)
+
+```python
+# MANDATORY COMPLIANCE CHECK
+# Run before EVERY commit:
+python scripts/check_architecture_compliance.py
+
+# Results must show:
+# ✓ All files ≤ 300 lines
+# ✓ All functions ≤ 8 lines
+# ✓ No violations found
+```
 
 ## Prerequisites
 
@@ -29,29 +63,34 @@
 
 ## Quick Start
 
-### One-Command Setup (Recommended)
+### 🚀 Recommended Developer Setup
 
-#### Windows
 ```bash
-# Clone and setup
+# 1. Clone repository
 git clone https://github.com/netra-systems/netra-apex.git
 cd netra-core-generation-1
+
+# 2. Read critical docs FIRST
+cat CLAUDE.md  # Business requirements
+cat SPEC/type_safety.xml  # Type safety rules
+cat SPEC/conventions.xml  # 300/8 rule
+
+# 3. Run automated setup
+# Windows:
 scripts\setup.bat
 
-# Start development
-start_dev.bat
-```
-
-#### macOS/Linux
-```bash
-# Clone and setup
-git clone https://github.com/netra-systems/netra-apex.git
-cd netra-core-generation-1
+# macOS/Linux:
 chmod +x scripts/setup.sh
 ./scripts/setup.sh
 
-# Start development
-./start_dev.sh
+# 4. Start with OPTIMAL configuration
+python dev_launcher.py --dynamic --no-backend-reload --load-secrets
+
+# 5. Verify compliance
+python scripts/check_architecture_compliance.py
+
+# 6. Run unit tests (DEFAULT)
+python test_runner.py --level unit
 ```
 
 The automated installer will:

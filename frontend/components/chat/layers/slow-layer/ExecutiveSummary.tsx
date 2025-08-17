@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import {
   Target, DollarSign, ArrowUpRight, Shield
 } from 'lucide-react';
-import type { ReportData } from './types';
+import type { ReportData } from '@/types/report-data';
 
 interface ExecutiveSummaryProps {
   data: ReportData;

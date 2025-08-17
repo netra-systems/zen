@@ -1,11 +1,7 @@
 from langchain_core.tools import tool
 from typing import List, Any
-from pydantic import BaseModel, Field
 from app.services.context import ToolContext
-
-class LearnedPolicy(BaseModel):
-    pattern_name: str = Field(..., description="The name of the pattern.")
-    optimal_supply_option_name: str = Field(..., description="The name of the optimal supply option.")
+from app.schemas.Policy import LearnedPolicy
 
 @tool
 async def cost_impact_simulator(context: ToolContext, learned_policies: List[LearnedPolicy]) -> str:

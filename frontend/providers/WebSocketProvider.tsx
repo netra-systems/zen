@@ -1,15 +1,10 @@
 'use client';
-import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { webSocketService, WebSocketStatus } from '../services/webSocketService';
 import { WebSocketMessage } from '../types/backend_schema_auto_generated';
 import { config as appConfig } from '@/config';
 import { logger } from '@/lib/logger';
-
-interface WebSocketContextType {
-  status: WebSocketStatus;
-  messages: WebSocketMessage[];
-  sendMessage: (message: WebSocketMessage) => void;
-}
+import { WebSocketContextType, WebSocketProviderProps } from '../types/websocket-context-types';
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
@@ -20,10 +15,6 @@ export const useWebSocketContext = () => {
   }
   return context;
 };
-
-interface WebSocketProviderProps {
-  children: ReactNode;
-}
 
 import { AuthContext } from '@/auth/context';
 

@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec name="team_updates" version="1.0">
+  <metadata>
+    <title>Team Updates System Specification</title>
+    <purpose>Generate human-readable summaries of all codebase changes for team synchronization</purpose>
+    <business_value>
+      <segment>All (Free, Early, Mid, Enterprise)</segment>
+      <goal>Reduce communication overhead and onboarding time by 30-50%</goal>
+      <value_impact>Faster feature delivery, reduced context switching, improved team velocity</value_impact>
+      <revenue_impact>Indirect - reduces developer churn, accelerates time-to-market</revenue_impact>
+    </business_value>
+    <created>2025-01-17</created>
+    <author>Elite Engineer</author>
+  </metadata>
+
+  <requirements>
+    <requirement priority="CRITICAL">
+      <id>TU-001</id>
+      <description>MUST be readable by junior team members with less than 1 year experience</description>
+    </requirement>
+    <requirement priority="CRITICAL">
+      <id>TU-002</id>
+      <description>MUST support multiple time frames: last hour, 5 hours, 24 hours, week, month</description>
+    </requirement>
+    <requirement priority="HIGH">
+      <id>TU-003</id>
+      <description>MUST aggregate data from: git commits, test reports, compliance, docs, architecture</description>
+    </requirement>
+    <requirement priority="HIGH">
+      <id>TU-004</id>
+      <description>MUST prioritize critical issues and breaking changes at the top</description>
+    </requirement>
+  </requirements>
+
+  <architecture>
+    <modules>
+      <module name="team_updates_orchestrator" max_lines="300">
+        <responsibility>Main coordinator for generating team updates</responsibility>
+        <functions>
+          <function name="generate_update" max_lines="8">Generate complete team update for time frame</function>
+          <function name="get_time_range" max_lines="8">Convert time frame to datetime range</function>
+          <function name="prioritize_changes" max_lines="8">Sort changes by criticality</function>
+        </functions>
+      </module>
+      
+      <module name="git_changes_analyzer" max_lines="300">
+        <responsibility>Analyze git commits and generate summaries</responsibility>
+        <functions>
+          <function name="get_commits" max_lines="8">Fetch commits for time range</function>
+          <function name="summarize_commits" max_lines="8">Create human-readable commit summary</function>
+          <function name="identify_authors" max_lines="8">List contributors and their changes</function>
+        </functions>
+      </module>
+
+      <module name="code_change_tracker" max_lines="300">
+        <responsibility>Track detailed code changes including modules, classes, functions</responsibility>
+        <functions>
+          <function name="extract_new_modules" max_lines="8">Identify all newly created Python modules</function>
+          <function name="extract_new_classes" max_lines="8">Identify all newly created classes</function>
+          <function name="extract_new_functions" max_lines="8">Identify all newly created functions</function>
+          <function name="extract_deletions" max_lines="8">Track deleted modules, classes, functions</function>
+          <function name="rank_by_relevance" max_lines="8">Sort changes by business/technical relevance</function>
+          <function name="analyze_ast_changes" max_lines="8">Use AST to detect code structure changes</function>
+          <function name="categorize_changes" max_lines="8">Group changes by type and purpose</function>
+          <function name="calculate_impact_score" max_lines="8">Assign relevance scores to changes</function>
+        </functions>
+      </module>
+
+      <module name="relevance_scorer" max_lines="300">
+        <responsibility>Calculate relevance scores for code changes</responsibility>
+        <functions>
+          <function name="score_by_business_value" max_lines="8">Score based on BVJ alignment</function>
+          <function name="score_by_dependencies" max_lines="8">Score by number of dependencies</function>
+          <function name="score_by_test_coverage" max_lines="8">Score by test coverage impact</function>
+          <function name="score_by_api_surface" max_lines="8">Score by API/route changes</function>
+          <function name="score_by_agent_impact" max_lines="8">Score by agent system impact</function>
+          <function name="score_by_user_facing" max_lines="8">Score by frontend/UX impact</function>
+          <function name="combine_scores" max_lines="8">Weighted combination of scores</function>
+          <function name="get_relevance_category" max_lines="8">Map score to relevance tier</function>
+        </functions>
+      </module>
+
+      <module name="test_report_analyzer" max_lines="300">
+        <responsibility>Analyze test reports and identify issues</responsibility>
+        <functions>
+          <function name="load_latest_reports" max_lines="8">Load test reports from test_reports/</function>
+          <function name="extract_failures" max_lines="8">Identify test failures and flaky tests</function>
+          <function name="calculate_coverage_delta" max_lines="8">Show coverage changes</function>
+        </functions>
+      </module>
+
+      <module name="compliance_analyzer" max_lines="300">
+        <responsibility>Check architecture compliance status</responsibility>
+        <functions>
+          <function name="check_300_line_violations" max_lines="8">Find files exceeding 300 lines</function>
+          <function name="check_8_line_violations" max_lines="8">Find functions exceeding 8 lines</function>
+          <function name="get_compliance_trends" max_lines="8">Show compliance improvement/degradation</function>
+        </functions>
+      </module>
+
+      <module name="documentation_analyzer" max_lines="300">
+        <responsibility>Track documentation and spec updates</responsibility>
+        <functions>
+          <function name="find_doc_changes" max_lines="8">Identify changed documentation files</function>
+          <function name="find_spec_updates" max_lines="8">Track SPEC/ directory changes</function>
+          <function name="extract_learnings" max_lines="8">Highlight new learnings added</function>
+        </functions>
+      </module>
+
+      <module name="human_formatter" max_lines="300">
+        <responsibility>Format updates for human readability</responsibility>
+        <functions>
+          <function name="format_summary" max_lines="8">Create executive summary</function>
+          <function name="format_section" max_lines="8">Format individual sections with emojis</function>
+          <function name="generate_action_items" max_lines="8">Extract actionable next steps</function>
+        </functions>
+      </module>
+    </modules>
+  </architecture>
+
+  <output_format>
+    <section name="header">
+      <format>
+        # 📊 Team Update Report
+        Generated: {timestamp}
+        Time Frame: {time_frame_description}
+        Report ID: {uuid}
+      </format>
+    </section>
+
+    <section name="critical_alerts" priority="1">
+      <format>
+        ## 🚨 Critical Issues (Action Required)
+        - Breaking changes that need immediate attention
+        - Test failures blocking deployment
+        - Security vulnerabilities discovered
+        - Production incidents
+      </format>
+    </section>
+
+    <section name="executive_summary" priority="2">
+      <format>
+        ## 📋 Executive Summary
+        In the {time_frame}, the team:
+        - Completed {feature_count} features
+        - Fixed {bug_count} bugs
+        - {test_status} with {pass_rate}% pass rate
+        - {compliance_status} architecture compliance
+        
+        Key Contributors: {top_contributors}
+      </format>
+    </section>
+
+    <section name="feature_updates" priority="3">
+      <format>
+        ## ✨ New Features & Improvements
+        {for each feature}
+        ### {feature_title}
+        - **What**: {plain_english_description}
+        - **Why**: {business_value}
+        - **Who**: {author}
+        - **Impact**: {affected_components}
+      </format>
+    </section>
+
+    <section name="bug_fixes" priority="4">
+      <format>
+        ## 🐛 Bug Fixes
+        {for each fix}
+        - **Fixed**: {issue_description}
+        - **Root Cause**: {simple_explanation}
+        - **Solution**: {fix_approach}
+        - **By**: {author}
+      </format>
+    </section>
+
+    <section name="test_health" priority="5">
+      <format>
+        ## 🧪 Test Health
+        ### Overall Status: {emoji_status}
+        - **Pass Rate**: {pass_percentage}% ({passed}/{total})
+        - **Coverage**: {coverage}% ({delta_symbol}{coverage_change}%)
+        - **Flaky Tests**: {flaky_count}
+        - **New Tests Added**: {new_test_count}
+        
+        {if failures exist}
+        ### ⚠️ Failing Tests
+        {list of failures with owners}
+      </format>
+    </section>
+
+    <section name="code_changes_detailed" priority="6">
+      <format>
+        ## 🔄 Code Changes Summary
+        
+        ### 📦 New Modules (Sorted by Relevance)
+        {for each new_module sorted by relevance_score descending}
+        - **{module_path}** [{relevance_tier}]
+          - Purpose: {module_purpose}
+          - Business Value: {business_alignment}
+          - Impact Score: {impact_score}/10
+        
+        ### 🏗️ New Classes 
+        {for each new_class sorted by relevance_score descending}
+        - **{class_name}** in {file_path} [{relevance_tier}]
+          - Type: {class_type: Model/Service/Agent/Component}
+          - Dependencies: {dependency_count}
+          - Methods: {method_count}
+        
+        ### ⚡ New Functions (Top 20 by Relevance)
+        {for each new_function limited to top 20}
+        - **{function_name}()** in {file_path}:{line_number} [{relevance_tier}]
+          - Purpose: {function_purpose}
+          - Complexity: {complexity_score}
+        
+        ### 🗑️ Deletions
+        #### Deleted Modules
+        {for each deleted_module}
+        - **{module_path}** (Reason: {deletion_reason})
+        
+        #### Deleted Classes
+        {for each deleted_class}
+        - **{class_name}** from {file_path}
+        
+        #### Deleted Functions
+        {for each deleted_function}
+        - **{function_name}()** from {file_path}
+        
+        ### 📝 Modified Files (By Relevance Tier)
+        
+        #### 🔴 Critical Changes (Business/Security Impact)
+        {for each file in critical_tier}
+        - **{file_path}**
+          - Changes: {change_summary}
+          - Lines: +{additions} -{deletions}
+          - Impact: {impact_description}
+        
+        #### 🟠 High Priority (Core Functionality)
+        {for each file in high_tier}
+        - **{file_path}**: {brief_change_description} (+{additions}/-{deletions})
+        
+        #### 🟡 Medium Priority (Feature Updates)
+        {for each file in medium_tier}
+        - **{file_path}**: {brief_change_description} (+{additions}/-{deletions})
+        
+        #### 🟢 Low Priority (Refactoring/Cleanup)
+        {for each file in low_tier}
+        - **{file_path}**: {brief_change_description} (+{additions}/-{deletions})
+      </format>
+    </section>
+
+    <section name="code_quality" priority="7">
+      <format>
+        ## 📏 Code Quality & Compliance
+        ### Architecture Compliance
+        - **300-line rule**: {compliant_files}/{total_files} compliant
+        - **8-line functions**: {compliant_functions}/{total_functions} compliant
+        - **New Violations**: {new_violations}
+        - **Fixed Violations**: {fixed_violations}
+        
+        ### Type Safety
+        - **New Untyped Code**: {untyped_additions}
+        - **Type Coverage**: {type_coverage}%
+      </format>
+    </section>
+
+    <section name="documentation" priority="8">
+      <format>
+        ## 📚 Documentation Updates
+        ### Updated Docs
+        {for each doc}
+        - **{doc_name}**: {change_summary}
+        
+        ### New Learnings
+        {for each learning}
+        - **{category}**: {learning_summary}
+      </format>
+    </section>
+
+    <section name="dependencies" priority="9">
+      <format>
+        ## 📦 Dependency Changes
+        ### Added
+        {list new dependencies with purpose}
+        
+        ### Updated
+        {list updated dependencies with version changes}
+        
+        ### Removed
+        {list removed dependencies}
+      </format>
+    </section>
+
+    <section name="action_items" priority="10">
+      <format>
+        ## ✅ Action Items
+        ### For Everyone
+        - {general_actions}
+        
+        ### For Specific Team Members
+        {for each member with actions}
+        **@{member}**:
+        - {action_item}
+      </format>
+    </section>
+  </output_format>
+
+  <relevance_scoring>
+    <tier name="critical" min_score="8" max_score="10" emoji="🔴">
+      <criteria>
+        - Business-critical functionality changes
+        - Security-related modifications
+        - API breaking changes
+        - Production deployment blockers
+        - Customer-facing features with high revenue impact
+      </criteria>
+    </tier>
+    
+    <tier name="high" min_score="6" max_score="7.9" emoji="🟠">
+      <criteria>
+        - Core service modifications
+        - Agent system changes
+        - Database schema updates
+        - Performance optimizations
+        - Test infrastructure changes
+      </criteria>
+    </tier>
+    
+    <tier name="medium" min_score="4" max_score="5.9" emoji="🟡">
+      <criteria>
+        - Feature enhancements
+        - UI/UX improvements
+        - Documentation updates
+        - Configuration changes
+        - Non-critical bug fixes
+      </criteria>
+    </tier>
+    
+    <tier name="low" min_score="0" max_score="3.9" emoji="🟢">
+      <criteria>
+        - Code refactoring
+        - Style/formatting changes
+        - Comment additions
+        - Development tools
+        - Test additions without feature changes
+      </criteria>
+    </tier>
+    
+    <scoring_weights>
+      <weight name="business_value" value="0.30">Direct revenue/cost impact</weight>
+      <weight name="user_impact" value="0.25">End-user experience changes</weight>
+      <weight name="technical_debt" value="0.15">Code quality/maintainability</weight>
+      <weight name="dependencies" value="0.10">Number of dependent components</weight>
+      <weight name="test_coverage" value="0.10">Test coverage changes</weight>
+      <weight name="security" value="0.10">Security implications</weight>
+    </scoring_weights>
+    
+    <path_priorities>
+      <path pattern="app/routes/*" priority="high">API endpoints</path>
+      <path pattern="app/agents/*" priority="high">Agent system</path>
+      <path pattern="app/auth/*" priority="critical">Authentication</path>
+      <path pattern="app/services/*" priority="high">Business logic</path>
+      <path pattern="frontend/components/chat/*" priority="high">Chat UI</path>
+      <path pattern="app/db/*" priority="high">Database layer</path>
+      <path pattern="app/websocket/*" priority="high">Real-time communication</path>
+      <path pattern="scripts/*" priority="low">Development tools</path>
+      <path pattern="test_framework/*" priority="medium">Test infrastructure</path>
+      <path pattern="SPEC/*" priority="medium">Specifications</path>
+      <path pattern="docs/*" priority="low">Documentation</path>
+    </path_priorities>
+  </relevance_scoring>
+
+  <time_frames>
+    <frame id="last_hour" hours="1" description="Last Hour"/>
+    <frame id="last_5_hours" hours="5" description="Last 5 Hours"/>
+    <frame id="last_day" hours="24" description="Last 24 Hours"/>
+    <frame id="last_week" hours="168" description="Last Week"/>
+    <frame id="last_month" hours="720" description="Last Month"/>
+    <frame id="custom" hours="custom" description="Custom Time Range"/>
+  </time_frames>
+
+  <emoji_guide>
+    <meaning emoji="✅" description="Success/Complete"/>
+    <meaning emoji="⚠️" description="Warning/Needs Attention"/>
+    <meaning emoji="❌" description="Failed/Broken"/>
+    <meaning emoji="🚨" description="Critical/Urgent"/>
+    <meaning emoji="📈" description="Improvement"/>
+    <meaning emoji="📉" description="Degradation"/>
+    <meaning emoji="🎯" description="On Target"/>
+    <meaning emoji="🔄" description="In Progress"/>
+    <meaning emoji="✨" description="New Feature"/>
+    <meaning emoji="🐛" description="Bug Fix"/>
+    <meaning emoji="📚" description="Documentation"/>
+    <meaning emoji="🧪" description="Testing"/>
+    <meaning emoji="📏" description="Code Quality"/>
+    <meaning emoji="🏗️" description="Refactoring"/>
+  </emoji_guide>
+
+  <plain_english_rules>
+    <rule>NO technical jargon without explanation</rule>
+    <rule>Use analogies for complex concepts</rule>
+    <rule>Define acronyms on first use</rule>
+    <rule>Use active voice</rule>
+    <rule>Keep sentences under 20 words when possible</rule>
+    <rule>Use bullet points for lists</rule>
+    <rule>Bold key information</rule>
+    <rule>Use examples to clarify</rule>
+  </plain_english_rules>
+
+  <implementation_notes>
+    <note>Run via: python scripts/team_updates.py --time-frame=last_day</note>
+    <note>Output to: team_updates/YYYY-MM-DD_HH-MM.md</note>
+    <note>Can be scheduled via cron or GitHub Actions</note>
+    <note>Should integrate with Slack/Teams for notifications</note>
+    <note>Cache git data for performance</note>
+  </implementation_notes>
+</spec>

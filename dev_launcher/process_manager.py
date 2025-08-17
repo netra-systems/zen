@@ -87,13 +87,17 @@ class ProcessManager:
     
     def _terminate_windows_process(self, process: subprocess.Popen, name: str):
         """Terminate Windows process using taskkill."""
-        result = subprocess.run(
+        result = self._run_taskkill_command(process)
+        if result.returncode != 0:
+            logger.warning(f"taskkill failed for {name}: {result.stderr}")
+    
+    def _run_taskkill_command(self, process: subprocess.Popen):
+        """Run taskkill command for Windows process."""
+        return subprocess.run(
             ["taskkill", "/F", "/T", "/PID", str(process.pid)],
             capture_output=True,
             text=True
         )
-        if result.returncode != 0:
-            logger.warning(f"taskkill failed for {name}: {result.stderr}")
     
     def _terminate_unix_process(self, process: subprocess.Popen, name: str):
         """Terminate Unix process using process group."""
@@ -109,8 +113,12 @@ class ProcessManager:
         try:
             process.wait(timeout=5)
         except subprocess.TimeoutExpired:
-            logger.warning(f"Process {name} did not terminate gracefully, forcing...")
-            self._force_kill_process(process, name)
+            self._handle_termination_timeout(process, name)
+    
+    def _handle_termination_timeout(self, process: subprocess.Popen, name: str):
+        """Handle process termination timeout."""
+        logger.warning(f"Process {name} did not terminate gracefully, forcing...")
+        self._force_kill_process(process, name)
     
     def _force_kill_process(self, process: subprocess.Popen, name: str):
         """Force kill a process."""
@@ -200,9 +208,13 @@ class ProcessManager:
     def _should_exit_early(self, failed_processes: list) -> bool:
         """Check if should exit early."""
         if failed_processes and not self.processes:
-            logger.error("All processes have terminated. Check the logs for details.")
+            self._log_all_processes_terminated()
             return True
         return False
+    
+    def _log_all_processes_terminated(self):
+        """Log message when all processes terminated."""
+        logger.error("All processes have terminated. Check the logs for details.")
     
     def get_process(self, name: str) -> Optional[subprocess.Popen]:
         """Get a specific process."""
@@ -222,11 +234,16 @@ class ProcessManager:
     def _collect_process_stats(self, stats: dict):
         """Collect statistics for all processes."""
         for name, process in self.processes.items():
-            stats['processes'].append({
-                'name': name,
-                'pid': process.pid,
-                'is_running': process.poll() is None
-            })
+            process_info = self._create_process_info(name, process)
+            stats['processes'].append(process_info)
+    
+    def _create_process_info(self, name: str, process: subprocess.Popen) -> dict:
+        """Create process information dictionary."""
+        return {
+            'name': name,
+            'pid': process.pid,
+            'is_running': process.poll() is None
+        }
     
     def get_running_count(self) -> int:
         """Get count of running processes."""

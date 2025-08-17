@@ -7,7 +7,11 @@ from enum import Enum
 from app.agents.state import DeepAgentState
 
 
-class ExecutionStrategy(Enum):
+# Import ExecutionStrategy from the authoritative source for compatibility
+from app.core.interfaces_execution import ExecutionStrategy
+
+
+class AgentExecutionStrategy(Enum):
     """Execution strategies for agent pipelines"""
     SEQUENTIAL = "sequential"
     PARALLEL = "parallel"
@@ -42,7 +46,7 @@ class AgentExecutionResult:
 class PipelineStep:
     """Represents a step in an execution pipeline"""
     agent_name: str
-    strategy: ExecutionStrategy = ExecutionStrategy.SEQUENTIAL
+    strategy: AgentExecutionStrategy = AgentExecutionStrategy.SEQUENTIAL
     condition: Optional[callable] = None
     dependencies: list = field(default_factory=list)
     metadata: Dict[str, Any] = field(default_factory=dict)

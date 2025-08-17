@@ -4,7 +4,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { generateUniqueId } from '@/lib/utils';
-import type { ChatMessage } from '@/types/websocket-event-types';
+import type { ChatMessage } from '@/types/chat';
 
 // ============================================
 // Thread Store State

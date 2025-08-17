@@ -14,7 +14,7 @@ from .health_types import SystemAlert, AlertSeverity, HealthStatus, ComponentHea
 logger = central_logger.get_logger(__name__)
 
 
-class AlertManager:
+class HealthAlertManager:
     """Manages system alerts and recovery actions."""
     
     def __init__(self, max_alert_history: int = 1000):

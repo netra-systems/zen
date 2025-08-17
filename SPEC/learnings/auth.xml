@@ -230,4 +230,39 @@
             - Provides clear next steps
         </features>
     </learning>
+    
+    <learning id="shared-auth-integration-mandatory" date="2025-01-17" severity="CRITICAL">
+        <problem>
+            Authentication logic was potentially duplicated across multiple files in the system.
+            This created maintenance burden and risk of inconsistent auth behavior.
+        </problem>
+        <root_cause>
+            Previous directory name "dependencies_auth" did not clearly communicate 
+            that this was the MANDATORY shared auth service for the entire system.
+        </root_cause>
+        <solution>
+            1. Renamed app/dependencies_auth/ to app/auth_integration/ for clarity
+            2. Updated all imports throughout the system
+            3. Created SPEC/shared_auth_integration.xml documenting MANDATORY use
+            4. Added clear documentation that ALL auth MUST use this service
+        </solution>
+        <prevention>
+            - Directory name "auth_integration" clearly indicates integration point
+            - Documentation emphasizes MANDATORY use throughout system
+            - No duplicate auth logic allowed anywhere
+            - Single source of truth for all authentication
+        </prevention>
+        <key_functions>
+            - get_current_user(): For protected routes (returns user or 401)
+            - get_current_user_optional(): For optional auth (returns user or None)
+            - validate_token(): For WebSocket authentication
+        </key_functions>
+        <impact>
+            - Consistent auth behavior across entire system
+            - Single point for security updates
+            - Easier testing with single mock point
+            - Reduced code duplication
+            - Simplified compliance and auditing
+        </impact>
+    </learning>
 </specification>

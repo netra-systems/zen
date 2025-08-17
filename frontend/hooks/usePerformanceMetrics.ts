@@ -1,24 +1,10 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-
-interface PerformanceMetrics {
-  renderCount: number;
-  lastRenderTime: number;
-  averageResponseTime: number;
-  memoryUsage: number;
-  fps: number;
-  wsLatency: number;
-  componentRenderTimes: Map<string, number>;
-  errorCount: number;
-  cacheHitRate: number;
-}
-
-interface MetricsOptions {
-  trackMemory?: boolean;
-  trackFPS?: boolean;
-  trackComponents?: boolean;
-  updateInterval?: number;
-}
+import type { 
+  PerformanceMetrics, 
+  MetricsOptions
+} from '@/types/performance-metrics';
+import { DEFAULT_PERFORMANCE_METRICS } from '@/types/performance-metrics';
 
 export const usePerformanceMetrics = (
   componentName?: string, 
@@ -32,15 +18,7 @@ export const usePerformanceMetrics = (
   } = options;
 
   const metricsRef = useRef<PerformanceMetrics>({
-    renderCount: 0,
-    lastRenderTime: 0,
-    averageResponseTime: 0,
-    memoryUsage: 0,
-    fps: 0,
-    wsLatency: 0,
-    componentRenderTimes: new Map(),
-    errorCount: 0,
-    cacheHitRate: 0
+    ...DEFAULT_PERFORMANCE_METRICS
   });
 
   const frameCountRef = useRef(0);
@@ -206,15 +184,7 @@ export class PerformanceMonitor {
 
   updateMetrics(component: string, metrics: Partial<PerformanceMetrics>) {
     const current = this.metrics.get(component) || {
-      renderCount: 0,
-      lastRenderTime: 0,
-      averageResponseTime: 0,
-      memoryUsage: 0,
-      fps: 0,
-      wsLatency: 0,
-      componentRenderTimes: new Map(),
-      errorCount: 0,
-      cacheHitRate: 0
+      ...DEFAULT_PERFORMANCE_METRICS
     };
 
     this.metrics.set(component, { ...current, ...metrics });

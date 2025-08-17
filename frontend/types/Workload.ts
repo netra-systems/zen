@@ -1,4 +1,4 @@
-import { DataSource } from './DataSource';
+import { DataSource } from './backend_schema_base';
 import { TimeRange } from './TimeRange';
 
 export interface Workload {

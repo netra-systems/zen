@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification name="shared_auth_integration" version="1.0" priority="CRITICAL">
+  <metadata>
+    <description>MANDATORY shared authentication service integration for entire system</description>
+    <created>2025-01-17</created>
+    <updated>2025-08-17</updated>
+    <business_value>
+      <tier>All (Free, Early, Mid, Enterprise)</tier>
+      <impact>Security consistency and centralized auth management</impact>
+      <revenue_impact>Prevents security breaches, maintains customer trust</revenue_impact>
+    </business_value>
+    <consolidation_status>
+      <core_implementation>COMPLETED</core_implementation>
+      <import_fixes>COMPLETED</core_implementation>
+      <test_cleanup>IN_PROGRESS</test_cleanup>
+      <date_completed>2025-08-17</date_completed>
+    </consolidation_status>
+  </metadata>
+
+  <critical_requirements>
+    <requirement priority="MANDATORY">
+      <title>Single Source of Auth Truth</title>
+      <description>
+        ALL authentication throughout the ENTIRE system MUST use app/auth_integration/.
+        NO duplicate auth logic allowed anywhere. NO exceptions.
+      </description>
+    </requirement>
+    
+    <requirement priority="MANDATORY">
+      <title>Centralized Auth Dependencies</title>
+      <location>app/auth_integration/auth.py</location>
+      <functions>
+        <function name="get_current_user">
+          <usage>ALL protected routes MUST use this dependency</usage>
+          <description>Returns authenticated user or raises 401</description>
+        </function>
+        <function name="get_current_user_optional">
+          <usage>ALL optional auth routes MUST use this dependency</usage>
+          <description>Returns user if authenticated, None otherwise</description>
+        </function>
+        <function name="validate_token">
+          <usage>ALL WebSocket connections MUST use this</usage>
+          <description>Validates JWT tokens for WebSocket auth</description>
+        </function>
+      </functions>
+    </requirement>
+  </critical_requirements>
+
+  <enforcement>
+    <rule priority="CRITICAL">
+      <title>No Duplicate Auth Logic</title>
+      <description>
+        NEVER create duplicate authentication functions.
+        NEVER copy auth logic to other files.
+        ALWAYS import from app.auth_integration.auth.
+      </description>
+      <violation_examples>
+        <!-- BAD: Creating duplicate auth function -->
+        <bad>
+          # In some_route.py
+          async def verify_user(token: str):
+              # Duplicate auth logic - FORBIDDEN
+              pass
+        </bad>
+        
+        <!-- GOOD: Using shared auth service -->
+        <good>
+          # In some_route.py
+          from app.auth_integration.auth import get_current_user
+          
+          @router.get("/protected")
+          async def protected_route(user = Depends(get_current_user)):
+              return {"user": user.email}
+        </good>
+      </violation_examples>
+    </rule>
+
+    <rule priority="CRITICAL">
+      <title>Route Protection Pattern</title>
+      <description>ALL routes requiring authentication MUST follow this pattern</description>
+      <examples>
+        <example type="protected_route">
+          from app.auth_integration.auth import get_current_user
+          
+          @router.post("/api/resource")
+          async def create_resource(
+              data: ResourceData,
+              user = Depends(get_current_user)  # MANDATORY for protected routes
+          ):
+              # user is guaranteed to be authenticated
+              return {"created_by": user.email}
+        </example>
+        
+        <example type="optional_auth_route">
+          from app.auth_integration.auth import get_current_user_optional
+          
+          @router.get("/api/public")
+          async def public_with_optional_auth(
+              user = Depends(get_current_user_optional)  # Optional auth
+          ):
+              if user:
+                  return {"message": f"Hello {user.email}"}
+              return {"message": "Hello anonymous"}
+        </example>
+        
+        <example type="websocket_auth">
+          from app.auth_integration.auth import validate_token
+          
+          @router.websocket("/ws")
+          async def websocket_endpoint(websocket: WebSocket, token: str):
+              user = await validate_token(token)  # MANDATORY for WebSocket
+              if not user:
+                  await websocket.close(code=1008)
+                  return
+              await websocket.accept()
+        </example>
+      </examples>
+    </rule>
+  </enforcement>
+
+  <integration_points>
+    <point>
+      <location>app/routes/*</location>
+      <description>ALL route files MUST import from auth_integration</description>
+    </point>
+    <point>
+      <location>app/middleware/*</location>
+      <description>Middleware requiring auth MUST use auth_integration</description>
+    </point>
+    <point>
+      <location>app/websocket/*</location>
+      <description>WebSocket auth MUST use auth_integration.validate_token</description>
+    </point>
+    <point>
+      <location>app/services/*</location>
+      <description>Services needing user context MUST receive it from routes using auth_integration</description>
+    </point>
+  </integration_points>
+
+  <benefits>
+    <benefit>Single point for security updates</benefit>
+    <benefit>Consistent auth behavior across entire system</benefit>
+    <benefit>Easier testing with single mock point</benefit>
+    <benefit>Centralized logging and monitoring</benefit>
+    <benefit>Simplified compliance and auditing</benefit>
+    <benefit>Reduced code duplication</benefit>
+    <benefit>Lower maintenance burden</benefit>
+  </benefits>
+
+  <migration_notes>
+    <note>
+      Directory renamed from app/dependencies_auth/ to app/auth_integration/ for clarity.
+      The name "auth_integration" emphasizes this is the INTEGRATION point for ALL auth.
+    </note>
+    <note>
+      All imports updated from "app.dependencies_auth" to "app.auth_integration"
+    </note>
+    <note>
+      This is the ONLY place auth dependencies should be defined.
+    </note>
+  </migration_notes>
+
+  <compliance_check>
+    <check>
+      Run: grep -r "def get_current_user" app/ --exclude-dir=auth_integration
+      Expected: No results (only auth_integration should define this)
+    </check>
+    <check>
+      Run: grep -r "jwt.decode" app/ --exclude-dir=auth_integration
+      Expected: Minimal results (JWT handling should be centralized)
+    </check>
+    <check>
+      Run: grep -r "from app.auth_integration.auth import" app/
+      Expected: Many results (all protected routes should import from here)
+    </check>
+  </compliance_check>
+
+  <consolidation_summary>
+    <date>2025-08-17</date>
+    <actions_completed>
+      <action>Enhanced app/auth_integration/auth.py with missing utility functions</action>
+      <action>Added password hashing functions (get_password_hash, verify_password)</action>
+      <action>Added JWT token utilities (create_access_token, validate_token_jwt)</action>
+      <action>Added compatibility aliases (ActiveUserWsDep)</action>
+      <action>Updated auth_integration __init__.py exports</action>
+      <action>Fixed broken imports in test files (test_simple_imports.py, test_admin.py)</action>
+      <action>Commented out broken imports in security framework</action>
+      <action>Verified core route imports working with shared auth service</action>
+    </actions_completed>
+    
+    <remaining_issues>
+      <issue>Multiple test files still import from non-existent app.auth.* modules</issue>
+      <issue>enhanced_auth_security and api_key_manager modules need to be created or removed</issue>
+      <issue>Many auth service test files need comprehensive import fixes</issue>
+    </remaining_issues>
+    
+    <auth_structure>
+      <core_service>app/auth_integration/ - MANDATORY shared auth service (ACTIVE)</core_service>
+      <auth_client>app/clients/auth_client.py - Auth service client (ACTIVE)</auth_client>
+      <legacy_auth>app/auth/ - Minimal compatibility layer (DEPRECATED)</legacy_auth>
+      <deleted>app/dependencies/auth.py - Deleted in git (GOOD)</deleted>
+    </auth_structure>
+    
+    <business_impact>
+      <security>Centralized auth reduces security vulnerabilities</security>
+      <maintenance>Single source of truth simplifies updates</maintenance>
+      <enterprise>Consistent auth experience for Enterprise customers</enterprise>
+      <revenue_protection>Prevents auth-related downtime that could cost revenue</revenue_protection>
+    </business_impact>
+  </consolidation_summary>
+</specification>

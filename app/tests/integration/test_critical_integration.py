@@ -4,7 +4,7 @@ Tests the most important cross-component interactions
 """
 
 import pytest
-from pytest_asyncio import fixture as pytest_asyncio_fixture
+import pytest_asyncio
 import asyncio
 import json
 import jwt
@@ -39,39 +39,33 @@ import os
 class TestCriticalIntegration:
     """Critical integration tests for core system functionality"""
 
-    @pytest_asyncio_fixture
-    async def setup_real_database(self):
+    @pytest.fixture
+    def setup_real_database(self):
         """Setup a real in-memory SQLite database for integration testing"""
-        # Create temporary database
-        db_file = tempfile.NamedTemporaryFile(delete=False, suffix='.db')
-        db_url = f"sqlite+aiosqlite:///{db_file.name}"
-        
-        # Create engine and session
-        engine = create_async_engine(db_url, echo=False)
-        async_session = sessionmaker(
-            engine, class_=AsyncSession, expire_on_commit=False
-        )
-        
-        # Create tables
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        
-        # Create session
-        async with async_session() as session:
-            yield {
+        async def _setup():
+            # Create temporary database
+            db_file = tempfile.NamedTemporaryFile(delete=False, suffix='.db')
+            db_url = f"sqlite+aiosqlite:///{db_file.name}"
+            
+            # Create engine and session
+            engine = create_async_engine(db_url, echo=False)
+            async_session = sessionmaker(
+                engine, class_=AsyncSession, expire_on_commit=False
+            )
+            
+            # Create tables
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+            
+            # Create session
+            session = async_session()
+            
+            return {
                 "session": session,
                 "engine": engine,
                 "db_file": db_file.name
             }
-        
-        # Cleanup
-        await engine.dispose()
-        try:
-            os.unlink(db_file.name)
-        except PermissionError:
-            # On Windows, file may still be locked
-            # This is okay for test cleanup
-            pass
+        return _setup
 
     @pytest.fixture
     def setup_integration_infrastructure(self):
@@ -154,13 +148,16 @@ class TestCriticalIntegration:
         - Persists state to database
         - Verifies final results in database
         """
-        db_setup, infra = setup_real_database, setup_integration_infrastructure
+        db_setup = await setup_real_database()
+        infra = setup_integration_infrastructure
         test_entities = await self._create_test_entities_for_workflow(db_setup)
         supervisor = self._setup_supervisor_with_database(db_setup, infra, test_entities)
         mock_websocket = await self._setup_websocket_connection(infra, test_entities["user_id"])
-        result = await self._execute_agent_workflow_with_patches(supervisor, test_entities["message"])
+        result = await self._execute_agent_workflow_with_patches(supervisor, test_entities["message"], test_entities)
         await self._verify_workflow_results(result, mock_websocket, supervisor, test_entities)
         await db_setup["session"].commit()
+        await db_setup["session"].close()
+        await db_setup["engine"].dispose()
 
     async def _create_test_entities_for_workflow(self, db_setup):
         """Create test user, thread, and message entities"""
@@ -185,11 +182,16 @@ class TestCriticalIntegration:
         await infra["websocket_manager"].connect(user_id, mock_websocket)
         return mock_websocket
 
-    async def _execute_agent_workflow_with_patches(self, supervisor, message):
+    async def _execute_agent_workflow_with_patches(self, supervisor, message, test_entities):
         """Execute agent workflow with state persistence patches"""
         with patch('app.services.state_persistence_service.StatePersistenceService.save_agent_state', AsyncMock()) as mock_save_state:
             with patch('app.services.state_persistence_service.StatePersistenceService.load_agent_state', AsyncMock(return_value=None)):
-                result = await supervisor.run(user_request=message.content, run_id=str(uuid.uuid4()), stream_updates=True)
+                result = await supervisor.run(
+                    user_prompt=message.content,
+                    thread_id=test_entities["thread"].id,
+                    user_id=test_entities["user_id"],
+                    run_id=str(uuid.uuid4())
+                )
                 self.mock_save_state = mock_save_state
                 return result
 
@@ -295,7 +297,7 @@ class TestCriticalIntegration:
         - Resumes execution from saved checkpoint
         - Verifies complete recovery and continuation
         """
-        db_setup = setup_real_database
+        db_setup = await setup_real_database()
         session = db_setup["session"]
         infra = setup_integration_infrastructure
         
@@ -321,6 +323,8 @@ class TestCriticalIntegration:
         
         # Cleanup
         await session.commit()
+        await session.close()
+        await db_setup["engine"].dispose()
 
     async def _setup_test_entities(self, session):
         """Setup test entities for state persistence test"""

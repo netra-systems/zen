@@ -1,13 +1,6 @@
 import React, { createContext, useContext } from 'react';
+import { WebSocketContextType, MockWebSocketProviderProps } from '../types/websocket-context-types';
 import { WebSocketStatus } from '../services/webSocketService';
-import { WebSocketMessage } from '../types/backend_schema_auto_generated';
-
-// Define the context type to match WebSocketProvider
-interface WebSocketContextType {
-  status: WebSocketStatus;
-  messages: WebSocketMessage[];
-  sendMessage: (message: WebSocketMessage) => void;
-}
 
 // Mock WebSocket context value
 export const mockWebSocketContextValue: WebSocketContextType = {
@@ -27,10 +20,7 @@ export const useWebSocketContext = () => {
 };
 
 // Mock WebSocketProvider that doesn't actually connect
-export const MockWebSocketProvider: React.FC<{ 
-  children: React.ReactNode;
-  value?: Partial<WebSocketContextType>;
-}> = ({ children, value }) => {
+export const MockWebSocketProvider: React.FC<MockWebSocketProviderProps> = ({ children, value }) => {
   const contextValue = { ...mockWebSocketContextValue, ...value };
   return (
     <WebSocketContext.Provider value={contextValue}>

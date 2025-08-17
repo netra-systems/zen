@@ -70,34 +70,39 @@ class WebSocketRecoveryManager:
         strategies: Optional[List[RecoveryStrategy]] = None
     ) -> bool:
         """Initiate recovery for a failed connection."""
+        strategies = self._prepare_recovery_strategies(strategies)
+        context = self._create_recovery_context(connection_id, user_id, error, strategies)
+        return await self._execute_recovery_process(connection_id, context)
+    
+    def _prepare_recovery_strategies(self, strategies: Optional[List[RecoveryStrategy]]) -> List[RecoveryStrategy]:
+        """Prepare recovery strategies with defaults if needed."""
         if strategies is None:
-            strategies = [
-                RecoveryStrategy.EXPONENTIAL_BACKOFF,
-                RecoveryStrategy.STATE_SYNC
-            ]
-        
-        # Create recovery context
-        context = RecoveryContext(
+            return [RecoveryStrategy.EXPONENTIAL_BACKOFF, RecoveryStrategy.STATE_SYNC]
+        return strategies
+    
+    def _create_recovery_context(self, connection_id: str, user_id: str, 
+                               error: WebSocketError, strategies: List[RecoveryStrategy]) -> RecoveryContext:
+        """Create recovery context for the connection."""
+        return RecoveryContext(
             connection_id=connection_id,
             user_id=user_id,
             error=error,
             strategies=strategies,
             state_snapshot=self.state_snapshots.get(connection_id)
         )
-        
-        # Store active recovery
+    
+    async def _execute_recovery_process(self, connection_id: str, context: RecoveryContext) -> bool:
+        """Execute the recovery process and handle cleanup."""
         self.active_recoveries[connection_id] = context
-        
         logger.info(f"Starting recovery for connection {connection_id}")
-        
-        # Execute recovery strategies
         success = await self._execute_recovery_strategies(context)
-        
-        # Clean up if recovery completed
+        self._cleanup_recovery_if_needed(connection_id, context, success)
+        return success
+    
+    def _cleanup_recovery_if_needed(self, connection_id: str, context: RecoveryContext, success: bool) -> None:
+        """Clean up recovery context if recovery completed."""
         if success or context.attempt_count >= context.max_attempts:
             self.active_recoveries.pop(connection_id, None)
-        
-        return success
     
     async def _execute_recovery_strategies(self, context: RecoveryContext) -> bool:
         """Execute recovery strategies in sequence."""

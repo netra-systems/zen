@@ -5,7 +5,7 @@ from app import schemas
 from app.services import clickhouse_service
 from app.services.corpus_service import corpus_service_instance as corpus_service
 from app.dependencies import get_db_session
-from app.auth.auth_dependencies import get_current_user
+from app.auth_integration.auth import get_current_user
 from app.db.models_postgres import User
 from pydantic import BaseModel
 

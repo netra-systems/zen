@@ -13,7 +13,9 @@ import {
   Layers, Activity, FileText, Send
 } from 'lucide-react';
 import type {
-  ReportData, RecommendationItem, ActionPlanItem, AgentTimelineItem,
+  ReportData, RecommendationItem, ActionPlanItem, AgentTimelineItem
+} from '@/types/report-data';
+import type {
   MetricCardProps, SectionHeaderProps, CostSectionProps, PerformanceCardProps,
   RecommendationHeaderProps, StepButtonProps, TimelineBarProps
 } from './slow-layer-types';

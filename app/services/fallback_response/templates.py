@@ -18,50 +18,61 @@ class TemplateManager:
     
     def _initialize_templates(self) -> Dict[Tuple[ContentType, FailureReason], List[str]]:
         """Initialize response templates by content type and failure reason"""
+        templates = {}
+        templates.update(self._get_optimization_templates())
+        templates.update(self._get_data_analysis_templates())
+        templates.update(self._get_action_plan_templates())
+        templates.update(self._get_report_templates())
+        templates.update(self._get_system_templates())
+        return templates
+    
+    def _get_optimization_templates(self) -> Dict[Tuple[ContentType, FailureReason], List[str]]:
+        """Get optimization-related templates."""
         return {
-            # Optimization fallbacks
             (ContentType.OPTIMIZATION, FailureReason.LOW_QUALITY): 
                 self._get_optimization_low_quality_templates(),
-            
             (ContentType.OPTIMIZATION, FailureReason.CONTEXT_MISSING): 
                 self._get_optimization_context_missing_templates(),
-            
             (ContentType.OPTIMIZATION, FailureReason.CIRCULAR_REASONING): 
-                self._get_optimization_circular_templates(),
-            
-            # Data Analysis fallbacks
+                self._get_optimization_circular_templates()
+        }
+    
+    def _get_data_analysis_templates(self) -> Dict[Tuple[ContentType, FailureReason], List[str]]:
+        """Get data analysis related templates."""
+        return {
             (ContentType.DATA_ANALYSIS, FailureReason.LOW_QUALITY): 
                 self._get_data_analysis_low_quality_templates(),
-            
             (ContentType.DATA_ANALYSIS, FailureReason.PARSING_ERROR): 
-                self._get_data_analysis_parsing_templates(),
-            
-            # Action Plan fallbacks
+                self._get_data_analysis_parsing_templates()
+        }
+    
+    def _get_action_plan_templates(self) -> Dict[Tuple[ContentType, FailureReason], List[str]]:
+        """Get action plan related templates."""
+        return {
             (ContentType.ACTION_PLAN, FailureReason.LOW_QUALITY): 
                 self._get_action_plan_low_quality_templates(),
-            
             (ContentType.ACTION_PLAN, FailureReason.VALIDATION_FAILED): 
-                self._get_action_plan_validation_templates(),
-            
-            # Report fallbacks
+                self._get_action_plan_validation_templates()
+        }
+    
+    def _get_report_templates(self) -> Dict[Tuple[ContentType, FailureReason], List[str]]:
+        """Get report related templates."""
+        return {
             (ContentType.REPORT, FailureReason.LOW_QUALITY): 
                 self._get_report_low_quality_templates(),
-            
             (ContentType.REPORT, FailureReason.GENERIC_CONTENT): 
                 self._get_report_generic_templates(),
-            
-            # Triage fallbacks
             (ContentType.TRIAGE, FailureReason.LOW_QUALITY): 
-                self._get_triage_low_quality_templates(),
-            
-            # Error message fallbacks
+                self._get_triage_low_quality_templates()
+        }
+    
+    def _get_system_templates(self) -> Dict[Tuple[ContentType, FailureReason], List[str]]:
+        """Get system error and general templates."""
+        return {
             (ContentType.ERROR_MESSAGE, FailureReason.LLM_ERROR): 
                 self._get_error_message_templates(),
-            
-            # General fallbacks
             (ContentType.GENERAL, FailureReason.TIMEOUT): 
                 self._get_general_timeout_templates(),
-            
             (ContentType.GENERAL, FailureReason.RATE_LIMIT): 
                 self._get_general_rate_limit_templates()
         }

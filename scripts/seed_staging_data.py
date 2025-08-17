@@ -195,65 +195,83 @@ class StagingDataSeeder:
                     message = await self.message_repo.create(db, message_data.dict())
                     self.created_data["messages"].append(message.id)
     
+    def _get_optimization_configuration(self, config: Dict) -> Dict[str, Any]:
+        """Get optimization seeding configuration."""
+        request_count = config.get("count", 50)
+        print(f"Creating {request_count} optimization requests...")
+        return {
+            "request_count": request_count,
+            "optimization_types": ["cost_optimization", "performance_optimization", "resource_optimization", "latency_optimization", "throughput_optimization"],
+            "statuses": ["pending", "processing", "completed", "failed", "cancelled"],
+            "status_weights": [0.1, 0.15, 0.6, 0.1, 0.05]
+        }
+
+    def _generate_request_identifiers(self) -> Dict[str, Any]:
+        """Generate user and thread identifiers for request."""
+        user_id = random.choice(self.created_data["users"])
+        thread_id = random.choice(self.created_data["threads"]) if self.created_data["threads"] else None
+        return {"user_id": user_id, "thread_id": thread_id}
+
+    def _generate_request_characteristics(self, opt_config: Dict) -> Dict[str, str]:
+        """Generate optimization request characteristics."""
+        status = random.choices(opt_config["statuses"], weights=opt_config["status_weights"])[0]
+        opt_type = random.choice(opt_config["optimization_types"])
+        priority = random.choice(["low", "medium", "high", "critical"])
+        return {"status": status, "request_type": opt_type, "priority": priority}
+
+    def _generate_request_parameters(self) -> Dict[str, str]:
+        """Generate optimization request parameters."""
+        return {
+            "target_metric": random.choice(["cost", "latency", "throughput"]),
+            "constraint": random.choice(["budget", "sla", "capacity"]),
+            "optimization_level": random.choice(["basic", "advanced", "extreme"]),
+            "time_window": random.choice(["hourly", "daily", "weekly", "monthly"])
+        }
+
+    def _generate_request_timestamps(self) -> Dict[str, datetime]:
+        """Generate request creation and update timestamps."""
+        return {
+            "created_at": datetime.utcnow() - timedelta(hours=random.randint(1, 720)),
+            "updated_at": datetime.utcnow() - timedelta(hours=random.randint(0, 24))
+        }
+
+    def _generate_completed_request_results(self) -> Dict[str, Any]:
+        """Generate results for completed optimization requests."""
+        return {
+            "original_cost": random.uniform(1000, 10000),
+            "optimized_cost": random.uniform(500, 8000),
+            "savings_percentage": random.uniform(10, 50),
+            "recommendations": [fake.sentence() for _ in range(random.randint(3, 7))],
+            "implementation_steps": [fake.sentence() for _ in range(random.randint(5, 10))]
+        }
+
+    def _build_optimization_request_data(self, opt_config: Dict) -> Dict[str, Any]:
+        """Build complete optimization request data structure."""
+        identifiers = self._generate_request_identifiers()
+        characteristics = self._generate_request_characteristics(opt_config)
+        parameters = self._generate_request_parameters()
+        timestamps = self._generate_request_timestamps()
+        
+        request_data = {**identifiers, **characteristics, "parameters": parameters, **timestamps}
+        
+        if characteristics["status"] == "completed":
+            request_data["results"] = self._generate_completed_request_results()
+            request_data["completed_at"] = datetime.utcnow() - timedelta(hours=random.randint(0, 12))
+        
+        return request_data
+
+    async def _create_single_optimization_request(self, db: AsyncSession, opt_config: Dict):
+        """Create a single optimization request and track it."""
+        request_data = self._build_optimization_request_data(opt_config)
+        optimization = await self.optimization_repo.create(db, request_data)
+        self.created_data["optimizations"].append(optimization.id)
+
     async def seed_optimization_requests(self, db: AsyncSession, config: Dict):
         """Create optimization requests with various statuses"""
-        request_count = config.get("count", 50)
-        
-        print(f"Creating {request_count} optimization requests...")
-        
-        optimization_types = [
-            "cost_optimization",
-            "performance_optimization",
-            "resource_optimization",
-            "latency_optimization",
-            "throughput_optimization"
-        ]
-        
-        statuses = ["pending", "processing", "completed", "failed", "cancelled"]
-        status_weights = [0.1, 0.15, 0.6, 0.1, 0.05]
-        
-        for i in range(request_count):
-            user_id = random.choice(self.created_data["users"])
-            thread_id = random.choice(self.created_data["threads"]) if self.created_data["threads"] else None
-            
-            status = random.choices(statuses, weights=status_weights)[0]
-            opt_type = random.choice(optimization_types)
-            
-            request_data = {
-                "user_id": user_id,
-                "thread_id": thread_id,
-                "request_type": opt_type,
-                "status": status,
-                "priority": random.choice(["low", "medium", "high", "critical"]),
-                "parameters": {
-                    "target_metric": random.choice(["cost", "latency", "throughput"]),
-                    "constraint": random.choice(["budget", "sla", "capacity"]),
-                    "optimization_level": random.choice(["basic", "advanced", "extreme"]),
-                    "time_window": random.choice(["hourly", "daily", "weekly", "monthly"])
-                },
-                "created_at": datetime.utcnow() - timedelta(hours=random.randint(1, 720)),
-                "updated_at": datetime.utcnow() - timedelta(hours=random.randint(0, 24))
-            }
-            
-            # Add results for completed requests
-            if status == "completed":
-                request_data["results"] = {
-                    "original_cost": random.uniform(1000, 10000),
-                    "optimized_cost": random.uniform(500, 8000),
-                    "savings_percentage": random.uniform(10, 50),
-                    "recommendations": [
-                        fake.sentence() for _ in range(random.randint(3, 7))
-                    ],
-                    "implementation_steps": [
-                        fake.sentence() for _ in range(random.randint(5, 10))
-                    ]
-                }
-                request_data["completed_at"] = datetime.utcnow() - timedelta(hours=random.randint(0, 12))
-            
-            optimization = await self.optimization_repo.create(db, request_data)
-            self.created_data["optimizations"].append(optimization.id)
-        
-        print(f"  Created {request_count} optimization requests")
+        opt_config = self._get_optimization_configuration(config)
+        for i in range(opt_config["request_count"]):
+            await self._create_single_optimization_request(db, opt_config)
+        print(f"  Created {opt_config['request_count']} optimization requests")
     
     def _get_metric_types(self) -> List[str]:
         """Get list of supported metric types."""

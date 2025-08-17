@@ -10,6 +10,7 @@ import { render, waitFor, screen, fireEvent, act } from '@testing-library/react'
 import { renderHook } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
+import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 
 // Import providers and hooks
 import { AgentProvider } from '@/providers/AgentProvider';
@@ -77,7 +78,7 @@ export const setupTestEnvironment = (server: WS) => {
  * Should be called in afterEach of each test suite
  */
 export const cleanupTestEnvironment = () => {
-  WS.clean();
+  safeWebSocketCleanup();
   jest.restoreAllMocks();
 };
 

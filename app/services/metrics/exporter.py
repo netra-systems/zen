@@ -37,10 +37,18 @@ class MetricsExporter:
         include_metadata: bool = True
     ) -> str:
         """Export metrics in specified format"""
+        handler = self._get_export_handler(export_format)
+        return await self._execute_export(handler, metrics_data, include_metadata, export_format)
+    
+    def _get_export_handler(self, export_format: ExportFormat):
+        """Get export handler for format."""
         handler = self._export_handlers.get(export_format)
         if not handler:
             raise ValueError(f"Unsupported export format: {export_format}")
-        
+        return handler
+    
+    async def _execute_export(self, handler, metrics_data, include_metadata: bool, export_format: ExportFormat) -> str:
+        """Execute export with error handling."""
         try:
             result = await handler(metrics_data, include_metadata)
             logger.debug(f"Exported metrics in {export_format.value} format")
@@ -56,82 +64,130 @@ class MetricsExporter:
     
     async def _prepare_json_data(self, data: Any, include_metadata: bool) -> Dict[str, Any]:
         """Prepare data structure for JSON export"""
+        return await self._convert_data_by_type(data, include_metadata)
+    
+    async def _convert_data_by_type(self, data: Any, include_metadata: bool) -> Dict[str, Any]:
+        """Convert data based on its type."""
         if isinstance(data, MetricsSnapshot):
             return await self._snapshot_to_dict(data, include_metadata)
         elif isinstance(data, list):
             return await self._list_to_dict(data, include_metadata)
         elif isinstance(data, dict):
             return data
-        else:
-            return {"data": str(data), "type": type(data).__name__}
+        return self._create_generic_data_dict(data)
+    
+    def _create_generic_data_dict(self, data: Any) -> Dict[str, Any]:
+        """Create generic data dictionary for unknown types."""
+        return {"data": str(data), "type": type(data).__name__}
     
     async def _snapshot_to_dict(self, snapshot: MetricsSnapshot, include_metadata: bool) -> Dict[str, Any]:
         """Convert metrics snapshot to dictionary"""
-        result = {
+        result = await self._build_snapshot_base_dict(snapshot)
+        await self._add_snapshot_metrics(result, snapshot)
+        self._add_snapshot_metadata_if_needed(result, include_metadata)
+        return result
+    
+    async def _build_snapshot_base_dict(self, snapshot: MetricsSnapshot) -> Dict[str, Any]:
+        """Build base snapshot dictionary."""
+        return {
             "corpus_id": snapshot.corpus_id,
             "snapshot_time": snapshot.snapshot_time.isoformat(),
             "total_records": snapshot.total_records,
-            "health_status": snapshot.health_status,
-            "operation_metrics": [
-                await self._operation_metrics_to_dict(op) for op in snapshot.operation_metrics
-            ],
-            "resource_usage": [
-                await self._resource_usage_to_dict(ru) for ru in snapshot.resource_usage
-            ],
-            "custom_metrics": [
-                await self._corpus_metric_to_dict(cm) for cm in snapshot.custom_metrics
-            ]
+            "health_status": snapshot.health_status
         }
-        
+    
+    async def _add_snapshot_metrics(self, result: Dict[str, Any], snapshot: MetricsSnapshot) -> None:
+        """Add metrics arrays to snapshot result."""
+        result["operation_metrics"] = await self._convert_operation_metrics(snapshot.operation_metrics)
+        result["resource_usage"] = await self._convert_resource_usage(snapshot.resource_usage)
+        result["custom_metrics"] = await self._convert_custom_metrics(snapshot.custom_metrics)
+        await self._add_quality_metrics_if_present(result, snapshot)
+    
+    async def _convert_operation_metrics(self, operation_metrics) -> List[Dict[str, Any]]:
+        """Convert operation metrics to dictionaries."""
+        return [await self._operation_metrics_to_dict(op) for op in operation_metrics]
+    
+    async def _convert_resource_usage(self, resource_usage) -> List[Dict[str, Any]]:
+        """Convert resource usage to dictionaries."""
+        return [await self._resource_usage_to_dict(ru) for ru in resource_usage]
+    
+    async def _convert_custom_metrics(self, custom_metrics) -> List[Dict[str, Any]]:
+        """Convert custom metrics to dictionaries."""
+        return [await self._corpus_metric_to_dict(cm) for cm in custom_metrics]
+    
+    async def _add_quality_metrics_if_present(self, result: Dict[str, Any], snapshot: MetricsSnapshot) -> None:
+        """Add quality metrics if present in snapshot."""
         if snapshot.quality_metrics:
             result["quality_metrics"] = await self._quality_metrics_to_dict(snapshot.quality_metrics)
-        
+    
+    def _add_snapshot_metadata_if_needed(self, result: Dict[str, Any], include_metadata: bool) -> None:
+        """Add export metadata if requested."""
         if include_metadata:
-            result["export_metadata"] = {
-                "exported_at": datetime.now(UTC).isoformat(),
-                "format": "json",
-                "version": "1.0"
-            }
-        
-        return result
+            result["export_metadata"] = self._create_json_export_metadata()
+    
+    def _create_json_export_metadata(self) -> Dict[str, str]:
+        """Create JSON export metadata."""
+        return {
+            "exported_at": datetime.now(UTC).isoformat(),
+            "format": "json",
+            "version": "1.0"
+        }
     
     async def _list_to_dict(self, data_list: List[Any], include_metadata: bool) -> Dict[str, Any]:
         """Convert list data to dictionary format"""
         result = {"metrics": [], "count": len(data_list)}
-        
-        for item in data_list:
-            if isinstance(item, CorpusMetric):
-                result["metrics"].append(await self._corpus_metric_to_dict(item))
-            elif isinstance(item, TimeSeriesPoint):
-                result["metrics"].append(await self._time_series_to_dict(item))
-            else:
-                result["metrics"].append(str(item))
-        
-        if include_metadata:
-            result["export_metadata"] = {
-                "exported_at": datetime.now(UTC).isoformat(),
-                "format": "json",
-                "data_type": "list"
-            }
-        
+        await self._populate_list_metrics(result, data_list)
+        self._add_list_metadata_if_needed(result, include_metadata)
         return result
+    
+    async def _populate_list_metrics(self, result: Dict[str, Any], data_list: List[Any]) -> None:
+        """Populate metrics array from data list."""
+        for item in data_list:
+            converted_item = await self._convert_list_item(item)
+            result["metrics"].append(converted_item)
+    
+    async def _convert_list_item(self, item: Any) -> Any:
+        """Convert individual list item to appropriate format."""
+        if isinstance(item, CorpusMetric):
+            return await self._corpus_metric_to_dict(item)
+        elif isinstance(item, TimeSeriesPoint):
+            return await self._time_series_to_dict(item)
+        return str(item)
+    
+    def _add_list_metadata_if_needed(self, result: Dict[str, Any], include_metadata: bool) -> None:
+        """Add export metadata for list if requested."""
+        if include_metadata:
+            result["export_metadata"] = self._create_list_export_metadata()
+    
+    def _create_list_export_metadata(self) -> Dict[str, str]:
+        """Create list export metadata."""
+        return {
+            "exported_at": datetime.now(UTC).isoformat(),
+            "format": "json",
+            "data_type": "list"
+        }
     
     async def _export_prometheus(self, data: Any, include_metadata: bool) -> str:
         """Export metrics in Prometheus format"""
         lines = []
         timestamp_ms = int(datetime.now(UTC).timestamp() * 1000)
-        
+        await self._add_prometheus_data_lines(lines, data, timestamp_ms)
+        self._add_prometheus_metadata_if_needed(lines, include_metadata, timestamp_ms)
+        return "\n".join(lines)
+    
+    async def _add_prometheus_data_lines(self, lines: List[str], data: Any, timestamp_ms: int) -> None:
+        """Add Prometheus data lines based on data type."""
         if isinstance(data, MetricsSnapshot):
             lines.extend(await self._snapshot_to_prometheus(data, timestamp_ms))
         elif isinstance(data, list):
             lines.extend(await self._list_to_prometheus(data, timestamp_ms))
-        
+    
+    def _add_prometheus_metadata_if_needed(self, lines: List[str], include_metadata: bool, timestamp_ms: int) -> None:
+        """Add Prometheus metadata lines if requested."""
         if include_metadata:
             lines.append(f"# HELP corpus_metrics_export_info Export metadata information")
             lines.append(f"# TYPE corpus_metrics_export_info gauge")
             lines.append(f'corpus_metrics_export_info{{format="prometheus",version="1.0"}} 1 {timestamp_ms}')
-        
-        return "\n".join(lines)
     
     async def _snapshot_to_prometheus(self, snapshot: MetricsSnapshot, timestamp_ms: int) -> List[str]:
         """Convert snapshot to Prometheus format"""
@@ -185,15 +241,17 @@ class MetricsExporter:
     async def _export_csv(self, data: Any, include_metadata: bool) -> str:
         """Export metrics as CSV"""
         output = io.StringIO()
-        
+        await self._write_csv_data_by_type(data, output, include_metadata)
+        return output.getvalue()
+    
+    async def _write_csv_data_by_type(self, data: Any, output: io.StringIO, include_metadata: bool) -> None:
+        """Write CSV data based on data type."""
         if isinstance(data, MetricsSnapshot):
             await self._snapshot_to_csv(data, output, include_metadata)
         elif isinstance(data, list):
             await self._list_to_csv(data, output, include_metadata)
         else:
             await self._generic_to_csv(data, output)
-        
-        return output.getvalue()
     
     async def _snapshot_to_csv(self, snapshot: MetricsSnapshot, output: io.StringIO, include_metadata: bool):
         """Convert snapshot to CSV format"""
@@ -260,13 +318,15 @@ class MetricsExporter:
     async def _export_influxdb(self, data: Any, include_metadata: bool) -> str:
         """Export metrics in InfluxDB line protocol format"""
         lines = []
-        
+        await self._add_influx_lines_by_type(lines, data)
+        return "\n".join(lines)
+    
+    async def _add_influx_lines_by_type(self, lines: List[str], data: Any) -> None:
+        """Add InfluxDB lines based on data type."""
         if isinstance(data, MetricsSnapshot):
             lines.extend(await self._snapshot_to_influx(data))
         elif isinstance(data, list):
             lines.extend(await self._list_to_influx(data))
-        
-        return "\n".join(lines)
     
     async def _snapshot_to_influx(self, snapshot: MetricsSnapshot) -> List[str]:
         """Convert snapshot to InfluxDB line protocol"""

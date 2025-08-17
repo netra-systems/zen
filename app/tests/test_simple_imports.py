@@ -95,7 +95,7 @@ class TestAuthenticationFlow:
     def test_password_hashing(self):
         """Test password hashing utilities"""
         try:
-            from app.auth.auth import verify_password, get_password_hash
+            from app.auth_integration.auth import verify_password, get_password_hash
             
             password = "test_password_123"
             hashed = get_password_hash(password)
@@ -109,7 +109,7 @@ class TestAuthenticationFlow:
     def test_jwt_token_creation(self):
         """Test JWT token creation"""
         try:
-            from app.auth.auth import create_access_token
+            from app.auth_integration.auth import create_access_token
             
             data = {"sub": "test@example.com"}
             token = create_access_token(data)

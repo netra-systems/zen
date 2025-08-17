@@ -13,13 +13,18 @@ from .report_generators import (
     generate_markdown_report, status_badge, calculate_total_counts
 )
 from .unified_reporter import UnifiedReporter
+from .enhanced_reporter import EnhancedReporter
 
 
 def save_test_report(results: Dict, level: str, config: Dict, exit_code: int, reports_dir: Path, staging_mode: bool = False):
-    """Save test report using unified reporting system."""
-    # Use unified reporter for all reporting
+    """Save test report using enhanced reporting system."""
+    # Use enhanced reporter for clearer reporting
+    enhanced = EnhancedReporter(reports_dir)
+    report = enhanced.generate_report(results, level)
+    
+    # Also use unified reporter for backward compatibility
     unified = UnifiedReporter(reports_dir)
-    report = unified.generate_unified_report(results, level, exit_code)
+    unified.generate_unified_report(results, level, exit_code)
     
     # Also save legacy format for compatibility (but no timestamps)
     latest_path = reports_dir / "latest" / f"{level}_report.md"
@@ -153,12 +158,6 @@ class ReportArchiver:
         self.reports_dir = reports_dir
         self.history_dir = reports_dir / "history"
         self.history_dir.mkdir(exist_ok=True)
-    
-    def archive_report(self, report_path: Path, level: str = None) -> Path:
-        """Archive report - no longer creates timestamps."""
-        # Deprecated - history is now managed by UnifiedReporter
-        # Keep for backward compatibility but just return the path
-        return report_path
     
     def get_archived_reports(self, level: str = None) -> list:
         """Get list of archived reports, optionally filtered by level."""

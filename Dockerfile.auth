@@ -1,0 +1,60 @@
+# Auth Service Dockerfile
+# Standalone microservice for authentication
+
+# Build stage
+FROM python:3.11-slim as builder
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY auth_service/requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# Production stage
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Copy Python dependencies from builder
+COPY --from=builder /root/.local /root/.local
+
+# Make sure scripts in .local are usable
+ENV PATH=/root/.local/bin:$PATH
+
+# Copy application code (selective copy for auth service)
+COPY auth_service_minimal.py ./main.py
+
+# Copy only necessary app modules (exclude LLM-related modules)
+COPY app/__init__.py ./app/
+COPY app/config*.py ./app/
+COPY app/logging_config.py ./app/
+COPY app/auth_dependencies.py ./app/
+COPY app/clients/ ./app/clients/
+COPY app/core/ ./app/core/
+COPY app/db/ ./app/db/
+COPY app/routes/auth/ ./app/routes/auth/
+COPY app/routes/__init__.py ./app/routes/
+COPY app/schemas/ ./app/schemas/
+COPY app/services/security_service.py ./app/services/
+COPY app/services/user_service.py ./app/services/
+COPY app/services/__init__.py ./app/services/
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV SERVICE_NAME=auth-service
+ENV PORT=8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD python -c "import requests; exit(0 if requests.get('http://localhost:8080/health').status_code == 200 else 1)"
+
+# Expose port
+EXPOSE 8080
+
+# Run the auth service
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "2"]

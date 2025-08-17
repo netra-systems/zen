@@ -33,6 +33,7 @@
         <description>
             Comprehensive testing strategy for the Netra AI Optimization Platform.
             Targets 97% code coverage with focus on E2E tests, quality gates, and real LLM validation.
+            Includes automatic bad test detection to identify and manage consistently failing tests.
         </description>
         <goals>
             <goal>Maintain 97% overall test coverage</goal>
@@ -43,6 +44,8 @@
             <goal>Synthetic data generation for consistent testing</goal>
             <goal>Fast feedback loops with quick test mode</goal>
             <goal>When fixing tests align tests with latest code. Update tests as needed to test real latest code.</goal>
+            <goal>Automatically detect and report bad tests (consistently failing or high failure rate)</goal>
+            <goal>Track test failure patterns to identify tests needing deletion or major refactoring</goal>
         </goals>
     </overview>
     
@@ -383,6 +386,115 @@
             <benefit>Easy CI/CD integration with configurable parallelization</benefit>
         </benefits>
     </frontend_parallel_testing>
+    
+    <bad_test_detection>
+        <description>
+            Automatic detection and tracking of consistently failing tests to identify
+            tests that need immediate attention, refactoring, or deletion.
+        </description>
+        
+        <features>
+            <feature>Automatic tracking of test failures across runs</feature>
+            <feature>Persistent storage of failure history in test_reports/bad_tests.json</feature>
+            <feature>Smart detection algorithms for identifying problematic tests</feature>
+            <feature>Detailed reporting with recommendations</feature>
+            <feature>Integration with pytest through custom plugin</feature>
+            <feature>CLI tool for viewing and managing bad test data</feature>
+        </features>
+        
+        <detection_criteria>
+            <criterion name="consistently_failing">
+                <threshold>5+ consecutive failures</threshold>
+                <action>Recommend immediate fix</action>
+                <priority>HIGH</priority>
+            </criterion>
+            <criterion name="high_failure_rate">
+                <threshold>70% failure rate with 10+ total runs</threshold>
+                <action>Consider refactoring</action>
+                <priority>MEDIUM</priority>
+            </criterion>
+            <criterion name="very_high_failure_rate">
+                <threshold>90% failure rate</threshold>
+                <action>Recommend deletion or complete rewrite</action>
+                <priority>CRITICAL</priority>
+            </criterion>
+        </detection_criteria>
+        
+        <components>
+            <component name="BadTestDetector" path="test_framework/bad_test_detector.py">
+                <description>Core detection engine that tracks and analyzes test failures</description>
+                <responsibilities>
+                    <responsibility>Track test results (pass/fail) with error details</responsibility>
+                    <responsibility>Maintain persistent storage of failure history</responsibility>
+                    <responsibility>Identify bad tests based on criteria</responsibility>
+                    <responsibility>Generate reports and statistics</responsibility>
+                </responsibilities>
+            </component>
+            
+            <component name="PytestBadTestPlugin" path="test_framework/pytest_bad_test_plugin.py">
+                <description>Pytest plugin for automatic integration</description>
+                <responsibilities>
+                    <responsibility>Hook into pytest test execution</responsibility>
+                    <responsibility>Record test outcomes automatically</responsibility>
+                    <responsibility>Mark bad tests with pytest markers</responsibility>
+                    <responsibility>Display warnings for bad tests</responsibility>
+                </responsibilities>
+            </component>
+            
+            <component name="BadTestReporter" path="test_framework/bad_test_reporter.py">
+                <description>CLI tool for viewing and managing bad test reports</description>
+                <commands>
+                    <command>python -m test_framework.bad_test_reporter</command>
+                    <command>python -m test_framework.bad_test_reporter --summary</command>
+                    <command>python -m test_framework.bad_test_reporter --details</command>
+                    <command>python -m test_framework.bad_test_reporter --test "test_name"</command>
+                    <command>python -m test_framework.bad_test_reporter --reset</command>
+                    <command>python -m test_framework.bad_test_reporter --export report.json</command>
+                </commands>
+            </component>
+        </components>
+        
+        <usage>
+            <note>Bad test detection is enabled by default for all test runs</note>
+            <disable_command>python scripts/test_backend.py --no-bad-test-detection</disable_command>
+            <view_report>python -m test_framework.bad_test_reporter</view_report>
+            <reset_data>python -m test_framework.bad_test_reporter --reset</reset_data>
+        </usage>
+        
+        <data_structure>
+            <file>test_reports/bad_tests.json</file>
+            <format>
+                {
+                    "version": "1.0",
+                    "tests": {
+                        "test_name": {
+                            "component": "backend|frontend|e2e",
+                            "first_seen": "ISO timestamp",
+                            "last_failure": "ISO timestamp",
+                            "last_pass": "ISO timestamp",
+                            "total_failures": "integer",
+                            "total_passes": "integer",
+                            "consecutive_failures": "integer",
+                            "recent_failures": ["array of last 10 failure details"],
+                            "marked_as_bad": "boolean",
+                            "bad_reason": "string"
+                        }
+                    },
+                    "runs": ["array of run statistics"],
+                    "stats": {
+                        "total_runs": "integer",
+                        "last_updated": "ISO timestamp"
+                    }
+                }
+            </format>
+        </data_structure>
+        
+        <integration_points>
+            <integration>test_framework/runner.py - Main test runner integration</integration>
+            <integration>test_framework/test_runners.py - Backend test execution</integration>
+            <integration>scripts/test_backend.py - Command-line argument support</integration>
+        </integration_points>
+    </bad_test_detection>
     
     <working_test_files>
         <test_file name="test_simple_health.py">

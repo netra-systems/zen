@@ -1,10 +1,144 @@
+// Mock all hooks before any imports
+const mockUseUnifiedChatStore = jest.fn();
+const mockUseWebSocket = jest.fn();
+const mockUseLoadingState = jest.fn();
+const mockUseEventProcessor = jest.fn();
+
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
+
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: mockUseWebSocket
+}));
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+
+jest.mock('@/hooks/useEventProcessor', () => ({
+  useEventProcessor: mockUseEventProcessor
+}));
+
+// Mock UI components
+jest.mock('@/components/chat/ChatHeader', () => ({
+  ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
+}));
+
+jest.mock('@/components/chat/MessageList', () => ({
+  MessageList: () => <div data-testid="message-list">Message List</div>
+}));
+
+jest.mock('@/components/chat/MessageInput', () => ({
+  MessageInput: () => <div data-testid="message-input">Message Input</div>
+}));
+
+jest.mock('@/components/chat/PersistentResponseCard', () => ({
+  PersistentResponseCard: ({ isCollapsed, onToggleCollapse }: any) => (
+    <div data-testid="response-card" data-collapsed={isCollapsed}>
+      <button onClick={onToggleCollapse}>Toggle</button>
+      Response Card
+    </div>
+  )
+}));
+
+jest.mock('@/components/chat/ExamplePrompts', () => ({
+  ExamplePrompts: () => <div data-testid="example-prompts">Example Prompts</div>
+}));
+
+jest.mock('@/components/chat/OverflowPanel', () => ({
+  OverflowPanel: () => <div data-testid="overflow-panel">Overflow Panel</div>
+}));
+
+jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
+  EventDiagnosticsPanel: () => <div data-testid="event-diagnostics">Event Diagnostics</div>
+}));
+
+// Mock framer-motion
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: 'div',
+  },
+  AnimatePresence: ({ children }: any) => children,
+}));
+
 import React from 'react';
 import { render, screen, waitFor, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MainChat from '@/components/chat/MainChat';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import { useChatWebSocket } from '@/hooks/useChatWebSocket';
-import { mockStore, setupMocks, cleanupMocks } from './MainChat.fixtures';
+import { useWebSocket } from '@/hooks/useWebSocket';
+
+// Mock store data
+const mockStore = {
+  isProcessing: false,
+  messages: [],
+  fastLayerData: null,
+  mediumLayerData: null,
+  slowLayerData: null,
+  currentRunId: null,
+  activeThreadId: null,
+  isThreadLoading: false,
+  handleWebSocketEvent: jest.fn(),
+  addMessage: jest.fn(),
+  setProcessing: jest.fn(),
+  clearMessages: jest.fn(),
+  updateLayerData: jest.fn(),
+};
+
+// Setup function
+const setupMocks = () => {
+  jest.clearAllMocks();
+  jest.useFakeTimers();
+  
+  // Mock fetch for config
+  global.fetch = jest.fn().mockResolvedValue({
+    json: jest.fn().mockResolvedValue({
+      ws_url: 'ws://localhost:8000/ws'
+    })
+  });
+
+  // Set up fresh default mock return values for each test
+  mockUseUnifiedChatStore.mockReturnValue({
+    isProcessing: false,
+    messages: [],
+    fastLayerData: null,
+    mediumLayerData: null,
+    slowLayerData: null,
+    currentRunId: null,
+    activeThreadId: null,
+    isThreadLoading: false,
+    handleWebSocketEvent: jest.fn(),
+    addMessage: jest.fn(),
+    setProcessing: jest.fn(),
+    clearMessages: jest.fn(),
+    updateLayerData: jest.fn(),
+  });
+  
+  mockUseWebSocket.mockReturnValue({
+    messages: [],
+    connected: true,
+    error: null
+  });
+  
+  mockUseLoadingState.mockReturnValue({
+    shouldShowLoading: false,
+    shouldShowEmptyState: false,
+    shouldShowExamplePrompts: false,
+    loadingMessage: ''
+  });
+  
+  mockUseEventProcessor.mockReturnValue({
+    processedEvents: [],
+    isProcessing: false,
+    stats: { processed: 0, failed: 0 }
+  });
+};
+
+// Cleanup function
+const cleanupMocks = () => {
+  jest.useRealTimers();
+};
 
 describe('MainChat - WebSocket Connection Tests', () => {
   beforeEach(() => {
@@ -19,13 +153,12 @@ describe('MainChat - WebSocket Connection Tests', () => {
     it('should initialize WebSocket connection on mount', () => {
       render(<MainChat />);
       
-      const { useChatWebSocket } = require('@/hooks/useChatWebSocket');
-      expect(useChatWebSocket).toHaveBeenCalled();
+      expect(mockUseWebSocket).toHaveBeenCalled();
     });
 
     it('should handle WebSocket connection state', () => {
-      const { useChatWebSocket } = require('@/hooks/useChatWebSocket');
-      useChatWebSocket.mockReturnValue({
+      mockUseWebSocket.mockReturnValue({
+        messages: [],
         connected: true,
         error: null
       });
@@ -33,7 +166,8 @@ describe('MainChat - WebSocket Connection Tests', () => {
       const { rerender } = render(<MainChat />);
       
       // Simulate disconnection
-      useChatWebSocket.mockReturnValue({
+      mockUseWebSocket.mockReturnValue({
+        messages: [],
         connected: false,
         error: null
       });
@@ -44,8 +178,8 @@ describe('MainChat - WebSocket Connection Tests', () => {
     });
 
     it('should handle WebSocket errors gracefully', () => {
-      const { useChatWebSocket } = require('@/hooks/useChatWebSocket');
-      useChatWebSocket.mockReturnValue({
+      mockUseWebSocket.mockReturnValue({
+        messages: [],
         connected: false,
         error: new Error('WebSocket connection failed')
       });
@@ -59,7 +193,8 @@ describe('MainChat - WebSocket Connection Tests', () => {
 
     it('should reconnect WebSocket on error', async () => {
       const mockReconnect = jest.fn();
-      (useChatWebSocket as jest.Mock).mockReturnValue({
+      mockUseWebSocket.mockReturnValue({
+        messages: [],
         connected: false,
         error: new Error('Connection lost'),
         reconnect: mockReconnect
@@ -69,7 +204,7 @@ describe('MainChat - WebSocket Connection Tests', () => {
       
       // Verify reconnect logic would be triggered
       // This would typically be handled by the WebSocket hook itself
-      expect(useChatWebSocket).toHaveBeenCalled();
+      expect(mockUseWebSocket).toHaveBeenCalled();
     });
 
     it('should maintain connection during component updates', () => {
@@ -80,11 +215,11 @@ describe('MainChat - WebSocket Connection Tests', () => {
         messages: [{ id: '1', type: 'user', content: 'Hello' }]
       };
       
-      (useUnifiedChatStore as jest.Mock).mockReturnValue(newMockStore);
+      mockUseUnifiedChatStore.mockReturnValue(newMockStore);
       rerender(<MainChat />);
       
       // WebSocket hook should not be re-initialized
-      expect(useChatWebSocket).toHaveBeenCalledTimes(2); // Once per render
+      expect(mockUseWebSocket).toHaveBeenCalledTimes(2); // Once per render
     });
 
     it('should handle rapid connection state changes', async () => {
@@ -92,7 +227,8 @@ describe('MainChat - WebSocket Connection Tests', () => {
       
       // Simulate rapid connection state changes
       for (let i = 0; i < 5; i++) {
-        (useChatWebSocket as jest.Mock).mockReturnValue({
+        mockUseWebSocket.mockReturnValue({
+          messages: [],
           connected: i % 2 === 0,
           error: null
         });
@@ -107,7 +243,7 @@ describe('MainChat - WebSocket Connection Tests', () => {
   describe('Error recovery and reconnection', () => {
     it('should handle store errors gracefully', () => {
       const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-      (useUnifiedChatStore as jest.Mock).mockImplementation(() => {
+      mockUseUnifiedChatStore.mockImplementation(() => {
         throw new Error('Store initialization failed');
       });
       
@@ -120,7 +256,8 @@ describe('MainChat - WebSocket Connection Tests', () => {
       const { rerender } = render(<MainChat />);
       
       // Simulate error
-      (useChatWebSocket as jest.Mock).mockReturnValue({
+      mockUseWebSocket.mockReturnValue({
+        messages: [],
         connected: false,
         error: new Error('Connection lost')
       });
@@ -128,7 +265,8 @@ describe('MainChat - WebSocket Connection Tests', () => {
       rerender(<MainChat />);
       
       // Simulate recovery
-      (useChatWebSocket as jest.Mock).mockReturnValue({
+      mockUseWebSocket.mockReturnValue({
+        messages: [],
         connected: true,
         error: null
       });
@@ -140,7 +278,7 @@ describe('MainChat - WebSocket Connection Tests', () => {
     });
 
     it('should handle message processing errors', () => {
-      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: true,
         error: 'Failed to process message'
@@ -155,7 +293,8 @@ describe('MainChat - WebSocket Connection Tests', () => {
 
     it('should retry failed operations', async () => {
       const mockRetry = jest.fn();
-      (useChatWebSocket as jest.Mock).mockReturnValue({
+      mockUseWebSocket.mockReturnValue({
+        messages: [],
         connected: false,
         error: new Error('Failed'),
         retry: mockRetry
@@ -164,7 +303,7 @@ describe('MainChat - WebSocket Connection Tests', () => {
       render(<MainChat />);
       
       // Verify retry mechanism would be available
-      expect(useChatWebSocket).toHaveBeenCalled();
+      expect(mockUseWebSocket).toHaveBeenCalled();
     });
 
     it('should maintain state during errors', () => {
@@ -172,7 +311,7 @@ describe('MainChat - WebSocket Connection Tests', () => {
         { id: '1', type: 'user', content: 'Previous message' }
       ];
       
-      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         messages,
         error: 'Current error'
@@ -188,7 +327,8 @@ describe('MainChat - WebSocket Connection Tests', () => {
       const { rerender } = render(<MainChat />);
       
       // Simulate network interruption
-      (useChatWebSocket as jest.Mock).mockReturnValue({
+      mockUseWebSocket.mockReturnValue({
+        messages: [],
         connected: false,
         error: new Error('Network error')
       });

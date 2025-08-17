@@ -145,17 +145,20 @@ class RetryStrategy:
     
     def should_retry(self, context: RecoveryContext) -> bool:
         """Determine if operation should be retried."""
-        if context.retry_count >= self.max_retries:
+        if self._has_exceeded_retry_limit(context):
             return False
-        
-        # Don't retry validation errors
+        return self._is_error_retryable(context)
+    
+    def _has_exceeded_retry_limit(self, context: RecoveryContext) -> bool:
+        """Check if retry limit has been exceeded."""
+        return context.retry_count >= self.max_retries
+    
+    def _is_error_retryable(self, context: RecoveryContext) -> bool:
+        """Check if error type is retryable."""
         if isinstance(context.error, ValueError):
             return False
-        
-        # Don't retry critical errors
         if context.severity == ErrorSeverity.CRITICAL:
             return False
-        
         return True
     
     def get_delay(self, retry_count: int) -> float:
@@ -248,15 +251,26 @@ class ErrorRecoveryManager:
     
     def _setup_default_strategies(self) -> None:
         """Set up default retry strategies for different operation types."""
-        self.retry_strategies = {
+        database_strategies = self._create_database_strategies()
+        service_strategies = self._create_service_strategies()
+        self.retry_strategies = {**database_strategies, **service_strategies}
+    
+    def _create_database_strategies(self) -> Dict[OperationType, RetryStrategy]:
+        """Create retry strategies for database operations."""
+        return {
             OperationType.DATABASE_WRITE: RetryStrategy(max_retries=2, base_delay=0.5),
             OperationType.DATABASE_READ: RetryStrategy(max_retries=3, base_delay=0.1),
+            OperationType.CACHE_OPERATION: RetryStrategy(max_retries=1, base_delay=0.1),
+            OperationType.FILE_OPERATION: RetryStrategy(max_retries=2, base_delay=0.5)
+        }
+    
+    def _create_service_strategies(self) -> Dict[OperationType, RetryStrategy]:
+        """Create retry strategies for service operations."""
+        return {
             OperationType.LLM_REQUEST: RetryStrategy(max_retries=3, base_delay=2.0),
             OperationType.WEBSOCKET_SEND: RetryStrategy(max_retries=1, base_delay=0.1),
             OperationType.EXTERNAL_API: RetryStrategy(max_retries=3, base_delay=1.0),
-            OperationType.AGENT_EXECUTION: RetryStrategy(max_retries=2, base_delay=1.0),
-            OperationType.CACHE_OPERATION: RetryStrategy(max_retries=1, base_delay=0.1),
-            OperationType.FILE_OPERATION: RetryStrategy(max_retries=2, base_delay=0.5),
+            OperationType.AGENT_EXECUTION: RetryStrategy(max_retries=2, base_delay=1.0)
         }
     
     def register_compensation_action(self, action: CompensationAction) -> None:
@@ -280,11 +294,9 @@ class RecoveryExecutor:
     async def attempt_recovery(self, context: RecoveryContext) -> RecoveryResult:
         """Attempt to recover from an error."""
         try:
-            # Check circuit breaker first
-            circuit_breaker_result = self._check_circuit_breaker(context)
-            if circuit_breaker_result:
-                return circuit_breaker_result
-            
+            circuit_result = self._check_circuit_breaker(context)
+            if circuit_result:
+                return circuit_result
             return await self._execute_recovery_strategy(context)
         except Exception as e:
             logger.error(f"Recovery attempt failed: {e}")
@@ -294,30 +306,33 @@ class RecoveryExecutor:
         """Check circuit breaker state and return result if blocked."""
         circuit_breaker = self._get_circuit_breaker(context)
         if not circuit_breaker.should_allow_request():
-            return RecoveryResult(
-                success=False,
-                action_taken=RecoveryAction.CIRCUIT_BREAK,
-                circuit_broken=True
-            )
+            return self._create_circuit_break_result()
         return None
+    
+    def _create_circuit_break_result(self) -> RecoveryResult:
+        """Create circuit breaker result."""
+        return RecoveryResult(
+            success=False,
+            action_taken=RecoveryAction.CIRCUIT_BREAK,
+            circuit_broken=True
+        )
     
     async def _execute_recovery_strategy(self, context: RecoveryContext) -> RecoveryResult:
         """Execute recovery strategy (retry, compensation, or abort)."""
-        # Try retry first
         if self._should_retry(context):
             return await self._execute_retry(context)
-        
-        # Try compensation
         compensation_result = await self._execute_compensation(context)
         if compensation_result:
-            return RecoveryResult(
-                success=True,
-                action_taken=RecoveryAction.COMPENSATE,
-                compensation_required=True
-            )
-        
-        # Fallback to abort
+            return self._create_compensation_result()
         return self._create_abort_result(f"No recovery possible for {context.operation_id}")
+    
+    def _create_compensation_result(self) -> RecoveryResult:
+        """Create compensation recovery result."""
+        return RecoveryResult(
+            success=True,
+            action_taken=RecoveryAction.COMPENSATE,
+            compensation_required=True
+        )
     
     def _create_abort_result(self, error_message: str) -> RecoveryResult:
         """Create abort recovery result."""
@@ -343,10 +358,12 @@ class RecoveryExecutor:
         """Execute retry logic."""
         strategy = self.recovery_manager.retry_strategies[context.operation_type]
         delay = strategy.get_delay(context.retry_count)
-        
         logger.info(f"Retrying {context.operation_id} in {delay}s")
         await asyncio.sleep(delay)
-        
+        return self._create_retry_result()
+    
+    def _create_retry_result(self) -> RecoveryResult:
+        """Create retry recovery result."""
         return RecoveryResult(
             success=True,
             action_taken=RecoveryAction.RETRY
@@ -355,21 +372,27 @@ class RecoveryExecutor:
     async def _execute_compensation(self, context: RecoveryContext) -> bool:
         """Execute applicable compensation actions."""
         compensation_success = True
-        
-        for action in self.recovery_manager.compensation_actions:
-            if action.can_compensate(context):
-                try:
-                    result = await action.execute(context)
-                    if not result:
-                        compensation_success = False
-                        logger.warning(
-                            f"Compensation action failed: {type(action).__name__}"
-                        )
-                except Exception as e:
-                    logger.error(f"Compensation action error: {e}")
-                    compensation_success = False
-        
+        applicable_actions = self._get_applicable_actions(context)
+        for action in applicable_actions:
+            action_result = await self._execute_single_compensation(action, context)
+            compensation_success = compensation_success and action_result
         return compensation_success
+    
+    def _get_applicable_actions(self, context: RecoveryContext) -> List[CompensationAction]:
+        """Get compensation actions that can handle this context."""
+        return [action for action in self.recovery_manager.compensation_actions
+                if action.can_compensate(context)]
+    
+    async def _execute_single_compensation(self, action: CompensationAction, context: RecoveryContext) -> bool:
+        """Execute a single compensation action with error handling."""
+        try:
+            result = await action.execute(context)
+            if not result:
+                logger.warning(f"Compensation action failed: {type(action).__name__}")
+            return result
+        except Exception as e:
+            logger.error(f"Compensation action error: {e}")
+            return False
 
 
 # Global recovery manager instance

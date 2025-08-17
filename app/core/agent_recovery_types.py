@@ -45,64 +45,56 @@ class AgentRecoveryConfig:
     require_manual_intervention: bool = False
 
 
+def _create_triage_config(agent_type: AgentType) -> AgentRecoveryConfig:
+    """Create triage agent recovery configuration."""
+    return AgentRecoveryConfig(
+        agent_type=agent_type, max_retries=3, retry_delay_base=1.0,
+        circuit_breaker_threshold=5, fallback_enabled=True, compensation_enabled=False,
+        priority=RecoveryPriority.HIGH, timeout_seconds=30, preserve_state=True,
+        allow_degraded_mode=True, require_manual_intervention=False
+    )
+
+def _create_data_analysis_config(agent_type: AgentType) -> AgentRecoveryConfig:
+    """Create data analysis agent recovery configuration."""
+    return AgentRecoveryConfig(
+        agent_type=agent_type, max_retries=5, retry_delay_base=2.0,
+        circuit_breaker_threshold=10, fallback_enabled=True, compensation_enabled=True,
+        priority=RecoveryPriority.MEDIUM, timeout_seconds=120, preserve_state=True,
+        allow_degraded_mode=True, require_manual_intervention=False
+    )
+
+def _create_corpus_admin_config(agent_type: AgentType) -> AgentRecoveryConfig:
+    """Create corpus admin agent recovery configuration."""
+    return AgentRecoveryConfig(
+        agent_type=agent_type, max_retries=3, retry_delay_base=1.5,
+        circuit_breaker_threshold=7, fallback_enabled=True, compensation_enabled=True,
+        priority=RecoveryPriority.HIGH, timeout_seconds=60, preserve_state=True,
+        allow_degraded_mode=False, require_manual_intervention=True
+    )
+
+def _create_supervisor_config(agent_type: AgentType) -> AgentRecoveryConfig:
+    """Create supervisor agent recovery configuration."""
+    return AgentRecoveryConfig(
+        agent_type=agent_type, max_retries=2, retry_delay_base=0.5,
+        circuit_breaker_threshold=3, fallback_enabled=True, compensation_enabled=False,
+        priority=RecoveryPriority.CRITICAL, timeout_seconds=15, preserve_state=True,
+        allow_degraded_mode=True, require_manual_intervention=False
+    )
+
+def _get_config_factory_map() -> dict:
+    """Get mapping of agent types to their config factory functions."""
+    return {
+        AgentType.TRIAGE: _create_triage_config,
+        AgentType.DATA_ANALYSIS: _create_data_analysis_config,
+        AgentType.CORPUS_ADMIN: _create_corpus_admin_config,
+        AgentType.SUPERVISOR: _create_supervisor_config
+    }
+
 def create_default_config(agent_type: AgentType) -> AgentRecoveryConfig:
     """Create default configuration for agent type."""
-    base_configs = {
-        AgentType.TRIAGE: AgentRecoveryConfig(
-            agent_type=agent_type,
-            max_retries=3,
-            retry_delay_base=1.0,
-            circuit_breaker_threshold=5,
-            fallback_enabled=True,
-            compensation_enabled=False,
-            priority=RecoveryPriority.HIGH,
-            timeout_seconds=30,
-            preserve_state=True,
-            allow_degraded_mode=True,
-            require_manual_intervention=False
-        ),
-        AgentType.DATA_ANALYSIS: AgentRecoveryConfig(
-            agent_type=agent_type,
-            max_retries=5,
-            retry_delay_base=2.0,
-            circuit_breaker_threshold=10,
-            fallback_enabled=True,
-            compensation_enabled=True,
-            priority=RecoveryPriority.MEDIUM,
-            timeout_seconds=120,
-            preserve_state=True,
-            allow_degraded_mode=True,
-            require_manual_intervention=False
-        ),
-        AgentType.CORPUS_ADMIN: AgentRecoveryConfig(
-            agent_type=agent_type,
-            max_retries=3,
-            retry_delay_base=1.5,
-            circuit_breaker_threshold=7,
-            fallback_enabled=True,
-            compensation_enabled=True,
-            priority=RecoveryPriority.HIGH,
-            timeout_seconds=60,
-            preserve_state=True,
-            allow_degraded_mode=False,
-            require_manual_intervention=True
-        ),
-        AgentType.SUPERVISOR: AgentRecoveryConfig(
-            agent_type=agent_type,
-            max_retries=2,
-            retry_delay_base=0.5,
-            circuit_breaker_threshold=3,
-            fallback_enabled=True,
-            compensation_enabled=False,
-            priority=RecoveryPriority.CRITICAL,
-            timeout_seconds=15,
-            preserve_state=True,
-            allow_degraded_mode=True,
-            require_manual_intervention=False
-        )
-    }
-    
-    return base_configs.get(agent_type, base_configs[AgentType.TRIAGE])
+    config_factories = _get_config_factory_map()
+    factory = config_factories.get(agent_type, _create_triage_config)
+    return factory(agent_type)
 
 
 def create_all_default_configs() -> dict[AgentType, AgentRecoveryConfig]:

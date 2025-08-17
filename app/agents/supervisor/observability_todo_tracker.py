@@ -40,15 +40,25 @@ class TodoTracker:
     def _create_todo_base_data(self, action: str, task_id: str, description: str, 
                               priority: str, status: str, correlation_id: str) -> Dict[str, Any]:
         """Create base TODO data structure."""
+        base_fields = self._create_todo_base_fields(action, task_id, description)
+        meta_fields = self._create_todo_meta_fields(priority, status, correlation_id)
+        return {**base_fields, **meta_fields, "timestamp": time.time()}
+
+    def _create_todo_base_fields(self, action: str, task_id: str, description: str) -> Dict[str, Any]:
+        """Create base TODO fields."""
         return {
             "type": "supervisor_todo",
             "action": action,
             "task_id": task_id,
-            "task_description": description,
+            "task_description": description
+        }
+
+    def _create_todo_meta_fields(self, priority: str, status: str, correlation_id: str) -> Dict[str, Any]:
+        """Create TODO metadata fields."""
+        return {
             "priority": priority,
             "status": status,
-            "correlation_id": correlation_id,
-            "timestamp": time.time()
+            "correlation_id": correlation_id
         }
 
     def build_todo_status_data(self, action: str, task_id: str, correlation_id: str) -> Dict[str, Any]:

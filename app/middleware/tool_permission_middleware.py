@@ -10,7 +10,7 @@ from app.db.postgres import get_db
 from app.services.tool_permission_service import ToolPermissionService
 from app.services.unified_tool_registry import UnifiedToolRegistry
 from app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
-from app.auth.auth_dependencies import get_current_user
+from app.auth_integration.auth import get_current_user
 from app.logging_config import central_logger
 import json
 import time
@@ -84,13 +84,17 @@ class ToolPermissionMiddleware:
     async def _extract_tool_info(self, request: Request) -> Optional[dict]:
         """Extract tool information from request"""
         try:
-            tool_info = await self._extract_from_post_body(request)
-            if tool_info:
-                return tool_info
-            return self._extract_from_alternative_sources(request)
+            return await self._try_extract_tool_info(request)
         except Exception as e:
             logger.error(f"Error extracting tool info: {e}")
             return None
+    
+    async def _try_extract_tool_info(self, request: Request) -> Optional[dict]:
+        """Try to extract tool info from various sources."""
+        tool_info = await self._extract_from_post_body(request)
+        if tool_info:
+            return tool_info
+        return self._extract_from_alternative_sources(request)
     
     async def _extract_from_alternative_sources(self, request: Request) -> Optional[dict]:
         """Extract tool info from URL path or MCP endpoint."""
@@ -114,6 +118,10 @@ class ToolPermissionMiddleware:
         """Create tool info from parsed data."""
         if "tool_name" not in data:
             return None
+        return self._build_tool_info_dict(data)
+    
+    def _build_tool_info_dict(self, data: dict) -> dict:
+        """Build tool info dictionary from data."""
         return {
             "name": data["tool_name"],
             "arguments": data.get("arguments", {}),
@@ -139,12 +147,16 @@ class ToolPermissionMiddleware:
     async def _get_user_from_request(self, request: Request) -> Optional[User]:
         """Get user from request context"""
         try:
-            if hasattr(request.state, 'user'):
-                return request.state.user
-            return self._extract_user_from_auth_header(request)
+            return self._try_get_user_from_request(request)
         except Exception as e:
             logger.error(f"Error getting user from request: {e}")
             return None
+    
+    def _try_get_user_from_request(self, request: Request) -> Optional[User]:
+        """Try to get user from request state or auth header."""
+        if hasattr(request.state, 'user'):
+            return request.state.user
+        return self._extract_user_from_auth_header(request)
     
     def _extract_user_from_auth_header(self, request: Request) -> Optional[User]:
         """Extract user from authorization header."""
@@ -163,22 +175,34 @@ class ToolPermissionMiddleware:
     ) -> PermissionCheckResult:
         """Check if user has permission to use the tool"""
         try:
-            context = self._create_execution_context(tool_info, user)
-            return await self.permission_service.check_tool_permission(context)
+            return await self._perform_permission_check(tool_info, user)
         except Exception as e:
-            logger.error(f"Error checking tool permissions: {e}")
-            return self._create_failed_permission_result(e)
+            return self._handle_permission_check_error(e)
+    
+    async def _perform_permission_check(self, tool_info: dict, user: User) -> PermissionCheckResult:
+        """Perform the actual permission check."""
+        context = self._create_execution_context(tool_info, user)
+        return await self.permission_service.check_tool_permission(context)
+    
+    def _handle_permission_check_error(self, error: Exception) -> PermissionCheckResult:
+        """Handle permission check errors."""
+        logger.error(f"Error checking tool permissions: {error}")
+        return self._create_failed_permission_result(error)
     
     def _create_execution_context(self, tool_info: dict, user: User) -> ToolExecutionContext:
         """Create tool execution context from tool info and user."""
+        base_context = self._get_base_context_data(tool_info, user)
         user_context = self._extract_user_context_attributes(user)
-        return ToolExecutionContext(
-            user_id=str(user.id),
-            tool_name=tool_info["name"],
-            requested_action=tool_info.get("action", "execute"),
-            environment=self._get_environment(),
-            **user_context
-        )
+        return ToolExecutionContext(**base_context, **user_context)
+    
+    def _get_base_context_data(self, tool_info: dict, user: User) -> dict:
+        """Get base context data for execution context."""
+        return {
+            "user_id": str(user.id),
+            "tool_name": tool_info["name"],
+            "requested_action": tool_info.get("action", "execute"),
+            "environment": self._get_environment()
+        }
 
     def _extract_user_context_attributes(self, user: User) -> dict:
         """Extract user context attributes for execution context."""
@@ -212,9 +236,20 @@ class ToolPermissionMiddleware:
 
     def _build_permission_error_detail(self, permission_result: PermissionCheckResult) -> dict:
         """Build permission error detail dictionary."""
+        base_detail = self._get_permission_error_base(permission_result)
+        permission_detail = self._get_permission_error_permissions(permission_result)
+        return {**base_detail, **permission_detail}
+    
+    def _get_permission_error_base(self, permission_result: PermissionCheckResult) -> dict:
+        """Get base permission error data."""
         return {
             "error": "permission_denied",
-            "message": permission_result.reason,
+            "message": permission_result.reason
+        }
+    
+    def _get_permission_error_permissions(self, permission_result: PermissionCheckResult) -> dict:
+        """Get permission-specific error data."""
+        return {
             "required_permissions": permission_result.required_permissions,
             "missing_permissions": permission_result.missing_permissions,
             "upgrade_path": permission_result.upgrade_path
@@ -241,24 +276,39 @@ class ToolPermissionMiddleware:
     ):
         """Log tool execution for analytics"""
         try:
-            log_entry = self._build_tool_execution_log_entry(request, response, execution_time)
-            self._add_permission_data_to_log_entry(request, log_entry)
-            logger.info("Tool execution", extra={"tool_execution": log_entry})
+            self._perform_tool_execution_logging(request, response, execution_time)
         except Exception as e:
             logger.error(f"Error logging tool execution: {e}")
+    
+    def _perform_tool_execution_logging(self, request: Request, response: Response, execution_time: float) -> None:
+        """Perform the actual tool execution logging."""
+        log_entry = self._build_tool_execution_log_entry(request, response, execution_time)
+        self._add_permission_data_to_log_entry(request, log_entry)
+        logger.info("Tool execution", extra={"tool_execution": log_entry})
 
     def _build_tool_execution_log_entry(self, request: Request, response: Response, execution_time: float) -> dict:
         """Build base tool execution log entry."""
-        tool_info = request.state.tool_info
+        base_data = self._get_log_entry_base_data(request, response, execution_time)
+        tool_data = self._get_log_entry_tool_data(request)
+        return {**base_data, **tool_data}
+    
+    def _get_log_entry_base_data(self, request: Request, response: Response, execution_time: float) -> dict:
+        """Get base log entry data."""
         return {
             "timestamp": datetime.now(UTC).isoformat(),
-            "tool_name": tool_info["name"],
-            "user_id": getattr(request.state, 'user_id', 'unknown'),
-            "action": tool_info.get("action", "execute"),
             "status_code": response.status_code,
             "execution_time_ms": int(execution_time * 1000),
             "user_agent": request.headers.get("User-Agent"),
-            "ip_address": request.client.host if request.client else None,
+            "ip_address": request.client.host if request.client else None
+        }
+    
+    def _get_log_entry_tool_data(self, request: Request) -> dict:
+        """Get tool-specific log entry data."""
+        tool_info = request.state.tool_info
+        return {
+            "tool_name": tool_info["name"],
+            "user_id": getattr(request.state, 'user_id', 'unknown'),
+            "action": tool_info.get("action", "execute")
         }
 
     def _add_permission_data_to_log_entry(self, request: Request, log_entry: dict) -> None:
@@ -283,14 +333,6 @@ class ToolPermissionMiddleware:
     def _is_post_request_with_body(self, request: Request) -> bool:
         """Check if request is POST with body."""
         return request.method == "POST" and hasattr(request, "_body")
-
-    def _build_tool_info_dict(self, data: dict) -> dict:
-        """Build tool info dictionary from data."""
-        return {
-            "name": data["tool_name"],
-            "arguments": data.get("arguments", {}),
-            "action": data.get("action", "execute")
-        }
 
     def _build_tool_info_from_path(self, path_parts: list, query_params) -> dict:
         """Build tool info from URL path parts."""
@@ -323,14 +365,18 @@ def create_tool_permission_dependency(
     ):
         """Dependency to check tool permissions"""
         try:
-            context = _create_execution_context_for_dependency(current_user, tool_name, action)
-            permission_result = await permission_service.check_tool_permission(context)
-            _validate_permission_result(permission_result)
-            return permission_result
+            return await _perform_dependency_permission_check(current_user, tool_name, action)
         except HTTPException:
             raise
         except Exception as e:
             _handle_dependency_error(e)
+    
+    async def _perform_dependency_permission_check(current_user: User, tool_name: str, action: str):
+        """Perform dependency permission check."""
+        context = _create_execution_context_for_dependency(current_user, tool_name, action)
+        permission_result = await permission_service.check_tool_permission(context)
+        _validate_permission_result(permission_result)
+        return permission_result
     
     return check_tool_permission
 

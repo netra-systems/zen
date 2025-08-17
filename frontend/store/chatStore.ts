@@ -1,23 +1,13 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { Message } from '@/types/chat';
+import type { SubAgentStatusData } from '@/types/chat-store';
+import { LegacyAgentStatus } from '@/types/agent-types';
 
-type AgentStatus = 'IDLE' | 'RUNNING' | 'COMPLETED' | 'ERROR';
+// Keep legacy status for store compatibility during migration
+type AgentStatus = LegacyAgentStatus;
 
-interface SubAgentStatusData {
-  status: string;
-  tools?: string[];
-  progress?: {
-    current: number;
-    total: number;
-    message?: string;
-  };
-  error?: string;
-  description?: string;
-  executionTime?: number;
-}
-
-interface ChatState {
+interface ImmerChatState {
   messages: Message[];
   currentRunId: string | null;
   agentStatus: AgentStatus;
@@ -45,7 +35,7 @@ interface ChatState {
   reset: () => void;
 }
 
-export const useChatStore = create<ChatState>()(
+export const useChatStore = create<ImmerChatState>()(
   immer((set) => ({
     messages: [],
     currentRunId: null,
@@ -103,20 +93,9 @@ export const useChatStore = create<ChatState>()(
     setSubAgentStatus: (statusData) =>
       set((state) => {
         if (statusData) {
-          state.subAgentStatus = statusData.status;
-          state.subAgentTools = statusData.tools || [];
-          state.subAgentProgress = statusData.progress || null;
-          state.subAgentError = statusData.error || null;
-          state.subAgentDescription = statusData.description || null;
-          state.subAgentExecutionTime = statusData.executionTime || null;
+          updateSubAgentFields(state, statusData);
         } else {
-          // Clear all sub-agent status fields
-          state.subAgentStatus = null;
-          state.subAgentTools = [];
-          state.subAgentProgress = null;
-          state.subAgentError = null;
-          state.subAgentDescription = null;
-          state.subAgentExecutionTime = null;
+          clearSubAgentFields(state);
         }
       }),
 
@@ -127,20 +106,42 @@ export const useChatStore = create<ChatState>()(
 
     reset: () =>
       set((state) => {
-        state.messages = [];
-        state.currentRunId = null;
-        state.agentStatus = 'IDLE';
-        state.agentProgress = 0;
-        state.isProcessing = false;
-        state.currentSubAgent = null;
-        state.subAgentName = null;
-        state.subAgentStatus = null;
-        state.subAgentTools = [];
-        state.subAgentProgress = null;
-        state.subAgentError = null;
-        state.subAgentDescription = null;
-        state.subAgentExecutionTime = null;
-        state.queuedSubAgents = [];
+        resetChatMessages(state);
+        resetAgentState(state);
+        clearSubAgentFields(state);
       }),
   }))
 );
+
+// Helper functions for state updates (≤8 lines each)
+const updateSubAgentFields = (state: any, statusData: SubAgentStatusData): void => {
+  state.subAgentStatus = statusData.status;
+  state.subAgentTools = statusData.tools || [];
+  state.subAgentProgress = statusData.progress || null;
+  state.subAgentError = statusData.error || null;
+  state.subAgentDescription = statusData.description || null;
+  state.subAgentExecutionTime = statusData.executionTime || null;
+};
+
+const clearSubAgentFields = (state: any): void => {
+  state.subAgentStatus = null;
+  state.subAgentTools = [];
+  state.subAgentProgress = null;
+  state.subAgentError = null;
+  state.subAgentDescription = null;
+  state.subAgentExecutionTime = null;
+};
+
+const resetChatMessages = (state: any): void => {
+  state.messages = [];
+  state.currentRunId = null;
+  state.queuedSubAgents = [];
+};
+
+const resetAgentState = (state: any): void => {
+  state.agentStatus = 'IDLE';
+  state.agentProgress = 0;
+  state.isProcessing = false;
+  state.currentSubAgent = null;
+  state.subAgentName = null;
+};
