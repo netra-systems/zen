@@ -12,7 +12,7 @@ from datetime import datetime, UTC
 from langchain_core.tools import BaseTool
 from app.services.tool_registry import ToolRegistry
 from app.core.exceptions_base import NetraException
-from test_tool_registry_registration_core import MockTool
+from .test_tool_registry_registration_core import MockTool
 
 
 class TestToolRegistryValidation:

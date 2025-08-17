@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch, call, AsyncMock
 
 from langchain_core.tools import BaseTool
 from app.services.tool_registry import ToolRegistry
-from test_tool_registry_registration_core import MockTool
+from .test_tool_registry_registration_core import MockTool
 
 
 class TestToolRegistryDiscovery:

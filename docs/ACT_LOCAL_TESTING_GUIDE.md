@@ -179,10 +179,16 @@ env:
 ```
 
 ### Runner Compatibility
-Workflows automatically switch runners:
+**IMPORTANT:** All GitHub Actions workflows MUST use `warp-custom-default` runner in production.
+ACT automatically overrides this for local testing:
 ```yaml
-runs-on: ${{ env.ACT && 'ubuntu-latest' || 'warp-custom-default' }}
+# For production workflows (MANDATORY):
+runs-on: warp-custom-default
+
+# For ACT compatibility (optional):
+runs-on: ${{ github.event.act && 'ubuntu-latest' || 'warp-custom-default' }}
 ```
+Note: The `warp-custom-default` runner is MANDATORY for all workflows. Never use `ubuntu-latest` directly.
 
 ### Mock Services
 - **GitHub API**: Skipped in ACT mode

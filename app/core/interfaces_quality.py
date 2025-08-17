@@ -1,65 +1,16 @@
-"""Quality validation interfaces - Single source of truth.
+"""Quality validation interface - Single source of truth.
 
-Consolidated quality validation logic from both comprehensive agent validation
-and threshold-checking implementations. Follows 300-line limit and 8-line functions.
+Main QualityValidator implementation with proper modular design.
+Follows 300-line limit and 8-line functions.
 """
 
 from typing import Dict, Optional, Any, List, Tuple
-from abc import ABC, abstractmethod
-from enum import Enum
 
 from app.logging_config import central_logger
+from .quality_types import ContentType, QualityLevel, QualityMetrics, ValidationResult
+from .quality_analysis import QualityAnalyzer, QualityIssueDetector
 
 logger = central_logger.get_logger(__name__)
-
-
-class ContentType(Enum):
-    """Content types for quality validation."""
-    OPTIMIZATION = "optimization"
-    DATA_ANALYSIS = "data_analysis"
-    ACTION_PLAN = "action_plan"
-    REPORT = "report"
-    TRIAGE = "triage"
-    ERROR_MESSAGE = "error_message"
-    GENERAL = "general"
-
-
-class QualityLevel(Enum):
-    """Quality levels based on scoring."""
-    EXCELLENT = "excellent"
-    GOOD = "good"
-    ACCEPTABLE = "acceptable"
-    POOR = "poor"
-    UNACCEPTABLE = "unacceptable"
-
-
-class QualityMetrics:
-    """Quality metrics structure for validation."""
-    
-    def __init__(self):
-        self.overall_score: float = 0.0
-        self.specificity_score: float = 0.0
-        self.actionability_score: float = 0.0
-        self.quantification_score: float = 0.0
-        self.relevance_score: float = 0.0
-        self.completeness_score: float = 0.0
-        self.clarity_score: float = 0.0
-        self.novelty_score: float = 0.0
-        self.generic_phrase_count: int = 0
-        self.circular_reasoning_detected: bool = False
-        self.hallucination_risk: float = 0.0
-        self.redundancy_ratio: float = 0.0
-        self.issues: List[str] = []
-
-
-class ValidationResult:
-    """Result of quality validation."""
-    
-    def __init__(self, passed: bool, metrics: QualityMetrics):
-        self.passed = passed
-        self.metrics = metrics
-        self.retry_suggested: bool = False
-        self.retry_prompt_adjustments: Dict[str, Any] = {}
 
 
 class QualityValidator:
@@ -71,6 +22,8 @@ class QualityValidator:
         self.strict_mode = strict_mode
         self.quality_stats = self._init_quality_stats()
         self.thresholds = self._init_content_type_thresholds()
+        self.analyzer = QualityAnalyzer()
+        self.issue_detector = QualityIssueDetector()
     
     def _init_quality_stats(self) -> Dict[str, int]:
         """Initialize quality statistics tracking."""
@@ -104,21 +57,21 @@ class QualityValidator:
         metrics = QualityMetrics()
         
         # Basic quality analysis
-        metrics.specificity_score = self._analyze_specificity(content)
-        metrics.actionability_score = self._analyze_actionability(content)
-        metrics.quantification_score = self._analyze_quantification(content)
-        metrics.relevance_score = self._analyze_relevance(content, content_type)
+        metrics.specificity_score = self.analyzer.analyze_specificity(content)
+        metrics.actionability_score = self.analyzer.analyze_actionability(content)
+        metrics.quantification_score = self.analyzer.analyze_quantification(content)
+        metrics.relevance_score = self.analyzer.analyze_relevance(content, content_type)
         
         # Additional quality checks  
-        metrics.completeness_score = self._analyze_completeness(content, content_type)
-        metrics.clarity_score = self._analyze_clarity(content)
-        metrics.novelty_score = self._analyze_novelty(content)
+        metrics.completeness_score = self.analyzer.analyze_completeness(content, content_type)
+        metrics.clarity_score = self.analyzer.analyze_clarity(content)
+        metrics.novelty_score = self.analyzer.analyze_novelty(content)
         
         # Quality issues detection
-        metrics.generic_phrase_count = self._count_generic_phrases(content)
-        metrics.circular_reasoning_detected = self._detect_circular_reasoning(content)
-        metrics.hallucination_risk = self._assess_hallucination_risk(content)
-        metrics.redundancy_ratio = self._calculate_redundancy_ratio(content)
+        metrics.generic_phrase_count = self.issue_detector.count_generic_phrases(content)
+        metrics.circular_reasoning_detected = self.issue_detector.detect_circular_reasoning(content)
+        metrics.hallucination_risk = self.issue_detector.assess_hallucination_risk(content)
+        metrics.redundancy_ratio = self.issue_detector.calculate_redundancy_ratio(content)
         
         return metrics
     
@@ -293,60 +246,3 @@ class QualityValidator:
             self.quality_stats['passed'] += 1
         else:
             self.quality_stats['failed'] += 1
-    
-    # Content analysis methods (simplified implementations)
-    def _analyze_specificity(self, content: str) -> float:
-        """Analyze content specificity."""
-        specific_indicators = ['parameter', 'config', 'value', 'setting', '%', 'seconds', 'bytes']
-        return min(1.0, sum(1 for indicator in specific_indicators if indicator in content.lower()) / 5)
-    
-    def _analyze_actionability(self, content: str) -> float:
-        """Analyze content actionability."""
-        action_words = ['run', 'execute', 'configure', 'set', 'enable', 'disable', 'install']
-        return min(1.0, sum(1 for word in action_words if word in content.lower()) / 4)
-    
-    def _analyze_quantification(self, content: str) -> float:
-        """Analyze content quantification."""
-        import re
-        numbers = re.findall(r'\d+(?:\.\d+)?', content)
-        return min(1.0, len(numbers) / 3)
-    
-    def _analyze_relevance(self, content: str, content_type: ContentType) -> float:
-        """Analyze content relevance to type."""
-        # Simplified relevance scoring
-        return 0.8  # Default implementation
-    
-    def _analyze_completeness(self, content: str, content_type: ContentType) -> float:
-        """Analyze content completeness."""
-        return min(1.0, len(content.split()) / 50)
-    
-    def _analyze_clarity(self, content: str) -> float:
-        """Analyze content clarity."""
-        avg_sentence_length = len(content.split()) / max(1, content.count('.'))
-        return max(0.0, 1.0 - (avg_sentence_length - 15) / 20)
-    
-    def _analyze_novelty(self, content: str) -> float:
-        """Analyze content novelty."""
-        # Simplified novelty scoring
-        return 0.7  # Default implementation
-    
-    def _count_generic_phrases(self, content: str) -> int:
-        """Count generic phrases in content."""
-        generic_phrases = ['in general', 'basically', 'obviously', 'clearly', 'simply']
-        return sum(1 for phrase in generic_phrases if phrase in content.lower())
-    
-    def _detect_circular_reasoning(self, content: str) -> bool:
-        """Detect circular reasoning patterns."""
-        # Simplified detection
-        return 'because it is' in content.lower() or 'it works because' in content.lower()
-    
-    def _assess_hallucination_risk(self, content: str) -> float:
-        """Assess hallucination risk."""
-        # Simplified risk assessment
-        return 0.1  # Default low risk
-    
-    def _calculate_redundancy_ratio(self, content: str) -> float:
-        """Calculate content redundancy ratio."""
-        words = content.lower().split()
-        unique_words = set(words)
-        return 1.0 - (len(unique_words) / max(1, len(words)))

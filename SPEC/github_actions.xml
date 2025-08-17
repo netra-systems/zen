@@ -4,7 +4,7 @@
         <name>GitHub Actions Configuration</name>
         <type>technical</type>
         <version>1.0</version>
-        <last_updated>2025-08-15</last_updated>
+        <last_updated>2025-08-17</last_updated>
         <description>GitHub Actions workflows configuration, permissions, and best practices</description>
     </metadata>
 
@@ -14,11 +14,53 @@
             1. CHECK learnings.xml for "GitHub Actions Deployment Permission Error" (2025-08-13)
             2. ALWAYS define explicit permissions block
             3. NEVER rely on default GITHUB_TOKEN permissions
+            4. ALWAYS use warp-custom-default runner for ALL jobs
+        </reminder>
+        <reminder priority="CRITICAL">
+            🚨 RUNNER REQUIREMENT:
+            ALL GitHub Actions workflows MUST use runs-on: warp-custom-default
+            Do NOT use ubuntu-latest or any other runner
+            This is a MANDATORY requirement for all workflows
         </reminder>
     </critical_reminders>
 
     <sections>
-        <section id="permissions" order="1">
+        <section id="runner-requirements" order="1">
+            <title>MANDATORY Runner Requirements</title>
+            <description>ALL GitHub Actions workflows MUST use the warp-custom-default runner</description>
+            
+            <requirement id="runner-type" priority="CRITICAL">
+                <title>Required Runner Type</title>
+                <rule>ALL jobs MUST use: runs-on: warp-custom-default</rule>
+                <rule>NEVER use ubuntu-latest or any other runner</rule>
+                <rule>This applies to ALL workflows without exception</rule>
+                <examples>
+                    <correct>
+                        jobs:
+                          build:
+                            runs-on: warp-custom-default
+                    </correct>
+                    <incorrect>
+                        jobs:
+                          build:
+                            runs-on: ubuntu-latest  # WRONG - Must use warp-custom-default
+                    </incorrect>
+                </examples>
+            </requirement>
+            
+            <requirement id="act-compatibility" priority="HIGH">
+                <title>ACT Local Testing Compatibility</title>
+                <rule>For ACT compatibility, use conditional expressions with github.event.act</rule>
+                <examples>
+                    <correct>
+                        runs-on: ${{ github.event.act && 'ubuntu-latest' || 'warp-custom-default' }}
+                    </correct>
+                </examples>
+                <note>ACT will override warp-custom-default to ubuntu-latest when running locally</note>
+            </requirement>
+        </section>
+        
+        <section id="permissions" order="2">
             <title>Required Permissions</title>
             <description>GitHub Actions workflows MUST explicitly declare permissions</description>
             
@@ -69,7 +111,7 @@ on:
             </example>
         </section>
 
-        <section id="common-errors" order="2">
+        <section id="common-errors" order="3">
             <title>Common Permission Errors</title>
             
             <error id="403-deployment">
@@ -86,7 +128,7 @@ on:
             </error>
         </section>
 
-        <section id="act-compatibility" order="3">
+        <section id="act-compatibility" order="4">
             <title>ACT Compatibility and Environment Variables</title>
             <description>Best practices for making workflows compatible with ACT local testing</description>
             
@@ -149,7 +191,7 @@ on:
             </validation>
         </section>
 
-        <section id="workflow-patterns" order="4">
+        <section id="workflow-patterns" order="5">
             <title>Workflow Patterns</title>
             
             <pattern id="concurrency-control">
@@ -187,7 +229,7 @@ concurrency:
             </pattern>
         </section>
 
-        <section id="environments" order="4">
+        <section id="environments" order="6">
             <title>Environment-Specific Workflows</title>
             
             <environment id="staging">
@@ -218,7 +260,7 @@ concurrency:
             </environment>
         </section>
 
-        <section id="testing-workflows" order="5">
+        <section id="testing-workflows" order="7">
             <title>Test Automation Workflows</title>
             
             <workflow id="test-suite">
@@ -236,7 +278,7 @@ concurrency:
             </workflow>
         </section>
 
-        <section id="best-practices" order="6">
+        <section id="best-practices" order="8">
             <title>Best Practices</title>
             
             <practice id="always-check-learnings">
@@ -258,9 +300,15 @@ concurrency:
                 <rule>Always use concurrency groups for PR workflows</rule>
                 <reason>Prevents resource waste from redundant runs</reason>
             </practice>
+            
+            <practice id="use-warp-runner">
+                <rule>ALWAYS use warp-custom-default runner for ALL jobs</rule>
+                <reason>Required runner for all GitHub Actions workflows</reason>
+                <enforcement>This is a MANDATORY requirement - no exceptions</enforcement>
+            </practice>
         </section>
 
-        <section id="debugging" order="7">
+        <section id="debugging" order="9">
             <title>Debugging Workflows</title>
             
             <technique id="enable-debug-logging">

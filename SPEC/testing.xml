@@ -934,6 +934,48 @@
         </command>
     </unified_commands>
     
+    <speed_optimization_commands>
+        <description>Speed optimization options for faster test execution</description>
+        
+        <safe_optimizations>
+            <command name="ci_mode" description="Safe speed optimizations for CI/CD">
+                python test_runner.py --level unit --ci
+            </command>
+            <command name="no_warnings" description="Suppress warnings for faster execution">
+                python test_runner.py --level unit --no-warnings
+            </command>
+            <command name="no_coverage" description="Skip coverage collection for speed">
+                python test_runner.py --level unit --no-coverage
+            </command>
+            <command name="fast_fail" description="Stop on first failure">
+                python test_runner.py --level unit --fast-fail
+            </command>
+            <command name="combined_safe" description="All safe optimizations">
+                python test_runner.py --level unit --ci --no-warnings --no-coverage --fast-fail
+            </command>
+        </safe_optimizations>
+        
+        <aggressive_optimizations>
+            <command name="speed_mode" description="WARNING: May skip slow tests">
+                python test_runner.py --level unit --speed
+            </command>
+            <note>Use --speed with caution - it may skip slow tests to improve execution time</note>
+            <note>Prefer --ci for safe speed optimizations that don't skip tests</note>
+        </aggressive_optimizations>
+        
+        <parallelization>
+            <command name="sequential" description="Run tests sequentially">
+                python test_runner.py --level unit --parallel 1
+            </command>
+            <command name="auto_parallel" description="Auto-detect optimal parallelism">
+                python test_runner.py --level unit --parallel auto
+            </command>
+            <command name="custom_parallel" description="Specify number of workers">
+                python test_runner.py --level unit --parallel 4
+            </command>
+        </parallelization>
+    </speed_optimization_commands>
+    
     <troubleshooting>
         <issue>
             <problem>Import test failures</problem>

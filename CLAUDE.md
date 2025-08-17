@@ -190,6 +190,92 @@ python dev_launcher.py # Start dev
 python test_runner.py --level unit # DEFAULT tests
 ```
 
+## 🧪 UNIFIED TEST RUNNER (test_runner.py)
+**SINGLE AUTHORITATIVE TEST RUNNER** - Do not create alternatives
+
+### Test Levels
+| Level | Time | Purpose | Command |
+|-------|------|---------|---------|
+| **smoke** | <30s | Pre-commit validation | `python test_runner.py --level smoke` |
+| **unit** | 1-2min | Development (DEFAULT) | `python test_runner.py --level unit` |
+| **integration** | 3-5min | Feature validation | `python test_runner.py --level integration` |
+| **critical** | 1-2min | Essential paths | `python test_runner.py --level critical` |
+| **comprehensive** | 30-45min | Full validation | `python test_runner.py --level comprehensive` |
+| **agents** | 2-3min | Agent testing | `python test_runner.py --level agents` |
+
+### Speed Optimizations (SAFE)
+```bash
+# CI Mode - Safe speed optimizations
+python test_runner.py --level unit --ci
+
+# Individual optimizations
+python test_runner.py --level unit --no-warnings  # Suppress warnings
+python test_runner.py --level unit --no-coverage  # Skip coverage
+python test_runner.py --level unit --fast-fail    # Stop on first failure
+
+# Aggressive speed mode (WARNING: May skip slow tests)
+python test_runner.py --level unit --speed
+```
+
+### Component Selection
+```bash
+python test_runner.py --level unit --backend-only  # Backend only
+python test_runner.py --level unit --frontend-only # Frontend only
+```
+
+### Real LLM Testing
+```bash
+# Unit tests with real LLM
+python test_runner.py --level unit --real-llm
+
+# Specify model and timeout
+python test_runner.py --level integration --real-llm --llm-model gemini-2.5-flash --llm-timeout 60
+
+# Control parallelism
+python test_runner.py --level unit --real-llm --parallel 1  # Sequential
+python test_runner.py --level unit --real-llm --parallel auto  # Auto-detect
+```
+
+### Staging Environment Testing
+```bash
+# Test against staging
+python test_runner.py --level integration --staging
+
+# Override staging URLs
+python test_runner.py --staging --staging-url https://staging.example.com --staging-api-url https://api.staging.example.com
+```
+
+### Test Discovery & Management
+```bash
+# List all tests
+python test_runner.py --list
+
+# List with different formats
+python test_runner.py --list --list-format json
+python test_runner.py --list --list-format markdown
+
+# List specific category
+python test_runner.py --list --list-category unit
+
+# Show failing tests
+python test_runner.py --show-failing
+
+# Run only failing tests
+python test_runner.py --run-failing
+
+# Clear failing tests log
+python test_runner.py --clear-failing
+```
+
+### CI/CD Integration
+```bash
+# CI mode with JSON output
+python test_runner.py --level unit --ci --output results.json --report-format json
+
+# Generate coverage report
+python test_runner.py --level comprehensive --coverage-output coverage.xml
+```
+
 ## 🔴 MANDATORY SPECS (Read 3x Before Coding)
 Generate a monetization-focused product and engineering value for Netra Apex.
 Ensures every feature directly creates and captures value proportional to a customer's AI spend.
@@ -264,8 +350,12 @@ Ensures every feature directly creates and captures value proportional to a cust
 - [`SPEC/growth_control.xml`](SPEC/growth_control.xml) - Good vs bad growth patterns
 - [`SPEC/conventions.xml`](SPEC/conventions.xml) - Boundary enforcement integration
 
-## Testing
-- Choose a category using test discovery
+## Testing (Use UNIFIED TEST RUNNER)
+- **DEFAULT**: `python test_runner.py --level unit`
+- **QUICK CHECK**: `python test_runner.py --level smoke` (before commits)
+- **FULL VALIDATION**: `python test_runner.py --level comprehensive` (before releases)
+- **SPEED MODE**: `python test_runner.py --level unit --ci` (safe optimizations)
+- Choose a category using test discovery: `python test_runner.py --list`
 - ALWAYS run UNIT tests for noticeable changes
 - ALWAYS run E2E real tests for agent changes
 - Think about DATA, data flow, data types, critical paths

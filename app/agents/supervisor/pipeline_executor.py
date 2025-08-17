@@ -7,6 +7,7 @@ from app.agents.supervisor.execution_context import (
 )
 from app.agents.supervisor.execution_engine import ExecutionEngine
 from app.services.state_persistence import state_persistence_service
+from app.schemas.agent_state import StatePersistenceRequest, CheckpointType
 from app.logging_config import central_logger
 from app.llm.observability import generate_llm_correlation_id
 from app.agents.supervisor.observability_flow import get_supervisor_flow_logger
@@ -149,35 +150,25 @@ class PipelineExecutor:
     async def _persist_final_state(self, state: DeepAgentState,
                                   context: Dict[str, str]) -> None:
         """Save final state to persistence."""
-        params = self._build_persistence_params(state, context)
-        await self.state_persistence.save_agent_state(**params)
+        request = self._build_persistence_request(state, context)
+        await self.state_persistence.save_agent_state(request, self.db_session)
     
-    def _build_persistence_params(self, state: DeepAgentState, 
-                                 context: Dict[str, str]) -> Dict[str, Any]:
-        """Build parameters for state persistence."""
-        return self._create_persistence_dict(state, context)
+    def _build_persistence_request(self, state: DeepAgentState, 
+                                   context: Dict[str, str]) -> StatePersistenceRequest:
+        """Build StatePersistenceRequest for state persistence."""
+        return self._create_persistence_request(state, context)
     
-    def _create_persistence_dict(self, state: DeepAgentState,
-                                context: Dict[str, str]) -> Dict[str, Any]:
-        """Create persistence parameter dictionary."""
-        context_params = self._extract_persistence_context(context)
-        state_params = self._get_state_persistence_params(state)
-        return {**context_params, **state_params}
+    def _create_persistence_request(self, state: DeepAgentState,
+                                   context: Dict[str, str]) -> StatePersistenceRequest:
+        """Create StatePersistenceRequest object."""
+        return StatePersistenceRequest(
+            run_id=context["run_id"],
+            thread_id=context["thread_id"],
+            user_id=context["user_id"],
+            state_data=state.to_dict(),
+            checkpoint_type=CheckpointType.AUTO
+        )
     
-    def _extract_persistence_context(self, context: Dict[str, str]) -> Dict[str, str]:
-        """Extract context for persistence."""
-        return {
-            "run_id": context["run_id"],
-            "thread_id": context["thread_id"],
-            "user_id": context["user_id"]
-        }
-    
-    def _get_state_persistence_params(self, state: DeepAgentState) -> Dict[str, Any]:
-        """Get state persistence parameters."""
-        return {
-            "state": state,
-            "db_session": self.db_session
-        }
     
     async def _notify_completion(self, state: DeepAgentState,
                                 context: Dict[str, str]) -> None:

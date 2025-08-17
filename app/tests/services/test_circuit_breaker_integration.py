@@ -128,8 +128,8 @@ class TestDatabaseClientCircuitBreaker:
         from app.core.circuit_breaker import circuit_registry
         circuit_registry.cleanup_all()
     
-    @patch('app.db.client_postgres.async_session_factory')
-    async def test_successful_db_query(self, mock_session_factory):
+    @patch('app.db.client_postgres_session.TransactionHandler.get_session')
+    async def test_successful_db_query(self, mock_get_session):
         """Test successful database query through circuit breaker."""
         mock_session = AsyncMock()
         
@@ -144,18 +144,19 @@ class TestDatabaseClientCircuitBreaker:
         mock_session.rollback = AsyncMock()
         mock_session.close = AsyncMock()
         
-        # Mock the session factory to be a callable that returns the session when called
-        mock_session_factory.side_effect = lambda: mock_session
+        # Mock the session context manager to yield the mock session
+        mock_get_session.return_value.__aenter__ = AsyncMock(return_value=mock_session)
+        mock_get_session.return_value.__aexit__ = AsyncMock(return_value=None)
         
         result = await self.db_client.execute_read_query("SELECT * FROM test")
         
         assert len(result) == 1
         assert result[0]["name"] == "test"
     
-    @patch('app.db.client_postgres.async_session_factory')
-    async def test_db_circuit_breaker_fallback(self, mock_session_factory):
+    @patch('app.db.client_postgres_session.TransactionHandler.get_session')
+    async def test_db_circuit_breaker_fallback(self, mock_get_session):
         """Test database circuit breaker fallback behavior."""
-        mock_session_factory.side_effect = Exception("Database connection error")
+        mock_get_session.side_effect = Exception("Database connection error")
         
         # Configure BOTH postgres and read circuits with low thresholds
         postgres_circuit = await self.db_client._get_postgres_circuit()

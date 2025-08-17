@@ -1,67 +1,36 @@
 """
 Quality Issue Detection and Improvement Suggestions
-Contains functions for detecting quality issues and suggesting improvements
+Contains functions for detecting quality issues and suggesting improvements - delegates to core implementation
 """
 
 from typing import Dict, List
-from .quality_models import ValidationConfig, QualityLevel, QualityMetrics
-from .quality_score_calculators import QualityScoreCalculators
+from app.core.interfaces_quality import QualityValidator as CoreQualityValidator
+from app.core.quality_types import ContentType, QualityLevel, QualityMetrics
 
 
 class QualityValidators:
-    """Collection of validation and improvement suggestion methods"""
+    """Collection of validation and improvement suggestion methods - delegates to core implementation"""
     
-    @staticmethod
-    def determine_validity(metrics: QualityMetrics, config: ValidationConfig) -> bool:
+    def __init__(self):
+        """Initialize with core quality validator."""
+        self._core_validator = CoreQualityValidator()
+    
+    def determine_validity(self, metrics: QualityMetrics, content_type: ContentType, strict_mode: bool = False) -> bool:
         """Determine if output meets quality thresholds"""
-        return (
-            metrics.overall_score >= config.min_quality_score and
-            metrics.specificity_score >= config.min_specificity and
-            metrics.actionability_score >= config.min_actionability and
-            metrics.quality_level not in [QualityLevel.POOR, QualityLevel.UNACCEPTABLE]
-        )
+        return self._core_validator.check_thresholds(metrics, content_type, strict_mode)
     
-    @staticmethod
-    def detect_issues(output: str, scores: Dict[str, float], config: ValidationConfig) -> List[str]:
-        """Detect specific quality issues"""
-        issues = []
-        
-        if len(output) < config.min_length:
-            issues.append(f"Output too short ({len(output)} chars, minimum {config.min_length})")
-        
-        if scores['specificity'] < 0.5:
-            issues.append("High presence of generic language and vague statements")
-        
-        if scores['actionability'] < 0.3:
-            issues.append("Lacks actionable recommendations or concrete steps")
-        
-        if scores['quantification'] < 0.2:
-            issues.append("Missing quantifiable metrics and measurements")
-        
-        # Check for specific slop patterns
-        if any(phrase in output.lower() for phrase in QualityScoreCalculators.GENERIC_PHRASES[:5]):
-            issues.append("Contains generic AI phrases")
-        
-        return issues
+    def detect_issues(self, output: str, content_type: ContentType) -> List[str]:
+        """Detect specific quality issues using core analyzer"""
+        # Use core analyzer to get metrics, then extract issues
+        metrics = self._analyze_with_core(output, content_type)
+        return metrics.issues
     
-    @staticmethod
-    def suggest_improvements(scores: Dict[str, float]) -> List[str]:
-        """Suggest improvements based on scores"""
-        improvements = []
-        
-        if scores['specificity'] < 0.7:
-            improvements.append("Add specific technical details and avoid generic language")
-        
-        if scores['actionability'] < 0.6:
-            improvements.append("Include concrete implementation steps with parameters")
-        
-        if scores['quantification'] < 0.5:
-            improvements.append("Add measurable metrics (percentages, times, sizes)")
-        
-        return improvements
+    def suggest_improvements(self, output: str, content_type: ContentType) -> List[str]:
+        """Suggest improvements based on core analysis"""
+        metrics = self._analyze_with_core(output, content_type)
+        return self._core_validator.generate_suggestions(metrics, content_type)
     
-    @staticmethod
-    def determine_quality_level(overall_score: float) -> QualityLevel:
+    def determine_quality_level(self, overall_score: float) -> QualityLevel:
         """Determine quality level based on overall score"""
         if overall_score >= 0.9:
             return QualityLevel.EXCELLENT
@@ -73,3 +42,8 @@ class QualityValidators:
             return QualityLevel.POOR
         else:
             return QualityLevel.UNACCEPTABLE
+    
+    async def _analyze_with_core(self, content: str, content_type: ContentType) -> QualityMetrics:
+        """Analyze content using core validator and return metrics"""
+        result = await self._core_validator.validate_content(content, content_type, {})
+        return result.metrics

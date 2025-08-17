@@ -37,6 +37,31 @@ class CRUDUser(EnhancedCRUDService[User, UserCreate, UserUpdate]):
         await db.commit()
         user = await db.execute(select(User).filter(User.id == user_id))
         return user.scalars().first()
+    
+    async def _process_user_operation(self, operation: str, user_id: str, db: AsyncSession) -> bool:
+        """Process single user operation."""
+        try:
+            if operation == "deactivate":
+                await db.execute(update(User).where(User.id == user_id).values(is_active=False))
+            elif operation == "activate":
+                await db.execute(update(User).where(User.id == user_id).values(is_active=True))
+            return True
+        except Exception:
+            return False
+    
+    async def _collect_operation_results(self, operation: str, user_ids: List[str], db: AsyncSession) -> tuple:
+        """Collect results from bulk operations."""
+        processed, failed, results = [], [], []
+        for user_id in user_ids:
+            success = await self._process_user_operation(operation, user_id, db)
+            (processed.append(user_id) and results.append(user_id)) if success else failed.append(user_id)
+        return processed, failed, results
+
+    async def bulk_update_users(self, operation: str, user_ids: List[str], db: AsyncSession) -> Dict[str, Any]:
+        """Perform bulk operations on multiple users."""
+        processed, failed, results = await self._collect_operation_results(operation, user_ids, db)
+        await db.commit()
+        return {"processed": len(processed), "failed": len(failed), "results": results}
 
 user_service = CRUDUser("user_service", User)
 
@@ -48,3 +73,7 @@ async def get_all_users(db: AsyncSession) -> List[User]:
 async def update_user_role(user_id: str, role: str, db: AsyncSession) -> User:
     """Update user role in the system."""
     return await user_service.update_user_role(user_id, role, db)
+
+async def bulk_update_users(operation: str, user_ids: List[str], db: AsyncSession) -> Dict[str, Any]:
+    """Perform bulk operations on multiple users."""
+    return await user_service.bulk_update_users(operation, user_ids, db)

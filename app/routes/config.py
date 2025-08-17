@@ -3,7 +3,7 @@ from app.config import settings
 from app import schemas
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
-from app.auth.auth_dependencies import get_current_user, require_admin
+from app.auth_integration.auth import get_current_user, require_admin
 
 router = APIRouter()
 

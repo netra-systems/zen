@@ -73,6 +73,33 @@ The Netra platform employs a comprehensive testing strategy across multiple laye
 | **Critical** | 1-2min | Revenue paths | Pre-deployment | `python test_runner.py --level critical` |
 | **Comprehensive** | 30-45min | Full coverage | Release | `python test_runner.py --level comprehensive` |
 
+### Speed Optimization Options
+
+#### Safe Optimizations (Recommended for CI/CD)
+```bash
+# CI Mode - All safe optimizations enabled
+python test_runner.py --level unit --ci
+
+# Individual safe optimizations
+python test_runner.py --level unit --no-warnings    # Suppress warnings
+python test_runner.py --level unit --no-coverage    # Skip coverage collection
+python test_runner.py --level unit --fast-fail      # Stop on first failure
+
+# Combined safe optimizations
+python test_runner.py --level unit --ci --no-warnings --no-coverage --fast-fail
+```
+
+#### Aggressive Optimizations (Use with Caution)
+```bash
+# Speed mode - WARNING: May skip slow tests
+python test_runner.py --level unit --speed
+
+# Control parallelism
+python test_runner.py --level unit --parallel 1      # Sequential (for debugging)
+python test_runner.py --level unit --parallel auto   # Auto-detect optimal
+python test_runner.py --level unit --parallel 4      # Custom worker count
+```
+
 ### Bad Test Detection System
 
 The test framework includes automatic bad test detection to identify consistently failing tests:

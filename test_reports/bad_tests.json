@@ -257,10 +257,82 @@
       "passed": 0,
       "failed": 0,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_154441_81048",
+      "timestamp": "2025-08-17T15:45:08.121999",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_154548_48825",
+      "timestamp": "2025-08-17T15:46:17.170907",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_154636_96009",
+      "timestamp": "2025-08-17T15:47:14.555423",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_154720_40938",
+      "timestamp": "2025-08-17T15:47:30.552781",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_154745_65022",
+      "timestamp": "2025-08-17T15:49:25.193981",
+      "total_tests": 383,
+      "passed": 367,
+      "failed": 2,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_154931_71412",
+      "timestamp": "2025-08-17T15:49:39.535524",
+      "total_tests": 7,
+      "passed": 7,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_154944_84355",
+      "timestamp": "2025-08-17T15:50:30.146230",
+      "total_tests": 12,
+      "passed": 8,
+      "failed": 4,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_155149_9405",
+      "timestamp": "2025-08-17T15:51:59.178989",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_155204_24616",
+      "timestamp": "2025-08-17T15:52:14.889134",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 32,
-    "last_updated": "2025-08-17T15:33:16.957147"
+    "total_runs": 41,
+    "last_updated": "2025-08-17T15:52:14.889134"
   }
 }

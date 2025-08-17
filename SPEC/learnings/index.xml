@@ -4,7 +4,7 @@
         <name>Learnings Index</name>
         <type>index</type>
         <version>1.0</version>
-        <last_updated>2025-01-16</last_updated>
+        <last_updated>2025-08-17</last_updated>
         <description>Index of all learning modules organized by category</description>
     </metadata>
     
@@ -92,7 +92,7 @@
             <learning_count>2</learning_count>
             <learning_ids>
                 <id>staging-project-name</id>
-                <id>staging-secrets-zero-load</id>
+                <id>github-actions-runner-requirement</id>
             </learning_ids>
         </category>
         <category>
@@ -249,6 +249,6 @@
     
     <statistics>
         <total_categories>16</total_categories>
-        <total_learnings>65</total_learnings>
+        <total_learnings>64</total_learnings>
     </statistics>
 </specification>

@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-08-17T15:33:17.073238",
-  "level": "unit",
+  "timestamp": "2025-08-17T15:52:14.889134",
+  "level": "critical",
   "components": {
     "backend": {
       "total": 0,
@@ -8,14 +8,14 @@
       "failed": 0,
       "skipped": 0,
       "errors": 0,
-      "import_errors": 2,
-      "duration": 7.56709098815918,
+      "import_errors": 1,
+      "duration": 10.28379774093628,
       "status": "import_error",
       "exit_code": 4,
       "pass_rate": 0.0,
       "has_issues": true,
       "status_icon": "\ud83d\udd34",
-      "summary_text": "Import errors (2)"
+      "summary_text": "Import errors (1)"
     },
     "frontend": {
       "total": 0,
@@ -24,9 +24,9 @@
       "skipped": 0,
       "errors": 0,
       "import_errors": 0,
-      "duration": 0.11509299278259277,
+      "duration": 0,
       "status": "collection_failed",
-      "exit_code": 2,
+      "exit_code": null,
       "pass_rate": 0.0,
       "has_issues": false,
       "status_icon": "\u26ab",
@@ -50,7 +50,7 @@
   },
   "overall_status": "\ud83d\udd34 Import Errors - Tests Cannot Run",
   "issues": [
-    "backend: 2 import error(s)",
+    "backend: 1 import error(s)",
     "frontend: Test collection failed",
     "e2e: Test collection failed"
   ]

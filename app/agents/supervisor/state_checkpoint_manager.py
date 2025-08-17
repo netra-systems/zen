@@ -53,8 +53,9 @@ class StateCheckpointManager:
     async def _persist_state_data(self, request: StatePersistenceRequest, 
                                 state, session):
         """Persist state data to database."""
-        return await self.state_persistence.save_agent_state(
-            request.run_id, request.thread_id, request.user_id, state, session)
+        success, snapshot_id = await self.state_persistence.save_agent_state(
+            request, session)
+        return success
     
     def _handle_checkpoint_save_result(self, success: bool, checkpoint_id: str) -> None:
         """Handle checkpoint save result."""
