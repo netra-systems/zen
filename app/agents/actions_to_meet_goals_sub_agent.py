@@ -95,27 +95,25 @@ class ActionsToMeetGoalsSubAgent(BaseSubAgent):
     async def _get_llm_response(self, prompt: str, run_id: str) -> str:
         """Get response from LLM with size monitoring."""
         correlation_id = generate_llm_correlation_id()
-        
-        # Start heartbeat for LLM operation
         start_llm_heartbeat(correlation_id, "ActionsToMeetGoalsSubAgent")
-        
         try:
-            self._log_prompt_size(prompt, run_id)
-            
-            # Log input to LLM
-            log_agent_input("ActionsToMeetGoalsSubAgent", "LLM", len(prompt), correlation_id)
-            
-            llm_response = await self.llm_manager.ask_llm(prompt, llm_config_name='actions_to_meet_goals')
-            
-            # Log output from LLM
-            log_agent_output("LLM", "ActionsToMeetGoalsSubAgent", 
-                           len(llm_response) if llm_response else 0, "success", correlation_id)
-            
-            self._log_response_size(llm_response, run_id)
-            return llm_response
+            return await self._execute_llm_request(prompt, run_id, correlation_id)
         finally:
-            # Stop heartbeat
             stop_llm_heartbeat(correlation_id)
+
+    async def _execute_llm_request(self, prompt: str, run_id: str, correlation_id: str) -> str:
+        """Execute LLM request with logging."""
+        self._log_prompt_size(prompt, run_id)
+        log_agent_input("ActionsToMeetGoalsSubAgent", "LLM", len(prompt), correlation_id)
+        llm_response = await self.llm_manager.ask_llm(prompt, llm_config_name='actions_to_meet_goals')
+        self._log_llm_output(llm_response, correlation_id)
+        self._log_response_size(llm_response, run_id)
+        return llm_response
+
+    def _log_llm_output(self, llm_response: str, correlation_id: str) -> None:
+        """Log LLM output with response length."""
+        log_agent_output("LLM", "ActionsToMeetGoalsSubAgent", 
+                       len(llm_response) if llm_response else 0, "success", correlation_id)
 
     def _log_prompt_size(self, prompt: str, run_id: str):
         """Log prompt size if large."""

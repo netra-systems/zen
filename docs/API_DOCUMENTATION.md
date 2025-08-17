@@ -1,19 +1,31 @@
-# Netra AI Optimization Platform - API Documentation
+# Netra Apex API Documentation
 
 ## Table of Contents
 - [Overview](#overview)
+- [Business Metrics APIs](#business-metrics-apis) **← Revenue & Savings Tracking**
 - [Authentication](#authentication)
 - [REST API Endpoints](#rest-api-endpoints)
 - [WebSocket API](#websocket-api)
-- [Error Handling](#error-handling)
 - [Rate Limiting](#rate-limiting)
 - [API Versioning](#api-versioning)
 
 ## Overview
 
-The Netra API provides programmatic access to the AI optimization platform's capabilities. All API endpoints are RESTful and return JSON responses. Real-time communication is handled through WebSockets.
+The Netra Apex API enables enterprise customers to integrate AI optimization capabilities directly into their workflows. APIs are designed to maximize value capture through real-time cost analysis and optimization recommendations.
 
-**Base URL**: `https://api.netrasystems.ai` (production) or `http://localhost:8000` (development)
+**Base URL**: 
+- Production: `https://api.netrasystems.ai`
+- Staging: `https://staging-api.netrasystems.ai`
+- Development: `http://localhost:8000`
+
+### API Tiers by Customer Segment
+
+| Segment | Rate Limits | Features | SLA |
+|---------|------------|----------|-----|
+| **Free** | 100 req/hr | Basic optimization | Best effort |
+| **Early** | 1000 req/hr | Full optimization + analytics | 99.5% |
+| **Mid** | 10000 req/hr | + Bulk operations | 99.9% |
+| **Enterprise** | Unlimited | + Custom endpoints | 99.99% |
 
 ## Authentication
 
@@ -320,31 +332,119 @@ Response:
 }
 ```
 
-### Supply Catalog
+## Business Metrics APIs
 
-#### Get Supply Catalog
+### Savings Dashboard
 ```http
-GET /api/supply/catalog
+GET /api/metrics/savings
 Authorization: Bearer <token>
 
 Query Parameters:
-- category: Filter by category (models, providers, tools)
-- search: Search term
+- period: day|week|month|quarter (default: month)
+- breakdown: true|false (show by model/provider)
 
 Response:
 {
-  "items": [
-    {
-      "id": "item-uuid",
-      "name": "GPT-4",
-      "category": "models",
-      "provider": "OpenAI",
-      "capabilities": ["text", "code", "analysis"],
-      "pricing": {
-        "input": 0.03,
-        "output": 0.06,
-        "unit": "per_1k_tokens"
+  "total_ai_spend": 125000.00,
+  "optimized_spend": 87500.00,
+  "total_savings": 37500.00,
+  "savings_percentage": 30.0,
+  "netra_fee": 7500.00,  // 20% of savings
+  "net_savings": 30000.00,
+  "optimization_count": 15234,
+  "breakdown": {
+    "by_model": [
+      {
+        "model": "gpt-4",
+        "original_cost": 50000,
+        "optimized_cost": 30000,
+        "savings": 20000
       }
+    ]
+  }
+}
+```
+
+### ROI Calculator
+```http
+POST /api/metrics/roi-estimate
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "current_monthly_spend": 50000,
+  "workload_breakdown": {
+    "chat": 0.3,
+    "analysis": 0.4,
+    "generation": 0.3
+  },
+  "volume_growth_rate": 0.15
+}
+
+Response:
+{
+  "estimated_monthly_savings": 12500,
+  "savings_percentage": 25,
+  "netra_monthly_fee": 2500,
+  "net_monthly_benefit": 10000,
+  "annual_roi": 120000,
+  "time_to_value_days": 7,
+  "confidence_level": 0.85
+}
+```
+
+### Usage Analytics
+```http
+GET /api/metrics/usage
+Authorization: Bearer <token>
+
+Response:
+{
+  "period": "2024-01",
+  "total_requests": 523421,
+  "optimized_requests": 498234,
+  "optimization_rate": 0.952,
+  "models_used": {
+    "gpt-4": 234123,
+    "gpt-3.5-turbo": 189234,
+    "claude-3": 99877
+  },
+  "cost_by_model": {...},
+  "latency_improvements": {
+    "average_ms_saved": 230,
+    "p95_ms_saved": 450
+  }
+}
+```
+
+### Supply Catalog
+
+#### Get Optimized Model Recommendations
+```http
+POST /api/supply/recommend
+Authorization: Bearer <token>
+
+{
+  "task_type": "text_generation",
+  "requirements": {
+    "max_latency_ms": 500,
+    "quality_threshold": 0.9,
+    "max_cost_per_1k_tokens": 0.02
+  },
+  "context_length": 4000
+}
+
+Response:
+{
+  "recommendations": [
+    {
+      "model": "gpt-3.5-turbo",
+      "provider": "OpenAI",
+      "estimated_cost": 0.002,
+      "estimated_latency_ms": 230,
+      "quality_score": 0.92,
+      "savings_vs_default": 0.028,
+      "reasoning": "Optimal balance of cost and quality for this task"
     }
   ],
   "total": 150

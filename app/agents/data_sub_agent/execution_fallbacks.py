@@ -39,27 +39,31 @@ class ExecutionFallbackHandler:
     async def _attempt_llm_fallback_analysis(self, state: 'DeepAgentState', original_error: Exception) -> Dict[str, Any]:
         """Attempt to generate insights using LLM as fallback."""
         triage_result = state.triage_result
-        
         if not triage_result:
             raise ValueError("No triage result available for LLM fallback")
-        
+        result = await self._execute_llm_fallback(triage_result)
+        self._update_fallback_metadata(result, original_error)
+        return result
+
+    async def _execute_llm_fallback(self, triage_result) -> Dict[str, Any]:
+        """Execute LLM fallback with error handling."""
         result = self._create_fallback_base_result()
-        
         try:
             llm_insights = await self._generate_llm_insights(triage_result)
             result.update(llm_insights)
         except Exception as llm_error:
             logger.warning(f"LLM insight generation failed: {llm_error}")
             result = self._create_basic_fallback_result(triage_result)
-        
+        return result
+
+    def _update_fallback_metadata(self, result: Dict[str, Any], original_error: Exception) -> None:
+        """Update result with fallback metadata."""
         result["metadata"].update({
             "fallback_used": True,
             "original_error": str(original_error),
             "fallback_type": "llm_analysis",
             "data_quality": "degraded"
         })
-        
-        return result
     
     def _create_fallback_base_result(self) -> Dict[str, Any]:
         """Create base structure for fallback results."""

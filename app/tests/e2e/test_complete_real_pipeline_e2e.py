@@ -31,16 +31,24 @@ class TestCompleteRealPipeline:
     
     async def _execute_complete_real_pipeline(self, setup: Dict, state: DeepAgentState) -> Dict:
         """Execute complete pipeline with real agents."""
-        results = {"stages": [], "start_time": asyncio.get_event_loop().time()}
-        
-        # Stage 1: Triage
+        results = self._init_pipeline_results()
+        results = await self._execute_all_pipeline_stages(setup, state, results)
+        return self._finalize_pipeline_timing(results)
+    
+    def _init_pipeline_results(self) -> Dict:
+        """Initialize pipeline results structure."""
+        return {"stages": [], "start_time": asyncio.get_event_loop().time()}
+    
+    async def _execute_all_pipeline_stages(self, setup: Dict, state: DeepAgentState, results: Dict) -> Dict:
+        """Execute all pipeline stages and collect results."""
         triage_result = await self._execute_triage_stage(setup, state)
         results["stages"].append({"name": "triage", "result": triage_result})
-        
-        # Stage 2: Data Analysis
         data_result = await self._execute_data_stage(setup, state)
         results["stages"].append({"name": "data", "result": data_result})
-        
+        return results
+    
+    def _finalize_pipeline_timing(self, results: Dict) -> Dict:
+        """Finalize pipeline results with timing calculations."""
         results["end_time"] = asyncio.get_event_loop().time()
         results["total_duration"] = results["end_time"] - results["start_time"]
         return results
@@ -102,17 +110,23 @@ class TestRealPipelineErrorHandling:
     async def _execute_pipeline_with_errors(self, setup: Dict, state: DeepAgentState) -> Dict:
         """Execute pipeline expecting errors."""
         results = {"errors": [], "stages": []}
-        
-        # Try triage with invalid input
+        return await self._try_execute_triage_with_errors(setup, state, results)
+    
+    async def _try_execute_triage_with_errors(self, setup: Dict, state: DeepAgentState, results: Dict) -> Dict:
+        """Try executing triage with error handling."""
         try:
-            triage_agent = setup['agents']['triage']
-            triage_agent.websocket_manager = setup['websocket']
+            triage_agent = self._prepare_triage_agent_for_error_test(setup)
             await triage_agent.run(state, setup['run_id'], stream_updates=True)
             results["stages"].append({"name": "triage", "state": triage_agent.state})
         except Exception as e:
             results["errors"].append({"stage": "triage", "error": str(e)})
-        
         return results
+    
+    def _prepare_triage_agent_for_error_test(self, setup: Dict):
+        """Prepare triage agent for error testing."""
+        triage_agent = setup['agents']['triage']
+        triage_agent.websocket_manager = setup['websocket']
+        return triage_agent
     
     async def _validate_error_handling(self, error_result: Dict):
         """Validate error handling is graceful."""
@@ -143,42 +157,69 @@ class TestRealPipelineWithValidationReporting:
                                                reporter: StateValidationReporter) -> Dict:
         """Execute pipeline with comprehensive validation at each stage."""
         results = {"validation_reports": [], "agent_results": []}
-        
-        # Execute triage with validation
-        triage_agent = setup['agents']['triage']
-        triage_agent.websocket_manager = setup['websocket']
+        results = await self._execute_triage_with_validation(setup, state, reporter, results)
+        results = await self._execute_data_with_validation(setup, state, reporter, results)
+        return results
+    
+    async def _execute_triage_with_validation(self, setup: Dict, state: DeepAgentState, 
+                                            reporter: StateValidationReporter, results: Dict) -> Dict:
+        """Execute triage stage with validation reporting."""
+        triage_agent = self._setup_triage_for_validation(setup)
         await triage_agent.run(state, setup['run_id'], True)
         triage_report = reporter.validate_and_report_triage(state)
         results["validation_reports"].append(triage_report)
         results["agent_results"].append({"stage": "triage", "state": triage_agent.state})
-        
-        # Store triage result for handoff validation
+        return results
+    
+    def _setup_triage_for_validation(self, setup: Dict):
+        """Setup triage agent for validation."""
+        triage_agent = setup['agents']['triage']
+        triage_agent.websocket_manager = setup['websocket']
+        return triage_agent
+    
+    async def _execute_data_with_validation(self, setup: Dict, state: DeepAgentState,
+                                          reporter: StateValidationReporter, results: Dict) -> Dict:
+        """Execute data stage with validation reporting."""
         original_triage = state.triage_result
-        
-        # Execute data with validation
+        data_agent = self._setup_data_for_validation(setup)
+        await data_agent.run(state, setup['run_id'], True)
+        self._collect_data_validation_reports(reporter, state, original_triage, results)
+        results["agent_results"].append({"stage": "data", "state": data_agent.state})
+        return results
+    
+    def _setup_data_for_validation(self, setup: Dict):
+        """Setup data agent for validation."""
         data_agent = setup['agents']['data']
         data_agent.websocket_manager = setup['websocket']
-        await data_agent.run(state, setup['run_id'], True)
+        return data_agent
+    
+    def _collect_data_validation_reports(self, reporter: StateValidationReporter, state: DeepAgentState,
+                                       original_triage, results: Dict):
+        """Collect validation reports for data stage."""
         data_report = reporter.validate_and_report_data(state)
         handoff_report = reporter.validate_and_report_handoff(state, original_triage)
         results["validation_reports"].extend([data_report, handoff_report])
-        results["agent_results"].append({"stage": "data", "state": data_agent.state})
-        
-        return results
     
     async def _validate_comprehensive_results(self, pipeline_result: Dict, 
                                             reporter: StateValidationReporter):
         """Validate comprehensive pipeline results."""
-        # Validate all agents completed successfully
+        self._validate_agent_completion_status(pipeline_result)
+        self._validate_validation_report_success(pipeline_result)
+        self._validate_summary_report_metrics(reporter)
+    
+    def _validate_agent_completion_status(self, pipeline_result: Dict):
+        """Validate all agents completed successfully."""
         for agent_result in pipeline_result["agent_results"]:
             assert agent_result["state"] == SubAgentLifecycle.COMPLETED, \
                    f"Stage {agent_result['stage']} should complete successfully"
-        
-        # Validate all validation reports passed
+    
+    def _validate_validation_report_success(self, pipeline_result: Dict):
+        """Validate all validation reports passed."""
         for report in pipeline_result["validation_reports"]:
             assert report["success"], f"Validation failed for {report['stage']}: {report.get('issues', [])}"
-        
-        # Validate summary report
+    
+    def _validate_summary_report_metrics(self, reporter: StateValidationReporter):
+        """Validate summary report metrics."""
         summary = reporter.get_summary_report()
         assert summary["success_rate"] == 1.0, "All validations should pass"
         assert summary["total_validations"] >= 3, "Should have comprehensive validations"
@@ -219,18 +260,26 @@ class TestRealPipelineConcurrencyAndStability:
     async def _validate_concurrent_stability(self, results: List):
         """Validate concurrent execution stability."""
         assert len(results) == 3, "All concurrent tasks should complete"
-        
-        # Check each result
+        self._validate_each_concurrent_result(results)
+    
+    def _validate_each_concurrent_result(self, results: List):
+        """Validate each concurrent execution result."""
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                # Exception should be handled gracefully
-                assert "agent" in str(result).lower() or "timeout" in str(result).lower(), \
-                       f"Task {i} had unexpected exception: {result}"
+                self._validate_exception_result(result, i)
             else:
-                # Success case - validate completion
-                assert result["task_id"] == i, f"Task ID mismatch for task {i}"
-                assert result["triage_state"] in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], \
-                       f"Task {i} should complete or fail gracefully"
+                self._validate_success_result(result, i)
+    
+    def _validate_exception_result(self, result: Exception, task_id: int):
+        """Validate exception result is handled gracefully."""
+        assert "agent" in str(result).lower() or "timeout" in str(result).lower(), \
+               f"Task {task_id} had unexpected exception: {result}"
+    
+    def _validate_success_result(self, result: Dict, task_id: int):
+        """Validate successful execution result."""
+        assert result["task_id"] == task_id, f"Task ID mismatch for task {task_id}"
+        assert result["triage_state"] in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], \
+               f"Task {task_id} should complete or fail gracefully"
 
 
 class TestRealPipelinePerformanceMetrics:
@@ -245,16 +294,24 @@ class TestRealPipelinePerformanceMetrics:
     
     async def _execute_and_collect_metrics(self, setup: Dict, state: DeepAgentState) -> Dict:
         """Execute pipeline and collect detailed metrics."""
-        metrics = {"stages": [], "total_start": asyncio.get_event_loop().time()}
-        
-        # Triage with metrics
+        metrics = self._init_metrics_collection()
+        metrics = await self._collect_stage_metrics(setup, state, metrics)
+        return self._finalize_metrics_timing(metrics)
+    
+    def _init_metrics_collection(self) -> Dict:
+        """Initialize metrics collection structure."""
+        return {"stages": [], "total_start": asyncio.get_event_loop().time()}
+    
+    async def _collect_stage_metrics(self, setup: Dict, state: DeepAgentState, metrics: Dict) -> Dict:
+        """Collect metrics for all stages."""
         triage_metrics = await self._execute_stage_with_metrics(setup, 'triage', state)
         metrics["stages"].append(triage_metrics)
-        
-        # Data with metrics
         data_metrics = await self._execute_stage_with_metrics(setup, 'data', state)
         metrics["stages"].append(data_metrics)
-        
+        return metrics
+    
+    def _finalize_metrics_timing(self, metrics: Dict) -> Dict:
+        """Finalize metrics with total timing calculations."""
         metrics["total_end"] = asyncio.get_event_loop().time()
         metrics["total_duration"] = metrics["total_end"] - metrics["total_start"]
         return metrics
@@ -275,14 +332,23 @@ class TestRealPipelinePerformanceMetrics:
     
     async def _validate_performance_metrics(self, metrics: Dict):
         """Validate performance metrics are reasonable."""
+        self._validate_basic_metrics_structure(metrics)
+        self._validate_total_duration_consistency(metrics)
+        self._validate_individual_stage_performance(metrics)
+    
+    def _validate_basic_metrics_structure(self, metrics: Dict):
+        """Validate basic metrics structure and values."""
         assert metrics["total_duration"] > 0, "Should have measurable total duration"
         assert len(metrics["stages"]) == 2, "Should have metrics for all stages"
-        
+    
+    def _validate_total_duration_consistency(self, metrics: Dict):
+        """Validate total duration is consistent with stage durations."""
         total_stage_duration = sum(stage["duration"] for stage in metrics["stages"])
         assert total_stage_duration <= metrics["total_duration"] + 1.0, \
                "Stage durations should not exceed total (allowing 1s margin)"
-        
-        # Each stage should complete in reasonable time (under 60 seconds for real LLM calls)
+    
+    def _validate_individual_stage_performance(self, metrics: Dict):
+        """Validate individual stage performance metrics."""
         for stage in metrics["stages"]:
             assert stage["duration"] < 60.0, f"Stage {stage['stage']} took too long: {stage['duration']}s"
             assert stage["agent_state"] in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], \

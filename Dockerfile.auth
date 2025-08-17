@@ -18,18 +18,9 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy auth-specific code
-COPY app/auth/ ./app/auth/
-COPY app/routes/auth/ ./app/routes/auth/
-COPY app/schemas/Auth.py ./app/schemas/
-COPY app/schemas/Token.py ./app/schemas/
-COPY app/schemas/registry.py ./app/schemas/
-COPY app/db/models_postgres.py ./app/db/
-COPY app/db/postgres.py ./app/db/
-COPY app/services/security_service.py ./app/services/
-COPY app/services/user_service.py ./app/services/
-COPY app/core/exceptions_auth.py ./app/core/
-COPY app/dependencies.py ./app/
+# Copy all necessary app modules for auth service
+# Core modules
+COPY app/__init__.py ./app/
 COPY app/config.py ./app/
 COPY app/config_manager.py ./app/
 COPY app/config_envvars.py ./app/
@@ -37,8 +28,28 @@ COPY app/config_environment.py ./app/
 COPY app/config_loader.py ./app/
 COPY app/config_secrets.py ./app/
 COPY app/config_secrets_manager.py ./app/
-COPY app/schemas/Config.py ./app/schemas/
 COPY app/logging_config.py ./app/
+COPY app/dependencies.py ./app/
+COPY app/redis_manager.py ./app/
+
+# Auth modules
+COPY app/auth/ ./app/auth/
+
+# Routes
+COPY app/routes/ ./app/routes/
+
+# Schemas - copy all needed schemas
+COPY app/schemas/ ./app/schemas/
+
+# Database modules
+COPY app/db/ ./app/db/
+
+# Services needed by auth
+COPY app/services/security_service.py ./app/services/
+COPY app/services/user_service.py ./app/services/
+
+# Core exceptions and interfaces
+COPY app/core/ ./app/core/
 
 # Copy the auth service main file
 COPY auth_service_main.py ./main.py

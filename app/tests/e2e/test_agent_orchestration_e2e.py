@@ -35,12 +35,20 @@ def orchestration_setup(real_agent_setup):
 
 def _create_mock_dependencies():
     """Create mock dependencies for testing."""
+    websocket_mock = _create_websocket_mock()
+    return _build_mock_dependency_dict(websocket_mock)
+
+def _create_websocket_mock():
+    """Create websocket mock with required methods."""
     websocket_mock = AsyncMock(spec=WebSocketManager)
     websocket_mock.send_message = AsyncMock()
     websocket_mock.send_agent_update = AsyncMock()
     websocket_mock.send_agent_log = AsyncMock()
     websocket_mock.send_error = AsyncMock()
-    
+    return websocket_mock
+
+def _build_mock_dependency_dict(websocket_mock):
+    """Build mock dependency dictionary."""
     return {
         'llm': AsyncMock(spec=LLMManager), 'websocket': websocket_mock,
         'dispatcher': AsyncMock(), 'redis': AsyncMock()
@@ -191,11 +199,21 @@ class TestConcurrentRequests:
         """Create concurrent task list for testing."""
         tasks = []
         for i in range(3):
-            state = DeepAgentState(user_request=f"Optimize workload {i}")
-            agent = setup['agents']['triage']
-            agent.websocket_manager, agent.user_id = setup['websocket'], f"user-{i}"
-            tasks.append(asyncio.create_task(agent.run(state, f"run-{i}", True)))
+            task = self._create_single_concurrent_task(setup, i)
+            tasks.append(task)
         return tasks
+    
+    def _create_single_concurrent_task(self, setup, task_id: int):
+        """Create single concurrent task for testing."""
+        state = DeepAgentState(user_request=f"Optimize workload {task_id}")
+        agent = self._configure_agent_for_concurrent_test(setup, task_id)
+        return asyncio.create_task(agent.run(state, f"run-{task_id}", True))
+    
+    def _configure_agent_for_concurrent_test(self, setup, task_id: int):
+        """Configure agent for concurrent testing."""
+        agent = setup['agents']['triage']
+        agent.websocket_manager, agent.user_id = setup['websocket'], f"user-{task_id}"
+        return agent
     
     async def test_resource_constraint_handling(self, orchestration_setup):
         """Test handling of resource constraints."""
@@ -251,7 +269,17 @@ class TestWorkflowValidation:
     async def _execute_and_collect_metrics(self, setup, state):
         """Execute workflow and collect metrics."""
         import time
-        metrics = {'agents_executed': 0, 'total_duration': 0.0, 'success_count': 0}
+        metrics = self._init_workflow_metrics()
+        metrics = await self._execute_all_agents_with_metrics(setup, state, metrics)
+        return metrics
+    
+    def _init_workflow_metrics(self) -> Dict:
+        """Initialize workflow metrics structure."""
+        return {'agents_executed': 0, 'total_duration': 0.0, 'success_count': 0}
+    
+    async def _execute_all_agents_with_metrics(self, setup, state, metrics):
+        """Execute all agents and collect metrics."""
+        import time
         for agent_name, agent in setup['agents'].items():
             agent.websocket_manager = setup['websocket']
             start_time = time.time()

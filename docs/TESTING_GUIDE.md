@@ -1,17 +1,55 @@
-# Netra Platform Testing Guide
+# Netra Apex Testing Guide - 97% Coverage Target
 
-Comprehensive testing documentation for the Netra AI Optimization Platform, covering backend, frontend, integration, and end-to-end testing strategies.
+## 🔴 CRITICAL: Revenue-Critical Path Testing
+
+**MANDATORY**: 97% test coverage for all revenue-generating features.
 
 ## Table of Contents
 
-1. [Testing Overview](#testing-overview)
-2. [Backend Testing](#backend-testing)
-3. [Frontend Testing](#frontend-testing)
-4. [Integration Testing](#integration-testing)
-5. [End-to-End Testing](#end-to-end-testing)
-6. [Test Coverage](#test-coverage)
-7. [CI/CD Testing](#cicd-testing)
-8. [Performance Testing](#performance-testing)
+1. [Business-Critical Testing](#business-critical-testing) **← Revenue Path Coverage**
+2. [Testing Overview](#testing-overview)
+3. [Backend Testing](#backend-testing)
+4. [Frontend Testing](#frontend-testing)
+5. [Integration Testing](#integration-testing)
+6. [End-to-End Testing](#end-to-end-testing)
+7. [Test Coverage Requirements](#test-coverage-requirements) **← 97% Target**
+8. [CI/CD Testing](#cicd-testing)
+9. [Performance Testing](#performance-testing)
+
+## Business-Critical Testing
+
+### Revenue Path Test Coverage
+
+| Revenue Component | Required Coverage | Current Status | Priority |
+|------------------|------------------|----------------|----------|
+| **Savings Calculator** | 100% | 98% | P0 - CRITICAL |
+| **Model Router** | 100% | 95% | P0 - CRITICAL |
+| **Usage Tracking** | 100% | 97% | P0 - CRITICAL |
+| **Billing Integration** | 100% | 92% | P0 - CRITICAL |
+| **Free→Paid Conversion** | 97% | 89% | P1 - HIGH |
+| **Analytics Dashboard** | 95% | 88% | P1 - HIGH |
+| **API Rate Limiting** | 95% | 94% | P2 - MEDIUM |
+
+### Test Categories by Business Impact
+
+```python
+# Revenue-Critical Tests (MUST PASS)
+@pytest.mark.revenue_critical
+def test_savings_calculation():
+    """Verify accurate savings calculation for billing."""
+    assert calculate_savings(100000, 70000) == {
+        'savings': 30000,
+        'percentage': 30.0,
+        'netra_fee': 6000,  # 20% of savings
+        'net_benefit': 24000
+    }
+
+@pytest.mark.revenue_critical
+def test_usage_metering():
+    """Ensure accurate usage tracking for billing."""
+    # Test implementation
+    pass
+```
 
 ## Testing Overview
 
@@ -20,19 +58,29 @@ The Netra platform employs a comprehensive testing strategy across multiple laye
 ### Testing Stack
 
 - **Backend**: Pytest, pytest-asyncio, pytest-cov, httpx
-- **Frontend**: Jest, React Testing Library (see SPEC/frontend_testing_guide.xml)
+- **Frontend**: Jest, React Testing Library
 - **WebSocket**: Jest WebSocket Mock, pytest-asyncio
 - **Performance**: Locust, k6
-- **Coverage**: 80%+ target coverage
+- **Coverage**: **97% MANDATORY** for revenue paths, 90%+ overall
 
-### Test Categories
+### Test Levels (Use test_runner.py)
 
-| Category | Purpose | Tools | Location |
-|----------|---------|-------|----------|
-| Unit Tests | Individual component testing | Pytest, Jest | `tests/`, `frontend/__tests__/` |
-| Integration Tests | Service interaction testing | Pytest, RTL | `tests/integration/` |
-| E2E Tests | Full workflow testing | Cypress | `cypress/e2e/` |
-| Performance Tests | Load and stress testing | Locust | `tests/performance/` |
+| Level | Duration | Coverage | When to Run | Command |
+|-------|----------|----------|-------------|---------|  
+| **Smoke** | <30s | Critical paths | Before commits | `python test_runner.py --level smoke` |
+| **Unit** | 1-2min | Components | DEFAULT - Development | `python test_runner.py --level unit` |
+| **Integration** | 3-5min | Services | Feature validation | `python test_runner.py --level integration` |
+| **Critical** | 1-2min | Revenue paths | Pre-deployment | `python test_runner.py --level critical` |
+| **Comprehensive** | 30-45min | Full coverage | Release | `python test_runner.py --level comprehensive` |
+
+### Test Categories by Priority
+
+| Category | Business Impact | Required Coverage | Failure Action |
+|----------|----------------|-------------------|----------------|
+| **Revenue Critical** | Direct revenue impact | 100% | Block deployment |
+| **Customer Critical** | Customer experience | 97% | Block deployment |
+| **Core Features** | Primary functionality | 95% | Fix required |
+| **Supporting Features** | Secondary features | 90% | Fix in next sprint |
 
 ## Backend Testing
 

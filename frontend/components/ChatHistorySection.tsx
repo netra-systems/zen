@@ -132,8 +132,12 @@ export const ChatHistorySection: React.FC = () => {
     }
   };
 
-  const formatDate = (timestamp: number) => {
+  const formatDate = (timestamp: number | null | undefined) => {
+    if (!timestamp || isNaN(timestamp)) return 'Unknown date';
+    
     const date = new Date(timestamp * 1000);
+    if (isNaN(date.getTime())) return 'Unknown date';
+    
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));

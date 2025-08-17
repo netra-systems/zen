@@ -35,18 +35,24 @@ class QualityMetricsCollector:
         operation_context: Optional[str] = None
     ):
         """Record quality assessment results"""
-        entry = {
+        entry = self._create_assessment_entry(corpus_id, quality_metrics, operation_context)
+        self._quality_history[corpus_id].append(entry)
+        await self._process_quality_metrics(corpus_id, quality_metrics)
+        logger.debug(f"Recorded quality assessment for corpus {corpus_id}: score={quality_metrics.overall_score:.3f}")
+    
+    def _create_assessment_entry(self, corpus_id: str, quality_metrics: QualityMetrics, operation_context: Optional[str]) -> Dict[str, Any]:
+        """Create quality assessment entry."""
+        return {
             "corpus_id": corpus_id,
             "timestamp": datetime.now(UTC),
             "metrics": quality_metrics,
             "context": operation_context or "general"
         }
-        
-        self._quality_history[corpus_id].append(entry)
+    
+    async def _process_quality_metrics(self, corpus_id: str, quality_metrics: QualityMetrics) -> None:
+        """Process quality metrics for tracking and analysis."""
         await self._track_quality_trends(corpus_id, quality_metrics)
         await self._analyze_issues(corpus_id, quality_metrics)
-        
-        logger.debug(f"Recorded quality assessment for corpus {corpus_id}: score={quality_metrics.overall_score:.3f}")
     
     async def _track_quality_trends(self, corpus_id: str, metrics: QualityMetrics):
         """Track quality trends over time"""

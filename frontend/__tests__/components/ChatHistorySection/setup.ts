@@ -3,7 +3,7 @@
  * Handles Jest mocks and test configuration
  */
 
-import { mockRouter, mockPathname, mockThreads } from './mockData';
+import { mockRouter, mockPathname, mockThreads, createMockThread } from './mockData';
 
 // CRITICAL: Jest mocks must be hoisted before imports
 jest.mock('@/store/threadStore');
@@ -84,6 +84,9 @@ export class ChatHistoryTestSetup {
     jest.clearAllMocks();
     mockRouter.push.mockClear();
     
+    // Reset mockThreads to original state
+    this.mockThreads = [...mockThreads];
+    
     // Initialize fresh authenticated mocks
     initializeAuthenticatedMocks();
     configureMockImplementations();
@@ -91,6 +94,13 @@ export class ChatHistoryTestSetup {
 
   afterEach() {
     jest.restoreAllMocks();
+    
+    // Reset any modified state
+    this.mockThreads = [...mockThreads];
+    
+    // Clear any timers or pending async operations
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
   }
 
   configureStoreMocks(config: {
@@ -125,7 +135,9 @@ export class ChatHistoryTestSetup {
   }
 
   updateMockThreads(newThreads: typeof mockThreads) {
-    this.mockThreads = newThreads;
+    this.mockThreads = [...newThreads];
+    // Update the store mock with new threads
+    this.configureStoreMocks({ threads: this.mockThreads });
   }
 
   mockLoadingState(isLoading: boolean = true) {
@@ -141,13 +153,21 @@ export class ChatHistoryTestSetup {
       error,
     });
   }
+
+  getCurrentMockThreads() {
+    return this.mockThreads;
+  }
+
+  createMockThread(overrides: Partial<typeof mockThreads[0]> = {}) {
+    return createMockThread(overrides);
+  }
 }
 
 export const createTestSetup = () => new ChatHistoryTestSetup();
 
 // Export commonly used items
 export { useThreadStore, useChatStore, useAuthStore, ThreadService };
-export { mockRouter, mockPathname };
+export { mockRouter, mockPathname, createMockThread };
 
 // Initialize mocks at module level
 initializeAuthenticatedMocks();

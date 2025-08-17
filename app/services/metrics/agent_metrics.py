@@ -145,13 +145,6 @@ class AgentMetricsCollector:
         """Clean up old operation records."""
         await self._core.cleanup_old_data(hours)
     
-    def _create_point_from_record(self, record: AgentOperationRecord, agent_name: str, metric_type: AgentMetricType) -> Optional[TimeSeriesPoint]:
-        """Create time series point from record if valid."""
-        if record.end_time:
-            value = self._extract_metric_value(record, metric_type)
-            if value is not None:
-                return self._create_time_series_point(record, value, agent_name)
-        return None
     
     def _get_execution_metrics(self, record: AgentOperationRecord) -> Dict[AgentMetricType, float]:
         """Get execution-related metrics."""

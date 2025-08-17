@@ -43,14 +43,17 @@ def create_supervisor_agent(mocks: Dict[str, Any]) -> SupervisorAgent:
 
 def create_execution_context(run_id: str, **kwargs) -> AgentExecutionContext:
     """Create execution context with defaults."""
-    return AgentExecutionContext(
-        run_id=run_id,
-        thread_id=kwargs.get('thread_id', 'thread-1'),
-        user_id=kwargs.get('user_id', 'user-1'),
-        agent_name=kwargs.get('agent_name', 'Supervisor'),
-        max_retries=kwargs.get('max_retries', 3),
-        started_at=kwargs.get('started_at', datetime.now(timezone.utc))
-    )
+    context_params = _build_execution_context_params(run_id, kwargs)
+    return AgentExecutionContext(**context_params)
+
+
+def _build_execution_context_params(run_id: str, kwargs: dict) -> dict:
+    """Build execution context parameters with defaults."""
+    return {
+        'run_id': run_id, 'thread_id': kwargs.get('thread_id', 'thread-1'),
+        'user_id': kwargs.get('user_id', 'user-1'), 'agent_name': kwargs.get('agent_name', 'Supervisor'),
+        'max_retries': kwargs.get('max_retries', 3), 'started_at': kwargs.get('started_at', datetime.now(timezone.utc))
+    }
 
 
 def create_agent_state(user_request: str, **kwargs) -> DeepAgentState:
@@ -283,11 +286,16 @@ def _create_triage_result(return_data: Dict[str, Any]):
     from app.agents.triage_sub_agent.models import TriageResult
     triage_dict = return_data.get('triage_result', {'message_type': 'query'})
     if isinstance(triage_dict, dict):
-        return TriageResult(
-            category=triage_dict.get('message_type', 'query'),
-            confidence_score=triage_dict.get('confidence', 0.8)
-        )
+        return _build_triage_result_from_dict(TriageResult, triage_dict)
     return triage_dict
+
+
+def _build_triage_result_from_dict(result_class, triage_dict: Dict[str, Any]):
+    """Build TriageResult from dictionary."""
+    return result_class(
+        category=triage_dict.get('message_type', 'query'),
+        confidence_score=triage_dict.get('confidence', 0.8)
+    )
 
 
 def _create_triage_execute_func(triage_result):
@@ -301,13 +309,18 @@ def _create_triage_execute_func(triage_result):
 def _create_optimizations_result(return_data: Dict[str, Any]):
     """Create optimizations result from return data."""
     from app.agents.state import OptimizationsResult
+    opt_dict = _prepare_optimizations_dict(return_data)
+    return OptimizationsResult(**opt_dict)
+
+
+def _prepare_optimizations_dict(return_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Prepare optimizations dictionary with defaults."""
     opt_dict = return_data.get('optimizations_result', {
-        'optimization_type': 'performance',
-        'recommendations': []
+        'optimization_type': 'performance', 'recommendations': []
     })
     if 'optimization_type' not in opt_dict:
         opt_dict['optimization_type'] = 'performance'
-    return OptimizationsResult(**opt_dict)
+    return opt_dict
 
 
 def _create_optimization_execute_func(optimizations_result):

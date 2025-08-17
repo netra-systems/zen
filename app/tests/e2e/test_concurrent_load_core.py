@@ -33,53 +33,84 @@ class TestConcurrentLoadCore:
     async def test_gradual_load_increase(self):
         """Test system behavior with gradually increasing load"""
         tester = ConcurrentUserLoadTest()
-        performance_metrics = []
-        
-        for num_users in [5, 10, 20, 30, 40, 50]:
-            tester.response_times = []
-            tester.error_count = 0
-            tester.success_count = 0
-            
-            results = await tester.run_concurrent_users(num_users)
-            performance_metrics.append({
-                'users': num_users,
-                'avg_response': results['avg_response_time'],
-                'success_rate': results['success_rate']
-            })
-            
-            await asyncio.sleep(2)
-        
+        performance_metrics = await self._collect_gradual_load_metrics(tester)
         self.validate_gradual_performance(performance_metrics)
+    
+    async def _collect_gradual_load_metrics(self, tester):
+        """Collect performance metrics for gradual load increase."""
+        performance_metrics = []
+        for num_users in [5, 10, 20, 30, 40, 50]:
+            metrics = await self._run_single_load_test(tester, num_users)
+            performance_metrics.append(metrics)
+            await asyncio.sleep(2)
+        return performance_metrics
+    
+    async def _run_single_load_test(self, tester, num_users: int):
+        """Run single load test and collect metrics."""
+        self._reset_tester_state(tester)
+        results = await tester.run_concurrent_users(num_users)
+        return self._create_performance_metric(num_users, results)
+    
+    def _reset_tester_state(self, tester):
+        """Reset tester state for clean test run."""
+        tester.response_times = []
+        tester.error_count = 0
+        tester.success_count = 0
+    
+    def _create_performance_metric(self, num_users: int, results: dict):
+        """Create performance metric from test results."""
+        return {
+            'users': num_users,
+            'avg_response': results['avg_response_time'],
+            'success_rate': results['success_rate']
+        }
     
     def validate_gradual_performance(self, metrics):
         """Validate performance doesn't degrade catastrophically."""
         for i in range(1, len(metrics)):
-            prev = metrics[i-1]
-            curr = metrics[i]
-            
-            assert curr['avg_response'] < prev['avg_response'] * 2.5, \
-                f"Response time degraded too much: {prev['avg_response']}s -> {curr['avg_response']}s"
-            
-            assert curr['success_rate'] > 80, \
-                f"Success rate too low with {curr['users']} users: {curr['success_rate']}%"
+            self._validate_metric_pair(metrics[i-1], metrics[i])
+    
+    def _validate_metric_pair(self, prev_metric: dict, curr_metric: dict):
+        """Validate performance between two consecutive metrics."""
+        self._validate_response_time_degradation(prev_metric, curr_metric)
+        self._validate_success_rate_threshold(curr_metric)
+    
+    def _validate_response_time_degradation(self, prev_metric: dict, curr_metric: dict):
+        """Validate response time doesn't degrade too much."""
+        assert curr_metric['avg_response'] < prev_metric['avg_response'] * 2.5, \
+            f"Response time degraded too much: {prev_metric['avg_response']}s -> {curr_metric['avg_response']}s"
+    
+    def _validate_success_rate_threshold(self, curr_metric: dict):
+        """Validate success rate meets minimum threshold."""
+        assert curr_metric['success_rate'] > 80, \
+            f"Success rate too low with {curr_metric['users']} users: {curr_metric['success_rate']}%"
     
     async def test_burst_traffic_handling(self):
         """Test handling of sudden traffic bursts"""
         tester = ConcurrentUserLoadTest()
-        
-        baseline = await tester.run_concurrent_users(10)
-        baseline_response_time = baseline['avg_response_time']
-        
+        baseline = await self._establish_baseline_performance(tester)
+        burst_results = await self._execute_burst_test(tester)
+        recovery_results = await self._execute_recovery_test(tester)
+        self._validate_burst_performance(baseline, burst_results, recovery_results)
+    
+    async def _establish_baseline_performance(self, tester):
+        """Establish baseline performance metrics."""
+        return await tester.run_concurrent_users(10)
+    
+    async def _execute_burst_test(self, tester):
+        """Execute burst traffic test."""
         tester.response_times = []
-        burst = await tester.run_concurrent_users(50)
-        
-        assert burst['success_rate'] > 85, f"Burst handling failed: {burst['success_rate']}% success"
-        assert burst['avg_response_time'] < baseline_response_time * 3, \
-            "Response time increased too much during burst"
-        
+        return await tester.run_concurrent_users(50)
+    
+    async def _execute_recovery_test(self, tester):
+        """Execute recovery test after burst."""
         await asyncio.sleep(5)
         tester.response_times = []
-        recovery = await tester.run_concurrent_users(10)
-        
-        assert recovery['avg_response_time'] < baseline_response_time * 1.5, \
-            "System did not recover after burst"
+        return await tester.run_concurrent_users(10)
+    
+    def _validate_burst_performance(self, baseline: dict, burst: dict, recovery: dict):
+        """Validate burst and recovery performance."""
+        baseline_time = baseline['avg_response_time']
+        assert burst['success_rate'] > 85, f"Burst handling failed: {burst['success_rate']}% success"
+        assert burst['avg_response_time'] < baseline_time * 3, "Response time increased too much during burst"
+        assert recovery['avg_response_time'] < baseline_time * 1.5, "System did not recover after burst"
