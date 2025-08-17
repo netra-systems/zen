@@ -60,8 +60,13 @@ from app.core.exceptions_websocket import WebSocketError
 class ErrorRecoveryStrategy:
     """Strategy for error recovery based on error type."""
     
+    # Strategy constants
+    RETRY = "retry"
+    ABORT = "abort"
+    FALLBACK = "fallback"
+    
     @staticmethod
-    def get_recovery_delay(error: AgentError, retry_count: int) -> float:
+    def get_recovery_delay(error: AgentError, attempt: int) -> float:
         """Calculate recovery delay based on error type and retry count."""
         base_delays = {
             ErrorCategory.NETWORK: 2.0,
@@ -75,17 +80,31 @@ class ErrorRecoveryStrategy:
         
         base_delay = base_delays.get(error.category, 2.0)
         # Exponential backoff with jitter
-        delay = base_delay * (2 ** retry_count)
+        delay = base_delay * (2 ** attempt)
         max_delay = 30.0  # Maximum 30 seconds
         
         return min(delay, max_delay)
     
     @staticmethod
-    def should_retry(error: AgentError) -> bool:
-        """Determine if error should be retried."""
+    def should_retry(error: AgentError, attempt: int = 1) -> bool:
+        """Determine if error should be retried based on attempt number."""
+        max_attempts = 5
+        if attempt >= max_attempts:
+            return False
         if not error.recoverable:
             return False
         return ErrorRecoveryStrategy._check_retry_conditions(error)
+    
+    @staticmethod
+    def get_strategy(error: AgentError) -> str:
+        """Get recovery strategy for the given error."""
+        if error.severity == ErrorSeverity.CRITICAL:
+            return ErrorRecoveryStrategy.ABORT
+        if error.category == ErrorCategory.VALIDATION:
+            return ErrorRecoveryStrategy.ABORT
+        if ErrorRecoveryStrategy._is_always_retryable_category(error.category):
+            return ErrorRecoveryStrategy.RETRY
+        return ErrorRecoveryStrategy.FALLBACK
     
     @staticmethod
     def _check_retry_conditions(error: AgentError) -> bool:

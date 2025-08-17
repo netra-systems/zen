@@ -29,9 +29,15 @@ COPY app/db/postgres.py ./app/db/
 COPY app/services/security_service.py ./app/services/
 COPY app/services/user_service.py ./app/services/
 COPY app/core/exceptions_auth.py ./app/core/
-COPY app/core/interfaces_auth.py ./app/core/
 COPY app/dependencies.py ./app/
 COPY app/config.py ./app/
+COPY app/config_manager.py ./app/
+COPY app/config_envvars.py ./app/
+COPY app/config_environment.py ./app/
+COPY app/config_loader.py ./app/
+COPY app/config_secrets.py ./app/
+COPY app/config_secrets_manager.py ./app/
+COPY app/schemas/Config.py ./app/schemas/
 COPY app/logging_config.py ./app/
 
 # Copy the auth service main file

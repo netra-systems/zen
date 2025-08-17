@@ -140,8 +140,10 @@ class SupplyResearchScheduler:
                 result = await self._execute_research_job(schedule)
                 if result:
                     return True
-            except Exception:
-                pass
+            except Exception as e:
+                logger.error(f"Job execution failed for {schedule.name} (attempt {attempt + 1}/{max_retries}): {e}")
+                if attempt == max_retries - 1:
+                    logger.error(f"Job {schedule.name} failed after {max_retries} attempts")
             
             # Add delay between retries (exponential backoff)
             if attempt < max_retries - 1:
@@ -172,9 +174,9 @@ class SupplyResearchScheduler:
                 await self.cache.delete(cache_key)
             
             # Log cleanup completion
-            self.logger.debug(f"Cleaned up resources for schedule: {schedule.name}")
+            logger.debug(f"Cleaned up resources for schedule: {schedule.name}")
         except Exception as e:
-            self.logger.warning(f"Resource cleanup failed for {schedule.name}: {e}")
+            logger.warning(f"Resource cleanup failed for {schedule.name}: {e}")
     
     async def _execute_job_with_metrics(self, schedule: ResearchSchedule) -> bool:
         """Execute job with metrics tracking - simplified wrapper"""
@@ -207,14 +209,14 @@ class SupplyResearchScheduler:
             }
             
             # Log metrics for observability
-            self.logger.info(f"Job metrics recorded", extra=metrics_data)
+            logger.info(f"Job metrics recorded", extra=metrics_data)
             
             # Store in result manager if available
             if hasattr(self, 'result_manager') and self.result_manager:
                 await self.result_manager.store_metrics(job_name, metrics_data)
                 
         except Exception as e:
-            self.logger.error(f"Failed to record metrics for {job_name}: {e}")
+            logger.error(f"Failed to record metrics for {job_name}: {e}")
     
     async def get_recent_results(
         self,

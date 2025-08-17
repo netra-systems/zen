@@ -68,6 +68,7 @@ class TestWebSocketUpdates:
         mock_ws = MagicMock()
         mock_ws.send_json = mock_send_json
         mock_ws.client_state = WebSocketState.CONNECTED
+        mock_ws.application_state = WebSocketState.CONNECTED
         
         await ws_service.connect(mock_ws, job_id)
         
@@ -145,6 +146,7 @@ class TestWebSocketUpdates:
             client = AsyncMock()
             client.send_json = AsyncMock()
             client.client_state = WebSocketState.CONNECTED
+            client.application_state = WebSocketState.CONNECTED
             clients.append(client)
         
         for client in clients:

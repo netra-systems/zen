@@ -231,7 +231,7 @@ class TestEnhancedErrorRecoverySystem:
     
     def test_get_agent_type_enum(self, recovery_system):
         """Test agent type enum conversion."""
-        from app.core.agent_recovery_strategies import AgentType
+        from app.core.agent_recovery_types import AgentType
         
         assert recovery_system._get_agent_type_enum('triage') == AgentType.TRIAGE
         assert recovery_system._get_agent_type_enum('data_analysis') == AgentType.DATA_ANALYSIS

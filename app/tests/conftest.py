@@ -78,6 +78,7 @@ async def db_session(test_engine):
     async with async_session() as session:
         yield session
 
+
 @pytest.fixture(scope="function")
 def client(db_session):
     def override_get_db():

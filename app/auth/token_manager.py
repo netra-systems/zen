@@ -113,12 +113,12 @@ class JWTTokenManager:
         """Handle specific revocation errors with appropriate logging."""
         if isinstance(error, ValidationError):
             logger.error(f"Invalid token format during revocation: {str(error)}")
-            raise AuthenticationError("Invalid token format")
+            # Don't raise for revocation - it should be a graceful operation
         elif isinstance(error, ConnectionError):
             logger.error(f"Redis connection failed during token revocation: {str(error)}")
         else:
             logger.error(f"Unexpected error during token revocation: {str(error)}")
-            raise
+            # Don't raise for revocation - log and continue gracefully
     
     async def revoke_jwt(self, token: str) -> None:
         """Add JWT token to revocation list in Redis."""

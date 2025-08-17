@@ -276,7 +276,7 @@ class SystemHealthMonitor:
     
     def _is_critical_system_health(self, stats: Dict[str, Any]) -> bool:
         """Check if system health is critical."""
-        return stats["critical"] > 0 and stats["health_pct"] < 0.5
+        return stats["critical"] > 0 and stats["health_pct"] <= 0.5
     
     def _is_degraded_system_health(self, stats: Dict[str, Any]) -> bool:
         """Check if system health is degraded."""

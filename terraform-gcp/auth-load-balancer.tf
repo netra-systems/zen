@@ -93,9 +93,7 @@ resource "google_compute_managed_ssl_certificate" "auth" {
   name = "netra-auth-ssl-cert"
   
   managed {
-    domains = var.environment == "production" ? 
-      ["auth.netrasystems.ai"] : 
-      ["auth.staging.netrasystems.ai"]
+    domains = var.environment == "production" ? ["auth.netrasystems.ai"] : ["auth.staging.netrasystems.ai"]
   }
 }
 

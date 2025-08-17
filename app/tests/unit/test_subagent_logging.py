@@ -125,7 +125,7 @@ class TestBaseSubAgentLogging:
         size = test_agent._calculate_data_size(data)
         assert size == 0
     
-    @patch('app.agents.base.log_agent_communication')
+    @patch('app.llm.observability.SubAgentLogger._log_communication_json')
     def test_log_agent_start(self, mock_log_comm, test_agent):
         """Test agent start logging."""
         test_agent._subagent_logging_enabled = True
@@ -135,7 +135,7 @@ class TestBaseSubAgentLogging:
             "system", test_agent.name, test_agent.correlation_id, "agent_start"
         )
     
-    @patch('app.agents.base.log_agent_communication')
+    @patch('app.llm.observability.SubAgentLogger._log_communication_json')
     def test_log_agent_start_disabled(self, mock_log_comm, test_agent):
         """Test agent start logging when disabled."""
         test_agent._subagent_logging_enabled = False
@@ -143,7 +143,7 @@ class TestBaseSubAgentLogging:
         
         mock_log_comm.assert_not_called()
     
-    @patch('app.agents.base.log_agent_communication')
+    @patch('app.llm.observability.SubAgentLogger._log_communication_json')
     def test_log_agent_completion(self, mock_log_comm, test_agent):
         """Test agent completion logging."""
         test_agent._subagent_logging_enabled = True
@@ -153,7 +153,7 @@ class TestBaseSubAgentLogging:
             test_agent.name, "system", test_agent.correlation_id, "agent_completed"
         )
     
-    @patch('app.agents.base.log_agent_input')
+    @patch('app.llm.observability.SubAgentLogger._log_input_json')
     def test_log_input_from_agent(self, mock_log_input, test_agent):
         """Test logging input from another agent."""
         test_agent._subagent_logging_enabled = True
@@ -166,7 +166,7 @@ class TestBaseSubAgentLogging:
         assert args[2] == len("test data")
         assert args[3] == test_agent.correlation_id
     
-    @patch('app.agents.base.log_agent_output')
+    @patch('app.llm.observability.SubAgentLogger._log_output_json')
     def test_log_output_to_agent(self, mock_log_output, test_agent):
         """Test logging output to another agent."""
         test_agent._subagent_logging_enabled = True
@@ -180,8 +180,8 @@ class TestBaseSubAgentLogging:
         assert args[3] == "success"
         assert args[4] == test_agent.correlation_id
     
-    @patch('app.agents.base.log_agent_communication')
-    @patch('app.agents.base.get_config')
+    @patch('app.llm.observability.SubAgentLogger._log_communication_json')
+    @patch('app.config.get_config')
     async def test_pre_run_logging(self, mock_get_config, mock_log_comm, test_agent, mock_state):
         """Test logging during pre_run."""
         # Mock config to enable logging

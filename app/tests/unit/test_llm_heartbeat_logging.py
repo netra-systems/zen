@@ -83,11 +83,16 @@ class TestHeartbeatLogger:
         assert elapsed < 0.2
 
     def test_heartbeat_message_format(self):
-        """Test heartbeat message formatting."""
+        """Test heartbeat data formatting."""
         logger = HeartbeatLogger()
-        message = logger._format_heartbeat_message("test_agent", "test-id", 2.5)
-        expected = "LLM heartbeat: test_agent - test-id - elapsed: 2.5s - status: processing"
-        assert message == expected
+        data = logger._build_heartbeat_data("test_agent", "test-id", 2.5)
+        
+        assert data["type"] == "llm_heartbeat"
+        assert data["agent_name"] == "test_agent"
+        assert data["correlation_id"] == "test-id"
+        assert data["elapsed_time_seconds"] == 2.5
+        assert data["status"] == "processing"
+        assert "timestamp" in data
 
 
 class TestHeartbeatIntegration:

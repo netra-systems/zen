@@ -140,9 +140,7 @@ resource "google_compute_managed_ssl_certificate" "main" {
   name = "netra-main-ssl-cert"
   
   managed {
-    domains = var.environment == "production" ? 
-      ["netrasystems.ai", "api.netrasystems.ai", "app.netrasystems.ai"] : 
-      ["staging.netrasystems.ai", "api.staging.netrasystems.ai", "app.staging.netrasystems.ai"]
+    domains = var.environment == "production" ? ["netrasystems.ai", "api.netrasystems.ai", "app.netrasystems.ai"] : ["staging.netrasystems.ai", "api.staging.netrasystems.ai", "app.staging.netrasystems.ai"]
   }
 }
 

@@ -180,7 +180,7 @@ class TestAutoRenameThread:
     async def test_auto_rename_exception(self, mock_db, mock_user):
         """Test general exception in auto_rename_thread"""
         with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
-             patch('app.routes.utils.thread_helpers.logger') as mock_logger:
+             patch('app.logging_config.central_logger.get_logger') as mock_get_logger:
             
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(side_effect=Exception("Database error"))
@@ -189,4 +189,5 @@ class TestAutoRenameThread:
                 await auto_rename_thread("thread_abc123", mock_db, mock_user)
             
             assert_http_exception(exc_info, 500, "Failed to auto-rename thread")
+            mock_logger = mock_get_logger.return_value
             mock_logger.error.assert_called_once()
