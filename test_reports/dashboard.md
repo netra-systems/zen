@@ -1,5 +1,5 @@
 # Test Dashboard
-**Level**: unit | **Time**: 2025-08-17 14:43:35
+**Level**: unit | **Time**: 2025-08-17 15:33:17
 
 ## Overall Status: 🔴 Import Errors - Tests Cannot Run
 
@@ -7,8 +7,8 @@
 
 | Component | Status | Tests | Passed | Failed | Errors | Import Errors | Duration |
 |-----------|--------|-------|--------|--------|--------|---------------|----------|
-| Backend | 🔴 import_error | 0 | 0 | 0 | 0 | 2 | 9.48s |
-| Frontend | ⚫ collection_failed | 0 | 0 | 0 | 0 | 0 | 0.37s |
+| Backend | 🔴 import_error | 0 | 0 | 0 | 0 | 2 | 7.57s |
+| Frontend | ⚫ collection_failed | 0 | 0 | 0 | 0 | 0 | 0.12s |
 | E2E | ⚫ collection_failed | 0 | 0 | 0 | 0 | 0 | 0.00s |
 
 ## 🔴 Issues Detected
@@ -24,7 +24,7 @@
 - **Failed**: 0
 - **Errors**: 0
 - **Skipped**: 0
-- **Total Duration**: 9.86s
+- **Total Duration**: 7.68s
 
 ## Quick Actions
 

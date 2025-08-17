@@ -101,3 +101,4 @@ terraform-dev-postgres/backups/
 act.zip
 terraform/staging/tfplan
 terraform-gcp/staging.tfplan
+terraform-gcp/staging.tfplan

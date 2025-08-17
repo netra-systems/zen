@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-17T14:43:35.350800",
+  "timestamp": "2025-08-17T15:33:17.073238",
   "level": "unit",
   "components": {
     "backend": {
@@ -9,7 +9,7 @@
       "skipped": 0,
       "errors": 0,
       "import_errors": 2,
-      "duration": 9.48421335220337,
+      "duration": 7.56709098815918,
       "status": "import_error",
       "exit_code": 4,
       "pass_rate": 0.0,
@@ -24,9 +24,9 @@
       "skipped": 0,
       "errors": 0,
       "import_errors": 0,
-      "duration": 0.37302589416503906,
+      "duration": 0.11509299278259277,
       "status": "collection_failed",
-      "exit_code": 255,
+      "exit_code": 2,
       "pass_rate": 0.0,
       "has_issues": false,
       "status_icon": "\u26ab",
