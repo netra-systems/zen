@@ -110,36 +110,44 @@ def reset_cloud_clickhouse():
     print("Use the web console or set up credentials properly")
     return False
 
-def main():
-    """Main function."""
+def display_final_header() -> None:
+    """Display the final reset tool header."""
     print("=" * 60)
     print("ClickHouse Complete Reset Tool")
     print("=" * 60)
-    
-    # Determine what to reset
-    target = sys.argv[1] if len(sys.argv) > 1 else "both"
-    
+
+def determine_reset_target() -> str:
+    """Determine reset target from command line arguments."""
+    return sys.argv[1] if len(sys.argv) > 1 else "both"
+
+def execute_final_reset(target: str) -> List[tuple]:
+    """Execute reset operations based on target and return results."""
     results = []
-    
     if target in ["local", "both"]:
         success = reset_local_clickhouse()
         results.append(("Local ClickHouse", success))
-    
     if target in ["cloud", "both"]:
         success = reset_cloud_clickhouse()
         results.append(("Cloud ClickHouse", success))
-    
-    # Summary
+    return results
+
+def display_final_summary(results: List[tuple]) -> int:
+    """Display final summary and return exit code."""
     print("\n" + "=" * 60)
     print("SUMMARY")
     print("=" * 60)
-    
     for name, success in results:
         status = "[SUCCESS]" if success else "[FAILED/SKIPPED]"
         print(f"{status} {name}")
-    
     print("\nOperation complete!")
     return 0 if all(s for _, s in results) else 1
+
+def main():
+    """Main function."""
+    display_final_header()
+    target = determine_reset_target()
+    results = execute_final_reset(target)
+    return display_final_summary(results)
 
 if __name__ == "__main__":
     exit(main())

@@ -237,29 +237,8 @@ export const updateSlowLayerWithCompletedAgent = (
   state: UnifiedChatState,
   set: (partial: Partial<UnifiedChatState>) => void
 ): void => {
-  const currentSlow = state.slowLayerData;
-  const iteration = state.agentIterations.get(agentData.agentId) || 1;
-  
-  const newAgentResult: AgentResult = {
-    agentName: displayName,
-    duration: agentData.durationMs,
-    result: agentData.result as AgentResultData,
-    metrics: agentData.metrics as AgentMetrics,
-    iteration
-  };
-  
-  const updatedCompletedAgents = deduplicateAgentResults(currentSlow?.completedAgents, newAgentResult, agentData.agentId);
-  
-  set({
-    slowLayerData: {
-      completedAgents: updatedCompletedAgents,
-      finalReport: currentSlow?.finalReport || null,
-      totalDuration: currentSlow?.totalDuration || 0,
-      metrics: currentSlow?.metrics || { total_duration_ms: 0, total_tokens: 0 }
-    },
-    fastLayerData: state.fastLayerData ? { ...state.fastLayerData, activeTools: [] } : null,
-    executedAgents: updateAgentExecution(agentData, state).executedAgents
-  });
+  const newAgentResult = createCompletedAgentResult(displayName, agentData, state);
+  updateSlowLayerWithAgentResult(newAgentResult, agentData, state, set);
 };
 
 /**
@@ -277,3 +256,42 @@ export const handleAgentCompleted = (
   updateSlowLayerWithCompletedAgent(displayName, agentData, state, set);
   cleanupToolsOnAgentComplete(state.fastLayerData, set);
 };
+
+// Helper functions for agent completion (≤8 lines each)
+const createCompletedAgentResult = (
+  displayName: string,
+  agentData: any,
+  state: UnifiedChatState
+): AgentResult => {
+  const iteration = state.agentIterations.get(agentData.agentId) || 1;
+  return {
+    agentName: displayName,
+    duration: agentData.durationMs,
+    result: agentData.result as AgentResultData,
+    metrics: agentData.metrics as AgentMetrics,
+    iteration
+  };
+};
+
+const updateSlowLayerWithAgentResult = (
+  newAgentResult: AgentResult,
+  agentData: any,
+  state: UnifiedChatState,
+  set: (partial: Partial<UnifiedChatState>) => void
+): void => {
+  const currentSlow = state.slowLayerData;
+  const updatedCompletedAgents = deduplicateAgentResults(currentSlow?.completedAgents, newAgentResult, agentData.agentId);
+  
+  set({
+    slowLayerData: createUpdatedSlowLayerData(currentSlow, updatedCompletedAgents),
+    fastLayerData: state.fastLayerData ? { ...state.fastLayerData, activeTools: [] } : null,
+    executedAgents: updateAgentExecution(agentData, state).executedAgents
+  });
+};
+
+const createUpdatedSlowLayerData = (currentSlow: any, updatedCompletedAgents: any) => ({
+  completedAgents: updatedCompletedAgents,
+  finalReport: currentSlow?.finalReport || null,
+  totalDuration: currentSlow?.totalDuration || 0,
+  metrics: currentSlow?.metrics || { total_duration_ms: 0, total_tokens: 0 }
+});

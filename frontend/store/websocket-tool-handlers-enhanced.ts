@@ -85,26 +85,8 @@ export const handleToolExecutingEnhanced = (
   set: (partial: Partial<UnifiedChatState>) => void
 ): void => {
   const { toolName, timestamp } = extractToolData(event.payload as any);
-  const currentFastLayer = state.fastLayerData || {
-    agentName: '', runId: '', timestamp: Date.now(),
-    activeTools: [], toolStatuses: []
-  };
-  
-  const toolTracker = getGlobalToolTracker();
-  toolTracker.startTool(toolName);
-  
-  const newToolStatus = createToolStatus(toolName, timestamp);
-  const updatedStatuses = updateToolStatuses(
-    currentFastLayer.toolStatuses || [], 
-    newToolStatus
-  );
-  
-  updateFastLayerWithEnhancedTools(
-    currentFastLayer, 
-    updatedStatuses, 
-    timestamp, 
-    set
-  );
+  const currentFastLayer = ensureFastLayerExists(state.fastLayerData);
+  startToolExecution(toolName, timestamp, currentFastLayer, set);
 };
 
 /**
@@ -134,25 +116,8 @@ export const handleToolCompletedEnhanced = (
   set: (partial: Partial<UnifiedChatState>) => void
 ): void => {
   const toolName = extractCompletedToolName(event.payload as any);
-  const currentFastLayer = state.fastLayerData || {
-    agentName: '', runId: '', timestamp: Date.now(),
-    activeTools: [], toolStatuses: []
-  };
-  
-  const toolTracker = getGlobalToolTracker();
-  toolTracker.completeTool(toolName);
-  
-  const updatedStatuses = removeToolFromStatuses(
-    currentFastLayer.toolStatuses || [], 
-    toolName
-  );
-  
-  updateFastLayerWithEnhancedTools(
-    currentFastLayer, 
-    updatedStatuses, 
-    Date.now(), 
-    set
-  );
+  const currentFastLayer = ensureFastLayerExists(state.fastLayerData);
+  completeToolExecution(toolName, currentFastLayer, set);
 };
 
 /**
@@ -195,4 +160,39 @@ export const cleanupToolsOnAgentComplete = (
       toolStatuses: []
     }
   });
+};
+
+// Helper functions for tool execution (≤8 lines each)
+const ensureFastLayerExists = (fastLayerData: FastLayerData | null): FastLayerData => {
+  return fastLayerData || {
+    agentName: '', 
+    runId: '', 
+    timestamp: Date.now(),
+    activeTools: [], 
+    toolStatuses: []
+  };
+};
+
+const startToolExecution = (
+  toolName: string,
+  timestamp: number,
+  currentFastLayer: FastLayerData,
+  set: (partial: Partial<UnifiedChatState>) => void
+): void => {
+  const toolTracker = getGlobalToolTracker();
+  toolTracker.startTool(toolName);
+  const newToolStatus = createToolStatus(toolName, timestamp);
+  const updatedStatuses = updateToolStatuses(currentFastLayer.toolStatuses || [], newToolStatus);
+  updateFastLayerWithEnhancedTools(currentFastLayer, updatedStatuses, timestamp, set);
+};
+
+const completeToolExecution = (
+  toolName: string,
+  currentFastLayer: FastLayerData,
+  set: (partial: Partial<UnifiedChatState>) => void
+): void => {
+  const toolTracker = getGlobalToolTracker();
+  toolTracker.completeTool(toolName);
+  const updatedStatuses = removeToolFromStatuses(currentFastLayer.toolStatuses || [], toolName);
+  updateFastLayerWithEnhancedTools(currentFastLayer, updatedStatuses, Date.now(), set);
 };

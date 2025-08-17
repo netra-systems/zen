@@ -138,52 +138,55 @@ def reset_clickhouse_instance(config: Dict[str, Any]) -> bool:
         print(f"Details: {type(e).__name__}: {str(e)}")
         return False
 
-def main():
-    """Main function to reset both ClickHouse instances."""
+def display_auto_reset_header() -> None:
+    """Display the auto-reset header and information."""
     print("=" * 60)
     print("ClickHouse Database Auto-Reset (Cloud & Local)")
     print("=" * 60)
     print("\nThis will attempt to drop ALL tables in both instances.")
-    
-    # Determine which instances to process based on command line args
+
+def determine_target_configs() -> List[Dict[str, Any]]:
+    """Determine target configurations based on command line arguments."""
     if len(sys.argv) > 1:
         arg = sys.argv[1].lower()
         if arg == 'cloud':
-            configs = [CLOUD_CONFIG]
             print("Processing: Cloud instance only")
+            return [CLOUD_CONFIG]
         elif arg == 'local':
-            configs = [LOCAL_CONFIG]
             print("Processing: Local instance only")
-        else:
-            configs = [CLOUD_CONFIG, LOCAL_CONFIG]
-            print("Processing: Both Cloud and Local instances")
-    else:
-        configs = [CLOUD_CONFIG, LOCAL_CONFIG]
-        print("Processing: Both Cloud and Local instances")
+            return [LOCAL_CONFIG]
+    print("Processing: Both Cloud and Local instances")
+    if len(sys.argv) <= 1:
         print("\nUsage: python reset_clickhouse_auto.py [cloud|local|both]")
-    
-    # Process each instance
+    return [CLOUD_CONFIG, LOCAL_CONFIG]
+
+def execute_auto_reset(configs: List[Dict[str, Any]]) -> List[tuple]:
+    """Execute auto-reset for all configurations and return results."""
     results = []
     for config in configs:
         success = reset_clickhouse_instance(config)
         results.append((config['name'], success))
-    
-    # Summary
+    return results
+
+def display_auto_summary(results: List[tuple]) -> int:
+    """Display summary and return appropriate exit code."""
     print("\n" + "=" * 60)
     print("SUMMARY")
     print("=" * 60)
-    
     success_count = sum(1 for _, success in results if success)
     total_count = len(results)
-    
     for name, success in results:
         status = "[SUCCESS]" if success else "[FAILED/SKIPPED]"
         print(f"{status} {name}")
-    
     print(f"\nOperation complete! ({success_count}/{total_count} instances reset)")
-    
-    # Return exit code based on results
     return 0 if success_count == total_count else 1
+
+def main():
+    """Main function to reset both ClickHouse instances."""
+    display_auto_reset_header()
+    configs = determine_target_configs()
+    results = execute_auto_reset(configs)
+    return display_auto_summary(results)
 
 if __name__ == "__main__":
     exit(main())

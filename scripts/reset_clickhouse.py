@@ -252,21 +252,31 @@ def print_operation_summary(results: List[Tuple[str, bool]]) -> None:
         print(f"{status} {name}")
     print("\nOperation complete!")
 
-def main():
-    """Main function to reset ClickHouse instances."""
-    print_main_header()
+def handle_user_choice() -> List[Dict[str, Any]]:
+    """Handle user menu choice and return selected configurations."""
     choice = show_menu_and_get_choice()
     if choice == '4':
         print("Exiting...")
-        return
+        return []
     configs = determine_configs_from_choice(choice)
     if not configs:
         print("Invalid choice. Exiting...")
-        return
+    return configs
+
+def execute_reset_operation(configs: List[Dict[str, Any]]) -> None:
+    """Execute reset operation with user confirmation."""
     print_confirmation_header(configs)
     skip_individual = get_batch_confirmation()
     results = process_all_instances(configs, skip_individual)
     print_operation_summary(results)
+
+def main():
+    """Main function to reset ClickHouse instances."""
+    print_main_header()
+    configs = handle_user_choice()
+    if not configs:
+        return
+    execute_reset_operation(configs)
 
 if __name__ == "__main__":
     main()
