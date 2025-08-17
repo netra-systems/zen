@@ -1,7 +1,0 @@
-usage: check_architecture_compliance.py [-h] [--path PATH]
-                                        [--fail-on-violation]
-                                        [--max-file-lines MAX_FILE_LINES]
-                                        [--max-function-lines MAX_FUNCTION_LINES]
-                                        [--json-output JSON_OUTPUT]
-                                        [--json-only] [--threshold THRESHOLD]
-check_architecture_compliance.py: error: ambiguous option: --json could match --json-output, --json-only

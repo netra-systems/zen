@@ -1,31 +1,16 @@
 #!/usr/bin/env python3
 """
-Redirect to the main dev_launcher.py at the project root.
+Wrapper script for the refactored dev launcher.
 
-This script is deprecated - use the main dev_launcher.py instead.
+This provides backwards compatibility with the old dev_launcher.py script.
+Simply redirects to the new modular implementation.
 """
 
 import sys
-import os
 from pathlib import Path
 
-# Get project root
-CURRENT_FILE = Path(__file__).resolve()
-PROJECT_ROOT = CURRENT_FILE.parent.parent
-
-# Add deprecation warning
-print("=" * 70)
-print("DEPRECATION WARNING:")
-print("scripts/dev_launcher.py is deprecated!")
-print(f"Please use: python {PROJECT_ROOT}/dev_launcher.py")
-print("=" * 70)
-print()
-
-# Change to project root directory
-os.chdir(PROJECT_ROOT)
-
-# Add project root to path
-sys.path.insert(0, str(PROJECT_ROOT))
+# Add current directory to path
+sys.path.insert(0, str(Path(__file__).parent))
 
 # Import and run the new launcher
 from dev_launcher.__main__ import main
