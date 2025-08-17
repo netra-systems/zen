@@ -7,7 +7,7 @@ Business Value: Enables targeted messaging to reduce noise and increase engageme
 
 import asyncio
 from typing import Dict, List, Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.logging_config import central_logger
 
@@ -21,7 +21,11 @@ class BroadcastManager:
         """Initialize the broadcast manager."""
         self.subscribers: Dict[str, Dict[str, Any]] = {}
         self.broadcast_history: List[Dict[str, Any]] = []
-        self.delivery_stats = {
+        self.delivery_stats = self._create_initial_stats()
+
+    def _create_initial_stats(self) -> Dict[str, int]:
+        """Create initial delivery statistics."""
+        return {
             'total_broadcasts': 0,
             'successful_deliveries': 0,
             'failed_deliveries': 0
@@ -101,12 +105,20 @@ class BroadcastManager:
 
     async def _deliver_message_to_recipients(self, recipients: List[str], message_data: Dict[str, Any]) -> Dict[str, int]:
         """Deliver message to all recipients."""
-        delivery_tasks = [
+        delivery_tasks = self._create_delivery_tasks(recipients, message_data)
+        delivery_results = await self._execute_delivery_tasks(delivery_tasks)
+        return self._count_delivery_results(delivery_results)
+
+    def _create_delivery_tasks(self, recipients: List[str], message_data: Dict[str, Any]) -> List:
+        """Create delivery tasks for all recipients."""
+        return [
             self._deliver_message(user_id, message_data)
             for user_id in recipients
         ]
-        delivery_results = await asyncio.gather(*delivery_tasks, return_exceptions=True)
-        return self._count_delivery_results(delivery_results)
+
+    async def _execute_delivery_tasks(self, delivery_tasks: List) -> List[Any]:
+        """Execute all delivery tasks concurrently."""
+        return await asyncio.gather(*delivery_tasks, return_exceptions=True)
 
     async def _deliver_message(self, user_id: str, message_data: Dict[str, Any]) -> bool:
         """Deliver message to a single user."""
@@ -145,11 +157,19 @@ class BroadcastManager:
 
     def _create_history_entry(self, message_data: Dict[str, Any], results: Dict[str, int], target_users: Optional[List[str]]) -> Dict[str, Any]:
         """Create broadcast history entry."""
-        entry = {
-            'timestamp': datetime.utcnow().isoformat(),
+        entry = self._create_base_history_entry(message_data, results)
+        return self._add_target_users_to_entry(entry, target_users)
+
+    def _create_base_history_entry(self, message_data: Dict[str, Any], results: Dict[str, int]) -> Dict[str, Any]:
+        """Create base history entry with timestamp, message, and results."""
+        return {
+            'timestamp': datetime.now(timezone.utc).isoformat(),
             'message_data': message_data,
             'results': results
         }
+
+    def _add_target_users_to_entry(self, entry: Dict[str, Any], target_users: Optional[List[str]]) -> Dict[str, Any]:
+        """Add target users to history entry if provided."""
         if target_users:
             entry['target_users'] = target_users
         return entry

@@ -6,6 +6,10 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { mockStore, setupMocks, cleanupMocks } from './MainChat.fixtures';
 
+// Mock all dependencies at the top level
+jest.mock('@/store/unified-chat');
+jest.mock('@/hooks/useChatWebSocket');
+
 describe('MainChat - Core Component Tests', () => {
   beforeEach(() => {
     setupMocks();

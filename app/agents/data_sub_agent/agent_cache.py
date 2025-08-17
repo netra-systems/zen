@@ -7,7 +7,7 @@ from app.logging_config import central_logger as logger
 
 
 class CacheManager:
-    """Manages caching operations for DataSubAgent."""
+    """Manages schema caching operations for DataSubAgent."""
     
     def __init__(self, agent):
         self.agent = agent

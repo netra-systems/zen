@@ -179,56 +179,63 @@ class SecretManager:
                 self._logger.debug(f"Error fetching {secret_name}: {error_msg[:100]}")
             return None
     
-    def _load_from_environment(self) -> Dict[str, Any]:
-        """Load secrets from environment variables as fallback."""
-        env_mapping = {
-            "gemini-api-key": "GEMINI_API_KEY",
-            "google-client-id": "GOOGLE_CLIENT_ID",
-            "google-client-secret": "GOOGLE_CLIENT_SECRET",
-            "langfuse-secret-key": "LANGFUSE_SECRET_KEY",
-            "langfuse-public-key": "LANGFUSE_PUBLIC_KEY",
-            "clickhouse-default-password": "CLICKHOUSE_DEFAULT_PASSWORD",
-            "clickhouse-development-password": "CLICKHOUSE_DEVELOPMENT_PASSWORD",
-            "jwt-secret-key": "JWT_SECRET_KEY",
-            "fernet-key": "FERNET_KEY",
-            "redis-default": "REDIS_PASSWORD",
-            # LLM API Keys
-            "anthropic-api-key": "ANTHROPIC_API_KEY",
-            "openai-api-key": "OPENAI_API_KEY",
-            "cohere-api-key": "COHERE_API_KEY",
-            "mistral-api-key": "MISTRAL_API_KEY",
-            # Additional services
-            "slack-webhook-url": "SLACK_WEBHOOK_URL",
-            "sendgrid-api-key": "SENDGRID_API_KEY",
+    def _get_environment_mapping(self) -> Dict[str, str]:
+        """Get mapping of secret names to environment variable names."""
+        return {
+            "gemini-api-key": "GEMINI_API_KEY", "google-client-id": "GOOGLE_CLIENT_ID",
+            "google-client-secret": "GOOGLE_CLIENT_SECRET", "langfuse-secret-key": "LANGFUSE_SECRET_KEY",
+            "langfuse-public-key": "LANGFUSE_PUBLIC_KEY", "clickhouse-default-password": "CLICKHOUSE_DEFAULT_PASSWORD",
+            "clickhouse-development-password": "CLICKHOUSE_DEVELOPMENT_PASSWORD", "jwt-secret-key": "JWT_SECRET_KEY",
+            "fernet-key": "FERNET_KEY", "redis-default": "REDIS_PASSWORD"
+        }
+
+    def _get_additional_environment_mapping(self) -> Dict[str, str]:
+        """Get additional service environment variable mappings."""
+        return {
+            "anthropic-api-key": "ANTHROPIC_API_KEY", "openai-api-key": "OPENAI_API_KEY",
+            "cohere-api-key": "COHERE_API_KEY", "mistral-api-key": "MISTRAL_API_KEY",
+            "slack-webhook-url": "SLACK_WEBHOOK_URL", "sendgrid-api-key": "SENDGRID_API_KEY",
             "sentry-dsn": "SENTRY_DSN"
         }
-        
-        # Check if we're in staging environment
+
+    def _detect_staging_environment(self) -> bool:
+        """Detect if we're running in staging environment."""
         environment = os.environ.get("ENVIRONMENT", "development").lower()
         k_service = os.environ.get("K_SERVICE")
-        is_staging = environment == "staging" or (k_service and "staging" in k_service.lower())
-        
+        return environment == "staging" or (k_service and "staging" in k_service.lower())
+
+    def _get_secret_value_for_environment(self, env_var: str, is_staging: bool) -> Optional[str]:
+        """Get secret value for environment, checking staging suffix if needed."""
+        if is_staging:
+            staging_value = os.environ.get(f"{env_var}_STAGING")
+            if staging_value:
+                return staging_value
+        return os.environ.get(env_var)
+
+    def _process_environment_secrets(self, env_mapping: Dict[str, str], is_staging: bool) -> Dict[str, Any]:
+        """Process environment secrets using mapping and staging detection."""
         secrets = {}
         for secret_name, env_var in env_mapping.items():
-            # Try staging-suffixed env var first if in staging
-            if is_staging:
-                staging_env_var = f"{env_var}_STAGING"
-                value = os.environ.get(staging_env_var)
-                if value:
-                    secrets[secret_name] = value
-                    continue
-            # Fall back to regular env var
-            value = os.environ.get(env_var)
+            value = self._get_secret_value_for_environment(env_var, is_staging)
             if value:
                 secrets[secret_name] = value
-        
+        return secrets
+
+    def _log_environment_secrets_status(self, secrets: Dict[str, Any]) -> None:
+        """Log status of loaded environment secrets."""
         if secrets:
             self._logger.info(f"Loaded {len(secrets)} secrets from environment variables")
-            # Log which critical secrets are present without exposing values
             critical_env_secrets = ['gemini-api-key', 'jwt-secret-key', 'fernet-key']
             present_critical = [s for s in critical_env_secrets if s in secrets]
             if present_critical:
                 self._logger.debug(f"Critical secrets present in env: {', '.join(present_critical)}")
         else:
             self._logger.info("No secrets loaded from environment variables")
+
+    def _load_from_environment(self) -> Dict[str, Any]:
+        """Load secrets from environment variables as fallback."""
+        env_mapping = {**self._get_environment_mapping(), **self._get_additional_environment_mapping()}
+        is_staging = self._detect_staging_environment()
+        secrets = self._process_environment_secrets(env_mapping, is_staging)
+        self._log_environment_secrets_status(secrets)
         return secrets

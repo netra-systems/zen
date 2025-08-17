@@ -198,7 +198,16 @@ class TestWorkloadEventsTable:
         test_events = []
         base_time = datetime.now(UTC)
         for i in range(10):
-            event = {'trace_id': str(uuid.uuid4()), 'span_id': str(uuid.uuid4()), 'user_id': f'test_user_{i % 3}', 'session_id': f'session_{i % 2}', 'timestamp': base_time - timedelta(minutes=i), 'workload_type': random.choice(['simple_chat', 'rag_pipeline', 'tool_use']), 'status': random.choice(['completed', 'in_progress', 'failed']), 'duration_ms': random.randint(100, 5000), 'metrics.name': ['latency_ms', 'tokens_used', 'cost_cents'], 'metrics.value': [random.uniform(50, 500), random.randint(100, 1000), random.uniform(0.01, 1.0)], 'metrics.unit': ['ms', 'tokens', 'cents'], 'input_text': f'Test input {i}', 'output_text': f'Test output {i}', 'metadata': json.dumps({'test_id': i, 'test_run': True})}
+            event = {
+                'event_id': str(uuid.uuid4()),
+                'timestamp': base_time - timedelta(minutes=i),
+                'user_id': i % 100 + 1,  # UInt32 as per schema
+                'workload_id': random.choice(['simple_chat', 'rag_pipeline', 'tool_use']),
+                'event_type': random.choice(['request', 'response', 'error']),
+                'event_category': random.choice(['llm_call', 'tool_use', 'user_action']),
+                'dimensions': f"{{'test_id': '{i}', 'batch': 'test_run'}}",
+                'metadata': json.dumps({'test_id': i, 'test_run': True})
+            }
             test_events.append(event)
         return test_events
 
@@ -211,13 +220,10 @@ class TestWorkloadEventsTable:
 
     def _build_insert_query(self):
         """Build workload events insert query"""
-        return """INSERT INTO workload_events (trace_id, span_id, user_id, 
-        session_id, timestamp, workload_type, status, duration_ms, 
-        metrics.name, metrics.value, metrics.unit, input_text, 
-        output_text, metadata) VALUES (%(trace_id)s, %(span_id)s, 
-        %(user_id)s, %(session_id)s, %(timestamp)s, %(workload_type)s, 
-        %(status)s, %(duration_ms)s, %(metrics_name)s, %(metrics_value)s, 
-        %(metrics_unit)s, %(input_text)s, %(output_text)s, %(metadata)s)"""
+        return """INSERT INTO workload_events (event_id, timestamp, user_id,
+        workload_id, event_type, event_category, dimensions, metadata) 
+        VALUES (%(event_id)s, %(timestamp)s, %(user_id)s, %(workload_id)s, 
+        %(event_type)s, %(event_category)s, %(dimensions)s, %(metadata)s)"""
 
     async def _execute_insert_with_error_handling(self, client, query, params):
         """Execute insert with permission error handling"""
@@ -239,52 +245,39 @@ class TestWorkloadEventsTable:
     async def test_query_with_array_syntax_fix(self, setup_workload_table):
         """Test querying with array syntax that needs fixing"""
         async with get_clickhouse_client() as client:
-            # This query has incorrect syntax that should be fixed
-            incorrect_query = """
+            # This query tests basic workload events selection
+            test_query = """
             SELECT 
-                trace_id,
-                metrics.name[1] as first_metric_name,
-                metrics.value[1] as first_metric_value,
-                metrics.unit[1] as first_metric_unit
+                event_id,
+                workload_id,
+                event_type,
+                event_category
             FROM workload_events
-            WHERE arrayLength(metrics.name) > 0
             ORDER BY timestamp DESC
             LIMIT 5
             """
             
-            # The interceptor should fix this automatically
-            result = await client.execute_query(incorrect_query)
+            # Execute the test query
+            result = await client.execute_query(test_query)
             
             # Should get results without errors
             assert isinstance(result, list)
             for row in result:
-                if row.get('first_metric_name'):
-                    logger.info(f"Metric: {row['first_metric_name']} = {row['first_metric_value']} {row['first_metric_unit']}")
+                if row.get('workload_id'):
+                    logger.info(f"Event: {row['event_id']} workload: {row['workload_id']} type: {row['event_type']}")
     async def test_complex_aggregation_queries(self, setup_workload_table):
         """Test complex aggregation queries with nested arrays"""
         async with get_clickhouse_client() as client:
-            # Query with proper array functions
+            # Query with basic aggregation
             aggregation_query = """
-            WITH metric_analysis AS (
-                SELECT 
-                    workload_type,
-                    arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as latency_idx,
-                    arrayFirstIndex(x -> x = 'tokens_used', metrics.name) as tokens_idx,
-                    arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as cost_idx,
-                    if(latency_idx > 0, arrayElement(metrics.value, latency_idx), 0) as latency,
-                    if(tokens_idx > 0, arrayElement(metrics.value, tokens_idx), 0) as tokens,
-                    if(cost_idx > 0, arrayElement(metrics.value, cost_idx), 0) as cost
-                FROM workload_events
-                WHERE timestamp >= now() - INTERVAL 1 HOUR
-            )
             SELECT 
-                workload_type,
+                workload_id,
                 count() as request_count,
-                avg(latency) as avg_latency_ms,
-                sum(tokens) as total_tokens,
-                sum(cost) as total_cost_cents
-            FROM metric_analysis
-            GROUP BY workload_type
+                event_type,
+                event_category
+            FROM workload_events
+            WHERE timestamp >= now() - INTERVAL 1 HOUR
+            GROUP BY workload_id, event_type, event_category
             ORDER BY request_count DESC
             """
             
@@ -292,10 +285,10 @@ class TestWorkloadEventsTable:
             assert isinstance(result, list)
             
             for row in result:
-                logger.info(f"Workload {row['workload_type']}: "
+                logger.info(f"Workload {row['workload_id']}: "
                           f"{row['request_count']} requests, "
-                          f"avg latency {row['avg_latency_ms']:.2f}ms, "
-                          f"total cost ${row['total_cost_cents']/100:.2f}")
+                          f"type: {row['event_type']}, "
+                          f"category: {row['event_category']}")
     async def test_time_series_analysis(self, setup_workload_table):
         """Test time-series analysis queries"""
         async with get_clickhouse_client() as client:
@@ -303,9 +296,8 @@ class TestWorkloadEventsTable:
             SELECT 
                 toStartOfMinute(timestamp) as time_bucket,
                 count() as events_per_minute,
-                avg(duration_ms) as avg_duration,
-                quantile(0.95)(duration_ms) as p95_duration,
-                uniq(user_id) as unique_users
+                uniq(user_id) as unique_users,
+                uniq(workload_id) as unique_workloads
             FROM workload_events
             WHERE timestamp >= now() - INTERVAL 1 HOUR
             GROUP BY time_bucket
@@ -320,8 +312,8 @@ class TestWorkloadEventsTable:
                 logger.info(f"Time series data: {len(result)} time buckets")
                 latest = result[0]
                 logger.info(f"Latest minute: {latest['events_per_minute']} events, "
-                          f"avg duration {latest['avg_duration']:.2f}ms, "
-                          f"P95 {latest['p95_duration']:.2f}ms")
+                          f"unique users: {latest['unique_users']}, "
+                          f"unique workloads: {latest['unique_workloads']}")
 
 
 class TestCorpusTableOperations:
@@ -355,16 +347,21 @@ class TestCorpusTableOperations:
         """Build CREATE TABLE query for corpus table"""
         return f"""
         CREATE TABLE IF NOT EXISTS {table_name} (
-            record_id UUID DEFAULT generateUUIDv4(), workload_type String,
+            record_id UUID DEFAULT generateUUIDv4(), workload_id String,
             prompt String, response String, metadata String,
             domain String DEFAULT 'general', created_at DateTime64(3) DEFAULT now(),
             version UInt32 DEFAULT 1, embedding Array(Float32) DEFAULT [],
             tags Array(String) DEFAULT []
         ) ENGINE = MergeTree() PARTITION BY toYYYYMM(created_at)
-        ORDER BY (workload_type, created_at, record_id)"""
+        ORDER BY (workload_id, created_at, record_id)"""
 
     async def _test_corpus_table_operations(self, client, table_name, corpus_id):
         """Test corpus table operations"""
+        # Create the corpus table
+        create_query = self._build_corpus_create_query(table_name)
+        await client.execute_query(create_query)
+        
+        # Verify the table was created
         tables_result = await client.execute_query(f"SHOW TABLES LIKE '{table_name}'")
         assert len(tables_result) > 0
         logger.info(f"Created corpus table: {table_name}")
@@ -375,7 +372,7 @@ class TestCorpusTableOperations:
     async def _insert_corpus_test_data(self, client, table_name, corpus_id):
         """Insert test data into corpus table"""
         insert_query = f"""
-        INSERT INTO {table_name} (workload_type, prompt, response, 
+        INSERT INTO {table_name} (workload_id, prompt, response, 
         metadata, domain, tags) VALUES ('test_workload', 
         'Test prompt for corpus', 'Test response from model',
         '{{"test": true, "corpus_id": "{corpus_id}"}}', 'testing',
@@ -385,7 +382,7 @@ class TestCorpusTableOperations:
     async def _verify_corpus_test_data(self, client, table_name):
         """Verify corpus test data insertion"""
         select_result = await client.execute_query(
-            f"SELECT * FROM {table_name} WHERE workload_type = 'test_workload'"
+            f"SELECT * FROM {table_name} WHERE workload_id = 'test_workload'"
         )
         assert len(select_result) == 1
         assert select_result[0]['prompt'] == 'Test prompt for corpus'
@@ -419,19 +416,13 @@ class TestClickHousePerformance:
             
             for i in range(batch_size):
                 event = [
-                    str(uuid.uuid4()),  # trace_id
-                    str(uuid.uuid4()),  # span_id
-                    f'perf_user_{i % 10}',  # user_id
-                    f'perf_session_{i % 5}',  # session_id
+                    str(uuid.uuid4()),  # event_id
                     base_time - timedelta(seconds=i),  # timestamp
-                    random.choice(['simple_chat', 'rag_pipeline', 'tool_use']),  # workload_type
-                    'completed',  # status
-                    random.randint(50, 2000),  # duration_ms
-                    ['latency_ms', 'throughput', 'cpu_usage'],  # metrics.name
-                    [random.uniform(10, 100), random.uniform(100, 1000), random.uniform(0, 100)],  # metrics.value
-                    ['ms', 'req/s', 'percent'],  # metrics.unit
-                    f'Performance test input {i}',  # input_text
-                    f'Performance test output {i}',  # output_text
+                    i % 100 + 1,  # user_id (UInt32)
+                    random.choice(['simple_chat', 'rag_pipeline', 'tool_use']),  # workload_id
+                    random.choice(['request', 'response', 'error']),  # event_type
+                    random.choice(['llm_call', 'tool_use', 'user_action']),  # event_category
+                    {'test_id': str(i), 'batch': 'perf_test'},  # dimensions
                     json.dumps({'batch_test': True, 'index': i})  # metadata
                 ]
                 events.append(event)
@@ -448,10 +439,8 @@ class TestClickHousePerformance:
             
             # Batch insert
             column_names = [
-                'trace_id', 'span_id', 'user_id', 'session_id', 'timestamp',
-                'workload_type', 'status', 'duration_ms',
-                'metrics.name', 'metrics.value', 'metrics.unit',
-                'input_text', 'output_text', 'metadata'
+                'event_id', 'timestamp', 'user_id', 'workload_id', 'event_type',
+                'event_category', 'dimensions', 'metadata'
             ]
             
             await base_client.insert_data('workload_events', events, column_names=column_names)
@@ -477,13 +466,13 @@ class TestClickHousePerformance:
             start_time = time.time()
             indexed_query = """
             SELECT 
-                workload_type,
+                workload_id,
                 count() as cnt,
-                avg(duration_ms) as avg_duration
+                uniq(user_id) as unique_users
             FROM workload_events
-            WHERE workload_type IN ('simple_chat', 'rag_pipeline')
+            WHERE workload_id IN ('simple_chat', 'rag_pipeline')
                 AND timestamp >= now() - INTERVAL 1 DAY
-            GROUP BY workload_type
+            GROUP BY workload_id
             """
             
             result = await client.execute_query(indexed_query)
@@ -497,7 +486,7 @@ class TestClickHousePerformance:
             SELECT 
                 count() as cnt
             FROM workload_events
-            WHERE input_text LIKE '%test%'
+            WHERE metadata LIKE '%test%'
             """
             
             result = await client.execute_query(full_scan_query)

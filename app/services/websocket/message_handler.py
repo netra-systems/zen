@@ -410,3 +410,7 @@ class MessageHandlerService:
     async def get_stats(self) -> Dict[str, Any]:
         """Get message processing statistics"""
         return await message_queue.get_queue_stats()
+
+
+# Import MessageRouter for backward compatibility with tests
+from .message_router import MessageRouter

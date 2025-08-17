@@ -7,7 +7,7 @@ request pools, cache managers, and performance metrics.
 import asyncio
 from typing import Any, Dict
 from app.llm.resource_pool import RequestPool
-from app.llm.resource_cache import CacheManager
+from app.llm.resource_cache import LLMCacheManager
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -19,7 +19,7 @@ class ResourceMonitor:
     def __init__(self):
         """Initialize resource monitor."""
         self.request_pools: Dict[str, RequestPool] = {}
-        self.cache_managers: Dict[str, CacheManager] = {}
+        self.cache_managers: Dict[str, LLMCacheManager] = {}
         self._metrics: Dict[str, Dict] = {}
         self._lock = asyncio.Lock()
     
@@ -37,10 +37,10 @@ class ResourceMonitor:
             return RequestPool(max_concurrent=3, requests_per_minute=30)
         return RequestPool(max_concurrent=5, requests_per_minute=60)
     
-    def get_cache_manager(self, config_name: str) -> CacheManager:
+    def get_cache_manager(self, config_name: str) -> LLMCacheManager:
         """Get or create cache manager for config."""
         if config_name not in self.cache_managers:
-            self.cache_managers[config_name] = CacheManager()
+            self.cache_managers[config_name] = LLMCacheManager()
         return self.cache_managers[config_name]
     
     async def record_request(self, config_name: str, 

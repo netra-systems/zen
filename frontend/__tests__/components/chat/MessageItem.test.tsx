@@ -3,6 +3,16 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MessageItem } from '@/components/chat/MessageItem';
 import { Message } from '@/types/chat';
+import { setupChatMocks, resetChatMocks, renderWithChatSetup } from './shared-test-setup';
+
+// Setup mocks before tests
+beforeAll(() => {
+  setupChatMocks();
+});
+
+beforeEach(() => {
+  resetChatMocks();
+});
 
 describe('MessageItem', () => {
   it('renders a user message correctly', () => {
@@ -13,9 +23,9 @@ describe('MessageItem', () => {
       sub_agent_name: 'User',
       displayed_to_user: true,
     };
-    render(<MessageItem message={message} />);
+    renderWithChatSetup(<MessageItem message={message} />);
     expect(screen.getByText('Hello, world!')).toBeInTheDocument();
-    expect(screen.getByText('User')).toBeInTheDocument();
+    expect(screen.getByText('You')).toBeInTheDocument(); // Component displays 'You' for user messages
   });
 
   it('renders an agent message correctly', () => {
@@ -26,7 +36,7 @@ describe('MessageItem', () => {
       sub_agent_name: 'Test Agent',
       displayed_to_user: true,
     };
-    render(<MessageItem message={message} />);
+    renderWithChatSetup(<MessageItem message={message} />);
     expect(screen.getByText('Hi there!')).toBeInTheDocument();
     expect(screen.getByText('Test Agent')).toBeInTheDocument();
   });
@@ -40,7 +50,7 @@ describe('MessageItem', () => {
       error: 'Something went wrong',
       displayed_to_user: true,
     };
-    render(<MessageItem message={message} />);
+    renderWithChatSetup(<MessageItem message={message} />);
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
   });
 
@@ -53,7 +63,7 @@ describe('MessageItem', () => {
       tool_info: { tool: 'test_tool', args: [1, 2] },
       displayed_to_user: true,
     };
-    render(<MessageItem message={message} />);
+    renderWithChatSetup(<MessageItem message={message} />);
     expect(screen.getByText('Tool Information')).toBeInTheDocument();
   });
 });

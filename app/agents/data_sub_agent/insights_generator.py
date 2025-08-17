@@ -25,160 +25,311 @@ class InsightsGenerator:
         usage_data: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Generate actionable insights from analysis data"""
-        
-        insights = {
+        insights = self._initialize_insights_structure()
+        await self._analyze_performance_trends(performance_data, insights)
+        await self._analyze_usage_patterns(usage_data, insights)
+        return insights
+    
+    def _initialize_insights_structure(self) -> Dict[str, Any]:
+        """Initialize insights structure with empty collections"""
+        return {
             "performance_insights": [],
             "usage_insights": [],
             "cost_insights": [],
             "recommendations": []
         }
-        
-        # Analyze performance trends
-        if "trends" in performance_data:
-            trends = performance_data["trends"]
-            
-            if trends.get("latency", {}).get("direction") == "increasing":
-                insights["performance_insights"].append({
-                    "type": "performance_degradation",
-                    "message": "Latency is increasing over time",
-                    "severity": "medium",
-                    "metric": "latency"
-                })
-                insights["recommendations"].append("Consider optimizing query performance or scaling resources")
-            
-            if trends.get("cost", {}).get("direction") == "increasing":
-                insights["cost_insights"].append({
-                    "type": "cost_increase",
-                    "message": "Costs are trending upward",
-                    "severity": "high",
-                    "metric": "cost"
-                })
-                insights["recommendations"].append("Review resource allocation and consider cost optimization strategies")
-        
-        # Analyze usage patterns
-        if usage_data.get("summary"):
-            summary = usage_data["summary"]
-            
-            # Check for unusual usage patterns
-            if "peak_usage_hour" in summary:
-                peak_hour = int(summary["peak_usage_hour"].split(":")[0])
-                if peak_hour < self.thresholds["off_hours_end"] or peak_hour > self.thresholds["off_hours_start"]:  # Off hours
-                    insights["usage_insights"].append({
-                        "type": "off_hours_usage",
-                        "message": f"Peak usage occurs at {summary['peak_usage_hour']} (off hours)",
-                        "severity": "low"
-                    })
-                    insights["recommendations"].append("Consider scheduled batch processing to optimize costs")
-        
-        return insights
+    
+    async def _analyze_performance_trends(
+        self, performance_data: Dict[str, Any], insights: Dict[str, Any]
+    ) -> None:
+        """Analyze performance trends and add insights"""
+        trends = performance_data.get("trends")
+        if not trends:
+            return
+        await self._process_performance_trends(trends, insights)
+    
+    async def _process_performance_trends(
+        self, trends: Dict[str, Any], insights: Dict[str, Any]
+    ) -> None:
+        """Process performance trends for insights"""
+        await self._check_latency_trends(trends, insights)
+        await self._check_cost_trends(trends, insights)
+    
+    async def _check_latency_trends(
+        self, trends: Dict[str, Any], insights: Dict[str, Any]
+    ) -> None:
+        """Check latency trends and add insights"""
+        if trends.get("latency", {}).get("direction") != "increasing":
+            return
+        self._add_latency_degradation_insight(insights)
+        self._add_performance_recommendation(insights)
+    
+    def _add_latency_degradation_insight(self, insights: Dict[str, Any]) -> None:
+        """Add latency degradation insight"""
+        insights["performance_insights"].append({
+            "type": "performance_degradation",
+            "message": "Latency is increasing over time",
+            "severity": "medium",
+            "metric": "latency"
+        })
+    
+    def _add_performance_recommendation(self, insights: Dict[str, Any]) -> None:
+        """Add performance optimization recommendation"""
+        recommendation = "Consider optimizing query performance or scaling resources"
+        insights["recommendations"].append(recommendation)
+    
+    async def _check_cost_trends(
+        self, trends: Dict[str, Any], insights: Dict[str, Any]
+    ) -> None:
+        """Check cost trends and add insights"""
+        if trends.get("cost", {}).get("direction") != "increasing":
+            return
+        self._add_cost_increase_insight(insights)
+        self._add_cost_optimization_recommendation(insights)
+    
+    def _add_cost_increase_insight(self, insights: Dict[str, Any]) -> None:
+        """Add cost increase insight"""
+        insights["cost_insights"].append({
+            "type": "cost_increase",
+            "message": "Costs are trending upward",
+            "severity": "high",
+            "metric": "cost"
+        })
+    
+    def _add_cost_optimization_recommendation(self, insights: Dict[str, Any]) -> None:
+        """Add cost optimization recommendation"""
+        recommendation = "Review resource allocation and consider cost optimization strategies"
+        insights["recommendations"].append(recommendation)
+    
+    async def _analyze_usage_patterns(
+        self, usage_data: Dict[str, Any], insights: Dict[str, Any]
+    ) -> None:
+        """Analyze usage patterns and add insights"""
+        summary = usage_data.get("summary")
+        if not summary or "peak_usage_hour" not in summary:
+            return
+        await self._check_off_hours_usage(summary, insights)
+    
+    async def _check_off_hours_usage(
+        self, summary: Dict[str, Any], insights: Dict[str, Any]
+    ) -> None:
+        """Check for off-hours usage patterns"""
+        peak_hour = int(summary["peak_usage_hour"].split(":")[0])
+        if not self._is_off_hours(peak_hour):
+            return
+        self._add_off_hours_insight(summary, insights)
+        self._add_scheduling_recommendation(insights)
+    
+    def _is_off_hours(self, peak_hour: int) -> bool:
+        """Check if peak hour is during off hours"""
+        return (peak_hour < self.thresholds["off_hours_end"] or 
+                peak_hour > self.thresholds["off_hours_start"])
+    
+    def _add_off_hours_insight(
+        self, summary: Dict[str, Any], insights: Dict[str, Any]
+    ) -> None:
+        """Add off-hours usage insight"""
+        insights["usage_insights"].append({
+            "type": "off_hours_usage",
+            "message": f"Peak usage occurs at {summary['peak_usage_hour']} (off hours)",
+            "severity": "low"
+        })
+    
+    def _add_scheduling_recommendation(self, insights: Dict[str, Any]) -> None:
+        """Add scheduling optimization recommendation"""
+        recommendation = "Consider scheduled batch processing to optimize costs"
+        insights["recommendations"].append(recommendation)
     
     async def generate_performance_insights(self, performance_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Generate insights specifically from performance data"""
-        
         insights = []
-        
-        # Check for anomalies in performance metrics
-        if "outliers" in performance_data:
-            outlier_count = len(performance_data["outliers"].get("latency_outliers", []))
-            if outlier_count > 0:
-                insights.append({
-                    "type": "performance_outliers",
-                    "message": f"Detected {outlier_count} performance outliers",
-                    "severity": "medium",
-                    "details": f"{outlier_count} data points with unusual latency values"
-                })
-        
-        # Check error rates
-        if "error_rate" in performance_data:
-            error_stats = performance_data["error_rate"]
-            if error_stats.get("mean", 0) > self.thresholds["error_rate"]:  # 5% error rate threshold
-                insights.append({
-                    "type": "high_error_rate",
-                    "message": f"Average error rate is {error_stats['mean']:.2%}",
-                    "severity": "high",
-                    "metric": "error_rate"
-                })
-        
-        # Check latency distribution
-        if "latency" in performance_data:
-            latency_stats = performance_data["latency"]
-            if latency_stats.get("p95", 0) > latency_stats.get("mean", 0) * 2:
-                insights.append({
-                    "type": "latency_variability",
-                    "message": "High latency variability detected (P95 >> average)",
-                    "severity": "medium",
-                    "details": f"P95: {latency_stats.get('p95', 0):.2f}ms, Mean: {latency_stats.get('mean', 0):.2f}ms"
-                })
-        
+        self._check_performance_outliers(performance_data, insights)
+        self._check_error_rate_insights(performance_data, insights)
+        self._check_latency_variability(performance_data, insights)
         return insights
+    
+    def _check_performance_outliers(
+        self, performance_data: Dict[str, Any], insights: List[Dict[str, Any]]
+    ) -> None:
+        """Check for performance outliers and add insights"""
+        outliers = performance_data.get("outliers", {})
+        outlier_count = len(outliers.get("latency_outliers", []))
+        if outlier_count > 0:
+            self._add_outlier_insight(outlier_count, insights)
+    
+    def _add_outlier_insight(self, outlier_count: int, insights: List[Dict[str, Any]]) -> None:
+        """Add performance outlier insight"""
+        insights.append({
+            "type": "performance_outliers",
+            "message": f"Detected {outlier_count} performance outliers",
+            "severity": "medium",
+            "details": f"{outlier_count} data points with unusual latency values"
+        })
+    
+    def _check_error_rate_insights(
+        self, performance_data: Dict[str, Any], insights: List[Dict[str, Any]]
+    ) -> None:
+        """Check error rates and add insights"""
+        error_stats = performance_data.get("error_rate")
+        if not error_stats:
+            return
+        if error_stats.get("mean", 0) > self.thresholds["error_rate"]:
+            self._add_error_rate_insight(error_stats, insights)
+    
+    def _add_error_rate_insight(
+        self, error_stats: Dict[str, Any], insights: List[Dict[str, Any]]
+    ) -> None:
+        """Add high error rate insight"""
+        insights.append({
+            "type": "high_error_rate",
+            "message": f"Average error rate is {error_stats['mean']:.2%}",
+            "severity": "high",
+            "metric": "error_rate"
+        })
+    
+    def _check_latency_variability(
+        self, performance_data: Dict[str, Any], insights: List[Dict[str, Any]]
+    ) -> None:
+        """Check latency variability and add insights"""
+        latency_stats = performance_data.get("latency")
+        if not latency_stats:
+            return
+        if self._has_high_latency_variability(latency_stats):
+            self._add_latency_variability_insight(latency_stats, insights)
+    
+    def _has_high_latency_variability(self, latency_stats: Dict[str, Any]) -> bool:
+        """Check if latency has high variability"""
+        p95 = latency_stats.get("p95", 0)
+        mean = latency_stats.get("mean", 0)
+        return p95 > mean * 2
+    
+    def _add_latency_variability_insight(
+        self, latency_stats: Dict[str, Any], insights: List[Dict[str, Any]]
+    ) -> None:
+        """Add latency variability insight"""
+        p95 = latency_stats.get('p95', 0)
+        mean = latency_stats.get('mean', 0)
+        insights.append({
+            "type": "latency_variability",
+            "message": "High latency variability detected (P95 >> average)",
+            "severity": "medium",
+            "details": f"P95: {p95:.2f}ms, Mean: {mean:.2f}ms"
+        })
     
     async def generate_cost_insights(self, performance_data: Dict[str, Any], usage_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Generate cost-related insights"""
-        
         insights = []
-        
-        # Check cost efficiency from performance data
-        if "summary" in performance_data:
-            total_cost = performance_data["summary"].get("total_cost", 0)
-            total_events = performance_data["summary"].get("total_events", 0)
-            
-            if total_events > 0:
-                cost_per_event = total_cost / total_events
-                if cost_per_event > self.thresholds["cost_per_event"]:  # 1 cent per event threshold
-                    insights.append({
-                        "type": "high_cost_per_event",
-                        "message": f"Cost per event is ${cost_per_event:.4f}",
-                        "severity": "medium",
-                        "metric": "cost_efficiency"
-                    })
-        
-        # Check usage pattern cost implications
-        if usage_data.get("summary"):
-            usage_summary = usage_data["summary"]
-            avg_daily_cost = usage_summary.get("average_daily_cost", 0)
-            
-            if avg_daily_cost > self.thresholds["daily_cost"]:  # $100/day threshold
-                insights.append({
-                    "type": "high_daily_cost",
-                    "message": f"Average daily cost is ${avg_daily_cost:.2f}",
-                    "severity": "high",
-                    "metric": "daily_cost"
-                })
-        
+        self._check_cost_efficiency(performance_data, insights)
+        self._check_daily_cost_patterns(usage_data, insights)
         return insights
+    
+    def _check_cost_efficiency(
+        self, performance_data: Dict[str, Any], insights: List[Dict[str, Any]]
+    ) -> None:
+        """Check cost efficiency from performance data"""
+        summary = performance_data.get("summary")
+        if not summary:
+            return
+        self._analyze_cost_per_event(summary, insights)
+    
+    def _analyze_cost_per_event(
+        self, summary: Dict[str, Any], insights: List[Dict[str, Any]]
+    ) -> None:
+        """Analyze cost per event metrics"""
+        total_cost = summary.get("total_cost", 0)
+        total_events = summary.get("total_events", 0)
+        if total_events <= 0:
+            return
+        cost_per_event = total_cost / total_events
+        if cost_per_event > self.thresholds["cost_per_event"]:
+            self._add_cost_per_event_insight(cost_per_event, insights)
+    
+    def _add_cost_per_event_insight(
+        self, cost_per_event: float, insights: List[Dict[str, Any]]
+    ) -> None:
+        """Add high cost per event insight"""
+        insights.append({
+            "type": "high_cost_per_event",
+            "message": f"Cost per event is ${cost_per_event:.4f}",
+            "severity": "medium",
+            "metric": "cost_efficiency"
+        })
+    
+    def _check_daily_cost_patterns(
+        self, usage_data: Dict[str, Any], insights: List[Dict[str, Any]]
+    ) -> None:
+        """Check usage pattern cost implications"""
+        usage_summary = usage_data.get("summary")
+        if not usage_summary:
+            return
+        avg_daily_cost = usage_summary.get("average_daily_cost", 0)
+        if avg_daily_cost > self.thresholds["daily_cost"]:
+            self._add_daily_cost_insight(avg_daily_cost, insights)
+    
+    def _add_daily_cost_insight(
+        self, avg_daily_cost: float, insights: List[Dict[str, Any]]
+    ) -> None:
+        """Add high daily cost insight"""
+        insights.append({
+            "type": "high_daily_cost",
+            "message": f"Average daily cost is ${avg_daily_cost:.2f}",
+            "severity": "high",
+            "metric": "daily_cost"
+        })
     
     async def generate_recommendations(self, all_insights: List[Dict[str, Any]]) -> List[str]:
         """Generate specific recommendations based on insights"""
-        
+        insight_types = self._group_insights_by_type(all_insights)
         recommendations = []
-        
-        # Group insights by type
+        self._add_performance_recommendations(insight_types, recommendations)
+        self._add_error_recommendations(insight_types, recommendations)
+        self._add_cost_recommendations(insight_types, recommendations)
+        self._add_scheduling_recommendations(insight_types, recommendations)
+        return recommendations
+    
+    def _group_insights_by_type(self, all_insights: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
+        """Group insights by type for pattern analysis"""
         insight_types = {}
         for insight in all_insights:
             insight_type = insight.get("type", "unknown")
             if insight_type not in insight_types:
                 insight_types[insight_type] = []
             insight_types[insight_type].append(insight)
-        
-        # Generate recommendations based on insight patterns
+        return insight_types
+    
+    def _add_performance_recommendations(
+        self, insight_types: Dict[str, List[Dict[str, Any]]], recommendations: List[str]
+    ) -> None:
+        """Add performance-related recommendations"""
         if "performance_degradation" in insight_types:
             recommendations.append("Implement performance monitoring alerts to catch degradation early")
             recommendations.append("Consider horizontal scaling or resource optimization")
-        
-        if "high_error_rate" in insight_types:
-            recommendations.append("Investigate error patterns and implement retry mechanisms")
-            recommendations.append("Review error handling and logging for root cause analysis")
-        
-        if "high_cost_per_event" in insight_types or "high_daily_cost" in insight_types:
-            recommendations.append("Conduct cost optimization analysis focusing on resource utilization")
-            recommendations.append("Consider implementing cost budgets and alerts")
-        
-        if "off_hours_usage" in insight_types:
-            recommendations.append("Optimize scheduling to reduce off-hours usage costs")
-            recommendations.append("Consider reserved capacity for predictable workloads")
-        
         if "latency_variability" in insight_types:
             recommendations.append("Investigate causes of latency spikes and implement caching strategies")
             recommendations.append("Consider load balancing improvements")
-        
-        return recommendations
+    
+    def _add_error_recommendations(
+        self, insight_types: Dict[str, List[Dict[str, Any]]], recommendations: List[str]
+    ) -> None:
+        """Add error-related recommendations"""
+        if "high_error_rate" in insight_types:
+            recommendations.append("Investigate error patterns and implement retry mechanisms")
+            recommendations.append("Review error handling and logging for root cause analysis")
+    
+    def _add_cost_recommendations(
+        self, insight_types: Dict[str, List[Dict[str, Any]]], recommendations: List[str]
+    ) -> None:
+        """Add cost-related recommendations"""
+        has_cost_issues = ("high_cost_per_event" in insight_types or 
+                          "high_daily_cost" in insight_types)
+        if has_cost_issues:
+            recommendations.append("Conduct cost optimization analysis focusing on resource utilization")
+            recommendations.append("Consider implementing cost budgets and alerts")
+    
+    def _add_scheduling_recommendations(
+        self, insight_types: Dict[str, List[Dict[str, Any]]], recommendations: List[str]
+    ) -> None:
+        """Add scheduling-related recommendations"""
+        if "off_hours_usage" in insight_types:
+            recommendations.append("Optimize scheduling to reduce off-hours usage costs")
+            recommendations.append("Consider reserved capacity for predictable workloads")

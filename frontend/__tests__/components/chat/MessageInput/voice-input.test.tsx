@@ -8,7 +8,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadStore } from '@/store/threadStore';
 import { useAuthStore } from '@/store/authStore';
 import { generateUniqueId } from '@/lib/utils';
@@ -17,10 +17,12 @@ import { generateUniqueId } from '@/lib/utils';
 jest.mock('@/hooks/useWebSocket', () => ({
   useWebSocket: jest.fn()
 }));
-jest.mock('@/store/chat');
+jest.mock('@/store/unified-chat');
 jest.mock('@/store/threadStore');
 jest.mock('@/store/authStore');
 jest.mock('@/lib/utils');
+jest.mock('@/services/threadService');
+jest.mock('@/services/threadRenameService');
 
 describe('MessageInput - Voice Input and Emoji Features', () => {
   const mockSendMessage = jest.fn();
@@ -41,10 +43,12 @@ describe('MessageInput - Voice Input and Emoji Features', () => {
       sendMessage: mockSendMessage,
     });
     
-    (useChatStore as jest.Mock).mockReturnValue({
+    (useUnifiedChatStore as jest.Mock).mockReturnValue({
       setProcessing: mockChatStore.setProcessing,
       isProcessing: false,
       addMessage: mockChatStore.addMessage,
+      activeThreadId: 'thread-1',
+      setActiveThread: jest.fn(),
     });
     
     (useThreadStore as jest.Mock).mockReturnValue({
@@ -69,10 +73,12 @@ describe('MessageInput - Voice Input and Emoji Features', () => {
     });
 
     it('should disable voice input when processing', () => {
-      (useChatStore as jest.Mock).mockReturnValue({
+      (useUnifiedChatStore as jest.Mock).mockReturnValue({
         setProcessing: mockChatStore.setProcessing,
         isProcessing: true,
         addMessage: mockChatStore.addMessage,
+        activeThreadId: 'thread-1',
+        setActiveThread: jest.fn(),
       });
       
       render(<MessageInput />);

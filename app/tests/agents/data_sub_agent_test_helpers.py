@@ -67,52 +67,91 @@ async def analyze_performance_metrics(user_id: int, workload_id: Optional[str],
                                      time_range: Tuple[datetime, datetime],
                                      clickhouse_ops) -> Dict[str, Any]:
     """Analyze performance metrics (test compatibility method)"""
-    data = await clickhouse_ops.fetch_data(
-        f"SELECT * FROM workload_events WHERE user_id = {user_id}", 
-        f"perf_metrics_{user_id}_{workload_id}"
-    )
-    
+    data = await _fetch_performance_data(user_id, workload_id, clickhouse_ops)
     if not data:
         return {"status": "no_data", "message": "No performance data available"}
     
+    aggregation_level = _determine_aggregation_level(time_range)
+    result = _build_base_metrics(data, time_range, aggregation_level)
+    _add_optional_analysis(result, data, aggregation_level)
+    return result
+
+
+async def _fetch_performance_data(user_id: int, workload_id: Optional[str], clickhouse_ops) -> List[Dict[str, Any]]:
+    """Fetch performance data from ClickHouse."""
+    return await clickhouse_ops.fetch_data(
+        f"SELECT * FROM workload_events WHERE user_id = {user_id}", 
+        f"perf_metrics_{user_id}_{workload_id}"
+    )
+
+
+def _determine_aggregation_level(time_range: Tuple[datetime, datetime]) -> str:
+    """Determine aggregation level based on time range duration."""
     duration = time_range[1] - time_range[0]
     if duration.total_seconds() < 3600:
-        aggregation_level = "minute"
+        return "minute"
     elif duration.total_seconds() < 86400:
-        aggregation_level = "hour"
-    else:
-        aggregation_level = "day"
-    
+        return "hour"
+    return "day"
+
+
+def _build_base_metrics(data: List[Dict[str, Any]], time_range: Tuple[datetime, datetime], 
+                       aggregation_level: str) -> Dict[str, Any]:
+    """Build base performance metrics result."""
     total_events = sum(item.get('event_count', 0) for item in data)
-    
-    result = {
-        "time_range": {
-            "start": time_range[0].isoformat(),
-            "end": time_range[1].isoformat(),
-            "aggregation_level": aggregation_level
-        },
-        "summary": {
-            "total_events": total_events,
-            "data_points": len(data)
-        },
-        "latency": {
-            "p50": data[0].get('latency_p50', 0) if data else 0,
-            "p95": data[0].get('latency_p95', 0) if data else 0,
-            "p99": data[0].get('latency_p99', 0) if data else 0
-        },
-        "throughput": {
-            "avg": data[0].get('avg_throughput', 0) if data else 0,
-            "peak": data[0].get('peak_throughput', 0) if data else 0
-        }
+    return {
+        "time_range": _build_time_range_info(time_range, aggregation_level),
+        "summary": {"total_events": total_events, "data_points": len(data)},
+        "latency": _build_latency_metrics(data),
+        "throughput": _build_throughput_metrics(data)
     }
-    
+
+
+def _build_time_range_info(time_range: Tuple[datetime, datetime], aggregation_level: str) -> Dict[str, str]:
+    """Build time range information."""
+    return {
+        "start": time_range[0].isoformat(),
+        "end": time_range[1].isoformat(),
+        "aggregation_level": aggregation_level
+    }
+
+
+def _build_latency_metrics(data: List[Dict[str, Any]]) -> Dict[str, float]:
+    """Build latency metrics from data."""
+    return {
+        "p50": data[0].get('latency_p50', 0) if data else 0,
+        "p95": data[0].get('latency_p95', 0) if data else 0,
+        "p99": data[0].get('latency_p99', 0) if data else 0
+    }
+
+
+def _build_throughput_metrics(data: List[Dict[str, Any]]) -> Dict[str, float]:
+    """Build throughput metrics from data."""
+    return {
+        "avg": data[0].get('avg_throughput', 0) if data else 0,
+        "peak": data[0].get('peak_throughput', 0) if data else 0
+    }
+
+
+def _add_optional_analysis(result: Dict[str, Any], data: List[Dict[str, Any]], aggregation_level: str) -> None:
+    """Add optional analysis sections to result."""
+    _add_trends_if_applicable(result, data, aggregation_level)
+    _add_seasonality_if_applicable(result, data, aggregation_level)
+    _add_outliers_if_applicable(result, data)
+
+
+def _add_trends_if_applicable(result: Dict[str, Any], data: List[Dict[str, Any]], aggregation_level: str) -> None:
+    """Add trends analysis if data is sufficient."""
     if aggregation_level == "hour" and len(data) >= 12:
         result["trends"] = {
             "latency_trend": "stable",
             "throughput_trend": "increasing",
             "error_rate_trend": "decreasing"
         }
-    
+
+
+def _add_seasonality_if_applicable(result: Dict[str, Any], data: List[Dict[str, Any]], aggregation_level: str) -> None:
+    """Add seasonality analysis if data is sufficient."""
     if aggregation_level == "day" and len(data) >= 24:
         result["seasonality"] = {
             "pattern_detected": True,
@@ -120,20 +159,27 @@ async def analyze_performance_metrics(user_id: int, workload_id: Optional[str],
             "low_hours": [2, 6, 23],
             "confidence": 0.85
         }
-    
+
+
+def _add_outliers_if_applicable(result: Dict[str, Any], data: List[Dict[str, Any]]) -> None:
+    """Add outliers analysis if data is sufficient."""
     if len(data) >= 10:
+        outlier_data = _build_outlier_data(data)
         result["outliers"] = {
-            "detected": True,
-            "count": 2,
-            "threshold": 2.5,
-            "outlier_indices": [5, 12] if len(data) > 12 else [2],
-            "latency_outliers": [
-                {"index": 5, "value": 150.0, "z_score": 3.2} if len(data) > 12 else
-                {"index": 2, "value": 120.0, "z_score": 2.8}
-            ]
+            "detected": True, "count": 2, "threshold": 2.5,
+            "outlier_indices": outlier_data["indices"],
+            "latency_outliers": outlier_data["latency_outliers"]
         }
-    
-    return result
+
+
+def _build_outlier_data(data: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Build outlier data structure."""
+    indices = [5, 12] if len(data) > 12 else [2]
+    latency_outliers = [
+        {"index": 5, "value": 150.0, "z_score": 3.2} if len(data) > 12 else
+        {"index": 2, "value": 120.0, "z_score": 2.8}
+    ]
+    return {"indices": indices, "latency_outliers": latency_outliers}
 
 
 async def process_batch_safe(batch: List[Dict[str, Any]]) -> List[Dict[str, Any]]:

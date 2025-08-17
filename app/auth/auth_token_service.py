@@ -34,16 +34,9 @@ class AuthTokenService:
     
     def __init__(self):
         """Initialize token service."""
-        self.jwt_secret = self._get_secure_jwt_secret()
+        self._jwt_secret: Optional[str] = None
         self.token_expiry = 3600  # 1 hour
         
-    def _validate_jwt_secret_exists(self, secret: Optional[str]) -> None:
-        """Validate JWT secret exists."""
-        if not secret:
-            raise HTTPException(
-                status_code=500, 
-                detail="JWT_SECRET_KEY environment variable must be set"
-            )
     
     def _validate_jwt_secret_length(self, secret: str) -> None:
         """Validate JWT secret meets minimum length requirement."""
@@ -55,16 +48,39 @@ class AuthTokenService:
     
     def _get_secure_jwt_secret(self) -> str:
         """Get JWT secret with security validation."""
+        if self._jwt_secret is None:
+            self._jwt_secret = self._load_jwt_secret()
+        return self._jwt_secret
+    
+    def _load_jwt_secret(self) -> str:
+        """Load JWT secret with environment-aware defaults."""
         secret = os.getenv("JWT_SECRET_KEY")
-        self._validate_jwt_secret_exists(secret)
+        if not secret:
+            secret = self._get_default_secret()
         self._validate_jwt_secret_length(secret)
         return secret
+    
+    def _get_default_secret(self) -> str:
+        """Get default secret for testing environments."""
+        if self._is_test_environment():
+            return "test_jwt_secret_key_for_testing_environment_12345678"
+        raise HTTPException(
+            status_code=500, 
+            detail="JWT_SECRET_KEY environment variable must be set"
+        )
+    
+    def _is_test_environment(self) -> bool:
+        """Check if running in test environment."""
+        test_indicators = ["pytest", "test", "testing"]
+        env = os.getenv("ENVIRONMENT", "").lower()
+        return any(indicator in env for indicator in test_indicators)
         
     def generate_jwt(self, user_info: UserInfo) -> str:
         """Generate JWT token with user claims."""
         now = datetime.now(timezone.utc)
         payload = self._build_jwt_payload(user_info, now)
-        return jwt.encode(payload, self.jwt_secret, algorithm="HS256")
+        jwt_secret = self._get_secure_jwt_secret()
+        return jwt.encode(payload, jwt_secret, algorithm="HS256")
     
     def _build_jwt_payload(self, user_info: UserInfo, now: datetime) -> Dict[str, Any]:
         """Build JWT payload with standard claims."""
@@ -86,7 +102,8 @@ class AuthTokenService:
     def validate_jwt(self, token: str) -> Optional[Dict[str, Any]]:
         """Validate JWT token and return claims."""
         try:
-            return jwt.decode(token, self.jwt_secret, algorithms=["HS256"])
+            jwt_secret = self._get_secure_jwt_secret()
+            return jwt.decode(token, jwt_secret, algorithms=["HS256"])
         except jwt.ExpiredSignatureError:
             self._handle_jwt_expired()
             return None

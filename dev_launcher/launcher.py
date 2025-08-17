@@ -472,6 +472,63 @@ class DevLauncher:
             return None
         return backend_info, port, frontend_path
     
+    def start_auth_service(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
+        """Start the auth service."""
+        self._print("🔐", "AUTH", "Starting auth service...")
+        port = int(os.getenv("AUTH_SERVICE_PORT", "8081"))
+        
+        # Build command for auth service
+        cmd = [
+            sys.executable, "-m", "uvicorn",
+            "auth_service.main:app",
+            "--host", "0.0.0.0",
+            "--port", str(port)
+        ]
+        
+        if not self.config.no_backend_reload:
+            cmd.append("--reload")
+        
+        # Create environment with auth service config
+        env = self._create_process_env()
+        env["SERVICE_NAME"] = "auth-service"
+        env["PORT"] = str(port)
+        env["AUTH_SERVICE_URL"] = f"http://localhost:{port}"
+        
+        try:
+            process = self._start_process(cmd, env, "auth-service")
+            if process:
+                streamer = self._create_log_streamer(process, "AUTH", "🔐")
+                if streamer:
+                    streamer.start()
+                self._print("✅", "OK", f"Auth service started on port {port}")
+                return process, streamer
+        except Exception as e:
+            logger.error(f"Failed to start auth service: {e}")
+            self._print("❌", "ERROR", f"Auth service startup failed: {str(e)[:100]}")
+        
+        return None, None
+    
+    def _start_and_verify_auth_service(self) -> int:
+        """Start and verify auth service."""
+        auth_process, auth_streamer = self.start_auth_service()
+        if not auth_process:
+            self._print("❌", "ERROR", "Failed to start auth service")
+            return 1
+        
+        self.process_manager.add_process("AuthService", auth_process)
+        
+        # Wait for auth service to be ready
+        self._print("⏳", "WAIT", "Waiting for auth service to be ready...")
+        auth_url = f"http://localhost:{os.getenv('AUTH_SERVICE_PORT', '8081')}/health"
+        
+        if not wait_for_service(auth_url, timeout=30):
+            self._print("❌", "ERROR", "Auth service failed health check")
+            self.process_manager.cleanup_all()
+            return 1
+        
+        self._print("✅", "AUTH", "Auth service is healthy")
+        return 0
+    
     def start_frontend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """Start the frontend server."""
         self._print("🚀", "FRONTEND", "Starting frontend server...")
@@ -655,6 +712,13 @@ class DevLauncher:
         if not self._run_pre_checks():
             return 1
         self._clear_service_discovery()
+        
+        # Start auth service if enabled
+        if os.getenv("AUTH_SERVICE_ENABLED", "true").lower() == "true":
+            auth_result = self._start_and_verify_auth_service()
+            if auth_result != 0:
+                return auth_result
+        
         backend_result = self._start_and_verify_backend()
         if backend_result != 0:
             return backend_result

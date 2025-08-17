@@ -75,49 +75,55 @@ class EnvironmentAuthConfig:
         
         return config
     
-    def _get_dev_config(self) -> OAuthConfig:
-        """Development environment OAuth configuration."""
-        # Support multiple naming conventions for dev OAuth credentials
-        # Priority order: DEV specific > Generic > Empty
+    def _get_dev_oauth_credentials(self) -> tuple[str, str]:
+        """Get OAuth credentials for development environment."""
         client_id = (
             os.getenv("GOOGLE_OAUTH_CLIENT_ID_DEV") or 
             os.getenv("GOOGLE_CLIENT_ID") or
-            os.getenv("GOOGLE_OAUTH_CLIENT_ID") or
-            ""
+            os.getenv("GOOGLE_OAUTH_CLIENT_ID") or ""
         )
         client_secret = (
             os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_DEV") or 
             os.getenv("GOOGLE_CLIENT_SECRET") or
-            os.getenv("GOOGLE_OAUTH_CLIENT_SECRET") or
-            ""
+            os.getenv("GOOGLE_OAUTH_CLIENT_SECRET") or ""
         )
-        
-        # Log configuration status
+        return client_id, client_secret
+    
+    def _log_dev_oauth_status(self, client_id: str, client_secret: str) -> None:
+        """Log OAuth configuration status for development."""
         if client_id:
             logger.info(f"OAuth client ID configured: {client_id[:20]}...")
         else:
             logger.error("No OAuth client ID found! Set GOOGLE_CLIENT_ID in .env")
-        
         if not client_secret:
             logger.error("No OAuth client secret found! Set GOOGLE_CLIENT_SECRET in .env")
+    
+    def _get_dev_redirect_uris(self) -> List[str]:
+        """Get development environment redirect URIs."""
+        return [
+            "http://localhost:8000/api/auth/callback",
+            "http://localhost:3000/api/auth/callback",
+            "http://localhost:3010/api/auth/callback",
+            "http://localhost:3000/auth/callback",
+            "http://localhost:3010/auth/callback"
+        ]
+    
+    def _get_dev_javascript_origins(self) -> List[str]:
+        """Get development environment JavaScript origins."""
+        return ["http://localhost:3000", "http://localhost:3010", "http://localhost:8000"]
+    
+    def _get_dev_config(self) -> OAuthConfig:
+        """Development environment OAuth configuration."""
+        client_id, client_secret = self._get_dev_oauth_credentials()
+        self._log_dev_oauth_status(client_id, client_secret)
         
         return OAuthConfig(
             client_id=client_id,
             client_secret=client_secret,
-            redirect_uris=[
-                "http://localhost:8000/api/auth/callback",
-                "http://localhost:3000/api/auth/callback",
-                "http://localhost:3010/api/auth/callback",
-                "http://localhost:3000/auth/callback",
-                "http://localhost:3010/auth/callback",
-            ],
-            javascript_origins=[
-                "http://localhost:3000",
-                "http://localhost:3010",
-                "http://localhost:8000",
-            ],
+            redirect_uris=self._get_dev_redirect_uris(),
+            javascript_origins=self._get_dev_javascript_origins(),
             allow_dev_login=True,
-            allow_mock_auth=True,
+            allow_mock_auth=True
         )
     
     def _get_test_config(self) -> OAuthConfig:

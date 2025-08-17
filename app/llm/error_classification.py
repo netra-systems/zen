@@ -105,17 +105,17 @@ class NetworkErrorHandler(ErrorClassificationHandler):
         return "network" in error_str or "connection" in error_str
 
 
-class ValidationErrorHandler(ErrorClassificationHandler):
-    """Handler for validation errors."""
+class LLMValidationErrorHandler(ErrorClassificationHandler):
+    """Handler for LLM validation errors."""
     
     def handle(self, error: Exception) -> FailureType:
-        """Handle validation error classification."""
+        """Handle LLM validation error classification."""
         if self._is_validation_error(error):
             return FailureType.VALIDATION_ERROR
         return self._handle_next(error)
     
     def _is_validation_error(self, error: Exception) -> bool:
-        """Check if error is validation-related."""
+        """Check if error is LLM validation-related."""
         return "validation" in str(error).lower()
 
 
@@ -158,7 +158,7 @@ class ErrorClassificationChain:
         """Create additional error handlers (network, validation, api)."""
         return {
             'network': NetworkErrorHandler(),
-            'validation': ValidationErrorHandler(),
+            'validation': LLMValidationErrorHandler(),
             'api': APIErrorHandler()
         }
     

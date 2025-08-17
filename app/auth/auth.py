@@ -9,29 +9,29 @@ class OAuthClient:
         self.oauth = None
         self.google = None
     
-    def init_app(self, app: Any) -> OAuth:
-        """Initialize OAuth with the FastAPI app"""
-        # Create OAuth instance
-        self.oauth = OAuth()
-        
-        # Get environment-specific OAuth configuration
-        oauth_config = auth_env_config.get_oauth_config()
-        
-        # Log OAuth initialization
+    def _log_oauth_initialization(self, oauth_config) -> None:
+        """Log OAuth initialization for debugging."""
         logger.info(f"Initializing OAuth for environment: {auth_env_config.environment.value}")
         logger.info(f"OAuth client ID configured: {bool(oauth_config.client_id)}")
         logger.info(f"OAuth client secret configured: {bool(oauth_config.client_secret)}")
-        
-        # Register Google OAuth client with environment-specific credentials
+    
+    def _register_google_oauth(self, oauth_config) -> None:
+        """Register Google OAuth client with environment credentials."""
         self.google = self.oauth.register(
             name='google',
             client_id=oauth_config.client_id,
             client_secret=oauth_config.client_secret,
             server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-            client_kwargs={
-                'scope': 'openid email profile'
-            }
+            client_kwargs={'scope': 'openid email profile'}
         )
+    
+    def init_app(self, app: Any) -> OAuth:
+        """Initialize OAuth with the FastAPI app"""
+        self.oauth = OAuth()
+        oauth_config = auth_env_config.get_oauth_config()
+        
+        self._log_oauth_initialization(oauth_config)
+        self._register_google_oauth(oauth_config)
         
         return self.oauth
 

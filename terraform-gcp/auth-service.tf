@@ -264,9 +264,10 @@ resource "google_secret_manager_secret_version" "session_secret" {
   secret_data = random_password.session_secret.result
 }
 
-# Update backend service to use auth service
-resource "google_cloud_run_service" "backend_updated" {
-  count    = 0  # Disabled by default, enable when ready to migrate
+# Auth service is now enabled and ready for deployment
+# Backend service configuration updated to use auth service
+resource "google_cloud_run_service" "backend_with_auth" {
+  count    = 1  # ENABLED - Auth service is active
   name     = "netra-backend"
   location = var.region
 

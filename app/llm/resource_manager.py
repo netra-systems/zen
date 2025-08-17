@@ -7,7 +7,7 @@ modular resource management components.
 # Import from the new modular structure for backward compatibility  
 from app.llm.resource_pool import RequestPool
 from app.llm.resource_batcher import RequestBatcher
-from app.llm.resource_cache import CacheManager
+from app.llm.resource_cache import LLMCacheManager as CacheManager
 from app.llm.resource_monitor import ResourceMonitor, resource_monitor
 
 # Re-export for backward compatibility

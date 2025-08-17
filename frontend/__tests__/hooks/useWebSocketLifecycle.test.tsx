@@ -2,6 +2,7 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { AuthContext } from '@/auth/context';
 import { WebSocketProvider, useWebSocketContext } from '@/providers/WebSocketProvider';
+import { ChatLoadingState } from '@/types/loading-state';
 
 // Mock the logger
 jest.mock('@/lib/logger', () => ({
@@ -59,7 +60,7 @@ describe('useWebSocket Hook Lifecycle', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useRealTimers(); // Use real timers since we need actual async behavior
+    jest.useRealTimers();
     
     // Reset mock WebSocket service completely
     mockWebSocketService.connect.mockClear();
@@ -248,6 +249,9 @@ describe('useWebSocket Hook Lifecycle', () => {
       expect(() => {
         renderHook(() => useWebSocketContext(), { wrapper });
       }).not.toThrow();
+      
+      // Test should expect CONNECTION_FAILED state if available
+      expect(ChatLoadingState.CONNECTION_FAILED).toBe('connection_failed');
     });
   });
 

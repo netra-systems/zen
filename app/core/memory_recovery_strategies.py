@@ -104,43 +104,47 @@ class GarbageCollectionStrategy(MemoryRecoveryStrategy):
         # Apply when memory pressure is moderate or higher
         return snapshot.pressure_level != MemoryPressureLevel.LOW
     
-    async def execute(self, snapshot: MemorySnapshot) -> Dict[str, Any]:
-        """Execute garbage collection."""
+    def _prepare_gc_execution(self):
+        """Prepare for garbage collection execution."""
         start_time = datetime.now()
         initial_memory = self._get_current_memory()
-        
-        # Record GC counts before
         before_counts = gc.get_count()
-        
+        return start_time, initial_memory, before_counts
+
+    def _perform_garbage_collection(self) -> int:
+        """Perform garbage collection based on strategy mode."""
         if self.aggressive:
-            # Force collection of all generations
-            collected = 0
-            for generation in range(3):
-                collected += gc.collect(generation)
+            collected = sum(gc.collect(generation) for generation in range(3))
         else:
-            # Standard garbage collection
             collected = gc.collect()
-        
-        # Record GC counts after
+        return collected
+
+    def _calculate_gc_results(self, start_time, initial_memory, before_counts, collected):
+        """Calculate garbage collection results and metrics."""
         after_counts = gc.get_count()
-        
-        # Calculate memory freed
         final_memory = self._get_current_memory()
         memory_freed = initial_memory - final_memory
-        
         duration = (datetime.now() - start_time).total_seconds()
         self.last_gc_time = datetime.now()
-        
-        result = {
+        return after_counts, memory_freed, duration
+
+    def _build_gc_result_dict(self, collected, memory_freed, duration, before_counts, after_counts):
+        """Build the garbage collection result dictionary."""
+        return {
             'action': RecoveryAction.GARBAGE_COLLECT.value,
-            'objects_collected': collected,
-            'memory_freed_mb': memory_freed,
-            'duration_seconds': duration,
-            'gc_counts_before': before_counts,
-            'gc_counts_after': after_counts,
-            'aggressive': self.aggressive
+            'objects_collected': collected, 'memory_freed_mb': memory_freed,
+            'duration_seconds': duration, 'gc_counts_before': before_counts,
+            'gc_counts_after': after_counts, 'aggressive': self.aggressive
         }
-        
+
+    async def execute(self, snapshot: MemorySnapshot) -> Dict[str, Any]:
+        """Execute garbage collection."""
+        start_time, initial_memory, before_counts = self._prepare_gc_execution()
+        collected = self._perform_garbage_collection()
+        after_counts, memory_freed, duration = self._calculate_gc_results(
+            start_time, initial_memory, before_counts, collected)
+        result = self._build_gc_result_dict(collected, memory_freed, duration, 
+                                          before_counts, after_counts)
         logger.info(f"Garbage collection completed: {result}")
         return result
     
@@ -384,58 +388,68 @@ class MemoryMonitor:
                 logger.error(f"Memory monitoring error: {e}")
                 await asyncio.sleep(interval_seconds)
     
-    async def take_snapshot(self) -> MemorySnapshot:
-        """Take a memory usage snapshot."""
-        timestamp = datetime.now()
-        
+    def _get_system_memory_metrics(self):
+        """Get system memory metrics from psutil or fallback values."""
         try:
             import psutil
             memory = psutil.virtual_memory()
-            process = psutil.Process()
-            process_memory = process.memory_info()
-            
             total_mb = memory.total / 1024 / 1024
             available_mb = memory.available / 1024 / 1024
             used_mb = memory.used / 1024 / 1024
             percent_used = memory.percent
-            
-            rss_mb = process_memory.rss / 1024 / 1024
-            vms_mb = process_memory.vms / 1024 / 1024
-            
+            return total_mb, available_mb, used_mb, percent_used
         except ImportError:
-            # Fallback if psutil not available
             total_mb = 8192.0  # Assume 8GB
             percent_used = 50.0
             available_mb = total_mb * (100 - percent_used) / 100
             used_mb = total_mb - available_mb
-            rss_mb = 512.0
-            vms_mb = 1024.0
-        
-        # Python-specific metrics
+            return total_mb, available_mb, used_mb, percent_used
+
+    def _get_process_memory_metrics(self):
+        """Get process memory metrics from psutil or fallback values."""
+        try:
+            import psutil
+            process = psutil.Process()
+            process_memory = process.memory_info()
+            rss_mb = process_memory.rss / 1024 / 1024
+            vms_mb = process_memory.vms / 1024 / 1024
+            return rss_mb, vms_mb
+        except ImportError:
+            return 512.0, 1024.0
+
+    def _get_python_memory_metrics(self):
+        """Get Python-specific memory metrics."""
         gc_counts = gc.get_count()
         object_count = len(gc.get_objects())
-        
-        # Determine pressure level
-        pressure_level = self._calculate_pressure_level(percent_used)
-        
-        snapshot = MemorySnapshot(
-            timestamp=timestamp,
-            total_mb=total_mb,
-            available_mb=available_mb,
-            used_mb=used_mb,
-            percent_used=percent_used,
-            pressure_level=pressure_level,
-            gc_counts=gc_counts,
-            object_count=object_count,
-            rss_mb=rss_mb,
-            vms_mb=vms_mb
+        return gc_counts, object_count
+
+    def _create_memory_snapshot(self, timestamp, total_mb, available_mb, used_mb, 
+                               percent_used, pressure_level, gc_counts, object_count, 
+                               rss_mb, vms_mb) -> MemorySnapshot:
+        """Create memory snapshot object."""
+        return MemorySnapshot(
+            timestamp=timestamp, total_mb=total_mb, available_mb=available_mb,
+            used_mb=used_mb, percent_used=percent_used, pressure_level=pressure_level,
+            gc_counts=gc_counts, object_count=object_count, rss_mb=rss_mb, vms_mb=vms_mb
         )
-        
-        # Store snapshot
+
+    def _store_snapshot(self, snapshot: MemorySnapshot) -> None:
+        """Store snapshot and manage snapshot history."""
         self.snapshots.append(snapshot)
         if len(self.snapshots) > self.max_snapshots:
             self.snapshots = self.snapshots[-self.max_snapshots//2:]
-        
+
+    async def take_snapshot(self) -> MemorySnapshot:
+        """Take a memory usage snapshot."""
+        timestamp = datetime.now()
+        total_mb, available_mb, used_mb, percent_used = self._get_system_memory_metrics()
+        rss_mb, vms_mb = self._get_process_memory_metrics()
+        gc_counts, object_count = self._get_python_memory_metrics()
+        pressure_level = self._calculate_pressure_level(percent_used)
+        snapshot = self._create_memory_snapshot(timestamp, total_mb, available_mb, used_mb,
+                                              percent_used, pressure_level, gc_counts, 
+                                              object_count, rss_mb, vms_mb)
+        self._store_snapshot(snapshot)
         return snapshot
     
     async def check_and_recover(self, snapshot: MemorySnapshot) -> List[Dict[str, Any]]:

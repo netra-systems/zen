@@ -1,0 +1,852 @@
+[
+  {
+    "id": 1,
+    "files": [
+      "app\\tests\\agents\\data_sub_agent_test_helpers.py",
+      "app\\tests\\core\\test_type_validation_part4.py"
+    ],
+    "total_violations": 14,
+    "priority": "critical"
+  },
+  {
+    "id": 2,
+    "files": [
+      "app\\tests\\core\\test_type_validation_part3.py",
+      "app\\tests\\core\\test_circuit_breaker.py"
+    ],
+    "total_violations": 19,
+    "priority": "critical"
+  },
+  {
+    "id": 3,
+    "files": [
+      "app\\tests\\core\\test_fallback_coordinator.py",
+      "app\\tests\\core\\test_async_edge_cases_error_handling.py"
+    ],
+    "total_violations": 36,
+    "priority": "critical"
+  },
+  {
+    "id": 4,
+    "files": [
+      "app\\tests\\core\\test_async_resource_pool_management.py",
+      "app\\tests\\core\\test_type_validation_part1.py"
+    ],
+    "total_violations": 17,
+    "priority": "critical"
+  },
+  {
+    "id": 5,
+    "files": [
+      "app\\tests\\core\\test_async_rate_limiting_circuit_breaker.py",
+      "app\\tests\\llm\\test_structured_generation.py"
+    ],
+    "total_violations": 25,
+    "priority": "critical"
+  },
+  {
+    "id": 6,
+    "files": [
+      "app\\tests\\core\\test_agent_reliability_mixin.py",
+      "app\\tests\\core\\test_async_processing_locking.py"
+    ],
+    "total_violations": 36,
+    "priority": "critical"
+  },
+  {
+    "id": 7,
+    "files": [
+      "app\\tests\\core\\test_config_manager.py",
+      "app\\tests\\core\\test_service_interfaces.py"
+    ],
+    "total_violations": 29,
+    "priority": "critical"
+  },
+  {
+    "id": 8,
+    "files": [
+      "app\\tests\\core\\test_core_infrastructure_11_20.py",
+      "app\\tests\\core\\test_alert_manager.py"
+    ],
+    "total_violations": 26,
+    "priority": "critical"
+  },
+  {
+    "id": 9,
+    "files": [
+      "app\\tests\\core\\test_reliability_mechanisms.py",
+      "app\\tests\\core\\test_async_function_utilities.py"
+    ],
+    "total_violations": 23,
+    "priority": "critical"
+  },
+  {
+    "id": 10,
+    "files": [
+      "app\\tests\\llm\\test_llm_integration_real.py",
+      "app\\tests\\core\\test_error_recovery_scenarios.py"
+    ],
+    "total_violations": 25,
+    "priority": "critical"
+  },
+  {
+    "id": 11,
+    "files": [
+      "app\\tests\\core\\test_health_checkers.py",
+      "app\\tests\\core\\test_system_health_monitor.py"
+    ],
+    "total_violations": 21,
+    "priority": "critical"
+  },
+  {
+    "id": 12,
+    "files": [
+      "app\\tests\\core\\test_missing_tests_async.py",
+      "app\\tests\\core\\test_error_handling.py"
+    ],
+    "total_violations": 16,
+    "priority": "critical"
+  },
+  {
+    "id": 13,
+    "files": [
+      "app\\tests\\services\\websocket_test_utilities.py",
+      "app\\tests\\auth\\test_environment_config.py"
+    ],
+    "total_violations": 10,
+    "priority": "normal"
+  },
+  {
+    "id": 14,
+    "files": [
+      "app\\tests\\core\\test_health_types.py",
+      "app\\tests\\core\\test_missing_tests_validation.py"
+    ],
+    "total_violations": 13,
+    "priority": "critical"
+  },
+  {
+    "id": 15,
+    "files": [
+      "app\\tests\\core\\test_type_validation_part2.py",
+      "app\\tests\\core\\test_data_validation_comprehensive.py"
+    ],
+    "total_violations": 6,
+    "priority": "critical"
+  },
+  {
+    "id": 16,
+    "files": [
+      "app\\tests\\core\\test_json_parsing_fix_functions.py",
+      "app\\tests\\core\\test_missing_tests_services.py"
+    ],
+    "total_violations": 12,
+    "priority": "critical"
+  },
+  {
+    "id": 17,
+    "files": [
+      "app\\tests\\core\\test_async_connection_pool.py",
+      "app\\tests\\core\\test_json_parsing_helpers_and_edge_cases.py"
+    ],
+    "total_violations": 5,
+    "priority": "critical"
+  },
+  {
+    "id": 18,
+    "files": [
+      "app\\core\\agent_recovery_types.py",
+      "app\\core\\memory_recovery_strategies.py"
+    ],
+    "total_violations": 13,
+    "priority": "critical"
+  },
+  {
+    "id": 19,
+    "files": [
+      "app\\core\\secret_manager.py",
+      "app\\core\\fallback_coordinator.py"
+    ],
+    "total_violations": 8,
+    "priority": "critical"
+  },
+  {
+    "id": 20,
+    "files": [
+      "app\\core\\middleware_setup.py",
+      "app\\core\\config_validator.py"
+    ],
+    "total_violations": 11,
+    "priority": "critical"
+  },
+  {
+    "id": 21,
+    "files": [
+      "app\\core\\system_health_monitor_enhanced.py",
+      "app\\core\\agent_reliability_mixin.py"
+    ],
+    "total_violations": 17,
+    "priority": "critical"
+  },
+  {
+    "id": 22,
+    "files": [
+      "app\\core\\database_recovery_strategies.py",
+      "app\\core\\agent_recovery_base.py"
+    ],
+    "total_violations": 12,
+    "priority": "critical"
+  },
+  {
+    "id": 23,
+    "files": [
+      "app\\core\\resource_manager.py",
+      "app\\core\\agent_recovery_registry.py"
+    ],
+    "total_violations": 12,
+    "priority": "critical"
+  },
+  {
+    "id": 24,
+    "files": [
+      "app\\core\\enhanced_retry_strategies.py",
+      "app\\core\\enhanced_secret_manager.py"
+    ],
+    "total_violations": 28,
+    "priority": "critical"
+  },
+  {
+    "id": 25,
+    "files": [
+      "app\\core\\error_handlers.py",
+      "app\\core\\performance_optimization_manager.py"
+    ],
+    "total_violations": 19,
+    "priority": "critical"
+  },
+  {
+    "id": 26,
+    "files": [
+      "app\\core\\agent_health_checker.py",
+      "app\\core\\graceful_degradation.py"
+    ],
+    "total_violations": 21,
+    "priority": "critical"
+  },
+  {
+    "id": 27,
+    "files": [
+      "app\\core\\async_retry_logic.py",
+      "app\\core\\interfaces_quality.py"
+    ],
+    "total_violations": 12,
+    "priority": "critical"
+  },
+  {
+    "id": 28,
+    "files": [
+      "app\\core\\type_validation_rules.py",
+      "app\\core\\schema_sync\\synchronizer.py"
+    ],
+    "total_violations": 11,
+    "priority": "critical"
+  },
+  {
+    "id": 29,
+    "files": [
+      "app\\core\\error_aggregation_patterns.py",
+      "app\\core\\fallback_coordinator_health.py"
+    ],
+    "total_violations": 15,
+    "priority": "critical"
+  },
+  {
+    "id": 30,
+    "files": [
+      "app\\core\\interfaces_data.py",
+      "app\\core\\error_recovery_integration.py"
+    ],
+    "total_violations": 13,
+    "priority": "critical"
+  },
+  {
+    "id": 31,
+    "files": [
+      "app\\core\\fallback_coordinator_emergency.py",
+      "app\\core\\type_validation_errors.py"
+    ],
+    "total_violations": 4,
+    "priority": "critical"
+  },
+  {
+    "id": 32,
+    "files": [
+      "app\\core\\health_checkers.py",
+      "app\\core\\interfaces_execution.py"
+    ],
+    "total_violations": 7,
+    "priority": "critical"
+  },
+  {
+    "id": 33,
+    "files": [
+      "app\\core\\schema_sync\\validator.py",
+      "app\\core\\error_aggregation_metrics.py"
+    ],
+    "total_violations": 20,
+    "priority": "critical"
+  },
+  {
+    "id": 34,
+    "files": [
+      "app\\core\\error_logger_core.py",
+      "app\\core\\error_logging_context.py"
+    ],
+    "total_violations": 24,
+    "priority": "critical"
+  },
+  {
+    "id": 35,
+    "files": [
+      "app\\core\\error_report_generator.py",
+      "app\\core\\reliability.py"
+    ],
+    "total_violations": 13,
+    "priority": "critical"
+  },
+  {
+    "id": 36,
+    "files": [
+      "app\\core\\type_validators.py",
+      "app\\core\\websocket_reconnection_handler.py"
+    ],
+    "total_violations": 4,
+    "priority": "critical"
+  },
+  {
+    "id": 37,
+    "files": [
+      "app\\core\\schema_sync\\extractor.py",
+      "app\\core\\error_aggregation_trend.py"
+    ],
+    "total_violations": 5,
+    "priority": "critical"
+  },
+  {
+    "id": 38,
+    "files": [
+      "app\\core\\error_logging_helpers.py",
+      "app\\core\\error_recovery.py"
+    ],
+    "total_violations": 12,
+    "priority": "critical"
+  },
+  {
+    "id": 39,
+    "files": [
+      "app\\core\\schema_sync\\generator.py",
+      "app\\core\\schema_sync\\utils.py"
+    ],
+    "total_violations": 11,
+    "priority": "critical"
+  },
+  {
+    "id": 40,
+    "files": [
+      "app\\core\\async_connection_pool.py",
+      "app\\core\\interfaces_tools.py"
+    ],
+    "total_violations": 5,
+    "priority": "critical"
+  },
+  {
+    "id": 41,
+    "files": [
+      "app\\core\\interfaces_validation.py",
+      "app\\core\\logging_context.py"
+    ],
+    "total_violations": 9,
+    "priority": "critical"
+  },
+  {
+    "id": 42,
+    "files": [
+      "app\\core\\logging_formatters.py",
+      "app\\core\\websocket_connection_manager.py"
+    ],
+    "total_violations": 6,
+    "priority": "critical"
+  },
+  {
+    "id": 43,
+    "files": [
+      "app\\core\\error_aggregation_alerts.py",
+      "app\\core\\fallback_utils.py"
+    ],
+    "total_violations": 9,
+    "priority": "critical"
+  },
+  {
+    "id": 44,
+    "files": [
+      "app\\core\\reliability_retry.py",
+      "app\\core\\async_batch_processor.py"
+    ],
+    "total_violations": 9,
+    "priority": "critical"
+  },
+  {
+    "id": 45,
+    "files": [
+      "app\\core\\interfaces_cache.py",
+      "app\\core\\reliability_utils.py"
+    ],
+    "total_violations": 6,
+    "priority": "critical"
+  },
+  {
+    "id": 46,
+    "files": [
+      "app\\core\\type_validation_core.py",
+      "app\\core\\circuit_breaker_core.py"
+    ],
+    "total_violations": 10,
+    "priority": "critical"
+  },
+  {
+    "id": 47,
+    "files": [
+      "app\\core\\database_recovery_core.py",
+      "app\\core\\error_aggregation_utils.py"
+    ],
+    "total_violations": 5,
+    "priority": "critical"
+  },
+  {
+    "id": 48,
+    "files": [
+      "app\\core\\json_utils.py",
+      "app\\core\\secret_manager_helpers.py"
+    ],
+    "total_violations": 6,
+    "priority": "critical"
+  },
+  {
+    "id": 49,
+    "files": [
+      "app\\core\\websocket_heartbeat_manager.py",
+      "app\\core\\adaptive_circuit_breaker_core.py"
+    ],
+    "total_violations": 3,
+    "priority": "critical"
+  },
+  {
+    "id": 50,
+    "files": [
+      "app\\core\\alert_manager.py",
+      "app\\core\\interfaces_observability.py"
+    ],
+    "total_violations": 5,
+    "priority": "critical"
+  },
+  {
+    "id": 51,
+    "files": [
+      "app\\core\\unified_logging.py",
+      "app\\core\\async_resource_manager.py"
+    ],
+    "total_violations": 3,
+    "priority": "critical"
+  },
+  {
+    "id": 52,
+    "files": [
+      "app\\core\\circuit_breaker_registry_adaptive.py",
+      "app\\core\\database_connection_manager.py"
+    ],
+    "total_violations": 5,
+    "priority": "critical"
+  },
+  {
+    "id": 53,
+    "files": [
+      "app\\core\\error_aggregation_service.py",
+      "app\\core\\interfaces_repository.py"
+    ],
+    "total_violations": 3,
+    "priority": "critical"
+  },
+  {
+    "id": 54,
+    "files": [
+      "app\\core\\type_validation_helpers.py",
+      "app\\core\\websocket_recovery_manager.py"
+    ],
+    "total_violations": 2,
+    "priority": "critical"
+  },
+  {
+    "id": 55,
+    "files": [
+      "app\\core\\exceptions_agent.py"
+    ],
+    "total_violations": 2,
+    "priority": "critical"
+  },
+  {
+    "id": 56,
+    "files": [
+      "app\\routes\\auth\\auth.py"
+    ],
+    "total_violations": 5,
+    "priority": "normal"
+  },
+  {
+    "id": 57,
+    "files": [
+      "app\\agents\\data_sub_agent\\insights_generator.py",
+      "app\\agents\\data_sub_agent\\clickhouse_operations.py"
+    ],
+    "total_violations": 6,
+    "priority": "critical"
+  },
+  {
+    "id": 58,
+    "files": [
+      "app\\agents\\data_sub_agent\\data_fetching.py",
+      "app\\agents\\supervisor_admin_init.py"
+    ],
+    "total_violations": 12,
+    "priority": "critical"
+  },
+  {
+    "id": 59,
+    "files": [
+      "app\\agents\\triage_sub_agent\\tool_recommender.py",
+      "app\\agents\\data_sub_agent\\state_management.py"
+    ],
+    "total_violations": 5,
+    "priority": "critical"
+  },
+  {
+    "id": 60,
+    "files": [
+      "app\\agents\\corpus_admin\\corpus_validation_handlers.py",
+      "app\\agents\\data_sub_agent\\data_fetching_recovery.py"
+    ],
+    "total_violations": 15,
+    "priority": "critical"
+  },
+  {
+    "id": 61,
+    "files": [
+      "app\\agents\\data_sub_agent\\query_builder_original.py",
+      "app\\agents\\supervisor_consolidated.py"
+    ],
+    "total_violations": 9,
+    "priority": "critical"
+  },
+  {
+    "id": 62,
+    "files": [
+      "app\\agents\\data_sub_agent\\clickhouse_recovery.py",
+      "app\\agents\\corpus_admin\\corpus_upload_handlers.py"
+    ],
+    "total_violations": 15,
+    "priority": "critical"
+  },
+  {
+    "id": 63,
+    "files": [
+      "app\\agents\\data_sub_agent\\execution_fallbacks.py",
+      "app\\agents\\data_sub_agent\\extended_operations.py"
+    ],
+    "total_violations": 11,
+    "priority": "critical"
+  },
+  {
+    "id": 64,
+    "files": [
+      "app\\agents\\data_sub_agent\\metrics_recovery.py",
+      "app\\agents\\corpus_admin\\corpus_indexing_handlers.py"
+    ],
+    "total_violations": 20,
+    "priority": "critical"
+  },
+  {
+    "id": 65,
+    "files": [
+      "app\\agents\\data_sub_agent\\data_operations.py",
+      "app\\agents\\data_sub_agent\\metrics_analyzer.py"
+    ],
+    "total_violations": 21,
+    "priority": "critical"
+  },
+  {
+    "id": 66,
+    "files": [
+      "app\\agents\\data_sub_agent\\usage_pattern_processor.py",
+      "app\\agents\\data_sub_agent\\query_fix_validator_original.py"
+    ],
+    "total_violations": 5,
+    "priority": "critical"
+  },
+  {
+    "id": 67,
+    "files": [
+      "app\\agents\\corpus_admin\\suggestion_profiles.py",
+      "app\\agents\\data_sub_agent\\data_analysis_ops.py"
+    ],
+    "total_violations": 9,
+    "priority": "critical"
+  },
+  {
+    "id": 68,
+    "files": [
+      "app\\agents\\data_sub_agent\\fallback_providers.py",
+      "app\\agents\\triage_sub_agent\\llm_processor.py"
+    ],
+    "total_violations": 9,
+    "priority": "critical"
+  },
+  {
+    "id": 69,
+    "files": [
+      "app\\agents\\data_sub_agent\\performance_data_processor.py",
+      "app\\agents\\triage_sub_agent\\error_core.py"
+    ],
+    "total_violations": 11,
+    "priority": "critical"
+  },
+  {
+    "id": 70,
+    "files": [
+      "app\\agents\\corpus_admin\\operations_analysis.py",
+      "app\\agents\\corpus_admin\\operations_crud.py"
+    ],
+    "total_violations": 9,
+    "priority": "critical"
+  },
+  {
+    "id": 71,
+    "files": [
+      "app\\agents\\data_sub_agent\\error_types.py",
+      "app\\agents\\data_sub_agent\\execution_analysis.py"
+    ],
+    "total_violations": 10,
+    "priority": "critical"
+  },
+  {
+    "id": 72,
+    "files": [
+      "app\\agents\\supervisor\\pipeline_executor.py",
+      "app\\agents\\triage_sub_agent\\error_reporting.py"
+    ],
+    "total_violations": 3,
+    "priority": "critical"
+  },
+  {
+    "id": 73,
+    "files": [
+      "app\\agents\\triage_sub_agent\\error_types.py",
+      "app\\agents\\triage_sub_agent\\fallback.py"
+    ],
+    "total_violations": 3,
+    "priority": "critical"
+  },
+  {
+    "id": 74,
+    "files": [
+      "app\\agents\\corpus_admin\\corpus_error_types.py",
+      "app\\agents\\data_sub_agent\\delegation.py"
+    ],
+    "total_violations": 5,
+    "priority": "critical"
+  },
+  {
+    "id": 75,
+    "files": [
+      "app\\agents\\data_sub_agent\\execution_core.py",
+      "app\\agents\\supervisor\\observability_example.py"
+    ],
+    "total_violations": 6,
+    "priority": "critical"
+  },
+  {
+    "id": 76,
+    "files": [
+      "app\\agents\\triage_sub_agent\\error_recovery.py",
+      "app\\agents\\corpus_admin\\corpus_error_compensation.py"
+    ],
+    "total_violations": 3,
+    "priority": "critical"
+  },
+  {
+    "id": 77,
+    "files": [
+      "app\\agents\\corpus_admin\\operations_handler.py",
+      "app\\agents\\data_sub_agent\\analysis_operations.py"
+    ],
+    "total_violations": 6,
+    "priority": "critical"
+  },
+  {
+    "id": 78,
+    "files": [
+      "app\\agents\\triage_sub_agent\\intent_detection.py",
+      "app\\agents\\corpus_admin\\validators.py"
+    ],
+    "total_violations": 3,
+    "priority": "critical"
+  },
+  {
+    "id": 79,
+    "files": [
+      "app\\agents\\data_sub_agent\\analysis_engine.py",
+      "app\\agents\\data_sub_agent\\query_builder.py"
+    ],
+    "total_violations": 5,
+    "priority": "critical"
+  },
+  {
+    "id": 80,
+    "files": [
+      "app\\agents\\supervisor\\observability_todo_tracker.py",
+      "app\\agents\\triage_sub_agent\\result_processor.py"
+    ],
+    "total_violations": 2,
+    "priority": "critical"
+  },
+  {
+    "id": 81,
+    "files": [
+      "app\\agents\\corpus_admin\\agent.py",
+      "app\\agents\\data_sub_agent\\execution_parameters.py"
+    ],
+    "total_violations": 2,
+    "priority": "critical"
+  },
+  {
+    "id": 82,
+    "files": [
+      "app\\agents\\data_sub_agent\\llm_query_detector.py",
+      "app\\agents\\triage_sub_agent\\entity_extractor.py"
+    ],
+    "total_violations": 2,
+    "priority": "critical"
+  },
+  {
+    "id": 83,
+    "files": [
+      "app\\agents\\triage_sub_agent\\intent_detector.py",
+      "app\\agents\\triage_sub_agent\\prompt_builder.py"
+    ],
+    "total_violations": 2,
+    "priority": "critical"
+  },
+  {
+    "id": 84,
+    "files": [
+      "app\\services\\websocket\\quality_message_handler.py",
+      "app\\services\\websocket\\message_handler.py"
+    ],
+    "total_violations": 10,
+    "priority": "normal"
+  },
+  {
+    "id": 85,
+    "files": [
+      "app\\services\\websocket\\message_queue.py",
+      "app\\services\\core\\service_container.py"
+    ],
+    "total_violations": 14,
+    "priority": "critical"
+  },
+  {
+    "id": 86,
+    "files": [
+      "app\\services\\websocket_service.py"
+    ],
+    "total_violations": 1,
+    "priority": "normal"
+  },
+  {
+    "id": 87,
+    "files": [
+      "app\\auth\\environment_config.py",
+      "app\\auth\\auth.py"
+    ],
+    "total_violations": 10,
+    "priority": "normal"
+  },
+  {
+    "id": 88,
+    "files": [
+      "app\\auth\\auth_interfaces.py",
+      "app\\auth\\api_key_manager.py"
+    ],
+    "total_violations": 7,
+    "priority": "normal"
+  },
+  {
+    "id": 89,
+    "files": [
+      "app\\auth\\pr_router.py",
+      "app\\auth\\session_validation.py"
+    ],
+    "total_violations": 7,
+    "priority": "normal"
+  },
+  {
+    "id": 90,
+    "files": [
+      "app\\auth\\session_utils.py",
+      "app\\auth\\auth_dependencies.py"
+    ],
+    "total_violations": 3,
+    "priority": "normal"
+  },
+  {
+    "id": 91,
+    "files": [
+      "app\\auth\\token_manager.py",
+      "app\\auth\\enhanced_auth_security.py"
+    ],
+    "total_violations": 3,
+    "priority": "normal"
+  },
+  {
+    "id": 92,
+    "files": [
+      "app\\auth\\session_security.py"
+    ],
+    "total_violations": 3,
+    "priority": "normal"
+  },
+  {
+    "id": 93,
+    "files": [
+      "auth_service\\app\\core\\session_manager.py",
+      "auth_service\\app\\core\\jwt_handler.py"
+    ],
+    "total_violations": 10,
+    "priority": "critical"
+  },
+  {
+    "id": 94,
+    "files": [
+      "app\\llm\\resource_monitor.py",
+      "app\\llm\\resource_cache.py"
+    ],
+    "total_violations": 4,
+    "priority": "critical"
+  },
+  {
+    "id": 95,
+    "files": [
+      "app\\llm\\llm_structured_operations.py"
+    ],
+    "total_violations": 1,
+    "priority": "critical"
+  }
+]

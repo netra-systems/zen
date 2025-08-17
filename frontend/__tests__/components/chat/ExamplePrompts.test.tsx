@@ -1,60 +1,63 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { WebSocketProvider } from '../providers/WebSocketProvider';
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
-import { useWebSocket } from '@/hooks/useWebSocket';
-import { useChatStore } from '@/store/chat';
-import { useAuthStore } from '@/store/authStore';
+import { setupChatMocks, resetChatMocks, renderWithChatSetup } from './shared-test-setup';
 
-import { TestProviders } from '../test-utils/providers';const mockSendMessage = jest.fn();
+const mockSendMessage = jest.fn();
 const mockSetProcessing = jest.fn();
 const mockAddMessage = jest.fn();
 
+// Mock all dependencies at the top level
 jest.mock('@/hooks/useWebSocket', () => ({
   useWebSocket: () => ({ sendMessage: mockSendMessage }),
 }));
 
-jest.mock('@/store/chat', () => ({
-  useChatStore: () => ({ 
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: () => ({ 
     setProcessing: mockSetProcessing,
     addMessage: mockAddMessage 
   }),
 }));
 
-jest.mock('@/store/authStore');
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn()
+}));
+
+// Import the mocked hooks
+import { useAuthStore } from '@/store/authStore';
+
+// Setup mocks before tests
+beforeAll(() => {
+  setupChatMocks();
+});
+
+beforeEach(() => {
+  resetChatMocks();
+  mockSendMessage.mockClear();
+  mockSetProcessing.mockClear();
+  mockAddMessage.mockClear();
+});
 
 describe('ExamplePrompts', () => {
-  beforeEach(() => {
-    // Mock fetch for config
-    global.fetch = jest.fn().mockResolvedValue({
-      json: jest.fn().mockResolvedValue({
-        ws_url: 'ws://localhost:8000/ws'
-      })
-    });
-
-    jest.clearAllMocks();
-    // Default mock for authenticated user
+  it('sends a message when an example prompt is clicked', () => {
     (useAuthStore as jest.Mock).mockReturnValue({
       isAuthenticated: true
     });
-  });
 
-  it('sends a message when an example prompt is clicked', () => {
-    render(<ExamplePrompts />);
+    renderWithChatSetup(<ExamplePrompts />);
 
     const firstPrompt = screen.getByText(/I need to reduce costs but keep quality the same/i);
     fireEvent.click(firstPrompt);
 
     expect(mockAddMessage).toHaveBeenCalledWith(expect.objectContaining({
-      type: 'user',
-      content: 'I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.',
-      displayed_to_user: true
+      role: 'user',
+      content: 'I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.'
     }));
     expect(mockSendMessage).toHaveBeenCalledWith({
       type: 'user_message',
       payload: { 
-        text: 'I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.',
+        content: 'I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.',
         references: []
       }
     });
@@ -62,14 +65,13 @@ describe('ExamplePrompts', () => {
   });
 
   it('does not send message when user is not authenticated', () => {
-    // Override the mock for this test only
     (useAuthStore as jest.Mock).mockReturnValue({
       isAuthenticated: false
     });
     
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     
-    render(<ExamplePrompts />);
+    renderWithChatSetup(<ExamplePrompts />);
     
     const firstPrompt = screen.getByText(/I need to reduce costs but keep quality the same/i);
     fireEvent.click(firstPrompt);

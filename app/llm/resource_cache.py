@@ -13,18 +13,26 @@ from app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class CacheManager:
+class LLMCacheManager:
     """Manages LLM cache with memory limits."""
     
     def __init__(self, max_size: int = 1000, 
                  ttl_seconds: int = 3600):
         """Initialize cache manager with limits."""
+        self._set_cache_limits(max_size, ttl_seconds)
+        self._initialize_cache_storage()
+        self._lock = asyncio.Lock()
+    
+    def _set_cache_limits(self, max_size: int, ttl_seconds: int) -> None:
+        """Set cache size and TTL limits."""
         self.max_size = max_size
         self.ttl_seconds = ttl_seconds
+    
+    def _initialize_cache_storage(self) -> None:
+        """Initialize cache storage dictionaries."""
         self._cache: Dict[str, Dict] = {}
         self._access_times: Dict[str, datetime] = {}
         self._weak_refs: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
-        self._lock = asyncio.Lock()
     
     async def get(self, key: str) -> Optional[Any]:
         """Get value from cache."""

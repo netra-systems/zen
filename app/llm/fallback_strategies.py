@@ -15,7 +15,7 @@ from app.core.reliability import CircuitBreaker
 logger = central_logger.get_logger(__name__)
 
 
-class ExecutionStrategy(ABC):
+class LLMExecutionStrategy(ABC):
     """Abstract strategy for LLM execution."""
     
     @abstractmethod
@@ -24,7 +24,7 @@ class ExecutionStrategy(ABC):
         pass
 
 
-class CircuitFallbackStrategy(ExecutionStrategy):
+class CircuitFallbackStrategy(LLMExecutionStrategy):
     """Strategy for circuit breaker fallback."""
     
     def __init__(self, handler: 'LLMFallbackHandler', fallback_type: str):
@@ -37,16 +37,26 @@ class CircuitFallbackStrategy(ExecutionStrategy):
         return self.handler._create_fallback_response(self.fallback_type)
 
 
-class RetryExecutionStrategy(ExecutionStrategy):
+class RetryExecutionStrategy(LLMExecutionStrategy):
     """Strategy for retry execution with fallback."""
     
     def _set_strategy_properties(self, handler: 'LLMFallbackHandler', llm_operation,
                                 operation_name: str, circuit_breaker: CircuitBreaker, 
                                 provider: str, fallback_type: str) -> None:
         """Set all strategy properties."""
+        self._set_core_properties(handler, llm_operation, operation_name)
+        self._set_reliability_properties(circuit_breaker, provider, fallback_type)
+    
+    def _set_core_properties(self, handler: 'LLMFallbackHandler', 
+                           llm_operation, operation_name: str) -> None:
+        """Set core strategy properties."""
         self.handler = handler
         self.llm_operation = llm_operation
         self.operation_name = operation_name
+    
+    def _set_reliability_properties(self, circuit_breaker: CircuitBreaker, 
+                                  provider: str, fallback_type: str) -> None:
+        """Set reliability-related properties."""
         self.circuit_breaker = circuit_breaker
         self.provider = provider
         self.fallback_type = fallback_type

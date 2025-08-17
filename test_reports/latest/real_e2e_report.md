@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-16T21:28:57.699157  
+**Generated:** 2025-08-16T21:49:12.665141  
 **Test Level:** real_e2e - [REAL E2E] Tests with actual LLM calls and services (15-20 minutes)  
 **Purpose:** End-to-end validation with real LLM and service integrations
 
@@ -17,7 +17,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 2 | 0 | 0 | 1 | 1 | 13.64s | [FAILED] |
+| Backend   | 2 | 0 | 0 | 1 | 1 | 14.17s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -27,7 +27,7 @@
 - **Purpose:** End-to-end validation with real LLM and service integrations
 - **Timeout:** 1200s
 - **Coverage Enabled:** No
-- **Total Duration:** 13.64s
+- **Total Duration:** 14.17s
 - **Exit Code:** 1
 
 ### Backend Configuration
@@ -66,11 +66,11 @@ rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
 configfile: pytest.ini
 plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
 asyncio: mode=Mode.AUTO
-[1mcollecting ... [0mcollected 3938 items / 1 error / 1 skipped
+[1mcollecting ... [0mcollected 4756 items / 1 error / 1 skipped
 
 =================================== ERRORS ====================================
-[31m[1m___ ERROR collecting tests/services/test_websocket_broadcast_mechanisms.py ____[0m
-[31mImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\services\test_websocket_broadcast_mechanisms.py'.
+[31m[1m__________ ERROR collecting tests/unit/auth_service/test_helpers.py ___________[0m
+[31mImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\unit\auth_service\test_helpers.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\site-packages\_pytest\python.py:498: in importtestmodule
@@ -90,19 +90,19 @@ Traceback:
     ???
 ..\..\..\..\miniconda3\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
     exec(co, module.__dict__)
-app\tests\services\test_websocket_broadcast_mechanisms.py:10: in <module>
-    from app.services.websocket.broadcast_manager import BroadcastManager
-E   ModuleNotFoundError: No module named 'app.services.websocket.broadcast_manager'[0m
+app\tests\unit\auth_service\test_helpers.py:14: in <module>
+    from app.auth.auth_service import (
+E   ImportError: cannot import name '_validate_and_get_return_url' from 'app.auth.auth_service' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\auth\auth_service.py)[0m
 [36m[1m=========================== short test summary info ===========================[0m
-[31mERROR[0m app\tests\services\test_websocket_broadcast_mechanisms.py
+[31mERROR[0m app\tests\unit\auth_service\test_helpers.py
 [31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
-[31m========================= [33m1 skipped[0m, [31m[1m1 error[0m[31m in 6.30s[0m[31m =========================[0m
+[31m========================= [33m1 skipped[0m, [31m[1m1 error[0m[31m in 6.20s[0m[31m =========================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 1 after 11.85s
+[FAIL] TESTS FAILED with exit code 1 after 12.98s
 ================================================================================
 
 --- Logging error in Loguru Handler #7 ---
-Record was: {'elapsed': datetime.timedelta(seconds=10, microseconds=300635), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=18632, name='MainProcess'), 'thread': (id=324, name='MainThread'), 'time': datetime(2025, 8, 16, 21, 28, 55, 999937, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
+Record was: {'elapsed': datetime.timedelta(seconds=10, microseconds=738314), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=14548, name='MainProcess'), 'thread': (id=13404, name='MainThread'), 'time': datetime(2025, 8, 16, 21, 49, 11, 674652, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
 Traceback (most recent call last):
   File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
     self._sink.write(message)
@@ -122,9 +122,9 @@ ValueError: I/O operation on closed file.
 
 ### Backend Errors
 - =================================== ERRORS ====================================
-- [31m[1m___ ERROR collecting tests/services/test_websocket_broadcast_mechanisms.py ____[0m
-- [31mERROR[0m app\tests\services\test_websocket_broadcast_mechanisms.py
-- [FAIL] TESTS FAILED with exit code 1 after 11.85s
+- [31m[1m__________ ERROR collecting tests/unit/auth_service/test_helpers.py ___________[0m
+- [31mERROR[0m app\tests\unit\auth_service\test_helpers.py
+- [FAIL] TESTS FAILED with exit code 1 after 12.98s
 
 
 ---

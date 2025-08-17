@@ -24,8 +24,8 @@ class TestAuthServiceEndpoints:
         """Test successful OAuth login initiation."""
         with patch('app.auth.auth_service.auth_session_manager.create_oauth_state', return_value="state123"), \
              patch('app.auth.auth_service.auth_env_config.get_oauth_config'), \
-             patch('app.auth.auth_service._validate_and_get_return_url', return_value="http://example.com"), \
-             patch('app.auth.auth_service._build_google_oauth_url', return_value="https://oauth.url"):
+             patch('app.auth.url_validators.validate_and_get_return_url', return_value="http://example.com"), \
+             patch('app.auth.oauth_utils.build_google_oauth_url', return_value="https://oauth.url"):
             request = MagicMock()
             response = await initiate_oauth_login(request, pr="42", return_url="http://example.com")
             assert isinstance(response, RedirectResponse)
@@ -33,7 +33,7 @@ class TestAuthServiceEndpoints:
     @pytest.mark.asyncio
     async def test_login_endpoint_invalid_params(self):
         """Test OAuth login with invalid return URL."""
-        with patch('app.auth.auth_service._validate_and_get_return_url') as mock_validate:
+        with patch('app.auth.url_validators.validate_and_get_return_url') as mock_validate:
             mock_validate.side_effect = HTTPException(status_code=400, detail="Invalid return URL")
             request = MagicMock()
             with pytest.raises(HTTPException):
@@ -47,10 +47,10 @@ class TestAuthServiceEndpoints:
         mock_user_info = {"id": "123", "email": "test@example.com"}
         
         with patch('app.auth.auth_service.auth_session_manager.validate_and_consume_state', return_value=mock_state_data), \
-             patch('app.auth.auth_service._exchange_code_for_tokens', return_value=mock_token_data), \
-             patch('app.auth.auth_service._get_user_info_from_google', return_value=mock_user_info), \
+             patch('app.auth.oauth_utils.exchange_code_for_tokens', return_value=mock_token_data), \
+             patch('app.auth.oauth_utils.get_user_info_from_google', return_value=mock_user_info), \
              patch('app.auth.auth_service.auth_token_service.generate_jwt', return_value="jwt123"), \
-             patch('app.auth.auth_service._build_oauth_callback_response', return_value=RedirectResponse(url="/")):
+             patch('app.auth.auth_response_builders.build_oauth_callback_response', return_value=RedirectResponse(url="/")):
             request = MagicMock()
             response = await handle_oauth_callback(request, "code123", "state123")
             assert isinstance(response, RedirectResponse)
@@ -70,8 +70,8 @@ class TestAuthServiceEndpoints:
         mock_token_data = {"access_token": "token123"}
         mock_user_info = {"id": "123", "email": "test@example.com"}
         
-        with patch('app.auth.auth_service._exchange_code_for_tokens', return_value=mock_token_data), \
-             patch('app.auth.auth_service._get_user_info_from_google', return_value=mock_user_info), \
+        with patch('app.auth.oauth_utils.exchange_code_for_tokens', return_value=mock_token_data), \
+             patch('app.auth.oauth_utils.get_user_info_from_google', return_value=mock_user_info), \
              patch('app.auth.auth_service.auth_token_service.generate_jwt', return_value="jwt123"):
             request = MagicMock()
             request.json = AsyncMock(return_value={"code": "code123"})
@@ -93,8 +93,8 @@ class TestAuthServiceEndpoints:
         """Test successful user logout."""
         mock_claims = {"sub": "123", "email": "test@example.com"}
         with patch('app.auth.auth_service.auth_token_service.validate_jwt', return_value=mock_claims), \
-             patch('app.auth.auth_service._revoke_user_sessions'), \
-             patch('app.auth.auth_service._clear_auth_cookies'):
+             patch('app.auth.auth_service.revoke_user_sessions'), \
+             patch('app.auth.auth_response_builders.clear_auth_cookies'):
             request = MagicMock()
             request.headers = {"Authorization": "Bearer valid_token"}
             response = await logout_user(request)
@@ -104,7 +104,7 @@ class TestAuthServiceEndpoints:
     async def test_logout_endpoint_invalid_token(self):
         """Test logout with invalid token."""
         with patch('app.auth.auth_service.auth_token_service.validate_jwt', return_value=None), \
-             patch('app.auth.auth_service._clear_auth_cookies'):
+             patch('app.auth.auth_response_builders.clear_auth_cookies'):
             request = MagicMock()
             request.headers = {"Authorization": "Bearer invalid_token"}
             response = await logout_user(request)
@@ -113,7 +113,7 @@ class TestAuthServiceEndpoints:
     @pytest.mark.asyncio
     async def test_status_endpoint_success(self):
         """Test successful auth service status check."""
-        with patch('app.auth.auth_service._check_redis_connection', return_value=True):
+        with patch('app.auth.auth_service.check_redis_connection', return_value=True):
             response = await get_auth_service_status()
             assert response["status"] == "healthy"
             assert "redis_connected" in response
@@ -121,7 +121,7 @@ class TestAuthServiceEndpoints:
     @pytest.mark.asyncio
     async def test_status_endpoint_redis_down(self):
         """Test auth service status with Redis down."""
-        with patch('app.auth.auth_service._check_redis_connection', return_value=False):
+        with patch('app.auth.auth_service.check_redis_connection', return_value=False):
             response = await get_auth_service_status()
             assert response["status"] == "healthy"
             assert response["redis_connected"] is False
@@ -131,7 +131,7 @@ class TestAuthServiceEndpoints:
         """Test successful frontend config retrieval."""
         mock_config = {"client_id": "test_client_id"}
         with patch('app.auth.auth_service.auth_env_config.get_frontend_config', return_value=mock_config), \
-             patch('app.auth.auth_service._get_auth_service_url', return_value="http://localhost:8001"):
+             patch('app.auth.url_validators.get_auth_service_url', return_value="http://localhost:8001"):
             response = await get_frontend_auth_config()
             assert "auth_service_url" in response
             assert "login_url" in response
@@ -141,7 +141,7 @@ class TestAuthServiceEndpoints:
         """Test frontend config in PR environment."""
         mock_config = {"client_id": "test_client_id", "use_proxy": True}
         with patch('app.auth.auth_service.auth_env_config.get_frontend_config', return_value=mock_config), \
-             patch('app.auth.auth_service._get_auth_service_url', return_value="https://auth.staging.netrasystems.ai"):
+             patch('app.auth.url_validators.get_auth_service_url', return_value="https://auth.staging.netrasystems.ai"):
             response = await get_frontend_auth_config()
             assert response["auth_service_url"] == "https://auth.staging.netrasystems.ai"
             
