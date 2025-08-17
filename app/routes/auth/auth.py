@@ -8,7 +8,7 @@ from starlette.requests import Request
 
 from app.clients.auth_client import auth_client
 from app.config import settings
-from app.dependencies import get_db_session, get_security_service
+from app.auth_dependencies import get_db_session, get_security_service
 from app.db.models_postgres import User
 from app.schemas.registry import UserCreate, UserCreateOAuth, User as UserSchema
 from app.schemas.Auth import AuthConfigResponse, AuthEndpoints, DevLoginRequest
