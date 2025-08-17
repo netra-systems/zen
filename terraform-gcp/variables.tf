@@ -118,3 +118,33 @@ variable "google_oauth_client_id_staging" {
   type        = string
   default     = ""
 }
+
+variable "enable_cloud_armor" {
+  description = "Enable Cloud Armor security policies"
+  type        = bool
+  default     = false
+}
+
+variable "auth_service_cpu" {
+  description = "Auth Service Cloud Run CPU allocation"
+  type        = string
+  default     = "1"
+}
+
+variable "auth_service_memory" {
+  description = "Auth Service Cloud Run memory allocation"
+  type        = string
+  default     = "512Mi"
+}
+
+variable "auth_service_min_instances" {
+  description = "Auth Service minimum instances"
+  type        = number
+  default     = 1
+}
+
+variable "auth_service_max_instances" {
+  description = "Auth Service maximum instances"
+  type        = number
+  default     = 10
+}

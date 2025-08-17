@@ -1,13 +1,13 @@
 # Unified Test Report
-**Level**: unit | **Time**: 2025-08-16 10:43:13
+**Level**: real_services | **Time**: 2025-08-16 20:23:21
 
 ## ⚠️ Test Failures Detected
 
 ## Current Run Summary
 | Component | Status | Tests | Passed | Failed | Duration |
 |-----------|--------|-------|--------|--------|----------|
-| Backend | ❌ | 0 | 0 | 0 | 10.3s |
-| Frontend | ❌ | 0 | 0 | 0 | 0.5s |
+| Backend | ❌ | 2 | 0 | 0 | 10.6s |
+| Frontend | ⏭️ | 0 | 0 | 0 | 0.0s |
 | E2E | ⏸️ | 0 | 0 | 0 | 0.0s |
 
 ## Failed Tests

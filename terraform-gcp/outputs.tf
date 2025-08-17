@@ -46,10 +46,27 @@ output "database_user" {
   sensitive   = false
 }
 
+output "auth_service_url" {
+  value       = google_cloud_run_service.auth.status[0].url
+  description = "Auth Service URL"
+}
+
+output "auth_service_ip" {
+  value       = google_compute_global_address.auth.address
+  description = "Auth Service Load Balancer IP"
+}
+
+output "auth_service_domain" {
+  value       = var.environment == "production" ? "auth.netrasystems.ai" : "auth.staging.netrasystems.ai"
+  description = "Auth Service domain name"
+}
+
 output "deployment_info" {
   value = {
     frontend_url    = google_cloud_run_service.frontend.status[0].url
     backend_url     = google_cloud_run_service.backend.status[0].url
+    auth_service_url = google_cloud_run_service.auth.status[0].url
+    auth_service_domain = var.environment == "production" ? "auth.netrasystems.ai" : "auth.staging.netrasystems.ai"
     database_ip     = google_sql_database_instance.postgres.public_ip_address
     artifact_registry = "${var.region}-docker.pkg.dev/${var.project_id}/netra-containers"
     project_id      = var.project_id

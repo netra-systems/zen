@@ -178,10 +178,13 @@ class AuthSessionManager:
     
     def _build_state_data(self, pr_number: Optional[str], return_url: str, csrf_token: str) -> StateData:
         """Build OAuth state data."""
-        return {
+        state_data = {
             "csrf_token": csrf_token, "return_url": return_url,
-            "timestamp": int(time.time()), "pr_number": pr_number
+            "timestamp": int(time.time())
         }
+        if pr_number is not None:
+            state_data["pr_number"] = pr_number
+        return state_data
     
     async def _store_state_data(self, state_data: StateData) -> str:
         """Store state data in Redis and return state ID."""
@@ -385,7 +388,7 @@ def _build_standard_callback_response(return_url: str, jwt_token: str) -> Redire
 def _build_oauth_callback_response(state_data: StateData, jwt_token: str, user_info: UserInfo):
     """Build OAuth callback response with redirect."""
     return_url = state_data["return_url"]
-    if state_data["pr_number"]:
+    if state_data.get("pr_number"):
         return _build_pr_environment_response(return_url, jwt_token, user_info, state_data["pr_number"])
     return _build_standard_callback_response(return_url, jwt_token)
 

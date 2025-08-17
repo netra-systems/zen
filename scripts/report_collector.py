@@ -80,6 +80,24 @@ class TestCategorizer:
             "agent": ["agent", "supervisor", "tool"],
             "llm": ["llm", "model", "ai"]
         }
+    
+    def categorize_test(self, test_path: str, test_name: str = "") -> str:
+        """Categorize test based on path and name"""
+        combined_text = f"{test_path} {test_name}".lower()
+        
+        # Check all pattern dictionaries
+        all_patterns = {
+            **self.category_patterns,
+            **self._init_performance_patterns(),
+            **self._init_domain_patterns(),
+            **self._init_specialized_patterns()
+        }
+        
+        for category, patterns in all_patterns.items():
+            if any(pattern in combined_text for pattern in patterns):
+                return category
+        
+        return "unit"  # Default category
 
 
 class TestMetricsCollector:
@@ -121,6 +139,93 @@ class TestMetricsCollector:
         self._extract_frontend_summary(output, metrics)
         
         return self._build_component_data(metrics, test_details, failure_details)
+    
+    def _extract_backend_files(self, output: str, metrics: CompleteTestMetrics) -> None:
+        """Extract backend test files from output"""
+        file_pattern = self.parser.backend_patterns["file"]
+        matches = re.findall(file_pattern, output)
+        metrics.total_files = len(set(matches))
+    
+    def _extract_backend_summary(self, output: str, metrics: CompleteTestMetrics) -> None:
+        """Extract backend test summary from output"""
+        summary_pattern = self.parser.backend_patterns["summary"]
+        for match in re.finditer(summary_pattern, output, re.IGNORECASE):
+            count, status = int(match.group(1)), match.group(2).lower()
+            self._update_metrics_by_status(metrics, status, count)
+    
+    def _update_metrics_by_status(self, metrics: CompleteTestMetrics, status: str, count: int) -> None:
+        """Update metrics based on test status"""
+        if status == "passed":
+            metrics.passed = count
+        elif status in ["failed", "error"]:
+            metrics.failed += count
+        elif status == "skipped":
+            metrics.skipped = count
+        metrics.total_tests = metrics.passed + metrics.failed + metrics.skipped
+    
+    def _extract_backend_tests(self, output: str, test_details: List, failure_details: List) -> None:
+        """Extract individual backend test details"""
+        test_pattern = self.parser.backend_patterns["test"]
+        for match in re.finditer(test_pattern, output):
+            status, file_path, test_name = match.group(1), match.group(2), match.group(3)
+            duration = float(match.group(5)) if match.group(5) else 0.0
+            self._process_test_match(status, file_path, test_name, duration, test_details, failure_details)
+    
+    def _process_test_match(self, status: str, file_path: str, test_name: str, 
+                           duration: float, test_details: List, failure_details: List) -> None:
+        """Process individual test match"""
+        test_detail = TestDetail(
+            name=test_name, file=file_path, status=status.lower(),
+            duration=duration, category=self.categorizer.categorize_test(file_path, test_name)
+        )
+        test_details.append(test_detail)
+        if status.upper() in ["FAILED", "ERROR"]:
+            failure_details.append(FailureDetail(test=test_name, file=file_path, error="Test failed"))
+    
+    def _extract_coverage(self, output: str, metrics: CompleteTestMetrics) -> None:
+        """Extract coverage information from output"""
+        extractor = CoverageExtractor()
+        coverage = extractor.extract_coverage(output)
+        if coverage is not None:
+            metrics.coverage = coverage
+    
+    def _build_component_data(self, metrics: CompleteTestMetrics, test_details: List, 
+                             failure_details: List) -> TestComponentData:
+        """Build component data structure"""
+        categories = self._categorize_tests(test_details)
+        return TestComponentData(
+            metrics=metrics, test_details=test_details,
+            failure_details=failure_details, categories=categories
+        )
+    
+    def _categorize_tests(self, test_details: List) -> CategoryMap:
+        """Categorize tests by type"""
+        categories = create_all_categories()
+        for test in test_details:
+            categories[test.category].append(test)
+        return convert_category_to_dict(categories)
+    
+    def _extract_frontend_files(self, output: str, metrics: CompleteTestMetrics) -> None:
+        """Extract frontend test files from output"""
+        file_pattern = self.parser.frontend_patterns["file"]
+        matches = re.findall(file_pattern, output)
+        metrics.total_files = len(set(match[1] if isinstance(match, tuple) else match for match in matches))
+    
+    def _extract_frontend_summary(self, output: str, metrics: CompleteTestMetrics) -> None:
+        """Extract frontend test summary from output"""
+        summary_pattern = self.parser.frontend_patterns["summary"]
+        match = re.search(summary_pattern, output)
+        if match:
+            metrics.failed, metrics.passed = int(match.group(1)), int(match.group(2))
+            metrics.total_tests = int(match.group(3))
+            metrics.skipped = metrics.total_tests - metrics.passed - metrics.failed
+    
+    def _create_empty_data(self) -> TestComponentData:
+        """Create empty component data"""
+        return TestComponentData(
+            metrics=CompleteTestMetrics(), test_details=[], 
+            failure_details=[], categories={}
+        )
 
 
 class HistoricalDataManager:

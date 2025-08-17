@@ -46,8 +46,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 load_dotenv()
 
 # Import test framework modules
-from test_framework import UnifiedTestRunner, TEST_LEVELS, SHARD_MAPPINGS, TestDiscovery
-from test_framework.test_config import configure_staging_environment, configure_real_llm
+from .runner import UnifiedTestRunner
+from .test_config import TEST_LEVELS, SHARD_MAPPINGS, configure_staging_environment, configure_real_llm
+from .test_discovery import TestDiscovery
 
 def handle_test_discovery(args):
     """Handle test discovery and listing."""

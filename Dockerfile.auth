@@ -1,0 +1,48 @@
+# Dockerfile.auth - Dedicated Auth Service Container
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy auth-specific code
+COPY app/auth/ ./app/auth/
+COPY app/routes/auth/ ./app/routes/auth/
+COPY app/schemas/Auth.py ./app/schemas/
+COPY app/schemas/Token.py ./app/schemas/
+COPY app/schemas/registry.py ./app/schemas/
+COPY app/db/models_postgres.py ./app/db/
+COPY app/db/postgres.py ./app/db/
+COPY app/services/security_service.py ./app/services/
+COPY app/services/user_service.py ./app/services/
+COPY app/core/exceptions_auth.py ./app/core/
+COPY app/core/interfaces_auth.py ./app/core/
+COPY app/dependencies.py ./app/
+COPY app/config.py ./app/
+COPY app/logging_config.py ./app/
+
+# Copy the auth service main file
+COPY auth_service_main.py ./main.py
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Run the auth service
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "2"]
