@@ -158,6 +158,19 @@
                 <id>hook-integration-testing</id>
             </learning_ids>
         </category>
+        <category>
+            <name>Deployment</name>
+            <file>learnings/deployment.xml</file>
+            <path>SPEC/learnings/deployment.xml</path>
+            <learning_count>5</learning_count>
+            <learning_ids>
+                <id>staging-setup</id>
+                <id>docker-builds</id>
+                <id>terraform-backend</id>
+                <id>cloud-armor-issues</id>
+                <id>iam-restrictions</id>
+            </learning_ids>
+        </category>
     </categories>
     
     <usage>
@@ -168,7 +181,7 @@
     </usage>
     
     <statistics>
-        <total_categories>13</total_categories>
-        <total_learnings>45</total_learnings>
+        <total_categories>14</total_categories>
+        <total_learnings>50</total_learnings>
     </statistics>
 </specification>
