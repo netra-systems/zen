@@ -9,21 +9,33 @@
     <primary-spec>
         <description>AIOps Closed-Loop Platform that captures 20% of AI cost savings</description>
         <goals>
-            <goal priority="critical"></goal>
+            <goal priority="critical">MUST LEARN **ALL** Requirements Relevant to your work.</goal>
             <goal priority="critical">The Coherence of the system working in harmony</goal>
+            <goal priority="critical">ONE UNIFIED SYSTEM. All UPDATES ARE TO CREATE A SINGLE UNIFIED SYSTEM 
+             KEEPING THE BEST OF ALL CURRENT WORK, COMPLETE INTEGRATION HARMONY.</goal>
+            <goal>COMPLETE ALL WORK </goal>
         </goals>
     </primary-spec>
     
     <sections>
-        <section id="PLANS" order="1">
-            <title>MUST READ PLANS</title>
-            <requirements>
-                <requirement>Read APEX/Plans/APEX_AGENT_SPAWNING_GUIDE.md</requirement>
-                <requirement>Read APEX/Plans/APEX_COMPLETE_IMPLEMENTATION_PLAN.md</requirement>
-                <requirement>Read APEX/Plans/APEX_MIGRATION_PLAN.md</requirement>
-                <requirement>Read APEX/Plans/APEX_QUICK_START_GUIDE.md</requirement>
-                <requirement>Read APEX/Plans/APEX_TECHNICAL_ARCHITECTURE.md</requirement>
-                <requirement type="optional">APEX/Plans/Background-Context/*</requirement>
+        <section id="Requirements" order="1">
+            <title>MUST READ Requirements</title>
+            <requirements type="PLANS">
+                <requirement order="0" type="ALWAYS">ULTRA DEEP THINK ALWAYS</requirement>
+                <requirement order="1">Read APEX/Plans/APEX_AGENT_SPAWNING_GUIDE.md</requirement>
+                <requirement order="2">Read APEX/Plans/APEX_COMPLETE_IMPLEMENTATION_PLAN.md</requirement>
+                <requirement order="3">Read APEX/Plans/APEX_MIGRATION_PLAN.md</requirement>
+                <requirement order="4">Read APEX/Plans/APEX_QUICK_START_GUIDE.md</requirement>
+                <requirement order="5">Read APEX/Plans/APEX_TECHNICAL_ARCHITECTURE.md</requirement>
+                <requirement order="6">Read SPEC/conventions.xml</requirement>
+                <requirement order="7">Read SPEC/type_safety.xml</requirement>             
+                <requirement order="8">Read SPEC/*.xml</requirement>
+                <requirement order="12" type="optional">APEX/Plans/Background-Context/*</requirement>
+            </requirements>
+
+            <requirements type="REPORTING">
+                <requirement order="0" type="ALWAYS">ALWAYS SAVE YOUR STATUS AND WORK REPORTS in APEX/WIP/[your-team-number]/[you]/x</requirement>
+                <requirement order="1" type="As needed">Read APEX/WIP/* to Cordinate with other teams</requirement>
             </requirements>
         </section>
     
