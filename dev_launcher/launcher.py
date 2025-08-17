@@ -475,7 +475,13 @@ class DevLauncher:
     def start_auth_service(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """Start the auth service."""
         self._print("🔐", "AUTH", "Starting auth service...")
-        port = int(os.getenv("AUTH_SERVICE_PORT", "8081"))
+        # Use dynamic port for auth service if configured
+        if self.config.dynamic_ports:
+            from .utils import find_available_port
+            port = find_available_port(8081, 8090)
+            os.environ['AUTH_SERVICE_PORT'] = str(port)
+        else:
+            port = int(os.getenv("AUTH_SERVICE_PORT", "8081"))
         
         # Build command for auth service
         cmd = [
@@ -485,21 +491,23 @@ class DevLauncher:
             "--port", str(port)
         ]
         
-        if not self.config.no_backend_reload:
+        if self.config.backend_reload:
             cmd.append("--reload")
         
         # Create environment with auth service config
-        env = self._create_process_env()
+        env = self._create_backend_env(port)
         env["SERVICE_NAME"] = "auth-service"
         env["PORT"] = str(port)
         env["AUTH_SERVICE_URL"] = f"http://localhost:{port}"
         
         try:
-            process = self._start_process(cmd, env, "auth-service")
+            from .utils import create_subprocess
+            process = create_subprocess(cmd, env=env)
             if process:
-                streamer = self._create_log_streamer(process, "AUTH", "🔐")
-                if streamer:
-                    streamer.start()
+                from .log_streamer import LogStreamer
+                from .utils import Colors
+                streamer = LogStreamer(process, "AUTH", Colors.MAGENTA, verbose=self.config.verbose)
+                streamer.start()
                 self._print("✅", "OK", f"Auth service started on port {port}")
                 return process, streamer
         except Exception as e:

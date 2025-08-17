@@ -48,25 +48,38 @@ class QueuedMessage:
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization"""
+        base_data = self._get_base_dict_data()
+        timestamp_data = self._get_timestamp_dict_data()
+        return {**base_data, **timestamp_data, "error": self.error}
+
+    def _get_base_dict_data(self) -> Dict[str, Any]:
+        """Get basic dictionary data for serialization."""
         return {
-            "id": self.id,
-            "user_id": self.user_id,
-            "type": self.type,
-            "payload": self.payload,
-            "priority": self.priority.value,
-            "status": self.status.value,
-            "retry_count": self.retry_count,
-            "max_retries": self.max_retries,
+            "id": self.id, "user_id": self.user_id, "type": self.type,
+            "payload": self.payload, "priority": self.priority.value,
+            "status": self.status.value, "retry_count": self.retry_count,
+            "max_retries": self.max_retries
+        }
+
+    def _get_timestamp_dict_data(self) -> Dict[str, Any]:
+        """Get timestamp data for serialization."""
+        return {
             "created_at": self.created_at.isoformat(),
             "processing_started_at": self.processing_started_at.isoformat() if self.processing_started_at else None,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
-            "error": self.error
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None
         }
     
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'QueuedMessage':
         """Create from dictionary"""
         msg = cls()
+        cls._set_basic_fields(msg, data)
+        cls._set_timestamp_fields(msg, data)
+        return msg
+
+    @classmethod
+    def _set_basic_fields(cls, msg: 'QueuedMessage', data: Dict[str, Any]) -> None:
+        """Set basic message fields from dictionary data."""
         msg.id = data.get("id", str(uuid.uuid4()))
         msg.user_id = data.get("user_id", "")
         msg.type = data.get("type", "")
@@ -75,11 +88,14 @@ class QueuedMessage:
         msg.status = MessageStatus(data.get("status", "pending"))
         msg.retry_count = data.get("retry_count", 0)
         msg.max_retries = data.get("max_retries", 3)
+        msg.error = data.get("error")
+
+    @classmethod
+    def _set_timestamp_fields(cls, msg: 'QueuedMessage', data: Dict[str, Any]) -> None:
+        """Set timestamp fields from dictionary data."""
         msg.created_at = datetime.fromisoformat(data["created_at"]) if "created_at" in data else datetime.now(UTC)
         msg.processing_started_at = datetime.fromisoformat(data["processing_started_at"]) if data.get("processing_started_at") else None
         msg.completed_at = datetime.fromisoformat(data["completed_at"]) if data.get("completed_at") else None
-        msg.error = data.get("error")
-        return msg
 
 class MessageQueue:
     """Manages WebSocket message queue with Redis backing"""
@@ -100,33 +116,46 @@ class MessageQueue:
     async def enqueue(self, message: QueuedMessage) -> bool:
         """Add message to the queue"""
         try:
-            queue_key = self._get_queue_key(message.priority)
-            message_data = json.dumps(message.to_dict())
-            
-            await self.redis.lpush(queue_key, message_data)
-            
+            await self._add_message_to_redis_queue(message)
             await self._update_message_status(message.id, MessageStatus.PENDING)
-            
-            logger.info(f"Enqueued message {message.id} of type {message.type} with priority {message.priority.name}")
+            self._log_enqueue_success(message)
             return True
-            
         except Exception as e:
             logger.error(f"Failed to enqueue message: {e}")
             return False
+
+    async def _add_message_to_redis_queue(self, message: QueuedMessage) -> None:
+        """Add message to Redis queue."""
+        queue_key = self._get_queue_key(message.priority)
+        message_data = json.dumps(message.to_dict())
+        await self.redis.lpush(queue_key, message_data)
+
+    def _log_enqueue_success(self, message: QueuedMessage) -> None:
+        """Log successful message enqueue."""
+        logger.info(f"Enqueued message {message.id} of type {message.type} with priority {message.priority.name}")
     
     async def process_queue(self, worker_count: int = 3) -> None:
         """Start processing messages from the queue"""
         if self._running:
             logger.warning("Queue processing already running")
             return
-        
+        await self._start_queue_processing(worker_count)
+
+    async def _start_queue_processing(self, worker_count: int) -> None:
+        """Start queue processing with workers."""
         self._running = True
         logger.info(f"Starting message queue processing with {worker_count} workers")
-        
+        self._create_workers(worker_count)
+        await self._run_workers_until_completion()
+
+    def _create_workers(self, worker_count: int) -> None:
+        """Create worker tasks for queue processing."""
         for i in range(worker_count):
             worker = asyncio.create_task(self._worker(i))
             self._workers.append(worker)
-        
+
+    async def _run_workers_until_completion(self) -> None:
+        """Run workers until completion or cancellation."""
         try:
             await asyncio.gather(*self._workers)
         except asyncio.CancelledError:
@@ -149,81 +178,111 @@ class MessageQueue:
     async def _worker(self, worker_id: int) -> None:
         """Worker coroutine to process messages"""
         logger.info(f"Worker {worker_id} started")
-        
-        while self._running:
-            try:
-                message = await self._get_next_message()
-                
-                if message:
-                    await self._process_message(message)
-                else:
-                    await asyncio.sleep(0.1)
-                    
-            except Exception as e:
-                logger.error(f"Worker {worker_id} error: {e}")
-                await asyncio.sleep(1)
-        
+        await self._run_worker_loop(worker_id)
         logger.info(f"Worker {worker_id} stopped")
+
+    async def _run_worker_loop(self, worker_id: int) -> None:
+        """Run the main worker processing loop."""
+        while self._running:
+            await self._worker_iteration(worker_id)
+
+    async def _worker_iteration(self, worker_id: int) -> None:
+        """Execute one iteration of worker processing."""
+        try:
+            message = await self._get_next_message()
+            await self._handle_worker_message(message)
+        except Exception as e:
+            logger.error(f"Worker {worker_id} error: {e}")
+            await asyncio.sleep(1)
+
+    async def _handle_worker_message(self, message: Optional[QueuedMessage]) -> None:
+        """Handle message processing or idle state."""
+        if message:
+            await self._process_message(message)
+        else:
+            await asyncio.sleep(0.1)
     
     async def _get_next_message(self) -> Optional[QueuedMessage]:
         """Get the next message from the queue"""
         try:
-            for priority in [MessagePriority.CRITICAL, MessagePriority.HIGH, 
-                           MessagePriority.NORMAL, MessagePriority.LOW]:
-                queue_key = self._get_queue_key(priority)
-                
-                message_data = await self.redis.rpop(queue_key)
-                if message_data:
-                    return QueuedMessage.from_dict(json.loads(message_data))
-            
-            retry_messages = await self._get_retry_messages()
-            return retry_messages[0] if retry_messages else None
-            
+            priority_message = await self._get_priority_message()
+            if priority_message:
+                return priority_message
+            return await self._get_retry_message()
         except Exception as e:
             logger.error(f"Error getting next message: {e}")
             return None
+
+    async def _get_priority_message(self) -> Optional[QueuedMessage]:
+        """Get message from priority queues."""
+        for priority in [MessagePriority.CRITICAL, MessagePriority.HIGH, 
+                        MessagePriority.NORMAL, MessagePriority.LOW]:
+            queue_key = self._get_queue_key(priority)
+            message_data = await self.redis.rpop(queue_key)
+            if message_data:
+                return QueuedMessage.from_dict(json.loads(message_data))
+        return None
+
+    async def _get_retry_message(self) -> Optional[QueuedMessage]:
+        """Get first available retry message."""
+        retry_messages = await self._get_retry_messages()
+        return retry_messages[0] if retry_messages else None
     
     async def _process_message(self, message: QueuedMessage) -> None:
         """Process a single message"""
         try:
-            message.status = MessageStatus.PROCESSING
-            message.processing_started_at = datetime.now(UTC)
-            await self._update_message_status(message.id, MessageStatus.PROCESSING)
-            
-            handler = self.handlers.get(message.type)
-            if not handler:
-                raise ValueError(f"No handler registered for message type: {message.type}")
-            
-            await asyncio.wait_for(
-                handler(message.user_id, message.payload),
-                timeout=self.processing_timeout
-            )
-            
-            message.status = MessageStatus.COMPLETED
-            message.completed_at = datetime.now(UTC)
-            await self._update_message_status(message.id, MessageStatus.COMPLETED)
-            
-            logger.info(f"Successfully processed message {message.id}")
-            
+            await self._start_message_processing(message)
+            await self._execute_message_handler(message)
+            await self._complete_message_processing(message)
         except asyncio.TimeoutError:
             await self._handle_failed_message(message, "Processing timeout")
         except Exception as e:
             await self._handle_failed_message(message, str(e))
+
+    async def _start_message_processing(self, message: QueuedMessage) -> None:
+        """Initialize message processing state."""
+        message.status = MessageStatus.PROCESSING
+        message.processing_started_at = datetime.now(UTC)
+        await self._update_message_status(message.id, MessageStatus.PROCESSING)
+
+    async def _execute_message_handler(self, message: QueuedMessage) -> None:
+        """Execute the appropriate handler for the message."""
+        handler = self.handlers.get(message.type)
+        if not handler:
+            raise ValueError(f"No handler registered for message type: {message.type}")
+        await asyncio.wait_for(
+            handler(message.user_id, message.payload),
+            timeout=self.processing_timeout
+        )
+
+    async def _complete_message_processing(self, message: QueuedMessage) -> None:
+        """Mark message as completed."""
+        message.status = MessageStatus.COMPLETED
+        message.completed_at = datetime.now(UTC)
+        await self._update_message_status(message.id, MessageStatus.COMPLETED)
+        logger.info(f"Successfully processed message {message.id}")
     
     async def _handle_failed_message(self, message: QueuedMessage, error: str) -> None:
         """Handle a failed message"""
         message.error = error
         message.retry_count += 1
-        
         if message.retry_count < message.max_retries:
-            message.status = MessageStatus.RETRYING
-            await self._schedule_retry(message)
-            logger.warning(f"Message {message.id} failed, scheduling retry {message.retry_count}/{message.max_retries}: {error}")
+            await self._handle_retry_message(message, error)
         else:
-            message.status = MessageStatus.FAILED
-            await self._update_message_status(message.id, MessageStatus.FAILED, error)
-            await self._send_failure_notification(message)
-            logger.error(f"Message {message.id} permanently failed after {message.max_retries} retries: {error}")
+            await self._handle_permanent_failure(message, error)
+
+    async def _handle_retry_message(self, message: QueuedMessage, error: str) -> None:
+        """Handle message that can be retried."""
+        message.status = MessageStatus.RETRYING
+        await self._schedule_retry(message)
+        logger.warning(f"Message {message.id} failed, scheduling retry {message.retry_count}/{message.max_retries}: {error}")
+
+    async def _handle_permanent_failure(self, message: QueuedMessage, error: str) -> None:
+        """Handle permanently failed message."""
+        message.status = MessageStatus.FAILED
+        await self._update_message_status(message.id, MessageStatus.FAILED, error)
+        await self._send_failure_notification(message)
+        logger.error(f"Message {message.id} permanently failed after {message.max_retries} retries: {error}")
     
     async def _schedule_retry(self, message: QueuedMessage) -> None:
         """Schedule a message for retry"""
@@ -285,38 +344,46 @@ class MessageQueue:
     
     async def get_queue_stats(self) -> Dict[str, Any]:
         """Get queue statistics"""
-        stats = {
-            "queues": {},
-            "total_pending": 0,
-            "processing": 0,
-            "completed": 0,
-            "failed": 0
-        }
-        
+        stats = self._init_empty_stats()
         try:
-            for priority in MessagePriority:
-                queue_key = self._get_queue_key(priority)
-                queue_length = await self.redis.llen(queue_key)
-                stats["queues"][priority.name] = queue_length
-                stats["total_pending"] += queue_length
-            
-            pattern = "message_status:*"
-            keys = await self.redis.keys(pattern)
-            
-            for key in keys:
-                status_data = await self.redis.get(key)
-                if status_data:
-                    status = json.loads(status_data)["status"]
-                    if status == "processing":
-                        stats["processing"] += 1
-                    elif status == "completed":
-                        stats["completed"] += 1
-                    elif status == "failed":
-                        stats["failed"] += 1
-            
+            await self._collect_queue_stats(stats)
+            await self._collect_status_stats(stats)
         except Exception as e:
             logger.error(f"Error getting queue stats: {e}")
-        
         return stats
+
+    def _init_empty_stats(self) -> Dict[str, Any]:
+        """Initialize empty statistics dictionary."""
+        return {
+            "queues": {}, "total_pending": 0,
+            "processing": 0, "completed": 0, "failed": 0
+        }
+
+    async def _collect_queue_stats(self, stats: Dict[str, Any]) -> None:
+        """Collect queue length statistics."""
+        for priority in MessagePriority:
+            queue_key = self._get_queue_key(priority)
+            queue_length = await self.redis.llen(queue_key)
+            stats["queues"][priority.name] = queue_length
+            stats["total_pending"] += queue_length
+
+    async def _collect_status_stats(self, stats: Dict[str, Any]) -> None:
+        """Collect message status statistics."""
+        pattern = "message_status:*"
+        keys = await self.redis.keys(pattern)
+        for key in keys:
+            await self._process_status_key(key, stats)
+
+    async def _process_status_key(self, key: str, stats: Dict[str, Any]) -> None:
+        """Process individual status key for statistics."""
+        status_data = await self.redis.get(key)
+        if status_data:
+            status = json.loads(status_data)["status"]
+            self._increment_status_count(stats, status)
+
+    def _increment_status_count(self, stats: Dict[str, Any], status: str) -> None:
+        """Increment count for specific status type."""
+        if status in ["processing", "completed", "failed"]:
+            stats[status] += 1
 
 message_queue = MessageQueue()

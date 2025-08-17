@@ -49,16 +49,23 @@ class LLMCacheManager:
         """Set value in cache with eviction."""
         async with self._lock:
             await self._ensure_capacity()
-            self._cache[key] = {
-                'value': value,
-                'created': datetime.now()
-            }
-            self._access_times[key] = datetime.now()
-            # Only add to weak refs if object supports it
-            try:
-                self._weak_refs[key] = value
-            except TypeError:
-                pass  # Strings and primitives can't be weakly referenced
+            self._store_cache_entry(key, value)
+            self._update_access_time(key)
+            self._try_add_weak_ref(key, value)
+    
+    def _store_cache_entry(self, key: str, value: Any) -> None:
+        """Store cache entry with timestamp."""
+        self._cache[key] = {
+            'value': value,
+            'created': datetime.now()
+        }
+    
+    def _try_add_weak_ref(self, key: str, value: Any) -> None:
+        """Try to add weak reference if supported."""
+        try:
+            self._weak_refs[key] = value
+        except TypeError:
+            pass  # Strings and primitives can't be weakly referenced
     
     def _is_expired(self, key: str) -> bool:
         """Check if cache entry is expired."""
@@ -87,12 +94,24 @@ class LLMCacheManager:
         """Evict least recently used entries."""
         if not self._access_times:
             return
-        sorted_keys = sorted(
+        sorted_keys = self._get_sorted_keys_by_access()
+        evict_count = self._calculate_eviction_count()
+        self._evict_entries(sorted_keys[:evict_count])
+    
+    def _get_sorted_keys_by_access(self) -> list:
+        """Get keys sorted by access time."""
+        return sorted(
             self._access_times.keys(),
             key=lambda k: self._access_times[k]
         )
-        evict_count = len(self._cache) - self.max_size + 1
-        for key in sorted_keys[:evict_count]:
+    
+    def _calculate_eviction_count(self) -> int:
+        """Calculate how many entries to evict."""
+        return len(self._cache) - self.max_size + 1
+    
+    def _evict_entries(self, keys_to_evict: list) -> None:
+        """Evict specified cache entries."""
+        for key in keys_to_evict:
             self._remove_entry(key)
             logger.debug(f"Evicted cache entry: {key}")
     

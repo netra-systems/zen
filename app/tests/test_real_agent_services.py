@@ -61,7 +61,7 @@ class TestRealAgentServices:
             return wrapper
         return decorator
     
-    @pytest.fixture(scope="class")
+    @pytest.fixture(scope="function")
     async def test_user_data(self):
         """Create test user data for real service tests"""
         return {
@@ -70,12 +70,12 @@ class TestRealAgentServices:
             "name": "Test User Real Services"
         }
     
-    @pytest.fixture(scope="class")
+    @pytest.fixture(scope="function")
     async def agent_service(self):
         """Initialize real agent service for testing"""
         return AgentService()
     
-    @pytest.fixture(scope="class")
+    @pytest.fixture(scope="function")
     async def llm_manager(self):
         """Initialize real LLM manager for testing"""
         return LLMManager()

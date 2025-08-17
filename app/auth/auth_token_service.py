@@ -108,5 +108,9 @@ class AuthTokenService:
             self._handle_jwt_expired()
             return None
         except jwt.InvalidTokenError as e:
-            self._handle_jwt_invalid(e)
-            return None
+            return self._handle_invalid_jwt(e)
+    
+    def _handle_invalid_jwt(self, error: jwt.InvalidTokenError) -> None:
+        """Handle invalid JWT token error."""
+        self._handle_jwt_invalid(error)
+        return None

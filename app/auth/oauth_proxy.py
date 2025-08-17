@@ -61,11 +61,15 @@ class OAuthProxyService:
         """Decode and validate state parameter."""
         try:
             state_data = self._decode_state_data(state)
-            self._validate_state_timestamp(state_data)
-            await self._validate_and_consume_csrf(state_data)
+            await self._perform_state_validations(state_data)
             return state_data
         except Exception as e:
             self._handle_decode_error(e)
+    
+    async def _perform_state_validations(self, state_data: Dict[str, Any]) -> None:
+        """Perform all state validations."""
+        self._validate_state_timestamp(state_data)
+        await self._validate_and_consume_csrf(state_data)
     
     def _decode_state_data(self, state: str) -> Dict[str, Any]:
         """Decode state data from base64."""
@@ -85,13 +89,17 @@ class OAuthProxyService:
 
     async def _validate_and_consume_csrf(self, state_data: Dict[str, Any]) -> None:
         """Validate and consume CSRF token."""
-        pr_number = state_data.get("pr_number")
-        csrf_token = state_data.get("csrf_token")
-        csrf_key = self._build_csrf_key(pr_number, csrf_token)
+        csrf_key = self._extract_csrf_key_from_state(state_data)
         csrf_valid = await self.redis.get(csrf_key)
         if not csrf_valid:
             raise ValueError("Invalid CSRF token")
         await self.redis.delete(csrf_key)
+    
+    def _extract_csrf_key_from_state(self, state_data: Dict[str, Any]) -> str:
+        """Extract CSRF key from state data."""
+        pr_number = state_data.get("pr_number")
+        csrf_token = state_data.get("csrf_token")
+        return self._build_csrf_key(pr_number, csrf_token)
     
     async def store_token(self, pr_number: str, token_data: Dict[str, Any]) -> str:
         """Store OAuth token temporarily and return transfer key."""

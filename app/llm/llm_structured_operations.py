@@ -59,8 +59,14 @@ class LLMStructuredOperations:
             return await self._generate_structured_response(prompt, llm_config_name, schema, 
                                                           cache_key, use_cache, **kwargs)
         except Exception as e:
-            return await self._fallback_structured_parse(prompt, llm_config_name, schema, 
-                                                       use_cache, e)
+            return await self._handle_generation_failure(prompt, llm_config_name, schema, use_cache, e)
+    
+    async def _handle_generation_failure(self, prompt: str, llm_config_name: str, 
+                                       schema: Type[T], use_cache: bool, 
+                                       original_error: Exception) -> T:
+        """Handle structured generation failure."""
+        return await self._fallback_structured_parse(prompt, llm_config_name, schema, 
+                                                   use_cache, original_error)
     
     async def _generate_structured_response(self, prompt: str, llm_config_name: str, 
                                           schema: Type[T], cache_key: str, 
@@ -69,9 +75,15 @@ class LLMStructuredOperations:
         structured_llm = self.get_structured_llm(llm_config_name, schema, **kwargs)
         response = await structured_llm.ainvoke(prompt)
         final_response = self._process_llm_response(response, schema)
-        await self._cache_structured_if_needed(use_cache, prompt, final_response, 
-                                             cache_key, llm_config_name)
+        await self._handle_response_caching(use_cache, prompt, final_response, cache_key, llm_config_name)
         return final_response
+    
+    async def _handle_response_caching(self, use_cache: bool, prompt: str, 
+                                     response: T, cache_key: str, 
+                                     llm_config_name: str) -> None:
+        """Handle response caching if needed."""
+        await self._cache_structured_if_needed(use_cache, prompt, response, 
+                                             cache_key, llm_config_name)
     
     def _process_llm_response(self, response: Any, schema: Type[T]) -> T:
         """Process LLM response and convert to structured format."""
@@ -85,13 +97,22 @@ class LLMStructuredOperations:
         """Fallback to text generation and JSON parsing."""
         logger.error(f"Structured generation failed: {original_error}")
         try:
-            text_response = await self.core.ask_llm(prompt, llm_config_name, use_cache)
-            # Ensure response is proper JSON before parsing
-            json_response = ensure_agent_response_is_json(text_response)
-            return schema(**json_response)
+            return await self._try_text_fallback(prompt, llm_config_name, schema, use_cache)
         except Exception as parse_error:
-            logger.error(f"Fallback parsing also failed: {parse_error}")
-            raise original_error
+            return self._handle_fallback_failure(parse_error, original_error)
+    
+    async def _try_text_fallback(self, prompt: str, llm_config_name: str, 
+                               schema: Type[T], use_cache: bool) -> T:
+        """Try text generation fallback."""
+        text_response = await self.core.ask_llm(prompt, llm_config_name, use_cache)
+        json_response = ensure_agent_response_is_json(text_response)
+        return schema(**json_response)
+    
+    def _handle_fallback_failure(self, parse_error: Exception, 
+                               original_error: Exception) -> None:
+        """Handle fallback parsing failure."""
+        logger.error(f"Fallback parsing also failed: {parse_error}")
+        raise original_error
     
     async def _cache_structured_if_needed(self, use_cache: bool, prompt: str, 
                                         response: T, cache_key: str, 

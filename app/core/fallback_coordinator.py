@@ -121,6 +121,15 @@ class FallbackCoordinator:
         await self.health_monitor.update_circuit_breaker_status(agent_name)
         await self.health_monitor.update_system_health()
 
+    async def _execute_with_error_handling(self, handler, operation, operation_name, agent_name, fallback_type) -> Any:
+        """Execute operation with error handling and monitoring updates."""
+        try:
+            result = await self._execute_operation_with_handler(handler, operation, operation_name, agent_name, fallback_type)
+            return await self._handle_operation_success(agent_name, result)
+        except Exception as e:
+            await self._handle_operation_failure(agent_name, e)
+            raise e
+
     async def execute_with_coordination(
         self, agent_name: str, operation: Callable, operation_name: str, fallback_type: str = "general"
     ) -> Any:
@@ -132,12 +141,7 @@ class FallbackCoordinator:
         if cascade_result is not None:
             return cascade_result
         handler = self._validate_agent_handler(agent_name)
-        try:
-            result = await self._execute_operation_with_handler(handler, operation, operation_name, agent_name, fallback_type)
-            return await self._handle_operation_success(agent_name, result)
-        except Exception as e:
-            await self._handle_operation_failure(agent_name, e)
-            raise e
+        return await self._execute_with_error_handling(handler, operation, operation_name, agent_name, fallback_type)
     
     def get_system_status(self) -> Dict[str, Any]:
         """Get comprehensive system fallback status"""

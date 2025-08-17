@@ -142,66 +142,72 @@ def reset_clickhouse_instance(config: Dict[str, Any], skip_confirmation: bool = 
         print(f"\n[ERROR] Unexpected error: {e}")
         return False
 
-def main():
-    """Main function to reset ClickHouse instances."""
+def _print_tool_header():
+    """Print the tool header."""
     print("=" * 60)
     print("ClickHouse Database Reset Tool (Cloud & Local)")
     print("=" * 60)
-    
-    # Ask which instances to reset
+
+def _display_menu_options():
+    """Display menu options and get user choice."""
     print("\nWhich ClickHouse instance(s) to reset?")
     print("1. Cloud only")
     print("2. Local only")
     print("3. Both Cloud and Local")
     print("4. Exit")
-    
-    choice = input("\nEnter choice (1-4): ").strip()
-    
-    if choice == '4':
-        print("Exiting...")
-        return
-    
-    # Determine which configs to use
-    configs = []
-    if choice == '1':
-        configs = [CLOUD_CONFIG]
-    elif choice == '2':
-        configs = [LOCAL_CONFIG]
-    elif choice == '3':
-        configs = [CLOUD_CONFIG, LOCAL_CONFIG]
-    else:
-        print("Invalid choice. Exiting...")
-        return
-    
-    # Ask for batch confirmation
+    return input("\nEnter choice (1-4): ").strip()
+
+def _select_configs_by_choice(choice: str):
+    """Select configurations based on user choice."""
+    if choice == '1': return [CLOUD_CONFIG]
+    elif choice == '2': return [LOCAL_CONFIG]
+    elif choice == '3': return [CLOUD_CONFIG, LOCAL_CONFIG]
+    return []
+
+def _show_confirmation_dialog(configs):
+    """Show confirmation dialog for selected instances."""
     print("\n" + "=" * 60)
     print("CONFIRMATION")
     print("=" * 60)
     print("This will DROP ALL TABLES in the selected instance(s):")
-    for config in configs:
-        print(f"  - {config['name']} ({config['host']})")
-    
+    for config in configs: print(f"  - {config['name']} ({config['host']})")
+
+def _get_batch_confirmation_choice():
+    """Get batch confirmation choice from user."""
     batch_confirm = input("\nProceed with ALL selected instances? (yes/no): ")
     skip_individual = batch_confirm.lower() == 'yes'
-    
-    if not skip_individual:
-        print("\nWill ask for confirmation for each instance...")
-    
-    # Process each instance
+    if not skip_individual: print("\nWill ask for confirmation for each instance...")
+    return skip_individual
+
+def _execute_instance_resets(configs, skip_individual):
+    """Execute reset for all selected instances."""
     results = []
     for config in configs:
         success = reset_clickhouse_instance(config, skip_confirmation=skip_individual)
         results.append((config['name'], success))
-    
-    # Summary
+    return results
+
+def _display_operation_summary(results):
+    """Display the final operation summary."""
     print("\n" + "=" * 60)
     print("SUMMARY")
     print("=" * 60)
     for name, success in results:
         status = "[SUCCESS]" if success else "[FAILED/SKIPPED]"
         print(f"{status} {name}")
-    
     print("\nOperation complete!")
+
+def main():
+    """Main function to reset ClickHouse instances."""
+    _print_tool_header()
+    choice = _display_menu_options()
+    if choice == '4': print("Exiting..."); return
+    configs = _select_configs_by_choice(choice)
+    if not configs: print("Invalid choice. Exiting..."); return
+    _show_confirmation_dialog(configs)
+    skip_individual = _get_batch_confirmation_choice()
+    results = _execute_instance_resets(configs, skip_individual)
+    _display_operation_summary(results)
 
 if __name__ == "__main__":
     main()

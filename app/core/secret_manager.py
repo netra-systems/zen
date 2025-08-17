@@ -18,91 +18,122 @@ class SecretManager:
     def __init__(self):
         self._logger = logger
         self._client: Optional[secretmanager.SecretManagerServiceClient] = None
-        # Use numerical project ID for Secret Manager (required by API)
-        # Staging: Use numerical ID if provided, otherwise use project name
+        self._project_id = self._initialize_project_id()
+        self._log_initialization_status()
+    
+    def _initialize_project_id(self) -> str:
+        """Initialize project ID based on environment."""
         environment = os.environ.get("ENVIRONMENT", "development").lower()
-        
-        # Set project ID based on environment
         if environment == "staging":
-            # For staging, use staging numerical ID
-            self._project_id = os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
-                                             os.environ.get("SECRET_MANAGER_PROJECT_ID",
-                                             "701982941522"))  # Default to staging numerical ID
-        else:
-            # For production or other environments
-            self._project_id = os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
-                                             os.environ.get("SECRET_MANAGER_PROJECT_ID",
-                                             "304612253870"))  # Default to production numerical ID
-        
-        # Log which project we're using for Secret Manager
+            return self._get_staging_project_id()
+        return self._get_production_project_id()
+    
+    def _get_staging_project_id(self) -> str:
+        """Get staging project ID with fallbacks."""
+        return os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
+                             os.environ.get("SECRET_MANAGER_PROJECT_ID",
+                             "701982941522"))
+    
+    def _get_production_project_id(self) -> str:
+        """Get production project ID with fallbacks."""
+        return os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
+                             os.environ.get("SECRET_MANAGER_PROJECT_ID",
+                             "304612253870"))
+    
+    def _log_initialization_status(self) -> None:
+        """Log Secret Manager initialization status."""
+        environment = os.environ.get("ENVIRONMENT", "development").lower()
         if environment in ["staging", "production"] or os.environ.get("K_SERVICE"):
             self._logger.info(f"Secret Manager initialized with project ID: {self._project_id} for environment: {environment}")
         
     def load_secrets(self) -> Dict[str, Any]:
         """Load secrets from Secret Manager with environment variables as base, Google Secrets supersede."""
         environment = os.environ.get("ENVIRONMENT", "development").lower()
-        
-        # Check if we should load from Secret Manager
-        should_load_secrets = (
-            os.environ.get("LOAD_SECRETS", "false").lower() == "true" or
-            environment == "staging" or
-            environment == "production" or
-            os.environ.get("K_SERVICE")  # Running in Cloud Run
-        )
-        
-        # Start with environment variables as base
+        should_load_secrets = self._should_load_from_secret_manager(environment)
+        secrets = self._load_base_environment_secrets(environment)
+        return self._merge_google_secrets_if_needed(secrets, should_load_secrets, environment)
+    
+    def _should_load_from_secret_manager(self, environment: str) -> bool:
+        """Determine if we should load from Secret Manager."""
+        return (os.environ.get("LOAD_SECRETS", "false").lower() == "true" or
+                environment == "staging" or environment == "production" or
+                bool(os.environ.get("K_SERVICE")))
+    
+    def _load_base_environment_secrets(self, environment: str) -> Dict[str, Any]:
+        """Load base secrets from environment variables."""
         self._logger.info(f"Starting secret loading process for environment: {environment}")
-        secrets = self._load_from_environment()
+        return self._load_from_environment()
+    
+    def _merge_google_secrets_if_needed(self, secrets: Dict[str, Any], should_load_secrets: bool, environment: str) -> Dict[str, Any]:
+        """Merge Google secrets if needed, handling development mode."""
         env_secret_count = len(secrets)
-        
-        # Skip Google Cloud Secret Manager in local development unless explicitly enabled
         if not should_load_secrets and environment in ["development", "testing"]:
-            self._logger.info(f"Using only environment variables for secrets (local development mode): {env_secret_count} secrets loaded")
-            return secrets
-        
-        # Load and merge Google Secrets (they supersede environment variables)
+            return self._handle_development_mode_secrets(secrets, env_secret_count)
+        return self._load_and_merge_google_secrets(secrets, environment, env_secret_count)
+    
+    def _handle_development_mode_secrets(self, secrets: Dict[str, Any], env_secret_count: int) -> Dict[str, Any]:
+        """Handle secrets loading in development mode."""
+        self._logger.info(f"Using only environment variables for secrets (local development mode): {env_secret_count} secrets loaded")
+        return secrets
+    
+    def _load_and_merge_google_secrets(self, secrets: Dict[str, Any], environment: str, env_secret_count: int) -> Dict[str, Any]:
+        """Load and merge Google secrets with environment secrets."""
         self._logger.info(f"Attempting to load Google Secrets for environment: {environment}")
+        return self._attempt_google_secret_loading(secrets, env_secret_count)
+    
+    def _attempt_google_secret_loading(self, secrets: Dict[str, Any], env_secret_count: int) -> Dict[str, Any]:
+        """Attempt to load Google secrets with error handling."""
         try:
             google_secrets = self._load_from_secret_manager()
-            if google_secrets:
-                # Google secrets supersede environment variables
-                before_merge = len(secrets)
-                secrets.update(google_secrets)  # This will overwrite env vars with Google Secrets
-                self._logger.info(f"Google Secrets loaded successfully: {len(google_secrets)} secrets from Google Secret Manager")
-                self._logger.info(f"Total secrets after merge: {len(secrets)} (Base env: {env_secret_count}, Google overrides: {len(google_secrets)})")
-                
-                # Log which secrets were superseded
-                superseded = [key for key in google_secrets if key in secrets]
-                if superseded:
-                    self._logger.debug(f"Google Secrets superseded environment variables for: {', '.join(superseded)}")
-            else:
-                self._logger.warning("No secrets loaded from Google Secret Manager")
+            return self._merge_google_secrets_with_logging(secrets, google_secrets, env_secret_count)
         except Exception as e:
             self._logger.error(f"Failed to load from Google Secret Manager, using environment variables only: {e}")
-        
+            return secrets
+    
+    def _merge_google_secrets_with_logging(self, secrets: Dict[str, Any], google_secrets: Dict[str, Any], env_secret_count: int) -> Dict[str, Any]:
+        """Merge Google secrets with comprehensive logging."""
+        if google_secrets:
+            secrets.update(google_secrets)
+            self._log_successful_google_merge(google_secrets, secrets, env_secret_count)
+            return secrets
+        self._logger.warning("No secrets loaded from Google Secret Manager")
         return secrets
+    
+    def _log_successful_google_merge(self, google_secrets: Dict[str, Any], secrets: Dict[str, Any], env_secret_count: int) -> None:
+        """Log successful Google secrets merge with statistics."""
+        self._logger.info(f"Google Secrets loaded successfully: {len(google_secrets)} secrets from Google Secret Manager")
+        self._logger.info(f"Total secrets after merge: {len(secrets)} (Base env: {env_secret_count}, Google overrides: {len(google_secrets)})")
+        superseded = [key for key in google_secrets if key in secrets]
+        if superseded:
+            self._logger.debug(f"Google Secrets superseded environment variables for: {', '.join(superseded)}")
     
     @retry(stop=stop_after_attempt(3), wait=wait_fixed(2))
     def _get_secret_client(self) -> secretmanager.SecretManagerServiceClient:
         """Get or create a Secret Manager client with retry logic."""
         if self._client is None:
-            try:
-                self._client = secretmanager.SecretManagerServiceClient()
-                return self._client
-            except Exception as e:
-                raise SecretManagerError(f"Failed to create Secret Manager client: {e}")
+            self._client = self._create_new_secret_client()
         return self._client
+    
+    def _create_new_secret_client(self) -> secretmanager.SecretManagerServiceClient:
+        """Create new Secret Manager client with error handling."""
+        try:
+            return secretmanager.SecretManagerServiceClient()
+        except Exception as e:
+            raise SecretManagerError(f"Failed to create Secret Manager client: {e}")
     
     def _load_from_secret_manager(self) -> Dict[str, Any]:
         """Load secrets from Google Cloud Secret Manager."""
         try:
-            client = self._initialize_secret_client()
-            environment, is_staging = self._detect_environment()
-            secrets = self._fetch_all_secrets(client, is_staging)
-            return secrets
+            return self._execute_secret_manager_loading()
         except Exception as e:
             self._logger.error(f"Error loading secrets from Secret Manager: {e}")
             raise SecretManagerError(f"Secret Manager loading failed: {e}")
+    
+    def _execute_secret_manager_loading(self) -> Dict[str, Any]:
+        """Execute the main secret manager loading logic."""
+        client = self._initialize_secret_client()
+        environment, is_staging = self._detect_environment()
+        return self._fetch_all_secrets(client, is_staging)
     
     def _initialize_secret_client(self) -> secretmanager.SecretManagerServiceClient:
         """Initialize Secret Manager client with logging."""
@@ -132,20 +163,31 @@ class SecretManager:
         """Process all secret names and build secrets dictionary."""
         secrets = {}
         for secret_name in secret_names:
-            secret_value = self._fetch_individual_secret(client, secret_name, is_staging)
-            self._track_secret_fetch_result(secret_name, secret_value, secrets, successful_secrets, failed_secrets)
+            self._process_single_secret_name(client, secret_name, is_staging, secrets, successful_secrets, failed_secrets)
         return secrets
+    
+    def _process_single_secret_name(self, client: secretmanager.SecretManagerServiceClient, secret_name: str, 
+                                   is_staging: bool, secrets: Dict[str, Any], 
+                                   successful_secrets: List[str], failed_secrets: List[str]) -> None:
+        """Process a single secret name and update tracking."""
+        secret_value = self._fetch_individual_secret(client, secret_name, is_staging)
+        self._track_secret_fetch_result(secret_name, secret_value, secrets, successful_secrets, failed_secrets)
     
     def _fetch_individual_secret(self, client: secretmanager.SecretManagerServiceClient, 
                                 secret_name: str, is_staging: bool) -> Optional[str]:
         """Fetch individual secret with error handling."""
-        from .secret_manager_helpers import determine_actual_secret_name
         try:
-            actual_secret_name = determine_actual_secret_name(secret_name, is_staging)
-            return self._fetch_secret(client, actual_secret_name)
+            return self._attempt_secret_fetch(client, secret_name, is_staging)
         except Exception as e:
             self._logger.debug(f"✗ Failed to fetch {secret_name}: {str(e)[:100]}")
             return None
+    
+    def _attempt_secret_fetch(self, client: secretmanager.SecretManagerServiceClient, 
+                             secret_name: str, is_staging: bool) -> Optional[str]:
+        """Attempt to fetch secret with proper naming."""
+        from .secret_manager_helpers import determine_actual_secret_name
+        actual_secret_name = determine_actual_secret_name(secret_name, is_staging)
+        return self._fetch_secret(client, actual_secret_name)
     
     def _track_secret_fetch_result(self, secret_name: str, secret_value: Optional[str],
                                   secrets: Dict[str, Any], successful_secrets: List[str], failed_secrets: List[str]) -> None:
@@ -164,29 +206,63 @@ class SecretManager:
     def _fetch_secret(self, client: secretmanager.SecretManagerServiceClient, secret_name: str, version: str = "latest") -> Optional[str]:
         """Fetch a single secret from Secret Manager."""
         try:
-            name = f"projects/{self._project_id}/secrets/{secret_name}/versions/{version}"
-            response = client.access_secret_version(name=name)
-            secret_value = response.payload.data.decode("UTF-8")
-            return secret_value
+            return self._execute_secret_fetch(client, secret_name, version)
         except Exception as e:
-            # More detailed error for debugging without exposing sensitive info
-            error_msg = str(e)
-            if "404" in error_msg or "NOT_FOUND" in error_msg:
-                self._logger.debug(f"Secret {secret_name} not found in project {self._project_id}")
-            elif "403" in error_msg or "PERMISSION_DENIED" in error_msg:
-                self._logger.warning(f"Permission denied accessing secret {secret_name} in project {self._project_id}")
-            else:
-                self._logger.debug(f"Error fetching {secret_name}: {error_msg[:100]}")
+            self._handle_secret_fetch_error(e, secret_name)
             return None
+    
+    def _execute_secret_fetch(self, client: secretmanager.SecretManagerServiceClient, secret_name: str, version: str) -> str:
+        """Execute the actual secret fetch operation."""
+        name = f"projects/{self._project_id}/secrets/{secret_name}/versions/{version}"
+        response = client.access_secret_version(name=name)
+        return response.payload.data.decode("UTF-8")
+    
+    def _handle_secret_fetch_error(self, error: Exception, secret_name: str) -> None:
+        """Handle secret fetch errors with appropriate logging."""
+        error_msg = str(error)
+        if "404" in error_msg or "NOT_FOUND" in error_msg:
+            self._log_secret_not_found_error(secret_name)
+        elif "403" in error_msg or "PERMISSION_DENIED" in error_msg:
+            self._log_secret_permission_error(secret_name)
+        else: self._logger.debug(f"Error fetching {secret_name}: {error_msg[:100]}")
+    
+    def _log_secret_not_found_error(self, secret_name: str) -> None:
+        """Log secret not found error."""
+        self._logger.debug(f"Secret {secret_name} not found in project {self._project_id}")
+    
+    def _log_secret_permission_error(self, secret_name: str) -> None:
+        """Log secret permission denied error."""
+        self._logger.warning(f"Permission denied accessing secret {secret_name} in project {self._project_id}")
     
     def _get_environment_mapping(self) -> Dict[str, str]:
         """Get mapping of secret names to environment variable names."""
         return {
+            **self._get_core_service_mapping(),
+            **self._get_database_mapping(),
+            **self._get_security_mapping()
+        }
+    
+    def _get_core_service_mapping(self) -> Dict[str, str]:
+        """Get core service environment mappings."""
+        return {
             "gemini-api-key": "GEMINI_API_KEY", "google-client-id": "GOOGLE_CLIENT_ID",
             "google-client-secret": "GOOGLE_CLIENT_SECRET", "langfuse-secret-key": "LANGFUSE_SECRET_KEY",
-            "langfuse-public-key": "LANGFUSE_PUBLIC_KEY", "clickhouse-default-password": "CLICKHOUSE_DEFAULT_PASSWORD",
-            "clickhouse-development-password": "CLICKHOUSE_DEVELOPMENT_PASSWORD", "jwt-secret-key": "JWT_SECRET_KEY",
-            "fernet-key": "FERNET_KEY", "redis-default": "REDIS_PASSWORD"
+            "langfuse-public-key": "LANGFUSE_PUBLIC_KEY"
+        }
+    
+    def _get_database_mapping(self) -> Dict[str, str]:
+        """Get database service environment mappings."""
+        return {
+            "clickhouse-default-password": "CLICKHOUSE_DEFAULT_PASSWORD",
+            "clickhouse-development-password": "CLICKHOUSE_DEVELOPMENT_PASSWORD",
+            "redis-default": "REDIS_PASSWORD"
+        }
+    
+    def _get_security_mapping(self) -> Dict[str, str]:
+        """Get security service environment mappings."""
+        return {
+            "jwt-secret-key": "JWT_SECRET_KEY",
+            "fernet-key": "FERNET_KEY"
         }
 
     def _get_additional_environment_mapping(self) -> Dict[str, str]:
@@ -224,13 +300,17 @@ class SecretManager:
     def _log_environment_secrets_status(self, secrets: Dict[str, Any]) -> None:
         """Log status of loaded environment secrets."""
         if secrets:
-            self._logger.info(f"Loaded {len(secrets)} secrets from environment variables")
-            critical_env_secrets = ['gemini-api-key', 'jwt-secret-key', 'fernet-key']
-            present_critical = [s for s in critical_env_secrets if s in secrets]
-            if present_critical:
-                self._logger.debug(f"Critical secrets present in env: {', '.join(present_critical)}")
+            self._log_environment_secrets_summary(secrets)
         else:
             self._logger.info("No secrets loaded from environment variables")
+    
+    def _log_environment_secrets_summary(self, secrets: Dict[str, Any]) -> None:
+        """Log summary of environment secrets with critical status."""
+        self._logger.info(f"Loaded {len(secrets)} secrets from environment variables")
+        critical_env_secrets = ['gemini-api-key', 'jwt-secret-key', 'fernet-key']
+        present_critical = [s for s in critical_env_secrets if s in secrets]
+        if present_critical:
+            self._logger.debug(f"Critical secrets present in env: {', '.join(present_critical)}")
 
     def _load_from_environment(self) -> Dict[str, Any]:
         """Load secrets from environment variables as fallback."""

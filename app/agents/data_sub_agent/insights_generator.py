@@ -26,6 +26,15 @@ class InsightsGenerator:
     ) -> Dict[str, Any]:
         """Generate actionable insights from analysis data"""
         insights = self._initialize_insights_structure()
+        return await self._process_all_insights(performance_data, usage_data, insights)
+    
+    async def _process_all_insights(
+        self, 
+        performance_data: Dict[str, Any], 
+        usage_data: Dict[str, Any], 
+        insights: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Process all insight types and return final insights"""
         await self._analyze_performance_trends(performance_data, insights)
         await self._analyze_usage_patterns(usage_data, insights)
         return insights
@@ -281,32 +290,58 @@ class InsightsGenerator:
         """Generate specific recommendations based on insights"""
         insight_types = self._group_insights_by_type(all_insights)
         recommendations = []
+        self._add_all_recommendation_types(insight_types, recommendations)
+        return recommendations
+    
+    def _add_all_recommendation_types(
+        self, insight_types: Dict[str, List[Dict[str, Any]]], recommendations: List[str]
+    ) -> None:
+        """Add all types of recommendations to the list"""
         self._add_performance_recommendations(insight_types, recommendations)
         self._add_error_recommendations(insight_types, recommendations)
         self._add_cost_recommendations(insight_types, recommendations)
         self._add_scheduling_recommendations(insight_types, recommendations)
-        return recommendations
     
     def _group_insights_by_type(self, all_insights: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
         """Group insights by type for pattern analysis"""
         insight_types = {}
         for insight in all_insights:
-            insight_type = insight.get("type", "unknown")
-            if insight_type not in insight_types:
-                insight_types[insight_type] = []
-            insight_types[insight_type].append(insight)
+            self._add_insight_to_group(insight, insight_types)
         return insight_types
+    
+    def _add_insight_to_group(
+        self, insight: Dict[str, Any], insight_types: Dict[str, List[Dict[str, Any]]]
+    ) -> None:
+        """Add a single insight to its type group"""
+        insight_type = insight.get("type", "unknown")
+        if insight_type not in insight_types:
+            insight_types[insight_type] = []
+        insight_types[insight_type].append(insight)
     
     def _add_performance_recommendations(
         self, insight_types: Dict[str, List[Dict[str, Any]]], recommendations: List[str]
     ) -> None:
         """Add performance-related recommendations"""
-        if "performance_degradation" in insight_types:
-            recommendations.append("Implement performance monitoring alerts to catch degradation early")
-            recommendations.append("Consider horizontal scaling or resource optimization")
-        if "latency_variability" in insight_types:
-            recommendations.append("Investigate causes of latency spikes and implement caching strategies")
-            recommendations.append("Consider load balancing improvements")
+        self._add_degradation_recommendations(insight_types, recommendations)
+        self._add_latency_recommendations(insight_types, recommendations)
+    
+    def _add_degradation_recommendations(
+        self, insight_types: Dict[str, List[Dict[str, Any]]], recommendations: List[str]
+    ) -> None:
+        """Add recommendations for performance degradation"""
+        if "performance_degradation" not in insight_types:
+            return
+        recommendations.append("Implement performance monitoring alerts to catch degradation early")
+        recommendations.append("Consider horizontal scaling or resource optimization")
+    
+    def _add_latency_recommendations(
+        self, insight_types: Dict[str, List[Dict[str, Any]]], recommendations: List[str]
+    ) -> None:
+        """Add recommendations for latency variability"""
+        if "latency_variability" not in insight_types:
+            return
+        recommendations.append("Investigate causes of latency spikes and implement caching strategies")
+        recommendations.append("Consider load balancing improvements")
     
     def _add_error_recommendations(
         self, insight_types: Dict[str, List[Dict[str, Any]]], recommendations: List[str]

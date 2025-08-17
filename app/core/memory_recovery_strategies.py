@@ -256,54 +256,74 @@ class ConnectionPoolReductionStrategy(MemoryRecoveryStrategy):
             MemoryPressureLevel.EMERGENCY
         ]
     
+    def _get_pool_size_attr(self, pool: Any) -> Optional[str]:
+        """Get the pool size attribute name."""
+        if hasattr(pool, 'maxsize'):
+            return 'maxsize'
+        elif hasattr(pool, 'max_size'):
+            return 'max_size'
+        return None
+    
+    def _store_original_pool_size(self, pool: Any, pool_id: int) -> bool:
+        """Store original pool size if not already stored."""
+        if pool_id in self.original_sizes:
+            return True
+        size_attr = self._get_pool_size_attr(pool)
+        if size_attr:
+            self.original_sizes[pool_id] = getattr(pool, size_attr)
+            return True
+        return False
+    
+    def _calculate_reduced_size(self, original_size: int) -> int:
+        """Calculate reduced pool size based on reduction factor."""
+        return max(1, int(original_size * self.reduction_factor))
+    
+    def _apply_pool_size_reduction(self, pool: Any, new_size: int) -> bool:
+        """Apply new size to connection pool."""
+        size_attr = self._get_pool_size_attr(pool)
+        if size_attr:
+            setattr(pool, size_attr, new_size)
+            return True
+        return False
+    
+    async def _cleanup_excess_connections(self, pool: Any) -> None:
+        """Close excess connections if pool supports cleanup."""
+        if hasattr(pool, '_cleanup'):
+            await pool._cleanup()
+    
+    async def _process_single_pool(self, pool: Any) -> bool:
+        """Process a single connection pool for size reduction."""
+        pool_id = id(pool)
+        if not self._store_original_pool_size(pool, pool_id):
+            return False
+        original_size = self.original_sizes[pool_id]
+        new_size = self._calculate_reduced_size(original_size)
+        if self._apply_pool_size_reduction(pool, new_size):
+            await self._cleanup_excess_connections(pool)
+            return True
+        return False
+    
+    def _build_reduction_result(self, start_time: datetime, reduced_pools: int, errors: List[str]) -> Dict[str, Any]:
+        """Build the connection pool reduction result dictionary."""
+        duration = (datetime.now() - start_time).total_seconds()
+        return {
+            'action': RecoveryAction.REDUCE_CONNECTIONS.value,
+            'pools_reduced': reduced_pools, 'reduction_factor': self.reduction_factor,
+            'duration_seconds': duration, 'errors': errors
+        }
+    
     async def execute(self, snapshot: MemorySnapshot) -> Dict[str, Any]:
         """Execute connection pool reduction."""
         start_time = datetime.now()
-        reduced_pools = 0
-        errors = []
-        
+        reduced_pools, errors = 0, []
         for pool in self.connection_pools:
             try:
-                pool_id = id(pool)
-                
-                # Store original size if not already stored
-                if pool_id not in self.original_sizes:
-                    if hasattr(pool, 'maxsize'):
-                        self.original_sizes[pool_id] = pool.maxsize
-                    elif hasattr(pool, 'max_size'):
-                        self.original_sizes[pool_id] = pool.max_size
-                    else:
-                        continue
-                
-                # Reduce pool size
-                original_size = self.original_sizes[pool_id]
-                new_size = max(1, int(original_size * self.reduction_factor))
-                
-                if hasattr(pool, 'maxsize'):
-                    pool.maxsize = new_size
-                elif hasattr(pool, 'max_size'):
-                    pool.max_size = new_size
-                
-                # Close excess connections if possible
-                if hasattr(pool, '_cleanup'):
-                    await pool._cleanup()
-                
-                reduced_pools += 1
-                
+                if await self._process_single_pool(pool):
+                    reduced_pools += 1
             except Exception as e:
                 errors.append(str(e))
                 logger.warning(f"Failed to reduce connection pool: {e}")
-        
-        duration = (datetime.now() - start_time).total_seconds()
-        
-        result = {
-            'action': RecoveryAction.REDUCE_CONNECTIONS.value,
-            'pools_reduced': reduced_pools,
-            'reduction_factor': self.reduction_factor,
-            'duration_seconds': duration,
-            'errors': errors
-        }
-        
+        result = self._build_reduction_result(start_time, reduced_pools, errors)
         logger.info(f"Connection pool reduction completed: {result}")
         return result
     
@@ -439,12 +459,17 @@ class MemoryMonitor:
         if len(self.snapshots) > self.max_snapshots:
             self.snapshots = self.snapshots[-self.max_snapshots//2:]
 
-    async def take_snapshot(self) -> MemorySnapshot:
-        """Take a memory usage snapshot."""
+    def _collect_all_memory_metrics(self) -> Tuple[datetime, float, float, float, float, float, float, Tuple[int, int, int], int]:
+        """Collect all memory metrics for snapshot creation."""
         timestamp = datetime.now()
         total_mb, available_mb, used_mb, percent_used = self._get_system_memory_metrics()
         rss_mb, vms_mb = self._get_process_memory_metrics()
         gc_counts, object_count = self._get_python_memory_metrics()
+        return timestamp, total_mb, available_mb, used_mb, percent_used, rss_mb, vms_mb, gc_counts, object_count
+    
+    async def take_snapshot(self) -> MemorySnapshot:
+        """Take a memory usage snapshot."""
+        timestamp, total_mb, available_mb, used_mb, percent_used, rss_mb, vms_mb, gc_counts, object_count = self._collect_all_memory_metrics()
         pressure_level = self._calculate_pressure_level(percent_used)
         snapshot = self._create_memory_snapshot(timestamp, total_mb, available_mb, used_mb,
                                               percent_used, pressure_level, gc_counts, 

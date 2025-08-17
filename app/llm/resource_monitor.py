@@ -49,13 +49,22 @@ class ResourceMonitor:
         async with self._lock:
             if config_name not in self._metrics:
                 self._metrics[config_name] = self._init_metrics()
-            metrics = self._metrics[config_name]
-            metrics['total_requests'] += 1
-            if success:
-                metrics['successful_requests'] += 1
-            else:
-                metrics['failed_requests'] += 1
-            metrics['total_duration_ms'] += duration_ms
+            self._update_request_metrics(config_name, success, duration_ms)
+    
+    def _update_request_metrics(self, config_name: str, 
+                               success: bool, duration_ms: float) -> None:
+        """Update request metrics for config."""
+        metrics = self._metrics[config_name]
+        metrics['total_requests'] += 1
+        metrics['total_duration_ms'] += duration_ms
+        self._update_success_metrics(metrics, success)
+    
+    def _update_success_metrics(self, metrics: Dict, success: bool) -> None:
+        """Update success/failure metrics."""
+        if success:
+            metrics['successful_requests'] += 1
+        else:
+            metrics['failed_requests'] += 1
     
     def _init_metrics(self) -> Dict:
         """Initialize metrics dictionary."""
@@ -69,20 +78,30 @@ class ResourceMonitor:
     async def get_metrics(self) -> Dict[str, Any]:
         """Get resource usage metrics."""
         async with self._lock:
+            pools_data = self._collect_pool_metrics()
+            caches_data = await self._collect_cache_metrics()
             return {
-                'pools': {
-                    name: {
-                        'max_concurrent': pool.max_concurrent,
-                        'requests_per_minute': pool.requests_per_minute
-                    }
-                    for name, pool in self.request_pools.items()
-                },
-                'caches': {
-                    name: await cache.get_stats()
-                    for name, cache in self.cache_managers.items()
-                },
+                'pools': pools_data,
+                'caches': caches_data,
                 'metrics': self._metrics.copy()
             }
+    
+    def _collect_pool_metrics(self) -> Dict[str, Dict]:
+        """Collect pool metrics data."""
+        return {
+            name: {
+                'max_concurrent': pool.max_concurrent,
+                'requests_per_minute': pool.requests_per_minute
+            }
+            for name, pool in self.request_pools.items()
+        }
+    
+    async def _collect_cache_metrics(self) -> Dict[str, Any]:
+        """Collect cache metrics data."""
+        return {
+            name: await cache.get_stats()
+            for name, cache in self.cache_managers.items()
+        }
     
     async def cleanup(self) -> None:
         """Cleanup resources."""

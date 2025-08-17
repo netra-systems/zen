@@ -173,6 +173,10 @@ class QualityValidationHandler(BaseMessageHandler):
         content_type_str = payload.get("content_type", "general")
         strict_mode = payload.get("strict_mode", False)
         content_type = self._map_content_type(content_type_str)
+        return self._build_validation_params_dict(content, content_type, strict_mode)
+
+    def _build_validation_params_dict(self, content: str, content_type, strict_mode: bool) -> Dict[str, Any]:
+        """Build validation parameters dictionary."""
         return {"content": content, "content_type": content_type, "strict_mode": strict_mode}
 
     def _map_content_type(self, content_type_str: str) -> ContentType:
@@ -244,86 +248,184 @@ class QualityReportHandler(BaseMessageHandler):
     async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
         """Handle quality report generation request"""
         try:
-            report_type = payload.get("report_type", "summary")
-            period = payload.get("period", "day")
-            
-            # Generate report based on type
-            if report_type == "summary":
-                report_data = await self.monitoring_service.get_dashboard_data()
-            elif report_type == "detailed":
-                # Get detailed reports for all agents
-                agent_reports = {}
-                for agent_name in ["TriageSubAgent", "DataSubAgent", "OptimizationsCoreSubAgent", 
-                                 "ActionsToMeetGoalsSubAgent", "ReportingSubAgent"]:
-                    agent_reports[agent_name] = await self.monitoring_service.get_agent_report(
-                        agent_name, 
-                        period_hours=24 if period == "day" else 168 if period == "week" else 24
-                    )
-                report_data = {
-                    "summary": await self.monitoring_service.get_dashboard_data(),
-                    "agents": agent_reports
-                }
-            else:
-                report_data = {"error": "Unknown report type"}
-            
-            # Format as markdown report
-            markdown_report = self._format_quality_report(report_data, report_type)
-            
-            await manager.send_message(
-                user_id,
-                {
-                    "type": "quality_report_generated",
-                    "payload": {
-                        "report": markdown_report,
-                        "raw_data": report_data,
-                        "timestamp": datetime.now(UTC).isoformat()
-                    }
-                }
-            )
-            
+            report_params = self._extract_report_params(payload)
+            report_data = await self._generate_report_data(report_params)
+            markdown_report = self._format_quality_report(report_data, report_params["report_type"])
+            await self._send_report_response(user_id, markdown_report, report_data)
         except Exception as e:
-            logger.error(f"Error generating quality report: {str(e)}")
-            await manager.send_error(user_id, f"Failed to generate report: {str(e)}")
+            await self._handle_report_error(user_id, e)
+
+    def _extract_report_params(self, payload: Dict[str, Any]) -> Dict[str, str]:
+        """Extract and validate report parameters from payload."""
+        report_type = payload.get("report_type", "summary")
+        period = payload.get("period", "day")
+        return {"report_type": report_type, "period": period}
+
+    async def _generate_report_data(self, params: Dict[str, str]) -> Dict[str, Any]:
+        """Generate report data based on parameters."""
+        report_type = params["report_type"]
+        if report_type == "summary":
+            return await self._generate_summary_report()
+        elif report_type == "detailed":
+            return await self._generate_detailed_report(params["period"])
+        return {"error": "Unknown report type"}
+
+    async def _generate_summary_report(self) -> Dict[str, Any]:
+        """Generate summary report data."""
+        return await self.monitoring_service.get_dashboard_data()
+
+    async def _generate_detailed_report(self, period: str) -> Dict[str, Any]:
+        """Generate detailed report with agent data."""
+        agent_names = self._get_monitored_agent_names()
+        period_hours = self._convert_period_to_hours(period)
+        agent_reports = await self._collect_agent_reports(agent_names, period_hours)
+        summary_data = await self.monitoring_service.get_dashboard_data()
+        return self._build_detailed_report_dict(summary_data, agent_reports)
+
+    def _build_detailed_report_dict(self, summary_data: Dict[str, Any], agent_reports: Dict[str, Any]) -> Dict[str, Any]:
+        """Build detailed report dictionary."""
+        return {"summary": summary_data, "agents": agent_reports}
+
+    def _get_monitored_agent_names(self) -> list[str]:
+        """Get list of agent names to monitor."""
+        return [
+            "TriageSubAgent", "DataSubAgent", "OptimizationsCoreSubAgent",
+            "ActionsToMeetGoalsSubAgent", "ReportingSubAgent"
+        ]
+
+    def _convert_period_to_hours(self, period: str) -> int:
+        """Convert period string to hours."""
+        if period == "day":
+            return 24
+        elif period == "week":
+            return 168
+        return 24
+
+    async def _collect_agent_reports(self, agent_names: list[str], period_hours: int) -> Dict[str, Any]:
+        """Collect reports for all monitored agents."""
+        agent_reports = {}
+        for agent_name in agent_names:
+            agent_reports[agent_name] = await self.monitoring_service.get_agent_report(
+                agent_name, period_hours
+            )
+        return agent_reports
+
+    async def _send_report_response(self, user_id: str, markdown_report: str, report_data: Dict[str, Any]) -> None:
+        """Send formatted report response to user."""
+        payload = self._build_report_payload(markdown_report, report_data)
+        await manager.send_message(user_id, {"type": "quality_report_generated", "payload": payload})
+
+    def _build_report_payload(self, markdown_report: str, report_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Build report response payload."""
+        return {
+            "report": markdown_report,
+            "raw_data": report_data,
+            "timestamp": datetime.now(UTC).isoformat()
+        }
+
+    async def _handle_report_error(self, user_id: str, error: Exception) -> None:
+        """Handle report generation error."""
+        logger.error(f"Error generating quality report: {str(error)}")
+        await manager.send_error(user_id, f"Failed to generate report: {str(error)}")
     
     def _format_quality_report(self, data: Dict[str, Any], report_type: str) -> str:
         """Format quality data as markdown report"""
-        report = f"# AI Quality Report\n\n"
-        report += f"**Generated:** {datetime.now(UTC).isoformat()}\n"
-        report += f"**Type:** {report_type.title()}\n\n"
-        
-        if "overall_stats" in data:
-            stats = data["overall_stats"]
-            report += "## Overall Statistics\n\n"
-            report += f"- **Average Quality Score:** {stats.get('average_quality', 0):.2f}\n"
-            report += f"- **Total Events:** {stats.get('total_events', 0)}\n"
-            report += f"- **Active Alerts:** {stats.get('active_alerts', 0)}\n"
-            report += f"- **Critical Alerts:** {stats.get('critical_alerts', 0)}\n\n"
-        
-        if "quality_distribution" in data:
-            dist = data["quality_distribution"]
-            report += "## Quality Distribution\n\n"
-            for level, count in dist.items():
-                report += f"- **{level}:** {count}\n"
-            report += "\n"
-        
-        if "agent_profiles" in data:
-            report += "## Agent Performance\n\n"
-            for agent_name, profile in data["agent_profiles"].items():
-                report += f"### {agent_name}\n"
-                report += f"- Average Score: {profile.get('average_quality_score', 0):.2f}\n"
-                report += f"- Total Requests: {profile.get('total_requests', 0)}\n"
-                report += f"- Slop Detections: {profile.get('slop_detection_count', 0)}\n"
-                if profile.get('issues'):
-                    report += f"- Issues: {', '.join(profile['issues'])}\n"
-                report += "\n"
-        
-        if "recent_alerts" in data:
-            report += "## Recent Alerts\n\n"
-            for alert in data["recent_alerts"][:5]:
-                report += f"- **{alert['severity']}** [{alert['timestamp']}]: {alert['message']}\n"
-            report += "\n"
-        
+        report = self._format_report_header(report_type)
+        report = self._add_report_sections(report, data)
         return report
+
+    def _add_report_sections(self, report: str, data: Dict[str, Any]) -> str:
+        """Add all report sections to the base report."""
+        report += self._format_overall_stats_section(data)
+        report += self._format_quality_distribution_section(data)
+        report += self._format_agent_performance_section(data)
+        report += self._format_recent_alerts_section(data)
+        return report
+
+    def _format_report_header(self, report_type: str) -> str:
+        """Format report header with title and metadata."""
+        header = f"# AI Quality Report\n\n"
+        header += f"**Generated:** {datetime.now(UTC).isoformat()}\n"
+        header += f"**Type:** {report_type.title()}\n\n"
+        return header
+
+    def _format_overall_stats_section(self, data: Dict[str, Any]) -> str:
+        """Format overall statistics section if data exists."""
+        if "overall_stats" not in data:
+            return ""
+        stats = data["overall_stats"]
+        section = "## Overall Statistics\n\n"
+        section += self._format_stats_metrics(stats)
+        return section
+
+    def _format_stats_metrics(self, stats: Dict[str, Any]) -> str:
+        """Format individual statistics metrics."""
+        metrics = f"- **Average Quality Score:** {stats.get('average_quality', 0):.2f}\n"
+        metrics += f"- **Total Events:** {stats.get('total_events', 0)}\n"
+        metrics += f"- **Active Alerts:** {stats.get('active_alerts', 0)}\n"
+        metrics += f"- **Critical Alerts:** {stats.get('critical_alerts', 0)}\n\n"
+        return metrics
+
+    def _format_quality_distribution_section(self, data: Dict[str, Any]) -> str:
+        """Format quality distribution section if data exists."""
+        if "quality_distribution" not in data:
+            return ""
+        dist = data["quality_distribution"]
+        section = "## Quality Distribution\n\n"
+        section += self._format_distribution_items(dist)
+        return section
+
+    def _format_distribution_items(self, dist: Dict[str, Any]) -> str:
+        """Format distribution items as bullet points."""
+        items = ""
+        for level, count in dist.items():
+            items += f"- **{level}:** {count}\n"
+        return items + "\n"
+
+    def _format_agent_performance_section(self, data: Dict[str, Any]) -> str:
+        """Format agent performance section if data exists."""
+        if "agent_profiles" not in data:
+            return ""
+        section = "## Agent Performance\n\n"
+        section += self._format_agent_profiles(data["agent_profiles"])
+        return section
+
+    def _format_agent_profiles(self, agent_profiles: Dict[str, Any]) -> str:
+        """Format individual agent profile data."""
+        profiles = ""
+        for agent_name, profile in agent_profiles.items():
+            profiles += self._format_single_agent_profile(agent_name, profile)
+        return profiles
+
+    def _format_single_agent_profile(self, agent_name: str, profile: Dict[str, Any]) -> str:
+        """Format single agent profile with metrics."""
+        agent_section = f"### {agent_name}\n"
+        agent_section += f"- Average Score: {profile.get('average_quality_score', 0):.2f}\n"
+        agent_section += f"- Total Requests: {profile.get('total_requests', 0)}\n"
+        agent_section += f"- Slop Detections: {profile.get('slop_detection_count', 0)}\n"
+        agent_section += self._format_agent_issues(profile)
+        return agent_section + "\n"
+
+    def _format_agent_issues(self, profile: Dict[str, Any]) -> str:
+        """Format agent issues if they exist."""
+        if not profile.get('issues'):
+            return ""
+        return f"- Issues: {', '.join(profile['issues'])}\n"
+
+    def _format_recent_alerts_section(self, data: Dict[str, Any]) -> str:
+        """Format recent alerts section if data exists."""
+        if "recent_alerts" not in data:
+            return ""
+        section = "## Recent Alerts\n\n"
+        section += self._format_alert_items(data["recent_alerts"][:5])
+        return section
+
+    def _format_alert_items(self, alerts: list) -> str:
+        """Format alert items as bullet points."""
+        items = ""
+        for alert in alerts:
+            items += f"- **{alert['severity']}** [{alert['timestamp']}]: {alert['message']}\n"
+        return items + "\n"
 
 
 class WebSocketQualityManager:
@@ -378,18 +480,23 @@ class WebSocketQualityManager:
     async def broadcast_quality_alert(self, alert: Dict[str, Any]) -> None:
         """Broadcast quality alert to all subscribers"""
         subscribers = self.monitoring_service.subscribers
-        
         for user_id in subscribers:
-            try:
-                await manager.send_message(
-                    user_id,
-                    {
-                        "type": "quality_alert",
-                        "payload": {
-                            **alert,
-                            "severity": alert.get("severity", "info")
-                        }
-                    }
-                )
-            except Exception as e:
-                logger.error(f"Error broadcasting alert to {user_id}: {str(e)}")
+            await self._send_alert_to_subscriber(user_id, alert)
+
+    async def _send_alert_to_subscriber(self, user_id: str, alert: Dict[str, Any]) -> None:
+        """Send quality alert to a single subscriber."""
+        try:
+            alert_message = self._build_alert_message(alert)
+            await manager.send_message(user_id, alert_message)
+        except Exception as e:
+            logger.error(f"Error broadcasting alert to {user_id}: {str(e)}")
+
+    def _build_alert_message(self, alert: Dict[str, Any]) -> Dict[str, Any]:
+        """Build alert message for broadcasting."""
+        return {
+            "type": "quality_alert",
+            "payload": {
+                **alert,
+                "severity": alert.get("severity", "info")
+            }
+        }

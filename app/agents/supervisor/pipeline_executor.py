@@ -35,13 +35,10 @@ class PipelineExecutor:
                               state: DeepAgentState, run_id: str,
                               context: Dict[str, str]) -> None:
         """Execute the agent pipeline."""
-        correlation_id = generate_llm_correlation_id()
-        flow_id = self.flow_logger.generate_flow_id()
-        self.flow_logger.start_flow(flow_id, correlation_id, len(pipeline))
-        
+        flow_context = self._prepare_flow_context(pipeline)
         exec_context = self._build_execution_context(run_id, context)
-        await self._run_pipeline_with_hooks(pipeline, state, exec_context, flow_id)
-        self.flow_logger.complete_flow(flow_id)
+        await self._execute_pipeline_with_flow(pipeline, state, exec_context, flow_context)
+        self.flow_logger.complete_flow(flow_context['flow_id'])
     
     def _build_execution_context(self, run_id: str, 
                                 context: Dict[str, str]) -> AgentExecutionContext:
@@ -62,6 +59,32 @@ class PipelineExecutor:
             "thread_id": context["thread_id"],
             "user_id": context["user_id"]
         }
+    
+    def _prepare_flow_context(self, pipeline: List[PipelineStep]) -> Dict[str, Any]:
+        """Prepare flow context for pipeline execution."""
+        correlation_id = generate_llm_correlation_id()
+        flow_id = self.flow_logger.generate_flow_id()
+        self.flow_logger.start_flow(flow_id, correlation_id, len(pipeline))
+        return {'flow_id': flow_id, 'correlation_id': correlation_id}
+    
+    async def _execute_pipeline_with_flow(self, pipeline: List[PipelineStep],
+                                         state: DeepAgentState,
+                                         exec_context: AgentExecutionContext,
+                                         flow_context: Dict[str, Any]) -> None:
+        """Execute pipeline with flow context."""
+        await self._run_pipeline_with_hooks(pipeline, state, exec_context, flow_context['flow_id'])
+    
+    def _log_step_transitions_start(self, pipeline: List[PipelineStep], flow_id: str) -> None:
+        """Log start of all step transitions."""
+        for i, step in enumerate(pipeline):
+            step_name = getattr(step, 'agent_name', f'step_{i}')
+            self.flow_logger.step_started(flow_id, step_name, "agent")
+    
+    def _log_step_transitions_complete(self, pipeline: List[PipelineStep], flow_id: str) -> None:
+        """Log completion of all step transitions."""
+        for i, step in enumerate(pipeline):
+            step_name = getattr(step, 'agent_name', f'step_{i}')
+            self.flow_logger.step_completed(flow_id, step_name, "agent")
     
     async def _run_pipeline_with_hooks(self, pipeline: List[PipelineStep],
                                       state: DeepAgentState,
@@ -112,16 +135,9 @@ class PipelineExecutor:
                                         state: DeepAgentState, 
                                         flow_id: str) -> List[AgentExecutionResult]:
         """Execute pipeline with step transition logging."""
-        for i, step in enumerate(pipeline):
-            step_name = getattr(step, 'agent_name', f'step_{i}')
-            self.flow_logger.step_started(flow_id, step_name, "agent")
-        
+        self._log_step_transitions_start(pipeline, flow_id)
         results = await self.engine.execute_pipeline(pipeline, context, state)
-        
-        for i, step in enumerate(pipeline):
-            step_name = getattr(step, 'agent_name', f'step_{i}')
-            self.flow_logger.step_completed(flow_id, step_name, "agent")
-        
+        self._log_step_transitions_complete(pipeline, flow_id)
         return results
     
     async def finalize_state(self, state: DeepAgentState, 
@@ -168,9 +184,7 @@ class PipelineExecutor:
         """Send completion notification."""
         if not self.websocket_manager:
             return
-        await self._send_completion_message(
-            state, context["thread_id"], context["run_id"]
-        )
+        await self._send_completion_message(state, context["thread_id"], context["run_id"])
     
     async def _send_completion_message(self, state: DeepAgentState, 
                                       thread_id: str, run_id: str) -> None:
@@ -205,11 +219,8 @@ class PipelineExecutor:
     def _create_completion_content(self, state: DeepAgentState, run_id: str):
         """Create agent completion content."""
         from app.schemas import AgentCompleted, AgentResult
-        return AgentCompleted(
-            run_id=run_id,
-            result=AgentResult(success=True, output=state.to_dict()),
-            execution_time_ms=0.0
-        )
+        result = AgentResult(success=True, output=state.to_dict())
+        return AgentCompleted(run_id=run_id, result=result, execution_time_ms=0.0)
     
     def _create_websocket_message(self, content) -> 'WebSocketMessage':
         """Create WebSocket message wrapper."""
