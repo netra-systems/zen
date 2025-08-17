@@ -1,0 +1,80 @@
+steps:
+  # Build and deploy backend with health checks
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/backend-staging-${SHORT_SHA}:latest'
+      - '-f'
+      - 'Dockerfile.backend.staging'
+      - '--build-arg'
+      - 'BUILDKIT_INLINE_CACHE=1'
+      - '.'
+    env:
+      - 'DOCKER_BUILDKIT=1'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/backend-staging-${SHORT_SHA}:latest']
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'backend-staging-${SHORT_SHA}'
+      - '--image=gcr.io/$PROJECT_ID/backend-staging-${SHORT_SHA}:latest'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--memory=2Gi'
+      - '--cpu=2'
+      - '--concurrency=100'
+      - '--timeout=300'
+      - '--max-instances=10'
+      - '--min-instances=1'
+      - '--port=8080'
+      - '--set-env-vars=ENVIRONMENT=staging,PORT=8080'
+      - '--set-env-vars=GOOGLE_OAUTH_CLIENT_ID_STAGING=${_GOOGLE_OAUTH_CLIENT_ID_STAGING}'
+      - '--set-env-vars=GOOGLE_OAUTH_CLIENT_SECRET_STAGING=${_GOOGLE_OAUTH_CLIENT_SECRET_STAGING}'
+      - '--set-env-vars=DATABASE_URL=${_DATABASE_URL}'
+      - '--set-env-vars=AUTH_SERVICE_ENABLED=false'
+      - '--set-env-vars=PYTHONUNBUFFERED=1'
+
+  # Add startup probe
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'services'
+      - 'update'
+      - 'backend-staging-${SHORT_SHA}'
+      - '--region=us-central1'
+      - '--execution-environment=gen2'
+      - '--startup-probe-type=http'
+      - '--startup-probe-path=/api/health'
+      - '--startup-probe-initial-delay=10'
+      - '--startup-probe-timeout=5'
+      - '--startup-probe-period=10'
+      - '--startup-probe-failure-threshold=3'
+
+  # Add liveness probe  
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'services'
+      - 'update'
+      - 'backend-staging-${SHORT_SHA}'
+      - '--region=us-central1'
+      - '--liveness-probe-type=http'
+      - '--liveness-probe-path=/api/auth/health'
+      - '--liveness-probe-initial-delay=30'
+      - '--liveness-probe-timeout=5'
+      - '--liveness-probe-period=30'
+      - '--liveness-probe-failure-threshold=3'
+
+substitutions:
+  _GOOGLE_OAUTH_CLIENT_ID_STAGING: 'your-google-client-id'
+  _GOOGLE_OAUTH_CLIENT_SECRET_STAGING: 'your-google-client-secret'
+  _DATABASE_URL: 'your-database-url'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  substitution_option: 'ALLOW_LOOSE'

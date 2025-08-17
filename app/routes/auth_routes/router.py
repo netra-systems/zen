@@ -34,7 +34,18 @@ async def token(
 @router.get("/config", response_model=AuthConfigResponse)
 async def get_auth_config(request: Request):
     """Returns authentication configuration for frontend integration."""
-    return build_auth_config_response(request)
+    try:
+        return build_auth_config_response(request)
+    except Exception as e:
+        from app.logging_config import central_logger
+        logger = central_logger.get_logger(__name__)
+        logger.error(f"Auth config endpoint failed: {str(e)}", exc_info=True)
+        
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Failed to retrieve auth configuration: {str(e)}"
+        )
 
 
 @router.get("/login")

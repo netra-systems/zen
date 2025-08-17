@@ -1,6 +1,9 @@
 /**
  * Axios-like wrapper for the apiClient to support ThreadService
+ * Enhanced with secure URL handling to prevent mixed content errors
  */
+
+import { secureApiConfig } from '@/lib/secure-api-config';
 
 interface ApiResponse<T = any> {
   data: T;
@@ -22,7 +25,8 @@ class ApiClientWrapper {
   private connectionCheckPromise: Promise<boolean> | null = null;
   
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    // Use secure API configuration to prevent mixed content errors
+    this.baseURL = secureApiConfig.apiUrl;
     this.checkConnection();
   }
 

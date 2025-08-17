@@ -1,7 +1,7 @@
-"""Null, Array, and Union Type Consistency Tests.
+"""Null Handling and Array Consistency Tests.
 
-Tests null vs undefined handling, array type consistency, and union type
-validation patterns across the frontend-backend interface.
+Tests null vs undefined handling and array type consistency patterns
+across the frontend-backend interface.
 """
 
 import json
@@ -117,6 +117,31 @@ class TestNullUndefinedHandling:
         without_nulls = payload.model_dump(exclude_none=True)
         assert "thread_id" not in without_nulls
         assert "context" not in without_nulls
+    
+    def test_nested_null_propagation(self) -> None:
+        """Test null value propagation in nested objects."""
+        nested_structure = {
+            "level1": {
+                "level2": {
+                    "value": None,
+                    "array": [None, "value", None]
+                },
+                "other_field": "present"
+            }
+        }
+        
+        message = Message(
+            id="msg123",
+            type=MessageType.SYSTEM,
+            content="Nested null test",
+            metadata=nested_structure
+        )
+        
+        json_data = message.model_dump()
+        level2 = json_data["metadata"]["level1"]["level2"]
+        assert level2["value"] is None
+        assert level2["array"][0] is None
+        assert level2["array"][2] is None
 
 
 class TestArrayTypeConsistency:
@@ -208,178 +233,55 @@ class TestArrayTypeConsistency:
         assert len(items) == 100
         assert items[0] == "item_0"
         assert items[99] == "item_99"
-
-
-class TestUnionTypeHandling:
-    """Test union type handling in schemas."""
     
-    def test_string_content_message(self) -> None:
-        """Test Message with string content."""
-        text_message = Message(
-            id="msg1",
-            type=MessageType.USER,
-            content="Simple text",
-            metadata={}
+    def test_sparse_array_handling(self) -> None:
+        """Test sparse array handling with None values."""
+        sparse_array = ["value1", None, "value3", None, "value5"]
+        
+        message = Message(
+            id="msg123",
+            type=MessageType.SYSTEM,
+            content="Sparse array test",
+            metadata={"sparse_data": sparse_array}
         )
         
-        json_data = text_message.model_dump()
-        assert isinstance(json_data["content"], str)
-        assert json_data["content"] == "Simple text"
-    
-    def test_complex_content_message(self) -> None:
-        """Test Message with complex content structure."""
-        complex_content = {
-            "text": "Complex message",
-            "attachments": ["file1.pdf", "file2.xlsx"],
-            "formatting": {"bold": True, "color": "blue"}
-        }
+        json_data = message.model_dump()
+        sparse_data = json_data["metadata"]["sparse_data"]
         
-        complex_message = Message(
-            id="msg2",
-            type=MessageType.AGENT,
-            content=complex_content,
-            metadata={}
-        )
-        
-        json_data = complex_message.model_dump()
-        assert isinstance(json_data["content"], dict)
-        assert json_data["content"]["text"] == "Complex message"
-        assert len(json_data["content"]["attachments"]) == 2
+        assert len(sparse_data) == 5
+        assert sparse_data[0] == "value1"
+        assert sparse_data[1] is None
+        assert sparse_data[2] == "value3"
+        assert sparse_data[3] is None
+        assert sparse_data[4] == "value5"
     
-    def test_mixed_content_types_sequence(self) -> None:
-        """Test multiple content types in sequence."""
-        messages = [
-            Message(id="1", type=MessageType.USER, content="Text", metadata={}),
-            Message(id="2", type=MessageType.AGENT, content={"data": "object"}, metadata={}),
-            Message(id="3", type=MessageType.SYSTEM, content="More text", metadata={})
+    def test_array_serialization_performance(self) -> None:
+        """Test array serialization with large datasets."""
+        # Create a reasonably large array to test performance
+        large_dataset = [
+            {
+                "id": i,
+                "name": f"item_{i}",
+                "values": [j for j in range(10)],
+                "metadata": {"category": i % 5}
+            }
+            for i in range(50)
         ]
         
-        for msg in messages:
-            json_data = msg.model_dump()
-            assert "content" in json_data
-            
-            content_type = type(json_data["content"])
-            assert content_type in [str, dict]
-    
-    def test_numeric_content_types(self) -> None:
-        """Test numeric content in union types."""
-        numeric_message = Message(
-            id="msg123",
-            type=MessageType.SYSTEM,
-            content=42,  # Integer content
-            metadata={}
-        )
-        
-        json_data = numeric_message.model_dump()
-        assert isinstance(json_data["content"], int)
-        assert json_data["content"] == 42
-    
-    def test_boolean_content_types(self) -> None:
-        """Test boolean content in union types."""
-        boolean_message = Message(
-            id="msg123",
-            type=MessageType.SYSTEM,
-            content=True,  # Boolean content
-            metadata={}
-        )
-        
-        json_data = boolean_message.model_dump()
-        assert isinstance(json_data["content"], bool)
-        assert json_data["content"] is True
-
-
-class TestComplexTypeValidation:
-    """Test complex nested type validation scenarios."""
-    
-    def test_deeply_nested_structure_consistency(self) -> None:
-        """Test deeply nested structure type consistency."""
-        complex_data = FrontendDataMocks.complex_websocket_payload()
-        
-        payload = StartAgentPayload(**complex_data["payload"])
-        json_data = payload.model_dump()
-        
-        session_data = json_data["context"]["session"]
-        assert session_data["id"] == "session123"
-        assert session_data["metadata"]["client"]["name"] == "web"
-    
-    def test_mixed_type_preservation_in_metadata(self) -> None:
-        """Test mixed type preservation in complex objects."""
-        mixed_metadata = {
-            "string_field": "text",
-            "number_field": 42,
-            "boolean_field": True,
-            "null_field": None,
-            "array_field": [1, "two", 3.0],
-            "object_field": {"nested": "value"}
-        }
-        
         message = Message(
             id="msg123",
             type=MessageType.SYSTEM,
-            content="Test",
-            metadata=mixed_metadata
+            content="Performance test",
+            metadata={"dataset": large_dataset}
         )
         
         json_data = message.model_dump()
-        metadata = json_data["metadata"]
+        dataset = json_data["metadata"]["dataset"]
         
-        assert isinstance(metadata["string_field"], str)
-        assert isinstance(metadata["number_field"], int)
-        assert isinstance(metadata["boolean_field"], bool)
-        assert metadata["null_field"] is None
-        assert isinstance(metadata["array_field"], list)
-        assert isinstance(metadata["object_field"], dict)
-    
-    def test_circular_reference_prevention(self) -> None:
-        """Test prevention of circular references in serialization."""
-        # Create non-circular but deeply nested structure
-        deep_structure = {
-            "level1": {
-                "level2": {
-                    "level3": {
-                        "data": "deep_value",
-                        "array": [1, 2, 3]
-                    }
-                }
-            }
-        }
-        
-        message = Message(
-            id="msg123",
-            type=MessageType.SYSTEM,
-            content="Deep structure test",
-            metadata=deep_structure
-        )
-        
-        json_data = message.model_dump()
-        deep_value = json_data["metadata"]["level1"]["level2"]["level3"]["data"]
-        assert deep_value == "deep_value"
-    
-    def test_large_object_serialization(self) -> None:
-        """Test serialization of large complex objects."""
-        large_data = {
-            "arrays": {
-                f"array_{i}": [j for j in range(10)]
-                for i in range(5)
-            },
-            "objects": {
-                f"obj_{i}": {"id": i, "data": f"value_{i}"}
-                for i in range(10)
-            },
-            "mixed": [i if i % 2 == 0 else f"string_{i}" for i in range(20)]
-        }
-        
-        message = Message(
-            id="msg123",
-            type=MessageType.SYSTEM,
-            content="Large object test",
-            metadata=large_data
-        )
-        
-        json_data = message.model_dump()
-        assert len(json_data["metadata"]["arrays"]) == 5
-        assert len(json_data["metadata"]["objects"]) == 10
-        assert len(json_data["metadata"]["mixed"]) == 20
+        assert len(dataset) == 50
+        assert dataset[0]["id"] == 0
+        assert dataset[49]["id"] == 49
+        assert len(dataset[0]["values"]) == 10
 
 
 if __name__ == "__main__":

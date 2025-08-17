@@ -27,7 +27,11 @@ steps:
       - '-t'
       - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/frontend:latest'
       - '--build-arg'
-      - 'NEXT_PUBLIC_API_URL=https://backend-staging-${SHORT_SHA}-uc.a.run.app'
+      - 'NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai/ws'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_FORCE_HTTPS=true'
       - '.'
 
   # Push backend image
@@ -91,7 +95,7 @@ steps:
       - 'managed'
       - '--allow-unauthenticated'
       - '--set-env-vars'
-      - 'NEXT_PUBLIC_API_URL=https://backend-staging-${SHORT_SHA}-uc.a.run.app'
+      - 'NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai,NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai/ws,NEXT_PUBLIC_FORCE_HTTPS=true'
       - '--min-instances'
       - '0'
       - '--max-instances'

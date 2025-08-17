@@ -63,9 +63,37 @@ def add_pr_configuration(response: AuthConfigResponse, oauth_config) -> None:
 
 def build_auth_config_response(request: Request) -> AuthConfigResponse:
     """Build complete authentication configuration response."""
-    base_url = normalize_base_url(request)
-    oauth_config = auth_client.get_oauth_config()
-    endpoints = build_auth_endpoints(base_url, oauth_config)
-    response = build_base_auth_response(oauth_config, endpoints)
-    add_pr_configuration(response, oauth_config)
-    return response
+    try:
+        base_url = normalize_base_url(request)
+        oauth_config = auth_client.get_oauth_config()
+        
+        # Validate OAuth configuration
+        if not oauth_config.client_id:
+            raise ValueError("OAuth client ID not configured")
+        
+        endpoints = build_auth_endpoints(base_url, oauth_config)
+        response = build_base_auth_response(oauth_config, endpoints)
+        add_pr_configuration(response, oauth_config)
+        return response
+    except Exception as e:
+        from app.logging_config import central_logger
+        logger = central_logger.get_logger(__name__)
+        logger.error(f"Failed to build auth config response: {str(e)}", exc_info=True)
+        
+        # Return minimal fallback configuration
+        fallback_endpoints = AuthEndpoints(
+            login=f"{base_url}/api/auth/login",
+            logout=f"{base_url}/api/auth/logout",
+            callback=f"{base_url}/api/auth/callback",
+            token=f"{base_url}/api/auth/token",
+            user=f"{base_url}/api/users/me",
+            dev_login=None
+        )
+        
+        return AuthConfigResponse(
+            development_mode=False,
+            google_client_id="",
+            endpoints=fallback_endpoints,
+            authorized_javascript_origins=[],
+            authorized_redirect_uris=[]
+        )

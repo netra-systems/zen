@@ -31,6 +31,12 @@ from .fixtures.llm_agent_fixtures import (
     create_mock_infrastructure, setup_llm_responses, setup_websocket_manager,
     create_supervisor_with_mocks
 )
+from .helpers.performance_test_helpers import (
+    create_benchmark_supervisor, create_lightweight_supervisor,
+    execute_lightweight_flow, setup_e2e_responses, create_e2e_persistence_mock,
+    create_flow_persistence_mock, run_concurrency_benchmark,
+    execute_optimization_flow, verify_performance_requirements
+)
 
 
 async def test_performance_metrics(supervisor_agent):
@@ -316,91 +322,6 @@ def _verify_performance_metrics(performance_metrics):
         assert metric["success_rate"] >= 0.8  # At least 80% success rate
 
 
-def _create_benchmark_infrastructure():
-    """Create infrastructure for benchmarking"""
-    return create_mock_infrastructure()
-
-
-def _create_benchmark_supervisor(infrastructure, index):
-    """Create supervisor for benchmarking"""
-    db_session, llm_manager, ws_manager = infrastructure
-    setup_llm_responses(llm_manager)
-    
-    mock_persistence = AsyncMock()
-    mock_persistence.save_agent_state = AsyncMock(return_value=(True, f"test_id_{index}"))
-    mock_persistence.load_agent_state = AsyncMock(return_value=None)
-    
-    return create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)
-
-
-def _create_mock_infrastructure_light():
-    """Create lightweight mock infrastructure"""
-    return create_mock_infrastructure()
-
-
-def _create_lightweight_infrastructure():
-    """Create lightweight infrastructure for high load testing"""
-    return create_mock_infrastructure()
-
-
-def _create_lightweight_supervisor(infrastructure):
-    """Create lightweight supervisor for high load testing"""
-    db_session, llm_manager, ws_manager = infrastructure
-    mock_persistence = _create_flow_persistence_mock()
-    return create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)
-
-
-async def _execute_lightweight_flow(supervisor):
-    """Execute lightweight flow for high load testing"""
-    return await supervisor.run(
-        "Light test",
-        supervisor.thread_id,
-        supervisor.user_id,
-        str(uuid.uuid4())
-    )
-
-
-def _setup_e2e_responses(llm_manager):
-    """Setup end-to-end LLM responses"""
-    responses = [
-        # Triage response
-        {"category": "optimization", "requires_analysis": True},
-        # Analysis response
-        {"bottleneck": "memory", "utilization": 0.95},
-        # Optimization response
-        {"recommendations": ["Use gradient checkpointing", "Reduce batch size"]}
-    ]
-    
-    response_index = 0
-    async def mock_structured_llm(*args, **kwargs):
-        nonlocal response_index
-        result = responses[response_index]
-        response_index += 1
-        return result
-    
-    llm_manager.ask_structured_llm = AsyncMock(side_effect=mock_structured_llm)
-    llm_manager.call_llm = AsyncMock(return_value={"content": "Optimization complete"})
-
-
-def _create_e2e_persistence_mock():
-    """Create persistence mock for e2e testing"""
-    mock_persistence = AsyncMock()
-    
-    # Mock the save_agent_state to handle both interfaces
-    async def mock_save_agent_state(*args, **kwargs):
-        if len(args) == 2:  # (request, session) signature
-            return (True, "test_id")
-        elif len(args) == 5:  # (run_id, thread_id, user_id, state, db_session) signature
-            return True
-        else:
-            return (True, "test_id")
-    
-    mock_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
-    mock_persistence.load_agent_state = AsyncMock(return_value=None)
-    mock_persistence.get_thread_context = AsyncMock(return_value=None)
-    mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
-    
-    return mock_persistence
 
 
 if __name__ == "__main__":

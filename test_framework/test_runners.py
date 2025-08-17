@@ -77,7 +77,7 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
     print(f"\n{'='*60}")
     print("RUNNING BACKEND TESTS")
     if speed_opts and speed_opts.get('enabled'):
-        print("⚡ SPEED MODE ENABLED")
+        print("[SPEED] Speed optimizations active")
     print(f"{'='*60}")
     
     start_time = time.time()
@@ -207,7 +207,7 @@ def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, A
     print(f"\n{'='*60}")
     print("RUNNING FRONTEND TESTS")
     if speed_opts and speed_opts.get('enabled'):
-        print("⚡ SPEED MODE ENABLED")
+        print("[SPEED] Speed optimizations active")
     print(f"{'='*60}")
     
     start_time = time.time()
@@ -461,27 +461,46 @@ def _apply_speed_optimizations(cmd: List[str], speed_opts: Dict[str, bool]) -> L
     """
     optimized_cmd = cmd.copy()
     
-    # Safe optimizations (99.99% no false positives/negatives)
-    if speed_opts.get('no_warnings', False):
-        optimized_cmd.extend(['-W', 'ignore::DeprecationWarning'])
-        optimized_cmd.extend(['-W', 'ignore::PendingDeprecationWarning'])
+    # Check if we're using the backend test runner
+    is_backend_runner = any('test_backend.py' in str(c) for c in cmd)
     
-    if speed_opts.get('no_coverage', False):
-        # Skip coverage collection
-        optimized_cmd.extend(['--no-cov'])
-    
-    if speed_opts.get('fast_fail', False):
-        # Stop on first failure
-        optimized_cmd.extend(['-x', '--maxfail=1'])
-    
-    # Potentially risky optimizations (require explicit flag)
-    if speed_opts.get('skip_slow', False):
-        # Skip tests marked as slow - REQUIRES WARNING
-        print("⚠️  WARNING: Skipping slow tests - may miss important edge cases!")
-        optimized_cmd.extend(['-m', 'not slow'])
-    
-    if speed_opts.get('parallel', False) and '-n' not in ' '.join(optimized_cmd):
-        # Auto-detect CPU count for parallel execution
-        optimized_cmd.extend(['-n', 'auto'])
+    if is_backend_runner:
+        # Backend runner has specific flags
+        if speed_opts.get('fast_fail', False):
+            optimized_cmd.append('--fail-fast')
+        
+        if speed_opts.get('parallel', False):
+            # Backend runner uses --parallel flag with number
+            optimized_cmd.extend(['--parallel', 'auto'])
+        
+        if speed_opts.get('no_warnings', False):
+            # Backend runner doesn't show warnings by default
+            pass  # No specific flag needed
+        
+        # Backend runner doesn't have direct skip slow support
+        # Would need to use --markers flag
+    else:
+        # Standard pytest flags for other runners
+        if speed_opts.get('no_warnings', False):
+            optimized_cmd.extend(['-W', 'ignore::DeprecationWarning'])
+            optimized_cmd.extend(['-W', 'ignore::PendingDeprecationWarning'])
+        
+        if speed_opts.get('no_coverage', False):
+            # Skip coverage collection
+            optimized_cmd.extend(['--no-cov'])
+        
+        if speed_opts.get('fast_fail', False):
+            # Stop on first failure
+            optimized_cmd.extend(['-x', '--maxfail=1'])
+        
+        # Potentially risky optimizations (require explicit flag)
+        if speed_opts.get('skip_slow', False):
+            # Skip tests marked as slow - REQUIRES WARNING
+            print("[WARNING] Skipping slow tests - may miss important edge cases!")
+            optimized_cmd.extend(['-m', 'not slow'])
+        
+        if speed_opts.get('parallel', False) and '-n' not in ' '.join(optimized_cmd):
+            # Auto-detect CPU count for parallel execution
+            optimized_cmd.extend(['-n', 'auto'])
     
     return optimized_cmd
