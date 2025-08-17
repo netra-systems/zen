@@ -15,8 +15,10 @@ from app.security.audit_findings import (
 )
 from app.security.audit_compliance import (
     AuthenticationAuditor, ApiSecurityAuditor, SessionManagementAuditor,
-    ConfigurationAuditor, SecurityAuditor, compliance_score_calculator,
-    security_recommendation_engine
+    ConfigurationAuditor, SecurityAuditor
+)
+from app.security.audit_scoring import (
+    compliance_score_calculator, security_recommendation_engine
 )
 
 logger = central_logger.get_logger(__name__)
