@@ -47,7 +47,20 @@ Examples:
                            help='Maximum lines per file (default: 300)')
         parser.add_argument('--max-function-lines', type=int, default=8,
                            help='Maximum lines per function (default: 8)')
+        CLIHandler._add_display_arguments(parser)
         CLIHandler._add_output_arguments(parser)
+    
+    @staticmethod
+    def _add_display_arguments(parser: argparse.ArgumentParser) -> None:
+        """Add display-related arguments"""
+        parser.add_argument('--show-all', action='store_true',
+                           help='Show all violations instead of top ones')
+        parser.add_argument('--violation-limit', type=int, default=10,
+                           help='Max violations to display per category (default: 10)')
+        parser.add_argument('--no-smart-limits', action='store_true',
+                           help='Disable smart limit detection')
+        parser.add_argument('--no-emoji', action='store_true',
+                           help='Disable emoji severity markers')
     
     @staticmethod
     def _add_output_arguments(parser: argparse.ArgumentParser) -> None:

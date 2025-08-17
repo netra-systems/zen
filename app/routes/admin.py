@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from app.schemas import AppConfig
-from app.auth.auth_dependencies import ActiveUserDep, DeveloperDep, AdminDep, require_permission
+from app.dependencies.auth import ActiveUserDep, DeveloperDep, AdminDep, require_permission
 from app import schemas
 from app.config import settings
 from app.services.permission_service import PermissionService

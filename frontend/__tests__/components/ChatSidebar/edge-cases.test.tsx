@@ -6,41 +6,37 @@
 import React from 'react';
 import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
+import { renderWithProviders, safeAsync, resetAllMocks } from '../../shared/unified-test-utilities';
+import { safeAct, waitForCondition, flushPromises } from '../../helpers/test-timing-utilities';
 import { 
-  createTestSetup, 
-  renderWithProvider, 
   mockThreadService,
   sampleThreads 
 } from './setup';
 
 describe('ChatSidebar - Edge Cases', () => {
-  const testSetup = createTestSetup();
-
   beforeEach(() => {
-    testSetup.beforeEach();
+    resetAllMocks();
   });
 
   afterEach(() => {
-    testSetup.afterEach();
+    resetAllMocks();
   });
 
   describe('Error Handling and Recovery', () => {
     it('should handle API failures gracefully', async () => {
       mockThreadService.listThreads.mockRejectedValue(new Error('API Error'));
       
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      
-      renderWithProvider(<ChatSidebar />);
+      await safeAsync(async () => {
+        renderWithProviders(<ChatSidebar />);
+      });
       
       // Should not crash and show error state or render normally
-      await waitFor(() => {
+      await waitForCondition(() => {
         const errorElement = screen.queryByText(/error loading threads/i) || 
                           screen.queryByText(/something went wrong/i);
         const sidebarElement = document.querySelector('.w-80');
-        expect(errorElement || sidebarElement).toBeInTheDocument();
+        return !!(errorElement || sidebarElement);
       });
-      
-      consoleSpy.mockRestore();
     });
 
     it('should recover from transient network errors', async () => {

@@ -5,6 +5,7 @@
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
+import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { setupTestEnvironment } from './test-setup';
 
 describe('Advanced Frontend Integration Tests - Search and Drag-Drop', () => {
@@ -17,7 +18,7 @@ describe('Advanced Frontend Integration Tests - Search and Drag-Drop', () => {
   });
 
   afterEach(() => {
-    WS.clean();
+    safeWebSocketCleanup();
   });
 
   describe('21. Advanced Search Integration', () => {

@@ -103,13 +103,26 @@ class UnifiedTestRunner:
     
     def _calculate_test_metrics(self) -> Dict:
         """Calculate test metrics for enhanced reporter."""
-        backend_counts = self.results["backend"]["test_counts"]
-        frontend_counts = self.results["frontend"]["test_counts"]
+        backend_counts = self._get_backend_counts()
+        frontend_counts = self._get_frontend_counts()
+        totals = self._aggregate_test_counts(backend_counts, frontend_counts)
+        coverage = self._get_coverage_data()
+        return {**totals, "coverage": coverage}
+    
+    def _get_backend_counts(self) -> Dict:
+        """Get backend test counts."""
+        return self.results["backend"]["test_counts"]
+    
+    def _get_frontend_counts(self) -> Dict:
+        """Get frontend test counts."""
+        return self.results["frontend"]["test_counts"]
+    
+    def _aggregate_test_counts(self, backend_counts: Dict, frontend_counts: Dict) -> Dict:
+        """Aggregate test counts from backend and frontend."""
         total_tests = backend_counts["total"] + frontend_counts["total"]
         passed = backend_counts["passed"] + frontend_counts["passed"]
         failed = backend_counts["failed"] + frontend_counts["failed"]
-        coverage = self._get_coverage_data()
-        return {"total_tests": total_tests, "passed": passed, "failed": failed, "coverage": coverage}
+        return {"total_tests": total_tests, "passed": passed, "failed": failed}
     
     def _save_enhanced_report(self, level: str, report_content: str, metrics: Dict):
         """Save report using enhanced reporter."""
@@ -160,26 +173,55 @@ class UnifiedTestRunner:
         """Initialize enhanced reporter if available."""
         if not ENHANCED_REPORTER_AVAILABLE:
             return None
+        return self._create_enhanced_reporter_instance()
+    
+    def _create_enhanced_reporter_instance(self) -> Optional['EnhancedTestReporter']:
+        """Create enhanced reporter instance with error handling."""
         try:
-            reporter = EnhancedTestReporter()
-            print("[INFO] Enhanced Test Reporter enabled")
-            return reporter
+            return self._build_enhanced_reporter()
         except Exception as e:
-            print(f"[WARNING] Could not initialize Enhanced Reporter: {e}")
+            self._log_enhanced_reporter_failure(e)
             return None
+    
+    def _build_enhanced_reporter(self) -> 'EnhancedTestReporter':
+        """Build and configure enhanced reporter."""
+        reporter = EnhancedTestReporter()
+        self._log_enhanced_reporter_success()
+        return reporter
+    
+    def _log_enhanced_reporter_success(self):
+        """Log successful enhanced reporter initialization."""
+        print("[INFO] Enhanced Test Reporter enabled")
+    
+    def _log_enhanced_reporter_failure(self, error: Exception):
+        """Log enhanced reporter initialization failure."""
+        print(f"[WARNING] Could not initialize Enhanced Reporter: {error}")
     
     def _initialize_results_structure(self) -> Dict:
         """Initialize results dictionary structure."""
-        component_template = {
+        component_template = self._create_component_template()
+        overall_template = self._create_overall_template()
+        return self._build_results_structure(component_template, overall_template)
+    
+    def _create_component_template(self) -> Dict:
+        """Create template for test component results."""
+        return {
             "status": "pending", "duration": 0, "exit_code": None, "output": "",
             "test_counts": {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0},
             "coverage": None
         }
+    
+    def _create_overall_template(self) -> Dict:
+        """Create template for overall test results."""
+        return {"status": "pending", "start_time": None, "end_time": None}
+    
+    def _build_results_structure(self, component_template: Dict, overall_template: Dict) -> Dict:
+        """Build complete results structure from templates."""
         return {
             "backend": component_template.copy(),
             "frontend": component_template.copy(),
             "e2e": component_template.copy(),
-            "overall": {"status": "pending", "start_time": None, "end_time": None}
+            "overall": overall_template
         }
     
     def _setup_directories(self):

@@ -106,52 +106,6 @@ class WebSocketService {
            this.handleUnknownMessageType(obj);
   }
 
-    // Additional validation based on message type
-    switch (obj.type) {
-      case 'agent_started':
-        // Basic structure validation - don't require all fields since we handle missing ones
-        return obj.payload && typeof obj.payload === 'object' ? obj : null;
-      
-      case 'tool_executing':
-        return obj.payload && typeof obj.payload === 'object' ? obj : null;
-      
-      case 'agent_thinking':
-        return obj.payload && typeof obj.payload === 'object' ? obj : null;
-      
-      case 'partial_result':
-        return obj.payload && typeof obj.payload === 'object' ? obj : null;
-      
-      case 'agent_completed':
-        return obj.payload && typeof obj.payload === 'object' ? obj : null;
-      
-      case 'final_report':
-        return obj.payload && typeof obj.payload === 'object' ? obj : null;
-      
-      case 'error':
-        return obj.payload && typeof obj.payload === 'object' ? obj : null;
-      
-      case 'thread_created':
-      case 'thread_loading':
-      case 'thread_loaded':
-      case 'thread_renamed':
-        return obj.payload && typeof obj.payload === 'object' ? obj : null;
-      
-      case 'auth':
-      case 'ping':
-      case 'pong':
-        return obj; // These have simpler structures
-      
-      default:
-        // Allow unknown message types but log them
-        logger.debug('Unknown WebSocket message type', undefined, {
-          component: 'WebSocketService',
-          action: 'unknown_message_type',
-          metadata: { type: obj.type }
-        });
-        return obj; // Pass through unknown types
-    }
-  }
-
   private setupConnectionState(url: string, options: WebSocketOptions): boolean {
     this.url = url;
     this.options = options;

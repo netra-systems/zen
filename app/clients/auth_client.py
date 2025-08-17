@@ -205,20 +205,9 @@ class AuthServiceClient:
     
     async def _local_validate(self, token: str) -> Optional[Dict]:
         """Local token validation fallback"""
-        # Import here to avoid circular dependency
-        from app.auth.token_validator import TokenValidator
-        
-        validator = TokenValidator()
-        payload = validator.validate_token(token)
-        
-        if payload:
-            return {
-                "valid": True,
-                "user_id": payload.get("sub"),
-                "email": payload.get("email"),
-                "permissions": payload.get("permissions", [])
-            }
-        
+        # In production, this should always fail if auth service is down
+        # Consider implementing JWT validation directly here if needed
+        logger.warning("Auth service unavailable, rejecting token")
         return {"valid": False}
     
     async def close(self):

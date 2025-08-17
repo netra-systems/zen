@@ -14,7 +14,7 @@ from app.services.factory_status.factory_status_integration import (
     ComplianceAPIHandler
 )
 from app.core.exceptions_base import ValidationError as ValidationException
-from app.auth.auth_dependencies import get_current_user
+from app.dependencies.auth import get_current_user
 
 
 router = APIRouter(

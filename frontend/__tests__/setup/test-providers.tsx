@@ -1,5 +1,6 @@
 import React from 'react';
 import { AuthContext } from '@/auth/context';
+import { WebSocketContext } from '@/providers/WebSocketProvider';
 
 // Mock auth context value
 export const mockAuthContextValue = {
@@ -15,24 +16,15 @@ export const mockAuthContextValue = {
   refreshToken: jest.fn()
 };
 
-// Mock WebSocket context value
+// Mock WebSocket context value (aligned with actual interface)
 export const mockWebSocketContextValue = {
-  sendMessage: jest.fn(),
-  connect: jest.fn(),
-  disconnect: jest.fn(),
-  isConnected: true,
-  connectionState: 'connected' as const,
-  error: null,
-  lastMessage: null,
-  reconnectAttempts: 0,
-  messageQueue: [],
   status: 'OPEN' as const,
-  messages: []
+  messages: [],
+  sendMessage: jest.fn()
 };
 
-// Create a mock WebSocketProvider that doesn't actually connect
+// Use the real WebSocketContext to avoid context mismatches
 export const MockWebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const WebSocketContext = React.createContext(mockWebSocketContextValue);
   return (
     <WebSocketContext.Provider value={mockWebSocketContextValue}>
       {children}

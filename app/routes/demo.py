@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, BackgroundTasks, WebSocket
 from typing import Optional, Dict, Any, List
 
-from app.auth.auth_dependencies import get_current_user
+from app.dependencies.auth import get_current_user
 from app.services.demo_service import DemoService, get_demo_service
 from app.schemas.demo_schemas import (
     DemoChatRequest, DemoChatResponse, ROICalculationRequest, ROICalculationResponse,

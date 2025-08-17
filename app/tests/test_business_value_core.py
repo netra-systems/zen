@@ -8,7 +8,7 @@ import uuid
 from unittest.mock import AsyncMock, patch
 from typing import Dict, List
 
-from .test_business_value_fixtures import BusinessValueFixtures
+from app.tests.test_business_value_fixtures import BusinessValueFixtures
 
 
 class TestBusinessValueCore(BusinessValueFixtures):

@@ -148,3 +148,21 @@ variable "auth_service_max_instances" {
   type        = number
   default     = 10
 }
+
+variable "jwt_secret" {
+  description = "JWT secret for auth service"
+  type        = string
+  sensitive   = true
+}
+
+variable "auth_database_url" {
+  description = "Database URL for auth service"
+  type        = string
+  sensitive   = true
+}
+
+variable "cors_origins" {
+  description = "CORS origins for auth service"
+  type        = string
+  default     = "https://netrasystems.ai,https://app.netrasystems.ai"
+}

@@ -166,15 +166,16 @@ def check_database_tables(conn) -> bool:
     print_table_results(tables)
     return bool(tables)
 
-def check_database_connection() -> bool:
-    """Test PostgreSQL database connection."""
-    print_section("PostgreSQL Connection Test")
-    
+def validate_database_url() -> str:
+    """Validate DATABASE_URL environment variable."""
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
         print(f"{Fore.RED}✗ DATABASE_URL not set{Style.RESET_ALL}")
-        return False
-    
+        return ""
+    return db_url
+
+def perform_database_connection_test(db_url: str) -> bool:
+    """Perform database connection and testing."""
     try:
         conn_type, params = parse_database_url(db_url)
         conn = create_db_connection(conn_type, params)
@@ -185,6 +186,14 @@ def check_database_connection() -> bool:
     except Exception as e:
         print(f"{Fore.RED}✗ PostgreSQL connection failed: {e}{Style.RESET_ALL}")
         return False
+
+def check_database_connection() -> bool:
+    """Test PostgreSQL database connection."""
+    print_section("PostgreSQL Connection Test")
+    db_url = validate_database_url()
+    if not db_url:
+        return False
+    return perform_database_connection_test(db_url)
 
 def check_redis_connection() -> bool:
     """Test Redis connection."""

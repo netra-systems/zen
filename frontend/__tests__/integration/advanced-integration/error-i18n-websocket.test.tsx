@@ -5,6 +5,7 @@
 import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
+import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { setupTestEnvironment } from './test-setup';
 
 describe('Advanced Frontend Integration Tests - Error, i18n, WebSocket', () => {
@@ -17,7 +18,7 @@ describe('Advanced Frontend Integration Tests - Error, i18n, WebSocket', () => {
   });
 
   afterEach(() => {
-    WS.clean();
+    safeWebSocketCleanup();
   });
 
   describe('27. Advanced Error Boundaries', () => {

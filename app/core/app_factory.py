@@ -23,7 +23,7 @@ from app.core.error_handlers import (
     http_exception_handler,
     general_exception_handler,
 )
-from app.auth.auth import oauth_client
+# OAuth now handled by auth service
 
 
 def create_fastapi_app() -> FastAPI:

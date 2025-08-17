@@ -12,9 +12,14 @@ from .core import Violation, ComplianceResults
 class ComplianceReporter:
     """Generates compliance reports"""
     
-    def __init__(self, max_file_lines: int, max_function_lines: int):
+    def __init__(self, max_file_lines: int, max_function_lines: int,
+                 default_limit: int = 10, smart_limits: bool = True,
+                 use_emoji: bool = True):
         self.max_file_lines = max_file_lines
         self.max_function_lines = max_function_lines
+        self.default_limit = default_limit
+        self.smart_limits = smart_limits
+        self.use_emoji = use_emoji
     
     def generate_report(self, results: ComplianceResults) -> str:
         """Generate full compliance report"""
@@ -49,21 +54,26 @@ class ComplianceReporter:
     def _print_file_violations(self, file_violations: List[Violation]) -> None:
         """Print file violation details"""
         if file_violations:
-            self._print_violation_list(file_violations, 10, "lines")
+            sorted_violations = self._sort_violations_by_severity(file_violations)
+            limit = self._get_smart_limit(len(sorted_violations))
+            self._print_violation_list(sorted_violations, limit, "lines")
             print(f"\n  Total violations: {len(file_violations)}")
         else:
             print("  [PASS] No violations found")
     
     def _print_violation_list(self, violations: List[Violation], limit: int, suffix: str) -> None:
         """Print a limited list of violations"""
-        for violation in violations[:limit]:
-            print(f"  {violation.actual_value:4d} {suffix}: {violation.file_path}")
-        self._print_truncation_message(violations, limit)
+        displayed = min(limit, len(violations))
+        for violation in violations[:displayed]:
+            severity_marker = self._get_severity_marker(violation.severity)
+            print(f"  {severity_marker} {violation.actual_value:4d} {suffix}: {violation.file_path}")
+        self._print_truncation_message(violations, displayed)
     
     def _print_truncation_message(self, violations: List[Violation], limit: int) -> None:
         """Print truncation message if needed"""
-        if len(violations) > limit:
-            print(f"  ... and {len(violations)-limit} more files")
+        remaining = len(violations) - limit
+        if remaining > 0:
+            print(f"  ... and {remaining} more (use --show-all to see all)")
     
     def _report_function_complexity_violations(self, results: ComplianceResults) -> None:
         """Report function complexity violations"""
@@ -90,26 +100,32 @@ class ComplianceReporter:
     def _print_function_error_list(self, func_errors: List[Violation]) -> None:
         """Print function error violations"""
         print("  VIOLATIONS (must fix):")
-        for violation in func_errors[:5]:
+        sorted_errors = self._sort_violations_by_severity(func_errors)
+        limit = self._get_smart_limit(len(sorted_errors), base_limit=5)
+        for violation in sorted_errors[:limit]:
             print(f"    {violation.actual_value:3d} lines: {violation.function_name}() in {violation.file_path}")
-        self._print_error_truncation(func_errors)
+        self._print_error_truncation(sorted_errors, limit)
     
-    def _print_error_truncation(self, func_errors: List[Violation]) -> None:
+    def _print_error_truncation(self, func_errors: List[Violation], limit: int) -> None:
         """Print error truncation message if needed"""
-        if len(func_errors) > 5:
-            print(f"    ... and {len(func_errors)-5} more violations")
+        remaining = len(func_errors) - limit
+        if remaining > 0:
+            print(f"    ... and {remaining} more violations")
     
     def _print_function_warning_list(self, func_warnings: List[Violation]) -> None:
         """Print function warning violations"""
         print("\n  WARNINGS (example/demo files):")
-        for violation in func_warnings[:5]:
+        sorted_warnings = self._sort_violations_by_severity(func_warnings)
+        limit = self._get_smart_limit(len(sorted_warnings), base_limit=5)
+        for violation in sorted_warnings[:limit]:
             print(f"    {violation.actual_value:3d} lines: {violation.function_name}() in {violation.file_path}")
-        self._print_warning_truncation(func_warnings)
+        self._print_warning_truncation(sorted_warnings, limit)
     
-    def _print_warning_truncation(self, func_warnings: List[Violation]) -> None:
+    def _print_warning_truncation(self, func_warnings: List[Violation], limit: int) -> None:
         """Print warning truncation message if needed"""
-        if len(func_warnings) > 5:
-            print(f"    ... and {len(func_warnings)-5} more warnings")
+        remaining = len(func_warnings) - limit
+        if remaining > 0:
+            print(f"    ... and {remaining} more warnings")
     
     def _print_function_summary(self, func_errors: List[Violation], func_warnings: List[Violation]) -> None:
         """Print function violation summary"""
@@ -135,15 +151,18 @@ class ComplianceReporter:
     
     def _print_duplicate_list(self, duplicate_violations: List[Violation]) -> None:
         """Print duplicate violation list"""
-        for violation in duplicate_violations[:10]:
+        sorted_dups = self._sort_violations_by_severity(duplicate_violations)
+        limit = self._get_smart_limit(len(sorted_dups))
+        for violation in sorted_dups[:limit]:
             print(f"  {violation.description}")
             print(f"    Files: {violation.file_path}")
-        self._print_duplicate_truncation(duplicate_violations)
+        self._print_duplicate_truncation(sorted_dups, limit)
     
-    def _print_duplicate_truncation(self, duplicate_violations: List[Violation]) -> None:
+    def _print_duplicate_truncation(self, duplicate_violations: List[Violation], limit: int) -> None:
         """Print duplicate truncation message if needed"""
-        if len(duplicate_violations) > 10:
-            print(f"\n  ... and {len(duplicate_violations)-10} more duplicate types")
+        remaining = len(duplicate_violations) - limit
+        if remaining > 0:
+            print(f"\n  ... and {remaining} more duplicate types")
     
     def _report_test_stub_violations(self, results: ComplianceResults) -> None:
         """Report test stub violations"""
@@ -162,21 +181,25 @@ class ComplianceReporter:
     
     def _print_test_stub_list(self, test_stub_violations: List[Violation]) -> None:
         """Print test stub violation list"""
-        for violation in test_stub_violations[:10]:
+        sorted_stubs = self._sort_violations_by_severity(test_stub_violations)
+        limit = self._get_smart_limit(len(sorted_stubs))
+        for violation in sorted_stubs[:limit]:
             line_info = f" (line {violation.line_number})" if violation.line_number else ""
             print(f"  {violation.file_path}{line_info}: {violation.description}")
-        self._print_stub_truncation(test_stub_violations)
+        self._print_stub_truncation(sorted_stubs, limit)
     
-    def _print_stub_truncation(self, test_stub_violations: List[Violation]) -> None:
+    def _print_stub_truncation(self, test_stub_violations: List[Violation], limit: int) -> None:
         """Print stub truncation message if needed"""
-        if len(test_stub_violations) > 10:
-            print(f"  ... and {len(test_stub_violations)-10} more files")
+        remaining = len(test_stub_violations) - limit
+        if remaining > 0:
+            print(f"  ... and {remaining} more files")
     
     def _generate_final_summary(self, results: ComplianceResults) -> str:
         """Generate final compliance summary"""
         print("\n" + "="*80)
         print("SUMMARY")
         print("="*80)
+        self._print_detailed_statistics(results)
         actual_violations, total_warnings = self._count_violations(results)
         return self._determine_compliance_status(results, actual_violations, total_warnings)
     
@@ -248,3 +271,78 @@ class ComplianceReporter:
             "duplicate_types": len(duplicate_violations),
             "test_stub": len(test_stub_violations)
         }
+    
+    def _sort_violations_by_severity(self, violations: List[Violation]) -> List[Violation]:
+        """Sort violations by severity and impact"""
+        severity_order = {'high': 0, 'medium': 1, 'low': 2}
+        return sorted(violations, key=lambda v: (
+            severity_order.get(v.severity, 3),
+            -(v.actual_value or 0),
+            v.file_path
+        ))
+    
+    def _get_smart_limit(self, total_count: int, base_limit: int = None) -> int:
+        """Get smart display limit based on violation count"""
+        if not self.smart_limits:
+            return base_limit or self.default_limit
+        if total_count <= 5:
+            return total_count
+        elif total_count <= 10:
+            return min(total_count, base_limit or self.default_limit)
+        elif total_count <= 20:
+            return min(10, base_limit or self.default_limit)
+        else:
+            return min(base_limit or self.default_limit, max(5, total_count // 10))
+    
+    def _get_severity_marker(self, severity: str) -> str:
+        """Get visual marker for severity level"""
+        if not self.use_emoji:
+            text_markers = {'high': '[H]', 'medium': '[M]', 'low': '[L]'}
+            return text_markers.get(severity, '[ ]')
+        markers = {'high': '🔴', 'medium': '🟡', 'low': '🟢'}
+        return markers.get(severity, '⚪')
+    
+    def _print_detailed_statistics(self, results: ComplianceResults) -> None:
+        """Print detailed violation statistics"""
+        print("\nViolation Statistics:")
+        print("-" * 40)
+        stats = self._calculate_statistics(results)
+        self._display_statistics(stats)
+    
+    def _calculate_statistics(self, results: ComplianceResults) -> Dict:
+        """Calculate detailed statistics"""
+        stats = {'total': len(results.violations)}
+        for vtype in ['file_size', 'function_complexity', 'duplicate_types', 'test_stub']:
+            violations = self._get_violations_by_type(results, vtype)
+            stats[vtype] = self._get_type_statistics(violations, vtype)
+        return stats
+    
+    def _get_type_statistics(self, violations: List[Violation], vtype: str) -> Dict:
+        """Get statistics for a violation type"""
+        if vtype == 'function_complexity':
+            return self._get_function_statistics(violations)
+        return {'count': len(violations), 'files': len(set(v.file_path for v in violations))}
+    
+    def _get_function_statistics(self, violations: List[Violation]) -> Dict:
+        """Get function-specific statistics"""
+        errors = [v for v in violations if v.severity == 'medium']
+        warnings = [v for v in violations if v.severity == 'low']
+        return {
+            'count': len(violations),
+            'errors': len(errors),
+            'warnings': len(warnings),
+            'files': len(set(v.file_path for v in violations))
+        }
+    
+    def _display_statistics(self, stats: Dict) -> None:
+        """Display formatted statistics"""
+        if stats.get('file_size', {}).get('count', 0) > 0:
+            print(f"  File Size: {stats['file_size']['count']} files")
+        if stats.get('function_complexity', {}).get('count', 0) > 0:
+            fc = stats['function_complexity']
+            print(f"  Functions: {fc['errors']} errors, {fc['warnings']} warnings")
+        if stats.get('duplicate_types', {}).get('count', 0) > 0:
+            print(f"  Duplicates: {stats['duplicate_types']['count']} types")
+        if stats.get('test_stub', {}).get('count', 0) > 0:
+            print(f"  Test Stubs: {stats['test_stub']['count']} instances")
+        print(f"\n  Total Violations: {stats['total']}")

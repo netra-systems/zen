@@ -7,6 +7,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
+import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 
 import { useAuthStore } from '@/store/authStore';
 import { useChatStore } from '@/store/chatStore';
@@ -77,7 +78,7 @@ export class TestSetup {
 
   afterEach() {
     if (this.server) {
-      WS.clean();
+      safeWebSocketCleanup();
     }
     jest.restoreAllMocks();
   }

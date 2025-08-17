@@ -16,7 +16,7 @@ from app.services.factory_status.report_builder import ReportBuilder, FactorySta
 #     init_compliance_api, ComplianceAPIHandler
 # )
 from app.core.exceptions import NetraException
-from app.auth.auth_dependencies import get_current_user
+from app.dependencies.auth import get_current_user
 
 
 router = APIRouter(

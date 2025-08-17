@@ -30,32 +30,32 @@ export function getAuthServiceConfig(): AuthServiceConfig {
   const env = process.env.NODE_ENV;
   const authServiceUrl = process.env.NEXT_PUBLIC_AUTH_SERVICE_URL;
   
-  // Determine base URL
+  // Determine base URL for standalone auth service
   let baseUrl: string;
   if (authServiceUrl) {
     baseUrl = authServiceUrl;
   } else if (env === 'production') {
     baseUrl = 'https://auth.netrasystems.ai';
   } else if (env === 'staging' || process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
-    baseUrl = 'https://auth.staging.netrasystems.ai';
+    baseUrl = 'https://auth-service-staging.run.app'; // Cloud Run URL
   } else {
-    // Development
-    baseUrl = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8080';
+    // Development - auth service runs on port 8081
+    baseUrl = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081';
   }
   
   // Build configuration
   const config: AuthServiceConfig = {
     baseUrl,
     endpoints: {
-      login: `${baseUrl}/api/auth/login`,
-      logout: `${baseUrl}/api/auth/logout`,
-      callback: `${baseUrl}/api/auth/callback`,
-      token: `${baseUrl}/api/auth/token`,
-      refresh: `${baseUrl}/api/auth/refresh`,
-      validate: `${baseUrl}/api/auth/validate`,
-      config: `${baseUrl}/api/auth/config`,
-      session: `${baseUrl}/api/auth/session`,
-      me: `${baseUrl}/api/auth/me`,
+      login: `${baseUrl}/auth/login`,
+      logout: `${baseUrl}/auth/logout`,
+      callback: `${baseUrl}/auth/callback`,
+      token: `${baseUrl}/auth/token`,
+      refresh: `${baseUrl}/auth/refresh`,
+      validate: `${baseUrl}/auth/validate`,
+      config: `${baseUrl}/auth/config`,
+      session: `${baseUrl}/auth/session`,
+      me: `${baseUrl}/auth/me`,
     },
     oauth: {
       googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,

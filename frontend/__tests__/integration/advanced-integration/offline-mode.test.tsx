@@ -5,6 +5,7 @@
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import WS from 'jest-websocket-mock';
+import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { setupTestEnvironment } from './test-setup';
 
 describe('Advanced Frontend Integration Tests - Offline Mode', () => {
@@ -17,7 +18,7 @@ describe('Advanced Frontend Integration Tests - Offline Mode', () => {
   });
 
   afterEach(() => {
-    WS.clean();
+    safeWebSocketCleanup();
   });
 
   describe('19. Offline Mode Integration', () => {

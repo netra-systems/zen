@@ -4,6 +4,7 @@
  */
 
 import WS from 'jest-websocket-mock';
+import { safeWebSocketCleanup } from '../../helpers/websocket-test-manager';
 import { useAuthStore } from '@/store/authStore';
 import { useChatStore } from '@/store/chatStore';
 import { useThreadStore } from '@/store/threadStore';
@@ -32,6 +33,6 @@ export const setupGlobalFetch = (): void => {
 };
 
 export const cleanupWebSocket = (): void => {
-  WS.clean();
+  safeWebSocketCleanup();
   jest.restoreAllMocks();
 };

@@ -6,8 +6,9 @@ import os
 import socket
 from pathlib import Path
 from typing import Dict, Tuple, Optional, List
-from datetime import datetime
 import logging
+
+from dev_launcher.env_file_loader import EnvFileLoader
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ class SecretLoader:
         self.project_root = project_root or Path.cwd()
         self.loaded_secrets: Dict[str, str] = {}
         self.failed_secrets: List[Tuple[str, str]] = []
+        self.env_file_loader = EnvFileLoader(self.project_root, verbose)
     
     def _determine_project_id(self, project_id: Optional[str]) -> str:
         """Determine project ID based on environment."""
@@ -39,35 +41,7 @@ class SecretLoader:
     
     def load_from_env_file(self, env_file: Optional[Path] = None) -> Dict[str, Tuple[str, str]]:
         """Load secrets from an environment file."""
-        if env_file is None:
-            env_file = self.project_root / ".env"
-        loaded = {}
-        if env_file.exists():
-            self._load_existing_env_file(env_file, loaded)
-        else:
-            logger.debug(f"No .env file found at {env_file}")
-        return loaded
-    
-    def _load_existing_env_file(self, env_file: Path, loaded: Dict):
-        """Load from existing environment file."""
-        logger.info(f"Loading from existing .env file: {env_file}")
-        with open(env_file, 'r') as f:
-            for line in f:
-                self._process_env_line(line, loaded)
-    
-    def _process_env_line(self, line: str, loaded: Dict):
-        """Process single environment file line."""
-        line = line.strip()
-        if line and not line.startswith('#') and '=' in line:
-            key, value = line.split('=', 1)
-            loaded[key] = (value.strip('"\''), "env_file")
-            self._log_loaded_value(key, value)
-    
-    def _log_loaded_value(self, key: str, value: str):
-        """Log loaded value if verbose."""
-        if self.verbose:
-            masked_value = self._mask_value(value)
-            logger.debug(f"  Loaded {key}: {masked_value} (from .env file)")
+        return self.env_file_loader.load_from_env_file(env_file)
     
     def load_from_google_secrets(self) -> Dict[str, Tuple[str, str]]:
         """Load secrets from Google Secret Manager."""
@@ -167,11 +141,10 @@ class SecretLoader:
         logger.info("=" * 70)
         logger.info("[LOCK] SECRET AND ENVIRONMENT VARIABLE LOADING PROCESS")
         logger.info("=" * 70)
-        env_tracking = {}
         existing_env = self._capture_existing_env()
-        env_secrets = self._load_env_file()
-        dev_secrets = self._load_dev_env_file()
-        terraform_secrets = self._load_terraform_env_file()
+        env_secrets = self.env_file_loader.load_env_file()
+        dev_secrets = self.env_file_loader.load_dev_env_file()
+        terraform_secrets = self.env_file_loader.load_terraform_env_file()
         google_secrets = self._load_google_secrets_conditionally(terraform_secrets)
         static_config = self._get_static_config()
         self._merge_and_set_environment(existing_env, env_secrets, dev_secrets, 
@@ -180,48 +153,8 @@ class SecretLoader:
     
     def _capture_existing_env(self) -> Dict[str, Tuple[str, str]]:
         """Capture existing OS environment variables."""
-        logger.info("\n[STEP 1] Checking existing OS environment variables...")
-        existing_env = {}
         relevant_keys = set(self._get_secret_mappings().values()) | set(self._get_static_config().keys())
-        for key in os.environ:
-            if self._is_relevant_env_key(key, relevant_keys):
-                existing_env[key] = (os.environ[key], "os_environment")
-                logger.info(f"  [OK] Found {key} in OS environment")
-        return existing_env
-    
-    def _is_relevant_env_key(self, key: str, relevant_keys: set) -> bool:
-        """Check if environment key is relevant."""
-        return (key in relevant_keys or 
-                key.startswith(("CLICKHOUSE_", "REDIS_", "GOOGLE_", "JWT_", "LANGFUSE_")))
-    
-    def _load_env_file(self) -> Dict[str, Tuple[str, str]]:
-        """Load from .env file."""
-        logger.info("\n[STEP 2] Loading from .env file...")
-        env_file = self.project_root / ".env"
-        return self._load_env_file_with_logging(env_file, ".env")
-    
-    def _load_dev_env_file(self) -> Dict[str, Tuple[str, str]]:
-        """Load from .env.development file."""
-        logger.info("\n[STEP 3] Loading from .env.development...")
-        dev_env_file = self.project_root / ".env.development"
-        return self._load_env_file_with_logging(dev_env_file, ".env.development")
-    
-    def _load_terraform_env_file(self) -> Dict[str, Tuple[str, str]]:
-        """Load from Terraform-generated .env.development.local."""
-        logger.info("\n[STEP 4] Loading from .env.development.local (Terraform)...")
-        terraform_env_file = self.project_root / ".env.development.local"
-        return self._load_env_file_with_logging(terraform_env_file, "Terraform config")
-    
-    def _load_env_file_with_logging(self, env_file: Path, description: str) -> Dict[str, Tuple[str, str]]:
-        """Load environment file with logging."""
-        if env_file.exists():
-            logger.info(f"  [FILE] Reading: {env_file}")
-            secrets = self.load_from_env_file(env_file)
-            logger.info(f"  [OK] Loaded {len(secrets)} variables from {description}")
-            return secrets
-        else:
-            logger.info(f"  [WARN] No {description} file found")
-            return {}
+        return self.env_file_loader.capture_existing_env(relevant_keys)
     
     def _load_google_secrets_conditionally(self, terraform_secrets: Dict) -> Dict[str, Tuple[str, str]]:
         """Load Google secrets conditionally."""

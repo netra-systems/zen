@@ -22,13 +22,15 @@ class ArchitectureEnforcer:
     """Orchestrates architectural rule enforcement"""
     
     def __init__(self, root_path: str = ".", max_file_lines: int = 300, 
-                 max_function_lines: int = 8):
+                 max_function_lines: int = 8, violation_limit: int = 10,
+                 smart_limits: bool = True, use_emoji: bool = True):
         self.config = ComplianceConfig(root_path, max_file_lines, max_function_lines)
         self.file_checker = FileChecker(self.config)
         self.function_checker = FunctionChecker(self.config)
         self.type_checker = TypeChecker(self.config)
         self.stub_checker = StubChecker(self.config)
-        self.reporter = ComplianceReporter(max_file_lines, max_function_lines)
+        self.reporter = ComplianceReporter(max_file_lines, max_function_lines,
+                                          violation_limit, smart_limits, use_emoji)
     
     def run_all_checks(self) -> ComplianceResults:
         """Run all compliance checks and return structured results"""

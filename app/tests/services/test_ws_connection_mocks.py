@@ -210,7 +210,7 @@ class WebSocketTestHelpers:
         """Connect multiple WebSocket users to manager"""
         connections = []
         for user_id, websocket in websockets.items():
-            conn_info = await ws_manager.connect(user_id, websocket)
+            conn_info = await ws_manager.connect_user(user_id, websocket)
             connections.append((user_id, websocket, conn_info))
         return connections
         
@@ -218,7 +218,7 @@ class WebSocketTestHelpers:
     async def cleanup_connections(ws_manager: WebSocketManager, connections: List):
         """Clean up list of WebSocket connections"""
         for user_id, websocket, _ in connections:
-            await ws_manager.disconnect(user_id, websocket)
+            await ws_manager.disconnect_user(user_id, websocket)
             
     @staticmethod
     def verify_connection_messages(websocket: MockWebSocket, 
