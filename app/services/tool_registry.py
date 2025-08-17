@@ -11,7 +11,7 @@
 from typing import List
 from langchain_core.tools import BaseTool
 
-class ToolRegistry:
+class AgentToolConfigRegistry:
     def __init__(self, db_session):
         self.db_session = db_session
         self._tool_configs = {
@@ -29,3 +29,8 @@ class ToolRegistry:
             if name in self._tool_configs:
                 tools.extend(self._tool_configs[name])
         return tools
+
+
+# Backward compatibility alias - DEPRECATED
+# Use AgentToolConfigRegistry instead for clarity
+ToolRegistry = AgentToolConfigRegistry

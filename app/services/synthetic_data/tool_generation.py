@@ -14,7 +14,7 @@ class ToolGenerationHelper:
         self.default_tools = default_tools
 
     async def generate_tool_invocations(self, count: int, pattern: str) -> List[Dict]:
-        """Generate tool invocations for testing"""
+        """Generate synthetic tool invocation data"""
         invocations = []
         for i in range(count):
             inv = self._generate_single_tool_set(pattern)

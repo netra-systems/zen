@@ -58,7 +58,7 @@ class CircuitBreaker:
         return await self._can_execute()
     
     def record_failure(self, error_type: str) -> None:
-        """Record failure synchronously for testing."""
+        """Record failure and update circuit breaker state."""
         self._failure_count += 1
         self._last_failure_time = time.time()
         self.metrics.total_calls += 1
@@ -73,7 +73,7 @@ class CircuitBreaker:
             self._transition_to_open_sync()
     
     def record_success(self) -> None:
-        """Record success synchronously for testing."""
+        """Record successful execution and update metrics."""
         self.metrics.total_calls += 1
         self.metrics.successful_calls += 1
         self.metrics.last_success_time = time.time()

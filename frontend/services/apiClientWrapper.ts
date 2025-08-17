@@ -22,7 +22,11 @@ class ApiClientWrapper {
   private connectionCheckPromise: Promise<boolean> | null = null;
   
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://api.staging.netrasystems.ai';
+    // Ensure HTTPS in production
+    if (typeof window !== 'undefined' && window.location.protocol === 'https:') {
+      this.baseURL = this.baseURL.replace(/^http:/, 'https:');
+    }
     this.checkConnection();
   }
 

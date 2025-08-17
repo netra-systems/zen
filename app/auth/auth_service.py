@@ -162,8 +162,8 @@ class AuthTokenService:
             return None
 
 
-class AuthSessionManager:
-    """Manages OAuth sessions and state for security."""
+class OAuthSessionManager:
+    """Manages OAuth session state and CSRF protection during authentication flows."""
     
     def __init__(self):
         """Initialize session manager."""
@@ -205,16 +205,21 @@ class AuthSessionManager:
         return state_data
 
 
+# Backward compatibility alias - DEPRECATED
+# Use OAuthSessionManager instead for clarity  
+AuthSessionManager = OAuthSessionManager
+
+
 # Initialize services
 auth_token_service = AuthTokenService()
-auth_session_manager = AuthSessionManager()
+oauth_session_manager = OAuthSessionManager()
 
 
 @app.get("/auth/login")
 async def initiate_oauth_login(request: Request, pr: Optional[str] = None, return_url: Optional[str] = None):
     """Initiate OAuth flow with Google."""
     validated_return_url = _validate_and_get_return_url(return_url)
-    state_id = await auth_session_manager.create_oauth_state(pr, validated_return_url)
+    state_id = await oauth_session_manager.create_oauth_state(pr, validated_return_url)
     oauth_config = auth_env_config.get_oauth_config()
     auth_url = _build_google_oauth_url(oauth_config, state_id)
     logger.info(f"Initiating OAuth login for {'PR ' + pr if pr else 'environment'}")
@@ -295,7 +300,7 @@ def _get_oauth_redirect_uri() -> str:
 @app.get("/auth/callback")
 async def handle_oauth_callback(request: Request, code: str, state: str):
     """Handle OAuth callback from Google."""
-    state_data = await auth_session_manager.validate_and_consume_state(state)
+    state_data = await oauth_session_manager.validate_and_consume_state(state)
     oauth_config = auth_env_config.get_oauth_config()
     token_data = await _exchange_code_for_tokens(code, oauth_config)
     user_info = await _get_user_info_from_google(token_data["access_token"])

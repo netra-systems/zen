@@ -1,12 +1,13 @@
 """Tool registration and management for the dispatcher."""
 from typing import List, Dict, Any, Optional
 from langchain_core.tools import BaseTool
+from app.schemas.Tool import ToolRegistryInterface
 from app.agents.production_tool import ProductionTool
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
-class ToolRegistry:
+class ToolRegistry(ToolRegistryInterface):
     """Manages tool registration and retrieval"""
     
     def __init__(self):

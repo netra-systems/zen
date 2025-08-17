@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from app.logging_config import central_logger as logger
+from app.config import get_config
 
 
 class Environment(Enum):
@@ -77,15 +78,20 @@ class EnvironmentAuthConfig:
     
     def _get_dev_config(self) -> OAuthConfig:
         """Development environment OAuth configuration."""
+        # Get OAuth credentials from config first, then fallback to env vars
+        config = get_config()
+        
         # Support multiple naming conventions for dev OAuth credentials
-        # Priority order: DEV specific > Generic > Empty
+        # Priority order: Config > DEV specific > Generic > Empty
         client_id = (
+            config.oauth_config.client_id or
             os.getenv("GOOGLE_OAUTH_CLIENT_ID_DEV") or 
             os.getenv("GOOGLE_CLIENT_ID") or
             os.getenv("GOOGLE_OAUTH_CLIENT_ID") or
             ""
         )
         client_secret = (
+            config.oauth_config.client_secret or
             os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_DEV") or 
             os.getenv("GOOGLE_CLIENT_SECRET") or
             os.getenv("GOOGLE_OAUTH_CLIENT_SECRET") or
@@ -138,11 +144,16 @@ class EnvironmentAuthConfig:
     
     def _get_staging_config(self) -> OAuthConfig:
         """Staging environment OAuth configuration."""
+        # Get OAuth credentials from config (loaded from Secret Manager)
+        config = get_config()
+        client_id = config.oauth_config.client_id or os.getenv("GOOGLE_OAUTH_CLIENT_ID_STAGING", "")
+        client_secret = config.oauth_config.client_secret or os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", "")
+        
         # For PR environments, use the OAuth proxy
         if self.is_pr_environment:
             return OAuthConfig(
-                client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID_STAGING", ""),
-                client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", ""),
+                client_id=client_id,
+                client_secret=client_secret,
                 redirect_uris=[
                     "https://auth.staging.netrasystems.ai/callback",
                 ],
@@ -159,8 +170,8 @@ class EnvironmentAuthConfig:
         
         # Regular staging environment
         return OAuthConfig(
-            client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID_STAGING", ""),
-            client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_STAGING", ""),
+            client_id=client_id,
+            client_secret=client_secret,
             redirect_uris=[
                 "https://staging.netrasystems.ai/api/auth/callback",
                 "https://api.staging.netrasystems.ai/auth/callback",
@@ -175,9 +186,14 @@ class EnvironmentAuthConfig:
     
     def _get_prod_config(self) -> OAuthConfig:
         """Production environment OAuth configuration."""
+        # Get OAuth credentials from config (loaded from Secret Manager)
+        config = get_config()
+        client_id = config.oauth_config.client_id or os.getenv("GOOGLE_OAUTH_CLIENT_ID_PROD", "")
+        client_secret = config.oauth_config.client_secret or os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_PROD", "")
+        
         return OAuthConfig(
-            client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID_PROD", ""),
-            client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_PROD", ""),
+            client_id=client_id,
+            client_secret=client_secret,
             redirect_uris=[
                 "https://api.netrasystems.ai/api/auth/callback",
                 "https://netrasystems.ai/auth/callback",

@@ -151,6 +151,11 @@ def is_origin_allowed(origin: str, allowed_origins: List[str]) -> bool:
         cloud_run_pattern = r'^https://netra-(frontend|backend)-[a-zA-Z0-9\-]+\.(us-central1|europe-west1|asia-northeast1)\.run\.app$'
         if re.match(cloud_run_pattern, origin):
             return True
+        
+        # Allow frontend-specific Cloud Run pattern with numeric suffixes
+        netra_frontend_pattern = r'^https://netra-frontend-[0-9]+\.(us-central1|europe-west1|asia-northeast1)\.run\.app$'
+        if re.match(netra_frontend_pattern, origin):
+            return True
     
     return False
 

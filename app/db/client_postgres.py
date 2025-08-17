@@ -298,11 +298,11 @@ class ResilientDatabaseClient:
         return await TransactionExecutor.execute_transaction(queries)
 
     async def _get_read_circuit(self):
-        """Get read circuit breaker for testing."""
+        """Get read circuit breaker for database operations."""
         return await CircuitBreakerManager.get_read_circuit()
     
     async def _get_postgres_circuit(self):
-        """Get postgres circuit breaker for testing."""
+        """Get postgres circuit breaker for database operations."""
         return await CircuitBreakerManager.get_postgres_circuit()
 
     async def _test_connection(self) -> Dict[str, Any]:

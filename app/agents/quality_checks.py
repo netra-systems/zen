@@ -6,6 +6,7 @@ to maintain the 300-line and 8-line function limits per CLAUDE.md.
 
 from typing import Dict, Optional, Any
 from app.logging_config import central_logger
+from app.schemas.quality_types import QualityValidatorInterface, QualityValidationResult
 from app.agents.supervisor.execution_context import AgentExecutionContext
 from app.agents.state import DeepAgentState
 from app.services.quality_gate_service import (
@@ -15,7 +16,7 @@ from app.services.quality_gate_service import (
 logger = central_logger.get_logger(__name__)
 
 
-class QualityValidator:
+class QualityValidator(QualityValidatorInterface):
     """Handles quality validation logic for supervisor agents."""
     
     def __init__(self, quality_gate_service: Optional[QualityGateService],
@@ -286,3 +287,62 @@ class QualityActions:
         if not hasattr(state, 'fallbacks_used'):
             state.fallbacks_used = {}
         state.fallbacks_used[agent_name] = True
+    
+    # Interface Implementation Methods
+    async def validate_content(
+        self, 
+        content: str, 
+        content_type: Optional[str] = None,
+        context: Optional[Dict[str, Any]] = None
+    ) -> QualityValidationResult:
+        """Validate content and return detailed quality results"""
+        if not self.quality_gate_service:
+            return self._create_default_validation_result(content)
+        
+        content_type_enum = self._convert_content_type_string(content_type)
+        validation_result = await self.quality_gate_service.validate_content(
+            content=content,
+            content_type=content_type_enum,
+            context=context or {},
+            strict_mode=self.strict_mode
+        )
+        
+        return validation_result
+    
+    def _convert_content_type_string(self, content_type: Optional[str]) -> ContentType:
+        """Convert string content type to ContentType enum"""
+        if not content_type:
+            return ContentType.GENERAL
+        try:
+            return ContentType(content_type.lower())
+        except ValueError:
+            return ContentType.GENERAL
+    
+    def _create_default_validation_result(self, content: str) -> QualityValidationResult:
+        """Create default validation result when no quality gate service available"""
+        from datetime import datetime, UTC
+        from app.schemas.quality_types import QualityMetrics, QualityLevel
+        
+        metrics = QualityMetrics(
+            overall_score=50.0, quality_level=QualityLevel.ACCEPTABLE,
+            specificity_score=50.0, actionability_score=50.0,
+            quantification_score=50.0, relevance_score=50.0,
+            completeness_score=50.0, novelty_score=50.0, clarity_score=50.0,
+            word_count=len(content.split()), generic_phrase_count=0,
+            circular_reasoning_detected=False, hallucination_risk=0.0,
+            redundancy_ratio=0.0, issues=[], suggestions=[]
+        )
+        
+        return QualityValidationResult(
+            passed=True, metrics=metrics, retry_suggested=False,
+            retry_prompt_adjustments=[], validation_duration_ms=0.0
+        )
+    
+    def get_validation_stats(self) -> Dict[str, Any]:
+        """Get validation statistics"""
+        return {
+            "validator_type": "SupervisorQualityValidator",
+            "has_quality_gate_service": self.quality_gate_service is not None,
+            "strict_mode": self.strict_mode,
+            "quality_stats": self.quality_stats.copy()
+        }

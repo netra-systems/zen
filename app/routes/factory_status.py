@@ -328,7 +328,7 @@ def _build_test_response(report) -> Dict[str, Any]:
 
 @router.get("/test")
 async def test_factory_status() -> Dict[str, Any]:
-    """Test endpoint for factory status (no auth required for testing)."""
+    """Public endpoint for factory status (no authentication required)."""
     report = await _ensure_latest_report()
     return _build_test_response(report)
 

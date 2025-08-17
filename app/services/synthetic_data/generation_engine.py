@@ -262,7 +262,7 @@ class GenerationEngine:
         return await self.advanced_methods.generate_domain_specific(config)
 
     async def generate_tool_invocations(self, count: int, pattern: str) -> List[Dict]:
-        """Generate tool invocations for testing"""
+        """Generate synthetic tool invocation data"""
         return await self.advanced_methods.generate_tool_invocations(count, pattern)
 
     async def generate_trace_hierarchies(self, cnt: int, min_d: int, max_d: int) -> List[Dict]:
