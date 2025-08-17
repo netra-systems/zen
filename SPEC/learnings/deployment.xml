@@ -55,6 +55,22 @@
         gcloud beta run services add-iam-policy-binding
       </solution>
     </lesson>
+    
+    <lesson id="frontend-api-url-configuration">
+      <problem>Frontend was calling localhost instead of staging API URL</problem>
+      <solution>
+        Build frontend with staging API URL using build args:
+        docker build -f Dockerfile.frontend.staging \
+          --build-arg NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai \
+          --build-arg NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai/ws \
+          -t us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:latest .
+      </solution>
+      <details>
+        The frontend uses environment variables at build time for API configuration.
+        These must be set during Docker build, not at runtime.
+        Default staging API URL: https://api.staging.netrasystems.ai
+      </details>
+    </lesson>
   </staging_deployment>
   
   <quick_commands>
@@ -69,7 +85,11 @@
       docker build -t us-central1-docker.pkg.dev/netra-staging/netra-containers/backend:latest -f Dockerfile.backend .
       docker push us-central1-docker.pkg.dev/netra-staging/netra-containers/backend:latest
       
-      docker build -t us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:latest -f Dockerfile.frontend.staging .
+      # Frontend with staging API URL
+      docker build -f Dockerfile.frontend.staging \
+        --build-arg NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai \
+        --build-arg NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai/ws \
+        -t us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:latest .
       docker push us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:latest
     </build_and_push>
     
