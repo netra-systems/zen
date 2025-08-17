@@ -16,9 +16,11 @@ from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.service_startup import ServiceStartupCoordinator
 from dev_launcher.process_manager import ProcessManager
 from dev_launcher.log_streamer import LogManager, setup_logging
-from dev_launcher.health_monitor import HealthMonitor, create_url_health_check, create_process_health_check
+from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.summary_display import SummaryDisplay
-from dev_launcher.utils import check_emoji_support, print_with_emoji, wait_for_service, open_browser
+from dev_launcher.utils import check_emoji_support, print_with_emoji
+from dev_launcher.health_registration import HealthRegistrationHelper
+from dev_launcher.startup_validator import StartupValidator
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +39,7 @@ class DevLauncher:
         self.use_emoji = check_emoji_support()
         self._setup_managers()
         self._setup_components()
+        self._setup_helpers()
         self._setup_logging()
     
     def _setup_managers(self):
@@ -54,6 +57,11 @@ class DevLauncher:
         self.service_startup = self._create_service_startup()
         self.summary_display = SummaryDisplay(self.config, self.service_discovery, self.use_emoji)
     
+    def _setup_helpers(self):
+        """Setup helper instances."""
+        self.health_helper = HealthRegistrationHelper(self.health_monitor, self.use_emoji)
+        self.startup_validator = StartupValidator(self.use_emoji)
+    
     def _create_secret_loader(self) -> SecretLoader:
         """Create secret loader instance."""
         return SecretLoader(
@@ -65,12 +73,8 @@ class DevLauncher:
     def _create_service_startup(self) -> ServiceStartupCoordinator:
         """Create service startup coordinator."""
         return ServiceStartupCoordinator(
-            self.config, 
-            self.config_manager.services_config,
-            self.log_manager,
-            self.service_discovery,
-            self.use_emoji
-        )
+            self.config, self.config_manager.services_config,
+            self.log_manager, self.service_discovery, self.use_emoji)
     
     def _setup_logging(self):
         """Setup logging and show verbose configuration."""
@@ -102,41 +106,9 @@ class DevLauncher:
     
     def register_health_monitoring(self):
         """Register health monitoring after services are verified ready."""
-        self._print("💚", "HEALTH", "Registering health monitoring...")
-        self._register_backend_health()
-        self._register_frontend_health()
-    
-    def _register_backend_health(self):
-        """Register backend health monitoring."""
-        if not self.service_startup.backend_health_info:
-            return
-        backend_url = f"http://localhost:{self.service_startup.backend_health_info['port']}/health/live"
-        self._register_backend_service(backend_url)
-        logger.info("Backend health monitoring registered")
-    
-    def _register_backend_service(self, backend_url: str):
-        """Register backend service with health monitor."""
-        self.health_monitor.register_service(
-            "Backend",
-            health_check=create_url_health_check(backend_url),
-            recovery_action=lambda: logger.error("Backend needs restart - please restart the launcher"),
-            max_failures=5
-        )
-    
-    def _register_frontend_health(self):
-        """Register frontend health monitoring."""
-        if not self.service_startup.frontend_health_info:
-            return
-        self._register_frontend_service()
-        logger.info("Frontend health monitoring registered")
-    
-    def _register_frontend_service(self):
-        """Register frontend service with health monitor."""
-        self.health_monitor.register_service(
-            "Frontend",
-            health_check=create_process_health_check(self.service_startup.frontend_health_info['process']),
-            recovery_action=lambda: logger.error("Frontend needs restart - please restart the launcher"),
-            max_failures=5
+        self.health_helper.register_all_services(
+            self.service_startup.backend_health_info,
+            self.service_startup.frontend_health_info
         )
     
     def run(self) -> int:
@@ -145,6 +117,10 @@ class DevLauncher:
         self.config_manager.show_configuration()
         if not self._run_pre_checks():
             return 1
+        return self._run_services()
+    
+    def _run_services(self) -> int:
+        """Run all services."""
         self._clear_service_discovery()
         backend_result = self._start_and_verify_backend()
         if backend_result != 0:
@@ -193,30 +169,15 @@ class DevLauncher:
         backend_info = self.service_discovery.read_backend_info()
         if not backend_info:
             return 1
-        backend_healthy = self._check_backend_health(backend_info)
-        if not backend_healthy:
+        return self._validate_backend_health(backend_info)
+    
+    def _validate_backend_health(self, backend_info: dict) -> int:
+        """Validate backend health status."""
+        if not self.startup_validator.verify_backend_ready(backend_info):
             self._handle_backend_failure()
             return 1
         return 0
     
-    def _check_backend_health(self, backend_info: dict) -> bool:
-        """Check backend health."""
-        self._print("⏳", "WAIT", "Waiting for backend to be ready...")
-        backend_ready_url = f"{backend_info['api_url']}/health/ready"
-        if not wait_for_service(backend_ready_url, timeout=30):
-            return False
-        self._print("✅", "OK", "Backend is ready")
-        return self._verify_auth_system(backend_info)
-    
-    def _verify_auth_system(self, backend_info: dict) -> bool:
-        """Verify auth system."""
-        auth_config_url = f"{backend_info['api_url']}/api/auth/config"
-        self._print("⏳", "WAIT", "Verifying auth system...")
-        if wait_for_service(auth_config_url, timeout=10):
-            self._print("✅", "OK", "Auth system is ready")
-            return True
-        self._print("⚠️", "WARN", "Auth config check timed out")
-        return False
     
     def _handle_backend_failure(self):
         """Handle backend failure."""
@@ -235,39 +196,23 @@ class DevLauncher:
         """Start and verify frontend."""
         frontend_process, frontend_streamer = self.service_startup.start_frontend()
         if not frontend_process:
-            self._print("❌", "ERROR", "Failed to start frontend")
-            self.process_manager.cleanup_all()
-            return 1
+            return self._handle_frontend_failure()
         self.process_manager.add_process("Frontend", frontend_process)
         self._wait_for_frontend_ready()
         return 0
     
+    def _handle_frontend_failure(self) -> int:
+        """Handle frontend startup failure."""
+        self._print("❌", "ERROR", "Failed to start frontend")
+        self.process_manager.cleanup_all()
+        return 1
+    
     def _wait_for_frontend_ready(self):
         """Wait for frontend to be ready."""
-        self._print("⏳", "WAIT", "Waiting for frontend to be ready...")
-        frontend_url = f"http://localhost:{self.config.frontend_port}"
-        self._allow_nextjs_compile()
-        self._check_frontend_service(frontend_url)
-    
-    def _allow_nextjs_compile(self):
-        """Allow Next.js to compile."""
-        logger.info("Allowing Next.js to compile...")
-        time.sleep(5)
-    
-    def _check_frontend_service(self, frontend_url: str):
-        """Check frontend service."""
-        if wait_for_service(frontend_url, timeout=90):
-            self._print("✅", "OK", "Frontend is ready")
-            self._handle_browser_opening(frontend_url)
-        else:
-            self._print("⚠️", "WARN", "Frontend readiness check timed out")
-    
-    def _handle_browser_opening(self, frontend_url: str):
-        """Handle browser opening."""
-        time.sleep(2)
-        if not self.config.no_browser:
-            self._print("🌐", "BROWSER", f"Opening browser at {frontend_url}")
-            open_browser(frontend_url)
+        self.startup_validator.verify_frontend_ready(
+            self.config.frontend_port,
+            self.config.no_browser
+        )
     
     def _run_main_loop(self):
         """Run main service loop."""

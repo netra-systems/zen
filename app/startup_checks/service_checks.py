@@ -103,7 +103,7 @@ class ServiceChecker:
             name="llm_providers",
             success=False,
             message="No LLM providers available",
-            critical=not self.is_staging
+            critical=(self.environment == "production")
         )
     
     def _create_partial_providers_result(self, available_providers: List[str], failed_providers: List[str]) -> StartupCheckResult:

@@ -46,10 +46,7 @@ output "database_user" {
   sensitive   = false
 }
 
-output "auth_service_url" {
-  value       = google_cloud_run_service.auth.status[0].url
-  description = "Auth Service URL"
-}
+# Auth service URL is defined in auth_service.tf
 
 output "auth_service_ip" {
   value       = google_compute_global_address.auth.address

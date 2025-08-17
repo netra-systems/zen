@@ -181,6 +181,7 @@ Organized API endpoints:
 routes/
 ├── auth/                  # Authentication module
 │   └── auth.py           # OAuth, JWT, and dev login endpoints
+│   # IMPORTANT: All auth endpoints use app/auth_integration/ for dependencies
 ├── websockets.py          # WebSocket connections
 ├── agent_route.py         # Agent execution endpoints  
 ├── threads_route.py       # Thread management
@@ -253,7 +254,26 @@ services/
     └── service_container.py  # Service registry
 ```
 
-#### 4. Database Models (`app/db/`)
+#### 4. Authentication Integration (`app/auth_integration/`)
+
+**CRITICAL**: Shared authentication service used throughout the entire system:
+
+```
+auth_integration/              # SHARED AUTH SERVICE (MANDATORY USE)
+├── __init__.py               # Auth exports
+└── auth.py                   # Centralized auth dependencies
+    ├── get_current_user()    # User authentication (ALL routes MUST use)
+    ├── get_current_user_optional() # Optional auth (ALL routes MUST use)
+    └── validate_token()      # Token validation (ALL WebSocket MUST use)
+```
+
+**IMPORTANT**: ALL authentication MUST go through `app/auth_integration/`. No duplicate auth logic allowed anywhere in the system. This ensures:
+- Consistent authentication across all endpoints
+- Single source of truth for auth logic
+- Centralized security updates
+- Uniform error handling
+
+#### 5. Database Models (`app/db/`)
 
 Data persistence layer:
 
@@ -1059,14 +1079,46 @@ async def validate_user_input(data: dict) -> bool:
 
 ```bash
 # Run compliance check (should be part of CI/CD)
-python scripts/check_architecture_compliance.py --strict
+python scripts/check_architecture_compliance.py --fail-on-violation
 
-# Check specific directory
-python scripts/check_architecture_compliance.py --path app/agents/
+# Check specific directory with custom limits
+python scripts/check_architecture_compliance.py --path app/agents/ --violation-limit 5
 
-# Generate compliance report
-python scripts/check_architecture_compliance.py --report
+# Generate compliance report with all violations
+python scripts/check_architecture_compliance.py --show-all
+
+# Generate JSON report for CI/CD
+python scripts/check_architecture_compliance.py --json-output compliance.json --fail-on-violation
+
+# Run with text markers (for Windows/CI environments)
+python scripts/check_architecture_compliance.py --no-emoji --violation-limit 10
 ```
+
+### Compliance System Architecture
+
+The compliance system is modularly designed with the following components:
+
+```
+scripts/compliance/
+├── __init__.py          # Package exports
+├── core.py              # Core data structures (Violation, ComplianceResults)
+├── orchestrator.py      # ArchitectureEnforcer orchestration
+├── reporter.py          # Report generation (273 lines)
+├── reporter_stats.py    # Statistics calculation (61 lines)
+├── reporter_utils.py    # Utilities & helpers (47 lines)
+├── cli.py               # CLI argument handling
+├── file_checker.py      # 300-line limit enforcement
+├── function_checker.py  # 8-line limit enforcement
+├── type_checker.py      # Duplicate type detection
+└── stub_checker.py      # Test stub detection
+```
+
+**Key Features:**
+- **Smart Violation Limits**: Adaptive display based on violation count
+- **Severity Prioritization**: High → Medium → Low with visual markers
+- **Accurate Statistics**: Detailed counts by type and severity
+- **Modular Design**: Each component under 300 lines
+- **Type Definition Focus**: Only checks type definitions, not usage
 
 ## Future Enhancements
 

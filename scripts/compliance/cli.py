@@ -47,6 +47,10 @@ Examples:
                            help='Maximum lines per file (default: 300)')
         parser.add_argument('--max-function-lines', type=int, default=8,
                            help='Maximum lines per function (default: 8)')
+        parser.add_argument('--target-folders', nargs='+', 
+                           help='Folders to check (default: app frontend)')
+        parser.add_argument('--ignore-folders', nargs='+',
+                           help='Folders to ignore (default: scripts test_framework)')
         CLIHandler._add_display_arguments(parser)
         CLIHandler._add_output_arguments(parser)
     

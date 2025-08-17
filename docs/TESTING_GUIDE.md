@@ -73,6 +73,40 @@ The Netra platform employs a comprehensive testing strategy across multiple laye
 | **Critical** | 1-2min | Revenue paths | Pre-deployment | `python test_runner.py --level critical` |
 | **Comprehensive** | 30-45min | Full coverage | Release | `python test_runner.py --level comprehensive` |
 
+### Bad Test Detection System
+
+The test framework includes automatic bad test detection to identify consistently failing tests:
+
+#### Features
+- **Automatic Tracking**: Monitors test failures across runs with `{test}:{failure_count}` tracking
+- **Persistent Storage**: Saves failure history to `test_reports/bad_tests.json`
+- **Smart Detection**: Identifies tests failing 5+ times consecutively or with >70% failure rate
+- **Recommendations**: Suggests tests for immediate fix or deletion
+
+#### Usage
+```bash
+# Tests run with detection enabled by default
+python test_runner.py --level unit
+
+# Disable bad test detection
+python scripts/test_backend.py --no-bad-test-detection
+
+# View bad test reports
+python -m test_framework.bad_test_reporter          # Full report
+python -m test_framework.bad_test_reporter --summary # Summary only
+python -m test_framework.bad_test_reporter --details # With histories
+python -m test_framework.bad_test_reporter --test "test_name" # Specific test history
+
+# Reset bad test data
+python -m test_framework.bad_test_reporter --reset  # Reset all data
+python -m test_framework.bad_test_reporter --reset --reset-test "test_name" # Reset specific test
+```
+
+#### Detection Criteria
+- **Consistently Failing**: 5+ consecutive failures → Recommended for immediate fix
+- **High Failure Rate**: >70% failure rate with 10+ total failures → Consider refactoring
+- **Very High Failure Rate**: >90% failure rate → Recommended for deletion/rewrite
+
 ### Test Categories by Priority
 
 | Category | Business Impact | Required Coverage | Failure Action |

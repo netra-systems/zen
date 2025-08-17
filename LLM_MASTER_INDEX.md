@@ -27,41 +27,14 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 | `models_corpus.py` | `/app/db/models_corpus.py` | Corpus database models | CorpusData, CorpusEntry |
 | `models_metrics.py` | `/app/db/models_metrics.py` | Metrics database models | MetricsData |
 
-### Authentication & Security (Dedicated Auth Service Architecture)
+### Authentication & Security (MANDATORY Shared Auth Integration)
 | File | Location | Purpose | Key Components |
 |------|----------|---------|----------------|
-| **AUTH SERVICE (Main)** | | | |
-| `auth_service.py` | `/app/auth/auth_service.py` | **Main OAuth FastAPI app** | Dedicated auth subdomain service |
-| `auth_token_service.py` | `/app/auth/auth_token_service.py` | Token management service | JWT creation, validation, refresh |
-| `oauth_session_manager.py` | `/app/auth/oauth_session_manager.py` | OAuth session handling | Session state management |
-| `enhanced_auth_core.py` | `/app/auth/enhanced_auth_core.py` | Enhanced auth core logic | Advanced authentication features |
-| `enhanced_auth_validator.py` | `/app/auth/enhanced_auth_validator.py` | Auth validation logic | Request validation, security checks |
-| `enhanced_auth_security.py` | `/app/auth/enhanced_auth_security.py` | Security enhancements | Additional security layers |
-| **ROUTING & ENDPOINTS** | | | |
-| `auth.py` (routes) | `/app/routes/auth/auth.py` | Auth API endpoints | login, logout, register |
-| `pr_router.py` | `/app/auth/pr_router.py` | PR environment routing | Dynamic PR auth routing |
-| **CORE AUTH** | | | |
-| `auth.py` (core) | `/app/auth/auth.py` | Core auth logic & JWT | verify_token, create_access_token |
-| `auth_dependencies.py` | `/app/auth/auth_dependencies.py` | FastAPI dependencies | Auth dependency injection |
-| `auth_interfaces.py` | `/app/auth/auth_interfaces.py` | Auth interfaces | Interface definitions |
-| **SESSION MANAGEMENT** | | | |
-| `session_manager.py` | `/app/auth/session_manager.py` | Session management | Session CRUD operations |
-| `enhanced_auth_sessions_modular.py` | `/app/auth/enhanced_auth_sessions_modular.py` | Modular session handling | Advanced session features |
-| `session_security.py` | `/app/auth/session_security.py` | Session security | Session encryption, validation |
-| `session_validation.py` | `/app/auth/session_validation.py` | Session validation | Session state checks |
-| `session_checker.py` | `/app/auth/session_checker.py` | Session health checks | Session monitoring |
-| **TOKEN MANAGEMENT** | | | |
-| `token_manager.py` | `/app/auth/token_manager.py` | Token lifecycle | Token creation, refresh, revocation |
-| `token_validator.py` | `/app/auth/token_validator.py` | Token validation | JWT verification |
-| **OAUTH & EXTERNAL** | | | |
-| `oauth_proxy.py` | `/app/auth/oauth_proxy.py` | OAuth proxy handling | OAuth flow proxying |
-| `oauth_utils.py` | `/app/auth/oauth_utils.py` | OAuth utilities | OAuth helper functions |
-| **UTILITIES** | | | |
-| `environment_config.py` | `/app/auth/environment_config.py` | Environment configuration | Auth environment settings |
-| `url_validators.py` | `/app/auth/url_validators.py` | URL validation | Redirect URL validation |
-| `auth_response_builders.py` | `/app/auth/auth_response_builders.py` | Response builders | Standardized auth responses |
-| `api_key_manager.py` | `/app/auth/api_key_manager.py` | API key management | API key CRUD, validation |
-| `permission_verifier.py` | `/app/auth/permission_verifier.py` | Permission checks | Role-based access control |
+| **🔴 AUTH INTEGRATION (MANDATORY)** | | | |
+| `auth.py` | `/app/auth_integration/auth.py` | **SHARED AUTH SERVICE** | get_current_user(), get_current_user_optional(), validate_token() |
+| **CRITICAL**: ALL authentication throughout ENTIRE system MUST use `/app/auth_integration/`. NO duplicate auth logic allowed. |
+| **AUTH MODULE** | | | |
+| `__init__.py` | `/app/auth/__init__.py` | Auth module initialization | Module exports |
 | **SECRETS** | | | |
 | `secret_manager.py` (app) | `/app/core/secret_manager.py` | Production secrets | get_secret, SecretManager class |
 | `secret_manager.py` (dev) | `/dev_launcher/secret_manager.py` | Dev secrets only | Development environment only |
@@ -79,12 +52,14 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 ### Agent Files (Multi-Agent System)
 | Agent Type | Location | Main File | Purpose |
 |------------|----------|-----------|---------|
-| Supervisor | `/app/agents/supervisor/` | `supervisor.py` | Main orchestrator agent |
-| Data Sub-Agent | `/app/agents/data_sub_agent/` | `data_agent.py` | Data processing & insights |
-| Triage Sub-Agent | `/app/agents/triage_sub_agent/` | `triage_agent.py` | Request classification |
-| Admin Tool Dispatcher | `/app/agents/admin_tool_dispatcher/` | `dispatcher.py` | Admin tool routing |
-| Corpus Admin | `/app/agents/corpus_admin/` | `corpus_agent.py` | Corpus management |
-| Supply Researcher | `/app/agents/supply_researcher/` | `researcher.py` | Supply chain research |
+| **APEX Optimizer Agent** | `/app/services/apex_optimizer_agent/` | Multiple tool files | AI optimization agent system |
+| - Cost Analysis Tools | `/app/services/apex_optimizer_agent/tools/` | `cost_*.py` | Cost analysis and optimization |
+| - Performance Tools | `/app/services/apex_optimizer_agent/tools/` | `performance_*.py`, `latency_*.py` | Performance optimization |
+| - Log Analysis Tools | `/app/services/apex_optimizer_agent/tools/` | `log_*.py` | Log analysis and pattern detection |
+| - Optimization Tools | `/app/services/apex_optimizer_agent/tools/` | `optimization_*.py`, `optimal_*.py` | Various optimization strategies |
+| - KV Cache Tools | `/app/services/apex_optimizer_agent/tools/` | `kv_cache_*.py` | Key-value cache optimization |
+| - Supply Tools | `/app/services/apex_optimizer_agent/tools/` | `supply_catalog_search.py` | Supply catalog search |
+| - Report Generation | `/app/services/apex_optimizer_agent/tools/` | `final_report_generator.py` | Final optimization reports |
 
 ### Test Files (Multiple Test Types)
 | Test Type | Location | Pattern | Run Command |
@@ -93,6 +68,33 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 | E2E Tests | `/app/tests/e2e/` | `test_e2e_*.py` | `python test_runner.py --level e2e` |
 | Real Agent Tests | `/app/tests/` | `test_real_agent_services.py` | Direct test file |
 | Frontend Tests | `/frontend/__tests__/` | `*.test.tsx` | `npm test` |
+
+### Bad Test Detection System
+| Component | Location | Purpose | Key Functions |
+|-----------|----------|---------|---------------|
+| **Detector** | `/test_framework/bad_test_detector.py` | Core detection engine | BadTestDetector class, tracks failures |
+| **Pytest Plugin** | `/test_framework/pytest_bad_test_plugin.py` | Pytest integration | Automatic test outcome recording |
+| **Reporter CLI** | `/test_framework/bad_test_reporter.py` | View/manage reports | `python -m test_framework.bad_test_reporter` |
+| **Data Storage** | `/test_reports/bad_tests.json` | Persistent failure history | JSON format with test statistics |
+| **Integration** | `/scripts/test_backend.py` | Backend test runner | `--no-bad-test-detection` flag |
+
+#### Bad Test Detection Commands
+```bash
+# View bad test report
+python -m test_framework.bad_test_reporter
+
+# View summary only
+python -m test_framework.bad_test_reporter --summary
+
+# View specific test history
+python -m test_framework.bad_test_reporter --test "test_name"
+
+# Reset bad test data
+python -m test_framework.bad_test_reporter --reset
+
+# Disable detection for a run
+python scripts/test_backend.py --no-bad-test-detection
+```
 
 ---
 
@@ -115,11 +117,14 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 ### Backend Schemas (`/app/schemas/`)
 | Category | Files | Purpose |
 |----------|-------|---------|
-| LLM Types | `llm_types.py`, `llm_request.py`, `llm_response.py` | LLM communication types |
-| Admin Types | `admin_types.py`, `admin_request.py` | Admin functionality types |
-| WebSocket | `websocket_types.py`, `websocket_messages.py` | WebSocket message types |
-| Auth | `auth_schemas.py` | Authentication schemas |
-| Metrics | `metrics_schemas.py` | Metrics data schemas |
+| Analysis | `Analysis.py` | Analysis data types |
+| Events | `Event.py` | Event data structures |
+| Logs | `Log.py` | Log data types |
+| Patterns | `Pattern.py` | Pattern detection types |
+| Performance | `Performance.py` | Performance metrics types |
+| Policy | `Policy.py` | Policy configuration types |
+| Requests | `Request.py` | Request data types |
+| Runs | `Run.py` | Run execution types |
 
 ### Frontend Types (`/frontend/types/`)
 | File | Purpose |
@@ -149,10 +154,24 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 ### Scripts (`/scripts/`)
 | Script | Purpose | When to Use |
 |--------|---------|-------------|
-| `check_architecture_compliance.py` | Check 300-line limit | Before commits |
-| `reset_clickhouse.py` | Reset ClickHouse DB | Development reset |
-| `setup_oauth_local.py` | Setup OAuth locally | Initial setup |
-| `config_setup_core.py` | Core config setup | Development setup |
+| `check_architecture_compliance.py` | Check 300-line & 8-line limits | Before commits, CI/CD |
+| `dev_launcher.py` | Development launcher | Start dev environment |
+| `test_runner.py` | Test runner | Run tests |
+
+### Architecture Compliance System (`/scripts/compliance/`)
+| Module | Purpose | Key Features |
+|--------|---------|-------------|
+| `__init__.py` | Package initialization | Module exports |
+| `core.py` | Core data structures | Violation, ComplianceResults, ComplianceConfig |
+| `orchestrator.py` | Compliance orchestration | ArchitectureEnforcer class |
+| `reporter.py` | Report generation (273 lines) | ComplianceReporter class |
+| `reporter_stats.py` | Statistics calculation (61 lines) | StatisticsCalculator class |
+| `reporter_utils.py` | Reporting utilities (47 lines) | ReporterUtils, sorting, limits |
+| `cli.py` | CLI argument handling | CLIHandler, OutputHandler |
+| `file_checker.py` | File size validation | Checks 300-line limit |
+| `function_checker.py` | Function complexity | Checks 8-line limit |
+| `type_checker.py` | Duplicate type detection | Single source of truth |
+| `stub_checker.py` | Test stub detection | No stubs in production |
 
 ---
 
@@ -239,4 +258,192 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 
 ---
 
-Last Updated: Check git history for latest changes
+## 🆕 NEW MODULES & SERVICES
+
+### Apex Optimizer Agent (`/app/services/apex_optimizer_agent/`)
+A comprehensive AI optimization agent system with 30+ specialized tools:
+
+#### Core Files
+- `config_form.py` - Configuration forms
+- `models.py` - Agent data models
+- `tool_builder.py` - Tool construction utilities
+- `dev_utils.py` - Development utilities
+
+#### Tool Categories (in `/tools/`)
+1. **Cost Optimization**
+   - `cost_analyzer.py`, `cost_estimator.py`, `cost_driver_identifier.py`
+   - `cost_impact_simulator.py`, `cost_reduction_quality_preservation.py`
+   - `cost_simulation_for_increased_usage.py`
+
+2. **Performance Analysis**
+   - `performance_predictor.py`, `performance_gains_simulator.py`
+   - `function_performance_analyzer.py`, `latency_analyzer.py`
+   - `latency_bottleneck_identifier.py`, `tool_latency_optimization.py`
+
+3. **Log Processing**
+   - `log_fetcher.py`, `log_analyzer.py`, `log_pattern_identifier.py`
+   - `log_enricher_and_clusterer.py`
+
+4. **Optimization Strategies**
+   - `optimization_proposer.py`, `optimization_method_researcher.py`
+   - `optimized_implementation_proposer.py`, `optimal_policy_proposer.py`
+   - `advanced_optimization_for_core_function.py`
+   - `multi_objective_optimization.py`
+
+5. **Cache Management**
+   - `kv_cache_finder.py`, `kv_cache_optimization_audit.py`
+
+6. **Policy & Simulation**
+   - `policy_proposer.py`, `policy_simulator.py`
+   - `quality_impact_simulator.py`, `rate_limit_impact_simulator.py`
+   - `new_model_effectiveness_analysis.py`
+
+7. **System Analysis**
+   - `system_inspector.py`, `code_analyzer.py`
+   - `evaluation_criteria_definer.py`, `future_usage_modeler.py`
+
+8. **Supply & Dispatch**
+   - `supply_catalog_search.py`, `tool_dispatcher.py`
+
+9. **Reporting**
+   - `final_report_generator.py`, `finish.py`
+
+### Database Services (`/app/services/database/`)
+- `reference_repository.py` - Reference data management
+- `thread_repository.py` - Thread management
+- `run_repository.py` - Run execution management
+- `message_repository.py` - Message handling
+
+### Other Services (`/app/services/`)
+- `clickhouse_service.py` - ClickHouse operations
+- `dev_bypass_service.py` - Development bypass utilities
+- `job_store.py` - Job management
+- `key_manager.py` - Key management service
+- `tool_registry.py` - Tool registration
+- `generation_worker.py` - Generation worker service
+- `state/persistence.py` - State persistence
+
+### Data Modules (`/app/data/`)
+- `content_corpus.py` - Content corpus management
+- `synthetic/content_generator.py` - Synthetic content generation
+- `synthetic/default_synthetic_config.py` - Default synthetic configs
+
+### MCP Integration (`/app/netra_mcp/`)
+- `run_server.py` - MCP server runner
+
+---
+
+## 🔥 TOP 50 STABLE CONCEPTS - Context Window Optimization
+
+### Core Infrastructure (Most Referenced)
+| Concept | Primary Location | Import | Frequency | Notes |
+|---------|-----------------|--------|-----------|-------|
+| **Logging** | `/app/logging_config.py` | `from app.logging_config import central_logger` | 495 | EVERY module uses this |
+| **Config** | `/app/config.py` | `from app.config import settings` | 41 | App-wide settings |
+| **WebSocket Manager** | `/app/ws_manager.py` | `from app.ws_manager import ws_manager` | 55 | WebSocket state management |
+| **Redis Manager** | `/app/redis_manager.py` | `from app.redis_manager import redis_manager` | 49 | Cache & pub/sub |
+
+### Type System & Schemas (Critical for Type Safety)
+| Concept | Primary Location | Import | Used For |
+|---------|-----------------|--------|----------|
+| **Schemas** | `/app/schemas/` | `from app.schemas import *` | 90+ | All data models |
+| **Shared Types** | `/app/schemas/shared_types.py` | `from app.schemas.shared_types import ToolResult, ErrorContext` | Type definitions |
+| **Core Enums** | `/app/schemas/core_enums.py` | `from app.schemas.core_enums import ErrorCategory, ToolStatus` | Enum constants |
+| **Registry** | `/app/schemas/registry.py` | `from app.schemas.registry import WebSocketMessage` | Message types |
+| **Metrics** | `/app/schemas/Metrics.py` | `from app.schemas.Metrics import MetricData` | Metrics types |
+
+### Database Layer (Stable Core)
+| Concept | Primary Location | Import | Purpose |
+|---------|-----------------|--------|---------|
+| **PostgreSQL Models** | `/app/db/models_postgres.py` | `from app.db.models_postgres import User, Team` | 73 uses |
+| **ClickHouse Client** | `/app/db/clickhouse.py` | `from app.db.clickhouse import get_clickhouse_client` | 27 uses |
+| **PostgreSQL Session** | `/app/db/postgres.py` | `from app.db.postgres import get_postgres_db` | 26 uses |
+| **Query Fixer** | `/app/db/clickhouse_query_fixer.py` | `from app.db.clickhouse_query_fixer import fix_query` | ClickHouse fixes |
+
+### Exception Hierarchy (Stable)
+| Concept | Primary Location | Import | Coverage |
+|---------|-----------------|--------|----------|
+| **Base Exceptions** | `/app/core/exceptions_base.py` | `from app.core.exceptions_base import NetraException` | 66 uses |
+| **Service Exceptions** | `/app/core/exceptions_service.py` | `from app.core.exceptions_service import ServiceError` | Service errors |
+| **Auth Exceptions** | `/app/core/exceptions_auth.py` | `from app.core.exceptions_auth import AuthenticationError` | Auth errors |
+| **Error Codes** | `/app/core/error_codes.py` | `from app.core.error_codes import ErrorSeverity` | 42 uses |
+
+### LLM Integration (Core Functionality)
+| Concept | Primary Location | Import | Purpose |
+|---------|-----------------|--------|---------|
+| **LLM Manager** | `/app/llm/llm_manager.py` | `from app.llm.llm_manager import LLMManager` | 87 uses |
+| **Observability** | `/app/llm/observability.py` | `from app.llm.observability import log_agent_*` | LLM tracking |
+| **LLM Operations** | `/app/llm/llm_operations.py` | `from app.llm.llm_operations import *` | LLM ops |
+
+### Agent System (Complex but Stable)
+| Concept | Primary Location | Import | Purpose |
+|---------|-----------------|--------|---------|
+| **Agent State** | `/app/agents/state.py` | `from app.agents.state import DeepAgentState` | 114 uses |
+| **Tool Dispatcher** | `/app/agents/tool_dispatcher.py` | `from app.agents.tool_dispatcher import ToolDispatcher` | 49 uses |
+| **Supervisor** | `/app/agents/supervisor_consolidated.py` | `from app.agents.supervisor_consolidated import SupervisorAgent` | 32 uses |
+| **Base Agent** | `/app/agents/base.py` | `from app.agents.base import BaseSubAgent` | 21 uses |
+| **Error Handler** | `/app/agents/error_handler.py` | `from app.agents.error_handler import global_error_handler` | Agent errors |
+
+### Core Services (Business Logic)
+| Concept | Primary Location | Import | Purpose |
+|---------|-----------------|--------|---------|
+| **Quality Gate** | `/app/services/quality_gate_service.py` | 60 uses | Quality checks |
+| **Context Service** | `/app/services/context.py` | 39 uses | Context management |
+| **Synthetic Data** | `/app/services/synthetic_data_service.py` | 32 uses | Data generation |
+| **Agent Service** | `/app/services/agent_service.py` | 26 uses | Agent orchestration |
+| **State Persistence** | `/app/services/state_persistence_service.py` | 22 uses | State storage |
+| **Corpus Service** | `/app/services/corpus_service.py` | 22 uses | Corpus management |
+| **Thread Service** | `/app/services/thread_service.py` | 17 uses | Thread management |
+| **Tool Permissions** | `/app/services/tool_permission_service.py` | 14 uses | Access control |
+| **Quality Monitoring** | `/app/services/quality_monitoring_service.py` | 13 uses | Quality metrics |
+
+### Reliability & Recovery
+| Concept | Primary Location | Import | Purpose |
+|---------|-----------------|--------|---------|
+| **Circuit Breaker** | `/app/core/circuit_breaker.py` | 19 uses | Fault tolerance |
+| **Error Recovery** | `/app/core/error_recovery.py` | 28 uses | Recovery strategies |
+| **Reliability** | `/app/core/reliability.py` | 14 uses | System reliability |
+
+### Authentication (MANDATORY Shared)
+| Concept | Primary Location | Import | Purpose |
+|---------|-----------------|--------|---------|
+| **Auth Integration** | `/app/auth_integration/auth.py` | `from app.auth_integration.auth import get_current_user` | 14 uses |
+| **Dependencies** | `/app/dependencies.py` | 16 uses | Dependency injection |
+
+### Utilities
+| Concept | Primary Location | Import | Purpose |
+|---------|-----------------|--------|---------|
+| **JSON Parsing** | `/app/core/json_parsing_utils.py` | 15 uses | Safe JSON parsing |
+
+### Quick Reference Patterns
+```python
+# Most common import pattern
+from app.logging_config import central_logger
+logger = central_logger.get_logger(__name__)
+
+# Database session pattern
+from app.db.postgres import get_postgres_db
+async with get_postgres_db() as db:
+    # operations
+
+# Error handling pattern
+from app.core.exceptions_base import NetraException
+raise NetraException("message", error_code="CODE")
+
+# Type-safe schema pattern
+from app.schemas import RequestModel, ResponseModel
+
+# Agent state pattern
+from app.agents.state import DeepAgentState
+state = DeepAgentState(...)
+```
+
+### Performance Tips
+1. **Import only what you need** - Don't use `from app.schemas import *`
+2. **Use TYPE_CHECKING** for circular imports - `if TYPE_CHECKING: from app.x import Y`
+3. **Cache heavy imports** - Store LLMManager, connections as module variables
+4. **Lazy load optional features** - Import inside functions if rarely used
+
+---
+
+Last Updated: 2025-08-17

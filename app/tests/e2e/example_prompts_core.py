@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.agents.state import DeepAgentState
 from app.llm.llm_manager import LLMManager
@@ -32,17 +33,16 @@ EXAMPLE_PROMPTS = [
 
 
 @pytest.fixture
-def real_llm_prompt_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
+def real_llm_prompt_setup(db_session, real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real LLM infrastructure for comprehensive example prompt testing."""
-    supervisor = create_real_supervisor(real_llm_manager, real_websocket_manager, real_tool_dispatcher)
+    supervisor = create_real_supervisor(db_session, real_llm_manager, real_websocket_manager, real_tool_dispatcher)
     quality_service = create_real_quality_service()
     return build_prompt_test_setup(supervisor, quality_service, real_llm_manager)
 
 
-def create_real_supervisor(llm_manager: LLMManager, ws_manager: WebSocketManager, tool_dispatcher: ToolDispatcher) -> Supervisor:
+def create_real_supervisor(db_session: AsyncSession, llm_manager: LLMManager, ws_manager: WebSocketManager, tool_dispatcher: ToolDispatcher) -> Supervisor:
     """Create real supervisor agent with dependencies."""
-    supervisor = Supervisor(llm_manager, tool_dispatcher)
-    supervisor.websocket_manager = ws_manager
+    supervisor = Supervisor(db_session, llm_manager, ws_manager, tool_dispatcher)
     supervisor.thread_id = str(uuid.uuid4())
     supervisor.user_id = 'example-prompts-test-user'
     return supervisor

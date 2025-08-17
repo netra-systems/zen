@@ -41,9 +41,6 @@ out/
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
 .DS_Store
 
 # Service Discovery
@@ -64,6 +61,18 @@ test-results/
 tmp/
 temp/
 *.tmp
+
+# Backup and legacy files
+*_old.*
+*_backup.*
+*.bak
+*.backup
+*.old
+*.orig
+*~
+*.swp
+*.swo
+*_copy.*
 /.venv
 /venv_test
 /ccusage

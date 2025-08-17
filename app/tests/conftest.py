@@ -53,6 +53,12 @@ from app.main import app
 from fastapi.testclient import TestClient
 from app.db.session import get_db_session
 from app.config import settings
+from app.tests.conftest_helpers import (
+    _setup_basic_llm_mocks, _setup_performance_llm_mocks,
+    _setup_websocket_interface_compatibility, _setup_websocket_test_mocks,
+    _create_real_tool_dispatcher, _create_mock_tool_dispatcher,
+    _import_agent_classes, _instantiate_agents
+)
 
 # Temporarily disabled to fix test hanging issue
 # @pytest.fixture(scope="function")

@@ -55,9 +55,12 @@ class TypeChecker:
     
     def _find_python_classes(self, content: str, rel_path: str, type_definitions: Dict) -> None:
         """Find Python class definitions in content"""
-        for match in re.finditer(r'^class\s+(\w+)', content, re.MULTILINE):
+        # Only match actual class definitions, not usage or inheritance
+        for match in re.finditer(r'^class\s+(\w+)\s*[\(:]', content, re.MULTILINE):
             type_name = match.group(1)
-            type_definitions[type_name].append(rel_path)
+            # Skip test classes and internal classes
+            if not type_name.startswith('_') and not type_name.startswith('Test'):
+                type_definitions[type_name].append(rel_path)
     
     def _scan_typescript_types(self, type_definitions: Dict) -> None:
         """Scan TypeScript files for type definitions"""
@@ -83,9 +86,19 @@ class TypeChecker:
     
     def _find_typescript_types(self, content: str, rel_path: str, type_definitions: Dict) -> None:
         """Find TypeScript type definitions in content"""
-        for match in re.finditer(r'(?:interface|type)\s+(\w+)', content):
+        # Match interface and type declarations, not usage
+        interface_pattern = r'^\s*(?:export\s+)?interface\s+(\w+)\s*[{<]'
+        type_pattern = r'^\s*(?:export\s+)?type\s+(\w+)\s*='
+        
+        for match in re.finditer(interface_pattern, content, re.MULTILINE):
             type_name = match.group(1)
-            type_definitions[type_name].append(rel_path)
+            if not type_name.startswith('_'):
+                type_definitions[type_name].append(rel_path)
+        
+        for match in re.finditer(type_pattern, content, re.MULTILINE):
+            type_name = match.group(1)
+            if not type_name.startswith('_'):
+                type_definitions[type_name].append(rel_path)
     
     def _filter_legitimate_duplicates(self, type_definitions: Dict) -> Dict:
         """Filter out legitimate duplicates that shouldn't be violations"""
@@ -136,13 +149,36 @@ class TypeChecker:
         filtered = []
         for file in files:
             file_lower = file.lower()
-            skip_patterns = ['schema', 'interface', 'types.py', 'models.py']
+            # Skip legitimate pattern files that commonly have types
+            skip_patterns = [
+                'schema', 'interface', 'types.py', 'models.py',
+                'base.py', 'abstract', 'protocol', 'typing'
+            ]
             if any(x in file_lower for x in skip_patterns):
                 continue
-            if 'db/' in file and 'services/' in file:
+            # Skip if it's a legitimate separation between layers
+            if self._is_layer_separation(file, files):
                 continue
             filtered.append(file)
         return filtered
+    
+    def _is_layer_separation(self, file: str, all_files: List[str]) -> bool:
+        """Check if file is part of legitimate layer separation"""
+        layers = ['db/', 'schemas/', 'models/', 'types/']
+        file_layer = None
+        for layer in layers:
+            if layer in file:
+                file_layer = layer
+                break
+        if not file_layer:
+            return False
+        # Check if other files are in different layers
+        for other_file in all_files:
+            if other_file != file:
+                for layer in layers:
+                    if layer in other_file and layer != file_layer:
+                        return True
+        return False
     
     def _are_legitimate_separations(self, files: List[str]) -> bool:
         """Check if files represent legitimate architectural separations"""

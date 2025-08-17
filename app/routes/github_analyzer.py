@@ -8,7 +8,7 @@ from datetime import datetime
 import uuid
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 
-from app.dependencies.auth import get_current_user
+from app.auth_integration.auth import get_current_user
 from app.schemas.github_analyzer import (
     AnalysisRequest,
     AnalysisResponse,

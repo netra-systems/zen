@@ -26,13 +26,17 @@ def _create_enforcer(args):
     violation_limit = 999999 if show_all else getattr(args, 'violation_limit', 10)
     smart_limits = not getattr(args, 'no_smart_limits', False)
     use_emoji = not getattr(args, 'no_emoji', False)
+    target_folders = getattr(args, 'target_folders', None)
+    ignore_folders = getattr(args, 'ignore_folders', None)
     return ArchitectureEnforcer(
         root_path=args.path,
         max_file_lines=args.max_file_lines,
         max_function_lines=args.max_function_lines,
         violation_limit=violation_limit,
         smart_limits=smart_limits,
-        use_emoji=use_emoji
+        use_emoji=use_emoji,
+        target_folders=target_folders,
+        ignore_folders=ignore_folders
     )
 
 

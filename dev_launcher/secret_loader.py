@@ -1,11 +1,11 @@
 """
-Secret loading for development environment.
+Simplified secret loader with single source and remote fallback.
 """
 
 import os
 import socket
 from pathlib import Path
-from typing import Dict, Tuple, Optional, List
+from typing import Dict, Tuple, Optional, List, Set
 import logging
 
 from dev_launcher.env_file_loader import EnvFileLoader
@@ -15,20 +15,22 @@ logger = logging.getLogger(__name__)
 
 class SecretLoader:
     """
-    Enhanced secret loader with support for multiple sources.
+    Simplified secret loader with single source (.env) and remote fallback.
     
-    Loads secrets from environment files and Google Cloud Secret Manager,
-    providing detailed visibility into the loading process.
+    Primary source: .env file (user-controlled)
+    Fallback: Google Cloud Secret Manager (for missing secrets only)
     """
     
     def __init__(self, 
                  project_id: Optional[str] = None, 
                  verbose: bool = False,
-                 project_root: Optional[Path] = None):
+                 project_root: Optional[Path] = None,
+                 use_remote_fallback: bool = True):
         """Initialize the secret loader."""
         self.project_id = self._determine_project_id(project_id)
         self.verbose = verbose
         self.project_root = project_root or Path.cwd()
+        self.use_remote_fallback = use_remote_fallback
         self.loaded_secrets: Dict[str, str] = {}
         self.failed_secrets: List[Tuple[str, str]] = []
         self.env_file_loader = EnvFileLoader(self.project_root, verbose)
@@ -39,18 +41,95 @@ class SecretLoader:
         default_project_id = "701982941522" if environment == "staging" else "304612253870"
         return project_id or os.environ.get('GOOGLE_CLOUD_PROJECT', default_project_id)
     
-    def load_from_env_file(self, env_file: Optional[Path] = None) -> Dict[str, Tuple[str, str]]:
-        """Load secrets from an environment file."""
-        return self.env_file_loader.load_from_env_file(env_file)
+    def load_all_secrets(self) -> bool:
+        """
+        Load secrets with simplified strategy:
+        1. Load from .env file (primary source)
+        2. Check for missing required secrets
+        3. Fallback to Google Secret Manager for missing ones only
+        """
+        logger.info("=" * 70)
+        logger.info("[SECRET LOADER] Simplified Environment Loading")
+        logger.info("=" * 70)
+        
+        # Step 1: Capture existing OS environment
+        existing_env = self._capture_existing_env()
+        
+        # Step 2: Load from .env file (single source)
+        env_secrets = self.env_file_loader.load_env_file()
+        
+        # Step 3: Get required secrets list
+        required_secrets = self._get_required_secrets()
+        
+        # Step 4: Check what's missing
+        missing = self._check_missing_secrets(env_secrets, existing_env, required_secrets)
+        
+        # Step 5: Fallback to Google Secret Manager if needed
+        google_secrets = {}
+        if missing and self.use_remote_fallback:
+            google_secrets = self._load_missing_from_google(missing)
+        
+        # Step 6: Merge and set environment
+        self._merge_and_set_environment(existing_env, env_secrets, google_secrets)
+        
+        return True
     
-    def load_from_google_secrets(self) -> Dict[str, Tuple[str, str]]:
-        """Load secrets from Google Secret Manager."""
-        logger.info(f"Loading secrets from Google Cloud Secret Manager")
+    def _capture_existing_env(self) -> Dict[str, Tuple[str, str]]:
+        """Capture existing OS environment variables."""
+        required_keys = self._get_required_secrets()
+        return self.env_file_loader.capture_existing_env(required_keys)
+    
+    def _get_required_secrets(self) -> Set[str]:
+        """Get list of required secret keys."""
+        return {
+            "GEMINI_API_KEY",
+            "GOOGLE_CLIENT_ID", 
+            "GOOGLE_CLIENT_SECRET",
+            "LANGFUSE_SECRET_KEY",
+            "LANGFUSE_PUBLIC_KEY",
+            "CLICKHOUSE_DEFAULT_PASSWORD",
+            "CLICKHOUSE_DEVELOPMENT_PASSWORD",
+            "JWT_SECRET_KEY",
+            "FERNET_KEY",
+            "REDIS_PASSWORD",
+            "ANTHROPIC_API_KEY",
+            "OPENAI_API_KEY",
+            # Static configs that can be overridden
+            "ENVIRONMENT",
+            "REDIS_HOST",
+            "REDIS_PORT",
+            "CLICKHOUSE_HOST",
+            "CLICKHOUSE_PORT",
+            "CLICKHOUSE_USER",
+            "CLICKHOUSE_DB",
+        }
+    
+    def _check_missing_secrets(self, env_secrets: Dict, existing_env: Dict, 
+                               required: Set[str]) -> Set[str]:
+        """Check which required secrets are missing."""
+        loaded_keys = set(env_secrets.keys()) | set(existing_env.keys())
+        missing = required - loaded_keys
+        
+        if missing:
+            logger.info(f"\n[MISSING] {len(missing)} required secrets not in .env or OS:")
+            for key in sorted(missing):
+                logger.info(f"  - {key}")
+        else:
+            logger.info("\n[OK] All required secrets found in .env or OS")
+        
+        return missing
+    
+    def _load_missing_from_google(self, missing_keys: Set[str]) -> Dict[str, Tuple[str, str]]:
+        """Load only missing secrets from Google Secret Manager."""
+        logger.info(f"\n[FALLBACK] Loading {len(missing_keys)} missing secrets from Google...")
         logger.info(f"  Project ID: {self.project_id}")
+        
         client = self._create_secret_manager_client()
         if not client:
+            logger.warning("  [WARN] Cannot connect to Google Secret Manager")
             return {}
-        return self._fetch_google_secrets(client)
+        
+        return self._fetch_missing_secrets(client, missing_keys)
     
     def _create_secret_manager_client(self):
         """Create Google Secret Manager client."""
@@ -60,24 +139,36 @@ class SecretLoader:
             socket.setdefaulttimeout(10)
             try:
                 client = secretmanager.SecretManagerServiceClient()
-                logger.info("  Connected to Secret Manager")
+                logger.info("  [OK] Connected to Secret Manager")
                 return client
             finally:
                 socket.setdefaulttimeout(original_timeout)
         except ImportError:
-            logger.error("  Google Cloud SDK not installed")
+            logger.error("  [ERROR] Google Cloud SDK not installed")
             return None
         except Exception as e:
-            logger.error(f"  Failed to connect: {e}")
+            logger.error(f"  [ERROR] Failed to connect: {e}")
             return None
     
-    def _fetch_google_secrets(self, client) -> Dict[str, Tuple[str, str]]:
-        """Fetch secrets from Google Secret Manager."""
+    def _fetch_missing_secrets(self, client, missing_keys: Set[str]) -> Dict[str, Tuple[str, str]]:
+        """Fetch only missing secrets from Google."""
         secret_mappings = self._get_secret_mappings()
         loaded = {}
-        logger.info(f"  Fetching {len(secret_mappings)} secrets...")
-        for secret_name, env_var in secret_mappings.items():
-            self._fetch_single_secret(client, secret_name, env_var, loaded)
+        
+        for env_var in missing_keys:
+            # Find the secret name for this env var
+            secret_name = None
+            for sname, evar in secret_mappings.items():
+                if evar == env_var:
+                    secret_name = sname
+                    break
+            
+            if secret_name:
+                self._fetch_single_secret(client, secret_name, env_var, loaded)
+            else:
+                logger.debug(f"  No Google secret mapping for {env_var}")
+        
+        logger.info(f"  [OK] Loaded {len(loaded)} secrets from Google")
         return loaded
     
     def _fetch_single_secret(self, client, secret_name: str, env_var: str, loaded: Dict):
@@ -87,23 +178,16 @@ class SecretLoader:
             response = client.access_secret_version(name=name)
             value = response.payload.data.decode("UTF-8")
             loaded[env_var] = (value, "google_secret")
-            self._log_google_secret_success(env_var, value, secret_name)
+            if self.verbose:
+                masked = self._mask_value(value)
+                logger.debug(f"    Loaded {env_var}: {masked}")
         except Exception as e:
-            self._handle_secret_failure(env_var, e)
-    
-    def _log_google_secret_success(self, env_var: str, value: str, secret_name: str):
-        """Log successful Google secret fetch."""
-        masked_value = self._mask_value(value)
-        logger.info(f"  Loaded {env_var}: {masked_value} (from Google Secret: {secret_name})")
-    
-    def _handle_secret_failure(self, env_var: str, error: Exception):
-        """Handle secret loading failure."""
-        self.failed_secrets.append((env_var, str(error)))
-        if self.verbose:
-            logger.warning(f"  Failed to load {env_var}: {str(error)[:50]}")
+            self.failed_secrets.append((env_var, str(e)))
+            if self.verbose:
+                logger.debug(f"    Failed {env_var}: {str(e)[:50]}")
     
     def _get_secret_mappings(self) -> Dict[str, str]:
-        """Get the mapping of secret names to environment variables."""
+        """Get the mapping of Google secret names to environment variables."""
         return {
             "gemini-api-key": "GEMINI_API_KEY",
             "google-client-id": "GOOGLE_CLIENT_ID",
@@ -119,13 +203,111 @@ class SecretLoader:
             "openai-api-key": "OPENAI_API_KEY",
         }
     
-    def _get_static_config(self) -> Dict[str, Tuple[str, str]]:
-        """Get static configuration values - only non-sensitive defaults."""
+    def _get_static_defaults(self) -> Dict[str, Tuple[str, str]]:
+        """Get static default values for non-sensitive configs."""
         return {
-            "ENVIRONMENT": ("development", "static"),
-            "REDIS_HOST": ("localhost", "static"),
-            "REDIS_PORT": ("6379", "static"),
+            "ENVIRONMENT": ("development", "default"),
+            "REDIS_HOST": ("localhost", "default"),
+            "REDIS_PORT": ("6379", "default"),
+            "CLICKHOUSE_HOST": ("localhost", "default"),
+            "CLICKHOUSE_PORT": ("9000", "default"),
+            "CLICKHOUSE_USER": ("default", "default"),
+            "CLICKHOUSE_DB": ("default", "default"),
         }
+    
+    def _merge_and_set_environment(self, existing_env: Dict, env_secrets: Dict, 
+                                   google_secrets: Dict):
+        """Merge all sources and set environment variables."""
+        logger.info("\n[MERGE] Setting environment variables...")
+        logger.info("Priority: OS Environment > .env file > Google Secrets > Defaults")
+        
+        # Start with defaults
+        all_secrets = self._get_static_defaults()
+        
+        # Override with Google secrets (fallback)
+        for key, value_tuple in google_secrets.items():
+            all_secrets[key] = value_tuple
+        
+        # Override with .env file (primary source)
+        for key, value_tuple in env_secrets.items():
+            all_secrets[key] = value_tuple
+        
+        # Override with OS environment (highest priority)
+        for key, value_tuple in existing_env.items():
+            all_secrets[key] = value_tuple
+        
+        # Set environment variables
+        self._set_environment_variables(all_secrets)
+        self._print_summary()
+    
+    def _set_environment_variables(self, all_secrets: Dict):
+        """Set environment variables and track them."""
+        logger.info("\n[FINAL] Environment variables set:")
+        logger.info("-" * 60)
+        
+        categories = self._get_secret_categories()
+        
+        # Set by category for better organization
+        for category, keys in categories.items():
+            has_vars = any(k in all_secrets for k in keys)
+            if has_vars:
+                logger.info(f"\n{category}:")
+                for key in keys:
+                    if key in all_secrets:
+                        value, source = all_secrets[key]
+                        os.environ[key] = value
+                        self.loaded_secrets[key] = source
+                        masked = self._mask_value(value)
+                        logger.info(f"  {key}: {masked} [from: {source}]")
+        
+        # Set any uncategorized
+        categorized = set()
+        for keys in categories.values():
+            categorized.update(keys)
+        
+        uncategorized = {k: v for k, v in all_secrets.items() if k not in categorized}
+        if uncategorized:
+            logger.info("\nOther:")
+            for key, (value, source) in uncategorized.items():
+                os.environ[key] = value
+                self.loaded_secrets[key] = source
+                masked = self._mask_value(value)
+                logger.info(f"  {key}: {masked} [from: {source}]")
+    
+    def _print_summary(self):
+        """Print summary of loaded environment variables."""
+        logger.info("\n" + "=" * 70)
+        logger.info("[SUMMARY] Environment Loading Complete")
+        logger.info("=" * 70)
+        
+        # Count by source
+        sources = {}
+        for source in self.loaded_secrets.values():
+            readable = {
+                "os_environment": "OS Environment",
+                "env_file": ".env file",
+                "google_secret": "Google Secret Manager",
+                "default": "Default values"
+            }.get(source, source)
+            sources[readable] = sources.get(readable, 0) + 1
+        
+        total = len(self.loaded_secrets)
+        logger.info(f"\nTotal variables set: {total}")
+        logger.info("\nBy source:")
+        for source, count in sorted(sources.items(), key=lambda x: x[1], reverse=True):
+            percentage = (count / total * 100) if total > 0 else 0
+            logger.info(f"  {source:25} {count:3} ({percentage:.1f}%)")
+        
+        # Show failures if any
+        if self.failed_secrets:
+            logger.warning(f"\nFailed to load {len(self.failed_secrets)} secrets:")
+            for secret, error in self.failed_secrets[:5]:
+                logger.warning(f"  - {secret}: {error[:50]}")
+        
+        # Tips
+        logger.info("\n[TIP] Create a .env file for local development")
+        logger.info("[TIP] Use 'cp .env.example .env' to start from example")
+        logger.info("=" * 70)
     
     def _mask_value(self, value: str) -> str:
         """Mask a sensitive value for display."""
@@ -135,179 +317,6 @@ class SecretLoader:
             return value[:3] + "***"
         else:
             return "***"
-    
-    def load_all_secrets(self) -> bool:
-        """Load secrets from all sources with priority."""
-        logger.info("=" * 70)
-        logger.info("[LOCK] SECRET AND ENVIRONMENT VARIABLE LOADING PROCESS")
-        logger.info("=" * 70)
-        existing_env = self._capture_existing_env()
-        env_secrets = self.env_file_loader.load_env_file()
-        dev_secrets = self.env_file_loader.load_dev_env_file()
-        terraform_secrets = self.env_file_loader.load_terraform_env_file()
-        google_secrets = self._load_google_secrets_conditionally(terraform_secrets)
-        static_config = self._get_static_config()
-        self._merge_and_set_environment(existing_env, env_secrets, dev_secrets, 
-                                       terraform_secrets, google_secrets, static_config)
-        return True
-    
-    def _capture_existing_env(self) -> Dict[str, Tuple[str, str]]:
-        """Capture existing OS environment variables."""
-        relevant_keys = set(self._get_secret_mappings().values()) | set(self._get_static_config().keys())
-        return self.env_file_loader.capture_existing_env(relevant_keys)
-    
-    def _load_google_secrets_conditionally(self, terraform_secrets: Dict) -> Dict[str, Tuple[str, str]]:
-        """Load Google secrets conditionally."""
-        logger.info("\n[STEP 5] Loading from Google Secret Manager...")
-        if self.project_id and not terraform_secrets:
-            google_secrets = self.load_from_google_secrets()
-            logger.info(f"  [OK] Loaded {len(google_secrets)} secrets from Google")
-            return google_secrets
-        elif terraform_secrets:
-            logger.info("  [SKIP] Skipping (using Terraform config instead)")
-        else:
-            logger.info("  [WARN] No project ID configured")
-        return {}
-    
-    def _merge_and_set_environment(self, existing_env: Dict, env_secrets: Dict, 
-                                   dev_secrets: Dict, terraform_secrets: Dict, 
-                                   google_secrets: Dict, static_config: Dict):
-        """Merge all sources and set environment variables."""
-        logger.info("\n[STEP 6] Adding static configuration defaults...")
-        logger.info(f"  [OK] {len(static_config)} static defaults available")
-        self._log_precedence_info()
-        all_secrets = self._merge_with_precedence(static_config, google_secrets, env_secrets,
-                                                 dev_secrets, terraform_secrets, existing_env)
-        self._set_environment_variables(all_secrets)
-        self._print_detailed_summary()
-    
-    def _log_precedence_info(self):
-        """Log precedence information."""
-        logger.info("\n[MERGE] MERGING WITH PRECEDENCE (highest to lowest):")
-        logger.info("  1. OS Environment Variables (highest)")
-        logger.info("  2. .env.development.local (Terraform)")
-        logger.info("  3. .env.development")
-        logger.info("  4. .env")
-        logger.info("  5. Google Secret Manager")
-        logger.info("  6. Static defaults (lowest)")
-    
-    def _merge_with_precedence(self, static_config: Dict, google_secrets: Dict, 
-                              env_secrets: Dict, dev_secrets: Dict, 
-                              terraform_secrets: Dict, existing_env: Dict) -> Dict:
-        """Merge secrets with proper precedence."""
-        all_secrets = {}
-        for source, secrets, name in [
-            ("static", static_config, "Static defaults"),
-            ("google", google_secrets, "Google Secret Manager"),
-            ("env", env_secrets, ".env file"),
-            ("dev", dev_secrets, ".env.development"),
-            ("terraform", terraform_secrets, ".env.development.local"),
-            ("os", existing_env, "OS Environment")
-        ]:
-            self._merge_source_secrets(all_secrets, secrets, source, name)
-        return all_secrets
-    
-    def _merge_source_secrets(self, all_secrets: Dict, secrets: Dict, source: str, name: str):
-        """Merge secrets from a single source."""
-        if not secrets:
-            return
-        for key, value_tuple in secrets.items():
-            value = value_tuple[0] if isinstance(value_tuple, tuple) else value_tuple
-            if key in all_secrets:
-                self._log_override(key, name)
-            all_secrets[key] = (value, source)
-    
-    def _log_override(self, key: str, name: str):
-        """Log variable override."""
-        logger.debug(f"  [OVERRIDE] {key}: overridden by {name}")
-    
-    def _set_environment_variables(self, all_secrets: Dict):
-        """Set environment variables and track them."""
-        logger.info("\n[FINAL] ENVIRONMENT VARIABLES:")
-        logger.info("-" * 60)
-        categories = self._get_secret_categories()
-        self._set_categorized_variables(categories, all_secrets)
-        self._set_uncategorized_variables(categories, all_secrets)
-    
-    def _set_categorized_variables(self, categories: Dict, all_secrets: Dict):
-        """Set categorized environment variables."""
-        for category, keys in categories.items():
-            has_vars = any(k in all_secrets for k in keys)
-            if has_vars:
-                logger.info(f"\n{category}:")
-                for key in keys:
-                    if key in all_secrets:
-                        self._set_single_variable(key, all_secrets[key])
-    
-    def _set_uncategorized_variables(self, categories: Dict, all_secrets: Dict):
-        """Set uncategorized environment variables."""
-        categorized = set()
-        for keys in categories.values():
-            categorized.update(keys)
-        uncategorized = {k: v for k, v in all_secrets.items() if k not in categorized}
-        if uncategorized:
-            logger.info("\nOther:")
-            for key, value_tuple in uncategorized.items():
-                self._set_single_variable(key, value_tuple)
-    
-    def _set_single_variable(self, key: str, value_tuple: Tuple[str, str]):
-        """Set single environment variable."""
-        value, source = value_tuple
-        os.environ[key] = value
-        self.loaded_secrets[key] = source
-        masked = self._mask_value(value)
-        logger.info(f"  {key}: {masked} (from: {source})")
-    
-    def _print_detailed_summary(self):
-        """Print detailed summary of loaded environment variables."""
-        logger.info("\n" + "=" * 70)
-        logger.info("[STATS] ENVIRONMENT VARIABLE LOADING SUMMARY")
-        logger.info("=" * 70)
-        sources = self._count_sources()
-        total = len(self.loaded_secrets)
-        self._log_summary_stats(total, sources)
-        self._log_failed_secrets()
-        self._log_summary_tips()
-    
-    def _count_sources(self) -> Dict[str, int]:
-        """Count variables by source."""
-        sources = {}
-        for source in self.loaded_secrets.values():
-            readable_source = {
-                "os": "OS Environment",
-                "terraform": ".env.development.local (Terraform)",
-                "dev": ".env.development",
-                "env": ".env file",
-                "env_file": ".env file",
-                "google": "Google Secret Manager",
-                "google_secret": "Google Secret Manager",
-                "static": "Static defaults"
-            }.get(source, source)
-            sources[readable_source] = sources.get(readable_source, 0) + 1
-        return sources
-    
-    def _log_summary_stats(self, total: int, sources: Dict[str, int]):
-        """Log summary statistics."""
-        logger.info(f"\n[SUCCESS] Total environment variables set: {total}")
-        logger.info("\n[CHART] Variables by source:")
-        for source, count in sorted(sources.items(), key=lambda x: x[1], reverse=True):
-            percentage = (count / total * 100) if total > 0 else 0
-            bar_length = int(percentage / 2)
-            bar = "#" * bar_length + "-" * (50 - bar_length)
-            logger.info(f"  {source:35} {count:3} vars [{bar}] {percentage:.1f}%")
-    
-    def _log_failed_secrets(self):
-        """Log failed secrets."""
-        if self.failed_secrets:
-            logger.warning(f"\n[WARNING] Failed to load {len(self.failed_secrets)} secrets:")
-            for secret, error in self.failed_secrets[:5]:
-                logger.warning(f"  - {secret}: {error[:80]}")
-    
-    def _log_summary_tips(self):
-        """Log summary tips."""
-        logger.info("\n[TIP] Environment variables from OS have highest priority")
-        logger.info("[TIP] Use .env.development for local overrides")
-        logger.info("=" * 70)
     
     def _get_secret_categories(self) -> Dict[str, List[str]]:
         """Get categorized grouping of secrets."""
@@ -319,7 +328,6 @@ class SecretLoader:
                 "CLICKHOUSE_DEFAULT_PASSWORD", "CLICKHOUSE_DEVELOPMENT_PASSWORD", 
                 "CLICKHOUSE_DB"
             ],
-            "Database": ["DATABASE_URL"],
             "Redis": ["REDIS_HOST", "REDIS_PORT", "REDIS_PASSWORD"],
             "Langfuse": ["LANGFUSE_PUBLIC_KEY", "LANGFUSE_SECRET_KEY"],
             "Security": ["JWT_SECRET_KEY", "FERNET_KEY"],

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="bad_test_detection">
+    <metadata>
+        <created>2025-08-17</created>
+        <updated>2025-08-17</updated>
+        <priority>HIGH</priority>
+        <impact>test_health</impact>
+    </metadata>
+    
+    <learning id="bad-test-detection-implementation">
+        <title>Automatic Bad Test Detection System</title>
+        <problem>
+            Tests that consistently fail across runs waste developer time and reduce confidence
+            in the test suite. No systematic way to identify and track problematic tests.
+        </problem>
+        
+        <solution>
+            Implemented automatic bad test detection system that tracks failures across runs
+            and identifies tests needing attention.
+        </solution>
+        
+        <implementation>
+            <file>test_framework/bad_test_detector.py</file>
+            <file>test_framework/pytest_bad_test_plugin.py</file>
+            <file>test_framework/bad_test_reporter.py</file>
+            <description>
+                Core detection engine with pytest plugin integration and CLI reporting tool.
+                Tracks {test}:{failure_count} patterns and persists to test_reports/bad_tests.json.
+            </description>
+        </implementation>
+        
+        <detection-criteria>
+            <criterion>5+ consecutive failures → Immediate fix needed</criterion>
+            <criterion>70% failure rate (10+ runs) → Consider refactoring</criterion>
+            <criterion>90% failure rate → Delete or complete rewrite</criterion>
+        </detection-criteria>
+        
+        <usage>
+            <enable>Enabled by default in all test runs</enable>
+            <disable>python scripts/test_backend.py --no-bad-test-detection</disable>
+            <report>python -m test_framework.bad_test_reporter</report>
+            <reset>python -m test_framework.bad_test_reporter --reset</reset>
+        </usage>
+        
+        <benefits>
+            <benefit>Automatic identification of problematic tests</benefit>
+            <benefit>Historical tracking of test failures</benefit>
+            <benefit>Data-driven recommendations for test maintenance</benefit>
+            <benefit>Reduced time spent debugging flaky tests</benefit>
+        </benefits>
+    </learning>
+    
+    <learning id="test-failure-patterns">
+        <title>Common Test Failure Patterns</title>
+        <patterns>
+            <pattern type="consistently_failing">
+                <description>Tests that fail every run</description>
+                <causes>
+                    <cause>Test checking for non-existent functionality</cause>
+                    <cause>Outdated test not updated with code changes</cause>
+                    <cause>Incorrect test assertions</cause>
+                </causes>
+                <action>Fix immediately or delete if obsolete</action>
+            </pattern>
+            
+            <pattern type="flaky_tests">
+                <description>Tests with intermittent failures (70-90% failure rate)</description>
+                <causes>
+                    <cause>Race conditions in async code</cause>
+                    <cause>Timing dependencies</cause>
+                    <cause>External service dependencies</cause>
+                    <cause>Insufficient test isolation</cause>
+                </causes>
+                <action>Refactor to improve reliability</action>
+            </pattern>
+            
+            <pattern type="environment_sensitive">
+                <description>Tests that fail in specific environments</description>
+                <causes>
+                    <cause>Hard-coded paths or configurations</cause>
+                    <cause>Missing test dependencies</cause>
+                    <cause>Platform-specific assumptions</cause>
+                </causes>
+                <action>Improve test portability and isolation</action>
+            </pattern>
+        </patterns>
+    </learning>
+    
+    <learning id="test-maintenance-strategy">
+        <title>Test Suite Health Maintenance</title>
+        <strategy>
+            <step>Run bad test detection report weekly</step>
+            <step>Fix tests with 5+ consecutive failures immediately</step>
+            <step>Review and refactor tests with 70-90% failure rate</step>
+            <step>Delete tests with 90%+ failure rate after review</step>
+            <step>Update tests when code changes to maintain alignment</step>
+        </strategy>
+        
+        <best-practices>
+            <practice>Keep test failure history for pattern analysis</practice>
+            <practice>Use failure data to identify systemic issues</practice>
+            <practice>Prioritize fixing revenue-critical test failures</practice>
+            <practice>Document reasons for test deletions</practice>
+            <practice>Monitor test suite health metrics over time</practice>
+        </best-practices>
+    </learning>
+    
+    <learning id="integration-points">
+        <title>Integration with Test Framework</title>
+        <integrations>
+            <integration component="test_runner">
+                <file>test_framework/runner.py</file>
+                <description>Main test runner integration for framework-level tracking</description>
+            </integration>
+            
+            <integration component="pytest">
+                <file>test_framework/pytest_bad_test_plugin.py</file>
+                <description>Pytest plugin for automatic test outcome recording</description>
+                <hooks>
+                    <hook>pytest_runtest_logreport - Capture test results</hook>
+                    <hook>pytest_sessionfinish - Generate final report</hook>
+                    <hook>pytest_collection_modifyitems - Mark bad tests</hook>
+                </hooks>
+            </integration>
+            
+            <integration component="backend_tests">
+                <file>scripts/test_backend.py</file>
+                <description>Command-line argument support and plugin activation</description>
+                <flag>--no-bad-test-detection to disable</flag>
+            </integration>
+        </integrations>
+    </learning>
+    
+    <learning id="data-persistence">
+        <title>Bad Test Data Management</title>
+        <storage>
+            <location>test_reports/bad_tests.json</location>
+            <format>JSON with test history and statistics</format>
+            <retention>Keeps last 10 failures per test, last 100 runs overall</retention>
+        </storage>
+        
+        <data-structure>
+            <field name="tests">Dictionary of test names to failure history</field>
+            <field name="runs">Array of run statistics</field>
+            <field name="stats">Overall statistics and metadata</field>
+        </data-structure>
+        
+        <management>
+            <command>View data: python -m test_framework.bad_test_reporter</command>
+            <command>Export data: python -m test_framework.bad_test_reporter --export file.json</command>
+            <command>Reset all: python -m test_framework.bad_test_reporter --reset</command>
+            <command>Reset test: python -m test_framework.bad_test_reporter --reset --reset-test NAME</command>
+        </management>
+    </learning>
+</learnings>

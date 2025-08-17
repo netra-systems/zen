@@ -10,7 +10,7 @@ from app.db.postgres import get_db
 from app.services.tool_permission_service import ToolPermissionService
 from app.services.unified_tool_registry import UnifiedToolRegistry
 from app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
-from app.dependencies.auth import get_current_user
+from app.auth_integration.auth import get_current_user
 from app.logging_config import central_logger
 import json
 import time

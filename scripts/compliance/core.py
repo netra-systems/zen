@@ -32,33 +32,49 @@ class ComplianceResults:
     violations_by_type: Dict[str, int]
     violations: List[Violation]
     summary: Dict[str, Union[int, str, float]]
+    category_scores: Dict[str, Dict[str, Union[int, float]]] = None
 
 
 class ComplianceConfig:
     """Configuration for compliance checking"""
     
     def __init__(self, root_path: str = ".", max_file_lines: int = 300, 
-                 max_function_lines: int = 8):
+                 max_function_lines: int = 8, target_folders: List[str] = None,
+                 ignore_folders: List[str] = None):
         self.root_path = Path(root_path)
         self.max_file_lines = max_file_lines
         self.max_function_lines = max_function_lines
+        self.target_folders = target_folders or ['app', 'frontend']
+        self.ignore_folders = ignore_folders or ['scripts', 'test_framework']
     
     def get_patterns(self) -> List[str]:
         """Get file patterns to check"""
-        return ['app/**/*.py', 'frontend/**/*.tsx', 'frontend/**/*.ts', 'scripts/**/*.py']
+        patterns = []
+        for folder in self.target_folders:
+            patterns.extend([f'{folder}/**/*.py', f'{folder}/**/*.ts', f'{folder}/**/*.tsx'])
+        return patterns
     
     def get_python_patterns(self) -> List[str]:
         """Get Python file patterns"""
-        return ['app/**/*.py', 'scripts/**/*.py']
+        return [f'{folder}/**/*.py' for folder in self.target_folders]
     
     def get_typescript_patterns(self) -> List[str]:
         """Get TypeScript file patterns"""
-        return ['frontend/**/*.ts', 'frontend/**/*.tsx']
+        patterns = []
+        for folder in self.target_folders:
+            if folder == 'frontend':
+                patterns.extend([f'{folder}/**/*.ts', f'{folder}/**/*.tsx'])
+        return patterns
     
     def should_skip_file(self, filepath: str) -> bool:
         """Check if file should be skipped"""
         skip_patterns = self._get_skip_patterns()
-        return any(pattern in filepath for pattern in skip_patterns)
+        path_str = str(filepath)
+        # Skip ignored folders
+        for folder in self.ignore_folders:
+            if path_str.startswith(folder + '/') or f'/{folder}/' in path_str:
+                return True
+        return any(pattern in path_str for pattern in skip_patterns)
     
     def _get_skip_patterns(self) -> List[str]:
         """Get patterns for files to skip"""
@@ -72,6 +88,12 @@ class ComplianceConfig:
             'yarn.lock', 'static/admin', 'static/rest_framework', 'wwwroot/lib',
             '.terraform', 'terraform/.terraform'
         ]
+    
+    def is_test_file(self, filepath: str) -> bool:
+        """Check if file is a test file"""
+        test_indicators = ['test_', '_test.', '/tests/', '/test/', 'spec.', '.spec.', '.test.']
+        path_str = str(filepath).lower()
+        return any(indicator in path_str for indicator in test_indicators)
 
 
 class ViolationBuilder:
@@ -123,7 +145,8 @@ class ViolationBuilder:
 
 def create_compliance_results(violations: List[Violation], total_files: int,
                             compliance_score: float, violations_by_type: Dict[str, int],
-                            max_file_lines: int, max_function_lines: int) -> ComplianceResults:
+                            max_file_lines: int, max_function_lines: int,
+                            category_scores: Dict[str, Dict] = None) -> ComplianceResults:
     """Create compliance results object"""
     import time
     summary = _build_summary(violations, total_files, compliance_score, 
@@ -131,7 +154,7 @@ def create_compliance_results(violations: List[Violation], total_files: int,
     return ComplianceResults(
         total_violations=len(violations), compliance_score=compliance_score,
         timestamp=time.strftime("%Y-%m-%d %H:%M:%S"), violations_by_type=violations_by_type,
-        violations=violations, summary=summary
+        violations=violations, summary=summary, category_scores=category_scores
     )
 
 

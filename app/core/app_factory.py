@@ -86,7 +86,8 @@ def setup_middleware(app: FastAPI) -> None:
 
 def initialize_oauth(app: FastAPI) -> None:
     """Initialize OAuth client."""
-    oauth_client.init_app(app)
+    # OAuth now handled by auth service - no initialization needed
+    pass
 
 
 def register_api_routes(app: FastAPI) -> None:

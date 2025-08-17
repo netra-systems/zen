@@ -82,18 +82,16 @@ class TestWorkloadEventsTable:
         return test_events
 
     def _create_single_test_event(self, index, base_time):
-        """Create a single test workload event"""
+        """Create a single test workload event matching actual schema"""
         return {
-            'trace_id': str(uuid.uuid4()), 'span_id': str(uuid.uuid4()),
-            'user_id': f'test_user_{index % 3}', 'session_id': f'session_{index % 2}',
-            'timestamp': base_time - timedelta(minutes=index),
-            'workload_type': random.choice(['simple_chat', 'rag_pipeline', 'tool_use']),
-            'status': random.choice(['completed', 'in_progress', 'failed']),
-            'duration_ms': random.randint(100, 5000),
+            'user_id': index % 1000,  # UInt32 as per schema
+            'workload_id': f'workload_{uuid.uuid4()}',
+            'event_type': random.choice(['simple_chat', 'rag_pipeline', 'tool_use']),
+            'event_category': random.choice(['completed', 'in_progress', 'failed']),
             'metrics.name': ['latency_ms', 'tokens_used', 'cost_cents'],
             'metrics.value': [random.uniform(50, 500), random.randint(100, 1000), random.uniform(0.01, 1.0)],
             'metrics.unit': ['ms', 'tokens', 'cents'],
-            'input_text': f'Test input {index}', 'output_text': f'Test output {index}',
+            'dimensions': {'test_id': str(index), 'test_run': 'true'},
             'metadata': json.dumps({'test_id': index, 'test_run': True})
         }
 
@@ -101,18 +99,22 @@ class TestWorkloadEventsTable:
         """Insert workload events into ClickHouse"""
         insert_query = self._build_insert_query()
         for event in test_events:
-            params = {k.replace('.', '_'): v for k, v in event.items()}
+            # Convert keys to match parameter names in query
+            params = {}
+            for k, v in event.items():
+                # Convert dots to underscores for parameter names
+                param_key = k.replace('.', '_')
+                params[param_key] = v
             await self._execute_insert_with_error_handling(client, insert_query, params)
 
     def _build_insert_query(self):
-        """Build workload events insert query"""
-        return """INSERT INTO workload_events (trace_id, span_id, user_id, 
-        session_id, timestamp, workload_type, status, duration_ms, 
-        metrics.name, metrics.value, metrics.unit, input_text, 
-        output_text, metadata) VALUES (%(trace_id)s, %(span_id)s, 
-        %(user_id)s, %(session_id)s, %(timestamp)s, %(workload_type)s, 
-        %(status)s, %(duration_ms)s, %(metrics_name)s, %(metrics_value)s, 
-        %(metrics_unit)s, %(input_text)s, %(output_text)s, %(metadata)s)"""
+        """Build workload events insert query matching actual schema"""
+        return """INSERT INTO workload_events (user_id, workload_id, 
+        event_type, event_category, metrics.name, metrics.value, 
+        metrics.unit, dimensions, metadata) VALUES (%(user_id)s, 
+        %(workload_id)s, %(event_type)s, %(event_category)s, 
+        %(metrics_name)s, %(metrics_value)s, %(metrics_unit)s, 
+        %(dimensions)s, %(metadata)s)"""
 
     async def _execute_insert_with_error_handling(self, client, query, params):
         """Execute insert with permission error handling"""
@@ -146,7 +148,7 @@ class TestWorkloadEventsTable:
         """Build array syntax query for testing"""
         return """
         SELECT 
-            trace_id,
+            event_id,
             metrics.name[1] as first_metric_name,
             metrics.value[1] as first_metric_value,
             metrics.unit[1] as first_metric_unit
@@ -177,7 +179,7 @@ class TestWorkloadEventsTable:
         return """
         WITH metric_analysis AS (
             SELECT 
-                workload_type,
+                event_type,
                 arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as latency_idx,
                 arrayFirstIndex(x -> x = 'tokens_used', metrics.name) as tokens_idx,
                 arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as cost_idx,
@@ -188,13 +190,13 @@ class TestWorkloadEventsTable:
             WHERE timestamp >= now() - INTERVAL 1 HOUR
         )
         SELECT 
-            workload_type,
+            event_type,
             count() as request_count,
             avg(latency) as avg_latency_ms,
             sum(tokens) as total_tokens,
             sum(cost) as total_cost_cents
         FROM metric_analysis
-        GROUP BY workload_type
+        GROUP BY event_type
         ORDER BY request_count DESC
         """
 
@@ -203,7 +205,7 @@ class TestWorkloadEventsTable:
         assert isinstance(result, list)
         
         for row in result:
-            logger.info(f"Workload {row['workload_type']}: "
+            logger.info(f"Event type {row['event_type']}: "
                       f"{row['request_count']} requests, "
                       f"avg latency {row['avg_latency_ms']:.2f}ms, "
                       f"total cost ${row['total_cost_cents']/100:.2f}")
@@ -218,14 +220,22 @@ class TestWorkloadEventsTable:
     def _build_time_series_query(self):
         """Build time series analysis query"""
         return """
+        WITH latency_metrics AS (
+            SELECT 
+                timestamp,
+                user_id,
+                arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as latency_idx,
+                if(latency_idx > 0, arrayElement(metrics.value, latency_idx), 0) as duration_ms
+            FROM workload_events
+            WHERE timestamp >= now() - INTERVAL 1 HOUR
+        )
         SELECT 
             toStartOfMinute(timestamp) as time_bucket,
             count() as events_per_minute,
             avg(duration_ms) as avg_duration,
             quantile(0.95)(duration_ms) as p95_duration,
             uniq(user_id) as unique_users
-        FROM workload_events
-        WHERE timestamp >= now() - INTERVAL 1 HOUR
+        FROM latency_metrics
         GROUP BY time_bucket
         ORDER BY time_bucket DESC
         LIMIT 60

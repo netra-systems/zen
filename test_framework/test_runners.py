@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 
 from .test_config import RUNNERS
 from .test_parser import parse_test_counts, parse_coverage, parse_cypress_counts, extract_test_details
+from .bad_test_detector import BadTestDetector
 
 # Load environment variables
 load_dotenv()
@@ -81,6 +82,9 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
     if results:
         results["backend"]["status"] = "running"
     
+    # Initialize bad test detector
+    bad_test_detector = BadTestDetector()
+    
     # Use backend test runner
     backend_script = PROJECT_ROOT / RUNNERS["backend"]
     if not backend_script.exists():
@@ -143,6 +147,16 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
             test_details = extract_test_details(result.stdout + result.stderr, "backend")
             results["backend"]["test_details"] = test_details
             
+            # Track bad tests
+            for test in test_details:
+                bad_test_detector.record_test_result(
+                    test_name=test["name"],
+                    component="backend",
+                    status=test["status"],
+                    error_type=test.get("error", "").split(":")[0] if test.get("error") else None,
+                    error_message=test.get("error")
+                )
+            
             # Parse coverage
             coverage = parse_coverage(result.stdout + result.stderr)
             if coverage is not None:
@@ -152,6 +166,19 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
         print_output(result.stdout, result.stderr)
         
         print(f"[{'PASS' if result.returncode == 0 else 'FAIL'}] Backend tests completed in {duration:.2f}s")
+        
+        # Finalize bad test detection and show report if needed
+        if results and "test_counts" in results["backend"]:
+            bad_tests = bad_test_detector.finalize_run(
+                total_tests=results["backend"]["test_counts"]["total"],
+                passed=results["backend"]["test_counts"]["passed"],
+                failed=results["backend"]["test_counts"]["failed"]
+            )
+            
+            # Show warning if bad tests detected
+            if bad_tests["consistently_failing"]:
+                print(f"\n⚠️  WARNING: {len(bad_tests['consistently_failing'])} tests are consistently failing!")
+                print("Run 'python -m test_framework.bad_test_reporter' for detailed report")
         
         return result.returncode, result.stdout + result.stderr
         

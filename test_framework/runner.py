@@ -85,6 +85,10 @@ class UnifiedTestRunner:
     
     def _try_enhanced_report(self, level: str, config: Dict, exit_code: int) -> bool:
         """Try to use enhanced reporter, return success status."""
+        return self._execute_safe_enhanced_report(level, config, exit_code)
+    
+    def _execute_safe_enhanced_report(self, level: str, config: Dict, exit_code: int) -> bool:
+        """Execute enhanced report with error handling."""
         try:
             self._execute_enhanced_reporting_workflow(level, config, exit_code)
             return True

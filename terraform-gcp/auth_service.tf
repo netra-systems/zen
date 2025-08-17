@@ -94,7 +94,7 @@ resource "google_cloud_run_service" "auth_service" {
   }
 
   depends_on = [
-    google_project_service.run,
+    google_project_service.apis,
     google_secret_manager_secret_version.jwt_secret,
     google_secret_manager_secret_version.auth_database_url,
     google_secret_manager_secret_version.redis_url
@@ -123,7 +123,7 @@ resource "google_secret_manager_secret" "jwt_secret" {
   project   = var.project_id
 
   replication {
-    automatic = true
+    auto {}
   }
 }
 
@@ -137,7 +137,7 @@ resource "google_secret_manager_secret" "auth_database_url" {
   project   = var.project_id
 
   replication {
-    automatic = true
+    auto {}
   }
 }
 
@@ -151,7 +151,7 @@ resource "google_secret_manager_secret" "redis_url" {
   project   = var.project_id
 
   replication {
-    automatic = true
+    auto {}
   }
 }
 

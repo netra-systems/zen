@@ -25,6 +25,10 @@ class LLMOperations:
         self._last_response_chunks = []
         self.enabled = True  # Default to enabled for testing
     
+    def get_llm(self, name: str, generation_config=None):
+        """Get LLM instance - delegates to provider manager."""
+        return self.provider_manager.get_llm(name, generation_config)
+    
     async def ask_llm(self, prompt: str, llm_config_name: str, use_cache: bool = True) -> str:
         """Ask LLM and return response content as string for backward compatibility."""
         response = await self.ask_llm_full(prompt, llm_config_name, use_cache)

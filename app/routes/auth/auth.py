@@ -27,7 +27,7 @@ def _get_explicit_frontend_url() -> Optional[str]:
 
 def _get_env_specific_frontend_url() -> str:
     """Get environment-specific frontend URL."""
-    env = auth_env_config.environment.value
+    env = auth_client.detect_environment().value
     if env == "staging":
         return "https://staging.netrasystems.ai"
     elif env == "production":
@@ -60,7 +60,7 @@ class AuthRoutes:
     def _build_proxy_url(oauth_config, request: Request) -> str:
         """Build proxy URL for PR environment OAuth."""
         import urllib.parse
-        pr_number = auth_env_config.pr_number
+        pr_number = os.getenv("PR_NUMBER")
         return_url = str(request.base_url).rstrip('/')
         proxy_url = f"{oauth_config.proxy_url}/initiate?pr_number={pr_number}&return_url={urllib.parse.quote(return_url)}"
         logger.info(f"PR #{pr_number} OAuth login via proxy: {proxy_url}")
@@ -86,7 +86,7 @@ class AuthRoutes:
     @staticmethod
     def _ensure_https_for_production(base_url: str) -> str:
         """Ensure HTTPS for production environments."""
-        if auth_env_config.environment.value in ["staging", "production"]:
+        if auth_client.detect_environment().value in ["staging", "production"]:
             base_url = base_url.replace("http://", "https://")
         return base_url
     
@@ -104,7 +104,7 @@ class AuthRoutes:
     def _log_oauth_initiation(oauth_config, redirect_uri: str) -> None:
         """Log OAuth login initiation for security auditing."""
         logger.info(f"OAuth login initiated")
-        logger.info(f"Environment: {auth_env_config.environment.value}")
+        logger.info(f"Environment: {auth_client.detect_environment().value}")
         logger.info(f"Redirect URI: {redirect_uri}")
         logger.info(f"Client ID: {oauth_config.client_id[:20]}...")
         logger.info(f"Session configured: same_site=lax for localhost")
@@ -146,7 +146,7 @@ class AuthRoutes:
     def _build_auth_config_response(request: Request) -> AuthConfigResponse:
         """Build complete authentication configuration response."""
         base_url = AuthRoutes._normalize_base_url(request)
-        oauth_config = auth_env_config.get_oauth_config()
+        oauth_config = auth_client.get_oauth_config()
         endpoints = AuthRoutes._build_auth_endpoints(base_url, oauth_config)
         response = AuthRoutes._build_base_auth_response(oauth_config, endpoints)
         AuthRoutes._add_pr_configuration(response, oauth_config)
@@ -178,7 +178,7 @@ class AuthRoutes:
     @router.get("/login")
     async def login(request: Request):
         """Initiate OAuth login with comprehensive security validation."""
-        oauth_config = auth_env_config.get_oauth_config()
+        oauth_config = auth_client.get_oauth_config()
         if early_response := AuthRoutes._perform_login_validations(oauth_config, request):
             return early_response
         return await AuthRoutes._complete_oauth_login(request, oauth_config)
@@ -228,7 +228,7 @@ class AuthRoutes:
 
     @router.post("/dev_login")
     async def dev_login(request: Request, dev_login_request: DevLoginRequest, db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
-        oauth_config = auth_env_config.get_oauth_config()
+        oauth_config = auth_client.get_oauth_config()
         AuthRoutes._validate_dev_login_allowed(oauth_config)
         user = await AuthRoutes._get_or_create_dev_user(db, dev_login_request.email)
         return AuthRoutes._create_token_response(security_service, user)
@@ -238,7 +238,7 @@ class AuthRoutes:
         """Log OAuth callback initiation for security auditing."""
         logger.info(f"OAuth callback received")
         logger.info(f"Query params: {dict(request.query_params)}")
-        logger.info(f"Environment: {auth_env_config.environment.value}")
+        logger.info(f"Environment: {auth_client.detect_environment().value}")
 
     @staticmethod
     def _validate_callback_params(request: Request) -> None:
@@ -293,7 +293,7 @@ class AuthRoutes:
     def _normalize_base_url(request: Request) -> str:
         """Normalize base URL for HTTPS in production environments."""
         base_url = str(request.base_url).rstrip('/')
-        if auth_env_config.environment.value in ["staging", "production"]:
+        if auth_client.detect_environment().value in ["staging", "production"]:
             base_url = base_url.replace("http://", "https://")
         return base_url
     
@@ -326,7 +326,7 @@ class AuthRoutes:
     def _build_base_auth_response(oauth_config, endpoints: AuthEndpoints) -> AuthConfigResponse:
         """Build base authentication configuration response."""
         return AuthConfigResponse(
-            development_mode=auth_env_config.environment.value == "development",
+            development_mode=auth_client.detect_environment().value == "development",
             google_client_id=oauth_config.client_id,
             endpoints=endpoints,
             authorized_javascript_origins=oauth_config.javascript_origins,
@@ -336,7 +336,8 @@ class AuthRoutes:
     @staticmethod
     def _add_pr_configuration(response: AuthConfigResponse, oauth_config) -> None:
         """Add PR-specific configuration to auth response."""
-        if auth_env_config.is_pr_environment:
-            response.pr_number = auth_env_config.pr_number
+        is_pr_environment = bool(os.getenv("PR_NUMBER"))
+        if is_pr_environment:
+            response.pr_number = os.getenv("PR_NUMBER")
             response.use_proxy = oauth_config.use_proxy
             response.proxy_url = oauth_config.proxy_url

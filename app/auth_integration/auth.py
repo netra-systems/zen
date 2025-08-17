@@ -5,10 +5,12 @@ Uses the standalone auth service for all auth operations
 from typing import Optional, Annotated
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.orm import Session
 from app.clients.auth_client import auth_client
 from app.db.models_postgres import User
-from app.db.postgres import get_db
-from sqlalchemy.orm import Session
+from app.db.session import get_db_session
+from app.dependencies import get_db_dependency as get_db
+from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,7 +19,7 @@ security = HTTPBearer()
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ) -> User:
     """
     Get current authenticated user from auth service

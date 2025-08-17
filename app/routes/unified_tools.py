@@ -6,7 +6,7 @@ from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies import DbDep
 from app.db.models_postgres import User
-from app.dependencies.auth import get_current_user
+from app.auth_integration.auth import get_current_user
 from app.services.unified_tool_registry import UnifiedToolRegistry, ToolExecutionResult
 from app.services.tool_permission_service import ToolPermissionService
 from app.schemas.ToolPermission import ToolAvailability, PermissionCheckResult

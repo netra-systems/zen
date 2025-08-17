@@ -1,59 +1,68 @@
 """
-Environment file loading functionality.
+Simplified environment file loader.
+Loads from single .env file only with strict user control.
 """
 
 import os
 import logging
 from pathlib import Path
-from typing import Dict, Tuple, Optional, List
+from typing import Dict, Tuple, Optional, Set
 
 logger = logging.getLogger(__name__)
 
 
 class EnvFileLoader:
     """
-    Handles loading environment variables from files.
+    Simplified environment file loader.
     
-    Manages loading from various .env file types with
-    proper precedence and logging.
+    Loads ONLY from .env file - strictly user-defined.
+    Never overwrites or modifies the .env file.
     """
     
     def __init__(self, project_root: Path, verbose: bool = False):
         """Initialize environment file loader."""
         self.project_root = project_root
         self.verbose = verbose
+        self.env_file = project_root / ".env"
     
-    def load_from_env_file(self, env_file: Optional[Path] = None) -> Dict[str, Tuple[str, str]]:
-        """Load secrets from an environment file."""
-        if env_file is None:
-            env_file = self.project_root / ".env"
+    def load_env_file(self) -> Dict[str, Tuple[str, str]]:
+        """Load from .env file (single source)."""
+        logger.info("\n[ENV LOADER] Loading from .env file...")
+        logger.info(f"  [FILE] Path: {self.env_file}")
+        
         loaded = {}
-        if env_file.exists():
-            self._load_existing_env_file(env_file, loaded)
+        if self.env_file.exists():
+            self._load_existing_env_file(self.env_file, loaded)
+            logger.info(f"  [OK] Loaded {len(loaded)} variables from .env")
         else:
-            logger.debug(f"No .env file found at {env_file}")
+            logger.info("  [INFO] No .env file found (user can create one)")
+            self._show_env_file_help()
         return loaded
     
     def _load_existing_env_file(self, env_file: Path, loaded: Dict):
-        """Load from existing environment file."""
-        logger.info(f"Loading from existing .env file: {env_file}")
-        with open(env_file, 'r') as f:
-            for line in f:
-                self._process_env_line(line, loaded)
+        """Load from existing .env file."""
+        try:
+            with open(env_file, 'r') as f:
+                for line_num, line in enumerate(f, 1):
+                    self._process_env_line(line, loaded, line_num)
+        except Exception as e:
+            logger.error(f"  [ERROR] Failed to read .env: {e}")
     
-    def _process_env_line(self, line: str, loaded: Dict):
+    def _process_env_line(self, line: str, loaded: Dict, line_num: int):
         """Process single environment file line."""
         line = line.strip()
         if line and not line.startswith('#') and '=' in line:
             key, value = line.split('=', 1)
-            loaded[key] = (value.strip('"\''), "env_file")
-            self._log_loaded_value(key, value)
+            key = key.strip()
+            value = value.strip('"\'').strip()
+            loaded[key] = (value, "env_file")
+            if self.verbose:
+                self._log_loaded_value(key, value, line_num)
     
-    def _log_loaded_value(self, key: str, value: str):
+    def _log_loaded_value(self, key: str, value: str, line_num: int):
         """Log loaded value if verbose."""
-        if self.verbose:
-            masked_value = self._mask_value(value)
-            logger.debug(f"  Loaded {key}: {masked_value} (from .env file)")
+        masked_value = self._mask_value(value)
+        logger.debug(f"    Line {line_num}: {key}={masked_value}")
     
     def _mask_value(self, value: str) -> str:
         """Mask a sensitive value for display."""
@@ -64,46 +73,45 @@ class EnvFileLoader:
         else:
             return "***"
     
-    def load_env_file(self) -> Dict[str, Tuple[str, str]]:
-        """Load from .env file."""
-        logger.info("\n[STEP 2] Loading from .env file...")
-        env_file = self.project_root / ".env"
-        return self._load_env_file_with_logging(env_file, ".env")
+    def _show_env_file_help(self):
+        """Show help for creating .env file."""
+        logger.info("\n  [HELP] To create a .env file:")
+        logger.info("    1. Copy from example: cp .env.example .env")
+        logger.info("    2. Copy from local: cp .env.local .env")
+        logger.info("    3. Create manually with required variables")
     
-    def load_dev_env_file(self) -> Dict[str, Tuple[str, str]]:
-        """Load from .env.development file."""
-        logger.info("\n[STEP 3] Loading from .env.development...")
-        dev_env_file = self.project_root / ".env.development"
-        return self._load_env_file_with_logging(dev_env_file, ".env.development")
+    def get_missing_variables(self, loaded: Dict, required: Set[str]) -> Set[str]:
+        """Get missing required variables."""
+        return required - set(loaded.keys())
     
-    def load_terraform_env_file(self) -> Dict[str, Tuple[str, str]]:
-        """Load from Terraform-generated .env.development.local."""
-        logger.info("\n[STEP 4] Loading from .env.development.local (Terraform)...")
-        terraform_env_file = self.project_root / ".env.development.local"
-        return self._load_env_file_with_logging(terraform_env_file, "Terraform config")
-    
-    def _load_env_file_with_logging(self, env_file: Path, description: str) -> Dict[str, Tuple[str, str]]:
-        """Load environment file with logging."""
-        if env_file.exists():
-            logger.info(f"  [FILE] Reading: {env_file}")
-            secrets = self.load_from_env_file(env_file)
-            logger.info(f"  [OK] Loaded {len(secrets)} variables from {description}")
-            return secrets
-        else:
-            logger.info(f"  [WARN] No {description} file found")
-            return {}
-    
-    def capture_existing_env(self, relevant_keys: set) -> Dict[str, Tuple[str, str]]:
+    def capture_existing_env(self, relevant_keys: Set[str]) -> Dict[str, Tuple[str, str]]:
         """Capture existing OS environment variables."""
-        logger.info("\n[STEP 1] Checking existing OS environment variables...")
+        logger.info("\n[ENV CHECK] Checking OS environment variables...")
         existing_env = {}
-        for key in os.environ:
-            if self._is_relevant_env_key(key, relevant_keys):
+        found_count = 0
+        for key in relevant_keys:
+            if key in os.environ:
                 existing_env[key] = (os.environ[key], "os_environment")
-                logger.info(f"  [OK] Found {key} in OS environment")
+                found_count += 1
+                if self.verbose:
+                    logger.debug(f"  Found: {key}")
+        logger.info(f"  [OK] Found {found_count} relevant variables in OS")
         return existing_env
     
-    def _is_relevant_env_key(self, key: str, relevant_keys: set) -> bool:
-        """Check if environment key is relevant."""
-        return (key in relevant_keys or 
-                key.startswith(("CLICKHOUSE_", "REDIS_", "GOOGLE_", "JWT_", "LANGFUSE_")))
+    def validate_env_file(self) -> bool:
+        """Validate .env file is user-controlled."""
+        if not self.env_file.exists():
+            return True  # No file is valid (user choice)
+        
+        # Check if file is readable and not system-generated
+        try:
+            with open(self.env_file, 'r') as f:
+                first_line = f.readline().strip()
+                if "AUTO-GENERATED" in first_line or "DO NOT EDIT" in first_line:
+                    logger.warning("  [WARN] .env appears to be auto-generated")
+                    logger.warning("  [WARN] User should create their own .env file")
+                    return False
+            return True
+        except Exception as e:
+            logger.error(f"  [ERROR] Cannot validate .env: {e}")
+            return False

@@ -32,17 +32,19 @@ class TestClickHouseAPISuite:
     
     def test_suite_structure(self):
         """Verify test suite modular structure"""
-        modules = [
-            'test_clickhouse_permissions',
-            'test_clickhouse_connection', 
-            'test_clickhouse_workload',
-            'test_clickhouse_corpus',
-            'test_clickhouse_performance',
-            'test_clickhouse_errors'
+        # Check for imported test classes and fixtures
+        imported_objects = [
+            'real_clickhouse_client',
+            'TestRealClickHouseConnection',
+            'TestClickHouseIntegration',
+            'TestWorkloadEventsTable',
+            'TestCorpusTableOperations',
+            'TestClickHousePerformance',
+            'TestClickHouseErrorHandling'
         ]
         
-        for module_name in modules:
-            assert module_name in globals(), f"Module {module_name} not imported"
+        for obj_name in imported_objects:
+            assert obj_name in globals(), f"Object {obj_name} not imported"
         
         print("✓ All ClickHouse test modules loaded successfully")
 

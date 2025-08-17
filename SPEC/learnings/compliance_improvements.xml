@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>Compliance Reporting Improvements</title>
+    <date>2025-08-17</date>
+    <category>architecture</category>
+    <impact>high</impact>
+    <tags>compliance, reporting, architecture, 300-line-limit, 8-line-limit</tags>
+  </metadata>
+
+  <problem>
+    <description>
+      The architecture compliance reporting system had several issues:
+      1. Inaccurate violation counting (mixed errors and warnings)
+      2. Poor default display behavior (showed too many violations)
+      3. Monolithic reporter module exceeding 300-line limit (347 lines)
+      4. No prioritization of violations by severity
+      5. Duplicate type checker too aggressive (flagged legitimate usage)
+    </description>
+    
+    <symptoms>
+      - Overwhelming output with hundreds of violations
+      - Mixed counting of actual violations vs warnings
+      - Reporter.py itself violated the 300-line rule
+      - Important violations buried in noise
+      - False positives for type duplicates
+    </symptoms>
+  </problem>
+
+  <solution>
+    <summary>
+      Refactored compliance system with modular design, smart defaults,
+      accurate counting, and proper type definition detection.
+    </summary>
+    
+    <implementation>
+      <step id="1">
+        <action>Split reporter.py into three modules</action>
+        <details>
+          - reporter.py: Main logic (273 lines)
+          - reporter_stats.py: Statistics (61 lines)
+          - reporter_utils.py: Utilities (47 lines)
+        </details>
+      </step>
+      
+      <step id="2">
+        <action>Implemented smart violation limits</action>
+        <details>
+          - Show all if ≤5 violations
+          - Adaptive limits for larger sets
+          - CLI option: --violation-limit N
+          - CLI option: --show-all for everything
+        </details>
+      </step>
+      
+      <step id="3">
+        <action>Added severity-based prioritization</action>
+        <details>
+          - Sort by: severity → impact → file path
+          - Visual markers: 🔴 (high), 🟡 (medium), 🟢 (low)
+          - Text markers [H], [M], [L] for compatibility
+        </details>
+      </step>
+      
+      <step id="4">
+        <action>Fixed violation counting accuracy</action>
+        <details>
+          - Separate counts for errors vs warnings
+          - Detailed statistics section
+          - Clear totals by violation type
+        </details>
+      </step>
+      
+      <step id="5">
+        <action>Enhanced duplicate type detection</action>
+        <details>
+          - Only match type definitions, not usage
+          - Skip test classes and internal types
+          - Recognize legitimate layer separations
+          - Better regex patterns for declarations
+        </details>
+      </step>
+    </implementation>
+    
+    <cli-options>
+      <option>--violation-limit N: Set display limit (default: 10)</option>
+      <option>--show-all: Display all violations</option>
+      <option>--no-smart-limits: Disable adaptive limits</option>
+      <option>--no-emoji: Use text markers instead of emoji</option>
+      <option>--json-output FILE: Save JSON report</option>
+      <option>--fail-on-violation: Exit code 1 on violations</option>
+    </cli-options>
+  </solution>
+
+  <impact>
+    <positive>
+      - Compliance reporting now follows 300-line rule
+      - More actionable output with top violations visible
+      - Accurate violation statistics for tracking
+      - Better developer experience with smart defaults
+      - Reduced false positives in type checking
+    </positive>
+    
+    <metrics>
+      - Reporter reduced from 347 to 273 lines (21% reduction)
+      - Default output shows top 10 violations per category
+      - Type checker false positives reduced significantly
+      - All modules now compliant with architecture rules
+    </metrics>
+  </impact>
+
+  <prevention>
+    <guideline id="1">
+      Always plan module boundaries before implementation
+      when creating reporting or analysis tools.
+    </guideline>
+    
+    <guideline id="2">
+      Design with configurable limits and smart defaults
+      to handle varying scales of output.
+    </guideline>
+    
+    <guideline id="3">
+      Separate statistics, utilities, and core logic
+      into focused modules from the start.
+    </guideline>
+    
+    <guideline id="4">
+      When checking for duplicates or patterns, focus on
+      definitions not usage to avoid false positives.
+    </guideline>
+  </prevention>
+
+  <testing>
+    <test id="1">
+      Run: python scripts/check_architecture_compliance.py --path scripts/compliance
+      Expected: All modules pass 300-line and 8-line checks
+    </test>
+    
+    <test id="2">
+      Run: python scripts/check_architecture_compliance.py --violation-limit 3
+      Expected: Shows max 3 violations per category
+    </test>
+    
+    <test id="3">
+      Run: python scripts/check_architecture_compliance.py --no-emoji
+      Expected: Uses [H], [M], [L] markers instead of emoji
+    </test>
+  </testing>
+
+  <related>
+    <spec>SPEC/compliance_reporting.xml</spec>
+    <spec>SPEC/conventions.xml</spec>
+    <file>scripts/compliance/reporter.py</file>
+    <file>scripts/compliance/type_checker.py</file>
+  </related>
+</learning>

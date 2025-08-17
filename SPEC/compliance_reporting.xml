@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Architecture Compliance Reporting Specification</title>
+    <version>1.0</version>
+    <created>2025-08-17</created>
+    <purpose>Define standards for compliance checking and reporting</purpose>
+    <priority>HIGH</priority>
+  </metadata>
+
+  <overview>
+    <description>
+      This specification defines the architecture compliance reporting system
+      that enforces CLAUDE.md rules including 300-line file limits and 8-line
+      function limits. The system provides accurate counting, smart defaults,
+      and prioritized violation reporting.
+    </description>
+  </overview>
+
+  <compliance-rules>
+    <rule id="file-size">
+      <name>File Size Limit</name>
+      <limit>300 lines</limit>
+      <severity>high</severity>
+      <description>No file should exceed 300 lines</description>
+      <remediation>Split into focused modules with single responsibilities</remediation>
+    </rule>
+    
+    <rule id="function-complexity">
+      <name>Function Line Limit</name>
+      <limit>8 lines</limit>
+      <severity>medium</severity>
+      <description>Functions must not exceed 8 lines</description>
+      <remediation>Extract logic into smaller, focused functions</remediation>
+    </rule>
+    
+    <rule id="duplicate-types">
+      <name>Single Source of Truth</name>
+      <severity>medium</severity>
+      <description>Type definitions must not be duplicated</description>
+      <remediation>Consolidate into single definition location</remediation>
+    </rule>
+    
+    <rule id="test-stubs">
+      <name>No Test Stubs in Production</name>
+      <severity>high</severity>
+      <description>Production code must not contain test stubs</description>
+      <remediation>Replace with production implementation</remediation>
+    </rule>
+  </compliance-rules>
+
+  <reporting-features>
+    <feature id="smart-limits">
+      <name>Intelligent Display Limits</name>
+      <description>
+        Adaptive display limits based on violation count:
+        - Show all if ≤5 violations
+        - Show up to 10 if ≤20 violations
+        - Show top violations for larger sets
+      </description>
+      <cli-option>--no-smart-limits</cli-option>
+    </feature>
+    
+    <feature id="severity-sorting">
+      <name>Violation Prioritization</name>
+      <description>
+        Violations sorted by:
+        1. Severity (high → medium → low)
+        2. Impact (actual value descending)
+        3. File path (alphabetical)
+      </description>
+    </feature>
+    
+    <feature id="detailed-statistics">
+      <name>Accurate Statistics</name>
+      <description>
+        Detailed violation counts including:
+        - Total violations by type
+        - Function errors vs warnings
+        - Files affected
+      </description>
+    </feature>
+    
+    <feature id="severity-markers">
+      <name>Visual Severity Indicators</name>
+      <description>
+        Visual markers for quick scanning:
+        - High: 🔴 or [H]
+        - Medium: 🟡 or [M]
+        - Low: 🟢 or [L]
+      </description>
+      <cli-option>--no-emoji</cli-option>
+    </feature>
+  </reporting-features>
+
+  <cli-interface>
+    <command>python scripts/check_architecture_compliance.py</command>
+    
+    <options>
+      <option name="--path" default=".">
+        <description>Root path to check</description>
+      </option>
+      
+      <option name="--max-file-lines" default="300">
+        <description>Maximum lines per file</description>
+      </option>
+      
+      <option name="--max-function-lines" default="8">
+        <description>Maximum lines per function</description>
+      </option>
+      
+      <option name="--violation-limit" default="10">
+        <description>Max violations to display per category</description>
+      </option>
+      
+      <option name="--show-all">
+        <description>Show all violations instead of top ones</description>
+      </option>
+      
+      <option name="--no-smart-limits">
+        <description>Disable smart limit detection</description>
+      </option>
+      
+      <option name="--no-emoji">
+        <description>Disable emoji severity markers</description>
+      </option>
+      
+      <option name="--json-output">
+        <description>Output JSON report to file</description>
+      </option>
+      
+      <option name="--json-only">
+        <description>Output only JSON, no human-readable report</description>
+      </option>
+      
+      <option name="--fail-on-violation">
+        <description>Exit with non-zero code on violations</description>
+      </option>
+      
+      <option name="--threshold" default="0.0">
+        <description>Minimum compliance score (0-100) to pass</description>
+      </option>
+    </options>
+  </cli-interface>
+
+  <module-structure>
+    <module path="/scripts/compliance/">
+      <file name="__init__.py" lines="20">Package initialization</file>
+      <file name="core.py" lines="147">Core data structures</file>
+      <file name="orchestrator.py" lines="72">Orchestration logic</file>
+      <file name="reporter.py" lines="273">Report generation</file>
+      <file name="reporter_stats.py" lines="61">Statistics calculation</file>
+      <file name="reporter_utils.py" lines="47">Reporting utilities</file>
+      <file name="cli.py" lines="98">CLI handling</file>
+      <file name="file_checker.py" lines="~100">File size checking</file>
+      <file name="function_checker.py" lines="~100">Function complexity</file>
+      <file name="type_checker.py" lines="~100">Duplicate detection</file>
+      <file name="stub_checker.py" lines="~100">Stub detection</file>
+    </module>
+  </module-structure>
+
+  <usage-examples>
+    <example id="basic">
+      <command>python scripts/check_architecture_compliance.py</command>
+      <description>Basic compliance check with defaults</description>
+    </example>
+    
+    <example id="limited">
+      <command>python scripts/check_architecture_compliance.py --violation-limit 5</command>
+      <description>Show only top 5 violations per category</description>
+    </example>
+    
+    <example id="all">
+      <command>python scripts/check_architecture_compliance.py --show-all</command>
+      <description>Show all violations without truncation</description>
+    </example>
+    
+    <example id="ci">
+      <command>python scripts/check_architecture_compliance.py --fail-on-violation --json-output report.json</command>
+      <description>CI/CD usage with failure on violations</description>
+    </example>
+    
+    <example id="no-emoji">
+      <command>python scripts/check_architecture_compliance.py --no-emoji</command>
+      <description>Use text markers for Windows terminals</description>
+    </example>
+  </usage-examples>
+
+  <implementation-notes>
+    <note id="modular-design">
+      The reporter was refactored from 347 lines into three modules:
+      - reporter.py (273 lines) - main reporting logic
+      - reporter_stats.py (61 lines) - statistics calculation
+      - reporter_utils.py (47 lines) - utilities and helpers
+    </note>
+    
+    <note id="accuracy">
+      Violation counts are now accurate with clear separation between:
+      - Actual violations (high/medium severity)
+      - Warnings (low severity, often in example/demo files)
+    </note>
+    
+    <note id="performance">
+      Smart limits prevent overwhelming output while ensuring
+      the most critical violations are always visible.
+    </note>
+  </implementation-notes>
+</specification>

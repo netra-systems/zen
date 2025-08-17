@@ -56,6 +56,8 @@ MANAGE SCOPE
 - Keep architecture limited in complexity.
 - Spend extra thinking energy to find elegant and "simple" solutions
 - Modular code ALWAY.
+- Avoid creating duplicate files with suffixes like `_enhanced, _fixed, _backup` or similar. 
+Always edit the existing file or create a new file and delete the old if it's now legacy.
 
 300-LINE MODULE 
 **CRITICAL**: No file exceeds 300 lines - enforce through modular design:
@@ -91,6 +93,7 @@ root/
 │   │   ├── supply_researcher/       # Supply research agents
 │   │   └── triage_sub_agent/        # Triage sub-agent modules
 │   ├── auth/                # Authentication & authorization
+│   ├── auth_integration/    # SHARED AUTH SERVICE (MANDATORY USE)
 │   ├── core/                # Core utilities & exceptions
 │   │   ├── exceptions_*.py         # Categorized exception handlers
 │   │   ├── interfaces_*.py         # Interface definitions

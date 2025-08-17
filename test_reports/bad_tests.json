@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "tests": {},
+  "runs": [
+    {
+      "run_id": "run_20250817_102921_61723",
+      "timestamp": "2025-08-17T10:29:29.916288",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_102951_91003",
+      "timestamp": "2025-08-17T10:30:59.860674",
+      "total_tests": 822,
+      "passed": 799,
+      "failed": 2,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_103502_2301",
+      "timestamp": "2025-08-17T10:36:20.573603",
+      "total_tests": 814,
+      "passed": 793,
+      "failed": 2,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_103802_82437",
+      "timestamp": "2025-08-17T10:39:47.901705",
+      "total_tests": 721,
+      "passed": 700,
+      "failed": 2,
+      "bad_tests_count": 0
+    }
+  ],
+  "stats": {
+    "total_runs": 4,
+    "last_updated": "2025-08-17T10:39:47.901705"
+  }
+}

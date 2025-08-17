@@ -13,14 +13,16 @@
             <name>Authentication/OAuth</name>
             <file>learnings/auth.xml</file>
             <path>SPEC/learnings/auth.xml</path>
-            <learning_count>5</learning_count>
+            <learning_count>6</learning_count>
             <learning_ids>
                 <id>oauth-local-staging-mismatch</id>
                 <id>oauth-environment-variables</id>
                 <id>oauth-session-middleware</id>
                 <id>oauth-redirect-uri-mismatch</id>
                 <id>oauth-diagnostic-tool</id>
+                <id>shared-auth-integration-mandatory</id>
             </learning_ids>
+            <important_note>See also SPEC/shared_auth_integration.xml for MANDATORY shared auth service requirements</important_note>
         </category>
         <category>
             <name>Configuration/Secrets</name>
@@ -29,6 +31,31 @@
             <learning_count>1</learning_count>
             <learning_ids>
                 <id>staging-env-var-suffix-handling</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Environment Loading</name>
+            <file>learnings/environment_loading.xml</file>
+            <path>SPEC/learnings/environment_loading.xml</path>
+            <learning_count>4</learning_count>
+            <learning_ids>
+                <id>simplified-single-source-loading</id>
+                <id>env-file-user-control</id>
+                <id>remote-fallback-optimization</id>
+                <id>observability-in-loading</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Bad Test Detection</name>
+            <file>learnings/bad_test_detection.xml</file>
+            <path>SPEC/learnings/bad_test_detection.xml</path>
+            <learning_count>5</learning_count>
+            <learning_ids>
+                <id>bad-test-detection-implementation</id>
+                <id>test-failure-patterns</id>
+                <id>test-maintenance-strategy</id>
+                <id>integration-points</id>
+                <id>data-persistence</id>
             </learning_ids>
         </category>
         <category>
@@ -131,6 +158,33 @@
             </learning_ids>
         </category>
         <category>
+            <name>Architecture/Compliance</name>
+            <file>learnings/compliance_improvements.xml</file>
+            <path>SPEC/learnings/compliance_improvements.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>compliance-reporting-improvements</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Context Optimization</name>
+            <file>learnings/context_optimization.xml</file>
+            <path>SPEC/learnings/context_optimization.xml</path>
+            <learning_count>10</learning_count>
+            <learning_ids>
+                <id>context-bloat-test-files</id>
+                <id>context-bloat-long-functions</id>
+                <id>context-waste-config-sprawl</id>
+                <id>context-waste-auth-modules</id>
+                <id>context-efficiency-monitoring</id>
+                <id>context-optimization-roi</id>
+                <id>context-heavy-imports</id>
+                <id>context-waste-superseded-files</id>
+                <id>context-optimization-emergency</id>
+                <id>context-aware-testing</id>
+            </learning_ids>
+        </category>
+        <category>
             <name>Type Safety</name>
             <file>learnings/type_safety.xml</file>
             <path>SPEC/learnings/type_safety.xml</path>
@@ -194,7 +248,7 @@
     </usage>
     
     <statistics>
-        <total_categories>15</total_categories>
-        <total_learnings>55</total_learnings>
+        <total_categories>16</total_categories>
+        <total_learnings>65</total_learnings>
     </statistics>
 </specification>

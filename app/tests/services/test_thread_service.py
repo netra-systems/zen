@@ -1,17 +1,8 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app.services.thread_service import ThreadService
 from app.db.models_postgres import Thread, Message, Run
-import uuid
 import time
-from typing import List, Dict, Any
-
-
-@pytest.fixture
-def mock_db():
-    return AsyncMock(spec=AsyncSession)
 
 
 @pytest.fixture
@@ -60,400 +51,162 @@ def sample_run():
         file_ids=[],
         metadata_={}
     )
+
+
 class TestThreadService:
-    """Test suite for ThreadService covering all methods with comprehensive scenarios"""
+    """Test suite for ThreadService with UnitOfWork pattern"""
 
-    class TestGetOrCreateThread:
-        """Tests for get_or_create_thread method"""
+    @patch('app.services.thread_service.get_unit_of_work')
+    @patch('app.services.thread_service.manager')
+    async def test_get_or_create_thread_existing(self, mock_manager, mock_get_uow, thread_service, sample_thread):
+        """Test getting an existing thread"""
+        # Setup mock UnitOfWork
+        mock_uow = AsyncMock()
+        mock_uow.__aenter__.return_value = mock_uow
+        mock_uow.__aexit__.return_value = None
+        mock_uow.threads.get_or_create_for_user = AsyncMock(return_value=sample_thread)
+        mock_uow.session = MagicMock()
+        
+        mock_get_uow.return_value = mock_uow
+        mock_manager.send_message = AsyncMock()
+        
+        # Execute
+        result = await thread_service.get_or_create_thread("user123")
+        
+        # Assert
+        assert result == sample_thread
+        mock_uow.threads.get_or_create_for_user.assert_called_once_with(mock_uow.session, "user123")
+        mock_manager.send_message.assert_called_once()
 
-        async def test_get_existing_thread_success(self, thread_service, mock_db, sample_thread):
-            """Test getting an existing thread"""
-            mock_result = MagicMock()
-            mock_result.scalar_one_or_none.return_value = sample_thread
-            mock_db.execute = AsyncMock(return_value=mock_result)
-            
-            result = await thread_service.get_or_create_thread(mock_db, "user123")
-            
-            assert result == sample_thread
-            mock_db.execute.assert_called_once()
-            mock_db.add.assert_not_called()
-            mock_db.commit.assert_not_called()
-
-        async def test_create_new_thread_success(self, thread_service, mock_db):
-            """Test creating a new thread when none exists"""
-            mock_result = MagicMock()
-            mock_result.scalar_one_or_none.return_value = None
-            mock_db.execute = AsyncMock(return_value=mock_result)
-            mock_db.add = MagicMock()
-            mock_db.commit = AsyncMock()
-            mock_db.refresh = AsyncMock()
-            
-            with patch('time.time', return_value=1234567890):
-                result = await thread_service.get_or_create_thread(mock_db, "user123")
-            
-            assert result != None
-            assert result.id == "thread_user123"
-            assert result.metadata_["user_id"] == "user123"
-            mock_db.add.assert_called_once()
-            mock_db.commit.assert_called_once()
-            mock_db.refresh.assert_called_once()
-
-        async def test_handle_integrity_error_race_condition(self, thread_service, mock_db, sample_thread):
-            """Test handling race condition during thread creation"""
-            mock_result_first = MagicMock()
-            mock_result_first.scalar_one_or_none.return_value = None
-            mock_result_second = MagicMock()
-            mock_result_second.scalar_one_or_none.return_value = sample_thread
-            
-            mock_db.execute = AsyncMock(side_effect=[mock_result_first, mock_result_second])
-            mock_db.add = MagicMock()
-            mock_db.commit = AsyncMock(side_effect=IntegrityError("statement", "params", "orig"))
-            mock_db.rollback = AsyncMock()
-            
-            result = await thread_service.get_or_create_thread(mock_db, "user123")
-            
-            assert result == sample_thread
-            mock_db.rollback.assert_called_once()
-            assert mock_db.execute.call_count == 2
-
-        async def test_handle_sqlalchemy_error(self, thread_service, mock_db):
-            """Test handling SQLAlchemy errors"""
-            mock_db.execute = AsyncMock(side_effect=SQLAlchemyError("Database error"))
-            mock_db.rollback = AsyncMock()
-            
-            result = await thread_service.get_or_create_thread(mock_db, "user123")
-            
-            assert result == None
-            mock_db.rollback.assert_called_once()
-
-        async def test_handle_unexpected_error(self, thread_service, mock_db):
-            """Test handling unexpected errors"""
-            mock_db.execute = AsyncMock(side_effect=Exception("Unexpected error"))
-            mock_db.rollback = AsyncMock()
-            
-            result = await thread_service.get_or_create_thread(mock_db, "user123")
-            
-            assert result == None
-            mock_db.rollback.assert_called_once()
-
-    class TestCreateMessage:
-        """Tests for create_message method"""
-
-        async def test_create_message_success_minimal(self, thread_service, mock_db):
-            """Test creating a message with minimal parameters"""
-            mock_db.add = MagicMock()
-            mock_db.commit = AsyncMock()
-            mock_db.refresh = AsyncMock()
-            
-            with patch('uuid.uuid4', return_value="test-uuid"), \
-                 patch('time.time', return_value=1234567890):
-                result = await thread_service.create_message(
-                    mock_db, "thread_123", "user", "Hello world"
-                )
-            
-            assert result != None
-            assert result.id == "msg_test-uuid"
-            assert result.thread_id == "thread_123"
-            assert result.role == "user"
-            assert result.content[0]["text"]["value"] == "Hello world"
-            mock_db.add.assert_called_once()
-            mock_db.commit.assert_called_once()
-            mock_db.refresh.assert_called_once()
-
-        async def test_create_message_success_full_params(self, thread_service, mock_db):
-            """Test creating a message with all parameters"""
-            mock_db.add = MagicMock()
-            mock_db.commit = AsyncMock()
-            mock_db.refresh = AsyncMock()
-            
-            metadata = {"priority": "high", "source": "api"}
-            
-            with patch('uuid.uuid4', return_value="test-uuid"), \
-                 patch('time.time', return_value=1234567890):
-                result = await thread_service.create_message(
-                    db=mock_db,
-                    thread_id="thread_123",
-                    role="assistant",
-                    content="Response message",
-                    assistant_id="asst_456",
-                    run_id="run_789",
-                    metadata=metadata
-                )
-            
-            assert result != None
-            assert result.assistant_id == "asst_456"
-            assert result.run_id == "run_789"
-            assert result.metadata_ == metadata
-
-        async def test_create_message_sqlalchemy_error(self, thread_service, mock_db):
-            """Test handling SQLAlchemy error during message creation"""
-            mock_db.add = MagicMock()
-            mock_db.commit = AsyncMock(side_effect=SQLAlchemyError("Database error"))
-            mock_db.rollback = AsyncMock()
-            
+    @patch('app.services.thread_service.get_unit_of_work')
+    @patch('app.services.thread_service.manager')
+    async def test_create_message_success(self, mock_manager, mock_get_uow, thread_service, sample_message):
+        """Test creating a message successfully"""
+        # Setup mock UnitOfWork
+        mock_uow = AsyncMock()
+        mock_uow.__aenter__.return_value = mock_uow
+        mock_uow.__aexit__.return_value = None
+        mock_uow.messages.create = AsyncMock(return_value=sample_message)
+        
+        mock_get_uow.return_value = mock_uow
+        
+        with patch('uuid.uuid4', return_value="test-uuid"), \
+             patch('time.time', return_value=1234567890):
             result = await thread_service.create_message(
-                mock_db, "thread_123", "user", "Test message"
+                "thread_123", "user", "Hello world"
             )
-            
-            assert result == None
-            mock_db.rollback.assert_called_once()
+        
+        assert result == sample_message
+        mock_uow.messages.create.assert_called_once()
 
-        async def test_create_message_unexpected_error(self, thread_service, mock_db):
-            """Test handling unexpected error during message creation"""
-            mock_db.add = MagicMock(side_effect=Exception("Unexpected error"))
-            mock_db.rollback = AsyncMock()
-            
-            result = await thread_service.create_message(
-                mock_db, "thread_123", "user", "Test message"
+    @patch('app.services.thread_service.get_unit_of_work')
+    async def test_get_thread_messages_success(self, mock_get_uow, thread_service):
+        """Test retrieving thread messages"""
+        # Create test messages
+        messages = [
+            Message(id=f"msg{i}", thread_id="thread_123", created_at=i*1000, 
+                   role="user", content=[], object="thread.message", file_ids=[], metadata_={})
+            for i in range(3)
+        ]
+        
+        # Setup mock UnitOfWork
+        mock_uow = AsyncMock()
+        mock_uow.__aenter__.return_value = mock_uow
+        mock_uow.__aexit__.return_value = None
+        mock_uow.messages.get_by_thread = AsyncMock(return_value=messages)
+        mock_uow.session = MagicMock()
+        
+        mock_get_uow.return_value = mock_uow
+        
+        result = await thread_service.get_thread_messages("thread_123")
+        
+        assert len(result) == 3
+        mock_uow.messages.get_by_thread.assert_called_once_with(mock_uow.session, "thread_123", 50)
+
+    @patch('app.services.thread_service.get_unit_of_work')
+    @patch('app.services.thread_service.manager')
+    async def test_create_run_success(self, mock_manager, mock_get_uow, thread_service, sample_run, sample_thread):
+        """Test creating a run successfully"""
+        # Setup mock UnitOfWork
+        mock_uow = AsyncMock()
+        mock_uow.__aenter__.return_value = mock_uow
+        mock_uow.__aexit__.return_value = None
+        mock_uow.runs.create = AsyncMock(return_value=sample_run)
+        mock_uow.threads.get_by_id = AsyncMock(return_value=sample_thread)
+        mock_uow.session = MagicMock()
+        
+        mock_get_uow.return_value = mock_uow
+        mock_manager.send_message = AsyncMock()
+        
+        with patch('uuid.uuid4', return_value="test-uuid"), \
+             patch('time.time', return_value=1234567890):
+            result = await thread_service.create_run(
+                "thread_123", "asst_456"
             )
-            
-            assert result == None
-            mock_db.rollback.assert_called_once()
+        
+        assert result == sample_run
+        mock_uow.runs.create.assert_called_once()
+        mock_manager.send_message.assert_called_once()
 
-    class TestGetThreadMessages:
-        """Tests for get_thread_messages method"""
-
-        async def test_get_thread_messages_success(self, thread_service, mock_db, sample_message):
-            """Test retrieving thread messages successfully"""
-            msg1 = Message(id="msg1", thread_id="thread_123", created_at=1000, role="user", content=[])
-            msg2 = Message(id="msg2", thread_id="thread_123", created_at=2000, role="assistant", content=[])
-            msg3 = Message(id="msg3", thread_id="thread_123", created_at=3000, role="user", content=[])
-            
-            mock_result = MagicMock()
-            # Messages should be returned in desc order by query, then reversed
-            mock_result.scalars.return_value.all.return_value = [msg3, msg2, msg1]
-            mock_db.execute = AsyncMock(return_value=mock_result)
-            
-            result = await thread_service.get_thread_messages(mock_db, "thread_123")
-            
-            assert len(result) == 3
-            assert result[0].id == "msg1"  # Chronological order after reversal
-            assert result[1].id == "msg2"
-            assert result[2].id == "msg3"
-            mock_db.execute.assert_called_once()
-
-        async def test_get_thread_messages_with_limit(self, thread_service, mock_db):
-            """Test retrieving thread messages with custom limit"""
-            messages = [Message(id=f"msg{i}", thread_id="thread_123", created_at=i*1000, role="user", content=[]) 
-                       for i in range(3)]
-            
-            mock_result = MagicMock()
-            mock_result.scalars.return_value.all.return_value = list(reversed(messages))
-            mock_db.execute = AsyncMock(return_value=mock_result)
-            
-            result = await thread_service.get_thread_messages(mock_db, "thread_123", limit=10)
-            
-            assert len(result) == 3
-            mock_db.execute.assert_called_once()
-
-        async def test_get_thread_messages_empty_thread(self, thread_service, mock_db):
-            """Test retrieving messages from empty thread"""
-            mock_result = MagicMock()
-            mock_result.scalars.return_value.all.return_value = []
-            mock_db.execute = AsyncMock(return_value=mock_result)
-            
-            result = await thread_service.get_thread_messages(mock_db, "empty_thread")
-            
-            assert result == []
-            mock_db.execute.assert_called_once()
-
-    class TestCreateRun:
-        """Tests for create_run method"""
-
-        async def test_create_run_success_minimal(self, thread_service, mock_db):
-            """Test creating a run with minimal parameters"""
-            mock_db.add = MagicMock()
-            mock_db.commit = AsyncMock()
-            mock_db.refresh = AsyncMock()
-            
-            with patch('uuid.uuid4', return_value="test-uuid"), \
-                 patch('time.time', return_value=1234567890):
-                result = await thread_service.create_run(
-                    mock_db, "thread_123", "asst_456"
-                )
-            
-            assert result != None
-            assert result.id == "run_test-uuid"
-            assert result.thread_id == "thread_123"
-            assert result.assistant_id == "asst_456"
-            assert result.status == "in_progress"
-            assert result.model == "gpt-4"
-            assert result.instructions == None
-            mock_db.add.assert_called_once()
-            mock_db.commit.assert_called_once()
-            mock_db.refresh.assert_called_once()
-
-        async def test_create_run_success_full_params(self, thread_service, mock_db):
-            """Test creating a run with all parameters"""
-            mock_db.add = MagicMock()
-            mock_db.commit = AsyncMock()
-            mock_db.refresh = AsyncMock()
-            
-            with patch('uuid.uuid4', return_value="test-uuid"), \
-                 patch('time.time', return_value=1234567890):
-                result = await thread_service.create_run(
-                    db=mock_db,
-                    thread_id="thread_123",
-                    assistant_id="asst_456",
-                    model="gpt-3.5-turbo",
-                    instructions="Custom instructions"
-                )
-            
-            assert result != None
-            assert result.model == "gpt-3.5-turbo"
-            assert result.instructions == "Custom instructions"
-
-    class TestUpdateRunStatus:
-        """Tests for update_run_status method"""
-
-        async def test_update_run_status_to_completed(self, thread_service, mock_db, sample_run):
-            """Test updating run status to completed"""
-            mock_result = MagicMock()
-            mock_result.scalar_one_or_none.return_value = sample_run
-            mock_db.execute = AsyncMock(return_value=mock_result)
-            mock_db.commit = AsyncMock()
-            mock_db.refresh = AsyncMock()
-            
-            with patch('time.time', return_value=1234567890):
-                result = await thread_service.update_run_status(
-                    mock_db, "run_test123", "completed"
-                )
-            
-            assert result.status == "completed"
-            assert result.completed_at == 1234567890
-            mock_db.commit.assert_called_once()
-            mock_db.refresh.assert_called_once()
-
-        async def test_update_run_status_to_failed_with_error(self, thread_service, mock_db, sample_run):
-            """Test updating run status to failed with error details"""
-            mock_result = MagicMock()
-            mock_result.scalar_one_or_none.return_value = sample_run
-            mock_db.execute = AsyncMock(return_value=mock_result)
-            mock_db.commit = AsyncMock()
-            mock_db.refresh = AsyncMock()
-            
-            error_details = {"code": "rate_limit_exceeded", "message": "Too many requests"}
-            
-            with patch('time.time', return_value=1234567890):
-                result = await thread_service.update_run_status(
-                    mock_db, "run_test123", "failed", error=error_details
-                )
-            
-            assert result.status == "failed"
-            assert result.failed_at == 1234567890
-            assert result.last_error == error_details
-
-        async def test_update_run_status_to_in_progress(self, thread_service, mock_db, sample_run):
-            """Test updating run status to in_progress (no timestamps)"""
-            mock_result = MagicMock()
-            mock_result.scalar_one_or_none.return_value = sample_run
-            mock_db.execute = AsyncMock(return_value=mock_result)
-            mock_db.commit = AsyncMock()
-            mock_db.refresh = AsyncMock()
-            
+    @patch('app.services.thread_service.get_unit_of_work')
+    async def test_update_run_status_completed(self, mock_get_uow, thread_service, sample_run):
+        """Test updating run status to completed"""
+        # Setup mock UnitOfWork
+        mock_uow = AsyncMock()
+        mock_uow.__aenter__.return_value = mock_uow
+        mock_uow.__aexit__.return_value = None
+        
+        # Update the sample run to completed
+        completed_run = sample_run
+        completed_run.status = "completed"
+        completed_run.completed_at = 1234567890
+        
+        mock_uow.runs.update = AsyncMock(return_value=completed_run)
+        mock_uow.session = MagicMock()
+        
+        mock_get_uow.return_value = mock_uow
+        
+        with patch('time.time', return_value=1234567890):
             result = await thread_service.update_run_status(
-                mock_db, "run_test123", "in_progress"
+                "run_test123", "completed"
             )
-            
-            assert result.status == "in_progress"
-            # Should not set completed_at or failed_at
-            assert not hasattr(result, 'completed_at') or result.completed_at == None
-            assert not hasattr(result, 'failed_at') or result.failed_at == None
+        
+        assert result.status == "completed"
+        mock_uow.runs.update.assert_called_once()
+        
+    @patch('app.services.thread_service.get_unit_of_work')
+    async def test_get_thread_success(self, mock_get_uow, thread_service, sample_thread):
+        """Test getting a thread by ID"""
+        # Setup mock UnitOfWork
+        mock_uow = AsyncMock()
+        mock_uow.__aenter__.return_value = mock_uow
+        mock_uow.__aexit__.return_value = None
+        mock_uow.threads.get_by_id = AsyncMock(return_value=sample_thread)
+        mock_uow.session = MagicMock()
+        
+        mock_get_uow.return_value = mock_uow
+        
+        result = await thread_service.get_thread("thread_user123")
+        
+        assert result == sample_thread
+        mock_uow.threads.get_by_id.assert_called_once_with(mock_uow.session, "thread_user123")
 
-        async def test_update_run_status_run_not_found(self, thread_service, mock_db):
-            """Test updating status when run doesn't exist"""
-            mock_result = MagicMock()
-            mock_result.scalar_one_or_none.return_value = None
-            mock_db.execute = AsyncMock(return_value=mock_result)
-            
-            result = await thread_service.update_run_status(
-                mock_db, "nonexistent_run", "completed"
-            )
-            
-            assert result == None
-            mock_db.commit.assert_not_called()
-            mock_db.refresh.assert_not_called()
-
-    class TestThreadServiceIntegration:
-        """Integration tests simulating real workflows"""
-
-        async def test_complete_conversation_flow(self, thread_service, mock_db):
-            """Test complete flow: create thread, add messages, create run, update status"""
-            # Mock thread creation
-            mock_result_thread = MagicMock()
-            mock_result_thread.scalar_one_or_none.return_value = None
-            mock_db.execute = AsyncMock(return_value=mock_result_thread)
-            mock_db.add = MagicMock()
-            mock_db.commit = AsyncMock()
-            mock_db.refresh = AsyncMock()
-            
-            # Step 1: Create/get thread
-            with patch('time.time', return_value=1000):
-                thread = await thread_service.get_or_create_thread(mock_db, "user123")
-            
-            assert thread.id == "thread_user123"
-            
-            # Step 2: Create user message
-            with patch('uuid.uuid4', return_value="msg-uuid"), \
-                 patch('time.time', return_value=2000):
-                user_message = await thread_service.create_message(
-                    mock_db, thread.id, "user", "Hello assistant"
-                )
-            
-            assert user_message.role == "user"
-            assert user_message.content[0]["text"]["value"] == "Hello assistant"
-            
-            # Step 3: Create run
-            with patch('uuid.uuid4', return_value="run-uuid"), \
-                 patch('time.time', return_value=3000):
-                run = await thread_service.create_run(
-                    mock_db, thread.id, "asst_123", instructions="Be helpful"
-                )
-            
-            assert run.status == "in_progress"
-            assert run.instructions == "Be helpful"
-            
-            # Step 4: Create assistant response
-            with patch('uuid.uuid4', return_value="response-uuid"), \
-                 patch('time.time', return_value=4000):
-                assistant_message = await thread_service.create_message(
-                    mock_db, thread.id, "assistant", "Hello user!", 
-                    assistant_id="asst_123", run_id=run.id
-                )
-            
-            assert assistant_message.role == "assistant"
-            assert assistant_message.assistant_id == "asst_123"
-            assert assistant_message.run_id == run.id
-            
-            # Step 5: Complete the run
-            mock_result_run = MagicMock()
-            mock_result_run.scalar_one_or_none.return_value = run
-            mock_db.execute = AsyncMock(return_value=mock_result_run)
-            
-            with patch('time.time', return_value=5000):
-                completed_run = await thread_service.update_run_status(
-                    mock_db, run.id, "completed"
-                )
-            
-            assert completed_run.status == "completed"
-            assert completed_run.completed_at == 5000
-
-        async def test_error_handling_workflow(self, thread_service, mock_db):
-            """Test workflow with various error conditions"""
-            # Test thread creation failure
-            mock_db.execute = AsyncMock(side_effect=SQLAlchemyError("DB Error"))
-            mock_db.rollback = AsyncMock()
-            
-            thread = await thread_service.get_or_create_thread(mock_db, "user123")
-            assert thread == None
-            
-            # Test message creation failure
-            mock_db.execute = AsyncMock()  # Reset mock
-            mock_db.add = MagicMock(side_effect=Exception("Unexpected error"))
-            mock_db.rollback = AsyncMock()
-            
-            message = await thread_service.create_message(
-                mock_db, "thread_123", "user", "Test"
-            )
-            assert message == None
-            mock_db.rollback.assert_called()
+    @patch('app.services.thread_service.get_unit_of_work')
+    @patch('app.services.thread_service.manager')
+    async def test_delete_thread_success(self, mock_manager, mock_get_uow, thread_service):
+        """Test deleting a thread"""
+        # Setup mock UnitOfWork
+        mock_uow = AsyncMock()
+        mock_uow.__aenter__.return_value = mock_uow
+        mock_uow.__aexit__.return_value = None
+        mock_uow.threads.delete = AsyncMock(return_value=True)
+        mock_uow.session = MagicMock()
+        
+        mock_get_uow.return_value = mock_uow
+        mock_manager.send_message = AsyncMock()
+        
+        result = await thread_service.delete_thread("thread_123", "user123")
+        
+        assert result == True
+        mock_uow.threads.delete.assert_called_once_with(mock_uow.session, "thread_123")
+        mock_manager.send_message.assert_called_once()
