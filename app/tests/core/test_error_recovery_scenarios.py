@@ -37,7 +37,7 @@ from app.core.exceptions_base import NetraException, ErrorDetails
 from app.core.error_codes import ErrorCode, ErrorSeverity
 from app.websocket.recovery import WebSocketRecoveryManager, RecoveryStrategy, WebSocketError
 from app.agents.state import DeepAgentState
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 
 
 class ErrorRecoveryTestFixtures:

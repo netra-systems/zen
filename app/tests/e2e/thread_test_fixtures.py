@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, Mock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.thread_service import ThreadService
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 from app.db.models_postgres import Thread, Message, Run
 from app.schemas.agent_state import StatePersistenceRequest, CheckpointType, AgentPhase
 from app.ws_manager import manager

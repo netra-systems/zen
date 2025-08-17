@@ -22,7 +22,7 @@ from app.services.synthetic_data_service import SyntheticDataService, WorkloadCa
 from app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
 from app.services.corpus_service import CorpusService
 from app.services.apex_optimizer_agent.tools.tool_dispatcher import ApexToolSelector
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 from app.ws_manager import WebSocketManager
 from app.config import get_config
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine

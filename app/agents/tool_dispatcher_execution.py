@@ -1,6 +1,7 @@
 """Tool execution engine for the dispatcher."""
 from typing import Dict, Any, TYPE_CHECKING
 from app.schemas import ToolResult, ToolStatus, ToolInput, SimpleToolPayload
+from app.schemas.Tool import ToolExecutionEngineInterface, ToolExecuteResponse
 from app.agents.state import DeepAgentState
 from app.agents.production_tool import ProductionTool
 from app.logging_config import central_logger
@@ -10,10 +11,10 @@ if TYPE_CHECKING:
 
 logger = central_logger.get_logger(__name__)
 
-class ToolExecutionEngine:
+class ToolExecutionEngine(ToolExecutionEngineInterface):
     """Handles tool execution with proper error handling"""
     
-    async def execute_tool(self, tool_input: ToolInput, tool: Any, kwargs: Dict[str, Any]) -> ToolResult:
+    async def execute_tool_with_input(self, tool_input: ToolInput, tool: Any, kwargs: Dict[str, Any]) -> ToolResult:
         """Execute tool and return typed result"""
         try:
             result = await self._run_tool(tool, kwargs)
@@ -77,5 +78,42 @@ class ToolExecutionEngine:
         """Create error response for tool execution failure"""
         from app.agents.tool_dispatcher_core import ToolDispatchResponse
         logger.error(f"Tool {tool_name} execution failed: {error}")
-        metadata = {"tool_name": tool_name, "run_id": run_id}
-        return ToolDispatchResponse(success=False, error=str(error), metadata=metadata)
+        return ToolDispatchResponse(
+            success=False,
+            error=str(error),
+            metadata={"tool_name": tool_name, "run_id": run_id}
+        )
+    
+    # Interface Implementation Method
+    async def execute_tool(
+        self, 
+        tool_name: str, 
+        parameters: Dict[str, Any]
+    ) -> ToolExecuteResponse:
+        """Execute a tool by name with parameters - implements ToolExecutionEngineInterface"""
+        # This is a simplified implementation for the basic executor
+        # In practice, it would need access to a tool registry
+        try:
+            # Create a basic tool instance
+            tool = ProductionTool(tool_name)
+            
+            # Execute using existing method infrastructure
+            if hasattr(tool, 'arun'):
+                result = await tool.arun(parameters)
+            else:
+                result = tool(parameters)
+            
+            return ToolExecuteResponse(
+                success=True,
+                data=result,
+                message="Tool executed successfully",
+                metadata={"tool_name": tool_name}
+            )
+        except Exception as e:
+            logger.error(f"Tool execution failed: {tool_name} - {e}")
+            return ToolExecuteResponse(
+                success=False,
+                data=None,
+                message=str(e),
+                metadata={"tool_name": tool_name}
+            )

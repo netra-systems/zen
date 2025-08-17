@@ -3,7 +3,7 @@
 from typing import Dict, Optional, Tuple
 from datetime import datetime, timezone
 from app.agents.state import DeepAgentState
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 from app.schemas.agent_state import (
     StatePersistenceRequest, CheckpointType, AgentPhase
 )

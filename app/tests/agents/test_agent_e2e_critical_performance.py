@@ -9,7 +9,7 @@ import uuid
 from unittest.mock import patch, AsyncMock
 from datetime import datetime
 
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 from app.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
 

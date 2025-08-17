@@ -35,7 +35,7 @@ from .content_generator import generate_content
 
 
 class ResourceTracker:
-    """Simple resource usage tracker for testing"""
+    """Resource usage tracker for synthetic data generation"""
     
     async def get_usage_summary(self) -> Dict:
         """Get resource usage summary"""
@@ -291,7 +291,7 @@ class SyntheticDataService(RecoveryMixin):
         workload_type: str,
         corpus_content: Optional[List[Dict]]
     ) -> tuple[str, str]:
-        """Generate content for testing - delegates to content generator"""
+        """Generate synthetic content using content generator"""
         return generate_content(workload_type, corpus_content)
 
     # Ingestion methods
@@ -364,7 +364,7 @@ class SyntheticDataService(RecoveryMixin):
         return await self.generation_engine.generate_from_corpus(config, corpus_content)
 
     async def generate_tool_invocations(self, count: int, pattern: str) -> List[Dict]:
-        """Generate tool invocations for testing"""
+        """Generate synthetic tool invocation data"""
         return await self.generation_engine.generate_tool_invocations(count, pattern)
 
     async def profile_generation(self, config) -> Dict[str, Any]:

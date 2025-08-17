@@ -2,7 +2,7 @@
 # This file contains staging-specific values to ensure staging deployments
 # do not use production resources
 
-project_id           = "netra-staging"  # Staging project ID
+project_id = "netra-staging"
 project_id_numerical = "701982941522"    # Numerical project ID for Secret Manager API
 region               = "us-central1"
 zone                 = "us-central1-a"

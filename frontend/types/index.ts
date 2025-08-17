@@ -1,10 +1,12 @@
 // frontend/types/index.ts
 
 // Export backend auto-generated types from modular files (split from original backend_schema_auto_generated)
-export * from './backend_schema_base';
 export * from './backend_schema_config';
 export * from './backend_schema_auth';
 export * from './backend_schema_tools';
+
+// Export core backend schema types (AUTHORITATIVE SOURCE)
+export * from './backend_schema_base';
 
 // Export consolidated agent types (SINGLE SOURCE OF TRUTH)
 export * from './agent-types';
@@ -12,14 +14,11 @@ export * from './agent-types';
 // Re-export specific items from chat that don't conflict with backend types
 export type { 
   Message as ChatMessage,
-  SubAgentState,
-  WebSocketMessage,
   ToolInput as ChatToolInput,
   ToolResult as ChatToolResult
 } from './chat';
 
 export { 
-  SubAgentLifecycle,
   ToolStatus as ChatToolStatus
 } from './chat';
 

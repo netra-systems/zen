@@ -6,8 +6,8 @@ import time
 from app.logging_config import central_logger as logger
 
 
-class CacheManager:
-    """Manages schema caching operations for DataSubAgent."""
+class DataSubAgentCacheManager:
+    """Manages database schema caching operations for DataSubAgent."""
     
     def __init__(self, agent):
         self.agent = agent
@@ -94,3 +94,8 @@ class CacheManager:
             self.agent._schema_cache.clear()
         if hasattr(self.agent, '_schema_cache_timestamps'):
             self.agent._schema_cache_timestamps.clear()
+
+
+# Backward compatibility alias - DEPRECATED  
+# Use DataSubAgentCacheManager instead for clarity
+CacheManager = DataSubAgentCacheManager

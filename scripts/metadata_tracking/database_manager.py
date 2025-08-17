@@ -1,66 +1,27 @@
 #!/usr/bin/env python3
 """
-Database Manager for Metadata Tracking
-Handles database setup, schema creation, and connection management.
+Database Manager - Handles metadata database setup and management
+Focused module for database operations
 """
 
 import sqlite3
 from pathlib import Path
-from typing import Dict, Any
+from typing import Tuple, Any
 
 
 class DatabaseManager:
-    """Manages database setup for metadata tracking."""
-    
+    """Manages metadata tracking database operations"""
+
     def __init__(self, project_root: Path):
         self.project_root = project_root
-        self.metadata_db_path = project_root / "metadata_tracking.db"
-    
-    def create_database(self) -> bool:
-        """Create metadata tracking database."""
-        try:
-            conn = self._setup_connection()
-            cursor = conn.cursor()
-            
-            self._create_tables(cursor)
-            self._create_indices(cursor)
-            self._finalize_setup(conn)
-            
-            print(f"[SUCCESS] Database created at {self.metadata_db_path}")
-            return True
-            
-        except Exception as e:
-            print(f"[ERROR] Database creation failed: {e}")
-            return False
-    
-    def _setup_connection(self):
-        """Set up database connection."""
-        return sqlite3.connect(self.metadata_db_path)
-    
-    def _create_tables(self, cursor) -> None:
-        """Create database tables."""
-        cursor.execute(self._get_ai_modifications_schema())
-        cursor.execute(self._get_audit_log_schema())
-        cursor.execute(self._get_rollback_history_schema())
-    
-    def _create_indices(self, cursor) -> None:
-        """Create database indices for performance."""
-        indices = [
-            "CREATE INDEX IF NOT EXISTS idx_ai_modifications_timestamp ON ai_modifications(timestamp)",
-            "CREATE INDEX IF NOT EXISTS idx_ai_modifications_file_path ON ai_modifications(file_path)",
-            "CREATE INDEX IF NOT EXISTS idx_audit_log_timestamp ON audit_log(timestamp)"
-        ]
-        
-        for index in indices:
-            cursor.execute(index)
-    
-    def _finalize_setup(self, conn) -> None:
-        """Finalize database setup."""
-        conn.commit()
-        conn.close()
-    
+        self.db_path = self._get_database_path()
+
+    def _get_database_path(self) -> Path:
+        """Get database file path"""
+        return self.project_root / "metadata_tracking.db"
+
     def _get_ai_modifications_schema(self) -> str:
-        """Get AI modifications table schema."""
+        """Get AI modifications table schema"""
         return """
             CREATE TABLE IF NOT EXISTS ai_modifications (
                 id TEXT PRIMARY KEY,
@@ -76,64 +37,104 @@ class DatabaseManager:
                 change_scope TEXT,
                 risk_level TEXT,
                 review_status TEXT DEFAULT 'Pending',
-                metadata_json TEXT
+                review_score INTEGER,
+                session_id TEXT,
+                sequence_number INTEGER,
+                lines_added INTEGER,
+                lines_modified INTEGER,
+                lines_deleted INTEGER,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """
-    
+
     def _get_audit_log_schema(self) -> str:
-        """Get audit log table schema."""
+        """Get audit log table schema"""
         return """
-            CREATE TABLE IF NOT EXISTS audit_log (
-                id TEXT PRIMARY KEY,
-                timestamp TEXT NOT NULL,
-                action TEXT NOT NULL,
-                details TEXT,
-                user_id TEXT,
-                session_id TEXT
+            CREATE TABLE IF NOT EXISTS metadata_audit_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                modification_id TEXT,
+                event_type TEXT,
+                event_data TEXT,
+                timestamp TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (modification_id) REFERENCES ai_modifications(id)
             )
         """
-    
+
     def _get_rollback_history_schema(self) -> str:
-        """Get rollback history table schema."""
+        """Get rollback history table schema"""
         return """
             CREATE TABLE IF NOT EXISTS rollback_history (
-                id TEXT PRIMARY KEY,
-                timestamp TEXT NOT NULL,
-                target_commit TEXT NOT NULL,
-                rollback_reason TEXT,
-                rollback_status TEXT DEFAULT 'pending',
-                affected_files TEXT,
-                backup_path TEXT
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                modification_id TEXT,
+                rollback_command TEXT,
+                rollback_timestamp TEXT,
+                rollback_status TEXT,
+                rollback_by TEXT,
+                FOREIGN KEY (modification_id) REFERENCES ai_modifications(id)
             )
         """
-    
-    def get_status(self) -> Dict[str, Any]:
-        """Get database status."""
-        db_exists = self.metadata_db_path.exists()
+
+    def _setup_connection(self) -> Tuple[sqlite3.Connection, sqlite3.Cursor]:
+        """Setup and return database connection"""
+        conn = sqlite3.connect(self.db_path)
+        return conn, conn.cursor()
+
+    def _create_tables(self, cursor: sqlite3.Cursor) -> None:
+        """Create all database tables"""
+        cursor.execute(self._get_ai_modifications_schema())
+        cursor.execute(self._get_audit_log_schema())
+        cursor.execute(self._get_rollback_history_schema())
+
+    def _create_indices(self, cursor: sqlite3.Cursor) -> None:
+        """Create database indices for performance"""
+        indices = [
+            "CREATE INDEX IF NOT EXISTS idx_file_path ON ai_modifications(file_path)",
+            "CREATE INDEX IF NOT EXISTS idx_timestamp ON ai_modifications(timestamp)",
+            "CREATE INDEX IF NOT EXISTS idx_session_id ON ai_modifications(session_id)",
+            "CREATE INDEX IF NOT EXISTS idx_risk_level ON ai_modifications(risk_level)",
+            "CREATE INDEX IF NOT EXISTS idx_review_status ON ai_modifications(review_status)"
+        ]
         
-        status = {
-            "database_exists": db_exists,
-            "database_path": str(self.metadata_db_path)
-        }
-        
-        if db_exists:
-            try:
-                conn = sqlite3.connect(self.metadata_db_path)
-                cursor = conn.cursor()
-                
-                # Check if tables exist
-                cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
-                tables = [row[0] for row in cursor.fetchall()]
-                
-                status.update({
-                    "tables_created": len(tables) >= 3,
-                    "table_count": len(tables),
-                    "tables": tables
-                })
-                
-                conn.close()
-                
-            except Exception as e:
-                status["error"] = str(e)
-        
-        return status
+        for index_sql in indices:
+            cursor.execute(index_sql)
+
+    def _finalize_setup(self, conn: sqlite3.Connection) -> None:
+        """Finalize database setup"""
+        conn.commit()
+        conn.close()
+        print(f"[SUCCESS] Metadata database created at {self.db_path}")
+
+    def create_database(self) -> bool:
+        """Initialize metadata tracking database"""
+        try:
+            conn, cursor = self._setup_connection()
+            self._create_tables(cursor)
+            self._create_indices(cursor)
+            self._finalize_setup(conn)
+            return True
+        except Exception as e:
+            print(f"[ERROR] Failed to create metadata database: {e}")
+            return False
+
+    def database_exists(self) -> bool:
+        """Check if database exists"""
+        return self.db_path.exists()
+
+    def validate_schema(self) -> bool:
+        """Validate database schema is correct"""
+        try:
+            conn, cursor = self._setup_connection()
+            
+            # Check if required tables exist
+            cursor.execute("""
+                SELECT name FROM sqlite_master 
+                WHERE type='table' AND name IN 
+                ('ai_modifications', 'metadata_audit_log', 'rollback_history')
+            """)
+            
+            tables = cursor.fetchall()
+            conn.close()
+            
+            return len(tables) == 3
+        except Exception:
+            return False

@@ -3,6 +3,7 @@ from app.config import settings
 from app import schemas
 from typing import Dict, Any, Optional
 from pydantic import BaseModel
+from app.auth.auth_dependencies import get_current_user, require_admin
 
 router = APIRouter()
 
@@ -13,7 +14,10 @@ class ConfigUpdate(BaseModel):
     feature_flags: Dict[str, Any] = None
 
 @router.get("/config/websocket", response_model=schemas.WebSocketConfig)
-async def get_websocket_config():
+async def get_websocket_config(
+    current_user: Dict = Depends(get_current_user)
+):
+    """Get WebSocket configuration (Authenticated)."""
     return settings.ws_config
 
 def _get_default_features() -> Dict[str, bool]:
@@ -36,8 +40,10 @@ async def get_public_config():
 
 
 @router.get("/config")
-async def get_api_config():
-    """Get API configuration including WebSocket URL"""
+async def get_api_config(
+    current_user: Dict = Depends(require_admin)
+):
+    """Get API configuration including WebSocket URL (Admin only)."""
     ws_config = settings.ws_config
     return {
         "log_level": "INFO",
@@ -47,8 +53,11 @@ async def get_api_config():
     }
 
 @router.put("/config")
-async def update_api_config(config: ConfigUpdate):
-    """Update configuration with validation"""
+async def update_api_config(
+    config: ConfigUpdate,
+    current_user: Dict = Depends(require_admin)
+):
+    """Update configuration with validation (Admin only)."""
     if config.log_level and config.log_level not in ["DEBUG", "INFO", "WARNING", "ERROR"]:
         raise HTTPException(status_code=422, detail="Invalid log level")
     if config.max_retries is not None and config.max_retries < 0:
@@ -74,11 +83,9 @@ def _check_admin_access(token: str) -> None:
 @router.post("/config/update")
 async def update_config_admin(
     config_data: Dict[str, Any],
-    authorization: Optional[str] = Header(None)
+    current_user: Dict = Depends(require_admin)
 ) -> Dict[str, Any]:
-    """Update configuration with admin authorization"""
-    token = _validate_authorization_header(authorization)
-    _check_admin_access(token)
+    """Update configuration with admin authorization (Admin only)."""
     result = await update_config(config_data)
     return {"success": True, "updated": config_data}
 

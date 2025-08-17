@@ -1,61 +1,73 @@
 #!/usr/bin/env python3
 """
-AI Agent Metadata Tracking Enabler
-Streamlined entry point using modular metadata tracking components.
+AI Agent Metadata Tracking Enabler - Modular Enterprise-Ready Version
+Enables comprehensive metadata tracking for AI modifications with enterprise audit compliance.
+Supports modular command execution following 8-line function architecture.
 """
 
-import sys
 import argparse
 from pathlib import Path
 
-# Add scripts directory to path for imports
-scripts_dir = Path(__file__).parent
-sys.path.insert(0, str(scripts_dir))
-
 from metadata_tracking import MetadataTrackingEnabler
+
+def _get_argument_parser() -> argparse.ArgumentParser:
+    """Get command line argument parser"""
+    parser = argparse.ArgumentParser(description="Enable AI Agent Metadata Tracking")
+    parser.add_argument("--activate", action="store_true", 
+                       help="Enable all tracking components")
+    parser.add_argument("--status", action="store_true", 
+                       help="Check current status")
+    parser.add_argument("--install-hooks", action="store_true", 
+                       help="Install git hooks only")
+    parser.add_argument("--create-db", action="store_true", 
+                       help="Create database only")
+    return parser
+
+
+def _handle_activate_command(enabler: MetadataTrackingEnabler) -> None:
+    """Handle activate command"""
+    enabler.enable_all()
+
+
+def _handle_status_command(enabler: MetadataTrackingEnabler) -> None:
+    """Handle status command"""
+    enabler.print_status()
+
+
+def _handle_install_hooks_command(enabler: MetadataTrackingEnabler) -> None:
+    """Handle install hooks command"""
+    enabler.install_git_hooks()
+
+
+def _handle_create_db_command(enabler: MetadataTrackingEnabler) -> None:
+    """Handle create database command"""
+    enabler.create_metadata_database()
+
+
+def _handle_default_command(enabler: MetadataTrackingEnabler) -> None:
+    """Handle default command (show status)"""
+    enabler.print_status()
+    print("\nUse --activate to enable the metadata tracking system")
 
 
 def main():
-    """Main entry point for metadata tracking enabler."""
-    parser = argparse.ArgumentParser(
-        description="Enable and manage AI agent metadata tracking"
-    )
-    
-    parser.add_argument(
-        "--enable",
-        action="store_true",
-        help="Enable all metadata tracking components"
-    )
-    
-    parser.add_argument(
-        "--status",
-        action="store_true", 
-        help="Show current status of metadata tracking system"
-    )
-    
-    parser.add_argument(
-        "--project-root",
-        type=Path,
-        default=None,
-        help="Project root directory (defaults to current directory)"
-    )
-    
+    """Main entry point - lightweight and modular"""
+    parser = _get_argument_parser()
     args = parser.parse_args()
     
     # Initialize enabler
-    enabler = MetadataTrackingEnabler(args.project_root)
+    enabler = MetadataTrackingEnabler()
     
-    if args.enable:
-        success = enabler.enable_all()
-        sys.exit(0 if success else 1)
-    
+    if args.activate:
+        _handle_activate_command(enabler)
     elif args.status:
-        enabler.print_status()
-        sys.exit(0)
-    
+        _handle_status_command(enabler)
+    elif args.install_hooks:
+        _handle_install_hooks_command(enabler)
+    elif args.create_db:
+        _handle_create_db_command(enabler)
     else:
-        parser.print_help()
-        sys.exit(1)
+        _handle_default_command(enabler)
 
 
 if __name__ == "__main__":

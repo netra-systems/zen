@@ -1,14 +1,15 @@
 """Quality Gate Service Validators and Threshold Checking"""
 
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, Optional
 
 from app.logging_config import central_logger
+from app.schemas.quality_types import QualityValidatorInterface, QualityValidationResult
 from .quality_gate_models import ContentType, QualityLevel, QualityMetrics
 
 logger = central_logger.get_logger(__name__)
 
 
-class QualityValidator:
+class QualityValidator(QualityValidatorInterface):
     """Validate content quality against thresholds"""
     
     def __init__(self):
@@ -307,3 +308,50 @@ class QualityValidator:
             )
         
         return adjustments
+    
+    # Interface Implementation Methods
+    async def validate_content(
+        self, 
+        content: str, 
+        content_type: Optional[str] = None,
+        context: Optional[Dict[str, Any]] = None
+    ) -> QualityValidationResult:
+        """Validate content and return detailed quality results"""
+        from datetime import datetime, UTC
+        from ..quality_gate_service import QualityGateService
+        
+        # Convert string content_type to ContentType enum
+        content_type_enum = self._convert_content_type(content_type)
+        
+        # Create QualityGateService instance to perform full validation
+        service = QualityGateService()
+        validation_result = await service.validate_content(
+            content=content,
+            content_type=content_type_enum,
+            context=context or {},
+            strict_mode=False
+        )
+        
+        return validation_result
+    
+    def _convert_content_type(self, content_type: Optional[str]) -> ContentType:
+        """Convert string content type to ContentType enum"""
+        if not content_type:
+            return ContentType.GENERAL
+        
+        try:
+            return ContentType(content_type.lower())
+        except ValueError:
+            return ContentType.GENERAL
+    
+    def get_validation_stats(self) -> Dict[str, Any]:
+        """Get validation statistics"""
+        return {
+            "validator_type": "QualityGateValidator",
+            "threshold_count": len(self.thresholds),
+            "supported_content_types": [ct.value for ct in ContentType],
+            "validation_capabilities": [
+                "threshold_checking", "scoring", "improvement_suggestions",
+                "prompt_adjustments", "quality_level_determination"
+            ]
+        }

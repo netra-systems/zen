@@ -20,7 +20,7 @@ from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.state import DeepAgentState
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 from starlette.websockets import WebSocketDisconnect
 from langchain_core.messages import SystemMessage
 

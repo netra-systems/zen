@@ -39,7 +39,7 @@ class MCPToolExecutor:
             raise ServiceError(f"Tool discovery failed: {str(e)}")
     
     async def _mock_tool_discovery(self, server_name: str) -> List[Dict[str, Any]]:
-        """Mock implementation of tool discovery."""
+        """TODO: Replace with real MCP server tool discovery implementation."""
         return [
             {
                 "name": "read_file",
@@ -112,7 +112,7 @@ class MCPToolExecutor:
     async def _execute_tool_on_server(self, server_name: str, tool_name: str,
                                     arguments: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Execute tool on actual MCP server."""
-        # Mock implementation - would call actual MCP server
+        # TODO: Implement actual MCP server communication
         await asyncio.sleep(0.1)  # Simulate network delay
         return [{"type": "text", "text": f"Mock result for {tool_name}"}]
     

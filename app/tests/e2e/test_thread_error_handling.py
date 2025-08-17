@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from app.services.thread_service import ThreadService
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 from app.core.exceptions_database import DatabaseError, RecordNotFoundError
 from app.core.exceptions_agent import AgentError
 from app.core.exceptions_base import NetraException

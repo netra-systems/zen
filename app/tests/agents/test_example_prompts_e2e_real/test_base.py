@@ -10,7 +10,7 @@ from unittest.mock import patch, AsyncMock
 
 from app.services.quality_gate_service import QualityGateService, ContentType
 from app.services.corpus_service import CorpusService
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 from app.schemas.llm_config_types import (
     CostOptimizationContext,
     LatencyOptimizationContext,

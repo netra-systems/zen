@@ -21,7 +21,8 @@ from app.schemas.websocket_message_types import (
     StartAgentMessage, UserMessage, AgentStartedMessage,
     AgentCompletedMessage, ConnectionInfo, BroadcastResult
 )
-from app.websocket.validation import DateTimeEncoder, MessageValidator
+from app.services.state_persistence import DateTimeEncoder
+from app.websocket.validation import MessageValidator
 from app.websocket.broadcast import BroadcastManager
 
 

@@ -6,7 +6,7 @@ from app.agents.supervisor.execution_context import (
     AgentExecutionContext, AgentExecutionResult, PipelineStep
 )
 from app.agents.supervisor.execution_engine import ExecutionEngine
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 from app.logging_config import central_logger
 from app.llm.observability import generate_llm_correlation_id
 from app.agents.supervisor.observability_flow import get_supervisor_flow_logger

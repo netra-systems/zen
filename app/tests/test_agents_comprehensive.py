@@ -22,7 +22,7 @@ from app.agents.tool_dispatcher import ToolDispatcher
 from app.schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAgentUpdate
 from app.llm.llm_manager import LLMManager
 from app.services.agent_service import AgentService
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 from app.tests.helpers.shared_test_types import TestIntegration as SharedTestIntegration
 
 

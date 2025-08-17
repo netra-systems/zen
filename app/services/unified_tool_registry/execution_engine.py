@@ -7,6 +7,7 @@ from typing import Dict, Any
 from datetime import datetime, UTC
 import inspect
 
+from app.schemas.Tool import ToolExecutionEngineInterface, ToolExecuteResponse
 from app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
 from app.services.tool_permission_service import ToolPermissionService
 from app.db.models_postgres import User
@@ -18,7 +19,7 @@ from .models import UnifiedTool, ToolExecutionResult
 logger = central_logger
 
 
-class ToolExecutionEngine:
+class ToolExecutionEngine(ToolExecutionEngineInterface):
     """Handles secure tool execution with permission checks and validation"""
     
     def __init__(self, permission_service: ToolPermissionService):
@@ -193,7 +194,7 @@ class ToolExecutionEngine:
         await self._record_successful_usage(tool, user, execution_time_ms)
         return self._create_successful_result(tool, user, result, permission_result, execution_time_ms)
     
-    async def execute_tool(
+    async def execute_unified_tool(
         self, 
         tool: UnifiedTool,
         arguments: Dict[str, Any],
@@ -214,3 +215,61 @@ class ToolExecutionEngine:
             
         except Exception as e:
             return await self._handle_execution_error(tool, user, e, start_time)
+    
+    # Interface Implementation Method
+    async def execute_tool(
+        self, 
+        tool_name: str, 
+        parameters: Dict[str, Any]
+    ) -> ToolExecuteResponse:
+        """Execute a tool by name with parameters - implements ToolExecutionEngineInterface"""
+        from .unified_tool_registry import UnifiedToolRegistry
+        
+        # Get tool from registry  
+        registry = UnifiedToolRegistry(self.permission_service)
+        tool = registry.get_tool(tool_name)
+        
+        if not tool:
+            return ToolExecuteResponse(
+                success=False,
+                message=f"Tool '{tool_name}' not found",
+                metadata={"tool_name": tool_name}
+            )
+        
+        # Create mock user for interface compatibility
+        mock_user = self._create_mock_user_for_interface()
+        
+        # Execute tool using existing comprehensive method
+        result = await self.execute_unified_tool(tool, parameters, mock_user)
+        
+        # Convert ToolExecutionResult to ToolExecuteResponse
+        return self._convert_execution_result_to_response(result, tool_name)
+    
+    def _create_mock_user_for_interface(self) -> User:
+        """Create mock user for interface method compatibility"""
+        # This is a temporary solution for interface compatibility
+        # In production, proper user should be passed through context
+        mock_user = User()
+        mock_user.id = "interface_user"
+        mock_user.plan_tier = "free"
+        mock_user.roles = []
+        mock_user.feature_flags = {}
+        mock_user.is_developer = False
+        return mock_user
+    
+    def _convert_execution_result_to_response(
+        self, 
+        result: ToolExecutionResult, 
+        tool_name: str
+    ) -> ToolExecuteResponse:
+        """Convert ToolExecutionResult to ToolExecuteResponse"""
+        return ToolExecuteResponse(
+            success=(result.status == "success"),
+            data=result.result if result.status == "success" else None,
+            message=result.error_message if result.status != "success" else "Success",
+            metadata={
+                "tool_name": tool_name,
+                "execution_time_ms": result.execution_time_ms,
+                "status": result.status
+            }
+        )

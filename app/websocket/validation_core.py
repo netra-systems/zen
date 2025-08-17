@@ -11,7 +11,7 @@ from pydantic import ValidationError
 
 from app.schemas.registry import WebSocketMessage, WebSocketMessageType
 from app.schemas.websocket_message_types import WebSocketValidationError
-from app.services.state_serialization import DateTimeEncoder
+from app.services.state_persistence import DateTimeEncoder
 
 
 def validate_message_is_dict(message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:

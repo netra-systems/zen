@@ -130,7 +130,7 @@ class ServiceLocator:
             return None
     
     def clear(self) -> None:
-        """Clear all registered services (useful for testing)."""
+        """Clear all registered services and reset service locator state."""
         self._services.clear()
         self._factories.clear()
         self._singletons.clear()

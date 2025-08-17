@@ -293,6 +293,7 @@ export function toLegacyStatus(status: AgentStatus): LegacyAgentStatus {
 export type {
   WebSocketMessage,
   WebSocketMessageType,
-  AgentResult,
-  ReferenceItem
+  AgentResult
 } from './backend_schema_auto_generated';
+
+export type { ReferenceItem } from './backend_schema_tools';

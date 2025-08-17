@@ -121,9 +121,10 @@ class AdminToolDispatcher(ToolDispatcher):
     def _build_success_response_params(self, tool_name: str, base_result: ToolResult,
                                       current_time: datetime, user_id: str) -> Dict[str, Any]:
         """Build parameters for success response."""
-        base_params = self._get_base_response_params(tool_name, current_time, user_id)
-        success_params = self._get_success_specific_params(base_result)
-        return {**base_params, **success_params}
+        return self._merge_response_params(
+            self._get_base_response_params(tool_name, current_time, user_id),
+            self._get_success_specific_params(base_result)
+        )
     
     def _get_base_response_params(self, tool_name: str, current_time: datetime, user_id: str) -> Dict[str, Any]:
         """Get base response parameters"""
@@ -156,9 +157,10 @@ class AdminToolDispatcher(ToolDispatcher):
     def _build_failure_response_params(self, tool_name: str, base_result: ToolResult,
                                       current_time: datetime, user_id: str) -> Dict[str, Any]:
         """Build parameters for failure response."""
-        base_params = self._get_base_response_params(tool_name, current_time, user_id)
-        failure_params = self._get_failure_specific_params(base_result)
-        return {**base_params, **failure_params}
+        return self._merge_response_params(
+            self._get_base_response_params(tool_name, current_time, user_id),
+            self._get_failure_specific_params(base_result)
+        )
     
     def _get_failure_specific_params(self, base_result: ToolResult) -> Dict[str, Any]:
         """Get failure-specific response parameters"""
@@ -170,8 +172,7 @@ class AdminToolDispatcher(ToolDispatcher):
     def get_dispatcher_stats(self) -> Dict[str, Any]:
         """Get comprehensive statistics for the admin tool dispatcher"""
         stats = self._build_base_stats()
-        self._add_user_specific_stats(stats)
-        self._add_system_health_stats(stats)
+        self._enhance_stats_with_user_and_health(stats)
         return stats
     
     def _build_base_stats(self) -> Dict[str, Any]:
@@ -249,10 +250,34 @@ class AdminToolDispatcher(ToolDispatcher):
         from .dispatcher_helpers import create_not_found_tool_info
         return create_not_found_tool_info(tool_name)
     
+    def _merge_response_params(self, base_params: Dict[str, Any], 
+                               specific_params: Dict[str, Any]) -> Dict[str, Any]:
+        """Merge base and specific response parameters."""
+        return {**base_params, **specific_params}
+    
+    def _enhance_stats_with_user_and_health(self, stats: Dict[str, Any]) -> None:
+        """Add user-specific and health statistics to stats dict."""
+        self._add_user_specific_stats(stats)
+        self._add_system_health_stats(stats)
+    
+    def _validate_operation_security(self, operation_params: Dict[str, Any]) -> None:
+        """Validate operation security and permissions."""
+        self._check_operation_permissions(
+            operation_params["type"], operation_params["user_role"]
+        )
+    
+    def _has_valid_tool_dispatcher(self) -> bool:
+        """Check if tool dispatcher is available and valid."""
+        return hasattr(self, 'tool_dispatcher') and self.tool_dispatcher
+    
+    def _has_valid_audit_logger(self) -> bool:
+        """Check if audit logger is available and valid."""
+        return hasattr(self, 'audit_logger') and self.audit_logger
+    
     async def dispatch_admin_operation(self, operation: Dict[str, Any]) -> Dict[str, Any]:
         """Dispatch admin operation based on operation type"""
         operation_params = self._extract_operation_params(operation)
-        self._check_operation_permissions(operation_params["type"], operation_params["user_role"])
+        self._validate_operation_security(operation_params)
         tool_name = self._get_operation_tool_name(operation_params["type"])
         return await self._execute_operation_with_audit(tool_name, operation_params["params"], operation)
     
@@ -304,13 +329,13 @@ class AdminToolDispatcher(ToolDispatcher):
                                        params: Dict[str, Any]) -> Dict[str, Any]:
         """Execute operation via tool dispatcher if available"""
         from .dispatcher_helpers import execute_operation_via_dispatcher, create_no_dispatcher_error
-        if hasattr(self, 'tool_dispatcher') and self.tool_dispatcher:
+        if self._has_valid_tool_dispatcher():
             return await execute_operation_via_dispatcher(self, tool_name, params)
         return create_no_dispatcher_error(tool_name)
     
     async def _log_audit_operation(self, operation: Dict[str, Any]) -> None:
         """Log audit information for admin operations"""
         from .dispatcher_helpers import create_audit_data, log_audit_data
-        if hasattr(self, 'audit_logger') and self.audit_logger:
+        if self._has_valid_audit_logger():
             audit_data = create_audit_data(operation)
             await log_audit_data(self.audit_logger, audit_data)

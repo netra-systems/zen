@@ -1,7 +1,7 @@
 import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
-from app.services.state_persistence_service import StatePersistenceService
+from app.services.state_persistence import StatePersistenceService
 from datetime import datetime
 class TestStatePersistence:
     

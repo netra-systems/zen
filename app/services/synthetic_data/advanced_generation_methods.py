@@ -72,5 +72,5 @@ class AdvancedGenerationMethods:
         return await self.patterns_helper.generate_domain_specific(config)
 
     async def generate_tool_invocations(self, count: int, pattern: str) -> List[Dict]:
-        """Generate tool invocations for testing"""
+        """Generate synthetic tool invocation data"""
         return await self.tool_helper.generate_tool_invocations(count, pattern)

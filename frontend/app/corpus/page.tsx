@@ -15,6 +15,7 @@ import { CorpusPermissions } from './components/corpus-permissions';
 import { useCorpusState } from './hooks/use-corpus-state';
 import { corpusData, statsData, STORAGE_USED_PERCENTAGE } from './data/corpus-data';
 
+
 const CorpusPage: NextPage = () => {
   const { user, loading } = authService.useAuth();
   const router = useRouter();
