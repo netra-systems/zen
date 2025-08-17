@@ -16,7 +16,7 @@ from .health_checkers import (
     check_postgres_health, check_clickhouse_health, check_redis_health,
     check_websocket_health, check_system_resources
 )
-from .alert_manager import AlertManager
+from .alert_manager import HealthAlertManager
 from .agent_health_checker import (
     register_agent_checker, convert_legacy_result, determine_system_status
 )
@@ -36,7 +36,7 @@ class SystemHealthMonitor:
     def _initialize_core_components(self) -> None:
         """Initialize core health monitoring components."""
         self.component_health: Dict[str, ComponentHealth] = {}
-        self.alert_manager = AlertManager()
+        self.alert_manager = HealthAlertManager()
         self.health_thresholds = {"healthy": 0.8, "degraded": 0.5, "unhealthy": 0.2}
         self.component_checkers: Dict[str, Callable] = {}
     

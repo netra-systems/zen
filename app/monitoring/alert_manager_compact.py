@@ -21,7 +21,7 @@ from .alert_notifications import NotificationDeliveryManager
 logger = central_logger.get_logger(__name__)
 
 
-class AlertManager:
+class CompactAlertManager:
     """Compact alert manager using modular components."""
     
     def __init__(
@@ -227,4 +227,4 @@ class AlertManager:
 
 
 # Global alert manager instance
-alert_manager = AlertManager()
+alert_manager = CompactAlertManager()

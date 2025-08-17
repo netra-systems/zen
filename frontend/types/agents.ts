@@ -5,7 +5,19 @@
  * Auto-generated from pydantic models - do not modify by hand
  */
 
-export type SubAgentLifecycle = "pending" | "running" | "completed" | "failed" | "shutdown";
+import type { ReferenceItem } from './backend_schema_tools';
+
+// Import consolidated types from backend schema
+import type {
+  BaseMessage,
+  SubAgentState,
+  SubAgentStatus,
+  SubAgentLifecycle
+} from './backend_schema_base';
+
+// Re-export for backward compatibility
+export type { BaseMessage, SubAgentState, SubAgentStatus, SubAgentLifecycle };
+
 
 export interface AgentCompleted {
   run_id: string;
@@ -49,16 +61,6 @@ export interface StopAgent {
   run_id: string;
 }
 
-export interface SubAgentState {
-  agent_id: string;
-  status: SubAgentLifecycle;
-  result?: unknown | null;
-  error?: string | null;
-}
-
-export interface SubAgentStatus {
-  agents: SubAgentState[];
-}
 
 export interface SubAgentUpdate {
   agent_id: string;
@@ -67,33 +69,6 @@ export interface SubAgentUpdate {
   error?: string | null;
 }
 
-// Re-export types needed by agents
-export interface BaseMessage {
-  content:
-    | string
-    | (
-        | string
-        | {
-            [k: string]: unknown;
-          }
-      )[];
-  additional_kwargs?: {
-    [k: string]: unknown;
-  } | null;
-  response_metadata?: {
-    [k: string]: unknown;
-  } | null;
-  type: string;
-  name?: string | null;
-  id?: string | null;
-}
 
-export interface ReferenceItem {
-  id: string;
-  title: string;
-  content: string;
-  type: string;
-  metadata?: {
-    [k: string]: unknown;
-  } | null;
-}
+// Re-export canonical type
+export type { ReferenceItem };

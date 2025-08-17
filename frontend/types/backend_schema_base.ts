@@ -1,9 +1,17 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
-/* This file was automatically generated from pydantic models by running pydantic2ts.
-/* Do not modify it by hand - just update the pydantic models and then re-run the script
-*/
+ * AUTHORITATIVE SOURCE FOR BACKEND SCHEMA TYPES
+ * 
+ * This file was automatically generated from pydantic models by running pydantic2ts.
+ * Do not modify it by hand - just update the pydantic models and then re-run the script
+ * 
+ * SINGLE SOURCE OF TRUTH for:
+ * - SubAgentState, SubAgentStatus, BaseMessage, Message
+ * - All backend schema types that mirror Python Pydantic models
+ * 
+ * For frontend UI-specific types, see './chat-store.ts'
+ */
 
 // Base types and enums
 export type MessageType = "user" | "agent" | "system" | "error" | "tool";
@@ -77,12 +85,17 @@ export interface SubAgentState {
   start_time?: string | null;
   end_time?: string | null;
   error_message?: string | null;
+  agent_id?: string;
+  status?: SubAgentLifecycle;
+  result?: unknown | null;
+  error?: string | null;
 }
 
 export interface SubAgentStatus {
   agent_name: string;
   tools: string[];
   status: string;
+  agents?: SubAgentState[];
 }
 
 export interface SubAgentUpdate {

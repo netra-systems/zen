@@ -12,7 +12,7 @@ from app.services.quality_gate_service import ContentType, QualityMetrics
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import QualityAlert, QualityTrend
-from .alerts import AlertManager
+from .alerts import QualityAlertManager
 from .metrics import MetricsCollector
 from .analytics import TrendAnalyzer
 
@@ -34,7 +34,7 @@ class QualityMonitoringService:
         self.db_session = db_session
         
         # Initialize components
-        self.alert_manager = AlertManager()
+        self.alert_manager = QualityAlertManager()
         self.metrics_collector = MetricsCollector(
             redis_manager, clickhouse_manager, db_session
         )

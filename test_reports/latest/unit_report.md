@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-17T11:08:59.343158  
+**Generated:** 2025-08-17T11:37:48.390888  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.32s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 5.69s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.47s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,7 +27,7 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 0.32s
+- **Total Duration:** 6.16s
 - **Exit Code:** 15
 
 ### Backend Configuration
@@ -44,6 +44,49 @@
 
 ### Backend Output
 ```
+Loaded test environment from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.test
+================================================================================
+NETRA AI PLATFORM - BACKEND TEST RUNNER
+================================================================================
+Test Configuration:
+  Category: unit
+  Parallel: 4
+  Coverage: enabled
+  Fail Fast: enabled
+  Environment: testing
+
+Running command:
+  pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services -p test_framework.pytest_bad_test_plugin --test-component backend
+================================================================================
+Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
+Loaded .env.development file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development
+Loaded .env.development.local file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development.local
+================================================================================
+[FAIL] TESTS FAILED with exit code 4 after 4.94s
+[Coverage] Coverage Report: reports/coverage/html/index.html
+================================================================================
+
+ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py'.
+app\tests\conftest.py:52: in <module>
+    from app.main import app
+app\main.py:69: in <module>
+    from app.core.app_factory import create_app
+app\core\app_factory.py:9: in <module>
+    from app.core.lifespan_manager import lifespan
+app\core\lifespan_manager.py:8: in <module>
+    from app.startup_module import run_complete_startup
+app\startup_module.py:16: in <module>
+    from app.config import settings
+E   ImportError: cannot import name 'settings' from 'app.config' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\config\__init__.py)
+--- Logging error in Loguru Handler #1 ---
+Record was: {'elapsed': datetime.timedelta(seconds=1, microseconds=212170), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=45732, name='MainProcess'), 'thread': (id=41580, name='MainThread'), 'time': datetime(2025, 8, 17, 11, 37, 47, 587879, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
+Traceback (most recent call last):
+  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
+    self._sink.write(message)
+  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_simple_sinks.py", line 16, in write
+    self._stream.write(message)
+ValueError: I/O operation on closed file.
+--- End of logging error ---
 
 ```
 

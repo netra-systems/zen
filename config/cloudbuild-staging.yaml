@@ -6,7 +6,7 @@ steps:
     args:
       - 'build'
       - '-f'
-      - 'Dockerfile.backend'
+      - 'Dockerfile.backend.cloudrun'
       - '-t'
       - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/backend:${_BRANCH_NAME}-${SHORT_SHA}'
       - '-t'
@@ -63,7 +63,7 @@ steps:
       - 'managed'
       - '--allow-unauthenticated'
       - '--set-env-vars'
-      - 'ENVIRONMENT=staging'
+      - 'ENVIRONMENT=staging,PYTHONUNBUFFERED=1,PORT=8080,WORKERS=1,TIMEOUT=120'
       - '--min-instances'
       - '0'
       - '--max-instances'
@@ -72,6 +72,8 @@ steps:
       - '1'
       - '--memory'
       - '1Gi'
+      - '--timeout'
+      - '300'
     waitFor: ['push-backend']
 
   # Deploy frontend to Cloud Run

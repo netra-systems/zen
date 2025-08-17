@@ -1,7 +1,8 @@
 
 import { create } from 'zustand';
 import { generateUniqueId } from '@/lib/utils';
-import { Message, SubAgentState as SubAgentStatus } from '@/types/chat';
+import { Message } from '@/types/chat';
+import type { SubAgentState as BackendSubAgentState } from '@/types/backend_schema_base';
 
 interface SubAgentStatusData {
   status: string;
@@ -20,7 +21,7 @@ interface ChatState {
   messages: Message[];
   subAgentName: string;
   currentSubAgent: string | null;
-  subAgentStatus: SubAgentStatus | string | null;
+  subAgentStatus: BackendSubAgentState | string | null;
   subAgentTools: string[];
   subAgentProgress: { current: number; total: number; message?: string } | null;
   subAgentError: string | null;
@@ -32,7 +33,7 @@ interface ChatState {
   addMessage: (message: Message) => void;
   updateMessage: (messageId: string, updates: Partial<Message>) => void;
   setSubAgentName: (name: string) => void;
-  setSubAgentStatus: (status: SubAgentStatus | SubAgentStatusData) => void;
+  setSubAgentStatus: (status: BackendSubAgentState | SubAgentStatusData) => void;
   setSubAgent: (name: string, status: string) => void;
   setProcessing: (isProcessing: boolean) => void;
   clearMessages: () => void;

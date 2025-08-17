@@ -1,10 +1,5 @@
 import { Message } from '@/types/chat';
-
-interface Thread {
-  id: string;
-  created_at: number;
-  metadata_?: any;
-}
+import { Thread } from '@/types/registry';
 
 interface PaginatedMessages {
   messages: Message[];
@@ -18,7 +13,7 @@ interface QueuedMessage {
   timestamp: number;
 }
 
-interface ThreadState {
+interface MessageThreadState {
   thread_id: string;
   last_message_id: string;
   unread_count: number;
@@ -36,7 +31,7 @@ interface GetMessagesOptions {
 
 class MessageService {
   private queuedMessages: QueuedMessage[] = [];
-  private threadStates: Map<string, ThreadState> = new Map();
+  private threadStates: Map<string, MessageThreadState> = new Map();
 
   private getAuthHeader(): string {
     const token = localStorage.getItem('jwt_token') || '';
@@ -220,12 +215,12 @@ class MessageService {
   }
 
   // Thread State Management
-  async saveThreadState(state: ThreadState): Promise<void> {
+  async saveThreadState(state: MessageThreadState): Promise<void> {
     this.threadStates.set(state.thread_id, state);
     localStorage.setItem(`thread_state_${state.thread_id}`, JSON.stringify(state));
   }
 
-  async getThreadState(threadId: string): Promise<ThreadState | null> {
+  async getThreadState(threadId: string): Promise<MessageThreadState | null> {
     // Check memory first
     if (this.threadStates.has(threadId)) {
       return this.threadStates.get(threadId)!;

@@ -17,7 +17,7 @@ from app.services.metrics.agent_metrics import (
 )
 from app.middleware.metrics_helpers import (
     AgentNameExtractor, OperationTypeDetector, FailureClassifier,
-    PerformanceMonitor, ErrorHandler, BatchResultProcessor,
+    PerformanceUtils, ErrorHandler, BatchResultProcessor,
     OperationMetadataBuilder, TimeoutHandler, WrapperUtils
 )
 
@@ -192,7 +192,7 @@ class AgentMetricsMiddleware:
         self, operation_id: str, result: Any, start_time: float, memory_before: float, include_performance: bool
     ) -> None:
         """Record successful operation with performance metrics."""
-        execution_time_ms = PerformanceMonitor.calculate_execution_time_ms(start_time)
+        execution_time_ms = PerformanceUtils.calculate_execution_time_ms(start_time)
         performance_metrics = self._collect_performance_metrics(memory_before, include_performance)
         metadata = OperationMetadataBuilder.create_success_metadata(execution_time_ms, result)
         await self._finalize_successful_operation(operation_id, performance_metrics, metadata)
@@ -200,7 +200,7 @@ class AgentMetricsMiddleware:
     def _collect_performance_metrics(self, memory_before: float, include_performance: bool) -> dict:
         """Collect performance metrics for operation."""
         memory_after = self._get_memory_usage() if include_performance else 0.0
-        memory_delta = PerformanceMonitor.calculate_memory_delta(memory_before, memory_after)
+        memory_delta = PerformanceUtils.calculate_memory_delta(memory_before, memory_after)
         cpu_usage = self._get_cpu_usage() if include_performance else 0.0
         return {'memory_usage_mb': memory_delta, 'cpu_usage_percent': cpu_usage}
     
@@ -282,11 +282,11 @@ class AgentMetricsMiddleware:
     
     def _get_memory_usage(self) -> float:
         """Get current memory usage in MB."""
-        return PerformanceMonitor.get_memory_usage_mb()
+        return PerformanceUtils.get_memory_usage_mb()
     
     def _get_cpu_usage(self) -> float:
         """Get current CPU usage percentage."""
-        return PerformanceMonitor.get_cpu_usage_percent()
+        return PerformanceUtils.get_cpu_usage_percent()
     
     async def track_batch_operation(
         self, 
@@ -331,8 +331,8 @@ class AgentMetricsMiddleware:
     def _calculate_batch_metrics(self, result: Any, batch_size: int, start_time: float) -> dict:
         """Calculate batch operation metrics."""
         successful_items, failed_items = self._count_batch_results(result)
-        execution_time_ms = PerformanceMonitor.calculate_execution_time_ms(start_time)
-        throughput = PerformanceMonitor.calculate_throughput(batch_size, execution_time_ms)
+        execution_time_ms = PerformanceUtils.calculate_execution_time_ms(start_time)
+        throughput = PerformanceUtils.calculate_throughput(batch_size, execution_time_ms)
         return {'successful': successful_items, 'failed': failed_items, 'time_ms': execution_time_ms, 'throughput': throughput, 'size': batch_size}
     
     def _create_batch_metadata(self, batch_metrics: dict) -> dict:

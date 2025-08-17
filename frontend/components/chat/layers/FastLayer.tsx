@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Zap } from 'lucide-react';
 import { useToolTracking } from '@/hooks/useToolTracking';
 import type { FastLayerProps } from '@/types/component-props';
-import type { ToolStatus } from '@/types/layer-types';
+import type { ToolExecutionStatus } from '@/types/layer-types';
 
 export const FastLayer: React.FC<FastLayerProps> = ({ data, isProcessing }) => {
   // Initialize tool tracking service
@@ -83,8 +83,8 @@ export const FastLayer: React.FC<FastLayerProps> = ({ data, isProcessing }) => {
 const getActiveTools = (data: any): string[] => {
   if (data?.toolStatuses) {
     return data.toolStatuses
-      .filter((status: ToolStatus) => status.isActive)
-      .map((status: ToolStatus) => status.name);
+      .filter((status: ToolExecutionStatus) => status.isActive)
+      .map((status: ToolExecutionStatus) => status.name);
   }
   return data?.activeTools || [];
 };
@@ -92,7 +92,7 @@ const getActiveTools = (data: any): string[] => {
 /**
  * Calculates tool duration for display
  */
-const getToolDuration = (status: ToolStatus): string => {
+const getToolDuration = (status: ToolExecutionStatus): string => {
   const duration = Date.now() - status.startTime;
   if (duration < 1000) return '< 1s';
   return `${Math.floor(duration / 1000)}s`;
@@ -116,7 +116,7 @@ const ToolDisplay: React.FC<{ data: any }> = ({ data }) => {
           key={tool}
           tool={tool}
           count={activeTools.filter(t => t === tool).length}
-          status={data?.toolStatuses?.find((s: ToolStatus) => s.name === tool)}
+          status={data?.toolStatuses?.find((s: ToolExecutionStatus) => s.name === tool)}
         />
       ))}
     </>
@@ -129,7 +129,7 @@ const ToolDisplay: React.FC<{ data: any }> = ({ data }) => {
 const ToolBadge: React.FC<{ 
   tool: string; 
   count: number; 
-  status?: ToolStatus; 
+  status?: ToolExecutionStatus; 
 }> = ({ tool, count, status }) => {
   return (
     <motion.div

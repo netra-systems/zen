@@ -1,6 +1,22 @@
+import type { SubAgentStatus } from './backend_schema_base';
+
+// Frontend UI-specific SubAgent state (different from backend SubAgentState)
+export interface FrontendSubAgentState {
+  status: 'idle' | 'thinking' | 'executing' | 'completed' | 'error';
+  currentStep?: string;
+  progress?: {
+    current: number;
+    total: number;
+  };
+  tools?: string[];
+  metadata?: {
+    [key: string]: unknown;
+  };
+}
+
 export interface SubAgentUpdate {
     sub_agent_name: string;
-    state: SubAgentState;
+    state: FrontendSubAgentState;
 }
 
 export interface AgentStarted {
@@ -21,24 +37,8 @@ export interface StopAgent {
     run_id: string;
 }
 
-export interface SubAgentStatus {
-  agent_name: string;
-  tools: string[];
-  status: string;
-}
-
-export interface SubAgentState {
-  status: 'idle' | 'thinking' | 'executing' | 'completed' | 'error';
-  currentStep?: string;
-  progress?: {
-    current: number;
-    total: number;
-  };
-  tools?: string[];
-  metadata?: {
-    [key: string]: unknown;
-  };
-}
+// Re-export backend type for compatibility
+export type { SubAgentStatus };
 
 export interface AgentCompletionResult {
   output: string;

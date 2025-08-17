@@ -1,26 +1,13 @@
-export type ToolStatus = "success" | "error" | "partial_success" | "in_progress" | "complete";
+// Import canonical types from backend schema
+import { ToolStatus, ToolInput, ToolResult } from './backend_schema_tools';
 
 export interface ToolCompleted {
   tool_name: string;
   result: ToolResultData;
 }
 
-export interface ToolInput {
-  tool_name: string;
-  args?: unknown[];
-  kwargs?: {
-    [k: string]: unknown;
-  };
-}
-
-export interface ToolResult {
-  tool_input: ToolInput;
-  status?: ToolStatus;
-  message?: string;
-  payload?: ToolPayload;
-  start_time?: number;
-  end_time?: number | null;
-}
+// Re-export for convenience
+export { ToolStatus, ToolInput, ToolResult };
 
 export interface ToolStarted {
   tool_name: string;

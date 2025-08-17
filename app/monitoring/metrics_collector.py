@@ -19,6 +19,7 @@ from collections import deque, defaultdict
 
 from app.logging_config import central_logger
 from app.core.performance_optimization_manager import performance_manager
+from app.db.observability_metrics import DatabaseMetrics
 
 logger = central_logger.get_logger(__name__)
 
@@ -47,17 +48,7 @@ class SystemResourceMetrics:
     timestamp: datetime = field(default_factory=datetime.now)
 
 
-@dataclass
-class DatabaseMetrics:
-    """Database performance metrics."""
-    active_connections: int
-    pool_size: int
-    pool_overflow: int
-    query_count: int
-    avg_query_time: float
-    slow_query_count: int
-    cache_hit_ratio: float
-    timestamp: datetime = field(default_factory=datetime.now)
+# DatabaseMetrics imported from app.db.observability_metrics
 
 
 @dataclass

@@ -1,5 +1,10 @@
 /**
  * Strong type definitions for Chat Store and message handling.
+ * 
+ * AUTHORITATIVE SOURCE FOR FRONTEND UI TYPES
+ * - This file contains frontend-specific UI types and state management types
+ * - For backend schema types, import from './backend_schema_base'
+ * - These types are optimized for React state management and UI interactions
  */
 
 // Core message types

@@ -5,11 +5,7 @@
 
 import { ThreadService } from '@/services/threadService';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-
-interface WebSocketMessage {
-  type: string;
-  payload: any;
-}
+import { WebSocketMessage } from '@/types/backend_schema_auto_generated';
 
 interface WebSocketSender {
   sendMessage: (message: WebSocketMessage) => void;

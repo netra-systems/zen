@@ -12,6 +12,9 @@ from enum import Enum
 from dataclasses import dataclass
 import logging
 
+from app.core.circuit_breaker_core import CircuitBreaker
+from app.core.circuit_breaker_types import CircuitConfig
+
 logger = logging.getLogger(__name__)
 
 
@@ -50,7 +53,12 @@ class AuthServiceClient:
         self.base_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
         self.enabled = os.getenv("AUTH_SERVICE_ENABLED", "true").lower() == "true"
         self.cache_ttl = int(os.getenv("AUTH_CACHE_TTL_SECONDS", "300"))  # 5 min
-        self.circuit_breaker = CircuitBreaker()
+        self.circuit_breaker = CircuitBreaker(CircuitConfig(
+            name="auth_service",
+            failure_threshold=5,
+            recovery_timeout=60,
+            timeout_seconds=30
+        ))
         self._token_cache: Dict[str, CachedToken] = {}
         self._client = None
         
@@ -431,56 +439,7 @@ class CachedToken:
         return datetime.utcnow() < self.expires_at
 
 
-class CircuitBreaker:
-    """Circuit breaker for auth service calls"""
-    
-    def __init__(self, failure_threshold: int = 5, 
-                 timeout_seconds: int = 60):
-        self.failure_threshold = failure_threshold
-        self.timeout_seconds = timeout_seconds
-        self.failures = 0
-        self.last_failure_time = None
-        self.is_open = False
-    
-    async def call(self, func, *args, **kwargs):
-        """Execute function with circuit breaker"""
-        if self._should_open():
-            raise Exception("Circuit breaker is open")
-        
-        try:
-            result = await func(*args, **kwargs)
-            self._on_success()
-            return result
-        except Exception as e:
-            self._on_failure()
-            raise
-    
-    def _should_open(self) -> bool:
-        """Check if circuit should be open"""
-        if self.is_open:
-            # Check if timeout has passed
-            if self.last_failure_time:
-                elapsed = (datetime.utcnow() - self.last_failure_time).seconds
-                if elapsed > self.timeout_seconds:
-                    self.is_open = False
-                    self.failures = 0
-                    return False
-            return True
-        return False
-    
-    def _on_success(self):
-        """Handle successful call"""
-        self.failures = 0
-        self.is_open = False
-    
-    def _on_failure(self):
-        """Handle failed call"""
-        self.failures += 1
-        self.last_failure_time = datetime.utcnow()
-        
-        if self.failures >= self.failure_threshold:
-            self.is_open = True
-            logger.warning("Circuit breaker opened for auth service")
+# CircuitBreaker class removed - now using core implementation
 
 
 # Global client instance

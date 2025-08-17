@@ -8,7 +8,7 @@ from .models import (
     QualityTrend,
     AgentQualityProfile
 )
-from .alerts import AlertManager
+from .alerts import QualityAlertManager
 from .metrics import MetricsCollector
 from .analytics import TrendAnalyzer
 
@@ -19,7 +19,7 @@ __all__ = [
     'QualityAlert',
     'QualityTrend',
     'AgentQualityProfile',
-    'AlertManager',
+    'QualityAlertManager',
     'MetricsCollector',
     'TrendAnalyzer'
 ]

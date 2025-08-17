@@ -27,7 +27,7 @@ export interface ToolExecutingEvent {
   };
 }
 
-export interface ToolStatus {
+export interface ToolExecutionStatus {
   name: string;
   startTime: number;
   isActive: boolean;
@@ -37,7 +37,7 @@ export interface ToolStatus {
 export interface FastLayerData {
   agentName: string;        // From agent_started event
   activeTools: string[];    // From tool_executing events (legacy)
-  toolStatuses: ToolStatus[]; // Enhanced tool tracking with lifecycle
+  toolStatuses: ToolExecutionStatus[]; // Enhanced tool tracking with lifecycle
   timestamp: number;        // From backend
   runId: string;           // From backend
 }

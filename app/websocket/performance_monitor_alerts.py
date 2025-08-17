@@ -13,7 +13,7 @@ from .performance_monitor_types import Alert, AlertSeverity
 logger = central_logger.get_logger(__name__)
 
 
-class AlertManager:
+class PerformanceAlertManager:
     """Manages performance alerts with micro-functions."""
     
     def __init__(self):

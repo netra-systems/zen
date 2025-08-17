@@ -6,7 +6,7 @@ import { logger } from '@/lib/logger';
 export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
 export type WebSocketState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
 
-export interface WebSocketError {
+export interface WebSocketServiceError {
   code: number;
   message: string;
   timestamp: number;
@@ -22,7 +22,7 @@ interface RateLimitConfig {
 interface WebSocketOptions {
   onOpen?: () => void;
   onMessage?: (message: WebSocketMessage | UnifiedWebSocketEvent) => void;
-  onError?: (error: WebSocketError) => void;
+  onError?: (error: WebSocketServiceError) => void;
   onClose?: () => void;
   onReconnect?: () => void;
   onBinaryMessage?: (data: ArrayBuffer) => void;

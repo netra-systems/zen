@@ -15,7 +15,7 @@ from app.services.metrics.agent_metrics_compact import AgentMetricsCollector
 from app.services.metrics.agent_metrics_models import FailureType
 from app.middleware.metrics_helpers import (
     AgentNameExtractor, OperationTypeDetector, FailureClassifier,
-    PerformanceMonitor, ErrorHandler, OperationMetadataBuilder, TimeoutHandler
+    PerformanceUtils, ErrorHandler, OperationMetadataBuilder, TimeoutHandler
 )
 
 logger = central_logger.get_logger(__name__)
@@ -115,11 +115,11 @@ class MetricsMiddlewareCore:
     
     def _get_memory_usage(self) -> float:
         """Get current memory usage in MB."""
-        return PerformanceMonitor.get_memory_usage_mb()
+        return PerformanceUtils.get_memory_usage_mb()
     
     def _get_cpu_usage(self) -> float:
         """Get current CPU usage percentage."""
-        return PerformanceMonitor.get_cpu_usage_percent()
+        return PerformanceUtils.get_cpu_usage_percent()
     
     async def _handle_timeout(
         self, 
@@ -230,7 +230,7 @@ class MetricsMiddlewareCore:
         self, operation_id: str, result: Any, start_time: float, memory_before: float, include_performance: bool
     ) -> None:
         """Record successful context operation."""
-        execution_time_ms = PerformanceMonitor.calculate_execution_time_ms(start_time)
+        execution_time_ms = PerformanceUtils.calculate_execution_time_ms(start_time)
         performance_metrics = self._collect_context_performance_metrics(memory_before, include_performance)
         metadata = OperationMetadataBuilder.create_success_metadata(execution_time_ms, result)
         await self._finalize_context_success(operation_id, performance_metrics, metadata)
@@ -238,7 +238,7 @@ class MetricsMiddlewareCore:
     def _collect_context_performance_metrics(self, memory_before: float, include_performance: bool) -> dict:
         """Collect context performance metrics for operation."""
         memory_after = self._get_memory_usage() if include_performance else 0.0
-        memory_delta = PerformanceMonitor.calculate_memory_delta(memory_before, memory_after)
+        memory_delta = PerformanceUtils.calculate_memory_delta(memory_before, memory_after)
         cpu_usage = self._get_cpu_usage() if include_performance else 0.0
         return {'memory_usage_mb': memory_delta, 'cpu_usage_percent': cpu_usage}
     

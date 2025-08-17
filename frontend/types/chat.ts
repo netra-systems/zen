@@ -1,4 +1,6 @@
-import { Message as BackendMessage } from './backend_schema_auto_generated';
+import type { Message as BackendMessage, SubAgentLifecycle, SubAgentState } from './backend_schema_base';
+import type { ToolStatus } from './backend_schema_base';
+import type { ToolInput, ToolResult } from './backend_schema_tools';
 
 export type ChatMessage = Omit<BackendMessage, 'content'> & {
   content: string;
@@ -9,48 +11,22 @@ export type ChatMessage = Omit<BackendMessage, 'content'> & {
 // Re-export as Message for backwards compatibility
 export type Message = ChatMessage;
 
-export enum SubAgentLifecycle {
-  PENDING = "pending",
-  RUNNING = "running",
-  COMPLETED = "completed",
-  FAILED = "failed",
-  SHUTDOWN = "shutdown",
-}
+// Re-export backend types for compatibility
+export type { SubAgentLifecycle, SubAgentState };
 
-export interface SubAgentState {
-  messages: Message[];
-  next_node: string;
-  tool_results?: Record<string, any>[];
-  lifecycle: SubAgentLifecycle;
-  start_time?: string;
-  end_time?: string;
-  error_message?: string;
-}
+// Export enum-like object for SubAgentLifecycle for easier usage
+export const SubAgentLifecycleEnum = {
+  PENDING: "pending" as const,
+  RUNNING: "running" as const,
+  COMPLETED: "completed" as const,
+  FAILED: "failed" as const,
+  SHUTDOWN: "shutdown" as const,
+} as const;
 
-export enum ToolStatus {
-  SUCCESS = "success",
-  ERROR = "error",
-  PARTIAL_SUCCESS = "partial_success",
-  IN_PROGRESS = "in_progress",
-  COMPLETE = "complete",
-}
+// Re-export canonical types from backend schema
+export type { ToolStatus, ToolInput, ToolResult };
 
-export interface ToolInput {
-  tool_name: string;
-  args: any[];
-  kwargs: Record<string, any>;
-}
-
-export interface ToolResult {
-  tool_input: ToolInput;
-  status: ToolStatus;
-  message: string;
-  payload?: any;
-  start_time: number;
-  end_time?: number;
-}
-
-export interface WebSocketMessage {
+export interface ChatWebSocketMessage {
   type: "analysis_request" | "error" | "stream_event" | "run_complete" | "sub_agent_update" | "agent_started" | "agent_completed" | "agent_error" | "message";
   payload: any;
 }

@@ -15,7 +15,7 @@ export type {
   AgentTrackingState,
   ThreadState,
   ConnectionState,
-  SubAgentState,
+  SubAgentUIState,
   PerformanceState,
   AgentExecution,
   PerformanceMetrics

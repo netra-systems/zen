@@ -6,21 +6,21 @@ import asyncio
 from unittest.mock import Mock, AsyncMock
 from datetime import datetime, timedelta, UTC
 
-from app.core.alert_manager import AlertManager
+from app.core.alert_manager import HealthAlertManager
 from app.core.health_types import (
     SystemAlert, AlertSeverity, HealthStatus, ComponentHealth, RecoveryAction
 )
 
 
-class TestAlertManager:
+class TestHealthAlertManager:
     """Test AlertManager class."""
     
     def setup_method(self):
         """Set up test fixtures."""
-        self.alert_manager = AlertManager(max_alert_history=100)
+        self.alert_manager = HealthAlertManager(max_alert_history=100)
     
     def test_alert_manager_initialization(self):
-        """Test AlertManager initialization."""
+        """Test HealthAlertManager initialization."""
         assert len(self.alert_manager.alerts) == 0
         assert self.alert_manager.max_alert_history == 100
         assert len(self.alert_manager.alert_callbacks) == 0

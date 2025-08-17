@@ -73,8 +73,8 @@ export interface ConnectionState {
   setConnectionStatus: (isConnected: boolean, error?: string) => void;
 }
 
-// Sub-agent compatibility slice state
-export interface SubAgentState {
+// Sub-agent UI slice state (frontend-specific, different from backend SubAgentState)
+export interface SubAgentUIState {
   subAgentName: string | null;
   subAgentStatus: string | null;
   subAgentTools: string[];

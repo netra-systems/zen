@@ -89,6 +89,25 @@ export interface User {
   token_type?: string;
 }
 
+export interface AuthEndpoints {
+  login: string;
+  logout: string;
+  token: string;
+  user: string;
+  dev_login: string;
+}
+
+export interface AuthConfigResponse {
+  google_client_id: string;
+  endpoints: AuthEndpoints;
+  development_mode: boolean;
+  user?: User | null;
+  authorized_javascript_origins: string[];
+  authorized_redirect_uris: string[];
+  google_login_url?: string;
+  logout_url?: string;
+}
+
 export interface MessageMetadata {
   model?: string;
   tokens_used?: number;
@@ -313,34 +332,8 @@ export function createWebSocketError(
 // EXPORTS - All unified types available from single import
 // ============================================================================
 
-export type {
-  // Core domain types
-  User,
-  Message,
-  MessageMetadata,
-  Thread,
-  ThreadMetadata,
-  
-  // Agent types
-  AgentState,
-  AgentResult,
-  AgentMetadata,
-  ToolResultData,
-  
-  // WebSocket types  
-  WebSocketMessage,
-  WebSocketError,
-  BaseWebSocketPayload,
-  UserMessagePayload,
-  AgentUpdatePayload,
-  
-  // Utility types
-  MessageAttachment,
-  MessageReaction,
-  MessageRole,
-  MessageStatus,
-  RegisteredTypeName
-};
+// Note: Types are automatically exported via interface declarations above
+// This export statement is removed to avoid conflicts
 
 // Default export for convenience
 export default {

@@ -1,29 +1,26 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { User } from '@/types/registry';
 
-interface User {
-  id: string;
-  email: string;
-  name?: string;
+interface ExtendedUser extends User {
   role?: 'standard_user' | 'power_user' | 'developer' | 'admin' | 'super_admin';
   permissions?: string[];
   is_developer?: boolean;
-  is_superuser?: boolean;
 }
 
 interface AuthState {
   isAuthenticated: boolean;
-  user: User | null;
+  user: ExtendedUser | null;
   token: string | null;
   loading: boolean;
   error: string | null;
   
   // Actions
-  login: (user: User, token: string) => void;
+  login: (user: ExtendedUser, token: string) => void;
   logout: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
-  updateUser: (user: Partial<User>) => void;
+  updateUser: (user: Partial<ExtendedUser>) => void;
   reset: () => void;
   
   // Permission helpers

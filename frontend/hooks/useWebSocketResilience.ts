@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { WebSocketError } from '@/types/backend_schema_auto_generated';
 
 export interface WebSocketOptions {
   onOpen?: () => void;
@@ -14,11 +15,6 @@ export interface WebSocketOptions {
   enableReconnect?: boolean;
 }
 
-export interface WebSocketError {
-  type: string;
-  code?: string;
-  message: string;
-}
 
 export interface UseWebSocketReturn {
   readyState: number;
@@ -88,7 +84,7 @@ export const useWebSocket = (url: string, options?: WebSocketOptions): UseWebSoc
       
       ws.current.onerror = (event) => {
         const errorObj: WebSocketError = {
-          type: 'CONNECTION_ERROR',
+          error_type: 'CONNECTION_ERROR',
           message: 'WebSocket connection error'
         };
         setError(errorObj);
@@ -103,7 +99,7 @@ export const useWebSocket = (url: string, options?: WebSocketOptions): UseWebSoc
           // Handle error messages
           if (data.type === 'error') {
             const errorObj: WebSocketError = {
-              type: data.type,
+              error_type: data.type,
               code: data.code,
               message: data.message
             };
@@ -119,7 +115,7 @@ export const useWebSocket = (url: string, options?: WebSocketOptions): UseWebSoc
           options?.onMessage?.(data);
         } catch (e) {
           const parseError: WebSocketError = {
-            type: 'PARSE_ERROR',
+            error_type: 'PARSE_ERROR',
             message: `Failed to parse JSON: ${e}`
           };
           setError(parseError);
@@ -128,7 +124,7 @@ export const useWebSocket = (url: string, options?: WebSocketOptions): UseWebSoc
       };
     } catch (err) {
       const connectionError: WebSocketError = {
-        type: 'CONNECTION_ERROR',
+        error_type: 'CONNECTION_ERROR',
         message: `Failed to connect: ${err}`
       };
       setError(connectionError);
