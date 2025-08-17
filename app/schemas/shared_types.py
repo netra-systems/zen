@@ -154,11 +154,29 @@ DEFAULT_RETRY_ATTEMPTS = 3
 # CONSOLIDATED TYPE DEFINITIONS - SINGLE SOURCE OF TRUTH
 # =============================================================================
 
+class BackoffStrategy(str, Enum):
+    """Types of backoff strategies for retries."""
+    EXPONENTIAL = "exponential"
+    LINEAR = "linear" 
+    FIXED = "fixed"
+    FIBONACCI = "fibonacci"
+
+
+class JitterType(str, Enum):
+    """Types of jitter to add to retry delays."""
+    NONE = "none"
+    FULL = "full"
+    EQUAL = "equal"
+    DECORRELATED = "decorrelated"
+
+
 class RetryConfig(BaseModel):
     """Centralized retry configuration for all components."""
     max_retries: int = Field(default=3, description="Maximum retry attempts")
     base_delay: float = Field(default=1.0, description="Base delay between retries")
-    max_delay: float = Field(default=60.0, description="Maximum delay between retries")
+    max_delay: float = Field(default=300.0, description="Maximum delay between retries")
+    backoff_strategy: BackoffStrategy = Field(default=BackoffStrategy.EXPONENTIAL, description="Backoff strategy")
+    jitter_type: JitterType = Field(default=JitterType.FULL, description="Jitter type")
     backoff_factor: float = Field(default=2.0, description="Exponential backoff factor")
     timeout_seconds: int = Field(default=600, description="Operation timeout")
     jitter: bool = Field(default=True, description="Add jitter to delays")

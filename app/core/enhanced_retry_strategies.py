@@ -14,26 +14,10 @@ from typing import Any, AsyncGenerator, Callable, Dict, List, Optional
 
 from app.core.error_recovery import RecoveryContext, OperationType
 from app.core.error_codes import ErrorSeverity
-from app.schemas.shared_types import RetryConfig
+from app.schemas.shared_types import RetryConfig, BackoffStrategy, JitterType
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
-
-
-class BackoffStrategy(Enum):
-    """Types of backoff strategies for retries."""
-    EXPONENTIAL = "exponential"
-    LINEAR = "linear" 
-    FIXED = "fixed"
-    FIBONACCI = "fibonacci"
-
-
-class JitterType(Enum):
-    """Types of jitter to add to retry delays."""
-    NONE = "none"
-    FULL = "full"
-    EQUAL = "equal"
-    DECORRELATED = "decorrelated"
 
 
 # RetryConfig now imported from shared_types.py
@@ -144,11 +128,13 @@ class DatabaseRetryStrategy(EnhancedRetryStrategy):
     
     def _evaluate_database_retry_conditions(self, error_msg: str, context: RecoveryContext) -> bool:
         """Evaluate specific database retry conditions."""
+        if context.severity == ErrorSeverity.CRITICAL:
+            return False
         if self._is_connection_issue(error_msg) or self._is_temporary_database_issue(error_msg):
             return True
         if self._is_constraint_violation(error_msg):
             return False
-        return context.severity != ErrorSeverity.CRITICAL
+        return True
     
     def _is_connection_issue(self, error_msg: str) -> bool:
         """Check if error indicates connection issues."""
