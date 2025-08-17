@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Auth Learnings</name>
+        <type>learnings</type>
+        <version>1.0</version>
+        <last_updated>2025-01-17</last_updated>
+        <description>Authentication and OAuth related learnings and fixes</description>
+    </metadata>
+    
+    <learning id="oauth-local-staging-mismatch">
+        <title>OAuth Configuration Mismatch for Local Development</title>
+        <problem>
+            OAuth returns errors when running locally:
+            - invalid_client: Unauthorized
+            - mismatching_state: CSRF Warning! State not equal in request and response
+        </problem>
+        <root_cause>
+            Multiple configuration issues:
+            1. Environment detection incorrectly uses staging OAuth for local development
+            2. OAuth credentials not properly loaded from environment variables
+            3. Session middleware configuration incompatible with local development
+            4. Redirect URI mismatch between configured and actual URLs
+        </root_cause>
+        <solution>
+            <step>Update environment detection to properly handle local development</step>
+            <step>Support multiple OAuth credential naming conventions</step>
+            <step>Configure session middleware for local development</step>
+            <step>Add localhost:3010 to allowed redirect URIs</step>
+        </solution>
+        <files_modified>
+            <file>app/auth/environment_config.py</file>
+            <file>app/routes/auth/auth.py</file>
+            <file>app/auth/auth.py</file>
+            <file>app/core/middleware_setup.py</file>
+        </files_modified>
+        <prevention>
+            Always test OAuth flow locally before deploying to staging.
+            Use environment-specific configuration files (.env.local.staging).
+            Run OAuth diagnostic script: python scripts/fix_oauth_local.py
+        </prevention>
+    </learning>
+    
+    <learning id="oauth-environment-variables">
+        <title>OAuth Environment Variable Configuration</title>
+        <problem>
+            OAuth credentials not loading from environment variables
+        </problem>
+        <root_cause>
+            Multiple naming conventions for OAuth credentials:
+            - GOOGLE_CLIENT_ID vs GOOGLE_OAUTH_CLIENT_ID_DEV
+            - Environment variables not loaded before checking
+        </root_cause>
+        <solution>
+            <step>Support both naming conventions in environment_config.py</step>
+            <step>Load .env file in diagnostic scripts</step>
+            <step>Create .env.local.staging for local staging-like setup</step>
+        </solution>
+        <files_modified>
+            <file>app/auth/environment_config.py</file>
+            <file>scripts/fix_oauth_local.py</file>
+            <file>.env.local.staging</file>
+        </files_modified>
+        <prevention>
+            Standardize environment variable naming across environments.
+            Document required environment variables in .env.example.
+        </prevention>
+    </learning>
+    
+    <learning id="oauth-session-middleware">
+        <title>Session Middleware Configuration for OAuth</title>
+        <problem>
+            OAuth state parameter validation fails due to session issues
+        </problem>
+        <root_cause>
+            Session middleware configured with https_only=true for local development.
+            Same-site cookie policy incompatible with OAuth flow.
+        </root_cause>
+        <solution>
+            <step>Configure session middleware based on environment</step>
+            <step>Use same_site="lax" for local development</step>
+            <step>Add DISABLE_HTTPS_ONLY option for local testing</step>
+            <step>Set appropriate session max_age</step>
+        </solution>
+        <files_modified>
+            <file>app/core/middleware_setup.py</file>
+        </files_modified>
+        <prevention>
+            Test OAuth flow with different cookie configurations.
+            Document session requirements for OAuth in each environment.
+        </prevention>
+    </learning>
+    
+    <learning id="oauth-redirect-uri-mismatch">
+        <title>OAuth Redirect URI Configuration</title>
+        <problem>
+            Google OAuth returns redirect_uri_mismatch error
+        </problem>
+        <root_cause>
+            Redirect URIs in Google Cloud Console don't match application configuration.
+            Different ports used for local development (3000, 3010, 8000).
+        </root_cause>
+        <solution>
+            <step>Add all local development URLs to Google Cloud Console OAuth app</step>
+            <step>Update environment_config.py to include all redirect URIs</step>
+            <step>Log redirect URI being used for debugging</step>
+        </solution>
+        <files_modified>
+            <file>app/auth/environment_config.py</file>
+            <file>app/routes/auth/auth.py</file>
+        </files_modified>
+        <prevention>
+            Maintain list of authorized redirect URIs in documentation.
+            Log OAuth configuration during initialization.
+            Check redirect URIs match between code and Google Cloud Console.
+        </prevention>
+    </learning>
+    
+    <learning id="oauth-diagnostic-tool">
+        <title>OAuth Diagnostic Tool Creation</title>
+        <problem>
+            Difficult to diagnose OAuth configuration issues
+        </problem>
+        <solution>
+            Created diagnostic script: scripts/fix_oauth_local.py
+            - Checks environment variables
+            - Validates OAuth configuration
+            - Suggests specific fixes
+            - Loads .env file automatically
+        </solution>
+        <files_created>
+            <file>scripts/fix_oauth_local.py</file>
+        </files_created>
+        <usage>
+            Run: python scripts/fix_oauth_local.py
+            Checks all OAuth-related configuration and suggests fixes.
+        </usage>
+    </learning>
+    
+    <learning id="oauth-staging-localhost-2025">
+        <title>OAuth Staging Errors on Localhost (January 2025)</title>
+        <problem>
+            When running locally with staging configuration:
+            - invalid_client: Unauthorized (wrong OAuth credentials)
+            - mismatching_state: CSRF Warning (session not maintaining state)
+        </problem>
+        <root_cause>
+            Critical configuration mismatches:
+            1. Environment detection was simplified and removed localhost checks
+            2. Staging OAuth credentials used with localhost redirect URIs
+            3. Session middleware not properly configured for localhost
+            4. OAuth state parameter lost due to cookie configuration
+        </root_cause>
+        <solution>
+            <step>Enhanced environment detection to force development OAuth for localhost</step>
+            <step>Added localhost detection based on multiple indicators</step>
+            <step>Fixed session middleware to use lax same-site for localhost</step>
+            <step>Added validation to ensure redirect URI matches allowed list</step>
+            <step>Created setup_oauth_local.py for proper configuration</step>
+        </solution>
+        <code_changes>
+            <change file="app/auth/environment_config.py">
+                Added localhost detection logic to _detect_environment()
+                Forces development OAuth unless FORCE_STAGING_OAUTH=true
+            </change>
+            <change file="app/core/middleware_setup.py">
+                Fixed session middleware to detect localhost properly
+                Sets same_site="lax" and https_only=False for localhost
+            </change>
+            <change file="app/routes/auth/auth.py">
+                Added OAuth credential validation
+                Enhanced redirect URI validation
+                Better error handling with specific messages
+            </change>
+        </code_changes>
+        <prevention>
+            ALWAYS force development OAuth for localhost URLs.
+            Test OAuth flow locally before deploying.
+            Run: python scripts/setup_oauth_local.py to configure.
+            Check Google Console redirect URIs match exactly.
+        </prevention>
+    </learning>
+    
+    <learning id="oauth-configuration-hierarchy">
+        <title>OAuth Configuration Environment Hierarchy</title>
+        <insight>
+            OAuth must use environment-appropriate credentials:
+            - Localhost MUST use development credentials
+            - Staging deployments use staging credentials
+            - Production uses production credentials
+        </insight>
+        <rules>
+            <rule>Never use staging/production OAuth with localhost URLs</rule>
+            <rule>Always validate redirect URI is in allowed list</rule>
+            <rule>Session cookies need same_site="lax" for localhost</rule>
+            <rule>Log OAuth configuration for debugging</rule>
+        </rules>
+        <environment_detection>
+            Priority order for detecting localhost:
+            1. FRONTEND_URL contains localhost
+            2. API_URL contains localhost
+            3. PORT is 8000, 3000, or 3010
+            4. Not running in Cloud Run (no K_SERVICE)
+            5. FORCE_LOCAL_OAUTH=true
+        </environment_detection>
+    </learning>
+    
+    <learning id="oauth-setup-script">
+        <title>OAuth Setup Automation</title>
+        <problem>
+            Manual OAuth configuration is error-prone
+        </problem>
+        <solution>
+            Created comprehensive setup scripts:
+            - setup_oauth_local.py: Configure for localhost
+            - fix_oauth_local.py: Diagnose issues
+        </solution>
+        <usage>
+            # Setup OAuth for local development
+            python scripts/setup_oauth_local.py
+            
+            # Diagnose OAuth issues
+            python scripts/fix_oauth_local.py
+        </usage>
+        <features>
+            - Detects existing configuration
+            - Validates Google Console setup
+            - Creates .env.local with proper settings
+            - Runs diagnostic checks
+            - Provides clear next steps
+        </features>
+    </learning>
+</specification>

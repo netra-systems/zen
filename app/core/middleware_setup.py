@@ -187,9 +187,39 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
 
 def setup_session_middleware(app: FastAPI) -> None:
     """Setup session middleware."""
+    # Import auth config to get actual environment
+    from app.auth.environment_config import auth_env_config
+    
+    # Determine if we're actually in production/staging (deployed)
+    is_deployed = auth_env_config.environment.value in ["production", "staging"]
+    is_localhost = any([
+        "localhost" in os.getenv("FRONTEND_URL", ""),
+        "localhost" in os.getenv("API_URL", ""),
+        os.getenv("PORT", "8000") in ["8000", "3000", "3010"],
+    ])
+    
+    # For OAuth to work properly:
+    # - localhost needs same_site="lax" and https_only=False
+    # - deployed needs same_site="none" and https_only=True
+    if is_localhost or os.getenv("DISABLE_HTTPS_ONLY") == "true":
+        same_site = "lax"
+        https_only = False
+    else:
+        same_site = "none" if is_deployed else "lax"
+        https_only = is_deployed
+    
+    # Log session configuration for debugging
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(
+        f"Session middleware config: same_site={same_site}, "
+        f"https_only={https_only}, environment={auth_env_config.environment.value}"
+    )
+    
     app.add_middleware(
         SessionMiddleware,
         secret_key=settings.secret_key,
-        same_site="lax",
-        https_only=(settings.environment in ["production", "staging"]),
+        same_site=same_site,
+        https_only=https_only,
+        max_age=3600,  # 1 hour session
     )

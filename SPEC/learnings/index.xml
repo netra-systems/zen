@@ -10,6 +10,19 @@
     
     <categories>
         <category>
+            <name>Authentication/OAuth</name>
+            <file>learnings/auth.xml</file>
+            <path>SPEC/learnings/auth.xml</path>
+            <learning_count>5</learning_count>
+            <learning_ids>
+                <id>oauth-local-staging-mismatch</id>
+                <id>oauth-environment-variables</id>
+                <id>oauth-session-middleware</id>
+                <id>oauth-redirect-uri-mismatch</id>
+                <id>oauth-diagnostic-tool</id>
+            </learning_ids>
+        </category>
+        <category>
             <name>Configuration/Secrets</name>
             <file>learnings/configuration_secrets.xml</file>
             <path>SPEC/learnings/configuration_secrets.xml</path>
@@ -181,7 +194,7 @@
     </usage>
     
     <statistics>
-        <total_categories>14</total_categories>
-        <total_learnings>50</total_learnings>
+        <total_categories>15</total_categories>
+        <total_learnings>55</total_learnings>
     </statistics>
 </specification>

@@ -50,7 +50,9 @@ class EnvironmentAuthConfig:
                 return Environment.STAGING
             return Environment.PRODUCTION
             
+        # Explicit environment override
         env_name = os.getenv("ENVIRONMENT", "development").lower()
+        
         try:
             return Environment(env_name)
         except ValueError:
@@ -75,15 +77,43 @@ class EnvironmentAuthConfig:
     
     def _get_dev_config(self) -> OAuthConfig:
         """Development environment OAuth configuration."""
+        # Support multiple naming conventions for dev OAuth credentials
+        # Priority order: DEV specific > Generic > Empty
+        client_id = (
+            os.getenv("GOOGLE_OAUTH_CLIENT_ID_DEV") or 
+            os.getenv("GOOGLE_CLIENT_ID") or
+            os.getenv("GOOGLE_OAUTH_CLIENT_ID") or
+            ""
+        )
+        client_secret = (
+            os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_DEV") or 
+            os.getenv("GOOGLE_CLIENT_SECRET") or
+            os.getenv("GOOGLE_OAUTH_CLIENT_SECRET") or
+            ""
+        )
+        
+        # Log configuration status
+        if client_id:
+            logger.info(f"OAuth client ID configured: {client_id[:20]}...")
+        else:
+            logger.error("No OAuth client ID found! Set GOOGLE_CLIENT_ID in .env")
+        
+        if not client_secret:
+            logger.error("No OAuth client secret found! Set GOOGLE_CLIENT_SECRET in .env")
+        
         return OAuthConfig(
-            client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID_DEV", ""),
-            client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_DEV", ""),
+            client_id=client_id,
+            client_secret=client_secret,
             redirect_uris=[
                 "http://localhost:8000/api/auth/callback",
+                "http://localhost:3000/api/auth/callback",
+                "http://localhost:3010/api/auth/callback",
                 "http://localhost:3000/auth/callback",
+                "http://localhost:3010/auth/callback",
             ],
             javascript_origins=[
                 "http://localhost:3000",
+                "http://localhost:3010",
                 "http://localhost:8000",
             ],
             allow_dev_login=True,

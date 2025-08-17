@@ -1,6 +1,7 @@
 from typing import Any, Optional
 from authlib.integrations.starlette_client import OAuth
 from app.auth.environment_config import auth_env_config
+from app.logging_config import central_logger as logger
 
 class OAuthClient:
     """OAuth client wrapper to properly expose the Google OAuth client"""
@@ -15,6 +16,11 @@ class OAuthClient:
         
         # Get environment-specific OAuth configuration
         oauth_config = auth_env_config.get_oauth_config()
+        
+        # Log OAuth initialization
+        logger.info(f"Initializing OAuth for environment: {auth_env_config.environment.value}")
+        logger.info(f"OAuth client ID configured: {bool(oauth_config.client_id)}")
+        logger.info(f"OAuth client secret configured: {bool(oauth_config.client_secret)}")
         
         # Register Google OAuth client with environment-specific credentials
         self.google = self.oauth.register(

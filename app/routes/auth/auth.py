@@ -99,6 +99,13 @@ class AuthRoutes:
     async def login(request: Request):
         oauth_config = auth_env_config.get_oauth_config()
         
+        # Validate OAuth configuration
+        if not oauth_config.client_id or not oauth_config.client_secret:
+            logger.error("OAuth credentials not configured!")
+            frontend_url = _get_frontend_url_for_environment()
+            error_msg = "OAuth not configured. Check server logs."
+            return RedirectResponse(url=f"{frontend_url}/auth/error?message={error_msg}")
+        
         # For PR environments using proxy, redirect to proxy
         if oauth_config.use_proxy and oauth_config.proxy_url:
             import urllib.parse
@@ -108,14 +115,42 @@ class AuthRoutes:
             logger.info(f"PR #{pr_number} OAuth login via proxy: {proxy_url}")
             return RedirectResponse(url=proxy_url)
         
-        # Standard OAuth flow - ensure HTTPS for non-development environments
+        # Build redirect URI based on actual request
         base_url = str(request.base_url).rstrip('/')
-        if auth_env_config.environment.value in ["staging", "production"]:
-            # Force HTTPS for staging and production
-            base_url = base_url.replace("http://", "https://")
-        redirect_uri = f"{base_url}/api/auth/callback"
-        logger.info(f"OAuth login initiated with redirect URI: {redirect_uri}")
-        return await oauth_client.google.authorize_redirect(request, redirect_uri)
+        
+        # For localhost, always use http
+        if "localhost" in base_url or "127.0.0.1" in base_url:
+            redirect_uri = f"{base_url}/api/auth/callback"
+        else:
+            # For deployed environments, force HTTPS
+            if auth_env_config.environment.value in ["staging", "production"]:
+                base_url = base_url.replace("http://", "https://")
+            redirect_uri = f"{base_url}/api/auth/callback"
+        
+        # Validate redirect URI is in allowed list
+        if redirect_uri not in oauth_config.redirect_uris:
+            logger.error(f"Redirect URI not in allowed list: {redirect_uri}")
+            logger.error(f"Allowed URIs: {oauth_config.redirect_uris}")
+            frontend_url = _get_frontend_url_for_environment()
+            return RedirectResponse(
+                url=f"{frontend_url}/auth/error?message=redirect_uri_mismatch"
+            )
+        
+        # Log OAuth configuration for debugging
+        logger.info(f"OAuth login initiated")
+        logger.info(f"Environment: {auth_env_config.environment.value}")
+        logger.info(f"Redirect URI: {redirect_uri}")
+        logger.info(f"Client ID: {oauth_config.client_id[:20]}...")
+        logger.info(f"Session configured: same_site=lax for localhost")
+        
+        try:
+            return await oauth_client.google.authorize_redirect(request, redirect_uri)
+        except Exception as e:
+            logger.error(f"OAuth redirect failed: {str(e)}")
+            frontend_url = _get_frontend_url_for_environment()
+            return RedirectResponse(
+                url=f"{frontend_url}/auth/error?message={str(e)}"
+            )
 
 
     @router.get("/callback")
@@ -123,7 +158,15 @@ class AuthRoutes:
         """Handle OAuth callback from Google"""
         try:
             # Log the callback request for debugging
-            logger.info(f"OAuth callback received with params: {dict(request.query_params)}")
+            logger.info(f"OAuth callback received")
+            logger.info(f"Query params: {dict(request.query_params)}")
+            logger.info(f"Environment: {auth_env_config.environment.value}")
+            
+            # Check for error in callback
+            if error := request.query_params.get("error"):
+                error_desc = request.query_params.get("error_description", "OAuth error")
+                logger.error(f"OAuth error: {error} - {error_desc}")
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{error}: {error_desc}")
             
             token = await oauth_client.google.authorize_access_token(request)
             user_info = await oauth_client.google.parse_id_token(request, token)

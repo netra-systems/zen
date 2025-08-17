@@ -1,474 +1,546 @@
-# NETRA APEX QUICK START GUIDE
-## Day 1 for 100 Engineers: Start Building Revenue NOW
+# Netra Apex Quick Start Guide for Engineers
+## Get Productive in 30 Minutes
 
 ---
 
-# 🚀 IMMEDIATE SETUP (First 30 Minutes)
+## Welcome Elite Engineer! 🚀
 
-## Step 1: Clone and Setup
+You're part of a 100-person team building the future of AIOps. This guide gets you coding in 30 minutes.
+
+**Your Mission**: Build Netra Apex - the platform that saves companies millions on AI costs while we capture 20% of those savings.
+
+---
+
+## 1. Find Your Team (2 minutes)
+
+### Team Assignments
+```
+Team 1: API Gateway Core        → Channel: #team-gateway
+Team 2: Optimization Engine     → Channel: #team-optimization  
+Team 3: Billing & Monetization  → Channel: #team-billing
+Team 4: Data Pipeline           → Channel: #team-data
+Team 5: Frontend & Dashboard    → Channel: #team-frontend
+Team 6: Infrastructure Opt      → Channel: #team-infrastructure
+Team 7: Validation Workbench    → Channel: #team-validation
+Team 8: AI Agents              → Channel: #team-agents
+Team 9: Testing & Quality       → Channel: #team-testing
+Team 10: DevOps & Platform      → Channel: #team-devops
+```
+
+**Action**: Join your team's Slack channel NOW.
+
+---
+
+## 2. Setup Development Environment (10 minutes)
+
+### Quick Setup Script
 ```bash
 # Clone the repository
-git clone https://github.com/netra-systems/netra-apex
-cd netra-apex
+git clone https://github.com/netra-systems/apex.git
+cd apex
 
-# Create your feature branch (use your squad name)
-git checkout -b squad-[YOUR_SQUAD_NUMBER]-week1
+# Run the automated setup
+python scripts/dev_setup.py --team=YOUR_TEAM_NUMBER
 
-# Install dependencies
+# This will:
+# - Install dependencies for your team
+# - Set up your local database
+# - Configure your IDE
+# - Create your feature branch
+```
+
+### Manual Setup (if script fails)
+```bash
+# Backend setup
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-npm install  # Frontend teams
+pip install -r requirements-dev.txt
 
-# Copy environment template
-cp .env.example .env
-```
+# Frontend setup (Team 5 only)
+cd frontend
+npm install
 
-## Step 2: Required Environment Variables
-```env
-# Add these to your .env file
-DATABASE_URL=postgresql://localhost:5432/apex_dev
-REDIS_URL=redis://localhost:6379
-CLICKHOUSE_URL=http://localhost:8123
+# Database setup
+docker-compose up -d postgres clickhouse redis
 
-# Stripe (test keys)
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_test_...
-
-# LLM Providers (test keys)
-OPENAI_API_KEY=sk-test-...
-ANTHROPIC_API_KEY=sk-ant-test-...
-```
-
-## Step 3: Start Development Services
-```bash
-# Terminal 1: Start all services
-python dev_launcher/launcher.py
-
-# Terminal 2: Run tests continuously  
-python test_runner.py --watch --level unit
-
-# Terminal 3: Frontend (if applicable)
-cd frontend && npm run dev
+# Apply migrations
+alembic upgrade head
 ```
 
 ---
 
-# 👥 FIND YOUR SQUAD
+## 3. Critical Rules - MEMORIZE (3 minutes)
 
-## Squad Assignments & First Tasks
+### The Three Commandments
+1. **300/8 Rule**: No file >300 lines, no function >8 lines
+2. **Business First**: Every feature must justify revenue impact
+3. **Test Everything**: 100% coverage, 2+ tests per function
 
-### Squad 1: Gateway Core (Room: #apex-gateway-core)
-**Day 1 Deliverable**: Basic HTTP proxy that forwards requests to OpenAI
-
+### Before You Code
 ```python
-# Your first code: app/gateway/proxy_core.py
-import httpx
-from fastapi import FastAPI, Request
+# ALWAYS ask yourself:
+# 1. Which customer segment does this serve?
+# 2. How much AI spend does this address?
+# 3. What's the revenue impact?
 
-app = FastAPI()
-
-@app.post("/v1/completions")
-async def proxy_completion(request: Request):
-    """Proxy OpenAI completion requests"""
-    # TODO: Forward to OpenAI
-    # TODO: Return response
-    pass  # START HERE
-```
-
-### Squad 2: Optimization Engine (Room: #apex-optimization)
-**Day 1 Deliverable**: Simple prompt cache check
-
-```python
-# Your first code: app/optimizations/semantic_cache.py
-import hashlib
-from app.db.cache_core import redis_client
-
-async def check_cache(prompt: str) -> Optional[str]:
-    """Check if we've seen this prompt before"""
-    key = hashlib.md5(prompt.encode()).hexdigest()
-    # TODO: Check Redis
-    # TODO: Return cached response if exists
-    pass  # START HERE
-```
-
-### Squad 3: PoV & Attribution (Room: #apex-attribution)
-**Day 1 Deliverable**: Calculate token difference between requests
-
-```python
-# Your first code: app/attribution/savings_calculator.py
-def calculate_savings(original_tokens: int, optimized_tokens: int) -> float:
-    """Calculate $ saved from optimization"""
-    # TODO: Get token prices
-    # TODO: Calculate difference
-    # TODO: Return savings amount
-    pass  # START HERE
-```
-
-### Squad 4: Billing & Monetization (Room: #apex-billing)
-**Day 1 Deliverable**: Track API calls per user
-
-```python
-# Your first code: app/services/usage_tracking_service.py
-async def track_usage(user_id: str, tokens: int):
-    """Track usage for billing"""
-    # TODO: Insert into database
-    # TODO: Check against tier limits
-    # TODO: Return usage status
-    pass  # START HERE
-```
-
-### Squad 5: Analytics & Telemetry (Room: #apex-analytics)
-**Day 1 Deliverable**: Parse OpenAI response for token count
-
-```python
-# Your first code: app/telemetry/log_parser.py
-def parse_openai_response(response: dict) -> dict:
-    """Extract metrics from OpenAI response"""
-    # TODO: Extract token usage
-    # TODO: Extract model used
-    # TODO: Return metrics dict
-    pass  # START HERE
-```
-
-### Squad 6: Frontend & Dashboard (Room: #apex-frontend)
-**Day 1 Deliverable**: Basic usage display component
-
-```tsx
-// Your first code: frontend/components/UsageDisplay.tsx
-export function UsageDisplay({ usage }: { usage: Usage }) {
-  // TODO: Show tokens used
-  // TODO: Show cost saved
-  // TODO: Show tier limits
-  return <div>START HERE</div>
-}
-```
-
----
-
-# 📋 CRITICAL RULES (MEMORIZE NOW)
-
-## The 300/8 Rule
-```python
-# ❌ BAD: Files over 300 lines
-# ❌ BAD: Functions over 8 lines
-
-# ✅ GOOD: Modular files under 300 lines
-# ✅ GOOD: Functions under 8 lines
-
-def process_request(request):  # Max 8 lines!
-    validated = validate(request)
-    optimized = optimize(validated)
-    cached = check_cache(optimized)
-    if cached:
-        return cached
-    response = execute(optimized)
-    save_to_cache(response)
-    return response
-```
-
-## The Revenue Rule
-```python
-# Before writing ANY code, ask:
-# 1. What customer segment does this serve?
-# 2. How much revenue does this generate?
-# 3. What % of AI spend does this capture?
-
-# Document it:
+# Example Business Value Justification (BVJ):
 """
-Feature: Semantic Caching
-BVJ:
-- Segment: All tiers
-- Revenue Impact: 15-25% cost savings = $3-5K MRR per customer
-- Business Goal: Direct value creation through optimization
+Feature: Semantic Cache
+Segment: All (Free → Enterprise)
+AI Spend Impact: 15-25% reduction in API costs
+Revenue Impact: +$50K MRR via 20% performance fee
 """
 ```
 
----
-
-# 🔥 WEEK 1 SPRINT GOALS
-
-## Overall Goal: Gateway Processing Requests
-
-### Success Metrics (End of Week 1)
-- [ ] Gateway proxy working end-to-end
-- [ ] Basic caching operational
-- [ ] Usage tracking active
-- [ ] 1000+ test requests processed
-- [ ] All tests passing
-
-### Daily Checkpoints
-
-#### Day 1 (Today)
-- [ ] Environment setup complete
-- [ ] First module created and tested
-- [ ] Squad communication established
-- [ ] Initial commit pushed
-
-#### Day 2
-- [ ] Core proxy forwarding requests
-- [ ] Basic cache implementation
-- [ ] Usage database schema created
-
-#### Day 3
-- [ ] Optimization pipeline structure
-- [ ] Attribution calculations working
-- [ ] Frontend scaffolding complete
-
-#### Day 4
-- [ ] Integration testing between squads
-- [ ] Performance benchmarks met (<50ms latency)
-- [ ] Error handling implemented
-
-#### Day 5
-- [ ] Full end-to-end flow working
-- [ ] Code review and cleanup
-- [ ] Documentation updated
-- [ ] Demo prepared
-
----
-
-# 💻 DEVELOPMENT WORKFLOW
-
-## Git Workflow
+### Architecture Compliance
 ```bash
-# Daily workflow
-git pull origin main
-git checkout -b feature/squad-X-description
-
-# Make changes (keep commits small)
-git add -p  # Stage selectively
-git commit -m "feat(gateway): implement request forwarding"
-
-# Push for review
-git push origin feature/squad-X-description
-
-# Create PR with template
-```
-
-## PR Template
-```markdown
-## Summary
-[What does this PR do?]
-
-## BVJ (Business Value Justification)
-- Segment: [Free/Early/Mid/Enterprise]
-- Revenue Impact: [Specific $ or %]
-- Business Goal: [How this makes money]
-
-## Checklist
-- [ ] All files < 300 lines
-- [ ] All functions < 8 lines
-- [ ] Tests written and passing
-- [ ] Types properly defined
-- [ ] No test stubs in production code
-```
-
-## Testing Requirements
-```bash
-# Before EVERY commit
-python test_runner.py --level unit
-
-# Before PR
+# Run before EVERY commit
 python scripts/check_architecture_compliance.py
-python test_runner.py --level integration
 
-# Squad-specific tests
-pytest app/tests/test_[your_module].py -v
+# This checks:
+# - File length ≤ 300 lines
+# - Function length ≤ 8 lines
+# - Type safety
+# - Test coverage
 ```
 
 ---
 
-# 🛠 TOOLING & HELPERS
+## 4. Your First Task (15 minutes)
 
-## Architecture Compliance Checker
+### Step 1: Get Your Assignment
 ```bash
-# Check your code meets requirements
-python scripts/check_architecture_compliance.py app/gateway/
+# Check your team's task board
+python scripts/get_my_task.py --team=YOUR_TEAM_NUMBER
 
-# Output:
-# ✅ proxy_core.py: 245 lines (OK)
-# ❌ router.py: 312 lines (VIOLATION - split required)
-# ❌ function 'process_all': 12 lines (VIOLATION - max 8)
+# Or check Jira/Linear
+# Your team lead has prepared starter tasks
 ```
 
-## Module Splitter Helper
+### Step 2: Create Your Branch
 ```bash
-# Automatically split large files
-python scripts/split_large_files.py app/gateway/large_file.py
-
-# Creates:
-# app/gateway/large_file_core.py (250 lines)
-# app/gateway/large_file_helpers.py (200 lines)
+git checkout -b team-X/your-name/task-description
+# Example: team-2/john/implement-semantic-cache
 ```
 
-## BVJ Generator
-```bash
-# Generate BVJ for your feature
-python scripts/generate_bvj.py "Semantic Caching" "All" "15-25% savings"
-
-# Output:
-# BVJ generated and added to feature documentation
-```
-
----
-
-# 📚 ESSENTIAL DOCUMENTATION
-
-## Must Read (Before Coding)
-1. `CLAUDE.md` - System constraints and principles
-2. `SPEC/type_safety.xml` - Type requirements
-3. `SPEC/conventions.xml` - Coding standards
-4. `business_execution_plan.md` - Why we're building this
-
-## Squad-Specific Docs
-- Gateway: `docs/gateway_architecture.md`
-- Optimization: `docs/optimization_pipeline.md`
-- Billing: `docs/payment_integration.md`
-- Frontend: `docs/frontend_patterns.md`
-
----
-
-# 🎯 QUICK WINS (Start Here)
-
-## Gateway Squad
+### Step 3: Code Template
 ```python
-# Simplest working proxy (30 mins)
-@app.post("/v1/completions")
-async def proxy(request: Request):
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            "https://api.openai.com/v1/completions",
-            json=await request.json(),
-            headers={"Authorization": f"Bearer {OPENAI_KEY}"}
-        )
-    return response.json()
+# app/your_module/your_file.py
+"""
+Module: [Your module name]
+Team: [Your team number]
+Engineer: [Your name]
+BVJ: [Business Value Justification]
+"""
+
+from typing import Optional, List, Dict
+from app.core.exceptions import NetraException
+
+class YourClass:
+    """Single responsibility class."""
+    
+    def your_method(self, param: str) -> str:
+        """8 lines max."""
+        # Line 1
+        # Line 2
+        # ...
+        # Line 8 max
+        return result
+
+# File must be ≤300 lines total
 ```
 
-## Optimization Squad
+### Step 4: Write Tests FIRST
 ```python
-# Simplest cache (30 mins)
-cache = {}  # In-memory for now
+# app/tests/unit/test_your_module.py
+import pytest
+from app.your_module.your_file import YourClass
 
-def get_from_cache(prompt: str):
-    key = hashlib.md5(prompt.encode()).hexdigest()
-    return cache.get(key)
-
-def save_to_cache(prompt: str, response: str):
-    key = hashlib.md5(prompt.encode()).hexdigest()
-    cache[key] = response
+class TestYourClass:
+    def test_your_method_success(self):
+        """Test successful case."""
+        instance = YourClass()
+        result = instance.your_method("input")
+        assert result == "expected"
+    
+    def test_your_method_edge_case(self):
+        """Test edge case."""
+        instance = YourClass()
+        result = instance.your_method("")
+        assert result == "default"
 ```
 
-## Attribution Squad
+### Step 5: Run Tests
+```bash
+# Run your tests
+python test_runner.py --level unit --module your_module
+
+# Run all tests for your team
+python test_runner.py --team YOUR_TEAM_NUMBER
+```
+
+---
+
+## 5. Team-Specific Quick Starts
+
+### Team 1: API Gateway
 ```python
-# Simplest savings calc (30 mins)
-PRICE_PER_1K_TOKENS = 0.002  # OpenAI pricing
+# Your focus: High-performance proxy
+# Key files: app/gateway/
+# First task: Implement provider abstraction
 
-def calculate_savings(original: int, optimized: int) -> float:
-    saved_tokens = original - optimized
-    return (saved_tokens / 1000) * PRICE_PER_1K_TOKENS
+# Example starter code:
+class ProviderRouter:
+    async def route_request(self, request: Request) -> Response:
+        provider = self.select_provider(request)
+        return await provider.execute(request)
+```
+
+### Team 2: Optimization Engine
+```python
+# Your focus: Maximize savings
+# Key files: app/services/optimization/
+# First task: Implement semantic cache
+
+# Example starter code:
+class SemanticCache:
+    async def find_similar(self, prompt: str) -> Optional[str]:
+        embedding = await self.embed(prompt)
+        return await self.search_cache(embedding)
+```
+
+### Team 3: Billing & Monetization
+```python
+# Your focus: Revenue capture
+# Key files: app/services/billing/
+# First task: Usage tracking
+
+# Example starter code:
+class UsageTracker:
+    async def track_request(self, user_id: str, tokens: int, cost: float):
+        await self.increment_usage(user_id, tokens, cost)
+        await self.check_limits(user_id)
+```
+
+### Team 4: Data Pipeline
+```sql
+-- Your focus: Analytics at scale
+-- Key files: app/services/telemetry/
+-- First task: ClickHouse schema
+
+CREATE TABLE llm_requests (
+    timestamp DateTime,
+    user_id String,
+    tokens UInt32,
+    cost Decimal(10,4)
+) ENGINE = MergeTree()
+ORDER BY (user_id, timestamp);
+```
+
+### Team 5: Frontend & Dashboard
+```typescript
+// Your focus: User conversion
+// Key files: frontend/components/
+// First task: Value metrics dashboard
+
+export const ValueMetrics: React.FC = () => {
+    const { savings } = useMetrics();
+    return <MetricCard title="Your Savings" value={savings} />;
+};
+```
+
+### Team 6: Infrastructure Optimization
+```python
+# Your focus: Infrastructure savings
+# Key files: app/services/iac/
+# First task: Waste detection
+
+class WasteDetector:
+    def analyze_utilization(self, metrics: CloudMetrics) -> List[Waste]:
+        return self.find_underutilized_resources(metrics)
+```
+
+### Team 7: Validation Workbench
+```python
+# Your focus: Prove optimizations work
+# Key files: app/services/validation/
+# First task: Sandbox provisioning
+
+class SandboxManager:
+    async def provision(self) -> Sandbox:
+        return await self.create_isolated_environment()
+```
+
+### Team 8: AI Agents
+```python
+# Your focus: Autonomous operations
+# Key files: app/agents/
+# First task: Enhanced supervisor
+
+class EnhancedSupervisor:
+    async def coordinate(self, task: Task):
+        agents = self.select_agents(task)
+        return await self.orchestrate(agents, task)
+```
+
+### Team 9: Testing & Quality
+```python
+# Your focus: 100% reliability
+# Key files: app/tests/
+# First task: E2E test framework
+
+class E2ETestFramework:
+    async def test_user_journey(self):
+        await self.signup()
+        await self.onboard()
+        await self.upgrade()
+```
+
+### Team 10: DevOps & Platform
+```yaml
+# Your focus: Scale & reliability
+# Key files: k8s/, terraform/
+# First task: Auto-scaling config
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+spec:
+  minReplicas: 3
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 70
 ```
 
 ---
 
-# 🚨 TROUBLESHOOTING
+## 6. Daily Workflow
 
-## Common Issues & Solutions
-
-### Database Connection Error
+### Morning Routine (9 AM)
 ```bash
-# Fix: Start local postgres
-docker run -p 5432:5432 -e POSTGRES_PASSWORD=apex postgres:14
+# 1. Pull latest changes
+git pull origin main
 
-# Or use shared dev database
-DATABASE_URL=postgresql://apex_dev@dev.netrasystems.ai:5432/apex
+# 2. Check team tasks
+python scripts/team_tasks.py --status
+
+# 3. Join team standup (15 min)
+# Slack: /standup
 ```
 
-### Redis Connection Error
+### Coding Flow
 ```bash
-# Fix: Start local redis
-docker run -p 6379:6379 redis:alpine
+# 1. Create feature branch
+git checkout -b team-X/feature
 
-# Or use shared dev redis
-REDIS_URL=redis://dev.netrasystems.ai:6379
+# 2. Code with compliance checks
+python scripts/watch_compliance.py  # Runs in background
+
+# 3. Test continuously
+python test_runner.py --watch
+
+# 4. Commit with BVJ
+git commit -m "feat: [Feature] - BVJ: Saves X% of AI spend"
 ```
 
-### Import Errors
+### Evening Routine (5 PM)
 ```bash
-# Fix: Reinstall dependencies
-pip install -r requirements.txt --force-reinstall
+# 1. Run full test suite
+python test_runner.py --level all
 
-# Check Python version (must be 3.11+)
-python --version
-```
+# 2. Create PR
+gh pr create --title "Team X: [Feature]" --body "BVJ: [Impact]"
 
-### Test Failures
-```bash
-# Fix: Reset test database
-python scripts/reset_test_db.py
-
-# Run specific test with debug
-pytest app/tests/test_specific.py -vvs
+# 3. Update team board
+python scripts/update_progress.py
 ```
 
 ---
 
-# 📞 GET HELP
+## 7. Integration Points
 
-## Slack Channels
-- **#apex-help** - General questions
-- **#apex-blockers** - Blocking issues (urgent)
-- **#apex-dev** - Development discussion
-- **Your Squad Channel** - Squad-specific help
+### Your Team's Interfaces
+Each team has specific integration points. Know yours:
 
-## Key People
-- **Tech Lead**: @tech-lead - Architecture decisions
-- **Revenue Lead**: @revenue-lead - Business/BVJ questions  
-- **DevOps**: @devops - Infrastructure/deployment
-- **QA Lead**: @qa-lead - Testing strategies
+```python
+# Team 1 → Team 2: Request optimization
+optimizer = OptimizationEngine()
+optimized_request = await optimizer.optimize(request)
 
-## Daily Standups
-- **9:00 AM**: Squad standups (15 min)
-- **10:00 AM**: Cross-squad sync (leads only)
-- **5:00 PM**: EOD progress check
+# Team 2 → Team 3: Track savings
+billing = BillingService()
+await billing.track_savings(user_id, amount)
 
----
-
-# ✅ YOUR DAY 1 CHECKLIST
-
-Before you leave today, ensure:
-
-- [ ] Development environment fully working
-- [ ] Joined your squad Slack channel
-- [ ] Created your first module file
-- [ ] Written at least one function (< 8 lines!)
-- [ ] Run tests successfully
-- [ ] Pushed first commit to feature branch
-- [ ] Updated squad progress tracker
-
----
-
-# 🎉 WELCOME TO APEX!
-
-Remember:
-- **Ship Daily** - Small increments, constant progress
-- **Revenue First** - Every line creates value
-- **300/8 Rule** - Keep it modular
-- **Test Everything** - Quality matters
-- **Ask Questions** - We're here to help
-
-**LET'S BUILD THE FUTURE OF AIOPS!**
-
----
-
-**Quick Commands Reference Card**
-```bash
-# Most used commands
-python dev_launcher.py              # Start everything
-python test_runner.py --level unit  # Run tests
-python scripts/check_architecture_compliance.py  # Check code
-git checkout -b feature/...        # New feature branch
-pytest app/tests/... -v            # Run specific tests
+# Team 3 → Team 5: Show metrics
+metrics = await get_user_metrics(user_id)
+return MetricsResponse(metrics)
 ```
 
-**END OF QUICK START GUIDE**
+---
 
-**Now stop reading and START CODING! Revenue awaits! 🚀💰**
+## 8. Communication Channels
+
+### Slack Channels
+```
+#general           - Company updates
+#team-X            - Your team channel
+#apex-dev          - Development discussion
+#apex-integration  - Cross-team coordination
+#apex-blockers     - Urgent issues
+#apex-wins         - Celebrate successes
+```
+
+### Daily Meetings
+```
+9:00 AM  - Team standup (15 min)
+9:30 AM  - Cross-team sync (Team leads only)
+5:00 PM  - Integration testing (If needed)
+Friday   - All-hands demo (30 min)
+```
+
+---
+
+## 9. Getting Help
+
+### Quick Help
+```bash
+# Get help on any topic
+python scripts/apex_help.py --topic "semantic cache"
+
+# Find code examples
+python scripts/find_examples.py --pattern "optimization"
+
+# Ask team lead
+slack: /ask-lead [your question]
+```
+
+### Documentation
+```
+docs/API_DOCUMENTATION.md      - API specs
+docs/ARCHITECTURE.md           - System design
+SPEC/*.xml                     - Detailed specifications
+CLAUDE.md                      - AI assistant instructions
+```
+
+### Escalation Path
+1. Team member → Team channel
+2. Team lead → Cross-team channel
+3. Architect → Architecture channel
+4. CTO → Direct message
+
+---
+
+## 10. Success Metrics
+
+### Your Personal KPIs
+- Code coverage: 100%
+- Functions ≤8 lines: 100%
+- Files ≤300 lines: 100%
+- PR review time: <2 hours
+- Bug rate: <1 per week
+
+### Team KPIs
+- Sprint velocity: 100 points/week
+- Integration success: 95%
+- Test pass rate: 100%
+- Revenue impact: Track weekly
+
+---
+
+## First Day Checklist
+
+### By End of Day 1
+- [ ] Environment setup complete
+- [ ] First PR submitted
+- [ ] Tests passing
+- [ ] Met team members
+- [ ] Understood team interfaces
+- [ ] Completed first task
+
+### By End of Week 1
+- [ ] 5+ PRs merged
+- [ ] 100% test coverage on your code
+- [ ] Integrated with another team
+- [ ] Contributed to team documentation
+- [ ] Identified optimization opportunity
+
+---
+
+## Pro Tips from the Architects
+
+### Performance
+```python
+# ALWAYS use async/await for I/O
+async def fetch_data():
+    return await db.query()  # Good
+
+def fetch_data():
+    return db.query()  # Bad - blocks event loop
+```
+
+### Error Handling
+```python
+# Use NetraException for better error tracking
+from app.core.exceptions import NetraException
+
+raise NetraException(
+    code="CACHE_MISS",
+    message="Semantic cache miss",
+    context={"prompt_hash": hash}
+)
+```
+
+### Testing
+```python
+# Use fixtures for common test data
+@pytest.fixture
+def sample_request():
+    return Request(
+        prompt="Test prompt",
+        model="gpt-4",
+        user_id="test_user"
+    )
+```
+
+---
+
+## Remember: You're Building a Money Machine 💰
+
+Every line of code should:
+1. Save customer money on AI
+2. Generate revenue for Apex
+3. Be maintainable and scalable
+
+**Your code directly impacts our $250K MRR target!**
+
+---
+
+## Quick Commands Reference
+
+```bash
+# Development
+python dev_launcher.py              # Start all services
+python test_runner.py               # Run tests
+python scripts/check_compliance.py  # Check code standards
+
+# Git
+git checkout -b team-X/feature     # Create branch
+git commit -m "feat: X - BVJ: Y"   # Commit with BVJ
+gh pr create                        # Create PR
+
+# Help
+python scripts/apex_help.py         # Get help
+python scripts/find_examples.py     # Find code examples
+slack: /ask-lead                    # Ask team lead
+```
+
+---
+
+**Welcome to the team! Let's build something incredible together.**
+
+*Questions? Join #apex-onboarding*
+
+---
+
+*Quick Start Guide v1.0*
+*Updated: 2025-08-17*
+*Time to First Commit: 30 minutes*

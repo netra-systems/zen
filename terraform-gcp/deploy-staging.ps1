@@ -167,7 +167,7 @@ terraform validate
 
 # Step 8: Plan deployment with staging variables
 Write-Status "Planning staging deployment..."
-terraform plan -var-file="$TF_VAR_FILE" -out=staging.tfplan
+terraform plan -var-file="$TF_VAR_FILE" -out="staging.tfplan"
 
 # Step 9: Confirm deployment
 Write-Host ""
