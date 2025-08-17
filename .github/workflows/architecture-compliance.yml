@@ -19,7 +19,7 @@ on:
 jobs:
   architectural-limits-enforcement:
     name: Enforce 300-Line & 8-Line Limits
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: Checkout Code
@@ -152,7 +152,7 @@ jobs:
 
   file-size-detailed-check:
     name: Detailed File Size Analysis
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     if: always()
     
     steps:
@@ -194,7 +194,7 @@ jobs:
 
   function-complexity-check:
     name: Function Complexity Analysis
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     if: always()
     
     steps:
