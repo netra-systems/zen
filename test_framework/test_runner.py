@@ -524,9 +524,9 @@ def configure_speed_options(args):
         
         # Speed mode enables more aggressive optimizations with warning
         if args.speed and not args.ci:
-            print("\n⚡ SPEED MODE ENABLED")
-            print("⚠️  WARNING: Some tests may be skipped for speed")
-            print("   Use --ci for safe speed optimizations only\n")
+            print("\n[SPEED MODE] ENABLED")
+            print("[WARNING] Some tests may be skipped for speed")
+            print("          Use --ci for safe speed optimizations only\n")
             speed_opts['skip_slow'] = True
             speed_opts['parallel'] = True
     
@@ -620,9 +620,9 @@ def print_test_configuration(level, config, speed_opts):
     print(f"Purpose: {config['purpose']}")
     print(f"Timeout: {config.get('timeout', 300)}s")
     if speed_opts and speed_opts.get('enabled'):
-        print("⚡ Speed optimizations enabled")
+        print("[SPEED] Speed optimizations enabled")
         if speed_opts.get('skip_slow'):
-            print("⚠️  WARNING: Slow tests will be skipped")
+            print("[WARNING] Slow tests will be skipped")
 
 def configure_real_llm_if_requested(args, level, config):
     """Configure real LLM testing if requested"""
