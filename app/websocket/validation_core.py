@@ -11,15 +11,7 @@ from pydantic import ValidationError
 
 from app.schemas.registry import WebSocketMessage, WebSocketMessageType
 from app.schemas.websocket_message_types import WebSocketValidationError
-
-
-class DateTimeEncoder(json.JSONEncoder):
-    """Custom JSON encoder that handles datetime objects."""
-    def default(self, obj):
-        from datetime import datetime
-        if isinstance(obj, datetime):
-            return obj.isoformat()
-        return super().default(obj)
+from app.services.state_persistence import DateTimeEncoder
 
 
 def validate_message_is_dict(message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:

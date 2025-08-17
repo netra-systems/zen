@@ -10,23 +10,11 @@ export type MessageType = "user" | "agent" | "system" | "error" | "tool";
 export type SubAgentLifecycle = "pending" | "running" | "completed" | "failed" | "shutdown";
 export type ToolStatus = "success" | "error" | "partial_success" | "in_progress" | "complete";
 
-// Core message interfaces
-export interface AgentCompleted {
-  run_id: string;
-  result: unknown;
-}
-
-export interface AgentErrorMessage {
-  run_id: string;
-  message: string;
-}
+// NOTE: AgentStarted, AgentCompleted, AgentErrorMessage, SubAgentUpdate, StopAgent
+// are now exported from the consolidated agent-types.ts file
 
 export interface AgentMessage {
   text: string;
-}
-
-export interface AgentStarted {
-  run_id: string;
 }
 
 /**
@@ -85,10 +73,7 @@ export interface SubAgentStatus {
   status: string;
 }
 
-export interface SubAgentUpdate {
-  sub_agent_name: string;
-  state: SubAgentState;
-}
+// NOTE: SubAgentUpdate and StopAgent are now exported from agent-types.ts
 
 export interface StreamEvent {
   event_type: string;
@@ -100,10 +85,6 @@ export interface StreamEvent {
 export interface RunComplete {
   run_id: string;
   result: unknown;
-}
-
-export interface StopAgent {
-  run_id: string;
 }
 
 // Message interfaces

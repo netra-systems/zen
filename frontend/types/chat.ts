@@ -1,4 +1,4 @@
-import { Message as BackendMessage } from './backend_schema_auto_generated';
+import { MessageData as BackendMessage } from './backend_schema_auto_generated';
 
 export type ChatMessage = Omit<BackendMessage, 'content'> & {
   content: string;

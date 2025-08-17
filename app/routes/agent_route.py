@@ -3,7 +3,7 @@ from fastapi.responses import StreamingResponse
 from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.schemas import RequestModel
 from typing import Dict, Any, Optional, AsyncGenerator
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 from app.services.agent_service import get_agent_service, AgentService
 from app.dependencies import get_llm_manager, DbDep
 from app.llm.llm_manager import LLMManager
