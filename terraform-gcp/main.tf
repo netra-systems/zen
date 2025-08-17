@@ -225,7 +225,12 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
-          name  = "GOOGLE_CLIENT_ID"  # Changed to match expected env var
+          name  = "ENVIRONMENT"
+          value = "staging"  # Ensure auth system knows this is staging
+        }
+        
+        env {
+          name  = "GOOGLE_OAUTH_CLIENT_ID_STAGING"  # Match what environment_config.py expects
           value_from {
             secret_key_ref {
               name = "google-client-id-staging"
@@ -235,7 +240,7 @@ resource "google_cloud_run_service" "backend" {
         }
         
         env {
-          name  = "GOOGLE_CLIENT_SECRET"  # Changed to match expected env var
+          name  = "GOOGLE_OAUTH_CLIENT_SECRET_STAGING"  # Match what environment_config.py expects
           value_from {
             secret_key_ref {
               name = "google-client-secret-staging"

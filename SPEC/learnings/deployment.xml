@@ -92,6 +92,54 @@
         Default staging API URL: https://api.staging.netrasystems.ai
       </details>
     </lesson>
+    
+    <lesson id="oauth-credential-env-var-mismatch">
+      <problem>OAuth authentication failing with invalid_client and CSRF state mismatch errors in staging</problem>
+      <root_cause>
+        Multiple configuration mismatches:
+        1. OAuth client initialized with wrong credentials - used settings.oauth_config instead of environment-specific config
+        2. Terraform set GOOGLE_CLIENT_ID but code expected GOOGLE_OAUTH_CLIENT_ID_STAGING
+        3. Session middleware https_only flag not set for staging (only production)
+        4. Frontend URL hardcoded to localhost:3010 instead of staging URL
+      </root_cause>
+      <solution>
+        Fixed all configuration mismatches:
+        1. Updated app/auth/auth.py to use auth_env_config.get_oauth_config() instead of settings.oauth_config
+        2. Updated terraform-gcp/main.tf to set correct env var names:
+           - GOOGLE_OAUTH_CLIENT_ID_STAGING (was GOOGLE_CLIENT_ID)
+           - GOOGLE_OAUTH_CLIENT_SECRET_STAGING (was GOOGLE_CLIENT_SECRET)
+        3. Updated middleware_setup.py to set https_only for both staging and production
+        4. Added _get_frontend_url_for_environment() helper to dynamically determine frontend URL
+        5. Added ENVIRONMENT=staging env var in Terraform for proper environment detection
+      </solution>
+      <affected_files>
+        - app/auth/auth.py
+        - app/routes/auth/auth.py
+        - app/core/middleware_setup.py
+        - terraform-gcp/main.tf
+      </affected_files>
+      <key_changes>
+        # OAuth client initialization
+        oauth_config = auth_env_config.get_oauth_config()
+        self.google = self.oauth.register(
+            client_id=oauth_config.client_id,
+            client_secret=oauth_config.client_secret
+        )
+        
+        # Terraform env vars
+        env {
+          name  = "GOOGLE_OAUTH_CLIENT_ID_STAGING"
+          value_from { secret_key_ref { name = "google-client-id-staging" } }
+        }
+        
+        # Session middleware
+        https_only=(settings.environment in ["production", "staging"])
+      </key_changes>
+      <prevention>
+        Always verify environment variable names match between infrastructure and application code.
+        Use single source of truth for OAuth configuration - prefer environment-specific config over static settings.
+      </prevention>
+    </lesson>
   </staging_deployment>
   
   <quick_commands>

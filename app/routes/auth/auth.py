@@ -1,3 +1,4 @@
+import os
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.responses import RedirectResponse
@@ -17,6 +18,22 @@ from app.services.security_service import SecurityService
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
+
+def _get_frontend_url_for_environment() -> str:
+    """Get the appropriate frontend URL based on environment."""
+    # Check for explicit FRONTEND_URL env var first
+    if frontend_url := os.getenv("FRONTEND_URL"):
+        return frontend_url.rstrip('/')
+    
+    # Use environment-specific defaults
+    env = auth_env_config.environment.value
+    if env == "staging":
+        return "https://staging.netrasystems.ai"
+    elif env == "production":
+        return "https://netrasystems.ai"
+    else:
+        # Development - use settings or default
+        return settings.frontend_url.rstrip('/')
 
 
 
@@ -124,12 +141,17 @@ class AuthRoutes:
 
             access_token = security_service.create_access_token(data=TokenPayload(sub=str(user.id)))
             
+            # Determine frontend URL based on environment
+            frontend_url = _get_frontend_url_for_environment()
+            
             # Redirect to frontend with token
-            frontend_callback_url = f"{settings.frontend_url}/auth/callback?token={access_token}"
+            frontend_callback_url = f"{frontend_url}/auth/callback?token={access_token}"
             return RedirectResponse(url=frontend_callback_url)
         except Exception as e:
+            # Determine frontend URL based on environment
+            frontend_url = _get_frontend_url_for_environment()
             # Redirect to frontend with error
-            error_url = f"{settings.frontend_url}/auth/error?message={str(e)}"
+            error_url = f"{frontend_url}/auth/error?message={str(e)}"
             return RedirectResponse(url=error_url)
 
 

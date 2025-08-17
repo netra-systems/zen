@@ -1,6 +1,6 @@
 from typing import Any, Optional
 from authlib.integrations.starlette_client import OAuth
-from app.config import settings
+from app.auth.environment_config import auth_env_config
 
 class OAuthClient:
     """OAuth client wrapper to properly expose the Google OAuth client"""
@@ -13,11 +13,14 @@ class OAuthClient:
         # Create OAuth instance
         self.oauth = OAuth()
         
-        # Register Google OAuth client
+        # Get environment-specific OAuth configuration
+        oauth_config = auth_env_config.get_oauth_config()
+        
+        # Register Google OAuth client with environment-specific credentials
         self.google = self.oauth.register(
             name='google',
-            client_id=settings.oauth_config.client_id,
-            client_secret=settings.oauth_config.client_secret,
+            client_id=oauth_config.client_id,
+            client_secret=oauth_config.client_secret,
             server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
             client_kwargs={
                 'scope': 'openid email profile'

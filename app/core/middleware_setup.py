@@ -168,5 +168,5 @@ def setup_session_middleware(app: FastAPI) -> None:
         SessionMiddleware,
         secret_key=settings.secret_key,
         same_site="lax",
-        https_only=(settings.environment == "production"),
+        https_only=(settings.environment in ["production", "staging"]),
     )
