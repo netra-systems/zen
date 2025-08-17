@@ -28,7 +28,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         # Override inherited test to work with PermissionService static methods
         db = Mock(spec=Session)
         user = Mock(spec=User)
-        user.email = "test@netra.ai"
+        user.email = "test@netrasystems.ai"
         user.role = "standard_user"
         user.is_developer = False
         user.permissions = None
@@ -56,7 +56,7 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
         
         # New user signs up
         user = Mock(spec=User)
-        user.email = "newdev@netra.ai"
+        user.email = "newdev@netrasystems.ai"
         user.role = "standard_user"
         user.is_developer = False
         user.permissions = None
@@ -83,8 +83,8 @@ class TestIntegrationScenarios(SharedTestIntegrationScenarios):
             result = PermissionService.detect_developer_status(user)
             assert result == False
             
-            # Unless explicitly set or netra.ai email
-            user.email = "dev@netra.ai"
+            # Unless explicitly set or netrasystems.ai email
+            user.email = "dev@netrasystems.ai"
             result = PermissionService.detect_developer_status(user)
             assert result == True
 
@@ -117,7 +117,7 @@ class TestRealWorldScenarios:
         
         # Developer user
         dev_user = Mock(spec=User)
-        dev_user.email = "dev@netra.ai"
+        dev_user.email = "dev@netrasystems.ai"
         dev_user.role = "developer"
         dev_user.is_developer = True
         dev_user.permissions = None
@@ -140,7 +140,7 @@ class TestRealWorldScenarios:
         
         # Admin user
         admin_user = Mock(spec=User)
-        admin_user.email = "admin@netra.ai"
+        admin_user.email = "admin@netrasystems.ai"
         admin_user.role = "admin"
         admin_user.is_developer = True
         admin_user.permissions = None

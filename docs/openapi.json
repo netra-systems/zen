@@ -6,12 +6,12 @@
     "description": "Enterprise-grade system for optimizing AI workloads. This API provides endpoints for agent orchestration, workflow management, and AI optimization tools.",
     "contact": {
       "name": "Netra Support",
-      "email": "support@netra.ai",
-      "url": "https://netra.ai/support"
+      "email": "support@netrasystems.ai",
+      "url": "https://netrasystems.ai/support"
     },
     "license": {
       "name": "Proprietary",
-      "url": "https://netra.ai/license"
+      "url": "https://netrasystems.ai/license"
     }
   },
   "paths": {
@@ -6351,11 +6351,11 @@
       "description": "Local development server"
     },
     {
-      "url": "https://api.netra.ai",
+      "url": "https://api.netrasystems.ai",
       "description": "Production server"
     },
     {
-      "url": "https://staging-api.netra.ai",
+      "url": "https://staging-api.netrasystems.ai",
       "description": "Staging server"
     }
   ],

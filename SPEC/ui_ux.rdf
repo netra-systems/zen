@@ -3,16 +3,16 @@
     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
-    xmlns:netra="http://netra.ai/ui-ux#"
-    xmlns:ui="http://netra.ai/ui#"
-    xmlns:ux="http://netra.ai/ux#"
-    xmlns:design="http://netra.ai/design#"
-    xmlns:arch="http://netra.ai/architecture#"
-    xmlns:ws="http://netra.ai/websocket#"
+    xmlns:netra="http://netrasystems.ai/ui-ux#"
+    xmlns:ui="http://netrasystems.ai/ui#"
+    xmlns:ux="http://netrasystems.ai/ux#"
+    xmlns:design="http://netrasystems.ai/design#"
+    xmlns:arch="http://netrasystems.ai/architecture#"
+    xmlns:ws="http://netrasystems.ai/websocket#"
     xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
 
     <!-- Document Metadata -->
-    <rdf:Description rdf:about="http://netra.ai/spec/ui-ux">
+    <rdf:Description rdf:about="http://netrasystems.ai/spec/ui-ux">
         <dc:title>Netra UI/UX Specification</dc:title>
         <dc:creator>Netra AI Platform</dc:creator>
         <dc:date>2025-08-16</dc:date>
@@ -23,120 +23,120 @@
     </rdf:Description>
 
     <!-- Core UI/UX System Definition -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/system">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#System"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/system">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#System"/>
         <netra:hasGoal>Define coherent UI/UX architecture with clear boundaries and seamless data flow</netra:hasGoal>
-        <netra:hasSwimlane rdf:resource="http://netra.ai/ui-ux/swimlane/1"/>
-        <netra:hasSwimlane rdf:resource="http://netra.ai/ui-ux/swimlane/2"/>
-        <netra:hasSwimlane rdf:resource="http://netra.ai/ui-ux/swimlane/3"/>
-        <netra:hasSwimlane rdf:resource="http://netra.ai/ui-ux/swimlane/4"/>
-        <netra:hasSwimlane rdf:resource="http://netra.ai/ui-ux/swimlane/5"/>
+        <netra:hasSwimlane rdf:resource="http://netrasystems.ai/ui-ux/swimlane/1"/>
+        <netra:hasSwimlane rdf:resource="http://netrasystems.ai/ui-ux/swimlane/2"/>
+        <netra:hasSwimlane rdf:resource="http://netrasystems.ai/ui-ux/swimlane/3"/>
+        <netra:hasSwimlane rdf:resource="http://netrasystems.ai/ui-ux/swimlane/4"/>
+        <netra:hasSwimlane rdf:resource="http://netrasystems.ai/ui-ux/swimlane/5"/>
     </rdf:Description>
 
     <!-- Swimlane 1: Core Chat Architecture -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/swimlane/1">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#Swimlane"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/swimlane/1">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#Swimlane"/>
         <netra:swimlaneId rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</netra:swimlaneId>
         <netra:name>Core Chat Architecture</netra:name>
         <netra:responsibility>Central orchestration of chat sessions, state management, and component routing</netra:responsibility>
         
         <!-- Ownership -->
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/thread-management"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/message-history"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/navigation"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/state-management"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/component-hierarchy"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/thread-management"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/message-history"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/navigation"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/state-management"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/component-hierarchy"/>
         
         <!-- Dependencies -->
-        <netra:dependsOn rdf:resource="http://netra.ai/ui-ux/swimlane/2"/>
-        <netra:providesTo rdf:resource="http://netra.ai/ui-ux/swimlane/3"/>
-        <netra:providesTo rdf:resource="http://netra.ai/ui-ux/swimlane/4"/>
+        <netra:dependsOn rdf:resource="http://netrasystems.ai/ui-ux/swimlane/2"/>
+        <netra:providesTo rdf:resource="http://netrasystems.ai/ui-ux/swimlane/3"/>
+        <netra:providesTo rdf:resource="http://netrasystems.ai/ui-ux/swimlane/4"/>
         
         <!-- Store Architecture -->
-        <netra:hasStore rdf:resource="http://netra.ai/ui-ux/store/unified-chat"/>
+        <netra:hasStore rdf:resource="http://netrasystems.ai/ui-ux/store/unified-chat"/>
     </rdf:Description>
 
     <!-- Unified Chat Store -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/store/unified-chat">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#Store"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/store/unified-chat">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#Store"/>
         <netra:storeName>UnifiedChatStore</netra:storeName>
         <netra:technology>Zustand with TypeScript</netra:technology>
         <netra:location>store/unified-chat.ts</netra:location>
         
         <!-- State Properties -->
-        <netra:hasStateProperty rdf:resource="http://netra.ai/ui-ux/state/activeThreadId"/>
-        <netra:hasStateProperty rdf:resource="http://netra.ai/ui-ux/state/threads"/>
-        <netra:hasStateProperty rdf:resource="http://netra.ai/ui-ux/state/messages"/>
-        <netra:hasStateProperty rdf:resource="http://netra.ai/ui-ux/state/currentRun"/>
-        <netra:hasStateProperty rdf:resource="http://netra.ai/ui-ux/state/layerData"/>
-        <netra:hasStateProperty rdf:resource="http://netra.ai/ui-ux/state/executedAgents"/>
+        <netra:hasStateProperty rdf:resource="http://netrasystems.ai/ui-ux/state/activeThreadId"/>
+        <netra:hasStateProperty rdf:resource="http://netrasystems.ai/ui-ux/state/threads"/>
+        <netra:hasStateProperty rdf:resource="http://netrasystems.ai/ui-ux/state/messages"/>
+        <netra:hasStateProperty rdf:resource="http://netrasystems.ai/ui-ux/state/currentRun"/>
+        <netra:hasStateProperty rdf:resource="http://netrasystems.ai/ui-ux/state/layerData"/>
+        <netra:hasStateProperty rdf:resource="http://netrasystems.ai/ui-ux/state/executedAgents"/>
         
         <!-- Actions -->
-        <netra:hasAction rdf:resource="http://netra.ai/ui-ux/action/switchThread"/>
-        <netra:hasAction rdf:resource="http://netra.ai/ui-ux/action/createThread"/>
-        <netra:hasAction rdf:resource="http://netra.ai/ui-ux/action/deleteThread"/>
-        <netra:hasAction rdf:resource="http://netra.ai/ui-ux/action/loadThreadHistory"/>
-        <netra:hasAction rdf:resource="http://netra.ai/ui-ux/action/handleWSMessage"/>
+        <netra:hasAction rdf:resource="http://netrasystems.ai/ui-ux/action/switchThread"/>
+        <netra:hasAction rdf:resource="http://netrasystems.ai/ui-ux/action/createThread"/>
+        <netra:hasAction rdf:resource="http://netrasystems.ai/ui-ux/action/deleteThread"/>
+        <netra:hasAction rdf:resource="http://netrasystems.ai/ui-ux/action/loadThreadHistory"/>
+        <netra:hasAction rdf:resource="http://netrasystems.ai/ui-ux/action/handleWSMessage"/>
     </rdf:Description>
 
     <!-- Thread Model -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/model/thread">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#ThreadModel"/>
-        <netra:hasState rdf:resource="http://netra.ai/ui-ux/thread-state/active"/>
-        <netra:hasState rdf:resource="http://netra.ai/ui-ux/thread-state/inactive"/>
-        <netra:hasState rdf:resource="http://netra.ai/ui-ux/thread-state/new"/>
-        <netra:hasState rdf:resource="http://netra.ai/ui-ux/thread-state/loading"/>
-        <netra:hasState rdf:resource="http://netra.ai/ui-ux/thread-state/error"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/model/thread">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#ThreadModel"/>
+        <netra:hasState rdf:resource="http://netrasystems.ai/ui-ux/thread-state/active"/>
+        <netra:hasState rdf:resource="http://netrasystems.ai/ui-ux/thread-state/inactive"/>
+        <netra:hasState rdf:resource="http://netrasystems.ai/ui-ux/thread-state/new"/>
+        <netra:hasState rdf:resource="http://netrasystems.ai/ui-ux/thread-state/loading"/>
+        <netra:hasState rdf:resource="http://netrasystems.ai/ui-ux/thread-state/error"/>
         <netra:hasAutoRenaming rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</netra:hasAutoRenaming>
         <netra:renamingTrigger>After first user message sent</netra:renamingTrigger>
     </rdf:Description>
 
     <!-- Components -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/component/MainChat">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#Component"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/component/MainChat">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#Component"/>
         <netra:componentType>container</netra:componentType>
         <netra:location>components/chat/MainChat.tsx</netra:location>
-        <netra:hasChild rdf:resource="http://netra.ai/ui-ux/component/ChatHeader"/>
-        <netra:hasChild rdf:resource="http://netra.ai/ui-ux/component/ChatSidebar"/>
-        <netra:hasChild rdf:resource="http://netra.ai/ui-ux/component/MessageArea"/>
-        <netra:hasChild rdf:resource="http://netra.ai/ui-ux/component/ChatInput"/>
+        <netra:hasChild rdf:resource="http://netrasystems.ai/ui-ux/component/ChatHeader"/>
+        <netra:hasChild rdf:resource="http://netrasystems.ai/ui-ux/component/ChatSidebar"/>
+        <netra:hasChild rdf:resource="http://netrasystems.ai/ui-ux/component/MessageArea"/>
+        <netra:hasChild rdf:resource="http://netrasystems.ai/ui-ux/component/ChatInput"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/component/ChatSidebar">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#Component"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/component/ChatSidebar">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#Component"/>
         <netra:componentType>navigation</netra:componentType>
         <netra:location>components/chat/ChatSidebar.tsx</netra:location>
         <netra:responsibility>Display all user threads and handle thread switching</netra:responsibility>
-        <netra:dataSource rdf:resource="http://netra.ai/ui-ux/api/threads"/>
+        <netra:dataSource rdf:resource="http://netrasystems.ai/ui-ux/api/threads"/>
         <netra:maxThreads rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">50</netra:maxThreads>
         <netra:sortOrder>last_updated_desc</netra:sortOrder>
     </rdf:Description>
 
     <!-- Swimlane 2: WebSocket & Real-time -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/swimlane/2">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#Swimlane"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/swimlane/2">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#Swimlane"/>
         <netra:swimlaneId rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</netra:swimlaneId>
         <netra:name>WebSocket &amp; Real-time Communication</netra:name>
         <netra:responsibility>Gateway between backend and frontend, ensuring type-safe real-time communication</netra:responsibility>
         
         <!-- Ownership -->
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/ws-connection"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/event-validation"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/reconnection"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/event-buffering"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/ws-connection"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/event-validation"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/reconnection"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/event-buffering"/>
         
         <!-- WebSocket Configuration -->
-        <ws:hasConnectionManager rdf:resource="http://netra.ai/ui-ux/ws/connection-manager"/>
+        <ws:hasConnectionManager rdf:resource="http://netrasystems.ai/ui-ux/ws/connection-manager"/>
     </rdf:Description>
 
     <!-- WebSocket Connection Manager -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/ws/connection-manager">
-        <rdf:type rdf:resource="http://netra.ai/websocket#ConnectionManager"/>
-        <ws:hasState rdf:resource="http://netra.ai/ui-ux/ws/state/disconnected"/>
-        <ws:hasState rdf:resource="http://netra.ai/ui-ux/ws/state/connecting"/>
-        <ws:hasState rdf:resource="http://netra.ai/ui-ux/ws/state/connected"/>
-        <ws:hasState rdf:resource="http://netra.ai/ui-ux/ws/state/reconnecting"/>
-        <ws:hasState rdf:resource="http://netra.ai/ui-ux/ws/state/error"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/ws/connection-manager">
+        <rdf:type rdf:resource="http://netrasystems.ai/websocket#ConnectionManager"/>
+        <ws:hasState rdf:resource="http://netrasystems.ai/ui-ux/ws/state/disconnected"/>
+        <ws:hasState rdf:resource="http://netrasystems.ai/ui-ux/ws/state/connecting"/>
+        <ws:hasState rdf:resource="http://netrasystems.ai/ui-ux/ws/state/connected"/>
+        <ws:hasState rdf:resource="http://netrasystems.ai/ui-ux/ws/state/reconnecting"/>
+        <ws:hasState rdf:resource="http://netrasystems.ai/ui-ux/ws/state/error"/>
         
         <!-- Reconnection Strategy -->
         <ws:initialDelay rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1000</ws:initialDelay>
@@ -151,8 +151,8 @@
     </rdf:Description>
 
     <!-- Event Categories -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/event-category/fast">
-        <rdf:type rdf:resource="http://netra.ai/websocket#EventCategory"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/event-category/fast">
+        <rdf:type rdf:resource="http://netrasystems.ai/websocket#EventCategory"/>
         <ws:categoryName>fast</ws:categoryName>
         <ws:latencyRange>0-100ms</ws:latencyRange>
         <ws:hasEvent>agent_started</ws:hasEvent>
@@ -160,8 +160,8 @@
         <ws:hasEvent>status_update</ws:hasEvent>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/event-category/medium">
-        <rdf:type rdf:resource="http://netra.ai/websocket#EventCategory"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/event-category/medium">
+        <rdf:type rdf:resource="http://netrasystems.ai/websocket#EventCategory"/>
         <ws:categoryName>medium</ws:categoryName>
         <ws:latencyRange>100ms-1s</ws:latencyRange>
         <ws:hasEvent>agent_thinking</ws:hasEvent>
@@ -169,8 +169,8 @@
         <ws:hasEvent>progress_update</ws:hasEvent>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/event-category/slow">
-        <rdf:type rdf:resource="http://netra.ai/websocket#EventCategory"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/event-category/slow">
+        <rdf:type rdf:resource="http://netrasystems.ai/websocket#EventCategory"/>
         <ws:categoryName>slow</ws:categoryName>
         <ws:latencyRange>1s+</ws:latencyRange>
         <ws:hasEvent>agent_completed</ws:hasEvent>
@@ -179,87 +179,87 @@
     </rdf:Description>
 
     <!-- Swimlane 3: Response Card & Agents -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/swimlane/3">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#Swimlane"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/swimlane/3">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#Swimlane"/>
         <netra:swimlaneId rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">3</netra:swimlaneId>
         <netra:name>Response Card &amp; Agents</netra:name>
         <netra:responsibility>Three-layer response card logic and agent tracking</netra:responsibility>
         
         <!-- Ownership -->
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/three-layer-card"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/agent-deduplication"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/layer-updates"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/progressive-disclosure"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/three-layer-card"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/agent-deduplication"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/layer-updates"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/progressive-disclosure"/>
         
         <!-- Layer Structure -->
-        <netra:hasLayer rdf:resource="http://netra.ai/ui-ux/layer/fast"/>
-        <netra:hasLayer rdf:resource="http://netra.ai/ui-ux/layer/medium"/>
-        <netra:hasLayer rdf:resource="http://netra.ai/ui-ux/layer/slow"/>
+        <netra:hasLayer rdf:resource="http://netrasystems.ai/ui-ux/layer/fast"/>
+        <netra:hasLayer rdf:resource="http://netrasystems.ai/ui-ux/layer/medium"/>
+        <netra:hasLayer rdf:resource="http://netrasystems.ai/ui-ux/layer/slow"/>
     </rdf:Description>
 
     <!-- Response Card Layers -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/layer/fast">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#ResponseLayer"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/layer/fast">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#ResponseLayer"/>
         <netra:layerName>Fast Layer</netra:layerName>
         <netra:height rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">48</netra:height>
         <netra:updateFrequency>Real-time</netra:updateFrequency>
         <netra:showsContent>Current agent status and progress</netra:showsContent>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/layer/medium">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#ResponseLayer"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/layer/medium">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#ResponseLayer"/>
         <netra:layerName>Medium Layer</netra:layerName>
         <netra:minHeight rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">100</netra:minHeight>
         <netra:updateFrequency>Periodic updates</netra:updateFrequency>
         <netra:showsContent>Agent thinking and partial results</netra:showsContent>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/layer/slow">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#ResponseLayer"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/layer/slow">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#ResponseLayer"/>
         <netra:layerName>Slow Layer</netra:layerName>
         <netra:updateFrequency>On completion</netra:updateFrequency>
         <netra:showsContent>Final reports and complete analysis</netra:showsContent>
     </rdf:Description>
 
     <!-- Swimlane 4: Visual Design & UX -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/swimlane/4">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#Swimlane"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/swimlane/4">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#Swimlane"/>
         <netra:swimlaneId rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">4</netra:swimlaneId>
         <netra:name>Visual Design &amp; UX</netra:name>
         <netra:responsibility>Consistent visual language, modern design patterns, and delightful user experience</netra:responsibility>
         
         <!-- Ownership -->
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/glassmorphic-design"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/color-palette"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/typography"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/animations"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/accessibility"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/glassmorphic-design"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/color-palette"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/typography"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/animations"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/accessibility"/>
         
         <!-- Design System -->
-        <design:hasDesignSystem rdf:resource="http://netra.ai/ui-ux/design-system"/>
+        <design:hasDesignSystem rdf:resource="http://netrasystems.ai/ui-ux/design-system"/>
     </rdf:Description>
 
     <!-- Design System -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/design-system">
-        <rdf:type rdf:resource="http://netra.ai/design#DesignSystem"/>
-        <design:hasPrinciple rdf:resource="http://netra.ai/ui-ux/principle/glassmorphism"/>
-        <design:hasPrinciple rdf:resource="http://netra.ai/ui-ux/principle/motion-design"/>
-        <design:hasPrinciple rdf:resource="http://netra.ai/ui-ux/principle/visual-hierarchy"/>
-        <design:hasPrinciple rdf:resource="http://netra.ai/ui-ux/principle/accessibility"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/design-system">
+        <rdf:type rdf:resource="http://netrasystems.ai/design#DesignSystem"/>
+        <design:hasPrinciple rdf:resource="http://netrasystems.ai/ui-ux/principle/glassmorphism"/>
+        <design:hasPrinciple rdf:resource="http://netrasystems.ai/ui-ux/principle/motion-design"/>
+        <design:hasPrinciple rdf:resource="http://netrasystems.ai/ui-ux/principle/visual-hierarchy"/>
+        <design:hasPrinciple rdf:resource="http://netrasystems.ai/ui-ux/principle/accessibility"/>
         
         <!-- Color Palette -->
-        <design:hasColorPalette rdf:resource="http://netra.ai/ui-ux/colors"/>
+        <design:hasColorPalette rdf:resource="http://netrasystems.ai/ui-ux/colors"/>
         
         <!-- Typography -->
-        <design:hasTypography rdf:resource="http://netra.ai/ui-ux/typography"/>
+        <design:hasTypography rdf:resource="http://netrasystems.ai/ui-ux/typography"/>
         
         <!-- Spacing System -->
-        <design:hasSpacingSystem rdf:resource="http://netra.ai/ui-ux/spacing"/>
+        <design:hasSpacingSystem rdf:resource="http://netrasystems.ai/ui-ux/spacing"/>
     </rdf:Description>
 
     <!-- Glassmorphism Principle -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/principle/glassmorphism">
-        <rdf:type rdf:resource="http://netra.ai/design#Principle"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/principle/glassmorphism">
+        <rdf:type rdf:resource="http://netrasystems.ai/design#Principle"/>
         <design:name>Glassmorphic Design Language</design:name>
         <design:description>Modern glass-like UI with transparency, blur, and subtle borders</design:description>
         <design:criticalRule>NO BLUE GRADIENT BARS - use glassmorphism instead</design:criticalRule>
@@ -272,23 +272,23 @@
     </rdf:Description>
 
     <!-- Color Palette -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/colors">
-        <rdf:type rdf:resource="http://netra.ai/design#ColorPalette"/>
-        <design:primaryColor rdf:resource="http://netra.ai/ui-ux/color/emerald"/>
-        <design:neutralColor rdf:resource="http://netra.ai/ui-ux/color/zinc"/>
-        <design:accentColor rdf:resource="http://netra.ai/ui-ux/color/purple"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/colors">
+        <rdf:type rdf:resource="http://netrasystems.ai/design#ColorPalette"/>
+        <design:primaryColor rdf:resource="http://netrasystems.ai/ui-ux/color/emerald"/>
+        <design:neutralColor rdf:resource="http://netrasystems.ai/ui-ux/color/zinc"/>
+        <design:accentColor rdf:resource="http://netrasystems.ai/ui-ux/color/purple"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/color/emerald">
-        <rdf:type rdf:resource="http://netra.ai/design#Color"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/color/emerald">
+        <rdf:type rdf:resource="http://netrasystems.ai/design#Color"/>
         <design:colorName>Emerald</design:colorName>
         <design:baseHex>#10B981</design:baseHex>
         <design:usage>Primary actions, success states, active elements</design:usage>
     </rdf:Description>
 
     <!-- Typography System -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/typography">
-        <rdf:type rdf:resource="http://netra.ai/design#Typography"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/typography">
+        <rdf:type rdf:resource="http://netrasystems.ai/design#Typography"/>
         <design:primaryFont>Inter, system-ui, -apple-system, sans-serif</design:primaryFont>
         <design:monospaceFont>JetBrains Mono, Monaco, Consolas, monospace</design:monospaceFont>
         <design:baseSize rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">16</design:baseSize>
@@ -296,23 +296,23 @@
     </rdf:Description>
 
     <!-- Animations -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/animations">
-        <rdf:type rdf:resource="http://netra.ai/design#AnimationSystem"/>
-        <design:hasTimingFunction rdf:resource="http://netra.ai/ui-ux/timing/ease-out-cubic"/>
-        <design:hasTimingFunction rdf:resource="http://netra.ai/ui-ux/timing/spring"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/animations">
+        <rdf:type rdf:resource="http://netrasystems.ai/design#AnimationSystem"/>
+        <design:hasTimingFunction rdf:resource="http://netrasystems.ai/ui-ux/timing/ease-out-cubic"/>
+        <design:hasTimingFunction rdf:resource="http://netrasystems.ai/ui-ux/timing/spring"/>
         <design:defaultDuration rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">300</design:defaultDuration>
         <design:performanceTarget>60fps minimum</design:performanceTarget>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/timing/ease-out-cubic">
-        <rdf:type rdf:resource="http://netra.ai/design#TimingFunction"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/timing/ease-out-cubic">
+        <rdf:type rdf:resource="http://netrasystems.ai/design#TimingFunction"/>
         <design:functionName>ease-out-cubic</design:functionName>
         <design:bezierCurve>cubic-bezier(0.33, 1, 0.68, 1)</design:bezierCurve>
     </rdf:Description>
 
     <!-- Accessibility Standards -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/accessibility">
-        <rdf:type rdf:resource="http://netra.ai/design#AccessibilityStandard"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/accessibility">
+        <rdf:type rdf:resource="http://netrasystems.ai/design#AccessibilityStandard"/>
         <design:wcagLevel>AA</design:wcagLevel>
         <design:minContrastNormal rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">4.5</design:minContrastNormal>
         <design:minContrastLarge rdf:datatype="http://www.w3.org/2001/XMLSchema#decimal">3.0</design:minContrastLarge>
@@ -322,185 +322,185 @@
     </rdf:Description>
 
     <!-- Swimlane 5: Developer Tools -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/swimlane/5">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#Swimlane"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/swimlane/5">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#Swimlane"/>
         <netra:swimlaneId rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</netra:swimlaneId>
         <netra:name>Developer Tools</netra:name>
         <netra:responsibility>Observability and debugging capabilities</netra:responsibility>
         
         <!-- Ownership -->
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/debug-panel"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/performance-monitoring"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/event-inspection"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/error-tracking"/>
-        <netra:owns rdf:resource="http://netra.ai/ui-ux/feature/export-tools"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/debug-panel"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/performance-monitoring"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/event-inspection"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/error-tracking"/>
+        <netra:owns rdf:resource="http://netrasystems.ai/ui-ux/feature/export-tools"/>
         
         <!-- Observes Other Swimlanes -->
-        <netra:observes rdf:resource="http://netra.ai/ui-ux/swimlane/1"/>
-        <netra:observes rdf:resource="http://netra.ai/ui-ux/swimlane/2"/>
-        <netra:observes rdf:resource="http://netra.ai/ui-ux/swimlane/3"/>
-        <netra:observes rdf:resource="http://netra.ai/ui-ux/swimlane/4"/>
+        <netra:observes rdf:resource="http://netrasystems.ai/ui-ux/swimlane/1"/>
+        <netra:observes rdf:resource="http://netrasystems.ai/ui-ux/swimlane/2"/>
+        <netra:observes rdf:resource="http://netrasystems.ai/ui-ux/swimlane/3"/>
+        <netra:observes rdf:resource="http://netrasystems.ai/ui-ux/swimlane/4"/>
     </rdf:Description>
 
     <!-- Data Flow Sequence -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/data-flow">
-        <rdf:type rdf:resource="http://netra.ai/architecture#DataFlow"/>
-        <arch:hasStep rdf:resource="http://netra.ai/ui-ux/flow/step1"/>
-        <arch:hasStep rdf:resource="http://netra.ai/ui-ux/flow/step2"/>
-        <arch:hasStep rdf:resource="http://netra.ai/ui-ux/flow/step3"/>
-        <arch:hasStep rdf:resource="http://netra.ai/ui-ux/flow/step4"/>
-        <arch:hasStep rdf:resource="http://netra.ai/ui-ux/flow/step5"/>
-        <arch:hasStep rdf:resource="http://netra.ai/ui-ux/flow/step6"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/data-flow">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#DataFlow"/>
+        <arch:hasStep rdf:resource="http://netrasystems.ai/ui-ux/flow/step1"/>
+        <arch:hasStep rdf:resource="http://netrasystems.ai/ui-ux/flow/step2"/>
+        <arch:hasStep rdf:resource="http://netrasystems.ai/ui-ux/flow/step3"/>
+        <arch:hasStep rdf:resource="http://netrasystems.ai/ui-ux/flow/step4"/>
+        <arch:hasStep rdf:resource="http://netrasystems.ai/ui-ux/flow/step5"/>
+        <arch:hasStep rdf:resource="http://netrasystems.ai/ui-ux/flow/step6"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/flow/step1">
-        <rdf:type rdf:resource="http://netra.ai/architecture#FlowStep"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/flow/step1">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#FlowStep"/>
         <arch:stepNumber rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</arch:stepNumber>
         <arch:description>Backend generates events and data</arch:description>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/flow/step2">
-        <rdf:type rdf:resource="http://netra.ai/architecture#FlowStep"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/flow/step2">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#FlowStep"/>
         <arch:stepNumber rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</arch:stepNumber>
         <arch:description>WebSocket layer receives and validates events</arch:description>
-        <arch:implementedBy rdf:resource="http://netra.ai/ui-ux/swimlane/2"/>
+        <arch:implementedBy rdf:resource="http://netrasystems.ai/ui-ux/swimlane/2"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/flow/step3">
-        <rdf:type rdf:resource="http://netra.ai/architecture#FlowStep"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/flow/step3">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#FlowStep"/>
         <arch:stepNumber rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">3</arch:stepNumber>
         <arch:description>Core Architecture manages state and routing</arch:description>
-        <arch:implementedBy rdf:resource="http://netra.ai/ui-ux/swimlane/1"/>
+        <arch:implementedBy rdf:resource="http://netrasystems.ai/ui-ux/swimlane/1"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/flow/step4">
-        <rdf:type rdf:resource="http://netra.ai/architecture#FlowStep"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/flow/step4">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#FlowStep"/>
         <arch:stepNumber rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">4</arch:stepNumber>
         <arch:description>Response Card processes agent-specific display logic</arch:description>
-        <arch:implementedBy rdf:resource="http://netra.ai/ui-ux/swimlane/3"/>
+        <arch:implementedBy rdf:resource="http://netrasystems.ai/ui-ux/swimlane/3"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/flow/step5">
-        <rdf:type rdf:resource="http://netra.ai/architecture#FlowStep"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/flow/step5">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#FlowStep"/>
         <arch:stepNumber rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</arch:stepNumber>
         <arch:description>Visual Design applies consistent styling</arch:description>
-        <arch:implementedBy rdf:resource="http://netra.ai/ui-ux/swimlane/4"/>
+        <arch:implementedBy rdf:resource="http://netrasystems.ai/ui-ux/swimlane/4"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/flow/step6">
-        <rdf:type rdf:resource="http://netra.ai/architecture#FlowStep"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/flow/step6">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#FlowStep"/>
         <arch:stepNumber rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">6</arch:stepNumber>
         <arch:description>Developer Tools observes all layers for debugging</arch:description>
-        <arch:implementedBy rdf:resource="http://netra.ai/ui-ux/swimlane/5"/>
+        <arch:implementedBy rdf:resource="http://netrasystems.ai/ui-ux/swimlane/5"/>
     </rdf:Description>
 
     <!-- Integration Points -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/integration/ws-to-core">
-        <rdf:type rdf:resource="http://netra.ai/architecture#IntegrationPoint"/>
-        <arch:from rdf:resource="http://netra.ai/ui-ux/swimlane/2"/>
-        <arch:to rdf:resource="http://netra.ai/ui-ux/swimlane/1"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/integration/ws-to-core">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#IntegrationPoint"/>
+        <arch:from rdf:resource="http://netrasystems.ai/ui-ux/swimlane/2"/>
+        <arch:to rdf:resource="http://netrasystems.ai/ui-ux/swimlane/1"/>
         <arch:interface>WebSocket events → Store actions</arch:interface>
         <arch:dataType>Thread events, messages, agent status</arch:dataType>
         <arch:contract>Events must match TypeScript interfaces exactly</arch:contract>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/integration/core-to-response">
-        <rdf:type rdf:resource="http://netra.ai/architecture#IntegrationPoint"/>
-        <arch:from rdf:resource="http://netra.ai/ui-ux/swimlane/1"/>
-        <arch:to rdf:resource="http://netra.ai/ui-ux/swimlane/3"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/integration/core-to-response">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#IntegrationPoint"/>
+        <arch:from rdf:resource="http://netrasystems.ai/ui-ux/swimlane/1"/>
+        <arch:to rdf:resource="http://netrasystems.ai/ui-ux/swimlane/3"/>
         <arch:interface>Store state → Component props</arch:interface>
         <arch:dataType>Layer data (fast/medium/slow), agent executions</arch:dataType>
         <arch:contract>Props derived from store, no local state for data</arch:contract>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/integration/response-to-visual">
-        <rdf:type rdf:resource="http://netra.ai/architecture#IntegrationPoint"/>
-        <arch:from rdf:resource="http://netra.ai/ui-ux/swimlane/3"/>
-        <arch:to rdf:resource="http://netra.ai/ui-ux/swimlane/4"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/integration/response-to-visual">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#IntegrationPoint"/>
+        <arch:from rdf:resource="http://netrasystems.ai/ui-ux/swimlane/3"/>
+        <arch:to rdf:resource="http://netrasystems.ai/ui-ux/swimlane/4"/>
         <arch:interface>Component structure → CSS classes</arch:interface>
         <arch:dataType>Layout requirements, animation triggers</arch:dataType>
         <arch:contract>Components use design system tokens only</arch:contract>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/integration/all-to-devtools">
-        <rdf:type rdf:resource="http://netra.ai/architecture#IntegrationPoint"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/integration/all-to-devtools">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#IntegrationPoint"/>
         <arch:from>all_swimlanes</arch:from>
-        <arch:to rdf:resource="http://netra.ai/ui-ux/swimlane/5"/>
+        <arch:to rdf:resource="http://netrasystems.ai/ui-ux/swimlane/5"/>
         <arch:interface>Event emission → Debug panel</arch:interface>
         <arch:dataType>WebSocket events, performance metrics, errors</arch:dataType>
         <arch:contract>Read-only observation, no state modification</arch:contract>
     </rdf:Description>
 
     <!-- Boundary Rules -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/boundary-rules">
-        <rdf:type rdf:resource="http://netra.ai/architecture#BoundaryRules"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/boundary-rules">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#BoundaryRules"/>
         
-        <arch:hasRule rdf:resource="http://netra.ai/ui-ux/rule/no-cross-swimlane-state"/>
-        <arch:hasRule rdf:resource="http://netra.ai/ui-ux/rule/single-source-truth"/>
-        <arch:hasRule rdf:resource="http://netra.ai/ui-ux/rule/interface-only-communication"/>
-        <arch:hasRule rdf:resource="http://netra.ai/ui-ux/rule/no-duplicate-logic"/>
+        <arch:hasRule rdf:resource="http://netrasystems.ai/ui-ux/rule/no-cross-swimlane-state"/>
+        <arch:hasRule rdf:resource="http://netrasystems.ai/ui-ux/rule/single-source-truth"/>
+        <arch:hasRule rdf:resource="http://netrasystems.ai/ui-ux/rule/interface-only-communication"/>
+        <arch:hasRule rdf:resource="http://netrasystems.ai/ui-ux/rule/no-duplicate-logic"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/rule/no-cross-swimlane-state">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Rule"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/rule/no-cross-swimlane-state">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Rule"/>
         <arch:ruleId>no-cross-swimlane-state</arch:ruleId>
         <arch:description>Each swimlane manages only its designated state. No swimlane can directly modify another's state.</arch:description>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/rule/single-source-truth">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Rule"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/rule/single-source-truth">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Rule"/>
         <arch:ruleId>single-source-truth</arch:ruleId>
         <arch:description>Each piece of data has exactly one authoritative source swimlane.</arch:description>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/rule/interface-only-communication">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Rule"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/rule/interface-only-communication">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Rule"/>
         <arch:ruleId>interface-only-communication</arch:ruleId>
         <arch:description>Swimlanes communicate only through documented interfaces, never through side channels.</arch:description>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/rule/no-duplicate-logic">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Rule"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/rule/no-duplicate-logic">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Rule"/>
         <arch:ruleId>no-duplicate-logic</arch:ruleId>
         <arch:description>Business logic must exist in exactly one swimlane, not duplicated across multiple.</arch:description>
     </rdf:Description>
 
     <!-- Cross-Cutting Concerns -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/concerns">
-        <rdf:type rdf:resource="http://netra.ai/architecture#CrossCuttingConcerns"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/concerns">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#CrossCuttingConcerns"/>
         
-        <arch:hasConcern rdf:resource="http://netra.ai/ui-ux/concern/type-safety"/>
-        <arch:hasConcern rdf:resource="http://netra.ai/ui-ux/concern/performance"/>
-        <arch:hasConcern rdf:resource="http://netra.ai/ui-ux/concern/error-handling"/>
-        <arch:hasConcern rdf:resource="http://netra.ai/ui-ux/concern/testing"/>
+        <arch:hasConcern rdf:resource="http://netrasystems.ai/ui-ux/concern/type-safety"/>
+        <arch:hasConcern rdf:resource="http://netrasystems.ai/ui-ux/concern/performance"/>
+        <arch:hasConcern rdf:resource="http://netrasystems.ai/ui-ux/concern/error-handling"/>
+        <arch:hasConcern rdf:resource="http://netrasystems.ai/ui-ux/concern/testing"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/concern/type-safety">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Concern"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/concern/type-safety">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Concern"/>
         <arch:concernName>Type Safety</arch:concernName>
-        <arch:owner rdf:resource="http://netra.ai/ui-ux/swimlane/2"/>
+        <arch:owner rdf:resource="http://netrasystems.ai/ui-ux/swimlane/2"/>
         <arch:consumers>All other swimlanes</arch:consumers>
         <arch:enforcement>TypeScript strict mode, no any types</arch:enforcement>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/concern/performance">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Concern"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/concern/performance">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Concern"/>
         <arch:concernName>Performance</arch:concernName>
         <arch:owner>Each swimlane owns its performance budget</arch:owner>
-        <arch:monitoring rdf:resource="http://netra.ai/ui-ux/swimlane/5"/>
+        <arch:monitoring rdf:resource="http://netrasystems.ai/ui-ux/swimlane/5"/>
         <arch:targets>60fps animations, &lt;100ms response time</arch:targets>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/concern/error-handling">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Concern"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/concern/error-handling">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Concern"/>
         <arch:concernName>Error Handling</arch:concernName>
         <arch:owner>Each swimlane handles its own errors</arch:owner>
-        <arch:reporting rdf:resource="http://netra.ai/ui-ux/swimlane/5"/>
-        <arch:recovery rdf:resource="http://netra.ai/ui-ux/swimlane/2"/>
+        <arch:reporting rdf:resource="http://netrasystems.ai/ui-ux/swimlane/5"/>
+        <arch:recovery rdf:resource="http://netrasystems.ai/ui-ux/swimlane/2"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/concern/testing">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Concern"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/concern/testing">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Concern"/>
         <arch:concernName>Testing</arch:concernName>
         <arch:unitTesting>Each swimlane tests its own logic</arch:unitTesting>
         <arch:integrationTesting>Test interfaces between swimlanes</arch:integrationTesting>
@@ -508,54 +508,54 @@
     </rdf:Description>
 
     <!-- Implementation Order -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/implementation-order">
-        <rdf:type rdf:resource="http://netra.ai/architecture#ImplementationOrder"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/implementation-order">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#ImplementationOrder"/>
         
-        <arch:phase rdf:resource="http://netra.ai/ui-ux/phase/1"/>
-        <arch:phase rdf:resource="http://netra.ai/ui-ux/phase/2"/>
-        <arch:phase rdf:resource="http://netra.ai/ui-ux/phase/3"/>
-        <arch:phase rdf:resource="http://netra.ai/ui-ux/phase/4"/>
-        <arch:phase rdf:resource="http://netra.ai/ui-ux/phase/5"/>
+        <arch:phase rdf:resource="http://netrasystems.ai/ui-ux/phase/1"/>
+        <arch:phase rdf:resource="http://netrasystems.ai/ui-ux/phase/2"/>
+        <arch:phase rdf:resource="http://netrasystems.ai/ui-ux/phase/3"/>
+        <arch:phase rdf:resource="http://netrasystems.ai/ui-ux/phase/4"/>
+        <arch:phase rdf:resource="http://netrasystems.ai/ui-ux/phase/5"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/phase/1">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Phase"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/phase/1">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Phase"/>
         <arch:phaseNumber rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">1</arch:phaseNumber>
         <arch:phaseName>WebSocket &amp; Real-time (foundation layer)</arch:phaseName>
-        <arch:implements rdf:resource="http://netra.ai/ui-ux/swimlane/2"/>
+        <arch:implements rdf:resource="http://netrasystems.ai/ui-ux/swimlane/2"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/phase/2">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Phase"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/phase/2">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Phase"/>
         <arch:phaseNumber rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">2</arch:phaseNumber>
         <arch:phaseName>Core Chat Architecture (state management)</arch:phaseName>
-        <arch:implements rdf:resource="http://netra.ai/ui-ux/swimlane/1"/>
+        <arch:implements rdf:resource="http://netrasystems.ai/ui-ux/swimlane/1"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/phase/3">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Phase"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/phase/3">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Phase"/>
         <arch:phaseNumber rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">3</arch:phaseNumber>
         <arch:phaseName>Response Card &amp; Agents (display logic)</arch:phaseName>
-        <arch:implements rdf:resource="http://netra.ai/ui-ux/swimlane/3"/>
+        <arch:implements rdf:resource="http://netrasystems.ai/ui-ux/swimlane/3"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/phase/4">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Phase"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/phase/4">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Phase"/>
         <arch:phaseNumber rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">4</arch:phaseNumber>
         <arch:phaseName>Visual Design &amp; UX (polish layer)</arch:phaseName>
-        <arch:implements rdf:resource="http://netra.ai/ui-ux/swimlane/4"/>
+        <arch:implements rdf:resource="http://netrasystems.ai/ui-ux/swimlane/4"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/phase/5">
-        <rdf:type rdf:resource="http://netra.ai/architecture#Phase"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/phase/5">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#Phase"/>
         <arch:phaseNumber rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">5</arch:phaseNumber>
         <arch:phaseName>Developer Tools (observability layer)</arch:phaseName>
-        <arch:implements rdf:resource="http://netra.ai/ui-ux/swimlane/5"/>
+        <arch:implements rdf:resource="http://netrasystems.ai/ui-ux/swimlane/5"/>
     </rdf:Description>
 
     <!-- Validation Criteria -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/validation">
-        <rdf:type rdf:resource="http://netra.ai/architecture#ValidationCriteria"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/validation">
+        <rdf:type rdf:resource="http://netrasystems.ai/architecture#ValidationCriteria"/>
         
         <arch:criterion>No circular dependencies between swimlanes</arch:criterion>
         <arch:criterion>Each data element has single authoritative source</arch:criterion>
@@ -565,8 +565,8 @@
     </rdf:Description>
 
     <!-- API Contracts -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/api/threads">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#APIEndpoint"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/api/threads">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#APIEndpoint"/>
         <netra:method>GET</netra:method>
         <netra:path>/api/threads</netra:path>
         <netra:description>List user threads</netra:description>
@@ -574,16 +574,16 @@
         <netra:sortOrder>updated_at_desc</netra:sortOrder>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/api/create-thread">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#APIEndpoint"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/api/create-thread">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#APIEndpoint"/>
         <netra:method>POST</netra:method>
         <netra:path>/api/threads</netra:path>
         <netra:description>Create new thread</netra:description>
         <netra:returnsThreadId rdf:datatype="http://www.w3.org/2001/XMLSchema#boolean">true</netra:returnsThreadId>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/api/thread-messages">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#APIEndpoint"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/api/thread-messages">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#APIEndpoint"/>
         <netra:method>GET</netra:method>
         <netra:path>/api/threads/{thread_id}/messages</netra:path>
         <netra:description>Get thread message history</netra:description>
@@ -591,49 +591,49 @@
     </rdf:Description>
 
     <!-- Testing Requirements -->
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/testing">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#TestingRequirements"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/testing">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#TestingRequirements"/>
         
-        <netra:hasTestCategory rdf:resource="http://netra.ai/ui-ux/test/unit"/>
-        <netra:hasTestCategory rdf:resource="http://netra.ai/ui-ux/test/integration"/>
-        <netra:hasTestCategory rdf:resource="http://netra.ai/ui-ux/test/e2e"/>
-        <netra:hasTestCategory rdf:resource="http://netra.ai/ui-ux/test/visual"/>
-        <netra:hasTestCategory rdf:resource="http://netra.ai/ui-ux/test/accessibility"/>
-        <netra:hasTestCategory rdf:resource="http://netra.ai/ui-ux/test/performance"/>
+        <netra:hasTestCategory rdf:resource="http://netrasystems.ai/ui-ux/test/unit"/>
+        <netra:hasTestCategory rdf:resource="http://netrasystems.ai/ui-ux/test/integration"/>
+        <netra:hasTestCategory rdf:resource="http://netrasystems.ai/ui-ux/test/e2e"/>
+        <netra:hasTestCategory rdf:resource="http://netrasystems.ai/ui-ux/test/visual"/>
+        <netra:hasTestCategory rdf:resource="http://netrasystems.ai/ui-ux/test/accessibility"/>
+        <netra:hasTestCategory rdf:resource="http://netrasystems.ai/ui-ux/test/performance"/>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/test/unit">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#TestCategory"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/test/unit">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#TestCategory"/>
         <netra:testType>Unit Tests</netra:testType>
         <netra:coverage>Store actions, component rendering, navigation flows</netra:coverage>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/test/integration">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#TestCategory"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/test/integration">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#TestCategory"/>
         <netra:testType>Integration Tests</netra:testType>
         <netra:coverage>Thread creation, WebSocket connections, history loading</netra:coverage>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/test/e2e">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#TestCategory"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/test/e2e">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#TestCategory"/>
         <netra:testType>End-to-End Tests</netra:testType>
         <netra:coverage>Complete conversation flows, persistence, concurrent updates</netra:coverage>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/test/visual">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#TestCategory"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/test/visual">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#TestCategory"/>
         <netra:testType>Visual Regression Tests</netra:testType>
         <netra:coverage>Component appearance, responsive layouts, animations</netra:coverage>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/test/accessibility">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#TestCategory"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/test/accessibility">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#TestCategory"/>
         <netra:testType>Accessibility Tests</netra:testType>
         <netra:coverage>WCAG 2.1 AA compliance, keyboard navigation, screen readers</netra:coverage>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://netra.ai/ui-ux/test/performance">
-        <rdf:type rdf:resource="http://netra.ai/ui-ux#TestCategory"/>
+    <rdf:Description rdf:about="http://netrasystems.ai/ui-ux/test/performance">
+        <rdf:type rdf:resource="http://netrasystems.ai/ui-ux#TestCategory"/>
         <netra:testType>Performance Tests</netra:testType>
         <netra:coverage>Animation frame rate, render time, interaction responsiveness</netra:coverage>
     </rdf:Description>

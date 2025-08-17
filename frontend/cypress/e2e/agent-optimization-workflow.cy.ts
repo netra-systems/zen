@@ -12,7 +12,7 @@ describe('Full Agent Optimization Workflow', () => {
       statusCode: 200,
       body: {
         id: 1,
-        email: 'test@netra.ai',
+        email: 'test@netrasystems.ai',
         full_name: 'Test User'
       }
     }).as('userRequest');

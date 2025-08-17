@@ -748,7 +748,7 @@ async def create_admin():
     async with get_database() as db:
         user_repo = UserRepository(db)
         admin = await user_repo.create_user({
-            'email': 'admin@netra.ai',
+            'email': 'admin@netrasystems.ai',
             'name': 'Admin User',
             'is_admin': True
         })

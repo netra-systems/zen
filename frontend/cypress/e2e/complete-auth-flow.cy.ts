@@ -16,7 +16,7 @@ describe('Complete Authentication Flow', () => {
         token_type: 'bearer',
         user: {
           id: 1,
-          email: 'test@netra.ai',
+          email: 'test@netrasystems.ai',
           full_name: 'Test User'
         }
       }
@@ -27,13 +27,13 @@ describe('Complete Authentication Flow', () => {
       statusCode: 200,
       body: {
         id: 1,
-        email: 'test@netra.ai',
+        email: 'test@netrasystems.ai',
         full_name: 'Test User'
       }
     }).as('userRequest');
 
     // Fill in login form (assuming there's an email/password form option)
-    cy.get('input[type="email"]').type('test@netra.ai');
+    cy.get('input[type="email"]').type('test@netrasystems.ai');
     cy.get('input[type="password"]').type('SecurePassword123!');
     cy.get('button[type="submit"]').contains('Sign In').click();
 
@@ -86,7 +86,7 @@ describe('Complete Authentication Flow', () => {
     }).as('failedLogin');
 
     // Try to login with invalid credentials
-    cy.get('input[type="email"]').type('wrong@netra.ai');
+    cy.get('input[type="email"]').type('wrong@netrasystems.ai');
     cy.get('input[type="password"]').type('WrongPassword');
     cy.get('button[type="submit"]').contains('Sign In').click();
 

@@ -26,7 +26,7 @@ def get_cors_origins() -> list[str]:
 def _get_production_cors_origins() -> list[str]:
     """Get CORS origins for production environment."""
     cors_origins_env = os.environ.get("CORS_ORIGINS", "")
-    return cors_origins_env.split(",") if cors_origins_env else ["https://netra.ai"]
+    return cors_origins_env.split(",") if cors_origins_env else ["https://netrasystems.ai"]
 
 
 def _get_staging_cors_origins() -> list[str]:

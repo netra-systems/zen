@@ -553,7 +553,7 @@ export default function ImplementationRoadmap({
                 <Mail className="h-4 w-4" />
                 <AlertTitle>Ready to Start?</AlertTitle>
                 <AlertDescription>
-                  Contact your dedicated success manager at success@netra.ai or call 1-800-NETRA-AI
+                  Contact your dedicated success manager at success@netrasystems.ai or call 1-800-NETRA-AI
                 </AlertDescription>
               </Alert>
             </CardContent>

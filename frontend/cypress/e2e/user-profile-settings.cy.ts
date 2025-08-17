@@ -17,7 +17,7 @@ describe('User Profile and Settings Management', () => {
 
     // Verify profile information is displayed
     cy.get('input[name="full_name"]').should('have.value', 'Test User');
-    cy.get('input[name="email"]').should('have.value', 'test@netra.ai');
+    cy.get('input[name="email"]').should('have.value', 'test@netrasystems.ai');
     cy.contains('Member since January 1, 2024').should('be.visible');
 
     // Update profile information
@@ -29,7 +29,7 @@ describe('User Profile and Settings Management', () => {
       statusCode: 200,
       body: {
         id: 1,
-        email: 'test@netra.ai',
+        email: 'test@netrasystems.ai',
         full_name: newName,
         created_at: '2024-01-01T00:00:00Z',
         avatar_url: null

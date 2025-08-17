@@ -14,7 +14,7 @@ describe('CRITICAL: State Management & Synchronization', () => {
       win.localStorage.setItem('auth_token', 'test-token');
       win.localStorage.setItem('user', JSON.stringify({
         id: 'test-user',
-        email: 'test@netra.ai',
+        email: 'test@netrasystems.ai',
         name: 'Test User'
       }));
       
