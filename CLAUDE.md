@@ -187,21 +187,50 @@ root/
 ## Quick Start
 ```bash
 python dev_launcher.py # Start dev
-python test_runner.py --level unit # DEFAULT tests
+python test_runner.py --level integration --no-coverage --fast-fail # DEFAULT tests (fast feedback)
 ```
 
 ## 🧪 UNIFIED TEST RUNNER (test_runner.py)
 **SINGLE AUTHORITATIVE TEST RUNNER** - Do not create alternatives
 
-### Test Levels
-| Level | Time | Purpose | Command |
-|-------|------|---------|---------|
-| **smoke** | <30s | Pre-commit validation | `python test_runner.py --level smoke` |
-| **unit** | 1-2min | Development (DEFAULT) | `python test_runner.py --level unit` |
-| **integration** | 3-5min | Feature validation | `python test_runner.py --level integration` |
-| **critical** | 1-2min | Essential paths | `python test_runner.py --level critical` |
-| **comprehensive** | 30-45min | Full validation | `python test_runner.py --level comprehensive` |
-| **agents** | 2-3min | Agent testing | `python test_runner.py --level agents` |
+### Test Levels (Priority Order)
+| Level | Time | Purpose | Command | When to Use |
+|-------|------|---------|---------|-------------|
+| **integration** | 3-5min | **DEFAULT** - Feature validation | `python test_runner.py --level integration --no-coverage --fast-fail` | After any feature change |
+| **unit** | 1-2min | Component testing | `python test_runner.py --level unit` | During development |
+| **smoke** | <30s | Pre-commit validation | `python test_runner.py --level smoke` | Before every commit |
+| **agents** | 2-3min | Agent testing | `python test_runner.py --level agents` | After agent changes |
+| **critical** | 1-2min | Essential paths | `python test_runner.py --level critical` | Quick validation |
+| **real_e2e** | 15-20min | **CRITICAL** - Real LLM testing | `python test_runner.py --level real_e2e --real-llm` | Before major releases |
+| **comprehensive** | 30-45min | Full validation | `python test_runner.py --level comprehensive` | Before production deploy |
+
+### Comprehensive Test Categories (10-15min each)
+| Category | Purpose | Command |
+|----------|---------|---------|
+| **comprehensive-backend** | Full backend validation | `python test_runner.py --level comprehensive-backend` |
+| **comprehensive-frontend** | Full frontend validation | `python test_runner.py --level comprehensive-frontend` |
+| **comprehensive-core** | Core components deep test | `python test_runner.py --level comprehensive-core` |
+| **comprehensive-agents** | Multi-agent system validation | `python test_runner.py --level comprehensive-agents` |
+| **comprehensive-websocket** | WebSocket deep validation | `python test_runner.py --level comprehensive-websocket` |
+| **comprehensive-database** | Database operations validation | `python test_runner.py --level comprehensive-database` |
+| **comprehensive-api** | API endpoints validation | `python test_runner.py --level comprehensive-api` |
+
+### 🔴 CRITICAL: Real LLM Testing
+**IMPORTANT**: Always test with real LLMs before releases to catch integration issues
+
+```bash
+# Integration tests with real LLM (DEFAULT for releases)
+python test_runner.py --level integration --real-llm
+
+# Specific model testing
+python test_runner.py --level integration --real-llm --llm-model gemini-2.5-flash
+
+# Full E2E with real services
+python test_runner.py --level real_e2e --real-llm --llm-timeout 60
+
+# Agent tests with real LLM (MANDATORY for agent changes)
+python test_runner.py --level agents --real-llm
+```
 
 ### Speed Optimizations (SAFE)
 ```bash
@@ -305,7 +334,7 @@ Ensures every feature directly creates and captures value proportional to a cust
 1. **CHECK** [`learnings/index.xml`](SPEC/learnings/index.xml) - SEARCH category files for related issues/fixes FIRST
 2. **READ** [`type_safety.xml`](SPEC/type_safety.xml) - SINGLE STRONGLY TYPED TYPES ONLY.
 3. **READ** [`conventions.xml`](SPEC/conventions.xml) - 300-LINE LIMIT  
-4. **RUN** `python test_runner.py --level unit` (DEFAULT)
+4. **RUN** `python test_runner.py --level integration --no-coverage --fast-fail` (DEFAULT - fast feedback)
 5. UPDATE specs with POSITIVE wording only.
 
 ### AFTER Any Code Change (Automatic)
@@ -351,13 +380,14 @@ Ensures every feature directly creates and captures value proportional to a cust
 - [`SPEC/conventions.xml`](SPEC/conventions.xml) - Boundary enforcement integration
 
 ## Testing (Use UNIFIED TEST RUNNER)
-- **DEFAULT**: `python test_runner.py --level unit`
-- **QUICK CHECK**: `python test_runner.py --level smoke` (before commits)
-- **FULL VALIDATION**: `python test_runner.py --level comprehensive` (before releases)
-- **SPEED MODE**: `python test_runner.py --level unit --ci` (safe optimizations)
+- **DEFAULT**: `python test_runner.py --level integration --no-coverage --fast-fail` (fast feedback)
+- **QUICK CHECK**: `python test_runner.py --level smoke --fast-fail` (before commits)
+- **AGENT CHANGES**: `python test_runner.py --level agents --real-llm` (MANDATORY for agent changes)
+- **REAL LLM TESTING**: `python test_runner.py --level integration --real-llm` (before releases)
+- **FULL VALIDATION**: `python test_runner.py --level comprehensive` (before production)
 - Choose a category using test discovery: `python test_runner.py --list`
-- ALWAYS run UNIT tests for noticeable changes
-- ALWAYS run E2E real tests for agent changes
+- ALWAYS run integration tests for feature changes
+- ALWAYS run real LLM tests for agent changes (catches integration issues)
 - Think about DATA, data flow, data types, critical paths
 
 ## 📝 MODULE PLANNING (3rd Reminder: 300 Lines MAX)

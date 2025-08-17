@@ -1,19 +1,19 @@
 # Test Dashboard
-**Level**: critical | **Time**: 2025-08-17 15:52:14
+**Level**: integration | **Time**: 2025-08-17 15:54:51
 
-## Overall Status: 🔴 Import Errors - Tests Cannot Run
+## Overall Status: ⚠️ Unknown - Check test output
 
 ## Component Summary
 
 | Component | Status | Tests | Passed | Failed | Errors | Import Errors | Duration |
 |-----------|--------|-------|--------|--------|--------|---------------|----------|
-| Backend | 🔴 import_error | 0 | 0 | 0 | 0 | 1 | 10.28s |
-| Frontend | ⚫ collection_failed | 0 | 0 | 0 | 0 | 0 | 0.00s |
+| Backend | ⚫ no_tests | 0 | 0 | 0 | 0 | 0 | 32.24s |
+| Frontend | ⚫ collection_failed | 0 | 0 | 0 | 0 | 0 | 0.12s |
 | E2E | ⚫ collection_failed | 0 | 0 | 0 | 0 | 0 | 0.00s |
 
 ## 🔴 Issues Detected
 
-- backend: 1 import error(s)
+- backend: No tests found to run
 - frontend: Test collection failed
 - e2e: Test collection failed
 
@@ -24,15 +24,11 @@
 - **Failed**: 0
 - **Errors**: 0
 - **Skipped**: 0
-- **Total Duration**: 10.28s
+- **Total Duration**: 32.36s
 
 ## Quick Actions
 
 ```bash
-# Fix import errors first
-python -m pip install -r requirements.txt
-python scripts/check_imports.py
-
 # Run specific test levels
 python test_runner.py --level unit
 python test_runner.py --level smoke

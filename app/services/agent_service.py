@@ -31,7 +31,7 @@ def get_primary_agent():
     return AgentService(SupervisorAgent())
 
 def get_fallback_agent():
-    """Get fallback agent instance.\"\"\"
+    """Get fallback agent instance."""
     from .agent_service_core import AgentService
     from app.agents.supervisor_consolidated import SupervisorAgent
     return AgentService(SupervisorAgent())

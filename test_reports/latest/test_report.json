@@ -1,6 +1,6 @@
 {
-  "timestamp": "2025-08-17T15:52:14.889134",
-  "level": "critical",
+  "timestamp": "2025-08-17T15:54:51.271776",
+  "level": "integration",
   "components": {
     "backend": {
       "total": 0,
@@ -8,14 +8,14 @@
       "failed": 0,
       "skipped": 0,
       "errors": 0,
-      "import_errors": 1,
-      "duration": 10.28379774093628,
-      "status": "import_error",
-      "exit_code": 4,
+      "import_errors": 0,
+      "duration": 32.24257826805115,
+      "status": "no_tests",
+      "exit_code": 3,
       "pass_rate": 0.0,
-      "has_issues": true,
-      "status_icon": "\ud83d\udd34",
-      "summary_text": "Import errors (1)"
+      "has_issues": false,
+      "status_icon": "\u26ab",
+      "summary_text": "No tests found"
     },
     "frontend": {
       "total": 0,
@@ -24,9 +24,9 @@
       "skipped": 0,
       "errors": 0,
       "import_errors": 0,
-      "duration": 0,
+      "duration": 0.1189420223236084,
       "status": "collection_failed",
-      "exit_code": null,
+      "exit_code": 2,
       "pass_rate": 0.0,
       "has_issues": false,
       "status_icon": "\u26ab",
@@ -48,9 +48,9 @@
       "summary_text": "No tests ran"
     }
   },
-  "overall_status": "\ud83d\udd34 Import Errors - Tests Cannot Run",
+  "overall_status": "\u26a0\ufe0f Unknown - Check test output",
   "issues": [
-    "backend: 1 import error(s)",
+    "backend: No tests found to run",
     "frontend: Test collection failed",
     "e2e: Test collection failed"
   ]

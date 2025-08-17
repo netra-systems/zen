@@ -329,10 +329,34 @@
       "passed": 0,
       "failed": 0,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_155251_71768",
+      "timestamp": "2025-08-17T15:53:00.298547",
+      "total_tests": 7,
+      "passed": 7,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_155402_42357",
+      "timestamp": "2025-08-17T15:54:13.151051",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_155415_55120",
+      "timestamp": "2025-08-17T15:55:12.969918",
+      "total_tests": 2484,
+      "passed": 2484,
+      "failed": 0,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 41,
-    "last_updated": "2025-08-17T15:52:14.889134"
+    "total_runs": 44,
+    "last_updated": "2025-08-17T15:55:12.969918"
   }
 }

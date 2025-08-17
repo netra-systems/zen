@@ -1,13 +1,13 @@
 # Test Summary
-**Level**: critical | **Time**: 2025-08-17 15:52:14
+**Level**: integration | **Time**: 2025-08-17 15:54:51
 
-**Status**: 🔴 Import Errors - Tests Cannot Run
+**Status**: ⚠️ Unknown - Check test output
 
-**Backend**: 🔴 Import errors (1)
+**Backend**: ⚫ No tests found
 **Frontend**: ⚫ No tests ran
 **E2E**: ⚫ No tests ran
 
 ## Issues
-- backend: 1 import error(s)
+- backend: No tests found to run
 - frontend: Test collection failed
 - e2e: Test collection failed

@@ -255,7 +255,7 @@ class EnvironmentAuthConfig:
         
     def _get_oauth_env_var(self, env_suffix: str, cred_type: str) -> str:
         """Get OAuth environment variable with fallback."""
-        primary_var = f"GOOGLE_OAUTH_CLIENT_{cred_type}_{env_suffix}"
+        primary_var = f"GOOGLE_OAUTH_{cred_type}_{env_suffix}"
         primary_value = os.getenv(primary_var, "")
         if primary_value:
             return primary_value
