@@ -317,7 +317,7 @@ async def test_latency_critical():
 ### 5. Parallel Execution
 
 ```yaml
-# pytest.ini configuration
+# config/pytest.ini configuration
 [tool:pytest]
 markers =
     real_services: All real service tests

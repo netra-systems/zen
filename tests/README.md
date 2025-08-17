@@ -89,7 +89,7 @@ python test_summary.py --html
 
 ## ⚙️ Configuration
 
-### Test Configuration (`pytest.ini`)
+### Test Configuration (`config/pytest.ini`)
 ```ini
 [pytest]
 asyncio_mode = auto

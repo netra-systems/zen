@@ -34,7 +34,7 @@ class TestPerformanceOptimizer:
 
     async def _enable_parallelization(self) -> bool:
         """Enable parallel test execution via pytest configuration"""
-        pytest_ini = self.project_root / "pytest.ini"
+        pytest_ini = self.project_root / "config" / "pytest.ini"
         
         if not pytest_ini.exists():
             return False

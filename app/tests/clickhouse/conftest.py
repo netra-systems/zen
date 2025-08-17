@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 
 
 # Remove event_loop fixture to prevent conflicts with pytest-asyncio auto mode
-# pytest.ini has asyncio_mode = auto which handles event loops automatically
+# config/pytest.ini has asyncio_mode = auto which handles event loops automatically
 
 
 @pytest.fixture

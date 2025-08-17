@@ -880,7 +880,7 @@
             <type name="runner_bypass">
                 <description>Tests that appear valid locally but are bypassed by test runners</description>
                 <patterns>
-                    <pattern>Tests excluded in pytest.ini or test configurations</pattern>
+                    <pattern>Tests excluded in config/pytest.ini or test configurations</pattern>
                     <pattern>Tests with custom markers that are never executed</pattern>
                     <pattern>Tests in files not included in test discovery patterns</pattern>
                 </patterns>

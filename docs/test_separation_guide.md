@@ -79,7 +79,7 @@ Well-isolated tests suitable for CI/CD:
 
 ### pytest.ini Markers
 All test markers are defined in both:
-- `/pytest.ini` (root)
+- `/config/pytest.ini` (configuration directory)
 - `/app/pytest.ini` (app directory)
 
 ### Test Runner Levels

@@ -10,6 +10,7 @@ import subprocess
 def fix_async_tests():
     """Fix pytest-asyncio configuration."""
     pytest_ini_path = "app/pytest.ini"
+    config_pytest_ini_path = "config/pytest.ini"
     
     # Already fixed in previous step
     print("[OK] Async test configuration already updated")
