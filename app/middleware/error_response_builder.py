@@ -14,14 +14,17 @@ from app.core.error_recovery import RecoveryContext
 
 def create_circuit_breaker_response() -> JSONResponse:
     """Create service unavailable response for circuit breaker."""
-    return JSONResponse(
-        status_code=503,
-        content={
-            "error": "SERVICE_UNAVAILABLE",
-            "message": "Service temporarily unavailable",
-            "retry_after": 60
-        }
-    )
+    content = _get_circuit_breaker_content()
+    return JSONResponse(status_code=503, content=content)
+
+
+def _get_circuit_breaker_content() -> Dict[str, Any]:
+    """Get circuit breaker response content."""
+    return {
+        "error": "SERVICE_UNAVAILABLE",
+        "message": "Service temporarily unavailable",
+        "retry_after": 60
+    }
 
 
 def create_recovery_response(
@@ -37,15 +40,21 @@ def create_recovery_response(
 
 def build_recovery_content(context: RecoveryContext, recovery_result) -> Dict[str, Any]:
     """Build recovery response content."""
+    recovery_info = _build_recovery_info(context, recovery_result)
     return {
         "success": True,
         "message": "Request completed with recovery",
-        "recovery_info": {
-            "action_taken": recovery_result.action_taken.value,
-            "operation_id": context.operation_id,
-            "compensation_required": recovery_result.compensation_required,
-            "retry_count": context.retry_count
-        }
+        "recovery_info": recovery_info
+    }
+
+
+def _build_recovery_info(context: RecoveryContext, recovery_result) -> Dict[str, Any]:
+    """Build recovery info section."""
+    return {
+        "action_taken": recovery_result.action_taken.value,
+        "operation_id": context.operation_id,
+        "compensation_required": recovery_result.compensation_required,
+        "retry_count": context.retry_count
     }
 
 
@@ -74,13 +83,24 @@ def determine_error_status_code(error: Exception) -> int:
     """Determine HTTP status code for error type."""
     if isinstance(error, HTTPException):
         return error.status_code
-    elif isinstance(error, (ValueError, TypeError)):
-        return 400
-    elif isinstance(error, PermissionError):
-        return 403
-    elif isinstance(error, FileNotFoundError):
-        return 404
+    return _get_status_code_for_standard_errors(error)
+
+def _get_status_code_for_standard_errors(error: Exception) -> int:
+    """Get status code for standard error types."""
+    error_mapping = _get_error_status_mapping()
+    for error_types, status_code in error_mapping.items():
+        if isinstance(error, error_types):
+            return status_code
     return 500
+
+
+def _get_error_status_mapping() -> Dict[tuple, int]:
+    """Get error type to status code mapping."""
+    return {
+        (ValueError, TypeError): 400,
+        PermissionError: 403,
+        FileNotFoundError: 404
+    }
 
 
 def build_complete_error_response(error: Exception, operation_id: str, request: Request) -> dict:

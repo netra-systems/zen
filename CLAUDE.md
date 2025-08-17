@@ -15,6 +15,17 @@ The product is Netra Apex.
 - Find middle ground between business goals and engineering goals. Business goals are superior to engineering goals.
 - Every added line of code, every file, every module, every system: you ALWAYS think and ask: What is the business value? Which customer segment is it for? How much value does this add relative to their AI spend?
 
+## IMPORTANT: Revenue-Driven Development: Business Value Justification (BVJ)
+To enforce the mandate that business goals are superior to engineering goals, every engineering task (Ticket/Issue) must include a Business Value Justification (BVJ).
+
+# Example Task: Implement Intelligent Model Routing
+Example:
+**BVJ:**
+1. **Segment**: Growth & Enterprise
+2. **Business Goal**: Increase Value Creation (Savings Delta).
+3. **Value Impact**: Estimated to increase average customer savings by 10-15%.
+4. **Revenue Impact**: Increases the 20% performance fee capture. Estimated +$10K MRR 
+
 
 ## 🔴 Engineering CRITICAL: MODULE-BASED ARCHITECTURE (300 LINES MAX, 8 LINES PER FUNCTION)
 **MANDATORY**: Every file MUST be ≤300 lines. ALL functions MUST be ≤8 lines.

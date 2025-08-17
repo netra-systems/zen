@@ -50,24 +50,55 @@ def _generate_trace_types_and_content(config, content_corpus, num_logs):
     return prompts, responses
 
 
-def _create_base_dataframe(num_logs, apps, models, app_choices, model_choices, prompts, responses):
-    """Create base DataFrame with core columns."""
-    return pd.DataFrame({
+def _generate_id_columns(num_logs: int) -> dict:
+    """Generate ID columns for DataFrame."""
+    return {
         'trace_id': [str(uuid.uuid4()) for _ in range(num_logs)],
         'span_id': [str(uuid.uuid4()) for _ in range(num_logs)],
-        'app_name': [apps[i]['app_name'] for i in app_choices],
-        'service_name': [random.choice(apps[i]['services']) for i in app_choices],
-        'model_provider': [models[i]['provider'] for i in model_choices],
-        'model_name': [models[i]['name'] for i in model_choices],
-        'model_pricing': [models[i]['pricing'] for i in model_choices],
-        'user_prompt': prompts, 'assistant_response': responses,
-        'prompt_tokens': [len(p.split()) * 2 for p in prompts],
-        'completion_tokens': [len(r.split()) * 2 for r in responses],
-        'total_e2e_ms': np.random.randint(200, 2000, size=num_logs),
-        'ttft_ms': np.random.randint(150, 800, size=num_logs),
         'user_id': [str(uuid.uuid4()) for _ in range(num_logs)],
         'organization_id': [f"org_{hashlib.sha256(Faker().company().encode()).hexdigest()[:12]}" for _ in range(num_logs)]
-    })
+    }
+
+def _generate_app_columns(apps: list, app_choices: list) -> dict:
+    """Generate app and service columns."""
+    return {
+        'app_name': [apps[i]['app_name'] for i in app_choices],
+        'service_name': [random.choice(apps[i]['services']) for i in app_choices]
+    }
+
+def _generate_model_columns(models: list, model_choices: list) -> dict:
+    """Generate model-related columns."""
+    return {
+        'model_provider': [models[i]['provider'] for i in model_choices],
+        'model_name': [models[i]['name'] for i in model_choices],
+        'model_pricing': [models[i]['pricing'] for i in model_choices]
+    }
+
+def _generate_content_columns(prompts: list, responses: list) -> dict:
+    """Generate content and token columns."""
+    return {
+        'user_prompt': prompts,
+        'assistant_response': responses,
+        'prompt_tokens': [len(p.split()) * 2 for p in prompts],
+        'completion_tokens': [len(r.split()) * 2 for r in responses]
+    }
+
+def _generate_performance_columns(num_logs: int) -> dict:
+    """Generate performance metric columns."""
+    return {
+        'total_e2e_ms': np.random.randint(200, 2000, size=num_logs),
+        'ttft_ms': np.random.randint(150, 800, size=num_logs)
+    }
+
+def _create_base_dataframe(num_logs, apps, models, app_choices, model_choices, prompts, responses):
+    """Create base DataFrame with core columns."""
+    columns = {}
+    columns.update(_generate_id_columns(num_logs))
+    columns.update(_generate_app_columns(apps, app_choices))
+    columns.update(_generate_model_columns(models, model_choices))
+    columns.update(_generate_content_columns(prompts, responses))
+    columns.update(_generate_performance_columns(num_logs))
+    return pd.DataFrame(columns)
 
 
 def _calculate_costs_and_totals(df):
@@ -88,37 +119,61 @@ def generate_data_chunk_for_service(args):
     return _calculate_costs_and_totals(df)
 
 
-def format_log_entry(row):
-    """Formats a DataFrame row into a structured log entry."""
+def _create_log_base_info(row) -> dict:
+    """Create base log information."""
     return {
         "timestamp": pd.Timestamp.now().isoformat(),
         "level": "INFO",
         "message": "API call processed",
         "trace_id": row['trace_id'],
-        "span_id": row['span_id'],
-        "metadata": {
-            "app_name": row['app_name'],
-            "service_name": row['service_name'],
-            "model_provider": row['model_provider'],
-            "model_name": row['model_name'],
-            "user_id": row['user_id'],
-            "organization_id": row['organization_id']
-        },
-        "llm_event": {
-            "user_prompt": row['user_prompt'],
-            "assistant_response": row['assistant_response'],
-            "prompt_tokens": row['prompt_tokens'],
-            "completion_tokens": row['completion_tokens'],
-            "total_tokens": row['total_tokens'],
-            "total_e2e_ms": row['total_e2e_ms'],
-            "ttft_ms": row['ttft_ms'],
-            "cost": {
-                "prompt_cost": row['prompt_cost'],
-                "completion_cost": row['completion_cost'],
-                "total_cost": row['total_cost']
-            }
-        }
+        "span_id": row['span_id']
     }
+
+def _create_log_metadata(row) -> dict:
+    """Create log metadata section."""
+    return {
+        "app_name": row['app_name'],
+        "service_name": row['service_name'],
+        "model_provider": row['model_provider'],
+        "model_name": row['model_name'],
+        "user_id": row['user_id'],
+        "organization_id": row['organization_id']
+    }
+
+def _create_cost_info(row) -> dict:
+    """Create cost information section."""
+    return {
+        "prompt_cost": row['prompt_cost'],
+        "completion_cost": row['completion_cost'],
+        "total_cost": row['total_cost']
+    }
+
+def _create_token_info(row) -> dict:
+    """Create token information section."""
+    return {
+        "prompt_tokens": row['prompt_tokens'],
+        "completion_tokens": row['completion_tokens'],
+        "total_tokens": row['total_tokens']
+    }
+
+def _create_llm_event(row) -> dict:
+    """Create LLM event section."""
+    event = {
+        "user_prompt": row['user_prompt'],
+        "assistant_response": row['assistant_response'],
+        "total_e2e_ms": row['total_e2e_ms'],
+        "ttft_ms": row['ttft_ms'],
+        "cost": _create_cost_info(row)
+    }
+    event.update(_create_token_info(row))
+    return event
+
+def format_log_entry(row):
+    """Formats a DataFrame row into a structured log entry."""
+    base_info = _create_log_base_info(row)
+    base_info["metadata"] = _create_log_metadata(row)
+    base_info["llm_event"] = _create_llm_event(row)
+    return base_info
 
 
 def get_config():
@@ -144,22 +199,40 @@ async def run_log_generation_job(job_id: str, params: dict):
         await update_job_status(job_id, "failed", error=str(e))
 
 
-async def _generate_synthetic_logs(job_id: str, params: dict, config: dict, content_corpus: dict):
-    """Generate synthetic logs using multiprocessing."""
-    num_logs = params['num_logs']
-    num_processes = min(cpu_count(), params['max_cores'])
+def _calculate_work_chunks(num_logs: int, max_cores: int) -> list:
+    """Calculate work chunks for multiprocessing."""
+    num_processes = min(cpu_count(), max_cores)
     chunk_size = num_logs // num_processes
     chunks = [chunk_size] * num_processes
     remainder = num_logs % num_processes
     if remainder:
         chunks.append(remainder)
-    worker_args = [(chunk, config, content_corpus) for chunk in chunks]
+    return chunks
+
+def _prepare_worker_args(chunks: list, config: dict, content_corpus: dict) -> list:
+    """Prepare arguments for worker processes."""
+    return [(chunk, config, content_corpus) for chunk in chunks]
+
+async def _execute_multiprocessing_pool(job_id: str, worker_args: list, num_logs: int) -> list:
+    """Execute multiprocessing pool with progress tracking."""
     results = []
     completed_logs = 0
+    num_processes = len(worker_args)
     with Pool(processes=num_processes) as pool:
-        for i, result_df in enumerate(pool.imap_unordered(generate_data_chunk_for_service, worker_args)):
+        for result_df in pool.imap_unordered(generate_data_chunk_for_service, worker_args):
             results.append(result_df)
             completed_logs += len(result_df)
             await update_job_status(job_id, "running", progress={'completed_logs': completed_logs, 'total_logs': num_logs})
+    return results
+
+def _process_log_results(results: list) -> list:
+    """Process and format multiprocessing results."""
     combined_df = pd.concat(results, ignore_index=True)
     return [format_log_entry(row) for _, row in combined_df.iterrows()]
+
+async def _generate_synthetic_logs(job_id: str, params: dict, config: dict, content_corpus: dict):
+    """Generate synthetic logs using multiprocessing."""
+    chunks = _calculate_work_chunks(params['num_logs'], params['max_cores'])
+    worker_args = _prepare_worker_args(chunks, config, content_corpus)
+    results = await _execute_multiprocessing_pool(job_id, worker_args, params['num_logs'])
+    return _process_log_results(results)

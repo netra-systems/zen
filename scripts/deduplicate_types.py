@@ -54,12 +54,14 @@ class DuplicateTypeInfo:
 class TypeDeduplicator:
     """Main class for type deduplication process."""
     
-    def __init__(self, project_root: Path = PROJECT_ROOT):
+    def _setup_project_paths(self, project_root):
+        """Setup project directory paths"""
         self.project_root = project_root
         self.app_dir = project_root / "app"
         self.frontend_dir = project_root / "frontend"
-        
-        # Files to be deleted after migration
+
+    def _setup_duplicate_files_list(self):
+        """Setup list of files to be deleted after migration"""
         self.duplicate_files = [
             "app/agents/state.py",  # AgentState duplicates
             "app/schemas/websocket_types.py",  # WebSocket duplicates
@@ -67,24 +69,22 @@ class TypeDeduplicator:
             "frontend/types/agent.ts",  # Agent type duplicates
             "frontend/types/chat.ts",  # Chat type duplicates
         ]
-        
-        # Registry mappings
+
+    def _setup_python_mappings(self):
+        """Setup Python type mapping configurations"""
         self.python_type_mappings = {
-            # Agent types
             "AgentState": "app.schemas.registry.AgentState",
             "AgentResult": "app.schemas.registry.AgentResult", 
             "AgentStatus": "app.schemas.registry.AgentStatus",
             "AgentMetadata": "app.schemas.registry.AgentMetadata",
             "ToolResultData": "app.schemas.registry.ToolResultData",
-            
-            # Core domain types
-            "User": "app.schemas.registry.User",
-            "Message": "app.schemas.registry.Message",
-            "MessageType": "app.schemas.registry.MessageType",
-            "Thread": "app.schemas.registry.Thread",
-            "ThreadMetadata": "app.schemas.registry.ThreadMetadata",
-            
-            # WebSocket types
+            "User": "app.schemas.registry.User", "Message": "app.schemas.registry.Message",
+            "MessageType": "app.schemas.registry.MessageType", "Thread": "app.schemas.registry.Thread",
+        }
+
+    def _setup_websocket_mappings(self):
+        """Setup WebSocket type mappings for Python"""
+        websocket_mappings = {
             "WebSocketMessage": "app.schemas.registry.WebSocketMessage",
             "WebSocketMessageType": "app.schemas.registry.WebSocketMessageType",
             "WebSocketError": "app.schemas.registry.WebSocketError",
@@ -92,30 +92,36 @@ class TypeDeduplicator:
             "AgentUpdatePayload": "app.schemas.registry.AgentUpdatePayload",
             "BaseWebSocketPayload": "app.schemas.registry.BaseWebSocketPayload",
         }
-        
+        self.python_type_mappings.update(websocket_mappings)
+
+    def _setup_typescript_mappings(self):
+        """Setup TypeScript type mapping configurations"""
         self.typescript_type_mappings = {
-            # Agent types
-            "AgentState": "@/types/registry.AgentState",
-            "AgentResult": "@/types/registry.AgentResult",
-            "AgentStatus": "@/types/registry.AgentStatus", 
-            "AgentMetadata": "@/types/registry.AgentMetadata",
-            "ToolResultData": "@/types/registry.ToolResultData",
-            
-            # Core domain types  
-            "User": "@/types/registry.User",
-            "Message": "@/types/registry.Message",
-            "MessageType": "@/types/registry.MessageType",
-            "Thread": "@/types/registry.Thread",
-            "ThreadMetadata": "@/types/registry.ThreadMetadata",
-            
-            # WebSocket types
+            "AgentState": "@/types/registry.AgentState", "AgentResult": "@/types/registry.AgentResult",
+            "AgentStatus": "@/types/registry.AgentStatus", "AgentMetadata": "@/types/registry.AgentMetadata",
+            "ToolResultData": "@/types/registry.ToolResultData", "User": "@/types/registry.User",
+            "Message": "@/types/registry.Message", "MessageType": "@/types/registry.MessageType",
+            "Thread": "@/types/registry.Thread", "ThreadMetadata": "@/types/registry.ThreadMetadata",
+        }
+
+    def _setup_typescript_websocket_mappings(self):
+        """Setup WebSocket type mappings for TypeScript"""
+        websocket_mappings = {
             "WebSocketMessage": "@/types/registry.WebSocketMessage",
             "WebSocketMessageType": "@/types/registry.WebSocketMessageType",
             "WebSocketError": "@/types/registry.WebSocketError",
             "UserMessagePayload": "@/types/registry.UserMessagePayload",
             "AgentUpdatePayload": "@/types/registry.AgentUpdatePayload",
         }
-        
+        self.typescript_type_mappings.update(websocket_mappings)
+
+    def __init__(self, project_root: Path = PROJECT_ROOT):
+        self._setup_project_paths(project_root)
+        self._setup_duplicate_files_list()
+        self._setup_python_mappings()
+        self._setup_websocket_mappings()
+        self._setup_typescript_mappings()
+        self._setup_typescript_websocket_mappings()
         self.replacements: List[ImportReplacement] = []
         
     def find_python_imports(self) -> List[ImportReplacement]:

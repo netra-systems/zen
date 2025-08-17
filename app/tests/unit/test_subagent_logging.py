@@ -6,7 +6,7 @@ from app.agents.state import DeepAgentState
 from app.llm.observability import SubAgentLogger, get_subagent_logger
 
 
-class TestSubAgent(BaseSubAgent):
+class MockSubAgent(BaseSubAgent):
     """Test implementation of BaseSubAgent."""
     
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
@@ -14,7 +14,7 @@ class TestSubAgent(BaseSubAgent):
         pass
 
 
-class TestSubAgentLogger:
+class MockSubAgentLogger:
     """Test SubAgentLogger class functionality."""
     
     def test_init_enabled(self):
@@ -78,7 +78,7 @@ class TestBaseSubAgentLogging:
     @pytest.fixture
     def test_agent(self):
         """Create test agent instance."""
-        return TestSubAgent(name="TestAgent")
+        return MockSubAgent(name="TestAgent")
     
     @pytest.fixture
     def mock_state(self):

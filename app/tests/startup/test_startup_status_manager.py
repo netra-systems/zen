@@ -18,7 +18,8 @@ from app.schemas.startup_types import (
     CrashEntry, HealthCheckHistory, ServiceType, Environment
 )
 from app.core.exceptions_base import NetraException
-from app.core.exceptions_file import FileError, FileNotFoundError, DataParsingError
+from app.core.exceptions_file import FileError, DataParsingError
+from app.core.exceptions_file import FileNotFoundError as NetraFileNotFoundError
 
 
 @pytest.fixture
@@ -74,15 +75,16 @@ class TestLoadStatus:
         assert status.last_startup.success is True
     async def test_load_nonexistent_creates_new(self, status_manager: StartupStatusManager) -> None:
         """Test creating new status when file doesn't exist."""
-        with patch.object(status_manager, '_create_new_status') as mock_create:
-            mock_create.return_value = StartupStatus()
-            status = await status_manager.load_status()
-            mock_create.assert_called_once()
+        with patch.object(status_manager, '_load_existing_status', side_effect=NetraFileNotFoundError("File not found")):
+            with patch.object(status_manager, '_create_new_status', new_callable=AsyncMock) as mock_create:
+                mock_create.return_value = StartupStatus()
+                status = await status_manager.load_status()
+                mock_create.assert_called_once()
     async def test_load_invalid_json_creates_new(self, status_manager: StartupStatusManager,
                                                 temp_status_path: Path) -> None:
         """Test handling invalid JSON creates new status."""
         temp_status_path.write_text("invalid json")
-        with patch.object(status_manager, '_create_new_status') as mock_create:
+        with patch.object(status_manager, '_create_new_status', new_callable=AsyncMock) as mock_create:
             mock_create.return_value = StartupStatus()
             await status_manager.load_status()
             mock_create.assert_called_once()
@@ -225,15 +227,15 @@ class TestFileLocking:
     """Test file locking mechanisms."""
     async def test_file_lock_context_manager(self, status_manager: StartupStatusManager) -> None:
         """Test file lock context manager."""
-        with patch.object(status_manager._lock_file_path, 'touch') as mock_touch:
-            with patch.object(status_manager._lock_file_path, 'unlink') as mock_unlink:
+        with patch('pathlib.Path.touch') as mock_touch:
+            with patch('pathlib.Path.unlink') as mock_unlink:
                 async with status_manager._file_lock():
                     pass
-                mock_touch.assert_called_once()
-                mock_unlink.assert_called_once()
+                mock_touch.assert_called_once_with(exist_ok=False)
+                mock_unlink.assert_called_once_with(missing_ok=True)
     async def test_file_lock_timeout(self, status_manager: StartupStatusManager) -> None:
         """Test file lock timeout handling."""
-        with patch.object(status_manager._lock_file_path, 'touch', side_effect=FileExistsError):
+        with patch('pathlib.Path.touch', side_effect=FileExistsError):
             with patch('asyncio.sleep', new_callable=AsyncMock):
                 with pytest.raises(NetraException, match="Could not acquire file lock"):
                     async with status_manager._file_lock():
@@ -245,7 +247,13 @@ class TestAtomicWrite:
     async def test_atomic_write_success(self, status_manager: StartupStatusManager) -> None:
         """Test successful atomic write."""
         test_data = {"test": "data"}
-        with patch.object(status_manager, '_file_lock', new_callable=AsyncMock):
+        from contextlib import asynccontextmanager
+        
+        @asynccontextmanager
+        async def mock_file_lock():
+            yield
+        
+        with patch.object(status_manager, '_file_lock', side_effect=mock_file_lock):
             with patch('pathlib.Path.write_text') as mock_write:
                 with patch('pathlib.Path.replace') as mock_replace:
                     await status_manager._atomic_write(test_data)
@@ -254,7 +262,13 @@ class TestAtomicWrite:
     async def test_atomic_write_failure_cleanup(self, status_manager: StartupStatusManager) -> None:
         """Test atomic write failure with cleanup."""
         test_data = {"test": "data"}
-        with patch.object(status_manager, '_file_lock', new_callable=AsyncMock):
+        from contextlib import asynccontextmanager
+        
+        @asynccontextmanager
+        async def mock_file_lock():
+            yield
+            
+        with patch.object(status_manager, '_file_lock', side_effect=mock_file_lock):
             with patch('pathlib.Path.write_text', side_effect=Exception("write error")):
                 with patch('pathlib.Path.unlink') as mock_cleanup:
                     with pytest.raises(FileError):

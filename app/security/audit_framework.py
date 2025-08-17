@@ -317,69 +317,71 @@ class SecurityAuditFramework:
         
     async def run_audit(self, categories: Optional[List[SecurityCategory]] = None) -> SecurityAuditResult:
         """Run comprehensive security audit."""
+        audit_id, start_time = self._initialize_audit()
+        all_findings, audit_metrics = await self._execute_auditors(categories)
+        end_time, duration = self._calculate_timing(start_time)
+        compliance_scores = self._calculate_compliance_scores(all_findings)
+        recommendations = self._generate_recommendations(all_findings)
+        result = self._create_audit_result(audit_id, start_time, end_time, duration, all_findings, audit_metrics, compliance_scores, recommendations)
+        self._finalize_audit(result, all_findings, audit_id, duration)
+        return result
+    
+    def _initialize_audit(self) -> Tuple[str, datetime]:
+        """Initialize audit with ID and start time."""
         audit_id = f"audit_{int(time.time())}"
         start_time = datetime.now(timezone.utc)
-        
         logger.info(f"Starting security audit {audit_id}")
-        
+        return audit_id, start_time
+    
+    async def _execute_auditors(self, categories: Optional[List[SecurityCategory]]) -> Tuple[List[SecurityFinding], Dict[str, Any]]:
+        """Execute all auditors and collect findings."""
         all_findings = []
         audit_metrics = {}
-        
-        # Run auditors
         for auditor in self.auditors:
             if categories is None or auditor.get_category() in categories:
-                try:
-                    auditor_start = time.time()
-                    findings = await auditor.audit()
-                    auditor_duration = time.time() - auditor_start
-                    
-                    all_findings.extend(findings)
-                    audit_metrics[auditor.get_category().value] = {
-                        "findings_count": len(findings),
-                        "duration_seconds": auditor_duration
-                    }
-                    
-                    logger.info(f"Auditor {auditor.__class__.__name__} found {len(findings)} issues")
-                    
-                except Exception as e:
-                    logger.error(f"Error in auditor {auditor.__class__.__name__}: {e}")
-                    audit_metrics[auditor.get_category().value] = {
-                        "error": str(e),
-                        "findings_count": 0
-                    }
-        
+                findings, metrics = await self._run_single_auditor(auditor)
+                all_findings.extend(findings)
+                audit_metrics[auditor.get_category().value] = metrics
+        return all_findings, audit_metrics
+    
+    async def _run_single_auditor(self, auditor: SecurityAuditor) -> Tuple[List[SecurityFinding], Dict[str, Any]]:
+        """Run a single auditor and return findings with metrics."""
+        try:
+            auditor_start = time.time()
+            findings = await auditor.audit()
+            auditor_duration = time.time() - auditor_start
+            metrics = {"findings_count": len(findings), "duration_seconds": auditor_duration}
+            logger.info(f"Auditor {auditor.__class__.__name__} found {len(findings)} issues")
+            return findings, metrics
+        except Exception as e:
+            logger.error(f"Error in auditor {auditor.__class__.__name__}: {e}")
+            return [], {"error": str(e), "findings_count": 0}
+    
+    def _calculate_timing(self, start_time: datetime) -> Tuple[datetime, float]:
+        """Calculate end time and duration."""
         end_time = datetime.now(timezone.utc)
         duration = (end_time - start_time).total_seconds()
-        
-        # Calculate compliance scores
-        compliance_scores = self._calculate_compliance_scores(all_findings)
-        
-        # Generate recommendations
-        recommendations = self._generate_recommendations(all_findings)
-        
-        # Create audit result
-        result = SecurityAuditResult(
-            audit_id=audit_id,
-            start_time=start_time,
-            end_time=end_time,
-            duration_seconds=duration,
-            findings=all_findings,
-            metrics=audit_metrics,
-            compliance_scores=compliance_scores,
-            recommendations=recommendations,
+        return end_time, duration
+    
+    def _create_audit_result(self, audit_id: str, start_time: datetime, end_time: datetime, 
+                           duration: float, all_findings: List[SecurityFinding], 
+                           audit_metrics: Dict[str, Any], compliance_scores: Dict[str, float], 
+                           recommendations: List[str]) -> SecurityAuditResult:
+        """Create the audit result object."""
+        return SecurityAuditResult(
+            audit_id=audit_id, start_time=start_time, end_time=end_time,
+            duration_seconds=duration, findings=all_findings, metrics=audit_metrics,
+            compliance_scores=compliance_scores, recommendations=recommendations,
             next_audit_date=datetime.now(timezone.utc) + timedelta(days=7)
         )
-        
-        # Store audit result
+    
+    def _finalize_audit(self, result: SecurityAuditResult, all_findings: List[SecurityFinding], 
+                       audit_id: str, duration: float) -> None:
+        """Finalize audit by storing results and updating active findings."""
         self.audit_history.append(result)
-        
-        # Update active findings
         for finding in all_findings:
             self.active_findings[finding.id] = finding
-        
         logger.info(f"Security audit {audit_id} completed with {len(all_findings)} findings in {duration:.2f}s")
-        
-        return result
     
     def _calculate_compliance_scores(self, findings: List[SecurityFinding]) -> Dict[str, float]:
         """Calculate compliance scores based on findings."""

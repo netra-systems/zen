@@ -239,7 +239,16 @@ class TestAgentServiceCritical:
         assert service1.supervisor == service2.supervisor
     async def test_logging_integration(self, agent_service, mock_request_model):
         """Test logging integration."""
-        with patch('app.services.agent_service.logger') as mock_logger:
-            await agent_service.run(mock_request_model, "log_test", stream_updates=False)
-            # Verify logging calls would be made in real scenarios
+        with patch('app.services.agent_service_core.logger') as mock_logger:
+            # Test that logger is properly mocked
             assert mock_logger is not None
+            
+            # Trigger WebSocket message handling which uses logging
+            await agent_service.handle_websocket_message("test_user", {"type": "start_agent", "payload": {}})
+            
+            # Verify logger was called (info level for websocket message handling)
+            assert mock_logger.info.call_count > 0
+            
+            # Verify first log call contains expected user_id info
+            first_call = mock_logger.info.call_args_list[0][0][0]
+            assert "test_user" in first_call

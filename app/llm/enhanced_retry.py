@@ -69,27 +69,43 @@ class APISpecificRetryStrategy(RetryStrategy):
     
     def _get_config_for_api(self, api_type: str, kwargs: dict) -> dict:
         """Get retry configuration for specific API type."""
-        configs = {
-            'openai': {
-                'max_attempts': kwargs.get('max_attempts', 5),
-                'base_delay': kwargs.get('base_delay', 2.0),
-                'max_delay': kwargs.get('max_delay', 120.0),
-                'backoff_factor': kwargs.get('backoff_factor', 2.5)
-            },
-            'anthropic': {
-                'max_attempts': kwargs.get('max_attempts', 4),
-                'base_delay': kwargs.get('base_delay', 1.5),
-                'max_delay': kwargs.get('max_delay', 90.0),
-                'backoff_factor': kwargs.get('backoff_factor', 2.0)
-            },
-            'standard': {
-                'max_attempts': kwargs.get('max_attempts', 3),
-                'base_delay': kwargs.get('base_delay', 1.0),
-                'max_delay': kwargs.get('max_delay', 60.0),
-                'backoff_factor': kwargs.get('backoff_factor', 2.0)
-            }
-        }
+        configs = self._build_api_configs(kwargs)
         return configs.get(api_type, configs['standard'])
+    
+    def _build_api_configs(self, kwargs: dict) -> dict:
+        """Build API configuration dictionary."""
+        return {
+            'openai': self._build_openai_config(kwargs),
+            'anthropic': self._build_anthropic_config(kwargs),
+            'standard': self._build_standard_config(kwargs)
+        }
+    
+    def _build_openai_config(self, kwargs: dict) -> dict:
+        """Build OpenAI configuration."""
+        return {
+            'max_attempts': kwargs.get('max_attempts', 5),
+            'base_delay': kwargs.get('base_delay', 2.0),
+            'max_delay': kwargs.get('max_delay', 120.0),
+            'backoff_factor': kwargs.get('backoff_factor', 2.5)
+        }
+    
+    def _build_anthropic_config(self, kwargs: dict) -> dict:
+        """Build Anthropic configuration."""
+        return {
+            'max_attempts': kwargs.get('max_attempts', 4),
+            'base_delay': kwargs.get('base_delay', 1.5),
+            'max_delay': kwargs.get('max_delay', 90.0),
+            'backoff_factor': kwargs.get('backoff_factor', 2.0)
+        }
+    
+    def _build_standard_config(self, kwargs: dict) -> dict:
+        """Build standard configuration."""
+        return {
+            'max_attempts': kwargs.get('max_attempts', 3),
+            'base_delay': kwargs.get('base_delay', 1.0),
+            'max_delay': kwargs.get('max_delay', 60.0),
+            'backoff_factor': kwargs.get('backoff_factor', 2.0)
+        }
     
     def should_retry(self, error: Exception) -> bool:
         """API-specific retry decision."""
@@ -115,30 +131,66 @@ def with_enhanced_retry(strategy: Optional[RetryStrategy] = None):
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(*args, **kwargs) -> Any:
-            last_error = None
-            for attempt in range(1, strategy.max_attempts + 1):
-                try:
-                    result = await func(*args, **kwargs)
-                    if attempt > 1:
-                        logger.info(f"Retry successful on attempt {attempt}")
-                    return result
-                except Exception as e:
-                    last_error = e
-                    if not strategy.should_retry(e):
-                        logger.error(f"Non-retryable error: {e}")
-                        raise
-                    if attempt < strategy.max_attempts:
-                        delay = strategy.calculate_delay(attempt)
-                        logger.warning(
-                            f"Attempt {attempt} failed: {e}. "
-                            f"Retrying in {delay:.2f}s..."
-                        )
-                        await asyncio.sleep(delay)
-                    else:
-                        logger.error(f"All {strategy.max_attempts} attempts failed")
-            raise last_error
+            return await _execute_retry_attempts(func, strategy, *args, **kwargs)
         return wrapper
     return decorator
+
+
+async def _execute_retry_attempts(func: Callable, strategy: RetryStrategy, *args, **kwargs) -> Any:
+    """Execute function with retry attempts strategy."""
+    last_error = None
+    for attempt in range(1, strategy.max_attempts + 1):
+        result = await _try_single_attempt(func, attempt, strategy, *args, **kwargs)
+        if result[0]:  # Success
+            return result[1]
+        last_error = result[1]
+    raise last_error
+
+async def _try_single_attempt(func: Callable, attempt: int, strategy: RetryStrategy, *args, **kwargs) -> tuple:
+    """Try single attempt and return (success, result_or_error)."""
+    try:
+        result = await _attempt_function_call(func, attempt, *args, **kwargs)
+        return (True, result)
+    except Exception as e:
+        error = await _handle_retry_attempt_error(e, attempt, strategy)
+        return (False, error)
+
+
+async def _attempt_function_call(func: Callable, attempt: int, *args, **kwargs) -> Any:
+    """Attempt function call and log success if retry."""
+    result = await func(*args, **kwargs)
+    if attempt > 1:
+        logger.info(f"Retry successful on attempt {attempt}")
+    return result
+
+
+async def _handle_retry_attempt_error(error: Exception, attempt: int, strategy: RetryStrategy) -> Exception:
+    """Handle retry attempt error and return error for re-raise."""
+    if not strategy.should_retry(error):
+        logger.error(f"Non-retryable error: {error}")
+        raise error
+    await _process_retryable_error(error, attempt, strategy)
+    return error
+
+
+async def _process_retryable_error(error: Exception, attempt: int, strategy: RetryStrategy) -> None:
+    """Process retryable error with delay or final failure."""
+    if attempt < strategy.max_attempts:
+        await _apply_retry_delay(error, attempt, strategy)
+    else:
+        _log_final_retry_failure(strategy)
+
+
+async def _apply_retry_delay(error: Exception, attempt: int, strategy: RetryStrategy) -> None:
+    """Apply retry delay with warning log."""
+    delay = strategy.calculate_delay(attempt)
+    logger.warning(f"Attempt {attempt} failed: {error}. Retrying in {delay:.2f}s...")
+    await asyncio.sleep(delay)
+
+
+def _log_final_retry_failure(strategy: RetryStrategy) -> None:
+    """Log final retry failure message."""
+    logger.error(f"All {strategy.max_attempts} attempts failed")
 
 
 class CircuitBreakerRetryStrategy:
@@ -151,9 +203,16 @@ class CircuitBreakerRetryStrategy:
     
     async def execute_with_retry(self, func: Callable, *args, **kwargs) -> Any:
         """Execute function with retry and circuit breaker."""
+        self._check_circuit_state()
+        return await self._execute_with_circuit_handling(func, *args, **kwargs)
+    
+    def _check_circuit_state(self) -> None:
+        """Check if circuit breaker is open and raise if needed."""
         if self._is_circuit_open():
             raise Exception("Circuit breaker is open")
-        
+    
+    async def _execute_with_circuit_handling(self, func: Callable, *args, **kwargs) -> Any:
+        """Execute with circuit breaker success/failure handling."""
         try:
             result = await self._execute_with_strategy(func, *args, **kwargs)
             self._on_success()
@@ -173,12 +232,20 @@ class CircuitBreakerRetryStrategy:
         """Check if circuit breaker is open."""
         if self.circuit_open_until is None:
             return False
+        return self._check_circuit_recovery()
+    
+    def _check_circuit_recovery(self) -> bool:
+        """Check if circuit should recover and return open status."""
         import time
         if time.time() >= self.circuit_open_until:
-            self.circuit_open_until = None
-            self.consecutive_failures = 0
+            self._reset_circuit_state()
             return False
         return True
+    
+    def _reset_circuit_state(self) -> None:
+        """Reset circuit breaker to closed state."""
+        self.circuit_open_until = None
+        self.consecutive_failures = 0
     
     def _on_success(self) -> None:
         """Handle successful execution."""

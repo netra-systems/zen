@@ -56,11 +56,18 @@ class SystemChecker:
         """Test all required directories for access"""
         issues = []
         for dir_name in required_dirs:
-            try:
-                self._test_directory_access(dir_name)
-            except Exception as e:
-                issues.append(f"{dir_name}: {e}")
+            issue = self._test_single_directory(dir_name)
+            if issue:
+                issues.append(issue)
         return issues
+    
+    def _test_single_directory(self, dir_name: str) -> str:
+        """Test single directory and return issue if any"""
+        try:
+            self._test_directory_access(dir_name)
+            return ""
+        except Exception as e:
+            return f"{dir_name}: {e}"
 
     def _create_permission_failure_result(self, issues: List[str]) -> StartupCheckResult:
         """Create permission failure result"""
@@ -116,11 +123,18 @@ class SystemChecker:
         """Test all network endpoints"""
         failed = []
         for service, endpoint in endpoints:
-            try:
-                self._test_endpoint_connectivity(endpoint)
-            except Exception as e:
-                failed.append(f"{service} ({endpoint}): {e}")
+            failure = self._test_single_endpoint(service, endpoint)
+            if failure:
+                failed.append(failure)
         return failed
+    
+    def _test_single_endpoint(self, service: str, endpoint: str) -> str:
+        """Test single endpoint and return failure message if any"""
+        try:
+            self._test_endpoint_connectivity(endpoint)
+            return ""
+        except Exception as e:
+            return f"{service} ({endpoint}): {e}"
 
     def _create_network_failure_result(self, failed: List[str]) -> StartupCheckResult:
         """Create network failure result"""
@@ -179,13 +193,22 @@ class SystemChecker:
     def _check_resource_warnings(self, memory, disk, cpu_count: int) -> List[str]:
         """Check for resource warnings"""
         warnings = []
-        available_gb = memory.available / (1024**3)
-        disk_free_gb = disk.free / (1024**3)
-        
-        self._check_memory_warning(warnings, available_gb)
-        self._check_disk_warning(warnings, disk_free_gb)
-        self._check_cpu_warning(warnings, cpu_count)
+        resource_metrics = self._calculate_resource_metrics(memory, disk)
+        self._check_all_resource_warnings(warnings, resource_metrics, cpu_count)
         return warnings
+    
+    def _calculate_resource_metrics(self, memory, disk) -> dict:
+        """Calculate resource metrics in GB"""
+        return {
+            "available_gb": memory.available / (1024**3),
+            "disk_free_gb": disk.free / (1024**3)
+        }
+    
+    def _check_all_resource_warnings(self, warnings: List[str], metrics: dict, cpu_count: int) -> None:
+        """Check all resource types for warnings"""
+        self._check_memory_warning(warnings, metrics["available_gb"])
+        self._check_disk_warning(warnings, metrics["disk_free_gb"])
+        self._check_cpu_warning(warnings, cpu_count)
     
     def _get_network_endpoints(self) -> List[Tuple[str, str]]:
         """Get network endpoints to test"""

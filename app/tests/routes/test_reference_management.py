@@ -11,13 +11,12 @@ class TestReferenceManagement:
         client = TestClient(app)
         
         reference_data = {
-            "name": "Performance Optimization Guide",
+            "name": "performance_optimization_guide",
+            "friendly_name": "Performance Optimization Guide",
             "type": "document",
-            "content": "Optimization strategies for AI workloads",
-            "metadata": {
-                "category": "optimization",
-                "tags": ["performance", "ai"]
-            }
+            "value": "Optimization strategies for AI workloads",
+            "description": "Guide for AI performance optimization",
+            "version": "1.0"
         }
         
         with patch('app.routes.references.get_db_session') as mock_db:
@@ -31,7 +30,7 @@ class TestReferenceManagement:
             response = client.post("/api/references", json=reference_data)
             
             assert response.status_code == 201
-            assert response.json()["name"] == reference_data["name"]
+            assert response.json()["friendly_name"] == reference_data["friendly_name"]
     
     def test_get_reference_by_id(self):
         """Test retrieving a reference by ID"""
@@ -39,10 +38,14 @@ class TestReferenceManagement:
         
         mock_reference = {
             "id": "ref-123",
-            "name": "Test Reference",
+            "name": "test_reference",
+            "friendly_name": "Test Reference",
             "type": "document",
-            "content": "Test content",
-            "created_at": datetime.now().isoformat()
+            "value": "Test content",
+            "description": "Test description",
+            "version": "1.0",
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat()
         }
         
         with patch('app.routes.references.get_db_session') as mock_db:
@@ -64,8 +67,24 @@ class TestReferenceManagement:
         client = TestClient(app)
         
         mock_references = [
-            {"id": "ref-1", "name": "AI Guide", "type": "document"},
-            {"id": "ref-2", "name": "ML Optimization", "type": "document"}
+            {
+                "id": "ref-1", 
+                "name": "ai_guide", 
+                "friendly_name": "AI Guide",
+                "type": "document",
+                "value": "AI content",
+                "description": "AI guide description",
+                "version": "1.0"
+            },
+            {
+                "id": "ref-2", 
+                "name": "ml_optimization", 
+                "friendly_name": "ML Optimization",
+                "type": "document",
+                "value": "ML content",
+                "description": "ML optimization description",
+                "version": "1.0"
+            }
         ]
         
         with patch('app.routes.references.get_db_session') as mock_db:
@@ -87,8 +106,8 @@ class TestReferenceManagement:
         client = TestClient(app)
         
         update_data = {
-            "name": "Updated Reference Name",
-            "content": "Updated content"
+            "friendly_name": "Updated Reference Name",
+            "value": "Updated content"
         }
         
         with patch('app.routes.references.get_db_session') as mock_db:
@@ -106,7 +125,7 @@ class TestReferenceManagement:
             response = client.patch("/api/references/ref-123", json=update_data)
             
             assert response.status_code == 200
-            assert mock_reference.name == update_data["name"]
+            assert mock_reference.friendly_name == update_data["friendly_name"]
     
     def test_delete_reference(self):
         """Test deleting a reference"""

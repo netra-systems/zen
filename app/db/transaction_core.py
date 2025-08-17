@@ -73,15 +73,22 @@ class TransactionManager:
         """Classify and potentially wrap errors."""
         return classify_error(error)
     
-    def _setup_transaction_metrics(self, tx_config: TransactionConfig, tx_id: str) -> TransactionMetrics:
-        """Setup transaction metrics and tracking."""
-        metrics = TransactionMetrics(
+    def _create_transaction_metrics(self, tx_config: TransactionConfig, tx_id: str) -> TransactionMetrics:
+        """Create transaction metrics object."""
+        return TransactionMetrics(
             transaction_id=tx_id, start_time=time.time(),
             isolation_level=tx_config.isolation_level.value
         )
-        
+    
+    def _register_transaction_metrics(self, tx_config: TransactionConfig, tx_id: str, metrics: TransactionMetrics):
+        """Register metrics if tracking is enabled."""
         if tx_config.enable_metrics:
             self.active_transactions[tx_id] = metrics
+    
+    def _setup_transaction_metrics(self, tx_config: TransactionConfig, tx_id: str) -> TransactionMetrics:
+        """Setup transaction metrics and tracking."""
+        metrics = self._create_transaction_metrics(tx_config, tx_id)
+        self._register_transaction_metrics(tx_config, tx_id, metrics)
         return metrics
     
     def _create_retry_config(self, tx_config: TransactionConfig) -> RetryConfig:
@@ -142,17 +149,49 @@ class TransactionManager:
         """Get tuple of retryable exceptions."""
         return (OperationalError, DisconnectionError, SQLTimeoutError)
     
-    async def _execute_transaction_with_retry(self, session, tx_config, metrics, retry_config):
-        """Execute transaction with retry logic."""
-        async for result in exponential_backoff_retry(
+    def _create_retry_operation_config(self, session, tx_config, metrics, retry_config):
+        """Create retry operation configuration."""
+        return exponential_backoff_retry(
             self._execute_transaction_core(session, tx_config, metrics),
             retry_config, retryable_exceptions=self._get_retry_exceptions(),
             exception_classifier=self._classify_error, logger=logger
-        ):
-            self._handle_transaction_success(metrics, result)
+        )
+    
+    async def _handle_retry_result(self, metrics, result):
+        """Handle successful retry result."""
+        self._handle_transaction_success(metrics, result)
+        yield result
+        return
+    
+    async def _execute_transaction_with_retry(self, session, tx_config, metrics, retry_config):
+        """Execute transaction with retry logic."""
+        retry_operation = self._create_retry_operation_config(session, tx_config, metrics, retry_config)
+        async for result in retry_operation:
+            async for final_result in self._handle_retry_result(metrics, result):
+                yield final_result
+                return
+    
+    async def _execute_transaction_with_context(self, session, tx_config, metrics, retry_config):
+        """Execute transaction and yield result."""
+        async for result in self._execute_transaction_with_retry(session, tx_config, metrics, retry_config):
             yield result
             return
     
+    def _handle_transaction_exception(self, metrics, tx_id, e):
+        """Handle transaction exception and return classified error."""
+        return self._handle_transaction_failure(metrics, tx_id, e)
+    
+    async def _execute_transaction_with_cleanup(self, session, tx_config, tx_id, metrics, retry_config):
+        """Execute transaction with proper cleanup."""
+        try:
+            async for result in self._execute_transaction_with_context(session, tx_config, metrics, retry_config):
+                yield result
+                return
+        except Exception as e:
+            raise self._handle_transaction_exception(metrics, tx_id, e)
+        finally:
+            self._cleanup_transaction_metrics(tx_config, tx_id)
+
     @asynccontextmanager
     async def transaction(
         self,
@@ -161,14 +200,8 @@ class TransactionManager:
     ) -> AsyncGenerator[TransactionMetrics, None]:
         """Context manager for robust transactions."""
         tx_config, tx_id, metrics, retry_config = self._prepare_transaction_context(config)
-        try:
-            async for result in self._execute_transaction_with_retry(session, tx_config, metrics, retry_config):
-                yield result
-                return
-        except Exception as e:
-            raise self._handle_transaction_failure(metrics, tx_id, e)
-        finally:
-            self._cleanup_transaction_metrics(tx_config, tx_id)
+        async for result in self._execute_transaction_with_cleanup(session, tx_config, tx_id, metrics, retry_config):
+            yield result
     
     async def execute_with_retry(
         self,

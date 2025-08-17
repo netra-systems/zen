@@ -157,65 +157,102 @@ class NetraMCPResources:
     
     def _register_current_metrics(self, server):
         """Register current metrics resource"""
-        
         @self.mcp.resource("netra://metrics/current")
         async def get_current_metrics() -> str:
             """Get current system metrics and performance indicators"""
             try:
-                metrics = {"timestamp": datetime.now(UTC).isoformat()}
-                
-                if server.thread_service:
-                    thread_metrics = await server.thread_service.get_metrics()
-                    if thread_metrics:
-                        metrics.update({
-                            "active_threads": thread_metrics.get("active_threads", 0),
-                            "queue_depth": thread_metrics.get("queue_depth", 0)
-                        })
-                
-                if server.llm_manager:
-                    llm_metrics = await server.llm_manager.get_metrics()
-                    if llm_metrics:
-                        metrics.update({
-                            "throughput": {
-                                "requests_per_minute": llm_metrics.get("rpm", 0),
-                                "tokens_per_minute": llm_metrics.get("tpm", 0)
-                            },
-                            "latency": {
-                                "p50": llm_metrics.get("latency_p50", 0),
-                                "p95": llm_metrics.get("latency_p95", 0),
-                                "p99": llm_metrics.get("latency_p99", 0)
-                            },
-                            "cost": {
-                                "last_hour": llm_metrics.get("cost_last_hour", 0),
-                                "today": llm_metrics.get("cost_today", 0),
-                                "this_month": llm_metrics.get("cost_month", 0)
-                            },
-                            "error_rate": llm_metrics.get("error_rate", 0)
-                        })
-                
-                # Fallback to sample data if services not available
-                if "throughput" not in metrics:
-                    metrics.update({
-                        "throughput": {
-                            "requests_per_minute": 1250,
-                            "tokens_per_minute": 450000
-                        },
-                        "latency": {
-                            "p50": 120,
-                            "p95": 450,
-                            "p99": 890
-                        },
-                        "cost": {
-                            "last_hour": 125.50,
-                            "today": 2450.75,
-                            "this_month": 45600.00
-                        },
-                        "error_rate": 0.02,
-                        "active_threads": 45,
-                        "queue_depth": 12
-                    })
-                
+                metrics = await self._collect_system_metrics(server)
                 return json.dumps(metrics, indent=2)
             except Exception as e:
-                logger.error(f"Error retrieving current metrics: {e}")
-                return json.dumps({"error": str(e)}, indent=2)
+                return self._format_error_response(e)
+    
+    async def _collect_system_metrics(self, server) -> Dict[str, Any]:
+        """Collect comprehensive system metrics"""
+        metrics = self._create_base_metrics()
+        await self._add_thread_metrics(server, metrics)
+        await self._add_llm_metrics(server, metrics)
+        self._ensure_fallback_metrics(metrics)
+        return metrics
+    
+    def _create_base_metrics(self) -> Dict[str, Any]:
+        """Create base metrics structure with timestamp"""
+        return {"timestamp": datetime.now(UTC).isoformat()}
+    
+    async def _add_thread_metrics(self, server, metrics: Dict[str, Any]) -> None:
+        """Add thread service metrics if available"""
+        if not server.thread_service:
+            return
+        thread_metrics = await server.thread_service.get_metrics()
+        if thread_metrics:
+            self._update_thread_metrics(metrics, thread_metrics)
+    
+    def _update_thread_metrics(self, metrics: Dict[str, Any], thread_data: Dict[str, Any]) -> None:
+        """Update metrics with thread data"""
+        metrics.update({
+            "active_threads": thread_data.get("active_threads", 0),
+            "queue_depth": thread_data.get("queue_depth", 0)
+        })
+    
+    async def _add_llm_metrics(self, server, metrics: Dict[str, Any]) -> None:
+        """Add LLM manager metrics if available"""
+        if not server.llm_manager:
+            return
+        llm_metrics = await server.llm_manager.get_metrics()
+        if llm_metrics:
+            self._update_llm_metrics(metrics, llm_metrics)
+    
+    def _update_llm_metrics(self, metrics: Dict[str, Any], llm_data: Dict[str, Any]) -> None:
+        """Update metrics with LLM performance data"""
+        metrics.update({
+            "throughput": self._build_throughput_metrics(llm_data),
+            "latency": self._build_latency_metrics(llm_data),
+            "cost": self._build_cost_metrics(llm_data),
+            "error_rate": llm_data.get("error_rate", 0)
+        })
+    
+    def _build_throughput_metrics(self, llm_data: Dict[str, Any]) -> Dict[str, int]:
+        """Build throughput metrics section"""
+        return {
+            "requests_per_minute": llm_data.get("rpm", 0),
+            "tokens_per_minute": llm_data.get("tpm", 0)
+        }
+    
+    def _build_latency_metrics(self, llm_data: Dict[str, Any]) -> Dict[str, int]:
+        """Build latency metrics section"""
+        return {
+            "p50": llm_data.get("latency_p50", 0),
+            "p95": llm_data.get("latency_p95", 0),
+            "p99": llm_data.get("latency_p99", 0)
+        }
+    
+    def _build_cost_metrics(self, llm_data: Dict[str, Any]) -> Dict[str, float]:
+        """Build cost metrics section"""
+        return {
+            "last_hour": llm_data.get("cost_last_hour", 0),
+            "today": llm_data.get("cost_today", 0),
+            "this_month": llm_data.get("cost_month", 0)
+        }
+    
+    def _ensure_fallback_metrics(self, metrics: Dict[str, Any]) -> None:
+        """Add fallback metrics if real data unavailable"""
+        if "throughput" not in metrics:
+            self._add_sample_metrics(metrics)
+    
+    def _add_sample_metrics(self, metrics: Dict[str, Any]) -> None:
+        """Add sample metrics as fallback"""
+        sample_data = self._get_sample_metrics_data()
+        metrics.update(sample_data)
+    
+    def _get_sample_metrics_data(self) -> Dict[str, Any]:
+        """Get sample metrics data structure"""
+        return {
+            "throughput": {"requests_per_minute": 1250, "tokens_per_minute": 450000},
+            "latency": {"p50": 120, "p95": 450, "p99": 890},
+            "cost": {"last_hour": 125.50, "today": 2450.75, "this_month": 45600.00},
+            "error_rate": 0.02, "active_threads": 45, "queue_depth": 12
+        }
+    
+    def _format_error_response(self, error: Exception) -> str:
+        """Format error response for metrics"""
+        logger.error(f"Error retrieving current metrics: {error}")
+        return json.dumps({"error": str(error)}, indent=2)

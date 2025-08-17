@@ -85,24 +85,33 @@ class ErrorRecoveryStrategy:
         """Determine if error should be retried."""
         if not error.recoverable:
             return False
-        
-        # Never retry validation errors
-        if error.category == ErrorCategory.VALIDATION:
+        return ErrorRecoveryStrategy._check_retry_conditions(error)
+    
+    @staticmethod
+    def _check_retry_conditions(error: AgentError) -> bool:
+        """Check specific retry conditions for error."""
+        if ErrorRecoveryStrategy._is_non_retryable_category(error.category):
             return False
-        
-        # Always retry network and timeout errors
-        if error.category in [ErrorCategory.NETWORK, ErrorCategory.TIMEOUT]:
+        if ErrorRecoveryStrategy._is_always_retryable_category(error.category):
             return True
-        
-        # Retry database and processing errors based on severity
+        return ErrorRecoveryStrategy._check_conditional_retry(error)
+    
+    @staticmethod
+    def _is_non_retryable_category(category: ErrorCategory) -> bool:
+        """Check if error category should never be retried."""
+        return category == ErrorCategory.VALIDATION
+    
+    @staticmethod
+    def _is_always_retryable_category(category: ErrorCategory) -> bool:
+        """Check if error category should always be retried."""
+        retryable_categories = [ErrorCategory.NETWORK, ErrorCategory.TIMEOUT, ErrorCategory.WEBSOCKET]
+        return category in retryable_categories
+    
+    @staticmethod
+    def _check_conditional_retry(error: AgentError) -> bool:
+        """Check conditional retry based on severity and category."""
         if error.category in [ErrorCategory.DATABASE, ErrorCategory.PROCESSING]:
             return error.severity != ErrorSeverity.CRITICAL
-        
-        # Retry WebSocket errors (they're usually temporary)
-        if error.category == ErrorCategory.WEBSOCKET:
-            return True
-        
-        # Default to retry for medium or low severity
         return error.severity in [ErrorSeverity.LOW, ErrorSeverity.MEDIUM]
 
 
@@ -121,30 +130,40 @@ class AgentErrorHandler:
         fallback_operation: Optional[Callable[[], Awaitable[Any]]] = None
     ) -> Any:
         """Handle error with appropriate recovery strategy."""
-        
-        # Convert to AgentError if needed
+        agent_error = self._process_error(error, context)
+        return await self._attempt_error_recovery(agent_error, context, fallback_operation)
+    
+    def _process_error(self, error: Exception, context: ErrorContext) -> AgentError:
+        """Process and log error for recovery."""
         agent_error = self._convert_to_agent_error(error, context)
-        
-        # Log error
         self._log_error(agent_error)
-        
-        # Store in history
         self._store_error(agent_error)
-        
-        # Determine if we should retry
+        return agent_error
+    
+    async def _attempt_error_recovery(
+        self, agent_error: AgentError, context: ErrorContext, fallback_operation
+    ) -> Any:
+        """Attempt recovery through retry or fallback."""
         if self._should_retry_operation(agent_error, context):
             return await self._retry_with_delay(agent_error, context)
-        
-        # Try fallback if available
+        return await self._try_fallback_or_raise(agent_error, context, fallback_operation)
+    
+    async def _try_fallback_or_raise(
+        self, agent_error: AgentError, context: ErrorContext, fallback_operation
+    ) -> Any:
+        """Try fallback operation or raise error."""
         if fallback_operation:
-            try:
-                logger.info(f"Using fallback operation for {context.operation_name}")
-                return await fallback_operation()
-            except Exception as fallback_error:
-                logger.error(f"Fallback operation failed: {fallback_error}")
-        
-        # If no recovery possible, re-raise as AgentError
+            return await self._execute_fallback(fallback_operation, context)
         raise agent_error
+    
+    async def _execute_fallback(self, fallback_operation, context: ErrorContext) -> Any:
+        """Execute fallback operation with error handling."""
+        try:
+            logger.info(f"Using fallback operation for {context.operation_name}")
+            return await fallback_operation()
+        except Exception as fallback_error:
+            logger.error(f"Fallback operation failed: {fallback_error}")
+            raise
     
     def _convert_to_agent_error(self, error: Exception, context: ErrorContext) -> AgentError:
         """Convert generic exception to AgentError."""
@@ -253,29 +272,50 @@ class AgentErrorHandler:
         if not self.error_history:
             return {"total_errors": 0}
         
-        recent_errors = [
-            e for e in self.error_history 
-            if time.time() - e.timestamp < 3600  # Last hour
-        ]
-        
+        recent_errors = self._get_recent_errors()
+        category_counts, severity_counts = self._count_error_types(recent_errors)
+        return self._build_stats_response(recent_errors, category_counts, severity_counts)
+    
+    def _get_recent_errors(self) -> List[AgentError]:
+        """Get errors from the last hour."""
+        cutoff_time = time.time() - 3600  # Last hour
+        return [e for e in self.error_history if time.time() - e.timestamp < 3600]
+    
+    def _count_error_types(self, errors: List[AgentError]) -> tuple:
+        """Count errors by category and severity."""
         category_counts: Dict[str, int] = {}
-        severity_counts = {}
-        
-        for error in recent_errors:
-            category_counts[error.category.value] = category_counts.get(error.category.value, 0) + 1
-            severity_counts[error.severity.value] = severity_counts.get(error.severity.value, 0) + 1
-        
+        severity_counts: Dict[str, int] = {}
+        for error in errors:
+            self._increment_count(category_counts, error.category.value)
+            self._increment_count(severity_counts, error.severity.value)
+        return category_counts, severity_counts
+    
+    def _increment_count(self, count_dict: Dict[str, int], key: str) -> None:
+        """Increment count for a key in dictionary."""
+        count_dict[key] = count_dict.get(key, 0) + 1
+    
+    def _build_stats_response(
+        self, recent_errors: List[AgentError], category_counts: Dict, severity_counts: Dict
+    ) -> Dict[str, Union[int, Dict[str, int], Dict[str, Union[str, float]]]]:
+        """Build complete statistics response."""
         return {
             "total_errors": len(self.error_history),
             "recent_errors": len(recent_errors),
             "error_categories": category_counts,
             "error_severities": severity_counts,
-            "last_error": {
-                "message": self.error_history[-1].message,
-                "category": self.error_history[-1].category.value,
-                "severity": self.error_history[-1].severity.value,
-                "timestamp": self.error_history[-1].timestamp
-            } if self.error_history else None
+            "last_error": self._get_last_error_info()
+        }
+    
+    def _get_last_error_info(self) -> Optional[Dict[str, Union[str, float]]]:
+        """Get information about the last error."""
+        if not self.error_history:
+            return None
+        last_error = self.error_history[-1]
+        return {
+            "message": last_error.message,
+            "category": last_error.category.value,
+            "severity": last_error.severity.value,
+            "timestamp": last_error.timestamp
         }
 
 
@@ -287,36 +327,67 @@ def handle_agent_error(operation_name: str):
     """Decorator to handle agent errors with recovery."""
     def decorator(func):
         async def wrapper(self, *args, **kwargs):
-            context = ErrorContext(
-                trace_id=str(uuid4()),
-                operation=operation_name,
-                agent_name=getattr(self, 'name', 'Unknown'),
-                operation_name=operation_name,
-                run_id=kwargs.get('run_id', 'unknown')
-            )
-            
-            max_attempts = 3
-            for attempt in range(max_attempts):
-                try:
-                    context.retry_count = attempt
-                    return await func(self, *args, **kwargs)
-                    
-                except Exception as e:
-                    if attempt == max_attempts - 1:
-                        # Last attempt, handle error and potentially re-raise
-                        fallback = getattr(self, f'_fallback_{operation_name}', None)
-                        return await global_error_handler.handle_error(e, context, fallback)
-                    
-                    # Convert and check if retryable
-                    agent_error = global_error_handler._convert_to_agent_error(e, context)
-                    if not global_error_handler.recovery_strategy.should_retry(agent_error):
-                        # Non-retryable error, handle immediately
-                        fallback = getattr(self, f'_fallback_{operation_name}', None)
-                        return await global_error_handler.handle_error(e, context, fallback)
-                    
-                    # Wait before retry
-                    delay = ErrorRecoveryStrategy.get_recovery_delay(agent_error, attempt)
-                    await asyncio.sleep(delay)
-        
+            context = _create_error_context(operation_name, self, kwargs)
+            return await _execute_with_retry(func, self, args, kwargs, context, operation_name)
         return wrapper
     return decorator
+
+def _create_error_context(operation_name: str, agent_instance, kwargs: dict) -> ErrorContext:
+    """Create error context for operation."""
+    return ErrorContext(
+        trace_id=str(uuid4()),
+        operation=operation_name,
+        agent_name=getattr(agent_instance, 'name', 'Unknown'),
+        operation_name=operation_name,
+        run_id=kwargs.get('run_id', 'unknown')
+    )
+
+async def _execute_with_retry(
+    func, agent_instance, args, kwargs, context: ErrorContext, operation_name: str
+) -> Any:
+    """Execute function with retry logic."""
+    max_attempts = 3
+    for attempt in range(max_attempts):
+        context.retry_count = attempt
+        result = await _attempt_execution(func, agent_instance, args, kwargs, context, operation_name, attempt, max_attempts)
+        if result is not None:
+            return result
+
+async def _attempt_execution(
+    func, agent_instance, args, kwargs, context: ErrorContext, operation_name: str, attempt: int, max_attempts: int
+) -> Any:
+    """Attempt single execution with error handling."""
+    try:
+        return await func(agent_instance, *args, **kwargs)
+    except Exception as e:
+        return await _handle_execution_error(e, context, operation_name, agent_instance, attempt, max_attempts)
+
+async def _handle_execution_error(
+    error: Exception, context: ErrorContext, operation_name: str, 
+    agent_instance, attempt: int, max_attempts: int
+) -> Any:
+    """Handle execution error with retry or fallback logic."""
+    if attempt == max_attempts - 1:
+        return await _handle_final_attempt_error(error, context, operation_name, agent_instance)
+    return await _handle_retry_attempt_error(error, context, operation_name, agent_instance, attempt)
+
+async def _handle_final_attempt_error(
+    error: Exception, context: ErrorContext, operation_name: str, agent_instance
+) -> Any:
+    """Handle error on final attempt."""
+    fallback = getattr(agent_instance, f'_fallback_{operation_name}', None)
+    return await global_error_handler.handle_error(error, context, fallback)
+
+async def _handle_retry_attempt_error(
+    error: Exception, context: ErrorContext, operation_name: str, 
+    agent_instance, attempt: int
+) -> Optional[Any]:
+    """Handle error on retry attempt."""
+    agent_error = global_error_handler._convert_to_agent_error(error, context)
+    if not global_error_handler.recovery_strategy.should_retry(agent_error):
+        fallback = getattr(agent_instance, f'_fallback_{operation_name}', None)
+        return await global_error_handler.handle_error(error, context, fallback)
+    
+    delay = ErrorRecoveryStrategy.get_recovery_delay(agent_error, attempt)
+    await asyncio.sleep(delay)
+    return None

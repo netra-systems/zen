@@ -101,6 +101,10 @@ class ToolPermissionMiddleware:
         if not self._is_post_request_with_body(request):
             return None
         body = await request.body()
+        return self._parse_body_for_tool_info(body)
+
+    def _parse_body_for_tool_info(self, body: bytes) -> Optional[dict]:
+        """Parse request body for tool information."""
         if not body:
             return None
         data = json.loads(body)
@@ -167,16 +171,23 @@ class ToolPermissionMiddleware:
     
     def _create_execution_context(self, tool_info: dict, user: User) -> ToolExecutionContext:
         """Create tool execution context from tool info and user."""
+        user_context = self._extract_user_context_attributes(user)
         return ToolExecutionContext(
             user_id=str(user.id),
             tool_name=tool_info["name"],
             requested_action=tool_info.get("action", "execute"),
-            user_plan=getattr(user, 'plan_tier', 'free'),
-            user_roles=getattr(user, 'roles', []),
-            feature_flags=getattr(user, 'feature_flags', {}),
-            is_developer=getattr(user, 'is_developer', False),
-            environment=self._get_environment()
+            environment=self._get_environment(),
+            **user_context
         )
+
+    def _extract_user_context_attributes(self, user: User) -> dict:
+        """Extract user context attributes for execution context."""
+        return {
+            "user_plan": getattr(user, 'plan_tier', 'free'),
+            "user_roles": getattr(user, 'roles', []),
+            "feature_flags": getattr(user, 'feature_flags', {}),
+            "is_developer": getattr(user, 'is_developer', False)
+        }
     
     def _create_failed_permission_result(self, error: Exception) -> PermissionCheckResult:
         """Create failed permission result for errors."""
@@ -195,17 +206,27 @@ class ToolPermissionMiddleware:
         permission_result: PermissionCheckResult
     ) -> Response:
         """Create permission denied response"""
-        error_detail = {
+        error_detail = self._build_permission_error_detail(permission_result)
+        self._add_rate_limit_to_error_detail(permission_result, error_detail)
+        return self._create_permission_denied_json_response(error_detail)
+
+    def _build_permission_error_detail(self, permission_result: PermissionCheckResult) -> dict:
+        """Build permission error detail dictionary."""
+        return {
             "error": "permission_denied",
             "message": permission_result.reason,
             "required_permissions": permission_result.required_permissions,
             "missing_permissions": permission_result.missing_permissions,
             "upgrade_path": permission_result.upgrade_path
         }
-        
+
+    def _add_rate_limit_to_error_detail(self, permission_result: PermissionCheckResult, error_detail: dict) -> None:
+        """Add rate limit status to error detail if present."""
         if permission_result.rate_limit_status:
             error_detail["rate_limit"] = permission_result.rate_limit_status
-        
+
+    def _create_permission_denied_json_response(self, error_detail: dict) -> Response:
+        """Create JSON response for permission denied."""
         return Response(
             content=json.dumps(error_detail),
             status_code=403,
@@ -220,31 +241,34 @@ class ToolPermissionMiddleware:
     ):
         """Log tool execution for analytics"""
         try:
-            tool_info = request.state.tool_info
-            permission_check = getattr(request.state, 'permission_check', None)
-            
-            log_entry = {
-                "timestamp": datetime.now(UTC).isoformat(),
-                "tool_name": tool_info["name"],
-                "user_id": getattr(request.state, 'user_id', 'unknown'),
-                "action": tool_info.get("action", "execute"),
-                "status_code": response.status_code,
-                "execution_time_ms": int(execution_time * 1000),
-                "user_agent": request.headers.get("User-Agent"),
-                "ip_address": request.client.host if request.client else None,
-            }
-            
-            if permission_check:
-                log_entry.update({
-                    "permission_allowed": permission_check.allowed,
-                    "required_permissions": permission_check.required_permissions,
-                })
-            
-            # Log to central logger (could also send to analytics service)
+            log_entry = self._build_tool_execution_log_entry(request, response, execution_time)
+            self._add_permission_data_to_log_entry(request, log_entry)
             logger.info("Tool execution", extra={"tool_execution": log_entry})
-            
         except Exception as e:
             logger.error(f"Error logging tool execution: {e}")
+
+    def _build_tool_execution_log_entry(self, request: Request, response: Response, execution_time: float) -> dict:
+        """Build base tool execution log entry."""
+        tool_info = request.state.tool_info
+        return {
+            "timestamp": datetime.now(UTC).isoformat(),
+            "tool_name": tool_info["name"],
+            "user_id": getattr(request.state, 'user_id', 'unknown'),
+            "action": tool_info.get("action", "execute"),
+            "status_code": response.status_code,
+            "execution_time_ms": int(execution_time * 1000),
+            "user_agent": request.headers.get("User-Agent"),
+            "ip_address": request.client.host if request.client else None,
+        }
+
+    def _add_permission_data_to_log_entry(self, request: Request, log_entry: dict) -> None:
+        """Add permission check data to log entry if available."""
+        permission_check = getattr(request.state, 'permission_check', None)
+        if permission_check:
+            log_entry.update({
+                "permission_allowed": permission_check.allowed,
+                "required_permissions": permission_check.required_permissions,
+            })
 
     async def _handle_middleware_error(self, error: Exception, request: Request, call_next: Callable):
         """Handle middleware errors."""
@@ -312,28 +336,43 @@ def create_tool_permission_dependency(
 
 def _create_execution_context_for_dependency(current_user: User, tool_name: str, action: str) -> ToolExecutionContext:
     """Create execution context for dependency check."""
-    return ToolExecutionContext(
-        user_id=str(current_user.id),
-        tool_name=tool_name,
-        requested_action=action,
-        user_plan=getattr(current_user, 'plan_tier', 'free'),
-        user_roles=getattr(current_user, 'roles', []),
-        feature_flags=getattr(current_user, 'feature_flags', {}),
-        is_developer=getattr(current_user, 'is_developer', False),
-    )
+    user_attributes = _extract_dependency_user_attributes(current_user)
+    base_context = _get_base_execution_context(current_user, tool_name, action)
+    return ToolExecutionContext(**base_context, **user_attributes)
+
+
+def _get_base_execution_context(current_user: User, tool_name: str, action: str) -> dict:
+    """Get base execution context parameters."""
+    return {
+        "user_id": str(current_user.id),
+        "tool_name": tool_name,
+        "requested_action": action
+    }
+
+def _extract_dependency_user_attributes(current_user: User) -> dict:
+    """Extract user attributes for dependency context creation."""
+    return {
+        "user_plan": getattr(current_user, 'plan_tier', 'free'),
+        "user_roles": getattr(current_user, 'roles', []),
+        "feature_flags": getattr(current_user, 'feature_flags', {}),
+        "is_developer": getattr(current_user, 'is_developer', False)
+    }
 
 def _validate_permission_result(permission_result) -> None:
     """Validate permission result and raise exception if denied."""
     if not permission_result.allowed:
-        raise HTTPException(
-            status_code=403,
-            detail={
-                "error": "permission_denied",
-                "message": permission_result.reason,
-                "required_permissions": permission_result.required_permissions,
-                "upgrade_path": permission_result.upgrade_path
-            }
-        )
+        detail = _build_permission_denied_detail(permission_result)
+        raise HTTPException(status_code=403, detail=detail)
+
+
+def _build_permission_denied_detail(permission_result) -> dict:
+    """Build permission denied detail dictionary."""
+    return {
+        "error": "permission_denied",
+        "message": permission_result.reason,
+        "required_permissions": permission_result.required_permissions,
+        "upgrade_path": permission_result.upgrade_path
+    }
 
 def _handle_dependency_error(error: Exception) -> None:
     """Handle dependency error."""

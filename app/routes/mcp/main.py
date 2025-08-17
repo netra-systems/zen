@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.dependencies import DbDep
 from app.auth.auth_dependencies import get_current_user, get_current_user_optional
 from app.schemas import UserInDB
-from app.services.mcp_service import MCPClient
+from app.services.mcp_models import MCPClient
 
 from .models import (
     MCPClientCreateRequest,
@@ -171,9 +171,6 @@ async def handle_mcp_message(
     mcp_service = Depends(get_mcp_service)
 ):
     """Handle MCP JSON-RPC message"""
-    return {
-        "jsonrpc": "2.0",
-        "result": {"tools": []},
-        "id": request.get("id", 1)
-    }
+    from app.services.mcp_request_handler import handle_request
+    return await handle_request(request)
 

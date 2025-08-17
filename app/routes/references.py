@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from app.db.session import get_db_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import func
-from app.db.models_postgres import Reference
+from sqlalchemy import func, or_
+from app.db.models_content import Reference
 from app.schemas import ReferenceGetResponse, ReferenceItem, ReferenceCreateRequest, ReferenceUpdateRequest
 from typing import Optional
 
@@ -39,8 +39,26 @@ async def get_references(
             limit=limit
         )
 
+@router.get("/references/search")
+async def search_references(
+    query: Optional[str] = Query(None, description="Search query"),
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Search references by name or description."""
+    async with db as session:
+        base_query = select(Reference)
+        if query:
+            base_query = base_query.filter(
+                or_(
+                    Reference.name.ilike(f"%{query}%"),
+                    Reference.description.ilike(f"%{query}%")
+                )
+            )
+        result = await session.execute(base_query)
+        return result.scalars().all()
+
 @router.get("/references/{reference_id}", response_model=ReferenceItem)
-async def get_reference(reference_id: int, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:
+async def get_reference(reference_id: str, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:
     """
     Returns a specific @reference item.
     """
@@ -51,7 +69,7 @@ async def get_reference(reference_id: int, db: AsyncSession = Depends(get_db_ses
             raise HTTPException(status_code=404, detail="Reference not found")
         return reference
 
-@router.post("/references", response_model=ReferenceItem)
+@router.post("/references", response_model=ReferenceItem, status_code=201)
 async def create_reference(reference: ReferenceCreateRequest, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:
     """
     Creates a new @reference item.
@@ -64,7 +82,7 @@ async def create_reference(reference: ReferenceCreateRequest, db: AsyncSession =
         return db_reference
 
 @router.put("/references/{reference_id}", response_model=ReferenceItem)
-async def update_reference(reference_id: int, reference: ReferenceUpdateRequest, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:
+async def update_reference(reference_id: str, reference: ReferenceUpdateRequest, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:
     """
     Updates a specific @reference item.
     """
@@ -74,9 +92,49 @@ async def update_reference(reference_id: int, reference: ReferenceUpdateRequest,
         if not db_reference:
             raise HTTPException(status_code=404, detail="Reference not found")
 
-        for key, value in reference.dict(exclude_unset=True).items():
+        for key, value in reference.model_dump(exclude_unset=True).items():
             setattr(db_reference, key, value)
 
         await session.commit()
         await session.refresh(db_reference)
         return db_reference
+
+@router.patch("/references/{reference_id}", response_model=ReferenceItem)
+async def patch_reference(
+    reference_id: str, 
+    reference: ReferenceUpdateRequest, 
+    db: AsyncSession = Depends(get_db_session)
+) -> ReferenceItem:
+    """Partially update a reference."""
+    async with db as session:
+        result = await session.execute(
+            select(Reference).filter(Reference.id == reference_id)
+        )
+        db_reference = result.scalar_one_or_none()
+        if not db_reference:
+            raise HTTPException(status_code=404, detail="Reference not found")
+
+        for key, value in reference.model_dump(exclude_unset=True).items():
+            setattr(db_reference, key, value)
+
+        await session.commit()
+        await session.refresh(db_reference)
+        return db_reference
+
+@router.delete("/references/{reference_id}", status_code=204)
+async def delete_reference(
+    reference_id: str, 
+    db: AsyncSession = Depends(get_db_session)
+):
+    """Delete a reference."""
+    async with db as session:
+        result = await session.execute(
+            select(Reference).filter(Reference.id == reference_id)
+        )
+        db_reference = result.scalar_one_or_none()
+        if not db_reference:
+            raise HTTPException(status_code=404, detail="Reference not found")
+        
+        await session.delete(db_reference)
+        await session.commit()
+        return {"status": "deleted"}

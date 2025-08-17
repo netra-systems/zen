@@ -225,7 +225,12 @@ class DeepAgentState(BaseModel):
         if not isinstance(other_state, DeepAgentState):
             raise TypeError("other_state must be a DeepAgentState instance")
         
-        # Prepare merged data
+        merged_metadata = self._create_merged_metadata(other_state)
+        merged_results = self._create_merged_results(other_state)
+        return self.copy_with_updates(**merged_results, metadata=merged_metadata)
+    
+    def _create_merged_metadata(self, other_state: 'DeepAgentState') -> AgentMetadata:
+        """Create merged metadata from current and other state."""
         merged_custom = self.metadata.custom_fields.copy()
         merged_context = self.metadata.execution_context.copy()
         
@@ -233,24 +238,21 @@ class DeepAgentState(BaseModel):
             merged_custom.update(other_state.metadata.custom_fields)
             merged_context.update(other_state.metadata.execution_context)
         
-        merged_metadata = AgentMetadata(
-            execution_context=merged_context,
-            custom_fields=merged_custom
-        )
-        
-        # Create new instance with merged data
-        return self.copy_with_updates(
-            triage_result=other_state.triage_result or self.triage_result,
-            data_result=other_state.data_result or self.data_result,
-            optimizations_result=other_state.optimizations_result or self.optimizations_result,
-            action_plan_result=other_state.action_plan_result or self.action_plan_result,
-            report_result=other_state.report_result or self.report_result,
-            synthetic_data_result=other_state.synthetic_data_result or self.synthetic_data_result,
-            supply_research_result=other_state.supply_research_result or self.supply_research_result,
-            final_report=other_state.final_report or self.final_report,
-            step_count=max(self.step_count, other_state.step_count),
-            metadata=merged_metadata
-        )
+        return AgentMetadata(execution_context=merged_context, custom_fields=merged_custom)
+    
+    def _create_merged_results(self, other_state: 'DeepAgentState') -> dict:
+        """Create merged result fields from current and other state."""
+        return {
+            'triage_result': other_state.triage_result or self.triage_result,
+            'data_result': other_state.data_result or self.data_result,
+            'optimizations_result': other_state.optimizations_result or self.optimizations_result,
+            'action_plan_result': other_state.action_plan_result or self.action_plan_result,
+            'report_result': other_state.report_result or self.report_result,
+            'synthetic_data_result': other_state.synthetic_data_result or self.synthetic_data_result,
+            'supply_research_result': other_state.supply_research_result or self.supply_research_result,
+            'final_report': other_state.final_report or self.final_report,
+            'step_count': max(self.step_count, other_state.step_count)
+        }
 
 
 def rebuild_model() -> None:

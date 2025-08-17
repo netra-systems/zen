@@ -10,6 +10,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import type { UnifiedChatState } from '@/types/store-types';
 import { threadLoadingService } from '@/services/threadLoadingService';
 import { 
   threadEventHandler,
@@ -71,7 +72,25 @@ export const useThreadSwitching = (): UseThreadSwitchingResult => {
   const timeoutManagerRef = useRef(createTimeoutManager());
   const currentOperationRef = useRef<string | null>(null);
   
-  const storeActions = extractStoreActions();
+  // Select individual actions to prevent re-renders
+  const setActiveThread = useUnifiedChatStore(state => state.setActiveThread);
+  const setThreadLoading = useUnifiedChatStore(state => state.setThreadLoading);
+  const startThreadLoading = useUnifiedChatStore(state => state.startThreadLoading);
+  const completeThreadLoading = useUnifiedChatStore(state => state.completeThreadLoading);
+  const clearMessages = useUnifiedChatStore(state => state.clearMessages);
+  const loadMessages = useUnifiedChatStore(state => state.loadMessages);
+  const handleWebSocketEvent = useUnifiedChatStore(state => state.handleWebSocketEvent);
+  
+  // Create store actions object
+  const storeActions = {
+    setActiveThread,
+    setThreadLoading,
+    startThreadLoading,
+    completeThreadLoading,
+    clearMessages,
+    loadMessages,
+    handleWebSocketEvent
+  };
   
   // Cleanup on unmount
   useEffect(() => {
@@ -142,20 +161,6 @@ const createTimeoutManager = () => {
   });
 };
 
-/**
- * Extracts store actions for thread management
- */
-const extractStoreActions = () => {
-  return useUnifiedChatStore((state) => ({
-    setActiveThread: state.setActiveThread,
-    setThreadLoading: state.setThreadLoading,
-    startThreadLoading: state.startThreadLoading,
-    completeThreadLoading: state.completeThreadLoading,
-    clearMessages: state.clearMessages,
-    loadMessages: state.loadMessages,
-    handleWebSocketEvent: state.handleWebSocketEvent
-  }));
-};
 
 /**
  * Performs thread switch operation

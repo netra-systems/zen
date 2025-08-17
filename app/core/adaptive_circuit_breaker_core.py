@@ -294,6 +294,14 @@ class AdaptiveCircuitBreaker:
         logger.info(f"Forcing circuit breaker {self.name} to CLOSED")
         self._transition_to_closed()
     
+    def record_success(self) -> None:
+        """Public method to record success (for compatibility)."""
+        self._record_success(0.0)
+    
+    def record_failure(self, error_type: str = "generic_error") -> None:
+        """Public method to record failure (for compatibility)."""
+        self._record_failure(0.0)
+    
     def cleanup(self) -> None:
         """Cleanup resources."""
         if self._health_check_task:

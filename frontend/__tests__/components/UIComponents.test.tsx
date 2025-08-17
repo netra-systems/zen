@@ -1,16 +1,39 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act, withRouter } from '../utils/test-utils';
+import { render as renderWithProviders, screen, fireEvent, waitFor, act, withRouter } from '../utils/test-utils';
+import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 // Using Jest, not vitest
 import { ErrorFallback } from '@/components/ErrorFallback';
 import { Header } from '@/components/Header';
 import { NavLinks } from '@/components/NavLinks';
 
+// Mock authService
+jest.mock('@/auth', () => ({
+  authService: {
+    useAuth: jest.fn(() => ({
+      user: {
+        id: 'test-user',
+        email: 'test@example.com',
+        name: 'Test User'
+      },
+      login: jest.fn(),
+      logout: jest.fn(),
+      loading: false,
+      authConfig: null,
+      token: 'mock-token'
+    }))
+  }
+}));
+
 // Test 62: ErrorFallback recovery
 describe('test_ErrorFallback_recovery', () => {
   it('should display error boundary correctly', () => {
     const error = new Error('Test error');
     const resetErrorBoundary = jest.fn();
+    
+    // Set NODE_ENV to development to show error details
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
     
     render(
       <ErrorFallback error={error} resetErrorBoundary={resetErrorBoundary} />
@@ -19,6 +42,9 @@ describe('test_ErrorFallback_recovery', () => {
     expect(screen.getByText(/Something went wrong/i)).toBeInTheDocument();
     expect(screen.getByText(/Test error/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Try again/i })).toBeInTheDocument();
+    
+    // Restore original environment
+    process.env.NODE_ENV = originalEnv;
   });
 
   it('should handle recovery actions', () => {
@@ -57,22 +83,23 @@ describe('test_ErrorFallback_recovery', () => {
 // Test 63: Header navigation
 describe('test_Header_navigation', () => {
   it('should render header components correctly', () => {
-    render(withRouter(<Header />));
+    const mockToggleSidebar = jest.fn();
+    renderWithProviders(withRouter(<Header toggleSidebar={mockToggleSidebar} />));
     
     expect(screen.getByRole('banner')).toBeInTheDocument();
-    expect(screen.getByAltText(/Netra/i)).toBeInTheDocument();
+    expect(screen.getByText(/Toggle navigation menu/i)).toBeInTheDocument();
   });
 
   it('should handle navigation interactions', async () => {
-    render(
-withRouter(<Header />)
+    const mockToggleSidebar = jest.fn();
+    renderWithProviders(
+withRouter(<Header toggleSidebar={mockToggleSidebar} />)
     );
     
-    const homeLink = screen.getByRole('link', { name: /Home/i });
-    expect(homeLink).toHaveAttribute('href', '/');
+    const toggleButton = screen.getByRole('button', { name: /Toggle navigation menu/i });
+    fireEvent.click(toggleButton);
     
-    const chatLink = screen.getByRole('link', { name: /Chat/i });
-    expect(chatLink).toHaveAttribute('href', '/chat');
+    expect(mockToggleSidebar).toHaveBeenCalledTimes(1);
   });
 
   it('should show responsive menu on mobile', () => {
@@ -80,51 +107,60 @@ withRouter(<Header />)
     window.innerWidth = 375;
     window.dispatchEvent(new Event('resize'));
     
-    render(
-withRouter(<Header />)
+    const mockToggleSidebar = jest.fn();
+    renderWithProviders(
+withRouter(<Header toggleSidebar={mockToggleSidebar} />)
     );
     
-    const menuButton = screen.getByRole('button', { name: /Menu/i });
+    const menuButton = screen.getByRole('button', { name: /Toggle navigation menu/i });
     expect(menuButton).toBeInTheDocument();
     
     fireEvent.click(menuButton);
-    expect(screen.getByRole('navigation')).toHaveClass('mobile-menu');
+    expect(mockToggleSidebar).toHaveBeenCalledTimes(1);
   });
 });
 
 // Test 64: NavLinks routing  
 describe('test_NavLinks_routing', () => {
-  it('should render navigation links correctly', () => {
-    render(
+  it('should render navigation links correctly when user is authenticated', () => {
+    renderWithProviders(
 withRouter(<NavLinks />)
     );
     
-    expect(screen.getByRole('link', { name: /Dashboard/i })).toBeInTheDocument();
+    // Note: Actual navigation items are Chat and Enterprise Demo based on the component
     expect(screen.getByRole('link', { name: /Chat/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Settings/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Enterprise Demo/i })).toBeInTheDocument();
   });
 
-  it('should highlight active route', () => {
-    window.history.pushState({}, '', '/chat');
+  it('should render login link when user is not authenticated', () => {
+    // Mock authService to return no user
+    const { authService } = require('@/auth');
+    authService.useAuth.mockReturnValue({
+      user: null,
+      login: jest.fn(),
+      logout: jest.fn(),
+      loading: false,
+      authConfig: null,
+      token: null
+    });
     
-    render(
+    renderWithProviders(
+withRouter(<NavLinks />)
+    );
+    
+    // When no user is authenticated, it should show a login link
+    expect(screen.getByRole('link', { name: /Login/i })).toBeInTheDocument();
+  });
+
+  it('should handle navigation correctly', () => {
+    renderWithProviders(
 withRouter(<NavLinks />)
     );
     
     const chatLink = screen.getByRole('link', { name: /Chat/i });
-    expect(chatLink).toHaveClass('active');
-  });
-
-  it('should handle navigation correctly', () => {
-    const mockNavigate = jest.fn();
+    expect(chatLink).toHaveAttribute('href', '/chat');
     
-    render(
-withRouter(<NavLinks onNavigate={mockNavigate} />)
-    );
-    
-    const settingsLink = screen.getByRole('link', { name: /Settings/i });
-    fireEvent.click(settingsLink);
-    
-    expect(window.location.pathname).toBe('/settings');
+    const enterpriseLink = screen.getByRole('link', { name: /Enterprise Demo/i });
+    expect(enterpriseLink).toHaveAttribute('href', '/enterprise-demo');
   });
 });

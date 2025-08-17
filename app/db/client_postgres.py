@@ -51,11 +51,17 @@ class TransactionHandler:
     """Handle database transactions with proper lifecycle management."""
     
     @staticmethod
+    async def _yield_session_and_commit(session: AsyncSession):
+        """Yield session and commit if successful."""
+        yield session
+        await SessionManager.commit_session(session)
+
+    @staticmethod
     async def handle_session_transaction(session: AsyncSession):
         """Handle session transaction with commit/rollback."""
         try:
-            yield session
-            await SessionManager.commit_session(session)
+            async for s in TransactionHandler._yield_session_and_commit(session):
+                yield s
         except Exception as e:
             await SessionManager.rollback_session(session, e)
         finally:
@@ -232,13 +238,18 @@ class PostgresHealthChecker:
             status[name] = circuit.get_status()
 
     @staticmethod
-    async def get_circuits_status() -> Dict[str, Dict[str, Any]]:
-        """Get status of all database circuits."""
-        status = {}
+    async def _get_all_circuits():
+        """Get all circuit breaker instances."""
         postgres_circuit = await CircuitBreakerManager.get_postgres_circuit()
         read_circuit = await CircuitBreakerManager.get_read_circuit()
         write_circuit = await CircuitBreakerManager.get_write_circuit()
-        
+        return postgres_circuit, read_circuit, write_circuit
+
+    @staticmethod
+    async def get_circuits_status() -> Dict[str, Dict[str, Any]]:
+        """Get status of all database circuits."""
+        status = {}
+        postgres_circuit, read_circuit, write_circuit = await PostgresHealthChecker._get_all_circuits()
         PostgresHealthChecker.add_circuit_status(status, "postgres", postgres_circuit)
         PostgresHealthChecker.add_circuit_status(status, "read", read_circuit)
         PostgresHealthChecker.add_circuit_status(status, "write", write_circuit)
@@ -289,6 +300,10 @@ class ResilientDatabaseClient:
     async def _get_read_circuit(self):
         """Get read circuit breaker for testing."""
         return await CircuitBreakerManager.get_read_circuit()
+    
+    async def _get_postgres_circuit(self):
+        """Get postgres circuit breaker for testing."""
+        return await CircuitBreakerManager.get_postgres_circuit()
 
     async def _test_connection(self) -> Dict[str, Any]:
         """Test database connection for health checks."""

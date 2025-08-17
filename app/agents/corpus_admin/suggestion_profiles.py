@@ -31,49 +31,79 @@ def get_optimization_rules() -> Dict[str, Dict[str, Any]]:
 
 def get_domain_profiles() -> Dict[str, Dict[str, Any]]:
     """Initialize domain-specific configuration profiles"""
+    fintech_profile = _get_fintech_profile()
+    healthcare_profile = _get_healthcare_profile()
+    ecommerce_profile = _get_ecommerce_profile()
     return {
-        "fintech": {
-            "precision": "high",
-            "audit_logging": True,
-            "encryption": "AES-256",
-            "compliance": ["PCI-DSS", "SOX"]
-        },
-        "healthcare": {
-            "privacy": "HIPAA",
-            "anonymization": True,
-            "retention": "7y",
-            "validation": "strict"
-        },
-        "ecommerce": {
-            "scalability": "elastic",
-            "cache_ttl": 300,
-            "real_time": True,
-            "analytics": "enabled"
-        }
+        "fintech": fintech_profile,
+        "healthcare": healthcare_profile,
+        "ecommerce": ecommerce_profile
+    }
+
+def _get_fintech_profile() -> Dict[str, Any]:
+    """Get fintech domain configuration profile."""
+    return {
+        "precision": "high",
+        "audit_logging": True,
+        "encryption": "AES-256",
+        "compliance": ["PCI-DSS", "SOX"]
+    }
+
+def _get_healthcare_profile() -> Dict[str, Any]:
+    """Get healthcare domain configuration profile."""
+    return {
+        "privacy": "HIPAA",
+        "anonymization": True,
+        "retention": "7y",
+        "validation": "strict"
+    }
+
+def _get_ecommerce_profile() -> Dict[str, Any]:
+    """Get ecommerce domain configuration profile."""
+    return {
+        "scalability": "elastic",
+        "cache_ttl": 300,
+        "real_time": True,
+        "analytics": "enabled"
     }
 
 
 def get_workload_optimizations() -> Dict[str, Dict[str, Any]]:
     """Initialize workload-specific optimizations"""
+    ml_optimizations = _get_machine_learning_optimizations()
+    web_optimizations = _get_web_services_optimizations()
+    data_optimizations = _get_data_processing_optimizations()
     return {
-        "machine_learning": {
-            "gpu_enabled": True,
-            "tensor_format": True,
-            "shuffle": True,
-            "augmentation": "auto"
-        },
-        "web_services": {
-            "rate_limiting": True,
-            "circuit_breaker": True,
-            "timeout": 30,
-            "retry_policy": "exponential"
-        },
-        "data_processing": {
-            "streaming": True,
-            "checkpointing": True,
-            "exactly_once": True,
-            "windowing": "sliding"
-        }
+        "machine_learning": ml_optimizations,
+        "web_services": web_optimizations,
+        "data_processing": data_optimizations
+    }
+
+def _get_machine_learning_optimizations() -> Dict[str, Any]:
+    """Get machine learning workload optimizations."""
+    return {
+        "gpu_enabled": True,
+        "tensor_format": True,
+        "shuffle": True,
+        "augmentation": "auto"
+    }
+
+def _get_web_services_optimizations() -> Dict[str, Any]:
+    """Get web services workload optimizations."""
+    return {
+        "rate_limiting": True,
+        "circuit_breaker": True,
+        "timeout": 30,
+        "retry_policy": "exponential"
+    }
+
+def _get_data_processing_optimizations() -> Dict[str, Any]:
+    """Get data processing workload optimizations."""
+    return {
+        "streaming": True,
+        "checkpointing": True,
+        "exactly_once": True,
+        "windowing": "sliding"
     }
 
 

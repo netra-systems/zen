@@ -279,7 +279,10 @@ describe('AuthContext', () => {
       );
       
       const { result } = renderHook(
-        () => React.useContext(AuthContext),
+        () => {
+          const context = React.useContext(AuthContext);
+          return context;
+        },
         { wrapper }
       );
       
@@ -304,7 +307,10 @@ describe('AuthContext', () => {
       );
       
       const { result } = renderHook(
-        () => React.useContext(AuthContext),
+        () => {
+          const context = React.useContext(AuthContext);
+          return context;
+        },
         { wrapper }
       );
       
@@ -330,7 +336,10 @@ describe('AuthContext', () => {
       );
       
       const { result } = renderHook(
-        () => React.useContext(AuthContext),
+        () => {
+          const context = React.useContext(AuthContext);
+          return context;
+        },
         { wrapper }
       );
       
@@ -360,7 +369,10 @@ describe('AuthContext', () => {
       );
       
       const { result } = renderHook(
-        () => React.useContext(AuthContext),
+        () => {
+          const context = React.useContext(AuthContext);
+          return context;
+        },
         { wrapper }
       );
       
@@ -385,7 +397,10 @@ describe('AuthContext', () => {
       );
       
       const { result } = renderHook(
-        () => React.useContext(AuthContext),
+        () => {
+          const context = React.useContext(AuthContext);
+          return context;
+        },
         { wrapper }
       );
       
@@ -410,7 +425,10 @@ describe('AuthContext', () => {
       );
       
       const { result } = renderHook(
-        () => React.useContext(AuthContext),
+        () => {
+          const context = React.useContext(AuthContext);
+          return context;
+        },
         { wrapper }
       );
       
@@ -435,7 +453,10 @@ describe('AuthContext', () => {
       );
       
       const { result } = renderHook(
-        () => React.useContext(AuthContext),
+        () => {
+          const context = React.useContext(AuthContext);
+          return context;
+        },
         { wrapper }
       );
       
@@ -463,7 +484,10 @@ describe('AuthContext', () => {
       );
       
       const { result } = renderHook(
-        () => React.useContext(AuthContext),
+        () => {
+          const context = React.useContext(AuthContext);
+          return context;
+        },
         { wrapper }
       );
       
@@ -486,7 +510,10 @@ describe('AuthContext', () => {
       );
       
       const { result } = renderHook(
-        () => React.useContext(AuthContext),
+        () => {
+          const context = React.useContext(AuthContext);
+          return context;
+        },
         { wrapper }
       );
       
@@ -529,7 +556,10 @@ describe('AuthContext', () => {
       );
       
       const { result } = renderHook(
-        () => React.useContext(AuthContext),
+        () => {
+          const context = React.useContext(AuthContext);
+          return context;
+        },
         { wrapper }
       );
       
@@ -598,7 +628,10 @@ describe('AuthContext', () => {
       );
       
       const { result } = renderHook(
-        () => React.useContext(AuthContext),
+        () => {
+          const context = React.useContext(AuthContext);
+          return context;
+        },
         { wrapper }
       );
       

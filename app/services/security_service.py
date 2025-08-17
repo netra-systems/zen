@@ -177,6 +177,11 @@ class SecurityService:
     async def get_or_create_user_from_oauth(self, db_session: AsyncSession, user_info: dict) -> schemas.User:
         user = await self.get_user(db_session, user_info["email"])
         if user:
+            # Update existing user's profile information from OAuth data
+            user.full_name = user_info.get("name", user.full_name)
+            user.picture = user_info.get("picture", user.picture)
+            await db_session.commit()
+            await db_session.refresh(user)
             return user
 
         # Create a new user if one doesn't exist

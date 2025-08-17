@@ -55,6 +55,7 @@ class ErrorAggregator:
 
     async def find_patterns(self, lookback_hours: int = 168) -> List[ErrorPattern]:
         """Detect similar error patterns using clustering."""
+        await self._ensure_database_exists()
         cutoff = datetime.now(timezone.utc) - timedelta(hours=lookback_hours)
         errors = await self._get_recent_errors(cutoff)
         patterns = await self._detect_similar_errors(errors)
@@ -64,6 +65,7 @@ class ErrorAggregator:
 
     async def get_trends(self, period_hours: int = 24) -> ErrorTrend:
         """Analyze error trends over specified period."""
+        await self._ensure_database_exists()
         cutoff = datetime.now(timezone.utc) - timedelta(hours=period_hours)
         errors = await self._get_recent_errors(cutoff)
         return self._analyze_error_trends(errors, f"{period_hours}h")

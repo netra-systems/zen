@@ -11,23 +11,36 @@ from app.logging_config import central_logger
 from app.schemas.demo_schemas import DemoWSMessage, DemoWSResponse
 
 
+async def _initialize_websocket_session(websocket: WebSocket):
+    """Initialize WebSocket session and return session data."""
+    await websocket.accept()
+    logger = central_logger.get_logger(__name__)
+    session_id = _generate_ws_session_id()
+    return logger, session_id
+
+async def _handle_websocket_lifecycle(websocket: WebSocket, demo_service: DemoService, session_id: str, logger):
+    """Handle WebSocket lifecycle from connection to close."""
+    await _send_connection_established(websocket, session_id)
+    await _handle_websocket_messages(websocket, demo_service, session_id, logger)
+
+async def _handle_websocket_exceptions(e: Exception, websocket: WebSocket, session_id: str, logger):
+    """Handle WebSocket exceptions with proper logging."""
+    if isinstance(e, WebSocketDisconnect):
+        logger.info(f"Demo WebSocket disconnected: {session_id}")
+    else:
+        logger.error(f"Demo WebSocket error: {str(e)}")
+        await _close_websocket_with_error(websocket, e)
+
 async def handle_demo_websocket(
     websocket: WebSocket,
     demo_service: DemoService
 ) -> None:
     """Main WebSocket endpoint handler for real-time demo interactions."""
-    await websocket.accept()
-    logger = central_logger.get_logger(__name__)
-    session_id = _generate_ws_session_id()
-    
+    logger, session_id = await _initialize_websocket_session(websocket)
     try:
-        await _send_connection_established(websocket, session_id)
-        await _handle_websocket_messages(websocket, demo_service, session_id, logger)
-    except WebSocketDisconnect:
-        logger.info(f"Demo WebSocket disconnected: {session_id}")
+        await _handle_websocket_lifecycle(websocket, demo_service, session_id, logger)
     except Exception as e:
-        logger.error(f"Demo WebSocket error: {str(e)}")
-        await _close_websocket_with_error(websocket, e)
+        await _handle_websocket_exceptions(e, websocket, session_id, logger)
 
 
 def _generate_ws_session_id() -> str:
@@ -57,6 +70,18 @@ async def _handle_websocket_messages(
         await _process_message_by_type(websocket, demo_service, session_id, message_data)
 
 
+async def _route_chat_message(websocket: WebSocket, demo_service: DemoService, session_id: str, message_data: Dict[str, Any]) -> None:
+    """Route chat message to handler."""
+    await _handle_chat_message(websocket, demo_service, session_id, message_data)
+
+async def _route_metrics_message(websocket: WebSocket, demo_service: DemoService, message_data: Dict[str, Any]) -> None:
+    """Route metrics message to handler."""
+    await _handle_metrics_message(websocket, demo_service, message_data)
+
+async def _route_ping_message(websocket: WebSocket) -> None:
+    """Route ping message to handler."""
+    await _handle_ping_message(websocket)
+
 async def _process_message_by_type(
     websocket: WebSocket,
     demo_service: DemoService,
@@ -65,13 +90,12 @@ async def _process_message_by_type(
 ) -> None:
     """Route message processing based on message type."""
     message_type = message_data.get("type")
-    
     if message_type == "chat":
-        await _handle_chat_message(websocket, demo_service, session_id, message_data)
+        await _route_chat_message(websocket, demo_service, session_id, message_data)
     elif message_type == "metrics":
-        await _handle_metrics_message(websocket, demo_service, message_data)
+        await _route_metrics_message(websocket, demo_service, message_data)
     elif message_type == "ping":
-        await _handle_ping_message(websocket)
+        await _route_ping_message(websocket)
 
 
 async def _handle_chat_message(

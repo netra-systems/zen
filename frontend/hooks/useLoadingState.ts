@@ -8,9 +8,10 @@
  * @compliance type_safety.xml - Strongly typed hook with clear interfaces
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useUnifiedChatStore } from '../store/unified-chat';
 import { useWebSocket } from './useWebSocket';
+import type { UnifiedChatState } from '../types/store-types';
 import {
   ChatLoadingState,
   LoadingStateResult,
@@ -44,38 +45,97 @@ export const useLoadingState = (): UseLoadingStateResult => {
   const [currentState, setCurrentState] = useState<ChatLoadingState>(ChatLoadingState.INITIALIZING);
   const previousStateRef = useRef<ChatLoadingState>(ChatLoadingState.INITIALIZING);
   
-  const storeData = extractStoreData();
+  // Select individual properties to avoid creating new objects
+  const activeThreadId = useUnifiedChatStore(state => state.activeThreadId);
+  const isThreadLoading = useUnifiedChatStore(state => state.isThreadLoading);
+  const messages = useUnifiedChatStore(state => state.messages);
+  const isProcessing = useUnifiedChatStore(state => state.isProcessing);
+  const currentRunId = useUnifiedChatStore(state => state.currentRunId);
+  const agentName = useUnifiedChatStore(state => state.fastLayerData?.agentName || null);
   const { status: wsStatus } = useWebSocket();
+  
+  // Create store data object for context
+  const storeData: ExtractedStoreData = {
+    activeThreadId,
+    isThreadLoading,
+    messages,
+    isProcessing,
+    currentRunId,
+    agentName
+  };
   
   const context = createContextFromData(storeData, wsStatus, isInitialized);
   const newState = determineLoadingState(context);
+  
+  // Debug logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[useLoadingState] Debug:', {
+      wsStatus,
+      isInitialized,
+      activeThreadId,
+      isThreadLoading,
+      messageCount: messages.length,
+      currentState,
+      newState,
+      context,
+      shouldShowLoading: isLoadingState(currentState),
+      shouldShowExamplePrompts: isReadyForPrompts(currentState, context)
+    });
+  }
+  
+  // Helper functions for debug
+  function isLoadingState(state: ChatLoadingState): boolean {
+    return [
+      ChatLoadingState.INITIALIZING,
+      ChatLoadingState.CONNECTING,
+      ChatLoadingState.LOADING_THREAD
+    ].includes(state);
+  }
+  
+  function isReadyForPrompts(state: ChatLoadingState, ctx: ChatStateContext): boolean {
+    return state === ChatLoadingState.THREAD_READY && 
+           !ctx.thread.hasMessages && 
+           !ctx.processing.isProcessing;
+  }
   
   useStateTransition(currentState, newState, setCurrentState, previousStateRef);
   useInitializationEffect(wsStatus, isInitialized, setIsInitialized);
   
   const result = createLoadingResult(currentState, context);
+  
+  // Debug the final result
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[useLoadingState] Final result:', {
+      currentState,
+      loadingState: result.state,
+      shouldShowLoading: result.shouldShowLoading,
+      shouldShowEmptyState: result.shouldShowEmptyState,
+      shouldShowExamplePrompts: result.shouldShowExamplePrompts,
+      loadingMessage: result.loadingMessage
+    });
+  }
+  
   return createHookResult(result, isInitialized);
 };
 
+
 /**
- * Extracts necessary data from unified store
+ * Store data extracted by selector
  */
-const extractStoreData = () => {
-  return useUnifiedChatStore((state) => ({
-    activeThreadId: state.activeThreadId,
-    isThreadLoading: state.isThreadLoading,
-    messages: state.messages,
-    isProcessing: state.isProcessing,
-    currentRunId: state.currentRunId,
-    agentName: state.fastLayerData?.agentName || null
-  }));
-};
+interface ExtractedStoreData {
+  activeThreadId: string | null;
+  isThreadLoading: boolean;
+  messages: any[];
+  isProcessing: boolean;
+  currentRunId: string | null;
+  agentName: string | null;
+}
 
 /**
  * Creates chat state context from hook data
  */
 const createContextFromData = (
-  storeData: any,
+  storeData: ExtractedStoreData,
   wsStatus: string,
   isInitialized: boolean
 ): ChatStateContext => {
@@ -100,7 +160,7 @@ const useStateTransition = (
   setCurrentState: (state: ChatLoadingState) => void,
   previousStateRef: React.MutableRefObject<ChatLoadingState>
 ) => {
-  const handleTransition = useCallback(() => {
+  useEffect(() => {
     if (currentState === newState) return;
     
     const transition = validateStateTransition(currentState, newState);
@@ -108,11 +168,7 @@ const useStateTransition = (
       previousStateRef.current = currentState;
       setCurrentState(newState);
     }
-  }, [currentState, newState, setCurrentState, previousStateRef]);
-  
-  useEffect(() => {
-    handleTransition();
-  }, [handleTransition]);
+  }, [newState]); // Only depend on newState to avoid loops
 };
 
 /**

@@ -57,14 +57,16 @@ class ToolInvocation(BaseModel, Generic[T]):
 
     def __init__(self, tool_name: str, *args, **kwargs):
         structured_args = kwargs.pop('structured_args', None)
-        super().__init__(tool_result=ToolResult(
-            tool_input=ToolInput(
-                tool_name=tool_name, 
-                args=list(args), 
-                kwargs=kwargs,
-                structured_args=structured_args
-            )
-        ))
+        tool_input = self._create_tool_input(tool_name, args, kwargs, structured_args)
+        super().__init__(tool_result=ToolResult(tool_input=tool_input))
+    
+    def _create_tool_input(self, tool_name: str, args: tuple, kwargs: dict, 
+                          structured_args: Optional[ToolArguments]) -> ToolInput:
+        """Create ToolInput object from parameters."""
+        return ToolInput(
+            tool_name=tool_name, args=list(args), 
+            kwargs=kwargs, structured_args=structured_args
+        )
 
     def set_result(self, status: ToolStatus, message: str, payload: Optional[T] = None, error_details: Optional[Dict[str, Union[str, int, dict]]] = None):
         self.tool_result.complete(status, message, payload, error_details)

@@ -43,6 +43,25 @@
         </rule>
     </critical-rules>
 
+    <frontend-state-management>
+        <convention id="zustand-selectors" priority="CRITICAL">
+            <title>Zustand Store Selector Pattern</title>
+            <description>ALWAYS use individual selectors to prevent infinite loops</description>
+            <problem>Object-returning selectors create new references on every render causing infinite loops</problem>
+            <solution>Select each state property individually with separate useStore calls</solution>
+            <example>
+                // WRONG - Will cause infinite loop
+                const selector = (state) => ({ a: state.a, b: state.b });
+                const data = useStore(selector, shallow);
+                
+                // CORRECT - Stable references
+                const a = useStore(state => state.a);
+                const b = useStore(state => state.b);
+            </example>
+            <reference>SPEC/learnings/frontend.xml#zustand-individual-selectors-pattern</reference>
+        </convention>
+    </frontend-state-management>
+
     <type-safety>
         <convention id="backend-types">
             <location>app/schemas/</location>

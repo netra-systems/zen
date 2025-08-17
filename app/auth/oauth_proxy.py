@@ -52,6 +52,11 @@ class OAuthProxyService:
         csrf_key = f"oauth_csrf:{pr_number}:{csrf_token}"
         await self.redis.setex(csrf_key, self.token_ttl, "valid")
     
+    def _handle_decode_error(self, error: Exception) -> None:
+        """Handle state decode error."""
+        logger.error(f"Failed to decode state: {error}")
+        raise HTTPException(status_code=400, detail="Invalid state parameter")
+
     async def decode_state(self, state: str) -> Dict[str, Any]:
         """Decode and validate state parameter."""
         try:
@@ -60,8 +65,7 @@ class OAuthProxyService:
             await self._validate_and_consume_csrf(state_data)
             return state_data
         except Exception as e:
-            logger.error(f"Failed to decode state: {e}")
-            raise HTTPException(status_code=400, detail="Invalid state parameter")
+            self._handle_decode_error(e)
     
     def _decode_state_data(self, state: str) -> Dict[str, Any]:
         """Decode state data from base64."""
@@ -75,11 +79,15 @@ class OAuthProxyService:
         if current_time - state_data.get("timestamp", 0) > self.token_ttl:
             raise ValueError("State parameter expired")
     
+    def _build_csrf_key(self, pr_number: str, csrf_token: str) -> str:
+        """Build CSRF key for Redis."""
+        return f"oauth_csrf:{pr_number}:{csrf_token}"
+
     async def _validate_and_consume_csrf(self, state_data: Dict[str, Any]) -> None:
         """Validate and consume CSRF token."""
         pr_number = state_data.get("pr_number")
         csrf_token = state_data.get("csrf_token")
-        csrf_key = f"oauth_csrf:{pr_number}:{csrf_token}"
+        csrf_key = self._build_csrf_key(pr_number, csrf_token)
         csrf_valid = await self.redis.get(csrf_key)
         if not csrf_valid:
             raise ValueError("Invalid CSRF token")
@@ -113,14 +121,18 @@ class OAuthProxyService:
             "grant_type": "authorization_code"
         }
     
+    def _validate_token_response(self, response: httpx.Response) -> Dict[str, Any]:
+        """Validate token exchange response."""
+        if response.status_code != 200:
+            logger.error(f"Token exchange failed: {response.text}")
+            raise HTTPException(status_code=400, detail="Failed to exchange code for token")
+        return response.json()
+
     async def _perform_token_exchange(self, token_url: str, data: Dict[str, str]) -> Dict[str, Any]:
         """Perform the actual token exchange request."""
         async with httpx.AsyncClient() as client:
             response = await client.post(token_url, data=data)
-            if response.status_code != 200:
-                logger.error(f"Token exchange failed: {response.text}")
-                raise HTTPException(status_code=400, detail="Failed to exchange code for token")
-            return response.json()
+            return self._validate_token_response(response)
     
     async def get_user_info(self, access_token: str) -> Dict[str, Any]:
         """Get user info from Google."""
@@ -132,14 +144,18 @@ class OAuthProxyService:
         """Build authorization headers."""
         return {"Authorization": f"Bearer {access_token}"}
     
+    def _validate_user_info_response(self, response: httpx.Response) -> Dict[str, Any]:
+        """Validate user info response."""
+        if response.status_code != 200:
+            logger.error(f"Failed to get user info: {response.text}")
+            raise HTTPException(status_code=400, detail="Failed to get user info")
+        return response.json()
+
     async def _fetch_user_info(self, url: str, headers: Dict[str, str]) -> Dict[str, Any]:
         """Fetch user info from Google API."""
         async with httpx.AsyncClient() as client:
             response = await client.get(url, headers=headers)
-            if response.status_code != 200:
-                logger.error(f"Failed to get user info: {response.text}")
-                raise HTTPException(status_code=400, detail="Failed to get user info")
-            return response.json()
+            return self._validate_user_info_response(response)
 
 
 # Initialize service
@@ -222,21 +238,24 @@ def _set_transfer_cookie(response: RedirectResponse, transfer_key: str) -> None:
     )
 
 
+def _validate_token_data(token_data: Optional[Dict[str, Any]]) -> None:
+    """Validate retrieved token data."""
+    if not token_data:
+        raise HTTPException(status_code=400, detail="Invalid or expired transfer key")
+
+def _build_oauth_complete_response(token_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Build OAuth completion response."""
+    return {
+        "success": True, "access_token": token_data["access_token"],
+        "user_info": token_data["user_info"]
+    }
+
 @router.post("/complete")
 async def complete_oauth(request: Request, transfer_key: str):
     """Complete OAuth flow by retrieving token."""
-    
-    # Retrieve token
     token_data = await oauth_proxy.retrieve_token(transfer_key)
-    
-    if not token_data:
-        raise HTTPException(status_code=400, detail="Invalid or expired transfer key")
-    
-    return {
-        "success": True,
-        "access_token": token_data["access_token"],
-        "user_info": token_data["user_info"],
-    }
+    _validate_token_data(token_data)
+    return _build_oauth_complete_response(token_data)
 
 
 @router.get("/status")

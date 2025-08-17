@@ -2,7 +2,8 @@ from typing import List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request, Query
 from sqlalchemy.orm import Session
 from app import schemas
-from app.services import corpus_service, clickhouse_service
+from app.services import clickhouse_service
+from app.services.corpus_service import corpus_service_instance as corpus_service
 from app.dependencies import get_db_session
 from app.auth.auth_dependencies import get_current_user
 from app.db.models_postgres import User
@@ -150,13 +151,25 @@ async def create_document(document: DocumentCreate):
         "metadata": document.metadata
     }
 
+async def _execute_corpus_search(corpus_id: str, query: str):
+    """Execute corpus search with fallback."""
+    return await corpus_service.search_with_fallback(corpus_id, query)
+
+def _handle_search_error(e: Exception):
+    """Handle search errors."""
+    raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
+
 @router.get("/search")
-async def search_corpus(q: str = Query(...)):
+async def search_corpus(
+    q: str = Query(...),
+    corpus_id: str = Query(default="default"),
+    current_user: User = Depends(get_current_user)
+):
     """Search corpus documents"""
-    return [
-        {"id": "1", "title": "Result 1", "score": 0.95},
-        {"id": "2", "title": "Result 2", "score": 0.87}
-    ]
+    try:
+        return await _execute_corpus_search(corpus_id, q)
+    except Exception as e:
+        _handle_search_error(e)
 
 @router.post("/bulk")
 async def bulk_index_documents(request: BulkIndexRequest):

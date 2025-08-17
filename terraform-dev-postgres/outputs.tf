@@ -2,13 +2,13 @@
 
 output "postgres_connection_string" {
   description = "PostgreSQL connection string for asyncpg"
-  value       = "postgresql+asyncpg://${var.postgres_user}:${random_password.postgres_password.result}@localhost:${var.postgres_port}/${var.postgres_db}"
+  value       = "postgresql+asyncpg://${var.postgres_user}:${random_string.postgres_password.result}@localhost:${var.postgres_port}/${var.postgres_db}"
   sensitive   = true
 }
 
 output "postgres_sync_connection_string" {
   description = "PostgreSQL connection string for synchronous connections"
-  value       = "postgresql://${var.postgres_user}:${random_password.postgres_password.result}@localhost:${var.postgres_port}/${var.postgres_db}"
+  value       = "postgresql://${var.postgres_user}:${random_string.postgres_password.result}@localhost:${var.postgres_port}/${var.postgres_db}"
   sensitive   = true
 }
 
@@ -45,7 +45,7 @@ output "postgres_user" {
 
 output "postgres_password" {
   description = "PostgreSQL password"
-  value       = random_password.postgres_password.result
+  value       = random_string.postgres_password.result
   sensitive   = true
 }
 
@@ -56,7 +56,7 @@ output "app_user" {
 
 output "app_password" {
   description = "Application user password"
-  value       = random_password.app_password.result
+  value       = random_string.app_password.result
   sensitive   = true
 }
 
@@ -107,13 +107,13 @@ output "clickhouse_container_name" {
 
 output "jwt_secret" {
   description = "JWT Secret for authentication"
-  value       = random_password.jwt_secret.result
+  value       = random_string.jwt_secret.result
   sensitive   = true
 }
 
 output "secret_key" {
   description = "Application secret key"
-  value       = random_password.secret_key.result
+  value       = random_string.secret_key.result
   sensitive   = true
 }
 

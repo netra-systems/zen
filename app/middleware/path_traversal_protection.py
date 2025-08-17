@@ -52,16 +52,17 @@ BLOCKED_EXTENSIONS = {
 async def path_traversal_protection_middleware(request: Request, call_next):
     """Protect against path traversal attacks."""
     path, query = _extract_path_and_query(request)
-    path_check_response = _check_path_traversal(request, path, query)
-    if path_check_response:
-        return path_check_response
-    extension_check_response = _check_blocked_extensions(request, path)
-    if extension_check_response:
-        return extension_check_response
-    header_check_response = _check_suspicious_headers(request)
-    if header_check_response:
-        return header_check_response
+    security_check_response = _perform_all_security_checks(request, path, query)
+    if security_check_response:
+        return security_check_response
     return await call_next(request)
+
+def _perform_all_security_checks(request: Request, path: str, query: str):
+    """Perform all security checks and return response if blocked."""
+    path_check = _check_path_traversal(request, path, query)
+    extension_check = _check_blocked_extensions(request, path)
+    header_check = _check_suspicious_headers(request)
+    return path_check or extension_check or header_check
 
 def _extract_path_and_query(request: Request) -> tuple[str, str]:
     """Extract path and query from request."""

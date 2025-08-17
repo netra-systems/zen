@@ -78,34 +78,39 @@ class ReportingSubAgent(BaseSubAgent):
         async def _execute_reporting():
             await self._send_processing_update(run_id, stream_updates)
             prompt = self._build_reporting_prompt(state)
-            
-            # Generate correlation ID and start heartbeat
             correlation_id = generate_llm_correlation_id()
-            start_llm_heartbeat(correlation_id, "ReportingSubAgent")
             
-            try:
-                # Log input to LLM
-                log_agent_input("ReportingSubAgent", "LLM", len(prompt), correlation_id)
-                
-                llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='reporting')
-                
-                # Log output from LLM
-                log_agent_output("LLM", "ReportingSubAgent", 
-                               len(llm_response_str), "success", correlation_id)
-                
-            except Exception as e:
-                # Log error output
-                log_agent_output("LLM", "ReportingSubAgent", 0, "error", correlation_id)
-                raise
-            finally:
-                # Stop heartbeat
-                stop_llm_heartbeat(correlation_id)
-            
-            report_result = self._extract_and_validate_report(llm_response_str, run_id)
-            state.report_result = self._create_report_result(report_result)
-            await self._send_success_update(run_id, stream_updates, report_result)
-            return report_result
+            llm_response_str = await self._execute_reporting_llm_with_observability(prompt, correlation_id)
+            return await self._process_reporting_response(llm_response_str, run_id, stream_updates, state)
         return _execute_reporting
+    
+    async def _execute_reporting_llm_with_observability(self, prompt: str, correlation_id: str) -> str:
+        """Execute LLM call with full observability for reporting."""
+        start_llm_heartbeat(correlation_id, "ReportingSubAgent")
+        try:
+            log_agent_input("ReportingSubAgent", "LLM", len(prompt), correlation_id)
+            return await self._make_reporting_llm_request(prompt, correlation_id)
+        finally:
+            stop_llm_heartbeat(correlation_id)
+    
+    async def _make_reporting_llm_request(self, prompt: str, correlation_id: str) -> str:
+        """Make LLM request for reporting with error handling."""
+        try:
+            response = await self.llm_manager.ask_llm(prompt, llm_config_name='reporting')
+            log_agent_output("LLM", "ReportingSubAgent", len(response), "success", correlation_id)
+            return response
+        except Exception as e:
+            log_agent_output("LLM", "ReportingSubAgent", 0, "error", correlation_id)
+            raise
+    
+    async def _process_reporting_response(
+        self, llm_response_str: str, run_id: str, stream_updates: bool, state: DeepAgentState
+    ) -> dict:
+        """Process LLM response and update state for reporting."""
+        report_result = self._extract_and_validate_report(llm_response_str, run_id)
+        state.report_result = self._create_report_result(report_result)
+        await self._send_success_update(run_id, stream_updates, report_result)
+        return report_result
     
     def _create_fallback_reporting_operation(self, state: DeepAgentState, run_id: str, stream_updates: bool):
         """Create the fallback reporting operation function."""

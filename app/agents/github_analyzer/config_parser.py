@@ -23,30 +23,54 @@ class ConfigurationExtractor:
     
     def _init_ai_keys(self) -> List[str]:
         """Initialize AI-related configuration keys."""
+        api_keys = self._get_api_keys()
+        model_keys = self._get_model_keys()
+        param_keys = self._get_param_keys()
+        endpoint_keys = self._get_endpoint_keys()
+        feature_keys = self._get_feature_keys()
+        limit_keys = self._get_limit_keys()
+        return api_keys + model_keys + param_keys + endpoint_keys + feature_keys + limit_keys
+    
+    def _get_api_keys(self) -> List[str]:
+        """Get API key patterns."""
         return [
-            # API Keys
             "OPENAI_API_KEY", "ANTHROPIC_API_KEY", "CLAUDE_API_KEY",
             "HUGGINGFACE_TOKEN", "COHERE_API_KEY", "AI21_API_KEY",
-            "REPLICATE_API_TOKEN", "AZURE_OPENAI_KEY",
-            
-            # Model configs
+            "REPLICATE_API_TOKEN", "AZURE_OPENAI_KEY"
+        ]
+    
+    def _get_model_keys(self) -> List[str]:
+        """Get model configuration keys."""
+        return [
             "MODEL", "MODEL_NAME", "LLM_MODEL", "AI_MODEL",
-            "GPT_MODEL", "CLAUDE_MODEL", "DEFAULT_MODEL",
-            
-            # Parameters
+            "GPT_MODEL", "CLAUDE_MODEL", "DEFAULT_MODEL"
+        ]
+    
+    def _get_param_keys(self) -> List[str]:
+        """Get parameter keys."""
+        return [
             "TEMPERATURE", "MAX_TOKENS", "TOP_P", "TOP_K",
             "FREQUENCY_PENALTY", "PRESENCE_PENALTY",
-            "MAX_LENGTH", "MIN_LENGTH", "BEAM_SIZE",
-            
-            # Endpoints
+            "MAX_LENGTH", "MIN_LENGTH", "BEAM_SIZE"
+        ]
+    
+    def _get_endpoint_keys(self) -> List[str]:
+        """Get endpoint configuration keys."""
+        return [
             "API_ENDPOINT", "LLM_ENDPOINT", "OPENAI_BASE_URL",
-            "AZURE_ENDPOINT", "API_BASE", "BASE_URL",
-            
-            # Features
+            "AZURE_ENDPOINT", "API_BASE", "BASE_URL"
+        ]
+    
+    def _get_feature_keys(self) -> List[str]:
+        """Get feature configuration keys."""
+        return [
             "STREAMING", "FUNCTION_CALLING", "EMBEDDINGS",
-            "VECTOR_STORE", "MEMORY_TYPE", "CHAIN_TYPE",
-            
-            # Limits
+            "VECTOR_STORE", "MEMORY_TYPE", "CHAIN_TYPE"
+        ]
+    
+    def _get_limit_keys(self) -> List[str]:
+        """Get limit configuration keys."""
+        return [
             "RATE_LIMIT", "TOKEN_LIMIT", "REQUEST_TIMEOUT",
             "MAX_RETRIES", "BATCH_SIZE"
         ]
@@ -70,40 +94,56 @@ class ConfigurationExtractor:
     ) -> Dict[str, Any]:
         """Extract all AI configurations."""
         repo = Path(repo_path)
-        configs = {
+        configs = self._init_config_structure()
+        config_files = await self._find_config_files(repo)
+        await self._process_config_files(configs, config_files)
+        configs["summary"] = self._generate_summary(configs)
+        return configs
+    
+    def _init_config_structure(self) -> Dict[str, Any]:
+        """Initialize configuration data structure."""
+        return {
             "env_variables": {},
             "config_files": [],
             "inline_configs": [],
             "summary": {}
         }
-        
-        # Find configuration files
-        config_files = await self._find_config_files(repo)
-        
-        # Process each file
+    
+    async def _process_config_files(
+        self, 
+        configs: Dict[str, Any], 
+        config_files: List[Path]
+    ) -> None:
+        """Process all configuration files."""
         for file_path in config_files:
             file_configs = await self._extract_from_file(file_path)
             if file_configs:
                 self._merge_configs(configs, file_configs, str(file_path))
-        
-        configs["summary"] = self._generate_summary(configs)
-        return configs
     
     async def _find_config_files(self, repo: Path) -> List[Path]:
         """Find all configuration files."""
         config_files = []
-        patterns = [
+        patterns = self._get_config_patterns()
+        for pattern in patterns:
+            found_files = self._find_files_by_pattern(repo, pattern)
+            config_files.extend(found_files)
+        return config_files
+    
+    def _get_config_patterns(self) -> List[str]:
+        """Get configuration file patterns."""
+        return [
             "**/.env*", "**/config.*", "**/settings.*",
             "**/*config.json", "**/*config.yaml", "**/*config.yml",
             "**/pyproject.toml", "**/package.json", "**/requirements.txt"
         ]
-        
-        for pattern in patterns:
-            for file_path in repo.glob(pattern):
-                if file_path.is_file():
-                    config_files.append(file_path)
-        
-        return config_files
+    
+    def _find_files_by_pattern(self, repo: Path, pattern: str) -> List[Path]:
+        """Find files matching a specific pattern."""
+        found_files = []
+        for file_path in repo.glob(pattern):
+            if file_path.is_file():
+                found_files.append(file_path)
+        return found_files
     
     async def _extract_from_file(
         self, 
@@ -111,10 +151,16 @@ class ConfigurationExtractor:
     ) -> Optional[Dict[str, Any]]:
         """Extract configurations from a file."""
         suffix = file_path.suffix.lower()
-        
         if suffix not in self.parsers:
             return None
-        
+        return await self._parse_file_content(file_path, suffix)
+    
+    async def _parse_file_content(
+        self, 
+        file_path: Path, 
+        suffix: str
+    ) -> Optional[Dict[str, Any]]:
+        """Parse file content using appropriate parser."""
         try:
             content = file_path.read_text(encoding='utf-8', errors='ignore')
             parser = self.parsers[suffix]
@@ -127,19 +173,22 @@ class ConfigurationExtractor:
         """Parse .env file."""
         configs = {}
         lines = content.split('\n')
-        
         for line in lines:
-            line = line.strip()
-            if line and not line.startswith('#'):
-                if '=' in line:
-                    key, value = line.split('=', 1)
-                    key = key.strip()
-                    value = value.strip().strip('"\'')
-                    
-                    if self._is_ai_config(key):
-                        configs[key] = self._mask_sensitive(key, value)
-        
+            processed_config = self._process_env_line(line)
+            if processed_config:
+                configs.update(processed_config)
         return configs
+    
+    def _process_env_line(self, line: str) -> Optional[Dict[str, str]]:
+        """Process a single environment line."""
+        line = line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            return None
+        key, value = line.split('=', 1)
+        key, value = key.strip(), value.strip().strip('"\'')
+        if self._is_ai_config(key):
+            return {key: self._mask_sensitive(key, value)}
+        return None
     
     async def _parse_json(self, content: str) -> Dict[str, Any]:
         """Parse JSON configuration."""
@@ -151,21 +200,25 @@ class ConfigurationExtractor:
     
     async def _parse_yaml(self, content: str) -> Dict[str, Any]:
         """Parse YAML configuration."""
-        # Simplified YAML parsing
         configs = {}
         lines = content.split('\n')
-        
         for line in lines:
-            if ':' in line and not line.strip().startswith('#'):
-                parts = line.split(':', 1)
-                if len(parts) == 2:
-                    key = parts[0].strip()
-                    value = parts[1].strip()
-                    
-                    if self._is_ai_config(key):
-                        configs[key] = self._mask_sensitive(key, value)
-        
+            processed_config = self._process_yaml_line(line)
+            if processed_config:
+                configs.update(processed_config)
         return configs
+    
+    def _process_yaml_line(self, line: str) -> Optional[Dict[str, str]]:
+        """Process a single YAML line."""
+        if ':' not in line or line.strip().startswith('#'):
+            return None
+        parts = line.split(':', 1)
+        if len(parts) != 2:
+            return None
+        key, value = parts[0].strip(), parts[1].strip()
+        if self._is_ai_config(key):
+            return {key: self._mask_sensitive(key, value)}
+        return None
     
     async def _parse_toml(self, content: str) -> Dict[str, Any]:
         """Parse TOML configuration."""

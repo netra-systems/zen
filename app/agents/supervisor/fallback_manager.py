@@ -15,6 +15,8 @@ from app.agents.supervisor.execution_context import (
 from app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
 from app.agents.supervisor_circuit_breaker import CircuitBreaker
 from app.schemas.core_models import CircuitBreakerConfig
+from app.core.circuit_breaker import circuit_registry
+from app.schemas.core_enums import CircuitBreakerState
 
 logger = central_logger.get_logger(__name__)
 
@@ -30,8 +32,8 @@ class FallbackManager:
                                    state: DeepAgentState,
                                    execute_func) -> AgentExecutionResult:
         """Execute with comprehensive fallback handling."""
-        circuit_breaker = self._get_agent_circuit_breaker(context.agent_name)
-        if circuit_breaker.is_open:
+        circuit_breaker = await self._get_agent_circuit_breaker(context.agent_name)
+        if circuit_breaker.state == CircuitBreakerState.OPEN:
             return await self._handle_open_circuit_breaker(context, state)
         return await self._execute_with_fallback_handler(context, state, execute_func)
     
@@ -59,7 +61,7 @@ class FallbackManager:
     async def _execute_with_handler(self, context: AgentExecutionContext,
                                    state: DeepAgentState, execute_func):
         """Execute through fallback handler."""
-        circuit_breaker = self._get_agent_circuit_breaker(context.agent_name)
+        circuit_breaker = await self._get_agent_circuit_breaker(context.agent_name)
         try:
             return await self._execute_and_record_result(context, execute_func, circuit_breaker)
         except Exception as e:
@@ -105,12 +107,10 @@ class FallbackManager:
     
     def _create_fallback_mapping(self) -> dict:
         """Create agent fallback type mapping."""
-        return {
-            "TriageSubAgent": "triage",
-            "DataSubAgent": "data_analysis",
-            "SupplyResearcherAgent": "data_analysis",
-            "SyntheticDataGenerator": "data_analysis"
-        }
+        base_mapping = {"TriageSubAgent": "triage", "DataSubAgent": "data_analysis"}
+        extended_mapping = {"SupplyResearcherAgent": "data_analysis"}
+        synthetic_mapping = {"SyntheticDataGenerator": "data_analysis"}
+        return {**base_mapping, **extended_mapping, **synthetic_mapping}
     
     def _wrap_fallback_response(self, fallback_data: dict,
                               context: AgentExecutionContext) -> AgentExecutionResult:
@@ -173,9 +173,7 @@ class FallbackManager:
                                     fallback_data: dict) -> AgentExecutionResult:
         """Build final fallback result."""
         metadata = self._create_final_fallback_metadata(context.agent_name, fallback_data)
-        return AgentExecutionResult(
-            success=False, state=state, duration=0.01,
-            error=str(error), metadata=metadata)
+        return self._create_final_result_with_metadata(state, error, metadata)
     
     def _create_final_fallback_metadata(self, agent_name: str, 
                                        fallback_data: dict) -> dict:
@@ -249,22 +247,26 @@ class FallbackManager:
             failure_threshold=threshold, recovery_timeout=timeout,
             name=f"agent_{agent_name}")
     
-    def get_fallback_health_status(self) -> Dict[str, any]:
+    async def get_fallback_health_status(self) -> Dict[str, any]:
         """Get health status of fallback mechanisms."""
         handler_status = self.fallback_handler.get_health_status()
-        breaker_status = self._get_circuit_breaker_status()
+        breaker_status = await self._get_circuit_breaker_status()
         return {"fallback_handler": handler_status, "circuit_breakers": breaker_status}
     
-    def _get_circuit_breaker_status(self) -> dict:
+    async def _get_circuit_breaker_status(self) -> dict:
         """Get circuit breaker status for all agents."""
-        return {
-            agent: cb.get_status()
-            for agent, cb in self.agent_circuit_breakers.items()
-        }
+        all_status = await circuit_registry.get_all_status()
+        return all_status
     
-    def reset_fallback_mechanisms(self) -> None:
+    def _create_final_result_with_metadata(self, state: DeepAgentState, 
+                                          error: Exception, metadata: dict) -> AgentExecutionResult:
+        """Create final result with metadata."""
+        return AgentExecutionResult(
+            success=False, state=state, duration=0.01,
+            error=str(error), metadata=metadata)
+
+    async def reset_fallback_mechanisms(self) -> None:
         """Reset all fallback mechanisms."""
         self.fallback_handler.reset_circuit_breakers()
-        for cb in self.agent_circuit_breakers.values():
-            cb.reset()
+        circuit_registry.cleanup_all()
         logger.info("All fallback mechanisms reset")

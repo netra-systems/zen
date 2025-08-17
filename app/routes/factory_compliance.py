@@ -231,15 +231,17 @@ def _is_dev_environment() -> bool:
     return env in ["development", "dev", "local"]
 
 
+def _create_violation_step(v: Dict) -> Dict:
+    """Create single violation step."""
+    return {
+        "violation": v.get("description"),
+        "severity": v.get("severity"),
+        "remediation": v.get("remediation"),
+        "file": v.get("file_path"),
+        "line": v.get("line_number")
+    }
+
+
 def _format_remediation_steps(score) -> List[Dict]:
     """Format remediation steps from score violations."""
-    steps = []
-    for v in score.violations[:10]:  # Limit to top 10
-        steps.append({
-            "violation": v.get("description"),
-            "severity": v.get("severity"),
-            "remediation": v.get("remediation"),
-            "file": v.get("file_path"),
-            "line": v.get("line_number")
-        })
-    return steps
+    return [_create_violation_step(v) for v in score.violations[:10]]

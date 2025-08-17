@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
-import { createTestSetup, mockThreads, useThreadStore } from './setup';
+import { createTestSetup, mockThreads, useThreadStore, useAuthStore } from './setup';
 
 describe('ChatHistorySection - Basic Functionality', () => {
   const testSetup = createTestSetup();

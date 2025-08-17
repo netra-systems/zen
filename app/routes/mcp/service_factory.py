@@ -44,6 +44,13 @@ async def get_mcp_service(
     return _mcp_service
 
 
+def _create_additional_services() -> tuple:
+    """Create additional service dependencies."""
+    synthetic_data_service = SyntheticDataService()
+    supply_catalog_service = SupplyCatalogService()
+    return synthetic_data_service, supply_catalog_service
+
+
 def _create_mcp_service(
     agent_service: AgentService,
     thread_service: ThreadService, 
@@ -51,9 +58,7 @@ def _create_mcp_service(
     security_service: SecurityService
 ) -> MCPService:
     """Create MCP service with dependencies"""
-    synthetic_data_service = SyntheticDataService()
-    supply_catalog_service = SupplyCatalogService()
-    
+    synthetic_data_service, supply_catalog_service = _create_additional_services()
     return MCPService(
         agent_service=agent_service,
         thread_service=thread_service,

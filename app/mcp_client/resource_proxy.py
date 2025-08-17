@@ -64,7 +64,7 @@ class MCPResourceProxy:
         return parser(content)
     
     async def _discover_and_cache_resources(self, connection: MCPConnection, cache_key: str) -> List[MCPResource]:
-        \"\"\"Discover resources and cache them.\"\"\"
+        """Discover resources and cache them."""
         resources = await self._fetch_resources_from_server(connection)
         self._resource_cache[cache_key] = resources
         return resources

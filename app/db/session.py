@@ -63,6 +63,12 @@ def _validate_session_factory():
         logger.error("async_session_factory is not initialized")
         raise RuntimeError("Database not configured")
 
+async def _get_validated_session() -> AsyncIterator[AsyncSession]:
+    """Get validated session for backward compatibility."""
+    _validate_session_factory()
+    async with session_manager.get_session() as session:
+        yield session
+
 @asynccontextmanager
 async def get_db_session() -> AsyncIterator[AsyncSession]:
     """Provide a transactional scope around a series of operations.
@@ -70,6 +76,5 @@ async def get_db_session() -> AsyncIterator[AsyncSession]:
     This function maintains backward compatibility while using the improved
     session management from postgres.py.
     """
-    _validate_session_factory()
-    async with session_manager.get_session() as session:
+    async with _get_validated_session() as session:
         yield session

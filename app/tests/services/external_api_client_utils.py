@@ -102,7 +102,7 @@ def verify_new_circuit_creation(circuit, mock_circuit, client, mock_registry):
     """Verify new circuit breaker creation."""
     assert circuit == mock_circuit
     assert client._circuits["test_api"] == mock_circuit
-    mock_registry.get_circuit.assert_called_once_with(
+    mock_registry.get_breaker.assert_called_once_with(
         "http_test_api", client._select_config("test_api")
     )
 
@@ -154,5 +154,5 @@ def setup_circuit_and_session_mocks(mock_response):
 def configure_request_flow_mocks(mock_cb_class, mock_registry, mock_session_class, mock_circuit, mock_session):
     """Configure mocks for request flow test."""
     mock_cb_class.return_value = mock_circuit
-    mock_registry.get_circuit = AsyncMock(return_value=mock_circuit)
+    mock_registry.get_breaker = Mock(return_value=mock_circuit)
     mock_session_class.return_value = mock_session

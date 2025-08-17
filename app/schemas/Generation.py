@@ -1,9 +1,8 @@
-from typing import List, Optional, Dict, Any, TYPE_CHECKING
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
-# Import types only for type checking to avoid circular dependencies  
-if TYPE_CHECKING:
-    from app.schemas.FinOps import WorkloadProfile
+# Import WorkloadProfile directly to avoid forward reference issues
+from app.schemas.FinOps import WorkloadProfile
 
 class ContentGenParams(BaseModel):
     samples_per_type: int = Field(10, gt=0, le=100, description="Number of samples to generate for each workload type.")
@@ -53,7 +52,7 @@ class GenerationStatus(BaseModel):
 class SyntheticDataResult(BaseModel):
     """Result of synthetic data generation - consolidated from duplicate definitions"""
     success: bool
-    workload_profile: "WorkloadProfile"
+    workload_profile: WorkloadProfile
     generation_status: GenerationStatus
     metadata: Dict[str, Any] = Field(default_factory=dict)
     sample_data: Optional[List[Dict[str, Any]]] = None
@@ -65,10 +64,18 @@ class SyntheticDataResult(BaseModel):
 def rebuild_generation_models() -> None:
     """Rebuild generation models after imports are complete."""
     try:
-        SyntheticDataResult.model_rebuild()
+        _execute_generation_rebuild()
     except Exception:
-        # Safe to ignore - model will rebuild when needed
-        pass
+        _handle_generation_rebuild_failure()
+
+def _execute_generation_rebuild() -> None:
+    """Execute the generation model rebuild operation."""
+    SyntheticDataResult.model_rebuild()
+
+def _handle_generation_rebuild_failure() -> None:
+    """Handle generation model rebuild failure gracefully."""
+    # Safe to ignore - model will rebuild when needed
+    pass
 
 # Initialize model rebuild
 rebuild_generation_models()

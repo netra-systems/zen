@@ -106,3 +106,15 @@ variable "frontend_max_instances" {
   type        = number
   default     = 3
 }
+
+variable "domain_name" {
+  description = "Domain name for SSL certificate"
+  type        = string
+  default     = ""
+}
+
+variable "google_oauth_client_id_staging" {
+  description = "Google OAuth Client ID for staging"
+  type        = string
+  default     = ""
+}

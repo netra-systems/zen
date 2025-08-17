@@ -89,7 +89,7 @@ describe('useAgent', () => {
     
     expect(mockSendMessage).toHaveBeenCalled();
     const sentData = mockSendMessage.mock.calls[0][0];
-    expect(sentData.type).toBe('message');
+    expect(sentData.type).toBe('user_message');
     expect(sentData.payload.content).toBe('Test message');
   });
 
@@ -146,7 +146,7 @@ describe('useAgent', () => {
     // Check that stop message was sent
     expect(mockSendMessage).toHaveBeenCalled();
     const sentData = mockSendMessage.mock.calls[0][0];
-    expect(sentData.type).toBe('message');
+    expect(sentData.type).toBe('stop_agent');
   });
 
   it('should handle empty message', async () => {

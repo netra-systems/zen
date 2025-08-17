@@ -1,6 +1,7 @@
 """Refactored Supervisor Agent with modular architecture (<300 lines)."""
 
 import uuid
+from contextlib import asynccontextmanager
 from typing import Dict, List, Optional, Tuple, Any
 from typing import TYPE_CHECKING
 
@@ -77,8 +78,10 @@ class SupervisorAgent(BaseSubAgent):
         self.pipeline_executor = PipelineExecutor(
             self.engine, websocket_manager, self.db_session
         )
-        # Create a factory that returns the existing session
-        db_session_factory = lambda: self.db_session
+        # Create a factory that returns the session as a context manager
+        @asynccontextmanager
+        async def db_session_factory():
+            yield self.db_session
         self.state_manager = StateManager(db_session_factory)
         self.pipeline_builder = PipelineBuilder()
         self.flow_logger = get_supervisor_flow_logger()

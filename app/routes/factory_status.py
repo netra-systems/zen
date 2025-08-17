@@ -82,6 +82,22 @@ async def get_latest_report(
     return _convert_report_to_response(report)
 
 
+def _filter_reports_by_date_range(reports: List, start_date: Optional[datetime], end_date: Optional[datetime]) -> List:
+    """Filter reports by date range if provided."""
+    if start_date:
+        reports = [r for r in reports if r.generated_at >= start_date]
+    if end_date:
+        reports = [r for r in reports if r.generated_at <= end_date]
+    return reports
+
+def _sort_and_limit_reports(reports: List, limit: int) -> List:
+    """Sort reports by date and apply limit."""
+    return sorted(reports, key=lambda r: r.generated_at, reverse=True)[:limit]
+
+def _convert_reports_to_responses(reports: List) -> List[ReportResponse]:
+    """Convert reports to response format."""
+    return [_convert_report_to_response(r) for r in reports]
+
 @router.get("/history", response_model=List[ReportResponse])
 async def get_report_history(
     start_date: Optional[datetime] = Query(None),
@@ -91,20 +107,24 @@ async def get_report_history(
     current_user: Dict = Depends(get_current_user)
 ) -> List[ReportResponse]:
     """Get historical factory status reports."""
-    # For demo, return cached reports
     reports = list(_report_cache.values())
-    
-    # Filter by date range if provided
-    if start_date:
-        reports = [r for r in reports if r.generated_at >= start_date]
-    if end_date:
-        reports = [r for r in reports if r.generated_at <= end_date]
-    
-    # Sort by date and limit
-    reports = sorted(reports, key=lambda r: r.generated_at, reverse=True)[:limit]
-    
-    return [_convert_report_to_response(r) for r in reports]
+    filtered_reports = _filter_reports_by_date_range(reports, start_date, end_date)
+    limited_reports = _sort_and_limit_reports(filtered_reports, limit)
+    return _convert_reports_to_responses(limited_reports)
 
+
+def _build_metric_response(metric_name: str, value: Any, hours: int) -> MetricResponse:
+    """Build metric response with metadata."""
+    return MetricResponse(
+        metric_name=metric_name,
+        value=value,
+        timestamp=datetime.now(),
+        metadata={"hours_analyzed": hours}
+    )
+
+def _handle_metric_fetch_error(e: Exception, metric_name: str):
+    """Handle metric fetch errors."""
+    raise HTTPException(status_code=404, detail=f"Metric not found: {metric_name}")
 
 @router.get("/metrics/{metric_name}", response_model=MetricResponse)
 async def get_specific_metric(
@@ -116,15 +136,9 @@ async def get_specific_metric(
     try:
         builder = ReportBuilder()
         value = await _fetch_metric(builder, metric_name, hours)
-        
-        return MetricResponse(
-            metric_name=metric_name,
-            value=value,
-            timestamp=datetime.now(),
-            metadata={"hours_analyzed": hours}
-        )
+        return _build_metric_response(metric_name, value, hours)
     except Exception as e:
-        raise HTTPException(status_code=404, detail=f"Metric not found: {metric_name}")
+        _handle_metric_fetch_error(e, metric_name)
 
 
 @router.post("/generate", response_model=ReportResponse)
@@ -140,44 +154,60 @@ async def generate_report(
         raise HTTPException(status_code=500, detail=f"Failed to generate report: {str(e)}")
 
 
-@router.get("/metrics/velocity/trend")
-async def get_velocity_trend(
-    days: int = Query(7, ge=1, le=30),
-    current_user: Dict = Depends(get_current_user)
-) -> Dict[str, Any]:
-    """Get velocity trend over specified days."""
+def _build_velocity_calculator() -> Any:
+    """Build velocity calculator from report builder."""
     builder = ReportBuilder()
-    calculator = builder.velocity_calc
-    
+    return builder.velocity_calc
+
+def _calculate_entry_date(i: int) -> str:
+    """Calculate entry date for velocity data."""
+    return (datetime.now() - timedelta(days=i)).date().isoformat()
+
+
+def _create_daily_velocity_entry(calculator, i: int) -> Dict[str, Any]:
+    """Create single daily velocity entry."""
+    start_hours = (i + 1) * 24
+    metrics = calculator.calculate_velocity(start_hours)
+    return {
+        "date": _calculate_entry_date(i),
+        "commits": metrics.commits_per_day,
+        "velocity": metrics.velocity_trend
+    }
+
+def _collect_daily_velocities(calculator, days: int) -> List[Dict[str, Any]]:
+    """Collect daily velocity data for specified period."""
     daily_velocities = []
     for i in range(days):
-        start_hours = (i + 1) * 24
-        end_hours = i * 24
-        metrics = calculator.calculate_velocity(start_hours)
-        daily_velocities.append({
-            "date": (datetime.now() - timedelta(days=i)).date().isoformat(),
-            "commits": metrics.commits_per_day,
-            "velocity": metrics.velocity_trend
-        })
-    
+        entry = _create_daily_velocity_entry(calculator, i)
+        daily_velocities.append(entry)
+    return daily_velocities
+
+def _build_velocity_trend_response(days: int, daily_velocities: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Build complete velocity trend response."""
     return {
         "period_days": days,
         "daily_data": daily_velocities,
         "overall_trend": _calculate_trend(daily_velocities)
     }
 
-
-@router.get("/metrics/business-value/objectives")
-async def get_business_objectives(
-    hours: int = Query(168, ge=1, le=720),
+@router.get("/metrics/velocity/trend")
+async def get_velocity_trend(
+    days: int = Query(7, ge=1, le=30),
     current_user: Dict = Depends(get_current_user)
 ) -> Dict[str, Any]:
-    """Get business objective scores."""
+    """Get velocity trend over specified days."""
+    calculator = _build_velocity_calculator()
+    daily_velocities = _collect_daily_velocities(calculator, days)
+    return _build_velocity_trend_response(days, daily_velocities)
+
+
+def _build_business_calculator() -> Any:
+    """Build business value calculator."""
     builder = ReportBuilder()
-    calculator = builder.business_calc
-    
-    metrics = calculator.calculate_business_value(hours)
-    
+    return builder.business_calc
+
+def _build_business_objectives_response(hours: int, metrics) -> Dict[str, Any]:
+    """Build business objectives response."""
     return {
         "period_hours": hours,
         "objectives": metrics.objective_scores,
@@ -187,30 +217,88 @@ async def get_business_objectives(
         "overall_score": metrics.overall_value_score
     }
 
+@router.get("/metrics/business-value/objectives")
+async def get_business_objectives(
+    hours: int = Query(168, ge=1, le=720),
+    current_user: Dict = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """Get business objective scores."""
+    calculator = _build_business_calculator()
+    metrics = calculator.calculate_business_value(hours)
+    return _build_business_objectives_response(hours, metrics)
+
+
+def _build_quality_calculator() -> Any:
+    """Build quality calculator from report builder."""
+    builder = ReportBuilder()
+    return builder.quality_calc
+
+def _determine_compliance_status(compliance) -> str:
+    """Determine compliance status from violations."""
+    return "compliant" if compliance.violations == 0 else "non-compliant"
+
+def _build_compliance_details(compliance) -> Dict[str, str]:
+    """Build compliance details section."""
+    return {
+        "300_line_rule": f"{len(compliance.files_over_limit)} violations",
+        "8_line_rule": f"{len(compliance.functions_over_limit)} violations"
+    }
+
+def _build_compliance_response(compliance) -> Dict[str, Any]:
+    """Build complete compliance response."""
+    return {
+        "violations": compliance.violations,
+        "files_over_limit": compliance.files_over_limit,
+        "functions_over_limit": compliance.functions_over_limit,
+        "compliance_rate": compliance.compliance_rate,
+        "status": _determine_compliance_status(compliance),
+        "details": _build_compliance_details(compliance)
+    }
 
 @router.get("/metrics/quality/compliance")
 async def get_compliance_status(
     current_user: Dict = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Get architecture compliance status."""
-    builder = ReportBuilder()
-    calculator = builder.quality_calc
-    
+    calculator = _build_quality_calculator()
     metrics = calculator.calculate_quality(24)
-    compliance = metrics.architecture_compliance
-    
+    return _build_compliance_response(metrics.architecture_compliance)
+
+
+def _build_executive_summary_section(report) -> Dict[str, Any]:
+    """Build executive summary section for dashboard."""
     return {
-        "violations": compliance.violations,
-        "files_over_limit": compliance.files_over_limit,
-        "functions_over_limit": compliance.functions_over_limit,
-        "compliance_rate": compliance.compliance_rate,
-        "status": "compliant" if compliance.violations == 0 else "non-compliant",
-        "details": {
-            "300_line_rule": f"{len(compliance.files_over_limit)} violations",
-            "8_line_rule": f"{len(compliance.functions_over_limit)} violations"
-        }
+        "productivity_score": report.executive_summary.productivity_score,
+        "business_value_score": report.executive_summary.business_value_score,
+        "status": report.executive_summary.overall_status,
+        "highlights": report.executive_summary.key_highlights
     }
 
+def _build_quick_stats_section(report) -> Dict[str, Any]:
+    """Build quick stats section for dashboard."""
+    return {
+        "commits_today": report.velocity_metrics["commits_per_day"],
+        "active_branches": report.branch_metrics["active_branches"],
+        "features_added": report.feature_progress["features_added"],
+        "bugs_fixed": report.feature_progress["bugs_fixed"]
+    }
+
+def _build_trends_section(report) -> Dict[str, Any]:
+    """Build trends section for dashboard."""
+    return {
+        "velocity": report.velocity_metrics["velocity_trend"],
+        "quality": report.quality_metrics["quality_score"],
+        "innovation": report.business_value_metrics["innovation"]["innovation_ratio"]
+    }
+
+def _build_complete_dashboard_summary(report) -> Dict[str, Any]:
+    """Build complete dashboard summary response."""
+    return {
+        "executive_summary": _build_executive_summary_section(report),
+        "quick_stats": _build_quick_stats_section(report),
+        "trends": _build_trends_section(report),
+        "last_updated": report.generated_at.isoformat()
+    }
 
 @router.get("/dashboard/summary")
 async def get_dashboard_summary(
@@ -218,63 +306,52 @@ async def get_dashboard_summary(
 ) -> Dict[str, Any]:
     """Get summary data for dashboard display."""
     report = await _ensure_latest_report()
-    
+    return _build_complete_dashboard_summary(report)
+
+
+def _build_test_summary(report) -> Dict[str, Any]:
+    """Build test summary from report."""
     return {
-        "executive_summary": {
-            "productivity_score": report.executive_summary.productivity_score,
-            "business_value_score": report.executive_summary.business_value_score,
-            "status": report.executive_summary.overall_status,
-            "highlights": report.executive_summary.key_highlights
-        },
-        "quick_stats": {
-            "commits_today": report.velocity_metrics["commits_per_day"],
-            "active_branches": report.branch_metrics["active_branches"],
-            "features_added": report.feature_progress["features_added"],
-            "bugs_fixed": report.feature_progress["bugs_fixed"]
-        },
-        "trends": {
-            "velocity": report.velocity_metrics["velocity_trend"],
-            "quality": report.quality_metrics["quality_score"],
-            "innovation": report.business_value_metrics["innovation"]["innovation_ratio"]
-        },
-        "last_updated": report.generated_at.isoformat()
+        "productivity_score": report.executive_summary.productivity_score,
+        "business_value_score": report.executive_summary.business_value_score,
+        "overall_status": report.executive_summary.overall_status
     }
 
+def _build_test_response(report) -> Dict[str, Any]:
+    """Build complete test response."""
+    return {
+        "status": "Factory Status API is working!",
+        "report_id": report.report_id,
+        "generated_at": report.generated_at.isoformat(),
+        "summary": _build_test_summary(report)
+    }
 
 @router.get("/test")
 async def test_factory_status() -> Dict[str, Any]:
     """Test endpoint for factory status (no auth required for testing)."""
     report = await _ensure_latest_report()
-    
-    return {
-        "status": "Factory Status API is working!",
-        "report_id": report.report_id,
-        "generated_at": report.generated_at.isoformat(),
-        "summary": {
-            "productivity_score": report.executive_summary.productivity_score,
-            "business_value_score": report.executive_summary.business_value_score,
-            "overall_status": report.executive_summary.overall_status
-        }
-    }
+    return _build_test_response(report)
 
 
-async def _generate_new_report(hours: int) -> FactoryStatusReport:
-    """Generate a new factory status report."""
+def _cache_generated_report(report: FactoryStatusReport) -> None:
+    """Cache the generated report."""
     global _latest_report_id
-    
-    builder = ReportBuilder()
-    report = builder.build_report(hours)
-    
-    # Cache the report
     _report_cache[report.report_id] = report
     _latest_report_id = report.report_id
-    
-    # Clean old reports (keep last 100)
+
+def _clean_old_reports() -> None:
+    """Clean old reports from cache (keep last 100)."""
     if len(_report_cache) > 100:
         oldest = sorted(_report_cache.keys())[:len(_report_cache) - 100]
         for key in oldest:
             del _report_cache[key]
-    
+
+async def _generate_new_report(hours: int) -> FactoryStatusReport:
+    """Generate a new factory status report."""
+    builder = ReportBuilder()
+    report = builder.build_report(hours)
+    _cache_generated_report(report)
+    _clean_old_reports()
     return report
 
 
@@ -285,9 +362,9 @@ async def _ensure_latest_report() -> FactoryStatusReport:
     return _report_cache[_latest_report_id]
 
 
-async def _fetch_metric(builder: ReportBuilder, metric_name: str, hours: int) -> Any:
-    """Fetch a specific metric value."""
-    metric_map = {
+def _build_metric_mapping(builder: ReportBuilder, hours: int) -> Dict[str, Any]:
+    """Build metric mapping dictionary."""
+    return {
         "commits_per_hour": lambda: builder.velocity_calc.calculate_velocity(hours).commits_per_hour,
         "commits_per_day": lambda: builder.velocity_calc.calculate_velocity(hours).commits_per_day,
         "velocity_trend": lambda: builder.velocity_calc.calculate_velocity(hours).velocity_trend,
@@ -296,27 +373,46 @@ async def _fetch_metric(builder: ReportBuilder, metric_name: str, hours: int) ->
         "active_branches": lambda: builder.branch_tracker.calculate_metrics().active_branches,
         "technical_debt": lambda: builder.quality_calc.calculate_quality(hours).technical_debt.debt_ratio
     }
-    
+
+def _validate_metric_exists(metric_name: str, metric_map: Dict) -> None:
+    """Validate metric exists in mapping."""
     if metric_name not in metric_map:
         raise ValueError(f"Unknown metric: {metric_name}")
-    
+
+async def _fetch_metric(builder: ReportBuilder, metric_name: str, hours: int) -> Any:
+    """Fetch a specific metric value."""
+    metric_map = _build_metric_mapping(builder, hours)
+    _validate_metric_exists(metric_name, metric_map)
     return metric_map[metric_name]()
+
+
+def _extract_core_report_fields(report: FactoryStatusReport) -> Dict[str, Any]:
+    """Extract core report fields."""
+    return {
+        "report_id": report.report_id,
+        "generated_at": report.generated_at,
+        "executive_summary": _serialize_summary(report.executive_summary)
+    }
+
+
+def _extract_metrics_fields(report: FactoryStatusReport) -> Dict[str, Any]:
+    """Extract metrics fields."""
+    return {
+        "velocity_metrics": report.velocity_metrics,
+        "impact_metrics": report.impact_metrics,
+        "quality_metrics": report.quality_metrics,
+        "business_value_metrics": report.business_value_metrics,
+        "branch_metrics": report.branch_metrics,
+        "feature_progress": report.feature_progress,
+        "recommendations": report.recommendations
+    }
 
 
 def _convert_report_to_response(report: FactoryStatusReport) -> ReportResponse:
     """Convert report to response model."""
-    return ReportResponse(
-        report_id=report.report_id,
-        generated_at=report.generated_at,
-        executive_summary=_serialize_summary(report.executive_summary),
-        velocity_metrics=report.velocity_metrics,
-        impact_metrics=report.impact_metrics,
-        quality_metrics=report.quality_metrics,
-        business_value_metrics=report.business_value_metrics,
-        branch_metrics=report.branch_metrics,
-        feature_progress=report.feature_progress,
-        recommendations=report.recommendations
-    )
+    core_fields = _extract_core_report_fields(report)
+    metrics_fields = _extract_metrics_fields(report)
+    return ReportResponse(**{**core_fields, **metrics_fields})
 
 
 def _serialize_summary(summary) -> Dict[str, Any]:
@@ -331,16 +427,24 @@ def _serialize_summary(summary) -> Dict[str, Any]:
     }
 
 
-def _calculate_trend(daily_data: List[Dict]) -> str:
-    """Calculate overall trend from daily data."""
-    if len(daily_data) < 2:
-        return "stable"
-    
-    first_half = sum(d["commits"] for d in daily_data[:len(daily_data)//2])
-    second_half = sum(d["commits"] for d in daily_data[len(daily_data)//2:])
-    
+def _calculate_trend_halves(daily_data: List[Dict]) -> tuple[int, int]:
+    """Calculate first and second half commit sums."""
+    midpoint = len(daily_data) // 2
+    first_half = sum(d["commits"] for d in daily_data[:midpoint])
+    second_half = sum(d["commits"] for d in daily_data[midpoint:])
+    return first_half, second_half
+
+def _determine_trend_direction(first_half: int, second_half: int) -> str:
+    """Determine trend direction from half comparisons."""
     if second_half > first_half * 1.1:
         return "increasing"
     elif second_half < first_half * 0.9:
         return "decreasing"
     return "stable"
+
+def _calculate_trend(daily_data: List[Dict]) -> str:
+    """Calculate overall trend from daily data."""
+    if len(daily_data) < 2:
+        return "stable"
+    first_half, second_half = _calculate_trend_halves(daily_data)
+    return _determine_trend_direction(first_half, second_half)

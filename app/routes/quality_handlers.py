@@ -136,30 +136,48 @@ async def _generate_report_data(monitoring_service: QualityMonitoringService, re
         return {"error": "Unknown report type"}
 
 
+def _get_default_agent_names() -> List[str]:
+    """Get list of default agent names for reporting."""
+    return ["TriageSubAgent", "DataSubAgent", "OptimizationsCoreSubAgent",
+            "ActionsToMeetGoalsSubAgent", "ReportingSubAgent"]
+
+async def _collect_agent_reports(monitoring_service: QualityMonitoringService, period_hours: int) -> Dict[str, Any]:
+    """Collect reports for all agents."""
+    agent_reports = {}
+    for agent_name in _get_default_agent_names():
+        agent_reports[agent_name] = await monitoring_service.get_agent_report(agent_name, period_hours)
+    return agent_reports
+
 async def _generate_detailed_report_data(monitoring_service: QualityMonitoringService, period_hours: int, period_days: int) -> Dict[str, Any]:
     """Generate detailed report data for all agents."""
-    agent_reports = {}
-    agent_names = ["TriageSubAgent", "DataSubAgent", "OptimizationsCoreSubAgent",
-                   "ActionsToMeetGoalsSubAgent", "ReportingSubAgent"]
-    for agent_name in agent_names:
-        agent_reports[agent_name] = await monitoring_service.get_agent_report(agent_name, period_hours)
+    agent_reports = await _collect_agent_reports(monitoring_service, period_hours)
+    summary = await monitoring_service.get_dashboard_data()
     return {
-        "summary": await monitoring_service.get_dashboard_data(),
+        "summary": summary,
         "agents": agent_reports,
         "period_days": period_days
     }
 
 
-async def _generate_trend_analysis_data(monitoring_service: QualityMonitoringService, period_days: int) -> Dict[str, Any]:
-    """Generate trend analysis data over time."""
+async def _create_daily_trend_entry(monitoring_service: QualityMonitoringService, day_offset: int) -> Dict[str, Any]:
+    """Create single daily trend entry."""
+    day_start = datetime.now(UTC) - timedelta(days=day_offset+1)
+    return {
+        "date": day_start.date().isoformat(),
+        "data": await monitoring_service.get_dashboard_data()
+    }
+
+async def _collect_trend_data(monitoring_service: QualityMonitoringService, period_days: int) -> List[Dict[str, Any]]:
+    """Collect trend data for specified period."""
     trends = []
     for i in range(period_days):
-        day_start = datetime.now(UTC) - timedelta(days=i+1)
-        trend_data = {
-            "date": day_start.date().isoformat(),
-            "data": await monitoring_service.get_dashboard_data()
-        }
-        trends.append(trend_data)
+        trend_entry = await _create_daily_trend_entry(monitoring_service, i)
+        trends.append(trend_entry)
+    return trends
+
+async def _generate_trend_analysis_data(monitoring_service: QualityMonitoringService, period_days: int) -> Dict[str, Any]:
+    """Generate trend analysis data over time."""
+    trends = await _collect_trend_data(monitoring_service, period_days)
     return {"trends": trends, "period_days": period_days}
 
 

@@ -47,5 +47,84 @@
                     <test-case>test_database_connection_pooling.py</test-case>
                 </learning>
 
+        <learning id="trial-period-type-mismatch">
+            <title>Database Column Type Mismatch - trial_period semantic change</title>
+            <date>2025-08-16</date>
+            <category>Database/AsyncIO</category>
+            <description>
+                Initial design had trial_period as Boolean (is in trial), but was changed to Integer (trial days).
+                Migration, model, and schema needed alignment to use Integer type consistently.
+            </description>
+            <symptoms>
+                <symptom>Error: asyncpg.exceptions.DatatypeMismatchError: column "trial_period" is of type integer but expression is of type boolean</symptom>
+                <symptom>Semantic mismatch: Boolean (is in trial) vs Integer (trial days)</symptom>
+                <symptom>Inconsistent types across migration, model, and schema</symptom>
+            </symptoms>
+            <root-causes>
+                <cause>Design change from Boolean flag to Integer days</cause>
+                <cause>Migration updated to use sa.Integer() for trial days</cause>
+                <cause>Model updated to use Integer() with default=0</cause>
+                <cause>Schema needed update from bool to int</cause>
+            </root-causes>
+            <solution>
+                <step>Ensure migration uses sa.Integer() with server_default='0'</step>
+                <step>Update model to use Integer() with default=0</step>
+                <step>Update Pydantic schema to use int with default=0</step>
+                <step>Change semantics: 0 = no trial, positive = trial days remaining</step>
+            </solution>
+            <files-modified>
+                <file>app/alembic/versions/bb39e1c49e2d_add_missing_tables_and_columns.py - Uses Integer for trial days</file>
+                <file>app/db/models_user.py - Uses Integer() with default=0</file>
+                <file>app/schemas/UserPlan.py - Uses int with default=0</file>
+            </files-modified>
+            <prevention>
+                <item>Document semantic changes clearly when changing field meanings</item>
+                <item>Create schema consistency tests to verify type alignment</item>
+                <item>Test both model creation and database operations</item>
+                <item>Use consistent type definitions across migrations, models, and schemas</item>
+            </prevention>
+            <test-case>tests/database/test_schema_consistency.py</test-case>
+            <test-case>tests/unit/test_user_plan_schema.py</test-case>
+        </learning>
+
+        <learning id="state-checkpoint-manager-session-factory">
+            <title>StateCheckpointManager AsyncSession Factory Context Manager Issue</title>
+            <date>2025-08-16</date>
+            <category>Database/AsyncIO</category>
+            <description>
+                StateCheckpointManager expected an async context manager factory but was receiving
+                an AsyncSession directly, causing "'async_sessionmaker' object has no attribute 'execute'" error
+                when the factory was called incorrectly.
+            </description>
+            <symptoms>
+                <symptom>Error: 'async_sessionmaker' object has no attribute 'execute'</symptom>
+                <symptom>Failed to save agent state for run in state_persistence_service</symptom>
+                <symptom>StateCheckpointManager using async with db_session_factory() as session</symptom>
+                <symptom>SupervisorAgent passing lambda that returns session directly</symptom>
+            </symptoms>
+            <root-causes>
+                <cause>StateCheckpointManager expects db_session_factory to be an async context manager factory</cause>
+                <cause>SupervisorAgent was passing lambda: self.db_session which doesn't work as context manager</cause>
+                <cause>Mismatch between expected factory pattern and actual session object</cause>
+            </root-causes>
+            <solution>
+                <step>Import asynccontextmanager from contextlib in supervisor_consolidated.py</step>
+                <step>Create proper async context manager factory that yields the session</step>
+                <step>Wrap existing db_session in asynccontextmanager decorator function</step>
+                <step>Pass the wrapped factory to StateManager instead of raw lambda</step>
+            </solution>
+            <files-modified>
+                <file>app/agents/supervisor_consolidated.py - Added asynccontextmanager wrapper for db_session</file>
+                <file>app/tests/unit/test_state_checkpoint_session_fix.py - Added comprehensive test coverage</file>
+            </files-modified>
+            <prevention>
+                <item>Always use asynccontextmanager when wrapping existing sessions for factory pattern</item>
+                <item>Ensure consistency between expected factory pattern and actual implementation</item>
+                <item>Test async context manager factories separately from business logic</item>
+                <item>Document whether parameters expect sessions or session factories</item>
+            </prevention>
+            <test-case>app/tests/unit/test_state_checkpoint_session_fix.py</test-case>
+        </learning>
+
     </learnings>
 </specification>

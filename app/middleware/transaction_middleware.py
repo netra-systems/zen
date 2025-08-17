@@ -49,11 +49,15 @@ class TransactionMiddleware(BaseHTTPMiddleware):
     async def _process_with_transaction(self, request: Request, call_next: Callable) -> Response:
         """Process request within a database transaction."""
         try:
-            async with self.transaction_manager.transaction() as transaction_id:
-                request.state.transaction_id = transaction_id
-                response = await call_next(request)
-                response.headers["X-Transaction-ID"] = transaction_id
-                return response
+            return await self._execute_request_in_transaction(request, call_next)
         except Exception as error:
             logger.error(f"Transaction failed: {error}")
             raise error
+
+    async def _execute_request_in_transaction(self, request: Request, call_next: Callable) -> Response:
+        """Execute request within transaction context."""
+        async with self.transaction_manager.transaction() as transaction_id:
+            request.state.transaction_id = transaction_id
+            response = await call_next(request)
+            response.headers["X-Transaction-ID"] = transaction_id
+            return response

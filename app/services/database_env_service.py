@@ -17,23 +17,30 @@ class DatabaseEnvironmentValidator:
     DEV_KEYWORDS = ["dev", "development", "local"]
     
     @classmethod
-    def validate_database_environment(cls) -> None:
-        """Validate that database URL matches the current environment"""
+    def _get_environment_settings(cls) -> tuple[str, str]:
+        """Get normalized environment and database URL settings."""
         environment = settings.environment.lower()
         database_url = settings.database_url.lower() if settings.database_url else ""
-        
-        if not database_url:
-            logger.warning("No database URL configured")
-            return
-        
-        # Check for environment mismatches
+        return environment, database_url
+    
+    @classmethod
+    def _validate_by_environment(cls, environment: str, database_url: str) -> None:
+        """Route validation based on environment type."""
         if environment == "production":
             cls._validate_production_database(database_url)
         elif environment == "testing":
             cls._validate_testing_database(database_url)
         elif environment == "development":
             cls._validate_development_database(database_url)
-        
+    
+    @classmethod
+    def validate_database_environment(cls) -> None:
+        """Validate that database URL matches the current environment"""
+        environment, database_url = cls._get_environment_settings()
+        if not database_url:
+            logger.warning("No database URL configured")
+            return
+        cls._validate_by_environment(environment, database_url)
         logger.info(f"Database environment validation passed for {environment}")
     
     @classmethod

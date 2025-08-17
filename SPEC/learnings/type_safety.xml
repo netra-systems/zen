@@ -133,5 +133,57 @@
     </key-learnings>
 </learning>
 
+<learning id="fallback-response-type-assumption-fix">
+    <title>FallbackResponseFactory Type Assumption Error Fix</title>
+    <date>2025-08-16</date>
+    <category>Type Safety</category>
+    <description>
+        Fixed AttributeError where FallbackResponseFactory incorrectly assumed all 
+        fallback responses were dictionaries, causing 'str' object has no attribute 
+        'copy' error when handling general fallback messages.
+    </description>
+    <problem>
+        <summary>FallbackResponseFactory tried to call .copy() on string responses</summary>
+        <error_message>ERROR | app.agents.supervisor.fallback_manager:_create_final_fallback:159 | Final fallback for optimization: 'str' object has no attribute 'copy'</error_message>
+        <root_cause>
+            <item>FallbackResponseFactory._enhance_response_with_error() assumed all responses were dicts</item>
+            <item>Called .copy() on response without type checking</item>
+            <item>The "general" fallback type returns a string, not a dict</item>
+        </root_cause>
+        <impact>
+            <item>Runtime errors when fallback mechanism triggered for general errors</item>
+            <item>Supervisor agent fallback failures during optimization tasks</item>
+            <item>System unable to gracefully degrade during failures</item>
+        </impact>
+    </problem>
+    <solution>
+        <approach>Add type checking before calling .copy() method on responses</approach>
+        <steps>
+            <step>Identified that general fallback returns DEFAULT_GENERAL_MESSAGE string</step>
+            <step>Modified _enhance_response_with_error to check isinstance(response, dict)</step>
+            <step>Only call .copy() and add metadata for dict responses</step>
+            <step>Return string responses unmodified</step>
+        </steps>
+        <files-changed>
+            <file>app/llm/fallback_responses.py - Added type checking in _enhance_response_with_error</file>
+            <file>app/tests/unit/test_fallback_response_factory.py - Added comprehensive test coverage</file>
+        </files-changed>
+    </solution>
+    <validation>
+        <test>test_general_fallback_returns_string - Verifies string responses work</test>
+        <test>test_general_fallback_with_error - Ensures no crash with error parameter</test>
+        <test>test_triage_fallback_returns_dict - Confirms dict responses still work</test>
+        <test>test_dict_response_is_copied - Validates dict copying prevents mutation</test>
+        <test>test_enhance_response_handles_mixed_types - Tests both string and dict handling</test>
+        <test>All 9 tests pass successfully</test>
+    </validation>
+    <key-learnings>
+        <learning>Always check type before calling type-specific methods like .copy()</learning>
+        <learning>Validate assumptions about return types when working with polymorphic responses</learning>
+        <learning>Add comprehensive tests for all response type variations</learning>
+        <learning>Fallback mechanisms should handle multiple response formats gracefully</learning>
+    </key-learnings>
+</learning>
+
     </learnings>
 </specification>

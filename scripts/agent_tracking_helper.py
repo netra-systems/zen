@@ -119,12 +119,10 @@ class AgentTrackingHelper:
         ext = file_path.suffix.lower()
         return self.LANGUAGE_MAP.get(ext)
     
-    def _format_header(self, language: str, metadata: Dict[str, str]) -> str:
-        """Format the tracking header based on language."""
+    def _create_header_lines(self, metadata):
+        """Create base metadata lines for header"""
         timestamp = datetime.now().astimezone().isoformat()
-        
-        # Base metadata
-        header_lines = [
+        return [
             f"Last Modified: {timestamp}",
             f"Agent: {metadata['agent']} ({metadata['model']})",
             f"Task ID: {metadata['task_id']}",
@@ -133,56 +131,47 @@ class AgentTrackingHelper:
             f"Prompt Summary: {metadata['prompt_summary'][:200]}",
             f"Changes: {metadata['changes'][:200]}"
         ]
-        
-        # Format based on language
-        if language == 'python':
-            header = "# Agent Modification Tracking\n"
-            header += "# " + "=" * 27 + "\n"
-            for line in header_lines:
-                header += f"# {line}\n"
-            header += "# " + "=" * 27 + "\n"
-        
-        elif language in ['javascript', 'typescript', 'java', 'c', 'cpp', 'csharp', 'go', 'rust', 'swift', 'kotlin', 'php']:
-            header = "/**\n"
-            header += " * Agent Modification Tracking\n"
-            header += " * " + "=" * 27 + "\n"
-            for line in header_lines:
-                header += f" * {line}\n"
-            header += " * " + "=" * 27 + "\n"
-            header += " */\n"
-        
-        elif language in ['jsx', 'tsx', 'html', 'vue']:
-            header = "{/* \n"
-            header += "  Agent Modification Tracking\n"
-            header += "  " + "=" * 27 + "\n"
-            for line in header_lines:
-                header += f"  {line}\n"
-            header += "  " + "=" * 27 + "\n"
-            header += "*/}\n"
-        
-        elif language == 'ruby':
-            header = "# Agent Modification Tracking\n"
-            header += "# " + "=" * 27 + "\n"
-            for line in header_lines:
-                header += f"# {line}\n"
-            header += "# " + "=" * 27 + "\n"
-        
-        elif language in ['bash', 'yaml', 'sql']:
-            header = "# Agent Modification Tracking\n"
-            header += "# " + "=" * 27 + "\n"
-            for line in header_lines:
-                header += f"# {line}\n"
-            header += "# " + "=" * 27 + "\n"
-        
-        else:
-            # Default to hash comment style
-            header = "# Agent Modification Tracking\n"
-            header += "# " + "=" * 27 + "\n"
-            for line in header_lines:
-                header += f"# {line}\n"
-            header += "# " + "=" * 27 + "\n"
-        
+
+    def _format_hash_comment_header(self, header_lines):
+        """Format header with hash comments for Python/Ruby/Bash/YAML/SQL"""
+        header = "# Agent Modification Tracking\n"
+        header += "# " + "=" * 27 + "\n"
+        for line in header_lines:
+            header += f"# {line}\n"
+        header += "# " + "=" * 27 + "\n"
         return header
+
+    def _format_block_comment_header(self, header_lines):
+        """Format header with block comments for JS/TS/Java/C/etc"""
+        header = "/**\n"
+        header += " * Agent Modification Tracking\n"
+        header += " * " + "=" * 27 + "\n"
+        for line in header_lines:
+            header += f" * {line}\n"
+        header += " * " + "=" * 27 + "\n"
+        header += " */\n"
+        return header
+
+    def _format_jsx_comment_header(self, header_lines):
+        """Format header with JSX comments for JSX/TSX/HTML/Vue"""
+        header = "{/* \n"
+        header += "  Agent Modification Tracking\n"
+        header += "  " + "=" * 27 + "\n"
+        for line in header_lines:
+            header += f"  {line}\n"
+        header += "  " + "=" * 27 + "\n"
+        header += "*/}\n"
+        return header
+
+    def _format_header(self, language: str, metadata: Dict[str, str]) -> str:
+        """Format the tracking header based on language."""
+        header_lines = self._create_header_lines(metadata)
+        if language in ['javascript', 'typescript', 'java', 'c', 'cpp', 'csharp', 'go', 'rust', 'swift', 'kotlin', 'php']:
+            return self._format_block_comment_header(header_lines)
+        elif language in ['jsx', 'tsx', 'html', 'vue']:
+            return self._format_jsx_comment_header(header_lines)
+        else:
+            return self._format_hash_comment_header(header_lines)
     
     def _extract_existing_header(self, content: str, language: str) -> Tuple[Optional[str], str]:
         """Extract existing agent tracking header if present."""
@@ -259,83 +248,86 @@ class AgentTrackingHelper:
         
         return history_section
     
-    def add_tracking_header(
-        self,
-        file_path: str,
-        agent: str,
-        model: str,
-        task_id: str,
-        prompt_summary: str,
-        changes: str,
-        dry_run: bool = False
-    ) -> bool:
-        """Add or update tracking header in a file."""
+    def _validate_and_prepare_file(self, file_path):
+        """Validate file path and determine language"""
         path = Path(file_path)
-        
-        # Check if file should be excluded
         if self._should_exclude(path):
             print(f"Skipping excluded file: {file_path}")
-            return False
-        
-        # Determine language
-        language = self._get_language(path)
-        if not language:
+            return None, None
+        language = self._get_language(path) or 'default'
+        if not self._get_language(path):
             print(f"Unknown file type, using default format: {file_path}")
-            language = 'default'
-        
-        # Read file content
+        return path, language
+
+    def _read_file_content(self, path, file_path):
+        """Read file content safely"""
         try:
             with open(path, 'r', encoding='utf-8') as f:
-                content = f.read()
+                return f.read()
         except Exception as e:
             print(f"Error reading file {file_path}: {e}")
-            return False
-        
-        # Extract existing header and history
+            return None
+
+    def _extract_header_and_history(self, content, language):
+        """Extract existing header and history"""
         existing_header, content_without_header = self._extract_existing_header(content, language)
-        history = []
-        
-        if existing_header:
-            history = self._extract_history(existing_header, language)
-        
-        # Create new header
-        metadata = {
-            'agent': agent,
-            'model': model,
-            'task_id': task_id,
-            'prompt_summary': prompt_summary,
-            'changes': changes
+        history = self._extract_history(existing_header, language) if existing_header else []
+        return existing_header, content_without_header, history
+
+    def _create_tracking_metadata(self, agent, model, task_id, prompt_summary, changes):
+        """Create metadata dictionary for tracking header"""
+        return {
+            'agent': agent, 'model': model, 'task_id': task_id,
+            'prompt_summary': prompt_summary, 'changes': changes
         }
-        
-        new_header = self._format_header(language, metadata)
-        
-        # Create history entry for current modification
+
+    def _generate_new_header(self, language, metadata):
+        """Generate new tracking header"""
+        return self._format_header(language, metadata)
+
+    def _create_history_entry(self, agent, changes):
+        """Create history entry for current modification"""
         timestamp = datetime.now().astimezone().isoformat()
-        current_entry = f"{timestamp} - {agent} - {changes[:50]}"
-        
-        # Add history section if there are previous modifications
+        return f"{timestamp} - {agent} - {changes[:50]}"
+
+    def _add_history_section(self, new_header, history, existing_header, current_entry, language):
+        """Add history section if needed"""
         if history or existing_header:
             history_section = self._format_history(history, current_entry, language)
-            new_header += history_section
-        
-        # Combine header with content
+            return new_header + history_section
+        return new_header
+
+    def _finalize_content(self, new_header, content_without_header, dry_run, path, file_path):
+        """Finalize and write content"""
         new_content = new_header + "\n" + content_without_header
-        
-        # Write or display result
         if dry_run:
             print(f"=== DRY RUN for {file_path} ===")
-            print(new_content[:500])  # Show first 500 chars
-            print("...")
+            print(new_content[:500] + "...")
             return True
-        else:
-            try:
-                with open(path, 'w', encoding='utf-8') as f:
-                    f.write(new_content)
-                print(f"Updated tracking header in: {file_path}")
-                return True
-            except Exception as e:
-                print(f"Error writing file {file_path}: {e}")
-                return False
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(new_content)
+            print(f"Updated tracking header in: {file_path}")
+            return True
+        except Exception as e:
+            print(f"Error writing file {file_path}: {e}")
+            return False
+
+    def add_tracking_header(
+        self, file_path: str, agent: str, model: str, task_id: str,
+        prompt_summary: str, changes: str, dry_run: bool = False
+    ) -> bool:
+        """Add or update tracking header in a file."""
+        path, language = self._validate_and_prepare_file(file_path)
+        if not path: return False
+        content = self._read_file_content(path, file_path)
+        if not content: return False
+        existing_header, content_without_header, history = self._extract_header_and_history(content, language)
+        metadata = self._create_tracking_metadata(agent, model, task_id, prompt_summary, changes)
+        new_header = self._generate_new_header(language, metadata)
+        current_entry = self._create_history_entry(agent, changes)
+        new_header = self._add_history_section(new_header, history, existing_header, current_entry, language)
+        return self._finalize_content(new_header, content_without_header, dry_run, path, file_path)
     
     def create_audit_log_entry(
         self,
@@ -366,68 +358,43 @@ class AgentTrackingHelper:
         }
 
 
-def main():
-    """Main entry point for the script."""
+def _create_argument_parser():
+    """Create and configure argument parser"""
     parser = argparse.ArgumentParser(
         description='Add or update agent tracking headers in modified files'
     )
-    
-    parser.add_argument(
-        'file_path',
-        help='Path to the file to update'
-    )
-    
-    parser.add_argument(
-        '--agent',
-        required=True,
-        help='Name of the AI agent (e.g., "Claude Code")'
-    )
-    
-    parser.add_argument(
-        '--model',
-        required=True,
-        help='Model version (e.g., "claude-opus-4-1-20250805")'
-    )
-    
-    parser.add_argument(
-        '--task-id',
-        required=True,
-        help='Task or conversation ID'
-    )
-    
-    parser.add_argument(
-        '--prompt',
-        required=True,
-        dest='prompt_summary',
-        help='Brief summary of the prompt (max 200 chars)'
-    )
-    
-    parser.add_argument(
-        '--changes',
-        required=True,
-        help='Brief description of changes (max 200 chars)'
-    )
-    
-    parser.add_argument(
-        '--dry-run',
-        action='store_true',
-        help='Show what would be changed without modifying files'
-    )
-    
-    args = parser.parse_args()
-    
-    # Create helper and process file
+    parser.add_argument('file_path', help='Path to the file to update')
+    return parser
+
+def _add_required_arguments(parser):
+    """Add required arguments to parser"""
+    parser.add_argument('--agent', required=True, help='Name of the AI agent (e.g., "Claude Code")')
+    parser.add_argument('--model', required=True, help='Model version (e.g., "claude-opus-4-1-20250805")')
+    parser.add_argument('--task-id', required=True, help='Task or conversation ID')
+    parser.add_argument('--prompt', required=True, dest='prompt_summary', help='Brief summary of the prompt (max 200 chars)')
+    parser.add_argument('--changes', required=True, help='Brief description of changes (max 200 chars)')
+
+def _add_optional_arguments(parser):
+    """Add optional arguments to parser"""
+    parser.add_argument('--dry-run', action='store_true', help='Show what would be changed without modifying files')
+
+def _process_tracking_header(args):
+    """Process tracking header with parsed arguments"""
     helper = AgentTrackingHelper()
     success = helper.add_tracking_header(
-        file_path=args.file_path,
-        agent=args.agent,
-        model=args.model,
-        task_id=args.task_id,
-        prompt_summary=args.prompt_summary[:200],
-        changes=args.changes[:200],
-        dry_run=args.dry_run
+        file_path=args.file_path, agent=args.agent, model=args.model,
+        task_id=args.task_id, prompt_summary=args.prompt_summary[:200],
+        changes=args.changes[:200], dry_run=args.dry_run
     )
-    
+    return success
+
+def main():
+    """Main entry point for the script."""
+    parser = _create_argument_parser()
+    _add_required_arguments(parser)
+    _add_optional_arguments(parser)
+    args = parser.parse_args()
+    success = _process_tracking_header(args)
     return 0 if success else 1
 
 

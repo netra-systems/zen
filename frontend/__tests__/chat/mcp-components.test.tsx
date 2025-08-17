@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Using Jest instead of vitest
 import { MCPToolIndicator } from '@/components/chat/MCPToolIndicator';
 import { MCPServerStatus } from '@/components/chat/MCPServerStatus';
 import { MCPResultCard } from '@/components/chat/MCPResultCard';
@@ -208,7 +208,7 @@ describe('MCPResultCard', () => {
   });
 
   it('handles copy to clipboard', async () => {
-    const mockClipboard = vi.fn();
+    const mockClipboard = jest.fn();
     Object.assign(navigator, {
       clipboard: { writeText: mockClipboard }
     });

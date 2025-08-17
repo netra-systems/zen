@@ -112,15 +112,20 @@ def create_supervisor_with_admin_support(
         Configured SupervisorAgent instance
     """
     has_admin_access = _determine_admin_access(db, user)
-    
+    tool_dispatcher = _setup_tool_dispatcher(tools, db, user, has_admin_access)
+    supervisor_config = _setup_supervisor_configuration(has_admin_access, enable_quality_gates)
+    return _create_supervisor_instance(db, llm_manager, websocket_manager, tool_dispatcher, supervisor_config, user, thread_id)
+
+def _setup_tool_dispatcher(tools: List[BaseTool], db: Optional[Session], user: Optional[User], has_admin_access: bool):
+    """Setup appropriate tool dispatcher based on admin access."""
     if has_admin_access:
-        tool_dispatcher = _create_admin_tool_dispatcher(tools, db, user)
-    else:
-        tool_dispatcher = _create_standard_tool_dispatcher(tools)
-    
+        return _create_admin_tool_dispatcher(tools, db, user)
+    return _create_standard_tool_dispatcher(tools)
+
+def _setup_supervisor_configuration(has_admin_access: bool, enable_quality_gates: bool) -> SupervisorConfig:
+    """Setup supervisor configuration based on access level."""
     mode = _determine_supervisor_mode(has_admin_access, enable_quality_gates)
-    config = _create_supervisor_config(mode, enable_quality_gates, has_admin_access)
-    return _create_supervisor_instance(db, llm_manager, websocket_manager, tool_dispatcher, config, user, thread_id)
+    return _create_supervisor_config(mode, enable_quality_gates, has_admin_access)
 
 
 def check_admin_command(message: str) -> Optional[str]:
@@ -133,34 +138,52 @@ def check_admin_command(message: str) -> Optional[str]:
     Returns:
         Admin command type if detected, None otherwise
     """
-    admin_commands = {
+    direct_command_result = _check_direct_admin_commands(message)
+    if direct_command_result:
+        return direct_command_result
+    return _check_natural_language_admin_commands(message)
+
+def _check_direct_admin_commands(message: str) -> Optional[str]:
+    """Check for direct admin command patterns."""
+    admin_commands = _get_direct_admin_commands()
+    message_lower = message.lower()
+    for command, cmd_type in admin_commands.items():
+        if message_lower.startswith(command):
+            return cmd_type
+    return None
+
+def _get_direct_admin_commands() -> dict:
+    """Get mapping of direct admin commands."""
+    return {
         '/corpus': 'corpus',
         '/synthetic': 'synthetic',
         '/users': 'users',
         '/config': 'config',
         '/logs': 'logs'
     }
-    
-    # Check if message starts with any admin command
-    for command, cmd_type in admin_commands.items():
-        if message.lower().startswith(command):
+
+def _check_natural_language_admin_commands(message: str) -> Optional[str]:
+    """Check for natural language admin command patterns."""
+    admin_keywords = _get_admin_keyword_mapping()
+    message_lower = message.lower()
+    for cmd_type, keywords in admin_keywords.items():
+        if _message_contains_keywords(message_lower, keywords):
             return cmd_type
-    
-    # Check for natural language admin requests
-    admin_keywords = {
+    return None
+
+def _get_admin_keyword_mapping() -> dict:
+    """Get mapping of admin command types to keywords."""
+    return {
         'corpus': ['create corpus', 'manage corpus', 'corpus management'],
         'synthetic': ['generate synthetic', 'synthetic data', 'test data'],
         'users': ['create user', 'manage users', 'user permissions'],
         'config': ['system setting', 'configuration', 'update config'],
         'logs': ['analyze logs', 'show logs', 'log analysis']
     }
-    
-    message_lower = message.lower()
-    for cmd_type, keywords in admin_keywords.items():
-        if any(keyword in message_lower for keyword in keywords):
-            return cmd_type
-    
-    return None
+
+def _message_contains_keywords(message_lower: str, keywords: List[str]) -> bool:
+    """Check if message contains any of the specified keywords."""
+    return any(keyword in message_lower for keyword in keywords)
 
 
 async def handle_admin_request(

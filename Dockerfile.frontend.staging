@@ -36,9 +36,16 @@ COPY frontend/postcss.config.mjs ./
 COPY frontend/eslint.config.mjs ./
 COPY frontend/components.json ./
 
-# Accept build args for API URL
+# Accept build args for API URL and other configs
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_WS_URL
+ARG NEXT_PUBLIC_AUTH_URL
+ARG NEXT_PUBLIC_ENVIRONMENT=staging
+
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL}
+ENV NEXT_PUBLIC_AUTH_URL=${NEXT_PUBLIC_AUTH_URL}
+ENV NEXT_PUBLIC_ENVIRONMENT=${NEXT_PUBLIC_ENVIRONMENT}
 
 # Copy source files in order of change frequency (least to most)
 # Static assets and configs change less frequently

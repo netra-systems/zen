@@ -75,18 +75,23 @@ const renderToolCollapsibleContent = (tool_info: any) => (
 );
 
 const renderRegularContent = (
-  content: string,
+  content: string | any,
   type: string,
   references: string[] | undefined,
   id: string | undefined
-) => (
-  <div className="space-y-3">
-    <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{content}</p>
-    {type === 'user' && references && references.length > 0 && 
-      renderUserReferences(references, id)
-    }
-  </div>
-);
+) => {
+  const textContent = typeof content === 'string' 
+    ? content 
+    : (content?.text || JSON.stringify(content));
+  return (
+    <div className="space-y-3">
+      <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{textContent}</p>
+      {type === 'user' && references && references.length > 0 && 
+        renderUserReferences(references, id)
+      }
+    </div>
+  );
+};
 
 const renderUserReferences = (references: string[], id: string | undefined) => (
   <div className="mt-4 p-3 glass-light rounded-lg border border-emerald-200">

@@ -23,7 +23,7 @@ from app.schemas import AppConfig, LLMConfig
 from app.schemas.llm_types import LLMResponse, LLMProvider, TokenUsage
 
 
-class TestResponseModel(BaseModel):
+class ResponseModel(BaseModel):
     """Test model for structured LLM responses."""
     category: str
     confidence: float = Field(ge=0.0, le=1.0)
@@ -81,7 +81,7 @@ class TestRealResponsePatterns:
         
         # Clean markdown wrapper
         clean_json = markdown_response.strip().replace("```json", "").replace("```", "").strip()
-        result = attempt_json_fallback_parse(clean_json, TestResponseModel)
+        result = attempt_json_fallback_parse(clean_json, ResponseModel)
         
         assert result.category == "optimization"
         assert result.confidence == 0.85
@@ -96,7 +96,7 @@ class TestRealResponsePatterns:
         }"""
         
         with pytest.raises((json.JSONDecodeError, ValidationError)):
-            attempt_json_fallback_parse(malformed_json, TestResponseModel)
+            attempt_json_fallback_parse(malformed_json, ResponseModel)
 
     def test_partial_response_due_to_token_limit(self):
         """Test handling of truncated responses."""
@@ -107,7 +107,7 @@ class TestRealResponsePatterns:
                 {"tool": "analyzer", "prior"""
         
         with pytest.raises((json.JSONDecodeError, ValidationError)):
-            attempt_json_fallback_parse(partial_response, TestResponseModel)
+            attempt_json_fallback_parse(partial_response, ResponseModel)
 
     def test_string_vs_dict_field_conversion(self):
         """Test conversion of string fields to expected dict types."""
@@ -119,7 +119,7 @@ class TestRealResponsePatterns:
         }
         
         parsed = parse_nested_json_recursive(mixed_response)
-        result = TestResponseModel(**parsed)
+        result = ResponseModel(**parsed)
         
         assert isinstance(result.metadata, dict)
         assert result.metadata["source"] == "llm"
@@ -233,7 +233,7 @@ class TestStructuredGenerationEdgeCases:
                 mock_ask.return_value = json_string
                 
                 result = await llm_manager.ask_structured_llm(
-                    "test", "primary", TestResponseModel, use_cache=False
+                    "test", "primary", ResponseModel, use_cache=False
                 )
                 
                 assert result.category == "test"
@@ -247,7 +247,7 @@ class TestStructuredGenerationEdgeCases:
         })
         
         with pytest.raises((ValidationError, Exception)):
-            attempt_json_fallback_parse(invalid_json, TestResponseModel)
+            attempt_json_fallback_parse(invalid_json, ResponseModel)
 
 
 class TestTokenUsageMonitoring:

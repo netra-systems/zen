@@ -44,24 +44,46 @@ class CorpusDiscoveryHandler:
     
     def _initialize_workload_types(self) -> Dict[str, Dict[str, Any]]:
         """Initialize available workload types and descriptions"""
+        core_workloads = self._get_core_workload_definitions()
+        service_workloads = self._get_service_workload_definitions()
+        return {**core_workloads, **service_workloads}
+    
+    def _get_core_workload_definitions(self) -> Dict[str, Dict[str, Any]]:
+        """Get core workload type definitions"""
         return {
             "data_processing": {"name": "Data Processing", "description": "Batch and stream processing workloads"},
             "machine_learning": {"name": "Machine Learning", "description": "ML training and inference workloads"},
+            "analytics": {"name": "Analytics", "description": "Data analytics and reporting"}
+        }
+    
+    def _get_service_workload_definitions(self) -> Dict[str, Dict[str, Any]]:
+        """Get service workload type definitions"""
+        return {
             "web_services": {"name": "Web Services", "description": "API and microservices workloads"},
             "database": {"name": "Database", "description": "Database operations and queries"},
-            "analytics": {"name": "Analytics", "description": "Data analytics and reporting"},
             "infrastructure": {"name": "Infrastructure", "description": "Infrastructure management workloads"}
         }
     
     def _initialize_parameter_specs(self) -> Dict[str, Dict[str, Any]]:
         """Initialize generation parameter specifications"""
+        numeric_params = self._get_numeric_parameter_specs()
+        string_params = self._get_string_parameter_specs()
+        return {**numeric_params, **string_params}
+    
+    def _get_numeric_parameter_specs(self) -> Dict[str, Dict[str, Any]]:
+        """Get numeric parameter specifications"""
         return {
             "record_count": {"type": "integer", "min": 100, "max": 1000000, "default": 10000},
-            "complexity": {"type": "string", "options": ["low", "medium", "high"], "default": "medium"},
-            "time_range": {"type": "string", "format": "duration", "default": "30d"},
-            "distribution": {"type": "string", "options": ["normal", "uniform", "exponential"], "default": "normal"},
             "error_rate": {"type": "float", "min": 0.0, "max": 0.5, "default": 0.01},
             "concurrency": {"type": "integer", "min": 1, "max": 100, "default": 10}
+        }
+    
+    def _get_string_parameter_specs(self) -> Dict[str, Dict[str, Any]]:
+        """Get string parameter specifications"""
+        return {
+            "complexity": {"type": "string", "options": ["low", "medium", "high"], "default": "medium"},
+            "time_range": {"type": "string", "format": "duration", "default": "30d"},
+            "distribution": {"type": "string", "options": ["normal", "uniform", "exponential"], "default": "normal"}
         }
     
     def _initialize_synthetic_options(self) -> Dict[str, List[str]]:
@@ -108,12 +130,16 @@ class CorpusDiscoveryHandler:
         """Get list of available workload types with descriptions"""
         workloads = []
         for key, value in self.workload_types.items():
-            workloads.append({
-                "id": key,
-                "name": value["name"],
-                "description": value["description"]
-            })
+            workloads.append(self._create_workload_entry(key, value))
         return workloads
+    
+    def _create_workload_entry(self, key: str, value: Dict[str, Any]) -> Dict[str, Any]:
+        """Create workload entry for response"""
+        return {
+            "id": key,
+            "name": value["name"],
+            "description": value["description"]
+        }
     
     async def get_generation_parameters(self, workload_type: Optional[str] = None) -> Dict[str, Any]:
         """Get available generation parameters for workload type"""

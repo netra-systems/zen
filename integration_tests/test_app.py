@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from app.main import app
 from app.db.testing import override_get_db
-from app.dependencies import get_async_db
+from app.dependencies import get_db_dependency
 from app.schemas.Generation import ContentGenParams, LogGenParams, DataIngestionParams
 
 # Set testing flags to simplify startup
@@ -15,7 +15,7 @@ os.environ["ENVIRONMENT"] = "testing"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 os.environ["SKIP_CLICKHOUSE_INIT"] = "true"
 
-app.dependency_overrides[get_async_db] = override_get_db
+app.dependency_overrides[get_db_dependency] = override_get_db
 
 @pytest.fixture(scope="module")
 def test_client():

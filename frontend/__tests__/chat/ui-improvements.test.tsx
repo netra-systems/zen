@@ -50,8 +50,38 @@ jest.mock('@/store/authStore', () => ({
 
 jest.mock('@/services/threadService', () => ({
   ThreadService: {
-    createThread: jest.fn().mockResolvedValue({ id: 'new-thread', title: 'Test Thread' }),
+    createThread: jest.fn().mockResolvedValue({ 
+      id: 'new-thread', 
+      title: 'Test Thread',
+      created_at: Math.floor(Date.now() / 1000),
+      updated_at: Math.floor(Date.now() / 1000),
+      message_count: 0,
+      metadata: { title: 'Test Thread', renamed: false }
+    }),
+    getThread: jest.fn().mockResolvedValue({
+      id: 'test-thread',
+      created_at: Math.floor(Date.now() / 1000),
+      updated_at: Math.floor(Date.now() / 1000),
+      message_count: 1,
+      metadata: { title: 'Test Thread', renamed: false }
+    }),
+    listThreads: jest.fn().mockResolvedValue([]),
+    deleteThread: jest.fn(),
+    updateThread: jest.fn(),
+    getThreadMessages: jest.fn().mockResolvedValue({ 
+      messages: [], 
+      thread_id: 'test', 
+      total: 0, 
+      limit: 50, 
+      offset: 0 
+    })
   },
+}));
+
+jest.mock('@/services/threadRenameService', () => ({
+  ThreadRenameService: {
+    autoRenameThread: jest.fn()
+  }
 }));
 
 describe('Chat UI Improvements', () => {

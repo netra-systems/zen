@@ -67,41 +67,68 @@ class EnhancedRetryStrategy(ABC):
     
     def _calculate_base_delay(self, retry_count: int) -> float:
         """Calculate base delay based on backoff strategy."""
-        if self.config.backoff_strategy == BackoffStrategy.EXPONENTIAL:
-            return self.config.base_delay * (2 ** retry_count)
-        elif self.config.backoff_strategy == BackoffStrategy.LINEAR:
-            return self.config.base_delay * (retry_count + 1)
-        elif self.config.backoff_strategy == BackoffStrategy.FIBONACCI:
-            return self.config.base_delay * self._fibonacci(retry_count + 1)
-        else:  # FIXED
-            return self.config.base_delay
+        strategy = self.config.backoff_strategy
+        delay_map = {
+            BackoffStrategy.EXPONENTIAL: self._calculate_exponential_delay,
+            BackoffStrategy.LINEAR: self._calculate_linear_delay,
+            BackoffStrategy.FIBONACCI: self._calculate_fibonacci_delay
+        }
+        return delay_map.get(strategy, lambda x: self.config.base_delay)(retry_count)
+    
+    def _calculate_exponential_delay(self, retry_count: int) -> float:
+        """Calculate exponential backoff delay."""
+        return self.config.base_delay * (2 ** retry_count)
+    
+    def _calculate_linear_delay(self, retry_count: int) -> float:
+        """Calculate linear backoff delay."""
+        return self.config.base_delay * (retry_count + 1)
+    
+    def _calculate_fibonacci_delay(self, retry_count: int) -> float:
+        """Calculate fibonacci backoff delay."""
+        return self.config.base_delay * self._fibonacci(retry_count + 1)
     
     def _apply_jitter(self, delay: float, retry_count: int) -> float:
         """Apply jitter to delay."""
-        if self.config.jitter_type == JitterType.NONE:
-            return delay
-        elif self.config.jitter_type == JitterType.FULL:
-            return random.uniform(0, delay)
-        elif self.config.jitter_type == JitterType.EQUAL:
-            return delay * 0.5 + random.uniform(0, delay * 0.5)
-        else:  # DECORRELATED
-            previous_delay = delay if retry_count == 0 else delay / 2
-            return random.uniform(self.config.base_delay, previous_delay * 3)
+        jitter_map = {
+            JitterType.NONE: lambda d, _: d,
+            JitterType.FULL: lambda d, _: self._apply_full_jitter(d),
+            JitterType.EQUAL: lambda d, _: self._apply_equal_jitter(d),
+            JitterType.DECORRELATED: self._apply_decorrelated_jitter
+        }
+        jitter_func = jitter_map.get(self.config.jitter_type, lambda d, _: d)
+        return jitter_func(delay, retry_count)
+    
+    def _apply_full_jitter(self, delay: float) -> float:
+        """Apply full jitter to delay."""
+        return random.uniform(0, delay)
+    
+    def _apply_equal_jitter(self, delay: float) -> float:
+        """Apply equal jitter to delay."""
+        return delay * 0.5 + random.uniform(0, delay * 0.5)
+    
+    def _apply_decorrelated_jitter(self, delay: float, retry_count: int) -> float:
+        """Apply decorrelated jitter to delay."""
+        previous_delay = delay if retry_count == 0 else delay / 2
+        return random.uniform(self.config.base_delay, previous_delay * 3)
     
     def _fibonacci(self, n: int) -> int:
         """Calculate fibonacci number."""
         if n <= 1:
             return n
-        a, b = 0, 1
-        for _ in range(2, n + 1):
-            a, b = b, a + b
-        return b
+        return self._fibonacci_iterative(n)
     
     def record_attempt(self, operation_id: str) -> None:
         """Record retry attempt."""
         if operation_id not in self.attempt_history:
             self.attempt_history[operation_id] = []
         self.attempt_history[operation_id].append(datetime.now())
+    
+    def _fibonacci_iterative(self, n: int) -> int:
+        """Calculate fibonacci number iteratively."""
+        a, b = 0, 1
+        for _ in range(2, n + 1):
+            a, b = b, a + b
+        return b
 
 
 class DatabaseRetryStrategy(EnhancedRetryStrategy):
@@ -113,20 +140,27 @@ class DatabaseRetryStrategy(EnhancedRetryStrategy):
             return False
         
         error_msg = str(context.error).lower()
-        
-        # Always retry on connection issues
-        if any(term in error_msg for term in ['connection', 'timeout', 'network']):
+        return self._evaluate_database_retry_conditions(error_msg, context)
+    
+    def _evaluate_database_retry_conditions(self, error_msg: str, context: RecoveryContext) -> bool:
+        """Evaluate specific database retry conditions."""
+        if self._is_connection_issue(error_msg) or self._is_temporary_database_issue(error_msg):
             return True
-        
-        # Don't retry on constraint violations
-        if any(term in error_msg for term in ['constraint', 'unique', 'foreign key']):
+        if self._is_constraint_violation(error_msg):
             return False
-        
-        # Retry on temporary database issues
-        if any(term in error_msg for term in ['deadlock', 'lock timeout', 'busy']):
-            return True
-        
         return context.severity != ErrorSeverity.CRITICAL
+    
+    def _is_connection_issue(self, error_msg: str) -> bool:
+        """Check if error indicates connection issues."""
+        return any(term in error_msg for term in ['connection', 'timeout', 'network'])
+    
+    def _is_constraint_violation(self, error_msg: str) -> bool:
+        """Check if error indicates constraint violations."""
+        return any(term in error_msg for term in ['constraint', 'unique', 'foreign key'])
+    
+    def _is_temporary_database_issue(self, error_msg: str) -> bool:
+        """Check if error indicates temporary database issues."""
+        return any(term in error_msg for term in ['deadlock', 'lock timeout', 'busy'])
 
 
 class ApiRetryStrategy(EnhancedRetryStrategy):
@@ -137,18 +171,22 @@ class ApiRetryStrategy(EnhancedRetryStrategy):
         if context.retry_count >= self.config.max_retries:
             return False
         
-        # Check status code if available
         status_code = context.metadata.get('status_code')
         if status_code:
-            # Retry on server errors and rate limits
-            if status_code in [429, 500, 502, 503, 504]:
-                return True
-            # Don't retry on client errors
-            if 400 <= status_code < 500:
-                return False
-        
-        # Retry on timeout and connection errors
-        error_msg = str(context.error).lower()
+            return self._should_retry_based_on_status_code(status_code)
+        return self._should_retry_based_on_error_message(context.error)
+    
+    def _should_retry_based_on_status_code(self, status_code: int) -> bool:
+        """Determine retry based on HTTP status code."""
+        server_errors = [429, 500, 502, 503, 504]
+        client_errors = range(400, 500)
+        if status_code in server_errors:
+            return True
+        return status_code not in client_errors
+    
+    def _should_retry_based_on_error_message(self, error: Exception) -> bool:
+        """Determine retry based on error message."""
+        error_msg = str(error).lower()
         return any(term in error_msg for term in ['timeout', 'connection', 'network'])
 
 
@@ -164,17 +202,11 @@ class MemoryAwareRetryStrategy(EnhancedRetryStrategy):
         """Check if retry is safe considering memory usage."""
         if context.retry_count >= self.config.max_retries:
             return False
-        
-        # Don't retry if memory usage is high
-        if self._get_memory_usage() > self.memory_threshold:
-            logger.warning(f"Skipping retry due to high memory usage")
+        if self._memory_prevents_retry():
             return False
-        
-        # Standard retry logic
         error_msg = str(context.error).lower()
         if 'memory' in error_msg:
             return False
-        
         return context.severity != ErrorSeverity.CRITICAL
     
     def _get_memory_usage(self) -> float:
@@ -185,6 +217,13 @@ class MemoryAwareRetryStrategy(EnhancedRetryStrategy):
         except ImportError:
             # Fallback if psutil not available
             return 0.5
+    
+    def _memory_prevents_retry(self) -> bool:
+        """Check if memory usage prevents retry."""
+        if self._get_memory_usage() > self.memory_threshold:
+            logger.warning(f"Skipping retry due to high memory usage")
+            return True
+        return False
 
 
 class AdaptiveRetryStrategy(EnhancedRetryStrategy):
@@ -200,18 +239,9 @@ class AdaptiveRetryStrategy(EnhancedRetryStrategy):
         """Adaptive retry decision based on historical patterns."""
         if context.retry_count >= self.config.max_retries:
             return False
-        
         error_pattern = self._extract_error_pattern(context.error)
-        
-        # Learn from patterns
         failure_rate = self._get_pattern_failure_rate(error_pattern)
-        
-        # Adjust retry likelihood based on historical success
-        if failure_rate > 0.8:  # High failure rate
-            self.config.max_retries = min(self.config.max_retries, 2)
-        elif failure_rate < 0.3:  # Low failure rate
-            self.config.max_retries = min(self.config.max_retries + 1, 5)
-        
+        self._adjust_retry_limits_based_on_failure_rate(failure_rate)
         return context.severity != ErrorSeverity.CRITICAL
     
     def record_success(self, error_pattern: str) -> None:
@@ -230,11 +260,8 @@ class AdaptiveRetryStrategy(EnhancedRetryStrategy):
         """Extract pattern from error for classification."""
         error_type = type(error).__name__
         error_msg = str(error).lower()
-        
-        # Create pattern signature
         key_terms = ['connection', 'timeout', 'memory', 'permission', 'not found']
         pattern_terms = [term for term in key_terms if term in error_msg]
-        
         return f"{error_type}:{':'.join(pattern_terms)}"
     
     def _get_pattern_failure_rate(self, pattern: str) -> float:
@@ -244,6 +271,13 @@ class AdaptiveRetryStrategy(EnhancedRetryStrategy):
         total = failures + successes
         
         return failures / total if total > 0 else 0.5
+    
+    def _adjust_retry_limits_based_on_failure_rate(self, failure_rate: float) -> None:
+        """Adjust retry limits based on historical failure rate."""
+        if failure_rate > 0.8:  # High failure rate
+            self.config.max_retries = min(self.config.max_retries, 2)
+        elif failure_rate < 0.3:  # Low failure rate
+            self.config.max_retries = min(self.config.max_retries + 1, 5)
 
 
 class RetryStrategyFactory:
@@ -327,13 +361,8 @@ class RetryManager:
     ) -> EnhancedRetryStrategy:
         """Get or create retry strategy for operation."""
         cache_key = f"{operation_type.value}:{operation_id or 'default'}"
-        
         if cache_key not in self.strategies:
-            config = DEFAULT_RETRY_CONFIGS.get(operation_type, RetryConfig())
-            self.strategies[cache_key] = RetryStrategyFactory.create_strategy(
-                operation_type, config
-            )
-        
+            self._create_and_cache_strategy(cache_key, operation_type)
         return self.strategies[cache_key]
     
     def record_retry_attempt(
@@ -343,26 +372,35 @@ class RetryManager:
     ) -> None:
         """Record retry attempt for metrics."""
         if operation_type.value not in self.metrics:
-            self.metrics[operation_type.value] = {
-                'attempts': 0, 'successes': 0, 'failures': 0
-            }
-        
-        self.metrics[operation_type.value]['attempts'] += 1
-        if success:
-            self.metrics[operation_type.value]['successes'] += 1
-        else:
-            self.metrics[operation_type.value]['failures'] += 1
+            self._initialize_metrics_for_operation(operation_type)
+        self._update_metrics(operation_type, success)
     
     def get_retry_metrics(self) -> Dict[str, Any]:
         """Get retry operation metrics."""
+        strategy_types = {
+            strategy_id: type(strategy).__name__
+            for strategy_id, strategy in self.strategies.items()
+        }
         return {
             'total_metrics': self.metrics,
             'active_strategies': len(self.strategies),
-            'strategy_types': {
-                strategy_id: type(strategy).__name__
-                for strategy_id, strategy in self.strategies.items()
-            }
+            'strategy_types': strategy_types
         }
+    
+    def _create_and_cache_strategy(self, cache_key: str, operation_type: OperationType) -> None:
+        """Create and cache retry strategy for operation type."""
+        config = DEFAULT_RETRY_CONFIGS.get(operation_type, RetryConfig())
+        self.strategies[cache_key] = RetryStrategyFactory.create_strategy(operation_type, config)
+    
+    def _initialize_metrics_for_operation(self, operation_type: OperationType) -> None:
+        """Initialize metrics structure for operation type."""
+        self.metrics[operation_type.value] = {'attempts': 0, 'successes': 0, 'failures': 0}
+    
+    def _update_metrics(self, operation_type: OperationType, success: bool) -> None:
+        """Update metrics based on retry attempt result."""
+        self.metrics[operation_type.value]['attempts'] += 1
+        metric_key = 'successes' if success else 'failures'
+        self.metrics[operation_type.value][metric_key] += 1
 
 
 # Global retry manager instance

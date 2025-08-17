@@ -50,26 +50,24 @@ class QueryCache:
             self.redis, query, params, self.config, self.metrics
         )
 
-    async def cache_result(
-        self,
-        query: str,
-        result: Any,
-        params: Optional[Dict] = None,
-        duration: Optional[float] = None,
-        tags: Optional[Set[str]] = None
-    ) -> bool:
-        """Cache query result."""
-        success = await CacheStorage.cache_result(
+    async def _store_cache_result(self, query: str, result: Any, params: Optional[Dict], duration: Optional[float], tags: Optional[Set[str]]) -> bool:
+        """Store result in cache storage."""
+        return await CacheStorage.cache_result(
             self.redis, query, result, params, duration, tags,
             self.config, self.metrics, 
             self.pattern_tracker.query_patterns,
             self.pattern_tracker.query_durations
         )
-        
-        # Trigger eviction if cache is too large
+    
+    async def _handle_cache_eviction_if_needed(self, success: bool):
+        """Trigger eviction if cache size exceeded."""
         if success and self.metrics.cache_size > self.config.max_cache_size:
             await self._trigger_eviction()
-        
+    
+    async def cache_result(self, query: str, result: Any, params: Optional[Dict] = None, duration: Optional[float] = None, tags: Optional[Set[str]] = None) -> bool:
+        """Cache query result."""
+        success = await self._store_cache_result(query, result, params, duration, tags)
+        await self._handle_cache_eviction_if_needed(success)
         return success
 
     async def invalidate_by_tag(self, tag: str) -> int:
@@ -108,70 +106,75 @@ class CachedQueryExecutor:
     """Execute cached queries using strategy pattern."""
     
     @staticmethod
-    async def execute_with_cache_check(
-        cache: QueryCache,
-        session: AsyncSession,
-        query: str,
-        params: Optional[Dict],
-        force_refresh: bool
-    ) -> Any:
-        """Execute query with cache check."""
+    async def _check_cache_for_result(cache: QueryCache, query: str, params: Optional[Dict], force_refresh: bool):
+        """Check cache for existing result if not forcing refresh."""
         if not force_refresh:
-            cached_result = await cache.get_cached_result(query, params)
-            if cached_result is not None:
-                return cached_result
-        
-        # Execute query and cache result
+            return await cache.get_cached_result(query, params)
+        return None
+    
+    @staticmethod
+    async def _execute_and_format_query(session: AsyncSession, query: str, params: Optional[Dict]):
+        """Execute query and format result."""
         from sqlalchemy import text
         result = await session.execute(text(query), params or {})
-        query_result = [dict(row._mapping) for row in result.fetchall()]
-        
-        # Cache the result
+        return [dict(row._mapping) for row in result.fetchall()]
+    
+    @staticmethod
+    async def _cache_query_result(cache: QueryCache, query: str, query_result, params: Optional[Dict]):
+        """Cache the query result."""
         await cache.cache_result(query, query_result, params)
-        
         return query_result
+    
+    @staticmethod
+    async def execute_with_cache_check(cache: QueryCache, session: AsyncSession, query: str, params: Optional[Dict], force_refresh: bool) -> Any:
+        """Execute query with cache check."""
+        cached_result = await CachedQueryExecutor._check_cache_for_result(cache, query, params, force_refresh)
+        if cached_result is not None:
+            return cached_result
+        
+        query_result = await CachedQueryExecutor._execute_and_format_query(session, query, params)
+        return await CachedQueryExecutor._cache_query_result(cache, query, query_result, params)
 
     @staticmethod
-    async def execute_with_tags(
-        cache: QueryCache,
-        session: AsyncSession,
-        query: str,
-        params: Optional[Dict],
-        cache_tags: Optional[Set[str]]
-    ) -> Any:
+    async def _cache_query_result_with_tags(cache: QueryCache, query: str, query_result, params: Optional[Dict], cache_tags: Optional[Set[str]]):
+        """Cache the query result with tags."""
+        await cache.cache_result(query, query_result, params, tags=cache_tags)
+        return query_result
+    
+    @staticmethod
+    async def execute_with_tags(cache: QueryCache, session: AsyncSession, query: str, params: Optional[Dict], cache_tags: Optional[Set[str]]) -> Any:
         """Execute query with cache tags."""
         cached_result = await cache.get_cached_result(query, params)
         if cached_result is not None:
             return cached_result
         
-        # Execute query and cache result with tags
-        from sqlalchemy import text
-        result = await session.execute(text(query), params or {})
-        query_result = [dict(row._mapping) for row in result.fetchall()]
-        
-        # Cache the result with tags
-        await cache.cache_result(query, query_result, params, tags=cache_tags)
-        
-        return query_result
+        query_result = await CachedQueryExecutor._execute_and_format_query(session, query, params)
+        return await CachedQueryExecutor._cache_query_result_with_tags(cache, query, query_result, params, cache_tags)
 
 
-async def cached_query(
-    session: AsyncSession,
-    query: str,
-    params: Optional[Dict] = None,
-    cache_tags: Optional[Set[str]] = None,
-    force_refresh: bool = False
-) -> Any:
+async def _execute_with_force_refresh(session: AsyncSession, query: str, params: Optional[Dict], force_refresh: bool) -> Any:
+    """Execute query with force refresh strategy."""
+    return await CachedQueryExecutor.execute_with_cache_check(
+        query_cache, session, query, params, force_refresh
+    )
+
+async def _execute_with_cache_tags(session: AsyncSession, query: str, params: Optional[Dict], cache_tags: Optional[Set[str]]) -> Any:
+    """Execute query with cache tags strategy."""
+    return await CachedQueryExecutor.execute_with_tags(
+        query_cache, session, query, params, cache_tags
+    )
+
+async def _execute_with_standard_cache(session: AsyncSession, query: str, params: Optional[Dict]) -> Any:
+    """Execute query with standard cache strategy."""
+    return await CachedQueryExecutor.execute_with_cache_check(
+        query_cache, session, query, params, False
+    )
+
+async def cached_query(session: AsyncSession, query: str, params: Optional[Dict] = None, cache_tags: Optional[Set[str]] = None, force_refresh: bool = False) -> Any:
     """Execute query using cache strategy."""
     if force_refresh:
-        return await CachedQueryExecutor.execute_with_cache_check(
-            query_cache, session, query, params, force_refresh
-        )
+        return await _execute_with_force_refresh(session, query, params, force_refresh)
     elif cache_tags:
-        return await CachedQueryExecutor.execute_with_tags(
-            query_cache, session, query, params, cache_tags
-        )
+        return await _execute_with_cache_tags(session, query, params, cache_tags)
     else:
-        return await CachedQueryExecutor.execute_with_cache_check(
-            query_cache, session, query, params, False
-        )
+        return await _execute_with_standard_cache(session, query, params)

@@ -130,6 +130,7 @@ class WebSocketService {
       this.ws = new WebSocket(url);
 
       this.ws.onopen = () => {
+        console.log('[WebSocketService] Connection opened to:', url);
         this.state = 'connected';
         this.status = 'OPEN';
         this.onStatusChange?.(this.status);

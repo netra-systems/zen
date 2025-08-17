@@ -60,14 +60,16 @@ class DatabaseHealthChecker:
         if len(self.check_history) > 10:
             self.check_history = self.check_history[-10:]
     
+    async def _process_all_database_checks(self, databases: List[str], results: Dict) -> None:
+        """Process health checks for all databases."""
+        for db in databases:
+            await self._process_single_database_check(db, results)
+
     async def check_database_health(self, databases: List[str] = None) -> Dict:
         """Check health of database connections"""
         databases = self._get_default_databases(databases)
         results = self._initialize_health_check_results()
-        
-        for db in databases:
-            await self._process_single_database_check(db, results)
-        
+        await self._process_all_database_checks(databases, results)
         self._update_check_history(results)
         return results
     

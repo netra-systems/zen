@@ -3,6 +3,27 @@
  * Shared setup, mocks, and utilities for ChatHistorySection component tests
  */
 
+// CRITICAL: Jest mocks must be hoisted before any imports
+const mockRouter = {
+  push: jest.fn(),
+};
+const mockPathname = '/chat';
+
+jest.mock('@/store/threadStore');
+jest.mock('@/store/chat');
+jest.mock('@/store/authStore');
+jest.mock('@/services/threadService');
+jest.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  usePathname: () => mockPathname,
+}));
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+  },
+  AnimatePresence: ({ children }: any) => children,
+}));
+
 import React from 'react';
 import '@testing-library/jest-dom';
 
@@ -12,58 +33,7 @@ import {
   createMockAuthStore
 } from '../../utils/storeMocks.helper';
 
-// Mock next/navigation
-export const mockRouter = {
-  push: jest.fn(),
-};
-export let mockPathname = '/chat';
-
-jest.mock('next/navigation', () => ({
-  useRouter: () => mockRouter,
-  usePathname: () => mockPathname,
-}));
-
-// Create mock instances
-export let mockThreadStore: ReturnType<typeof createMockThreadStore>;
-export let mockChatStore: ReturnType<typeof createMockChatStore>;
-export let mockAuthStore: ReturnType<typeof createMockAuthStore>;
-
-jest.mock('@/store/threadStore', () => ({
-  useThreadStore: jest.fn(),
-}));
-
-jest.mock('@/store/chat', () => ({
-  useChatStore: jest.fn(),
-}));
-
-jest.mock('@/store/authStore', () => ({
-  useAuthStore: jest.fn(),
-}));
-
-jest.mock('@/services/threadService', () => ({
-  ThreadService: {
-    listThreads: jest.fn(),
-    getThreadMessages: jest.fn(),
-    createThread: jest.fn(),
-    updateThread: jest.fn(),
-    deleteThread: jest.fn(),
-  },
-}));
-
-jest.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  },
-  AnimatePresence: ({ children }: any) => children,
-}));
-
-// Import store and service mocks
-import { useThreadStore } from '@/store/threadStore';
-import { useChatStore } from '@/store/chat';
-import { useAuthStore } from '@/store/authStore';
-import { ThreadService } from '@/services/threadService';
-
-// Sample mock data
+// Sample mock data - moved up to be available for initialization
 export const mockThreads = [
   {
     id: 'thread-1',
@@ -94,15 +64,56 @@ export const mockThreads = [
   },
 ];
 
+// Create mock instances at module level
+export let mockThreadStore: ReturnType<typeof createMockThreadStore>;
+export let mockChatStore: ReturnType<typeof createMockChatStore>;
+export let mockAuthStore: ReturnType<typeof createMockAuthStore>;
+
+// Initialize mocks at module level
+mockThreadStore = createMockThreadStore({
+  threads: mockThreads,
+  currentThread: mockThreads[0],
+  currentThreadId: 'thread-1'
+});
+
+mockChatStore = createMockChatStore();
+
+mockAuthStore = createMockAuthStore({
+  isAuthenticated: true
+});
+
+// Export mock instances for external access
+export { mockRouter };
+export { mockPathname };
+
+// Import store and service mocks
+import { useThreadStore } from '@/store/threadStore';
+import { useChatStore } from '@/store/chat';
+import { useAuthStore } from '@/store/authStore';
+import { ThreadService } from '@/services/threadService';
+
+// Set up mock implementations after imports
+(useThreadStore as jest.Mock).mockImplementation(() => mockThreadStore);
+(useChatStore as jest.Mock).mockImplementation(() => mockChatStore);
+(useAuthStore as jest.Mock).mockImplementation(() => mockAuthStore);
+
+// Mock services
+(ThreadService as any).listThreads = jest.fn().mockResolvedValue(mockThreads);
+(ThreadService as any).getThreadMessages = jest.fn().mockResolvedValue({ messages: [] });
+(ThreadService as any).createThread = jest.fn().mockResolvedValue(mockThreads[0]);
+(ThreadService as any).updateThread = jest.fn().mockResolvedValue(mockThreads[0]);
+(ThreadService as any).deleteThread = jest.fn().mockResolvedValue({ success: true });
+
 export class ChatHistoryTestSetup {
+  public mockThreads = mockThreads;
+  
   beforeEach() {
     jest.clearAllMocks();
     
     // Reset router mocks
     mockRouter.push.mockClear();
-    mockPathname = '/chat';
     
-    // Create fresh mock instances
+    // Reinitialize fresh mock instances
     mockThreadStore = createMockThreadStore({
       threads: mockThreads,
       currentThread: mockThreads[0],
@@ -115,13 +126,17 @@ export class ChatHistoryTestSetup {
       isAuthenticated: true
     });
     
-    // Configure store mocks
-    (useThreadStore as unknown as jest.Mock).mockReturnValue(mockThreadStore);
-    (useChatStore as unknown as jest.Mock).mockReturnValue(mockChatStore);
-    (useAuthStore as unknown as jest.Mock).mockReturnValue(mockAuthStore);
+    // Configure store mocks with fresh instances
+    (useThreadStore as unknown as jest.Mock).mockImplementation(() => mockThreadStore);
+    (useChatStore as unknown as jest.Mock).mockImplementation(() => mockChatStore);
+    (useAuthStore as unknown as jest.Mock).mockImplementation(() => mockAuthStore);
 
+    // Configure service mocks
     (ThreadService.listThreads as jest.Mock).mockResolvedValue(mockThreads);
     (ThreadService.getThreadMessages as jest.Mock).mockResolvedValue({ messages: [] });
+    (ThreadService.createThread as jest.Mock).mockResolvedValue(mockThreads[0]);
+    (ThreadService.updateThread as jest.Mock).mockResolvedValue(mockThreads[0]);
+    (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
   }
 
   afterEach() {
@@ -134,25 +149,23 @@ export class ChatHistoryTestSetup {
     currentThreadId?: string | null;
     isAuthenticated?: boolean;
   }) {
-    if (config.threads !== undefined) {
-      (useThreadStore as unknown as jest.Mock).mockReturnValue({
+    // Update mockThreadStore reference if needed
+    if (config.threads !== undefined || config.currentThreadId !== undefined) {
+      mockThreadStore = {
         ...mockThreadStore,
-        threads: config.threads,
-      });
+        ...(config.threads !== undefined && { threads: config.threads }),
+        ...(config.currentThreadId !== undefined && { currentThreadId: config.currentThreadId }),
+      };
+      (useThreadStore as unknown as jest.Mock).mockImplementation(() => mockThreadStore);
     }
 
-    if (config.currentThreadId !== undefined) {
-      (useThreadStore as unknown as jest.Mock).mockReturnValue({
-        ...mockThreadStore,
-        currentThreadId: config.currentThreadId,
-      });
-    }
-
+    // Update mockAuthStore reference if needed
     if (config.isAuthenticated !== undefined) {
-      (useAuthStore as unknown as jest.Mock).mockReturnValue({
+      mockAuthStore = {
         ...mockAuthStore,
         isAuthenticated: config.isAuthenticated,
-      });
+      };
+      (useAuthStore as unknown as jest.Mock).mockImplementation(() => mockAuthStore);
     }
   }
 
@@ -168,6 +181,16 @@ export class ChatHistoryTestSetup {
       status: 'active' as const,
       ...overrides,
     };
+  }
+
+  // Helper to get current mock threads
+  getCurrentMockThreads() {
+    return this.mockThreads;
+  }
+
+  // Helper to update the mock threads reference
+  updateMockThreads(newThreads: typeof mockThreads) {
+    this.mockThreads = newThreads;
   }
 
   // Helper to simulate loading states

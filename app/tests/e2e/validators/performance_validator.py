@@ -7,7 +7,7 @@ Maximum 300 lines, functions ≤8 lines.
 import time
 import psutil
 import asyncio
-from typing import Dict, List, Any, Optional, Callable
+from typing import Dict, List, Any, Optional, Callable, Tuple
 from pydantic import BaseModel, Field
 from datetime import datetime, UTC
 from statistics import median, quantiles
@@ -392,67 +392,64 @@ class PerformanceValidator:
                                        *args, **kwargs) -> PerformanceValidationResult:
         """Validate performance of a single stage."""
         operation_id = f"{stage_name}_{int(time.time())}"
-        
-        # Start monitoring
+        await self._execute_stage_with_monitoring(operation_id, stage_function, *args, **kwargs)
+        metrics = self._calculate_all_metrics()
+        thresholds_met = self._validate_thresholds(metrics[0], metrics[1], metrics[2])
+        regression_analysis = self._detect_regressions(metrics, thresholds_met)
+        benchmark_comparison = self._compare_benchmarks(metrics, thresholds_met, regression_analysis)
+        overall_valid = thresholds_met and not regression_analysis.regression_detected and benchmark_comparison.baseline_met
+        return self._create_performance_result(metrics, thresholds_met, regression_analysis, benchmark_comparison, overall_valid)
+    
+    async def _execute_stage_with_monitoring(self, operation_id: str, stage_function: Callable, *args, **kwargs):
+        """Execute stage with monitoring."""
         self.resource_monitor.start_monitoring()
         self.latency_measurer.start_measurement(operation_id)
-        
-        # Execute stage with monitoring
         try:
             result = await self._execute_with_monitoring(stage_function, *args, **kwargs)
             self.throughput_tracker.record_request()
-        except Exception as e:
-            # Record error but continue with performance analysis
-            pass
+        except Exception:
+            pass  # Record error but continue with performance analysis
         finally:
-            # Stop monitoring
             self.latency_measurer.end_measurement(operation_id)
             self.resource_monitor.stop_monitoring()
-        
-        # Calculate metrics
+    
+    def _calculate_all_metrics(self) -> Tuple[LatencyMetrics, ThroughputMetrics, ResourceMetrics]:
+        """Calculate all performance metrics."""
         latency_metrics = self.latency_measurer.calculate_metrics()
         throughput_metrics = self.throughput_tracker.calculate_metrics()
         resource_metrics = self.resource_monitor.calculate_metrics()
-        
-        # Validate thresholds
-        thresholds_met = self._validate_thresholds(latency_metrics, throughput_metrics, resource_metrics)
-        
-        # Detect regressions
-        regression_analysis = self.regression_detector.detect_regression(
+        return latency_metrics, throughput_metrics, resource_metrics
+    
+    def _detect_regressions(self, metrics: Tuple[LatencyMetrics, ThroughputMetrics, ResourceMetrics], 
+                           thresholds_met: bool) -> PerformanceRegression:
+        """Detect performance regressions."""
+        return self.regression_detector.detect_regression(
             PerformanceValidationResult(
-                latency_metrics=latency_metrics,
-                throughput_metrics=throughput_metrics,
-                resource_metrics=resource_metrics,
-                thresholds_met=thresholds_met,
-                regression_analysis=PerformanceRegression(),
+                latency_metrics=metrics[0], throughput_metrics=metrics[1], resource_metrics=metrics[2],
+                thresholds_met=thresholds_met, regression_analysis=PerformanceRegression(),
                 benchmark_comparison=BenchmarkComparison()
             )
         )
-        
-        # Compare to benchmarks
-        benchmark_comparison = self.benchmark_comparator.compare_to_baseline(
+    
+    def _compare_benchmarks(self, metrics: Tuple[LatencyMetrics, ThroughputMetrics, ResourceMetrics],
+                           thresholds_met: bool, regression_analysis: PerformanceRegression) -> BenchmarkComparison:
+        """Compare performance to benchmarks."""
+        return self.benchmark_comparator.compare_to_baseline(
             PerformanceValidationResult(
-                latency_metrics=latency_metrics,
-                throughput_metrics=throughput_metrics,
-                resource_metrics=resource_metrics,
-                thresholds_met=thresholds_met,
-                regression_analysis=regression_analysis,
+                latency_metrics=metrics[0], throughput_metrics=metrics[1], resource_metrics=metrics[2],
+                thresholds_met=thresholds_met, regression_analysis=regression_analysis,
                 benchmark_comparison=BenchmarkComparison()
             )
         )
-        
-        overall_valid = (thresholds_met and 
-                        not regression_analysis.regression_detected and
-                        benchmark_comparison.baseline_met)
-        
+    
+    def _create_performance_result(self, metrics: Tuple[LatencyMetrics, ThroughputMetrics, ResourceMetrics],
+                                  thresholds_met: bool, regression_analysis: PerformanceRegression,
+                                  benchmark_comparison: BenchmarkComparison, overall_valid: bool) -> PerformanceValidationResult:
+        """Create final performance validation result."""
         return PerformanceValidationResult(
-            latency_metrics=latency_metrics,
-            throughput_metrics=throughput_metrics,
-            resource_metrics=resource_metrics,
-            thresholds_met=thresholds_met,
-            regression_analysis=regression_analysis,
-            benchmark_comparison=benchmark_comparison,
-            overall_performance_valid=overall_valid
+            latency_metrics=metrics[0], throughput_metrics=metrics[1], resource_metrics=metrics[2],
+            thresholds_met=thresholds_met, regression_analysis=regression_analysis,
+            benchmark_comparison=benchmark_comparison, overall_performance_valid=overall_valid
         )
     
     async def _execute_with_monitoring(self, stage_function: Callable, *args, **kwargs) -> Any:

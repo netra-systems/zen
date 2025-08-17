@@ -72,21 +72,28 @@ def validate_timestamp_not_future(value: datetime, field_name: str) -> datetime:
 
 def create_validation_error(field: str, message: str) -> Dict[str, str]:
     """Create standardized validation error."""
+    return _build_error_dict(field, message)
+
+def _build_error_dict(field: str, message: str) -> Dict[str, str]:
+    """Build error dictionary with timestamp."""
     return {
-        'field': field,
-        'message': message,
+        'field': field, 'message': message,
         'timestamp': datetime.now(UTC).isoformat()
     }
 
 
 def validate_uuid_format(value: str, field_name: str) -> str:
     """Validate string is valid UUID format."""
-    import uuid
     try:
-        uuid.UUID(value)
+        _validate_uuid_value(value)
         return value
     except ValueError:
         _raise_uuid_error(field_name)
+
+def _validate_uuid_value(value: str) -> None:
+    """Validate UUID value using uuid module."""
+    import uuid
+    uuid.UUID(value)
 
 
 def _raise_uuid_error(field_name: str) -> None:
@@ -112,12 +119,16 @@ def validate_enum_value(value: Any, enum_class: type, field_name: str) -> Any:
 
 def validate_json_serializable(value: Any, field_name: str) -> Any:
     """Validate value is JSON serializable."""
-    import json
     try:
-        json.dumps(value)
+        _test_json_serialization(value)
         return value
     except (TypeError, ValueError):
         _raise_json_error(field_name)
+
+def _test_json_serialization(value: Any) -> None:
+    """Test if value can be JSON serialized."""
+    import json
+    json.dumps(value)
 
 
 def _raise_json_error(field_name: str) -> None:
@@ -135,10 +146,14 @@ def create_field_validator(validator_func, **kwargs):
 def validate_nested_dict_structure(value: Dict[str, Any], required_keys: List[str], 
                                   field_name: str) -> Dict[str, Any]:
     """Validate nested dictionary has required keys."""
-    missing_keys = [key for key in required_keys if key not in value]
+    missing_keys = _find_missing_keys(value, required_keys)
     if missing_keys:
         raise ValueError(f'{field_name} missing required keys: {missing_keys}')
     return value
+
+def _find_missing_keys(value: Dict[str, Any], required_keys: List[str]) -> List[str]:
+    """Find keys that are missing from dictionary."""
+    return [key for key in required_keys if key not in value]
 
 
 # Type conversion utilities (≤8 lines each)
@@ -179,6 +194,10 @@ def extract_numeric_value(value: Any, field_name: str) -> Union[int, float]:
         return value
     if isinstance(value, str):
         return safe_str_to_float(value.strip())
+    _raise_numeric_error(field_name)
+
+def _raise_numeric_error(field_name: str) -> None:
+    """Raise numeric value error."""
     raise ValueError(f'{field_name} must be numeric')
 
 
@@ -192,11 +211,12 @@ def validate_metadata_structure(metadata: Dict[str, Any]) -> Dict[str, Any]:
 
 def create_default_metadata() -> Dict[str, Any]:
     """Create default metadata structure."""
-    return {
-        'created_at': datetime.now(UTC).isoformat(),
-        'version': '1.0',
-        'source': 'schema_validation'
-    }
+    return _build_default_metadata_dict()
+
+def _build_default_metadata_dict() -> Dict[str, Any]:
+    """Build default metadata dictionary."""
+    timestamp = datetime.now(UTC).isoformat()
+    return {'created_at': timestamp, 'version': '1.0', 'source': 'schema_validation'}
 
 
 # Collection utilities (≤8 lines each)
@@ -217,15 +237,12 @@ def ensure_list(value: Any) -> List[Any]:
     """Ensure value is a list."""
     if value is None:
         return []
-    if not isinstance(value, list):
-        return [value]
-    return value
+    return value if isinstance(value, list) else [value]
 
 
 def deduplicate_list(items: List[Any]) -> List[Any]:
     """Remove duplicates from list while preserving order."""
-    seen = set()
-    result = []
+    seen, result = set(), []
     for item in items:
         _add_unique_item(item, seen, result)
     return result

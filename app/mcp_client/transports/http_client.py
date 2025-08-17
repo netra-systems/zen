@@ -35,6 +35,14 @@ class HttpTransport(MCPTransport):
     ) -> None:
         """Initialize HTTP transport with authentication."""
         super().__init__(timeout)
+        self._initialize_transport_config(base_url, auth_type, auth_token, api_key, headers, max_retries, retry_delay)
+
+    def _initialize_transport_config(
+        self, base_url: str, auth_type: Optional[str], auth_token: Optional[str], 
+        api_key: Optional[str], headers: Optional[Dict[str, str]], 
+        max_retries: int, retry_delay: float
+    ) -> None:
+        """Initialize all transport configuration parameters."""
         self._init_config(base_url, auth_type, auth_token, api_key)
         self._init_options(headers, max_retries, retry_delay)
         self._init_runtime_state()
@@ -66,13 +74,17 @@ class HttpTransport(MCPTransport):
     async def _establish_connection(self) -> None:
         """Establish the HTTP connection."""
         try:
-            await self._create_client()
-            await self._test_connection()
-            self._connected = True
-            logger.info(f"HTTP transport connected: {self.base_url}")
+            await self._perform_connection_setup()
         except Exception as e:
             await self._cleanup()
             raise MCPConnectionError(f"Failed to connect: {e}")
+
+    async def _perform_connection_setup(self) -> None:
+        """Perform HTTP connection setup steps."""
+        await self._create_client()
+        await self._test_connection()
+        self._connected = True
+        logger.info(f"HTTP transport connected: {self.base_url}")
 
     async def _create_client(self) -> None:
         """Create httpx client with proper configuration."""
@@ -94,13 +106,22 @@ class HttpTransport(MCPTransport):
 
     async def _build_auth_headers(self) -> Dict[str, str]:
         """Build authentication headers based on auth type."""
-        if self.auth_type == "bearer" and self.auth_token:
-            return {"Authorization": f"Bearer {self.auth_token}"}
-        elif self.auth_type == "api_key" and self.api_key:
-            return {"X-API-Key": self.api_key}
-        elif self.api_key:
-            return {"Authorization": f"ApiKey {self.api_key}"}
+        auth_map = self._get_auth_header_builders()
+        for auth_check, header_builder in auth_map:
+            if auth_check():
+                return header_builder()
         return {}
+
+    def _get_auth_header_builders(self) -> List[Tuple[callable, callable]]:
+        """Get list of auth checkers and header builders."""
+        return [
+            (lambda: self.auth_type == "bearer" and self.auth_token, 
+             lambda: {"Authorization": f"Bearer {self.auth_token}"}),
+            (lambda: self.auth_type == "api_key" and self.api_key, 
+             lambda: {"X-API-Key": self.api_key}),
+            (lambda: self.api_key and not self.auth_type, 
+             lambda: {"Authorization": f"ApiKey {self.api_key}"})
+        ]
 
     async def _test_connection(self) -> None:
         """Test connection with health check endpoint."""

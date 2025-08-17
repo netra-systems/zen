@@ -168,7 +168,7 @@ class ApiErrorHandler:
             )
         
         # General SQLAlchemy error
-        self._logger.error(f"Database error: {exc}", exc_info=True)
+        self._logger.error(f"Database error: {str(exc)}", exc_info=True)
         return ErrorResponse(
             error_code=ErrorCode.DATABASE_QUERY_FAILED.value,
             message="Database operation failed",

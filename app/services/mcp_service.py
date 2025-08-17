@@ -26,34 +26,9 @@ from app.services.supply_catalog_service import SupplyCatalogService
 from app.services.database.mcp_repository import MCPClientRepository, MCPToolExecutionRepository
 from app.schemas import UserInDB
 from app.netra_mcp.netra_mcp_server import NetraMCPServer
+from .mcp_models import MCPClient, MCPToolExecution
 
 logger = CentralLogger()
-
-
-class MCPClient(BaseModel):
-    """MCP Client model"""
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    client_type: str  # claude, cursor, gemini, vscode, etc
-    api_key_hash: Optional[str] = None
-    permissions: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    last_active: datetime = Field(default_factory=lambda: datetime.now(UTC))
-
-
-class MCPToolExecution(BaseModel):
-    """MCP Tool execution record"""
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    session_id: str
-    client_id: Optional[str] = None
-    tool_name: str
-    input_params: Dict[str, Any]
-    output_result: Optional[Dict[str, Any]] = None
-    execution_time_ms: int
-    status: str  # success, error, timeout
-    error: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class MCPService(IMCPService):
@@ -63,6 +38,46 @@ class MCPService(IMCPService):
     Integrates MCP functionality with existing Netra services.
     """
     
+    def _assign_core_services(self, agent_service, thread_service, corpus_service, 
+                             synthetic_data_service, security_service, supply_catalog_service, llm_manager):
+        """Assign core services to instance variables."""
+        self.agent_service = agent_service
+        self.thread_service = thread_service
+        self.corpus_service = corpus_service
+        self.synthetic_data_service = synthetic_data_service
+        self.security_service = security_service
+        self.supply_catalog_service = supply_catalog_service
+        self.llm_manager = llm_manager
+
+    def _initialize_repositories(self):
+        """Initialize MCP repositories."""
+        self.client_repository = MCPClientRepository()
+        self.execution_repository = MCPToolExecutionRepository()
+
+    def _create_mcp_server(self):
+        """Create and configure MCP server."""
+        self.mcp_server = NetraMCPServer(
+            name="netra-mcp-server",
+            version="2.0.0"
+        )
+
+    def _inject_services_to_server(self):
+        """Inject services into MCP server."""
+        self.mcp_server.set_services(
+            agent_service=self.agent_service,
+            thread_service=self.thread_service,
+            corpus_service=self.corpus_service,
+            synthetic_data_service=self.synthetic_data_service,
+            security_service=self.security_service,
+            supply_catalog_service=self.supply_catalog_service,
+            llm_manager=self.llm_manager
+        )
+
+    def _initialize_session_storage(self):
+        """Initialize active session storage."""
+        self.active_sessions: Dict[str, Dict[str, Any]] = {}
+        logger.info("MCP Service initialized with FastMCP 2")
+
     def __init__(
         self,
         agent_service: AgentService,
@@ -73,40 +88,40 @@ class MCPService(IMCPService):
         supply_catalog_service: SupplyCatalogService,
         llm_manager=None
     ):
-        self.agent_service = agent_service
-        self.thread_service = thread_service
-        self.corpus_service = corpus_service
-        self.synthetic_data_service = synthetic_data_service
-        self.security_service = security_service
-        self.supply_catalog_service = supply_catalog_service
-        self.llm_manager = llm_manager
-        
-        # Initialize repositories
-        self.client_repository = MCPClientRepository()
-        self.execution_repository = MCPToolExecutionRepository()
-        
-        # Initialize MCP server with FastMCP 2
-        self.mcp_server = NetraMCPServer(
-            name="netra-mcp-server",
-            version="2.0.0"
-        )
-        
-        # Inject services into MCP server
-        self.mcp_server.set_services(
-            agent_service=agent_service,
-            thread_service=thread_service,
-            corpus_service=corpus_service,
-            synthetic_data_service=synthetic_data_service,
-            security_service=security_service,
-            supply_catalog_service=supply_catalog_service,
-            llm_manager=llm_manager
-        )
-        
-        # Store active sessions
-        self.active_sessions: Dict[str, Dict[str, Any]] = {}
-        
-        logger.info("MCP Service initialized with FastMCP 2")
+        self._assign_core_services(agent_service, thread_service, corpus_service, 
+                                 synthetic_data_service, security_service, supply_catalog_service, llm_manager)
+        self._initialize_repositories()
+        self._create_mcp_server()
+        self._inject_services_to_server()
+        self._initialize_session_storage()
     
+    async def _hash_api_key(self, api_key: Optional[str]) -> Optional[str]:
+        """Hash API key if provided."""
+        if api_key:
+            return self.security_service.hash_password(api_key)
+        return None
+
+    async def _store_client_in_db(self, db_session: AsyncSession, name: str, client_type: str, 
+                                 api_key: Optional[str], permissions: Optional[List[str]], 
+                                 metadata: Optional[Dict[str, Any]]):
+        """Store client in database."""
+        return await self.client_repository.create_client(
+            db=db_session, name=name, client_type=client_type,
+            api_key=api_key, permissions=permissions, metadata=metadata
+        )
+
+    def _convert_to_mcp_client(self, db_client) -> MCPClient:
+        """Convert database client to MCPClient model."""
+        return MCPClient(
+            id=db_client.id, name=db_client.name, client_type=db_client.client_type,
+            api_key_hash=db_client.api_key_hash, permissions=db_client.permissions,
+            metadata=db_client.metadata, created_at=db_client.created_at, last_active=db_client.last_active
+        )
+
+    async def _log_registration_success(self, client: MCPClient, client_type: str):
+        """Log successful client registration."""
+        logger.info(f"Registered MCP client: {client.id} ({client_type})")
+
     async def register_client(
         self,
         db_session: AsyncSession,
@@ -118,40 +133,13 @@ class MCPService(IMCPService):
     ) -> MCPClient:
         """Register a new MCP client"""
         try:
-            # Hash API key if provided
-            api_key_hash = None
-            if api_key:
-                api_key_hash = self.security_service.hash_password(api_key)
-                
-            # Store in database
-            db_client = await self.client_repository.create_client(
-                db=db_session,
-                name=name,
-                client_type=client_type,
-                api_key=api_key,
-                permissions=permissions,
-                metadata=metadata
-            )
-            
+            api_key_hash = await self._hash_api_key(api_key)
+            db_client = await self._store_client_in_db(db_session, name, client_type, api_key, permissions, metadata)
             if not db_client:
                 raise NetraException("Failed to create MCP client in database")
-            
-            # Convert to MCPClient model for response
-            client = MCPClient(
-                id=db_client.id,
-                name=db_client.name,
-                client_type=db_client.client_type,
-                api_key_hash=db_client.api_key_hash,
-                permissions=db_client.permissions,
-                metadata=db_client.metadata,
-                created_at=db_client.created_at,
-                last_active=db_client.last_active
-            )
-            
-            logger.info(f"Registered MCP client: {client.id} ({client_type})")
-            
+            client = self._convert_to_mcp_client(db_client)
+            await self._log_registration_success(client, client_type)
             return client
-            
         except Exception as e:
             logger.error(f"Error registering MCP client: {e}", exc_info=True)
             raise NetraException(f"Failed to register MCP client: {str(e)}")
@@ -350,3 +338,7 @@ class MCPService(IMCPService):
             execution.error = str(e)
             await self.record_tool_execution(execution)
             raise NetraException(f"Tool execution failed: {e}")
+
+
+# Import request handler from separate module for modularity
+from .mcp_request_handler import handle_request

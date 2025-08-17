@@ -58,20 +58,22 @@ def delegate_metrics_history(circuit_name: str, hours: int) -> List[Dict[str, An
         handle_circuit_breaker_error(e, "metrics history")
 
 
+def _format_single_event(event) -> Dict[str, Any]:
+    """Format single event for response."""
+    return {
+        "circuit_name": event.circuit_name,
+        "old_state": event.old_state,
+        "new_state": event.new_state,
+        "timestamp": event.timestamp.isoformat(),
+        "failure_count": event.failure_count,
+        "success_rate": event.success_rate,
+        "metadata": event.metadata
+    }
+
+
 def _format_events_list(events) -> List[Dict[str, Any]]:
     """Format events list for response."""
-    return [
-        {
-            "circuit_name": event.circuit_name,
-            "old_state": event.old_state,
-            "new_state": event.new_state,
-            "timestamp": event.timestamp.isoformat(),
-            "failure_count": event.failure_count,
-            "success_rate": event.success_rate,
-            "metadata": event.metadata
-        }
-        for event in events
-    ]
+    return [_format_single_event(event) for event in events]
 
 
 def _format_alerts_list(alerts) -> List[Dict[str, Any]]:
