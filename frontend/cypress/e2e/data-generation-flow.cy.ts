@@ -13,7 +13,7 @@ describe('Synthetic Data Generation Flow', () => {
       win.localStorage.setItem('auth_token', 'mock-jwt-token-for-testing');
       win.localStorage.setItem('user', JSON.stringify({
         id: 'test-user-id',
-        email: 'test@netra.ai',
+        email: 'test@netrasystems.ai',
         name: 'Test User',
         role: 'user'
       }));

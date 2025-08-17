@@ -61,11 +61,11 @@ def test_cors_patterns():
     # Test Production
     print("\n=== PRODUCTION ENVIRONMENT ===")
     with patch('app.core.middleware_setup.settings', MockSettings('production')):
-        prod_origins = ["https://netra.ai", "https://app.netra.ai"]
+        prod_origins = ["https://netrasystems.ai", "https://app.netrasystems.ai"]
         
         test_cases = [
-            ("https://netra.ai", True, "Direct match"),
-            ("https://app.netra.ai", True, "Direct match"),
+            ("https://netrasystems.ai", True, "Direct match"),
+            ("https://app.netrasystems.ai", True, "Direct match"),
             ("https://staging.netrasystems.ai", False, "Staging domain"),
             ("http://localhost:3000", False, "Localhost"),
             ("https://malicious.com", False, "External domain"),

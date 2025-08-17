@@ -379,7 +379,7 @@ def calculate_savings(original: int, optimized: int) -> float:
 docker run -p 5432:5432 -e POSTGRES_PASSWORD=apex postgres:14
 
 # Or use shared dev database
-DATABASE_URL=postgresql://apex_dev@dev.netra.ai:5432/apex
+DATABASE_URL=postgresql://apex_dev@dev.netrasystems.ai:5432/apex
 ```
 
 ### Redis Connection Error
@@ -388,7 +388,7 @@ DATABASE_URL=postgresql://apex_dev@dev.netra.ai:5432/apex
 docker run -p 6379:6379 redis:alpine
 
 # Or use shared dev redis
-REDIS_URL=redis://dev.netra.ai:6379
+REDIS_URL=redis://dev.netrasystems.ai:6379
 ```
 
 ### Import Errors

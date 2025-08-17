@@ -292,7 +292,7 @@ Location: `app/core/middleware_setup.py`
 
 #### Production CORS:
 - **Allowed Origins**: Explicit domain whitelist from `CORS_ORIGINS` env var
-- **Default**: `https://netra.ai`
+- **Default**: `https://netrasystems.ai`
 - **Credentials**: Allowed
 - **Methods**: `GET, POST, PUT, DELETE, OPTIONS, PATCH`
 

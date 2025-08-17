@@ -252,7 +252,7 @@ alias netra-backup='gcloud sql backups create --instance=$(terraform output -raw
 
 - **On-Call**: Check PagerDuty
 - **Slack**: #netra-platform
-- **Escalation**: devops@netra.ai
+- **Escalation**: devops@netrasystems.ai
 - **GCP Support**: [Console](https://console.cloud.google.com/support)
 
 ---

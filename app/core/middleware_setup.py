@@ -26,7 +26,7 @@ def get_cors_origins() -> list[str]:
 def _get_production_cors_origins() -> list[str]:
     """Get CORS origins for production environment."""
     cors_origins_env = os.environ.get("CORS_ORIGINS", "")
-    return cors_origins_env.split(",") if cors_origins_env else ["https://netra.ai"]
+    return cors_origins_env.split(",") if cors_origins_env else ["https://netrasystems.ai"]
 
 
 def _get_staging_cors_origins() -> list[str]:
@@ -40,6 +40,8 @@ def _get_staging_cors_origins() -> list[str]:
         "https://app.staging.netrasystems.ai",
         "https://auth.staging.netrasystems.ai",
         "https://backend.staging.netrasystems.ai",
+        "https://netra-frontend-701982941522.us-central1.run.app",
+        "https://netra-backend-701982941522.us-central1.run.app",
         "http://localhost:3000",
         "http://localhost:3001",
         "*"  # Will use pattern matching in is_origin_allowed
@@ -143,6 +145,11 @@ def is_origin_allowed(origin: str, allowed_origins: List[str]) -> bool:
         # Allow localhost for local development - any port
         localhost_pattern = r'^https?://(localhost|127\.0\.0\.1)(:\d+)?$'
         if re.match(localhost_pattern, origin):
+            return True
+        
+        # Allow Cloud Run URLs
+        cloud_run_pattern = r'^https://netra-(frontend|backend)-[a-zA-Z0-9\-]+\.(us-central1|europe-west1|asia-northeast1)\.run\.app$'
+        if re.match(cloud_run_pattern, origin):
             return True
     
     return False

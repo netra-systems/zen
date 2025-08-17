@@ -94,7 +94,7 @@
                 <description>Developers automatically get admin capabilities</description>
                 <detection>
                     <environment-variable>DEV_MODE=true</environment-variable>
-                    <email-domain>@netra.ai</email-domain>
+                    <email-domain>@netrasystems.ai</email-domain>
                     <github-membership>netra-ai organization</github-membership>
                 </detection>
                 <inherits>power-user</inherits>

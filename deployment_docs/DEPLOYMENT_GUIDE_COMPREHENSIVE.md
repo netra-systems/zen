@@ -238,7 +238,7 @@ psql -U postgres -c "CREATE DATABASE netra;"
 alembic upgrade head
 
 # Create initial admin user (optional)
-python scripts/create_admin.py --email admin@netra.ai --password secure-password
+python scripts/create_admin.py --email admin@netrasystems.ai --password secure-password
 
 # Start backend server
 uvicorn app.main:app --reload --port 8000
@@ -539,7 +539,7 @@ DATABASE_URL="postgresql://netra_user:${DB_PASSWORD}@${DB_IP}:5432/netra" \
 
 # Create initial admin user
 DATABASE_URL="postgresql://netra_user:${DB_PASSWORD}@${DB_IP}:5432/netra" \
-  python scripts/create_admin.py --email admin@netra.ai
+  python scripts/create_admin.py --email admin@netrasystems.ai
 ```
 
 ### Step 6: Configure Redis (Production)

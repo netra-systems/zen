@@ -47,6 +47,10 @@ class AuthRoutes:
         # Use the actual request URL to build endpoints (handles dynamic ports)
         base_url = str(request.base_url).rstrip('/')
         
+        # Ensure HTTPS for staging and production environments
+        if auth_env_config.environment.value in ["staging", "production"]:
+            base_url = base_url.replace("http://", "https://")
+        
         # Get environment-specific OAuth configuration
         oauth_config = auth_env_config.get_oauth_config()
         frontend_config = auth_env_config.get_frontend_config()
@@ -87,8 +91,11 @@ class AuthRoutes:
             logger.info(f"PR #{pr_number} OAuth login via proxy: {proxy_url}")
             return RedirectResponse(url=proxy_url)
         
-        # Standard OAuth flow
+        # Standard OAuth flow - ensure HTTPS for non-development environments
         base_url = str(request.base_url).rstrip('/')
+        if auth_env_config.environment.value in ["staging", "production"]:
+            # Force HTTPS for staging and production
+            base_url = base_url.replace("http://", "https://")
         redirect_uri = f"{base_url}/api/auth/callback"
         logger.info(f"OAuth login initiated with redirect URI: {redirect_uri}")
         return await oauth_client.google.authorize_redirect(request, redirect_uri)

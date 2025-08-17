@@ -140,7 +140,7 @@ jobs:
         run: |
           # Remove staging environment DNS records
           ZONE_NAME="${{ secrets.DNS_ZONE_NAME }}"
-          DOMAIN="${{ inputs.environment_name }}.staging.netra.ai"
+          DOMAIN="${{ inputs.environment_name }}.staging.netrasystems.ai"
           
           gcloud dns record-sets delete ${DOMAIN}. \
             --type=A \

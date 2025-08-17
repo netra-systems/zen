@@ -4,7 +4,7 @@
         <name>Learnings Index</name>
         <type>index</type>
         <version>1.0</version>
-        <last_updated>2025-08-16</last_updated>
+        <last_updated>2025-01-16</last_updated>
         <description>Index of all learning modules organized by category</description>
     </metadata>
     
@@ -13,21 +13,18 @@
             <name>Configuration/Secrets</name>
             <file>learnings/configuration_secrets.xml</file>
             <path>SPEC/learnings/configuration_secrets.xml</path>
-            <learning_count>3</learning_count>
+            <learning_count>1</learning_count>
             <learning_ids>
                 <id>staging-env-var-suffix-handling</id>
-                <id>cors-devlauncher-middleware-configuration</id>
-                <id>staging-cors-missing-env-var</id>
             </learning_ids>
         </category>
         <category>
             <name>Database/AsyncIO</name>
             <file>learnings/database_asyncio.xml</file>
             <path>SPEC/learnings/database_asyncio.xml</path>
-            <learning_count>2</learning_count>
+            <learning_count>1</learning_count>
             <learning_ids>
                 <id>async-context-manager-dependency-injection</id>
-                <id>trial-period-type-mismatch</id>
             </learning_ids>
         </category>
         <category>
@@ -124,28 +121,17 @@
             <name>Type Safety</name>
             <file>learnings/type_safety.xml</file>
             <path>SPEC/learnings/type_safety.xml</path>
-            <learning_count>4</learning_count>
+            <learning_count>2</learning_count>
             <learning_ids>
                 <id>circuit-breaker-consolidation</id>
                 <id>research-type-circular-import-fix</id>
-                <id>fallback-response-type-assumption-fix</id>
-                <id>pydantic-forward-reference-resolution</id>
-            </learning_ids>
-        </category>
-        <category>
-            <name>Pydantic Forward References</name>
-            <file>learnings/pydantic_forward_references.xml</file>
-            <path>SPEC/learnings/pydantic_forward_references.xml</path>
-            <learning_count>1</learning_count>
-            <learning_ids>
-                <id>agent-completed-forward-references</id>
             </learning_ids>
         </category>
         <category>
             <name>Testing</name>
             <file>learnings/testing.xml</file>
             <path>SPEC/learnings/testing.xml</path>
-            <learning_count>9</learning_count>
+            <learning_count>8</learning_count>
             <learning_ids>
                 <id>clickhouse-regex-deep-nested-fields</id>
                 <id>clickhouse-function-wrapper-preservation</id>
@@ -155,7 +141,6 @@
                 <id>frontend-component-test-setup</id>
                 <id>windows-jest-bus-error-fix</id>
                 <id>websocket-mock-server-conflicts</id>
-                <id>frontend-testing-complete-guide</id>
             </learning_ids>
         </category>
         <category>
@@ -174,36 +159,16 @@
             </learning_ids>
         </category>
         <category>
-            <name>Frontend</name>
-            <file>learnings/frontend.xml</file>
-            <path>SPEC/learnings/frontend.xml</path>
+            <name>Deployment</name>
+            <file>learnings/deployment.xml</file>
+            <path>SPEC/learnings/deployment.xml</path>
             <learning_count>5</learning_count>
             <learning_ids>
-                <id>zustand-selector-infinite-loop</id>
-                <id>zustand-hook-selector-inline</id>
-                <id>zustand-selector-memoization</id>
-                <id>zustand-individual-selectors-pattern</id>
-                <id>websocket-loading-state-transitions</id>
-            </learning_ids>
-        </category>
-        <category>
-            <name>React Content Handling</name>
-            <file>learnings/react-content-handling.xml</file>
-            <path>SPEC/learnings/react-content-handling.xml</path>
-            <learning_count>1</learning_count>
-            <learning_ids>
-                <id>react-child-object-error</id>
-            </learning_ids>
-        </category>
-        <category>
-            <name>WebSocket Errors</name>
-            <file>learnings/websocket_errors.xml</file>
-            <path>SPEC/learnings/websocket_errors.xml</path>
-            <learning_count>3</learning_count>
-            <learning_ids>
-                <id>websocket-connection-state-error</id>
-                <id>websocket-state-attributes</id>
-                <id>websocket-send-after-close-error</id>
+                <id>staging-setup</id>
+                <id>docker-builds</id>
+                <id>terraform-backend</id>
+                <id>cloud-armor-issues</id>
+                <id>iam-restrictions</id>
             </learning_ids>
         </category>
     </categories>
@@ -216,7 +181,7 @@
     </usage>
     
     <statistics>
-        <total_categories>17</total_categories>
-        <total_learnings>58</total_learnings>
+        <total_categories>14</total_categories>
+        <total_learnings>50</total_learnings>
     </statistics>
 </specification>

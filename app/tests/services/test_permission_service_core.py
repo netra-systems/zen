@@ -63,10 +63,10 @@ class TestDetectDeveloperStatus:
             assert result == False
     
     def test_detect_developer_with_netra_email(self):
-        """Test developer detection with @netra.ai email"""
+        """Test developer detection with @netrasystems.ai email"""
         user = Mock(spec=User)
         
-        user.email = "developer@netra.ai"
+        user.email = "developer@netrasystems.ai"
         result = PermissionService.detect_developer_status(user)
         assert result == True
         
@@ -124,7 +124,7 @@ class TestUpdateUserRole:
         """Test auto-elevation to developer role"""
         db = Mock(spec=Session)
         user = Mock(spec=User)
-        user.email = "test@netra.ai"
+        user.email = "test@netrasystems.ai"
         user.role = "standard_user"
         user.is_developer = False
         
@@ -139,7 +139,7 @@ class TestUpdateUserRole:
         """Test that admins are not downgraded to developer"""
         db = Mock(spec=Session)
         user = Mock(spec=User)
-        user.email = "admin@netra.ai"
+        user.email = "admin@netrasystems.ai"
         user.role = "admin"
         user.is_developer = True
         
@@ -153,7 +153,7 @@ class TestUpdateUserRole:
         """Test that super admins are not changed"""
         db = Mock(spec=Session)
         user = Mock(spec=User)
-        user.email = "superadmin@netra.ai"
+        user.email = "superadmin@netrasystems.ai"
         user.role = "super_admin"
         user.is_developer = True
         
@@ -167,7 +167,7 @@ class TestUpdateUserRole:
         """Test skipping developer check"""
         db = Mock(spec=Session)
         user = Mock(spec=User)
-        user.email = "test@netra.ai"
+        user.email = "test@netrasystems.ai"
         user.role = "standard_user"
         user.is_developer = False
         
@@ -182,7 +182,7 @@ class TestUpdateUserRole:
         """Test that developers are not re-elevated"""
         db = Mock(spec=Session)
         user = Mock(spec=User)
-        user.email = "dev@netra.ai"
+        user.email = "dev@netrasystems.ai"
         user.role = "developer"
         user.is_developer = True
         
@@ -196,7 +196,7 @@ class TestUpdateUserRole:
         """Test power user elevation to developer"""
         db = Mock(spec=Session)
         user = Mock(spec=User)
-        user.email = "power@netra.ai"
+        user.email = "power@netrasystems.ai"
         user.role = "power_user"
         user.is_developer = False
         

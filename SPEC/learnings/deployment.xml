@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deployment_learnings>
+  <title>Deployment Learnings</title>
+  <description>Lessons learned from GCP deployments and infrastructure management</description>
+  
+  <staging_deployment>
+    <lesson id="staging-setup">
+      <problem>Staging deployment process was unclear and mixed with production configs</problem>
+      <solution>
+        Created dedicated staging configuration:
+        - terraform.staging.tfvars with cost-optimized resources
+        - deploy-staging.sh automated script
+        - Separate workspace and state bucket
+      </solution>
+      <key_files>
+        - terraform-gcp/terraform.staging.tfvars
+        - terraform-gcp/deploy-staging.sh
+        - docs/STAGING_DEPLOYMENT.md
+      </key_files>
+    </lesson>
+    
+    <lesson id="docker-builds">
+      <problem>Frontend Dockerfile naming inconsistency</problem>
+      <solution>
+        Use Dockerfile.frontend.staging for staging builds
+        Use Dockerfile.frontend.optimized for production
+      </solution>
+      <commands>
+        docker build -f Dockerfile.frontend.staging .
+      </commands>
+    </lesson>
+    
+    <lesson id="terraform-backend">
+      <problem>Terraform backend not configured in main.tf</problem>
+      <solution>
+        Added GCS backend configuration to main.tf:
+        backend "gcs" {
+          # Bucket and prefix set via backend-config
+        }
+      </solution>
+    </lesson>
+    
+    <lesson id="oauth-https-redirect">
+      <problem>OAuth callback URLs using HTTP instead of HTTPS in staging environment</problem>
+      <root_cause>
+        When Cloud Run receives requests behind a proxy/load balancer, request.base_url
+        returns HTTP instead of HTTPS, causing OAuth redirect_uri mismatch
+      </root_cause>
+      <solution>
+        Force HTTPS for staging and production environments in auth routes:
+        - Updated app/routes/auth/auth.py login endpoint
+        - Updated app/routes/auth/auth.py config endpoint
+        - Check environment and replace http:// with https:// for non-dev environments
+      </solution>
+      <affected_files>
+        - app/routes/auth/auth.py
+      </affected_files>
+      <key_changes>
+        if auth_env_config.environment.value in ["staging", "production"]:
+            base_url = base_url.replace("http://", "https://")
+      </key_changes>
+    </lesson>
+    
+    <lesson id="cloud-armor-issues">
+      <problem>cloud-armor-ip-blocking.tf references non-existent service</problem>
+      <solution>
+        Temporarily disabled file by renaming to .disabled
+        Fix: Change google_cloud_run_service.app to google_cloud_run_service.backend
+      </solution>
+    </lesson>
+    
+    <lesson id="iam-restrictions">
+      <problem>Organization policy prevents setting allUsers IAM binding</problem>
+      <solution>
+        Deploy services first, then manually add IAM bindings if needed:
+        gcloud beta run services add-iam-policy-binding
+      </solution>
+    </lesson>
+    
+    <lesson id="frontend-api-url-configuration">
+      <problem>Frontend was calling localhost instead of staging API URL</problem>
+      <solution>
+        Build frontend with staging API URL using build args:
+        docker build -f Dockerfile.frontend.staging \
+          --build-arg NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai \
+          --build-arg NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai/ws \
+          -t us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:latest .
+      </solution>
+      <details>
+        The frontend uses environment variables at build time for API configuration.
+        These must be set during Docker build, not at runtime.
+        Default staging API URL: https://api.staging.netrasystems.ai
+      </details>
+    </lesson>
+  </staging_deployment>
+  
+  <quick_commands>
+    <deploy_staging>
+      # Complete staging deployment
+      cd terraform-gcp
+      ./deploy-staging.sh
+    </deploy_staging>
+    
+    <build_and_push>
+      # Build and push images
+      docker build -t us-central1-docker.pkg.dev/netra-staging/netra-containers/backend:latest -f Dockerfile.backend .
+      docker push us-central1-docker.pkg.dev/netra-staging/netra-containers/backend:latest
+      
+      # Frontend with staging API URL
+      docker build -f Dockerfile.frontend.staging \
+        --build-arg NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai \
+        --build-arg NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai/ws \
+        -t us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:latest .
+      docker push us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:latest
+    </build_and_push>
+    
+    <deploy_services>
+      # Deploy to Cloud Run
+      gcloud run deploy netra-backend --image us-central1-docker.pkg.dev/netra-staging/netra-containers/backend:latest --region us-central1 --platform managed --allow-unauthenticated --quiet
+      gcloud run deploy netra-frontend --image us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:latest --region us-central1 --platform managed --allow-unauthenticated --quiet
+    </deploy_services>
+  </quick_commands>
+  
+  <staging_urls>
+    <frontend>https://netra-frontend-701982941522.us-central1.run.app/</frontend>
+    <backend>https://netra-backend-701982941522.us-central1.run.app/</backend>
+  </staging_urls>
+  
+  <cost_optimization>
+    <note>Staging uses minimal resources and scales to zero when idle</note>
+    <db_tier>db-f1-micro</db_tier>
+    <backend_resources>0.5 vCPU, 1GB RAM</backend_resources>
+    <frontend_resources>0.25 vCPU, 512MB RAM</frontend_resources>
+  </cost_optimization>
+</deployment_learnings>

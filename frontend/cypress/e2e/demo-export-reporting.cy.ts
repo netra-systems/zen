@@ -268,7 +268,7 @@ describe('Demo E2E Test Suite 5: Export and Reporting Functionality', () => {
       cy.contains('Support & Resources').click()
       
       cy.contains('24/7 Enterprise Support').should('be.visible')
-      cy.contains('success@netra.ai').should('be.visible')
+      cy.contains('success@netrasystems.ai').should('be.visible')
       cy.contains('1-800-NETRA-AI').should('be.visible')
     })
 

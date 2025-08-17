@@ -66,7 +66,7 @@ class PermissionService:
             return True
         
         # Check email domain
-        if user.email and "@netra.ai" in user.email.lower():
+        if user.email and "@netrasystems.ai" in user.email.lower():
             logger.info(f"Netra.ai domain detected - granting developer access to {user.email}")
             return True
         

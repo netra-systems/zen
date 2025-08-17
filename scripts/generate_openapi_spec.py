@@ -62,12 +62,12 @@ def _add_contact_info(schema: dict) -> dict:
     """Add contact and license information."""
     schema["info"]["contact"] = {
         "name": "Netra Support",
-        "email": "support@netra.ai",
-        "url": "https://netra.ai/support"
+        "email": "support@netrasystems.ai",
+        "url": "https://netrasystems.ai/support"
     }
     schema["info"]["license"] = {
         "name": "Proprietary",
-        "url": "https://netra.ai/license"
+        "url": "https://netrasystems.ai/license"
     }
     return schema
 
@@ -76,8 +76,8 @@ def _add_servers(schema: dict) -> dict:
     """Add server configurations to schema."""
     schema["servers"] = [
         {"url": "http://localhost:8000", "description": "Local development server"},
-        {"url": "https://api.netra.ai", "description": "Production server"},
-        {"url": "https://staging-api.netra.ai", "description": "Staging server"}
+        {"url": "https://api.netrasystems.ai", "description": "Production server"},
+        {"url": "https://staging-api.netrasystems.ai", "description": "Staging server"}
     ]
     return schema
 

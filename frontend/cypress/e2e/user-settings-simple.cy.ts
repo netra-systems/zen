@@ -12,7 +12,7 @@ describe('User Settings Simple Flow', () => {
       win.localStorage.setItem('auth_token', 'mock-jwt-token-for-testing');
       win.localStorage.setItem('user', JSON.stringify({
         id: 'test-user-id',
-        email: 'test@netra.ai',
+        email: 'test@netrasystems.ai',
         name: 'Test User'
       }));
     });
@@ -35,7 +35,7 @@ describe('User Settings Simple Flow', () => {
           const token = win.localStorage.getItem('auth_token');
           expect(token).to.equal('mock-jwt-token-for-testing');
           const user = win.localStorage.getItem('user');
-          expect(user).to.include('test@netra.ai');
+          expect(user).to.include('test@netrasystems.ai');
         });
       } else {
         cy.log('Redirected to login - mock auth not accepted');
@@ -105,7 +105,7 @@ describe('User Settings Simple Flow', () => {
     cy.window().then((win) => {
       const userProfile = {
         id: 'test-user-id',
-        email: 'test@netra.ai',
+        email: 'test@netrasystems.ai',
         name: 'Test User',
         company: 'Netra AI',
         role: 'Developer'
@@ -120,7 +120,7 @@ describe('User Settings Simple Flow', () => {
       expect(profile).to.not.be.null;
       if (profile) {
         const userData = JSON.parse(profile);
-        expect(userData.email).to.equal('test@netra.ai');
+        expect(userData.email).to.equal('test@netrasystems.ai');
         expect(userData.company).to.equal('Netra AI');
       }
     });

@@ -187,7 +187,7 @@
                     <permission>*</permission>
                 </permissions>
                 <auto_detection>
-                    <condition>email_domain: "@netra.ai"</condition>
+                    <condition>email_domain: "@netrasystems.ai"</condition>
                     <condition>environment_variable: "DEV_MODE=true"</condition>
                     <condition>role: "developer"</condition>
                 </auto_detection>
