@@ -14,18 +14,11 @@ from app.db.models_postgres import Run, Reference
 from app.redis_manager import redis_manager
 from app.logging_config import central_logger
 from app.agents.state import DeepAgentState
+from app.services.state_serialization import DateTimeEncoder
 import pickle
 
 logger = central_logger.get_logger(__name__)
 
-
-class DateTimeEncoder(json.JSONEncoder):
-    """Custom JSON encoder for datetime objects"""
-    
-    def default(self, obj):
-        if isinstance(obj, datetime):
-            return obj.isoformat()
-        return super().default(obj)
 
 class StatePersistenceService:
     """Service for persisting and retrieving agent state"""

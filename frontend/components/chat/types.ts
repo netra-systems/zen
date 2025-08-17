@@ -50,11 +50,5 @@ export const MESSAGE_INPUT_CONSTANTS = {
   MIN_HEIGHT: 48,
 } as const;
 
-export type MessageRole = 'user' | 'assistant';
-
-export interface ChatMessage {
-  id: string;
-  role: MessageRole;
-  content: string;
-  timestamp: number;
-}
+// Re-export consolidated types from single source of truth
+export type { MessageRole, ChatMessage } from '@/types/chat';

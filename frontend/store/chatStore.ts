@@ -1,23 +1,13 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { Message } from '@/types/chat';
+import type { SubAgentStatusData } from '@/types/chat-store';
+import { LegacyAgentStatus } from '@/types/agent-types';
 
-type AgentStatus = 'IDLE' | 'RUNNING' | 'COMPLETED' | 'ERROR';
+// Keep legacy status for store compatibility during migration
+type AgentStatus = LegacyAgentStatus;
 
-interface SubAgentStatusData {
-  status: string;
-  tools?: string[];
-  progress?: {
-    current: number;
-    total: number;
-    message?: string;
-  };
-  error?: string;
-  description?: string;
-  executionTime?: number;
-}
-
-interface ChatState {
+interface ImmerChatState {
   messages: Message[];
   currentRunId: string | null;
   agentStatus: AgentStatus;
@@ -45,7 +35,7 @@ interface ChatState {
   reset: () => void;
 }
 
-export const useChatStore = create<ChatState>()(
+export const useChatStore = create<ImmerChatState>()(
   immer((set) => ({
     messages: [],
     currentRunId: null,

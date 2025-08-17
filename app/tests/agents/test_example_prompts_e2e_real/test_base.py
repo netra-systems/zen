@@ -84,8 +84,13 @@ class BaseExamplePromptsTest:
         DefaultContext
     ]):
         """Generate default corpus data if none exists"""
-        # For now, skip corpus generation in tests
-        pass
+        try:
+            existing_data = await corpus_service.get_corpus_data(context.__class__.__name__)
+            if existing_data:
+                return existing_data
+        except Exception:
+            pass
+        return {"test_corpus": "default_data", "context_type": context.__class__.__name__}
     
     async def _create_mock_state_persistence(self, context_with_run_id):
         """Create mock state persistence functions"""

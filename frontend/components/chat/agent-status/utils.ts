@@ -8,7 +8,7 @@ import {
   X,
   Bot
 } from 'lucide-react';
-import { AgentStatus } from './types';
+import { AgentStatus } from '@/types/agent-types';
 
 export const convertMsToTimeUnits = (ms: number) => {
   const seconds = Math.floor(ms / 1000);

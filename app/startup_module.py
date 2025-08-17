@@ -26,7 +26,7 @@ from app.db.migration_utils import (
     log_migration_status, should_continue_on_error, validate_database_url
 )
 from app.core.performance_optimization_manager import performance_manager
-from app.monitoring.performance_monitor import performance_monitor
+from app.monitoring import performance_monitor
 from app.db.index_optimizer import index_manager
 
 

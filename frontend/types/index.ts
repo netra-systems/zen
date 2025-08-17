@@ -6,6 +6,9 @@ export * from './backend_schema_config';
 export * from './backend_schema_auth';
 export * from './backend_schema_tools';
 
+// Export consolidated agent types (SINGLE SOURCE OF TRUTH)
+export * from './agent-types';
+
 // Re-export specific items from chat that don't conflict with backend types
 export type { 
   Message as ChatMessage,
@@ -19,6 +22,9 @@ export {
   SubAgentLifecycle,
   ToolStatus as ChatToolStatus
 } from './chat';
+
+// Export performance metrics unified types
+export * from './performance-metrics';
 
 // Only export from other files if they have unique types not in backend_schema_auto_generated
 // Most types are already defined in backend_schema_auto_generated

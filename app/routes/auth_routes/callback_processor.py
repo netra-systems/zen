@@ -4,7 +4,7 @@ OAuth Callback Processing Logic
 from fastapi import HTTPException, status, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.clients.auth_client import auth_client, oauth_client
+from app.clients.auth_client import auth_client
 from app.services.security_service import SecurityService
 from app.services.user_service import user_service
 from app.schemas.registry import UserCreateOAuth
@@ -78,8 +78,24 @@ async def process_oauth_callback(
 async def handle_callback_request(
     request: Request, db: AsyncSession, security_service: SecurityService
 ):
-    """Handle OAuth callback from Google with comprehensive security validation."""
-    try:
-        return await process_oauth_callback(request, db, security_service)
-    except Exception as e:
-        return build_error_redirect(e)
+    """Forward OAuth callback to auth service."""
+    import os
+    from fastapi.responses import RedirectResponse
+    
+    # Determine auth service URL based on environment
+    environment = auth_client.detect_environment()
+    
+    if environment.value == 'staging':
+        auth_service_url = 'https://auth.staging.netrasystems.ai'
+    elif environment.value == 'production':
+        auth_service_url = 'https://auth.netrasystems.ai'
+    else:
+        auth_service_url = os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081')
+    
+    # Forward all query params to auth service
+    query_string = str(request.url.query)
+    callback_url = f"{auth_service_url}/auth/callback"
+    if query_string:
+        callback_url += f"?{query_string}"
+    
+    return RedirectResponse(url=callback_url, status_code=302)

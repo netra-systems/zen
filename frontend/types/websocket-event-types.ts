@@ -344,24 +344,9 @@ export interface MCPServerErrorEvent {
 // Supporting Types
 // ============================================
 
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: number;
-  threadId?: string;
-  threadTitle?: string;
-  metadata?: {
-    runId?: string;
-    agentName?: string;
-    duration?: number;
-    mcpExecutions?: Array<{
-      execution_id: string;
-      tool_name: string;
-      server_name: string;
-    }>;
-  };
-}
+// Import ChatMessage from consolidated types
+import type { ChatMessage } from './chat';
+export type { ChatMessage };
 
 // ============================================
 // Union Type

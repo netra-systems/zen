@@ -1,8 +1,12 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * Agent-related type definitions
- * Auto-generated from pydantic models - do not modify by hand
+ * DEPRECATED: Agent-related type definitions
+ * 
+ * This file now re-exports from the consolidated agent-types.ts
+ * Use @/types/agent-types instead for new code.
+ * 
+ * This file exists only for backward compatibility during migration.
  */
 
 import type { ReferenceItem } from './backend_schema_tools';
@@ -15,26 +19,30 @@ import type {
   SubAgentLifecycle
 } from './backend_schema_base';
 
-// Re-export for backward compatibility
+// Import from consolidated agent types (single source of truth)
+import type {
+  AgentStarted,
+  AgentCompleted,
+  AgentErrorMessage,
+  SubAgentUpdate,
+  StopAgent
+} from './agent-types';
+
+// Re-export consolidated types for backward compatibility
+export type { 
+  AgentStarted,
+  AgentCompleted,
+  AgentErrorMessage,
+  SubAgentUpdate,
+  StopAgent
+};
+
+// Re-export backend schema types
 export type { BaseMessage, SubAgentState, SubAgentStatus, SubAgentLifecycle };
 
-
-export interface AgentCompleted {
-  run_id: string;
-  result: unknown;
-}
-
-export interface AgentErrorMessage {
-  run_id: string;
-  message: string;
-}
-
+// Agent-specific types not covered by consolidated types
 export interface AgentMessage {
   text: string;
-}
-
-export interface AgentStarted {
-  run_id: string;
 }
 
 export interface AgentState {
@@ -56,19 +64,6 @@ export interface StartAgentMessage {
 export interface StartAgentPayload {
   message: StartAgentMessage;
 }
-
-export interface StopAgent {
-  run_id: string;
-}
-
-
-export interface SubAgentUpdate {
-  agent_id: string;
-  status: SubAgentLifecycle;
-  result?: unknown | null;
-  error?: string | null;
-}
-
 
 // Re-export canonical type
 export type { ReferenceItem };

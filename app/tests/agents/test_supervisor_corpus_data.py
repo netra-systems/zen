@@ -81,7 +81,14 @@ class DemoAgent:
     
     async def generate_demo_data(self):
         """Generate demo data"""
-        pass
+        import random
+        random.seed(self.random_seed)
+        return {
+            "demo_scenario": "cost_optimization",
+            "sample_requests": random.randint(100, 1000),
+            "estimated_savings": round(random.uniform(1000, 50000), 2),
+            "demo_timestamp": datetime.now(timezone.utc).isoformat()
+        }
     
     async def generate_synthetic_metrics(self):
         """Generate synthetic metrics with variety"""

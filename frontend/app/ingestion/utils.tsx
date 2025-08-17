@@ -6,7 +6,7 @@ import {
   FileText, Code, Image as ImageIcon, Video, Music, Archive,
   CheckCircle, XCircle, Clock, AlertCircle
 } from 'lucide-react';
-import { DataSource, IngestionJob } from './types';
+import { IngestionDataSource, IngestionJob } from './types';
 
 export const getStatusIcon = (status: string) => {
   switch (status) {
@@ -66,7 +66,7 @@ const getMediaIcon = (ext?: string) => {
   }
 };
 
-export const DATA_SOURCES: DataSource[] = [
+export const DATA_SOURCES: IngestionDataSource[] = [
   { id: 'file', label: 'File Upload', icon: <Upload className="h-4 w-4" /> },
   { id: 'database', label: 'Database', icon: <Database className="h-4 w-4" /> },
   { id: 'api', label: 'API Endpoint', icon: <Webhook className="h-4 w-4" /> },

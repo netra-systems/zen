@@ -6,6 +6,7 @@ import type {
   MediumLayerData, 
   SlowLayerData 
 } from './layer-types';
+import type { PerformanceMetrics } from './performance-metrics';
 
 // ============================================
 // Component Props Types
@@ -51,16 +52,9 @@ export interface StreamingConfig {
 }
 
 // ============================================
-// Performance Monitoring Types
+// Performance Monitoring Types (imported from unified types)
 // ============================================
-
-export interface PerformanceMetrics {
-  renderTime: number;
-  updateTime: number;
-  memoryUsage?: number;
-  frameRate?: number;
-  eventProcessingTime: number;
-}
+// PerformanceMetrics now imported from './performance-metrics'
 
 // ============================================
 // Configuration Types

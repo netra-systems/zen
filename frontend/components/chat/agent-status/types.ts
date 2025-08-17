@@ -1,42 +1,24 @@
-export interface AgentStatusCardProps {
-  agentName: string;
-  status: 'idle' | 'thinking' | 'executing' | 'success' | 'error' | 'cancelled';
-  currentAction?: string;
-  progress?: number;
-  eta?: number;
-  tools?: Array<{
-    name: string;
-    status: 'pending' | 'running' | 'completed' | 'failed';
-    duration?: number;
-  }>;
-  metrics?: {
-    cpu?: number;
-    memory?: number;
-    apiCalls?: number;
-    tokensUsed?: number;
-  };
-  logs?: string[];
-  onCancel?: () => void;
-  onPause?: () => void;
-  onResume?: () => void;
-  isPaused?: boolean;
-}
+/**
+ * Agent Status Component Types
+ * 
+ * This file re-exports consolidated agent types for component-specific use.
+ * All types now come from the single source of truth: @/types/agent-types
+ */
 
-export interface Tool {
-  name: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  duration?: number;
-}
+import { 
+  AgentStatus, 
+  AgentStatusCardProps as BaseAgentStatusCardProps,
+  AgentTool,
+  AgentMetrics
+} from '@/types/agent-types';
 
-export interface Metrics {
-  cpu?: number;
-  memory?: number;
-  apiCalls?: number;
-  tokensUsed?: number;
-}
+// Re-export consolidated types for component use
+export type { AgentStatus };
+export type AgentStatusCardProps = BaseAgentStatusCardProps;
+export type Tool = AgentTool;
+export type Metrics = AgentMetrics;
 
-export type AgentStatus = 'idle' | 'thinking' | 'executing' | 'success' | 'error' | 'cancelled';
-
+// Component-specific props (not duplicated in consolidated types)
 export interface AgentHeaderProps {
   agentName: string;
   status: AgentStatus;

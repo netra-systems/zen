@@ -15,7 +15,6 @@ from app.agents.synthetic_data_presets import WorkloadProfile
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.synthetic_data_batch_processor import SyntheticDataBatchProcessor
 from app.agents.synthetic_data_progress_tracker import SyntheticDataProgressTracker
-from app.agents.synthetic_data_mock_generators import SyntheticDataMockGenerators
 from app.logging_config import central_logger
 
 # Import consolidated types from single source of truth
@@ -31,7 +30,6 @@ class SyntheticDataGenerator:
         self.tool_dispatcher = tool_dispatcher
         self.batch_processor = SyntheticDataBatchProcessor(tool_dispatcher)
         self.progress_tracker = SyntheticDataProgressTracker()
-        self.mock_generators = SyntheticDataMockGenerators()
     
     async def generate_data(
         self, 

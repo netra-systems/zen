@@ -11,7 +11,7 @@ from .quality_models import (
 from .test_coverage_calculator import TestCoverageCalculator
 from .documentation_assessor import DocumentationAssessor
 from .architecture_compliance_checker import ArchitectureComplianceChecker
-from .technical_debt_calculator import TechnicalDebtCalculator
+from .metrics_technical_debt import TechnicalDebtCalculator
 
 
 class QualityAggregator:

@@ -7,9 +7,11 @@
  * - These types are optimized for React state management and UI interactions
  */
 
-// Core message types
-export type MessageRole = 'user' | 'assistant' | 'system';
-export type MessageType = 'user' | 'ai' | 'error' | 'system' | 'tool_call' | 'tool_result' | 'thinking';
+// Import consolidated types from single source of truth
+import type { MessageRole, MessageMetadata, MessageType } from '@/types/chat';
+
+// Re-export for backwards compatibility
+export type { MessageRole, MessageMetadata, MessageType };
 
 export interface BaseMessage {
   id: string;
@@ -20,19 +22,6 @@ export interface BaseMessage {
   displayed_to_user?: boolean;
   error?: string;
   thread_id?: string | null;
-}
-
-export interface MessageMetadata {
-  sub_agent?: string;
-  tool_name?: string;
-  execution_time_ms?: number;
-  token_count?: number;
-  model_used?: string;
-  confidence_score?: number;
-  source?: string;
-  references?: string[];
-  is_streaming?: boolean;
-  chunk_index?: number;
 }
 
 export interface Message extends BaseMessage {

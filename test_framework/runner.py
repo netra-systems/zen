@@ -22,7 +22,7 @@ from .failing_tests_manager import (
 
 # Try to import enhanced reporter if available
 try:
-    from scripts.enhanced_test_reporter import EnhancedTestReporter
+    from .enhanced_reporter import EnhancedReporter as EnhancedTestReporter
     ENHANCED_REPORTER_AVAILABLE = True
 except ImportError:
     ENHANCED_REPORTER_AVAILABLE = False
@@ -45,9 +45,9 @@ class UnifiedTestRunner:
     
     def __init__(self):
         self.test_categories = defaultdict(list)
-        self.enhanced_reporter = self._setup_enhanced_reporter()
         self.results = self._initialize_results_structure()
         self._setup_directories()
+        self.enhanced_reporter = self._setup_enhanced_reporter()
         self.staging_mode = False
     
     def run_backend_tests(self, args: List[str], timeout: int = 300, real_llm_config: Optional[Dict] = None, speed_opts: Optional[Dict] = None) -> Tuple[int, str]:
@@ -189,7 +189,7 @@ class UnifiedTestRunner:
     
     def _build_enhanced_reporter(self) -> 'EnhancedTestReporter':
         """Build and configure enhanced reporter."""
-        reporter = EnhancedTestReporter()
+        reporter = EnhancedTestReporter(self.reports_dir)
         self._log_enhanced_reporter_success()
         return reporter
     

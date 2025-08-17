@@ -37,7 +37,7 @@ export function getAuthServiceConfig(): AuthServiceConfig {
   } else if (env === 'production') {
     baseUrl = 'https://auth.netrasystems.ai';
   } else if (env === 'staging' || process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
-    baseUrl = 'https://auth-service-staging.run.app'; // Cloud Run URL
+    baseUrl = 'https://auth.staging.netrasystems.ai'; // Staging auth service URL
   } else {
     // Development - auth service runs on port 8081
     baseUrl = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081';
@@ -59,10 +59,13 @@ export function getAuthServiceConfig(): AuthServiceConfig {
     },
     oauth: {
       googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      redirectUri: `${baseUrl}/api/auth/callback`,
+      redirectUri: env === 'staging' || process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' 
+        ? 'https://staging.netrasystems.ai/auth/callback'
+        : `${typeof window !== 'undefined' ? window.location.origin : baseUrl}/auth/callback`,
       javascriptOrigins: [
         baseUrl,
         typeof window !== 'undefined' ? window.location.origin : '',
+        env === 'staging' || process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ? 'https://staging.netrasystems.ai' : '',
       ].filter(Boolean),
     },
   };

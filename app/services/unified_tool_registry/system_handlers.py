@@ -165,23 +165,8 @@ def _create_unknown_action_response(action: str) -> Dict[str, Any]:
         from app.services.log_analysis_service import LogAnalysisService
         
         log_service = LogAnalysisService(self.db)
-        
-        analysis = await log_service.analyze_logs(
-            query=arguments.get('query', ''),
-            time_range=arguments.get('time_range', '1h'),
-            log_level=arguments.get('log_level'),
-            service=arguments.get('service'),
-            user_id=user.id
-        )
-        
-        return {
-            "type": "text",
-            "text": f"Log analysis completed",
-            "analysis": analysis,
-            "total_logs": analysis.get('total_count', 0),
-            "error_count": analysis.get('error_count', 0),
-            "warning_count": analysis.get('warning_count', 0)
-        }
+        analysis = await _perform_log_analysis(log_service, arguments, user)
+        return _create_log_analysis_response(analysis)
     
     async def _debug_panel_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for debug_panel tool"""
@@ -189,18 +174,54 @@ def _create_unknown_action_response(action: str) -> Dict[str, Any]:
         
         debug_service = DebugService(self.db)
         component = arguments.get('component', 'system')
-        
-        debug_info = await debug_service.get_debug_info(
-            component=component,
-            include_metrics=arguments.get('include_metrics', True),
-            include_logs=arguments.get('include_logs', False),
-            user_id=user.id
-        )
-        
-        return {
-            "type": "text",
-            "text": f"Debug info for {component}",
-            "debug_info": debug_info,
-            "timestamp": debug_info.get('timestamp'),
-            "health_status": debug_info.get('health_status', 'unknown')
-        }
+        debug_info = await _get_component_debug_info(debug_service, component, arguments, user)
+        return _create_debug_info_response(component, debug_info)
+
+
+async def _perform_log_analysis(log_service: 'LogAnalysisService', arguments: Dict[str, Any], user: User) -> Dict[str, Any]:
+    """Perform log analysis with given parameters."""
+    return await log_service.analyze_logs(
+        query=arguments.get('query', ''),
+        time_range=arguments.get('time_range', '1h'),
+        log_level=arguments.get('log_level'),
+        service=arguments.get('service'),
+        user_id=user.id
+    )
+
+
+def _create_log_analysis_response(analysis: Dict[str, Any]) -> Dict[str, Any]:
+    """Create response for log analysis results."""
+    return {
+        "type": "text",
+        "text": f"Log analysis completed",
+        "analysis": analysis,
+        "total_logs": analysis.get('total_count', 0),
+        "error_count": analysis.get('error_count', 0),
+        "warning_count": analysis.get('warning_count', 0)
+    }
+
+
+async def _get_component_debug_info(
+    debug_service: 'DebugService', 
+    component: str, 
+    arguments: Dict[str, Any], 
+    user: User
+) -> Dict[str, Any]:
+    """Get debug information for a component."""
+    return await debug_service.get_debug_info(
+        component=component,
+        include_metrics=arguments.get('include_metrics', True),
+        include_logs=arguments.get('include_logs', False),
+        user_id=user.id
+    )
+
+
+def _create_debug_info_response(component: str, debug_info: Dict[str, Any]) -> Dict[str, Any]:
+    """Create response for debug information."""
+    return {
+        "type": "text",
+        "text": f"Debug info for {component}",
+        "debug_info": debug_info,
+        "timestamp": debug_info.get('timestamp'),
+        "health_status": debug_info.get('health_status', 'unknown')
+    }

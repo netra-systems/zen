@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, TrendingUp, Activity, ChevronDown, ChevronRight, Package, Layers
 } from 'lucide-react';
-import type { RecommendationItem, ActionPlanItem, AgentTimelineItem } from './slow-layer-types';
+import type { RecommendationItem, ActionPlanItem, AgentTimelineItem } from '@/types/report-data';
 import { StepButton, StepContent, TimelineBar } from './slow-layer-components';
 
 // Utility Functions for Recommendations

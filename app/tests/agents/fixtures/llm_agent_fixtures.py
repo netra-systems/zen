@@ -11,6 +11,7 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 import uuid
 from datetime import datetime
 import time
+from typing import Dict, Any
 
 from app.agents.supervisor_consolidated import SupervisorAgent
 from app.agents.state import DeepAgentState
@@ -23,54 +24,93 @@ from sqlalchemy.ext.asyncio import AsyncSession
 def mock_llm_manager():
     """Create properly mocked LLM manager"""
     llm_manager = Mock(spec=LLMManager)
-    
-    # Mock standard LLM responses
+    _setup_basic_llm_responses(llm_manager)
+    _setup_structured_llm_responses(llm_manager)
+    _setup_triage_agent_responses(llm_manager)
+    return llm_manager
+
+
+def _setup_basic_llm_responses(llm_manager: Mock) -> None:
+    """Setup basic LLM response mocks."""
     llm_manager.call_llm = AsyncMock(return_value={
         "content": "I'll help you optimize your AI workload",
         "tool_calls": []
     })
-    
-    # Mock structured responses for triage
-    llm_manager.ask_llm = AsyncMock(return_value=json.dumps({
+
+
+def _setup_structured_llm_responses(llm_manager: Mock) -> None:
+    """Setup structured LLM response mocks."""
+    llm_manager.ask_llm = AsyncMock(return_value=json.dumps(_get_optimization_response()))
+
+
+def _get_optimization_response() -> Dict[str, Any]:
+    """Get mock optimization response data."""
+    return {
         "category": "optimization",
         "confidence": 0.95,
         "requires_data": True,
         "requires_optimization": True,
         "requires_actions": True,
         "analysis": "User needs AI workload optimization"
-    }))
-    
-    # Mock structured LLM for triage agent
+    }
+
+
+def _setup_triage_agent_responses(llm_manager: Mock) -> None:
+    """Setup triage agent structured LLM responses."""
     from app.agents.triage_sub_agent import (
         TriageResult, Priority, Complexity, UserIntent,
         ExtractedEntities, TriageMetadata
     )
-    
-    llm_manager.ask_structured_llm = AsyncMock(return_value=TriageResult(
+    llm_manager.ask_structured_llm = AsyncMock(return_value=_create_triage_result())
+
+
+def _create_triage_result() -> 'TriageResult':
+    """Create mock triage result."""
+    from app.agents.triage_sub_agent import (
+        TriageResult, Priority, Complexity, UserIntent,
+        ExtractedEntities, TriageMetadata
+    )
+    return TriageResult(
         category="AI Optimization",
         confidence_score=0.95,
         priority=Priority.HIGH,
         complexity=Complexity.MODERATE,
         is_admin_mode=False,
-        extracted_entities=ExtractedEntities(
-            models_mentioned=["GPT-4", "Claude"],
-            metrics_mentioned=["latency", "throughput"],
-            time_ranges=[]
-        ),
-        user_intent=UserIntent(
-            primary_intent="optimize",
-            secondary_intents=["analyze", "monitor"]
-        ),
+        extracted_entities=_create_extracted_entities(),
+        user_intent=_create_user_intent(),
         tool_recommendations=[],
-        metadata=TriageMetadata(
-            triage_duration_ms=150,
-            cache_hit=False,
-            fallback_used=False,
-            retry_count=0
-        )
-    ))
-    
-    return llm_manager
+        metadata=_create_triage_metadata()
+    )
+
+
+def _create_extracted_entities() -> 'ExtractedEntities':
+    """Create mock extracted entities."""
+    from app.agents.triage_sub_agent import ExtractedEntities
+    return ExtractedEntities(
+        models_mentioned=["GPT-4", "Claude"],
+        metrics_mentioned=["latency", "throughput"],
+        time_ranges=[]
+    )
+
+
+def _create_user_intent() -> 'UserIntent':
+    """Create mock user intent."""
+    from app.agents.triage_sub_agent import UserIntent
+    return UserIntent(
+        primary_intent="optimize",
+        secondary_intents=["analyze", "monitor"]
+    )
+
+
+def _create_triage_metadata() -> 'TriageMetadata':
+    """Create mock triage metadata."""
+    from app.agents.triage_sub_agent import TriageMetadata
+    return TriageMetadata(
+        triage_duration_ms=150,
+        cache_hit=False,
+        fallback_used=False,
+        retry_count=0
+    )
 
 
 @pytest.fixture

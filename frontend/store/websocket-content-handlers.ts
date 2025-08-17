@@ -5,10 +5,10 @@ import { generateUniqueId } from '@/lib/utils';
 import { mapEventPayload } from '@/utils/event-payload-mapper';
 import type { 
   UnifiedWebSocketEvent,
-  ChatMessage,
   MediumLayerData,
   FinalReport
 } from '@/types/websocket-event-types';
+import type { ChatMessage } from '@/types/chat';
 import type { UnifiedChatState } from '@/types/store-types';
 
 /**

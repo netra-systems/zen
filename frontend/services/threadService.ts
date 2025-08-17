@@ -1,17 +1,6 @@
 import { apiClient } from '@/services/apiClientWrapper';
 import { Thread, ThreadMetadata } from '@/types/registry';
-
-export interface MessageMetadata {
-  references?: string[];
-  attachments?: Array<{
-    id: string;
-    filename: string;
-    mimeType: string;
-    size: number;
-  }>;
-  editedAt?: string;
-  [key: string]: unknown;
-}
+import type { MessageMetadata } from '@/types/chat';
 
 export interface ThreadMessage {
   id: string;

@@ -61,39 +61,85 @@ def add_pr_configuration(response: AuthConfigResponse, oauth_config) -> None:
         response.proxy_url = oauth_config.proxy_url
 
 
+def determine_environment_urls() -> tuple[str, str]:
+    """Determine auth service and frontend URLs based on environment."""
+    environment = auth_client.detect_environment()
+    if environment.value == 'staging':
+        return 'https://auth.staging.netrasystems.ai', 'https://staging.netrasystems.ai'
+    elif environment.value == 'production':
+        return 'https://auth.netrasystems.ai', 'https://netrasystems.ai'
+    return os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081'), 'http://localhost:3000'
+
+
+def build_environment_endpoints(auth_service_url: str, frontend_url: str, oauth_config) -> AuthEndpoints:
+    """Build authentication endpoints for the current environment."""
+    dev_login = f"{auth_service_url}/auth/dev_login" if oauth_config.allow_dev_login else None
+    return AuthEndpoints(
+        login=f"{auth_service_url}/auth/login",
+        logout=f"{auth_service_url}/auth/logout",
+        callback=f"{frontend_url}/auth/callback",
+        token=f"{auth_service_url}/auth/token",
+        user=f"{auth_service_url}/auth/me",
+        dev_login=dev_login
+    )
+
+
+def create_auth_response(endpoints: AuthEndpoints, oauth_config) -> AuthConfigResponse:
+    """Create authentication configuration response."""
+    environment = auth_client.detect_environment()
+    response = AuthConfigResponse(
+        development_mode=environment.value == "development",
+        google_client_id=oauth_config.client_id or os.getenv('GOOGLE_CLIENT_ID', ''),
+        endpoints=endpoints,
+        authorized_javascript_origins=oauth_config.javascript_origins,
+        authorized_redirect_uris=oauth_config.redirect_uris
+    )
+    return response
+
+
+def build_fallback_endpoints() -> AuthEndpoints:
+    """Build fallback authentication endpoints."""
+    auth_service_url = 'https://auth.staging.netrasystems.ai'
+    frontend_url = 'https://staging.netrasystems.ai'
+    return AuthEndpoints(
+        login=f"{auth_service_url}/auth/login",
+        logout=f"{auth_service_url}/auth/logout",
+        callback=f"{frontend_url}/auth/callback",
+        token=f"{auth_service_url}/auth/token",
+        user=f"{auth_service_url}/auth/me",
+        dev_login=None
+    )
+
+
+def create_fallback_response() -> AuthConfigResponse:
+    """Create fallback authentication configuration response."""
+    fallback_endpoints = build_fallback_endpoints()
+    frontend_url = 'https://staging.netrasystems.ai'
+    return AuthConfigResponse(
+        development_mode=False,
+        google_client_id=os.getenv('GOOGLE_CLIENT_ID', ''),
+        endpoints=fallback_endpoints,
+        authorized_javascript_origins=[frontend_url],
+        authorized_redirect_uris=[f"{frontend_url}/auth/callback"]
+    )
+
+
+def log_auth_config_error(error: Exception) -> None:
+    """Log authentication configuration error."""
+    from app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+    logger.error(f"Failed to build auth config response: {str(error)}", exc_info=True)
+
+
 def build_auth_config_response(request: Request) -> AuthConfigResponse:
     """Build complete authentication configuration response."""
     try:
-        base_url = normalize_base_url(request)
+        auth_service_url, frontend_url = determine_environment_urls()
         oauth_config = auth_client.get_oauth_config()
-        
-        # Validate OAuth configuration
-        if not oauth_config.client_id:
-            raise ValueError("OAuth client ID not configured")
-        
-        endpoints = build_auth_endpoints(base_url, oauth_config)
-        response = build_base_auth_response(oauth_config, endpoints)
+        endpoints = build_environment_endpoints(auth_service_url, frontend_url, oauth_config)
+        response = create_auth_response(endpoints, oauth_config)
         add_pr_configuration(response, oauth_config)
         return response
     except Exception as e:
-        from app.logging_config import central_logger
-        logger = central_logger.get_logger(__name__)
-        logger.error(f"Failed to build auth config response: {str(e)}", exc_info=True)
-        
-        # Return minimal fallback configuration
-        fallback_endpoints = AuthEndpoints(
-            login=f"{base_url}/api/auth/login",
-            logout=f"{base_url}/api/auth/logout",
-            callback=f"{base_url}/api/auth/callback",
-            token=f"{base_url}/api/auth/token",
-            user=f"{base_url}/api/users/me",
-            dev_login=None
-        )
-        
-        return AuthConfigResponse(
-            development_mode=False,
-            google_client_id="",
-            endpoints=fallback_endpoints,
-            authorized_javascript_origins=[],
-            authorized_redirect_uris=[]
-        )
+        log_auth_config_error(e)
+        return create_fallback_response()

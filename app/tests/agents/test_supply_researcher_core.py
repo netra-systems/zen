@@ -142,8 +142,7 @@ class TestSupplyResearcherCore:
                 "provider": run_id.split("_")[1]
             }
         
-        with patch.object(agent, 'execute', side_effect=mock_research):
-            pass
+        agent.execute = AsyncMock(side_effect=mock_research)
 
     async def _execute_parallel_research(self, agent, providers):
         """Execute parallel research test (≤8 lines)"""

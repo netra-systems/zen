@@ -1,12 +1,12 @@
 # Unified Test Report
-**Level**: smoke | **Time**: 2025-08-17 11:49:50
+**Level**: smoke | **Time**: 2025-08-17 11:58:41
 
 ## ⚠️ Test Failures Detected
 
 ## Current Run Summary
 | Component | Status | Tests | Passed | Failed | Duration |
 |-----------|--------|-------|--------|--------|----------|
-| Backend | ❌ | 0 | 0 | 0 | 2.7s |
+| Backend | ❌ | 0 | 0 | 0 | 6.3s |
 | Frontend | ⏭️ | 0 | 0 | 0 | 0.0s |
 | E2E | ⏸️ | 0 | 0 | 0 | 0.0s |
 

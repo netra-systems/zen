@@ -263,3 +263,5 @@ class GracefulDegradationManager:
             }
             for name, status in self.services.items()
         }
+# Global degradation manager instance
+degradation_manager = GracefulDegradationManager()

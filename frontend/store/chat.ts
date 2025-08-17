@@ -3,21 +3,9 @@ import { create } from 'zustand';
 import { generateUniqueId } from '@/lib/utils';
 import { Message } from '@/types/chat';
 import type { SubAgentState as BackendSubAgentState } from '@/types/backend_schema_base';
+import type { SubAgentStatusData } from '@/types/chat-store';
 
-interface SubAgentStatusData {
-  status: string;
-  tools?: string[];
-  progress?: {
-    current: number;
-    total: number;
-    message?: string;
-  };
-  error?: string;
-  description?: string;
-  executionTime?: number;
-}
-
-interface ChatState {
+interface SimpleChatState {
   messages: Message[];
   subAgentName: string;
   currentSubAgent: string | null;
@@ -46,7 +34,7 @@ interface ChatState {
   reset: () => void;
 }
 
-export const useChatStore = create<ChatState>((set) => ({
+export const useChatStore = create<SimpleChatState>((set) => ({
   messages: [],
   subAgentName: 'Netra Agent',
   currentSubAgent: null,

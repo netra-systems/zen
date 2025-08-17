@@ -1,7 +1,7 @@
 import { AuthConfigResponse } from '@/auth';
 import { useContext } from 'react';
 import { AuthContext, AuthContextType } from '@/auth';
-import { config } from '@/config';
+import { authService as authServiceClient } from '@/lib/auth-service-config';
 import { logger } from '@/lib/logger';
 
 const TOKEN_KEY = 'jwt_token';
@@ -11,18 +11,28 @@ class AuthService {
   async getAuthConfig(retries = 3, delay = 1000): Promise<AuthConfigResponse> {
     for (let i = 0; i < retries; i++) {
       try {
-        const response = await fetch(`${config.apiUrl}/api/auth/config`);
-        if (!response.ok) {
-          if (i < retries - 1) {
-            logger.warn(`Auth config fetch failed, retrying... (${i + 1}/${retries})`, {
-              component: 'AuthService'
-            });
-            await new Promise(resolve => setTimeout(resolve, delay));
-            continue;
-          }
-          throw new Error('Failed to fetch auth config');
-        }
-        return response.json();
+        // Get config from auth service
+        const authConfig = await authServiceClient.getConfig();
+        
+        // Get the auth service configuration
+        const { getAuthServiceConfig } = await import('@/lib/auth-service-config');
+        const config = getAuthServiceConfig();
+        
+        // Transform to expected format
+        return {
+          development_mode: process.env.NODE_ENV === 'development',
+          google_client_id: authConfig.google_client_id || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+          endpoints: {
+            login: config.endpoints.login,
+            logout: config.endpoints.logout,
+            callback: config.endpoints.callback,
+            token: config.endpoints.token,
+            user: config.endpoints.me,
+            dev_login: process.env.NODE_ENV === 'development' ? `${config.baseUrl}/auth/dev_login` : undefined
+          },
+          authorized_javascript_origins: config.oauth.javascriptOrigins,
+          authorized_redirect_uris: [config.oauth.redirectUri]
+        };
       } catch (error) {
         if (i < retries - 1) {
           logger.warn(`Auth config fetch error, retrying... (${i + 1}/${retries})`, {
@@ -97,34 +107,15 @@ class AuthService {
   }
 
   handleLogin(authConfig: AuthConfigResponse) {
-    // Always redirect to OAuth login endpoint
-    // The backend will handle whether it's dev mode or production
-    window.location.href = authConfig.endpoints.login;
+    // Use the auth service client to initiate login
+    authServiceClient.initiateLogin('google');
   }
 
   async handleLogout(authConfig: AuthConfigResponse) {
     try {
-      const response = await fetch(authConfig.endpoints.logout, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...this.getAuthHeaders(),
-        },
-      });
-      
-      if (response.ok) {
-        this.removeToken();
-        window.location.href = '/';
-      } else {
-        logger.error('Logout failed', undefined, { 
-          component: 'AuthService', 
-          action: 'logout_failed',
-          metadata: { status: response.status }
-        });
-        // Still remove token and redirect on error
-        this.removeToken();
-        window.location.href = '/';
-      }
+      await authServiceClient.logout();
+      this.removeToken();
+      window.location.href = '/';
     } catch (error) {
       logger.error('Error during logout', error as Error, { 
         component: 'AuthService', 

@@ -424,21 +424,27 @@ class AuthServiceClient:
     
     def _get_staging_redirect_uris(self) -> List[str]:
         """Get staging redirect URIs."""
-        return ["https://staging.netrasystems.ai/api/auth/callback",
-                "https://app.staging.netrasystems.ai/callback"]
+        return ["https://staging.netrasystems.ai/auth/callback",
+                "https://auth.staging.netrasystems.ai/auth/callback",
+                "https://app.staging.netrasystems.ai/auth/callback"]
     
     def _get_staging_js_origins(self) -> List[str]:
         """Get staging JavaScript origins."""
-        return ["https://staging.netrasystems.ai", "https://app.staging.netrasystems.ai"]
+        return ["https://staging.netrasystems.ai", 
+                "https://auth.staging.netrasystems.ai",
+                "https://app.staging.netrasystems.ai"]
     
     def _get_prod_redirect_uris(self) -> List[str]:
         """Get production redirect URIs."""
-        return ["https://api.netrasystems.ai/api/auth/callback",
-                "https://netrasystems.ai/callback"]
+        return ["https://netrasystems.ai/auth/callback",
+                "https://auth.netrasystems.ai/auth/callback",
+                "https://app.netrasystems.ai/auth/callback"]
     
     def _get_prod_js_origins(self) -> List[str]:
         """Get production JavaScript origins."""
-        return ["https://netrasystems.ai", "https://api.netrasystems.ai"]
+        return ["https://netrasystems.ai", 
+                "https://auth.netrasystems.ai",
+                "https://app.netrasystems.ai"]
     
     def _get_fallback_oauth_config(self) -> OAuthConfig:
         """Get fallback OAuth configuration when normal config fails."""

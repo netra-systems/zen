@@ -45,54 +45,68 @@ class ResearchSchedule:
     
     def _calculate_next_run(self) -> datetime:
         """Calculate next run time based on frequency"""
-        # Use last_run as base if available, otherwise use current time
         base_time = self.last_run if self.last_run else datetime.now(UTC)
         now = datetime.now(UTC)
         
         if self.frequency == ScheduleFrequency.HOURLY:
-            # Next hour from base_time
-            next_run = base_time.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
-        
+            return self._calculate_hourly_next_run(base_time)
         elif self.frequency == ScheduleFrequency.DAILY:
-            # Next day at specified hour
-            next_run = now.replace(hour=self.hour, minute=0, second=0, microsecond=0)
-            if next_run <= now:
-                next_run += timedelta(days=1)
-        
+            return self._calculate_daily_next_run(now)
         elif self.frequency == ScheduleFrequency.WEEKLY:
-            # Next specified day of week
-            current_weekday = now.weekday()
-            days_ahead = self.day_of_week - current_weekday
-            if days_ahead <= 0:  # Target day already happened this week
-                days_ahead += 7
-            next_run = now.replace(hour=self.hour, minute=0, second=0, microsecond=0)
-            next_run += timedelta(days=days_ahead)
-        
+            return self._calculate_weekly_next_run(now)
         elif self.frequency == ScheduleFrequency.MONTHLY:
-            # Next month on specified day
-            if now.day >= self.day_of_month:
-                # Move to next month
-                if now.month == 12:
-                    next_run = now.replace(year=now.year + 1, month=1)
-                else:
-                    next_run = now.replace(month=now.month + 1)
-            else:
-                next_run = now
-            
-            # Set to specified day and hour
-            try:
-                next_run = next_run.replace(
-                    day=self.day_of_month,
-                    hour=self.hour,
-                    minute=0,
-                    second=0,
-                    microsecond=0
-                )
-            except ValueError:
-                # Handle months with fewer days
-                next_run = next_run.replace(day=1) + timedelta(days=self.day_of_month - 1)
+            return self._calculate_monthly_next_run(now)
         
+        return now
+    
+    def _calculate_hourly_next_run(self, base_time: datetime) -> datetime:
+        """Calculate next run time for hourly frequency."""
+        return base_time.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+    
+    def _calculate_daily_next_run(self, now: datetime) -> datetime:
+        """Calculate next run time for daily frequency."""
+        next_run = now.replace(hour=self.hour, minute=0, second=0, microsecond=0)
+        if next_run <= now:
+            next_run += timedelta(days=1)
         return next_run
+    
+    def _calculate_weekly_next_run(self, now: datetime) -> datetime:
+        """Calculate next run time for weekly frequency."""
+        current_weekday = now.weekday()
+        days_ahead = self.day_of_week - current_weekday
+        if days_ahead <= 0:  # Target day already happened this week
+            days_ahead += 7
+        next_run = now.replace(hour=self.hour, minute=0, second=0, microsecond=0)
+        return next_run + timedelta(days=days_ahead)
+    
+    def _calculate_monthly_next_run(self, now: datetime) -> datetime:
+        """Calculate next run time for monthly frequency."""
+        next_run = self._get_next_month_base(now)
+        return self._set_monthly_day_and_hour(next_run)
+    
+    def _get_next_month_base(self, now: datetime) -> datetime:
+        """Get base datetime for next month calculation."""
+        if now.day >= self.day_of_month:
+            # Move to next month
+            if now.month == 12:
+                return now.replace(year=now.year + 1, month=1)
+            else:
+                return now.replace(month=now.month + 1)
+        return now
+    
+    def _set_monthly_day_and_hour(self, next_run: datetime) -> datetime:
+        """Set the specific day and hour for monthly schedule."""
+        try:
+            return next_run.replace(
+                day=self.day_of_month,
+                hour=self.hour,
+                minute=0,
+                second=0,
+                microsecond=0
+            )
+        except ValueError:
+            # Handle months with fewer days
+            return next_run.replace(day=1) + timedelta(days=self.day_of_month - 1)
     
     def should_run(self) -> bool:
         """Check if schedule should run now"""

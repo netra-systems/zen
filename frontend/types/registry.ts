@@ -108,16 +108,9 @@ export interface AuthConfigResponse {
   logout_url?: string;
 }
 
-export interface MessageMetadata {
-  model?: string;
-  tokens_used?: number;
-  processing_time?: number;
-  agent_name?: string;
-  run_id?: string;
-  step_id?: string;
-  tool_calls?: Array<Record<string, unknown>>;
-  custom_fields?: Record<string, string | number | boolean>;
-}
+// Import MessageMetadata from consolidated chat types
+import type { MessageMetadata } from './chat';
+export type { MessageMetadata };
 
 export interface Message {
   id: string;
@@ -265,7 +258,9 @@ export interface WebSocketMessage {
 // UTILITY TYPES
 // ============================================================================
 
-export type MessageRole = MessageType;
+// Import MessageRole from consolidated chat types
+import type { MessageRole } from './chat';
+export type { MessageRole };
 export type MessageStatus = 'pending' | 'sent' | 'delivered' | 'read' | 'failed';
 
 export interface MessageAttachment {

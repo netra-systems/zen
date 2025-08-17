@@ -23,7 +23,7 @@ export interface IngestionJob {
   error?: string;
 }
 
-export interface DataSource {
+export interface IngestionDataSource {
   id: string;
   label: string;
   icon: React.ReactNode;

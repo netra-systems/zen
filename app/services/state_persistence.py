@@ -5,7 +5,6 @@ compression, and recovery capabilities following the 8-line function limit.
 """
 
 import json
-import time
 import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, Optional, List, Tuple
@@ -16,7 +15,7 @@ from app.db.models_agent_state import (
 )
 from app.schemas.agent_state import (
     StatePersistenceRequest, StateRecoveryRequest,
-    CheckpointType, SerializationFormat
+    CheckpointType, SerializationFormat, RecoveryType
 )
 from app.redis_manager import redis_manager
 from app.logging_config import central_logger
@@ -25,11 +24,10 @@ from app.core.exceptions import NetraException
 from app.services.state_serialization import (
     DateTimeEncoder, StateSerializer, StateValidator
 )
-from app.services.state_recovery import state_recovery_service
+from app.services.state_recovery_manager import state_recovery_manager
+from app.services.state_cache_manager import state_cache_manager
 
 logger = central_logger.get_logger(__name__)
-
-
 
 
 class StatePersistenceService:
@@ -74,7 +72,7 @@ class StatePersistenceService:
 
     async def _finalize_state_save(self, request: StatePersistenceRequest, transaction_id: str, db_session: AsyncSession) -> None:
         """Complete state save with caching and cleanup."""
-        await self._cache_state_in_redis(request)
+        await state_cache_manager.cache_state_in_redis(request)
         await self._cleanup_old_snapshots(request.run_id, db_session)
         await self._complete_transaction(transaction_id, "committed", db_session)
     
@@ -93,7 +91,7 @@ class StatePersistenceService:
     async def _attempt_cache_load(self, run_id: str, snapshot_id: Optional[str]) -> Optional[DeepAgentState]:
         """Try loading state from Redis cache first."""
         if not snapshot_id:
-            return await self._load_from_redis_cache(run_id)
+            return await state_cache_manager.load_from_redis_cache(run_id)
         return None
 
     async def _attempt_database_load(self, run_id: str, snapshot_id: Optional[str], db_session: Optional[AsyncSession]) -> Optional[DeepAgentState]:
@@ -112,7 +110,7 @@ class StatePersistenceService:
         state_data = await self._deserialize_state_data(
             snapshot.state_data, snapshot.serialization_format
         )
-        await self._cache_deserialized_state(run_id, state_data)
+        await state_cache_manager.cache_deserialized_state(run_id, state_data)
         logger.info(f"Loaded state from snapshot {snapshot.id}")
         return DeepAgentState(**state_data)
     
@@ -126,26 +124,12 @@ class StatePersistenceService:
             return success, recovery_id if success else None
         except Exception as e:
             logger.error(f"Recovery failed for run {request.run_id}: {e}")
-            await self._complete_recovery_log(recovery_id, False, db_session, str(e))
+            await state_recovery_manager.complete_recovery_log(recovery_id, False, db_session, str(e))
             return False, None
 
     async def _execute_recovery_operation(self, request: StateRecoveryRequest, recovery_id: str, db_session: AsyncSession) -> bool:
         """Execute the recovery operation workflow."""
-        await self._create_recovery_log(request, recovery_id, db_session)
-        success = await self._perform_recovery_by_type(request, db_session)
-        await self._complete_recovery_log(recovery_id, success, db_session)
-        return success
-
-    async def _perform_recovery_by_type(self, request: StateRecoveryRequest, db_session: AsyncSession) -> bool:
-        """Perform recovery operation based on recovery type."""
-        if request.recovery_type == RecoveryType.RESTART:
-            return await self._perform_restart_recovery(request, db_session)
-        elif request.recovery_type == RecoveryType.RESUME:
-            return await self._perform_resume_recovery(request, db_session)
-        elif request.recovery_type == RecoveryType.ROLLBACK:
-            return await self._perform_rollback_recovery(request, db_session)
-        else:
-            raise ValueError(f"Unsupported recovery type: {request.recovery_type}")
+        return await state_recovery_manager.execute_recovery_operation(request, recovery_id, db_session)
     
     async def _create_state_snapshot(self, request: StatePersistenceRequest,
                                     db_session: AsyncSession) -> str:
@@ -171,14 +155,6 @@ class StatePersistenceService:
         db_session.add(transaction)
         await db_session.flush()
         return transaction_id
-    
-    async def _cache_state_in_redis(self, request: StatePersistenceRequest) -> None:
-        """Cache state data in Redis for fast access."""
-        redis_client = await self.redis_manager.get_client()
-        if not redis_client:
-            return
-        await self._cache_agent_state(redis_client, request)
-        await self._cache_thread_context(redis_client, request)
     
     async def _cleanup_old_snapshots(self, run_id: str, db_session: AsyncSession) -> None:
         """Clean up old snapshots to maintain performance."""
@@ -246,34 +222,6 @@ class StatePersistenceService:
         """Extract value from enum or return as-is."""
         return obj.value if hasattr(obj, 'value') else obj
     
-    async def _cache_agent_state(self, redis_client, request: StatePersistenceRequest) -> None:
-        """Cache agent state in Redis."""
-        redis_key = f"agent_state:{request.run_id}"
-        state_json = json.dumps(request.state_data, cls=DateTimeEncoder)
-        await redis_client.set(redis_key, state_json, ex=self.redis_ttl)
-    
-    async def _cache_thread_context(self, redis_client, request: StatePersistenceRequest) -> None:
-        """Cache thread context in Redis."""
-        thread_key = f"thread_context:{request.thread_id}"
-        checkpoint_value = self._extract_value(request.checkpoint_type)
-        thread_context = {
-            "current_run_id": request.run_id, "user_id": request.user_id,
-            "last_updated": time.time(), "checkpoint_type": checkpoint_value}
-        await redis_client.set(thread_key, json.dumps(thread_context), ex=self.redis_ttl * 24)
-    
-    async def _load_from_redis_cache(self, run_id: str) -> Optional[DeepAgentState]:
-        """Load state from Redis cache."""
-        redis_client = await self.redis_manager.get_client()
-        if not redis_client:
-            return None
-        redis_key = f"agent_state:{run_id}"
-        state_json = await redis_client.get(redis_key)
-        if state_json:
-            state_dict = json.loads(state_json)
-            logger.info(f"Loaded state for run {run_id} from Redis cache")
-            return DeepAgentState(**state_dict)
-        return None
-    
     async def _get_latest_snapshot(self, run_id: str, snapshot_id: Optional[str],
                                   db_session: AsyncSession) -> Optional[AgentStateSnapshot]:
         """Get the latest or specific snapshot for a run."""
@@ -292,15 +240,6 @@ class StatePersistenceService:
         # For now, state_data is already stored as JSON in database
         # In future, could support other formats stored as BLOB
         return state_data
-    
-    async def _cache_deserialized_state(self, run_id: str, state_data: Dict[str, Any]) -> None:
-        """Cache deserialized state in Redis."""
-        redis_client = await self.redis_manager.get_client()
-        if not redis_client:
-            return
-        redis_key = f"agent_state:{run_id}"
-        state_json = json.dumps(state_data, cls=DateTimeEncoder)
-        await redis_client.set(redis_key, state_json, ex=self.redis_ttl)
 
 # Global instance
 state_persistence_service = StatePersistenceService()
