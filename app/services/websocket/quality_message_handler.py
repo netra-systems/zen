@@ -30,27 +30,30 @@ class QualityMetricsHandler(BaseMessageHandler):
     async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
         """Handle quality metrics request"""
         try:
-            agent_name = payload.get("agent_name")
-            period_hours = payload.get("period_hours", 24)
-            
-            if agent_name:
-                # Get specific agent report
-                report = await self.monitoring_service.get_agent_report(agent_name, period_hours)
-            else:
-                # Get overall dashboard
-                report = await self.monitoring_service.get_dashboard_data()
-            
-            await manager.send_message(
-                user_id,
-                {
-                    "type": "quality_metrics",
-                    "payload": report
-                }
-            )
-            
+            report = await self._get_quality_report(payload)
+            await self._send_metrics_response(user_id, report)
         except Exception as e:
-            logger.error(f"Error getting quality metrics: {str(e)}")
-            await manager.send_error(user_id, f"Failed to get quality metrics: {str(e)}")
+            await self._handle_metrics_error(user_id, e)
+
+    async def _get_quality_report(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Get quality report based on payload parameters."""
+        agent_name = payload.get("agent_name")
+        period_hours = payload.get("period_hours", 24)
+        if agent_name:
+            return await self.monitoring_service.get_agent_report(agent_name, period_hours)
+        return await self.monitoring_service.get_dashboard_data()
+
+    async def _send_metrics_response(self, user_id: str, report: Dict[str, Any]) -> None:
+        """Send quality metrics response to user."""
+        await manager.send_message(
+            user_id,
+            {"type": "quality_metrics", "payload": report}
+        )
+
+    async def _handle_metrics_error(self, user_id: str, error: Exception) -> None:
+        """Handle quality metrics request error."""
+        logger.error(f"Error getting quality metrics: {str(error)}")
+        await manager.send_error(user_id, f"Failed to get quality metrics: {str(error)}")
 
 
 class QualityAlertHandler(BaseMessageHandler):
@@ -66,29 +69,37 @@ class QualityAlertHandler(BaseMessageHandler):
         """Handle quality alert subscription"""
         try:
             action = payload.get("action", "subscribe")
-            
-            if action == "subscribe":
-                await self.monitoring_service.subscribe_to_updates(user_id)
-                await manager.send_message(
-                    user_id,
-                    {
-                        "type": "quality_alerts_subscribed",
-                        "payload": {"status": "subscribed"}
-                    }
-                )
-            elif action == "unsubscribe":
-                await self.monitoring_service.unsubscribe_from_updates(user_id)
-                await manager.send_message(
-                    user_id,
-                    {
-                        "type": "quality_alerts_unsubscribed",
-                        "payload": {"status": "unsubscribed"}
-                    }
-                )
-            
+            await self._process_subscription_action(user_id, action)
         except Exception as e:
-            logger.error(f"Error handling quality alert subscription: {str(e)}")
-            await manager.send_error(user_id, f"Failed to handle subscription: {str(e)}")
+            await self._handle_subscription_error(user_id, e)
+
+    async def _process_subscription_action(self, user_id: str, action: str) -> None:
+        """Process subscription action (subscribe/unsubscribe)."""
+        if action == "subscribe":
+            await self._handle_subscribe_action(user_id)
+        elif action == "unsubscribe":
+            await self._handle_unsubscribe_action(user_id)
+
+    async def _handle_subscribe_action(self, user_id: str) -> None:
+        """Handle subscribe action for quality alerts."""
+        await self.monitoring_service.subscribe_to_updates(user_id)
+        await manager.send_message(
+            user_id,
+            {"type": "quality_alerts_subscribed", "payload": {"status": "subscribed"}}
+        )
+
+    async def _handle_unsubscribe_action(self, user_id: str) -> None:
+        """Handle unsubscribe action for quality alerts."""
+        await self.monitoring_service.unsubscribe_from_updates(user_id)
+        await manager.send_message(
+            user_id,
+            {"type": "quality_alerts_unsubscribed", "payload": {"status": "unsubscribed"}}
+        )
+
+    async def _handle_subscription_error(self, user_id: str, error: Exception) -> None:
+        """Handle quality alert subscription error."""
+        logger.error(f"Error handling quality alert subscription: {str(error)}")
+        await manager.send_error(user_id, f"Failed to handle subscription: {str(error)}")
 
 
 class QualityEnhancedStartAgentHandler(StartAgentHandler):
@@ -101,31 +112,41 @@ class QualityEnhancedStartAgentHandler(StartAgentHandler):
     async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
         """Handle start_agent message with quality tracking"""
         try:
-            # Store start time for performance tracking
             start_time = datetime.now(UTC)
-            
-            # Call parent handler
             await super().handle(user_id, payload)
-            
-            # Calculate response time
-            response_time = (datetime.now(UTC) - start_time).total_seconds()
-            
-            # Send quality update
-            if hasattr(self.supervisor, 'get_quality_dashboard'):
-                quality_data = await self.supervisor.get_quality_dashboard()
-                quality_data['response_time'] = response_time
-                
-                await manager.send_message(
-                    user_id,
-                    {
-                        "type": "quality_update",
-                        "payload": quality_data
-                    }
-                )
-            
+            await self._send_quality_tracking_update(user_id, start_time)
         except Exception as e:
-            logger.error(f"Error in quality-enhanced handler: {str(e)}")
+            self._log_handler_error(e)
             raise
+
+    async def _send_quality_tracking_update(self, user_id: str, start_time: datetime) -> None:
+        """Send quality tracking update after agent start."""
+        if not hasattr(self.supervisor, 'get_quality_dashboard'):
+            return
+        response_time = self._calculate_response_time(start_time)
+        quality_data = await self._get_enhanced_quality_data(response_time)
+        await self._send_quality_update_message(user_id, quality_data)
+
+    def _calculate_response_time(self, start_time: datetime) -> float:
+        """Calculate response time from start to now."""
+        return (datetime.now(UTC) - start_time).total_seconds()
+
+    async def _get_enhanced_quality_data(self, response_time: float) -> Dict[str, Any]:
+        """Get quality data enhanced with response time."""
+        quality_data = await self.supervisor.get_quality_dashboard()
+        quality_data['response_time'] = response_time
+        return quality_data
+
+    async def _send_quality_update_message(self, user_id: str, quality_data: Dict[str, Any]) -> None:
+        """Send quality update message to user."""
+        await manager.send_message(
+            user_id,
+            {"type": "quality_update", "payload": quality_data}
+        )
+
+    def _log_handler_error(self, error: Exception) -> None:
+        """Log error in quality-enhanced handler."""
+        logger.error(f"Error in quality-enhanced handler: {str(error)}")
 
 
 class QualityValidationHandler(BaseMessageHandler):
@@ -140,54 +161,75 @@ class QualityValidationHandler(BaseMessageHandler):
     async def handle(self, user_id: str, payload: Dict[str, Any]) -> None:
         """Handle content validation request"""
         try:
-            content = payload.get("content", "")
-            content_type_str = payload.get("content_type", "general")
-            strict_mode = payload.get("strict_mode", False)
-            
-            # Map string to ContentType enum
-            content_type_map = {
-                "optimization": ContentType.OPTIMIZATION,
-                "data_analysis": ContentType.DATA_ANALYSIS,
-                "action_plan": ContentType.ACTION_PLAN,
-                "report": ContentType.REPORT,
-                "triage": ContentType.TRIAGE,
-                "error": ContentType.ERROR_MESSAGE,
-                "general": ContentType.GENERAL
-            }
-            content_type = content_type_map.get(content_type_str, ContentType.GENERAL)
-            
-            # Validate content
-            result = await self.quality_gate_service.validate_content(
-                content=content,
-                content_type=content_type,
-                context={"user_id": user_id},
-                strict_mode=strict_mode
-            )
-            
-            # Send validation result
-            await manager.send_message(
-                user_id,
-                {
-                    "type": "content_validated",
-                    "payload": {
-                        "passed": result.passed,
-                        "metrics": {
-                            "overall_score": result.metrics.overall_score,
-                            "quality_level": result.metrics.quality_level.value,
-                            "specificity": result.metrics.specificity_score,
-                            "actionability": result.metrics.actionability_score,
-                            "quantification": result.metrics.quantification_score,
-                            "issues": result.metrics.issues,
-                            "suggestions": result.metrics.suggestions
-                        },
-                        "retry_suggested": result.retry_suggested
-                    }
-                }
-            )
-            
+            validation_params = self._extract_validation_params(payload)
+            result = await self._validate_content_with_params(user_id, validation_params)
+            await self._send_validation_result(user_id, result)
         except Exception as e:
-            logger.error(f"Error validating content: {str(e)}")
-            await manager.send_error(user_id, f"Failed to validate content: {str(e)}")
+            await self._handle_validation_error(user_id, e)
+
+    def _extract_validation_params(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract validation parameters from payload."""
+        content = payload.get("content", "")
+        content_type_str = payload.get("content_type", "general")
+        strict_mode = payload.get("strict_mode", False)
+        content_type = self._map_content_type(content_type_str)
+        return {"content": content, "content_type": content_type, "strict_mode": strict_mode}
+
+    def _map_content_type(self, content_type_str: str) -> ContentType:
+        """Map string to ContentType enum."""
+        content_type_map = self._get_content_type_mapping()
+        return content_type_map.get(content_type_str, ContentType.GENERAL)
+
+    def _get_content_type_mapping(self) -> Dict[str, ContentType]:
+        """Get content type string to enum mapping."""
+        return {
+            "optimization": ContentType.OPTIMIZATION,
+            "data_analysis": ContentType.DATA_ANALYSIS,
+            "action_plan": ContentType.ACTION_PLAN,
+            "report": ContentType.REPORT,
+            "triage": ContentType.TRIAGE,
+            "error": ContentType.ERROR_MESSAGE,
+            "general": ContentType.GENERAL
+        }
+
+    async def _validate_content_with_params(self, user_id: str, params: Dict[str, Any]):
+        """Validate content using extracted parameters."""
+        return await self.quality_gate_service.validate_content(
+            content=params["content"],
+            content_type=params["content_type"],
+            context={"user_id": user_id},
+            strict_mode=params["strict_mode"]
+        )
+
+    async def _send_validation_result(self, user_id: str, result) -> None:
+        """Send validation result to user."""
+        payload = self._build_validation_payload(result)
+        await manager.send_message(user_id, {"type": "content_validated", "payload": payload})
+
+    def _build_validation_payload(self, result) -> Dict[str, Any]:
+        """Build validation result payload."""
+        return {
+            "passed": result.passed,
+            "metrics": self._build_metrics_payload(result.metrics),
+            "retry_suggested": result.retry_suggested
+        }
+
+    def _build_metrics_payload(self, metrics) -> Dict[str, Any]:
+        """Build metrics payload from validation result."""
+        return {
+            "overall_score": metrics.overall_score,
+            "quality_level": metrics.quality_level.value,
+            "specificity": metrics.specificity_score,
+            "actionability": metrics.actionability_score,
+            "quantification": metrics.quantification_score,
+            "issues": metrics.issues,
+            "suggestions": metrics.suggestions
+        }
+
+    async def _handle_validation_error(self, user_id: str, error: Exception) -> None:
+        """Handle content validation error."""
+        logger.error(f"Error validating content: {str(error)}")
+        await manager.send_error(user_id, f"Failed to validate content: {str(error)}")
 
 
 class QualityReportHandler(BaseMessageHandler):
