@@ -353,6 +353,22 @@ def add_llm_arguments(parser):
         "--parallel", type=str, default="auto",
         help="Parallelism for tests: auto, 1 (sequential), or number of workers"
     )
+    parser.add_argument(
+        "--speed", action="store_true",
+        help="Enable speed optimizations (WARNING: May skip slow tests)"
+    )
+    parser.add_argument(
+        "--no-warnings", action="store_true",
+        help="Disable pytest warnings (speeds up execution)"
+    )
+    parser.add_argument(
+        "--no-coverage", action="store_true",
+        help="Skip coverage collection (speeds up execution significantly)"
+    )
+    parser.add_argument(
+        "--fast-fail", action="store_true",
+        help="Stop on first failure (speeds up failure detection)"
+    )
 
 def add_staging_arguments(parser):
     """Add staging environment arguments"""
@@ -375,6 +391,10 @@ def add_cicd_arguments(parser):
     )
     parser.add_argument(
         "--output", type=str, help="Output file for test results (for CI/CD integration)"
+    )
+    parser.add_argument(
+        "--ci", action="store_true",
+        help="CI mode: Optimized for continuous integration (enables safe speed optimizations)"
     )
 
 def add_discovery_arguments(parser):
@@ -440,9 +460,10 @@ def execute_test_run(parser, args):
     handle_cicd_aliases(args)
     print_header()
     configure_staging_if_requested(args)
+    speed_opts = configure_speed_options(args)
     runner = initialize_test_runner()
     handle_failing_test_commands(args, runner)
-    return run_tests_with_configuration(args, runner)
+    return run_tests_with_configuration(args, runner, speed_opts)
 
 def handle_cicd_aliases(args):
     """Handle CI/CD specific argument aliases"""
@@ -477,6 +498,39 @@ def print_staging_configuration(staging_url, staging_api_url):
     print(f"[STAGING MODE] Testing against staging environment:")
     print(f"  Frontend: {staging_url}")
     print(f"  API: {staging_api_url}")
+
+def configure_speed_options(args):
+    """Configure speed optimization options based on arguments"""
+    speed_opts = {}
+    
+    # Check if any speed options are enabled
+    if args.speed or args.ci or args.no_warnings or args.no_coverage or args.fast_fail:
+        speed_opts['enabled'] = True
+        
+        # Safe optimizations
+        if args.no_warnings or args.speed or args.ci:
+            speed_opts['no_warnings'] = True
+        
+        if args.no_coverage or args.speed or args.ci:
+            speed_opts['no_coverage'] = True
+            
+        if args.fast_fail or args.ci:
+            speed_opts['fast_fail'] = True
+        
+        # CI mode enables safe parallel execution
+        if args.ci:
+            speed_opts['parallel'] = True
+            print("[CI MODE] Enabling safe speed optimizations")
+        
+        # Speed mode enables more aggressive optimizations with warning
+        if args.speed and not args.ci:
+            print("\n⚡ SPEED MODE ENABLED")
+            print("⚠️  WARNING: Some tests may be skipped for speed")
+            print("   Use --ci for safe speed optimizations only\n")
+            speed_opts['skip_slow'] = True
+            speed_opts['parallel'] = True
+    
+    return speed_opts if speed_opts else None
 
 def initialize_test_runner():
     """Initialize test runner and set start time"""
@@ -517,7 +571,7 @@ def handle_fix_failing_command():
     print("Use --run-failing to run only failing tests")
     sys.exit(0)
 
-def run_tests_with_configuration(args, runner):
+def run_tests_with_configuration(args, runner, speed_opts):
     """Run tests with the specified configuration"""
     if args.staging:
         runner.staging_mode = True
@@ -525,7 +579,7 @@ def run_tests_with_configuration(args, runner):
     if args.simple:
         return run_simple_tests(runner)
     else:
-        return run_level_based_tests(args, runner)
+        return run_level_based_tests(args, runner, speed_opts)
 
 def run_simple_tests(runner):
     """Run simple test validation"""
@@ -535,14 +589,14 @@ def run_simple_tests(runner):
     level = "simple"
     return finalize_test_run(runner, level, config, "", exit_code)
 
-def run_level_based_tests(args, runner):
+def run_level_based_tests(args, runner, speed_opts):
     """Run tests based on specified level"""
     config = TEST_LEVELS[args.level]
     level = args.level
     apply_shard_filtering(args, config)
-    print_test_configuration(level, config)
+    print_test_configuration(level, config, speed_opts)
     real_llm_config = configure_real_llm_if_requested(args, level, config)
-    exit_code = execute_test_suite(args, config, runner, real_llm_config)
+    exit_code = execute_test_suite(args, config, runner, real_llm_config, speed_opts)
     return finalize_test_run(runner, level, config, "", exit_code)
 
 def apply_shard_filtering(args, config):
@@ -560,11 +614,15 @@ def apply_shard_filtering(args, config):
             args.frontend_only = True
             args.backend_only = False
 
-def print_test_configuration(level, config):
+def print_test_configuration(level, config, speed_opts):
     """Print test configuration details"""
     print(f"Running {level} tests: {config['description']}")
     print(f"Purpose: {config['purpose']}")
     print(f"Timeout: {config.get('timeout', 300)}s")
+    if speed_opts and speed_opts.get('enabled'):
+        print("⚡ Speed optimizations enabled")
+        if speed_opts.get('skip_slow'):
+            print("⚠️  WARNING: Slow tests will be skipped")
 
 def configure_real_llm_if_requested(args, level, config):
     """Configure real LLM testing if requested"""
@@ -587,45 +645,49 @@ def print_real_llm_configuration(args, config):
     config['timeout'] = adjusted_timeout
     print(f"  - Adjusted test timeout: {adjusted_timeout}s")
 
-def execute_test_suite(args, config, runner, real_llm_config):
+def execute_test_suite(args, config, runner, real_llm_config, speed_opts):
     """Execute the test suite based on configuration"""
     if args.backend_only:
-        return execute_backend_only_tests(config, runner, real_llm_config)
+        return execute_backend_only_tests(config, runner, real_llm_config, speed_opts)
     elif args.frontend_only:
-        return execute_frontend_only_tests(config, runner)
+        return execute_frontend_only_tests(config, runner, speed_opts)
     else:
-        return execute_full_test_suite(config, runner, real_llm_config)
+        return execute_full_test_suite(config, runner, real_llm_config, speed_opts)
 
-def execute_backend_only_tests(config, runner, real_llm_config):
+def execute_backend_only_tests(config, runner, real_llm_config, speed_opts):
     """Execute backend-only tests"""
     backend_exit, _ = runner.run_backend_tests(
         config['backend_args'], 
         config.get('timeout', 300),
-        real_llm_config
+        real_llm_config,
+        speed_opts
     )
     runner.results["frontend"]["status"] = "skipped"
     return backend_exit
 
-def execute_frontend_only_tests(config, runner):
+def execute_frontend_only_tests(config, runner, speed_opts):
     """Execute frontend-only tests"""
     frontend_exit, _ = runner.run_frontend_tests(
         config['frontend_args'],
-        config.get('timeout', 300)  
+        config.get('timeout', 300),
+        speed_opts
     )
     runner.results["backend"]["status"] = "skipped"
     return frontend_exit
 
-def execute_full_test_suite(config, runner, real_llm_config):
+def execute_full_test_suite(config, runner, real_llm_config, speed_opts):
     """Execute full test suite (backend + frontend + E2E)"""
     if config.get('run_both', True):
         backend_exit, _ = runner.run_backend_tests(
             config['backend_args'],
             config.get('timeout', 300),
-            real_llm_config
+            real_llm_config,
+            speed_opts
         )
         frontend_exit, _ = runner.run_frontend_tests(
             config['frontend_args'], 
-            config.get('timeout', 300)
+            config.get('timeout', 300),
+            speed_opts
         )
         exit_code = max(backend_exit, frontend_exit)
         if config.get('run_e2e', False):
@@ -633,7 +695,7 @@ def execute_full_test_suite(config, runner, real_llm_config):
             exit_code = max(exit_code, e2e_exit)
         return exit_code
     else:
-        return execute_backend_only_tests(config, runner, real_llm_config)
+        return execute_backend_only_tests(config, runner, real_llm_config, speed_opts)
 
 def finalize_test_run(runner, level, config, output, exit_code):
     """Finalize test run with reporting and cleanup"""

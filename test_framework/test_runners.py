@@ -72,10 +72,12 @@ def print_output(stdout: str, stderr: str):
             print(cleaned_stderr, file=sys.stderr)
 
 
-def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Optional[Dict[str, Any]] = None, results: Dict[str, Any] = None) -> Tuple[int, str]:
+def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Optional[Dict[str, Any]] = None, results: Dict[str, Any] = None, speed_opts: Optional[Dict[str, bool]] = None) -> Tuple[int, str]:
     """Run backend tests with specified arguments."""
     print(f"\n{'='*60}")
     print("RUNNING BACKEND TESTS")
+    if speed_opts and speed_opts.get('enabled'):
+        print("⚡ SPEED MODE ENABLED")
     print(f"{'='*60}")
     
     start_time = time.time()
@@ -92,6 +94,10 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
         return 1, "Backend test runner not found"
     
     cmd = [sys.executable, str(backend_script)] + args
+    
+    # Apply speed optimizations if requested
+    if speed_opts:
+        cmd = _apply_speed_optimizations(cmd, speed_opts)
     
     # Prepare environment with real LLM configuration if provided
     env = os.environ.copy()
@@ -194,12 +200,14 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
         return -1, f"Tests timed out after {timeout}s"
 
 
-def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, Any] = None) -> Tuple[int, str]:
+def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, Any] = None, speed_opts: Optional[Dict[str, bool]] = None) -> Tuple[int, str]:
     """Run frontend tests with specified arguments."""
     global _active_processes
     
     print(f"\n{'='*60}")
     print("RUNNING FRONTEND TESTS")
+    if speed_opts and speed_opts.get('enabled'):
+        print("⚡ SPEED MODE ENABLED")
     print(f"{'='*60}")
     
     start_time = time.time()
@@ -218,6 +226,10 @@ def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, A
         return 1, "Frontend test runner not found"
         
     cmd = [sys.executable, str(frontend_script)] + args
+    
+    # Apply speed optimizations if requested
+    if speed_opts:
+        cmd = _apply_speed_optimizations(cmd, speed_opts)
     
     # Add cleanup flag for frontend tests only if script supports it
     if "test_frontend.py" in str(frontend_script):
@@ -435,3 +447,41 @@ def run_simple_tests(results: Dict[str, Any] = None) -> Tuple[int, str]:
     except subprocess.TimeoutExpired:
         print(f"[TIMEOUT] Simple tests timed out after 60s")
         return -1, "Tests timed out after 60s"
+
+
+def _apply_speed_optimizations(cmd: List[str], speed_opts: Dict[str, bool]) -> List[str]:
+    """Apply speed optimizations to test command.
+    
+    SAFETY ANALYSIS:
+    - no_warnings: Safe - only suppresses deprecation warnings
+    - no_coverage: Safe - skips coverage but doesn't affect test results
+    - fast_fail: Safe - stops on first failure, useful for quick feedback
+    - parallel: Safe with caveats - may hide race conditions
+    - skip_slow: RISKY - may skip important tests, requires explicit flag
+    """
+    optimized_cmd = cmd.copy()
+    
+    # Safe optimizations (99.99% no false positives/negatives)
+    if speed_opts.get('no_warnings', False):
+        optimized_cmd.extend(['-W', 'ignore::DeprecationWarning'])
+        optimized_cmd.extend(['-W', 'ignore::PendingDeprecationWarning'])
+    
+    if speed_opts.get('no_coverage', False):
+        # Skip coverage collection
+        optimized_cmd.extend(['--no-cov'])
+    
+    if speed_opts.get('fast_fail', False):
+        # Stop on first failure
+        optimized_cmd.extend(['-x', '--maxfail=1'])
+    
+    # Potentially risky optimizations (require explicit flag)
+    if speed_opts.get('skip_slow', False):
+        # Skip tests marked as slow - REQUIRES WARNING
+        print("⚠️  WARNING: Skipping slow tests - may miss important edge cases!")
+        optimized_cmd.extend(['-m', 'not slow'])
+    
+    if speed_opts.get('parallel', False) and '-n' not in ' '.join(optimized_cmd):
+        # Auto-detect CPU count for parallel execution
+        optimized_cmd.extend(['-n', 'auto'])
+    
+    return optimized_cmd

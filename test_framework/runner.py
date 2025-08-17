@@ -50,15 +50,15 @@ class UnifiedTestRunner:
         self._setup_directories()
         self.staging_mode = False
     
-    def run_backend_tests(self, args: List[str], timeout: int = 300, real_llm_config: Optional[Dict] = None) -> Tuple[int, str]:
+    def run_backend_tests(self, args: List[str], timeout: int = 300, real_llm_config: Optional[Dict] = None, speed_opts: Optional[Dict] = None) -> Tuple[int, str]:
         """Run backend tests and update results."""
-        exit_code, output = run_backend_tests(args, timeout, real_llm_config, self.results)
+        exit_code, output = run_backend_tests(args, timeout, real_llm_config, self.results, speed_opts)
         self._handle_test_failures(exit_code, output, "backend")
         return exit_code, output
     
-    def run_frontend_tests(self, args: List[str], timeout: int = 300) -> Tuple[int, str]:
+    def run_frontend_tests(self, args: List[str], timeout: int = 300, speed_opts: Optional[Dict] = None) -> Tuple[int, str]:
         """Run frontend tests and update results."""
-        exit_code, output = run_frontend_tests(args, timeout, self.results)
+        exit_code, output = run_frontend_tests(args, timeout, self.results, speed_opts)
         self._handle_test_failures(exit_code, output, "frontend")
         return exit_code, output
     

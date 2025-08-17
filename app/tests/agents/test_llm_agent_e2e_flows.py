@@ -29,57 +29,18 @@ from .fixtures.llm_agent_fixtures import (
 async def test_concurrent_request_handling(mock_db_session, mock_llm_manager,
                                           mock_websocket_manager, mock_tool_dispatcher):
     """Test handling multiple concurrent requests"""
-    # Create a proper mock that matches the expected interface
-    mock_persistence = AsyncMock()
-    
-    # Mock the save_agent_state to handle both interfaces
-    async def mock_save_agent_state(*args, **kwargs):
-        if len(args) == 2:  # (request, session) signature
-            return (True, "test_id")
-        elif len(args) == 5:  # (run_id, thread_id, user_id, state, db_session) signature
-            return True
-        else:
-            return (True, "test_id")
-    
-    mock_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
-    mock_persistence.load_agent_state = AsyncMock(return_value=None)
-    mock_persistence.get_thread_context = AsyncMock(return_value=None)
-    mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
+    mock_persistence = _create_concurrent_persistence_mock()
     
     with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
-        # Create multiple supervisors for concurrent requests
-        supervisors = []
-        for i in range(5):
-            supervisor = SupervisorAgent(
-                mock_db_session,
-                mock_llm_manager,
-                mock_websocket_manager,
-                mock_tool_dispatcher
-            )
-            supervisor.thread_id = str(uuid.uuid4())
-            supervisor.user_id = str(uuid.uuid4())
-            supervisor.engine.execute_pipeline = AsyncMock(return_value=[])
-            supervisor.state_persistence = mock_persistence
-            supervisors.append(supervisor)
+        supervisors = _create_concurrent_supervisors(
+            mock_db_session, mock_llm_manager, mock_websocket_manager, 
+            mock_tool_dispatcher, mock_persistence
+        )
         
-        # Run concurrent requests
-        tasks = [
-            supervisor.run(
-                f"Request {i}",
-                supervisor.thread_id,
-                supervisor.user_id,
-                str(uuid.uuid4())
-            )
-            for i, supervisor in enumerate(supervisors)
-        ]
-        
+        tasks = _create_concurrent_tasks(supervisors)
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
-        # Verify all completed
-        assert len(results) == 5
-        for result in results:
-            if not isinstance(result, Exception):
-                assert isinstance(result, DeepAgentState)
+        _verify_concurrent_results(results)
 
 
 async def execute_optimization_flow(supervisor):
@@ -100,80 +61,18 @@ def verify_optimization_flow(state, supervisor):
 
 async def test_end_to_end_optimization_flow():
     """Test complete end-to-end optimization flow"""
-    # Create full mock infrastructure
-    db_session = AsyncMock(spec=AsyncSession)
-    llm_manager = Mock(spec=LLMManager)
-    ws_manager = Mock()
+    # Create infrastructure and setup responses
+    infrastructure = _create_e2e_test_infrastructure()
+    _setup_e2e_llm_responses(infrastructure['llm_manager'])
+    _setup_e2e_websocket(infrastructure['ws_manager'])
     
-    # Setup LLM responses for full flow
-    responses = [
-        # Triage response
-        {"category": "optimization", "requires_analysis": True},
-        # Analysis response
-        {"bottleneck": "memory", "utilization": 0.95},
-        # Optimization response
-        {"recommendations": ["Use gradient checkpointing", "Reduce batch size"]}
-    ]
+    # Create and configure supervisor
+    supervisor = _create_e2e_supervisor(infrastructure)
+    _configure_e2e_pipeline(supervisor)
     
-    response_index = 0
-    async def mock_structured_llm(*args, **kwargs):
-        nonlocal response_index
-        result = responses[response_index]
-        response_index += 1
-        return result
-    
-    llm_manager.ask_structured_llm = AsyncMock(side_effect=mock_structured_llm)
-    llm_manager.call_llm = AsyncMock(return_value={"content": "Optimization complete"})
-    
-    ws_manager.send_message = AsyncMock()
-    
-    # Create supervisor with mocked dependencies
-    # Create a proper mock that matches the expected interface
-    mock_persistence = AsyncMock()
-    
-    # Mock the save_agent_state to handle both interfaces
-    async def mock_save_agent_state(*args, **kwargs):
-        if len(args) == 2:  # (request, session) signature
-            return (True, "test_id")
-        elif len(args) == 5:  # (run_id, thread_id, user_id, state, db_session) signature
-            return True
-        else:
-            return (True, "test_id")
-    
-    mock_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
-    mock_persistence.load_agent_state = AsyncMock(return_value=None)
-    mock_persistence.get_thread_context = AsyncMock(return_value=None)
-    mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
-    
-    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
-        from app.agents.tool_dispatcher import ToolDispatcher
-        dispatcher = Mock(spec=ToolDispatcher)
-        dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
-        
-        supervisor = SupervisorAgent(db_session, llm_manager, ws_manager, dispatcher)
-        supervisor.thread_id = str(uuid.uuid4())
-        supervisor.user_id = str(uuid.uuid4())
-        supervisor.state_persistence = mock_persistence
-        
-        # Mock pipeline execution with proper result structure
-        from app.agents.supervisor.execution_context import AgentExecutionResult
-        supervisor.engine.execute_pipeline = AsyncMock(return_value=[
-            AgentExecutionResult(success=True, state=None),
-            AgentExecutionResult(success=True, state=None),
-            AgentExecutionResult(success=True, state=None)
-        ])
-        
-        # Run full flow
-        state = await supervisor.run(
-            "Optimize my LLM workload for better memory usage",
-            supervisor.thread_id,
-            supervisor.user_id,
-            str(uuid.uuid4())
-        )
-        
-        # Verify complete flow
-        assert state is not None
-        assert supervisor.engine.execute_pipeline.called
+    # Execute and verify flow
+    state = await _execute_e2e_flow(supervisor)
+    _verify_e2e_flow_completion(state, supervisor)
 
 
 async def test_complex_multi_step_flow():
@@ -229,35 +128,194 @@ async def test_flow_performance_benchmarks():
     performance_metrics = []
     
     for concurrency_level in [1, 3, 5]:
-        start_time = time.time()
-        
-        # Create concurrent flows
-        tasks = []
-        for i in range(concurrency_level):
-            db_session, llm_manager, ws_manager = create_mock_infrastructure()
-            setup_llm_responses(llm_manager)
-            
-            mock_persistence = AsyncMock()
-            mock_persistence.save_agent_state = AsyncMock(return_value=(True, f"test_id_{i}"))
-            mock_persistence.load_agent_state = AsyncMock(return_value=None)
-            
-            supervisor = create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)
-            tasks.append(execute_optimization_flow(supervisor))
-        
-        # Execute all tasks
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        execution_time = time.time() - start_time
-        
-        performance_metrics.append({
-            "concurrency": concurrency_level,
-            "execution_time": execution_time,
-            "success_rate": len([r for r in results if not isinstance(r, Exception)]) / len(results)
-        })
+        metrics = await _run_concurrency_benchmark(concurrency_level)
+        performance_metrics.append(metrics)
     
-    # Verify performance is reasonable
+    _verify_performance_requirements(performance_metrics)
+
+
+def _create_concurrent_persistence_mock():
+    """Create persistence mock for concurrent testing"""
+    mock_persistence = AsyncMock()
+    
+    async def mock_save_agent_state(*args, **kwargs):
+        if len(args) == 2:
+            return (True, "test_id")
+        elif len(args) == 5:
+            return True
+        else:
+            return (True, "test_id")
+    
+    mock_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
+    mock_persistence.load_agent_state = AsyncMock(return_value=None)
+    mock_persistence.get_thread_context = AsyncMock(return_value=None)
+    mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
+    return mock_persistence
+
+
+def _create_concurrent_supervisors(mock_db_session, mock_llm_manager, 
+                                  mock_websocket_manager, mock_tool_dispatcher, mock_persistence):
+    """Create supervisors for concurrent testing"""
+    supervisors = []
+    for i in range(5):
+        supervisor = SupervisorAgent(
+            mock_db_session, mock_llm_manager, 
+            mock_websocket_manager, mock_tool_dispatcher
+        )
+        supervisor.thread_id = str(uuid.uuid4())
+        supervisor.user_id = str(uuid.uuid4())
+        supervisor.engine.execute_pipeline = AsyncMock(return_value=[])
+        supervisor.state_persistence = mock_persistence
+        supervisors.append(supervisor)
+    return supervisors
+
+
+def _create_concurrent_tasks(supervisors):
+    """Create concurrent execution tasks"""
+    return [
+        supervisor.run(
+            f"Request {i}", supervisor.thread_id,
+            supervisor.user_id, str(uuid.uuid4())
+        )
+        for i, supervisor in enumerate(supervisors)
+    ]
+
+
+def _verify_concurrent_results(results):
+    """Verify concurrent execution results"""
+    assert len(results) == 5
+    for result in results:
+        if not isinstance(result, Exception):
+            assert isinstance(result, DeepAgentState)
+
+
+def _create_e2e_test_infrastructure():
+    """Create infrastructure for E2E testing"""
+    return {
+        'db_session': AsyncMock(spec=AsyncSession),
+        'llm_manager': Mock(spec=LLMManager),
+        'ws_manager': Mock()
+    }
+
+
+def _setup_e2e_llm_responses(llm_manager):
+    """Setup LLM responses for E2E flow"""
+    responses = [
+        {"category": "optimization", "requires_analysis": True},
+        {"bottleneck": "memory", "utilization": 0.95},
+        {"recommendations": ["Use gradient checkpointing", "Reduce batch size"]}
+    ]
+    
+    response_index = 0
+    async def mock_structured_llm(*args, **kwargs):
+        nonlocal response_index
+        result = responses[response_index]
+        response_index += 1
+        return result
+    
+    llm_manager.ask_structured_llm = AsyncMock(side_effect=mock_structured_llm)
+    llm_manager.call_llm = AsyncMock(return_value={"content": "Optimization complete"})
+
+
+def _setup_e2e_websocket(ws_manager):
+    """Setup WebSocket for E2E testing"""
+    ws_manager.send_message = AsyncMock()
+
+
+def _create_e2e_supervisor(infrastructure):
+    """Create supervisor for E2E testing"""
+    mock_persistence = AsyncMock()
+    
+    async def mock_save_agent_state(*args, **kwargs):
+        if len(args) == 2:
+            return (True, "test_id")
+        elif len(args) == 5:
+            return True
+        else:
+            return (True, "test_id")
+    
+    mock_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
+    mock_persistence.load_agent_state = AsyncMock(return_value=None)
+    mock_persistence.get_thread_context = AsyncMock(return_value=None)
+    mock_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
+    
+    with patch('app.agents.supervisor_consolidated.state_persistence_service', mock_persistence):
+        from app.agents.tool_dispatcher import ToolDispatcher
+        dispatcher = Mock(spec=ToolDispatcher)
+        dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
+        
+        supervisor = SupervisorAgent(
+            infrastructure['db_session'], infrastructure['llm_manager'],
+            infrastructure['ws_manager'], dispatcher
+        )
+        supervisor.thread_id = str(uuid.uuid4())
+        supervisor.user_id = str(uuid.uuid4())
+        supervisor.state_persistence = mock_persistence
+        return supervisor
+
+
+def _configure_e2e_pipeline(supervisor):
+    """Configure supervisor pipeline for E2E testing"""
+    from app.agents.supervisor.execution_context import AgentExecutionResult
+    supervisor.engine.execute_pipeline = AsyncMock(return_value=[
+        AgentExecutionResult(success=True, state=None),
+        AgentExecutionResult(success=True, state=None),
+        AgentExecutionResult(success=True, state=None)
+    ])
+
+
+async def _execute_e2e_flow(supervisor):
+    """Execute E2E optimization flow"""
+    return await supervisor.run(
+        "Optimize my LLM workload for better memory usage",
+        supervisor.thread_id,
+        supervisor.user_id,
+        str(uuid.uuid4())
+    )
+
+
+def _verify_e2e_flow_completion(state, supervisor):
+    """Verify E2E flow completion"""
+    assert state is not None
+    assert supervisor.engine.execute_pipeline.called
+
+
+async def _run_concurrency_benchmark(concurrency_level):
+    """Run concurrency benchmark for given level"""
+    start_time = time.time()
+    
+    tasks = _create_benchmark_tasks(concurrency_level)
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    execution_time = time.time() - start_time
+    
+    return {
+        "concurrency": concurrency_level,
+        "execution_time": execution_time,
+        "success_rate": len([r for r in results if not isinstance(r, Exception)]) / len(results)
+    }
+
+
+def _create_benchmark_tasks(concurrency_level):
+    """Create benchmark tasks for performance testing"""
+    tasks = []
+    for i in range(concurrency_level):
+        db_session, llm_manager, ws_manager = create_mock_infrastructure()
+        setup_llm_responses(llm_manager)
+        
+        mock_persistence = AsyncMock()
+        mock_persistence.save_agent_state = AsyncMock(return_value=(True, f"test_id_{i}"))
+        mock_persistence.load_agent_state = AsyncMock(return_value=None)
+        
+        supervisor = create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence)
+        tasks.append(execute_optimization_flow(supervisor))
+    return tasks
+
+
+def _verify_performance_requirements(performance_metrics):
+    """Verify performance metrics meet requirements"""
     for metric in performance_metrics:
-        assert metric["execution_time"] < 5.0  # Should complete within 5 seconds
-        assert metric["success_rate"] >= 0.8  # At least 80% success rate
+        assert metric["execution_time"] < 5.0
+        assert metric["success_rate"] >= 0.8
 
 
 if __name__ == "__main__":
