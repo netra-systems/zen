@@ -22,12 +22,6 @@ from .alert_models import AlertLevel, NotificationChannel, AlertRule, Alert
 from .alert_evaluator import AlertEvaluator  
 from .alert_notifications import NotificationDeliveryManager
 
-# Backward compatibility - import from legacy performance_monitor for gradual migration
-try:
-    from .performance_monitor import performance_monitor as legacy_performance_monitor
-except ImportError:
-    legacy_performance_monitor = None
-
 __all__ = [
     # Core monitoring
     "MetricsCollector",
@@ -51,8 +45,5 @@ __all__ = [
     "AlertRule",
     "Alert",
     "AlertEvaluator",
-    "NotificationDeliveryManager",
-    
-    # Legacy support
-    "legacy_performance_monitor"
+    "NotificationDeliveryManager"
 ]

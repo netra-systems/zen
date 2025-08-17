@@ -6,7 +6,12 @@ from datetime import datetime
 
 def parse_test_counts(output: str, component: str) -> Dict:
     """Parse test counts from pytest/jest output."""
-    counts = {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0}
+    counts = {"total": 0, "passed": 0, "failed": 0, "skipped": 0, "errors": 0, "import_errors": 0}
+    
+    # Check for import errors first
+    if "ImportError" in output or "ModuleNotFoundError" in output:
+        counts["import_errors"] = _count_import_errors(output)
+        counts["status"] = "import_error"
     
     # Track test files
     test_files = set()
@@ -57,7 +62,35 @@ def parse_test_counts(output: str, component: str) -> Dict:
     if counts["total"] == 0:
         counts["total"] = counts["passed"] + counts["failed"] + counts["skipped"] + counts["errors"]
     
+    # Set status if not already set
+    if "status" not in counts:
+        if counts["total"] == 0 and counts["import_errors"] == 0:
+            # Check for collection errors
+            if "no tests ran" in output.lower() or "collected 0 items" in output.lower():
+                counts["status"] = "no_tests"
+            else:
+                counts["status"] = "unknown"
+        elif counts["failed"] > 0 or counts["errors"] > 0:
+            counts["status"] = "failed"
+        elif counts["passed"] > 0:
+            counts["status"] = "passed"
+        else:
+            counts["status"] = "skipped"
+    
     return counts
+
+def _count_import_errors(output: str) -> int:
+    """Count import errors in output."""
+    import_errors = 0
+    lines = output.split('\n')
+    for line in lines:
+        if 'ImportError' in line or 'ModuleNotFoundError' in line:
+            import_errors += 1
+    # Count unique import error files
+    import_files = set()
+    for match in re.finditer(r'ImportError.*?["\']([^"\'\.]+)', output):
+        import_files.add(match.group(1))
+    return max(import_errors, len(import_files), 1)  # At least 1 if found
 
 def parse_coverage(output: str) -> Optional[float]:
     """Parse coverage percentage from test output."""

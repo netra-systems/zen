@@ -116,8 +116,8 @@ def get_agent_metrics_collector():
 
 def get_enhanced_health_monitor():
     """Lazy import for enhanced health monitor."""
-    from app.core.system_health_monitor_enhanced import enhanced_system_health_monitor
-    return enhanced_system_health_monitor
+    from app.core.system_health_monitor import system_health_monitor
+    return system_health_monitor
 
 def get_alert_manager():
     """Lazy import for alert manager."""
