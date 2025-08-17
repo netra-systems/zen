@@ -40,6 +40,27 @@
       </solution>
     </lesson>
     
+    <lesson id="oauth-https-redirect">
+      <problem>OAuth callback URLs using HTTP instead of HTTPS in staging environment</problem>
+      <root_cause>
+        When Cloud Run receives requests behind a proxy/load balancer, request.base_url
+        returns HTTP instead of HTTPS, causing OAuth redirect_uri mismatch
+      </root_cause>
+      <solution>
+        Force HTTPS for staging and production environments in auth routes:
+        - Updated app/routes/auth/auth.py login endpoint
+        - Updated app/routes/auth/auth.py config endpoint
+        - Check environment and replace http:// with https:// for non-dev environments
+      </solution>
+      <affected_files>
+        - app/routes/auth/auth.py
+      </affected_files>
+      <key_changes>
+        if auth_env_config.environment.value in ["staging", "production"]:
+            base_url = base_url.replace("http://", "https://")
+      </key_changes>
+    </lesson>
+    
     <lesson id="cloud-armor-issues">
       <problem>cloud-armor-ip-blocking.tf references non-existent service</problem>
       <solution>
