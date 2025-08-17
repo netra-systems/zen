@@ -106,12 +106,19 @@ class ConnectionManager:
     async def _execute_disconnection(self, user_id: str, conn_info: ConnectionInfo, 
                                    websocket: WebSocket, code: int, reason: str) -> None:
         """Execute disconnection cleanup steps."""
-        # Mark connection as closing to prevent further sends
-        conn_info.is_closing = True
-        self._remove_from_registry(user_id, conn_info)
-        self._cleanup_empty_user_list(user_id)
+        self._mark_connection_closing(conn_info)
+        self._cleanup_connection_registry(user_id, conn_info)
         await self._close_websocket_safely(websocket, code, reason)
         self._log_disconnection_stats(user_id, conn_info)
+    
+    def _mark_connection_closing(self, conn_info: ConnectionInfo) -> None:
+        """Mark connection as closing to prevent further sends."""
+        conn_info.is_closing = True
+    
+    def _cleanup_connection_registry(self, user_id: str, conn_info: ConnectionInfo) -> None:
+        """Clean up connection from registry and user lists."""
+        self._remove_from_registry(user_id, conn_info)
+        self._cleanup_empty_user_list(user_id)
     
     def _find_connection_info(self, user_id: str, websocket: WebSocket) -> Optional[ConnectionInfo]:
         """Find connection info for user and websocket."""
@@ -133,16 +140,26 @@ class ConnectionManager:
     
     async def _close_websocket_safely(self, websocket: WebSocket, code: int, reason: str) -> None:
         """Close websocket connection safely with error handling."""
-        # Only attempt to close if WebSocket is in CONNECTED state
-        # Check both client_state and application_state to be safe
         try:
-            if (hasattr(websocket, 'client_state') and 
-                websocket.client_state == WebSocketState.CONNECTED and
-                hasattr(websocket, 'application_state') and
-                websocket.application_state != WebSocketState.DISCONNECTED):
+            if self._is_websocket_safe_to_close(websocket):
                 await websocket.close(code=code, reason=reason)
         except Exception as e:
             logger.debug(f"Error closing WebSocket: {e}")
+    
+    def _is_websocket_safe_to_close(self, websocket: WebSocket) -> bool:
+        """Check if websocket is safe to close."""
+        return (self._has_valid_client_state(websocket) and 
+                self._has_valid_application_state(websocket))
+    
+    def _has_valid_client_state(self, websocket: WebSocket) -> bool:
+        """Check if websocket has valid client state for closing."""
+        return (hasattr(websocket, 'client_state') and 
+                websocket.client_state == WebSocketState.CONNECTED)
+    
+    def _has_valid_application_state(self, websocket: WebSocket) -> bool:
+        """Check if websocket has valid application state for closing."""
+        return (hasattr(websocket, 'application_state') and
+                websocket.application_state != WebSocketState.DISCONNECTED)
     
     def _log_disconnection_stats(self, user_id: str, conn_info: ConnectionInfo) -> None:
         """Log disconnection with statistics."""

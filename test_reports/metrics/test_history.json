@@ -507,6 +507,130 @@
         "skipped": 23,
         "errors": 0
       }
+    },
+    {
+      "timestamp": "2025-08-16T21:26:20.412364",
+      "level": "real_e2e",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 10.689572095870972,
+          "exit_code": 1,
+          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -vv -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -k real_ or _real\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\n\u001b[1mcollecting ... \u001b[0mcollected 2701 items / 1 error / 1 skipped\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m_____ ERROR collecting tests/services/test_circuit_breaker_integration.py _____\u001b[0m\n\u001b[31mImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_circuit_breaker_integration.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_circuit_breaker_integration.py:16: in <module>\n    from app.db.client import ResilientDatabaseClient\napp\\db\\client.py:13: in <module>\n    from .client_postgres import (\nE   ImportError: cannot import name 'SessionManager' from 'app.db.client_postgres' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\db\\client_postgres.py)\u001b[0m\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_circuit_breaker_integration.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n\u001b[31m========================= \u001b[33m1 skipped\u001b[0m, \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 4.16s\u001b[0m\u001b[31m =========================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 1 after 9.50s\n================================================================================\n\n--- Logging error in Loguru Handler #7 ---\nRecord was: {'elapsed': datetime.timedelta(seconds=7, microseconds=732605), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\\\Users\\\\antho\\\\miniconda3\\\\Lib\\\\logging\\\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\\u2139\\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=5740, name='MainProcess'), 'thread': (id=27548, name='MainThread'), 'time': datetime(2025, 8, 16, 21, 26, 19, 542778, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}\nTraceback (most recent call last):\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\loguru\\_handler.py\", line 315, in _queued_writer\n    self._sink.write(message)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\loguru\\_simple_sinks.py\", line 16, in write\n    self._stream.write(message)\nValueError: I/O operation on closed file.\n--- End of logging error ---\n",
+          "test_counts": {
+            "total": 2,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 1,
+            "errors": 1,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "skipped",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755404769.6835096,
+          "end_time": 1755404780.375588
+        }
+      },
+      "summary": {
+        "total": 2,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 1,
+        "errors": 1
+      }
+    },
+    {
+      "timestamp": "2025-08-16T21:28:57.575198",
+      "level": "real_e2e",
+      "results": {
+        "backend": {
+          "status": "failed",
+          "duration": 13.635833978652954,
+          "exit_code": 1,
+          "output": "Loaded test environment from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env.test\n================================================================================\nNETRA AI PLATFORM - BACKEND TEST RUNNER\n================================================================================\nTest Configuration:\n  Category: all\n  Parallel: disabled\n  Coverage: disabled\n  Fail Fast: enabled\n  Environment: testing\n\nRunning command:\n  pytest app/tests tests integration_tests -vv -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -k real_ or _real\n================================================================================\n\u001b[1m============================= test session starts =============================\u001b[0m\nplatform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\antho\\miniconda3\\python.exe\ncachedir: .pytest_cache\nmetadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}\nrootdir: C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\nconfigfile: pytest.ini\nplugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4\nasyncio: mode=Mode.AUTO\n\u001b[1mcollecting ... \u001b[0mcollected 3938 items / 1 error / 1 skipped\n\n=================================== ERRORS ====================================\n\u001b[31m\u001b[1m___ ERROR collecting tests/services/test_websocket_broadcast_mechanisms.py ____\u001b[0m\n\u001b[31mImportError while importing test module 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_websocket_broadcast_mechanisms.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\python.py:498: in importtestmodule\n    mod = import_path(\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\pathlib.py:587: in import_path\n    importlib.import_module(module_name)\n..\\..\\..\\..\\miniconda3\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n<frozen importlib._bootstrap>:1387: in _gcd_import\n    ???\n<frozen importlib._bootstrap>:1360: in _find_and_load\n    ???\n<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked\n    ???\n<frozen importlib._bootstrap>:935: in _load_unlocked\n    ???\n..\\..\\..\\..\\miniconda3\\Lib\\site-packages\\_pytest\\assertion\\rewrite.py:186: in exec_module\n    exec(co, module.__dict__)\napp\\tests\\services\\test_websocket_broadcast_mechanisms.py:10: in <module>\n    from app.services.websocket.broadcast_manager import BroadcastManager\nE   ModuleNotFoundError: No module named 'app.services.websocket.broadcast_manager'\u001b[0m\n\u001b[36m\u001b[1m=========================== short test summary info ===========================\u001b[0m\n\u001b[31mERROR\u001b[0m app\\tests\\services\\test_websocket_broadcast_mechanisms.py\n\u001b[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\u001b[0m\n\u001b[31m========================= \u001b[33m1 skipped\u001b[0m, \u001b[31m\u001b[1m1 error\u001b[0m\u001b[31m in 6.30s\u001b[0m\u001b[31m =========================\u001b[0m\n================================================================================\n[FAIL] TESTS FAILED with exit code 1 after 11.85s\n================================================================================\n\n--- Logging error in Loguru Handler #7 ---\nRecord was: {'elapsed': datetime.timedelta(seconds=10, microseconds=300635), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\\\Users\\\\antho\\\\miniconda3\\\\Lib\\\\logging\\\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\\u2139\\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=18632, name='MainProcess'), 'thread': (id=324, name='MainThread'), 'time': datetime(2025, 8, 16, 21, 28, 55, 999937, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}\nTraceback (most recent call last):\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\loguru\\_handler.py\", line 315, in _queued_writer\n    self._sink.write(message)\n  File \"C:\\Users\\antho\\miniconda3\\Lib\\site-packages\\loguru\\_simple_sinks.py\", line 16, in write\n    self._stream.write(message)\nValueError: I/O operation on closed file.\n--- End of logging error ---\n",
+          "test_counts": {
+            "total": 2,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 1,
+            "errors": 1,
+            "test_files": 0
+          },
+          "coverage": null,
+          "test_details": []
+        },
+        "frontend": {
+          "status": "skipped",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "e2e": {
+          "status": "pending",
+          "duration": 0,
+          "exit_code": null,
+          "output": "",
+          "test_counts": {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "errors": 0
+          },
+          "coverage": null
+        },
+        "overall": {
+          "status": "failed",
+          "start_time": 1755404923.8738272,
+          "end_time": 1755404937.515192
+        }
+      },
+      "summary": {
+        "total": 2,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 1,
+        "errors": 1
+      }
     }
   ],
   "flaky_tests": {},

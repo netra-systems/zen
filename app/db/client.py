@@ -10,9 +10,17 @@ This module has been refactored into focused sub-modules for maintainability.
 from .client_config import (
     DatabaseClientConfig, CircuitBreakerManager, HealthAssessment
 )
+from .client_postgres_session import (
+    SessionManager, TransactionHandler
+)
+from .client_postgres_executors import (
+    QueryExecutor, WriteExecutor, TransactionExecutor
+)
+from .client_postgres_health import (
+    PostgresHealthChecker
+)
 from .client_postgres import (
-    SessionManager, TransactionHandler, QueryExecutor, WriteExecutor,
-    TransactionExecutor, PostgresHealthChecker, ResilientDatabaseClient
+    ResilientDatabaseClient
 )
 from .client_clickhouse import (
     ClickHouseQueryExecutor, ClickHouseHealthChecker, ClickHouseDatabaseClient

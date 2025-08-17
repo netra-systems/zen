@@ -33,17 +33,13 @@ class AdaptiveCircuitBreaker:
     def _initialize_state(self) -> None:
         """Initialize circuit breaker state."""
         self.state = CircuitBreakerState.CLOSED
-        self.failure_count = 0
-        self.success_count = 0
+        self.failure_count = self.success_count = 0
         self.last_failure_time: Optional[datetime] = None
         self.last_state_change: datetime = datetime.now()
     
     def _initialize_metrics(self) -> None:
         """Initialize metrics tracking."""
-        self.total_requests = 0
-        self.successful_requests = 0
-        self.failed_requests = 0
-        self.slow_requests = 0
+        self.total_requests = self.successful_requests = self.failed_requests = self.slow_requests = 0
         self.adaptive_failure_threshold = self.config.failure_threshold
         self.recent_response_times: List[float] = []
     
@@ -52,7 +48,6 @@ class AdaptiveCircuitBreaker:
         self.last_health_check: Optional[HealthCheckResult] = None
         self.health_history: List[HealthCheckResult] = []
         self._health_check_task: Optional[asyncio.Task] = None
-        self.start_time = datetime.now().timestamp()
     
     def _start_health_monitoring(self) -> None:
         """Start background health monitoring."""
@@ -213,8 +208,7 @@ class AdaptiveCircuitBreaker:
     
     def _reset_state_counters(self) -> None:
         """Reset state counters for closed state."""
-        self.failure_count = 0
-        self.success_count = 0
+        self.failure_count = self.success_count = 0
         self.last_state_change = datetime.now()
     
     async def _health_check_loop(self) -> None:
@@ -252,9 +246,6 @@ class AdaptiveCircuitBreaker:
         """Get circuit breaker metrics."""
         return self._build_metrics_dict()
     
-    def get_status(self) -> Dict[str, Any]:
-        """Get circuit breaker status - alias for get_metrics for compatibility."""
-        return self.get_metrics()
     
     def _build_metrics_dict(self) -> Dict[str, Any]:
         """Build comprehensive metrics dictionary."""

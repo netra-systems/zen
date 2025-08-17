@@ -180,68 +180,58 @@ class AIFixGenerator:
         except Exception as e:
             return FixResult(False, "", f"Error calling GPT-4: {e}", 0, "gpt4")
             
-    def _build_prompt(self, test_file: str, error: str, context: Dict[str, str]) -> str:
-        """Build the prompt for the AI model."""
-        prompt_parts = [
+    def _add_test_and_error_sections(self, test_file: str, error: str, context: Dict[str, str]) -> List[str]:
+        """Add test file and error sections to prompt."""
+        return [
             "Fix the following test failure in the Netra AI platform.",
-            "",
-            "## Test File",
-            f"```python",
+            "", "## Test File", "```python",
             context.get("test_code", "# Test code not available"),
-            "```",
-            "",
-            "## Error",
-            "```",
-            error[:2000],  # Limit error length
-            "```",
+            "```", "", "## Error", "```",
+            error[:2000], "```"  # Limit error length
         ]
-        
-        # Add source code if available
+
+    def _add_source_code_section(self, prompt_parts: List[str], context: Dict[str, str]) -> None:
+        """Add source code section if available."""
         if "source_code" in context:
             prompt_parts.extend([
-                "",
-                "## Related Source Code",
-                "```python",
-                context["source_code"][:3000],  # Limit source length
-                "```"
+                "", "## Related Source Code", "```python",
+                context["source_code"][:3000], "```"  # Limit source length
             ])
-            
-        # Add recent changes if available
+
+    def _add_git_diff_section(self, prompt_parts: List[str], context: Dict[str, str]) -> None:
+        """Add git diff section if available."""
         if "git_diff" in context:
             prompt_parts.extend([
-                "",
-                "## Recent Changes",
-                "```diff",
-                context["git_diff"][:2000],  # Limit diff length
-                "```"
+                "", "## Recent Changes", "```diff",
+                context["git_diff"][:2000], "```"  # Limit diff length
             ])
-            
+
+    def _add_instructions_section(self, prompt_parts: List[str]) -> None:
+        """Add instructions and response format sections."""
         prompt_parts.extend([
-            "",
-            "## Instructions",
+            "", "## Instructions",
             "1. Analyze the error and identify the root cause",
             "2. Generate a minimal fix that resolves the issue",
             "3. Ensure the fix maintains the test's original intent",
-            "4. Follow the project's coding conventions",
-            "",
-            "## Response Format",
-            "Provide your response in the following format:",
-            "",
-            "FIX_START",
-            "```diff",
-            "# Your git diff patch here",
-            "```",
-            "FIX_END",
-            "",
-            "EXPLANATION_START",
-            "# Brief explanation of the fix",
-            "EXPLANATION_END",
-            "",
-            "CONFIDENCE_START",
-            "# Confidence score (0-100)",
-            "CONFIDENCE_END"
+            "4. Follow the project's coding conventions"
         ])
-        
+        self._add_response_format_section(prompt_parts)
+
+    def _add_response_format_section(self, prompt_parts: List[str]) -> None:
+        """Add response format section to prompt."""
+        prompt_parts.extend([
+            "", "## Response Format", "Provide your response in the following format:",
+            "", "FIX_START", "```diff", "# Your git diff patch here", "```", "FIX_END",
+            "", "EXPLANATION_START", "# Brief explanation of the fix", "EXPLANATION_END",
+            "", "CONFIDENCE_START", "# Confidence score (0-100)", "CONFIDENCE_END"
+        ])
+
+    def _build_prompt(self, test_file: str, error: str, context: Dict[str, str]) -> str:
+        """Build the prompt for the AI model."""
+        prompt_parts = self._add_test_and_error_sections(test_file, error, context)
+        self._add_source_code_section(prompt_parts, context)
+        self._add_git_diff_section(prompt_parts, context)
+        self._add_instructions_section(prompt_parts)
         return "\n".join(prompt_parts)
         
     def _parse_fix_response(self, content: str) -> tuple[str, str, float]:
