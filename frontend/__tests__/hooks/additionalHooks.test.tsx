@@ -143,7 +143,13 @@ describe('test_useDemoWebSocket_connection', () => {
     
     // Should not send since not connected
     expect(mockWebSocketInstance.send).not.toHaveBeenCalled();
-    expect(consoleErrorSpy).toHaveBeenCalledWith('WebSocket is not connected');
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('"message":"WebSocket is not connected"'),
+      expect.objectContaining({
+        component: 'useDemoWebSocket',
+        action: 'send_failed_not_connected'
+      })
+    );
     expect(result.current.error).toBeTruthy();
     
     // Clear mocks before continuing

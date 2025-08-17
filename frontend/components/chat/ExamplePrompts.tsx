@@ -32,7 +32,7 @@ export const ExamplePrompts: React.FC = () => {
     addMessage(userMessage);
     
     // Send message via WebSocket
-    sendMessage({ type: 'user_message', payload: { text: prompt, references: [] } });
+    sendMessage({ type: 'user_message', payload: { content: prompt, references: [] } });
     setProcessing(true);
     setIsOpen(false); // Collapse the panel after sending a prompt
   };

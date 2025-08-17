@@ -1,10 +1,12 @@
 from sqlalchemy import text
-from fastapi import APIRouter, HTTPException
-from app.db.postgres import get_async_db as get_db, async_engine
+from fastapi import APIRouter, HTTPException, Depends
+from app.db.postgres import async_engine
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.logging_config import central_logger
 from app.services.database_env_service import DatabaseEnvironmentValidator
 from app.services.schema_validation_service import SchemaValidationService
 from app.config import settings
+from app.dependencies import get_db_dependency
 
 import asyncio
 from typing import Dict, Any
@@ -26,37 +28,45 @@ async def live() -> Dict[str, str]:
     """
     return {"status": "healthy", "service": "netra-ai-platform"}
 
+async def _check_postgres_connection(db: AsyncSession) -> None:
+    """Check Postgres database connection."""
+    import os
+    database_url = os.getenv("DATABASE_URL", "")
+    if "mock" not in database_url.lower():
+        result = await db.execute(text("SELECT 1"))
+        result.scalar_one_or_none()
+
+async def _check_clickhouse_connection() -> None:
+    """Check ClickHouse database connection."""
+    import os
+    if os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() != 'true':
+        await _perform_clickhouse_check()
+
+async def _perform_clickhouse_check() -> None:
+    """Perform the actual ClickHouse connection check."""
+    try:
+        from app.db.clickhouse import get_clickhouse_client
+        async with get_clickhouse_client() as client:
+            client.ping()
+    except Exception as e:
+        await _handle_clickhouse_error(e)
+
+async def _handle_clickhouse_error(error: Exception) -> None:
+    """Handle ClickHouse connection errors."""
+    logger.warning(f"ClickHouse check failed (non-critical): {error}")
+    if settings.environment == "staging":
+        logger.info("Ignoring ClickHouse failure in staging environment")
+    else:
+        raise
+
 @router.get("/ready")
-async def ready() -> Dict[str, str]:
+async def ready(db: AsyncSession = Depends(get_db_dependency)) -> Dict[str, str]:
     """
     Readiness probe to check if the application is ready to serve requests.
     """
-    import os
-    
     try:
-        # Skip database check if in mock mode
-        database_url = os.getenv("DATABASE_URL", "")
-        if "mock" not in database_url.lower():
-            # Check Postgres connection
-            async with get_db() as db:
-                result = await db.execute(text("SELECT 1"))
-                result.scalar_one_or_none()
-
-        # Check ClickHouse connection only if not explicitly skipped
-        if os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() != 'true':
-            try:
-                from app.db.clickhouse import get_clickhouse_client
-                async with get_clickhouse_client() as client:
-                    client.ping()
-            except Exception as e:
-                logger.warning(f"ClickHouse check failed (non-critical): {e}")
-                # Don't fail readiness if ClickHouse is not available in staging
-                if settings.environment == "staging":
-                    logger.info("Ignoring ClickHouse failure in staging environment")
-                else:
-                    raise
-
-        # If all checks pass, return a success response
+        await _check_postgres_connection(db)
+        await _check_clickhouse_connection()
         return {"status": "ready", "service": "netra-ai-platform"}
     except Exception as e:
         logger.error(f"Readiness probe failed: {e}")

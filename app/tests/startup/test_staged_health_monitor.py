@@ -216,9 +216,10 @@ class TestMonitoringLifecycle:
         health_monitor._monitoring_tasks = {"service1": mock_task1, "service2": mock_task2}
         health_monitor._running = True
         
-        with patch('asyncio.gather') as mock_gather:
-            mock_gather.return_value = None
-            
+        async def mock_gather_func(*args, **kwargs):
+            return []
+        
+        with patch('asyncio.gather', side_effect=mock_gather_func):
             await health_monitor.stop_monitoring()
             
             assert health_monitor._running is False

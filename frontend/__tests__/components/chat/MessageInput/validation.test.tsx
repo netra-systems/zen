@@ -63,7 +63,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
   describe('Input validation and sanitization', () => {
     it('should trim whitespace from messages before sending', async () => {
       render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i);
+      const textarea = screen.getByPlaceholderText(/Type a message\.\.\./i);
       
       await userEvent.type(textarea, '  Hello World  ');
       await userEvent.type(textarea, '{enter}');
@@ -72,7 +72,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
         expect(mockSendMessage).toHaveBeenCalledWith({
           type: 'user_message',
           payload: {
-            text: 'Hello World',
+            content: 'Hello World',
             references: [],
             thread_id: 'thread-1'
           }
@@ -82,7 +82,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
 
     it('should not send empty messages', async () => {
       render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i);
+      const textarea = screen.getByPlaceholderText(/Type a message\.\.\./i);
       
       await userEvent.type(textarea, '   ');
       await userEvent.type(textarea, '{enter}');
@@ -128,7 +128,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
 
     it('should sanitize HTML in messages', async () => {
       render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i);
+      const textarea = screen.getByPlaceholderText(/Type a message\.\.\./i);
       
       const htmlContent = '<script>alert("XSS")</script>Hello';
       await userEvent.type(textarea, htmlContent);
@@ -138,7 +138,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
         expect(mockSendMessage).toHaveBeenCalledWith({
           type: 'user_message',
           payload: {
-            text: htmlContent, // Component sends raw text, sanitization happens on display
+            content: htmlContent, // Component sends raw text, sanitization happens on display
             references: [],
             thread_id: 'thread-1'
           }
@@ -148,7 +148,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
 
     it('should handle special characters correctly', async () => {
       render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i);
+      const textarea = screen.getByPlaceholderText(/Type a message\.\.\./i);
       
       // Use fireEvent for special characters to avoid userEvent parsing issues with brackets
       const specialChars = '!@#$%^&*()_+-=[]{}|;\':\",./<>?`~';
@@ -159,7 +159,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
         expect(mockSendMessage).toHaveBeenCalledWith(
           expect.objectContaining({
             payload: expect.objectContaining({
-              text: specialChars
+              content: specialChars
             })
           })
         );
@@ -168,7 +168,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
 
     it('should handle unicode and emoji characters', async () => {
       render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i);
+      const textarea = screen.getByPlaceholderText(/Type a message\.\.\./i);
       
       const unicodeText = '你好世界 🌍 مرحبا بالعالم';
       await userEvent.type(textarea, unicodeText);
@@ -178,7 +178,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
         expect(mockSendMessage).toHaveBeenCalledWith({
           type: 'user_message',
           payload: {
-            text: unicodeText,
+            content: unicodeText,
             references: [],
             thread_id: 'thread-1'
           }
@@ -216,7 +216,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
 
     it('should handle rapid successive sends correctly', async () => {
       render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i);
+      const textarea = screen.getByPlaceholderText(/Type a message\.\.\./i);
       
       // First message
       await userEvent.type(textarea, 'Message 1');

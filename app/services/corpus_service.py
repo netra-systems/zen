@@ -133,16 +133,27 @@ class CorpusService:
         return await self._modular_service.index_with_deduplication(corpus_id, documents)
     
     # Search and relevance operations - for test compatibility  
-    async def rerank_results(self, query: str, results: List[Dict]) -> List[Dict]:
-        """Rerank search results based on relevance"""
+    async def _process_rerank_model(self) -> List[Dict]:
+        """Process using rerank model if available."""
         if hasattr(self, 'rerank_model'):
             return await self.rerank_model()
-        
-        query_terms = query.lower().split()
+        return None
+
+    async def _calculate_scores_for_results(self, results: List[Dict], query_terms: List[str]) -> List[Dict]:
+        """Calculate relevance scores for all results."""
         ranked_results = []
         for result in results:
             score = calculate_relevance_score(result, query_terms)
             ranked_results.append(prepare_ranked_result(result, score))
+        return ranked_results
+
+    async def rerank_results(self, query: str, results: List[Dict]) -> List[Dict]:
+        """Rerank search results based on relevance"""
+        model_result = await self._process_rerank_model()
+        if model_result:
+            return model_result
+        query_terms = query.lower().split()
+        ranked_results = await self._calculate_scores_for_results(results, query_terms)
         return sorted(ranked_results, key=lambda x: x.get('score', 0), reverse=True)
     
     def _calculate_relevance_score(self, result: Dict, query_terms: List[str]) -> int:
@@ -150,34 +161,40 @@ class CorpusService:
         return calculate_relevance_score(result, query_terms)
     
     # Mock operations for test compatibility
+    async def _try_modular_indexing(self, document: Dict) -> Optional[Dict]:
+        """Try indexing with modular service."""
+        return await check_modular_service_indexing(self._modular_service, document)
+
+    async def _try_fallback_indexing(self, document: Dict) -> Optional[Dict]:
+        """Try fallback document manager processing."""
+        try:
+            return await try_document_manager_processing(self._modular_service, document)
+        except Exception as e:
+            logger.warning(f"Document indexing failed: {e}")
+            return None
+
     async def index_document(self, document: Dict) -> Dict:
         """Index a single document with real vector processing."""
         validate_document_indexing_params(document)
-        
-        # Check if modular service supports indexing
-        result = await check_modular_service_indexing(self._modular_service, document)
+        result = await self._try_modular_indexing(document)
         if result:
             return result
-        
-        # Fallback to document manager processing
-        try:
-            result = await try_document_manager_processing(self._modular_service, document)
-            if result:
-                return result
-        except Exception as e:
-            logger.warning(f"Document indexing failed: {e}")
-        
+        result = await self._try_fallback_indexing(document)
+        if result:
+            return result
         raise RuntimeError("Document indexing service not available")
     
+    async def _execute_progress_callback(self, progress_callback, documents: List[Dict]) -> None:
+        """Execute progress callback if provided."""
+        if progress_callback:
+            await progress_callback(len(documents), len(documents))
+
     async def batch_index_documents(self, documents: List[Dict], 
                                    progress_callback=None) -> Dict:
         """Index multiple documents in batch with real processing."""
         validate_batch_documents(documents)
         result = await self._modular_service.batch_index_documents(documents)
-        
-        if progress_callback:
-            await progress_callback(len(documents), len(documents))
-        
+        await self._execute_progress_callback(progress_callback, documents)
         return result
     
     async def _process_single_document(self, doc: Dict) -> tuple[bool, str]:
@@ -189,44 +206,56 @@ class CorpusService:
         except Exception:
             return False, doc_id
     
-    async def batch_index_with_recovery(self, documents: List[Dict]) -> Dict:
-        """Index documents with recovery from partial failures"""
-        successful_count = 0
-        failed_count = 0
-        failed_ids = []
-        
+    async def _update_counters_for_result(self, success: bool, doc_id: str, counters: Dict) -> None:
+        """Update success/failure counters based on result."""
+        if success:
+            counters["successful"] += 1
+        else:
+            counters["failed"] += 1
+            counters["failed_ids"].append(doc_id)
+
+    async def _process_documents_with_recovery(self, documents: List[Dict]) -> Dict:
+        """Process all documents and track results."""
+        counters = {"successful": 0, "failed": 0, "failed_ids": []}
         for doc in documents:
             success, doc_id = await self._process_single_document(doc)
-            if success:
-                successful_count += 1
-            else:
-                failed_count += 1
-                failed_ids.append(doc_id)
-        
-        return {
-            "successful": successful_count,
-            "failed": failed_count, 
-            "failed_ids": failed_ids
-        }
+            await self._update_counters_for_result(success, doc_id, counters)
+        return counters
+
+    async def batch_index_with_recovery(self, documents: List[Dict]) -> Dict:
+        """Index documents with recovery from partial failures"""
+        return await self._process_documents_with_recovery(documents)
     
     async def apply_relevance_feedback(self, original_query: str, 
                                      results: List[Dict], feedback: Dict) -> str:
         """Apply relevance feedback to improve search"""
         return f"improved_{original_query}"
     
+    async def _handle_empty_filters(self) -> bool:
+        """Handle case when no filters provided."""
+        logger.debug("No filters provided, skipping filter application")
+        return True
+
+    async def _apply_modular_filters(self, filters: Dict) -> bool:
+        """Apply filters via modular service if available."""
+        if hasattr(self._modular_service, 'apply_search_filters'):
+            await self._modular_service.apply_search_filters(filters)
+            return True
+        return False
+
+    async def _store_active_filters(self, filters: Dict) -> None:
+        """Store filters for next search operation."""
+        self._active_filters = filters
+        logger.info(f"Applied filters for next search: {list(filters.keys())}")
+
     async def apply_filters(self, filters: Dict) -> None:
         """Apply search filters to corpus operations"""
         if not filters:
-            logger.debug("No filters provided, skipping filter application")
+            await self._handle_empty_filters()
             return
-        
         self._validate_filter_structure(filters)
-        
-        if hasattr(self._modular_service, 'apply_search_filters'):
-            await self._modular_service.apply_search_filters(filters)
-        else:
-            self._active_filters = filters
-            logger.info(f"Applied filters for next search: {list(filters.keys())}")
+        if not await self._apply_modular_filters(filters):
+            await self._store_active_filters(filters)
     
     def _validate_filter_structure(self, filters: Dict) -> None:
         """Validate filter structure and types"""
@@ -269,6 +298,9 @@ class CorpusService:
 
 # Legacy functions removed - migrate to async CorpusService methods
 # For backward compatibility in tests, create minimal implementations
+
+# Create module-level instance for compatibility
+corpus_service_instance = CorpusService()
 
 async def create_document(db: Session, corpus_id: str, document_data: schemas.DocumentCreate) -> Dict:
     """Create a document in the corpus with proper validation"""

@@ -25,12 +25,8 @@ logger = central_logger
 class AdminToolDispatcher(ToolDispatcher):
     """Extended tool dispatcher that includes admin tools for privileged users"""
     
-    def __init__(self, 
-                 llm_manager=None,
-                 tool_dispatcher=None,
-                 tools: List[BaseTool] = None, 
-                 db: Optional[Session] = None,
-                 user: Optional[User] = None) -> None:
+    def __init__(self, llm_manager=None, tool_dispatcher=None, tools: List[BaseTool] = None,
+                 db: Optional[Session] = None, user: Optional[User] = None) -> None:
         """Initialize the admin tool dispatcher with proper type annotations"""
         super().__init__(tools or [])
         self._setup_dispatcher_components(llm_manager, tool_dispatcher, db, user)

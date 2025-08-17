@@ -293,6 +293,12 @@ class LLMCoreOperations:
         """Stream LLM response content with heartbeat and data logging."""
         correlation_id = generate_llm_correlation_id()
         self._start_heartbeat_if_enabled(correlation_id, llm_config_name)
+        async for chunk in self._stream_with_heartbeat_cleanup(prompt, llm_config_name, correlation_id):
+            yield chunk
+    
+    async def _stream_with_heartbeat_cleanup(self, prompt: str, llm_config_name: str, 
+                                           correlation_id: str) -> AsyncIterator[str]:
+        """Stream with automatic heartbeat cleanup."""
         try:
             async for chunk in self._execute_streaming_process(prompt, llm_config_name, correlation_id):
                 yield chunk

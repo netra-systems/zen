@@ -1,11 +1,17 @@
 from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
+from datetime import datetime
 
 class ReferenceItem(BaseModel):
-    id: int
+    id: str
     name: str
+    friendly_name: str
     description: Optional[str] = None
-    url: Optional[str] = None
+    type: str
+    value: str
+    version: str
+    created_at: datetime
+    updated_at: datetime
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -17,10 +23,16 @@ class ReferenceGetResponse(BaseModel):
 
 class ReferenceCreateRequest(BaseModel):
     name: str
+    friendly_name: str
     description: Optional[str] = None
-    url: Optional[str] = None
+    type: str
+    value: str
+    version: Optional[str] = "1.0"
 
 class ReferenceUpdateRequest(BaseModel):
     name: Optional[str] = None
+    friendly_name: Optional[str] = None
     description: Optional[str] = None
-    url: Optional[str] = None
+    type: Optional[str] = None
+    value: Optional[str] = None
+    version: Optional[str] = None

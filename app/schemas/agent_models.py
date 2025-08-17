@@ -19,11 +19,25 @@ from datetime import datetime, UTC
 from pydantic import BaseModel, Field, field_validator
 import uuid
 
-# Import types only for type checking to avoid circular dependencies  
-if TYPE_CHECKING:
+# Import forward-referenced types - these are needed for model rebuild
+# Using try/except to handle missing types gracefully
+try:
     from app.agents.triage_sub_agent.models import TriageResult
+except ImportError:
+    TriageResult = None  # type: ignore
+
+try:
     from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+except ImportError:
+    DataAnalysisResponse = None  # type: ignore
+    AnomalyDetectionResponse = None  # type: ignore
+
+try:
+    from app.schemas.FinOps import WorkloadProfile
     from app.schemas.Generation import SyntheticDataResult
+except ImportError:
+    WorkloadProfile = None  # type: ignore
+    SyntheticDataResult = None  # type: ignore
 
 
 class ToolResultData(BaseModel):
@@ -53,9 +67,7 @@ class AgentMetadata(BaseModel):
         """Convert string priority to integer."""
         if v is None:
             return None
-        if isinstance(v, int):
-            return cls._clamp_priority(v)
-        return cls._parse_string_priority(v)
+        return cls._process_priority_value(v)
     
     @classmethod
     def _clamp_priority(cls, value: int) -> int:
@@ -63,12 +75,24 @@ class AgentMetadata(BaseModel):
         return max(0, min(10, value))
     
     @classmethod
+    def _process_priority_value(cls, value: Union[int, str, Any]) -> int:
+        """Process priority value based on type."""
+        if isinstance(value, int):
+            return cls._clamp_priority(value)
+        return cls._parse_string_priority(value)
+    
+    @classmethod
     def _parse_string_priority(cls, value: Union[str, Any]) -> int:
         """Parse string priority to integer."""
         if isinstance(value, str):
-            priority_map = {'low': 3, 'medium': 5, 'high': 8, 'urgent': 10}
-            return priority_map.get(value.lower(), 5)
+            return cls._get_priority_from_map(value)
         return 5
+    
+    @classmethod
+    def _get_priority_from_map(cls, value: str) -> int:
+        """Get priority value from string mapping."""
+        priority_map = {'low': 3, 'medium': 5, 'high': 8, 'urgent': 10}
+        return priority_map.get(value.lower(), 5)
     
     def update_timestamp(self) -> 'AgentMetadata':
         """Update the last updated timestamp."""
@@ -92,12 +116,12 @@ class DeepAgentState(BaseModel):
     user_id: Optional[str] = None
     
     # Strongly typed result fields with proper type unions
-    triage_result: Optional["TriageResult"] = None
-    data_result: Optional[Union["DataAnalysisResponse", "AnomalyDetectionResponse"]] = None
+    triage_result: Optional[TriageResult] = None
+    data_result: Optional[Union[DataAnalysisResponse, AnomalyDetectionResponse]] = None
     optimizations_result: Optional[Any] = None  # Will be strongly typed when OptimizationsResult is moved to schemas
     action_plan_result: Optional[Any] = None    # Will be strongly typed when ActionPlanResult is moved to schemas
     report_result: Optional[Any] = None         # Will be strongly typed when ReportResult is moved to schemas
-    synthetic_data_result: Optional["SyntheticDataResult"] = None
+    synthetic_data_result: Optional[SyntheticDataResult] = None
     supply_research_result: Optional[Any] = None # Will be strongly typed when SupplyResearchResult is moved to schemas
     corpus_admin_result: Optional[Any] = None
     
@@ -195,9 +219,13 @@ class DeepAgentState(BaseModel):
         """Create merged metadata object."""
         merged_custom = self._merge_custom_fields(other_state)
         merged_context = self._merge_execution_context(other_state)
+        return self._build_metadata_object(merged_context, merged_custom)
+    
+    def _build_metadata_object(self, context: Dict[str, str], custom: Dict[str, str]) -> AgentMetadata:
+        """Build AgentMetadata object from merged data."""
         return AgentMetadata(
-            execution_context=merged_context,
-            custom_fields=merged_custom
+            execution_context=context,
+            custom_fields=custom
         )
     
     def _merge_agent_results(self, other_state: 'DeepAgentState') -> Dict[str, Any]:
@@ -208,18 +236,40 @@ class DeepAgentState(BaseModel):
     
     def _get_result_field_mappings(self, other_state: 'DeepAgentState') -> Dict[str, Any]:
         """Get result field mappings for merge operation."""
+        triage_data = self._get_triage_mappings(other_state)
+        optimization_data = self._get_optimization_mappings(other_state)
+        return {**triage_data, **optimization_data}
+    
+    def _get_triage_mappings(self, other_state: 'DeepAgentState') -> Dict[str, Any]:
+        """Get triage and data result mappings."""
         return {
             'triage_result': other_state.triage_result or self.triage_result,
-            'data_result': other_state.data_result or self.data_result,
+            'data_result': other_state.data_result or self.data_result
+        }
+    
+    def _get_optimization_mappings(self, other_state: 'DeepAgentState') -> Dict[str, Any]:
+        """Get optimization and action plan mappings."""
+        return {
             'optimizations_result': self._merge_field('optimizations_result', other_state),
             'action_plan_result': self._merge_field('action_plan_result', other_state)
         }
     
     def _get_data_field_mappings(self, other_state: 'DeepAgentState') -> Dict[str, Any]:
         """Get data field mappings for merge operation."""
+        report_data = self._get_report_mappings(other_state)
+        research_data = self._get_research_mappings(other_state)
+        return {**report_data, **research_data}
+    
+    def _get_report_mappings(self, other_state: 'DeepAgentState') -> Dict[str, Any]:
+        """Get report and synthetic data mappings."""
         return {
             'report_result': self._merge_field('report_result', other_state),
-            'synthetic_data_result': self._merge_field('synthetic_data_result', other_state),
+            'synthetic_data_result': self._merge_field('synthetic_data_result', other_state)
+        }
+    
+    def _get_research_mappings(self, other_state: 'DeepAgentState') -> Dict[str, Any]:
+        """Get research and final report mappings."""
+        return {
             'supply_research_result': self._merge_field('supply_research_result', other_state),
             'final_report': self._merge_field('final_report', other_state)
         }
@@ -240,28 +290,20 @@ class DeepAgentState(BaseModel):
     def merge_from(self, other_state: 'DeepAgentState') -> 'DeepAgentState':
         """Create new state with data merged from another state (immutable)."""
         merged_metadata, merged_results = self._prepare_merge_components(other_state)
-        return self.copy_with_updates(
-            step_count=max(self.step_count, other_state.step_count),
-            metadata=merged_metadata,
-            **merged_results
-        )
+        merge_data = self._create_merge_data(other_state, merged_metadata, merged_results)
+        return self.copy_with_updates(**merge_data)
+    
+    def _create_merge_data(self, other_state: 'DeepAgentState', metadata: AgentMetadata, 
+                          results: Dict[str, Any]) -> Dict[str, Any]:
+        """Create merge data dictionary."""
+        step_count = max(self.step_count, other_state.step_count)
+        return {'step_count': step_count, 'metadata': metadata, **results}
 
 
 # Backward compatibility alias  
 AgentState = DeepAgentState
 
 
-# Model rebuild for forward reference resolution
-def rebuild_model() -> None:
-    """Rebuild the model after imports are complete."""
-    try:
-        DeepAgentState.model_rebuild()
-    except Exception:
-        # Safe to ignore - model will rebuild when needed
-        pass
-
-# Initialize model rebuild
-rebuild_model()
 
 # Export all agent models
 __all__ = [

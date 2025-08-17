@@ -53,6 +53,20 @@ class JWTTokenManager:
         """Create Redis key for token revocation."""
         return f"revoked_token:{jti}"
         
+    def _build_jwt_claims(self, user_data: Dict[str, Any], environment: str, 
+                          pr_number: Optional[str], now: datetime, jti: str) -> Dict[str, Any]:
+        """Build JWT claims dictionary."""
+        return {
+            "user_id": user_data["user_id"], "email": user_data["email"],
+            "environment": environment, "pr_number": pr_number,
+            "iat": int(now.timestamp()), "exp": self._calculate_expiration(now),
+            "jti": jti
+        }
+    
+    def _calculate_expiration(self, now: datetime) -> int:
+        """Calculate JWT expiration timestamp."""
+        return int((now + timedelta(hours=self.expiration_hours)).timestamp())
+    
     async def generate_jwt(
         self, 
         user_data: Dict[str, Any], 
@@ -62,17 +76,7 @@ class JWTTokenManager:
         """Generate JWT token with user claims and environment context."""
         now = datetime.utcnow()
         jti = str(uuid.uuid4())
-        
-        claims = {
-            "user_id": user_data["user_id"],
-            "email": user_data["email"],
-            "environment": environment,
-            "pr_number": pr_number,
-            "iat": int(now.timestamp()),
-            "exp": int((now + timedelta(hours=self.expiration_hours)).timestamp()),
-            "jti": jti
-        }
-        
+        claims = self._build_jwt_claims(user_data, environment, pr_number, now, jti)
         token = jwt.encode(claims, self._get_secret_key(), algorithm=self.algorithm)
         logger.info(f"JWT generated for user {user_data['user_id']} in env {environment}")
         return token
@@ -100,26 +104,31 @@ class JWTTokenManager:
         logger.info(f"JWT refreshed for user {claims.user_id}")
         return new_token
         
+    async def _store_revocation_in_redis(self, revocation_key: str) -> None:
+        """Store revocation key in Redis if enabled."""
+        if self.redis_manager.enabled:
+            await self.redis_manager.set(revocation_key, "revoked", ex=3600)
+    
+    def _handle_revocation_error(self, error: Exception, error_type: str) -> None:
+        """Handle specific revocation errors with appropriate logging."""
+        if isinstance(error, ValidationError):
+            logger.error(f"Invalid token format during revocation: {str(error)}")
+            raise AuthenticationError("Invalid token format")
+        elif isinstance(error, ConnectionError):
+            logger.error(f"Redis connection failed during token revocation: {str(error)}")
+        else:
+            logger.error(f"Unexpected error during token revocation: {str(error)}")
+            raise
+    
     async def revoke_jwt(self, token: str) -> None:
         """Add JWT token to revocation list in Redis."""
         try:
             claims = await self.get_jwt_claims(token)
             revocation_key = self._create_revocation_key(claims.jti)
-            
-            if self.redis_manager.enabled:
-                await self.redis_manager.set(revocation_key, "revoked", ex=3600)
-            
+            await self._store_revocation_in_redis(revocation_key)
             logger.info(f"JWT revoked for user {claims.user_id}")
-        except ValidationError as e:
-            logger.error(f"Invalid token format during revocation: {str(e)}")
-            raise AuthenticationError("Invalid token format")
-        except ConnectionError as e:
-            logger.error(f"Redis connection failed during token revocation: {str(e)}")
-            # Continue without revocation if Redis is down
         except Exception as e:
-            logger.error(f"Unexpected error during token revocation: {str(e)}")
-            # Re-raise for unknown errors to surface issues
-            raise
+            self._handle_revocation_error(e, "revocation")
             
     def _decode_token_payload(self, token: str) -> Dict[str, Any]:
         """Decode JWT payload without validation."""

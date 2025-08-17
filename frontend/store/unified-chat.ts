@@ -164,7 +164,8 @@ const resetAllLayers = (set: (partial: Partial<UnifiedChatState>) => void): void
     mediumLayerData: null,
     slowLayerData: null,
     currentRunId: null,
-    isProcessing: false
+    isProcessing: false,
+    messages: []
   });
 };
 

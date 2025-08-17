@@ -121,3 +121,12 @@ export const createWebSocketMessage = (data: any) => {
 
 // Helper to wait for async updates
 export const waitForAsync = () => new Promise(resolve => setTimeout(resolve, 0));
+
+// Router wrapper for components that need router context
+export function withRouter(component: ReactElement) {
+  const MockRouter = ({ children }: { children: React.ReactNode }) => {
+    return <div data-testid="mock-router">{children}</div>;
+  };
+  
+  return <MockRouter>{component}</MockRouter>;
+}

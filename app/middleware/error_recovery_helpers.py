@@ -19,39 +19,39 @@ logger = central_logger.get_logger(__name__)
 
 def get_operation_mapping() -> Dict[str, OperationType]:
     """Get request method to operation type mapping."""
-    return {
-        'POST': OperationType.DATABASE_WRITE,
-        'PUT': OperationType.DATABASE_WRITE,
-        'PATCH': OperationType.DATABASE_WRITE,
-        'DELETE': OperationType.DATABASE_WRITE,
-        'GET': OperationType.DATABASE_READ,
-    }
+    write_methods = ['POST', 'PUT', 'PATCH', 'DELETE']
+    mapping = {method: OperationType.DATABASE_WRITE for method in write_methods}
+    mapping['GET'] = OperationType.DATABASE_READ
+    return mapping
 
 
 def get_special_operation_type(path: str) -> Optional[OperationType]:
     """Get special operation type for specific paths."""
-    if '/websocket' in path or '/ws' in path:
-        return OperationType.WEBSOCKET_SEND
-    elif '/llm' in path or '/ai' in path or '/agent' in path:
-        return OperationType.LLM_REQUEST
-    elif '/api/external' in path:
-        return OperationType.EXTERNAL_API
-    elif '/files' in path or '/upload' in path:
-        return OperationType.FILE_OPERATION
-    elif '/cache' in path:
-        return OperationType.CACHE_OPERATION
+    path_mappings = _get_path_operation_mappings()
+    for path_patterns, operation_type in path_mappings.items():
+        if any(pattern in path for pattern in path_patterns):
+            return operation_type
     return None
+
+
+def _get_path_operation_mappings() -> Dict[tuple, OperationType]:
+    """Get path pattern to operation type mappings."""
+    return {
+        ('/websocket', '/ws'): OperationType.WEBSOCKET_SEND,
+        ('/llm', '/ai', '/agent'): OperationType.LLM_REQUEST,
+        ('/api/external',): OperationType.EXTERNAL_API,
+        ('/files', '/upload'): OperationType.FILE_OPERATION,
+        ('/cache',): OperationType.CACHE_OPERATION
+    }
 
 
 def determine_operation_type(request: Request) -> OperationType:
     """Determine operation type from request."""
     path = request.url.path.lower()
-    method = request.method
     special_type = get_special_operation_type(path)
     if special_type:
         return special_type
-    operation_mapping = get_operation_mapping()
-    return operation_mapping.get(method, OperationType.DATABASE_READ)
+    return get_operation_mapping().get(request.method, OperationType.DATABASE_READ)
 
 
 def get_severity_mapping() -> Dict[str, ErrorSeverity]:
@@ -157,14 +157,19 @@ def add_stack_trace_if_critical(error_data: Dict[str, Any], context: RecoveryCon
 
 def log_by_severity(severity: ErrorSeverity, error_data: Dict[str, Any]) -> None:
     """Log error based on severity level."""
-    if severity == ErrorSeverity.CRITICAL:
-        logger.critical("Critical error in request processing", **error_data)
-    elif severity == ErrorSeverity.HIGH:
-        logger.error("High severity error in request processing", **error_data)
-    elif severity == ErrorSeverity.MEDIUM:
-        logger.warning("Medium severity error in request processing", **error_data)
-    else:
-        logger.info("Low severity error in request processing", **error_data)
+    log_methods = _get_severity_log_methods()
+    log_method = log_methods.get(severity, logger.info)
+    message = "Error in request processing"
+    log_method(f"{severity.value.title()} {message.lower()}", **error_data)
+
+
+def _get_severity_log_methods() -> Dict[ErrorSeverity, callable]:
+    """Get severity to log method mappings."""
+    return {
+        ErrorSeverity.CRITICAL: logger.critical,
+        ErrorSeverity.HIGH: logger.error,
+        ErrorSeverity.MEDIUM: logger.warning
+    }
 
 
 def build_recovery_context(

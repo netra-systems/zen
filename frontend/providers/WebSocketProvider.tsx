@@ -75,6 +75,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
 
   // Memoized status handler
   const handleStatusChange = useCallback((newStatus: WebSocketStatus) => {
+    console.log('[WebSocketProvider] Status changed to:', newStatus);
     setStatus(newStatus);
   }, []);
 

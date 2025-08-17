@@ -208,16 +208,16 @@ class AlertOrchestrator:
             await AlertHandler.handle_alert(alert, storage, callback)
 
     @staticmethod
-    async def check_and_process_alerts(
-        metrics: DatabaseMetrics, 
-        thresholds: AlertThresholds, 
-        storage, 
-        callback=None
-    ) -> None:
+    async def _execute_alert_workflow(metrics: DatabaseMetrics, thresholds: AlertThresholds, storage, callback):
+        """Execute the alert checking and processing workflow."""
+        alerts = AlertOrchestrator.collect_all_alerts(metrics, thresholds)
+        await AlertOrchestrator.process_all_alerts(alerts, storage, callback)
+    
+    @staticmethod
+    async def check_and_process_alerts(metrics: DatabaseMetrics, thresholds: AlertThresholds, storage, callback=None) -> None:
         """Check for alerts and process them."""
         try:
-            alerts = AlertOrchestrator.collect_all_alerts(metrics, thresholds)
-            await AlertOrchestrator.process_all_alerts(alerts, storage, callback)
+            await AlertOrchestrator._execute_alert_workflow(metrics, thresholds, storage, callback)
         except Exception as e:
             logger.error(f"Error checking alerts: {e}")
 

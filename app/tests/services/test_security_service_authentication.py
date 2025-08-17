@@ -223,21 +223,27 @@ def _assert_user_permissions(result: Dict[str, Any]) -> None:
     assert user_data.get('tool_permissions', {}).get('data_analyzer', {}).get('allowed') is True
 
 
-def _create_token_data(user: MockUser) -> Dict[str, Any]:
+def _create_token_data(user: MockUser):
     """Create token data for user"""
-    return {
-        'user_id': user.id,
-        'email': user.email,
-        'roles': user.roles,
-        'permissions': user.permissions
-    }
+    from app.schemas import TokenPayload
+    return TokenPayload(
+        sub=user.email,
+        user_id=user.id,
+        roles=user.roles,
+        permissions=user.permissions
+    )
 
 
-def _create_expired_token_data(user: MockUser) -> Dict[str, Any]:
+def _create_expired_token_data(user: MockUser):
     """Create expired token data"""
-    token_data = _create_token_data(user)
-    token_data['exp'] = datetime.now(UTC) - timedelta(hours=1)  # Expired 1 hour ago
-    return token_data
+    from app.schemas import TokenPayload
+    return TokenPayload(
+        sub=user.email,
+        user_id=user.id,
+        roles=user.roles,
+        permissions=user.permissions,
+        exp=datetime.now(UTC) - timedelta(hours=1)  # Expired 1 hour ago
+    )
 
 
 def _assert_token_validation_success(validation_result: Dict[str, Any], user: MockUser) -> None:

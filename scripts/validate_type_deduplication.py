@@ -240,62 +240,77 @@ class TypeDeduplicationValidator:
             success=success
         )
     
-    def generate_report(self, result: ValidationResult, format: str = "console") -> str:
-        """Generate validation report in specified format."""
-        if format == "json":
-            return json.dumps(asdict(result), indent=2)
-        
-        # Console format
+    def _create_report_header(self):
+        """Create report header section"""
         report = []
         report.append("=" * 80)
         report.append("TYPE DEDUPLICATION VALIDATION REPORT")
         report.append("=" * 80)
-        
-        if result.success:
-            report.append("✅ SUCCESS: No duplicate types or import violations found!")
-            return "\n".join(report)
-        
+        return report
+
+    def _add_success_message(self, report):
+        """Add success message and return early"""
+        report.append("✅ SUCCESS: No duplicate types or import violations found!")
+        return report
+
+    def _add_failure_summary(self, report, result):
+        """Add failure summary to report"""
         report.append(f"❌ FAILURE: Found {result.total_duplicates} duplicate types and {len(result.violations)} violations")
         report.append("")
-        
-        if result.critical_duplicates:
-            report.append("🔴 CRITICAL DUPLICATES (Must Fix Immediately):")
-            report.append("-" * 50)
-            for dup in result.critical_duplicates:
-                report.append(f"  {dup.name} ({len(dup.locations)} definitions)")
-                for loc in dup.locations:
-                    report.append(f"    📁 {loc}")
-                if dup.canonical_location:
-                    report.append(f"    ✅ Canonical: {dup.canonical_location}")
-                report.append("")
-        
-        if result.python_duplicates:
-            report.append(f"🐍 PYTHON DUPLICATES ({len(result.python_duplicates)}):")
-            report.append("-" * 30)
-            for dup in result.python_duplicates[:10]:  # Show top 10
-                report.append(f"  {dup.name} ({len(dup.locations)} definitions)")
-            if len(result.python_duplicates) > 10:
-                report.append(f"  ... and {len(result.python_duplicates) - 10} more")
+        return report
+
+    def _add_critical_duplicates_section(self, report, critical_duplicates):
+        """Add critical duplicates section to report"""
+        if not critical_duplicates: return report
+        report.append("🔴 CRITICAL DUPLICATES (Must Fix Immediately):")
+        report.append("-" * 50)
+        for dup in critical_duplicates:
+            report.append(f"  {dup.name} ({len(dup.locations)} definitions)")
+            for loc in dup.locations:
+                report.append(f"    📁 {loc}")
+            if dup.canonical_location:
+                report.append(f"    ✅ Canonical: {dup.canonical_location}")
             report.append("")
-        
-        if result.typescript_duplicates:
-            report.append(f"🔷 TYPESCRIPT DUPLICATES ({len(result.typescript_duplicates)}):")
-            report.append("-" * 35)
-            for dup in result.typescript_duplicates[:10]:  # Show top 10
-                report.append(f"  {dup.name} ({len(dup.locations)} definitions)")
-            if len(result.typescript_duplicates) > 10:
-                report.append(f"  ... and {len(result.typescript_duplicates) - 10} more")
-            report.append("")
-        
-        if result.violations:
-            report.append(f"⚠️  IMPORT VIOLATIONS ({len(result.violations)}):")
-            report.append("-" * 30)
-            for violation in result.violations[:10]:  # Show top 10
-                report.append(f"  {violation}")
-            if len(result.violations) > 10:
-                report.append(f"  ... and {len(result.violations) - 10} more")
-            report.append("")
-        
+        return report
+
+    def _add_python_duplicates_section(self, report, python_duplicates):
+        """Add Python duplicates section to report"""
+        if not python_duplicates: return report
+        report.append(f"🐍 PYTHON DUPLICATES ({len(python_duplicates)}):")
+        report.append("-" * 30)
+        for dup in python_duplicates[:10]:  # Show top 10
+            report.append(f"  {dup.name} ({len(dup.locations)} definitions)")
+        if len(python_duplicates) > 10:
+            report.append(f"  ... and {len(python_duplicates) - 10} more")
+        report.append("")
+        return report
+
+    def _add_typescript_duplicates_section(self, report, typescript_duplicates):
+        """Add TypeScript duplicates section to report"""
+        if not typescript_duplicates: return report
+        report.append(f"🔷 TYPESCRIPT DUPLICATES ({len(typescript_duplicates)}):")
+        report.append("-" * 35)
+        for dup in typescript_duplicates[:10]:  # Show top 10
+            report.append(f"  {dup.name} ({len(dup.locations)} definitions)")
+        if len(typescript_duplicates) > 10:
+            report.append(f"  ... and {len(typescript_duplicates) - 10} more")
+        report.append("")
+        return report
+
+    def _add_violations_section(self, report, violations):
+        """Add import violations section to report"""
+        if not violations: return report
+        report.append(f"⚠️  IMPORT VIOLATIONS ({len(violations)}):")
+        report.append("-" * 30)
+        for violation in violations[:10]:  # Show top 10
+            report.append(f"  {violation}")
+        if len(violations) > 10:
+            report.append(f"  ... and {len(violations) - 10} more")
+        report.append("")
+        return report
+
+    def _add_next_steps_footer(self, report):
+        """Add next steps footer to report"""
         report.append("=" * 80)
         report.append("NEXT STEPS:")
         report.append("1. Review TYPE_DEDUPLICATION_PLAN.md for consolidation strategy")
@@ -303,7 +318,22 @@ class TypeDeduplicationValidator:
         report.append("3. Update imports to use canonical locations")
         report.append("4. Re-run validation: python scripts/validate_type_deduplication.py")
         report.append("=" * 80)
-        
+        return report
+
+    def generate_report(self, result: ValidationResult, format: str = "console") -> str:
+        """Generate validation report in specified format."""
+        if format == "json":
+            return json.dumps(asdict(result), indent=2)
+        report = self._create_report_header()
+        if result.success:
+            report = self._add_success_message(report)
+            return "\n".join(report)
+        report = self._add_failure_summary(report, result)
+        report = self._add_critical_duplicates_section(report, result.critical_duplicates)
+        report = self._add_python_duplicates_section(report, result.python_duplicates)
+        report = self._add_typescript_duplicates_section(report, result.typescript_duplicates)
+        report = self._add_violations_section(report, result.violations)
+        report = self._add_next_steps_footer(report)
         return "\n".join(report)
 
 

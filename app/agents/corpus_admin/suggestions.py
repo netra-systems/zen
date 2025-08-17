@@ -188,8 +188,20 @@ class ConfigurationSuggestionEngine:
     def _check_parameter_conflicts(self, config: Dict) -> List[str]:
         """Check for conflicting parameter values"""
         errors = []
+        errors.extend(self._check_streaming_conflicts(config))
+        errors.extend(self._check_gpu_conflicts(config))
+        return errors
+    
+    def _check_streaming_conflicts(self, config: Dict) -> List[str]:
+        """Check streaming-related parameter conflicts"""
+        errors = []
         if config.get("streaming") and config.get("batch_size", 0) > 1000:
             errors.append("Large batch size conflicts with streaming mode")
+        return errors
+    
+    def _check_gpu_conflicts(self, config: Dict) -> List[str]:
+        """Check GPU-related parameter conflicts"""
+        errors = []
         if config.get("gpu_enabled") and config.get("cpu_only"):
             errors.append("GPU and CPU-only modes are mutually exclusive")
         return errors
@@ -197,8 +209,20 @@ class ConfigurationSuggestionEngine:
     def _check_value_ranges(self, config: Dict) -> List[str]:
         """Check if values are within acceptable ranges"""
         errors = []
+        errors.extend(self._check_record_count_range(config))
+        errors.extend(self._check_concurrency_range(config))
+        return errors
+    
+    def _check_record_count_range(self, config: Dict) -> List[str]:
+        """Check record count range"""
+        errors = []
         if "record_count" in config and config["record_count"] > 10000000:
             errors.append("Record count exceeds maximum limit of 10M")
+        return errors
+    
+    def _check_concurrency_range(self, config: Dict) -> List[str]:
+        """Check concurrency range"""
+        errors = []
         if "concurrency" in config and config["concurrency"] > 100:
             errors.append("Concurrency exceeds recommended limit of 100")
         return errors

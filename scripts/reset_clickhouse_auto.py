@@ -58,61 +58,77 @@ def drop_table(client, table_name: str):
     client.command(query)
     print(f"  [OK] Dropped table: {table_name}")
 
-def reset_clickhouse_instance(config: Dict[str, Any]) -> bool:
-    """Reset a single ClickHouse instance."""
+def _display_instance_header(config):
+    """Display instance processing header"""
     print("\n" + "=" * 60)
     print(f"Processing: {config['name']}")
     print("=" * 60)
-    
-    # Check for password if needed
+
+def _check_password_requirements(config):
+    """Check password requirements for secure connections"""
     if config['secure'] and not config['password']:
         print("\n[WARNING] No password provided for secure connection!")
         print(f"Skipping {config['name']} - Set CLICKHOUSE_PASSWORD env var")
         return False
-    
+    return True
+
+def _display_connection_info(config):
+    """Display connection information"""
     print(f"\nConnecting to {config['name']}...")
     print(f"  Host: {config['host']}")
     print(f"  Port: {config['port']}")
     print(f"  Database: {config['database']}")
     print(f"  User: {config['user']}")
-    
+
+def _establish_connection(config):
+    """Establish and test ClickHouse connection"""
+    client = get_client(config)
+    client.ping()
+    print("[OK] Connected successfully!\n")
+    return client
+
+def _process_existing_tables(client, config):
+    """Process and display existing tables"""
+    print("Fetching existing tables...")
+    tables = list_tables(client)
+    if not tables:
+        print("[OK] No tables found. Database is already clean.")
+        return tables, True
+    print(f"\nFound {len(tables)} table(s):")
+    for row in tables:
+        print(f"  - {row[0]}")
+    return tables, False
+
+def _drop_all_tables(client, tables, config):
+    """Drop all tables and verify deletion"""
+    print(f"\nDropping all tables in {config['name']}...")
+    for row in tables:
+        drop_table(client, row[0])
+    print("\nVerifying...")
+    remaining = list_tables(client)
+    return remaining
+
+def _handle_verification_results(remaining, config):
+    """Handle table deletion verification results"""
+    if not remaining:
+        print(f"\n[SUCCESS] All tables dropped in {config['name']}!")
+        return True
+    print(f"\n[WARNING] {len(remaining)} table(s) still exist:")
+    for row in remaining:
+        print(f"  - {row[0]}")
+    return False
+
+def reset_clickhouse_instance(config: Dict[str, Any]) -> bool:
+    """Reset a single ClickHouse instance."""
+    _display_instance_header(config)
+    if not _check_password_requirements(config): return False
+    _display_connection_info(config)
     try:
-        client = get_client(config)
-        
-        # Test connection
-        client.ping()
-        print("[OK] Connected successfully!\n")
-        
-        # List tables
-        print("Fetching existing tables...")
-        tables = list_tables(client)
-        
-        if not tables:
-            print("[OK] No tables found. Database is already clean.")
-            return True
-        
-        print(f"\nFound {len(tables)} table(s):")
-        for row in tables:
-            print(f"  - {row[0]}")
-        
-        # Drop all tables
-        print(f"\nDropping all tables in {config['name']}...")
-        for row in tables:
-            drop_table(client, row[0])
-        
-        # Verify
-        print("\nVerifying...")
-        remaining = list_tables(client)
-        
-        if not remaining:
-            print(f"\n[SUCCESS] All tables dropped in {config['name']}!")
-            return True
-        else:
-            print(f"\n[WARNING] {len(remaining)} table(s) still exist:")
-            for row in remaining:
-                print(f"  - {row[0]}")
-            return False
-                
+        client = _establish_connection(config)
+        tables, is_clean = _process_existing_tables(client, config)
+        if is_clean: return True
+        remaining = _drop_all_tables(client, tables, config)
+        return _handle_verification_results(remaining, config)
     except ConnectionError as e:
         print(f"\n[ERROR] Connection failed: {e}")
         print(f"Skipping {config['name']}")

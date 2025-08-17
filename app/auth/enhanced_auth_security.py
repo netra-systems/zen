@@ -38,12 +38,19 @@ class EnhancedAuthSecurity:
         except Exception as e:
             return self._handle_authentication_error(user_id, ip_address, user_agent, e)
     
-    def _execute_authentication_flow(self, user_id: str, password: str, ip_address: str,
-                                   user_agent: str, additional_factors: Optional[Dict]) -> Tuple[AuthenticationResult, Optional[str]]:
-        """Execute the complete authentication flow."""
+    def _check_preauth_flow(self, user_id: str, ip_address: str, user_agent: str) -> Optional[Tuple[AuthenticationResult, None]]:
+        """Check pre-authentication and return early failure if needed."""
         preauth_result = self._perform_preauth_checks(user_id, ip_address, user_agent)
         if preauth_result != AuthenticationResult.SUCCESS:
             return preauth_result, None
+        return None
+
+    def _execute_authentication_flow(self, user_id: str, password: str, ip_address: str,
+                                   user_agent: str, additional_factors: Optional[Dict]) -> Tuple[AuthenticationResult, Optional[str]]:
+        """Execute the complete authentication flow."""
+        preauth_failure = self._check_preauth_flow(user_id, ip_address, user_agent)
+        if preauth_failure:
+            return preauth_failure
         credentials_result = self._check_credentials_flow(user_id, password, ip_address, user_agent)
         if credentials_result != AuthenticationResult.SUCCESS:
             return credentials_result, None
@@ -77,24 +84,30 @@ class EnhancedAuthSecurity:
             self._handle_failed_authentication(user_id, ip_address, user_agent)
         return credentials_valid
     
+    def _check_mfa_requirement(self, user_id: str, ip_address: str) -> bool:
+        """Check if MFA is required for authentication."""
+        return self.validator.requires_mfa(user_id, ip_address)
+
     def _handle_mfa_validation(self, user_id: str, ip_address: str, user_agent: str, 
                               additional_factors: Optional[Dict]) -> AuthenticationResult:
         """Handle MFA validation if required."""
-        if not self.validator.requires_mfa(user_id, ip_address):
+        if not self._check_mfa_requirement(user_id, ip_address):
             return AuthenticationResult.SUCCESS
-        
         if not additional_factors or not self.validator.validate_mfa(user_id, additional_factors):
             self._log_authentication_attempt(user_id, ip_address, user_agent, AuthenticationResult.REQUIRES_MFA)
             return AuthenticationResult.REQUIRES_MFA
-        
         return AuthenticationResult.SUCCESS
     
-    def _finalize_successful_authentication(self, user_id: str, ip_address: str, user_agent: str) -> Tuple[AuthenticationResult, str]:
-        """Finalize successful authentication."""
-        session_id = self.session_manager.create_secure_session(user_id, ip_address, user_agent)
+    def _record_successful_login(self, user_id: str, ip_address: str, user_agent: str) -> None:
+        """Record successful login metrics and cleanup."""
         self._log_authentication_attempt(user_id, ip_address, user_agent, AuthenticationResult.SUCCESS)
         self.metrics.successful_logins += 1
         self._clear_failed_attempts(user_id)
+
+    def _finalize_successful_authentication(self, user_id: str, ip_address: str, user_agent: str) -> Tuple[AuthenticationResult, str]:
+        """Finalize successful authentication."""
+        session_id = self.session_manager.create_secure_session(user_id, ip_address, user_agent)
+        self._record_successful_login(user_id, ip_address, user_agent)
         return AuthenticationResult.SUCCESS, session_id
     
     def _handle_authentication_error(self, user_id: str, ip_address: str, user_agent: str, error: Exception) -> Tuple[AuthenticationResult, None]:
@@ -152,22 +165,25 @@ class EnhancedAuthSecurity:
         if len(self.attempts_log) > 10000:
             self.attempts_log = self.attempts_log[-10000:]
     
+    def _build_security_metrics(self) -> Dict[str, Any]:
+        """Build security metrics dictionary."""
+        return {
+            "failed_logins": self.metrics.failed_login_attempts,
+            "successful_logins": self.metrics.successful_logins,
+            "blocked_attempts": self.metrics.blocked_attempts,
+            "security_score": self.metrics.get_security_score(),
+            "hijacking_attempts": self.metrics.session_hijacking_attempts
+        }
+
     def get_security_status(self) -> Dict[str, Any]:
         """Get comprehensive security status."""
         session_status = self.session_manager.get_security_status()
-        
         return {
             "active_sessions": session_status["total_active_sessions"],
             "blocked_ips": len(self.validator.blocked_ips),
             "suspicious_users": len(self.validator.suspicious_users),
             "suspicious_sessions": session_status["suspicious_sessions"],
-            "metrics": {
-                "failed_logins": self.metrics.failed_login_attempts,
-                "successful_logins": self.metrics.successful_logins,
-                "blocked_attempts": self.metrics.blocked_attempts,
-                "security_score": self.metrics.get_security_score(),
-                "hijacking_attempts": self.metrics.session_hijacking_attempts
-            },
+            "metrics": self._build_security_metrics(),
             "recent_attempts": self._count_recent_attempts()
         }
     

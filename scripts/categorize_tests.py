@@ -21,137 +21,120 @@ class TestCategorizer:
     
     def __init__(self):
         self.test_dir = PROJECT_ROOT / "app" / "tests"
-        self.categories = {
-            "real_llm": [],
-            "real_database": [],
-            "real_redis": [],
-            "real_clickhouse": [],
-            "real_services": [],
-            "mock_only": [],
-            "unit": [],
-            "integration": [],
-            "e2e": [],
-            "uncategorized": []
-        }
-        
-        # Patterns to identify test dependencies
-        self.patterns = {
-            "real_llm": [
-                r"ANTHROPIC_API_KEY",
-                r"OPENAI_API_KEY",
-                r"GEMINI_API_KEY",
-                r"ENABLE_REAL_LLM",
-                r"real.*llm",
-                r"actual.*llm"
-            ],
-            "real_database": [
-                r"create_engine.*postgresql",
-                r"asyncpg\.connect",
-                r"real.*database",
-                r"actual.*postgres"
-            ],
-            "real_redis": [
-                r"redis\.Redis\(",
-                r"aioredis\.create_redis",
-                r"real.*redis",
-                r"actual.*redis"
-            ],
-            "real_clickhouse": [
-                r"clickhouse_driver\.Client",
-                r"ClickHouseClient",
-                r"real.*clickhouse",
-                r"actual.*clickhouse"
-            ],
-            "mock_patterns": [
-                r"Mock\(",
-                r"AsyncMock\(",
-                r"MagicMock\(",
-                r"@patch",
-                r"monkeypatch",
-                r"mock_.*=",
-                r"fake_.*="
-            ],
-            "integration_patterns": [
-                r"test.*integration",
-                r"test.*e2e",
-                r"test.*workflow",
-                r"test.*orchestration",
-                r"WebSocketManager",
-                r"AgentService"
-            ],
-            "unit_patterns": [
-                r"test.*unit",
-                r"test.*isolated",
-                r"test.*component"
-            ]
+        self.categories = self._initialize_categories()
+        self.patterns = self._initialize_patterns()
+    
+    def _initialize_categories(self) -> Dict[str, List]:
+        """Initialize test categories dictionary."""
+        return {
+            "real_llm": [], "real_database": [], "real_redis": [], "real_clickhouse": [],
+            "real_services": [], "mock_only": [], "unit": [], "integration": [], "e2e": [], "uncategorized": []
         }
     
-    def analyze_file(self, file_path: Path) -> Dict[str, bool]:
-        """Analyze a single test file for dependencies"""
-        results = {
-            "uses_real_llm": False,
-            "uses_real_database": False,
-            "uses_real_redis": False,
-            "uses_real_clickhouse": False,
-            "uses_mocks": False,
-            "is_integration": False,
-            "is_unit": False,
-            "is_e2e": False,
-            "has_skip_marker": False
+    def _initialize_patterns(self) -> Dict[str, List[str]]:
+        """Initialize test detection patterns."""
+        return {
+            "real_llm": self._get_llm_patterns(),
+            "real_database": self._get_database_patterns(),
+            "real_redis": self._get_redis_patterns(),
+            "real_clickhouse": self._get_clickhouse_patterns(),
+            "mock_patterns": self._get_mock_patterns(),
+            "integration_patterns": self._get_integration_patterns(),
+            "unit_patterns": self._get_unit_patterns()
         }
-        
+    
+    def _get_llm_patterns(self) -> List[str]:
+        """Get LLM service detection patterns."""
+        return [r"ANTHROPIC_API_KEY", r"OPENAI_API_KEY", r"GEMINI_API_KEY", 
+                r"ENABLE_REAL_LLM", r"real.*llm", r"actual.*llm"]
+    
+    def _get_database_patterns(self) -> List[str]:
+        """Get database service detection patterns."""
+        return [r"create_engine.*postgresql", r"asyncpg\.connect", 
+                r"real.*database", r"actual.*postgres"]
+    
+    def _get_redis_patterns(self) -> List[str]:
+        """Get Redis service detection patterns."""
+        return [r"redis\.Redis\(", r"aioredis\.create_redis", 
+                r"real.*redis", r"actual.*redis"]
+    
+    def _get_clickhouse_patterns(self) -> List[str]:
+        """Get ClickHouse service detection patterns."""
+        return [r"clickhouse_driver\.Client", r"ClickHouseClient", 
+                r"real.*clickhouse", r"actual.*clickhouse"]
+    
+    def _get_mock_patterns(self) -> List[str]:
+        """Get mock usage detection patterns."""
+        return [r"Mock\(", r"AsyncMock\(", r"MagicMock\(", r"@patch", 
+                r"monkeypatch", r"mock_.*=", r"fake_.*="]
+    
+    def _get_integration_patterns(self) -> List[str]:
+        """Get integration test detection patterns."""
+        return [r"test.*integration", r"test.*e2e", r"test.*workflow", 
+                r"test.*orchestration", r"WebSocketManager", r"AgentService"]
+    
+    def _get_unit_patterns(self) -> List[str]:
+        """Get unit test detection patterns."""
+        return [r"test.*unit", r"test.*isolated", r"test.*component"]
+    
+    def _initialize_analysis_results(self):
+        """Initialize analysis results dictionary"""
+        return {
+            "uses_real_llm": False, "uses_real_database": False,
+            "uses_real_redis": False, "uses_real_clickhouse": False,
+            "uses_mocks": False, "is_integration": False,
+            "is_unit": False, "is_e2e": False, "has_skip_marker": False
+        }
+
+    def _read_file_content_safely(self, file_path):
+        """Read file content safely"""
         try:
-            content = file_path.read_text(encoding='utf-8')
-            
-            # Check for real service usage
-            for pattern in self.patterns["real_llm"]:
-                if re.search(pattern, content, re.IGNORECASE):
-                    results["uses_real_llm"] = True
-                    break
-            
-            for pattern in self.patterns["real_database"]:
-                if re.search(pattern, content, re.IGNORECASE):
-                    results["uses_real_database"] = True
-                    break
-            
-            for pattern in self.patterns["real_redis"]:
-                if re.search(pattern, content, re.IGNORECASE):
-                    results["uses_real_redis"] = True
-                    break
-            
-            for pattern in self.patterns["real_clickhouse"]:
-                if re.search(pattern, content, re.IGNORECASE):
-                    results["uses_real_clickhouse"] = True
-                    break
-            
-            # Check for mock usage
-            for pattern in self.patterns["mock_patterns"]:
-                if re.search(pattern, content):
-                    results["uses_mocks"] = True
-                    break
-            
-            # Check test type
-            for pattern in self.patterns["integration_patterns"]:
-                if re.search(pattern, content, re.IGNORECASE):
-                    results["is_integration"] = True
-                    break
-            
-            for pattern in self.patterns["unit_patterns"]:
-                if re.search(pattern, content, re.IGNORECASE):
-                    results["is_unit"] = True
-                    break
-            
-            # Check for E2E
-            if "e2e" in str(file_path).lower() or "end.to.end" in content.lower():
-                results["is_e2e"] = True
-            
-            # Check for skip markers
-            if re.search(r"@pytest\.mark\.skip", content):
-                results["has_skip_marker"] = True
-            
+            return file_path.read_text(encoding='utf-8')
         except Exception as e:
             print(f"Error analyzing {file_path}: {e}")
-        
+            return None
+
+    def _check_real_service_patterns(self, content, service_key, result_key, results):
+        """Check for real service usage patterns"""
+        for pattern in self.patterns[service_key]:
+            if re.search(pattern, content, re.IGNORECASE):
+                results[result_key] = True
+                break
+
+    def _check_mock_usage(self, content, results):
+        """Check for mock usage patterns"""
+        for pattern in self.patterns["mock_patterns"]:
+            if re.search(pattern, content):
+                results["uses_mocks"] = True
+                break
+
+    def _check_test_type_patterns(self, content, pattern_key, result_key, results):
+        """Check for test type patterns"""
+        for pattern in self.patterns[pattern_key]:
+            if re.search(pattern, content, re.IGNORECASE):
+                results[result_key] = True
+                break
+
+    def _check_e2e_and_skip_markers(self, content, file_path, results):
+        """Check for E2E and skip markers"""
+        if "e2e" in str(file_path).lower() or "end.to.end" in content.lower():
+            results["is_e2e"] = True
+        if re.search(r"@pytest\.mark\.skip", content):
+            results["has_skip_marker"] = True
+
+    def analyze_file(self, file_path: Path) -> Dict[str, bool]:
+        """Analyze a single test file for dependencies"""
+        results = self._initialize_analysis_results()
+        content = self._read_file_content_safely(file_path)
+        if not content: return results
+        self._check_real_service_patterns(content, "real_llm", "uses_real_llm", results)
+        self._check_real_service_patterns(content, "real_database", "uses_real_database", results)
+        self._check_real_service_patterns(content, "real_redis", "uses_real_redis", results)
+        self._check_real_service_patterns(content, "real_clickhouse", "uses_real_clickhouse", results)
+        self._check_mock_usage(content, results)
+        self._check_test_type_patterns(content, "integration_patterns", "is_integration", results)
+        self._check_test_type_patterns(content, "unit_patterns", "is_unit", results)
+        self._check_e2e_and_skip_markers(content, file_path, results)
         return results
     
     def categorize_test(self, file_path: Path, analysis: Dict[str, bool]) -> List[str]:

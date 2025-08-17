@@ -23,15 +23,17 @@ from app.config_envvars import ConfigEnvVarsManager
 class ConfigManager:
     """Main configuration manager orchestrating all configuration loading"""
     
+    def _initialize_components(self):
+        """Initialize modular configuration components."""
+        self._environment = ConfigEnvironment()
+        self._secrets_manager = ConfigSecretsManager()
+        self._envvars_manager = ConfigEnvVarsManager()
+
     def __init__(self):
         self._config: Optional[AppConfig] = None
         self._validator = ConfigValidator()
         self._logger = logger
-        
-        # Initialize modular components
-        self._environment = ConfigEnvironment()
-        self._secrets_manager = ConfigSecretsManager()
-        self._envvars_manager = ConfigEnvVarsManager()
+        self._initialize_components()
         
     @lru_cache(maxsize=1)
     def get_config(self) -> AppConfig:

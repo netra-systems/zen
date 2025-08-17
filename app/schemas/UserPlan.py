@@ -43,7 +43,7 @@ class UserPlan(BaseModel):
     expires_at: Optional[datetime] = Field(default=None, description="Plan expiration")
     auto_renew: bool = Field(default=False, description="Auto-renewal enabled")
     payment_status: str = Field(default="active", description="Payment status")
-    trial_period: bool = Field(default=False, description="Is trial period")
+    trial_period: int = Field(default=0, description="Trial period days (0 = not in trial)")
     upgraded_from: Optional[str] = Field(default=None, description="Previous plan tier")
 
 

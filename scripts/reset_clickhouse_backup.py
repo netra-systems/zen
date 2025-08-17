@@ -57,70 +57,84 @@ def drop_table(client, table_name: str):
     client.command(query)
     print(f"  [OK] Dropped table: {table_name}")
 
-def reset_clickhouse_instance(config: Dict[str, Any], skip_confirmation: bool = False):
-    """Reset a single ClickHouse instance."""
+def _print_instance_header(config):
+    """Print processing header for instance"""
     print("\n" + "=" * 60)
     print(f"Processing: {config['name']}")
     print("=" * 60)
-    
-    # Check for password if needed
+
+def _validate_secure_password(config):
+    """Validate password for secure connections"""
     if config['secure'] and not config['password']:
         print("\n[WARNING] No password provided for secure connection!")
         print(f"Set CLICKHOUSE_PASSWORD environment variable or update script.")
         return False
-    
+    return True
+
+def _print_connection_details(config):
+    """Print connection details"""
     print(f"\nConnecting to {config['name']}...")
-    print(f"  Host: {config['host']}")
-    print(f"  Port: {config['port']}")
-    print(f"  Database: {config['database']}")
-    print(f"  User: {config['user']}")
-    
+    print(f"  Host: {config['host']}\n  Port: {config['port']}")
+    print(f"  Database: {config['database']}\n  User: {config['user']}")
+
+def _create_and_test_client(config):
+    """Create client and test connection"""
+    client = get_client(config)
+    client.ping()
+    print("[OK] Connected successfully!\n")
+    return client
+
+def _list_existing_tables(client):
+    """List and display existing tables"""
+    print("Fetching existing tables...")
+    tables = list_tables(client)
+    if not tables:
+        print("[OK] No tables found. Database is already clean.")
+        return None
+    print(f"\nFound {len(tables)} table(s):")
+    for row in tables: print(f"  - {row[0]}")
+    return tables
+
+def _get_drop_confirmation(config, skip_confirmation):
+    """Get user confirmation for dropping tables"""
+    if skip_confirmation:
+        return True
+    print("\n" + "-" * 40)
+    response = input(f"[!] Drop ALL tables in {config['name']}? (yes/no): ")
+    if response.lower() != 'yes':
+        print("Operation cancelled for this instance.")
+        return False
+    return True
+
+def _drop_all_tables(client, tables, config):
+    """Drop all tables in the database"""
+    print(f"\nDropping all tables in {config['name']}...")
+    for row in tables:
+        drop_table(client, row[0])
+
+def _verify_and_display_results(client, config):
+    """Verify table deletion and display results"""
+    print("\nVerifying...")
+    remaining = list_tables(client)
+    if not remaining:
+        print(f"\n[SUCCESS] All tables dropped in {config['name']}!")
+        return True
+    print(f"\n[WARNING] {len(remaining)} table(s) still exist:")
+    for row in remaining: print(f"  - {row[0]}")
+    return False
+
+def reset_clickhouse_instance(config: Dict[str, Any], skip_confirmation: bool = False):
+    """Reset a single ClickHouse instance."""
+    _print_instance_header(config)
+    if not _validate_secure_password(config): return False
+    _print_connection_details(config)
     try:
-        client = get_client(config)
-        
-        # Test connection
-        client.ping()
-        print("[OK] Connected successfully!\n")
-        
-        # List tables
-        print("Fetching existing tables...")
-        tables = list_tables(client)
-        
-        if not tables:
-            print("[OK] No tables found. Database is already clean.")
-            return True
-        
-        print(f"\nFound {len(tables)} table(s):")
-        for row in tables:
-            print(f"  - {row[0]}")
-        
-        # Confirm before dropping (unless skipped)
-        if not skip_confirmation:
-            print("\n" + "-" * 40)
-            response = input(f"[!] Drop ALL tables in {config['name']}? (yes/no): ")
-            
-            if response.lower() != 'yes':
-                print("Operation cancelled for this instance.")
-                return False
-        
-        # Drop all tables
-        print(f"\nDropping all tables in {config['name']}...")
-        for row in tables:
-            drop_table(client, row[0])
-        
-        # Verify
-        print("\nVerifying...")
-        remaining = list_tables(client)
-        
-        if not remaining:
-            print(f"\n[SUCCESS] All tables dropped in {config['name']}!")
-            return True
-        else:
-            print(f"\n[WARNING] {len(remaining)} table(s) still exist:")
-            for row in remaining:
-                print(f"  - {row[0]}")
-            return False
-                
+        client = _create_and_test_client(config)
+        tables = _list_existing_tables(client)
+        if not tables: return True
+        if not _get_drop_confirmation(config, skip_confirmation): return False
+        _drop_all_tables(client, tables, config)
+        return _verify_and_display_results(client, config)
     except ConnectionError as e:
         print(f"\n[ERROR] Connection failed: {e}")
         return False

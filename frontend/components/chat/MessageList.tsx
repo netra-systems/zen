@@ -56,7 +56,9 @@ export const MessageList: React.FC = () => {
   const displayedMessages = messages.map(msg => ({
     id: msg.id,
     type: msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : 'ai',
-    content: msg.content,
+    content: typeof msg.content === 'string' 
+      ? msg.content 
+      : (msg.content?.text || JSON.stringify(msg.content)),
     sub_agent_name: msg.metadata?.agentName || null,
     created_at: new Date(msg.timestamp).toISOString(),
     displayed_to_user: true,

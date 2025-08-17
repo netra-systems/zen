@@ -8,7 +8,7 @@ export const WebSocketTest: React.FC = () => {
   const handleSendMessage = () => {
     const message: WebSocketMessage = {
       type: 'message',
-      payload: { text: 'Hello, from the client!' },
+      payload: { content: 'Hello, from the client!' },
     };
     sendMessage(message);
   };

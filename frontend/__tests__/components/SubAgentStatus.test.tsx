@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { SubAgentStatus } from '@/components/SubAgentStatus';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 
-jest.mock('@/store/chat');
+jest.mock('@/store/unified-chat');
 
 describe('SubAgentStatus', () => {
-  const mockUseChatStore = useChatStore as jest.Mock;
+  const mockUseChatStore = useUnifiedChatStore as jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -14,8 +14,14 @@ describe('SubAgentStatus', () => {
 
   it('should not render when no sub-agent is active', () => {
     mockUseChatStore.mockReturnValue({
-      currentSubAgent: null,
+      subAgentName: null,
       subAgentStatus: null,
+      subAgentTools: [],
+      subAgentProgress: null,
+      subAgentError: null,
+      subAgentDescription: null,
+      subAgentExecutionTime: null,
+      queuedSubAgents: []
     });
 
     const { container } = render(<SubAgentStatus />);
@@ -24,8 +30,14 @@ describe('SubAgentStatus', () => {
 
   it('should display sub-agent name and status', () => {
     mockUseChatStore.mockReturnValue({
-      currentSubAgent: 'DataSubAgent',
+      subAgentName: 'DataSubAgent',
       subAgentStatus: 'Analyzing data patterns...',
+      subAgentTools: [],
+      subAgentProgress: null,
+      subAgentError: null,
+      subAgentDescription: null,
+      subAgentExecutionTime: null,
+      queuedSubAgents: []
     });
 
     render(<SubAgentStatus />);
@@ -37,8 +49,14 @@ describe('SubAgentStatus', () => {
 
   it('should show running indicator for active agents', () => {
     mockUseChatStore.mockReturnValue({
-      currentSubAgent: 'TriageSubAgent',
+      subAgentName: 'TriageSubAgent',
       subAgentStatus: 'RUNNING',
+      subAgentTools: [],
+      subAgentProgress: null,
+      subAgentError: null,
+      subAgentDescription: null,
+      subAgentExecutionTime: null,
+      queuedSubAgents: []
     });
 
     render(<SubAgentStatus />);
@@ -58,8 +76,14 @@ describe('SubAgentStatus', () => {
 
     lifecycleStates.forEach(({ state, color }) => {
       mockUseChatStore.mockReturnValue({
-        currentSubAgent: 'TestAgent',
+        subAgentName: 'TestAgent',
         subAgentStatus: state,
+        subAgentTools: [],
+        subAgentProgress: null,
+        subAgentError: null,
+        subAgentDescription: null,
+        subAgentExecutionTime: null,
+        queuedSubAgents: []
       });
 
       const { getByTestId, unmount } = render(<SubAgentStatus />);
@@ -74,7 +98,7 @@ describe('SubAgentStatus', () => {
 
   it('should display tool usage information', () => {
     mockUseChatStore.mockReturnValue({
-      currentSubAgent: 'OptimizationsCoreSubAgent',
+      subAgentName: 'OptimizationsCoreSubAgent',
       subAgentStatus: 'RUNNING',
       subAgentTools: ['cost_analyzer', 'performance_profiler'],
       subAgentProgress: null,
@@ -93,7 +117,7 @@ describe('SubAgentStatus', () => {
 
   it('should show progress for multi-step agents', () => {
     mockUseChatStore.mockReturnValue({
-      currentSubAgent: 'ReportingSubAgent',
+      subAgentName: 'ReportingSubAgent',
       subAgentStatus: 'RUNNING',
       subAgentProgress: {
         current: 3,
@@ -121,7 +145,7 @@ describe('SubAgentStatus', () => {
     
     // First agent
     mockUseChatStore.mockReturnValue({
-      currentSubAgent: 'TriageSubAgent',
+      subAgentName: 'TriageSubAgent',
       subAgentStatus: 'COMPLETED',
       subAgentTools: [],
       subAgentProgress: null,
@@ -136,7 +160,7 @@ describe('SubAgentStatus', () => {
 
     // Transition to second agent
     mockUseChatStore.mockReturnValue({
-      currentSubAgent: 'DataSubAgent',
+      subAgentName: 'DataSubAgent',
       subAgentStatus: 'RUNNING',
       subAgentTools: [],
       subAgentProgress: null,
@@ -155,7 +179,7 @@ describe('SubAgentStatus', () => {
 
   it('should handle error states gracefully', () => {
     mockUseChatStore.mockReturnValue({
-      currentSubAgent: 'ActionsToMeetGoalsSubAgent',
+      subAgentName: 'ActionsToMeetGoalsSubAgent',
       subAgentStatus: 'FAILED',
       subAgentError: 'Unable to generate action plan: Insufficient data',
       subAgentTools: [],
@@ -177,7 +201,7 @@ describe('SubAgentStatus', () => {
 
   it('should show agent descriptions on hover', async () => {
     mockUseChatStore.mockReturnValue({
-      currentSubAgent: 'DataSubAgent',
+      subAgentName: 'DataSubAgent',
       subAgentStatus: 'RUNNING',
       subAgentDescription: 'Gathers and enriches data from various sources',
       subAgentTools: [],
@@ -201,9 +225,14 @@ describe('SubAgentStatus', () => {
 
   it('should display execution time', () => {
     mockUseChatStore.mockReturnValue({
-      currentSubAgent: 'ReportingSubAgent',
+      subAgentName: 'ReportingSubAgent',
       subAgentStatus: 'COMPLETED',
       subAgentExecutionTime: 3456, // milliseconds
+      subAgentTools: [],
+      subAgentProgress: null,
+      subAgentError: null,
+      subAgentDescription: null,
+      queuedSubAgents: []
     });
 
     render(<SubAgentStatus />);
@@ -213,7 +242,7 @@ describe('SubAgentStatus', () => {
 
   it('should show queued agents', () => {
     mockUseChatStore.mockReturnValue({
-      currentSubAgent: 'TriageSubAgent',
+      subAgentName: 'TriageSubAgent',
       subAgentStatus: 'RUNNING',
       queuedSubAgents: [
         'DataSubAgent',
@@ -221,6 +250,11 @@ describe('SubAgentStatus', () => {
         'ActionsToMeetGoalsSubAgent',
         'ReportingSubAgent',
       ],
+      subAgentTools: [],
+      subAgentProgress: null,
+      subAgentError: null,
+      subAgentDescription: null,
+      subAgentExecutionTime: null
     });
 
     render(<SubAgentStatus />);

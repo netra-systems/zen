@@ -89,14 +89,19 @@ class CorpusExecutionHelper:
     
     def _create_empty_analysis_result(self) -> Dict[str, Any]:
         """Create empty analysis result structure."""
+        base_metrics = self._get_base_analysis_metrics()
+        recommendations = ["Real corpus analysis implementation required"]
+        return {**base_metrics, "recommendations": recommendations}
+    
+    def _get_base_analysis_metrics(self) -> Dict[str, Any]:
+        """Get base analysis metrics"""
         return {
             "total_documents": 0,
             "total_size_mb": 0.0,
             "avg_document_size_kb": 0.0,
             "unique_terms": 0,
             "coverage_score": 0.0,
-            "quality_score": 0.0,
-            "recommendations": ["Real corpus analysis implementation required"]
+            "quality_score": 0.0
         }
     
     async def execute_corpus_validation(self, corpus_name: str) -> Dict[str, Any]:

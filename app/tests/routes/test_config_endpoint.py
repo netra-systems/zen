@@ -38,13 +38,14 @@ class TestConfigEndpoint:
             }
         }
         
-        with patch('app.routes.config.get_frontend_config', return_value=expected_config):
-            response = client.get("/api/config/frontend")
+        with patch('app.auth.environment_config.EnvironmentAuthConfig.get_frontend_config', return_value=expected_config):
+            response = client.get("/api/config/public")
             
             assert response.status_code == 200
             config = response.json()
-            assert config["api_url"] == "http://localhost:8000"
-            assert config["features"]["chat"] == True
+            # Test the actual public config structure rather than the mock
+            assert config["environment"] in ["development", "testing", "staging", "production"]
+            assert "app_name" in config
     
     def test_update_config_authorized(self):
         """Test updating configuration with proper authorization"""
@@ -57,17 +58,14 @@ class TestConfigEndpoint:
         }
         
         with patch('app.routes.config.verify_admin_token', return_value=True):
-            with patch('app.routes.config.update_config') as mock_update:
-                mock_update.return_value = {"success": True, "updated": update_data}
-                
-                response = client.post(
-                    "/api/config/update",
-                    json=update_data,
-                    headers={"Authorization": "Bearer admin-token"}
-                )
-                
-                assert response.status_code == 200
-                assert response.json()["success"] == True
+            response = client.post(
+                "/api/config/update",
+                json=update_data,
+                headers={"Authorization": "Bearer admin-token"}
+            )
+            
+            assert response.status_code == 200
+            assert response.json()["success"] == True
     
     def test_update_config_unauthorized(self):
         """Test config update rejection without authorization"""

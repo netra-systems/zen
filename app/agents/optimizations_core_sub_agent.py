@@ -9,6 +9,7 @@
 # Review: Pending | Score: 85
 # ================================
 import json
+from typing import Any, List
 
 from app.llm.llm_manager import LLMManager
 from app.agents.base import BaseSubAgent
@@ -73,34 +74,39 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
         async def _execute_optimization():
             await self._send_processing_update(run_id, stream_updates)
             prompt = self._build_optimization_prompt(state)
-            
-            # Generate correlation ID and start heartbeat
             correlation_id = generate_llm_correlation_id()
-            start_llm_heartbeat(correlation_id, "OptimizationsCoreSubAgent")
             
-            try:
-                # Log input to LLM
-                log_agent_input("OptimizationsCoreSubAgent", "LLM", len(prompt), correlation_id)
-                
-                llm_response_str = await self.llm_manager.ask_llm(prompt, llm_config_name='optimizations_core')
-                
-                # Log output from LLM
-                log_agent_output("LLM", "OptimizationsCoreSubAgent", 
-                               len(llm_response_str), "success", correlation_id)
-                
-            except Exception as e:
-                # Log error output
-                log_agent_output("LLM", "OptimizationsCoreSubAgent", 0, "error", correlation_id)
-                raise
-            finally:
-                # Stop heartbeat
-                stop_llm_heartbeat(correlation_id)
-            
-            optimizations_result = self._extract_and_validate_result(llm_response_str, run_id)
-            state.optimizations_result = self._create_optimizations_result(optimizations_result)
-            await self._send_success_update(run_id, stream_updates, optimizations_result)
-            return optimizations_result
+            llm_response_str = await self._execute_llm_with_observability(prompt, correlation_id)
+            return await self._process_optimization_response(llm_response_str, run_id, stream_updates, state)
         return _execute_optimization
+    
+    async def _execute_llm_with_observability(self, prompt: str, correlation_id: str) -> str:
+        """Execute LLM call with full observability."""
+        start_llm_heartbeat(correlation_id, "OptimizationsCoreSubAgent")
+        try:
+            log_agent_input("OptimizationsCoreSubAgent", "LLM", len(prompt), correlation_id)
+            return await self._make_llm_request(prompt, correlation_id)
+        finally:
+            stop_llm_heartbeat(correlation_id)
+    
+    async def _make_llm_request(self, prompt: str, correlation_id: str) -> str:
+        """Make LLM request with error handling."""
+        try:
+            response = await self.llm_manager.ask_llm(prompt, llm_config_name='optimizations_core')
+            log_agent_output("LLM", "OptimizationsCoreSubAgent", len(response), "success", correlation_id)
+            return response
+        except Exception as e:
+            log_agent_output("LLM", "OptimizationsCoreSubAgent", 0, "error", correlation_id)
+            raise
+    
+    async def _process_optimization_response(
+        self, llm_response_str: str, run_id: str, stream_updates: bool, state: DeepAgentState
+    ) -> dict:
+        """Process LLM response and update state."""
+        optimizations_result = self._extract_and_validate_result(llm_response_str, run_id)
+        state.optimizations_result = self._create_optimizations_result(optimizations_result)
+        await self._send_success_update(run_id, stream_updates, optimizations_result)
+        return optimizations_result
     
     def _create_fallback_optimization_operation(self, state: DeepAgentState, run_id: str, stream_updates: bool):
         """Create the fallback optimization operation function."""
@@ -182,25 +188,37 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
         """Convert dictionary to OptimizationsResult object."""
         from app.agents.state import OptimizationsResult
         
-        # Fix recommendations field - handle both dict and string formats
-        recommendations = data.get("recommendations", data.get("optimizations", []))
-        
-        # Convert dict recommendations to list of strings
+        recommendations = self._extract_recommendations(data)
+        processed_recommendations = self._process_recommendations(recommendations)
+        return self._build_optimizations_result(data, processed_recommendations)
+    
+    def _extract_recommendations(self, data: dict) -> Any:
+        """Extract recommendations from data dict."""
+        return data.get("recommendations", data.get("optimizations", []))
+    
+    def _process_recommendations(self, recommendations: Any) -> List[str]:
+        """Process recommendations to ensure they're a list of strings."""
         if isinstance(recommendations, list):
-            fixed_recommendations = []
-            for rec in recommendations:
-                if isinstance(rec, dict):
-                    # Convert dict to string description
-                    desc = rec.get("description", str(rec))
-                    fixed_recommendations.append(desc)
-                elif isinstance(rec, str):
-                    fixed_recommendations.append(rec)
-                else:
-                    fixed_recommendations.append(str(rec))
-            recommendations = fixed_recommendations
-        elif not isinstance(recommendations, list):
-            recommendations = [str(recommendations)] if recommendations else []
-        
+            return self._convert_recommendation_list(recommendations)
+        return [str(recommendations)] if recommendations else []
+    
+    def _convert_recommendation_list(self, recommendations: List) -> List[str]:
+        """Convert list of recommendations to strings."""
+        fixed_recommendations = []
+        for rec in recommendations:
+            converted_rec = self._convert_single_recommendation(rec)
+            fixed_recommendations.append(converted_rec)
+        return fixed_recommendations
+    
+    def _convert_single_recommendation(self, rec: Any) -> str:
+        """Convert single recommendation to string."""
+        if isinstance(rec, dict):
+            return rec.get("description", str(rec))
+        return str(rec)
+    
+    def _build_optimizations_result(self, data: dict, recommendations: List[str]) -> 'OptimizationsResult':
+        """Build OptimizationsResult from processed data."""
+        from app.agents.state import OptimizationsResult
         return OptimizationsResult(
             optimization_type=data.get("optimization_type", data.get("type", "general")),
             recommendations=recommendations,

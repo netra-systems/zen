@@ -59,64 +59,75 @@ class SystemStartupTestRunner:
         
         print("\nEnvironment setup complete")
         
-    def check_dependencies(self):
-        """Check that all required services are available"""
+    def _setup_dependency_check(self):
+        """Setup dependency check header"""
         print("\n" + "-"*40)
         print("Checking Dependencies")
         print("-"*40)
-        
-        checks = []
-        
-        # Check Python version
+        return []
+
+    def _check_python_version(self, checks):
+        """Check Python version requirement"""
         python_version = sys.version_info
-        if python_version >= (3, 8):
-            checks.append(("Python 3.8+", True, f"{python_version.major}.{python_version.minor}"))
-        else:
-            checks.append(("Python 3.8+", False, f"{python_version.major}.{python_version.minor}"))
-        
-        # Check Node.js
+        passed = python_version >= (3, 8)
+        version_str = f"{python_version.major}.{python_version.minor}"
+        checks.append(("Python 3.8+", passed, version_str))
+        return checks
+
+    def _check_nodejs(self, checks):
+        """Check Node.js availability"""
         try:
             result = subprocess.run(["node", "--version"], capture_output=True, text=True)
-            node_version = result.stdout.strip()
-            checks.append(("Node.js", True, node_version))
+            checks.append(("Node.js", True, result.stdout.strip()))
         except FileNotFoundError:
             checks.append(("Node.js", False, "Not installed"))
-        
-        # Check npm
+        return checks
+
+    def _check_npm(self, checks):
+        """Check npm availability"""
         try:
             result = subprocess.run(["npm", "--version"], capture_output=True, text=True)
-            npm_version = result.stdout.strip()
-            checks.append(("npm", True, npm_version))
+            checks.append(("npm", True, result.stdout.strip()))
         except FileNotFoundError:
             checks.append(("npm", False, "Not installed"))
-        
-        # Check Redis (if not in minimal mode)
-        if self.args.mode != "minimal":
-            try:
-                import redis
-                r = redis.Redis(host='localhost', port=6379, socket_connect_timeout=1)
-                r.ping()
-                checks.append(("Redis", True, "Connected"))
-            except:
-                checks.append(("Redis", False, "Not available"))
-        
-        # Check PostgreSQL (if not in minimal mode)
-        if self.args.mode != "minimal":
-            try:
-                import psycopg2
-                # Just check if module is available
-                checks.append(("PostgreSQL driver", True, "Available"))
-            except ImportError:
-                checks.append(("PostgreSQL driver", False, "Not installed"))
-        
-        # Display results
+        return checks
+
+    def _check_redis(self, checks):
+        """Check Redis availability if not minimal mode"""
+        if self.args.mode == "minimal":
+            return checks
+        try:
+            import redis
+            r = redis.Redis(host='localhost', port=6379, socket_connect_timeout=1)
+            r.ping()
+            checks.append(("Redis", True, "Connected"))
+        except:
+            checks.append(("Redis", False, "Not available"))
+        return checks
+
+    def _check_postgresql(self, checks):
+        """Check PostgreSQL driver if not minimal mode"""
+        if self.args.mode == "minimal":
+            return checks
+        try:
+            import psycopg2
+            checks.append(("PostgreSQL driver", True, "Available"))
+        except ImportError:
+            checks.append(("PostgreSQL driver", False, "Not installed"))
+        return checks
+
+    def _display_dependency_results(self, checks):
+        """Display dependency check results"""
         all_passed = True
         for name, passed, version in checks:
             status = "[OK]" if passed else "[FAIL]"
             print(f"  {status} {name:20} {version}")
             if not passed and name not in ["Redis", "PostgreSQL driver"]:
                 all_passed = False
-        
+        return all_passed
+
+    def _handle_dependency_failures(self, all_passed):
+        """Handle dependency check failures"""
         if not all_passed:
             print("\n[WARNING] Some required dependencies are missing!")
             if not self.args.force:
@@ -124,7 +135,17 @@ class SystemStartupTestRunner:
                 sys.exit(1)
         else:
             print("\n[OK] All dependencies satisfied")
-        
+
+    def check_dependencies(self):
+        """Check that all required services are available"""
+        checks = self._setup_dependency_check()
+        checks = self._check_python_version(checks)
+        checks = self._check_nodejs(checks)
+        checks = self._check_npm(checks)
+        checks = self._check_redis(checks)
+        checks = self._check_postgresql(checks)
+        all_passed = self._display_dependency_results(checks)
+        self._handle_dependency_failures(all_passed)
         return checks
     
     def run_backend_startup_tests(self):
@@ -223,145 +244,179 @@ class SystemStartupTestRunner:
         
         return test_result
     
-    def run_e2e_tests(self):
-        """Run complete E2E tests"""
+    def _setup_e2e_test_header(self):
+        """Setup E2E test header and validate test file"""
         print("\n" + "-"*40)
         print("Running End-to-End Tests")
         print("-"*40)
-        
         test_file = "tests/test_super_e2e.py"
-        
         if not os.path.exists(test_file):
             print(f"[WARNING] Test file not found: {test_file}")
             return None
-        
-        # Check if services are available
+        return test_file
+
+    def _prepare_e2e_services(self):
+        """Prepare services for E2E testing"""
         print("Checking service availability...")
-        
-        # For E2E tests, we need actual services running
         if self.args.mode == "full":
             print("Starting services for E2E tests...")
             # Services will be started by the E2E test itself
-        
+
+    def _build_e2e_command(self, test_file):
+        """Build pytest command for E2E tests"""
         cmd = [
-            "python", "-m", "pytest",
-            test_file,
+            "python", "-m", "pytest", test_file,
             "-v" if self.args.verbose else "-q",
-            "--tb=short",
-            "-s",  # Show print statements
-            "--disable-warnings"
+            "--tb=short", "-s", "--disable-warnings"
         ]
-        
+        return cmd
+
+    def _add_e2e_coverage_options(self, cmd):
+        """Add coverage options if requested"""
         if self.args.coverage:
             cmd.extend(["--cov=app", "--cov-report=term-missing"])
-        
-        # Select specific tests based on mode
+        return cmd
+
+    def _add_e2e_mode_filters(self, cmd):
+        """Add test filters based on mode"""
         if self.args.mode == "minimal":
             cmd.extend(["-k", "not concurrent and not performance"])
         elif self.args.mode == "quick":
             cmd.extend(["-k", "startup or login or websocket"])
-        
+        return cmd
+
+    def _execute_e2e_tests(self, cmd):
+        """Execute E2E tests and measure duration"""
         print(f"Running: {' '.join(cmd)}")
-        
         start_time = time.time()
         result = subprocess.run(cmd, capture_output=True, text=True)
         duration = time.time() - start_time
-        
-        # Parse results
+        return result, duration
+
+    def _process_e2e_results(self, result, duration):
+        """Process E2E test results and create result object"""
         test_result = {
-            "name": "End-to-End Tests",
-            "duration": duration,
+            "name": "End-to-End Tests", "duration": duration,
             "passed": result.returncode == 0,
             "output": result.stdout if self.args.verbose else "",
             "errors": result.stderr if result.returncode != 0 else ""
         }
-        
+        return test_result
+
+    def _display_e2e_status(self, test_result):
+        """Display E2E test completion status"""
         self.results["tests"].append(test_result)
-        
         if test_result["passed"]:
-            print(f"[OK] E2E tests passed ({duration:.2f}s)")
+            print(f"[OK] E2E tests passed ({test_result['duration']:.2f}s)")
         else:
             print(f"[FAIL] E2E tests failed")
             if not self.args.verbose:
                 print("  Run with --verbose to see details")
-        
+
+    def run_e2e_tests(self):
+        """Run complete E2E tests"""
+        test_file = self._setup_e2e_test_header()
+        if not test_file: return None
+        self._prepare_e2e_services()
+        cmd = self._build_e2e_command(test_file)
+        cmd = self._add_e2e_coverage_options(cmd)
+        cmd = self._add_e2e_mode_filters(cmd)
+        result, duration = self._execute_e2e_tests(cmd)
+        test_result = self._process_e2e_results(result, duration)
+        self._display_e2e_status(test_result)
         return test_result
     
-    def run_performance_tests(self):
-        """Run performance benchmarks"""
-        if self.args.mode not in ["full", "performance"]:
-            return None
-        
+    def _should_skip_performance_tests(self):
+        """Check if performance tests should be skipped"""
+        return self.args.mode not in ["full", "performance"]
+
+    def _setup_performance_header_and_metrics(self):
+        """Setup performance test header and initialize metrics"""
         print("\n" + "-"*40)
         print("Running Performance Tests")
         print("-"*40)
-        
-        metrics = {
-            "startup_time": 0,
-            "memory_baseline": 0,
-            "memory_after_startup": 0,
-            "api_response_time": 0
-        }
-        
-        # Measure startup time
-        print("Measuring startup time...")
-        start_time = time.time()
-        
-        # Start backend
+        return {"startup_time": 0, "memory_baseline": 0, "memory_after_startup": 0, "api_response_time": 0}
+
+    def _setup_backend_environment(self):
+        """Setup environment for backend process"""
         env = os.environ.copy()
         env["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
         env["TESTING"] = "1"
-        
-        process = subprocess.Popen(
+        return env
+
+    def _start_backend_process(self, env):
+        """Start backend process for performance testing"""
+        return subprocess.Popen(
             ["python", "run_server.py"],
             env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE
         )
-        
-        # Wait for startup
-        # Removed unnecessary sleep
-        
-        metrics["startup_time"] = time.time() - start_time
-        
-        # Measure memory
+
+    def _measure_startup_time(self, start_time):
+        """Measure and return startup time"""
+        return time.time() - start_time
+
+    def _measure_memory_usage(self, process):
+        """Measure memory usage of process"""
         if process.poll() is None:
             try:
                 p = psutil.Process(process.pid)
-                metrics["memory_after_startup"] = p.memory_info().rss / (1024**2)  # MB
+                return p.memory_info().rss / (1024**2)  # MB
             except:
                 pass
-        
-        # Cleanup
+        return 0
+
+    def _cleanup_process(self, process):
+        """Cleanup backend process"""
         process.terminate()
         process.wait(timeout=5)
-        
-        # Display results
+
+    def _display_performance_results(self, metrics):
+        """Display performance test results"""
         print(f"\nPerformance Metrics:")
         print(f"  Startup time: {metrics['startup_time']:.2f}s")
         print(f"  Memory usage: {metrics['memory_after_startup']:.2f} MB")
-        
-        # Check against thresholds
-        passed = (
+
+    def _check_performance_thresholds(self, metrics):
+        """Check if metrics pass performance thresholds"""
+        return (
             metrics["startup_time"] < 10 and  # Less than 10 seconds
             metrics["memory_after_startup"] < 500  # Less than 500MB
         )
-        
-        test_result = {
+
+    def _create_performance_test_result(self, metrics, passed):
+        """Create performance test result object"""
+        return {
             "name": "Performance Tests",
             "duration": metrics["startup_time"],
             "passed": passed,
             "metrics": metrics
         }
-        
+
+    def _finalize_performance_test(self, test_result):
+        """Finalize performance test and display status"""
         self.results["tests"].append(test_result)
-        
-        if passed:
-            print("[OK] Performance tests passed")
-        else:
-            print("[FAIL] Performance tests failed (exceeded thresholds)")
-        
+        status = "[OK] Performance tests passed" if test_result["passed"] else "[FAIL] Performance tests failed (exceeded thresholds)"
+        print(status)
         return test_result
+
+    def run_performance_tests(self):
+        """Run performance benchmarks"""
+        if self._should_skip_performance_tests():
+            return None
+        metrics = self._setup_performance_header_and_metrics()
+        env = self._setup_backend_environment()
+        print("Measuring startup time...")
+        start_time = time.time()
+        process = self._start_backend_process(env)
+        metrics["startup_time"] = self._measure_startup_time(start_time)
+        metrics["memory_after_startup"] = self._measure_memory_usage(process)
+        self._cleanup_process(process)
+        self._display_performance_results(metrics)
+        passed = self._check_performance_thresholds(metrics)
+        test_result = self._create_performance_test_result(metrics, passed)
+        return self._finalize_performance_test(test_result)
     
     def generate_report(self):
         """Generate test report"""

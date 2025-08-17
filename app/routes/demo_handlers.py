@@ -50,6 +50,11 @@ async def _process_chat_request(
         _log_and_raise_error("Demo chat processing failed", e)
 
 
+def _create_chat_tracking_data(request: DemoChatRequest) -> Dict[str, Any]:
+    """Create tracking data for chat interaction."""
+    return {"industry": request.industry, "message_length": len(request.message)}
+
+
 def _track_chat_interaction(
     background_tasks: BackgroundTasks,
     demo_service: DemoService,
@@ -57,11 +62,12 @@ def _track_chat_interaction(
     request: DemoChatRequest
 ) -> None:
     """Track demo analytics in background."""
+    data = _create_chat_tracking_data(request)
     background_tasks.add_task(
         demo_service.track_demo_interaction,
         session_id=session_id,
         interaction_type="chat",
-        data={"industry": request.industry, "message_length": len(request.message)}
+        data=data
     )
 
 
@@ -115,6 +121,11 @@ async def _calculate_roi_metrics(
         _log_and_raise_error("ROI calculation failed", e)
 
 
+def _create_roi_tracking_data(request: ROICalculationRequest, result: Dict[str, Any]) -> Dict[str, Any]:
+    """Create tracking data for ROI calculation."""
+    return {"industry": request.industry, "potential_savings": result["annual_savings"]}
+
+
 def _track_roi_calculation(
     background_tasks: BackgroundTasks,
     demo_service: DemoService,
@@ -122,11 +133,12 @@ def _track_roi_calculation(
     result: Dict[str, Any]
 ) -> None:
     """Track ROI calculation for analytics."""
+    data = _create_roi_tracking_data(request, result)
     background_tasks.add_task(
         demo_service.track_demo_interaction,
         session_id=str(uuid.uuid4()),
         interaction_type="roi_calculation",
-        data={"industry": request.industry, "potential_savings": result["annual_savings"]}
+        data=data
     )
 
 
@@ -177,17 +189,23 @@ async def _generate_demo_report(
         _log_and_raise_error("Failed to export report", e)
 
 
+def _create_export_tracking_data(request: ExportReportRequest) -> Dict[str, Any]:
+    """Create tracking data for report export."""
+    return {"format": request.format, "sections": request.include_sections}
+
+
 def _track_report_export(
     background_tasks: BackgroundTasks,
     demo_service: DemoService,
     request: ExportReportRequest
 ) -> None:
     """Track export for analytics."""
+    data = _create_export_tracking_data(request)
     background_tasks.add_task(
         demo_service.track_demo_interaction,
         session_id=request.session_id,
         interaction_type="report_export",
-        data={"format": request.format, "sections": request.include_sections}
+        data=data
     )
 
 

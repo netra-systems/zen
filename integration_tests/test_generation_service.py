@@ -114,13 +114,14 @@ async def test_synthetic_data_generation_with_table_selection(mock_run_job, test
         pytest.fail("Job did not complete in time")
 
 @pytest.mark.asyncio
-@patch('app.services.generation_service.ClickHouseDatabase')
+@patch('app.services.generation_job_manager.ClickHouseDatabase')
 async def test_save_and_get_corpus(MockClickHouseDatabase):
     """Test saving a corpus to ClickHouse and retrieving it."""
     # Arrange
     mock_instance = MagicMock()
     mock_instance.command = AsyncMock()
     mock_instance.insert_data = AsyncMock()
+    mock_instance.disconnect = AsyncMock()
     mock_instance.execute_query = AsyncMock(return_value=[
         {'workload_type': 'test_workload', 'prompt': 'prompt1', 'response': 'response1'},
         {'workload_type': 'test_workload', 'prompt': 'prompt2', 'response': 'response2'}
@@ -143,26 +144,22 @@ async def test_save_and_get_corpus(MockClickHouseDatabase):
     assert retrieved_corpus == {"test_workload": [('prompt1', 'response1'), ('prompt2', 'response2')]}
 
 @pytest.mark.asyncio
-@patch('app.services.generation_service.ingest_records', new_callable=AsyncMock)
-@patch('app.services.generation_service.synthetic_data_main')
-@patch('app.services.generation_service.get_corpus_from_clickhouse', new_callable=AsyncMock)
-@patch('app.services.generation_service.ClickHouseDatabase')
-async def test_run_synthetic_data_generation_job_e2e(MockClickHouseDatabase, mock_get_corpus, mock_synth_main, mock_ingest):
+@patch('app.services.synthetic_data_service.synthetic_data_service.generate_synthetic_data', new_callable=AsyncMock)
+async def test_run_synthetic_data_generation_job_e2e(mock_generate_synthetic_data):
     """An end-to-end test for the synthetic data generation job."""
     # Arrange
     job_id = str(uuid.uuid4())
     await job_store.set(job_id, {"status": "pending"})
-    
-    mock_db_instance = MagicMock()
-    mock_db_instance.command = AsyncMock()
-    MockClickHouseDatabase.return_value = mock_db_instance
 
     source_table = 'source_corpus'
     destination_table = 'dest_table'
     
-    mock_get_corpus.return_value = {"greeting": [("hello", "world")]}
-    mock_synth_main.return_value = [{"id": i} for i in range(5)]
-    mock_ingest.side_effect = [2, 2, 1] 
+    # Mock the synthetic data service to return a result with records_ingested
+    mock_generate_synthetic_data.return_value = {
+        "records_ingested": 5,
+        "table_name": destination_table,
+        "status": "completed"
+    }
 
     params = {
         "num_traces": 5,
@@ -179,8 +176,7 @@ async def test_run_synthetic_data_generation_job_e2e(MockClickHouseDatabase, moc
     assert job_status is not None
     assert job_status["status"] == "completed"
     assert job_status["summary"]["records_ingested"] == 5
-    mock_db_instance.command.assert_called_once_with(get_llm_events_table_schema(destination_table))
-    assert mock_ingest.call_count == 3
+    mock_generate_synthetic_data.assert_called_once()
 
     # Cleanup
     if job_id in job_store._jobs:

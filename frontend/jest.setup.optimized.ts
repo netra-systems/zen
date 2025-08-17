@@ -179,3 +179,13 @@ afterEach(() => {
 
 // Global test timeout for faster failure detection
 jest.setTimeout(10000);
+
+// Mock apiClientWrapper to prevent connection attempts in tests
+jest.mock('@/services/apiClientWrapper', () => ({
+  apiClientWrapper: {
+    request: jest.fn().mockRejectedValue(new Error('API mocked in tests')),
+    retryRequest: jest.fn().mockRejectedValue(new Error('API mocked in tests')),
+    checkConnection: jest.fn().mockResolvedValue(false),
+    isConnected: false,
+  }
+}));

@@ -34,7 +34,7 @@ def _get_staging_cors_origins() -> list[str]:
     cors_origins_env = os.environ.get("CORS_ORIGINS", "")
     if cors_origins_env:
         return cors_origins_env.split(",")
-    # Staging origins - will be handled by custom middleware
+    # Staging origins - will be handled by custom middleware for wildcards
     return [
         "https://staging.netrasystems.ai",
         "https://app.staging.netrasystems.ai",
@@ -43,7 +43,8 @@ def _get_staging_cors_origins() -> list[str]:
         "https://netra-frontend-701982941522.us-central1.run.app",
         "https://netra-backend-701982941522.us-central1.run.app",
         "http://localhost:3000",
-        "http://localhost:3001"
+        "http://localhost:3001",
+        "*"  # Will use pattern matching in is_origin_allowed
     ]
 
 
@@ -51,25 +52,21 @@ def _get_development_cors_origins() -> list[str]:
     """Get CORS origins for development environment."""
     cors_origins_env = os.environ.get("CORS_ORIGINS", "")
     if cors_origins_env:
+        # Handle wildcard separately - don't try to split it
+        if cors_origins_env == "*":
+            return ["*"]
         return cors_origins_env.split(",")
-    # Restrict to localhost origins only in development
-    return [
-        "http://localhost:3000",
-        "http://localhost:3001", 
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000"
-    ]
+    # Allow all localhost origins in development (any port)
+    return ["http://localhost:3000", "http://localhost:8000", "*"]
 
 
 def setup_cors_middleware(app: FastAPI) -> None:
     """Configure CORS middleware."""
-    if settings.environment == "staging":
-        # Use custom middleware for staging to support wildcard subdomains
+    if settings.environment in ["staging", "development"]:
+        # Use custom middleware for staging and development to support wildcards
         app.add_middleware(CustomCORSMiddleware)
     else:
-        # Use standard CORS middleware for other environments
+        # Use standard CORS middleware for production
         allowed_origins = get_cors_origins()
         app.add_middleware(
             CORSMiddleware,
@@ -117,15 +114,37 @@ def is_origin_allowed(origin: str, allowed_origins: List[str]) -> bool:
     if not origin:
         return False
     
-    # Direct match
+    # Direct match first
     if origin in allowed_origins:
         return True
     
-    # Check wildcard patterns for staging
-    if settings.environment == "staging":
+    # Allow all origins if wildcard is specified
+    if "*" in allowed_origins:
+        # In development, allow everything
+        if settings.environment == "development":
+            return True
+        # In staging, check patterns below instead of allowing all
+        if settings.environment == "staging":
+            pass  # Continue to pattern matching below
+        else:
+            return True
+    
+    # Check wildcard patterns for staging and development
+    if settings.environment in ["staging", "development"]:
         # Allow any subdomain of staging.netrasystems.ai
-        pattern = r'^https://[a-zA-Z0-9\-]+\.staging\.netrasystems\.ai$'
-        if re.match(pattern, origin):
+        staging_pattern = r'^https://[a-zA-Z0-9\-]+\.staging\.netrasystems\.ai$'
+        if re.match(staging_pattern, origin):
+            return True
+        
+        # Allow Google Cloud Run URLs (backend services)
+        # Pattern matches: https://service-name-hash-region.a.run.app
+        cloud_run_pattern = r'^https://[a-zA-Z0-9\-]+(-[a-zA-Z0-9]+)*-[a-z]{2}\.a\.run\.app$'
+        if re.match(cloud_run_pattern, origin):
+            return True
+        
+        # Allow localhost for local development - any port
+        localhost_pattern = r'^https?://(localhost|127\.0\.0\.1)(:\d+)?$'
+        if re.match(localhost_pattern, origin):
             return True
         
         # Allow Cloud Run URLs
@@ -151,13 +170,17 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
         
         # Add CORS headers if origin is allowed
         allowed_origins = get_cors_origins()
-        if origin and (origin == "*" in allowed_origins or 
-                      is_origin_allowed(origin, allowed_origins)):
+        if origin and is_origin_allowed(origin, allowed_origins):
             response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
             response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
             response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID"
             response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID"
+        elif origin:
+            # Log for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.debug(f"CORS: Origin {origin} not allowed. Allowed: {allowed_origins}")
         
         return response
 

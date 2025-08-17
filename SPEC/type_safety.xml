@@ -149,6 +149,28 @@ const response: any = await externalApi.call();
     </error>
   </common-errors>
 
+  <frontend-state-management>
+    <critical-pattern id="ZUSTAND-1" priority="CRITICAL">
+      <title>Zustand Selector Infinite Loop Prevention</title>
+      <problem>Object-returning selectors create new references causing infinite loops</problem>
+      <solution>Use individual selectors for each piece of state</solution>
+      <forbidden>
+        // WRONG - Creates new object reference every render
+        const storeSelector = (state: UnifiedChatState) => ({
+          activeThreadId: state.activeThreadId,
+          isThreadLoading: state.isThreadLoading
+        });
+        const storeData = useUnifiedChatStore(storeSelector, shallow);
+      </forbidden>
+      <correct>
+        // CORRECT - Individual selectors with stable references
+        const activeThreadId = useUnifiedChatStore(state => state.activeThreadId);
+        const isThreadLoading = useUnifiedChatStore(state => state.isThreadLoading);
+      </correct>
+      <reference>SPEC/learnings/frontend.xml#zustand-individual-selectors-pattern</reference>
+    </critical-pattern>
+  </frontend-state-management>
+
   <validation>
     <check id="V1">
       <name>Python Type Coverage</name>

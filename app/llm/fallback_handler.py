@@ -109,6 +109,13 @@ class LLMFallbackHandler:
                                  fallback_type: str) -> Any:
         """Execute operation with retry logic using Template Method pattern."""
         retry_executor = RetryExecutor(self)
+        return await self._execute_retry_template(retry_executor, llm_operation, 
+                                                 operation_name, circuit_breaker, provider, fallback_type)
+    
+    async def _execute_retry_template(self, retry_executor: RetryExecutor, llm_operation, 
+                                     operation_name: str, circuit_breaker: CircuitBreaker, 
+                                     provider: str, fallback_type: str) -> Any:
+        """Execute retry template with all parameters."""
         return await execute_retry_template(
             self, retry_executor, llm_operation, operation_name, 
             circuit_breaker, provider, fallback_type
@@ -133,7 +140,10 @@ class LLMFallbackHandler:
         """Handle operation failure with logging and circuit breaker recording."""
         failure_type = self._classify_error(error)
         self._record_retry_attempt(attempt, failure_type, str(error))
-        
+        self._record_circuit_failure_if_enabled(circuit_breaker, failure_type)
+    
+    def _record_circuit_failure_if_enabled(self, circuit_breaker: CircuitBreaker, failure_type: Any) -> None:
+        """Record circuit breaker failure if circuit breaker is enabled."""
         if self.config.use_circuit_breaker:
             circuit_breaker.record_failure(failure_type)
     
@@ -141,11 +151,15 @@ class LLMFallbackHandler:
         """Wait before retry with exponential backoff."""
         failure_type = self._classify_error(error)
         delay = self._calculate_delay(attempt, failure_type)
+        self._log_retry_warning(operation_name, attempt, error, delay)
+        await asyncio.sleep(delay)
+    
+    def _log_retry_warning(self, operation_name: str, attempt: int, error: Exception, delay: float) -> None:
+        """Log retry warning message with details."""
         logger.warning(
             f"LLM operation {operation_name} failed (attempt {attempt}/{self.config.max_retries}): {error}. "
             f"Retrying in {delay:.2f}s"
         )
-        await asyncio.sleep(delay)
     
     async def execute_structured_with_fallback(
         self,

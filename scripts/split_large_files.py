@@ -196,73 +196,87 @@ class TestFileSplitter:
         return '\n'.join(content_lines)
 
 
-def main():
-    """Main execution function"""
+def _initialize_splitter_and_files():
+    """Initialize splitter and priority files list"""
     splitter = TestFileSplitter()
-    
-    # Priority files for splitting
     priority_files = [
         "app/tests/agents/test_supervisor_consolidated_comprehensive.py",
         "app/tests/services/test_tool_permission_service_comprehensive.py", 
         "app/tests/services/test_quality_gate_service_comprehensive.py",
-        "app/tests/core/test_async_utils.py",
-        "app/tests/core/test_missing_tests_11_30.py"
+        "app/tests/core/test_async_utils.py", "app/tests/core/test_missing_tests_11_30.py"
     ]
-    
+    return splitter, priority_files
+
+def _check_file_exists(filepath, relative_path):
+    """Check if file exists and handle missing files"""
+    if not filepath.exists():
+        print(f"File not found: {filepath}")
+        return False
+    return True
+
+def _analyze_and_display_file(splitter, filepath, relative_path):
+    """Analyze file and display basic information"""
+    print(f"\n{'='*60}\nAnalyzing: {relative_path}\n{'='*60}")
+    analysis = splitter.analyze_file(str(filepath))
+    print(f"Total lines: {analysis.total_lines}")
+    print(f"Test classes found: {len(analysis.split_points)}")
+    return analysis
+
+def _check_file_size_limit(analysis, splitter):
+    """Check if file is within size limit"""
+    if analysis.total_lines <= splitter.max_lines:
+        print("File is within size limit")
+        return True
+    return False
+
+def _display_split_suggestions(analysis):
+    """Display split suggestions"""
+    print(f"\nSuggested split into {len(analysis.split_points)} modules:")
+    for i, (point, module) in enumerate(zip(analysis.split_points, analysis.suggested_modules)):
+        print(f"  {i+1}. {module}\n     Class: {point.class_name}")
+        print(f"     Lines: {point.estimated_lines}\n     Methods: {len(point.test_methods)}")
+
+def _get_user_confirmations(relative_path):
+    """Get user confirmations for splitting and removal"""
+    split_confirm = input(f"\nSplit {relative_path}? (y/N): ").lower() == 'y'
+    remove_confirm = False
+    if split_confirm:
+        remove_confirm = input(f"Remove original file? (y/N): ").lower() == 'y'
+    return split_confirm, remove_confirm
+
+def _handle_file_splitting(splitter, analysis, relative_path, filepath, split_confirm, remove_confirm):
+    """Handle file splitting process"""
+    if split_confirm:
+        created_files = splitter.split_file(analysis)
+        print(f"\nSuccessfully split into {len(created_files)} modules")
+        if remove_confirm:
+            filepath.unlink()
+            print(f"Removed: {relative_path}")
+    else:
+        print("Skipped")
+
+def _print_completion_message():
+    """Print completion message"""
+    print(f"\n{'='*60}\nFile splitting complete!\nRemember to:")
+    print("   1. Update any imports in other files\n   2. Run tests to verify functionality")
+    print(f"   3. Update test discovery patterns if needed\n{'='*60}")
+
+def main():
+    """Main execution function"""
+    splitter, priority_files = _initialize_splitter_and_files()
     base_dir = Path(__file__).parent.parent
-    
     for relative_path in priority_files:
         filepath = base_dir / relative_path
-        
-        if not filepath.exists():
-            print(f"File not found: {filepath}")
-            continue
-        
-        print(f"\n{'='*60}")
-        print(f"Analyzing: {relative_path}")
-        print(f"{'='*60}")
-        
+        if not _check_file_exists(filepath, relative_path): continue
         try:
-            analysis = splitter.analyze_file(str(filepath))
-            
-            print(f"Total lines: {analysis.total_lines}")
-            print(f"Test classes found: {len(analysis.split_points)}")
-            
-            if analysis.total_lines <= splitter.max_lines:
-                print("File is within size limit")
-                continue
-            
-            print(f"\nSuggested split into {len(analysis.split_points)} modules:")
-            for i, (point, module) in enumerate(zip(analysis.split_points, analysis.suggested_modules)):
-                print(f"  {i+1}. {module}")
-                print(f"     Class: {point.class_name}")
-                print(f"     Lines: {point.estimated_lines}")
-                print(f"     Methods: {len(point.test_methods)}")
-            
-            # Ask for confirmation before splitting
-            response = input(f"\nSplit {relative_path}? (y/N): ").lower()
-            if response == 'y':
-                created_files = splitter.split_file(analysis)
-                print(f"\nSuccessfully split into {len(created_files)} modules")
-                
-                # Ask about removing original file
-                response = input(f"Remove original file? (y/N): ").lower()
-                if response == 'y':
-                    filepath.unlink()
-                    print(f"Removed: {relative_path}")
-            else:
-                print("Skipped")
-                
+            analysis = _analyze_and_display_file(splitter, filepath, relative_path)
+            if _check_file_size_limit(analysis, splitter): continue
+            _display_split_suggestions(analysis)
+            split_confirm, remove_confirm = _get_user_confirmations(relative_path)
+            _handle_file_splitting(splitter, analysis, relative_path, filepath, split_confirm, remove_confirm)
         except Exception as e:
             print(f"Error processing {relative_path}: {e}")
-    
-    print(f"\n{'='*60}")
-    print("File splitting complete!")
-    print("Remember to:")
-    print("   1. Update any imports in other files")
-    print("   2. Run tests to verify functionality") 
-    print("   3. Update test discovery patterns if needed")
-    print(f"{'='*60}")
+    _print_completion_message()
 
 
 if __name__ == "__main__":

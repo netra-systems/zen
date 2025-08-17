@@ -66,22 +66,42 @@ class CorpusRequestParser:
     
     def _get_schema_section(self) -> str:
         """Get JSON schema section of prompt"""
-        return '''\n\nReturn a JSON object with these fields:
-{
-    "operation": "create|update|delete|search|analyze|export|import|validate",
-    "corpus_metadata": {
+        schema_header = self._get_schema_header()
+        operation_fields = self._get_operation_fields()
+        metadata_fields = self._get_metadata_fields()
+        filter_fields = self._get_filter_fields()
+        option_fields = self._get_option_fields()
+        return f"{schema_header}{operation_fields}{metadata_fields}{filter_fields}{option_fields}}}"
+    
+    def _get_schema_header(self) -> str:
+        """Get schema header section."""
+        return "\n\nReturn a JSON object with these fields:\n{"
+    
+    def _get_operation_fields(self) -> str:
+        """Get operation field definition."""
+        return '\n    "operation": "create|update|delete|search|analyze|export|import|validate",'
+    
+    def _get_metadata_fields(self) -> str:
+        """Get corpus metadata field definitions."""
+        return '''\n    "corpus_metadata": {
         "corpus_name": "<name of corpus>",
         "corpus_type": "documentation|knowledge_base|training_data|reference_data|embeddings",
         "description": "<optional description>",
         "tags": ["<optional tags>"],
         "access_level": "private|team|public"
-    },
-    "filters": {
+    },'''
+    
+    def _get_filter_fields(self) -> str:
+        """Get filter field definitions."""
+        return '''\n    "filters": {
         "date_range": {"start": "ISO date", "end": "ISO date"},
         "document_types": ["<types>"],
         "size_range": {"min": bytes, "max": bytes}
-    },
-    "options": {
+    },'''
+    
+    def _get_option_fields(self) -> str:
+        """Get option field definitions."""
+        return '''\n    "options": {
         "include_embeddings": true/false,
         "format": "json|csv|parquet",
         "compression": true/false

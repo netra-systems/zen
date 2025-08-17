@@ -52,23 +52,26 @@ class RecoveryActions:
     async def execute_recovery_actions(self, service_name: str, diagnosis: DiagnosisResult) -> List[str]:
         """Execute appropriate recovery actions based on diagnosis."""
         actions = []
-        
-        # Kill zombie processes
+        await self._execute_process_cleanup(actions, diagnosis)
+        await self._execute_resource_cleanup(actions)
+        await self._execute_conflict_resolution(actions, diagnosis)
+        return actions
+    
+    async def _execute_process_cleanup(self, actions: List[str], diagnosis: DiagnosisResult):
+        """Execute process cleanup actions."""
         if diagnosis.zombie_processes:
             actions.extend(await self.cleanup_zombie_processes(diagnosis.zombie_processes))
-        
-        # Clear temporary files
+    
+    async def _execute_resource_cleanup(self, actions: List[str]):
+        """Execute resource cleanup actions."""
         actions.extend(await self.cleanup_temp_files())
-        
-        # Resolve port conflicts
+    
+    async def _execute_conflict_resolution(self, actions: List[str], diagnosis: DiagnosisResult):
+        """Execute conflict resolution actions."""
         if diagnosis.port_conflicts:
             actions.extend(await self.resolve_port_conflicts(diagnosis.port_conflicts))
-        
-        # Handle config issues
         if diagnosis.config_issues:
             actions.extend(await self.handle_config_issues(diagnosis.config_issues))
-        
-        return actions
     
     async def cleanup_zombie_processes(self, zombie_pids: List[int]) -> List[str]:
         """Kill zombie processes and their parents if necessary."""

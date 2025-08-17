@@ -84,17 +84,7 @@ const config = {
     ['default', { summaryThreshold: 10 }]
   ],
   
-  // Disable source maps in tests for speed
-  globals: {
-    'ts-jest': {
-      isolatedModules: true,
-      tsconfig: {
-        jsx: 'react',
-        sourceMap: false,
-        inlineSourceMap: false,
-      }
-    }
-  },
+  // Disable source maps in tests for speed (handled in transform config above)
   
   // Uncomment below to use projects (currently disabled for simpler setup)
   // projects: [

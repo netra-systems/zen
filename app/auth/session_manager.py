@@ -67,16 +67,29 @@ class SessionLifecycleManager:
         return self._create_session_object(session_id, user_id, ip_address, user_agent, 
                                          csrf_token, now, security_flags)
     
+    def _calculate_session_expiration(self, created_at: datetime) -> datetime:
+        """Calculate session expiration time."""
+        return created_at + self.config.session_timeout
+    
+    def _build_session_params(self, session_id: str, user_id: str, ip_address: str,
+                             user_agent: str, csrf_token: str, now: datetime, 
+                             security_flags: Dict[str, Any], expires_at: datetime) -> Dict[str, Any]:
+        """Build SecuritySession constructor parameters."""
+        return {
+            "session_id": session_id, "user_id": user_id, "ip_address": ip_address,
+            "user_agent": user_agent, "created_at": now, "last_activity": now,
+            "expires_at": expires_at, "status": SessionStatus.ACTIVE,
+            "security_flags": security_flags, "csrf_token": csrf_token
+        }
+    
     def _create_session_object(self, session_id: str, user_id: str, ip_address: str,
                               user_agent: str, csrf_token: str, now: datetime, 
                               security_flags: Dict[str, Any]) -> SecuritySession:
         """Create the SecuritySession object."""
-        return SecuritySession(
-            session_id=session_id, user_id=user_id, ip_address=ip_address,
-            user_agent=user_agent, created_at=now, last_activity=now,
-            expires_at=now + self.config.session_timeout, status=SessionStatus.ACTIVE,
-            security_flags=security_flags, csrf_token=csrf_token
-        )
+        expires_at = self._calculate_session_expiration(now)
+        params = self._build_session_params(session_id, user_id, ip_address, user_agent, 
+                                           csrf_token, now, security_flags, expires_at)
+        return SecuritySession(**params)
     
     def _build_security_flags(self, user_id: str, ip_address: str, user_agent: str) -> Dict[str, Any]:
         """Build security flags for session."""

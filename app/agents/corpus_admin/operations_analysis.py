@@ -49,14 +49,7 @@ class CorpusAnalysisOperations:
         analysis = await self._generate_corpus_analysis(
             request.corpus_metadata.corpus_name
         )
-        return CorpusOperationResult(
-            success=not analysis.get("error"),
-            operation=request.operation,
-            corpus_metadata=request.corpus_metadata,
-            affected_documents=analysis.get("total_documents", 0),
-            result_data=analysis,
-            errors=[analysis.get("error")] if analysis.get("error") else []
-        )
+        return self._build_analysis_result(request, analysis)
     
     async def _export_corpus(
         self, 
@@ -100,16 +93,7 @@ class CorpusAnalysisOperations:
             request.corpus_metadata.corpus_name
         )
         warnings = self._build_validation_warnings(validation_results)
-        
-        return CorpusOperationResult(
-            success=not validation_results.get("error"),
-            operation=request.operation,
-            corpus_metadata=request.corpus_metadata,
-            affected_documents=validation_results.get("total_checked", 0),
-            result_data=validation_results,
-            warnings=warnings,
-            errors=[validation_results.get("error")] if validation_results.get("error") else []
-        )
+        return self._build_validation_result(request, validation_results, warnings)
     
     async def _generate_corpus_analysis(self, corpus_name: str) -> Dict[str, Any]:
         """Generate corpus analysis"""
@@ -164,3 +148,26 @@ class CorpusAnalysisOperations:
             "invalid": 0,
             "issues": [{"type": "system_error", "count": 1}]
         }
+    
+    def _build_analysis_result(self, request: CorpusOperationRequest, analysis: Dict[str, Any]) -> CorpusOperationResult:
+        """Build analysis operation result"""
+        return CorpusOperationResult(
+            success=not analysis.get("error"),
+            operation=request.operation,
+            corpus_metadata=request.corpus_metadata,
+            affected_documents=analysis.get("total_documents", 0),
+            result_data=analysis,
+            errors=[analysis.get("error")] if analysis.get("error") else []
+        )
+    
+    def _build_validation_result(self, request: CorpusOperationRequest, validation_results: Dict[str, Any], warnings: list) -> CorpusOperationResult:
+        """Build validation operation result"""
+        return CorpusOperationResult(
+            success=not validation_results.get("error"),
+            operation=request.operation,
+            corpus_metadata=request.corpus_metadata,
+            affected_documents=validation_results.get("total_checked", 0),
+            result_data=validation_results,
+            warnings=warnings,
+            errors=[validation_results.get("error")] if validation_results.get("error") else []
+        )

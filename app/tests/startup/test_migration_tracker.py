@@ -140,8 +140,8 @@ class TestFileOperations:
 class TestAlembicOperations:
     """Test Alembic configuration and operations."""
     
-    @patch('app.db.migration_utils.create_alembic_config')
-    @patch('app.db.migration_utils.get_sync_database_url')
+    @patch('app.startup.migration_tracker.create_alembic_config')
+    @patch('app.startup.migration_tracker.get_sync_database_url')
     def test_get_alembic_config(self, mock_sync_url: Mock, mock_create_config: Mock,
                                migration_tracker: MigrationTracker) -> None:
         """Test Alembic configuration creation."""
@@ -154,7 +154,7 @@ class TestAlembicOperations:
         mock_create_config.assert_called_once_with("sync_url")
         assert config == mock_config
 
-    @patch('app.db.migration_utils.get_current_revision')
+    @patch('app.startup.migration_tracker.get_current_revision')
     def test_get_current_safely_success(self, mock_get_current: Mock,
                                        migration_tracker: MigrationTracker) -> None:
         """Test successful current revision retrieval."""
@@ -164,7 +164,7 @@ class TestAlembicOperations:
         result = migration_tracker._get_current_safely(mock_config)
         assert result == "abc123"
 
-    @patch('app.db.migration_utils.get_current_revision')
+    @patch('app.startup.migration_tracker.get_current_revision')
     def test_get_current_safely_error(self, mock_get_current: Mock,
                                      migration_tracker: MigrationTracker) -> None:
         """Test current revision retrieval with error."""
@@ -177,8 +177,8 @@ class TestAlembicOperations:
 
 class TestMigrationChecking:
     """Test migration checking functionality."""
-    @patch('app.db.migration_utils.get_head_revision')
-    @patch('app.db.migration_utils.needs_migration')
+    @patch('app.startup.migration_tracker.get_head_revision')
+    @patch('app.startup.migration_tracker.needs_migration')
     async def test_check_migrations_pending(self, mock_needs: Mock, mock_head: Mock,
                                            migration_tracker: MigrationTracker) -> None:
         """Test checking with pending migrations."""
@@ -191,8 +191,8 @@ class TestMigrationChecking:
                     state = await migration_tracker.check_migrations()
                     assert len(state.pending_migrations) == 1
                     assert state.pending_migrations[0] == "def456"
-    @patch('app.db.migration_utils.get_head_revision')
-    @patch('app.db.migration_utils.needs_migration')
+    @patch('app.startup.migration_tracker.get_head_revision')
+    @patch('app.startup.migration_tracker.needs_migration')
     async def test_check_migrations_none_pending(self, mock_needs: Mock, mock_head: Mock,
                                                  migration_tracker: MigrationTracker) -> None:
         """Test checking with no pending migrations."""

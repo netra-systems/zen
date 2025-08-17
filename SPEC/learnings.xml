@@ -2685,7 +2685,72 @@
             </compliance>
         </learning>
     </type-safety-consolidation>
-</specification>
+    
+    <react-frontend-learnings>
+        <learning id="react-infinite-loop-useeffect">
+            <title>React Infinite Loop in useLoadingState Hook</title>
+            <date>2025-08-16</date>
+            <category>Frontend/React</category>
+            <description>
+                Maximum update depth exceeded error in MainChat component caused by improper useEffect dependency management in useLoadingState hook.
+                The useStateTransition function was creating infinite loops due to recreating callbacks on every state change.
+            </description>
+            <symptoms>
+                <symptom>Maximum update depth exceeded error in browser console</symptom>
+                <symptom>React limits nested updates to prevent infinite loops</symptom>
+                <symptom>Error pointing to MainChat component rendering</symptom>
+                <symptom>Application crashes on chat page load</symptom>
+            </symptoms>
+            <root-causes>
+                <cause>useCallback in useStateTransition recreated on every currentState or newState change</cause>
+                <cause>useEffect depending on recreated callback triggers on every render</cause>
+                <cause>State update in effect causes callback recreation, creating infinite loop</cause>
+                <cause>Improper dependency array in useEffect hook</cause>
+            </root-causes>
+            <solution>
+                <step>Remove intermediate useCallback wrapper in useStateTransition</step>
+                <step>Move transition logic directly into useEffect</step>
+                <step>Depend only on newState to avoid circular dependencies</step>
+                <step>Let React handle currentState comparison without explicit dependency</step>
+            </solution>
+            <code-fix>
+                <before>
+                    const handleTransition = useCallback(() => {
+                        if (currentState === newState) return;
+                        const transition = validateStateTransition(currentState, newState);
+                        if (transition.isValid) {
+                            previousStateRef.current = currentState;
+                            setCurrentState(newState);
+                        }
+                    }, [currentState, newState, setCurrentState, previousStateRef]);
+                    
+                    useEffect(() => {
+                        handleTransition();
+                    }, [handleTransition]);
+                </before>
+                <after>
+                    useEffect(() => {
+                        if (currentState === newState) return;
+                        const transition = validateStateTransition(currentState, newState);
+                        if (transition.isValid) {
+                            previousStateRef.current = currentState;
+                            setCurrentState(newState);
+                        }
+                    }, [newState]); // Only depend on newState to avoid loops
+                </after>
+            </code-fix>
+            <files-modified>
+                <file>frontend/hooks/useLoadingState.ts - Fixed useStateTransition function</file>
+            </files-modified>
+            <prevention>
+                <practice>Avoid recreating callbacks that are used as useEffect dependencies</practice>
+                <practice>Be careful with state updates inside useEffect that affect its dependencies</practice>
+                <practice>Consider using useEffect directly instead of useCallback + useEffect pattern</practice>
+                <practice>Test state management hooks thoroughly with React DevTools</practice>
+            </prevention>
+        </learning>
+    </react-frontend-learnings>
+    
     <comprehensive-audit>
         <learning id="spec-alignment-comprehensive-audit-2025-08-15">
             <timestamp>2025-08-15T23:52:00Z</timestamp>
@@ -2785,3 +2850,4 @@
             <impact>SYSTEM_WIDE</impact>
         </learning>
     </comprehensive-audit>
+</specification>

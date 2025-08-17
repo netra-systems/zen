@@ -115,6 +115,15 @@ class MCPClient:
     ) -> MCPToolResult:
         """Execute tool on external MCP server with arguments."""
         await self._validate_tool_execution(connection, tool_name, arguments)
+        return await self._perform_tool_execution(connection, tool_name, arguments)
+
+    async def _perform_tool_execution(
+        self, 
+        connection: MCPConnection, 
+        tool_name: str, 
+        arguments: Dict[str, Any]
+    ) -> MCPToolResult:
+        """Perform the actual tool execution steps."""
         context = self._create_operation_context(connection, "execute_tool")
         result = await self._send_tool_execution(connection, tool_name, arguments, context)
         await self._process_tool_result(result, connection, tool_name)

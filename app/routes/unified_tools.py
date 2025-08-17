@@ -70,25 +70,39 @@ def _filter_available_tools(available_tools: List[Dict]) -> List[Dict]:
     """Filter tools to only include available ones."""
     return [tool for tool in available_tools if tool.get("available", False)]
 
+def _extract_tool_basic_info(tool: Dict) -> Dict:
+    """Extract basic tool information."""
+    return {
+        "tool_name": tool["name"],
+        "category": tool["category"],
+        "description": tool["description"]
+    }
+
+
+def _extract_tool_requirements(tool: Dict) -> Dict:
+    """Extract tool requirements information."""
+    return {
+        "available": tool.get("available", False),
+        "required_permissions": tool.get("required_permissions", []),
+        "missing_requirements": tool.get("missing_requirements", []),
+        "upgrade_required": tool.get("upgrade_path")
+    }
+
+
 def _create_tool_availability(tool: Dict) -> ToolAvailability:
     """Create ToolAvailability object from tool dict."""
-    return ToolAvailability(
-        tool_name=tool["name"],
-        category=tool["category"],
-        description=tool["description"],
-        available=tool.get("available", False),
-        required_permissions=tool.get("required_permissions", []),
-        missing_requirements=tool.get("missing_requirements", []),
-        upgrade_required=tool.get("upgrade_path")
-    )
+    basic_info = _extract_tool_basic_info(tool)
+    requirements = _extract_tool_requirements(tool)
+    return ToolAvailability(**{**basic_info, **requirements})
 
 def _build_tool_availability_response(
     available_tools: List[Dict], tools_available: List[Dict], 
     categories: List[str], current_user: User
 ) -> ToolAvailabilityResponse:
     """Build the tool availability response."""
+    tool_objects = [_create_tool_availability(tool) for tool in available_tools]
     return ToolAvailabilityResponse(
-        tools=[_create_tool_availability(tool) for tool in available_tools],
+        tools=tool_objects,
         user_plan=current_user.plan_tier,
         total_tools=len(available_tools),
         available_tools=len(tools_available),
@@ -99,6 +113,13 @@ def _handle_list_tools_error(e: Exception):
     """Handle list tools error."""
     logger.error(f"Error listing tools: {e}", exc_info=True)
     raise HTTPException(status_code=500, detail="Failed to list tools")
+
+async def _gather_tool_data(current_user: User, category: Optional[str]):
+    """Gather tool data for user."""
+    available_tools = await _get_available_tools_for_user(current_user, category)
+    categories = _get_tool_category_names()
+    tools_available = _filter_available_tools(available_tools)
+    return available_tools, categories, tools_available
 
 @router.get("/", summary="List available tools")
 async def list_tools(
@@ -113,9 +134,7 @@ async def list_tools(
     a unified view of all tools with their availability status.
     """
     try:
-        available_tools = await _get_available_tools_for_user(current_user, category)
-        categories = _get_tool_category_names()
-        tools_available = _filter_available_tools(available_tools)
+        available_tools, categories, tools_available = await _gather_tool_data(current_user, category)
         return _build_tool_availability_response(available_tools, tools_available, categories, current_user)
     except Exception as e:
         _handle_list_tools_error(e)
@@ -145,15 +164,20 @@ def _add_result_or_error(response: Dict[str, Any], result) -> None:
     else:
         response["error"] = result.error_message
 
+def _create_permission_info(permission_check) -> Dict[str, Any]:
+    """Create permission info dictionary."""
+    return {
+        "required_permissions": permission_check.required_permissions,
+        "missing_permissions": permission_check.missing_permissions,
+        "upgrade_path": permission_check.upgrade_path,
+        "rate_limit_status": permission_check.rate_limit_status
+    }
+
+
 def _add_permission_info_if_denied(response: Dict[str, Any], result) -> None:
     """Add permission info if access was denied."""
     if result.status == "permission_denied" and result.permission_check:
-        response["permission_info"] = {
-            "required_permissions": result.permission_check.required_permissions,
-            "missing_permissions": result.permission_check.missing_permissions,
-            "upgrade_path": result.permission_check.upgrade_path,
-            "rate_limit_status": result.permission_check.rate_limit_status
-        }
+        response["permission_info"] = _create_permission_info(result.permission_check)
 
 def _format_tool_execution_response(result) -> Dict[str, Any]:
     """Format complete tool execution response."""
@@ -166,6 +190,12 @@ def _handle_tool_execution_error(e: Exception, tool_name: str):
     """Handle tool execution error."""
     logger.error(f"Error executing tool {tool_name}: {e}", exc_info=True)
     raise HTTPException(status_code=500, detail=f"Tool execution failed: {str(e)}")
+
+async def _process_tool_execution(request: ToolExecutionRequest, current_user: User, db: DbDep):
+    """Process tool execution and logging."""
+    result = await _execute_tool_through_registry(request, current_user)
+    await _log_tool_execution_to_db(result, db)
+    return _format_tool_execution_response(result)
 
 @router.post("/execute", summary="Execute a tool")
 async def execute_tool(
@@ -180,9 +210,7 @@ async def execute_tool(
     a unified interface for all tool operations.
     """
     try:
-        result = await _execute_tool_through_registry(request, current_user)
-        await _log_tool_execution_to_db(result, db)
-        return _format_tool_execution_response(result)
+        return await _process_tool_execution(request, current_user, db)
     except Exception as e:
         _handle_tool_execution_error(e, request.tool_name)
 
@@ -207,27 +235,34 @@ async def get_tool_categories() -> List[Dict[str, Any]]:
         _handle_categories_error(e)
 
 
+def _extract_user_context_data(current_user: User) -> Dict[str, Any]:
+    """Extract user context data."""
+    return {
+        "user_id": str(current_user.id),
+        "user_plan": current_user.plan_tier,
+        "user_roles": getattr(current_user, 'roles', []),
+        "feature_flags": current_user.feature_flags or {},
+        "is_developer": current_user.is_developer
+    }
+
+
 def _create_tool_execution_context(current_user: User, tool_name: str, action: str):
     """Create tool execution context for permission checking."""
     from app.schemas.ToolPermission import ToolExecutionContext
+    user_data = _extract_user_context_data(current_user)
     return ToolExecutionContext(
-        user_id=str(current_user.id),
         tool_name=tool_name,
         requested_action=action,
-        user_plan=current_user.plan_tier,
-        user_roles=getattr(current_user, 'roles', []),
-        feature_flags=current_user.feature_flags or {},
-        is_developer=current_user.is_developer,
+        **user_data
     )
 
 async def _check_tool_permission_with_service(context):
     """Check tool permission using permission service."""
     return await permission_service.check_tool_permission(context)
 
-def _build_permission_response(tool_name: str, permission_result) -> Dict[str, Any]:
-    """Build permission check response."""
+def _extract_permission_details(permission_result) -> Dict[str, Any]:
+    """Extract permission details from result."""
     return {
-        "tool_name": tool_name,
         "allowed": permission_result.allowed,
         "reason": permission_result.reason,
         "required_permissions": permission_result.required_permissions,
@@ -236,10 +271,22 @@ def _build_permission_response(tool_name: str, permission_result) -> Dict[str, A
         "rate_limit_status": permission_result.rate_limit_status
     }
 
+
+def _build_permission_response(tool_name: str, permission_result) -> Dict[str, Any]:
+    """Build permission check response."""
+    details = _extract_permission_details(permission_result)
+    return {"tool_name": tool_name, **details}
+
 def _handle_permission_check_error(e: Exception, tool_name: str):
     """Handle permission check error."""
     logger.error(f"Error checking permissions for {tool_name}: {e}")
     raise HTTPException(status_code=500, detail="Permission check failed")
+
+async def _execute_permission_check(tool_name: str, action: str, current_user: User):
+    """Execute permission check workflow."""
+    context = _create_tool_execution_context(current_user, tool_name, action)
+    permission_result = await _check_tool_permission_with_service(context)
+    return _build_permission_response(tool_name, permission_result)
 
 @router.get("/permissions/{tool_name}", summary="Check tool permissions")
 async def check_tool_permissions(
@@ -253,9 +300,7 @@ async def check_tool_permissions(
     This is useful for UI elements to show/hide tool options dynamically.
     """
     try:
-        context = _create_tool_execution_context(current_user, tool_name, action)
-        permission_result = await _check_tool_permission_with_service(context)
-        return _build_permission_response(tool_name, permission_result)
+        return await _execute_permission_check(tool_name, action, current_user)
     except Exception as e:
         _handle_permission_check_error(e, tool_name)
 
@@ -299,6 +344,13 @@ def _handle_user_plan_error(e: Exception):
     logger.error(f"Error getting user plan: {e}")
     raise HTTPException(status_code=500, detail="Failed to get plan information")
 
+async def _gather_user_plan_data(current_user: User, db: DbDep):
+    """Gather user plan data components."""
+    current_plan_def = _get_current_plan_definition(current_user)
+    available_upgrades = _calculate_available_upgrades(current_user)
+    usage_summary = await _get_usage_summary(current_user, db)
+    return current_plan_def, available_upgrades, usage_summary
+
 @router.get("/user/plan", summary="Get user plan information")
 async def get_user_plan(
     db: DbDep,
@@ -308,9 +360,7 @@ async def get_user_plan(
     Get current user's plan information and upgrade options
     """
     try:
-        current_plan_def = _get_current_plan_definition(current_user)
-        available_upgrades = _calculate_available_upgrades(current_user)
-        usage_summary = await _get_usage_summary(current_user, db)
+        current_plan_def, available_upgrades, usage_summary = await _gather_user_plan_data(current_user, db)
         return _build_user_plan_response(current_user, current_plan_def, available_upgrades, usage_summary)
     except Exception as e:
         _handle_user_plan_error(e)
@@ -360,6 +410,19 @@ def _handle_migration_error(e: Exception):
     logger.error(f"Error migrating user: {e}")
     raise HTTPException(status_code=500, detail="Migration failed")
 
+def _execute_user_migration(current_user: User, db: DbDep):
+    """Execute user migration workflow."""
+    new_plan, feature_flags = _determine_migration_plan_and_flags(current_user.role)
+    _update_user_plan_in_db(current_user, new_plan, feature_flags, db)
+    return _build_migration_success_response(current_user, new_plan, feature_flags)
+
+def _process_migration_request(current_user: User, db: DbDep):
+    """Process migration request based on user status."""
+    if _check_user_needs_migration(current_user):
+        return _execute_user_migration(current_user, db)
+    else:
+        return _build_no_migration_response(current_user)
+
 @router.post("/migrate-legacy", summary="Migrate from legacy admin system")
 async def migrate_legacy_admin(
     db: DbDep,
@@ -372,12 +435,7 @@ async def migrate_legacy_admin(
     to the new per-tool permission system.
     """
     try:
-        if _check_user_needs_migration(current_user):
-            new_plan, feature_flags = _determine_migration_plan_and_flags(current_user.role)
-            _update_user_plan_in_db(current_user, new_plan, feature_flags, db)
-            return _build_migration_success_response(current_user, new_plan, feature_flags)
-        else:
-            return _build_no_migration_response(current_user)
+        return _process_migration_request(current_user, db)
     except Exception as e:
         _handle_migration_error(e)
 

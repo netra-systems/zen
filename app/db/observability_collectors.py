@@ -135,15 +135,17 @@ class PerformanceMetricsCollector:
     """Collect derived performance metrics."""
     
     @staticmethod
+    async def _calculate_per_second_rates(metrics: DatabaseMetrics, prev_metrics) -> None:
+        """Calculate per-second performance rates."""
+        metrics.queries_per_second = PerformanceCalculator.calculate_queries_per_second(metrics, prev_metrics)
+        metrics.connections_per_second = PerformanceCalculator.calculate_connections_per_second(metrics, prev_metrics)
+
+    @staticmethod
     async def calculate_rates(metrics: DatabaseMetrics, metrics_history, query_times) -> None:
         """Calculate performance rates."""
-        # Calculate queries per second
         if len(metrics_history) > 1:
             prev_metrics = metrics_history[-1]
-            metrics.queries_per_second = PerformanceCalculator.calculate_queries_per_second(metrics, prev_metrics)
-            metrics.connections_per_second = PerformanceCalculator.calculate_connections_per_second(metrics, prev_metrics)
-        
-        # Calculate average response time
+            await PerformanceMetricsCollector._calculate_per_second_rates(metrics, prev_metrics)
         metrics.avg_response_time = PerformanceCalculator.calculate_average_response_time(query_times)
 
     @staticmethod

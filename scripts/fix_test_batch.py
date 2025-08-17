@@ -258,74 +258,87 @@ class BatchTestProcessor:
         
         return batch_results
     
+    def _initialize_test_result(self, test_path):
+        """Initialize test result dictionary"""
+        print(f"\nProcessing: {test_path}")
+        return {
+            "test": test_path, "status": "pending", 
+            "error_type": None, "fix_applied": None
+        }
+
+    def _build_pytest_command(self, test_path):
+        """Build pytest command for single test"""
+        return [
+            sys.executable, "-m", "pytest", test_path,
+            "-xvs", "--tb=short"
+        ]
+
+    def _run_test_subprocess(self, cmd):
+        """Run test subprocess with timeout"""
+        return subprocess.run(
+            cmd, capture_output=True, text=True,
+            timeout=10, cwd=PROJECT_ROOT
+        )
+
+    def _check_test_already_passed(self, proc_result, result):
+        """Check if test already passes"""
+        if proc_result.returncode == 0:
+            result["status"] = "passed"
+            print(f"  ✓ Test already passing")
+            return True
+        return False
+
+    def _analyze_test_failure(self, test_path, proc_result):
+        """Analyze test failure and return analysis"""
+        return self.analyzer.analyze_failure(
+            test_path, proc_result.stdout + proc_result.stderr
+        )
+
+    def _apply_import_fix(self, analysis, test_path):
+        """Apply import error fix"""
+        test_file = Path(test_path.split("::")[0])
+        if not test_file.is_absolute():
+            test_file = PROJECT_ROOT / test_file
+        return self.fixer.fix_import_error(
+            test_file, analysis["details"].get("missing_name"),
+            analysis["details"].get("module")
+        )
+
+    def _apply_test_fix(self, analysis, test_path, result):
+        """Apply fix based on analysis strategy"""
+        if analysis["fix_strategy"] == "check_and_fix_import":
+            fixed = self._apply_import_fix(analysis, test_path)
+            result["status"] = "fixed" if fixed else "needs_implementation"
+            if fixed: result["fix_applied"] = "import_correction"
+        else:
+            result["status"] = "manual_review"
+            print(f"  ⚠ Needs manual review: {analysis['error_type']}")
+
+    def _handle_test_timeout(self, result):
+        """Handle test timeout"""
+        result["status"] = "timeout"
+        print(f"  ⏰ Test timed out")
+
+    def _handle_test_error(self, e, result):
+        """Handle test execution error"""
+        result["status"] = "error"
+        result["error"] = str(e)
+        print(f"  ❌ Error: {e}")
+
     def process_single_test(self, test_path: str) -> Dict:
         """Process a single test"""
-        
-        print(f"\nProcessing: {test_path}")
-        
-        result = {
-            "test": test_path,
-            "status": "pending",
-            "error_type": None,
-            "fix_applied": None
-        }
-        
-        # Run the test to get error details
-        cmd = [
-            sys.executable, "-m", "pytest",
-            test_path,
-            "-xvs",
-            "--tb=short"
-        ]
-        
+        result = self._initialize_test_result(test_path)
+        cmd = self._build_pytest_command(test_path)
         try:
-            proc_result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                timeout=10,
-                cwd=PROJECT_ROOT
-            )
-            
-            if proc_result.returncode == 0:
-                result["status"] = "passed"
-                print(f"  ✓ Test already passing")
-                return result
-            
-            # Analyze the failure
-            analysis = self.analyzer.analyze_failure(test_path, proc_result.stdout + proc_result.stderr)
+            proc_result = self._run_test_subprocess(cmd)
+            if self._check_test_already_passed(proc_result, result): return result
+            analysis = self._analyze_test_failure(test_path, proc_result)
             result["error_type"] = analysis["error_type"]
-            
-            # Apply fix based on strategy
-            if analysis["fix_strategy"] == "check_and_fix_import":
-                # Extract test file path
-                test_file = Path(test_path.split("::")[0])
-                if not test_file.is_absolute():
-                    test_file = PROJECT_ROOT / test_file
-                
-                fixed = self.fixer.fix_import_error(
-                    test_file,
-                    analysis["details"].get("missing_name"),
-                    analysis["details"].get("module")
-                )
-                
-                if fixed:
-                    result["status"] = "fixed"
-                    result["fix_applied"] = "import_correction"
-                else:
-                    result["status"] = "needs_implementation"
-            else:
-                result["status"] = "manual_review"
-                print(f"  ⚠ Needs manual review: {analysis['error_type']}")
-            
+            self._apply_test_fix(analysis, test_path, result)
         except subprocess.TimeoutExpired:
-            result["status"] = "timeout"
-            print(f"  ⏰ Test timed out")
+            self._handle_test_timeout(result)
         except Exception as e:
-            result["status"] = "error"
-            result["error"] = str(e)
-            print(f"  ❌ Error: {e}")
-        
+            self._handle_test_error(e, result)
         return result
 
 def main():

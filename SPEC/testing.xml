@@ -3,8 +3,8 @@
     <metadata>
         <name>Testing Specification</name>
         <type>testing</type>
-        <version>3.1</version>
-        <last_updated>2025-08-11</last_updated>
+        <version>3.2</version>
+        <last_updated>2025-08-16</last_updated>
         <changes>
             <change version="3.0" date="2025-08-11">
                 - Coverage generation for unit level and above
@@ -18,6 +18,13 @@
                 - Introduced --real-llm option for test runner
                 - Added dedicated test environments configuration
                 - Defined seed data management for real LLM tests
+            </change>
+            <change version="3.2" date="2025-08-16">
+                - Added frontend parallel testing architecture
+                - Introduced test suite organization with priorities and weights
+                - Created custom Jest configuration for parallel execution
+                - Added intelligent test suite runner with resource management
+                - Defined 11 test suites with optimized parallel execution strategy
             </change>
         </changes>
     </metadata>
@@ -251,6 +258,131 @@
             </coverage_requirements>
         </report_generation>
     </unified_test_runner>
+    
+    <frontend_parallel_testing>
+        <description>
+            Frontend test suite organization for optimal parallel execution.
+            Tests are categorized into suites with priority levels and resource weights
+            to maximize parallelization efficiency while preventing resource contention.
+        </description>
+        
+        <configuration_files>
+            <file name="jest.config.suites.cjs">
+                <description>Jest configuration with parallel test suite projects</description>
+                <location>frontend/jest.config.suites.cjs</location>
+            </file>
+            <file name="test-suite-runner.js">
+                <description>Intelligent test suite runner with priority-based execution</description>
+                <location>frontend/test-suite-runner.js</location>
+            </file>
+            <file name="jest-suite-reporter.js">
+                <description>Custom reporter for test suite summary and metrics</description>
+                <location>frontend/jest-suite-reporter.js</location>
+            </file>
+        </configuration_files>
+        
+        <test_suites>
+            <suite name="components" priority="1" weight="0.8" timeout="5">
+                <description>Component unit tests - fast and isolated</description>
+                <pattern>**/__tests__/components/**/!(*.integration|*.e2e).test.[jt]s?(x)</pattern>
+            </suite>
+            
+            <suite name="chat" priority="2" weight="0.8" timeout="8">
+                <description>Chat-related component tests</description>
+                <pattern>**/__tests__/components/chat/**/*.test.[jt]s?(x)</pattern>
+                <pattern>**/__tests__/chat/**/*.test.[jt]s?(x)</pattern>
+            </suite>
+            
+            <suite name="hooks" priority="1" weight="0.6" timeout="5">
+                <description>React hooks unit tests</description>
+                <pattern>**/__tests__/hooks/**/*.test.[jt]s?(x)</pattern>
+            </suite>
+            
+            <suite name="auth" priority="2" weight="0.4" timeout="8">
+                <description>Authentication flow tests</description>
+                <pattern>**/__tests__/auth/**/*.test.[jt]s?(x)</pattern>
+            </suite>
+            
+            <suite name="integration-basic" priority="3" weight="0.5" timeout="15">
+                <description>Basic integration tests</description>
+                <pattern>**/__tests__/integration/basic-*.test.[jt]s?(x)</pattern>
+            </suite>
+            
+            <suite name="integration-advanced" priority="3" weight="0.6" timeout="20">
+                <description>Advanced integration scenarios</description>
+                <pattern>**/__tests__/integration/advanced-integration/**/*.test.[jt]s?(x)</pattern>
+            </suite>
+            
+            <suite name="integration-comprehensive" priority="4" weight="0.8" timeout="25">
+                <description>Comprehensive integration tests - heaviest</description>
+                <pattern>**/__tests__/integration/comprehensive/**/*.test.[jt]s?(x)</pattern>
+            </suite>
+            
+            <suite name="integration-critical" priority="4" weight="0.8" timeout="20">
+                <description>Critical path integration tests</description>
+                <pattern>**/__tests__/integration/critical/**/*.test.[jt]s?(x)</pattern>
+            </suite>
+            
+            <suite name="system" priority="3" weight="0.4" timeout="15">
+                <description>System-level tests</description>
+                <pattern>**/__tests__/system/**/*.test.[jt]s?(x)</pattern>
+            </suite>
+            
+            <suite name="imports" priority="1" weight="0.2" timeout="5">
+                <description>Import verification tests - run sequentially</description>
+                <pattern>**/__tests__/imports/**/*.test.[jt]s?(x)</pattern>
+                <max_workers>1</max_workers>
+            </suite>
+            
+            <suite name="core" priority="2" weight="0.4" timeout="10">
+                <description>Core unified tests</description>
+                <pattern>**/__tests__/unified-*.test.[jt]s?(x)</pattern>
+            </suite>
+        </test_suites>
+        
+        <execution_strategy>
+            <principle>Priority-based execution with intelligent resource allocation</principle>
+            <steps>
+                <step order="1">Group tests by priority level (1-4)</step>
+                <step order="2">Calculate parallel slots based on suite weights</step>
+                <step order="3">Execute priority groups sequentially</step>
+                <step order="4">Within each priority, run compatible suites in parallel</step>
+                <step order="5">Monitor and enforce suite timeouts</step>
+                <step order="6">Aggregate results with custom reporter</step>
+            </steps>
+            
+            <resource_management>
+                <cpu_usage>75% of available cores by default</cpu_usage>
+                <weight_system>Weights determine parallel slot allocation</weight_system>
+                <chunking>Compatible tests grouped for parallel execution</chunking>
+            </resource_management>
+        </execution_strategy>
+        
+        <npm_scripts>
+            <script name="test:suites">Run all test suites in parallel</script>
+            <script name="test:suites:components">Run component tests only</script>
+            <script name="test:suites:chat">Run chat tests only</script>
+            <script name="test:suites:hooks">Run hooks tests only</script>
+            <script name="test:suites:auth">Run auth tests only</script>
+            <script name="test:suites:integration">Run all integration tests</script>
+            <script name="test:suites:fast">Run priority 1 tests only</script>
+            <script name="test:suites:medium">Run priority 1-2 tests</script>
+            <script name="test:suites:slow">Run all tests including heavy integration</script>
+            <script name="test:suites:parallel">Run with max 8 parallel suites</script>
+            <script name="test:suites:sequential">Run all suites sequentially</script>
+            <script name="test:suites:watch">Watch mode for development</script>
+            <script name="test:suites:coverage">Generate coverage report</script>
+        </npm_scripts>
+        
+        <benefits>
+            <benefit>Reduced test execution time through intelligent parallelization</benefit>
+            <benefit>Granular control over test execution</benefit>
+            <benefit>Priority-based execution for faster feedback</benefit>
+            <benefit>Resource-aware parallel execution prevents system overload</benefit>
+            <benefit>Detailed suite-level reporting and metrics</benefit>
+            <benefit>Easy CI/CD integration with configurable parallelization</benefit>
+        </benefits>
+    </frontend_parallel_testing>
     
     <working_test_files>
         <test_file name="test_simple_health.py">

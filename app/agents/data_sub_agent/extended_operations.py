@@ -44,14 +44,28 @@ class ExtendedOperations:
             raise last_exception
         
     async def process_with_cache(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process data with caching support."""
+        """Process data with TTL-based caching support."""
         # Use agent's cache if it exists (for test compatibility)
         cache = getattr(self.agent, '_cache', self._cache)
         cache_key = self._generate_cache_key(data)
+        current_time = time.time()
+        
+        # Check if cached entry exists and is not expired
         if cache_key in cache:
-            return cache[cache_key]
+            cache_entry = cache[cache_key]
+            cache_ttl = getattr(self.agent, 'cache_ttl', 60)  # Default 60 seconds
+            if current_time - cache_entry['timestamp'] < cache_ttl:
+                return cache_entry['data']
+            else:
+                # Entry expired, remove it
+                del cache[cache_key]
+        
+        # Process data and cache with timestamp
         result = await self._process_internal(data)
-        cache[cache_key] = result
+        cache[cache_key] = {
+            'data': result,
+            'timestamp': current_time
+        }
         return result
         
     def _generate_cache_key(self, data: Dict[str, Any]) -> str:

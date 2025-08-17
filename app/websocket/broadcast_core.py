@@ -136,6 +136,8 @@ class BroadcastManager:
     async def _cleanup_broadcast_dead_connections(self, connections_to_remove: List[Tuple[str, ConnectionInfo]]) -> None:
         """Clean up dead connections identified during broadcast."""
         for user_id, conn_info in connections_to_remove:
+            # Mark connection as closing before cleanup
+            conn_info.is_closing = True
             await self.connection_manager._disconnect_internal(
                 user_id, conn_info.websocket, code=1001, reason="Connection lost during broadcast"
             )
@@ -182,6 +184,8 @@ class BroadcastManager:
     async def _cleanup_user_dead_connections(self, user_id: str, connections_to_remove: List[ConnectionInfo]) -> None:
         """Clean up dead connections for user."""
         for conn_info in connections_to_remove:
+            # Mark connection as closing before cleanup
+            conn_info.is_closing = True
             await self.connection_manager._disconnect_internal(
                 user_id, conn_info.websocket, code=1001, reason="Connection lost"
             )
@@ -250,21 +254,44 @@ class BroadcastManager:
 
     def _is_connection_ready(self, conn_info: ConnectionInfo) -> bool:
         """Check if connection is ready for sending."""
-        if conn_info.websocket.client_state == WebSocketState.CONNECTED:
-            return True
-        else:
-            logger.debug(f"Connection {conn_info.connection_id} not in CONNECTED state")
+        # Check if connection is marked as closing
+        if conn_info.is_closing:
+            logger.debug(f"Connection {conn_info.connection_id} is closing, skipping send")
             return False
+            
+        ws_state = conn_info.websocket.client_state
+        app_state = conn_info.websocket.application_state
+        
+        # Check both client and application states
+        if ws_state != WebSocketState.CONNECTED:
+            logger.debug(f"Connection {conn_info.connection_id} not in CONNECTED state: {ws_state.name}")
+            return False
+        
+        # Check if connection is closing or closed on app side
+        if app_state != WebSocketState.CONNECTED:
+            logger.debug(f"Connection {conn_info.connection_id} application state not connected: {app_state.name}")
+            return False
+            
+        return True
 
     async def _perform_message_send(self, conn_info: ConnectionInfo, message: Union[Dict[str, Any], Any]) -> bool:
         """Perform actual message sending."""
-        prepared_message = prepare_websocket_message(message)
-        await conn_info.websocket.send_json(prepared_message)
-        return True
+        try:
+            prepared_message = prepare_websocket_message(message)
+            await conn_info.websocket.send_json(prepared_message)
+            return True
+        except RuntimeError as e:
+            # Re-raise to be handled by outer error handler
+            raise e
 
     def _handle_connection_error(self, conn_info: ConnectionInfo, error: Exception) -> None:
         """Handle connection-related errors."""
-        if "Cannot call" in str(error) or "close" in str(error).lower():
+        error_msg = str(error)
+        
+        # Handle specific case where send is called after close message
+        if "Cannot call \"send\" once a close message has been sent" in error_msg:
+            logger.debug(f"Connection {conn_info.connection_id} already closing, skipping send")
+        elif "Cannot call" in error_msg or "close" in error_msg.lower():
             logger.debug(f"Connection {conn_info.connection_id} closed: {error}")
         else:
             logger.warning(f"Error sending to connection {conn_info.connection_id}: {error}")
