@@ -1,43 +1,72 @@
-# Netra AI Optimization Platform apex-v1
+# Netra Apex - AI Optimization Platform
 
-**The world's best, highest quality, most intelligent system for optimizing AI workloads including AI tools and Agents.**
+**Enterprise AI spend optimization platform delivering measurable ROI through intelligent workload analysis and cost reduction.**
 
-## 🚀 Overview
+## 💰 Business Value Proposition
 
-Netra is a sophisticated AI optimization platform that leverages a multi-agent system to intelligently analyze and optimize AI workloads. Built with a modern tech stack combining FastAPI, Next.js, and dual-database architecture, it provides real-time optimization recommendations through an intuitive chat-based interface.
+Netra Apex captures value proportional to customer AI spend by delivering:
+- **10-40% reduction** in AI infrastructure costs
+- **Real-time optimization** of model selection and routing
+- **Performance-based pricing** aligned with customer savings
+- **Enterprise-grade** security and compliance
+
+### 🎯 Customer Segments & Value Creation
+
+| Segment | Monthly AI Spend | Value Proposition | Pricing Model |
+|---------|-----------------|-------------------|---------------|
+| **Free** | < $1K | Try core features, see potential savings | Free (conversion focus) |
+| **Early** | $1K - $10K | 15-20% cost reduction | 20% of savings |
+| **Mid** | $10K - $100K | 20-30% cost reduction + advanced analytics | 20% of savings + platform fee |
+| **Enterprise** | > $100K | 30-40% reduction + custom integrations | Negotiated % + SLA |
 
 ### Key Features
 
-- **Multi-Agent Intelligence**: Seven specialized sub-agents orchestrated by advanced supervisor
-- **Real-Time Communication**: WebSocket manager with heartbeat, retry logic, and connection pooling
-- **Dual Database System**: PostgreSQL for transactional data, ClickHouse for time-series analytics
-- **Enterprise Security**: Google OAuth 2.0 integration with JWT tokens and secure session management
-- **Modern UI/UX**: Next.js 14 chat interface with real-time agent status and thinking indicators
-- **Apex Optimizer Agent**: 30+ specialized optimization tools for cost, latency, and performance analysis
-- **State Persistence**: Database-backed conversation continuity and recovery
-- **Scalable Architecture**: Async-first design with repository pattern and dependency injection
+- **Multi-Agent Intelligence**: Seven specialized sub-agents for comprehensive optimization
+- **Intelligent Model Routing**: Automatic selection of optimal LLM for each task
+- **Cost Analytics Dashboard**: Real-time spend tracking and optimization metrics
+- **Usage Pattern Analysis**: ML-driven insights into AI workload patterns
+- **Performance Monitoring**: Latency, throughput, and quality metrics
+- **Enterprise Integration**: API-first design for seamless integration
+- **Compliance & Security**: SOC2, GDPR ready with audit trails
+- **ROI Calculator**: Transparent savings tracking and reporting
 
 ## 📋 Table of Contents
 
-- [Developer Welcome Guide](#-developer-welcome-guide) **← Start Here for AI-Native Development**
+- [Business Value & Monetization](#-business-value--monetization)
+- [Developer Guidelines](#-developer-guidelines) **← Revenue-Driven Development**
 - [Quick Start](#-quick-start)
-- [Architecture](#-architecture)
+- [Architecture](#-architecture) **← Module-Based (300 lines max)**
 - [Installation](#-installation)
 - [Development](#-development)
 - [API Documentation](#-api-documentation)
-- [Testing](#-testing)
+- [Testing](#-testing) **← 97% Coverage Target**
 - [Deployment](#-deployment)
 - [Contributing](#-contributing)
 
-## 🚀 Developer Welcome Guide
+## 💰 Business Value & Monetization
 
-**New to Netra?** Start with our comprehensive [Developer Welcome Guide](DEVELOPER_WELCOME_GUIDE.md) to understand:
-- **AI-Native Development Philosophy**: How we use AI agents as first-class citizens in development
-- **Specification-Driven Development**: Why specifications, not code, are our source of truth
-- **Ultra-Thinking Capabilities**: Deep AI analysis for intelligent code generation
-- **Autonomous Improvement Cycles**: How the system self-optimizes with 97% test coverage targets
+### Revenue Model
+- **Performance-Based Pricing**: 20% of demonstrated AI cost savings
+- **Platform Fees**: Monthly SaaS fees for Mid/Enterprise tiers
+- **Professional Services**: Custom integrations and optimization consulting
 
-📖 **[Read the Developer Welcome Guide →](DEVELOPER_WELCOME_GUIDE.md)**
+### Value Metrics
+- **Savings Delta**: Measurable reduction in AI spend
+- **Optimization Rate**: Percentage of workloads optimized
+- **Time to Value**: < 7 days from signup to first savings
+
+## 🚀 Developer Guidelines
+
+### 🔴 CRITICAL: Revenue-Driven Development
+
+**Every line of code must justify its business value:**
+
+1. **Business Value Justification (BVJ)** required for all features
+2. **Customer Segment** targeting (Free → Paid conversion focus)  
+3. **Revenue Impact** estimation before implementation
+4. **300-line modules, 8-line functions** for maintainability
+
+📖 **[Read CLAUDE.md →](CLAUDE.md)** for complete development philosophy
 
 ## 🏃 Quick Start
 

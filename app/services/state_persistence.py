@@ -159,92 +159,105 @@ class StatePersistenceService:
     async def save_agent_state(self, request: StatePersistenceRequest,
                               db_session: AsyncSession) -> Tuple[bool, Optional[str]]:
         """Save agent state with atomic transactions and versioning."""
-        snapshot_id = None
-        transaction_id = None
-        
         try:
-            # Start transaction
-            async with db_session.begin():
-                snapshot_id = await self._create_state_snapshot(request, db_session)
-                transaction_id = await self._log_state_transaction(
-                    snapshot_id, request, "create", db_session)
-                
-                # Cache in Redis
-                await self._cache_state_in_redis(request)
-                
-                # Clean up old snapshots
-                await self._cleanup_old_snapshots(request.run_id, db_session)
-                
-                await self._complete_transaction(transaction_id, "committed", db_session)
-                
+            snapshot_id = await self._execute_state_save_transaction(request, db_session)
             logger.info(f"Saved state snapshot {snapshot_id} for run {request.run_id}")
             return True, snapshot_id
-            
         except Exception as e:
             logger.error(f"Failed to save state for run {request.run_id}: {e}")
-            if transaction_id:
-                await self._complete_transaction(transaction_id, "failed", db_session, str(e))
             return False, None
+
+    async def _execute_state_save_transaction(self, request: StatePersistenceRequest, db_session: AsyncSession) -> str:
+        """Execute the complete state save transaction."""
+        snapshot_id = None
+        transaction_id = None
+        async with db_session.begin():
+            snapshot_id, transaction_id = await self._create_snapshot_and_transaction(request, db_session)
+            await self._finalize_state_save(request, transaction_id, db_session)
+        return snapshot_id
+
+    async def _create_snapshot_and_transaction(self, request: StatePersistenceRequest, db_session: AsyncSession) -> Tuple[str, str]:
+        """Create snapshot and transaction records."""
+        snapshot_id = await self._create_state_snapshot(request, db_session)
+        transaction_id = await self._log_state_transaction(
+            snapshot_id, request, "create", db_session
+        )
+        return snapshot_id, transaction_id
+
+    async def _finalize_state_save(self, request: StatePersistenceRequest, transaction_id: str, db_session: AsyncSession) -> None:
+        """Complete state save with caching and cleanup."""
+        await self._cache_state_in_redis(request)
+        await self._cleanup_old_snapshots(request.run_id, db_session)
+        await self._complete_transaction(transaction_id, "committed", db_session)
     
     async def load_agent_state(self, run_id: str, snapshot_id: Optional[str] = None,
                               db_session: Optional[AsyncSession] = None) -> Optional[DeepAgentState]:
         """Load agent state with recovery support."""
         try:
-            # Try Redis cache first
-            if not snapshot_id:
-                state = await self._load_from_redis_cache(run_id)
-                if state:
-                    return state
-            
-            # Load from database snapshots
-            if db_session:
-                snapshot = await self._get_latest_snapshot(run_id, snapshot_id, db_session)
-                if snapshot:
-                    state_data = await self._deserialize_state_data(
-                        snapshot.state_data, snapshot.serialization_format)
-                    
-                    # Re-cache in Redis
-                    await self._cache_deserialized_state(run_id, state_data)
-                    
-                    logger.info(f"Loaded state from snapshot {snapshot.id}")
-                    return DeepAgentState(**state_data)
-            
-            logger.warning(f"No state found for run {run_id}")
-            return None
-            
+            state = await self._attempt_cache_load(run_id, snapshot_id)
+            if state:
+                return state
+            return await self._attempt_database_load(run_id, snapshot_id, db_session)
         except Exception as e:
             logger.error(f"Failed to load state for run {run_id}: {e}")
             return None
+
+    async def _attempt_cache_load(self, run_id: str, snapshot_id: Optional[str]) -> Optional[DeepAgentState]:
+        """Try loading state from Redis cache first."""
+        if not snapshot_id:
+            return await self._load_from_redis_cache(run_id)
+        return None
+
+    async def _attempt_database_load(self, run_id: str, snapshot_id: Optional[str], db_session: Optional[AsyncSession]) -> Optional[DeepAgentState]:
+        """Load state from database snapshots."""
+        if not db_session:
+            logger.warning(f"No state found for run {run_id}")
+            return None
+        snapshot = await self._get_latest_snapshot(run_id, snapshot_id, db_session)
+        if not snapshot:
+            logger.warning(f"No state found for run {run_id}")
+            return None
+        return await self._process_database_snapshot(run_id, snapshot)
+
+    async def _process_database_snapshot(self, run_id: str, snapshot) -> DeepAgentState:
+        """Process database snapshot and return state."""
+        state_data = await self._deserialize_state_data(
+            snapshot.state_data, snapshot.serialization_format
+        )
+        await self._cache_deserialized_state(run_id, state_data)
+        logger.info(f"Loaded state from snapshot {snapshot.id}")
+        return DeepAgentState(**state_data)
     
     async def recover_agent_state(self, request: StateRecoveryRequest,
                                  db_session: AsyncSession) -> Tuple[bool, Optional[str]]:
         """Recover agent state from a specific checkpoint."""
         recovery_id = str(uuid.uuid4())
-        
         try:
-            # Create recovery log
-            recovery_log = await self._create_recovery_log(request, recovery_id, db_session)
-            
-            # Perform recovery based on type
-            if request.recovery_type == RecoveryType.RESTART:
-                success = await self._perform_restart_recovery(request, db_session)
-            elif request.recovery_type == RecoveryType.RESUME:
-                success = await self._perform_resume_recovery(request, db_session)
-            elif request.recovery_type == RecoveryType.ROLLBACK:
-                success = await self._perform_rollback_recovery(request, db_session)
-            else:
-                raise ValueError(f"Unsupported recovery type: {request.recovery_type}")
-            
-            # Update recovery log
-            await self._complete_recovery_log(recovery_id, success, db_session)
-            
+            success = await self._execute_recovery_operation(request, recovery_id, db_session)
             logger.info(f"Recovery {recovery_id} {'completed' if success else 'failed'}")
             return success, recovery_id if success else None
-            
         except Exception as e:
             logger.error(f"Recovery failed for run {request.run_id}: {e}")
             await self._complete_recovery_log(recovery_id, False, db_session, str(e))
             return False, None
+
+    async def _execute_recovery_operation(self, request: StateRecoveryRequest, recovery_id: str, db_session: AsyncSession) -> bool:
+        """Execute the recovery operation workflow."""
+        await self._create_recovery_log(request, recovery_id, db_session)
+        success = await self._perform_recovery_by_type(request, db_session)
+        await self._complete_recovery_log(recovery_id, success, db_session)
+        return success
+
+    async def _perform_recovery_by_type(self, request: StateRecoveryRequest, db_session: AsyncSession) -> bool:
+        """Perform recovery operation based on recovery type."""
+        if request.recovery_type == RecoveryType.RESTART:
+            return await self._perform_restart_recovery(request, db_session)
+        elif request.recovery_type == RecoveryType.RESUME:
+            return await self._perform_resume_recovery(request, db_session)
+        elif request.recovery_type == RecoveryType.ROLLBACK:
+            return await self._perform_rollback_recovery(request, db_session)
+        else:
+            raise ValueError(f"Unsupported recovery type: {request.recovery_type}")
     
     async def _create_state_snapshot(self, request: StatePersistenceRequest,
                                     db_session: AsyncSession) -> str:

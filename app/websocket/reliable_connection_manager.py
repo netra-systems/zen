@@ -32,41 +32,66 @@ class ReliableConnectionManager:
         max_connections_per_user: int = 5,
         connection_timeout: int = 300  # 5 minutes
     ):
-        # Core components
+        self._initialize_core_components()
+        self._configure_intervals(heartbeat_interval, cleanup_interval, max_connections_per_user, connection_timeout)
+        self._setup_reliability_wrapper()
+        self._initialize_connection_tracking()
+        self._initialize_health_monitoring()
+        self._initialize_background_tasks()
+    
+    def _initialize_core_components(self) -> None:
+        """Initialize core components."""
         self.connection_manager = ConnectionManager()
         self.heartbeat_manager = HeartbeatManager(self.connection_manager, default_error_handler)
         self.error_handler = default_error_handler
         self.message_handler = ReliableMessageHandler()
         self.message_router = MessageTypeRouter()
-        
-        # Configuration
+    
+    def _configure_intervals(self, heartbeat_interval: int, cleanup_interval: int, 
+                           max_connections_per_user: int, connection_timeout: int) -> None:
+        """Configure timing intervals and limits."""
         self.heartbeat_interval = heartbeat_interval
         self.cleanup_interval = cleanup_interval
         self.max_connections_per_user = max_connections_per_user
         self.connection_timeout = connection_timeout
-        
-        # Reliability wrapper for connection operations
+    
+    def _setup_reliability_wrapper(self) -> None:
+        """Setup reliability wrapper for connection operations."""
+        circuit_config = self._create_circuit_breaker_config()
+        retry_config = self._create_retry_config()
         self.reliability = get_reliability_wrapper(
-            "ReliableConnectionManager",
-            CircuitBreakerConfig(
-                failure_threshold=5,
-                recovery_timeout=45.0,
-                name="ReliableConnectionManager"
-            ),
-            RetryConfig(
-                max_retries=2,
-                base_delay=1.0,
-                max_delay=10.0
-            )
+            "ReliableConnectionManager", circuit_config, retry_config
         )
-        
-        # Connection tracking
-        self.user_connections: Dict[str, Set[str]] = {}  # user_id -> {connection_ids}
-        self.connection_timeouts: Dict[str, float] = {}  # connection_id -> timeout_timestamp
-        
-        # Health monitoring
+    
+    def _create_circuit_breaker_config(self) -> CircuitBreakerConfig:
+        """Create circuit breaker configuration."""
+        return CircuitBreakerConfig(
+            failure_threshold=5,
+            recovery_timeout=45.0,
+            name="ReliableConnectionManager"
+        )
+    
+    def _create_retry_config(self) -> RetryConfig:
+        """Create retry configuration."""
+        return RetryConfig(
+            max_retries=2,
+            base_delay=1.0,
+            max_delay=10.0
+        )
+    
+    def _initialize_connection_tracking(self) -> None:
+        """Initialize connection tracking structures."""
+        self.user_connections: Dict[str, Set[str]] = {}
+        self.connection_timeouts: Dict[str, float] = {}
+    
+    def _initialize_health_monitoring(self) -> None:
+        """Initialize health monitoring and statistics."""
         self.last_cleanup_time = time.time()
-        self.stats = {
+        self.stats = self._create_initial_stats()
+    
+    def _create_initial_stats(self) -> Dict[str, int]:
+        """Create initial statistics dictionary."""
+        return {
             "total_connections": 0,
             "active_connections": 0,
             "failed_connections": 0,
@@ -74,8 +99,9 @@ class ReliableConnectionManager:
             "heartbeat_failures": 0,
             "cleanup_runs": 0
         }
-        
-        # Background tasks
+    
+    def _initialize_background_tasks(self) -> None:
+        """Initialize background task tracking."""
         self._cleanup_task: Optional[asyncio.Task] = None
         self._running = False
     
@@ -203,42 +229,43 @@ class ReliableConnectionManager:
     
     async def remove_connection(self, connection_id: str) -> bool:
         """Remove a connection with cleanup."""
-        
-        async def _remove_connection():
-            conn_info = self.connection_manager.get_connection_by_id(connection_id)
-            if not conn_info:
-                return True  # Already removed
-            
-            # Stop heartbeat monitoring
-            await self.heartbeat_manager.stop_heartbeat_for_connection(connection_id)
-            
-            # Remove from user tracking
-            if conn_info.user_id and conn_info.user_id in self.user_connections:
-                self.user_connections[conn_info.user_id].discard(connection_id)
-                if not self.user_connections[conn_info.user_id]:
-                    del self.user_connections[conn_info.user_id]
-            
-            # Remove timeout tracking
-            self.connection_timeouts.pop(connection_id, None)
-            
-            # Remove from connection manager
-            self.connection_manager.remove_connection(connection_id)
-            
-            # Update statistics
-            self.stats["active_connections"] = len(self.connection_manager.get_all_connections())
-            
-            logger.info(f"Removed connection {connection_id}")
-            return True
-        
         try:
             return await self.reliability.execute_safely(
-                _remove_connection,
+                lambda: self._execute_connection_removal(connection_id),
                 "remove_connection",
                 timeout=5.0
             )
         except Exception as e:
             logger.error(f"Error removing connection {connection_id}: {e}")
             return False
+    
+    async def _execute_connection_removal(self, connection_id: str) -> bool:
+        """Execute the connection removal process."""
+        conn_info = self.connection_manager.get_connection_by_id(connection_id)
+        if not conn_info:
+            return True  # Already removed
+        await self._cleanup_connection_resources(connection_id, conn_info)
+        self._update_removal_statistics()
+        logger.info(f"Removed connection {connection_id}")
+        return True
+    
+    async def _cleanup_connection_resources(self, connection_id: str, conn_info) -> None:
+        """Cleanup all resources associated with connection."""
+        await self.heartbeat_manager.stop_heartbeat_for_connection(connection_id)
+        self._cleanup_user_tracking(connection_id, conn_info)
+        self.connection_timeouts.pop(connection_id, None)
+        self.connection_manager.remove_connection(connection_id)
+    
+    def _cleanup_user_tracking(self, connection_id: str, conn_info) -> None:
+        """Cleanup user connection tracking."""
+        if conn_info.user_id and conn_info.user_id in self.user_connections:
+            self.user_connections[conn_info.user_id].discard(connection_id)
+            if not self.user_connections[conn_info.user_id]:
+                del self.user_connections[conn_info.user_id]
+    
+    def _update_removal_statistics(self) -> None:
+        """Update statistics after connection removal."""
+        self.stats["active_connections"] = len(self.connection_manager.get_all_connections())
     
     async def handle_message(self, connection_id: str, raw_message: str) -> bool:
         """Handle incoming message from connection."""
@@ -265,38 +292,42 @@ class ReliableConnectionManager:
     
     async def send_message(self, connection_id: str, message: dict) -> bool:
         """Send message to connection with reliability protection."""
-        
-        async def _send_message():
-            conn_info = self.connection_manager.get_connection_by_id(connection_id)
-            if not conn_info:
-                raise ValueError(f"Connection {connection_id} not found")
-            
-            # Check connection state
-            if not self.connection_manager.is_connection_alive(conn_info):
-                raise ConnectionError(f"Connection {connection_id} is not alive")
-            
-            # Send message
-            prepared_message = prepare_websocket_message(message)
-            await conn_info.websocket.send_json(prepared_message)
-            return True
-        
-        async def _fallback_send_message():
-            """Fallback when message sending fails."""
-            logger.warning(f"Failed to send message to connection {connection_id}")
-            # Mark connection for removal
-            await self.remove_connection(connection_id)
-            return False
-        
         try:
             return await self.reliability.execute_safely(
-                _send_message,
+                lambda: self._execute_message_send(connection_id, message),
                 "send_message",
-                fallback=_fallback_send_message,
+                fallback=lambda: self._handle_send_failure(connection_id),
                 timeout=5.0
             )
         except Exception as e:
             logger.error(f"Error sending message to {connection_id}: {e}")
             return False
+    
+    async def _execute_message_send(self, connection_id: str, message: dict) -> bool:
+        """Execute the message sending process."""
+        conn_info = self._validate_connection_for_send(connection_id)
+        await self._send_prepared_message(conn_info, message)
+        return True
+    
+    def _validate_connection_for_send(self, connection_id: str):
+        """Validate connection exists and is alive for sending."""
+        conn_info = self.connection_manager.get_connection_by_id(connection_id)
+        if not conn_info:
+            raise ValueError(f"Connection {connection_id} not found")
+        if not self.connection_manager.is_connection_alive(conn_info):
+            raise ConnectionError(f"Connection {connection_id} is not alive")
+        return conn_info
+    
+    async def _send_prepared_message(self, conn_info, message: dict) -> None:
+        """Send prepared message to connection."""
+        prepared_message = prepare_websocket_message(message)
+        await conn_info.websocket.send_json(prepared_message)
+    
+    async def _handle_send_failure(self, connection_id: str) -> bool:
+        """Handle message send failure by removing connection."""
+        logger.warning(f"Failed to send message to connection {connection_id}")
+        await self.remove_connection(connection_id)
+        return False
     
     async def broadcast_message(self, message: dict, user_filter: Optional[str] = None) -> int:
         """Broadcast message to multiple connections."""

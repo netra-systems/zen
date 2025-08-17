@@ -321,66 +321,78 @@ def check_gcp_configuration() -> bool:
         print(f"{Fore.YELLOW}⚠ GCP check skipped: {e}{Style.RESET_ALL}")
         return False
 
-def main():
-    """Run all validation checks."""
+def _print_configuration_validator_header():
+    """Print the configuration validator header."""
     print(f"{Fore.MAGENTA}╔{'═' * 58}╗")
     print(f"║{'Staging Environment Configuration Validator':^58}║")
     print(f"╚{'═' * 58}╝{Style.RESET_ALL}")
-    
-    # Track results
-    results = {
-        "github_secrets": False,
-        "environment_vars": False,
-        "postgresql": False,
-        "redis": False,
-        "clickhouse": False,
-        "gcp": False,
+
+def _initialize_validation_results() -> Dict[str, bool]:
+    """Initialize validation results tracking."""
+    return {
+        "github_secrets": False, "environment_vars": False,
+        "postgresql": False, "redis": False,
+        "clickhouse": False, "gcp": False
     }
-    
-    # Run checks
-    if os.getenv("GITHUB_ACTIONS"):
-        print(f"\n{Fore.BLUE}Running in GitHub Actions environment{Style.RESET_ALL}")
-        secrets = check_github_secrets()
-        results["github_secrets"] = all([
-            secrets.get("GCP_STAGING_SA_KEY", False),
-            secrets.get("STAGING_DB_PASSWORD", False),
-            secrets.get("CLICKHOUSE_PASSWORD", False)
-        ])
-    else:
-        print(f"\n{Fore.BLUE}Running in local environment{Style.RESET_ALL}")
-    
+
+def _execute_github_validation(results: Dict[str, bool]):
+    """Execute GitHub Actions specific validations."""
+    print(f"\n{Fore.BLUE}Running in GitHub Actions environment{Style.RESET_ALL}")
+    secrets = check_github_secrets()
+    results["github_secrets"] = all([
+        secrets.get("GCP_STAGING_SA_KEY", False),
+        secrets.get("STAGING_DB_PASSWORD", False),
+        secrets.get("CLICKHOUSE_PASSWORD", False)
+    ])
+
+def _execute_local_validation():
+    """Execute local environment validations."""
+    print(f"\n{Fore.BLUE}Running in local environment{Style.RESET_ALL}")
+
+def _run_all_core_validations(results: Dict[str, bool]):
+    """Run all core validation checks."""
     env_results = check_environment_variables()
     results["environment_vars"] = all([
         v for k, v in env_results.items() 
         if k in ["DATABASE_URL", "REDIS_URL", "CLICKHOUSE_PASSWORD", "PR_NUMBER"]
     ])
-    
     results["postgresql"] = check_database_connection()
     results["redis"] = check_redis_connection()
     results["clickhouse"] = check_clickhouse_connection()
     results["gcp"] = check_gcp_configuration()
-    
-    # Summary
+
+def _display_validation_summary(results: Dict[str, bool]):
+    """Display validation summary results."""
     print_section("Validation Summary")
-    
+    for check, check_passed in results.items():
+        status = f"{Fore.GREEN}✓ PASS" if check_passed else f"{Fore.RED}✗ FAIL"
+        print(f"  {check.replace('_', ' ').title():30} {status}{Style.RESET_ALL}")
+
+def _calculate_and_display_final_status(results: Dict[str, bool]) -> int:
+    """Calculate and display final validation status."""
     total = len(results)
     passed = sum(1 for v in results.values() if v)
-    
-    for check, passed in results.items():
-        status = f"{Fore.GREEN}✓ PASS" if passed else f"{Fore.RED}✗ FAIL"
-        print(f"  {check.replace('_', ' ').title():30} {status}{Style.RESET_ALL}")
-    
     print(f"\n{Fore.CYAN}{'─' * 60}{Style.RESET_ALL}")
-    
     if passed == total:
         print(f"{Fore.GREEN}✓ All checks passed! ({passed}/{total}){Style.RESET_ALL}")
         print(f"{Fore.GREEN}Your staging environment is properly configured.{Style.RESET_ALL}")
         return 0
+    print(f"{Fore.YELLOW}⚠ Some checks failed ({passed}/{total}){Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}Please review the errors above and update your configuration.{Style.RESET_ALL}")
+    print(f"\nRefer to docs/STAGING_SECRETS_GUIDE.md for setup instructions.")
+    return 1
+
+def main():
+    """Run all validation checks."""
+    _print_configuration_validator_header()
+    results = _initialize_validation_results()
+    if os.getenv("GITHUB_ACTIONS"):
+        _execute_github_validation(results)
     else:
-        print(f"{Fore.YELLOW}⚠ Some checks failed ({passed}/{total}){Style.RESET_ALL}")
-        print(f"{Fore.YELLOW}Please review the errors above and update your configuration.{Style.RESET_ALL}")
-        print(f"\nRefer to docs/STAGING_SECRETS_GUIDE.md for setup instructions.")
-        return 1
+        _execute_local_validation()
+    _run_all_core_validations(results)
+    _display_validation_summary(results)
+    return _calculate_and_display_final_status(results)
 
 if __name__ == "__main__":
     sys.exit(main())

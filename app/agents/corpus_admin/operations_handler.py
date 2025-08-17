@@ -32,7 +32,12 @@ class CorpusOperationHandler:
     ) -> CorpusOperationResult:
         """Execute corpus operation based on type"""
         result = self._create_base_result(request)
-        
+        return await self._execute_with_error_handling(request, result, run_id, stream_updates)
+    
+    async def _execute_with_error_handling(
+        self, request: CorpusOperationRequest, result: CorpusOperationResult, run_id: str, stream_updates: bool
+    ) -> CorpusOperationResult:
+        """Execute operation with error handling"""
         try:
             return await self._route_operation(request, run_id, stream_updates)
         except Exception as e:
@@ -42,12 +47,20 @@ class CorpusOperationHandler:
         """Route operation to appropriate handler"""
         operation = request.operation.value
         
-        if operation in ["create", "search", "update", "delete"]:
+        if self._is_crud_operation(operation):
             return await self.crud_ops.execute(operation, request, run_id, stream_updates)
-        elif operation in ["analyze", "export", "import", "validate"]:
+        elif self._is_analysis_operation(operation):
             return await self.analysis_ops.execute(operation, request, run_id, stream_updates)
         else:
             return self._create_unsupported_operation_result(request)
+    
+    def _is_crud_operation(self, operation: str) -> bool:
+        """Check if operation is CRUD type"""
+        return operation in ["create", "search", "update", "delete"]
+    
+    def _is_analysis_operation(self, operation: str) -> bool:
+        """Check if operation is analysis type"""
+        return operation in ["analyze", "export", "import", "validate"]
     
     def _handle_operation_error(self, result: CorpusOperationResult, error: Exception) -> CorpusOperationResult:
         """Handle operation execution error"""
@@ -79,28 +92,46 @@ class CorpusOperationHandler:
     
     def _get_corpora_by_type(self) -> Dict[str, int]:
         """Get corpora count by type"""
+        base_types = self._get_base_corpus_types()
+        additional_types = self._get_additional_corpus_types()
+        return {**base_types, **additional_types}
+    
+    def _get_base_corpus_types(self) -> Dict[str, int]:
+        """Get base corpus type counts"""
         return {
             "documentation": 3,
             "knowledge_base": 5,
-            "training_data": 2,
+            "training_data": 2
+        }
+    
+    def _get_additional_corpus_types(self) -> Dict[str, int]:
+        """Get additional corpus type counts"""
+        return {
             "reference_data": 1,
             "embeddings": 1
         }
     
     def _get_recent_operations(self) -> list:
         """Get list of recent operations"""
-        return [
-            {
-                "operation": "search", 
-                "timestamp": datetime.now(timezone.utc).isoformat(), 
-                "corpus": "main_kb"
-            },
-            {
-                "operation": "create", 
-                "timestamp": datetime.now(timezone.utc).isoformat(), 
-                "corpus": "product_docs"
-            }
-        ]
+        search_operation = self._create_search_operation_record()
+        create_operation = self._create_create_operation_record()
+        return [search_operation, create_operation]
+    
+    def _create_search_operation_record(self) -> dict:
+        """Create search operation record"""
+        return {
+            "operation": "search",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "corpus": "main_kb"
+        }
+    
+    def _create_create_operation_record(self) -> dict:
+        """Create create operation record"""
+        return {
+            "operation": "create",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "corpus": "product_docs"
+        }
     
     def _create_base_result(self, request: CorpusOperationRequest) -> CorpusOperationResult:
         """Create base result object"""

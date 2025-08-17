@@ -160,42 +160,57 @@ class WebSocketMemoryManager:
     async def _perform_cleanup(self) -> Dict[str, Any]:
         """Perform memory cleanup operations."""
         start_time = time.time()
-        cleaned_connections = 0
-        freed_memory_mb = 0.0
-        
-        # Clean up old metrics
+        cleaned_metrics = self._cleanup_old_metrics()
+        cleaned_connections, freed_memory_mb = self._cleanup_stale_connections()
+        return self._build_cleanup_stats(start_time, cleaned_connections, cleaned_metrics, freed_memory_mb)
+    
+    def _cleanup_old_metrics(self) -> int:
+        """Clean up old metrics and return count cleaned."""
         cutoff_time = datetime.now(timezone.utc) - timedelta(hours=self.metrics_retention_hours)
-        initial_metrics_count = len(self.metrics_history)
+        initial_count = len(self.metrics_history)
         self.metrics_history = [m for m in self.metrics_history if m.timestamp > cutoff_time]
-        cleaned_metrics = initial_metrics_count - len(self.metrics_history)
-        
-        # Clean up stale connection buffers
+        return initial_count - len(self.metrics_history)
+    
+    def _cleanup_stale_connections(self) -> tuple[int, float]:
+        """Clean up stale connection buffers and return counts."""
+        stale_connections = self._identify_stale_connections()
+        return self._remove_stale_connections(stale_connections)
+    
+    def _identify_stale_connections(self) -> List[str]:
+        """Identify connections with oversized buffers."""
         active_connection_ids = set(self.memory_tracker.message_buffers.keys())
         stale_connections = []
-        
         for connection_id in active_connection_ids:
-            info = self.memory_tracker.get_connection_memory_info(connection_id)
-            if info["buffer_size_mb"] > self.memory_tracker.buffer_limits["max_buffer_size_mb"]:
+            if self._is_connection_stale(connection_id):
                 stale_connections.append(connection_id)
-        
+        return stale_connections
+    
+    def _is_connection_stale(self, connection_id: str) -> bool:
+        """Check if connection buffer exceeds size limit."""
+        info = self.memory_tracker.get_connection_memory_info(connection_id)
+        return info["buffer_size_mb"] > self.memory_tracker.buffer_limits["max_buffer_size_mb"]
+    
+    def _remove_stale_connections(self, stale_connections: List[str]) -> tuple[int, float]:
+        """Remove stale connections and return cleanup metrics."""
+        freed_memory_mb = 0.0
         for connection_id in stale_connections:
             buffer_size = self.memory_tracker.get_connection_memory_info(connection_id)["buffer_size_mb"]
             self.memory_tracker.untrack_connection(connection_id)
             freed_memory_mb += buffer_size
-            cleaned_connections += 1
-        
+        return len(stale_connections), freed_memory_mb
+    
+    def _build_cleanup_stats(self, start_time: float, cleaned_connections: int, 
+                           cleaned_metrics: int, freed_memory_mb: float) -> Dict[str, Any]:
+        """Build cleanup statistics report."""
         cleanup_time = time.time() - start_time
-        
         cleanup_stats = {
             "cleaned_connections": cleaned_connections,
             "cleaned_metrics": cleaned_metrics,
             "freed_memory_mb": freed_memory_mb,
             "cleanup_time_seconds": cleanup_time
         }
-        
         if cleaned_connections > 0 or cleaned_metrics > 0:
             logger.info(f"Memory cleanup completed: {cleanup_stats}")
-        
         return cleanup_stats
     
     async def _collect_garbage(self) -> None:
@@ -253,37 +268,55 @@ class WebSocketMemoryManager:
         """Check memory health and identify issues."""
         if not self.metrics_history:
             return {"status": "no_data", "issues": []}
-        
         current = self.metrics_history[-1]
+        issues = self._collect_memory_health_issues(current)
+        return self._build_health_report(current, issues)
+    
+    def _collect_memory_health_issues(self, current) -> List[Dict[str, Any]]:
+        """Collect all memory health issues."""
         issues = []
-        
-        # Check for high memory usage
-        if current.connection_memory_mb > 100:  # 100MB threshold
+        self._check_high_memory_usage(current, issues)
+        self._check_high_connection_count(current, issues)
+        self._check_memory_growth_trend(issues)
+        return issues
+    
+    def _check_high_memory_usage(self, current, issues: List[Dict[str, Any]]) -> None:
+        """Check for high memory usage issues."""
+        if current.connection_memory_mb > 100:
             issues.append({
                 "type": "high_memory_usage",
                 "severity": "high",
                 "message": f"Connection memory usage: {current.connection_memory_mb:.1f}MB"
             })
-        
-        # Check for too many connections
+    
+    def _check_high_connection_count(self, current, issues: List[Dict[str, Any]]) -> None:
+        """Check for high connection count issues."""
         if current.active_connections > 1000:
             issues.append({
                 "type": "high_connection_count",
                 "severity": "medium",
                 "message": f"Active connections: {current.active_connections}"
             })
-        
-        # Check for memory growth trend
+    
+    def _check_memory_growth_trend(self, issues: List[Dict[str, Any]]) -> None:
+        """Check for memory growth trend issues."""
         if len(self.metrics_history) >= 2:
-            prev = self.metrics_history[-2]
-            growth_rate = (current.total_memory_mb - prev.total_memory_mb) / prev.total_memory_mb
-            if growth_rate > 0.1:  # 10% growth
+            growth_rate = self._calculate_memory_growth_rate()
+            if growth_rate > 0.1:
                 issues.append({
                     "type": "memory_growth",
                     "severity": "medium",
                     "message": f"Memory growth rate: {growth_rate:.1%}"
                 })
-        
+    
+    def _calculate_memory_growth_rate(self) -> float:
+        """Calculate memory growth rate between last two metrics."""
+        current = self.metrics_history[-1]
+        prev = self.metrics_history[-2]
+        return (current.total_memory_mb - prev.total_memory_mb) / prev.total_memory_mb
+    
+    def _build_health_report(self, current, issues: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Build final health report."""
         status = "healthy" if not issues else "issues_detected"
         return {
             "status": status,

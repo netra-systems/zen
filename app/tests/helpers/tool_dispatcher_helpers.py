@@ -87,23 +87,36 @@ def setup_service_mock(service_path: str, method_name: str, return_value: Any = 
 
 def assert_synthetic_tools_registered(dispatcher: ToolDispatcher) -> None:
     """Assert synthetic tools are registered in dispatcher."""
-    synthetic_tools = [
-        "generate_synthetic_data_batch",
-        "validate_synthetic_data", 
-        "store_synthetic_data"
-    ]
-    for tool_name in synthetic_tools:
-        assert tool_name in dispatcher.tools
-        assert isinstance(dispatcher.tools[tool_name], ProductionTool)
+    synthetic_tools = _get_synthetic_tool_names()
+    _assert_tools_registered(dispatcher, synthetic_tools)
 
 
 def assert_corpus_tools_registered(dispatcher: ToolDispatcher) -> None:
     """Assert corpus tools are registered in dispatcher."""
-    corpus_tools = [
+    corpus_tools = _get_corpus_tool_names()
+    _assert_tools_registered(dispatcher, corpus_tools)
+
+
+def _get_synthetic_tool_names() -> list[str]:
+    """Get list of synthetic tool names."""
+    return [
+        "generate_synthetic_data_batch",
+        "validate_synthetic_data", 
+        "store_synthetic_data"
+    ]
+
+
+def _get_corpus_tool_names() -> list[str]:
+    """Get list of corpus tool names."""
+    return [
         "create_corpus", "search_corpus", "update_corpus", "delete_corpus",
         "analyze_corpus", "export_corpus", "import_corpus", "validate_corpus"
     ]
-    for tool_name in corpus_tools:
+
+
+def _assert_tools_registered(dispatcher: ToolDispatcher, tool_names: list[str]) -> None:
+    """Assert all tools in list are registered."""
+    for tool_name in tool_names:
         assert tool_name in dispatcher.tools
         assert isinstance(dispatcher.tools[tool_name], ProductionTool)
 

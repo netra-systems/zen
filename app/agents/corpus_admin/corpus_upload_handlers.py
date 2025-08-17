@@ -40,23 +40,28 @@ class UploadErrorHandler:
         original_error: Exception
     ) -> Dict[str, Any]:
         """Handle document upload failures with recovery strategies."""
-        context = self._create_upload_error_context(
-            filename, file_size, run_id, original_error
-        )
-        
+        context = self._create_upload_error_context(filename, file_size, run_id, original_error)
         error = DocumentUploadError(filename, file_size, str(original_error), context)
-        
+        return await self._execute_upload_error_workflow(filename, file_size, run_id, error, context)
+    
+    async def _execute_upload_error_workflow(
+        self, filename: str, file_size: int, run_id: str, error: DocumentUploadError, context
+    ) -> Dict[str, Any]:
+        """Execute upload error handling workflow."""
         try:
-            # Try recovery strategies in sequence
             result = await self._attempt_upload_recovery(filename, file_size, run_id)
-            if result:
-                return result
-            
-            raise error
-            
-        except Exception as fallback_error:
-            await global_error_handler.handle_error(error, context)
-            raise error
+            return result if result else await self._handle_upload_failure(error, context)
+        except Exception:
+            return await self._handle_fallback_error(error, context)
+    
+    async def _handle_upload_failure(self, error: DocumentUploadError, context) -> Dict[str, Any]:
+        """Handle upload failure when recovery fails."""
+        raise error
+    
+    async def _handle_fallback_error(self, error: DocumentUploadError, context) -> Dict[str, Any]:
+        """Handle fallback error during upload recovery."""
+        await global_error_handler.handle_error(error, context)
+        raise error
     
     def _create_upload_error_context(
         self,
@@ -84,13 +89,9 @@ class UploadErrorHandler:
         run_id: str
     ) -> Optional[Dict[str, Any]]:
         """Attempt various upload recovery strategies."""
-        # Check if file size is the issue
         if self._is_file_too_large(filename, file_size):
             return await self._handle_large_file(filename, file_size, run_id)
-        
-        # Try alternative upload methods
-        result = await self._try_recovery_methods(filename, file_size, run_id)
-        return result
+        return await self._try_recovery_methods(filename, file_size, run_id)
     
     async def _try_recovery_methods(
         self,

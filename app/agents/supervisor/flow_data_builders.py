@@ -10,10 +10,21 @@ from typing import Dict, Any, Optional, List
 def build_spec_todo_data(action: str, task_id: str, description: str,
                         priority: str, dependencies: Optional[List[str]]) -> Dict[str, Any]:
     """Build spec-compliant TODO event data structure."""
+    base_data = _create_todo_base_data(action, task_id, description)
+    meta_data = _create_todo_meta_data(priority, dependencies, action)
+    return {**base_data, **meta_data}
+
+def _create_todo_base_data(action: str, task_id: str, description: str) -> Dict[str, Any]:
+    """Create base TODO data fields."""
     return {
         "action": action,
         "task_id": task_id,
-        "task_description": description,
+        "task_description": description
+    }
+
+def _create_todo_meta_data(priority: str, dependencies: Optional[List[str]], action: str) -> Dict[str, Any]:
+    """Create TODO metadata fields."""
+    return {
         "priority": priority,
         "dependencies": dependencies or [],
         "status": "pending" if action == "task_added" else None
@@ -81,10 +92,21 @@ def build_spec_decision_data(flow_id: str, decision: str, reason: str) -> Dict[s
 def build_base_log_entry(event_type: str, correlation_id: str, run_id: str,
                         flow_state: str, data: Dict[str, Any]) -> Dict[str, Any]:
     """Build base log entry structure."""
+    base_fields = _create_log_base_fields(event_type, correlation_id, run_id)
+    state_fields = _create_log_state_fields(flow_state, data)
+    return {**base_fields, **state_fields}
+
+def _create_log_base_fields(event_type: str, correlation_id: str, run_id: str) -> Dict[str, Any]:
+    """Create base log entry fields."""
     return {
         "type": event_type,
         "correlation_id": correlation_id,
-        "run_id": run_id,
+        "run_id": run_id
+    }
+
+def _create_log_state_fields(flow_state: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    """Create state and data fields for log entry."""
+    return {
         "flow_state": flow_state,
         "timestamp": time.time(),
         **data

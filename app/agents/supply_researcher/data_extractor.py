@@ -33,12 +33,11 @@ class SupplyDataExtractor:
         extracted_data: List[Dict[str, Any]]
     ) -> float:
         """Calculate confidence score for extracted data"""
-        score = 0.5  # Base score
-        
-        score += self._score_citations(research_result.get("citations", []))
-        score += self._score_data_completeness(extracted_data)
-        
-        return min(1.0, score)
+        base_score = 0.5
+        citation_score = self._score_citations(research_result.get("citations", []))
+        completeness_score = self._score_data_completeness(extracted_data)
+        total_score = base_score + citation_score + completeness_score
+        return min(1.0, total_score)
     
     def _extract_pricing(self, answer: str) -> List[str]:
         """Extract pricing information from answer"""
@@ -57,8 +56,7 @@ class SupplyDataExtractor:
         supply_items = []
         for qa in questions_answered:
             item = self._extract_from_single_answer(qa, parsed_request)
-            if item:
-                supply_items.append(item)
+            self._append_item_if_valid(supply_items, item)
         return supply_items
     
     def _extract_from_single_answer(
@@ -96,12 +94,23 @@ class SupplyDataExtractor:
     
     def _create_base_item(self, parsed_request: Dict[str, Any]) -> Dict[str, Any]:
         """Create base supply item structure"""
+        base_fields = self._get_base_item_fields(parsed_request)
+        metadata_fields = self._get_metadata_fields()
+        return {**base_fields, **metadata_fields}
+    
+    def _get_base_item_fields(self, parsed_request: Dict[str, Any]) -> Dict[str, Any]:
+        """Get base item fields from parsed request"""
         return {
             "provider": parsed_request.get("provider", "unknown"),
             "model_name": parsed_request.get("model_name", "unknown"),
             "pricing_input": None,
             "pricing_output": None,
-            "context_window": None,
+            "context_window": None
+        }
+    
+    def _get_metadata_fields(self) -> Dict[str, Any]:
+        """Get metadata fields for supply item"""
+        return {
             "last_updated": datetime.now(UTC),
             "research_source": "Google Deep Research",
             "confidence_score": 0.8
@@ -114,55 +123,85 @@ class SupplyDataExtractor:
         context_matches: List[str]
     ) -> None:
         """Enrich item with extracted pricing and context data"""
-        item.update(self._parse_pricing_data(pricing_matches))
-        item.update(self._parse_context_data(context_matches))
+        pricing_data = self._parse_pricing_data(pricing_matches)
+        context_data = self._parse_context_data(context_matches)
+        item.update(pricing_data)
+        item.update(context_data)
     
     def _parse_pricing_data(self, pricing_matches: List[str]) -> Dict[str, Any]:
         """Parse pricing data from matches"""
-        data = {}
-        
         if len(pricing_matches) >= 2:
-            data["pricing_input"] = Decimal(pricing_matches[0].replace(",", ""))
-            data["pricing_output"] = Decimal(pricing_matches[1].replace(",", ""))
+            return self._parse_dual_pricing(pricing_matches)
         elif len(pricing_matches) == 1:
-            data["pricing_input"] = Decimal(pricing_matches[0].replace(",", ""))
-        
-        return data
+            return self._parse_single_pricing(pricing_matches)
+        return {}
+    
+    def _parse_dual_pricing(self, pricing_matches: List[str]) -> Dict[str, Any]:
+        """Parse input and output pricing from matches"""
+        return {
+            "pricing_input": Decimal(pricing_matches[0].replace(",", "")),
+            "pricing_output": Decimal(pricing_matches[1].replace(",", ""))
+        }
+    
+    def _parse_single_pricing(self, pricing_matches: List[str]) -> Dict[str, Any]:
+        """Parse single pricing value from matches"""
+        return {
+            "pricing_input": Decimal(pricing_matches[0].replace(",", ""))
+        }
     
     def _parse_context_data(self, context_matches: List[str]) -> Dict[str, Any]:
         """Parse context window data from matches"""
-        data = {}
-        
-        if context_matches:
-            context_size = int(context_matches[0])
-            if context_size < 1000:  # Likely in K tokens
-                context_size *= 1000
-            data["context_window"] = context_size
-        
-        return data
+        if not context_matches:
+            return {}
+        raw_context_size = int(context_matches[0])
+        normalized_size = self._normalize_context_size(raw_context_size)
+        return {"context_window": normalized_size}
+    
+    def _normalize_context_size(self, context_size: int) -> int:
+        """Normalize context size to full token count"""
+        if context_size < 1000:  # Likely in K tokens
+            return context_size * 1000
+        return context_size
     
     def _score_citations(self, citations: List[Dict[str, Any]]) -> float:
         """Score based on citations quality"""
+        if not citations:
+            return 0.0
+        quantity_score = self._calculate_citation_quantity_score(citations)
+        quality_score = self._calculate_citation_quality_score(citations)
+        return quantity_score + quality_score
+    
+    def _calculate_citation_quantity_score(self, citations: List[Dict[str, Any]]) -> float:
+        """Calculate score based on number of citations"""
+        return min(0.2, len(citations) * 0.05)
+    
+    def _calculate_citation_quality_score(self, citations: List[Dict[str, Any]]) -> float:
+        """Calculate score based on citation quality keywords"""
+        quality_keywords = ["official", "documentation", "pricing"]
         score = 0.0
-        
-        if citations:
-            score += min(0.2, len(citations) * 0.05)
-        
         for citation in citations:
-            if any(word in citation.get("source", "").lower() 
-                   for word in ["official", "documentation", "pricing"]):
+            source = citation.get("source", "").lower()
+            if any(word in source for word in quality_keywords):
                 score += 0.1
-        
         return score
     
     def _score_data_completeness(self, extracted_data: List[Dict[str, Any]]) -> float:
         """Score based on data completeness"""
         score = 0.0
-        
         for item in extracted_data:
-            if item.get("pricing_input") and item.get("pricing_output"):
-                score += 0.1
-            if item.get("context_window"):
-                score += 0.05
-        
+            score += self._score_item_completeness(item)
         return score
+    
+    def _score_item_completeness(self, item: Dict[str, Any]) -> float:
+        """Score completeness of individual item"""
+        score = 0.0
+        if item.get("pricing_input") and item.get("pricing_output"):
+            score += 0.1
+        if item.get("context_window"):
+            score += 0.05
+        return score
+    
+    def _append_item_if_valid(self, supply_items: List[Dict[str, Any]], item: Dict[str, Any] | None) -> None:
+        """Append item to list if valid"""
+        if item:
+            supply_items.append(item)

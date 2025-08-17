@@ -56,11 +56,15 @@ class ErrorMetricsMiddleware(BaseHTTPMiddleware):
     def _log_slow_request_if_needed(self, request: Request, duration: float, status_code: int) -> None:
         """Log slow requests that exceed threshold."""
         if duration > 5.0:
-            logger.warning(
-                f"Slow request: {request.method} {request.url.path}",
-                duration_seconds=duration,
-                status_code=status_code
-            )
+            self._log_slow_request_warning(request, duration, status_code)
+    
+    def _log_slow_request_warning(self, request: Request, duration: float, status_code: int) -> None:
+        """Log warning for slow request."""
+        logger.warning(
+            f"Slow request: {request.method} {request.url.path}",
+            duration_seconds=duration,
+            status_code=status_code
+        )
     
     def _record_error_metric(
         self,

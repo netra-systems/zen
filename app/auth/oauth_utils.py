@@ -85,11 +85,15 @@ async def perform_token_exchange_request(url: str, data: Dict[str, str]) -> OAut
     """Perform HTTP request for token exchange with timeout and security."""
     timeout = create_exchange_timeout()
     async with httpx.AsyncClient(timeout=timeout) as client:
-        try:
-            response = await client.post(url, data=data)
-            return validate_token_exchange_response(response)
-        except httpx.TimeoutException:
-            handle_token_exchange_timeout()
+        return await _execute_token_exchange(client, url, data)
+
+async def _execute_token_exchange(client: httpx.AsyncClient, url: str, data: Dict[str, str]) -> OAuthTokenData:
+    """Execute token exchange request with error handling."""
+    try:
+        response = await client.post(url, data=data)
+        return validate_token_exchange_response(response)
+    except httpx.TimeoutException:
+        handle_token_exchange_timeout()
 
 
 def build_user_info_request_config(access_token: str) -> Tuple[str, Dict[str, str], httpx.Timeout]:
@@ -118,8 +122,12 @@ async def get_user_info_from_google(access_token: str) -> UserInfo:
     """Get user information from Google API with timeout and security."""
     url, headers, timeout = build_user_info_request_config(access_token)
     async with httpx.AsyncClient(timeout=timeout) as client:
-        try:
-            response = await client.get(url, headers=headers)
-            return handle_user_info_response(response)
-        except httpx.TimeoutException:
-            handle_user_info_timeout()
+        return await _execute_user_info_request(client, url, headers)
+
+async def _execute_user_info_request(client: httpx.AsyncClient, url: str, headers: Dict[str, str]) -> UserInfo:
+    """Execute user info request with error handling."""
+    try:
+        response = await client.get(url, headers=headers)
+        return handle_user_info_response(response)
+    except httpx.TimeoutException:
+        handle_user_info_timeout()

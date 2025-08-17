@@ -102,13 +102,21 @@ class AuthTokenService:
     def validate_jwt(self, token: str) -> Optional[Dict[str, Any]]:
         """Validate JWT token and return claims."""
         try:
-            jwt_secret = self._get_secure_jwt_secret()
-            return jwt.decode(token, jwt_secret, algorithms=["HS256"])
+            return self._decode_jwt_token(token)
         except jwt.ExpiredSignatureError:
-            self._handle_jwt_expired()
-            return None
+            return self._handle_jwt_expired_validation()
         except jwt.InvalidTokenError as e:
             return self._handle_invalid_jwt(e)
+    
+    def _decode_jwt_token(self, token: str) -> Dict[str, Any]:
+        """Decode JWT token with secure algorithm."""
+        jwt_secret = self._get_secure_jwt_secret()
+        return jwt.decode(token, jwt_secret, algorithms=["HS256"])
+    
+    def _handle_jwt_expired_validation(self) -> None:
+        """Handle expired JWT during validation."""
+        self._handle_jwt_expired()
+        return None
     
     def _handle_invalid_jwt(self, error: jwt.InvalidTokenError) -> None:
         """Handle invalid JWT token error."""

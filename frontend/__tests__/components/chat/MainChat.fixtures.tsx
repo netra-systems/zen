@@ -1,13 +1,63 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useUnifiedChatStore } from '@/store/unified-chat';
-import { useChatWebSocket } from '@/hooks/useChatWebSocket';
 import { TestProviders } from '../../test-utils/providers';
 
-// Mock dependencies
-jest.mock('@/store/unified-chat');
-jest.mock('@/hooks/useChatWebSocket', () => ({
-  useChatWebSocket: jest.fn()
+// Mock dependencies with implementations
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: () => ({
+    isProcessing: false,
+    messages: [],
+    fastLayerData: null,
+    mediumLayerData: null,
+    slowLayerData: null,
+    currentRunId: null,
+    activeThreadId: null,
+    isThreadLoading: false,
+    handleWebSocketEvent: jest.fn(),
+    addMessage: jest.fn(),
+    setProcessing: jest.fn(),
+    clearMessages: jest.fn(),
+    updateLayerData: jest.fn(),
+  })
+}));
+
+// Export mock store data for test use
+export const mockStore = {
+  isProcessing: false,
+  messages: [],
+  fastLayerData: null,
+  mediumLayerData: null,
+  slowLayerData: null,
+  currentRunId: null,
+  activeThreadId: null,
+  isThreadLoading: false,
+  handleWebSocketEvent: jest.fn(),
+  addMessage: jest.fn(),
+  setProcessing: jest.fn(),
+  clearMessages: jest.fn(),
+  updateLayerData: jest.fn(),
+};
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: () => ({
+    messages: [],
+    connected: true,
+    error: null
+  })
+}));
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: () => ({
+    shouldShowLoading: false,
+    shouldShowEmptyState: false,
+    shouldShowExamplePrompts: true,
+    loadingMessage: ''
+  })
+}));
+jest.mock('@/hooks/useEventProcessor', () => ({
+  useEventProcessor: () => ({
+    processedEvents: [],
+    isProcessing: false,
+    stats: { processed: 0, failed: 0 }
+  })
 }));
 jest.mock('@/components/chat/ChatHeader', () => ({
   ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
@@ -29,20 +79,20 @@ jest.mock('@/components/chat/PersistentResponseCard', () => ({
 jest.mock('@/components/chat/ExamplePrompts', () => ({
   ExamplePrompts: () => <div data-testid="example-prompts">Example Prompts</div>
 }));
+jest.mock('@/components/chat/OverflowPanel', () => ({
+  OverflowPanel: () => <div data-testid="overflow-panel">Overflow Panel</div>
+}));
+jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
+  EventDiagnosticsPanel: () => <div data-testid="event-diagnostics">Event Diagnostics</div>
+}));
 
-// Mock store with all properties
-export const mockStore = {
-  isProcessing: false,
-  messages: [],
-  fastLayerData: null,
-  mediumLayerData: null,
-  slowLayerData: null,
-  currentRunId: null,
-  addMessage: jest.fn(),
-  setProcessing: jest.fn(),
-  clearMessages: jest.fn(),
-  updateLayerData: jest.fn(),
-};
+// Mock framer-motion to avoid animation issues
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: 'div',
+  },
+  AnimatePresence: ({ children }: any) => children,
+}));
 
 // Common test setup function
 export const setupMocks = () => {
@@ -55,12 +105,6 @@ export const setupMocks = () => {
 
   jest.clearAllMocks();
   jest.useFakeTimers();
-  (useUnifiedChatStore as jest.Mock).mockReturnValue(mockStore);
-  const { useChatWebSocket } = require('@/hooks/useChatWebSocket');
-  useChatWebSocket.mockReturnValue({
-    connected: true,
-    error: null
-  });
 };
 
 // Common cleanup function

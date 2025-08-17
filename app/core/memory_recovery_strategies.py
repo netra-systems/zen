@@ -95,13 +95,19 @@ class GarbageCollectionStrategy(MemoryRecoveryStrategy):
     
     async def can_apply(self, snapshot: MemorySnapshot) -> bool:
         """Check if GC should be triggered."""
-        # Don't run GC too frequently
-        if self.last_gc_time:
-            time_since_gc = datetime.now() - self.last_gc_time
-            if time_since_gc < self.min_gc_interval:
-                return False
-        
-        # Apply when memory pressure is moderate or higher
+        if self._is_gc_too_frequent():
+            return False
+        return self._should_gc_for_pressure_level(snapshot)
+    
+    def _is_gc_too_frequent(self) -> bool:
+        """Check if GC was run too recently."""
+        if not self.last_gc_time:
+            return False
+        time_since_gc = datetime.now() - self.last_gc_time
+        return time_since_gc < self.min_gc_interval
+    
+    def _should_gc_for_pressure_level(self, snapshot: MemorySnapshot) -> bool:
+        """Check if memory pressure justifies GC."""
         return snapshot.pressure_level != MemoryPressureLevel.LOW
     
     def _prepare_gc_execution(self):
@@ -190,41 +196,61 @@ class CacheClearingStrategy(MemoryRecoveryStrategy):
         """Execute cache clearing."""
         start_time = datetime.now()
         initial_memory = self._get_current_memory()
-        
+        cleared_count, errors = await self._clear_all_caches()
+        self._clear_python_internal_caches()
+        return self._build_cache_clear_result(start_time, initial_memory, cleared_count, errors)
+    
+    async def _clear_all_caches(self) -> Tuple[int, List[str]]:
+        """Clear all managed caches."""
         cleared_count = 0
         errors = []
-        
         for cache_manager in self.cache_managers:
-            try:
-                if hasattr(cache_manager, 'clear_all'):
-                    await cache_manager.clear_all()
-                    cleared_count += 1
-                elif hasattr(cache_manager, 'clear'):
-                    cache_manager.clear()
-                    cleared_count += 1
-            except Exception as e:
-                errors.append(str(e))
-                logger.warning(f"Failed to clear cache {type(cache_manager).__name__}: {e}")
-        
-        # Clear Python's internal caches
+            cache_result = await self._clear_single_cache(cache_manager)
+            if cache_result['success']:
+                cleared_count += 1
+            else:
+                errors.append(cache_result['error'])
+        return cleared_count, errors
+    
+    async def _clear_single_cache(self, cache_manager: Any) -> Dict[str, Any]:
+        """Clear a single cache manager."""
+        try:
+            if hasattr(cache_manager, 'clear_all'):
+                await cache_manager.clear_all()
+                return {'success': True}
+            elif hasattr(cache_manager, 'clear'):
+                cache_manager.clear()
+                return {'success': True}
+            return {'success': False, 'error': 'No clear method found'}
+        except Exception as e:
+            error_msg = str(e)
+            logger.warning(f"Failed to clear cache {type(cache_manager).__name__}: {e}")
+            return {'success': False, 'error': error_msg}
+    
+    def _clear_python_internal_caches(self) -> None:
+        """Clear Python's internal caches."""
         if hasattr(sys, '_clear_type_cache'):
             sys._clear_type_cache()
-        
+    
+    def _build_cache_clear_result(self, start_time: datetime, initial_memory: float, cleared_count: int, errors: List[str]) -> Dict[str, Any]:
+        """Build cache clearing result dictionary."""
         final_memory = self._get_current_memory()
         memory_freed = initial_memory - final_memory
         duration = (datetime.now() - start_time).total_seconds()
         self.last_clear_time = datetime.now()
-        
-        result = {
+        result = self._create_cache_result_dict(cleared_count, memory_freed, duration, errors)
+        logger.info(f"Cache clearing completed: {result}")
+        return result
+    
+    def _create_cache_result_dict(self, cleared_count: int, memory_freed: float, duration: float, errors: List[str]) -> Dict[str, Any]:
+        """Create cache clearing result dictionary."""
+        return {
             'action': RecoveryAction.CLEAR_CACHES.value,
             'caches_cleared': cleared_count,
             'memory_freed_mb': memory_freed,
             'duration_seconds': duration,
             'errors': errors
         }
-        
-        logger.info(f"Cache clearing completed: {result}")
-        return result
     
     def get_priority(self) -> int:
         """Cache clearing has medium priority."""
@@ -411,19 +437,27 @@ class MemoryMonitor:
     def _get_system_memory_metrics(self):
         """Get system memory metrics from psutil or fallback values."""
         try:
-            import psutil
-            memory = psutil.virtual_memory()
-            total_mb = memory.total / 1024 / 1024
-            available_mb = memory.available / 1024 / 1024
-            used_mb = memory.used / 1024 / 1024
-            percent_used = memory.percent
-            return total_mb, available_mb, used_mb, percent_used
+            return self._get_psutil_memory_metrics()
         except ImportError:
-            total_mb = 8192.0  # Assume 8GB
-            percent_used = 50.0
-            available_mb = total_mb * (100 - percent_used) / 100
-            used_mb = total_mb - available_mb
-            return total_mb, available_mb, used_mb, percent_used
+            return self._get_fallback_memory_metrics()
+    
+    def _get_psutil_memory_metrics(self):
+        """Get memory metrics using psutil."""
+        import psutil
+        memory = psutil.virtual_memory()
+        total_mb = memory.total / 1024 / 1024
+        available_mb = memory.available / 1024 / 1024
+        used_mb = memory.used / 1024 / 1024
+        percent_used = memory.percent
+        return total_mb, available_mb, used_mb, percent_used
+    
+    def _get_fallback_memory_metrics(self):
+        """Get fallback memory metrics when psutil unavailable."""
+        total_mb = 8192.0  # Assume 8GB
+        percent_used = 50.0
+        available_mb = total_mb * (100 - percent_used) / 100
+        used_mb = total_mb - available_mb
+        return total_mb, available_mb, used_mb, percent_used
 
     def _get_process_memory_metrics(self):
         """Get process memory metrics from psutil or fallback values."""
@@ -479,42 +513,65 @@ class MemoryMonitor:
     
     async def check_and_recover(self, snapshot: MemorySnapshot) -> List[Dict[str, Any]]:
         """Check memory pressure and trigger recovery if needed."""
-        if snapshot.pressure_level == MemoryPressureLevel.LOW:
+        if self._should_skip_recovery(snapshot):
             return []
-        
-        # Check if we should throttle recovery attempts
-        if self.last_recovery_time:
-            time_since_recovery = datetime.now() - self.last_recovery_time
-            if time_since_recovery < self.min_recovery_interval:
-                return []
-        
+        self._log_memory_pressure_warning(snapshot)
+        recovery_results = await self._execute_recovery_strategies(snapshot)
+        self._finalize_recovery_session(recovery_results)
+        return recovery_results
+    
+    def _should_skip_recovery(self, snapshot: MemorySnapshot) -> bool:
+        """Check if recovery should be skipped."""
+        if snapshot.pressure_level == MemoryPressureLevel.LOW:
+            return True
+        return self._is_recovery_throttled()
+    
+    def _is_recovery_throttled(self) -> bool:
+        """Check if recovery is throttled by time interval."""
+        if not self.last_recovery_time:
+            return False
+        time_since_recovery = datetime.now() - self.last_recovery_time
+        return time_since_recovery < self.min_recovery_interval
+    
+    def _log_memory_pressure_warning(self, snapshot: MemorySnapshot) -> None:
+        """Log memory pressure warning with details."""
         logger.warning(
             f"Memory pressure detected: {snapshot.pressure_level.value} "
             f"({snapshot.percent_used:.1f}% used)"
         )
-        
+    
+    async def _execute_recovery_strategies(self, snapshot: MemorySnapshot) -> List[Dict[str, Any]]:
+        """Execute recovery strategies in priority order."""
         recovery_results = []
-        
-        # Try recovery strategies in priority order
         for strategy in self.strategies:
-            try:
-                if await strategy.can_apply(snapshot):
-                    result = await strategy.execute(snapshot)
-                    recovery_results.append(result)
-                    
-                    # Take new snapshot to check improvement
-                    new_snapshot = await self.take_snapshot()
-                    if new_snapshot.pressure_level < snapshot.pressure_level:
-                        logger.info(f"Memory pressure reduced: {new_snapshot.pressure_level.value}")
-                        break
-                        
-            except Exception as e:
-                logger.error(f"Recovery strategy failed {type(strategy).__name__}: {e}")
-        
+            strategy_result = await self._try_recovery_strategy(strategy, snapshot)
+            if strategy_result:
+                recovery_results.append(strategy_result)
+                if await self._check_pressure_improvement(snapshot):
+                    break
+        return recovery_results
+    
+    async def _try_recovery_strategy(self, strategy: MemoryRecoveryStrategy, snapshot: MemorySnapshot) -> Optional[Dict[str, Any]]:
+        """Try executing a single recovery strategy."""
+        try:
+            if await strategy.can_apply(snapshot):
+                return await strategy.execute(snapshot)
+        except Exception as e:
+            logger.error(f"Recovery strategy failed {type(strategy).__name__}: {e}")
+        return None
+    
+    async def _check_pressure_improvement(self, original_snapshot: MemorySnapshot) -> bool:
+        """Check if memory pressure has improved after recovery."""
+        new_snapshot = await self.take_snapshot()
+        if new_snapshot.pressure_level < original_snapshot.pressure_level:
+            logger.info(f"Memory pressure reduced: {new_snapshot.pressure_level.value}")
+            return True
+        return False
+    
+    def _finalize_recovery_session(self, recovery_results: List[Dict[str, Any]]) -> None:
+        """Finalize recovery session tracking."""
         self.last_recovery_time = datetime.now()
         self.recovery_history.extend(recovery_results)
-        
-        return recovery_results
     
     def _calculate_pressure_level(self, percent_used: float) -> MemoryPressureLevel:
         """Calculate memory pressure level."""
@@ -533,15 +590,24 @@ class MemoryMonitor:
         """Get current memory status."""
         if not self.snapshots:
             return {'status': 'no_data'}
-        
         latest = self.snapshots[-1]
-        
+        basic_status = self._get_basic_memory_status(latest)
+        recovery_status = self._get_recovery_status()
+        return {**basic_status, **recovery_status}
+    
+    def _get_basic_memory_status(self, latest: MemorySnapshot) -> Dict[str, Any]:
+        """Get basic memory status information."""
         return {
             'current_usage_percent': latest.percent_used,
             'pressure_level': latest.pressure_level.value,
             'available_mb': latest.available_mb,
             'process_rss_mb': latest.rss_mb,
-            'gc_objects': latest.object_count,
+            'gc_objects': latest.object_count
+        }
+    
+    def _get_recovery_status(self) -> Dict[str, Any]:
+        """Get recovery status information."""
+        return {
             'recovery_count': len(self.recovery_history),
             'last_recovery': self.last_recovery_time.isoformat() if self.last_recovery_time else None
         }
@@ -558,17 +624,22 @@ async def setup_memory_recovery(
     thresholds: Optional[MemoryThresholds] = None
 ) -> None:
     """Set up memory recovery with common strategies."""
+    _configure_memory_monitor(thresholds)
+    _add_recovery_strategies(cache_managers, connection_pools)
+    await memory_monitor.start_monitoring()
+
+def _configure_memory_monitor(thresholds: Optional[MemoryThresholds]) -> None:
+    """Configure global memory monitor with thresholds."""
     if thresholds:
         global memory_monitor
         memory_monitor = MemoryMonitor(thresholds)
-    
-    # Add standard recovery strategies
+
+def _add_recovery_strategies(cache_managers: List[Any], connection_pools: List[Any]) -> None:
+    """Add standard recovery strategies to memory monitor."""
     memory_monitor.add_recovery_strategy(GarbageCollectionStrategy())
     memory_monitor.add_recovery_strategy(GarbageCollectionStrategy(aggressive=True))
     memory_monitor.add_recovery_strategy(CacheClearingStrategy(cache_managers))
     memory_monitor.add_recovery_strategy(ConnectionPoolReductionStrategy(connection_pools))
-    
-    await memory_monitor.start_monitoring()
 
 
 async def emergency_memory_recovery() -> List[Dict[str, Any]]:

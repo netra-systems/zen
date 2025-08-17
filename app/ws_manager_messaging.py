@@ -114,11 +114,17 @@ class WebSocketMessagingManager:
 
     async def _validate_and_process(self, conn_info: ConnectionInfo, message: Dict[str, Any]) -> bool:
         """Validate message and process if valid."""
-        # Handle ping messages first
-        if isinstance(message, dict) and message.get("type") == "ping":
+        if self._is_ping_message(message):
             await self._send_pong_response(conn_info.websocket)
             return True
-        
+        return await self._validate_and_increment_stats(conn_info, message)
+
+    def _is_ping_message(self, message: Dict[str, Any]) -> bool:
+        """Check if message is a ping message."""
+        return isinstance(message, dict) and message.get("type") == "ping"
+
+    async def _validate_and_increment_stats(self, conn_info: ConnectionInfo, message: Dict[str, Any]) -> bool:
+        """Validate message and update stats if valid."""
         validation_result = self.validate_incoming_message(message)
         if isinstance(validation_result, WebSocketValidationError):
             await self._handle_validation_error(conn_info, validation_result, message)

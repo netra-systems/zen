@@ -51,7 +51,12 @@ class CorpusAdminSubAgent(BaseSubAgent):
         """Execute corpus administration operation"""
         log_agent_communication("Supervisor", "CorpusAdminSubAgent", run_id, "execute_request")
         start_time = time.time()
-        
+        await self._execute_with_error_handling(state, run_id, stream_updates, start_time)
+    
+    async def _execute_with_error_handling(
+        self, state: DeepAgentState, run_id: str, stream_updates: bool, start_time: float
+    ) -> None:
+        """Execute with error handling wrapper"""
         try:
             await self._execute_corpus_operation_workflow(state, run_id, stream_updates, start_time)
         except Exception as e:
@@ -144,10 +149,20 @@ class CorpusAdminSubAgent(BaseSubAgent):
         stream_updates: bool
     ) -> bool:
         """Handle approval requirements check"""
-        requires_approval = await self.validator.check_approval_requirements(operation_request, state)
+        requires_approval = await self._check_approval_requirements(operation_request, state)
+        await self._process_approval_if_required(operation_request, state, run_id, stream_updates, requires_approval)
+        return requires_approval
+    
+    async def _check_approval_requirements(self, operation_request, state: DeepAgentState) -> bool:
+        """Check if approval is required"""
+        return await self.validator.check_approval_requirements(operation_request, state)
+    
+    async def _process_approval_if_required(
+        self, operation_request, state: DeepAgentState, run_id: str, stream_updates: bool, requires_approval: bool
+    ) -> None:
+        """Process approval if required"""
         if requires_approval:
             await self._process_approval_requirement(operation_request, state, run_id, stream_updates)
-        return requires_approval
     
     async def _process_approval_requirement(
         self, operation_request, state: DeepAgentState, run_id: str, stream_updates: bool
@@ -175,8 +190,12 @@ class CorpusAdminSubAgent(BaseSubAgent):
     ) -> None:
         """Send completion update"""
         if stream_updates:
-            update_data = await self._build_completion_update_data(result, start_time)
-            await self._send_update(run_id, update_data)
+            await self._send_completion_update_data(result, run_id, start_time)
+    
+    async def _send_completion_update_data(self, result, run_id: str, start_time: float) -> None:
+        """Send completion update data"""
+        update_data = await self._build_completion_update_data(result, start_time)
+        await self._send_update(run_id, update_data)
     
     async def _build_completion_update_data(self, result, start_time: float) -> dict:
         """Build completion update data."""
@@ -191,11 +210,15 @@ class CorpusAdminSubAgent(BaseSubAgent):
         self, result, duration: int, status_emoji: str, statistics
     ) -> dict:
         """Create completion update dictionary."""
+        base_data = self._create_update_base_data(result, duration, status_emoji)
+        return {**base_data, "statistics": statistics}
+    
+    def _create_update_base_data(self, result, duration: int, status_emoji: str) -> dict:
+        """Create base update data"""
         return {
             "status": "completed" if result.success else "failed",
             "message": f"{status_emoji} Corpus operation completed in {duration}ms",
-            "result": result.model_dump(),
-            "statistics": statistics
+            "result": result.model_dump()
         }
     
     async def _handle_execution_error(
@@ -206,7 +229,17 @@ class CorpusAdminSubAgent(BaseSubAgent):
         stream_updates: bool
     ) -> None:
         """Handle execution errors"""
+        self._log_execution_error(error, run_id)
+        await self._process_error_result(error, state, run_id, stream_updates)
+    
+    def _log_execution_error(self, error: Exception, run_id: str) -> None:
+        """Log execution error"""
         logger.error(f"Corpus operation failed for run_id {run_id}: {error}")
+    
+    async def _process_error_result(
+        self, error: Exception, state: DeepAgentState, run_id: str, stream_updates: bool
+    ) -> None:
+        """Process error result"""
         await self._store_error_result(error, state)
         await self._send_error_notification(run_id, error, stream_updates)
     
@@ -245,6 +278,10 @@ class CorpusAdminSubAgent(BaseSubAgent):
     ) -> None:
         """Store approval result in state"""
         approval_result = self._create_approval_result(operation_request, approval_message)
+        self._update_state_with_approval(state, approval_result)
+    
+    def _update_state_with_approval(self, state: DeepAgentState, approval_result) -> None:
+        """Update state with approval result"""
         state.corpus_admin_result = approval_result.model_dump()
     
     def _create_approval_result(self, operation_request, approval_message: str) -> CorpusOperationResult:
@@ -254,10 +291,21 @@ class CorpusAdminSubAgent(BaseSubAgent):
     
     def _build_approval_result_params(self, operation_request, approval_message: str) -> dict:
         """Build parameters for approval result"""
+        base_params = self._get_base_approval_params(operation_request)
+        approval_params = self._get_approval_specific_params(approval_message)
+        return {**base_params, **approval_params}
+    
+    def _get_base_approval_params(self, operation_request) -> dict:
+        """Get base approval parameters"""
         return {
             "success": False,
             "operation": operation_request.operation,
-            "corpus_metadata": operation_request.corpus_metadata,
+            "corpus_metadata": operation_request.corpus_metadata
+        }
+    
+    def _get_approval_specific_params(self, approval_message: str) -> dict:
+        """Get approval-specific parameters"""
+        return {
             "requires_approval": True,
             "approval_message": approval_message
         }
@@ -271,15 +319,32 @@ class CorpusAdminSubAgent(BaseSubAgent):
     ) -> None:
         """Send approval required update"""
         if stream_updates:
-            update_data = self._build_approval_update_data(approval_message, operation_request)
-            await self._send_update(run_id, update_data)
+            await self._send_approval_update_data(approval_message, operation_request, run_id)
+    
+    async def _send_approval_update_data(
+        self, approval_message: str, operation_request, run_id: str
+    ) -> None:
+        """Send approval update data"""
+        update_data = self._build_approval_update_data(approval_message, operation_request)
+        await self._send_update(run_id, update_data)
     
     def _build_approval_update_data(self, approval_message: str, operation_request) -> dict:
         """Build approval update data."""
+        base_update = self._get_base_approval_update(approval_message)
+        action_data = self._get_approval_action_data(operation_request)
+        return {**base_update, **action_data}
+    
+    def _get_base_approval_update(self, approval_message: str) -> dict:
+        """Get base approval update data"""
         return {
             "status": "approval_required",
             "message": approval_message,
-            "requires_user_action": True,
+            "requires_user_action": True
+        }
+    
+    def _get_approval_action_data(self, operation_request) -> dict:
+        """Get approval action data"""
+        return {
             "action_type": "approve_corpus_operation",
             "operation_details": operation_request.model_dump()
         }

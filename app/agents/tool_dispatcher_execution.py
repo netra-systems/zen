@@ -70,18 +70,12 @@ class ToolExecutionEngine:
     def _create_success_response(self, result: Any, tool_name: str, run_id: str) -> "ToolDispatchResponse":
         """Create successful tool execution response"""
         from app.agents.tool_dispatcher_core import ToolDispatchResponse
-        return ToolDispatchResponse(
-            success=True,
-            result=result,
-            metadata={"tool_name": tool_name, "run_id": run_id}
-        )
+        metadata = {"tool_name": tool_name, "run_id": run_id}
+        return ToolDispatchResponse(success=True, result=result, metadata=metadata)
     
     def _create_error_response(self, error: Exception, tool_name: str, run_id: str) -> "ToolDispatchResponse":
         """Create error response for tool execution failure"""
         from app.agents.tool_dispatcher_core import ToolDispatchResponse
         logger.error(f"Tool {tool_name} execution failed: {error}")
-        return ToolDispatchResponse(
-            success=False,
-            error=str(error),
-            metadata={"tool_name": tool_name, "run_id": run_id}
-        )
+        metadata = {"tool_name": tool_name, "run_id": run_id}
+        return ToolDispatchResponse(success=False, error=str(error), metadata=metadata)

@@ -477,8 +477,8 @@ class DevLauncher:
         self._print("🔐", "AUTH", "Starting auth service...")
         # Use dynamic port for auth service if configured
         if self.config.dynamic_ports:
-            from .utils import find_available_port
-            port = find_available_port(8081, 8090)
+            from .utils import get_free_port
+            port = get_free_port()
             os.environ['AUTH_SERVICE_PORT'] = str(port)
         else:
             port = int(os.getenv("AUTH_SERVICE_PORT", "8081"))
@@ -504,9 +504,8 @@ class DevLauncher:
             from .utils import create_subprocess
             process = create_subprocess(cmd, env=env)
             if process:
-                from .log_streamer import LogStreamer
-                from .utils import Colors
-                streamer = LogStreamer(process, "AUTH", Colors.MAGENTA, verbose=self.config.verbose)
+                from .log_streamer import LogStreamer, Colors
+                streamer = LogStreamer(process, "AUTH", Colors.MAGENTA)
                 streamer.start()
                 self._print("✅", "OK", f"Auth service started on port {port}")
                 return process, streamer

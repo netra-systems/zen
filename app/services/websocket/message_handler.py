@@ -66,8 +66,7 @@ class StartAgentHandler(BaseMessageHandler):
             if not thread:
                 await manager.send_error(user_id, "Failed to create or retrieve thread")
                 return None, None
-            thread_id, run_id = await self._create_message_and_run(uow, thread, user_request, user_id)
-            return thread_id, run_id
+            return await self._create_message_and_run(uow, thread, user_request, user_id)
     
     async def _create_message_and_run(self, uow, thread, user_request: str, user_id: str) -> tuple[str, str]:
         """Create user message and run in database"""
@@ -152,6 +151,10 @@ class UserMessageHandler(BaseMessageHandler):
         thread_id, run_id = await self._setup_user_message_thread(user_id, text, references)
         if not thread_id or not run_id:
             return
+        await self._execute_user_message_workflow(user_id, text, thread_id, run_id)
+
+    async def _execute_user_message_workflow(self, user_id: str, text: str, thread_id: str, run_id: str) -> None:
+        """Execute user message workflow and finalize response."""
         response = await self._process_user_message_workflow(text, thread_id, user_id, run_id)
         await self._finalize_user_message_response(user_id, thread_id, run_id, response)
 
@@ -168,8 +171,7 @@ class UserMessageHandler(BaseMessageHandler):
             if not thread:
                 await manager.send_error(user_id, "Failed to create or retrieve thread")
                 return None, None
-            thread_id, run_id = await self._create_user_message_and_run(uow, thread, text, references)
-            return thread_id, run_id
+            return await self._create_user_message_and_run(uow, thread, text, references)
     
     async def _create_user_message_and_run(self, uow, thread, text: str, references: list) -> tuple[str, str]:
         """Create user message and run in database"""
@@ -240,40 +242,48 @@ class ThreadHistoryHandler(BaseMessageHandler):
         """Handle get_thread_history message"""
         try:
             async with get_unit_of_work() as uow:
-                thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
-                if not thread:
-                    await manager.send_error(user_id, "Failed to retrieve thread")
-                    return
-                
-                messages = await uow.messages.get_thread_messages(
-                    uow.session, 
-                    thread.id,
-                    limit=payload.get("limit", 50)
-                )
-                
-                history = []
-                for msg in messages:
-                    content = msg.content[0]["text"]["value"] if msg.content else ""
-                    history.append({
-                        "role": msg.role,
-                        "content": content,
-                        "created_at": msg.created_at,
-                        "id": msg.id
-                    })
-                
-                await manager.send_message(
-                    user_id,
-                    {
-                        "type": "thread_history",
-                        "payload": {
-                            "thread_id": thread.id,
-                            "messages": history
-                        }
-                    }
-                )
+                await self._process_thread_history_request(uow, user_id, payload)
         except Exception as e:
             logger.error(f"Error retrieving thread history: {e}")
             await manager.send_error(user_id, "Failed to retrieve thread history")
+
+    async def _process_thread_history_request(self, uow, user_id: str, payload: Dict[str, Any]) -> None:
+        """Process thread history request with database operations."""
+        thread = await uow.threads.get_or_create_for_user(uow.session, user_id)
+        if not thread:
+            await manager.send_error(user_id, "Failed to retrieve thread")
+            return
+        messages = await self._get_thread_messages(uow, thread.id, payload)
+        history = await self._build_message_history(messages)
+        await self._send_thread_history_response(user_id, thread.id, history)
+
+    async def _get_thread_messages(self, uow, thread_id: str, payload: Dict[str, Any]):
+        """Get messages for thread with limit."""
+        return await uow.messages.get_thread_messages(
+            uow.session, thread_id, limit=payload.get("limit", 50)
+        )
+
+    async def _build_message_history(self, messages) -> list:
+        """Build formatted message history from database messages."""
+        history = []
+        for msg in messages:
+            content = msg.content[0]["text"]["value"] if msg.content else ""
+            history.append(self._format_message_entry(msg, content))
+        return history
+
+    def _format_message_entry(self, msg, content: str) -> Dict[str, Any]:
+        """Format single message entry for history."""
+        return {
+            "role": msg.role, "content": content,
+            "created_at": msg.created_at, "id": msg.id
+        }
+
+    async def _send_thread_history_response(self, user_id: str, thread_id: str, history: list) -> None:
+        """Send formatted thread history response."""
+        await manager.send_message(user_id, {
+            "type": "thread_history",
+            "payload": {"thread_id": thread_id, "messages": history}
+        })
 
 class StopAgentHandler(BaseMessageHandler):
     """Handler for stop_agent messages"""
@@ -334,14 +344,18 @@ class MessageHandlerService:
     async def handle_message(self, user_id: str, message: Dict[str, Any]) -> None:
         """Queue a message for processing with validation"""
         try:
-            if not await self._validate_message_format(user_id, message):
-                return
-            message_type = await self._extract_message_type(user_id, message)
-            if not message_type:
-                return
-            message = await self._sanitize_and_queue_message(user_id, message, message_type)
+            await self._validate_and_process_message(user_id, message)
         except Exception as e:
             await self._handle_processing_error(user_id, e)
+
+    async def _validate_and_process_message(self, user_id: str, message: Dict[str, Any]) -> None:
+        """Validate message format and queue for processing."""
+        if not await self._validate_message_format(user_id, message):
+            return
+        message_type = await self._extract_message_type(user_id, message)
+        if not message_type:
+            return
+        await self._sanitize_and_queue_message(user_id, message, message_type)
     
     async def _validate_message_format(self, user_id: str, message: Dict[str, Any]) -> bool:
         """Validate incoming message format"""
@@ -361,7 +375,7 @@ class MessageHandlerService:
             return None
         return message_type
     
-    async def _sanitize_and_queue_message(self, user_id: str, message: Dict[str, Any], message_type: str) -> Dict[str, Any]:
+    async def _sanitize_and_queue_message(self, user_id: str, message: Dict[str, Any], message_type: str) -> None:
         """Sanitize message and add to processing queue"""
         sanitized_message = manager.sanitize_message(message)
         priority = self._determine_priority(message_type)
@@ -369,7 +383,6 @@ class MessageHandlerService:
         success = await message_queue.enqueue(queued_message)
         if not success:
             await manager.send_error(user_id, "Failed to queue message")
-        return sanitized_message
     
     def _create_queued_message(self, user_id: str, message: Dict[str, Any], message_type: str, priority: MessagePriority) -> QueuedMessage:
         """Create queued message object"""

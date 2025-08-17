@@ -268,12 +268,8 @@ def assert_quality_stats_structure(stats, content_type_key):
     """Assert quality statistics have expected structure"""
     assert content_type_key in stats
     type_stats = stats[content_type_key]
-    assert type_stats['count'] == 10
-    assert 0.7 <= type_stats['avg_score'] <= 0.88
-    assert type_stats['min_score'] >= 0.7
-    assert type_stats['max_score'] <= 0.88
-    assert 0 <= type_stats['failure_rate'] <= 1
-    assert 'quality_distribution' in type_stats
+    _assert_count_and_scores(type_stats)
+    _assert_failure_rate_and_distribution(type_stats)
 
 
 def assert_batch_validation_results(results, expected_count):
@@ -308,6 +304,20 @@ def assert_domain_terms_count(content, quality_service, min_count=8):
     domain_term_count = sum(1 for term in quality_service.patterns.DOMAIN_TERMS 
                            if term in content.lower())
     assert domain_term_count >= min_count
+
+
+def _assert_count_and_scores(type_stats):
+    """Assert count and score values are correct."""
+    assert type_stats['count'] == 10
+    assert 0.7 <= type_stats['avg_score'] <= 0.88
+    assert type_stats['min_score'] >= 0.7
+    assert type_stats['max_score'] <= 0.88
+
+
+def _assert_failure_rate_and_distribution(type_stats):
+    """Assert failure rate and quality distribution are correct."""
+    assert 0 <= type_stats['failure_rate'] <= 1
+    assert 'quality_distribution' in type_stats
 
 
 def assert_content_type_threshold_behavior(results):

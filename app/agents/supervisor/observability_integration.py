@@ -120,6 +120,10 @@ class PipelineIntegration:
         flow_id = context.get("flow_id")
         if not flow_id:
             return
+        self._handle_step_status(flow_id, step_name, step_type, status)
+
+    def _handle_step_status(self, flow_id: str, step_name: str, step_type: str, status: str) -> None:
+        """Handle step status logging."""
         if status == "started":
             self.flow_logger.step_started(flow_id, step_name, step_type)
         elif status == "completed":
@@ -131,6 +135,10 @@ class PipelineIntegration:
         flow_id = context.get("flow_id")
         if not flow_id:
             return
+        self._handle_strategy_logging(flow_id, strategy, agents)
+
+    def _handle_strategy_logging(self, flow_id: str, strategy: str, agents: List[str]) -> None:
+        """Handle strategy-specific logging."""
         if strategy == "parallel":
             self.flow_logger.log_parallel_execution(flow_id, agents)
         elif strategy == "sequential":
@@ -174,9 +182,16 @@ class AgentExecutionIntegration:
         """Log agent execution completion."""
         flow_id = context.get("flow_id")
         correlation_id = context.get("correlation_id", "")
+        self._log_agent_step_completion(flow_id, agent_name)
+        self._trigger_completion_hooks(agent_name, flow_id, correlation_id, success)
+
+    def _log_agent_step_completion(self, flow_id: str, agent_name: str) -> None:
+        """Log agent step completion."""
         if flow_id:
             self.flow_logger.step_completed(flow_id, agent_name, "agent")
-        
+
+    def _trigger_completion_hooks(self, agent_name: str, flow_id: str, correlation_id: str, success: bool) -> None:
+        """Trigger completion event hooks."""
         event_type = "step_completed" if success else "step_failed"
         self.hook_registry.trigger_hooks(event_type, agent_name=agent_name,
                                         flow_id=flow_id, correlation_id=correlation_id, success=success)

@@ -166,14 +166,19 @@ class MessageQueue:
     async def stop_processing(self) -> None:
         """Stop processing messages"""
         self._running = False
-        
+        await self._cancel_all_workers()
+        await self._wait_for_workers_completion()
+        self._workers.clear()
+        logger.info("Message queue processing stopped")
+    
+    async def _cancel_all_workers(self) -> None:
+        """Cancel all worker tasks."""
         for worker in self._workers:
             worker.cancel()
-        
+    
+    async def _wait_for_workers_completion(self) -> None:
+        """Wait for all workers to complete or be cancelled."""
         await asyncio.gather(*self._workers, return_exceptions=True)
-        self._workers.clear()
-        
-        logger.info("Message queue processing stopped")
     
     async def _worker(self, worker_id: int) -> None:
         """Worker coroutine to process messages"""
@@ -215,13 +220,27 @@ class MessageQueue:
 
     async def _get_priority_message(self) -> Optional[QueuedMessage]:
         """Get message from priority queues."""
-        for priority in [MessagePriority.CRITICAL, MessagePriority.HIGH, 
-                        MessagePriority.NORMAL, MessagePriority.LOW]:
-            queue_key = self._get_queue_key(priority)
-            message_data = await self.redis.rpop(queue_key)
-            if message_data:
-                return QueuedMessage.from_dict(json.loads(message_data))
+        priority_order = self._get_priority_order()
+        return await self._check_priority_queues(priority_order)
+    
+    def _get_priority_order(self) -> List[MessagePriority]:
+        """Get ordered list of message priorities."""
+        return [MessagePriority.CRITICAL, MessagePriority.HIGH, 
+                MessagePriority.NORMAL, MessagePriority.LOW]
+    
+    async def _check_priority_queues(self, priorities: List[MessagePriority]) -> Optional[QueuedMessage]:
+        """Check priority queues for available messages."""
+        for priority in priorities:
+            message = await self._get_message_from_priority_queue(priority)
+            if message:
+                return message
         return None
+    
+    async def _get_message_from_priority_queue(self, priority: MessagePriority) -> Optional[QueuedMessage]:
+        """Get message from specific priority queue."""
+        queue_key = self._get_queue_key(priority)
+        message_data = await self.redis.rpop(queue_key)
+        return QueuedMessage.from_dict(json.loads(message_data)) if message_data else None
 
     async def _get_retry_message(self) -> Optional[QueuedMessage]:
         """Get first available retry message."""
@@ -297,46 +316,64 @@ class MessageQueue:
     
     async def _get_retry_messages(self) -> List[QueuedMessage]:
         """Get messages ready for retry"""
-        retry_messages = []
-        
         try:
-            pattern = "retry:*"
-            keys = await self.redis.keys(pattern)
-            
-            for key in keys:
-                message_data = await self.redis.get(key)
-                if message_data:
-                    message = QueuedMessage.from_dict(json.loads(message_data))
-                    retry_messages.append(message)
-                    await self.redis.delete(key)
-            
+            return await self._collect_retry_messages()
         except Exception as e:
             logger.error(f"Error getting retry messages: {e}")
-        
+            return []
+    
+    async def _collect_retry_messages(self) -> List[QueuedMessage]:
+        """Collect all available retry messages."""
+        pattern = "retry:*"
+        keys = await self.redis.keys(pattern)
+        return await self._process_retry_keys(keys)
+    
+    async def _process_retry_keys(self, keys: List[str]) -> List[QueuedMessage]:
+        """Process retry keys and extract messages."""
+        retry_messages = []
+        for key in keys:
+            message = await self._extract_retry_message(key)
+            if message:
+                retry_messages.append(message)
         return retry_messages
+    
+    async def _extract_retry_message(self, key: str) -> Optional[QueuedMessage]:
+        """Extract message from retry key."""
+        message_data = await self.redis.get(key)
+        if message_data:
+            message = QueuedMessage.from_dict(json.loads(message_data))
+            await self.redis.delete(key)
+            return message
+        return None
     
     async def _update_message_status(self, message_id: str, status: MessageStatus, error: Optional[str] = None) -> None:
         """Update message status in Redis"""
         status_key = f"message_status:{message_id}"
-        status_data = {
+        status_data = self._build_status_data(status, error)
+        await self.redis.set(status_key, json.dumps(status_data), ex=3600)
+    
+    def _build_status_data(self, status: MessageStatus, error: Optional[str]) -> Dict[str, Any]:
+        """Build status data dictionary."""
+        return {
             "status": status.value,
             "updated_at": datetime.now(UTC).isoformat(),
             "error": error
         }
-        
-        await self.redis.set(status_key, json.dumps(status_data), ex=3600)
     
     async def _send_failure_notification(self, message: QueuedMessage) -> None:
         """Send notification for permanently failed message"""
-        from app.ws_manager import manager
-        
         try:
-            await manager.send_error(
-                message.user_id,
-                f"Message processing failed: {message.error}"
-            )
+            await self._send_failure_message(message)
         except Exception as e:
             logger.error(f"Failed to send failure notification: {e}")
+    
+    async def _send_failure_message(self, message: QueuedMessage) -> None:
+        """Send failure message to user."""
+        from app.ws_manager import manager
+        await manager.send_error(
+            message.user_id,
+            f"Message processing failed: {message.error}"
+        )
     
     def _get_queue_key(self, priority: MessagePriority) -> str:
         """Get Redis key for a priority queue"""
@@ -346,11 +383,15 @@ class MessageQueue:
         """Get queue statistics"""
         stats = self._init_empty_stats()
         try:
-            await self._collect_queue_stats(stats)
-            await self._collect_status_stats(stats)
+            await self._populate_queue_statistics(stats)
         except Exception as e:
             logger.error(f"Error getting queue stats: {e}")
         return stats
+    
+    async def _populate_queue_statistics(self, stats: Dict[str, Any]) -> None:
+        """Populate statistics with queue and status data."""
+        await self._collect_queue_stats(stats)
+        await self._collect_status_stats(stats)
 
     def _init_empty_stats(self) -> Dict[str, Any]:
         """Initialize empty statistics dictionary."""
@@ -371,6 +412,10 @@ class MessageQueue:
         """Collect message status statistics."""
         pattern = "message_status:*"
         keys = await self.redis.keys(pattern)
+        await self._process_all_status_keys(keys, stats)
+    
+    async def _process_all_status_keys(self, keys: List[str], stats: Dict[str, Any]) -> None:
+        """Process all status keys for statistics."""
         for key in keys:
             await self._process_status_key(key, stats)
 

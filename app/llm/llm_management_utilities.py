@@ -35,7 +35,7 @@ class LLMManagementUtilities:
             provider=LLMProvider(config.provider),
             model_name=config.model_name,
             api_key_configured=bool(config.api_key),
-            generation_config=GenerationConfig(**config.generation_config),
+            generation_config=config.generation_config,
             enabled=self._determine_config_enabled(config)
         )
     

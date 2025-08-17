@@ -23,6 +23,10 @@ class PermissionVerifier:
         """Validate user credentials."""
         if not self._is_valid_password_format(password):
             return False
+        return self._perform_credential_verification(user_id, password)
+    
+    def _perform_credential_verification(self, user_id: str, password: str) -> bool:
+        """Perform credential verification with error handling."""
         try:
             credentials = self._get_stored_credentials(user_id)
             return self._verify_against_stored(password, credentials)
@@ -50,6 +54,10 @@ class PermissionVerifier:
         """Verify password against hash."""
         if not stored_hash:
             return False
+        return self._perform_hash_verification(password, stored_hash)
+    
+    def _perform_hash_verification(self, password: str, stored_hash: str) -> bool:
+        """Perform hash verification with error handling."""
         try:
             return self._check_bcrypt_hash(password, stored_hash)
         except Exception as e:
