@@ -40,6 +40,8 @@ def _get_staging_cors_origins() -> list[str]:
         "https://app.staging.netrasystems.ai",
         "https://auth.staging.netrasystems.ai",
         "https://backend.staging.netrasystems.ai",
+        "https://netra-frontend-701982941522.us-central1.run.app",
+        "https://netra-backend-701982941522.us-central1.run.app",
         "http://localhost:3000",
         "http://localhost:3001"
     ]
@@ -124,6 +126,11 @@ def is_origin_allowed(origin: str, allowed_origins: List[str]) -> bool:
         # Allow any subdomain of staging.netrasystems.ai
         pattern = r'^https://[a-zA-Z0-9\-]+\.staging\.netrasystems\.ai$'
         if re.match(pattern, origin):
+            return True
+        
+        # Allow Cloud Run URLs
+        cloud_run_pattern = r'^https://netra-(frontend|backend)-[a-zA-Z0-9\-]+\.(us-central1|europe-west1|asia-northeast1)\.run\.app$'
+        if re.match(cloud_run_pattern, origin):
             return True
     
     return False

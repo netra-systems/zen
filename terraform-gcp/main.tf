@@ -11,6 +11,10 @@ terraform {
       version = "~> 3.5"
     }
   }
+  
+  backend "gcs" {
+    # Bucket and prefix will be set via backend-config
+  }
 }
 
 provider "google" {
@@ -198,6 +202,11 @@ resource "google_cloud_run_service" "backend" {
         env {
           name  = "ENVIRONMENT"
           value = "staging"
+        }
+        
+        env {
+          name  = "CORS_ORIGINS"
+          value = "https://netra-frontend-701982941522.us-central1.run.app,https://staging.netrasystems.ai,https://app.staging.netrasystems.ai"
         }
         
         env {
