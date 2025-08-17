@@ -206,19 +206,17 @@ class DataSubAgent(BaseSubAgent):
     
     def _get_process_delegation_methods(self) -> List[str]:
         """Get process-related delegation methods."""
-        return [
-            "_process_internal", "process_with_retry", "process_with_cache",
-            "process_batch_safe", "process_concurrent", "process_stream",
-            "process_and_persist", "handle_supervisor_request", "enrich_data"
-        ]
+        core_methods = ["_process_internal", "process_with_retry", "process_with_cache"]
+        batch_methods = ["process_batch_safe", "process_concurrent", "process_stream"]
+        supervisor_methods = ["process_and_persist", "handle_supervisor_request", "enrich_data"]
+        return core_methods + batch_methods + supervisor_methods
     
     def _get_analysis_delegation_methods(self) -> List[str]:
         """Get analysis-related delegation methods."""
-        return [
-            "_transform_with_pipeline", "_apply_operation", "save_state",
-            "load_state", "recover", "_analyze_performance_metrics",
-            "_detect_anomalies", "_analyze_usage_patterns", "_analyze_correlations"
-        ]
+        pipeline_methods = ["_transform_with_pipeline", "_apply_operation"]
+        state_methods = ["save_state", "load_state", "recover"]
+        analysis_methods = ["_analyze_performance_metrics", "_detect_anomalies", "_analyze_usage_patterns", "_analyze_correlations"]
+        return pipeline_methods + state_methods + analysis_methods
     
     def _resolve_delegation_method(self, name: str):
         """Resolve delegation method from delegation module."""

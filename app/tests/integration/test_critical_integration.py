@@ -18,7 +18,7 @@ from app.agents.base import BaseSubAgent
 from app.agents.state import DeepAgentState
 from app.services.agent_service import AgentService
 from app.services.websocket.message_handler import BaseMessageHandler
-from app.services.state_persistence_service import StatePersistenceService
+from app.services.state_persistence import StatePersistenceService
 from app.services.database.thread_repository import ThreadRepository
 from app.services.database.message_repository import MessageRepository
 from app.services.database.run_repository import RunRepository

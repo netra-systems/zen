@@ -160,11 +160,8 @@ class CorpusAdminSubAgent(BaseSubAgent):
     async def _send_processing_update(self, operation_request, run_id: str, stream_updates: bool) -> None:
         """Send processing update"""
         if stream_updates:
-            await self._send_update(run_id, {
-                "status": "processing",
-                "message": f"🔄 Executing {operation_request.operation.value} operation on corpus '{operation_request.corpus_metadata.corpus_name}'...",
-                "operation": operation_request.operation.value
-            })
+            update_data = self._build_processing_update_data(operation_request)
+            await self._send_update(run_id, update_data)
     
     async def _send_completion_update(
         self, 
@@ -207,8 +204,7 @@ class CorpusAdminSubAgent(BaseSubAgent):
     ) -> None:
         """Handle execution errors"""
         logger.error(f"Corpus operation failed for run_id {run_id}: {error}")
-        await self._store_error_result(error, state)
-        await self._send_error_notification(run_id, error, stream_updates)
+        await self._store_and_notify_error(error, state, run_id, stream_updates)
     
     async def _store_error_result(self, error: Exception, state: DeepAgentState) -> None:
         """Store error result in state"""
@@ -286,14 +282,12 @@ class CorpusAdminSubAgent(BaseSubAgent):
     
     def _log_completion(self, result, run_id: str) -> None:
         """Log operation completion"""
-        logger.info(f"Corpus operation completed for run_id {run_id}: "
-                   f"operation={result.operation.value}, "
-                   f"success={result.success}, "
-                   f"affected={result.affected_documents}")
+        completion_message = self._format_completion_log_message(result, run_id)
+        logger.info(completion_message)
     
     def _log_final_metrics(self, state: DeepAgentState) -> None:
         """Log final metrics"""
-        if state.corpus_admin_result and isinstance(state.corpus_admin_result, dict):
+        if self._has_valid_corpus_result(state):
             result = state.corpus_admin_result
             metrics_message = self._build_metrics_message(result)
             logger.info(metrics_message)
@@ -312,3 +306,28 @@ class CorpusAdminSubAgent(BaseSubAgent):
                 await self.websocket_manager.send_agent_update(run_id, "corpus_admin", update)
             except Exception as e:
                 logger.error(f"Failed to send WebSocket update: {e}")
+    
+    def _build_processing_update_data(self, operation_request) -> dict:
+        """Build processing update data for operation."""
+        return {
+            "status": "processing",
+            "message": f"🔄 Executing {operation_request.operation.value} operation on corpus '{operation_request.corpus_metadata.corpus_name}'...",
+            "operation": operation_request.operation.value
+        }
+    
+    async def _store_and_notify_error(self, error: Exception, state: DeepAgentState, 
+                                     run_id: str, stream_updates: bool) -> None:
+        """Store error result and send notification."""
+        await self._store_error_result(error, state)
+        await self._send_error_notification(run_id, error, stream_updates)
+    
+    def _format_completion_log_message(self, result, run_id: str) -> str:
+        """Format completion log message."""
+        return (f"Corpus operation completed for run_id {run_id}: "
+                f"operation={result.operation.value}, "
+                f"success={result.success}, "
+                f"affected={result.affected_documents}")
+    
+    def _has_valid_corpus_result(self, state: DeepAgentState) -> bool:
+        """Check if state has valid corpus admin result."""
+        return state.corpus_admin_result and isinstance(state.corpus_admin_result, dict)

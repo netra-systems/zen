@@ -16,7 +16,7 @@ from app.services.factory_status.report_builder import ReportBuilder, FactorySta
 #     init_compliance_api, ComplianceAPIHandler
 # )
 from app.core.exceptions import NetraException
-from app.auth.auth_dependencies import get_current_user
+from app.auth.auth_dependencies import get_current_user, require_admin
 
 
 router = APIRouter(
@@ -70,9 +70,9 @@ _latest_report_id: Optional[str] = None
 
 @router.get("/latest", response_model=ReportResponse)
 async def get_latest_report(
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(require_admin)
 ) -> ReportResponse:
-    """Get the latest factory status report."""
+    """Get the latest factory status report (Admin only)."""
     if not _latest_report_id or _latest_report_id not in _report_cache:
         # Generate new report if none exists
         report = await _generate_new_report(24)
@@ -104,9 +104,9 @@ async def get_report_history(
     end_date: Optional[datetime] = Query(None),
     interval: str = Query("daily", pattern="^(hourly|daily|weekly)$"),
     limit: int = Query(10, ge=1, le=100),
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(require_admin)
 ) -> List[ReportResponse]:
-    """Get historical factory status reports."""
+    """Get historical factory status reports (Admin only)."""
     reports = list(_report_cache.values())
     filtered_reports = _filter_reports_by_date_range(reports, start_date, end_date)
     limited_reports = _sort_and_limit_reports(filtered_reports, limit)
@@ -130,9 +130,9 @@ def _handle_metric_fetch_error(e: Exception, metric_name: str):
 async def get_specific_metric(
     metric_name: str,
     hours: int = Query(24, ge=1, le=720),
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(require_admin)
 ) -> MetricResponse:
-    """Get a specific metric from the factory status system."""
+    """Get a specific metric from the factory status system (Admin only)."""
     try:
         builder = ReportBuilder()
         value = await _fetch_metric(builder, metric_name, hours)
@@ -144,9 +144,9 @@ async def get_specific_metric(
 @router.post("/generate", response_model=ReportResponse)
 async def generate_report(
     request: GenerateReportRequest,
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(require_admin)
 ) -> ReportResponse:
-    """Generate a new factory status report."""
+    """Generate a new factory status report (Admin only)."""
     try:
         report = await _generate_new_report(request.hours)
         return _convert_report_to_response(report)
@@ -193,9 +193,9 @@ def _build_velocity_trend_response(days: int, daily_velocities: List[Dict[str, A
 @router.get("/metrics/velocity/trend")
 async def get_velocity_trend(
     days: int = Query(7, ge=1, le=30),
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(require_admin)
 ) -> Dict[str, Any]:
-    """Get velocity trend over specified days."""
+    """Get velocity trend over specified days (Admin only)."""
     calculator = _build_velocity_calculator()
     daily_velocities = _collect_daily_velocities(calculator, days)
     return _build_velocity_trend_response(days, daily_velocities)
@@ -220,9 +220,9 @@ def _build_business_objectives_response(hours: int, metrics) -> Dict[str, Any]:
 @router.get("/metrics/business-value/objectives")
 async def get_business_objectives(
     hours: int = Query(168, ge=1, le=720),
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(require_admin)
 ) -> Dict[str, Any]:
-    """Get business objective scores."""
+    """Get business objective scores (Admin only)."""
     calculator = _build_business_calculator()
     metrics = calculator.calculate_business_value(hours)
     return _build_business_objectives_response(hours, metrics)
@@ -257,9 +257,9 @@ def _build_compliance_response(compliance) -> Dict[str, Any]:
 
 @router.get("/metrics/quality/compliance")
 async def get_compliance_status(
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(require_admin)
 ) -> Dict[str, Any]:
-    """Get architecture compliance status."""
+    """Get architecture compliance status (Admin only)."""
     calculator = _build_quality_calculator()
     metrics = calculator.calculate_quality(24)
     return _build_compliance_response(metrics.architecture_compliance)
@@ -302,9 +302,9 @@ def _build_complete_dashboard_summary(report) -> Dict[str, Any]:
 
 @router.get("/dashboard/summary")
 async def get_dashboard_summary(
-    current_user: Dict = Depends(get_current_user)
+    current_user: Dict = Depends(require_admin)
 ) -> Dict[str, Any]:
-    """Get summary data for dashboard display."""
+    """Get summary data for dashboard display (Admin only)."""
     report = await _ensure_latest_report()
     return _build_complete_dashboard_summary(report)
 

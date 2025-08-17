@@ -64,8 +64,7 @@ class ExecutionEngine:
         logger.error(f"Agent {context.agent_name} failed: {error}")
         if self._can_retry(context):
             return await self._retry_execution(context, state)
-        self._log_fallback_trigger(context)
-        return await self.fallback_manager.create_fallback_result(context, state, error, start_time)
+        return await self._execute_fallback_strategy(context, state, error, start_time)
     
     def _can_retry(self, context: AgentExecutionContext) -> bool:
         """Check if retry is allowed."""
@@ -74,10 +73,9 @@ class ExecutionEngine:
     async def _retry_execution(self, context: AgentExecutionContext,
                               state: DeepAgentState) -> AgentExecutionResult:
         """Retry agent execution."""
-        context.retry_count += 1
-        logger.info(f"Retrying {context.agent_name} ({context.retry_count}/{context.max_retries})")
+        self._prepare_retry_context(context)
         self._log_retry_attempt(context)
-        await asyncio.sleep(2 ** context.retry_count)
+        await self._wait_for_retry(context.retry_count)
         return await self.execute_agent(context, state)
     
     async def execute_pipeline(self, steps: List[PipelineStep],
@@ -186,8 +184,7 @@ class ExecutionEngine:
     def _update_history(self, result: AgentExecutionResult) -> None:
         """Update run history with size limit."""
         self.run_history.append(result)
-        if len(self.run_history) > self.MAX_HISTORY_SIZE:
-            self.run_history = self.run_history[-self.MAX_HISTORY_SIZE:]
+        self._enforce_history_size_limit()
     
     # WebSocket delegation methods
     async def send_agent_thinking(self, context: AgentExecutionContext, 
@@ -212,13 +209,13 @@ class ExecutionEngine:
     
     def _log_fallback_trigger(self, context: AgentExecutionContext) -> None:
         """Log fallback trigger if flow_id is available."""
-        flow_id = getattr(context, 'flow_id', None)
+        flow_id = self._get_context_flow_id(context)
         if flow_id:
             self.flow_logger.log_fallback_triggered(flow_id, context.agent_name, "fallback_agent")
     
     def _log_retry_attempt(self, context: AgentExecutionContext) -> None:
         """Log retry attempt if flow_id is available."""
-        flow_id = getattr(context, 'flow_id', None)
+        flow_id = self._get_context_flow_id(context)
         if flow_id:
             self.flow_logger.log_retry_attempt(flow_id, context.agent_name, context.retry_count)
 
@@ -230,3 +227,28 @@ class ExecutionEngine:
     async def reset_fallback_mechanisms(self) -> None:
         """Reset all fallback mechanisms."""
         await self.fallback_manager.reset_fallback_mechanisms()
+    
+    async def _execute_fallback_strategy(self, context: AgentExecutionContext, 
+                                        state: DeepAgentState, error: Exception, 
+                                        start_time: float) -> AgentExecutionResult:
+        """Execute fallback strategy for failed agent."""
+        self._log_fallback_trigger(context)
+        return await self.fallback_manager.create_fallback_result(context, state, error, start_time)
+    
+    def _prepare_retry_context(self, context: AgentExecutionContext) -> None:
+        """Prepare context for retry execution."""
+        context.retry_count += 1
+        logger.info(f"Retrying {context.agent_name} ({context.retry_count}/{context.max_retries})")
+    
+    async def _wait_for_retry(self, retry_count: int) -> None:
+        """Wait for exponential backoff delay."""
+        await asyncio.sleep(2 ** retry_count)
+    
+    def _enforce_history_size_limit(self) -> None:
+        """Enforce maximum history size to prevent memory leaks."""
+        if len(self.run_history) > self.MAX_HISTORY_SIZE:
+            self.run_history = self.run_history[-self.MAX_HISTORY_SIZE:]
+    
+    def _get_context_flow_id(self, context: AgentExecutionContext) -> Optional[str]:
+        """Get flow ID from execution context if available."""
+        return getattr(context, 'flow_id', None)

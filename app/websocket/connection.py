@@ -133,21 +133,40 @@ class ConnectionManager:
     
     async def _close_websocket_safely(self, websocket: WebSocket, code: int, reason: str) -> None:
         """Close websocket connection safely with error handling."""
-        # Only attempt to close if WebSocket is in CONNECTED state
-        # Check both client_state and application_state to be safe
+        if not self._should_attempt_close(websocket):
+            return
+        await self._execute_websocket_close(websocket, code, reason)
+    
+    def _should_attempt_close(self, websocket: WebSocket) -> bool:
+        """Check if websocket should be closed based on state."""
+        if not hasattr(websocket, 'client_state'):
+            return False
+        if websocket.client_state != WebSocketState.CONNECTED:
+            return False
+        if not hasattr(websocket, 'application_state'):
+            return True
+        return websocket.application_state != WebSocketState.DISCONNECTED
+    
+    async def _execute_websocket_close(self, websocket: WebSocket, code: int, reason: str) -> None:
+        """Execute websocket close operation with error handling."""
         try:
-            if (hasattr(websocket, 'client_state') and 
-                websocket.client_state == WebSocketState.CONNECTED and
-                hasattr(websocket, 'application_state') and
-                websocket.application_state != WebSocketState.DISCONNECTED):
-                await websocket.close(code=code, reason=reason)
+            await websocket.close(code=code, reason=reason)
         except Exception as e:
             logger.debug(f"Error closing WebSocket: {e}")
     
     def _log_disconnection_stats(self, user_id: str, conn_info: ConnectionInfo) -> None:
         """Log disconnection with statistics."""
-        duration = (datetime.now(timezone.utc) - conn_info.connected_at).total_seconds()
-        logger.info(
+        duration = self._calculate_connection_duration(conn_info)
+        message = self._build_disconnection_log_message(user_id, conn_info, duration)
+        logger.info(message)
+    
+    def _calculate_connection_duration(self, conn_info: ConnectionInfo) -> float:
+        """Calculate connection duration in seconds."""
+        return (datetime.now(timezone.utc) - conn_info.connected_at).total_seconds()
+    
+    def _build_disconnection_log_message(self, user_id: str, conn_info: ConnectionInfo, duration: float) -> str:
+        """Build formatted disconnection log message."""
+        return (
             f"WebSocket disconnected for user {user_id} "
             f"(ID: {conn_info.connection_id}, Duration: {duration:.1f}s, "
             f"Messages: {conn_info.message_count}, Errors: {conn_info.error_count})"

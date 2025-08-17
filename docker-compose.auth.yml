@@ -1,0 +1,86 @@
+# Simplified auth service deployment
+services:
+  # PostgreSQL Database for auth
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: netra_auth
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password
+    ports:
+      - "5434:5432"  # Using 5434 to avoid conflicts
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for session/cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"  # Using 6380 to avoid conflicts
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Auth Service (Backend)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      DATABASE_URL: postgresql://auth_user:auth_password@postgres:5432/netra_auth
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: auth_secret_key_for_testing
+      PORT: 8080
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: >
+      sh -c "
+        echo 'Starting auth service...' &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8080
+      "
+
+  # Auth Proxy Service
+  auth-proxy:
+    build:
+      context: auth-proxy
+      dockerfile: Dockerfile
+    environment:
+      BACKEND_URL: http://backend:8080
+      FRONTEND_URL: http://localhost:3000
+    ports:
+      - "8081:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  auth_postgres_data:
+
+networks:
+  default:
+    name: netra_auth
+    driver: bridge

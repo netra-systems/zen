@@ -19,7 +19,7 @@ from app.schemas import (
 from app.llm.llm_manager import LLMManager
 from app.services.agent_service import AgentService
 from app.services.websocket.message_handler import BaseMessageHandler
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 from app.services.apex_optimizer_agent.tools.tool_dispatcher import ApexToolSelector
 from sqlalchemy.ext.asyncio import AsyncSession
 

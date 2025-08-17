@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, Mock, patch
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy import select
 
-from app.services.state_persistence_service import state_persistence_service
+from app.services.state_persistence import state_persistence_service
 from app.agents.state import DeepAgentState, AgentMetadata, OptimizationsResult
 from app.db.models_postgres import Run, Reference
 
