@@ -178,7 +178,7 @@ class TestProviderComparison:
                 return [sample_anthropic_item]
             return []
         
-        with patch.object(service, 'get_supply_items', side_effect=mock_get_supply_items):
+        with patch.object(service.market_ops.supply_ops, 'get_supply_items', side_effect=mock_get_supply_items):
             result: Dict[str, Any] = service.get_provider_comparison()
         
         self._verify_provider_comparison_structure(result)
