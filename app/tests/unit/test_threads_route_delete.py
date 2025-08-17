@@ -32,7 +32,7 @@ class TestDeleteThread:
         """Test successful thread deletion (archival)"""
         mock_thread = create_mock_thread()
         
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
             thread_repo.archive_thread = AsyncMock(return_value=True)
@@ -45,7 +45,7 @@ class TestDeleteThread:
         """Test failure to archive thread"""
         mock_thread = create_mock_thread()
         
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
             thread_repo.archive_thread = AsyncMock(return_value=False)
@@ -56,7 +56,7 @@ class TestDeleteThread:
             assert_http_exception(exc_info, 500, "Failed to archive thread")
     async def test_delete_thread_not_found(self, mock_db, mock_user):
         """Test deleting non-existent thread"""
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(return_value=None)
             
@@ -68,7 +68,7 @@ class TestDeleteThread:
         """Test deleting thread owned by another user"""
         mock_thread = create_access_denied_thread()
         
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo:
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(return_value=mock_thread)
             
@@ -78,8 +78,8 @@ class TestDeleteThread:
             assert_http_exception(exc_info, 403, "Access denied")
     async def test_delete_thread_exception(self, mock_db, mock_user):
         """Test general exception in delete_thread"""
-        with patch('app.routes.threads_route.ThreadRepository') as MockThreadRepo, \
-             patch('app.routes.threads_route.logger') as mock_logger:
+        with patch('app.routes.utils.thread_helpers.ThreadRepository') as MockThreadRepo, \
+             patch('app.routes.utils.thread_helpers.logger') as mock_logger:
             
             thread_repo = MockThreadRepo.return_value
             thread_repo.get_by_id = AsyncMock(side_effect=Exception("Database error"))

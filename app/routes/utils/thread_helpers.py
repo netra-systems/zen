@@ -28,9 +28,9 @@ async def build_thread_response(thread, message_count: int, title: Optional[str]
     return ThreadResponse(
         id=thread.id,
         object=thread.object,
-        title=title or thread.metadata_.get("title"),
+        title=title or (thread.metadata_.get("title") if thread.metadata_ else None),
         created_at=thread.created_at,
-        updated_at=thread.metadata_.get("updated_at"),
+        updated_at=thread.metadata_.get("updated_at") if thread.metadata_ else None,
         metadata=thread.metadata_,
         message_count=message_count
     )
@@ -220,6 +220,7 @@ async def handle_auto_rename_request(db: AsyncSession, thread_id: str, user_id: 
 # Error handling wrapper
 async def handle_route_with_error_logging(handler_func, error_context: str):
     """Handle route with standardized error logging."""
+    from fastapi import HTTPException
     try:
         return await handler_func()
     except HTTPException:
@@ -228,5 +229,13 @@ async def handle_route_with_error_logging(handler_func, error_context: str):
         from app.logging_config import central_logger
         logger = central_logger.get_logger(__name__)
         logger.error(f"Error {error_context}: {e}", exc_info=True if "creating" in error_context else False)
-        from fastapi import HTTPException
-        raise HTTPException(status_code=500, detail=f"Failed to {error_context.lower()}")
+        # Convert -ing verbs to base form for cleaner error messages
+        clean_context = error_context.lower()
+        if " " in clean_context:
+            verb, rest = clean_context.split(" ", 1)
+            if verb.endswith("ing"):
+                verb = verb[:-3]
+            clean_context = f"{verb} {rest}"
+        elif clean_context.endswith("ing"):
+            clean_context = clean_context[:-3]
+        raise HTTPException(status_code=500, detail=f"Failed to {clean_context}")
