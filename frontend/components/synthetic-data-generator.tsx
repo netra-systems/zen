@@ -38,7 +38,12 @@ export function SyntheticDataGenerator({ onGenerationComplete }: { onGenerationC
   useEffect(() => {
     const fetchTables = async () => {
       try {
-        const response = await fetch("http://localhost:8000/api/generation/clickhouse_tables");
+        const token = localStorage.getItem('jwt_token') || sessionStorage.getItem('jwt_token');
+        const response = await fetch("http://localhost:8000/api/generation/clickhouse_tables", {
+          headers: {
+            ...(token && { 'Authorization': `Bearer ${token}` })
+          }
+        });
         if (!response.ok) throw new Error("Failed to fetch tables.");
         const data = await response.json();
         setTables(data);
@@ -68,9 +73,13 @@ export function SyntheticDataGenerator({ onGenerationComplete }: { onGenerationC
     setIsLoading(true);
     setError(null);
     try {
+      const token = localStorage.getItem('jwt_token') || sessionStorage.getItem('jwt_token');
       const response = await fetch("http://localhost:8000/api/generation/synthetic_data", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { 'Authorization': `Bearer ${token}` })
+        },
         body: JSON.stringify(generationParams),
       });
       if (!response.ok) throw new Error("Failed to generate synthetic data.");

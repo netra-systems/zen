@@ -52,6 +52,34 @@
         </functions>
       </module>
 
+      <module name="code_change_tracker" max_lines="300">
+        <responsibility>Track detailed code changes including modules, classes, functions</responsibility>
+        <functions>
+          <function name="extract_new_modules" max_lines="8">Identify all newly created Python modules</function>
+          <function name="extract_new_classes" max_lines="8">Identify all newly created classes</function>
+          <function name="extract_new_functions" max_lines="8">Identify all newly created functions</function>
+          <function name="extract_deletions" max_lines="8">Track deleted modules, classes, functions</function>
+          <function name="rank_by_relevance" max_lines="8">Sort changes by business/technical relevance</function>
+          <function name="analyze_ast_changes" max_lines="8">Use AST to detect code structure changes</function>
+          <function name="categorize_changes" max_lines="8">Group changes by type and purpose</function>
+          <function name="calculate_impact_score" max_lines="8">Assign relevance scores to changes</function>
+        </functions>
+      </module>
+
+      <module name="relevance_scorer" max_lines="300">
+        <responsibility>Calculate relevance scores for code changes</responsibility>
+        <functions>
+          <function name="score_by_business_value" max_lines="8">Score based on BVJ alignment</function>
+          <function name="score_by_dependencies" max_lines="8">Score by number of dependencies</function>
+          <function name="score_by_test_coverage" max_lines="8">Score by test coverage impact</function>
+          <function name="score_by_api_surface" max_lines="8">Score by API/route changes</function>
+          <function name="score_by_agent_impact" max_lines="8">Score by agent system impact</function>
+          <function name="score_by_user_facing" max_lines="8">Score by frontend/UX impact</function>
+          <function name="combine_scores" max_lines="8">Weighted combination of scores</function>
+          <function name="get_relevance_category" max_lines="8">Map score to relevance tier</function>
+        </functions>
+      </module>
+
       <module name="test_report_analyzer" max_lines="300">
         <responsibility>Analyze test reports and identify issues</responsibility>
         <functions>
@@ -161,7 +189,67 @@
       </format>
     </section>
 
-    <section name="code_quality" priority="6">
+    <section name="code_changes_detailed" priority="6">
+      <format>
+        ## 🔄 Code Changes Summary
+        
+        ### 📦 New Modules (Sorted by Relevance)
+        {for each new_module sorted by relevance_score descending}
+        - **{module_path}** [{relevance_tier}]
+          - Purpose: {module_purpose}
+          - Business Value: {business_alignment}
+          - Impact Score: {impact_score}/10
+        
+        ### 🏗️ New Classes 
+        {for each new_class sorted by relevance_score descending}
+        - **{class_name}** in {file_path} [{relevance_tier}]
+          - Type: {class_type: Model/Service/Agent/Component}
+          - Dependencies: {dependency_count}
+          - Methods: {method_count}
+        
+        ### ⚡ New Functions (Top 20 by Relevance)
+        {for each new_function limited to top 20}
+        - **{function_name}()** in {file_path}:{line_number} [{relevance_tier}]
+          - Purpose: {function_purpose}
+          - Complexity: {complexity_score}
+        
+        ### 🗑️ Deletions
+        #### Deleted Modules
+        {for each deleted_module}
+        - **{module_path}** (Reason: {deletion_reason})
+        
+        #### Deleted Classes
+        {for each deleted_class}
+        - **{class_name}** from {file_path}
+        
+        #### Deleted Functions
+        {for each deleted_function}
+        - **{function_name}()** from {file_path}
+        
+        ### 📝 Modified Files (By Relevance Tier)
+        
+        #### 🔴 Critical Changes (Business/Security Impact)
+        {for each file in critical_tier}
+        - **{file_path}**
+          - Changes: {change_summary}
+          - Lines: +{additions} -{deletions}
+          - Impact: {impact_description}
+        
+        #### 🟠 High Priority (Core Functionality)
+        {for each file in high_tier}
+        - **{file_path}**: {brief_change_description} (+{additions}/-{deletions})
+        
+        #### 🟡 Medium Priority (Feature Updates)
+        {for each file in medium_tier}
+        - **{file_path}**: {brief_change_description} (+{additions}/-{deletions})
+        
+        #### 🟢 Low Priority (Refactoring/Cleanup)
+        {for each file in low_tier}
+        - **{file_path}**: {brief_change_description} (+{additions}/-{deletions})
+      </format>
+    </section>
+
+    <section name="code_quality" priority="7">
       <format>
         ## 📏 Code Quality & Compliance
         ### Architecture Compliance
@@ -176,7 +264,7 @@
       </format>
     </section>
 
-    <section name="documentation" priority="7">
+    <section name="documentation" priority="8">
       <format>
         ## 📚 Documentation Updates
         ### Updated Docs
@@ -189,7 +277,7 @@
       </format>
     </section>
 
-    <section name="dependencies" priority="8">
+    <section name="dependencies" priority="9">
       <format>
         ## 📦 Dependency Changes
         ### Added
@@ -203,7 +291,7 @@
       </format>
     </section>
 
-    <section name="action_items" priority="9">
+    <section name="action_items" priority="10">
       <format>
         ## ✅ Action Items
         ### For Everyone
@@ -216,6 +304,71 @@
       </format>
     </section>
   </output_format>
+
+  <relevance_scoring>
+    <tier name="critical" min_score="8" max_score="10" emoji="🔴">
+      <criteria>
+        - Business-critical functionality changes
+        - Security-related modifications
+        - API breaking changes
+        - Production deployment blockers
+        - Customer-facing features with high revenue impact
+      </criteria>
+    </tier>
+    
+    <tier name="high" min_score="6" max_score="7.9" emoji="🟠">
+      <criteria>
+        - Core service modifications
+        - Agent system changes
+        - Database schema updates
+        - Performance optimizations
+        - Test infrastructure changes
+      </criteria>
+    </tier>
+    
+    <tier name="medium" min_score="4" max_score="5.9" emoji="🟡">
+      <criteria>
+        - Feature enhancements
+        - UI/UX improvements
+        - Documentation updates
+        - Configuration changes
+        - Non-critical bug fixes
+      </criteria>
+    </tier>
+    
+    <tier name="low" min_score="0" max_score="3.9" emoji="🟢">
+      <criteria>
+        - Code refactoring
+        - Style/formatting changes
+        - Comment additions
+        - Development tools
+        - Test additions without feature changes
+      </criteria>
+    </tier>
+    
+    <scoring_weights>
+      <weight name="business_value" value="0.30">Direct revenue/cost impact</weight>
+      <weight name="user_impact" value="0.25">End-user experience changes</weight>
+      <weight name="technical_debt" value="0.15">Code quality/maintainability</weight>
+      <weight name="dependencies" value="0.10">Number of dependent components</weight>
+      <weight name="test_coverage" value="0.10">Test coverage changes</weight>
+      <weight name="security" value="0.10">Security implications</weight>
+    </scoring_weights>
+    
+    <path_priorities>
+      <path pattern="app/routes/*" priority="high">API endpoints</path>
+      <path pattern="app/agents/*" priority="high">Agent system</path>
+      <path pattern="app/auth/*" priority="critical">Authentication</path>
+      <path pattern="app/services/*" priority="high">Business logic</path>
+      <path pattern="frontend/components/chat/*" priority="high">Chat UI</path>
+      <path pattern="app/db/*" priority="high">Database layer</path>
+      <path pattern="app/websocket/*" priority="high">Real-time communication</path>
+      <path pattern="scripts/*" priority="low">Development tools</path>
+      <path pattern="test_framework/*" priority="medium">Test infrastructure</path>
+      <path pattern="SPEC/*" priority="medium">Specifications</path>
+      <path pattern="docs/*" priority="low">Documentation</path>
+    </path_priorities>
+  </relevance_scoring>
 
   <time_frames>
     <frame id="last_hour" hours="1" description="Last Hour"/>

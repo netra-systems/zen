@@ -300,7 +300,7 @@ class FailFastEngine:
             return dependencies
         
         try:
-            with open(test_file, 'r') as f:
+            with open(test_file, 'r', encoding='utf-8', errors='ignore') as f:
                 content = f.read()
             
             # Look for import patterns that indicate dependencies
@@ -462,6 +462,52 @@ class OptimizedTestExecutor:
             'execution_count': len(uncached_tests),
             'estimated_duration': self._estimate_execution_time(test_shards),
             'memory_allocation': self._calculate_memory_requirements(test_shards)
+        }
+    
+    def _estimate_execution_time(self, test_shards: List[List[str]]) -> float:
+        """Estimate execution time based on test shards"""
+        if not test_shards:
+            return 0.0
+        
+        # Get max shard size (longest running)
+        max_shard_size = max(len(shard) for shard in test_shards)
+        # Estimate 5 seconds per test average
+        return max_shard_size * 5.0
+    
+    def _calculate_memory_requirements(self, test_shards: List[List[str]]) -> Dict[str, int]:
+        """Calculate memory requirements for test shards"""
+        if not test_shards:
+            return {'total_mb': 0, 'per_shard_mb': 0}
+        
+        # Estimate 50MB per test
+        total_tests = sum(len(shard) for shard in test_shards)
+        total_memory = total_tests * 50
+        per_shard = total_memory // len(test_shards) if test_shards else 0
+        
+        return {
+            'total_mb': total_memory,
+            'per_shard_mb': per_shard
+        }
+    
+    def _analyze_execution_performance(self, results: List[TestExecutionResult], start_time: float) -> Dict[str, Any]:
+        """Analyze test execution performance"""
+        total_duration = time.time() - start_time
+        success_count = sum(1 for r in results if r.success)
+        failed_count = len(results) - success_count
+        
+        # Calculate metrics
+        avg_duration = sum(r.duration for r in results) / len(results) if results else 0
+        max_duration = max((r.duration for r in results), default=0)
+        min_duration = min((r.duration for r in results), default=0)
+        
+        return {
+            'total_duration': total_duration,
+            'success_rate': (success_count / len(results) * 100) if results else 0,
+            'avg_test_duration': avg_duration,
+            'max_test_duration': max_duration,
+            'min_test_duration': min_duration,
+            'failed_count': failed_count,
+            'success_count': success_count
         }
     
     async def _execute_optimization_plan(self, plan: Dict[str, Any]) -> List[TestExecutionResult]:

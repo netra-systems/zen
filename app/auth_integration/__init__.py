@@ -12,11 +12,17 @@ from .auth import (
     ActiveUserDep,
     DeveloperDep,
     AdminDep,
+    ActiveUserWsDep,
     require_permission,
     get_current_user,
     get_current_active_user,
+    get_current_user_optional,
     require_admin,
-    require_developer
+    require_developer,
+    get_password_hash,
+    verify_password,
+    create_access_token,
+    validate_token_jwt
 )
 
 __all__ = [
@@ -26,9 +32,15 @@ __all__ = [
     'ActiveUserDep',
     'DeveloperDep',
     'AdminDep',
+    'ActiveUserWsDep',
     'require_permission',
     'get_current_user',
     'get_current_active_user',
+    'get_current_user_optional',
     'require_admin',
-    'require_developer'
+    'require_developer',
+    'get_password_hash',
+    'verify_password',
+    'create_access_token',
+    'validate_token_jwt'
 ]

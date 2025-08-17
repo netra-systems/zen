@@ -154,12 +154,6 @@ class ReportArchiver:
         self.history_dir = reports_dir / "history"
         self.history_dir.mkdir(exist_ok=True)
     
-    def archive_report(self, report_path: Path, level: str = None) -> Path:
-        """Archive report - no longer creates timestamps."""
-        # Deprecated - history is now managed by UnifiedReporter
-        # Keep for backward compatibility but just return the path
-        return report_path
-    
     def get_archived_reports(self, level: str = None) -> list:
         """Get list of archived reports, optionally filtered by level."""
         archived = []

@@ -14,8 +14,8 @@ from app.services.factory_status.git_diff_analyzer import GitDiffAnalyzer
 from app.services.factory_status.git_branch_tracker import GitBranchTracker
 from app.services.factory_status.metrics_velocity import VelocityCalculator
 from app.services.factory_status.metrics_impact import ImpactCalculator
-from app.services.factory_status.metrics_quality import QualityCalculator
-from app.services.factory_status.metrics_business_value import BusinessValueCalculator
+from app.services.factory_status.quality_validation import QualityCalculator
+from app.services.factory_status.business_reporting import BusinessValueCalculator
 
 
 @dataclass

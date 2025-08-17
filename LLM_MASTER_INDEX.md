@@ -439,7 +439,7 @@ state = DeepAgentState(...)
 ```
 
 ### Performance Tips
-1. **Import only what you need** - Don't use `from app.schemas import *`
+1. **Import only what you need** - e.g use `from app.schemas import {specific exact thing needed}`
 2. **Use TYPE_CHECKING** for circular imports - `if TYPE_CHECKING: from app.x import Y`
 3. **Cache heavy imports** - Store LLMManager, connections as module variables
 4. **Lazy load optional features** - Import inside functions if rarely used

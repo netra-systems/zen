@@ -59,57 +59,106 @@ class SystemManagementHandlers:
         """Handler for user_admin tool"""
         from app.services.user_service import UserService
         
-        # Check admin permissions
         if not user.is_admin:
-            return {
-                "type": "text",
-                "text": "Admin privileges required",
-                "error": True
-            }
+            return _create_permission_error_response()
         
         user_service = UserService(self.db)
         action = arguments['action']
-        
-        if action == 'create':
-            new_user = await user_service.create_user(
-                email=arguments['email'],
-                username=arguments.get('username'),
-                role=arguments.get('role', 'user')
-            )
-            return {
-                "type": "text",
-                "text": f"Created user: {new_user.email}",
-                "user_id": new_user.id
-            }
-        elif action == 'update':
-            await user_service.update_user(
-                user_id=arguments['user_id'],
-                updates=arguments.get('updates', {})
-            )
-            return {
-                "type": "text",
-                "text": f"Updated user: {arguments['user_id']}"
-            }
-        elif action == 'delete':
-            await user_service.delete_user(user_id=arguments['user_id'])
-            return {
-                "type": "text",
-                "text": f"Deleted user: {arguments['user_id']}"
-            }
-        elif action == 'list':
-            users = await user_service.list_users(
-                filters=arguments.get('filters', {})
-            )
-            return {
-                "type": "text",
-                "text": f"Found {len(users)} users",
-                "users": users
-            }
-        else:
-            return {
-                "type": "text",
-                "text": f"Unknown action: {action}"
-            }
+        return await _execute_user_admin_action(user_service, action, arguments)
+
+
+def _create_permission_error_response() -> Dict[str, Any]:
+    """Create permission error response for non-admin users."""
+    return {
+        "type": "text",
+        "text": "Admin privileges required",
+        "error": True
+    }
+
+
+async def _execute_user_admin_action(
+    user_service: 'UserService', 
+    action: str, 
+    arguments: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Execute user admin action based on type."""
+    if action == 'create':
+        return await _handle_user_create_action(user_service, arguments)
+    elif action == 'update':
+        return await _handle_user_update_action(user_service, arguments)
+    elif action == 'delete':
+        return await _handle_user_delete_action(user_service, arguments)
+    elif action == 'list':
+        return await _handle_user_list_action(user_service, arguments)
+    else:
+        return _create_unknown_action_response(action)
+
+
+async def _handle_user_create_action(
+    user_service: 'UserService', 
+    arguments: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Handle user creation action."""
+    new_user = await user_service.create_user(
+        email=arguments['email'],
+        username=arguments.get('username'),
+        role=arguments.get('role', 'user')
+    )
+    return {
+        "type": "text",
+        "text": f"Created user: {new_user.email}",
+        "user_id": new_user.id
+    }
+
+
+async def _handle_user_update_action(
+    user_service: 'UserService', 
+    arguments: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Handle user update action."""
+    await user_service.update_user(
+        user_id=arguments['user_id'],
+        updates=arguments.get('updates', {})
+    )
+    return {
+        "type": "text",
+        "text": f"Updated user: {arguments['user_id']}"
+    }
+
+
+async def _handle_user_delete_action(
+    user_service: 'UserService', 
+    arguments: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Handle user deletion action."""
+    await user_service.delete_user(user_id=arguments['user_id'])
+    return {
+        "type": "text",
+        "text": f"Deleted user: {arguments['user_id']}"
+    }
+
+
+async def _handle_user_list_action(
+    user_service: 'UserService', 
+    arguments: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Handle user listing action."""
+    users = await user_service.list_users(
+        filters=arguments.get('filters', {})
+    )
+    return {
+        "type": "text",
+        "text": f"Found {len(users)} users",
+        "users": users
+    }
+
+
+def _create_unknown_action_response(action: str) -> Dict[str, Any]:
+    """Create response for unknown action."""
+    return {
+        "type": "text",
+        "text": f"Unknown action: {action}"
+    }
     
     async def _log_analyzer_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for log_analyzer tool"""

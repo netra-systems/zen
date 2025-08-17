@@ -146,6 +146,18 @@ class ResourceMonitor:
             load_average=os.getloadavg() if hasattr(os, 'getloadavg') else (0.0, 0.0, 0.0)
         )
     
+    def _check_resource_alerts(self, metrics: SystemMetrics):
+        """Check metrics against thresholds and record alerts"""
+        if metrics.cpu_percent > self.thresholds['cpu_critical']:
+            self.resource_alerts['cpu'].append(('critical', metrics.timestamp))
+        elif metrics.cpu_percent > self.thresholds['cpu_warning']:
+            self.resource_alerts['cpu'].append(('warning', metrics.timestamp))
+        
+        if metrics.memory_percent > self.thresholds['memory_critical']:
+            self.resource_alerts['memory'].append(('critical', metrics.timestamp))
+        elif metrics.memory_percent > self.thresholds['memory_warning']:
+            self.resource_alerts['memory'].append(('warning', metrics.timestamp))
+    
     def get_current_load(self) -> Dict[str, float]:
         """Get current system load summary"""
         if not self.metrics_history:
@@ -528,6 +540,16 @@ class HardwareAwareOptimizer:
             'memory_allocation': self._calculate_memory_allocation(test_shards),
             'estimated_duration': self._estimate_execution_time(test_shards)
         }
+    
+    def _estimate_execution_time(self, test_shards: List[List[str]]) -> float:
+        """Estimate execution time based on test shards"""
+        if not test_shards:
+            return 0.0
+        
+        # Get max shard size (longest running)
+        max_shard_size = max(len(shard) for shard in test_shards)
+        # Estimate 5 seconds per test average
+        return max_shard_size * 5.0
     
     def _calculate_memory_allocation(self, test_shards: List[List[str]]) -> Dict[str, int]:
         """Calculate optimal memory allocation per shard"""

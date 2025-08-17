@@ -56,58 +56,87 @@ def generate_content(
     corpus_content: Optional[List[Dict]]
 ) -> tuple[str, str]:
     """Generate request/response content"""
-    if corpus_content:  # Always use corpus when available
-        entry = random.choice(corpus_content)
-        return entry.get("prompt", ""), entry.get("response", "")
-    
-    # Generate synthetic content based on workload type
-    content_map = {
-        "simple_queries": (
-            [
-                "What is the weather today?",
-                "How do I reset my password?",
-                "What are your business hours?",
-                "Can you help me with my order?"
-            ],
-            [
-                "I can help you with that information.",
-                "Here's what you need to know.",
-                "Let me look that up for you.",
-                "I've found the answer to your question."
-            ]
-        ),
-        "tool_orchestration": (
-            [
-                "Analyze my system performance and provide recommendations",
-                "Generate a report on last week's metrics",
-                "Optimize my database queries",
-                "Debug this application issue"
-            ],
-            [
-                "I've completed the analysis with multiple tools.",
-                "Report generated successfully after data processing.",
-                "Optimization complete with significant improvements.",
-                "Issue identified and resolved using diagnostic tools."
-            ]
-        ),
-        "data_analysis": (
-            [
-                "What are the trends in our data?",
-                "Analyze the performance metrics",
-                "Generate insights from the logs",
-                "Compare this week to last week"
-            ],
-            [
-                "Analysis shows significant patterns in the data.",
-                "Performance metrics indicate positive trends.",
-                "Key insights have been extracted from the logs.",
-                "Comparison reveals notable improvements."
-            ]
-        )
-    }
-    
-    prompts, responses = content_map.get(workload_type, (["Generic request"], ["Generic response"]))
+    if corpus_content:
+        return _generate_from_corpus(corpus_content)
+    return _generate_synthetic_content(workload_type)
+
+
+def _generate_from_corpus(corpus_content: List[Dict]) -> tuple[str, str]:
+    """Generate content from corpus data."""
+    entry = random.choice(corpus_content)
+    prompt = entry.get("prompt", "")
+    response = entry.get("response", "")
+    return prompt, response
+
+
+def _generate_synthetic_content(workload_type: str) -> tuple[str, str]:
+    """Generate synthetic content based on workload type."""
+    content_map = _build_content_mapping()
+    prompts, responses = content_map.get(
+        workload_type, 
+        (["Generic request"], ["Generic response"])
+    )
     return random.choice(prompts), random.choice(responses)
+
+
+def _build_content_mapping() -> Dict[str, tuple[List[str], List[str]]]:
+    """Build mapping of workload types to content."""
+    return {
+        "simple_queries": _get_simple_query_content(),
+        "tool_orchestration": _get_tool_orchestration_content(),
+        "data_analysis": _get_data_analysis_content()
+    }
+
+
+def _get_simple_query_content() -> tuple[List[str], List[str]]:
+    """Get simple query prompts and responses."""
+    prompts = [
+        "What is the weather today?",
+        "How do I reset my password?",
+        "What are your business hours?",
+        "Can you help me with my order?"
+    ]
+    responses = [
+        "I can help you with that information.",
+        "Here's what you need to know.",
+        "Let me look that up for you.",
+        "I've found the answer to your question."
+    ]
+    return prompts, responses
+
+
+def _get_tool_orchestration_content() -> tuple[List[str], List[str]]:
+    """Get tool orchestration prompts and responses."""
+    prompts = [
+        "Analyze my system performance and provide recommendations",
+        "Generate a report on last week's metrics",
+        "Optimize my database queries",
+        "Debug this application issue"
+    ]
+    responses = [
+        "I've completed the analysis with multiple tools.",
+        "Report generated successfully after data processing.",
+        "Optimization complete with significant improvements.",
+        "Issue identified and resolved using diagnostic tools."
+    ]
+    return prompts, responses
+
+
+def _get_data_analysis_content() -> tuple[List[str], List[str]]:
+    """Get data analysis prompts and responses."""
+    prompts = [
+        "What are the trends in our data?",
+        "Analyze the performance metrics",
+        "Generate insights from the logs",
+        "Compare this week to last week"
+    ]
+    responses = [
+        "Analysis shows significant patterns in the data.",
+        "Performance metrics indicate positive trends.",
+        "Key insights have been extracted from the logs.",
+        "Comparison reveals notable improvements."
+    ]
+    return prompts, responses
 
 
 def generate_child_spans(spans: List[Dict], parent: Dict, max_depth: int, max_branches: int, current_depth: int):

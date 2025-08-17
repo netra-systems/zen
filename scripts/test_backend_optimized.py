@@ -157,7 +157,7 @@ class OptimizedTestManager:
         except Exception as e:
             logger.error(f"Optimized execution failed: {e}")
             # Fallback to standard execution
-            return await self._fallback_execution(test_files)
+            return await self._fallback_execution(test_files, str(e))
     
     def _create_optimization_config(self, category: str, optimization_level: str) -> Dict[str, Any]:
         """Create optimization configuration"""
@@ -240,7 +240,7 @@ class OptimizedTestManager:
         if len(self.execution_history) > 50:
             self.execution_history = self.execution_history[-50:]
     
-    async def _fallback_execution(self, test_files: List[str]) -> Dict[str, Any]:
+    async def _fallback_execution(self, test_files: List[str], error_msg: str = "Execution failed") -> Dict[str, Any]:
         """Fallback to standard test execution"""
         logger.warning("Using fallback execution method")
         
@@ -249,15 +249,16 @@ class OptimizedTestManager:
         # Simple sequential execution for fallback
         results = []
         for test_file in test_files:
-            # Simulate basic test execution
-            success = True  # In real implementation, would run actual test
-            duration = 1.0  # Placeholder duration
+            # Mark as failed since executor failed
+            success = False  
+            duration = 0.0  
             
             results.append({
                 'test_file': test_file,
                 'success': success,
                 'duration': duration,
-                'cached': False
+                'cached': False,
+                'error': error_msg
             })
         
         total_duration = time.time() - start_time
@@ -266,14 +267,15 @@ class OptimizedTestManager:
             'summary': {
                 'total_duration': total_duration,
                 'test_count': len(results),
-                'success_count': len(results),
-                'success_rate': 100.0,
+                'success_count': 0,  # No tests passed since execution failed
+                'success_rate': 0.0,
                 'productivity_gain': 1.0,
                 'cache_hits': 0,
-                'performance_grade': 'Fallback Mode'
+                'performance_grade': 'Fallback Mode (Execution Failed)'
             },
             'execution_results': {'results': results},
-            'fallback_mode': True
+            'fallback_mode': True,
+            'error_message': error_msg
         }
 
 
@@ -325,12 +327,12 @@ def print_results_summary(results: Dict[str, Any]):
     print("OPTIMIZED TEST EXECUTION RESULTS")
     print("="*80)
     
-    print(f"📊 PERFORMANCE SUMMARY")
+    print("PERFORMANCE SUMMARY")
     print(f"   Total Duration: {summary['total_duration']:.2f} seconds")
     print(f"   Productivity Gain: {summary['productivity_gain']:.1f}x")
     print(f"   Performance Grade: {summary['performance_grade']}")
     
-    print(f"\n🧪 TEST RESULTS")
+    print("\nTEST RESULTS")
     print(f"   Tests Executed: {summary['test_count']}")
     print(f"   Tests Passed: {summary['success_count']}")
     print(f"   Success Rate: {summary['success_rate']:.1f}%")
@@ -339,7 +341,7 @@ def print_results_summary(results: Dict[str, Any]):
     # Print optimization recommendations
     recommendations = results.get('optimization_recommendations', [])
     if recommendations:
-        print(f"\n💡 TOP OPTIMIZATION RECOMMENDATIONS")
+        print("\nTOP OPTIMIZATION RECOMMENDATIONS")
         for i, rec in enumerate(recommendations[:3], 1):
             print(f"   {i}. {rec['recommendation']}")
             print(f"      Impact: {rec['impact_level']}, Improvement: {rec['estimated_improvement']:.1f}%")
@@ -420,7 +422,7 @@ async def main():
         # Disable caching
         manager.executor.test_cache = None
     
-    print(f"🚀 Starting optimized test execution...")
+    print("Starting optimized test execution...")
     print(f"   Category: {args.category}")
     print(f"   Optimization: {args.optimization}")
     print(f"   Test files: {len(test_files)}")
@@ -443,10 +445,10 @@ async def main():
             return 2  # Significant failures
     
     except KeyboardInterrupt:
-        print("\n❌ Test execution interrupted by user")
+        print("\nTest execution interrupted by user")
         return 130
     except Exception as e:
-        print(f"\n❌ Test execution failed: {e}")
+        print(f"\nTest execution failed: {e}")
         logger.exception("Detailed error information:")
         return 1
 

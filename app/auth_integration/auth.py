@@ -2,7 +2,7 @@
 Auth Dependencies - FastAPI dependency injection for authentication
 Uses the standalone auth service for all auth operations
 """
-from typing import Optional, Annotated
+from typing import Optional, Annotated, Dict, Any
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -12,6 +12,10 @@ from app.db.session import get_db_session
 from app.dependencies import get_db_dependency as get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
+import jwt
+import bcrypt
+from datetime import datetime, timedelta
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -110,3 +114,45 @@ def require_permission(permission: str):
                 )
         return user
     return check_permission
+
+# Password hashing utilities
+def get_password_hash(password: str) -> str:
+    """Hash a password using bcrypt"""
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash"""
+    return bcrypt.checkpw(
+        plain_password.encode('utf-8'), 
+        hashed_password.encode('utf-8')
+    )
+
+# JWT token utilities
+def create_access_token(data: Dict[str, Any], expires_delta: timedelta = None) -> str:
+    """Create a JWT access token"""
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    
+    to_encode.update({"exp": expire})
+    secret_key = os.getenv("JWT_SECRET_KEY", "fallback-secret-key")
+    return jwt.encode(to_encode, secret_key, algorithm="HS256")
+
+def validate_token_jwt(token: str) -> Optional[Dict[str, Any]]:
+    """Validate and decode a JWT token (local validation)"""
+    try:
+        secret_key = os.getenv("JWT_SECRET_KEY", "fallback-secret-key")
+        payload = jwt.decode(token, secret_key, algorithms=["HS256"])
+        return payload
+    except jwt.ExpiredSignatureError:
+        logger.warning("Token has expired")
+        return None
+    except jwt.JWTError as e:
+        logger.warning(f"Token validation failed: {e}")
+        return None
+
+# Compatibility aliases for deprecated dependencies
+ActiveUserWsDep = Annotated[User, Depends(get_current_user)]
