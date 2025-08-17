@@ -71,6 +71,13 @@ Generate a monetization-focused product and engineering value for Netra Apex.
 Ensures every feature directly creates and captures value proportional to a customer's AI spend,
 prioritizing the conversion of free users to paid tiers.
 
+## 🗺️ NAVIGATION: LLM Master Index
+**CRITICAL**: Before searching for files or functionality, consult [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md)
+- Resolves common file confusion (config.py vs config_setup_core.py, multiple auth.py files, etc.)
+- Quick reference for locating functionality
+- Organized by business domains and technical areas
+- Common pitfalls and solutions
+
 ## Project Directory Structure
 
 ```

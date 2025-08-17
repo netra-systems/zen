@@ -7,6 +7,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
 import { createTestSetup, mockThreads, useThreadStore, useAuthStore } from './setup';
+import { AuthenticatedChatHistorySection, renderWithAuth } from './testWrapper';
 
 describe('ChatHistorySection - Basic Functionality', () => {
   const testSetup = createTestSetup();
@@ -21,7 +22,7 @@ describe('ChatHistorySection - Basic Functionality', () => {
 
   describe('History item rendering', () => {
     it('should render all conversation threads', () => {
-      render(<ChatHistorySection />);
+      renderWithAuth();
       
       expect(screen.getByText('First Conversation')).toBeInTheDocument();
       expect(screen.getByText('Second Conversation')).toBeInTheDocument();

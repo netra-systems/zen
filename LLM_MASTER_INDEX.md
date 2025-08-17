@@ -27,14 +27,44 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 | `models_corpus.py` | `/app/db/models_corpus.py` | Corpus database models | CorpusData, CorpusEntry |
 | `models_metrics.py` | `/app/db/models_metrics.py` | Metrics database models | MetricsData |
 
-### Authentication & Security (Multiple Layers)
+### Authentication & Security (Dedicated Auth Service Architecture)
 | File | Location | Purpose | Key Components |
 |------|----------|---------|----------------|
+| **AUTH SERVICE (Main)** | | | |
+| `auth_service.py` | `/app/auth/auth_service.py` | **Main OAuth FastAPI app** | Dedicated auth subdomain service |
+| `auth_token_service.py` | `/app/auth/auth_token_service.py` | Token management service | JWT creation, validation, refresh |
+| `oauth_session_manager.py` | `/app/auth/oauth_session_manager.py` | OAuth session handling | Session state management |
+| `enhanced_auth_core.py` | `/app/auth/enhanced_auth_core.py` | Enhanced auth core logic | Advanced authentication features |
+| `enhanced_auth_validator.py` | `/app/auth/enhanced_auth_validator.py` | Auth validation logic | Request validation, security checks |
+| `enhanced_auth_security.py` | `/app/auth/enhanced_auth_security.py` | Security enhancements | Additional security layers |
+| **ROUTING & ENDPOINTS** | | | |
 | `auth.py` (routes) | `/app/routes/auth/auth.py` | Auth API endpoints | login, logout, register |
-| `auth.py` (core) | `/app/auth/auth.py` | Auth logic & JWT | verify_token, create_access_token |
+| `pr_router.py` | `/app/auth/pr_router.py` | PR environment routing | Dynamic PR auth routing |
+| **CORE AUTH** | | | |
+| `auth.py` (core) | `/app/auth/auth.py` | Core auth logic & JWT | verify_token, create_access_token |
+| `auth_dependencies.py` | `/app/auth/auth_dependencies.py` | FastAPI dependencies | Auth dependency injection |
+| `auth_interfaces.py` | `/app/auth/auth_interfaces.py` | Auth interfaces | Interface definitions |
+| **SESSION MANAGEMENT** | | | |
+| `session_manager.py` | `/app/auth/session_manager.py` | Session management | Session CRUD operations |
+| `enhanced_auth_sessions_modular.py` | `/app/auth/enhanced_auth_sessions_modular.py` | Modular session handling | Advanced session features |
+| `session_security.py` | `/app/auth/session_security.py` | Session security | Session encryption, validation |
+| `session_validation.py` | `/app/auth/session_validation.py` | Session validation | Session state checks |
+| `session_checker.py` | `/app/auth/session_checker.py` | Session health checks | Session monitoring |
+| **TOKEN MANAGEMENT** | | | |
+| `token_manager.py` | `/app/auth/token_manager.py` | Token lifecycle | Token creation, refresh, revocation |
+| `token_validator.py` | `/app/auth/token_validator.py` | Token validation | JWT verification |
+| **OAUTH & EXTERNAL** | | | |
+| `oauth_proxy.py` | `/app/auth/oauth_proxy.py` | OAuth proxy handling | OAuth flow proxying |
+| `oauth_utils.py` | `/app/auth/oauth_utils.py` | OAuth utilities | OAuth helper functions |
+| **UTILITIES** | | | |
+| `environment_config.py` | `/app/auth/environment_config.py` | Environment configuration | Auth environment settings |
+| `url_validators.py` | `/app/auth/url_validators.py` | URL validation | Redirect URL validation |
+| `auth_response_builders.py` | `/app/auth/auth_response_builders.py` | Response builders | Standardized auth responses |
+| `api_key_manager.py` | `/app/auth/api_key_manager.py` | API key management | API key CRUD, validation |
+| `permission_verifier.py` | `/app/auth/permission_verifier.py` | Permission checks | Role-based access control |
+| **SECRETS** | | | |
 | `secret_manager.py` (app) | `/app/core/secret_manager.py` | Production secrets | get_secret, SecretManager class |
 | `secret_manager.py` (dev) | `/dev_launcher/secret_manager.py` | Dev secrets only | Development environment only |
-| `security.py` | `/app/auth/security.py` | Security utilities | Password hashing, validation |
 
 ### WebSocket Files (Complex Structure)
 | File | Location | Purpose | Key Functions |
@@ -98,6 +128,7 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 | `websocket.ts` | WebSocket types |
 | `auth.ts` | Authentication types |
 | `admin.ts` | Admin panel types |
+| `chat.ts` | Chat interface types |
 
 ---
 
@@ -128,15 +159,9 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 ## 🎯 BUSINESS-CRITICAL FILES
 
 ### Revenue & Monetization
-- `/app/services/billing/` - Billing service modules
-- `/app/services/usage_tracking/` - Usage monitoring
-- `/app/routes/pricing.py` - Pricing endpoints
-- `/app/schemas/billing_types.py` - Billing type definitions
-
-### Customer Segments
-- `/app/services/segments/` - Customer segmentation
-- `/app/db/models_customer.py` - Customer models
-- `/app/routes/customers.py` - Customer endpoints
+- **To Be Implemented** - Business-critical revenue tracking
+- Monitor `/app/services/` for future billing modules
+- Check `/app/routes/` for pricing endpoints when added
 
 ---
 

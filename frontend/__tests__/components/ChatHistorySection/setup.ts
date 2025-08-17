@@ -65,9 +65,9 @@ const initializeAuthenticatedMocks = () => {
 
 // Configure mock implementations
 const configureMockImplementations = () => {
-  (useThreadStore as jest.Mock).mockReturnValue(mockThreadStore);
-  (useChatStore as jest.Mock).mockReturnValue(mockChatStore);
-  (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
+  (useThreadStore as jest.Mock).mockImplementation(() => mockThreadStore);
+  (useChatStore as jest.Mock).mockImplementation(() => mockChatStore);
+  (useAuthStore as jest.Mock).mockImplementation(() => mockAuthStore);
 
   // Configure service mocks
   (ThreadService as any).listThreads = jest.fn().mockResolvedValue(mockThreads);
@@ -97,10 +97,6 @@ export class ChatHistoryTestSetup {
     
     // Reset any modified state
     this.mockThreads = [...mockThreads];
-    
-    // Clear any timers or pending async operations
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
   }
 
   configureStoreMocks(config: {
@@ -108,13 +104,20 @@ export class ChatHistoryTestSetup {
     currentThreadId?: string | null;
     isAuthenticated?: boolean;
   }) {
-    if (config.threads !== undefined || config.currentThreadId !== undefined) {
+    if (config.threads !== undefined) {
       mockThreadStore = {
         ...mockThreadStore,
-        ...(config.threads !== undefined && { threads: config.threads }),
+        threads: config.threads,
         ...(config.currentThreadId !== undefined && { currentThreadId: config.currentThreadId }),
       };
-      (useThreadStore as jest.Mock).mockReturnValue(mockThreadStore);
+      (useThreadStore as jest.Mock).mockImplementation(() => mockThreadStore);
+      this.mockThreads = [...config.threads];
+    } else if (config.currentThreadId !== undefined) {
+      mockThreadStore = {
+        ...mockThreadStore,
+        currentThreadId: config.currentThreadId,
+      };
+      (useThreadStore as jest.Mock).mockImplementation(() => mockThreadStore);
     }
 
     if (config.isAuthenticated !== undefined) {
@@ -130,7 +133,7 @@ export class ChatHistoryTestSetup {
           token: null 
         }),
       };
-      (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
+      (useAuthStore as jest.Mock).mockImplementation(() => mockAuthStore);
     }
   }
 
@@ -141,17 +144,19 @@ export class ChatHistoryTestSetup {
   }
 
   mockLoadingState(isLoading: boolean = true) {
-    (useThreadStore as jest.Mock).mockReturnValue({
+    mockThreadStore = {
       ...mockThreadStore,
       loading: isLoading,
-    });
+    };
+    (useThreadStore as jest.Mock).mockImplementation(() => mockThreadStore);
   }
 
   mockErrorState(error: string) {
-    (useThreadStore as jest.Mock).mockReturnValue({
+    mockThreadStore = {
       ...mockThreadStore,
       error,
-    });
+    };
+    (useThreadStore as jest.Mock).mockImplementation(() => mockThreadStore);
   }
 
   getCurrentMockThreads() {

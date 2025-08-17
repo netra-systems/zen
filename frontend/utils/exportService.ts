@@ -57,7 +57,217 @@ interface ReportData {
   timestamp?: number;
 }
 
+interface PDFLayout {
+  pageHeight: number;
+  pageWidth: number;
+  margin: number;
+  lineHeight: number;
+}
+
 export class ExportService {
+  /**
+   * Initialize PDF instance
+   */
+  private static async initializePDF(): Promise<any> {
+    const { default: jsPDF } = await import('jspdf');
+    return new jsPDF();
+  }
+
+  /**
+   * Create PDF layout configuration
+   */
+  private static createPDFLayout(pdf: any): PDFLayout {
+    return {
+      pageHeight: pdf.internal.pageSize.getHeight(),
+      pageWidth: pdf.internal.pageSize.getWidth(),
+      margin: 20,
+      lineHeight: 10
+    };
+  }
+
+  /**
+   * Add PDF branding section
+   */
+  private static addPDFBranding(pdf: any, layout: PDFLayout, options: ExportOptions): number {
+    let yPosition = 20;
+    if (!options.customBranding?.companyName) return yPosition;
+    pdf.setFontSize(10);
+    pdf.setTextColor(128, 128, 128);
+    pdf.text(options.customBranding.companyName, layout.margin, yPosition);
+    return yPosition + layout.lineHeight * 2;
+  }
+
+  /**
+   * Add PDF title section
+   */
+  private static addPDFTitle(pdf: any, layout: PDFLayout, data: ReportData, yPosition: number): number {
+    if (!data.title) return yPosition;
+    pdf.setFontSize(24);
+    pdf.setTextColor(0, 0, 0);
+    const titleLines = pdf.splitTextToSize(data.title, layout.pageWidth - 2 * layout.margin);
+    pdf.text(titleLines, layout.margin, yPosition);
+    return yPosition + titleLines.length * 12 + 10;
+  }
+
+  /**
+   * Add PDF timestamp section
+   */
+  private static addPDFTimestamp(pdf: any, layout: PDFLayout, data: ReportData, yPosition: number): number {
+    pdf.setFontSize(10);
+    pdf.setTextColor(128, 128, 128);
+    const timestamp = new Date(data.timestamp || Date.now()).toLocaleString();
+    pdf.text(timestamp, layout.margin, yPosition);
+    return yPosition + layout.lineHeight * 2;
+  }
+
+  /**
+   * Add PDF summary section
+   */
+  private static addPDFSummary(pdf: any, layout: PDFLayout, data: ReportData, yPosition: number): number {
+    if (!data.summary) return yPosition;
+    yPosition = this.checkAndAddPage(pdf, layout, yPosition, 50);
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 0, 0);
+    const summaryLines = pdf.splitTextToSize(data.summary, layout.pageWidth - 2 * layout.margin);
+    pdf.text(summaryLines, layout.margin, yPosition);
+    return yPosition + summaryLines.length * 6 + 10;
+  }
+
+  /**
+   * Add PDF sections
+   */
+  private static addPDFSections(pdf: any, layout: PDFLayout, data: ReportData, yPosition: number): number {
+    if (!data.sections) return yPosition;
+    for (const section of data.sections) {
+      yPosition = this.addPDFSection(pdf, layout, section, yPosition);
+    }
+    return yPosition;
+  }
+
+  /**
+   * Add single PDF section
+   */
+  private static addPDFSection(pdf: any, layout: PDFLayout, section: ExportSection, yPosition: number): number {
+    yPosition = this.checkAndAddPage(pdf, layout, yPosition, 50);
+    yPosition = this.addSectionTitle(pdf, layout, section.title, yPosition);
+    return this.addSectionContent(pdf, layout, section, yPosition);
+  }
+
+  /**
+   * Add section title
+   */
+  private static addSectionTitle(pdf: any, layout: PDFLayout, title: string, yPosition: number): number {
+    pdf.setFontSize(14);
+    pdf.setTextColor(16, 185, 129);
+    pdf.text(title, layout.margin, yPosition);
+    return yPosition + layout.lineHeight;
+  }
+
+  /**
+   * Add section content
+   */
+  private static addSectionContent(pdf: any, layout: PDFLayout, section: ExportSection, yPosition: number): number {
+    pdf.setFontSize(11);
+    pdf.setTextColor(0, 0, 0);
+    if (section.type === 'table' && Array.isArray(section.content)) {
+      return this.addTableContent(pdf, layout, section.content, yPosition);
+    }
+    return this.addTextContent(pdf, layout, section.content, yPosition);
+  }
+
+  /**
+   * Add table content to PDF
+   */
+  private static addTableContent(pdf: any, layout: PDFLayout, content: any[], yPosition: number): number {
+    (pdf as any).autoTable({
+      startY: yPosition,
+      head: [Object.keys(content[0] || {})],
+      body: content.map(row => Object.values(row)),
+      margin: { left: layout.margin },
+      theme: 'striped'
+    });
+    return (pdf as any).lastAutoTable.finalY + 10;
+  }
+
+  /**
+   * Add text content to PDF
+   */
+  private static addTextContent(pdf: any, layout: PDFLayout, content: any, yPosition: number): number {
+    const contentText = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+    const contentLines = pdf.splitTextToSize(contentText, layout.pageWidth - 2 * layout.margin);
+    yPosition = this.checkAndAddPage(pdf, layout, yPosition, contentLines.length * 6);
+    pdf.text(contentLines, layout.margin, yPosition);
+    return yPosition + contentLines.length * 6 + 10;
+  }
+
+  /**
+   * Add PDF recommendations
+   */
+  private static addPDFRecommendations(pdf: any, layout: PDFLayout, data: ReportData, yPosition: number): number {
+    if (!data.recommendations?.length) return yPosition;
+    yPosition = this.checkAndAddPage(pdf, layout, yPosition, 50);
+    yPosition = this.addRecommendationsHeader(pdf, layout, yPosition);
+    return this.addRecommendationsList(pdf, layout, data.recommendations, yPosition);
+  }
+
+  /**
+   * Add recommendations header
+   */
+  private static addRecommendationsHeader(pdf: any, layout: PDFLayout, yPosition: number): number {
+    pdf.setFontSize(14);
+    pdf.setTextColor(16, 185, 129);
+    pdf.text('Recommendations', layout.margin, yPosition);
+    return yPosition + layout.lineHeight;
+  }
+
+  /**
+   * Add recommendations list
+   */
+  private static addRecommendationsList(pdf: any, layout: PDFLayout, recommendations: ExportRecommendation[], yPosition: number): number {
+    pdf.setFontSize(11);
+    pdf.setTextColor(0, 0, 0);
+    recommendations.forEach((rec, index) => {
+      yPosition = this.checkAndAddPage(pdf, layout, yPosition, 30);
+      yPosition = this.addSingleRecommendation(pdf, layout, rec, index, yPosition);
+    });
+    return yPosition;
+  }
+
+  /**
+   * Add single recommendation
+   */
+  private static addSingleRecommendation(pdf: any, layout: PDFLayout, rec: ExportRecommendation, index: number, yPosition: number): number {
+    const recText = `${index + 1}. ${rec.title}`;
+    const recLines = pdf.splitTextToSize(recText, layout.pageWidth - 2 * layout.margin - 10);
+    pdf.text(recLines, layout.margin + 5, yPosition);
+    return yPosition + recLines.length * 6 + 5;
+  }
+
+  /**
+   * Add PDF footer
+   */
+  private static addPDFFooter(pdf: any, layout: PDFLayout): void {
+    pdf.setFontSize(8);
+    pdf.setTextColor(128, 128, 128);
+    pdf.text(
+      'Generated by Netra AI Optimization Platform',
+      layout.pageWidth / 2,
+      layout.pageHeight - 10,
+      { align: 'center' }
+    );
+  }
+
+  /**
+   * Check and add new page if needed
+   */
+  private static checkAndAddPage(pdf: any, layout: PDFLayout, yPosition: number, requiredSpace: number): number {
+    if (yPosition + requiredSpace <= layout.pageHeight - layout.margin) {
+      return yPosition;
+    }
+    pdf.addPage();
+    return layout.margin;
+  }
+
   /**
    * Export report in specified format
    */
