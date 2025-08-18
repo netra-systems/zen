@@ -24,8 +24,6 @@ from app.logging_config import central_logger as logger
 
 def get_clickhouse_config():
     """Get ClickHouse configuration based on environment"""
-    if settings.environment == "development":
-        return settings.clickhouse_https_dev
     return settings.clickhouse_https
 
 
