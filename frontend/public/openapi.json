@@ -1352,7 +1352,7 @@
           "clickhouse_native": {
             "$ref": "#/components/schemas/ClickHouseNativeConfig",
             "default": {
-              "host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+              "host": "clickhouse_host_url_placeholder",
               "port": 9440,
               "user": "default",
               "password": "",
@@ -1362,7 +1362,7 @@
           "clickhouse_https": {
             "$ref": "#/components/schemas/ClickHouseHTTPSConfig",
             "default": {
-              "host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+              "host": "clickhouse_host_url_placeholder",
               "port": 8443,
               "user": "default",
               "password": "",
@@ -1372,7 +1372,7 @@
           "clickhouse_https_dev": {
             "$ref": "#/components/schemas/ClickHouseHTTPSDevConfig",
             "default": {
-              "host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+              "host": "clickhouse_host_url_placeholder",
               "port": 8443,
               "user": "development_user",
               "password": "",
@@ -1491,7 +1491,7 @@
           "host": {
             "type": "string",
             "title": "Host",
-            "default": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+            "default": "clickhouse_host_url_placeholder"
           },
           "port": {
             "type": "integer",
@@ -1522,7 +1522,7 @@
           "host": {
             "type": "string",
             "title": "Host",
-            "default": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+            "default": "clickhouse_host_url_placeholder"
           },
           "port": {
             "type": "integer",
@@ -1600,7 +1600,7 @@
           "host": {
             "type": "string",
             "title": "Host",
-            "default": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+            "default": "clickhouse_host_url_placeholder"
           },
           "port": {
             "type": "integer",

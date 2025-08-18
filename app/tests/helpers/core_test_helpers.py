@@ -35,7 +35,6 @@ def _set_service_configs(config):
     config.clickhouse_logging = Mock(enabled=True)
     config.clickhouse_native = Mock(host="localhost", password="pass")
     config.clickhouse_https = Mock(host="localhost", password="pass")
-    config.clickhouse_https_dev = Mock(host="localhost", password="pass")
     config.redis = Mock(host="localhost", password="pass")
 
 

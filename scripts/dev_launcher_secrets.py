@@ -160,7 +160,7 @@ class EnhancedSecretLoader:
     def _get_static_config(self) -> Dict[str, Tuple[str, str]]:
         """Get static configuration values."""
         return {
-            "CLICKHOUSE_HOST": ("xedvrr4c3r.us-central1.gcp.clickhouse.cloud", "static"),
+            "CLICKHOUSE_HOST": ("clickhouse_host_url_placeholder", "static"),
             "CLICKHOUSE_PORT": ("8443", "static"),
             "CLICKHOUSE_USER": ("default", "static"),
             "CLICKHOUSE_DB": ("default", "static"),

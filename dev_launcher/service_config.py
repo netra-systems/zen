@@ -94,7 +94,7 @@ class ServicesConfiguration:
             "database": "netra_dev"
         },
         shared_config={
-            "host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+            "host": "clickhouse_host_url_placeholder",
             "port": 8443,
             "user": "default",
             "password": "46YQC0J~6SfZ.",

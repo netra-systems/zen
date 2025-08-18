@@ -51,7 +51,7 @@ def real_clickhouse_client(event_loop):
     if settings.environment == "testing" and not settings.dev_mode_clickhouse_enabled:
         pytest.skip("ClickHouse disabled in testing mode")
     
-    config = settings.clickhouse_https_dev if settings.environment == "development" else settings.clickhouse_https
+    config = settings.clickhouse_https
     
     # Skip if pointing to localhost (no real ClickHouse available)
     if config.host in ["localhost", "127.0.0.1"]:

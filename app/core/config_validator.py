@@ -60,8 +60,7 @@ class ConfigValidator:
         elif config.clickhouse_logging.enabled:
             clickhouse_configs = [
                 ("clickhouse_native", config.clickhouse_native),
-                ("clickhouse_https", config.clickhouse_https),
-                ("clickhouse_https_dev", config.clickhouse_https_dev)
+                ("clickhouse_https", config.clickhouse_https)
             ]
             
             for name, ch_config in clickhouse_configs:

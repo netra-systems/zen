@@ -49,15 +49,6 @@ export interface ClickHouseHTTPSConfig {
   secure?: boolean;
 }
 
-export interface ClickHouseHTTPSDevConfig {
-  host: string;
-  port?: number;
-  username: string;
-  password: string;
-  database: string;
-  secure?: boolean;
-  debug?: boolean;
-}
 
 export interface ClickHouseLoggingConfig {
   enabled: boolean;

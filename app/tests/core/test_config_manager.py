@@ -151,7 +151,6 @@ class TestConfigValidator:
         # Set required production database passwords to avoid validation failures
         config.clickhouse_native.password = "production_password"
         config.clickhouse_https.password = "production_password"
-        config.clickhouse_https_dev.password = "production_password"
         
         validator = ConfigValidator()
         

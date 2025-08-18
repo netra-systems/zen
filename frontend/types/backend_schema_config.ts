@@ -81,14 +81,6 @@ export interface ClickHouseHTTPSConfig {
   database?: string;
 }
 
-export interface ClickHouseHTTPSDevConfig {
-  host?: string;
-  port?: number;
-  user?: string;
-  password?: string;
-  database?: string;
-  superuser?: boolean;
-}
 
 export interface ClickHouseLoggingConfig {
   enabled?: boolean;
@@ -118,7 +110,6 @@ export interface AppConfig {
   oauth_config?: OAuthConfig;
   clickhouse_native?: ClickHouseNativeConfig;
   clickhouse_https?: ClickHouseHTTPSConfig;
-  clickhouse_https_dev?: ClickHouseHTTPSDevConfig;
   clickhouse_logging?: ClickHouseLoggingConfig;
   langfuse?: LangfuseConfig;
   ws_config?: WebSocketConfig;
@@ -147,7 +138,6 @@ export interface DevelopmentConfig {
   oauth_config?: OAuthConfig;
   clickhouse_native?: ClickHouseNativeConfig;
   clickhouse_https?: ClickHouseHTTPSConfig;
-  clickhouse_https_dev?: ClickHouseHTTPSDevConfig;
   clickhouse_logging?: ClickHouseLoggingConfig;
   langfuse?: LangfuseConfig;
   ws_config?: WebSocketConfig;
@@ -178,7 +168,6 @@ export interface ProductionConfig {
   oauth_config?: OAuthConfig;
   clickhouse_native?: ClickHouseNativeConfig;
   clickhouse_https?: ClickHouseHTTPSConfig;
-  clickhouse_https_dev?: ClickHouseHTTPSDevConfig;
   clickhouse_logging?: ClickHouseLoggingConfig;
   langfuse?: LangfuseConfig;
   ws_config?: WebSocketConfig;
@@ -208,7 +197,6 @@ export interface TestingConfig {
   oauth_config?: OAuthConfig;
   clickhouse_native?: ClickHouseNativeConfig;
   clickhouse_https?: ClickHouseHTTPSConfig;
-  clickhouse_https_dev?: ClickHouseHTTPSDevConfig;
   clickhouse_logging?: ClickHouseLoggingConfig;
   langfuse?: LangfuseConfig;
   ws_config?: WebSocketConfig;

@@ -63,14 +63,14 @@ class OAuthConfig(BaseModel):
     ]
 
 class ClickHouseNativeConfig(BaseModel):
-    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+    host: str = "clickhouse_host_url_placeholder"
     port: int = 9440
     user: str = "default"
     password: str = ""
     database: str = "default"
 
 class ClickHouseHTTPSConfig(BaseModel):
-    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+    host: str = "clickhouse_host_url_placeholder"
     port: int = 8443
     user: str = "default"
     password: str = ""
