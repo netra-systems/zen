@@ -7,7 +7,7 @@ Tests for basic JWT manager setup and utility functions.
 import pytest
 from unittest.mock import Mock, patch
 
-from app.auth.token_manager import JWTTokenManager
+from app.auth_integration.auth import JWTTokenManager
 from app.core.exceptions_auth import AuthenticationError
 
 

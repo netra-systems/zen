@@ -3,7 +3,7 @@
 import pytest
 from unittest.mock import AsyncMock, Mock
 
-from app.auth.pr_router import (
+from app.auth_integration.auth import (
     _validate_pr_inputs,
     _validate_pr_number_format,
     _validate_pr_with_github,

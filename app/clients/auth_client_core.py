@@ -262,7 +262,7 @@ class AuthServiceClient:
             # Accept any token in development mode for testing
             return {
                 "valid": True,
-                "user_id": 1,
+                "user_id": "dev-user-1",  # Use string ID as the User table expects varchar
                 "email": "dev@example.com",
                 "permissions": ["admin", "developer"],
                 "is_admin": True

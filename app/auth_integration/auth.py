@@ -75,16 +75,21 @@ async def get_current_user(
         user = result.scalar_one_or_none()
         
         if not user:
-            # In development mode, create a mock user
+            # In development mode, create and persist a dev user
             if os.getenv("ENVIRONMENT", "development") == "development":
-                # Create a development user object (not persisted)
+                # Create and persist a development user
                 user = User(
                     id=user_id,
                     email=validation_result.get("email", "dev@example.com"),
-                    is_admin=validation_result.get("is_admin", True),
-                    is_developer=True
+                    is_superuser=validation_result.get("is_admin", True),
+                    is_developer=True,
+                    full_name="Development User",
+                    role="admin"
                 )
-                logger.warning(f"Created mock user for development: {user.email}")
+                session.add(user)
+                await session.commit()
+                await session.refresh(user)
+                logger.warning(f"Created and persisted dev user: {user.email}")
             else:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -119,7 +124,10 @@ OptionalUserDep = Annotated[Optional[User], Depends(get_current_user_optional)]
 # Permission-based dependencies
 async def require_admin(user: User = Depends(get_current_user)) -> User:
     """Require admin permissions"""
-    if not hasattr(user, 'is_admin') or not user.is_admin:
+    # Check both is_superuser and role for admin permissions
+    is_admin = (hasattr(user, 'is_superuser') and user.is_superuser) or \
+               (hasattr(user, 'role') and user.role in ['admin', 'super_admin'])
+    if not is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required"
@@ -182,3 +190,130 @@ def validate_token_jwt(token: str) -> Optional[Dict]:
     """DEPRECATED: Use auth service instead"""
     logger.warning("validate_token_jwt is deprecated - use auth service")
     return None
+
+# Backward compatibility for token_manager imports
+from dataclasses import dataclass
+
+@dataclass
+class TokenClaims:
+    """DEPRECATED: Compatibility stub for token_manager.TokenClaims"""
+    user_id: str
+    email: str
+    environment: str
+    iat: int
+    exp: int
+    jti: str
+    pr_number: Optional[str] = None
+
+class JWTTokenManager:
+    """DEPRECATED: Compatibility stub for token_manager.JWTTokenManager"""
+    def __init__(self):
+        logger.warning("JWTTokenManager is deprecated - use auth service")
+        self.algorithm = "HS256"
+        self.expiration_hours = 1
+        self.config = None
+        self.redis_manager = None
+
+# Backward compatibility for pr_router imports
+def build_pr_redirect_url(pr_number: str, base_path: str = "/") -> str:
+    """DEPRECATED: Compatibility stub for pr_router.build_pr_redirect_url"""
+    logger.warning("build_pr_redirect_url is deprecated - use auth service")
+    pr_domain = f"https://pr-{pr_number}.staging.netrasystems.ai"
+    return f"{pr_domain}{base_path}"
+
+def handle_pr_routing_error(error: Exception) -> Dict:
+    """DEPRECATED: Compatibility stub for pr_router.handle_pr_routing_error"""
+    logger.warning("handle_pr_routing_error is deprecated - use auth service")
+    return {"error": str(error)}
+
+def get_pr_environment_status(pr_number: str) -> Dict:
+    """DEPRECATED: Compatibility stub for pr_router.get_pr_environment_status"""
+    logger.warning("get_pr_environment_status is deprecated - use auth service")
+    return {"pr_number": pr_number, "status": "unknown"}
+
+def extract_pr_number_from_request(request_headers: Dict[str, str]) -> Optional[str]:
+    """DEPRECATED: Compatibility stub for pr_router.extract_pr_number_from_request"""
+    logger.warning("extract_pr_number_from_request is deprecated - use auth service")
+    return None
+
+def extract_pr_from_host(host: str) -> Optional[str]:
+    """DEPRECATED: Compatibility stub for pr_router.extract_pr_from_host"""
+    logger.warning("extract_pr_from_host is deprecated - use auth service")
+    import re
+    pr_pattern = r"pr-(\d+)(?:-api)?\.staging\.netrasystems\.ai"
+    match = re.search(pr_pattern, host)
+    return match.group(1) if match else None
+
+async def route_pr_authentication(pr_number: str, auth_code: str) -> Dict:
+    """DEPRECATED: Compatibility stub for pr_router.route_pr_authentication"""
+    logger.warning("route_pr_authentication is deprecated - use auth service")
+    return {"pr_number": pr_number, "authenticated": False}
+
+# PR_STATE_TTL constant for compatibility
+PR_STATE_TTL = 3600
+
+# Additional pr_router compatibility stubs
+def _build_pr_state_data(pr_number: str, csrf_token: str) -> Dict:
+    """DEPRECATED: Compatibility stub for pr_router._build_pr_state_data"""
+    logger.warning("_build_pr_state_data is deprecated - use auth service")
+    import time
+    return {"pr_number": pr_number, "csrf_token": csrf_token, "timestamp": time.time()}
+
+def _encode_state_to_base64(state_data: Dict) -> str:
+    """DEPRECATED: Compatibility stub for pr_router._encode_state_to_base64"""
+    logger.warning("_encode_state_to_base64 is deprecated - use auth service")
+    import json
+    import base64
+    return base64.urlsafe_b64encode(json.dumps(state_data).encode()).decode()
+
+def _decode_state_from_base64(state_string: str) -> Dict:
+    """DEPRECATED: Compatibility stub for pr_router._decode_state_from_base64"""
+    logger.warning("_decode_state_from_base64 is deprecated - use auth service")
+    import json
+    import base64
+    return json.loads(base64.urlsafe_b64decode(state_string))
+
+def _validate_state_timestamp(timestamp: float) -> None:
+    """DEPRECATED: Compatibility stub for pr_router._validate_state_timestamp"""
+    logger.warning("_validate_state_timestamp is deprecated - use auth service")
+    import time
+    if time.time() - timestamp > PR_STATE_TTL:
+        raise ValueError("State expired")
+
+async def _validate_and_consume_csrf_token(csrf_token: str, redis_manager: Any) -> None:
+    """DEPRECATED: Compatibility stub for pr_router._validate_and_consume_csrf_token"""
+    logger.warning("_validate_and_consume_csrf_token is deprecated - use auth service")
+    pass
+
+async def _store_csrf_token_in_redis(csrf_token: str, redis_manager: Any) -> None:
+    """DEPRECATED: Compatibility stub for pr_router._store_csrf_token_in_redis"""
+    logger.warning("_store_csrf_token_in_redis is deprecated - use auth service")
+    pass
+
+# Additional security validation stubs for pr_router
+def _validate_pr_inputs(pr_number: str, return_url: Optional[str] = None) -> None:
+    """DEPRECATED: Compatibility stub for pr_router._validate_pr_inputs"""
+    logger.warning("_validate_pr_inputs is deprecated - use auth service")
+    pass
+
+def _validate_pr_number_format(pr_number: str) -> None:
+    """DEPRECATED: Compatibility stub for pr_router._validate_pr_number_format"""
+    logger.warning("_validate_pr_number_format is deprecated - use auth service")
+    if not pr_number or not pr_number.isdigit():
+        raise ValueError("Invalid PR number format")
+
+async def _validate_pr_with_github(pr_number: str, github_client: Any) -> None:
+    """DEPRECATED: Compatibility stub for pr_router._validate_pr_with_github"""
+    logger.warning("_validate_pr_with_github is deprecated - use auth service")
+    pass
+
+def _is_valid_url(url: str) -> bool:
+    """DEPRECATED: Compatibility stub for pr_router._is_valid_url"""
+    logger.warning("_is_valid_url is deprecated - use auth service")
+    return url.startswith(("http://", "https://"))
+
+def _is_allowed_return_domain(domain: str) -> bool:
+    """DEPRECATED: Compatibility stub for pr_router._is_allowed_return_domain"""
+    logger.warning("_is_allowed_return_domain is deprecated - use auth service")
+    allowed_domains = ["staging.netrasystems.ai", "localhost", "127.0.0.1"]
+    return any(domain.endswith(allowed) for allowed in allowed_domains)

@@ -9,7 +9,7 @@ import pytest
 from unittest.mock import Mock, patch
 from fastapi import HTTPException
 
-from app.auth.pr_router import (
+from app.auth_integration.auth import (
     build_pr_redirect_url,
     handle_pr_routing_error,
     get_pr_environment_status,

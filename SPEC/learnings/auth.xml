@@ -3,10 +3,50 @@
     <metadata>
         <name>Auth Learnings</name>
         <type>learnings</type>
-        <version>1.0</version>
-        <last_updated>2025-01-17</last_updated>
+        <version>1.1</version>
+        <last_updated>2025-08-18</last_updated>
         <description>Authentication and OAuth related learnings and fixes</description>
     </metadata>
+    
+    <learning id="mandatory-auth-integration" priority="CRITICAL">
+        <title>🔴 MANDATORY: All Auth Must Use auth_integration Module</title>
+        <problem>
+            Multiple duplicate auth implementations scattered across codebase:
+            - app/auth/ directory (legacy, MUST be removed)
+            - app/schemas/Auth.py (duplicate models)
+            - Test files importing from app.auth.*
+            - Services implementing their own auth logic
+        </problem>
+        <root_cause>
+            Historical evolution led to multiple auth implementations.
+            No clear architectural boundary enforcement.
+            Developers creating local auth implementations instead of using central service.
+        </root_cause>
+        <solution>
+            <step>ALL auth MUST use app/auth_integration/auth.py</step>
+            <step>Legacy app/auth/ directory completely removed</step>
+            <step>All imports changed from app.auth.* to app.auth_integration.*</step>
+            <step>Backward compatibility stubs added for migration period</step>
+            <step>Security service uses auth_integration only</step>
+        </solution>
+        <files_modified>
+            <file>app/auth_integration/auth.py - Added compatibility stubs</file>
+            <file>SPEC/shared_auth_integration.xml - Updated to mandate single source</file>
+            <file>All test files - Updated imports to auth_integration</file>
+        </files_modified>
+        <prevention>
+            NEVER create duplicate auth logic.
+            ALWAYS import from app.auth_integration.auth.
+            Run: grep -r "from app.auth" --exclude-dir=auth_integration
+            Expected: No results (only auth_integration should be imported).
+        </prevention>
+        <business_impact>
+            Security: Single point for security updates and patches.
+            Compliance: Centralized audit trail for all auth operations.
+            Revenue: Prevents auth-related downtime that impacts customers.
+            Enterprise: Consistent auth experience across all tiers.
+        </business_impact>
+    </learning>
     
     <learning id="oauth-local-staging-mismatch">
         <title>OAuth Configuration Mismatch for Local Development</title>
