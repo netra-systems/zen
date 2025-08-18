@@ -12,7 +12,7 @@ BVJ: Growth & Enterprise | Increase Value Creation | +15% customer savings
 """
 
 import time
-from typing import Dict, Any, Optional, Protocol
+from typing import Dict, Any, Optional, Protocol, List
 from dataclasses import dataclass
 
 from app.logging_config import central_logger
@@ -40,16 +40,13 @@ from app.agents.synthetic_data_generation_flow import GenerationFlowFactory
 from app.schemas.shared_types import RetryConfig
 from app.agents.base.circuit_breaker import CircuitBreakerConfig
 
+# Validation and Workflow Modules
+from app.agents.synthetic_data_sub_agent_validation import SyntheticDataValidator
+from app.agents.synthetic_data_sub_agent_workflow import SyntheticDataWorkflowOrchestrator, SyntheticDataContext
+
 logger = central_logger.get_logger(__name__)
 
 
-@dataclass
-class SyntheticDataContext:
-    """Extended context for synthetic data operations."""
-    workload_profile: Optional[WorkloadProfile] = None
-    requires_approval: bool = False
-    generation_started: bool = False
-    approval_requested: bool = False
 
 
 class ModernSyntheticDataSubAgent(BaseExecutionInterface):
@@ -111,15 +108,18 @@ class ModernSyntheticDataSubAgent(BaseExecutionInterface):
             send_update_callback=self._send_legacy_update,
             approval_handler=self._handle_approval_flow_legacy
         )
+        self.validator = SyntheticDataValidator(self)
+        self.workflow = SyntheticDataWorkflowOrchestrator(self)
     
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate execution preconditions for synthetic data generation."""
         try:
-            is_valid = await self._check_synthetic_data_conditions(context.state)
-            await self._log_validation_result(context, is_valid)
+            validation_checks = await self.validator.run_comprehensive_validation(context)
+            is_valid = all(validation_checks.values())
+            await self.validator.log_validation_result(context, is_valid, validation_checks)
             return is_valid
         except Exception as e:
-            logger.error(f"Precondition validation failed: {e}")
+            logger.error(f"Precondition validation failed: {e}", exc_info=True)
             return False
     
     async def _check_synthetic_data_conditions(self, state: DeepAgentState) -> bool:
@@ -130,12 +130,6 @@ class ModernSyntheticDataSubAgent(BaseExecutionInterface):
             return True
         return False
     
-    async def _log_validation_result(self, context: ExecutionContext, is_valid: bool) -> None:
-        """Log validation result for monitoring."""
-        status = "valid" if is_valid else "invalid" 
-        logger.info(f"Precondition validation for {context.run_id}: {status}")
-        if not is_valid:
-            logger.info("Synthetic data generation not required for this request")
     
     def _is_admin_request(self, state: DeepAgentState) -> bool:
         """Check if request is from admin mode."""
@@ -154,114 +148,90 @@ class ModernSyntheticDataSubAgent(BaseExecutionInterface):
         return "synthetic" in request_lower or "generate data" in request_lower
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-        """Execute synthetic data generation core logic."""
-        synthetic_context = SyntheticDataContext()
+        """Execute synthetic data generation core logic with modern patterns."""
+        synthetic_context = await self._prepare_synthetic_context(context)
+        await self._track_execution_start(context, synthetic_context)
         
         try:
             result = await self._execute_generation_workflow(context, synthetic_context)
-            return self._format_execution_result(result)
+            return await self._finalize_successful_execution(context, result)
         except Exception as e:
-            return await self._handle_core_logic_error(context, e)
+            return await self._handle_execution_error(context, e)
     
+    async def _prepare_synthetic_context(self, context: ExecutionContext) -> SyntheticDataContext:
+        """Prepare synthetic data context with enhanced tracking."""
+        synthetic_context = SyntheticDataContext()
+        synthetic_context.workload_profile = await self._determine_workload_profile(context.state)
+        synthetic_context.requires_approval = await self._check_approval_requirements(
+            synthetic_context.workload_profile, context.state
+        )
+        return synthetic_context
+
+    async def _track_execution_start(self, context: ExecutionContext, 
+                                   synthetic_context: SyntheticDataContext) -> None:
+        """Track execution start with monitoring integration."""
+        self.monitor.start_execution(context)
+        await self.send_status_update(context, "initializing", "Preparing synthetic data generation")
+        await self.metrics_handler.record_execution_start(context.run_id, synthetic_context.workload_profile)
+
     async def _execute_generation_workflow(self, context: ExecutionContext,
                                          synthetic_context: SyntheticDataContext) -> SyntheticDataResult:
-        """Execute complete generation workflow."""
-        workload_profile = await self._determine_workload_profile(context.state)
-        synthetic_context.workload_profile = workload_profile
-        
-        if await self._requires_approval(workload_profile, context.state):
-            return await self._handle_approval_workflow(context, synthetic_context)
-        
-        return await self._execute_direct_generation(context, synthetic_context)
-    
-    async def _determine_workload_profile(self, state: DeepAgentState) -> WorkloadProfile:
-        """Determine workload profile from user request."""
-        return await self.profile_parser.determine_workload_profile(
-            state.user_request, self.llm_manager
-        )
-    
-    async def _requires_approval(self, profile: WorkloadProfile, state: DeepAgentState) -> bool:
-        """Check if user approval is required for generation."""
-        large_volume = profile.volume > 50000
-        sensitive_data = self._is_sensitive_data_type(profile)
-        explicit_approval = self._requires_explicit_approval(state)
-        return large_volume or sensitive_data or explicit_approval
-    
-    def _is_sensitive_data_type(self, profile: WorkloadProfile) -> bool:
-        """Check if profile contains sensitive data types."""
-        custom_params = profile.custom_parameters
-        return custom_params.get("data_sensitivity") == "high"
-    
-    def _requires_explicit_approval(self, state: DeepAgentState) -> bool:
-        """Check if explicit approval is requested in state."""
-        triage_result = state.triage_result or {}
-        return triage_result.get("require_approval", False)
-    
-    async def _handle_approval_workflow(self, context: ExecutionContext,
-                                      synthetic_context: SyntheticDataContext) -> SyntheticDataResult:
-        """Handle approval workflow for sensitive operations."""
-        synthetic_context.requires_approval = True
-        synthetic_context.approval_requested = True
-        
-        approval_message = self._generate_approval_message(synthetic_context.workload_profile)
-        result = self._create_approval_result(synthetic_context.workload_profile, approval_message)
-        await self._send_approval_update(context, approval_message)
-        
+        """Execute workflow with enhanced monitoring."""
+        result = await self.workflow.execute_generation_workflow(context, synthetic_context)
+        self._record_generation_metrics(context, result, synthetic_context)
         return result
-    
-    async def _execute_direct_generation(self, context: ExecutionContext,
-                                       synthetic_context: SyntheticDataContext) -> SyntheticDataResult:
-        """Execute direct data generation without approval."""
-        synthetic_context.generation_started = True
-        await self.send_status_update(context, "generating", "Starting data generation...")
-        
-        result = await self.generator.generate_data(
-            synthetic_context.workload_profile, context.run_id, context.stream_updates
-        )
-        context.state.synthetic_data_result = result.model_dump()
-        
-        return result
-    
-    def _generate_approval_message(self, profile: WorkloadProfile) -> str:
-        """Generate approval message for user review."""
-        workload_type = profile.workload_type.value.replace('_', ' ').title()
-        base_info = f"{workload_type}, {profile.volume:,} records"
-        timing_info = f"{profile.time_range_days} days, {profile.distribution} distribution"
-        return f"📊 Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed."
-    
-    def _create_approval_result(self, profile: WorkloadProfile, message: str) -> SyntheticDataResult:
-        """Create result indicating approval required."""
-        from app.agents.synthetic_data_generator import GenerationStatus
-        return SyntheticDataResult(
-            success=False,
-            workload_profile=profile,
-            generation_status=GenerationStatus(status="pending_approval"),
-            requires_approval=True,
-            approval_message=message
-        )
-    
-    async def _send_approval_update(self, context: ExecutionContext, message: str) -> None:
-        """Send approval required update via WebSocket."""
-        await self.send_status_update(context, "approval_required", message)
-    
-    def _format_execution_result(self, result: SyntheticDataResult) -> Dict[str, Any]:
-        """Format SyntheticDataResult for standard execution result."""
-        return {
-            "success": result.success,
-            "workload_profile": result.workload_profile.model_dump() if result.workload_profile else None,
-            "generation_status": result.generation_status.model_dump() if result.generation_status else None,
-            "requires_approval": result.requires_approval,
-            "sample_data": result.sample_data[:5] if result.sample_data else None
+
+    async def _finalize_successful_execution(self, context: ExecutionContext, 
+                                           result: SyntheticDataResult) -> Dict[str, Any]:
+        """Finalize successful execution with metrics tracking."""
+        formatted_result = self.workflow.format_execution_result(result)
+        await self.metrics_handler.record_successful_generation(context.run_id, result)
+        await self.send_status_update(context, "completed", "Synthetic data generation completed")
+        return formatted_result
+
+    async def _handle_execution_error(self, context: ExecutionContext, error: Exception) -> Dict[str, Any]:
+        """Handle execution errors with comprehensive error tracking."""
+        self.monitor.record_error(context, error)
+        await self.metrics_handler.record_generation_error(context.run_id, error)
+        error_result = await self.workflow.handle_core_logic_error(context, error)
+        await self.send_status_update(context, "failed", f"Generation failed: {str(error)}")
+        return error_result
+
+    def _record_generation_metrics(self, context: ExecutionContext, result: SyntheticDataResult,
+                                 synthetic_context: SyntheticDataContext) -> None:
+        """Record generation-specific metrics for performance tracking."""
+        metrics = {
+            "workload_type": synthetic_context.workload_profile.workload_type.value,
+            "volume": synthetic_context.workload_profile.volume,
+            "requires_approval": synthetic_context.requires_approval,
+            "generation_success": result.success
         }
-    
-    async def _handle_core_logic_error(self, context: ExecutionContext, error: Exception) -> Dict[str, Any]:
-        """Handle errors in core logic execution."""
-        logger.error(f"Core logic error in {context.agent_name}: {error}")
-        return {
-            "success": False,
-            "error": str(error),
-            "error_type": error.__class__.__name__
-        }
+        context.metadata.update(metrics)
+
+    async def _determine_workload_profile(self, state: DeepAgentState) -> 'WorkloadProfile':
+        """Determine workload profile from state with error handling."""
+        try:
+            return await self.profile_parser.determine_workload_profile(
+                state.user_request, self.llm_manager
+            )
+        except Exception as e:
+            logger.warning(f"Failed to parse workload profile, using default: {e}")
+            return self._create_default_workload_profile()
+
+    async def _check_approval_requirements(self, profile: 'WorkloadProfile', 
+                                         state: DeepAgentState) -> bool:
+        """Check if approval is required with enhanced logic."""
+        return await self.workflow._requires_approval(profile, state)
+
+    def _create_default_workload_profile(self) -> 'WorkloadProfile':
+        """Create default workload profile for error cases."""
+        from app.agents.synthetic_data_presets import WorkloadType
+        return WorkloadProfile(
+            workload_type=WorkloadType.GENERAL_ANALYTICS, 
+            volume=1000,
+            time_range_days=30,
+            distribution="uniform"
+        )
     
     async def _send_legacy_update(self, run_id: str, update_data: Dict[str, Any]) -> None:
         """Send legacy format update (compatibility bridge)."""
@@ -309,3 +279,4 @@ class ModernSyntheticDataSubAgent(BaseExecutionInterface):
             "profile_parser": "healthy",
             "metrics_handler": "healthy"
         }
+    

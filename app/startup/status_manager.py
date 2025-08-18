@@ -106,12 +106,17 @@ class StartupStatusManager:
         """Update migration status information."""
         await self._ensure_status_loaded()
         migration = self.status.migration_status
+        self._update_migration_fields(migration, current_version, pending, failed, auto_run)
+        await self.save_status()
+
+    def _update_migration_fields(self, migration: MigrationStatus, current_version: Optional[str],
+                                pending: Optional[List[str]], failed: Optional[List[str]], auto_run: bool) -> None:
+        """Update individual migration status fields."""
         if current_version: migration.current_version = current_version
         if pending: migration.pending_migrations = pending
         if failed: migration.failed_migrations = failed
         migration.auto_run = auto_run
         migration.last_run = datetime.now(timezone.utc)
-        await self.save_status()
 
     async def update_service_config(self, config_hash: str,
                                   validation_errors: List[str] = None) -> None:
@@ -144,11 +149,17 @@ class StartupStatusManager:
         """Get crash count with optional filters."""
         await self._ensure_status_loaded()
         crashes = self.status.crash_history
+        filtered_crashes = self._apply_crash_filters(crashes, service, since)
+        return len(filtered_crashes)
+
+    def _apply_crash_filters(self, crashes: List[CrashEntry], service: Optional[ServiceType], 
+                            since: Optional[datetime]) -> List[CrashEntry]:
+        """Apply service and time filters to crash list."""
         if service:
             crashes = [c for c in crashes if c.service == service]
         if since:
             crashes = [c for c in crashes if c.timestamp >= since]
-        return len(crashes)
+        return crashes
 
     async def get_recent_crashes(self, limit: int = 10) -> List[CrashEntry]:
         """Get recent crashes limited by count."""
@@ -224,12 +235,16 @@ class StartupStatusManager:
         """Write data atomically with file locking."""
         async with self._file_lock():
             temp_path = Path(f"{self.status_path}.tmp")
-            try:
-                self._write_temp_file(temp_path, data)
-                temp_path.replace(self.status_path)
-            except Exception as e:
-                temp_path.unlink(missing_ok=True)
-                raise FileError(f"Failed to write status file: {e}")
+            await self._perform_atomic_write(temp_path, data)
+
+    async def _perform_atomic_write(self, temp_path: Path, data: Dict[str, Any]) -> None:
+        """Perform atomic write with error handling."""
+        try:
+            self._write_temp_file(temp_path, data)
+            temp_path.replace(self.status_path)
+        except Exception as e:
+            temp_path.unlink(missing_ok=True)
+            raise FileError(f"Failed to write status file: {e}")
 
     def _write_temp_file(self, temp_path: Path, data: Dict[str, Any]) -> None:
         """Write data to temporary file."""

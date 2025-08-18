@@ -1,19 +1,34 @@
 """
-Core Admin Tool Dispatcher Module
+Modernized Admin Tool Dispatcher Core
 
-Provides the main AdminToolDispatcher class with core functionality
-for handling admin-level tool operations with proper authorization.
+Provides AdminToolDispatcher with modern agent architecture:
+- Inherits from BaseExecutionInterface for consistency
+- Integrates ReliabilityManager for robust execution
+- Uses ExecutionMonitor for performance tracking
+- Implements ExecutionErrorHandler for error management
+
+Business Value: 100% compliant with modern agent patterns.
 """
 from typing import List, Dict, Any, Optional
 from langchain_core.tools import BaseTool
 from sqlalchemy.orm import Session
+
 from app.schemas import ToolResult, ToolStatus, ToolInput
 from app.schemas.admin_tool_types import (
     ToolResponse, ToolSuccessResponse, ToolFailureResponse,
     AdminToolType, AdminToolInfo,
     ToolStatus as AdminToolStatus
 )
+from app.schemas.shared_types import RetryConfig
+
 from app.agents.tool_dispatcher import ToolDispatcher
+from app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
+from app.agents.base.executor import BaseExecutionEngine
+from app.agents.base.reliability_manager import ReliabilityManager
+from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from app.agents.base.monitoring import ExecutionMonitor
+from app.agents.base.errors import ExecutionErrorHandler
+
 from app.db.models_postgres import User
 from app.services.permission_service import PermissionService
 from app.logging_config import central_logger
@@ -22,19 +37,33 @@ from datetime import datetime, UTC
 logger = central_logger
 
 
-class AdminToolDispatcher(ToolDispatcher):
-    """Extended tool dispatcher that includes admin tools for privileged users"""
+class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
+    """Modernized admin tool dispatcher with BaseExecutionInterface compliance.
+    
+    Provides advanced error handling, circuit breaker patterns, and monitoring.
+    """
     
     def __init__(self, llm_manager=None, tool_dispatcher=None, tools: List[BaseTool] = None,
-                 db: Optional[Session] = None, user: Optional[User] = None) -> None:
-        """Initialize the admin tool dispatcher with proper type annotations"""
-        super().__init__(tools or [])
+                 db: Optional[Session] = None, user: Optional[User] = None, 
+                 websocket_manager=None) -> None:
+        """Initialize with modern agent architecture components."""
+        ToolDispatcher.__init__(self, tools or [])
+        BaseExecutionInterface.__init__(self, "AdminToolDispatcher", websocket_manager)
         self._setup_dispatcher_components(llm_manager, tool_dispatcher, db, user)
+        self._initialize_modern_components()
     
     def _setup_dispatcher_components(self, llm_manager, tool_dispatcher, db, user) -> None:
         """Setup dispatcher components and initialize access"""
         self._set_manager_properties(llm_manager, tool_dispatcher, db, user)
         self._initialize_admin_access()
+        
+    def _initialize_modern_components(self) -> None:
+        """Initialize modern agent architecture components."""
+        circuit_config = self._create_circuit_config()
+        retry_config = self._create_retry_config()
+        self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
+        self.monitor = ExecutionMonitor()
+        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
     
     def _set_manager_properties(self, llm_manager, tool_dispatcher, db, user) -> None:
         """Set manager properties and initialize state"""
@@ -44,6 +73,22 @@ class AdminToolDispatcher(ToolDispatcher):
         self.db = db
         self.user = user
         initialize_dispatcher_state(self)
+        
+    def _create_circuit_config(self) -> CircuitBreakerConfig:
+        """Create circuit breaker configuration."""
+        return CircuitBreakerConfig(
+            name="admin_tool_dispatcher",
+            failure_threshold=3,
+            recovery_timeout=30
+        )
+        
+    def _create_retry_config(self) -> RetryConfig:
+        """Create retry configuration."""
+        return RetryConfig(
+            max_retries=3,
+            base_delay=1.0,
+            max_delay=10.0
+        )
 
     def _initialize_admin_access(self) -> None:
         """Initialize admin tools based on user permissions"""
@@ -66,14 +111,31 @@ class AdminToolDispatcher(ToolDispatcher):
         from .dispatcher_helpers import log_available_admin_tools
         log_available_admin_tools(self.user)
     
-    async def dispatch(self, tool_name: str, **kwargs) -> ToolResponse:
-        """Dispatch tool execution with admin tool support and proper typing"""
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute admin tool dispatch with modern architecture patterns."""
+        tool_name = context.metadata.get("tool_name")
+        kwargs = context.metadata.get("kwargs", {})
         tool_input = ToolInput(tool_name=tool_name, kwargs=kwargs)
         
         if self._is_admin_tool(tool_name):
-            return await self._dispatch_admin_tool_safe(tool_name, tool_input, **kwargs)
+            response = await self._dispatch_admin_tool_safe(tool_name, tool_input, **kwargs)
+        else:
+            response = await self._dispatch_base_tool(tool_name, **kwargs)
+            
+        return self._convert_response_to_dict(response)
         
-        return await self._dispatch_base_tool(tool_name, **kwargs)
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate execution preconditions for admin tool dispatch."""
+        tool_name = context.metadata.get("tool_name")
+        if not tool_name:
+            return False
+        return self._validate_tool_access(tool_name)
+        
+    async def dispatch(self, tool_name: str, **kwargs) -> ToolResponse:
+        """Main dispatch method using modern execution engine."""
+        context = self._create_dispatch_context(tool_name, kwargs)
+        result = await self.execution_engine.execute(self, context)
+        return self._convert_result_to_response(result, tool_name)
     
     def _is_admin_tool(self, tool_name: str) -> bool:
         """Check if a tool is an admin tool"""
@@ -171,25 +233,8 @@ class AdminToolDispatcher(ToolDispatcher):
     
     def get_dispatcher_stats(self) -> Dict[str, Any]:
         """Get comprehensive statistics for the admin tool dispatcher"""
-        stats = self._build_base_stats()
-        self._enhance_stats_with_user_and_health(stats)
-        return stats
-    
-    def _build_base_stats(self) -> Dict[str, Any]:
-        """Build base dispatcher statistics."""
-        from .dispatcher_helpers import build_dispatcher_stats_base
-        return build_dispatcher_stats_base()
-    
-    def _add_user_specific_stats(self, stats: Dict[str, Any]) -> None:
-        """Add user-specific statistics."""
-        from .dispatcher_helpers import calculate_enabled_tools_count, calculate_active_sessions
-        stats["enabled_tools"] = calculate_enabled_tools_count(self.user)
-        stats["active_sessions"] = calculate_active_sessions(self.user)
-    
-    def _add_system_health_stats(self, stats: Dict[str, Any]) -> None:
-        """Add system health statistics."""
-        from .dispatcher_helpers import add_system_health_to_stats
-        add_system_health_to_stats(stats)
+        from .tool_info_helpers import get_dispatcher_stats
+        return get_dispatcher_stats(self)
     
     def has_admin_access(self) -> bool:
         """Check if the current user has admin access"""
@@ -197,145 +242,57 @@ class AdminToolDispatcher(ToolDispatcher):
     
     def list_all_tools(self) -> List[AdminToolInfo]:
         """List all available tools including admin tools"""
-        all_tools = self._get_base_tool_info()
-        if self.admin_tools_enabled:
-            all_tools.extend(self._get_admin_tool_info())
-        return all_tools
-    
-    def _get_base_tool_info(self) -> List[AdminToolInfo]:
-        """Get information about base tools"""
-        from .dispatcher_helpers import get_base_tools_list
-        return get_base_tools_list(self)
-    
-    def _get_admin_tool_info(self) -> List[AdminToolInfo]:
-        """Get information about admin tools"""
-        from .dispatcher_helpers import get_admin_tools_list
-        return get_admin_tools_list(self)
+        from .tool_info_helpers import list_all_tools
+        return list_all_tools(self)
     
     def get_tool_info(self, tool_name: str) -> AdminToolInfo:
         """Get information about a specific tool"""
-        if self._is_admin_tool(tool_name):
-            return self._get_admin_tool_info_detail(tool_name)
-        return self._get_regular_tool_info(tool_name)
-    
-    def _get_regular_tool_info(self, tool_name: str) -> AdminToolInfo:
-        """Get information for regular (non-admin) tools"""
-        if tool_name in self.tools:
-            return self._get_base_tool_info_detail(tool_name)
-        return self._get_not_found_tool_info(tool_name)
-    
-    def _get_admin_tool_info_detail(self, tool_name: str) -> AdminToolInfo:
-        """Get detailed information about an admin tool"""
-        try:
-            admin_tool_type = AdminToolType(tool_name)
-            return self._create_admin_tool_info(tool_name, admin_tool_type)
-        except ValueError:
-            return self._get_not_found_tool_info(tool_name)
-    
-    def _create_admin_tool_info(self, tool_name: str, admin_tool_type: AdminToolType) -> AdminToolInfo:
-        """Create admin tool info object."""
-        from .dispatcher_helpers import create_admin_tool_info
-        return create_admin_tool_info(
-            tool_name, admin_tool_type, self.user, self.admin_tools_enabled
-        )
-    
-    def _get_base_tool_info_detail(self, tool_name: str) -> AdminToolInfo:
-        """Get detailed information about a base tool"""
-        from .dispatcher_helpers import create_base_tool_info
-        tool = self.tools[tool_name]
-        return create_base_tool_info(tool_name, tool)
-    
-    def _get_not_found_tool_info(self, tool_name: str) -> AdminToolInfo:
-        """Get information for a tool that was not found"""
-        from .dispatcher_helpers import create_not_found_tool_info
-        return create_not_found_tool_info(tool_name)
+        from .tool_info_helpers import get_tool_info
+        return get_tool_info(self, tool_name)
     
     def _merge_response_params(self, base_params: Dict[str, Any], 
                                specific_params: Dict[str, Any]) -> Dict[str, Any]:
         """Merge base and specific response parameters."""
         return {**base_params, **specific_params}
     
-    def _enhance_stats_with_user_and_health(self, stats: Dict[str, Any]) -> None:
-        """Add user-specific and health statistics to stats dict."""
-        self._add_user_specific_stats(stats)
-        self._add_system_health_stats(stats)
-    
-    def _validate_operation_security(self, operation_params: Dict[str, Any]) -> None:
-        """Validate operation security and permissions."""
-        self._check_operation_permissions(
-            operation_params["type"], operation_params["user_role"]
-        )
+    async def dispatch_admin_operation(self, operation: Dict[str, Any]) -> Dict[str, Any]:
+        """Dispatch admin operation based on operation type"""
+        from .operation_helpers import dispatch_admin_operation
+        return await dispatch_admin_operation(self, operation)
     
     def _has_valid_tool_dispatcher(self) -> bool:
         """Check if tool dispatcher is available and valid."""
-        return hasattr(self, 'tool_dispatcher') and self.tool_dispatcher
+        from .operation_helpers import has_valid_tool_dispatcher
+        return has_valid_tool_dispatcher(self)
     
     def _has_valid_audit_logger(self) -> bool:
         """Check if audit logger is available and valid."""
-        return hasattr(self, 'audit_logger') and self.audit_logger
+        from .operation_helpers import has_valid_audit_logger
+        return has_valid_audit_logger(self)
     
-    async def dispatch_admin_operation(self, operation: Dict[str, Any]) -> Dict[str, Any]:
-        """Dispatch admin operation based on operation type"""
-        operation_params = self._extract_operation_params(operation)
-        self._validate_operation_security(operation_params)
-        tool_name = self._get_operation_tool_name(operation_params["type"])
-        return await self._execute_operation_with_audit(tool_name, operation_params["params"], operation)
+    # Modern execution pattern helper methods
     
-    def _extract_operation_params(self, operation: Dict[str, Any]) -> Dict[str, Any]:
-        """Extract operation parameters"""
-        return {
-            "type": operation.get("type"),
-            "params": operation.get("params", {}),
-            "user_role": operation.get("user_role", "user")
-        }
-    
-    def _check_operation_permissions(self, operation_type: str, user_role: str) -> None:
-        """Check permissions for sensitive operations"""
-        from .dispatcher_helpers import check_operation_permissions
-        check_operation_permissions(operation_type, user_role)
-    
-    def _get_operation_tool_name(self, operation_type: str) -> str:
-        """Get tool name for operation type"""
-        from .dispatcher_helpers import get_operation_tool_mapping
-        tool_mapping = get_operation_tool_mapping()
-        tool_name = tool_mapping.get(operation_type)
-        if not tool_name:
-            raise ValueError(f"Unknown operation type: {operation_type}")
-        return tool_name
-    
-    async def _execute_operation_with_audit(self, tool_name: str, 
-                                           params: Dict[str, Any],
-                                           operation: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute operation and audit the result"""
-        try:
-            return await self._execute_and_audit_success(tool_name, params, operation)
-        except Exception as e:
-            return await self._handle_operation_error(e, operation)
-    
-    async def _execute_and_audit_success(self, tool_name: str, 
-                                        params: Dict[str, Any],
-                                        operation: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute operation and audit successful result"""
-        result = await self._execute_operation_safely(tool_name, params)
-        await self._log_audit_operation(operation)
-        return result
-    
-    async def _handle_operation_error(self, error: Exception, operation: Dict[str, Any]) -> Dict[str, Any]:
-        """Handle operation execution error."""
-        await self._log_audit_operation(operation)
-        return {"success": False, "error": str(error)}
-    
-    async def _execute_operation_safely(self, tool_name: str, 
-                                       params: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute operation via tool dispatcher if available"""
-        from .dispatcher_helpers import execute_operation_via_dispatcher, create_no_dispatcher_error
-        if self._has_valid_tool_dispatcher():
-            return await execute_operation_via_dispatcher(self, tool_name, params)
-        return create_no_dispatcher_error(tool_name)
-    
-    async def _log_audit_operation(self, operation: Dict[str, Any]) -> None:
-        """Log audit information for admin operations"""
-        from .dispatcher_helpers import create_audit_data, log_audit_data
-        if self._has_valid_audit_logger():
-            audit_data = create_audit_data(operation)
-            await log_audit_data(self.audit_logger, audit_data)
+    def _create_dispatch_context(self, tool_name: str, kwargs: Dict[str, Any]) -> ExecutionContext:
+        """Create execution context for tool dispatch."""
+        from .modern_execution_helpers import create_dispatch_context
+        return create_dispatch_context(self, tool_name, kwargs)
+        
+    def _validate_tool_access(self, tool_name: str) -> bool:
+        """Validate user has access to the specified tool."""
+        from .modern_execution_helpers import validate_tool_access
+        return validate_tool_access(self, tool_name)
+        
+    def _convert_response_to_dict(self, response: ToolResponse) -> Dict[str, Any]:
+        """Convert ToolResponse to dictionary format."""
+        from .modern_execution_helpers import convert_response_to_dict
+        return convert_response_to_dict(response)
+        
+    def _convert_result_to_response(self, result: ExecutionResult, tool_name: str) -> ToolResponse:
+        """Convert ExecutionResult back to ToolResponse format."""
+        from .modern_execution_helpers import convert_result_to_response
+        return convert_result_to_response(self, result, tool_name)
+        
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get comprehensive health status including modern components."""
+        from .modern_execution_helpers import get_modern_health_status
+        return get_modern_health_status(self)

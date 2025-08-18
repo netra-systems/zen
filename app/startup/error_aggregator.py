@@ -45,6 +45,12 @@ class ErrorAggregator:
                           stack_trace: Optional[str] = None,
                           context: Optional[Dict] = None) -> int:
         """Record error in database and return ID."""
+        return await self._record_error_impl(service, message, phase, severity, error_type, stack_trace, context)
+
+    async def _record_error_impl(self, service: str, message: str, phase: ErrorPhase, 
+                                severity: str, error_type: ErrorType, stack_trace: Optional[str], 
+                                context: Optional[Dict]) -> int:
+        """Implementation of error recording."""
         await self._ensure_database_exists()
         error = self._create_startup_error(service, message, phase, severity, error_type, stack_trace, context)
         return await self._insert_error(error)
@@ -78,9 +84,17 @@ class ErrorAggregator:
 
     async def generate_report(self, report_type: str = "daily") -> Dict:
         """Generate error analysis report."""
-        hours = 24 if report_type == "daily" else 168
+        hours = self._get_report_hours(report_type)
         trends = await self.get_trends(hours)
         patterns = await self.find_patterns(hours)
+        return self._build_report_dict(report_type, trends, patterns)
+
+    def _get_report_hours(self, report_type: str) -> int:
+        """Get hours for report type."""
+        return 24 if report_type == "daily" else 168
+
+    def _build_report_dict(self, report_type: str, trends, patterns: List) -> Dict:
+        """Build report dictionary."""
         return {
             "report_type": report_type, "generated_at": datetime.now(timezone.utc),
             "trends": trends.model_dump(), "top_patterns": patterns[:5],
@@ -202,10 +216,21 @@ class ErrorAggregator:
 
     def _get_error_fix_mapping(self) -> Dict[ErrorType, str]:
         """Get mapping of error types to suggested fixes."""
+        base_fixes = self._get_base_error_fixes()
+        extended_fixes = self._get_extended_error_fixes()
+        return {**base_fixes, **extended_fixes}
+
+    def _get_base_error_fixes(self) -> Dict[ErrorType, str]:
+        """Get base error type fixes."""
         return {
             ErrorType.CONNECTION: "Check network connectivity and service availability",
             ErrorType.CONFIGURATION: "Verify configuration files and environment variables",
-            ErrorType.DEPENDENCY: "Run dependency installation and version checks",
+            ErrorType.DEPENDENCY: "Run dependency installation and version checks"
+        }
+
+    def _get_extended_error_fixes(self) -> Dict[ErrorType, str]:
+        """Get extended error type fixes."""
+        return {
             ErrorType.MIGRATION: "Check database migration status and run pending migrations",
             ErrorType.TIMEOUT: "Increase timeout values or check system resources",
             ErrorType.PERMISSION: "Verify file/directory permissions and access rights"

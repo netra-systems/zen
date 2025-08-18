@@ -1,16 +1,30 @@
-"""Refactored Supervisor Agent with modular architecture (<300 lines)."""
+"""Modernized Supervisor Agent with BaseExecutionInterface pattern (<300 lines).
+
+Business Value: Standardized execution patterns for 40+ agents,
+improved reliability, and comprehensive monitoring.
+"""
 
 import uuid
 from contextlib import asynccontextmanager
-from typing import Dict, List, Optional, Tuple, Any
-from typing import TYPE_CHECKING
+from typing import Dict, List, Optional, Tuple, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from app.ws_manager import WebSocketManager
-from datetime import datetime, timezone
+
 import asyncio
+from datetime import datetime, timezone
+
 from app.logging_config import central_logger
 from app.agents.base import BaseSubAgent
+# Modern execution pattern imports
+from app.agents.base.interface import (
+    BaseExecutionInterface, ExecutionContext, ExecutionResult, 
+    ExecutionStatus, WebSocketManagerProtocol
+)
+from app.agents.base.executor import BaseExecutionEngine
+from app.agents.base.monitoring import ExecutionMonitor
+from app.agents.base.reliability_manager import ReliabilityManager
+from app.agents.base.errors import ExecutionErrorHandler, ValidationError
 from app.schemas import (
     SubAgentLifecycle, WebSocketMessage, AgentStarted, 
     SubAgentUpdate, AgentCompleted, SubAgentState
@@ -32,11 +46,15 @@ from app.agents.supervisor.pipeline_executor import PipelineExecutor
 from app.agents.supervisor.state_manager import StateManager
 from app.agents.supervisor.pipeline_builder import PipelineBuilder
 from app.agents.supervisor.observability_flow import get_supervisor_flow_logger
+from app.agents.supervisor.supervisor_utilities import SupervisorUtilities
+from app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
+from app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
+from app.agents.supervisor.agent_routing import SupervisorAgentRouter
+from app.agents.supervisor.supervisor_completion_helpers import SupervisorCompletionHelpers
 
 logger = central_logger.get_logger(__name__)
 
-
-class SupervisorAgent(BaseSubAgent):
+class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     """Refactored Supervisor agent with modular design."""
     
     def __init__(self, 
@@ -44,18 +62,17 @@ class SupervisorAgent(BaseSubAgent):
                  llm_manager: LLMManager,
                  websocket_manager: 'WebSocketManager',
                  tool_dispatcher: ToolDispatcher):
-        self._init_base(llm_manager)
+        self._init_base(llm_manager, websocket_manager)
         self._init_services(db_session, websocket_manager, tool_dispatcher)
         self._init_components(llm_manager, tool_dispatcher, websocket_manager)
+        self._init_modern_execution_infrastructure()
         self._init_supervisor_state()
     
-    def _init_base(self, llm_manager: LLMManager) -> None:
-        """Initialize base agent."""
-        super().__init__(
-            llm_manager, 
-            name="Supervisor", 
-            description="The supervisor agent that orchestrates sub-agents"
-        )
+    def _init_base(self, llm_manager: LLMManager, websocket_manager: 'WebSocketManager') -> None:
+        """Initialize base agent with modern execution interface."""
+        BaseSubAgent.__init__(self, llm_manager, name="Supervisor", 
+                            description="The supervisor agent that orchestrates sub-agents")
+        BaseExecutionInterface.__init__(self, "Supervisor", websocket_manager)
     
     def _init_services(self, db_session: AsyncSession,
                        websocket_manager: 'WebSocketManager',
@@ -75,6 +92,16 @@ class SupervisorAgent(BaseSubAgent):
         self._init_state_components()
         self._init_supporting_components()
 
+    def _init_modern_execution_infrastructure(self) -> None:
+        """Initialize modern execution infrastructure."""
+        self.monitor = ExecutionMonitor()
+        self.reliability_manager = ReliabilityManager(
+            circuit_breaker_config={"failure_threshold": 5, "recovery_timeout": 60},
+            retry_config={"max_retries": 3, "base_delay": 1.0, "max_delay": 10.0}
+        )
+        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
+        self.error_handler = ExecutionErrorHandler()
+    
     def _init_supervisor_state(self) -> None:
         """Initialize supervisor state and hooks."""
         self.hooks = self._init_hooks()
@@ -104,6 +131,12 @@ class SupervisorAgent(BaseSubAgent):
         """Initialize supporting components."""
         self.pipeline_builder = PipelineBuilder()
         self.flow_logger = get_supervisor_flow_logger()
+        self.utilities = SupervisorUtilities(self.hooks, self.registry, self.engine,
+            self.monitor, self.reliability_manager, self.execution_engine, self.error_handler)
+        self.execution_helpers = SupervisorExecutionHelpers(self)
+        self.workflow_executor = SupervisorWorkflowExecutor(self)
+        self.agent_router = SupervisorAgentRouter(self)
+        self.completion_helpers = SupervisorCompletionHelpers(self)
 
     @asynccontextmanager
     async def _create_db_session_factory(self):
@@ -140,43 +173,88 @@ class SupervisorAgent(BaseSubAgent):
         for i, agent in enumerate(agents):
             self.registry.register(f"agent_{i}", agent)
     
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate execution preconditions for supervisor."""
+        await self._validate_state_requirements(context.state)
+        await self._validate_execution_resources(context)
+        await self._validate_agent_dependencies()
+        return True
+
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute core supervisor orchestration logic."""
+        self.monitor.start_operation(f"supervisor_execution_{context.run_id}")
+        await self.send_status_update(context, "executing", "Starting orchestration...")
+        
+        result = await self._execute_orchestration_workflow(context)
+        
+        self.monitor.complete_operation(f"supervisor_execution_{context.run_id}")
+        await self.send_status_update(context, "completed", "Orchestration completed")
+        return result
+
+    async def _validate_state_requirements(self, state: DeepAgentState) -> None:
+        """Validate required state attributes."""
+        if not hasattr(state, 'user_request') or not state.user_request:
+            raise ValidationError("Missing required user_request in state")
+    
+    async def _validate_execution_resources(self, context: ExecutionContext) -> None:
+        """Validate execution resources are available."""
+        if not self.registry or not self.registry.agents:
+            raise ValidationError("No agents registered for execution")
+    
+    async def _validate_agent_dependencies(self) -> None:
+        """Validate agent dependencies are healthy."""
+        if not self.reliability_manager.get_health_status().get('healthy', False):
+            raise ValidationError("Agent dependencies not healthy")
+    
+    async def _execute_orchestration_workflow(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute orchestration workflow with monitoring."""
+        state = context.state
+        updated_state = await self._run_supervisor_workflow(state, context.run_id)
+        return {"supervisor_result": "completed", "updated_state": updated_state}
+
     async def execute(self, state: DeepAgentState, 
                      run_id: str, stream_updates: bool) -> None:
-        """Execute method for BaseSubAgent compatibility."""
-        flow_id = self._start_execution_flow(run_id)
-        context = self._extract_context_from_state(state, run_id)
-        updated_state = await self._execute_run_with_logging(flow_id, context)
-        self._finalize_execution(flow_id, state, updated_state)
-
-    def _start_execution_flow(self, run_id: str) -> str:
-        """Start execution flow logging."""
-        flow_id = self.flow_logger.generate_flow_id()
-        self.flow_logger.start_flow(flow_id, run_id, 3)
-        return flow_id
-
-    def _extract_context_from_state(self, state: DeepAgentState, run_id: str) -> dict:
-        """Extract execution context from state."""
-        return {
-            "thread_id": state.chat_thread_id or run_id,
-            "user_id": state.user_id or "default_user",
-            "user_prompt": state.user_request or "",
-            "run_id": run_id
-        }
-
-    async def _execute_run_with_logging(self, flow_id: str, context: dict) -> DeepAgentState:
-        """Execute run with flow logging."""
-        self.flow_logger.step_started(flow_id, "execute_run", "supervisor")
-        updated_state = await self.run(
-            context["user_prompt"], context["thread_id"], context["user_id"], context["run_id"]
+        """Modernized execute using BaseExecutionEngine."""
+        # Create execution context for modern pattern
+        context = ExecutionContext(
+            run_id=run_id,
+            agent_name=self.name,
+            state=state,
+            stream_updates=stream_updates,
+            thread_id=getattr(state, 'chat_thread_id', run_id),
+            user_id=getattr(state, 'user_id', 'default_user'),
+            metadata={"description": self.description}
         )
-        self.flow_logger.step_completed(flow_id, "execute_run", "supervisor")
-        return updated_state
+        
+        try:
+            # Execute with modern pattern using reliability manager
+            result = await self.reliability_manager.execute_with_reliability(
+                context, lambda: self.execution_engine.execute(self, context)
+            )
+            
+            # Handle result with error handler
+            if not result.success:
+                await self.error_handler.handle_execution_error(result.error, context)
+                
+        except Exception as e:
+            # Handle with error handler and fallback
+            await self.error_handler.handle_execution_error(str(e), context)
+            logger.error(f"Modern execution failed, falling back to legacy: {e}")
+            await self._execute_legacy_workflow(state, run_id, stream_updates)
+    
+    async def _run_supervisor_workflow(self, state: DeepAgentState, run_id: str) -> DeepAgentState:
+        """Run supervisor workflow using legacy run method."""
+        return await self.execution_helpers.run_supervisor_workflow(state, run_id)
+    
+    async def _handle_execution_failure(self, result: ExecutionResult, state: DeepAgentState) -> None:
+        """Handle execution failure with proper error handling."""
+        await self.execution_helpers.handle_execution_failure(result, state)
+    
+    async def _execute_legacy_workflow(self, state: DeepAgentState, 
+                                     run_id: str, stream_updates: bool) -> None:
+        """Legacy execution workflow for backward compatibility."""
+        await self.execution_helpers.execute_legacy_workflow(state, run_id, stream_updates)
 
-    def _finalize_execution(self, flow_id: str, state: DeepAgentState, updated_state: DeepAgentState) -> None:
-        """Finalize execution and merge states."""
-        if updated_state:
-            state = state.merge_from(updated_state)
-        self.flow_logger.complete_flow(flow_id)
     
     async def run(self, user_prompt: str, thread_id: str, 
                   user_id: str, run_id: str) -> DeepAgentState:
@@ -196,114 +274,45 @@ class SupervisorAgent(BaseSubAgent):
     async def _execute_workflow_steps(self, flow_id: str, user_prompt: str, 
                                     thread_id: str, user_id: str, run_id: str) -> DeepAgentState:
         """Execute all workflow steps."""
-        context = await self._create_context_step(flow_id, thread_id, user_id, run_id)
-        state = await self._initialize_state_step(flow_id, user_prompt, thread_id, user_id, run_id)
-        pipeline = await self._build_pipeline_step(flow_id, user_prompt, state)
-        await self._execute_pipeline_step(flow_id, pipeline, state, context)
-        return state
-
-    async def _create_context_step(self, flow_id: str, thread_id: str, user_id: str, run_id: str) -> dict:
-        """Execute create context step."""
-        self.flow_logger.step_started(flow_id, "create_context", "initialization")
-        context = self._create_run_context(thread_id, user_id, run_id)
-        self.flow_logger.step_completed(flow_id, "create_context", "initialization")
-        return context
-
-    async def _initialize_state_step(self, flow_id: str, user_prompt: str, 
-                                   thread_id: str, user_id: str, run_id: str) -> DeepAgentState:
-        """Execute initialize state step."""
-        self.flow_logger.step_started(flow_id, "initialize_state", "state_management")
-        state = await self.state_manager.initialize_state(user_prompt, thread_id, user_id, run_id)
-        self.flow_logger.step_completed(flow_id, "initialize_state", "state_management")
-        return state
-
-    async def _build_pipeline_step(self, flow_id: str, user_prompt: str, state: DeepAgentState) -> List[PipelineStep]:
-        """Execute build pipeline step."""
-        self.flow_logger.step_started(flow_id, "build_pipeline", "planning")
-        pipeline = self.pipeline_builder.get_execution_pipeline(user_prompt, state)
-        self.flow_logger.step_completed(flow_id, "build_pipeline", "planning")
-        return pipeline
-
-    async def _execute_pipeline_step(self, flow_id: str, pipeline: List[PipelineStep], 
-                                   state: DeepAgentState, context: dict) -> None:
-        """Execute pipeline step."""
-        self.flow_logger.step_started(flow_id, "execute_pipeline", "execution")
-        await self._execute_with_context(pipeline, state, context)
-        self.flow_logger.step_completed(flow_id, "execute_pipeline", "execution")
-    
-    def _create_run_context(self, thread_id: str, 
-                           user_id: str, run_id: str) -> Dict[str, str]:
-        """Create execution context."""
-        return {
-            "thread_id": thread_id,
-            "user_id": user_id,
-            "run_id": run_id
-        }
-    
-    async def _execute_with_context(self, pipeline: List[PipelineStep],
-                                   state: DeepAgentState, 
-                                   context: Dict[str, str]) -> None:
-        """Execute pipeline with context."""
-        await self.pipeline_executor.execute_pipeline(
-            pipeline, state, context["run_id"], context
+        return await self.workflow_executor.execute_workflow_steps(
+            flow_id, user_prompt, thread_id, user_id, run_id
         )
-        await self.pipeline_executor.finalize_state(state, context)
+
     
     async def _route_to_agent(self, state: DeepAgentState, 
                              context: 'AgentExecutionContext', 
                              agent_name: str) -> 'AgentExecutionResult':
         """Route request to specific agent with basic execution."""
-        from app.agents.supervisor.execution_context import AgentExecutionContext
-        exec_context = self._create_agent_execution_context(context, agent_name)
-        return await self.engine.execute_agent(exec_context, state)
+        return await self.agent_router.route_to_agent(state, context, agent_name)
     
     async def _route_to_agent_with_retry(self, state: DeepAgentState,
                                         context: 'AgentExecutionContext',
                                         agent_name: str) -> 'AgentExecutionResult':
         """Route request to agent with retry logic."""
-        from app.agents.supervisor.execution_context import AgentExecutionContext  
-        exec_context = self._create_agent_execution_context(context, agent_name)
-        exec_context.max_retries = context.max_retries
-        return await self.engine.execute_agent(exec_context, state)
+        return await self.agent_router.route_to_agent_with_retry(state, context, agent_name)
     
     async def _route_to_agent_with_circuit_breaker(self, state: DeepAgentState,
                                                   context: 'AgentExecutionContext',
                                                   agent_name: str) -> 'AgentExecutionResult':
         """Route request to agent with circuit breaker protection."""
-        from app.agents.supervisor.execution_context import AgentExecutionContext
-        exec_context = self._create_agent_execution_context(context, agent_name)
-        return await self.engine._execute_with_fallback(exec_context, state)
-    
-    def _create_agent_execution_context(self, base_context, agent_name: str):
-        """Create AgentExecutionContext from base context."""
-        from app.agents.supervisor.execution_context import AgentExecutionContext
-        return AgentExecutionContext(
-            run_id=base_context.run_id, thread_id=base_context.thread_id,
-            user_id=base_context.user_id, agent_name=agent_name,
-            max_retries=getattr(base_context, 'max_retries', 3)
-        )
+        return await self.agent_router.route_to_agent_with_circuit_breaker(state, context, agent_name)
     
     async def _run_hooks(self, event: str, state: DeepAgentState, **kwargs) -> None:
         """Run registered hooks for an event."""
-        handlers = self.hooks.get(event, [])
-        for handler in handlers:
-            await self._execute_single_hook(handler, event, state, **kwargs)
-
-    async def _execute_single_hook(self, handler, event: str, state: DeepAgentState, **kwargs) -> None:
-        """Execute a single hook with error handling."""
-        try:
-            await handler(state, **kwargs)
-        except Exception as e:
-            logger.error(f"Hook {handler.__name__} failed: {e}")
-            if event == "on_error":
-                raise
-    
+        await self.utilities.run_hooks(event, state, **kwargs)
     
     def get_stats(self) -> Dict[str, Any]:
-        """Get supervisor statistics."""
-        return {
-            "registered_agents": len(self.registry.agents),
-            "active_runs": len(self.engine.active_runs),
-            "completed_runs": len(self.engine.run_history),
-            "hooks_registered": {k: len(v) for k, v in self.hooks.items()}
-        }
+        """Get comprehensive supervisor statistics."""
+        return self.completion_helpers.get_comprehensive_stats()
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get comprehensive health status from modern execution infrastructure."""
+        return self.completion_helpers.get_agent_health_status()
+    
+    def get_performance_metrics(self) -> Dict[str, Any]:
+        """Get performance metrics from modern monitoring."""
+        return self.completion_helpers.get_agent_performance_metrics()
+    
+    def get_circuit_breaker_status(self) -> Dict[str, Any]:
+        """Get circuit breaker status from reliability manager."""
+        return self.completion_helpers.get_reliability_status()

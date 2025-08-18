@@ -13,7 +13,10 @@
 from typing import Dict, Any, Optional
 from datetime import datetime, UTC
 
-from app.agents.base import BaseSubAgent
+from app.agents.base import BaseSubAgent, BaseExecutionInterface, ExecutionContext, ExecutionResult
+from app.agents.base import BaseExecutionEngine, ExecutionMonitor, ReliabilityManager
+from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from app.schemas.shared_types import RetryConfig
 from app.llm.llm_manager import LLMManager
 from app.ws_manager import WebSocketManager
 from app.logging_config import central_logger
@@ -21,12 +24,14 @@ from app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class DemoReportingAgent(BaseSubAgent):
+class DemoReportingAgent(BaseSubAgent, BaseExecutionInterface):
     """Specialized reporting agent for demo scenarios."""
     
     def __init__(self, llm_manager: LLMManager, websocket_manager: WebSocketManager):
-        super().__init__(llm_manager, websocket_manager)
+        BaseSubAgent.__init__(self, llm_manager, websocket_manager)
+        BaseExecutionInterface.__init__(self, "DemoReportingAgent", websocket_manager)
         self.agent_name = "DemoReportingAgent"
+        self._initialize_modern_components()
         
     async def process(
         self,
@@ -143,6 +148,14 @@ Include specific metrics and timelines where possible."""
             "cost_benefit_analysis",
             "implementation_roadmap"
         ]
+    
+    def _initialize_modern_components(self) -> None:
+        """Initialize modern execution components."""
+        circuit_config = self._create_circuit_breaker_config()
+        retry_config = self._create_retry_config()
+        self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
+        self.execution_monitor = ExecutionMonitor()
+        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.execution_monitor)
         
     def get_executive_summary_sections(self) -> list:
         """Get standard sections for executive summary reports."""
@@ -153,3 +166,60 @@ Include specific metrics and timelines where possible."""
             "Expected Outcomes",
             "Next Steps"
         ]
+    
+    def _create_circuit_breaker_config(self) -> CircuitBreakerConfig:
+        """Create circuit breaker configuration for reporting."""
+        return CircuitBreakerConfig(
+            name=f"{self.agent_name}_circuit_breaker",
+            failure_threshold=3,
+            recovery_timeout=30
+        )
+    
+    def _create_retry_config(self) -> RetryConfig:
+        """Create retry configuration for reporting."""
+        return RetryConfig(
+            max_retries=2,
+            base_delay=1.0,
+            max_delay=5.0,
+            exponential_backoff=True
+        )
+    
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute core reporting logic with modern patterns."""
+        message = self._extract_message_from_context(context)
+        report_context = self._extract_report_context_from_context(context)
+        return await self._process_reporting_request(message, report_context)
+    
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate execution preconditions for reporting."""
+        return self._validate_context_has_message(context) and self._validate_llm_available()
+    
+    def _extract_message_from_context(self, context: ExecutionContext) -> str:
+        """Extract message from execution context."""
+        return context.state.message or context.metadata.get('message', '')
+    
+    def _extract_report_context_from_context(self, context: ExecutionContext) -> Optional[Dict[str, Any]]:
+        """Extract report context from execution context."""
+        return context.metadata.get('context')
+    
+    def _validate_context_has_message(self, context: ExecutionContext) -> bool:
+        """Validate context contains a message."""
+        message = self._extract_message_from_context(context)
+        return bool(message and message.strip())
+    
+    def _validate_llm_available(self) -> bool:
+        """Validate LLM manager is available."""
+        return self.llm_manager is not None
+    
+    async def execute_with_modern_interface(self, context: ExecutionContext) -> ExecutionResult:
+        """Execute with modern interface for external callers."""
+        return await self.execution_engine.execute(self, context)
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get comprehensive health status for reporting agent."""
+        return {
+            "agent_name": self.agent_name,
+            "reliability": self.reliability_manager.get_health_status(),
+            "monitoring": self.execution_monitor.get_health_status(),
+            "execution_engine": self.execution_engine.get_health_status()
+        }
