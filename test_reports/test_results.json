@@ -1,14 +1,14 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-18T14:52:08.396184",
-    "total_runs": 71
+    "last_update": "2025-08-18T14:57:43.249017",
+    "total_runs": 72
   },
   "current_state": {
-    "overall_status": "[FAILED] 141 failures",
-    "last_run_level": "integration",
-    "last_run_time": "2025-08-18T14:52:08.396184",
-    "last_exit_code": 15
+    "overall_status": "[FAILED] 3 failures",
+    "last_run_level": "agents",
+    "last_run_time": "2025-08-18T14:57:43.249017",
+    "last_exit_code": 2
   },
   "known_test_counts": {
     "unit:backend": {
@@ -60,12 +60,12 @@
       "last_update": "2025-08-18T13:28:21.043329"
     },
     "agents:backend": {
-      "total": 94,
-      "passed": 90,
-      "failed": 2,
-      "skipped": 0,
-      "errors": 2,
-      "last_update": "2025-08-18T14:39:23.252236"
+      "total": 118,
+      "passed": 112,
+      "failed": 3,
+      "skipped": 2,
+      "errors": 1,
+      "last_update": "2025-08-18T14:57:43.249017"
     }
   },
   "category_results": {
@@ -108,11 +108,11 @@
     "agents": {
       "description": "Agent tests",
       "expected": 45,
-      "actual": 94,
-      "passed": 90,
-      "failed": 2,
-      "last_run": "2025-08-18T14:39:23.252236",
-      "status": "[FAILED] 2 failures"
+      "actual": 118,
+      "passed": 112,
+      "failed": 3,
+      "last_run": "2025-08-18T14:57:43.249017",
+      "status": "[FAILED] 3 failures"
     },
     "websocket": {
       "description": "WebSocket tests",
@@ -218,32 +218,29 @@
     "backend": {
       "status": "failed",
       "last_counts": {
-        "total": 111,
-        "passed": 109,
-        "failed": 2,
-        "skipped": 0,
-        "errors": 0,
+        "total": 118,
+        "passed": 112,
+        "failed": 3,
+        "skipped": 2,
+        "errors": 1,
         "import_errors": 0,
-        "test_files": 21,
+        "test_files": 14,
         "status": "failed"
       },
-      "last_duration": 29.403441429138184,
-      "last_run": "2025-08-18T14:52:08.396184"
+      "last_duration": 20.490822792053223,
+      "last_run": "2025-08-18T14:57:43.249017"
     },
     "frontend": {
-      "status": "failed",
+      "status": "skipped",
       "last_counts": {
-        "total": 202,
-        "passed": 63,
-        "failed": 139,
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
         "skipped": 0,
-        "errors": 0,
-        "import_errors": 0,
-        "test_files": 80,
-        "status": "failed"
+        "errors": 0
       },
-      "last_duration": 79.42185497283936,
-      "last_run": "2025-08-18T14:52:08.396184"
+      "last_duration": 0,
+      "last_run": "2025-08-18T14:57:43.249017"
     },
     "e2e": {
       "status": "pending",
@@ -255,46 +252,42 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-18T14:52:08.396184"
+      "last_run": "2025-08-18T14:57:43.249017"
     }
   },
   "failing_tests": [
     {
       "component": "backend",
-      "test": "\u001b[0m app\\tests\\routes\\test_supply_management.py::TestSupplyManagement::test_supply_risk_assessment",
-      "timestamp": "2025-08-18T14:52:08.396184"
+      "test": "\u001b[0m app\\tests\\agents\\test_data_sub_agent_reliability.py::TestErrorHandling::test_retry_on_failure",
+      "timestamp": "2025-08-18T14:57:43.249017"
     },
     {
       "component": "backend",
-      "test": "\u001b[0m app\\tests\\routes\\test_reference_management.py::TestReferenceManagement::test_get_reference_by_id Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env",
-      "timestamp": "2025-08-18T14:52:08.396184"
+      "test": "\u001b[0m app\\tests\\agents\\test_data_sub_agent_comprehensive_suite\\test_data_sub_agent_processing.py::TestDataSubAgentProcessing::test_process_with_retry_all_failures",
+      "timestamp": "2025-08-18T14:57:43.249017"
     },
     {
       "component": "backend",
-      "test": "\u001b[0m app\\tests\\routes\\test_supply_management.py::\u001b[1mTestSupplyManagement::test_supply_risk_assessment\u001b[0m - AttributeError: module 'app.services' has no attribute 'supply_risk_service'. Did you mean: 'supply_catalog_service'?",
-      "timestamp": "2025-08-18T14:52:08.396184"
+      "test": "\u001b[0m app\\tests\\agents\\test_agent_e2e_critical_tools.py::TestAgentE2ECriticalTools::test_5_state_persistence_and_recovery Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env",
+      "timestamp": "2025-08-18T14:57:43.249017"
     },
     {
       "component": "backend",
-      "test": "\u001b[0m app\\tests\\routes\\test_reference_management.py::\u001b[1mTestReferenceManagement::test_get_reference_by_id\u001b[0m - AttributeError: 'coroutine' object has no attribute 'first'",
-      "timestamp": "2025-08-18T14:52:08.396184"
+      "test": "\u001b[0m app\\tests\\agents\\test_data_sub_agent_reliability.py::\u001b[1mTestErrorHandling::test_retry_on_failure\u001b[0m - AssertionError: assert 0 == 3",
+      "timestamp": "2025-08-18T14:57:43.249017"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\agents\\test_data_sub_agent_comprehensive_suite\\test_data_sub_agent_processing.py::\u001b[1mTestDataSubAgentProcessing::test_process_with_retry_all_failures\u001b[0m - AssertionError: assert 3 == 2",
+      "timestamp": "2025-08-18T14:57:43.249017"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\agents\\test_agent_e2e_critical_tools.py::\u001b[1mTestAgentE2ECriticalTools::test_5_state_persistence_and_recovery\u001b[0m - TypeError: TestAgentE2ECriticalTools.test_5_state_persistence_and_recovery.<locals>.mock_save_state() missing 3 required positional arguments: 'user_id', 'state', and 'db_session'",
+      "timestamp": "2025-08-18T14:57:43.249017"
     }
   ],
   "test_history": [
-    {
-      "timestamp": "2025-08-18T13:51:46.676025",
-      "level": "integration",
-      "exit_code": 2,
-      "status": "[FAILED] 3 failures",
-      "statistics": {
-        "total_tests_known": 6357,
-        "total_tests_run": 111,
-        "total_passed": 108,
-        "total_failed": 3,
-        "total_skipped": 0,
-        "pass_rate": 97.3
-      }
-    },
     {
       "timestamp": "2025-08-18T13:51:47.376802",
       "level": "unit",
@@ -560,15 +553,29 @@
         "total_skipped": 0,
         "pass_rate": 54.95
       }
+    },
+    {
+      "timestamp": "2025-08-18T14:57:43.249017",
+      "level": "agents",
+      "exit_code": 2,
+      "status": "[FAILED] 3 failures",
+      "statistics": {
+        "total_tests_known": 6357,
+        "total_tests_run": 118,
+        "total_passed": 112,
+        "total_failed": 3,
+        "total_skipped": 2,
+        "pass_rate": 94.92
+      }
     }
   ],
   "statistics": {
     "total_tests_known": 6357,
-    "total_tests_run": 313,
-    "total_passed": 172,
-    "total_failed": 141,
-    "total_skipped": 0,
-    "pass_rate": 54.95
+    "total_tests_run": 118,
+    "total_passed": 112,
+    "total_failed": 3,
+    "total_skipped": 2,
+    "pass_rate": 94.92
   },
   "version": "1.0",
   "tests": {},

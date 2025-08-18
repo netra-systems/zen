@@ -445,9 +445,20 @@ export class ChatSidebarTestSetup {
 
   // Helper to create test threads
   createThread(overrides: Partial<typeof sampleThreads[0]> = {}) {
+    const now = Math.floor(Date.now() / 1000); // Unix timestamp
     return {
       id: `thread-${Math.random().toString(36).substr(2, 9)}`,
       title: 'Test Thread',
+      created_at: now,
+      updated_at: now,
+      message_count: 1,
+      metadata: {
+        title: 'Test Thread',
+        last_message: 'Test message',
+        lastActivity: new Date().toISOString(),
+        messageCount: 1,
+        tags: ['test']
+      },
       lastMessage: 'Test message',
       lastActivity: new Date().toISOString(),
       messageCount: 1,
@@ -491,7 +502,7 @@ export const TestChatSidebar: React.FC = () => {
     showAllThreads, setShowAllThreads,
     filterType, setFilterType,
     currentPage, setCurrentPage
-  } = useChatSidebarState();
+  } = ChatSidebarHooksModule.useChatSidebarState();
   
   const threadsPerPage = 50;
 
@@ -517,7 +528,7 @@ export const TestChatSidebar: React.FC = () => {
     { sendMessage }
   );
   
-  const { threads, isLoadingThreads, loadError, loadThreads } = useThreadLoader(
+  const { threads, isLoadingThreads, loadError, loadThreads } = ChatSidebarHooksModule.useThreadLoader(
     showAllThreads,
     filterType,
     activeThreadId,
@@ -529,7 +540,7 @@ export const TestChatSidebar: React.FC = () => {
     loadThreads
   );
   
-  const { sortedThreads, paginatedThreads, totalPages } = useThreadFiltering(
+  const { sortedThreads, paginatedThreads, totalPages } = ChatSidebarHooksModule.useThreadFiltering(
     threads,
     searchQuery,
     threadsPerPage,

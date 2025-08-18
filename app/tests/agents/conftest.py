@@ -150,6 +150,25 @@ def service(agent):
 
 
 @pytest.fixture
+def sample_performance_data():
+    """Sample performance metrics data for testing"""
+    return [
+        {
+            'time_bucket': '2024-01-01T12:00:00',
+            'event_count': 100,
+            'latency_p50': 50.0,
+            'latency_p95': 95.0,
+            'latency_p99': 99.0,
+            'avg_throughput': 1000.0,
+            'peak_throughput': 2000.0,
+            'error_rate': 0.5,
+            'total_cost': 10.0,
+            'unique_workloads': 5
+        }
+    ]
+
+
+@pytest.fixture
 def setup_real_infrastructure():
     """Setup infrastructure for real LLM tests."""
     config = get_config()

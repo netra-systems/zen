@@ -204,36 +204,46 @@
     </prevention>
   </learning>
 
-  <learning id="config-placeholder-replacement">
+  <learning id="config-placeholder-replacement-paradox">
     <date>2025-08-18</date>
     <category>Environment Loading</category>
-    <title>Configuration Placeholders Not Being Replaced</title>
+    <title>Configuration Placeholder Replacement Paradox - Inheritance Issue</title>
     
     <problem>
-      <description>Configuration schemas had hardcoded placeholders not replaced by environment variables</description>
+      <description>PARADOX: Configuration had placeholder replacement code that never executed due to inheritance model</description>
       <symptoms>
         <symptom>ClickHouse connection failing with "clickhouse_host_url_placeholder"</symptom>
         <symptom>Redis connection failing with placeholder values</symptom>
         <symptom>Environment variables present in .env but not used</symptom>
-        <symptom>Config using placeholder defaults instead of env values</symptom>
+        <symptom>Previous fix attempts failed despite appearing correct</symptom>
       </symptoms>
+      <root_cause>
+        <item>AppConfig parent class defines clickhouse_native with placeholder defaults</item>
+        <item>DevelopmentConfig.__init__ checked "if 'clickhouse_native' not in data"</item>
+        <item>This condition was ALWAYS False because parent class already set the attribute</item>
+        <item>Environment variable loading code was NEVER executed</item>
+        <item>Additionally, UnifiedConfigManager creates config with no arguments</item>
+        <item>Service modes weren't being set in data dict, only enabled flags</item>
+      </root_cause>
       <impact>
         <item>Services unable to start due to invalid connection strings</item>
         <item>Development environment broken despite correct .env file</item>
-        <item>Confusion about why env vars aren't being used</item>
+        <item>Multiple fix attempts failed due to misunderstanding root cause</item>
+        <item>SSL errors when trying to use HTTPS with local HTTP-only services</item>
       </impact>
     </problem>
 
     <solution>
-      <description>Modified DevelopmentConfig to load configuration from environment variables</description>
+      <description>Fixed inheritance paradox by ALWAYS overriding configs and setting all mode fields</description>
       <implementation>
-        <step>Added _load_clickhouse_config method to read CLICKHOUSE_* env vars</step>
-        <step>Added _load_redis_config method to read REDIS_* env vars or parse REDIS_URL</step>
-        <step>Override default placeholder configs with env values in __init__</step>
-        <step>Ensure env vars take precedence over hardcoded defaults</step>
+        <step>Removed conditional checks - ALWAYS override clickhouse/redis configs</step>
+        <step>Handle empty data dict when called from UnifiedConfigManager</step>
+        <step>Set mode fields (clickhouse_mode, redis_mode) not just enabled flags</step>
+        <step>Ensure environment variables are loaded BEFORE parent init</step>
       </implementation>
       <code_changes>
-        <file>app/configuration/schemas.py - DevelopmentConfig class</file>
+        <file>app/configuration/schemas.py - DevelopmentConfig.__init__ - removed conditionals</file>
+        <file>app/configuration/schemas.py - _configure_service_flags - added mode field setting</file>
       </code_changes>
     </solution>
 
@@ -241,24 +251,26 @@
       <outcome>Configuration properly loads from environment variables</outcome>
       <benefits>
         <benefit>Services connect to correct hosts specified in .env</benefit>
+        <benefit>Local mode uses HTTP, shared mode uses HTTPS correctly</benefit>
         <benefit>Development environment works with local Docker services</benefit>
         <benefit>Clear precedence: env vars override default placeholders</benefit>
-        <benefit>Both URL format and individual env vars supported</benefit>
       </benefits>
     </result>
 
     <prevention>
-      <practice>Never use placeholder values as actual defaults in config schemas</practice>
-      <practice>Always load service configs from environment in __init__</practice>
-      <practice>Test configuration loading with actual env values</practice>
-      <practice>Support both URL format and individual env vars for flexibility</practice>
-      <practice>Ensure all configuration classes properly override defaults with env values</practice>
+      <practice>NEVER conditionally check for field existence when overriding parent defaults</practice>
+      <practice>ALWAYS override configuration values unconditionally in child classes</practice>
+      <practice>Set ALL related fields (modes AND flags) when configuring services</practice>
+      <practice>Test with actual UnifiedConfigManager flow, not just direct instantiation</practice>
+      <practice>Ensure .env is loaded into os.environ before config creation</practice>
+      <practice>Watch for inheritance paradoxes where parent defaults prevent child overrides</practice>
     </prevention>
 
     <related>
       <spec>SPEC/configuration.xml</spec>
       <file>app/configuration/schemas.py</file>
-      <file>app/core/configuration/database.py</file>
+      <file>app/core/configuration/base.py</file>
+      <file>app/db/clickhouse.py</file>
     </related>
   </learning>
 </learnings>

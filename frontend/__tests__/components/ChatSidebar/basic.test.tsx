@@ -6,7 +6,7 @@
 import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
-import { createTestSetup, renderWithProvider, sampleThreads } from './setup';
+import { createTestSetup, renderWithProvider, sampleThreads, TestChatSidebar } from './setup';
 
 describe('ChatSidebar - Basic Functionality', () => {
   const testSetup = createTestSetup();
@@ -35,7 +35,7 @@ describe('ChatSidebar - Basic Functionality', () => {
         threads: sampleThreads
       });
       
-      renderWithProvider(<ChatSidebar />);
+      renderWithProvider(<TestChatSidebar />);
       
       expect(screen.getByTestId('thread-list')).toBeInTheDocument();
       
@@ -72,7 +72,7 @@ describe('ChatSidebar - Basic Functionality', () => {
         threads: [threadWithMetadata]
       });
       
-      renderWithProvider(<ChatSidebar />);
+      renderWithProvider(<TestChatSidebar />);
       
       const threadItem = screen.getByTestId('thread-item-thread-1');
       
@@ -89,10 +89,15 @@ describe('ChatSidebar - Basic Functionality', () => {
     it('should show empty state when no threads exist', () => {
       testSetup.configureStore({ threads: [] });
       
-      renderWithProvider(<ChatSidebar />);
+      // Configure hooks for empty state
+      testSetup.configureChatSidebarHooks({
+        threads: []
+      });
+      
+      renderWithProvider(<TestChatSidebar />);
       
       expect(screen.getByText('No conversations yet')).toBeInTheDocument();
-      expect(screen.getByText('Start a new conversation to get started')).toBeInTheDocument();
+      expect(screen.getByText('Start a new chat to begin')).toBeInTheDocument();
     });
 
     it('should handle threads with missing metadata gracefully', () => {
@@ -106,7 +111,12 @@ describe('ChatSidebar - Basic Functionality', () => {
         threads: [incompleteThread]
       });
       
-      renderWithProvider(<ChatSidebar />);
+      // Configure hooks with incomplete thread
+      testSetup.configureChatSidebarHooks({
+        threads: [incompleteThread]
+      });
+      
+      renderWithProvider(<TestChatSidebar />);
       
       expect(screen.getByText('Incomplete Thread')).toBeInTheDocument();
       // Should render without crashing despite missing fields
@@ -125,7 +135,12 @@ describe('ChatSidebar - Basic Functionality', () => {
         threads: [threadWithoutActivity]
       });
       
-      renderWithProvider(<ChatSidebar />);
+      // Configure hooks with thread without activity
+      testSetup.configureChatSidebarHooks({
+        threads: [threadWithoutActivity]
+      });
+      
+      renderWithProvider(<TestChatSidebar />);
       
       const threadItem = screen.getByTestId('thread-item-no-activity-thread');
       expect(within(threadItem).getByText('1h ago')).toBeInTheDocument();
@@ -141,7 +156,12 @@ describe('ChatSidebar - Basic Functionality', () => {
         threads: [longTitleThread]
       });
       
-      renderWithProvider(<ChatSidebar />);
+      // Configure hooks with long title thread
+      testSetup.configureChatSidebarHooks({
+        threads: [longTitleThread]
+      });
+      
+      renderWithProvider(<TestChatSidebar />);
       
       const threadItem = screen.getByTestId('thread-item-long-title-thread');
       const titleElement = within(threadItem).getByText(/This is an extremely long thread title/);
@@ -159,7 +179,12 @@ describe('ChatSidebar - Basic Functionality', () => {
       
       testSetup.configureStore({ threads });
       
-      renderWithProvider(<ChatSidebar />);
+      // Configure hooks with message count threads
+      testSetup.configureChatSidebarHooks({
+        threads: threads
+      });
+      
+      renderWithProvider(<TestChatSidebar />);
       
       expect(screen.getByText('1 message')).toBeInTheDocument();
       expect(screen.getByText('0 messages')).toBeInTheDocument();
@@ -177,7 +202,12 @@ describe('ChatSidebar - Basic Functionality', () => {
         threads: [threadWithParticipants]
       });
       
-      renderWithProvider(<ChatSidebar />);
+      // Configure hooks with participants thread
+      testSetup.configureChatSidebarHooks({
+        threads: [threadWithParticipants]
+      });
+      
+      renderWithProvider(<TestChatSidebar />);
       
       const threadItem = screen.getByTestId('thread-item-participants-thread');
       
@@ -195,7 +225,7 @@ describe('ChatSidebar - Basic Functionality', () => {
         activeThreadId: 'thread-1'
       });
       
-      renderWithProvider(<ChatSidebar />);
+      renderWithProvider(<TestChatSidebar />);
       
       const activeThread = screen.getByTestId('thread-item-thread-1');
       expect(activeThread).toHaveAttribute('aria-current', 'page');
@@ -213,7 +243,7 @@ describe('ChatSidebar - Basic Functionality', () => {
         threads: [loadingThread]
       });
       
-      renderWithProvider(<ChatSidebar />);
+      renderWithProvider(<TestChatSidebar />);
       
       const threadItem = screen.getByTestId('thread-item-loading-thread');
       // Should show loading indicator (implementation specific)
@@ -232,7 +262,7 @@ describe('ChatSidebar - Basic Functionality', () => {
         threads: [errorThread]
       });
       
-      renderWithProvider(<ChatSidebar />);
+      renderWithProvider(<TestChatSidebar />);
       
       const threadItem = screen.getByTestId('thread-item-error-thread');
       // Should show error indicator or styling
@@ -251,7 +281,7 @@ describe('ChatSidebar - Basic Functionality', () => {
         threads: [unreadThread]
       });
       
-      renderWithProvider(<ChatSidebar />);
+      renderWithProvider(<TestChatSidebar />);
       
       const threadItem = screen.getByTestId('thread-item-unread-thread');
       // Should show unread indicator
@@ -267,7 +297,7 @@ describe('ChatSidebar - Basic Functionality', () => {
 
   describe('Component Structure', () => {
     it('should render main sidebar container', () => {
-      renderWithProvider(<ChatSidebar />);
+      renderWithProvider(<TestChatSidebar />);
       
       const sidebar = screen.getByRole('complementary') || 
                      screen.getByTestId('chat-sidebar') ||
@@ -277,7 +307,7 @@ describe('ChatSidebar - Basic Functionality', () => {
     });
 
     it('should render new thread button', () => {
-      renderWithProvider(<ChatSidebar />);
+      renderWithProvider(<TestChatSidebar />);
       
       const newThreadButton = screen.getByRole('button', { name: /new/i }) ||
                              screen.getByTestId('new-thread-button') ||
@@ -287,7 +317,7 @@ describe('ChatSidebar - Basic Functionality', () => {
     });
 
     it('should render search functionality', () => {
-      renderWithProvider(<ChatSidebar />);
+      renderWithProvider(<TestChatSidebar />);
       
       const searchInput = screen.queryByRole('textbox') ||
                          screen.queryByPlaceholderText(/search/i);
@@ -313,7 +343,7 @@ describe('ChatSidebar - Basic Functionality', () => {
       // Mock small screen
       Object.defineProperty(window, 'innerWidth', { value: 320, configurable: true });
       
-      renderWithProvider(<ChatSidebar />);
+      renderWithProvider(<TestChatSidebar />);
       
       // Should render appropriately on small screens
       expect(screen.getByRole('complementary') || screen.getByTestId('chat-sidebar')).toBeInTheDocument();
@@ -331,7 +361,7 @@ describe('ChatSidebar - Basic Functionality', () => {
         threads: sampleThreads
       });
       
-      renderWithProvider(<ChatSidebar />);
+      renderWithProvider(<TestChatSidebar />);
       
       // Should handle collapsed state appropriately
       const sidebar = screen.getByRole('complementary') || screen.getByTestId('chat-sidebar');
