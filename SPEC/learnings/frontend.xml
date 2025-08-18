@@ -350,5 +350,59 @@ const getValidTransitions = (state: ChatLoadingState): ChatLoadingState[] => {
                 <pattern>State machine design for async operations</pattern>
             </related_patterns>
         </learning>
+        </learning>
+        
+        <learning>
+            <id>module-default-export-initialization</id>
+            <date>2025-08-18</date>
+            <category>Module System</category>
+            <severity>critical</severity>
+            <title>Default Export Module Initialization Runtime Error</title>
+            
+            <problem>
+                <description>Default exports containing enum references cause runtime ReferenceError</description>
+                <error_message>Runtime ReferenceError: MessageType is not defined</error_message>
+                <location>types/registry.ts, types/shared/enums.ts</location>
+                <impact>Application fails to start with runtime error</impact>
+                <root_cause>Default export objects trying to reference imported enums before they are fully initialized in the module system</root_cause>
+            </problem>
+            
+            <solution>
+                <description>Remove default exports containing enum references, use named exports only</description>
+                <implementation>
+                    <step>Remove all default exports that reference imported enums</step>
+                    <step>Use only named exports for enums and utilities</step>
+                    <step>Ensure all consumers use named imports</step>
+                </implementation>
+                <code_example>
+// WRONG - Default export with enum references
+export default {
+  MessageType,  // ReferenceError at runtime
+  AgentStatus,
+  WebSocketMessageType
+};
+
+// CORRECT - Named exports only
+export {
+  MessageType,
+  AgentStatus,
+  WebSocketMessageType
+};
+                </code_example>
+            </solution>
+            
+            <prevention>
+                <rule>Never use default exports containing imported enum references</rule>
+                <rule>Prefer named exports for type modules</rule>
+                <rule>Test module initialization order in development environment</rule>
+            </prevention>
+            
+            <tags>
+                <tag>module-system</tag>
+                <tag>typescript</tag>
+                <tag>runtime-error</tag>
+                <tag>enums</tag>
+            </tags>
+        </learning>
     </learnings>
 </specification>

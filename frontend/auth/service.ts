@@ -28,7 +28,7 @@ class AuthService {
             callback: config.endpoints.callback,
             token: config.endpoints.token,
             user: config.endpoints.me,
-            dev_login: process.env.NODE_ENV === 'development' ? `${config.baseUrl}/auth/dev_login` : undefined
+            ...(process.env.NODE_ENV === 'development' && { dev_login: `${config.baseUrl}/auth/dev_login` })
           },
           authorized_javascript_origins: config.oauth.javascriptOrigins,
           authorized_redirect_uris: [config.oauth.redirectUri]
