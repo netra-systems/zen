@@ -1,61 +1,5 @@
 [
   {
-    "timestamp": "2025-08-17T18:01:09.350932",
-    "level": "real_e2e",
-    "exit_code": 1,
-    "stats": {
-      "total": 1,
-      "passed": 0,
-      "failed": 0,
-      "errors": 1,
-      "skipped": 0,
-      "duration": 12.573271036148071,
-      "pass_rate": 0.0
-    }
-  },
-  {
-    "timestamp": "2025-08-17T18:01:09.374016",
-    "level": "real_e2e",
-    "exit_code": 1,
-    "stats": {
-      "total": 1,
-      "passed": 0,
-      "failed": 0,
-      "errors": 1,
-      "skipped": 0,
-      "duration": 12.573271036148071,
-      "pass_rate": 0.0
-    }
-  },
-  {
-    "timestamp": "2025-08-17T18:01:57.459119",
-    "level": "comprehensive",
-    "exit_code": 2,
-    "stats": {
-      "total": 1,
-      "passed": 0,
-      "failed": 0,
-      "errors": 1,
-      "skipped": 0,
-      "duration": 36.265774726867676,
-      "pass_rate": 0.0
-    }
-  },
-  {
-    "timestamp": "2025-08-17T18:01:57.486772",
-    "level": "comprehensive",
-    "exit_code": 2,
-    "stats": {
-      "total": 1,
-      "passed": 0,
-      "failed": 0,
-      "errors": 1,
-      "skipped": 0,
-      "duration": 36.265774726867676,
-      "pass_rate": 0.0
-    }
-  },
-  {
     "timestamp": "2025-08-17T18:03:44.723915",
     "level": "unit",
     "exit_code": 2,
@@ -697,6 +641,62 @@
       "skipped": 0,
       "duration": 6.778837203979492,
       "pass_rate": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:51:43.112846",
+    "level": "smoke",
+    "exit_code": 4,
+    "stats": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 4.619953155517578,
+      "pass_rate": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:51:43.145637",
+    "level": "smoke",
+    "exit_code": 4,
+    "stats": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 4.619953155517578,
+      "pass_rate": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:52:55.882441",
+    "level": "smoke",
+    "exit_code": 0,
+    "stats": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 7.785488128662109,
+      "pass_rate": 100.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:52:55.914560",
+    "level": "smoke",
+    "exit_code": 0,
+    "stats": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 7.785488128662109,
+      "pass_rate": 100.0
     }
   }
 ]

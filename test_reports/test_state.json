@@ -20,7 +20,7 @@
       },
       "smoke": {
         "total": 7,
-        "timestamp": "2025-08-17T18:49:31.517194"
+        "timestamp": "2025-08-17T18:52:55.912843"
       },
       "integration": {
         "total": 51,
@@ -29,5 +29,5 @@
     }
   },
   "category_status": {},
-  "last_update": "2025-08-17T18:51:08.552940"
+  "last_update": "2025-08-17T18:52:55.912843"
 }

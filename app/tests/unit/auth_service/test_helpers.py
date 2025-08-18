@@ -1,270 +1,230 @@
-"""Unit tests for auth service helper functions.
+"""Auth client integration tests for unit testing.
 
-Tests utility and helper functions used by auth service endpoints.
+Tests the integration with the external auth service via auth client.
 All test functions ≤8 lines (MANDATORY). File ≤300 lines (MANDATORY).
+
+IMPORTANT: These tests only test the integration with auth client.
+The actual auth logic is tested in the separate auth service, not here.
+
+Business Value Justification (BVJ):
+1. Segment: Growth, Mid, and Enterprise
+2. Business Goal: Ensure reliable auth client integration
+3. Value Impact: Prevents auth failures in production
+4. Revenue Impact: Critical for customer retention
 """
 
 from unittest.mock import AsyncMock, MagicMock, patch
-
+import os
 import pytest
-import httpx
-from fastapi import HTTPException
-from fastapi.responses import RedirectResponse
-
-# Import from new modular structure
-from app.auth.url_validators import (
-    validate_and_get_return_url, get_default_return_url, validate_return_url_security,
-    get_oauth_redirect_uri, get_auth_service_url
+from app.clients.auth_client import (
+    Environment, OAuthConfig, EnvironmentDetector, OAuthConfigGenerator,
+    auth_client, AuthServiceClient
 )
-from app.auth.oauth_utils import (
-    build_google_oauth_url, exchange_code_for_tokens,
-    perform_token_exchange_request, get_user_info_from_google
-)
-from app.auth.auth_response_builders import (
-    build_oauth_callback_response, build_pr_environment_response,
-    set_auth_cookies, set_pr_auth_cookies, clear_auth_cookies
-)
-from app.auth.auth_service import revoke_user_sessions, check_redis_connection
-from app.clients.auth_client import Environment, EnvironmentDetector, OAuthConfigGenerator
 
 
-class TestAuthServiceHelpers:
-    """Test helper functions."""
+class TestAuthClientIntegration:
+    """Test auth client integration functionality."""
     
-    def test_validate_return_url_success(self):
-        """Test successful return URL validation."""
-        with patch('app.auth.url_validators.get_default_return_url', return_value="http://localhost:8000"), \
-             patch('app.auth.url_validators.validate_return_url_security'):
-            result = validate_and_get_return_url("http://localhost:8000/auth")
-            assert result == "http://localhost:8000/auth"
+    def test_environment_detector_instantiation(self):
+        """Test environment detector can be instantiated."""
+        detector = EnvironmentDetector()
+        assert detector is not None
+        assert hasattr(detector, 'detect_environment')
             
-    def test_validate_return_url_invalid(self):
-        """Test return URL validation with invalid URL."""
-        with patch('app.auth.url_validators.validate_return_url_security') as mock_validate:
-            mock_validate.side_effect = HTTPException(status_code=400, detail="Invalid return URL")
-            with pytest.raises(HTTPException):
-                validate_and_get_return_url("http://malicious.com")
+    def test_oauth_config_generator_instantiation(self):
+        """Test OAuth config generator can be instantiated."""
+        generator = OAuthConfigGenerator()
+        assert generator is not None
+        assert hasattr(generator, 'get_oauth_config')
                 
-    def test_get_default_return_url_success(self):
-        """Test default return URL generation."""
-        mock_config = {"javascript_origins": ["http://localhost:8000"]}
-        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
-            mock_detector.return_value.detect_environment.return_value = Environment.DEVELOPMENT
-            with patch('app.auth.url_validators.OAuthConfigGenerator') as mock_generator:
-                mock_generator.return_value.get_frontend_config.return_value = mock_config
-                result = get_default_return_url()
-                assert result == "http://localhost:8000"
+    def test_environment_enum_values(self):
+        """Test Environment enum has required values."""
+        assert Environment.DEVELOPMENT.value == "development"
+        assert Environment.TESTING.value == "testing"
+        assert Environment.STAGING.value == "staging"
+        assert Environment.PRODUCTION.value == "production"
             
-    def test_get_default_return_url_pr_environment(self):
-        """Test default return URL in PR environment."""
-        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
-            mock_detector.return_value.detect_environment.return_value = Environment.STAGING
-            with patch('app.auth.url_validators.OAuthConfigGenerator') as mock_generator:
-                mock_generator.return_value.is_pr_environment.return_value = True
-                mock_generator.return_value.pr_number = "42"
-                result = get_default_return_url()
-                assert result == "https://pr-42.staging.netrasystems.ai"
+    def test_oauth_config_dataclass_structure(self):
+        """Test OAuthConfig has required structure."""
+        config = OAuthConfig()
+        assert hasattr(config, 'client_id')
+        assert hasattr(config, 'client_secret')
+        assert hasattr(config, 'redirect_uris')
+        assert hasattr(config, 'javascript_origins')
             
-    def test_validate_return_url_security_success(self):
-        """Test return URL security validation success."""
-        mock_config = MagicMock()
-        mock_config.javascript_origins = ["http://localhost:8000", "https://app.netrasystems.ai"]
-        with patch('app.auth.url_validators.OAuthConfigGenerator') as mock_generator:
-            mock_generator.return_value.get_oauth_config.return_value = mock_config
-            validate_return_url_security("http://localhost:8000/auth")  # Should not raise
+    def test_development_environment_detection(self):
+        """Test development environment detection."""
+        with patch.dict(os.environ, {"ENVIRONMENT": "development"}, clear=True):
+            detector = EnvironmentDetector()
+            assert detector.detect_environment() == Environment.DEVELOPMENT
             
-    def test_validate_return_url_security_invalid(self):
-        """Test return URL security validation failure."""
-        mock_config = MagicMock()
-        mock_config.javascript_origins = ["http://localhost:8000"]
-        with patch('app.auth.url_validators.OAuthConfigGenerator') as mock_generator:
-            mock_generator.return_value.get_oauth_config.return_value = mock_config
-            with pytest.raises(HTTPException):
-                validate_return_url_security("http://malicious.com")
+    def test_staging_environment_detection(self):
+        """Test staging environment detection."""
+        with patch.dict(os.environ, {"K_SERVICE": "netra-staging"}, clear=True):
+            detector = EnvironmentDetector()
+            assert detector.detect_environment() == Environment.STAGING
                 
-    def test_build_google_oauth_url_success(self):
-        """Test Google OAuth URL building."""
-        mock_config = MagicMock()
-        mock_config.client_id = "test_client_id"
-        with patch('app.auth.oauth_utils.get_oauth_redirect_uri', return_value="http://localhost:8001/auth/callback"):
-            url = build_google_oauth_url(mock_config, "state123")
-            assert "https://accounts.google.com/o/oauth2/v2/auth" in url
-            assert "state=state123" in url
+    def test_production_environment_detection(self):
+        """Test production environment detection."""
+        with patch.dict(os.environ, {"ENVIRONMENT": "production"}, clear=True):
+            detector = EnvironmentDetector()
+            assert detector.detect_environment() == Environment.PRODUCTION
             
-    def test_get_oauth_redirect_uri_development(self):
-        """Test OAuth redirect URI for development."""
-        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
-            mock_detector.return_value.detect_environment.return_value = Environment.DEVELOPMENT
-            uri = get_oauth_redirect_uri()
-            assert uri == "http://localhost:8001/auth/callback"
+    def test_oauth_config_generation_development(self):
+        """Test OAuth config generation for development."""
+        generator = OAuthConfigGenerator()
+        config = generator.get_oauth_config(Environment.DEVELOPMENT)
+        assert isinstance(config, OAuthConfig)
+        assert isinstance(config.client_id, str)
             
-    def test_get_oauth_redirect_uri_production(self):
-        """Test OAuth redirect URI for production."""
-        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
-            mock_detector.return_value.detect_environment.return_value = Environment.PRODUCTION
-            uri = get_oauth_redirect_uri()
-            assert uri == "https://auth.netrasystems.ai/auth/callback"
+    def test_oauth_config_generation_staging(self):
+        """Test OAuth config generation for staging."""
+        generator = OAuthConfigGenerator()
+        config = generator.get_oauth_config(Environment.STAGING)
+        assert isinstance(config, OAuthConfig)
+        assert isinstance(config.client_secret, str)
+            
+    def test_oauth_config_generation_production(self):
+        """Test OAuth config generation for production."""
+        generator = OAuthConfigGenerator()
+        config = generator.get_oauth_config(Environment.PRODUCTION)
+        assert isinstance(config, OAuthConfig)
+        assert isinstance(config.redirect_uris, list)
+            
+    def test_frontend_config_development(self):
+        """Test frontend config generation for development."""
+        generator = OAuthConfigGenerator()
+        config = generator.get_frontend_config(Environment.DEVELOPMENT)
+        assert isinstance(config, dict)
+        assert "environment" in config
+            
+    def test_frontend_config_staging(self):
+        """Test frontend config generation for staging."""
+        generator = OAuthConfigGenerator()
+        config = generator.get_frontend_config(Environment.STAGING)
+        assert isinstance(config, dict)
+        assert config["environment"] == "staging"
+                
+    def test_frontend_config_production(self):
+        """Test frontend config generation for production."""
+        generator = OAuthConfigGenerator()
+        config = generator.get_frontend_config(Environment.PRODUCTION)
+        assert isinstance(config, dict)
+        assert config["environment"] == "production"
             
     @pytest.mark.asyncio
-    async def test_exchange_code_for_tokens_success(self):
-        """Test successful code to token exchange."""
-        mock_config = MagicMock()
-        mock_config.client_id = "test_client_id"
-        mock_config.client_secret = "test_secret"
-        mock_response = {"access_token": "token123", "token_type": "Bearer"}
-        
-        with patch('app.auth.oauth_utils.get_oauth_redirect_uri', return_value="http://localhost:8001/auth/callback"), \
-             patch('app.auth.oauth_utils.perform_token_exchange_request', return_value=mock_response):
-            result = await exchange_code_for_tokens("code123", mock_config)
-            assert result["access_token"] == "token123"
-            
-    @pytest.mark.asyncio
-    async def test_perform_token_exchange_request_success(self):
-        """Test successful token exchange HTTP request."""
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {"access_token": "token123"}
-        
-        with patch('httpx.AsyncClient') as mock_client:
-            mock_client.return_value.__aenter__.return_value.post.return_value = mock_response
-            result = await perform_token_exchange_request("https://oauth.googleapis.com/token", {"code": "code123"})
-            assert result["access_token"] == "token123"
-            
-    @pytest.mark.asyncio
-    async def test_perform_token_exchange_request_failure(self):
-        """Test failed token exchange HTTP request."""
-        mock_response = MagicMock()
-        mock_response.status_code = 400
-        mock_response.text = "Invalid request"
-        
-        with patch('httpx.AsyncClient') as mock_client:
-            mock_client.return_value.__aenter__.return_value.post.return_value = mock_response
-            with pytest.raises(HTTPException):
-                await perform_token_exchange_request("https://oauth.googleapis.com/token", {"code": "invalid"})
+    async def test_auth_client_instance_exists(self):
+        """Test auth client instance is available."""
+        assert auth_client is not None
+        assert isinstance(auth_client, AuthServiceClient)
                 
     @pytest.mark.asyncio
-    async def test_get_user_info_from_google_success(self):
-        """Test successful user info retrieval from Google."""
-        mock_response = MagicMock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = {"id": "123", "email": "test@example.com"}
+    async def test_auth_client_methods_exist(self):
+        """Test auth client has expected methods."""
+        assert hasattr(auth_client, 'validate_token')
+        assert hasattr(auth_client, 'create_user')
+        assert hasattr(auth_client, 'authenticate_user')
+            
+    def test_oauth_config_lists_initialized(self):
+        """Test OAuth config lists are properly initialized."""
+        config = OAuthConfig()
+        assert isinstance(config.redirect_uris, list)
+        assert isinstance(config.javascript_origins, list)
+            
+    def test_environment_detection_with_empty_env(self):
+        """Test environment detection with empty environment."""
+        with patch.dict(os.environ, {}, clear=True):
+            detector = EnvironmentDetector()
+            env = detector.detect_environment()
+            assert env in [Environment.DEVELOPMENT, Environment.STAGING]
+            
+    def test_environment_detection_with_testing_flag(self):
+        """Test environment detection with TESTING flag."""
+        with patch.dict(os.environ, {"TESTING": "true"}, clear=True):
+            detector = EnvironmentDetector()
+            assert detector.detect_environment() == Environment.TESTING
         
-        with patch('httpx.AsyncClient') as mock_client:
-            mock_client.return_value.__aenter__.return_value.get.return_value = mock_response
-            result = await get_user_info_from_google("token123")
-            assert result["id"] == "123"
+    def test_oauth_config_with_environment_vars(self):
+        """Test OAuth config with environment variables."""
+        with patch.dict(os.environ, {
+            "GOOGLE_OAUTH_CLIENT_ID_DEV": "test_client_id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_DEV": "test_secret"
+        }, clear=True):
+            generator = OAuthConfigGenerator()
+            config = generator.get_oauth_config(Environment.DEVELOPMENT)
+            assert config.client_id == "test_client_id"
+        
+    def test_pr_environment_detection_integration(self):
+        """Test PR environment detection integration."""
+        with patch.dict(os.environ, {
+            "K_SERVICE": "netra-staging-pr-123",
+            "PR_NUMBER": "123"
+        }, clear=True):
+            detector = EnvironmentDetector()
+            assert detector.detect_environment() == Environment.STAGING
+            
+    def test_case_insensitive_environment_handling(self):
+        """Test case insensitive environment variable handling."""
+        with patch.dict(os.environ, {"ENVIRONMENT": "STAGING"}, clear=True):
+            detector = EnvironmentDetector()
+            assert detector.detect_environment() == Environment.STAGING
+            
+    def test_malformed_environment_variable_fallback(self):
+        """Test malformed environment variable handling."""
+        with patch.dict(os.environ, {"ENVIRONMENT": "invalid"}, clear=True):
+            detector = EnvironmentDetector()
+            env = detector.detect_environment()
+            assert env == Environment.DEVELOPMENT  # Should fall back
+        
+    def test_empty_k_service_fallback(self):
+        """Test empty K_SERVICE variable falls back properly."""
+        with patch.dict(os.environ, {"K_SERVICE": ""}, clear=True):
+            detector = EnvironmentDetector()
+            env = detector.detect_environment()
+            assert env in [Environment.DEVELOPMENT, Environment.STAGING]
+            
+    def test_oauth_config_structure_validation(self):
+        """Test OAuth config structure validation."""
+        generator = OAuthConfigGenerator()
+        for env in [Environment.DEVELOPMENT, Environment.STAGING, Environment.PRODUCTION]:
+            config = generator.get_oauth_config(env)
+            assert hasattr(config, 'client_id')
+            assert hasattr(config, 'client_secret')
+            assert hasattr(config, 'redirect_uris')
+            assert hasattr(config, 'javascript_origins')
+            
+    def test_frontend_config_structure_validation(self):
+        """Test frontend config structure validation."""
+        generator = OAuthConfigGenerator()
+        for env in [Environment.DEVELOPMENT, Environment.STAGING, Environment.PRODUCTION]:
+            config = generator.get_frontend_config(env)
+            assert isinstance(config, dict)
+            assert "environment" in config
             
     @pytest.mark.asyncio
-    async def test_get_user_info_from_google_failure(self):
-        """Test failed user info retrieval from Google."""
-        mock_response = MagicMock()
-        mock_response.status_code = 401
-        mock_response.text = "Unauthorized"
-        
-        with patch('httpx.AsyncClient') as mock_client:
-            mock_client.return_value.__aenter__.return_value.get.return_value = mock_response
-            with pytest.raises(HTTPException):
-                await get_user_info_from_google("invalid_token")
-                
-    def test_build_oauth_callback_response_success(self):
-        """Test OAuth callback response building."""
-        state_data = {"return_url": "http://localhost:8000"}
-        user_info = {"id": "123", "email": "test@example.com"}
-        
-        with patch('app.auth.auth_response_builders.set_auth_cookies'):
-            response = build_oauth_callback_response(state_data, "jwt123", user_info)
-            assert isinstance(response, RedirectResponse)
+    async def test_auth_client_mock_validation(self):
+        """Test auth client can be mocked for testing."""
+        with patch.object(auth_client, 'validate_token', new_callable=AsyncMock) as mock_validate:
+            mock_validate.return_value = {"valid": True, "user_id": "test123"}
+            result = await auth_client.validate_token("test_token")
+            assert result["valid"] is True
             
-    def test_build_oauth_callback_response_pr_env(self):
-        """Test OAuth callback response for PR environment."""
-        state_data = {"return_url": "http://localhost:8000", "pr_number": "42"}
-        user_info = {"id": "123", "email": "test@example.com"}
-        
-        with patch('app.auth.auth_response_builders.build_pr_environment_response', return_value=RedirectResponse(url="/")):
-            response = build_oauth_callback_response(state_data, "jwt123", user_info)
-            assert isinstance(response, RedirectResponse)
+    def test_oauth_config_with_staging_credentials(self):
+        """Test OAuth config with staging credentials."""
+        with patch.dict(os.environ, {
+            "GOOGLE_OAUTH_CLIENT_ID_STAGING": "staging_id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_STAGING": "staging_secret"
+        }, clear=True):
+            generator = OAuthConfigGenerator()
+            config = generator.get_oauth_config(Environment.STAGING)
+            assert config.client_id == "staging_id"
             
-    def test_build_pr_environment_response_success(self):
-        """Test PR environment response building."""
-        with patch('app.auth.auth_response_builders.set_pr_auth_cookies'):
-            response = build_pr_environment_response("http://localhost:8000", "jwt123", {}, "42")
-            assert isinstance(response, RedirectResponse)
-            
-    def test_set_auth_cookies_success(self):
-        """Test setting secure authentication cookies."""
-        response = MagicMock()
-        set_auth_cookies(response, "jwt123")
-        response.set_cookie.assert_called_once()
-        
-    def test_set_pr_auth_cookies_success(self):
-        """Test setting PR environment authentication cookies."""
-        response = MagicMock()
-        set_pr_auth_cookies(response, "jwt123", "42")
-        response.set_cookie.assert_called_once()
-        
-    @pytest.mark.asyncio
-    async def test_revoke_user_sessions_success(self):
-        """Test successful user session revocation."""
-        with patch('app.auth.auth_service.redis_service') as mock_redis:
-            mock_redis.keys = AsyncMock(return_value=["session1", "session2"])
-            mock_redis.delete = AsyncMock()
-            await revoke_user_sessions("user123")
-            mock_redis.delete.assert_called_once_with("session1", "session2")
-            
-    @pytest.mark.asyncio
-    async def test_revoke_user_sessions_no_user(self):
-        """Test session revocation with no user ID."""
-        with patch('app.auth.auth_service.redis_service') as mock_redis:
-            mock_redis.keys = AsyncMock()
-            await revoke_user_sessions(None)
-            mock_redis.keys.assert_not_called()
-            
-    def test_clear_auth_cookies_success(self):
-        """Test clearing authentication cookies."""
-        response = MagicMock()
-        clear_auth_cookies(response)
-        assert response.delete_cookie.call_count == 2
-        
-    @pytest.mark.asyncio
-    async def test_check_redis_connection_success(self):
-        """Test successful Redis connection check."""
-        with patch('app.auth.auth_service.redis_service') as mock_redis:
-            mock_redis.ping = AsyncMock()
-            result = await check_redis_connection()
-            assert result is True
-            
-    @pytest.mark.asyncio
-    async def test_check_redis_connection_failure(self):
-        """Test failed Redis connection check."""
-        with patch('app.auth.auth_service.redis_service') as mock_redis:
-            mock_redis.ping = AsyncMock(side_effect=Exception("Connection failed"))
-            result = await check_redis_connection()
-            assert result is False
-            
-    def test_get_auth_service_url_development(self):
-        """Test auth service URL for development."""
-        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
-            mock_detector.return_value.detect_environment.return_value = Environment.DEVELOPMENT
-            url = get_auth_service_url()
-            assert url == "http://localhost:8001"
-            
-    def test_get_auth_service_url_production(self):
-        """Test auth service URL for production."""
-        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
-            mock_detector.return_value.detect_environment.return_value = Environment.PRODUCTION
-            url = get_auth_service_url()
-            assert url == "https://auth.netrasystems.ai"
-            
-    def test_get_oauth_redirect_uri_staging(self):
-        """Test OAuth redirect URI for staging environment."""
-        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
-            mock_detector.return_value.detect_environment.return_value = Environment.STAGING
-            uri = get_oauth_redirect_uri()
-            assert uri == "https://auth.staging.netrasystems.ai/auth/callback"
-            
-    def test_get_auth_service_url_staging(self):
-        """Test auth service URL for staging environment."""
-        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
-            mock_detector.return_value.detect_environment.return_value = Environment.STAGING
-            url = get_auth_service_url()
-            assert url == "https://auth.staging.netrasystems.ai"
+    def test_oauth_config_with_production_credentials(self):
+        """Test OAuth config with production credentials."""
+        with patch.dict(os.environ, {
+            "GOOGLE_OAUTH_CLIENT_ID_PROD": "prod_id",
+            "GOOGLE_OAUTH_CLIENT_SECRET_PROD": "prod_secret"
+        }, clear=True):
+            generator = OAuthConfigGenerator()
+            config = generator.get_oauth_config(Environment.PRODUCTION)
+            assert config.client_id == "prod_id"

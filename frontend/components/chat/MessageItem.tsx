@@ -1,6 +1,6 @@
 
 import React, { useMemo, useCallback } from 'react';
-import { Message as MessageType } from '@/types/chat';
+import { Message as MessageType } from '@/types/registry';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';

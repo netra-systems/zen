@@ -15,7 +15,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import jwt
-from passlib.context import CryptContext
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError, InvalidHashError
 
 # Configure logging
 logging.basicConfig(
@@ -30,7 +31,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+ph = PasswordHasher()
 
 # Security
 security = HTTPBearer()
@@ -60,7 +61,7 @@ USERS_DB = {
     "admin@netra.ai": {
         "id": "user_001",
         "email": "admin@netra.ai",
-        "hashed_password": pwd_context.hash("admin123"),
+        "hashed_password": ph.hash("admin123"),
         "role": "admin"
     }
 }
@@ -112,7 +113,11 @@ if os.getenv("ENVIRONMENT") in ["staging", "production"]:
 # Helper functions
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        ph.verify(hashed_password, plain_password)
+        return True
+    except (VerifyMismatchError, InvalidHashError):
+        return False
 
 def create_access_token(data: dict) -> str:
     """Create a JWT access token"""

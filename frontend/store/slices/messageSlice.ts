@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand';
-import type { ChatMessage } from '@/types/chat';
+import type { ChatMessage } from '@/types/registry';
 import type { MessageState } from './types';
 
 export const createMessageSlice: StateCreator<
