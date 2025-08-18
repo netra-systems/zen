@@ -191,7 +191,7 @@ def validate_token_jwt(token: str) -> Optional[Dict[str, Any]]:
         return payload
     except jwt.ExpiredSignatureError:
         return _handle_expired_token()
-    except jwt.JWTError as e:
+    except (jwt.PyJWTError, jwt.DecodeError, jwt.InvalidTokenError) as e:
         return _handle_jwt_error(e)
 
 def _handle_expired_token() -> None:

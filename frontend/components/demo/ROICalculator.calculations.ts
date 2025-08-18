@@ -13,7 +13,7 @@ import {
   INDUSTRY_MULTIPLIERS 
 } from './ROICalculator.types'
 
-const mapApiResponseToSavings = (data: ROIApiResponse, metrics: Metrics): Savings => {
+export const mapApiResponseToSavings = (data: ROIApiResponse, metrics: Metrics): Savings => {
   const annualSavingsDiff = data.current_annual_cost - data.optimized_annual_cost
   const monthlySavings = data.annual_savings / 12
   const infrastructureCost = (annualSavingsDiff / 12) * 0.7
@@ -32,31 +32,31 @@ const mapApiResponseToSavings = (data: ROIApiResponse, metrics: Metrics): Saving
   }
 }
 
-const calculateInfrastructureSavings = (metrics: Metrics, multiplier: number): number => {
+export const calculateInfrastructureSavings = (metrics: Metrics, multiplier: number): number => {
   const infrastructureSavingsPercent = 0.45 + (Math.random() * 0.15)
   return metrics.currentMonthlySpend * infrastructureSavingsPercent * multiplier
 }
 
-const calculateOperationalSavings = (metrics: Metrics): number => {
+export const calculateOperationalSavings = (metrics: Metrics): number => {
   const operationalSavingsPercent = 0.25
   return (metrics.teamSize * 10000) * operationalSavingsPercent
 }
 
-const calculatePerformanceValue = (metrics: Metrics): number => {
+export const calculatePerformanceValue = (metrics: Metrics): number => {
   const latencyImprovement = 0.6 // 60% latency reduction
   return (metrics.requestsPerMonth / 1000000) * 500 * latencyImprovement
 }
 
-const calculatePaybackPeriod = (implementationCost: number, monthlySavings: number): number => {
+export const calculatePaybackPeriod = (implementationCost: number, monthlySavings: number): number => {
   return implementationCost / monthlySavings
 }
 
-const calculateThreeYearROI = (annualSavings: number, implementationCost: number): number => {
+export const calculateThreeYearROI = (annualSavings: number, implementationCost: number): number => {
   const threeYearSavings = annualSavings * 3
   return ((threeYearSavings - implementationCost) / implementationCost) * 100
 }
 
-const buildFallbackSavings = (metrics: Metrics, industry: string): Savings => {
+export const buildFallbackSavings = (metrics: Metrics, industry: string): Savings => {
   const multiplier = INDUSTRY_MULTIPLIERS[industry] || INDUSTRY_MULTIPLIERS.default
   const infrastructureCost = calculateInfrastructureSavings(metrics, multiplier)
   const operationalCost = calculateOperationalSavings(metrics)
@@ -76,7 +76,7 @@ const buildFallbackSavings = (metrics: Metrics, industry: string): Savings => {
   }
 }
 
-const buildCalculationInput = (metrics: Metrics, industry: string): ROICalculationInput => {
+export const buildCalculationInput = (metrics: Metrics, industry: string): ROICalculationInput => {
   return {
     current_spend: metrics.currentMonthlySpend,
     request_volume: metrics.requestsPerMonth,

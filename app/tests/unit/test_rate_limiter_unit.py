@@ -11,6 +11,7 @@ Tests the ToolPermissionRateLimiter that enforces free tier rate limits,
 usage tracking, and upgrade prompts. Critical for conversion funnel and cost control.
 """
 
+import asyncio
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, UTC
