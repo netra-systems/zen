@@ -21,13 +21,15 @@ module.exports = {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
       tsconfig: {
         jsx: 'react-jsx',
+        esModuleInterop: true,
+        allowSyntheticDefaultImports: true,
       },
     }],
-    '^.+\\.(js|jsx)$': 'babel-jest',
+    '^.+\\.(js|jsx|mjs)$': ['babel-jest', {
+      presets: ['next/babel'],
+    }],
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(react-markdown|remark-gfm|remark-math|rehype-katex|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|hast-util-whitespace|space-separated-tokens|comma-separated-tokens|vfile|unist-|unified|bail|is-plain-obj|trough|micromark|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|hast-util-parse-selector|mdast-util-)/)',
-  ],
+  transformIgnorePatterns: [],
   testMatch: [
     '<rootDir>/__tests__/**/*.test.[jt]s?(x)',
     '<rootDir>/__tests__/**/*.spec.[jt]s?(x)',

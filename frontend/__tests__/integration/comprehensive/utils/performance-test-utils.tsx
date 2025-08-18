@@ -195,7 +195,7 @@ export const resolveConflictContent = (
 };
 
 // History management utilities
-export const trimHistory = <T>(
+export const trimHistory = <T,>(
   history: T[],
   maxSize: number
 ): T[] => {
@@ -204,7 +204,7 @@ export const trimHistory = <T>(
     : history;
 };
 
-export const addToHistory = <T>(
+export const addToHistory = <T,>(
   history: T[],
   currentIndex: number,
   newItem: T,

@@ -31,6 +31,19 @@ async def get_cache_stats(llm_config_name: Optional[str] = None) -> Dict[str, An
         "stats": stats
     }
 
+@router.post("/stats")
+async def get_aggregated_cache_stats(stats_request: Dict[str, Any]) -> Dict[str, Any]:
+    """Get aggregated cache statistics over time periods"""
+    try:
+        period = stats_request.get("period", "daily")
+        days = stats_request.get("days", 7)
+        metrics = stats_request.get("metrics", None)
+        
+        return await llm_cache_service.get_aggregated_stats(period, days, metrics)
+    except Exception as e:
+        logger.error(f"Error getting aggregated stats: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.delete("/clear")
 async def clear_cache(llm_config_name: Optional[str] = None) -> Dict[str, Any]:
     """
@@ -166,5 +179,33 @@ async def warm_up_cache(config: Dict[str, Any]) -> Dict[str, Any]:
             "success": False,
             "error": str(e),
             "message": "Cache warm-up failed"
+        }
+
+
+async def backup_cache() -> Dict[str, Any]:
+    """Create a backup of the current cache state"""
+    try:
+        backup_result = await llm_cache_service.create_backup()
+        logger.info(f"Cache backup created: {backup_result.get('backup_id')}")
+        return backup_result
+    except Exception as e:
+        logger.error(f"Error creating cache backup: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+
+async def restore_cache(backup_id: str) -> Dict[str, Any]:
+    """Restore cache from a backup"""
+    try:
+        restore_result = await llm_cache_service.restore_from_backup(backup_id)
+        logger.info(f"Cache restored from backup: {backup_id}")
+        return restore_result
+    except Exception as e:
+        logger.error(f"Error restoring cache from backup {backup_id}: {e}")
+        return {
+            "success": False,
+            "error": str(e)
         }
 

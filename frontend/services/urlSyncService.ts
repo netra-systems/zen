@@ -10,7 +10,6 @@
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useUnifiedChatStore } from '@/store/unified-chat';
-import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import { useEffect, useCallback, useRef, useState } from 'react';
 import { 
   urlSyncTypes, 
@@ -19,9 +18,9 @@ import {
 } from './url-sync';
 
 /**
- * URL synchronization hook
+ * URL synchronization hook - handles ONLY URL state management
  */
-export const useUrlSync = (config: Partial<urlSyncTypes.UrlSyncConfig> = {}): urlSyncTypes.UseUrlSyncResult => {
+export const useURLSync = (config: Partial<urlSyncTypes.UrlSyncConfig> = {}): urlSyncTypes.UseUrlSyncResult => {
   const fullConfig = { ...urlSyncTypes.DEFAULT_CONFIG, ...config };
   const [state, setState] = useState<urlSyncTypes.UrlSyncState>(urlSyncUtils.createInitialSyncState());
   
@@ -30,29 +29,19 @@ export const useUrlSync = (config: Partial<urlSyncTypes.UrlSyncConfig> = {}): ur
   const pathname = usePathname();
   
   const activeThreadId = useUnifiedChatStore(state => state.activeThreadId);
-  const { switchToThread } = useThreadSwitching();
   
   const lastSyncedRef = useRef<string | null>(null);
   const isUpdatingRef = useRef(false);
-
-  // Initialize URL sync on mount
-  useEffect(() => {
-    urlSyncHandlers.initializeUrlSync(fullConfig, searchParams, activeThreadId, setState, switchToThread);
-  }, []);
 
   // Listen to store changes and update URL
   useEffect(() => {
     urlSyncHandlers.handleStoreToUrlSync(activeThreadId, fullConfig, pathname, router, lastSyncedRef, isUpdatingRef);
   }, [activeThreadId, pathname, router]);
 
-  // Listen to URL changes and update store
-  useEffect(() => {
-    urlSyncHandlers.handleUrlToStoreSync(searchParams, fullConfig, switchToThread, lastSyncedRef, isUpdatingRef, setState);
-  }, [searchParams, switchToThread]);
-
-  const syncUrlToStore = useCallback(async (url: string): Promise<boolean> => {
+  const syncUrlToStore = useCallback(async (url: string, switchToThread?: urlSyncTypes.ThreadSwitchFunction): Promise<boolean> => {
+    if (!switchToThread) return false;
     return await urlSyncHandlers.performUrlToStoreSync(url, fullConfig, switchToThread, setState);
-  }, [switchToThread]);
+  }, []);
 
   const syncStoreToUrl = useCallback((threadId: string | null): void => {
     urlSyncHandlers.performStoreToUrlSync(threadId, fullConfig, router, lastSyncedRef);
@@ -62,7 +51,65 @@ export const useUrlSync = (config: Partial<urlSyncTypes.UrlSyncConfig> = {}): ur
     return await urlSyncUtils.performThreadValidation(threadId);
   }, []);
 
-  return { state, syncUrlToStore, syncStoreToUrl, validateThreadId };
+  return { 
+    state, 
+    syncUrlToStore, 
+    syncStoreToUrl, 
+    validateThreadId,
+    // Aliases for backward compatibility
+    updateUrl: syncStoreToUrl,
+    currentThreadId: searchParams.get(fullConfig.paramName),
+    navigateToThread: (threadId: string) => syncStoreToUrl(threadId),
+    navigateToChat: () => syncStoreToUrl(null)
+  };
+};
+
+/**
+ * URL sync with thread switching integration hook
+ */
+export const useURLSyncWithThreadSwitching = (
+  config: Partial<urlSyncTypes.UrlSyncConfig> = {},
+  switchToThread: urlSyncTypes.ThreadSwitchFunction
+): urlSyncTypes.UseUrlSyncResult & { 
+  initializeFromUrl: () => void;
+  syncFromUrl: () => void;
+} => {
+  const urlSync = useURLSync(config);
+  const searchParams = useSearchParams();
+  const activeThreadId = useUnifiedChatStore(state => state.activeThreadId);
+  const fullConfig = { ...urlSyncTypes.DEFAULT_CONFIG, ...config };
+  
+  const initializeFromUrl = useCallback(() => {
+    if (!fullConfig.enabled) return;
+    const urlThreadId = searchParams.get(fullConfig.paramName);
+    if (urlThreadId && urlThreadId !== activeThreadId) {
+      switchToThread(urlThreadId);
+    }
+  }, [searchParams, activeThreadId, switchToThread, fullConfig]);
+  
+  const syncFromUrl = useCallback(() => {
+    if (!fullConfig.enabled) return;
+    const urlThreadId = searchParams.get(fullConfig.paramName);
+    if (urlThreadId && urlThreadId !== activeThreadId) {
+      switchToThread(urlThreadId);
+    }
+  }, [searchParams, activeThreadId, switchToThread, fullConfig]);
+  
+  // Initialize URL sync on mount
+  useEffect(() => {
+    initializeFromUrl();
+  }, []);
+  
+  // Listen to URL changes
+  useEffect(() => {
+    syncFromUrl();
+  }, [searchParams]);
+  
+  return {
+    ...urlSync,
+    initializeFromUrl,
+    syncFromUrl
+  };
 };
 
 /**
@@ -105,6 +152,37 @@ export const urlSyncService = {
     }
     
     return `${fullConfig.basePath}?${fullConfig.paramName}=${threadId}`;
+  }
+};
+
+/**
+ * Browser history sync hook
+ */
+export const useBrowserHistorySync = (onHistoryChange: (threadId: string | null) => void): void => {
+  useEffect(() => {
+    const handlePopState = () => {
+      const threadId = urlSyncService.getThreadIdFromUrl();
+      onHistoryChange(threadId);
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [onHistoryChange]);
+};
+
+/**
+ * Standalone thread ID validation function
+ */
+export const validateThreadId = async (threadId: string): Promise<boolean> => {
+  return await urlSyncUtils.performThreadValidation(threadId);
+};
+
+/**
+ * Handle deep link navigation
+ */
+export const handleDeepLink = (threadId: string, onNavigate: (id: string) => void): void => {
+  if (threadId && urlSyncUtils.performThreadValidation(threadId)) {
+    onNavigate(threadId);
   }
 };
 
