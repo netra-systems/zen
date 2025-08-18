@@ -17,7 +17,7 @@ import psutil
 from .priority_engine import PriorityEngine
 from .smart_cache import SmartCache
 from .memory_optimized_executor import MemoryOptimizedExecutor, MemoryMonitor
-from .unified_reporter import UnifiedReporter
+from .comprehensive_reporter import ComprehensiveTestReporter
 
 class TestProfileBuilder:
     """Build test profiles from discovered tests"""
@@ -166,7 +166,7 @@ class UltraTestOrchestrator:
         self.memory_executor = MemoryOptimizedExecutor(self.cache_dir)
         self.memory_monitor = MemoryMonitor()
         self.profile_builder = TestProfileBuilder()
-        self.unified_reporter = UnifiedReporter(self.project_root / "test_reports")
+        self.comprehensive_reporter = ComprehensiveTestReporter(self.project_root / "test_reports")
         
         self.stats = {
             'start_time': None,
@@ -314,11 +314,13 @@ class UltraTestOrchestrator:
             }
         }
         
-        # Generate unified report
-        report = self.unified_reporter.generate_unified_report(
-            formatted_results,
-            'ultra',
-            0 if formatted_results['overall']['status'] == 'passed' else 1
+        # Generate comprehensive report
+        exit_code = 0 if formatted_results['overall']['status'] == 'passed' else 1
+        report = self.comprehensive_reporter.generate_comprehensive_report(
+            level='ultra',
+            results=formatted_results,
+            config={},
+            exit_code=exit_code
         )
         
         # Save optimization metrics

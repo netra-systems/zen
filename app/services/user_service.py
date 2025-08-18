@@ -3,11 +3,11 @@ from ..db.models_postgres import User
 from ..schemas.User import UserCreate, UserUpdate
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
-from passlib.context import CryptContext
+import bcrypt
 from fastapi.encoders import jsonable_encoder
 from typing import List, Dict, Any, Optional
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Direct bcrypt usage for better compatibility
 
 class CRUDUser(EnhancedCRUDService[User, UserCreate, UserUpdate]):
     async def get_by_email(self, db: AsyncSession, *, email: str) -> User:
@@ -17,7 +17,8 @@ class CRUDUser(EnhancedCRUDService[User, UserCreate, UserUpdate]):
     async def create(self, db: AsyncSession, *, obj_in: UserCreate) -> User:
         obj_in_data = jsonable_encoder(obj_in)
         del obj_in_data['password']
-        hashed_password = pwd_context.hash(obj_in.password)
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(obj_in.password.encode('utf-8'), salt).decode('utf-8')
         db_obj = User(**obj_in_data, hashed_password=hashed_password)
         db.add(db_obj)
         await db.commit()

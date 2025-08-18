@@ -12,21 +12,16 @@ from typing import Dict
 from .report_generators import (
     generate_markdown_report, status_badge, calculate_total_counts
 )
-from .unified_reporter import UnifiedReporter
 from .comprehensive_reporter import ComprehensiveTestReporter
 
 
 def save_test_report(results: Dict, level: str, config: Dict, exit_code: int, reports_dir: Path, staging_mode: bool = False):
     """Save test report using comprehensive reporting system."""
-    # Use comprehensive reporter for clear, accurate reporting
+    # Use comprehensive reporter as the single source of truth
     comprehensive = ComprehensiveTestReporter(reports_dir)
     comprehensive.generate_comprehensive_report(results=results, level=level, config=config, exit_code=exit_code)
     
-    # Also use unified reporter for backward compatibility
-    unified = UnifiedReporter(reports_dir)
-    unified.generate_unified_report(results, level, exit_code)
-    
-    # Also save legacy format for compatibility (but no timestamps)
+    # Also save legacy format for backward compatibility
     latest_path = reports_dir / "latest" / f"{level}_report.md"
     latest_path.parent.mkdir(exist_ok=True)
     
@@ -37,8 +32,7 @@ def save_test_report(results: Dict, level: str, config: Dict, exit_code: int, re
     print(f"\n[REPORT] Test reports saved:")
     print(f"  - Dashboard: {reports_dir / 'dashboard.md'}")
     print(f"  - Summary: {reports_dir / 'summary.md'}")
-    print(f"  - Unified: {reports_dir / 'unified_report.md'}")
-    print(f"  - Deltas: {reports_dir / 'latest/delta_summary.md'}")
+    print(f"  - Latest: {latest_path}")
 
 
 def print_summary(results: Dict):

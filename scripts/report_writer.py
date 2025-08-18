@@ -165,32 +165,36 @@ class ReportCleanupManager:
             return False
 
 
-class UnifiedReporterIntegration:
-    """Integrates with unified reporter system"""
+class ComprehensiveReporterIntegration:
+    """Integrates with comprehensive reporter system"""
     
     def __init__(self, reports_dir: Path):
         self.reports_dir = reports_dir
-        self.unified_reporter = self._try_import_unified_reporter()
+        self.comprehensive_reporter = self._try_import_comprehensive_reporter()
     
-    def _try_import_unified_reporter(self):
-        """Try to import unified reporter"""
+    def _try_import_comprehensive_reporter(self):
+        """Try to import comprehensive reporter"""
         try:
-            from test_framework.unified_reporter import UnifiedReporter
-            return UnifiedReporter
+            from test_framework.comprehensive_reporter import ComprehensiveTestReporter
+            return ComprehensiveTestReporter
         except ImportError:
             return None
     
-    def generate_unified_report(self, results: Dict, level: str, exit_code: int) -> None:
-        """Generate unified report if available"""
-        if not self.unified_reporter:
+    def generate_comprehensive_report(self, results: Dict, level: str, exit_code: int) -> None:
+        """Generate comprehensive report if available"""
+        if not self.comprehensive_reporter:
             return
         
         try:
-            unified = self.unified_reporter(self.reports_dir)
-            unified_results = self._convert_results_format(results)
-            unified.generate_unified_report(unified_results, level, exit_code)
+            reporter = self.comprehensive_reporter(self.reports_dir)
+            reporter.generate_comprehensive_report(
+                level=level,
+                results=results,
+                config={},
+                exit_code=exit_code
+            )
         except Exception as e:
-            self._print_unified_warning(str(e))
+            self._print_comprehensive_warning(str(e))
     
     def _convert_results_format(self, results: Dict) -> Dict:
         """Convert results to unified reporter format"""
@@ -200,9 +204,9 @@ class UnifiedReporterIntegration:
             "e2e": results.get("e2e", {})
         }
     
-    def _print_unified_warning(self, error: str) -> None:
-        """Print warning about unified reporter failure"""
-        print(f"[WARNING] Unified reporter failed: {error}")
+    def _print_comprehensive_warning(self, error: str) -> None:
+        """Print warning about comprehensive reporter failure"""
+        print(f"[WARNING] Comprehensive reporter failed: {error}")
 
 
 class ReportOutputManager:
@@ -271,7 +275,7 @@ class ReportSaveOrchestrator:
         self.dir_manager = ReportDirectoryManager(reports_dir)
         self.file_writer = ReportFileWriter(self.dir_manager)
         self.historical_updater = HistoricalDataUpdater(self.file_writer)
-        self.unified_integration = UnifiedReporterIntegration(reports_dir)
+        self.comprehensive_integration = ComprehensiveReporterIntegration(reports_dir)
         self.output_manager = ReportOutputManager()
     
     def save_complete_report(self, level: str, report_content: str, 
@@ -284,9 +288,9 @@ class ReportSaveOrchestrator:
         # Update historical data
         self.historical_updater.update_historical_runs(historical_data, level, metrics, results)
         self.file_writer.write_historical_data(historical_data)
-        # Generate unified report and print confirmation
+        # Generate comprehensive report and print confirmation
         exit_code = 0 if metrics.get("failed", 0) == 0 else 1
-        self.unified_integration.generate_unified_report(results, level, exit_code)
+        self.comprehensive_integration.generate_comprehensive_report(results, level, exit_code)
         self.output_manager.print_save_confirmation(
             latest_file, metrics_file, self.dir_manager.directories.history_dir
         )

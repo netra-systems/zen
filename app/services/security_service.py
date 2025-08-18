@@ -1,7 +1,7 @@
 # app/services/security_service.py
 
 from typing import Optional
-from passlib.context import CryptContext
+import bcrypt
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from jose import JWTError, jwt
@@ -15,7 +15,7 @@ from app.services.key_manager import KeyManager
 from app.config import settings
 from app.logging_config import central_logger as logger
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Direct bcrypt usage for better compatibility and performance
 
 class SecurityService:
     def __init__(self, key_manager: Optional[KeyManager] = None):
@@ -48,10 +48,11 @@ class SecurityService:
         return self.fernet.decrypt(encrypted_data.encode()).decode()
 
     def get_password_hash(self, password: str) -> str:
-        return pwd_context.hash(password)
+        salt = bcrypt.gensalt()
+        return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        return pwd_context.verify(plain_password, hashed_password)
+        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
     def create_access_token(self, data: schemas.TokenPayload, expires_delta: Optional[timedelta] = None):
         to_encode = data.model_dump()

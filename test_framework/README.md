@@ -54,8 +54,7 @@ test_framework/
 ├── test_discovery.py            # Test discovery engine
 ├── test_execution_engine.py     # Execution engine
 ├── failing_test_runner.py       # Specialized failing test runner
-├── unified_reporter.py          # Unified reporting
-└── delta_reporter.py            # Change detection
+└── comprehensive_reporter.py    # Comprehensive reporting (single source of truth)
 ```
 
 ## Quick Start

@@ -152,7 +152,7 @@ root/
 ├── test_framework/          # Test framework utilities
 │   ├── runner.py            # Test runner core
 │   ├── test_discovery.py    # Test discovery logic
-│   └── unified_reporter.py  # Test reporting
+│   └── comprehensive_reporter.py  # Test reporting (single source of truth)
 │
 ├── SPEC/                    # Specification documents
 │   ├── type_safety.xml      # Type safety rules
