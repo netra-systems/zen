@@ -4,12 +4,13 @@ import userEvent from '@testing-library/user-event';
 // Using Jest, not vitest
 import { MessageList } from '@/components/chat/MessageList';
 import { MessageInput } from '@/components/chat/MessageInput';
-import { useChatStore } from '@/store/chat';
+import { useUnifiedChatStore } from '@/store/unified-chat';
+import { act } from '@testing-library/react';
 // Removed imports for non-existent components: ResponseCard, ThreadList, SettingsPanel, NotificationToast, LoadingSpinner
 
-// Mock the chat store
-jest.mock('@/store/chat', () => ({
-  useChatStore: jest.fn(),
+// Mock the unified chat store
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: jest.fn(),
 }))
 
 // Test 69: MessageList virtualization
@@ -24,9 +25,11 @@ describe('test_MessageList_virtualization', () => {
     }));
     
     // Mock the store to return our messages
-    (useChatStore as jest.Mock).mockReturnValue({
+    (useUnifiedChatStore as jest.Mock).mockReturnValue({
       messages,
       isProcessing: false,
+      isThreadLoading: false,
+      currentRunId: null,
     });
     
     render(<MessageList />);
@@ -47,9 +50,11 @@ describe('test_MessageList_virtualization', () => {
     }));
     
     // Mock the store to return our messages
-    (useChatStore as jest.Mock).mockReturnValue({
+    (useUnifiedChatStore as jest.Mock).mockReturnValue({
       messages,
       isProcessing: false,
+      isThreadLoading: false,
+      currentRunId: null,
     });
     
     const startTime = performance.now();
@@ -70,9 +75,11 @@ describe('test_MessageList_virtualization', () => {
     }));
     
     // Mock the store to return our messages
-    (useChatStore as jest.Mock).mockReturnValue({
+    (useUnifiedChatStore as jest.Mock).mockReturnValue({
       messages,
       isProcessing: false,
+      isThreadLoading: false,
+      currentRunId: null,
     });
     
     const { container } = render(<MessageList />);
@@ -104,13 +111,90 @@ jest.mock('@/store/authStore', () => ({
   }),
 }));
 
+// Mock MessageInput hooks
+jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
+  useMessageHistory: () => ({
+    messageHistory: [],
+    addToHistory: jest.fn(),
+    navigateHistory: jest.fn(() => ''),
+  }),
+}));
+
+jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
+  useTextareaResize: () => ({
+    rows: 1,
+  }),
+}));
+
+jest.mock('@/components/chat/hooks/useMessageSending', () => ({
+  useMessageSending: () => ({
+    isSending: false,
+    handleSend: jest.fn().mockResolvedValue(undefined),
+  }),
+}));
+
+// Mock MessageInput components
+jest.mock('@/components/chat/components/MessageActionButtons', () => ({
+  MessageActionButtons: ({ onSend, canSend }: any) => (
+    <button 
+      onClick={onSend} 
+      disabled={!canSend}
+      aria-label="Send message"
+    >
+      Send
+    </button>
+  ),
+}));
+
+jest.mock('@/components/chat/components/KeyboardShortcutsHint', () => ({
+  KeyboardShortcutsHint: () => <div data-testid="keyboard-hints" />,
+}));
+
+// Mock UI components
+jest.mock('@/components/ui/scroll-area', () => ({
+  ScrollArea: React.forwardRef<HTMLDivElement, any>(({ children, className, ...props }, ref) => (
+    <div ref={ref} className={className} {...props}>
+      {children}
+    </div>
+  )),
+}));
+
+// Mock MessageList dependencies
+jest.mock('@/components/chat/MessageItem', () => ({
+  MessageItem: ({ message }: any) => (
+    <div data-testid="message-item">
+      {message.content}
+    </div>
+  ),
+}));
+
+jest.mock('@/components/chat/ThinkingIndicator', () => ({
+  ThinkingIndicator: () => <div data-testid="thinking-indicator" />,
+}));
+
+jest.mock('@/components/loading/MessageSkeleton', () => ({
+  MessageSkeleton: () => <div data-testid="message-skeleton" />,
+  SkeletonPresets: {},
+}));
+
+jest.mock('@/hooks/useProgressiveLoading', () => ({
+  useProgressiveLoading: () => ({
+    shouldShowSkeleton: false,
+    shouldShowContent: true,
+    contentOpacity: 1,
+    startLoading: jest.fn(),
+    completeLoading: jest.fn(),
+  }),
+}));
+
 // Test 70: MessageInput validation
 describe('test_MessageInput_validation', () => {
   beforeEach(() => {
-    (useChatStore as jest.Mock).mockReturnValue({
-      setProcessing: jest.fn(),
+    (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      activeThreadId: 'thread-123',
       isProcessing: false,
       addMessage: jest.fn(),
+      setProcessing: jest.fn(),
     });
   });
 
@@ -129,33 +213,48 @@ describe('test_MessageInput_validation', () => {
   }, 10000);
 
   it('should handle text input and sending', async () => {
-    const mockSendMessage = jest.fn();
-    (require('@/hooks/useWebSocket').useWebSocket as jest.Mock).mockReturnValue({
-      sendMessage: mockSendMessage,
+    const mockHandleSend = jest.fn().mockResolvedValue(undefined);
+    
+    // Override the mock for this test
+    (require('@/components/chat/hooks/useMessageSending').useMessageSending as jest.Mock).mockReturnValue({
+      isSending: false,
+      handleSend: mockHandleSend,
     });
     
-    render(<MessageInput />);
+    await act(async () => {
+      render(<MessageInput />);
+    });
     
     const input = screen.getByRole('textbox');
-    await userEvent.type(input, 'Test message');
+    await act(async () => {
+      await userEvent.type(input, 'Test message');
+    });
     
     const sendButton = screen.getByRole('button', { name: /send/i });
-    fireEvent.click(sendButton);
+    await act(async () => {
+      fireEvent.click(sendButton);
+    });
     
-    expect(mockSendMessage).toHaveBeenCalled();
+    expect(mockHandleSend).toHaveBeenCalled();
   });
 
   it('should handle keyboard shortcuts', async () => {
-    render(<MessageInput />);
+    await act(async () => {
+      render(<MessageInput />);
+    });
     
     const input = screen.getByRole('textbox') as HTMLInputElement;
-    await userEvent.type(input, 'Test message');
+    await act(async () => {
+      await userEvent.type(input, 'Test message');
+    });
     
-    // Test Enter to send (should not send with just Enter)
-    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    // Test Enter to send (should clear input after sending)
+    await act(async () => {
+      fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
+    });
     
-    // Message should contain the test text
-    expect(input.value).toContain('Test');
+    // Input should be cleared after sending (since message was valid)
+    expect(input.value).toBe('');
   });
 
   it('should prevent empty message submission', () => {

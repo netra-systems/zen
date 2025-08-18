@@ -7,6 +7,16 @@ if TYPE_CHECKING:
     from app.config import Settings
 from app.logging_config import central_logger as logger
 
+# Import from modular components to maintain backward compatibility
+from app.config_exceptions import ConfigLoadError
+from app.cloud_environment_detector import (
+    detect_cloud_run_environment, 
+    detect_app_engine_environment, 
+    CloudEnvironmentDetector
+)
+from app.config_environment_loader import load_config_from_environment
+from app.config_validation import validate_required_config
+
 
 def load_env_var(env_var: str, config: 'Settings', field_name: str) -> bool:
     """Load a single environment variable into config."""
@@ -145,26 +155,3 @@ def apply_single_secret(config: 'Settings', path: str, field: str, value: str) -
     parent_obj = _navigate_to_parent_object(config, parts)
     if parent_obj:
         _set_field_on_target(parent_obj, parts[-1], field, value)
-
-
-def _check_k_service_for_staging() -> str:
-    """Check K_SERVICE environment variable for staging."""
-    k_service = os.environ.get("K_SERVICE")
-    if k_service and "staging" in k_service.lower():
-        logger.debug(f"Staging from K_SERVICE: {k_service}")
-        return "staging"
-    return ""
-
-def _check_pr_number_for_staging() -> str:
-    """Check PR_NUMBER environment variable for staging."""
-    if os.environ.get("PR_NUMBER"):
-        logger.debug(f"Staging from PR_NUMBER")
-        return "staging"
-    return ""
-
-def detect_cloud_run_environment() -> str:
-    """Detect if running in Cloud Run and determine environment."""
-    env = _check_k_service_for_staging()
-    if env:
-        return env
-    return _check_pr_number_for_staging()
