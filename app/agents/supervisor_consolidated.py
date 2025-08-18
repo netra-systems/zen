@@ -52,9 +52,7 @@ from app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
 from app.agents.supervisor.agent_routing import SupervisorAgentRouter
 from app.agents.supervisor.supervisor_completion_helpers import SupervisorCompletionHelpers
 from app.agents.supervisor.initialization_helpers import SupervisorInitializationHelpers
-
 logger = central_logger.get_logger(__name__)
-
 class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     """Refactored Supervisor agent with modular design."""
     
@@ -86,9 +84,19 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
                            tool_dispatcher: ToolDispatcher,
                            websocket_manager: 'WebSocketManager') -> None:
         """Initialize all modular components and infrastructure."""
+        self._init_core_components(llm_manager, tool_dispatcher, websocket_manager)
+        self._init_infrastructure_components()
+
+    def _init_core_components(self, llm_manager: LLMManager,
+                            tool_dispatcher: ToolDispatcher,
+                            websocket_manager: 'WebSocketManager') -> None:
+        """Initialize core agent components."""
         self._init_registry(llm_manager, tool_dispatcher, websocket_manager)
         self._init_execution_components(websocket_manager)
         self._init_state_components()
+
+    def _init_infrastructure_components(self) -> None:
+        """Initialize infrastructure and supporting components."""
         self._init_modern_execution_infrastructure()
         self._init_supervisor_state()
         self._init_supporting_components()

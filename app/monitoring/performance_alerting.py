@@ -33,10 +33,21 @@ class PerformanceAlertManager:
 
     def _get_rule_creators(self) -> Dict[str, Callable]:
         """Get alert rule creator functions."""
+        resource_rules = self._get_resource_rule_creators()
+        database_rules = self._get_database_rule_creators()
+        return {**resource_rules, **database_rules}
+
+    def _get_resource_rule_creators(self) -> Dict[str, Callable]:
+        """Get resource-related rule creators."""
         return {
             "high_cpu": self._create_high_cpu_rule,
             "high_memory": self._create_high_memory_rule,
-            "low_memory": self._create_low_memory_rule,
+            "low_memory": self._create_low_memory_rule
+        }
+
+    def _get_database_rule_creators(self) -> Dict[str, Callable]:
+        """Get database-related rule creators."""
+        return {
             "database_pool_exhaustion": self._create_pool_exhaustion_rule,
             "low_cache_hit_ratio": self._create_cache_hit_rule
         }
@@ -87,13 +98,17 @@ class PerformanceAlertManager:
     
     def _create_cache_hit_rule(self) -> Dict[str, Any]:
         """Create low cache hit ratio alert rule."""
+        base_rule = self._get_cache_hit_base_rule()
+        return {**base_rule, "min_samples": 10}
+
+    def _get_cache_hit_base_rule(self) -> Dict[str, Any]:
+        """Get base cache hit ratio rule parameters."""
         return {
             "metric": "database.cache_hit_ratio",
             "threshold": 0.5,
             "operator": "<",
             "duration": 300,
-            "severity": "warning",
-            "min_samples": 10  # Require minimum samples before alerting
+            "severity": "warning"
         }
     
     def add_alert_callback(self, callback: Callable[[str, Dict[str, Any]], None]) -> None:
@@ -103,23 +118,30 @@ class PerformanceAlertManager:
     async def check_alerts(self) -> List[Dict[str, Any]]:
         """Check all alert rules and return triggered alerts."""
         triggered_alerts = []
-        
         for alert_name, rule in self.alert_rules.items():
             alert_data = await self._process_single_alert_rule(alert_name, rule)
-            if alert_data:
-                triggered_alerts.append(alert_data)
-        
+            self._add_alert_if_triggered(triggered_alerts, alert_data)
         return triggered_alerts
+
+    def _add_alert_if_triggered(self, triggered_alerts: List, alert_data: Optional[Dict]) -> None:
+        """Add alert data to list if it was triggered."""
+        if alert_data:
+            triggered_alerts.append(alert_data)
 
     async def _process_single_alert_rule(self, alert_name: str, rule: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Process a single alert rule and return alert data if triggered."""
         try:
-            if await self._evaluate_alert_rule(alert_name, rule):
-                alert_data = self._create_alert_data(alert_name, rule)
-                self._notify_callbacks(alert_name, alert_data)
-                return alert_data
+            return await self._evaluate_and_notify_rule(alert_name, rule)
         except Exception as e:
             logger.error(f"Error evaluating alert rule {alert_name}: {e}")
+        return None
+
+    async def _evaluate_and_notify_rule(self, alert_name: str, rule: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Evaluate rule and notify if triggered."""
+        if await self._evaluate_alert_rule(alert_name, rule):
+            alert_data = self._create_alert_data(alert_name, rule)
+            self._notify_callbacks(alert_name, alert_data)
+            return alert_data
         return None
     
     def _create_alert_data(self, alert_name: str, rule: Dict[str, Any]) -> Dict[str, Any]:
@@ -134,10 +156,14 @@ class PerformanceAlertManager:
     def _notify_callbacks(self, alert_name: str, alert_data: Dict[str, Any]) -> None:
         """Notify all registered callbacks about alert."""
         for callback in self._alert_callbacks:
-            try:
-                callback(alert_name, alert_data)
-            except Exception as e:
-                logger.error(f"Error in alert callback: {e}")
+            self._safe_callback_execution(callback, alert_name, alert_data)
+
+    def _safe_callback_execution(self, callback, alert_name: str, alert_data: Dict[str, Any]) -> None:
+        """Execute callback with error handling."""
+        try:
+            callback(alert_name, alert_data)
+        except Exception as e:
+            logger.error(f"Error in alert callback: {e}")
     
     async def _evaluate_alert_rule(self, alert_name: str, rule: Dict[str, Any]) -> bool:
         """Evaluate a single alert rule."""
@@ -195,9 +221,12 @@ class PerformanceAlertManager:
         """Count threshold violations in metrics."""
         violation_count = 0
         for metric in metrics:
-            if self._is_violation(metric.value, threshold, operator):
-                violation_count += 1
+            violation_count += self._check_metric_violation(metric, threshold, operator)
         return violation_count
+
+    def _check_metric_violation(self, metric, threshold: float, operator: str) -> int:
+        """Check if single metric violates threshold."""
+        return 1 if self._is_violation(metric.value, threshold, operator) else 0
     
     def _is_violation(self, value: float, threshold: float, operator: str) -> bool:
         """Check if a single value violates threshold."""

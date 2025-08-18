@@ -6,12 +6,19 @@ Provides structured, testable components for data generation workflows.
 Business Value: Customer-facing data generation - HIGH revenue impact
 """
 
-from .core import (
-    SyntheticDataAgentCore,
-    SyntheticDataExecutionContext
-)
+from .approval_flow import ApprovalWorkflow, ApprovalRequirements
+from .llm_handler import SyntheticDataLLMExecutor
+from .generation_workflow import GenerationExecutor, GenerationErrorHandler
+from .validation import RequestValidator, MetricsValidator
+from .messaging import CommunicationCoordinator
 
 __all__ = [
-    'SyntheticDataAgentCore',
-    'SyntheticDataExecutionContext'
+    'ApprovalWorkflow',
+    'ApprovalRequirements', 
+    'SyntheticDataLLMExecutor',
+    'GenerationExecutor',
+    'GenerationErrorHandler',
+    'RequestValidator',
+    'MetricsValidator',
+    'CommunicationCoordinator'
 ]

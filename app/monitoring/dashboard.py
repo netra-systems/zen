@@ -116,7 +116,10 @@ class OperationMeasurement:
         """Record operation completion metrics."""
         duration = self._calculate_duration(start_metrics["start_time"])
         memory_delta = self._calculate_memory_delta(start_metrics["start_memory"])
-        
+        self._record_both_operation_metrics(operation_name, duration, memory_delta)
+
+    def _record_both_operation_metrics(self, operation_name: str, duration: float, memory_delta: float) -> None:
+        """Record both duration and memory metrics for operation."""
         self._record_duration_metric(operation_name, duration)
         self._record_memory_metric(operation_name, memory_delta)
     
@@ -155,9 +158,20 @@ class SystemOverview:
     
     def get_system_health(self) -> Dict[str, Any]:
         """Get comprehensive system health overview."""
+        status_data = self._get_status_data()
+        metrics_data = self._get_metrics_data()
+        return {**status_data, **metrics_data}
+
+    def _get_status_data(self) -> Dict[str, Any]:
+        """Get status-related health data."""
         return {
             "overall_status": self._determine_overall_status(),
-            "resource_utilization": self._get_resource_utilization(),
+            "resource_utilization": self._get_resource_utilization()
+        }
+
+    def _get_metrics_data(self) -> Dict[str, Any]:
+        """Get metrics-related health data."""
+        return {
             "performance_metrics": self._get_performance_metrics(),
             "service_health": self._get_service_health()
         }
@@ -192,19 +206,17 @@ class SystemOverview:
     
     def _get_resource_utilization(self) -> Dict[str, Any]:
         """Get current resource utilization."""
-        return {
-            "cpu": self.metrics_collector.get_metric_summary("system.cpu_percent"),
-            "memory": self.metrics_collector.get_metric_summary("system.memory_percent"),
-            "connections": self.metrics_collector.get_metric_summary("system.active_connections")
-        }
+        cpu_data = self.metrics_collector.get_metric_summary("system.cpu_percent")
+        memory_data = self.metrics_collector.get_metric_summary("system.memory_percent")
+        connection_data = self.metrics_collector.get_metric_summary("system.active_connections")
+        return {"cpu": cpu_data, "memory": memory_data, "connections": connection_data}
     
     def _get_performance_metrics(self) -> Dict[str, Any]:
         """Get performance-related metrics."""
-        return {
-            "database_pool": self.metrics_collector.get_metric_summary("database.pool_utilization"),
-            "cache_efficiency": self.metrics_collector.get_metric_summary("database.cache_hit_ratio"),
-            "websocket_connections": self.metrics_collector.get_metric_summary("websocket.active_connections")
-        }
+        db_pool = self.metrics_collector.get_metric_summary("database.pool_utilization")
+        cache_ratio = self.metrics_collector.get_metric_summary("database.cache_hit_ratio")
+        ws_connections = self.metrics_collector.get_metric_summary("websocket.active_connections")
+        return {"database_pool": db_pool, "cache_efficiency": cache_ratio, "websocket_connections": ws_connections}
     
     def _get_service_health(self) -> Dict[str, Any]:
         """Get service health indicators."""
@@ -219,7 +231,10 @@ class SystemOverview:
         pool_summary = self.metrics_collector.get_metric_summary("database.pool_utilization")
         if not pool_summary:
             return "unknown"
-        
+        return self._evaluate_database_utilization(pool_summary)
+
+    def _evaluate_database_utilization(self, pool_summary: Dict[str, float]) -> str:
+        """Evaluate database utilization for status."""
         utilization = pool_summary.get("current", 0)
         return "critical" if utilization > 0.9 else "healthy"
     
@@ -233,6 +248,9 @@ class SystemOverview:
         memory_summary = self.metrics_collector.get_metric_summary("system.memory_available_mb")
         if not memory_summary:
             return "unknown"
-        
+        return self._evaluate_memory_availability(memory_summary)
+
+    def _evaluate_memory_availability(self, memory_summary: Dict[str, float]) -> str:
+        """Evaluate memory availability for status."""
         available_mb = memory_summary.get("current", 0)
         return "critical" if available_mb < 512 else "healthy"

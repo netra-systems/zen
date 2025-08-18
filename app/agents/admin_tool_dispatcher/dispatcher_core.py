@@ -116,13 +116,14 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
         tool_name = context.metadata.get("tool_name")
         kwargs = context.metadata.get("kwargs", {})
         tool_input = ToolInput(tool_name=tool_name, kwargs=kwargs)
-        
-        if self._is_admin_tool(tool_name):
-            response = await self._dispatch_admin_tool_safe(tool_name, tool_input, **kwargs)
-        else:
-            response = await self._dispatch_base_tool(tool_name, **kwargs)
-            
+        response = await self._dispatch_tool_based_on_type(tool_name, tool_input, kwargs)
         return self._convert_response_to_dict(response)
+    
+    async def _dispatch_tool_based_on_type(self, tool_name: str, tool_input: ToolInput, kwargs: Dict[str, Any]):
+        """Dispatch tool based on admin vs base type."""
+        if self._is_admin_tool(tool_name):
+            return await self._dispatch_admin_tool_safe(tool_name, tool_input, **kwargs)
+        return await self._dispatch_base_tool(tool_name, **kwargs)
         
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate execution preconditions for admin tool dispatch."""
@@ -190,13 +191,13 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
     
     def _get_base_response_params(self, tool_name: str, current_time: datetime, user_id: str) -> Dict[str, Any]:
         """Get base response parameters"""
-        return {
-            "tool_name": tool_name,
-            "execution_time_ms": 0.0,
-            "started_at": current_time,
-            "completed_at": current_time,
-            "user_id": user_id
-        }
+        base_params = self._create_timing_params(current_time)
+        base_params.update({"tool_name": tool_name, "user_id": user_id})
+        return base_params
+    
+    def _create_timing_params(self, current_time: datetime) -> Dict[str, Any]:
+        """Create timing parameters for response."""
+        return {"execution_time_ms": 0.0, "started_at": current_time, "completed_at": current_time}
     
     def _get_success_specific_params(self, base_result: ToolResult) -> Dict[str, Any]:
         """Get success-specific response parameters"""
@@ -206,15 +207,11 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
             "message": base_result.message
         }
     
-    def _create_failure_response(self, 
-                                 tool_name: str, 
-                                 base_result: ToolResult,
-                                 current_time: datetime,
-                                 user_id: str) -> ToolFailureResponse:
+    def _create_failure_response(self, tool_name: str, base_result: ToolResult,
+                                 current_time: datetime, user_id: str) -> ToolFailureResponse:
         """Create failed tool response"""
-        return ToolFailureResponse(**self._build_failure_response_params(
-            tool_name, base_result, current_time, user_id
-        ))
+        params = self._build_failure_response_params(tool_name, base_result, current_time, user_id)
+        return ToolFailureResponse(**params)
     
     def _build_failure_response_params(self, tool_name: str, base_result: ToolResult,
                                       current_time: datetime, user_id: str) -> Dict[str, Any]:

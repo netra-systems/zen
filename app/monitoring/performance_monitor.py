@@ -101,13 +101,15 @@ class PerformanceMonitor:
     def get_performance_dashboard(self) -> Dict[str, Any]:
         """Get performance dashboard data."""
         dashboard_data = self._dashboard.get_dashboard_data()
-        
-        # Ensure required fields are present
+        enhanced_data = self._enhance_dashboard_data(dashboard_data)
+        return {**enhanced_data, **dashboard_data}
+
+    def _enhance_dashboard_data(self, dashboard_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Enhance dashboard data with required fields."""
         return {
             "timestamp": dashboard_data.get("timestamp", datetime.now().isoformat()),
             "system": self._get_system_metrics(),
-            "memory": self._get_memory_metrics(),
-            **dashboard_data
+            "memory": self._get_memory_metrics()
         }
     
     def _get_system_metrics(self) -> Dict[str, Any]:
@@ -122,7 +124,10 @@ class PerformanceMonitor:
         """Get memory performance metrics."""
         memory_metrics = self.metrics_collector.get_recent_metrics("system.memory_percent", 60)
         available_metrics = self.metrics_collector.get_recent_metrics("system.memory_available_mb", 60)
-        
+        return self._build_memory_metrics_dict(memory_metrics, available_metrics)
+
+    def _build_memory_metrics_dict(self, memory_metrics: List, available_metrics: List) -> Dict[str, Any]:
+        """Build memory metrics dictionary from collected metrics."""
         return {
             "usage_percent": memory_metrics[-1].value if memory_metrics else 0.0,
             "available_mb": available_metrics[-1].value if available_metrics else 0.0

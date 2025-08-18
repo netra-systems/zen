@@ -190,19 +190,37 @@ class DemoOptimizationAgent(BaseExecutionInterface):
     ) -> str:
         """Build the complete optimization prompt content."""
         categories = triage_result.get('category', ['General Optimization'])
-        return f"""As an AI optimization expert, provide specific optimization recommendations for this {industry} use case.
-
-Request: {message}
-Optimization Focus: {categories}
-
-Generate 3 specific optimization strategies with:
+        return self._format_optimization_prompt(message, industry, categories)
+    
+    def _format_optimization_prompt(self, message: str, industry: str, 
+                                  categories: List[str]) -> str:
+        """Format the optimization prompt with structure."""
+        header = self._create_prompt_header(industry)
+        request_section = self._create_request_section(message, categories)
+        requirements = self._create_requirements_section()
+        footer = self._create_prompt_footer()
+        return f"{header}\n\n{request_section}\n\n{requirements}\n\n{footer}"
+    
+    def _create_prompt_header(self, industry: str) -> str:
+        """Create optimization prompt header."""
+        return f"As an AI optimization expert, provide specific optimization recommendations for this {industry} use case."
+    
+    def _create_request_section(self, message: str, categories: List[str]) -> str:
+        """Create request section of prompt."""
+        return f"Request: {message}\nOptimization Focus: {categories}"
+    
+    def _create_requirements_section(self) -> str:
+        """Create requirements section of prompt."""
+        return """Generate 3 specific optimization strategies with:
 1. Strategy name and description
 2. Implementation approach (2-3 steps)
 3. Quantified benefits (use realistic percentages/metrics)
 4. Timeline for implementation
-5. Risk mitigation approach
-
-Format each strategy clearly with headers and bullet points.
+5. Risk mitigation approach"""
+    
+    def _create_prompt_footer(self) -> str:
+        """Create prompt footer with formatting instructions."""
+        return """Format each strategy clearly with headers and bullet points.
 Use industry-specific terminology and examples."""
         
     async def _generate_llm_response(self, prompt: str) -> str:
