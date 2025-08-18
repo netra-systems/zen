@@ -30,11 +30,8 @@ class CacheStorage:
     def _build_cache_entry_object(cache_key: str, result: Any, created_at: float, expires_at: float, duration: float, tags: Optional[Set[str]]) -> CacheEntry:
         """Build CacheEntry object with provided timestamps."""
         return CacheEntry(
-            key=cache_key,
-            value=result,
-            created_at=created_at,
-            expires_at=expires_at,
-            query_duration=duration,
+            key=cache_key, value=result, created_at=created_at,
+            expires_at=expires_at, query_duration=duration,
             tags=tags or set()
         )
     
@@ -90,10 +87,8 @@ class CacheStorage:
     
     @staticmethod
     def update_pattern_tracking(
-        query: str, 
-        duration: float, 
-        query_patterns: Dict[str, int], 
-        query_durations: Dict[str, List[float]]
+        query: str, duration: float, 
+        query_patterns: Dict[str, int], query_durations: Dict[str, List[float]]
     ) -> None:
         """Update query pattern and performance tracking."""
         pattern = QueryPatternAnalyzer.normalize_query_pattern(query)
@@ -220,8 +215,7 @@ class CacheMetricsBuilder:
     
     @staticmethod
     def build_metrics(
-        metrics: CacheMetrics, 
-        query_patterns: Dict[str, int], 
+        metrics: CacheMetrics, query_patterns: Dict[str, int], 
         query_durations: Dict[str, List[float]]
     ) -> Dict[str, Any]:
         """Build comprehensive cache metrics."""

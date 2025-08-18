@@ -57,30 +57,48 @@ class AnomalyDetector(BaseExecutionInterface):
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute core anomaly detection logic."""
+        params = self._extract_execution_parameters(context)
+        await self._send_execution_start_status(context, params['metric_name'])
+        response = await self._process_anomaly_detection(params)
+        await self._send_execution_complete_status(context, response)
+        return {"anomaly_response": response}
+    
+    def _extract_execution_parameters(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Extract and validate execution parameters from context."""
         metadata = context.metadata
-        user_id = metadata['user_id']
-        metric_name = metadata['metric_name']
-        time_range = metadata['time_range']
-        z_score_threshold = metadata.get('z_score_threshold', 2.0)
-        
+        return {
+            'user_id': metadata['user_id'],
+            'metric_name': metadata['metric_name'],
+            'time_range': metadata['time_range'],
+            'z_score_threshold': metadata.get('z_score_threshold', 2.0)
+        }
+    
+    async def _send_execution_start_status(self, context: ExecutionContext, 
+                                         metric_name: str) -> None:
+        """Send execution start status update."""
         await self.send_status_update(
             context, "executing", 
             f"Detecting anomalies in {metric_name}..."
         )
-        
+    
+    async def _process_anomaly_detection(self, params: Dict[str, Any]) -> Any:
+        """Process the anomaly detection with given parameters."""
         data = await self._fetch_anomaly_data(
-            user_id, metric_name, time_range, z_score_threshold
+            params['user_id'], params['metric_name'], 
+            params['time_range'], params['z_score_threshold']
         )
-        response = self._convert_to_typed_response(
-            data, metric_name, z_score_threshold, time_range
+        return self._convert_to_typed_response(
+            data, params['metric_name'], 
+            params['z_score_threshold'], params['time_range']
         )
-        
+    
+    async def _send_execution_complete_status(self, context: ExecutionContext, 
+                                            response: Any) -> None:
+        """Send execution complete status update."""
         await self.send_status_update(
             context, "completed", 
             f"Found {response.anomaly_count} anomalies"
         )
-        
-        return {"anomaly_response": response}
     
     async def detect_anomalies(
         self, user_id: int, metric_name: str,
@@ -100,15 +118,24 @@ class AnomalyDetector(BaseExecutionInterface):
                                  z_score_threshold: float) -> Optional[List[Dict]]:
         """Fetch anomaly data from ClickHouse with caching."""
         start_time, end_time = time_range
+        query_params = self._prepare_query_parameters(
+            user_id, metric_name, start_time, end_time, z_score_threshold
+        )
+        return await self.clickhouse_ops.fetch_data(
+            query_params['query'], query_params['cache_key'], self.redis_manager
+        )
+    
+    def _prepare_query_parameters(self, user_id: int, metric_name: str,
+                                start_time: datetime, end_time: datetime,
+                                z_score_threshold: float) -> Dict[str, str]:
+        """Prepare query and cache key for anomaly data fetch."""
         query = self._build_anomaly_query(
             user_id, metric_name, start_time, end_time, z_score_threshold
         )
         cache_key = self._build_anomaly_cache_key(
             user_id, metric_name, start_time, z_score_threshold
         )
-        return await self.clickhouse_ops.fetch_data(
-            query, cache_key, self.redis_manager
-        )
+        return {'query': query, 'cache_key': cache_key}
     
     def _build_anomaly_query(self, user_id: int, metric_name: str, 
                            start_time: datetime, end_time: datetime,
@@ -145,14 +172,33 @@ class AnomalyDetector(BaseExecutionInterface):
         time_range: Tuple[datetime, datetime]
     ) -> AnomalyDetectionResponse:
         """Create typed response for no anomalies found."""
+        analysis_period = self._create_analysis_period(time_range)
+        recommendations = self._create_no_anomalies_recommendations(metric_name)
+        return self._build_no_anomalies_response_object(
+            z_score_threshold, analysis_period, recommendations
+        )
+    
+    def _create_analysis_period(self, time_range: Tuple[datetime, datetime]) -> Dict[str, datetime]:
+        """Create analysis period dictionary from time range."""
         start_time, end_time = time_range
+        return {"start": start_time, "end": end_time}
+    
+    def _create_no_anomalies_recommendations(self, metric_name: str) -> List[str]:
+        """Create recommendations for no anomalies case."""
+        return [f"Continue monitoring {metric_name}"]
+    
+    def _build_no_anomalies_response_object(
+        self, z_score_threshold: float, analysis_period: Dict[str, datetime],
+        recommendations: List[str]
+    ) -> AnomalyDetectionResponse:
+        """Build AnomalyDetectionResponse object for no anomalies."""
         return AnomalyDetectionResponse(
             anomalies_detected=False,
             anomaly_count=0,
             confidence_score=0.95,
             threshold_used=z_score_threshold,
-            analysis_period={"start": start_time, "end": end_time},
-            recommended_actions=[f"Continue monitoring {metric_name}"]
+            analysis_period=analysis_period,
+            recommended_actions=recommendations
         )
     
     def _build_anomalies_response(
@@ -172,17 +218,32 @@ class AnomalyDetector(BaseExecutionInterface):
         time_range: Tuple[datetime, datetime]
     ) -> AnomalyDetectionResponse:
         """Create AnomalyDetectionResponse object."""
-        start_time, end_time = time_range
-        return AnomalyDetectionResponse(
-            anomalies_detected=True,
-            anomaly_count=len(data),
-            anomaly_details=anomaly_details[:50],
-            confidence_score=0.85,
-            severity=max_severity,
-            threshold_used=z_score_threshold,
-            analysis_period={"start": start_time, "end": end_time},
-            recommended_actions=self._generate_recommendations(max_severity)
+        response_params = self._prepare_anomaly_response_params(
+            data, anomaly_details, max_severity, z_score_threshold, time_range
         )
+        return self._build_anomaly_response_object(response_params)
+    
+    def _prepare_anomaly_response_params(
+        self, data: List[Dict], anomaly_details: List[AnomalyDetail],
+        max_severity: AnomalySeverity, z_score_threshold: float,
+        time_range: Tuple[datetime, datetime]
+    ) -> Dict[str, Any]:
+        """Prepare parameters for anomaly response object creation."""
+        start_time, end_time = time_range
+        return {
+            'anomalies_detected': True,
+            'anomaly_count': len(data),
+            'anomaly_details': anomaly_details[:50],
+            'confidence_score': 0.85,
+            'severity': max_severity,
+            'threshold_used': z_score_threshold,
+            'analysis_period': {"start": start_time, "end": end_time},
+            'recommended_actions': self._generate_recommendations(max_severity)
+        }
+    
+    def _build_anomaly_response_object(self, params: Dict[str, Any]) -> AnomalyDetectionResponse:
+        """Build AnomalyDetectionResponse object from prepared parameters."""
+        return AnomalyDetectionResponse(**params)
     
     def _convert_to_anomaly_details(self, data: List[Dict], 
                                   metric_name: str) -> List[AnomalyDetail]:
@@ -209,17 +270,31 @@ class AnomalyDetector(BaseExecutionInterface):
         values: Tuple[float, float, float]
     ) -> AnomalyDetail:
         """Create AnomalyDetail object from extracted values."""
+        detail_params = self._prepare_anomaly_detail_params(
+            row, metric_name, values
+        )
+        return self._build_anomaly_detail_object(detail_params)
+    
+    def _prepare_anomaly_detail_params(
+        self, row: Dict, metric_name: str, 
+        values: Tuple[float, float, float]
+    ) -> Dict[str, Any]:
+        """Prepare parameters for anomaly detail object creation."""
         actual_value, expected_value, z_score = values
         deviation_pct = self._calculate_deviation_percentage(actual_value, expected_value)
-        return AnomalyDetail(
-            timestamp=row.get('timestamp', datetime.utcnow()),
-            metric_name=metric_name,
-            actual_value=actual_value,
-            expected_value=expected_value,
-            deviation_percentage=deviation_pct,
-            z_score=z_score,
-            severity=self._determine_severity(z_score)
-        )
+        return {
+            'timestamp': row.get('timestamp', datetime.utcnow()),
+            'metric_name': metric_name,
+            'actual_value': actual_value,
+            'expected_value': expected_value,
+            'deviation_percentage': deviation_pct,
+            'z_score': z_score,
+            'severity': self._determine_severity(z_score)
+        }
+    
+    def _build_anomaly_detail_object(self, params: Dict[str, Any]) -> AnomalyDetail:
+        """Build AnomalyDetail object from prepared parameters."""
+        return AnomalyDetail(**params)
     
     def _calculate_deviation_percentage(self, actual: float, 
                                       expected: float) -> float:

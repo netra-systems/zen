@@ -32,16 +32,20 @@ class PostgreSQLSlowQueryAnalyzer:
         """Get ORDER BY and LIMIT clause for slow queries."""
         return "ORDER BY mean_time DESC LIMIT 20"
     
+    def _format_slow_queries_sql(self, select: str, from_where: str, order_limit: str) -> str:
+        """Format the SQL query string for slow queries."""
+        return f"""
+            {select}
+            {from_where}  -- queries slower than 100ms
+            {order_limit}
+        """
+    
     def _get_slow_queries_sql_text(self) -> str:
         """Get the SQL text for slow query analysis."""
         select_clause = self._get_slow_queries_select_clause()
         from_where_clause = self._get_slow_queries_from_where_clause()
         order_limit_clause = self._get_slow_queries_order_limit_clause()
-        return f"""
-            {select_clause}
-            {from_where_clause}  -- queries slower than 100ms
-            {order_limit_clause}
-        """
+        return self._format_slow_queries_sql(select_clause, from_where_clause, order_limit_clause)
     
     def _build_slow_queries_sql(self) -> text:
         """Build SQL query for slow query analysis."""
@@ -79,11 +83,9 @@ class PostgreSQLSlowQueryAnalyzer:
         """Get subset of WHERE conditions for recommendation."""
         return where_conditions[:3]
     
-    def _create_where_recommendation_data(self, table_name: str, where_conditions: List,
-                                         benefit: float, priority: int) -> Dict[str, Any]:
-        """Create WHERE recommendation data dictionary."""
-        columns = self._get_where_columns_subset(where_conditions)
-        reason = self._build_where_reason_text(where_conditions)
+    def _build_recommendation_dict(self, table_name: str, columns: List, reason: str,
+                                  benefit: float, priority: int) -> Dict[str, Any]:
+        """Build recommendation dictionary with common fields."""
         return {
             "table_name": table_name,
             "columns": columns,
@@ -91,6 +93,13 @@ class PostgreSQLSlowQueryAnalyzer:
             "estimated_benefit": benefit,
             "priority": priority
         }
+    
+    def _create_where_recommendation_data(self, table_name: str, where_conditions: List,
+                                         benefit: float, priority: int) -> Dict[str, Any]:
+        """Create WHERE recommendation data dictionary."""
+        columns = self._get_where_columns_subset(where_conditions)
+        reason = self._build_where_reason_text(where_conditions)
+        return self._build_recommendation_dict(table_name, columns, reason, benefit, priority)
     
     def _build_where_recommendation(self, table_name: str, where_conditions: List, 
                                    benefit: float, priority: int) -> IndexRecommendation:
@@ -124,13 +133,7 @@ class PostgreSQLSlowQueryAnalyzer:
         """Create ORDER BY recommendation data dictionary."""
         columns = self._get_order_columns_subset(order_columns)
         reason = self._build_order_reason_text(order_columns)
-        return {
-            "table_name": table_name,
-            "columns": columns,
-            "reason": reason,
-            "estimated_benefit": benefit,
-            "priority": priority
-        }
+        return self._build_recommendation_dict(table_name, columns, reason, benefit, priority)
     
     def _build_order_recommendation(self, table_name: str, order_columns: List,
                                    benefit: float, priority: int) -> IndexRecommendation:
