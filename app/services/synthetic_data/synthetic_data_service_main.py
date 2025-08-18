@@ -10,12 +10,19 @@ from .analytics_reporter import AnalyticsReporter
 from .advanced_generators import AdvancedGenerators
 from .resource_tracker import ResourceTracker
 from .recovery_mixin import RecoveryMixin
+from .tools import initialize_default_tools
 
 
 class SyntheticDataService(RecoveryMixin):
     """Main synthetic data service that orchestrates all modular functionality"""
     
     def __init__(self):
+        # Initialize core attributes required by tests
+        self.active_jobs: Dict[str, Dict] = {}
+        self.corpus_cache: Dict[str, List[Dict]] = {}
+        self.default_tools = initialize_default_tools()
+        
+        # Initialize modular components
         self.coordinator = GenerationCoordinator()
         self.job_ops = JobOperations()
         self.analytics = AnalyticsReporter()

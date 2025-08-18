@@ -36,7 +36,7 @@ COPY app/logging_config.py ./app/
 COPY app/clients/ ./app/clients/
 COPY app/core/ ./app/core/
 COPY app/db/ ./app/db/
-COPY app/routes/auth/ ./app/routes/auth/
+COPY app/routes/auth_routes/ ./app/routes/auth_routes/
 COPY app/routes/__init__.py ./app/routes/
 COPY app/schemas/ ./app/schemas/
 COPY app/services/security_service.py ./app/services/
