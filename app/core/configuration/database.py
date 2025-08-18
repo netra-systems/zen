@@ -138,7 +138,6 @@ class DatabaseConfigManager:
         """Apply ClickHouse configuration to config objects."""
         self._apply_to_clickhouse_native(config, ch_config)
         self._apply_to_clickhouse_https(config, ch_config)
-        self._apply_to_clickhouse_dev(config, ch_config)
     
     def _apply_to_clickhouse_native(self, config: AppConfig, ch_config: Dict[str, str]) -> None:
         """Apply configuration to ClickHouse native connection."""
@@ -158,13 +157,6 @@ class DatabaseConfigManager:
             config.clickhouse_https.password = ch_config["password"]
             config.clickhouse_https.database = ch_config["database"]
     
-    def _apply_to_clickhouse_dev(self, config: AppConfig, ch_config: Dict[str, str]) -> None:
-        """Apply configuration to ClickHouse development connection."""
-        if hasattr(config, 'clickhouse_https_dev'):
-            config.clickhouse_https_dev.host = ch_config["host"]
-            config.clickhouse_https_dev.user = ch_config.get("dev_user", "development_user")
-            config.clickhouse_https_dev.password = ch_config["password"]
-            config.clickhouse_https_dev.database = ch_config.get("dev_db", "development")
     
     def _set_clickhouse_url(self, config: AppConfig) -> None:
         """Set unified ClickHouse URL for external integrations."""

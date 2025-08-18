@@ -29,7 +29,6 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="langfuse-secret-key", target_models=["langfuse"], target_field="secret_key"),
     SecretReference(name="langfuse-public-key", target_models=["langfuse"], target_field="public_key"),
     SecretReference(name="clickhouse-default-password", target_models=["clickhouse_native", "clickhouse_https"], target_field="password"),
-    SecretReference(name="clickhouse-development-password", target_models=["clickhouse_https_dev"], target_field="password"),
     SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
     SecretReference(name="fernet-key", target_field="fernet_key"),
     SecretReference(name="redis-default", target_models=["redis"], target_field="password"),
@@ -78,14 +77,6 @@ class ClickHouseHTTPSConfig(BaseModel):
     database: str = "default"
 
 
-class ClickHouseHTTPSDevConfig(BaseModel):
-    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
-    port: int = 8443
-    user: str = "development_user"
-    password: str = ""
-    database: str = "development"
-    superuser: bool = True
-
 
 class ClickHouseLoggingConfig(BaseModel):
     enabled: bool = True
@@ -132,7 +123,6 @@ class AppConfig(BaseModel):
     oauth_config: OAuthConfig = Field(default_factory=OAuthConfig)
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
     clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
-    clickhouse_https_dev: ClickHouseHTTPSDevConfig = ClickHouseHTTPSDevConfig()
     clickhouse_logging: ClickHouseLoggingConfig = ClickHouseLoggingConfig()
     langfuse: LangfuseConfig = LangfuseConfig()
     ws_config: WebSocketConfig = Field(default_factory=WebSocketConfig)
