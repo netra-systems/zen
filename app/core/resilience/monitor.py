@@ -17,9 +17,17 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from dataclasses import dataclass, field
 
 from app.logging_config import central_logger
-from app.core.shared_health_types import HealthStatus
 
 logger = central_logger.get_logger(__name__)
+
+
+class HealthStatus(Enum):
+    """Health status for monitoring - local definition to avoid circular imports."""
+    HEALTHY = "healthy"
+    DEGRADED = "degraded"
+    UNHEALTHY = "unhealthy"
+    UNKNOWN = "unknown"
+    CRITICAL = "critical"
 
 
 class AlertSeverity(Enum):

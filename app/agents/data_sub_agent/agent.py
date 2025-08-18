@@ -185,6 +185,14 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             if len(data) >= 10:  # Need sufficient data for trend analysis
                 result["trends"] = self._calculate_trends(data)
                 
+            # Add seasonality analysis for full day data (24 hours)
+            if len(data) >= 24:  
+                result["seasonality"] = self._calculate_seasonality(data)
+            
+            # Add outlier detection for sufficient data points
+            if len(data) >= 5:  # Need at least 5 data points for meaningful outlier detection
+                result["outliers"] = self._detect_outliers(data)
+                
             return result
         except Exception as e:
             logger.error(f"Error analyzing performance metrics: {e}")
@@ -225,9 +233,219 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             "confidence": "medium"
         }
     
+    def _calculate_seasonality(self, data: list) -> Dict[str, Any]:
+        """Calculate seasonality patterns for performance data."""
+        if not data or len(data) < 24:
+            return {"status": "insufficient_data"}
+        
+        # Simple hourly pattern detection
+        hourly_data = {}
+        for i, item in enumerate(data):
+            hour = i % 24  # Assume hourly data
+            if hour not in hourly_data:
+                hourly_data[hour] = []
+            hourly_data[hour].append(item.get('event_count', 0))
+        
+        # Find peak hours
+        avg_by_hour = {hour: sum(counts)/len(counts) for hour, counts in hourly_data.items()}
+        peak_hour = max(avg_by_hour, key=avg_by_hour.get) if avg_by_hour else 0
+        low_hour = min(avg_by_hour, key=avg_by_hour.get) if avg_by_hour else 0
+        
+        return {
+            "detected": True,
+            "peak_hour": peak_hour,
+            "low_hour": low_hour,
+            "peak_value": avg_by_hour.get(peak_hour, 0),
+            "low_value": avg_by_hour.get(low_hour, 0),
+            "confidence": "medium"
+        }
+    
+    def _detect_outliers(self, data: list) -> Dict[str, Any]:
+        """Detect outliers in performance data using simple statistical methods."""
+        if not data or len(data) < 5:
+            return {"detected": False, "reason": "insufficient_data"}
+        
+        # Extract latency values for outlier detection
+        latency_values = [item.get('latency_p50', 0) for item in data if item.get('latency_p50') is not None]
+        
+        if len(latency_values) < 5:
+            return {"detected": False, "reason": "insufficient_latency_data"}
+        
+        # Calculate basic statistics
+        mean_latency = sum(latency_values) / len(latency_values)
+        variance = sum((x - mean_latency) ** 2 for x in latency_values) / len(latency_values)
+        std_dev = variance ** 0.5
+        
+        # Simple outlier detection: values more than 2 standard deviations from mean
+        outlier_threshold = 2.0
+        outliers = []
+        
+        for i, value in enumerate(latency_values):
+            z_score = abs((value - mean_latency) / std_dev) if std_dev > 0 else 0
+            if z_score > outlier_threshold:
+                outliers.append({
+                    "index": i,
+                    "value": value,
+                    "z_score": z_score,
+                    "metric": "latency_p50"
+                })
+        
+        return {
+            "detected": len(outliers) > 0,
+            "count": len(outliers),
+            "latency_outliers": outliers,
+            "threshold": outlier_threshold,
+            "mean_latency": mean_latency,
+            "std_dev": std_dev
+        }
+    
+    async def _detect_anomalies(self, user_id: int, metric_name: str, time_range, z_score_threshold: float = 3.0) -> Dict[str, Any]:
+        """Detect anomalies in metrics data."""
+        try:
+            data = await self._fetch_clickhouse_data(
+                f"SELECT * FROM metrics WHERE user_id = {user_id} AND metric_name = '{metric_name}'",
+                cache_key=f"anomalies_{user_id}_{metric_name}"
+            )
+            if not data:
+                return {"status": "no_data", "message": "No data found for anomaly detection"}
+            
+            # Extract values for anomaly detection
+            values = [item.get('value', 0) for item in data if item.get('value') is not None]
+            if len(values) < 2:
+                return {"status": "insufficient_data", "message": "Need at least 2 data points"}
+            
+            # Detect anomalies using provided z_score or calculate if not available
+            anomalies = []
+            for i, item in enumerate(data):
+                # Use provided z_score if available, otherwise calculate
+                if 'z_score' in item and item['z_score'] is not None:
+                    z_score = abs(item['z_score'])
+                else:
+                    # Fallback: calculate z_score
+                    value = item.get('value', 0)
+                    mean_value = sum(values) / len(values)
+                    variance = sum((x - mean_value) ** 2 for x in values) / len(values)
+                    std_dev = variance ** 0.5
+                    z_score = abs((value - mean_value) / std_dev) if std_dev > 0 else 0
+                
+                if z_score > z_score_threshold:
+                    anomalies.append({
+                        "index": i,
+                        "timestamp": item.get('timestamp'),
+                        "value": item.get('value', 0),
+                        "z_score": z_score
+                    })
+            
+            return {
+                "status": "success",
+                "anomalies_detected": len(anomalies),
+                "anomaly_percentage": (len(anomalies) / len(data)) * 100 if data else 0,
+                "anomalies": anomalies,
+                "threshold": z_score_threshold,
+                "total_data_points": len(data)
+            }
+        except Exception as e:
+            logger.error(f"Error detecting anomalies: {e}")
+            return {"status": "error", "message": str(e)}
+    
+    async def _analyze_usage_patterns(self, user_id: int, days_back: int = 7) -> Dict[str, Any]:
+        """Analyze usage patterns for a user."""
+        try:
+            data = await self._fetch_clickhouse_data(
+                f"SELECT * FROM usage_patterns WHERE user_id = {user_id} AND date_added >= NOW() - INTERVAL {days_back} DAY",
+                cache_key=f"usage_patterns_{user_id}_{days_back}"
+            )
+            if not data:
+                return {"status": "no_data", "message": "No usage pattern data found"}
+            
+            # Analyze hourly patterns
+            hourly_totals = {}
+            for item in data:
+                hour = item.get('hour', 0)
+                total_events = item.get('total_events', 0)
+                if hour not in hourly_totals:
+                    hourly_totals[hour] = []
+                hourly_totals[hour].append(total_events)
+            
+            # Calculate averages
+            hourly_averages = {hour: sum(events)/len(events) for hour, events in hourly_totals.items()}
+            
+            # Find peak and low hours
+            peak_hour = max(hourly_averages, key=hourly_averages.get) if hourly_averages else 0
+            low_hour = min(hourly_averages, key=hourly_averages.get) if hourly_averages else 0
+            
+            return {
+                "status": "success",
+                "hourly_patterns": hourly_averages,
+                "peak_hour": peak_hour,
+                "low_hour": low_hour,
+                "peak_value": hourly_averages.get(peak_hour, 0),
+                "low_value": hourly_averages.get(low_hour, 0),
+                "days_analyzed": days_back
+            }
+        except Exception as e:
+            logger.error(f"Error analyzing usage patterns: {e}")
+            return {"status": "error", "message": str(e)}
+    
+    async def _analyze_correlations(self, user_id: int, metric1: str, metric2: str, time_range) -> Dict[str, Any]:
+        """Analyze correlations between two metrics."""
+        try:
+            data = await self._fetch_clickhouse_data(
+                f"SELECT metric1, metric2 FROM correlations WHERE user_id = {user_id}",
+                cache_key=f"correlations_{user_id}_{metric1}_{metric2}"
+            )
+            if not data or len(data) < 2:
+                return {"status": "insufficient_data", "message": "Need at least 2 data points for correlation"}
+            
+            # Extract metric values
+            values1 = [item.get('metric1', 0) for item in data if item.get('metric1') is not None]
+            values2 = [item.get('metric2', 0) for item in data if item.get('metric2') is not None]
+            
+            if len(values1) != len(values2) or len(values1) < 2:
+                return {"status": "insufficient_data", "message": "Mismatched or insufficient data"}
+            
+            # Calculate Pearson correlation coefficient
+            n = len(values1)
+            sum1 = sum(values1)
+            sum2 = sum(values2)
+            sum1_sq = sum(x * x for x in values1)
+            sum2_sq = sum(x * x for x in values2)
+            sum_products = sum(x * y for x, y in zip(values1, values2))
+            
+            numerator = n * sum_products - sum1 * sum2
+            denominator = ((n * sum1_sq - sum1 * sum1) * (n * sum2_sq - sum2 * sum2)) ** 0.5
+            
+            correlation = numerator / denominator if denominator != 0 else 0
+            
+            # Determine correlation strength
+            abs_corr = abs(correlation)
+            if abs_corr >= 0.7:
+                strength = "strong"
+            elif abs_corr >= 0.3:
+                strength = "moderate"
+            else:
+                strength = "weak"
+            
+            return {
+                "status": "success",
+                "correlation_coefficient": correlation,
+                "correlation_strength": strength,
+                "data_points": n,
+                "metric1": metric1,
+                "metric2": metric2
+            }
+        except Exception as e:
+            logger.error(f"Error analyzing correlations: {e}")
+            return {"status": "error", "message": str(e)}
+    
     async def _get_cached_schema(self, table_name: str) -> Optional[Dict[str, Any]]:
         """Get cached schema information for a table."""
-        return await self.helpers.get_cached_schema(table_name)
+        try:
+            # Call the clickhouse_ops method directly instead of going through helpers
+            return await self.clickhouse_ops.get_table_schema(table_name)
+        except Exception as e:
+            logger.error(f"Error getting cached schema: {e}")
+            return None
     
     def _validate_data(self, data: Dict[str, Any]) -> bool:
         """Validate data has required fields."""
@@ -295,6 +513,42 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
             "id": "saved_123",
             "data": result["data"]
         }
+        
+    async def handle_supervisor_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        """Handle supervisor request with action-based routing."""
+        action = request.get("action")
+        data = request.get("data", {})
+        callback = request.get("callback")
+        
+        if action == "process_data":
+            result = await self.process_data(data)
+        else:
+            result = {"status": "error", "message": f"Unknown action: {action}"}
+        
+        # Call callback if provided
+        if callback:
+            await callback(result)
+            
+        return {"status": "completed", "result": result}
+        
+    async def process_concurrent(self, items: list, max_concurrent: int = 5) -> list:
+        """Process multiple items concurrently with limit."""
+        import asyncio
+        semaphore = asyncio.Semaphore(max_concurrent)
+        
+        async def process_with_semaphore(item):
+            async with semaphore:
+                return await self._process_internal(item)
+        
+        tasks = [process_with_semaphore(item) for item in items]
+        return await asyncio.gather(*tasks)
+    
+    async def process_stream(self, dataset, chunk_size: int = 100):
+        """Process dataset in chunks as async generator."""
+        dataset_list = list(dataset)  # Convert to list to support slicing
+        for i in range(0, len(dataset_list), chunk_size):
+            chunk = dataset_list[i:i + chunk_size]
+            yield chunk
     
     # Health and status monitoring
     def get_health_status(self) -> Dict[str, Any]:

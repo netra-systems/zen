@@ -101,3 +101,11 @@ class ExecutionErrorHandler:
             "timestamp": time.time(),
             "context": context.model_dump() if hasattr(context, 'model_dump') else str(context)
         }
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get error handler health status."""
+        return {
+            "status": "healthy",
+            "cache_size": len(self._fallback_data_cache),
+            "classifier_status": "active"
+        }

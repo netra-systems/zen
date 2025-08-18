@@ -4,7 +4,23 @@ import { NextPage } from 'next';
 import { authService } from '@/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { Shield, Settings, Users, Database, Activity, FileText } from 'lucide-react';
+import { User } from '@/types/registry';
+import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import { Shield, Settings, Users, Database, Activity, FileText, LucideIcon } from 'lucide-react';
+
+interface AdminStat {
+  label: string;
+  value: string;
+  icon: LucideIcon;
+  color: string;
+}
+
+interface AdminSection {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  color: string;
+}
 import { motion } from 'framer-motion';
 
 const AdminPage: NextPage = () => {
@@ -26,7 +42,7 @@ const AdminPage: NextPage = () => {
   );
 };
 
-const useAuth = (loading: boolean, user: any, router: any) => {
+const useAuth = (loading: boolean, user: User | null, router: AppRouterInstance) => {
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
@@ -71,7 +87,7 @@ const AdminQuickStats = () => {
   );
 };
 
-const createStatCard = (stat: any, index: number) => {
+const createStatCard = (stat: AdminStat, index: number) => {
   const Icon = stat.icon;
   return (
     <motion.div
@@ -133,7 +149,7 @@ const AdminDashboard = () => {
   );
 };
 
-const createAdminSectionCard = (section: any, index: number) => {
+const createAdminSectionCard = (section: AdminSection, index: number) => {
   const Icon = section.icon;
   return (
     <motion.div

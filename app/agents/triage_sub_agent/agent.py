@@ -187,7 +187,13 @@ class TriageSubAgent(BaseExecutionInterface, BaseSubAgent):
             "category": "Error",
             "confidence_score": 0.0,
             "error": error_message,
-            "metadata": {"fallback_used": True, "error_details": error_message}
+            "metadata": {
+                "triage_duration_ms": 0,
+                "fallback_used": True, 
+                "error_details": error_message,
+                "cache_hit": False,
+                "retry_count": 0
+            }
         }
     
     def get_health_status(self) -> dict:

@@ -16,8 +16,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Any, Protocol, Union
 from pydantic import BaseModel, Field
 
-from app.core.resilience.monitor import AlertSeverity as CanonicalAlertSeverity
-from app.core.shared_health_types import HealthStatus
+from app.core.resilience.monitor import AlertSeverity as CanonicalAlertSeverity, HealthStatus
 
 
 # === Core Monitoring Enums ===
