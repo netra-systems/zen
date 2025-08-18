@@ -51,7 +51,20 @@ class CRUDUser(EnhancedCRUDService[User, UserCreate, UserUpdate]):
         result = await db.execute(select(User).offset(skip).limit(limit))
         return result.scalars().all()
 
+    async def get_or_create(self, db: AsyncSession, *, obj_in: UserCreate) -> User:
+        """Get existing user by email or create new one."""
+        existing_user = await self.get_by_email(db, email=obj_in.email)
+        if existing_user:
+            return existing_user
+        return await self.create(db, obj_in=obj_in)
+    
     async def create(self, db: AsyncSession, *, obj_in: UserCreate) -> User:
+        # Check if user already exists with this email
+        existing_user = await self.get_by_email(db, email=obj_in.email)
+        if existing_user:
+            return existing_user
+        
+        # Create new user if doesn't exist
         obj_in_data = jsonable_encoder(obj_in)
         del obj_in_data['password']
         hashed_password = pwd_context.hash(obj_in.password)
