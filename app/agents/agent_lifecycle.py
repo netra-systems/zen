@@ -63,8 +63,12 @@ class AgentLifecycleMixin(ABC):
         except WebSocketDisconnect as e:
             await self._handle_websocket_disconnect(e, state, run_id, stream_updates)
         except Exception as e:
-            await self._handle_execution_error(e, state, run_id, stream_updates)
-            raise
+            await self._handle_and_reraise_error(e, state, run_id, stream_updates)
+    
+    async def _handle_and_reraise_error(self, e: Exception, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+        """Handle execution error and reraise."""
+        await self._handle_execution_error(e, state, run_id, stream_updates)
+        raise
     
     async def _handle_entry_conditions(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> bool:
         """Handle entry condition checks and failures."""
@@ -78,11 +82,15 @@ class AgentLifecycleMixin(ABC):
         if not (stream_updates and self.websocket_manager):
             return
         try:
-            ws_user_id = self._get_websocket_user_id(run_id)
-            message = f"Entry conditions not met for {self.name}"
-            await self.websocket_manager.send_agent_log(ws_user_id, "warning", message, self.name)
+            await self._send_websocket_warning(run_id)
         except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
             self.logger.debug(f"WebSocket disconnected when sending warning: {e}")
+    
+    async def _send_websocket_warning(self, run_id: str) -> None:
+        """Send WebSocket warning about entry conditions."""
+        ws_user_id = self._get_websocket_user_id(run_id)
+        message = f"Entry conditions not met for {self.name}"
+        await self.websocket_manager.send_agent_log(ws_user_id, "warning", message, self.name)
     
     async def _handle_websocket_disconnect(self, e: WebSocketDisconnect, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Handle WebSocket disconnection during execution."""
@@ -100,11 +108,15 @@ class AgentLifecycleMixin(ABC):
         if not (stream_updates and self.websocket_manager):
             return
         try:
-            ws_user_id = self._get_websocket_user_id(run_id)
-            error_message = f"{self.name} encountered an error: {str(error)}"
-            await self.websocket_manager.send_error(ws_user_id, error_message, self.name)
+            await self._send_websocket_error(error, run_id)
         except (WebSocketDisconnect, RuntimeError, ConnectionError):
             self.logger.debug(f"WebSocket disconnected when sending error")
+    
+    async def _send_websocket_error(self, error: Exception, run_id: str) -> None:
+        """Send WebSocket error notification."""
+        ws_user_id = self._get_websocket_user_id(run_id)
+        error_message = f"{self.name} encountered an error: {str(error)}"
+        await self.websocket_manager.send_error(ws_user_id, error_message, self.name)
     
     @abstractmethod
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:

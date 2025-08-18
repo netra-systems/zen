@@ -40,40 +40,64 @@ async def ingest_batch_to_clickhouse(table_name: str, batch: List[Dict], get_cli
     if not batch:
         return
     
-    # Convert complex fields to JSON strings
-    for record in batch:
-        record["request_payload"] = json.dumps(record["request_payload"])
-        record["response_payload"] = json.dumps(record["response_payload"])
-        record["metrics"] = json.dumps(record["metrics"])
-    
-    # Insert batch
+    _prepare_batch_for_insertion(batch)
     async with get_clickhouse_client() as client:
-        # Prepare values for insertion
-        values = []
-        for record in batch:
-            values.append([
-                record["event_id"],
-                record["trace_id"],
-                record["span_id"],
-                record["parent_span_id"],
-                record["timestamp_utc"],
-                record["workload_type"],
-                record["agent_type"],
-                record["tool_invocations"],
-                record["request_payload"],
-                record["response_payload"],
-                record["metrics"],
-                record["corpus_reference_id"]
-            ])
-        
-        await client.execute(
-            f"""INSERT INTO {table_name} 
-            (event_id, trace_id, span_id, parent_span_id, timestamp_utc, 
-             workload_type, agent_type, tool_invocations, request_payload, 
-             response_payload, metrics, corpus_reference_id)
-            VALUES""",
-            values
-        )
+        values = _extract_values_from_batch(batch)
+        await _execute_batch_insertion(client, table_name, values)
+
+
+def _prepare_batch_for_insertion(batch: List[Dict]) -> None:
+    """Convert complex fields to JSON strings"""
+    for record in batch:
+        _convert_record_payloads_to_json(record)
+
+
+def _convert_record_payloads_to_json(record: Dict) -> None:
+    """Convert record payloads to JSON strings"""
+    record["request_payload"] = json.dumps(record["request_payload"])
+    record["response_payload"] = json.dumps(record["response_payload"])
+    record["metrics"] = json.dumps(record["metrics"])
+
+
+def _extract_values_from_batch(batch: List[Dict]) -> List[List]:
+    """Extract values from batch for insertion"""
+    values = []
+    for record in batch:
+        values.append(_extract_record_values(record))
+    return values
+
+
+def _extract_record_values(record: Dict) -> List:
+    """Extract values from a single record"""
+    return [
+        record["event_id"],
+        record["trace_id"],
+        record["span_id"],
+        record["parent_span_id"],
+        record["timestamp_utc"],
+        record["workload_type"],
+        record["agent_type"],
+        record["tool_invocations"],
+        record["request_payload"],
+        record["response_payload"],
+        record["metrics"],
+        record["corpus_reference_id"]
+    ]
+
+
+async def _execute_batch_insertion(client, table_name: str, values: List[List]) -> None:
+    """Execute batch insertion into ClickHouse"""
+    insert_query = _build_insert_query(table_name)
+    await client.execute(insert_query, values)
+
+
+def _build_insert_query(table_name: str) -> str:
+    """Build INSERT query for ClickHouse"""
+    return f"""INSERT INTO {table_name} 
+    (event_id, trace_id, span_id, parent_span_id, timestamp_utc, 
+     workload_type, agent_type, tool_invocations, request_payload, 
+     response_payload, metrics, corpus_reference_id)
+    VALUES"""
 
 
 async def ingest_batch(records: List[Dict], table_name: str = None, batch_size: int = 100, 

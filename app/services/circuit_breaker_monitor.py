@@ -157,13 +157,9 @@ class CircuitBreakerMonitor:
     
     async def _create_open_circuit_alert(self, circuit_name: str, new_state: str, status: Dict[str, Any]) -> None:
         """Create alert for opened circuit breaker."""
-        await self._create_alert(
-            circuit_name=circuit_name,
-            severity=AlertSeverity.HIGH,
-            message=f"Circuit breaker OPENED due to failures",
-            state=new_state,
-            metrics=status.get("metrics", {})
-        )
+        message = "Circuit breaker OPENED due to failures"
+        metrics = status.get("metrics", {})
+        await self._create_alert(circuit_name, AlertSeverity.HIGH, message, new_state, metrics)
     
     async def _check_alerts(self, circuit_name: str, status: Dict[str, Any]) -> None:
         """Check for alert conditions."""
@@ -205,12 +201,8 @@ class CircuitBreakerMonitor:
             except Exception as e:
                 logger.error(f"Alert handler error: {e}")
 
-    async def _create_alert(self, 
-                           circuit_name: str,
-                           severity: AlertSeverity,
-                           message: str,
-                           state: str,
-                           metrics: Dict[str, Any]) -> None:
+    async def _create_alert(self, circuit_name: str, severity: AlertSeverity, message: str, 
+                           state: str, metrics: Dict[str, Any]) -> None:
         """Create and dispatch alert."""
         alert = self._build_alert(circuit_name, severity, message, state, metrics)
         self._store_alert(alert)
@@ -243,16 +235,11 @@ class CircuitBreakerMonitor:
     
     def get_health_summary(self) -> Dict[str, Any]:
         """Get health summary of all circuits."""
-        from .circuit_breaker_helpers import build_health_summary_base, categorize_circuit_state
+        from .circuit_breaker_helpers import build_health_summary_base, populate_health_summary
         summary = build_health_summary_base()
-        summary["total_circuits"] = len(self._last_states)
-        summary["recent_events"] = len(self.get_recent_events(10))
-        summary["recent_alerts"] = len(self.get_recent_alerts(10))
-        
-        for state in self._last_states.values():
-            category = categorize_circuit_state(state)
-            summary[f"{category}_circuits"] += 1
-        
+        recent_events_count = len(self.get_recent_events(10))
+        recent_alerts_count = len(self.get_recent_alerts(10))
+        populate_health_summary(summary, self._last_states, recent_events_count, recent_alerts_count)
         return summary
 
 
@@ -266,56 +253,39 @@ class CircuitBreakerMetricsCollector:
         """Collect current metrics from all circuits."""
         all_status = await circuit_registry.get_all_status()
         timestamp = datetime.now(UTC)
-        
         for circuit_name, status in all_status.items():
             metrics = self._extract_metrics(status, timestamp)
             self._store_metrics(circuit_name, metrics)
-        
         return all_status
     
     def _extract_metrics(self, status: Dict[str, Any], timestamp: datetime) -> Dict[str, Any]:
         """Extract key metrics from circuit status."""
-        return {
-            "timestamp": timestamp,
-            "state": status.get("state", "unknown"),
-            "success_rate": status.get("success_rate", 0.0),
-            "failure_count": status.get("failure_count", 0),
-            "total_calls": status.get("metrics", {}).get("total_calls", 0),
-            "rejected_calls": status.get("metrics", {}).get("rejected_calls", 0),
-            "timeouts": status.get("metrics", {}).get("timeouts", 0)
-        }
+        from .circuit_breaker_helpers import extract_metrics_from_status
+        return extract_metrics_from_status(status, timestamp)
     
     def _store_metrics(self, circuit_name: str, metrics: Dict[str, Any]) -> None:
         """Store metrics with history trimming."""
-        if circuit_name not in self._metrics_history:
-            self._metrics_history[circuit_name] = []
-        
+        from .circuit_breaker_helpers import initialize_circuit_history, trim_metrics_history
+        initialize_circuit_history(self._metrics_history, circuit_name)
         self._metrics_history[circuit_name].append(metrics)
-        
-        # Keep last 1000 entries
-        if len(self._metrics_history[circuit_name]) > 1000:
-            self._metrics_history[circuit_name] = self._metrics_history[circuit_name][-1000:]
+        self._metrics_history[circuit_name] = trim_metrics_history(self._metrics_history[circuit_name])
     
     def get_metrics_history(self, circuit_name: str, hours: int = 24) -> List[Dict[str, Any]]:
         """Get metrics history for circuit."""
         if circuit_name not in self._metrics_history:
             return []
         
+        from .circuit_breaker_helpers import filter_metrics_by_time
         cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
-        return [
-            m for m in self._metrics_history[circuit_name]
-            if m["timestamp"] >= cutoff_time
-        ]
+        return filter_metrics_by_time(self._metrics_history[circuit_name], cutoff_time)
     
     def get_aggregated_metrics(self, hours: int = 1) -> Dict[str, Dict[str, Any]]:
         """Get aggregated metrics for all circuits."""
         aggregated = {}
-        
         for circuit_name in self._metrics_history.keys():
             history = self.get_metrics_history(circuit_name, hours)
             if history:
                 aggregated[circuit_name] = self._aggregate_history(history)
-        
         return aggregated
     
     def _aggregate_history(self, history: List[Dict[str, Any]]) -> Dict[str, Any]:
@@ -323,16 +293,9 @@ class CircuitBreakerMetricsCollector:
         if not history:
             return {}
         
-        total_calls = sum(m.get("total_calls", 0) for m in history)
-        success_rates = [m.get("success_rate", 0.0) for m in history if m.get("total_calls", 0) > 0]
-        
-        return {
-            "avg_success_rate": sum(success_rates) / len(success_rates) if success_rates else 0.0,
-            "total_calls": total_calls,
-            "total_rejections": sum(m.get("rejected_calls", 0) for m in history),
-            "total_timeouts": sum(m.get("timeouts", 0) for m in history),
-            "state_changes": len(set(m.get("state", "unknown") for m in history)) - 1
-        }
+        from .circuit_breaker_helpers import calculate_aggregated_totals, build_aggregated_metrics
+        total_calls, success_rates = calculate_aggregated_totals(history)
+        return build_aggregated_metrics(total_calls, success_rates, history)
 
 
 # Global monitoring instances
@@ -354,30 +317,27 @@ circuit_monitor.add_alert_handler(default_alert_handler)
 
 async def get_circuit_health_dashboard() -> Dict[str, Any]:
     """Get comprehensive circuit breaker health dashboard."""
+    from .circuit_breaker_helpers import build_event_data, build_alert_data
     health_summary = circuit_monitor.get_health_summary()
     recent_events = circuit_monitor.get_recent_events(20)
     recent_alerts = circuit_monitor.get_recent_alerts(10)
     aggregated_metrics = metrics_collector.get_aggregated_metrics(1)
-    
+    return _build_dashboard_response(health_summary, recent_events, recent_alerts, aggregated_metrics)
+
+
+def _build_dashboard_response(health_summary, recent_events, recent_alerts, aggregated_metrics) -> Dict[str, Any]:
+    """Build dashboard response dictionary."""
+    from .circuit_breaker_helpers import build_event_data, build_alert_data
+    event_data = build_event_data(recent_events)
+    alert_data = build_alert_data(recent_alerts)
+    return _create_dashboard_dict(health_summary, event_data, alert_data, aggregated_metrics)
+
+
+def _create_dashboard_dict(health_summary, event_data, alert_data, aggregated_metrics) -> Dict[str, Any]:
+    """Create dashboard dictionary with all components."""
     return {
         "summary": health_summary,
-        "recent_events": [
-            {
-                "circuit": event.circuit_name,
-                "transition": f"{event.old_state} -> {event.new_state}",
-                "timestamp": event.timestamp.isoformat(),
-                "success_rate": event.success_rate
-            }
-            for event in recent_events
-        ],
-        "recent_alerts": [
-            {
-                "circuit": alert.circuit_name,
-                "severity": alert.severity.value,
-                "message": alert.message,
-                "timestamp": alert.timestamp.isoformat()
-            }
-            for alert in recent_alerts
-        ],
+        "recent_events": event_data,
+        "recent_alerts": alert_data,
         "metrics": aggregated_metrics
     }

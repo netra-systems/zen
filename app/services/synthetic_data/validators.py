@@ -46,42 +46,78 @@ async def validate_distribution(records: List[Dict], expected_distribution: str 
     """Validate statistical distribution"""
     ValidationResult = namedtuple('ValidationResult', ['chi_square_p_value', 'ks_test_p_value', 'distribution_match'])
     
-    # Extract numeric values for distribution analysis
-    if not records:
+    values = _extract_latency_values(records)
+    if not _has_sufficient_samples(values):
         return ValidationResult(0.0, 0.0, False)
     
-    # Extract latency values for distribution testing
+    statistics_data = _calculate_statistics(values)
+    p_values = _calculate_p_values(statistics_data, expected_distribution)
+    return _create_validation_result(ValidationResult, p_values, tolerance)
+
+
+def _extract_latency_values(records: List[Dict]) -> List[float]:
+    """Extract numeric latency values from records"""
+    if not records:
+        return []
+    
     values = []
     for record in records:
-        if 'latency_ms' in record:
-            try:
-                val = float(record['latency_ms'])
-                values.append(val)
-            except (ValueError, TypeError):
-                continue
-    
-    if len(values) < 10:  # Need minimum samples
-        return ValidationResult(0.0, 0.0, False)
-    
-    # Simple statistical validation using statistics module
+        if value := _get_valid_latency(record):
+            values.append(value)
+    return values
+
+
+def _get_valid_latency(record: Dict) -> Optional[float]:
+    """Get valid latency value from record"""
+    if 'latency_ms' not in record:
+        return None
+    try:
+        return float(record['latency_ms'])
+    except (ValueError, TypeError):
+        return None
+
+
+def _has_sufficient_samples(values: List[float]) -> bool:
+    """Check if we have sufficient samples for analysis"""
+    return len(values) >= 10
+
+
+def _calculate_statistics(values: List[float]) -> Dict[str, float]:
+    """Calculate basic statistics for values"""
     mean_val = statistics.mean(values)
     std_val = statistics.stdev(values) if len(values) > 1 else 0
-    
-    # Basic normality check using 68-95-99.7 rule
-    within_1_std = sum(1 for v in values if abs(v - mean_val) <= std_val) / len(values) if std_val > 0 else 0
-    within_2_std = sum(1 for v in values if abs(v - mean_val) <= 2*std_val) / len(values) if std_val > 0 else 0
-    
-    # Approximate p-values based on distribution
+    within_1_std = _calculate_std_ratio(values, mean_val, std_val, 1)
+    within_2_std = _calculate_std_ratio(values, mean_val, std_val, 2)
+    return {'mean': mean_val, 'std': std_val, 'within_1_std': within_1_std, 'within_2_std': within_2_std}
+
+
+def _calculate_std_ratio(values: List[float], mean_val: float, std_val: float, std_multiplier: int) -> float:
+    """Calculate ratio of values within standard deviation"""
+    if std_val == 0:
+        return 0
+    within_std = sum(1 for v in values if abs(v - mean_val) <= std_multiplier * std_val)
+    return within_std / len(values)
+
+
+def _calculate_p_values(stats: Dict[str, float], expected_distribution: str) -> Dict[str, float]:
+    """Calculate p-values based on distribution type"""
     if expected_distribution == "normal":
-        chi_square_p = 0.10 if within_1_std > 0.60 else 0.03
-        ks_test_p = 0.10 if within_2_std > 0.90 else 0.03
+        chi_square_p = 0.10 if stats['within_1_std'] > 0.60 else 0.03
+        ks_test_p = 0.10 if stats['within_2_std'] > 0.90 else 0.03
     else:
         chi_square_p = 0.10
         ks_test_p = 0.10
-    
-    distribution_match = chi_square_p > tolerance and ks_test_p > tolerance
-    
-    return ValidationResult(chi_square_p, ks_test_p, distribution_match)
+    return {'chi_square_p': chi_square_p, 'ks_test_p': ks_test_p}
+
+
+def _create_validation_result(ValidationResult, p_values: Dict[str, float], tolerance: float):
+    """Create final validation result"""
+    distribution_match = p_values['chi_square_p'] > tolerance and p_values['ks_test_p'] > tolerance
+    return ValidationResult(
+        p_values['chi_square_p'], 
+        p_values['ks_test_p'], 
+        distribution_match
+    )
 
 
 async def validate_referential_integrity(traces: List[Dict]):

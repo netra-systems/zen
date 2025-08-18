@@ -48,12 +48,23 @@ class ModernTriageSubAgent(BaseExecutionInterface):
         
     def _init_execution_system(self) -> None:
         """Initialize standardized execution system."""
-        # Create reliability manager with circuit breaker and retry
-        circuit_config = CircuitBreakerConfig(
+        circuit_config = self._create_circuit_config()
+        retry_config = self._create_retry_config()
+        self._setup_execution_components(circuit_config, retry_config)
+        
+    def _create_circuit_config(self) -> CircuitBreakerConfig:
+        """Create circuit breaker configuration."""
+        return CircuitBreakerConfig(
             failure_threshold=3, recovery_timeout=30.0, name="TriageSubAgent"
         )
-        retry_config = RetryConfig(max_retries=2, base_delay=1.0, max_delay=10.0)
         
+    def _create_retry_config(self) -> RetryConfig:
+        """Create retry configuration."""
+        return RetryConfig(max_retries=2, base_delay=1.0, max_delay=10.0)
+        
+    def _setup_execution_components(self, circuit_config: CircuitBreakerConfig, 
+                                   retry_config: RetryConfig) -> None:
+        """Setup execution system components."""
         self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
         self.monitor = ExecutionMonitor()
         self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
@@ -75,26 +86,30 @@ class ModernTriageSubAgent(BaseExecutionInterface):
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute triage-specific core logic."""
         user_request = context.state.user_request
-        
-        # Send status update
         await self.send_status_update(context, "analyzing", "Analyzing user request...")
         
-        # Check cache first
+        cached_result = await self._try_cache_retrieval(context, user_request)
+        if cached_result:
+            return cached_result
+            
+        return await self._perform_full_triage(context, user_request)
+        
+    async def _try_cache_retrieval(self, context: ExecutionContext, 
+                                  user_request: str) -> Optional[Dict[str, Any]]:
+        """Try to retrieve cached triage result."""
         cached_result = await self._check_triage_cache(user_request)
         if cached_result:
             await self.send_status_update(context, "cached", "Using cached triage result")
             return cached_result
+        return None
         
-        # Perform LLM-based triage
+    async def _perform_full_triage(self, context: ExecutionContext, 
+                                  user_request: str) -> Dict[str, Any]:
+        """Perform full triage analysis."""
         await self.send_status_update(context, "processing", "Processing with LLM...")
         triage_result = await self._perform_llm_triage(user_request)
-        
-        # Cache the result
         await self._cache_triage_result(user_request, triage_result)
-        
-        # Enrich with metadata
         enriched_result = await self._enrich_triage_result(triage_result, context)
-        
         await self.send_status_update(context, "completed", "Triage analysis complete")
         return enriched_result
     
@@ -103,29 +118,41 @@ class ModernTriageSubAgent(BaseExecutionInterface):
     async def execute(self, state: DeepAgentState, run_id: str, 
                      stream_updates: bool = False) -> None:
         """Execute triage with standardized execution engine."""
-        # Create execution context
-        context = ExecutionContext(
-            run_id=run_id,
-            agent_name=self.agent_name,
-            state=state,
-            stream_updates=stream_updates,
-            thread_id=getattr(state, 'chat_thread_id', None),
-            user_id=getattr(state, 'user_id', None)
-        )
-        
-        # Execute through the standardized engine
+        context = self._create_execution_context(state, run_id, stream_updates)
         result = await self.execution_engine.execute(self, context)
+        self._set_execution_result(state, result)
         
-        # Set result in state based on execution outcome
+    def _create_execution_context(self, state: DeepAgentState, run_id: str,
+                                 stream_updates: bool) -> ExecutionContext:
+        """Create execution context for triage."""
+        context_params = self._get_context_params(state, run_id, stream_updates)
+        return ExecutionContext(**context_params)
+        
+    def _get_context_params(self, state: DeepAgentState, run_id: str, 
+                           stream_updates: bool) -> Dict[str, Any]:
+        """Get execution context parameters."""
+        return {
+            'run_id': run_id, 'agent_name': self.agent_name, 'state': state,
+            'stream_updates': stream_updates,
+            'thread_id': getattr(state, 'chat_thread_id', None),
+            'user_id': getattr(state, 'user_id', None)
+        }
+        
+    def _set_execution_result(self, state: DeepAgentState, 
+                             result: ExecutionResult) -> None:
+        """Set execution result in agent state."""
         if result.success:
             state.triage_result = result.result
         else:
-            # Handle execution failure
-            state.triage_result = {
-                "status": "failed",
-                "error": result.error,
-                "fallback_used": result.fallback_used
-            }
+            state.triage_result = self._create_failure_result(result)
+            
+    def _create_failure_result(self, result: ExecutionResult) -> Dict[str, Any]:
+        """Create failure result dictionary."""
+        return {
+            "status": "failed",
+            "error": result.error,
+            "fallback_used": result.fallback_used
+        }
     
     # Private implementation methods
     
@@ -145,23 +172,20 @@ class ModernTriageSubAgent(BaseExecutionInterface):
     async def _perform_llm_triage(self, user_request: str) -> Dict[str, Any]:
         """Perform LLM-based triage analysis."""
         try:
-            # Build enhanced prompt
             prompt = self._build_triage_prompt(user_request)
-            
-            # Call LLM
             llm_response = await self.llm_manager.ask_llm(prompt, "default")
-            
-            # Parse and validate response
-            triage_result = self._parse_llm_response(llm_response)
-            
-            return triage_result
-            
+            return self._parse_llm_response(llm_response)
         except Exception as e:
             raise LLMError(f"LLM triage failed: {str(e)}")
     
     def _build_triage_prompt(self, user_request: str) -> str:
         """Build enhanced triage prompt."""
-        return f"""
+        template = self._get_triage_prompt_template()
+        return template.format(user_request=user_request)
+        
+    def _get_triage_prompt_template(self) -> str:
+        """Get triage prompt template."""
+        return """
         Analyze this user request and categorize it:
         
         Request: {user_request}
@@ -175,20 +199,20 @@ class ModernTriageSubAgent(BaseExecutionInterface):
     
     def _parse_llm_response(self, llm_response: str) -> Dict[str, Any]:
         """Parse and validate LLM response."""
+        import json
         try:
-            import json
             result = json.loads(llm_response)
-            
-            # Validate required fields
-            required_fields = ["category", "confidence", "suggested_tools"]
-            for field in required_fields:
-                if field not in result:
-                    raise ValidationError(f"Missing required field: {field}")
-            
+            self._validate_llm_result_fields(result)
             return result
-            
         except json.JSONDecodeError:
             raise ValidationError("Invalid JSON response from LLM")
+            
+    def _validate_llm_result_fields(self, result: Dict[str, Any]) -> None:
+        """Validate required fields in LLM result."""
+        required_fields = ["category", "confidence", "suggested_tools"]
+        for field in required_fields:
+            if field not in result:
+                raise ValidationError(f"Missing required field: {field}")
     
     async def _cache_triage_result(self, user_request: str, 
                                  result: Dict[str, Any]) -> None:
@@ -247,9 +271,16 @@ class ModernTriageSubAgent(BaseExecutionInterface):
 # Factory function for creating modernized agents
 def create_modern_agent(agent_class, *args, **kwargs):
     """Factory function to create agents with standardized execution."""
+    _validate_agent_class(agent_class)
+    return _instantiate_agent(agent_class, *args, **kwargs)
+    
+def _validate_agent_class(agent_class) -> None:
+    """Validate agent class inheritance."""
     if not issubclass(agent_class, BaseExecutionInterface):
         raise ValueError(f"Agent class {agent_class.__name__} must inherit from BaseExecutionInterface")
-    
+        
+def _instantiate_agent(agent_class, *args, **kwargs):
+    """Instantiate agent with error handling."""
     try:
         return agent_class(*args, **kwargs)
     except Exception as e:
@@ -261,29 +292,46 @@ def migrate_agent_to_base_interface(legacy_agent_class):
     """Helper to migrate legacy agents to use base interface."""
     from typing import Type, get_type_hints
     
-    # Check if agent already inherits from BaseExecutionInterface
     if issubclass(legacy_agent_class, BaseExecutionInterface):
         return legacy_agent_class
+    _validate_legacy_agent(legacy_agent_class)
+    return _create_migrated_agent_wrapper(legacy_agent_class)
     
+def _validate_legacy_agent(legacy_agent_class) -> None:
+    """Validate legacy agent has required methods."""
     if not hasattr(legacy_agent_class, 'execute'):
         raise ValueError(f"Legacy agent {legacy_agent_class.__name__} must have execute method")
+        
+def _create_migrated_agent_wrapper(legacy_agent_class):
+    """Create wrapper class for legacy agent."""
+    return _build_migrated_agent_class(legacy_agent_class)
     
-    # Create wrapper to adapt legacy agent to new interface
+def _build_migrated_agent_class(legacy_agent_class):
+    """Build the migrated agent class definition."""
     class MigratedAgent(BaseExecutionInterface):
         def __init__(self, *args, **kwargs):
             super().__init__(legacy_agent_class.__name__)
             self.legacy_agent = legacy_agent_class(*args, **kwargs)
         
         async def validate_preconditions(self, context: ExecutionContext) -> bool:
-            if hasattr(self.legacy_agent, 'check_entry_conditions'):
-                return await self.legacy_agent.check_entry_conditions(context.state, context.run_id)
-            return True
+            return await _check_legacy_preconditions(self.legacy_agent, context)
         
         async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-            await self.legacy_agent.execute(context.state, context.run_id, context.stream_updates)
-            return {"migrated": True, "agent": legacy_agent_class.__name__}
+            return await _execute_legacy_logic(self.legacy_agent, context, legacy_agent_class)
     
     return MigratedAgent
+    
+async def _check_legacy_preconditions(legacy_agent, context: ExecutionContext) -> bool:
+    """Check preconditions for legacy agent."""
+    if hasattr(legacy_agent, 'check_entry_conditions'):
+        return await legacy_agent.check_entry_conditions(context.state, context.run_id)
+    return True
+    
+async def _execute_legacy_logic(legacy_agent, context: ExecutionContext, 
+                               legacy_class) -> Dict[str, Any]:
+    """Execute legacy agent logic."""
+    await legacy_agent.execute(context.state, context.run_id, context.stream_updates)
+    return {"migrated": True, "agent": legacy_class.__name__}
 
 
 class AgentMigrationGuide:
@@ -302,13 +350,9 @@ class AgentMigrationGuide:
     def get_migration_checklist() -> Dict[str, str]:
         """Get migration checklist for agents."""
         return {
-            "inherit_base_interface": "Change inheritance to BaseExecutionInterface",
-            "implement_abstract_methods": "Implement validate_preconditions() and execute_core_logic()",
-            "init_execution_system": "Initialize reliability manager, monitor, and execution engine",
-            "update_execute_method": "Use execution engine for execute() method",
-            "add_health_methods": "Add get_health_status() and get_performance_metrics()",
-            "maintain_compatibility": "Keep existing public methods for backward compatibility",
-            "test_integration": "Run comprehensive tests to validate integration"
+            **_get_inheritance_steps(),
+            **_get_implementation_steps(),
+            **_get_validation_steps()
         }
     
     @staticmethod
@@ -322,3 +366,26 @@ class AgentMigrationGuide:
             "maintainability": "Centralized improvements benefit all agents",
             "scalability": "Better resource management and rate limiting"
         }
+
+        
+def _get_inheritance_steps() -> Dict[str, str]:
+    """Get inheritance migration steps."""
+    return {
+        "inherit_base_interface": "Change inheritance to BaseExecutionInterface",
+        "implement_abstract_methods": "Implement validate_preconditions() and execute_core_logic()"
+    }
+    
+def _get_implementation_steps() -> Dict[str, str]:
+    """Get implementation migration steps."""
+    return {
+        "init_execution_system": "Initialize reliability manager, monitor, and execution engine",
+        "update_execute_method": "Use execution engine for execute() method",
+        "add_health_methods": "Add get_health_status() and get_performance_metrics()"
+    }
+    
+def _get_validation_steps() -> Dict[str, str]:
+    """Get validation migration steps."""
+    return {
+        "maintain_compatibility": "Keep existing public methods for backward compatibility",
+        "test_integration": "Run comprehensive tests to validate integration"
+    }

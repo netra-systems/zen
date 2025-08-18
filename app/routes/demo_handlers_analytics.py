@@ -10,11 +10,23 @@ async def handle_demo_analytics(
     """Get demo analytics summary."""
     from app.routes.demo_handlers_utils import validate_admin_access
     validate_admin_access(current_user)
+    return await execute_analytics_with_error_handling(demo_service, days)
+
+
+async def execute_analytics_with_error_handling(
+    demo_service: DemoService, days: int
+) -> Dict[str, Any]:
+    """Execute analytics with error handling."""
     try:
         return await get_analytics_from_service(demo_service, days)
     except Exception as e:
-        from app.routes.demo_handlers_utils import log_and_raise_error
-        log_and_raise_error("Failed to get analytics", e)
+        handle_analytics_error(e)
+
+
+def handle_analytics_error(e: Exception) -> None:
+    """Handle analytics error."""
+    from app.routes.demo_handlers_utils import log_and_raise_error
+    log_and_raise_error("Failed to get analytics", e)
 
 
 async def get_analytics_from_service(demo_service: DemoService, days: int) -> Dict[str, Any]:

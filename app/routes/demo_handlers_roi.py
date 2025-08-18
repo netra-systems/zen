@@ -38,11 +38,23 @@ async def calculate_roi_metrics(
     request: ROICalculationRequest, demo_service: DemoService
 ) -> Dict[str, Any]:
     """Calculate ROI metrics using demo service."""
+    return await execute_roi_with_error_handling(request, demo_service)
+
+
+async def execute_roi_with_error_handling(
+    request: ROICalculationRequest, demo_service: DemoService
+) -> Dict[str, Any]:
+    """Execute ROI calculation with error handling."""
     try:
         return await execute_roi_calculation(request, demo_service)
     except Exception as e:
-        from app.routes.demo_handlers_utils import log_and_raise_error
-        log_and_raise_error("ROI calculation failed", e)
+        handle_roi_error(e)
+
+
+def handle_roi_error(e: Exception) -> None:
+    """Handle ROI calculation error."""
+    from app.routes.demo_handlers_utils import log_and_raise_error
+    log_and_raise_error("ROI calculation failed", e)
 
 
 def create_roi_tracking_data(request: ROICalculationRequest, result: Dict[str, Any]) -> Dict[str, Any]:

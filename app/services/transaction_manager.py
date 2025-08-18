@@ -160,13 +160,17 @@ class ClickHouseOperationManager:
         
         try:
             success = await self._execute_compensation(operation_id)
-            if success:
-                del self.operation_records[operation_id]
-                logger.debug(f"Compensated ClickHouse operations: {operation_id}")
+            self._handle_successful_compensation(operation_id, success)
             return success
         except Exception as e:
             logger.error(f"ClickHouse compensation failed: {e}")
             return False
+    
+    def _handle_successful_compensation(self, operation_id: str, success: bool) -> None:
+        """Handle successful compensation cleanup."""
+        if success:
+            del self.operation_records[operation_id]
+            logger.debug(f"Compensated ClickHouse operations: {operation_id}")
     
     async def _execute_compensation(self, operation_id: str) -> bool:
         """Execute compensation for operation records."""
@@ -206,10 +210,18 @@ class TransactionManager:
     
     def _register_default_handlers(self) -> None:
         """Register default compensation handlers."""
-        handlers = [
+        handlers = self._get_default_handler_mappings()
+        self._register_handlers(handlers)
+    
+    def _get_default_handler_mappings(self) -> List:
+        """Get default handler mappings."""
+        return [
             (OperationType.DATABASE_WRITE, self._compensate_postgres_write),
             (OperationType.DATABASE_READ, self._compensate_postgres_read)
         ]
+    
+    def _register_handlers(self, handlers: List) -> None:
+        """Register all handlers from list."""
         for operation_type, handler in handlers:
             self.compensation_registry.register(operation_type, handler)
     
@@ -237,14 +249,17 @@ class TransactionManager:
     ) -> str:
         """Add operation to transaction."""
         self._validate_transaction_exists(transaction_id)
-        
-        operation = self._create_new_operation(operation_type, metadata)
-        transaction = self.active_transactions[transaction_id]
-        transaction.operations.append(operation)
-        
+        operation = self._create_and_add_operation(transaction_id, operation_type, metadata)
         await self._initialize_operation(transaction_id, operation)
         logger.debug(f"Added operation {operation.operation_id} to transaction {transaction_id}")
         return operation.operation_id
+    
+    def _create_and_add_operation(self, transaction_id: str, operation_type: OperationType, metadata: Optional[Dict]) -> Operation:
+        """Create new operation and add to transaction."""
+        operation = self._create_new_operation(operation_type, metadata)
+        transaction = self.active_transactions[transaction_id]
+        transaction.operations.append(operation)
+        return operation
     
     def _validate_transaction_exists(self, transaction_id: str) -> None:
         """Validate transaction exists in active transactions."""
@@ -312,6 +327,10 @@ class TransactionManager:
         if not self._can_commit_transaction(transaction):
             return False
         
+        return await self._attempt_commit(transaction_id)
+    
+    async def _attempt_commit(self, transaction_id: str) -> bool:
+        """Attempt to commit transaction with error handling."""
         try:
             await self._execute_commit(transaction_id)
             return True
@@ -345,7 +364,11 @@ class TransactionManager:
             return
         
         logger.info(f"Rolling back transaction: {transaction_id}")
-        
+        await self._perform_rollback(transaction_id, transaction)
+        await self._cleanup_transaction(transaction_id)
+    
+    async def _perform_rollback(self, transaction_id: str, transaction: Transaction) -> None:
+        """Perform rollback operations with error handling."""
         try:
             await self._execute_rollback(transaction_id, transaction)
             transaction.state = TransactionState.ROLLED_BACK
@@ -353,8 +376,6 @@ class TransactionManager:
         except Exception as e:
             logger.error(f"Rollback failed for transaction {transaction_id}: {e}")
             transaction.state = TransactionState.FAILED
-        finally:
-            await self._cleanup_transaction(transaction_id)
     
     async def _execute_rollback(self, transaction_id: str, transaction: Transaction) -> None:
         """Execute transaction rollback operations."""
@@ -421,14 +442,18 @@ class TransactionManager:
         """Execute compensation for completed operation."""
         handler = self.compensation_registry.get_handler(operation.operation_type)
         if handler:
-            try:
-                await handler(operation)
-                operation.state = OperationState.COMPENSATED
-                logger.debug(f"Compensated operation: {operation.operation_id}")
-            except Exception as e:
-                logger.error(f"Compensation failed for {operation.operation_id}: {e}")
+            await self._execute_compensation_handler(handler, operation)
         else:
             logger.warning(f"No compensation handler for {operation.operation_type}")
+    
+    async def _execute_compensation_handler(self, handler: Callable, operation: Operation) -> None:
+        """Execute compensation handler with error handling."""
+        try:
+            await handler(operation)
+            operation.state = OperationState.COMPENSATED
+            logger.debug(f"Compensated operation: {operation.operation_id}")
+        except Exception as e:
+            logger.error(f"Compensation failed for {operation.operation_id}: {e}")
     
     async def _compensate_postgres_write(self, operation: Operation) -> None:
         """Compensate PostgreSQL write operation."""
@@ -456,8 +481,12 @@ class TransactionManager:
             yield transaction_id
             await self._finalize_transaction(transaction_id)
         except Exception as e:
-            await self.rollback_transaction(transaction_id)
-            raise e
+            await self._handle_transaction_error(transaction_id, e)
+    
+    async def _handle_transaction_error(self, transaction_id: str, error: Exception) -> None:
+        """Handle transaction context manager error."""
+        await self.rollback_transaction(transaction_id)
+        raise error
     
     async def _finalize_transaction(self, transaction_id: str) -> None:
         """Finalize transaction with commit."""

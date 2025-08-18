@@ -183,6 +183,13 @@ class MessageHandlerService(IMessageHandlerService):
         """Setup thread and run for message processing"""
         if not db_session:
             return None, None
+        return await self._setup_thread_with_validation(user_id, text, references, thread_id, db_session)
+    
+    async def _setup_thread_with_validation(
+        self, user_id: str, text: str, references: list,
+        thread_id: Optional[str], db_session: AsyncSession
+    ) -> tuple:
+        """Setup thread with validation and error handling"""
         try:
             thread = await self._get_validated_thread(user_id, thread_id, db_session)
             if not thread:
@@ -288,6 +295,10 @@ class MessageHandlerService(IMessageHandlerService):
         if not thread_id:
             await manager.send_error(user_id, "Thread ID required")
             return
+        await self._execute_thread_switch(user_id, thread_id)
+    
+    async def _execute_thread_switch(self, user_id: str, thread_id: str) -> None:
+        """Execute the thread switch operation"""
         # Leave all current rooms and join new thread room
         await manager.broadcasting.leave_all_rooms(user_id)
         await manager.broadcasting.join_room(user_id, thread_id)
@@ -296,16 +307,22 @@ class MessageHandlerService(IMessageHandlerService):
     # Interface implementation methods
     async def handle_message(self, user_id: str, message: Dict[str, Any]):
         """Handle a WebSocket message with proper type and payload."""
-        # Extract message type and payload from message
         message_type = message.get("type", "")
         payload = message.get("payload", {})
-        
-        # Route to specific handlers based on message type
+        await self._route_message(user_id, message_type, payload)
+    
+    async def _route_message(self, user_id: str, message_type: str, payload: Dict[str, Any]) -> None:
+        """Route message to appropriate handler based on type"""
         if message_type == "start_agent":
             await self.handle_start_agent(user_id, payload, None)
         elif message_type == "user_message":
             await self.handle_user_message(user_id, payload, None)
-        elif message_type == "get_thread_history":
+        else:
+            await self._route_other_messages(user_id, message_type, payload)
+    
+    async def _route_other_messages(self, user_id: str, message_type: str, payload: Dict[str, Any]) -> None:
+        """Route other message types to their handlers"""
+        if message_type == "get_thread_history":
             await self.handle_thread_history(user_id, None)
         elif message_type == "stop_agent":
             await self.handle_stop_agent(user_id)

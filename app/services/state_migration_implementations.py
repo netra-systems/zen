@@ -141,7 +141,11 @@ class Migration_1_1_to_1_2(StateMigration):
         """Check completion and reporting phases."""
         if state_data.get('final_report'):
             return "completion"
-        elif state_data.get('report_result'):
+        return self._check_reporting_phases(state_data)
+    
+    def _check_reporting_phases(self, state_data: Dict[str, Any]) -> Optional[str]:
+        """Check reporting and action planning phases."""
+        if state_data.get('report_result'):
             return "reporting"
         elif state_data.get('action_plan_result'):
             return "action_planning"
@@ -151,7 +155,11 @@ class Migration_1_1_to_1_2(StateMigration):
         """Check analysis and processing phases."""
         if state_data.get('optimizations_result'):
             return "optimization"
-        elif state_data.get('data_result'):
+        return self._check_data_and_triage_phases(state_data)
+    
+    def _check_data_and_triage_phases(self, state_data: Dict[str, Any]) -> str:
+        """Check data analysis and triage phases."""
+        if state_data.get('data_result'):
             return "data_analysis"
         elif state_data.get('triage_result'):
             return "triage"

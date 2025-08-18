@@ -27,17 +27,20 @@ def extract_permission_result(result: ToolExecutionResult) -> Any:
     return result.permission_check.dict() if result.permission_check else None
 
 
+def build_log_entry_params(result: ToolExecutionResult, tool: Any) -> dict:
+    """Build parameters for tool usage log entry."""
+    return {
+        "user_id": result.user_id, "tool_name": result.tool_name,
+        "category": extract_tool_category(tool), "execution_time_ms": result.execution_time_ms,
+        "status": result.status, "plan_tier": "free",
+        "permission_check_result": extract_permission_result(result)
+    }
+
+
 def create_tool_usage_log_entry(result: ToolExecutionResult, tool: Any) -> ToolUsageLog:
     """Create tool usage log entry."""
-    return ToolUsageLog(
-        user_id=result.user_id,
-        tool_name=result.tool_name,
-        category=extract_tool_category(tool),
-        execution_time_ms=result.execution_time_ms,
-        status=result.status,
-        plan_tier="free",
-        permission_check_result=extract_permission_result(result)
-    )
+    params = build_log_entry_params(result, tool)
+    return ToolUsageLog(**params)
 
 
 async def save_log_entry_to_db(log_entry: ToolUsageLog, db: AsyncSession) -> None:

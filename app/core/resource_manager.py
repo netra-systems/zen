@@ -227,39 +227,64 @@ class ApplicationLifecycle:
         """Get a registered resource."""
         return self._resource_tracker.get_resource(name)
     
-    async def startup(self):
+    async def startup(self) -> None:
         """Run startup procedures."""
         if self._started:
             return
         
         try:
-            # Run startup callbacks
-            for callback in self._startup_callbacks:
-                if asyncio.iscoroutinefunction(callback):
-                    await callback()
-                else:
-                    callback()
-            
-            self._started = True
-            logger.info("Application startup completed successfully", file=sys.stderr)
-            
+            await self._execute_startup_sequence()
         except Exception as e:
-            logger.error(f"Startup failed: {e}", file=sys.stderr)
-            await self.shutdown()
-            raise
+            await self._handle_startup_failure(e)
     
-    async def shutdown(self, timeout: Optional[float] = None):
+    async def _execute_startup_sequence(self) -> None:
+        """Execute the main startup sequence."""
+        await self._run_startup_callbacks()
+        self._mark_startup_complete()
+    
+    async def _run_startup_callbacks(self) -> None:
+        """Run all registered startup callbacks."""
+        for callback in self._startup_callbacks:
+            await self._execute_startup_callback(callback)
+    
+    async def _execute_startup_callback(self, callback: Callable) -> None:
+        """Execute a single startup callback (async or sync)."""
+        if asyncio.iscoroutinefunction(callback):
+            await callback()
+        else:
+            callback()
+    
+    def _mark_startup_complete(self) -> None:
+        """Mark startup as complete and log success."""
+        self._started = True
+        logger.info("Application startup completed successfully", file=sys.stderr)
+    
+    async def _handle_startup_failure(self, error: Exception) -> None:
+        """Handle startup failure with cleanup."""
+        logger.error(f"Startup failed: {error}", file=sys.stderr)
+        await self.shutdown()
+        raise
+    
+    async def shutdown(self, timeout: Optional[float] = None) -> None:
         """Run shutdown procedures."""
         if not self._started:
             return
-        timeout = timeout or self._shutdown_timeout
+        effective_timeout = timeout or self._shutdown_timeout
         try:
-            logger.info("Starting application shutdown...", file=sys.stderr)
-            await self._execute_shutdown_callbacks()
-            await self._resource_tracker.shutdown_all(timeout=timeout)
-            self._finalize_shutdown()
+            await self._execute_shutdown_sequence(effective_timeout)
         except Exception as e:
-            logger.error(f"Error during shutdown: {e}", file=sys.stderr)
+            self._log_shutdown_error(e)
+    
+    async def _execute_shutdown_sequence(self, timeout: float) -> None:
+        """Execute the main shutdown sequence."""
+        logger.info("Starting application shutdown...", file=sys.stderr)
+        await self._execute_shutdown_callbacks()
+        await self._resource_tracker.shutdown_all(timeout=timeout)
+        self._finalize_shutdown()
+    
+    def _log_shutdown_error(self, error: Exception) -> None:
+        """Log shutdown error."""
+        logger.error(f"Error during shutdown: {error}", file=sys.stderr)
     
     async def _execute_shutdown_callbacks(self) -> None:
         """Execute all shutdown callbacks with error handling."""
@@ -322,30 +347,51 @@ class HealthMonitor:
         self._monitoring = True
         self._monitor_task = asyncio.create_task(self._monitor_loop(check_interval))
     
-    async def stop_monitoring(self):
+    async def stop_monitoring(self) -> None:
         """Stop health monitoring."""
         if not self._monitoring:
             return
         
         self._monitoring = False
-        if self._monitor_task:
-            self._monitor_task.cancel()
-            try:
-                await self._monitor_task
-            except asyncio.CancelledError:
-                pass
+        await self._cancel_monitor_task()
     
-    async def _monitor_loop(self, check_interval: float):
+    async def _cancel_monitor_task(self) -> None:
+        """Cancel the monitoring task if it exists."""
+        if not self._monitor_task:
+            return
+        self._monitor_task.cancel()
+        await self._wait_for_task_completion()
+    
+    async def _wait_for_task_completion(self) -> None:
+        """Wait for monitor task to complete cancellation."""
+        try:
+            await self._monitor_task
+        except asyncio.CancelledError:
+            pass
+    
+    async def _monitor_loop(self, check_interval: float) -> None:
         """Main monitoring loop."""
         while self._monitoring:
-            try:
-                await self.perform_health_checks()
-                await asyncio.sleep(check_interval)
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.error(f"Error in health monitoring: {e}", file=sys.stderr)
-                await asyncio.sleep(check_interval)
+            await self._execute_monitoring_cycle(check_interval)
+    
+    async def _execute_monitoring_cycle(self, check_interval: float) -> None:
+        """Execute a single monitoring cycle."""
+        try:
+            await self._perform_health_checks_and_wait(check_interval)
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            await self._handle_monitoring_error(e, check_interval)
+    
+    async def _perform_health_checks_and_wait(self, check_interval: float) -> None:
+        """Perform health checks and wait for next cycle."""
+        await self.perform_health_checks()
+        await asyncio.sleep(check_interval)
+    
+    async def _handle_monitoring_error(self, error: Exception, check_interval: float) -> None:
+        """Handle monitoring error and wait before retry."""
+        logger.error(f"Error in health monitoring: {error}", file=sys.stderr)
+        await asyncio.sleep(check_interval)
     
     async def perform_health_checks(self) -> Dict[str, Dict[str, Any]]:
         """Perform all registered health checks."""

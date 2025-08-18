@@ -31,20 +31,28 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
         super().__init__(llm_manager, name="OptimizationsCoreSubAgent", description="This agent formulates optimization strategies.")
         self.tool_dispatcher = tool_dispatcher
-        
-        # Initialize reliability wrapper
-        self.reliability = get_reliability_wrapper(
-            "OptimizationsCoreSubAgent",
-            CircuitBreakerConfig(
-                failure_threshold=3,
-                recovery_timeout=30.0,
-                name="OptimizationsCoreSubAgent"
-            ),
-            RetryConfig(
-                max_retries=2,
-                base_delay=1.0,
-                max_delay=10.0
-            )
+        self.reliability = self._initialize_reliability_wrapper()
+    
+    def _initialize_reliability_wrapper(self):
+        """Initialize reliability wrapper with circuit breaker and retry configs."""
+        circuit_config = self._create_circuit_breaker_config()
+        retry_config = self._create_retry_config()
+        return get_reliability_wrapper("OptimizationsCoreSubAgent", circuit_config, retry_config)
+    
+    def _create_circuit_breaker_config(self) -> CircuitBreakerConfig:
+        """Create circuit breaker configuration."""
+        return CircuitBreakerConfig(
+            failure_threshold=3,
+            recovery_timeout=30.0,
+            name="OptimizationsCoreSubAgent"
+        )
+    
+    def _create_retry_config(self) -> RetryConfig:
+        """Create retry configuration."""
+        return RetryConfig(
+            max_retries=2,
+            base_delay=1.0,
+            max_delay=10.0
         )
 
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
@@ -155,16 +163,24 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
         """Create default fallback optimization result."""
         return {
             "optimization_type": "general",
-            "recommendations": [
-                "Basic optimization analysis - review current resource utilization",
-                "Consider cost optimization opportunities based on usage patterns",
-                "Evaluate performance improvements for critical workloads"
-            ],
+            "recommendations": self._get_default_recommendations(),
             "confidence_score": 0.5,
-            "metadata": {
-                "fallback_used": True,
-                "reason": "Primary optimization analysis failed"
-            }
+            "metadata": self._get_fallback_metadata()
+        }
+    
+    def _get_default_recommendations(self) -> List[str]:
+        """Get default optimization recommendations."""
+        return [
+            "Basic optimization analysis - review current resource utilization",
+            "Consider cost optimization opportunities based on usage patterns",
+            "Evaluate performance improvements for critical workloads"
+        ]
+    
+    def _get_fallback_metadata(self) -> dict:
+        """Get fallback metadata dictionary."""
+        return {
+            "fallback_used": True,
+            "reason": "Primary optimization analysis failed"
         }
     
     async def _send_fallback_update(self, run_id: str, stream_updates: bool, result: dict) -> None:
@@ -220,10 +236,14 @@ class OptimizationsCoreSubAgent(BaseSubAgent):
         """Build OptimizationsResult from processed data."""
         from app.agents.state import OptimizationsResult
         return OptimizationsResult(
-            optimization_type=data.get("optimization_type", data.get("type", "general")),
+            optimization_type=self._get_optimization_type(data),
             recommendations=recommendations,
             confidence_score=data.get("confidence_score", 0.8),
             cost_savings=data.get("cost_savings"),
             performance_improvement=data.get("performance_improvement"),
             metadata=data.get("metadata", {})
         )
+    
+    def _get_optimization_type(self, data: dict) -> str:
+        """Extract optimization type from data with fallback."""
+        return data.get("optimization_type", data.get("type", "general"))

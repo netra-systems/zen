@@ -14,27 +14,33 @@ def extract_thread_updated_at(thread) -> Optional[int]:
     return thread.metadata_.get("updated_at") if thread.metadata_ else None
 
 
+def _create_thread_response_fields(thread, message_count: int, title: Optional[str]) -> Dict:
+    """Create thread response field dictionary."""
+    return {
+        "id": thread.id, "object": thread.object,
+        "title": extract_thread_title(thread, title), "created_at": thread.created_at,
+        "updated_at": extract_thread_updated_at(thread), "metadata": thread.metadata_,
+        "message_count": message_count
+    }
+
 async def build_thread_response(thread, message_count: int, title: Optional[str] = None):
     """Build ThreadResponse object."""
     from app.routes.threads_route import ThreadResponse
-    return ThreadResponse(
-        id=thread.id,
-        object=thread.object,
-        title=extract_thread_title(thread, title),
-        created_at=thread.created_at,
-        updated_at=extract_thread_updated_at(thread),
-        metadata=thread.metadata_,
-        message_count=message_count
-    )
+    fields = _create_thread_response_fields(thread, message_count, title)
+    return ThreadResponse(**fields)
 
+
+async def _process_single_thread(db: AsyncSession, message_repo: MessageRepository, thread):
+    """Process single thread for response."""
+    message_count = await message_repo.count_by_thread(db, thread.id)
+    return await build_thread_response(thread, message_count)
 
 async def convert_threads_to_responses(db: AsyncSession, threads: List, offset: int, limit: int):
     """Convert threads to response objects with message counts."""
     message_repo = MessageRepository()
     response_threads = []
     for thread in threads[offset:offset+limit]:
-        message_count = await message_repo.count_by_thread(db, thread.id)
-        response = await build_thread_response(thread, message_count)
+        response = await _process_single_thread(db, message_repo, thread)
         response_threads.append(response)
     return response_threads
 

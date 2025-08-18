@@ -125,16 +125,27 @@ class ExecutionFallbackHandler:
     def _create_basic_fallback_result(self, triage_result) -> Dict[str, Any]:
         """Create basic fallback result when LLM also fails."""
         category = getattr(triage_result, 'category', 'Unknown')
-        
         return {
             "analysis_type": "basic_fallback",
             "category": category,
+            **self._build_basic_fallback_content(category),
+            **self._build_basic_fallback_metadata()
+        }
+    
+    def _build_basic_fallback_content(self, category: str) -> Dict[str, Any]:
+        """Build content sections for basic fallback."""
+        return {
             "insights": self._create_basic_insights(category),
             "recommendations": self._create_basic_recommendations(),
             "data": {
                 "status": "basic_fallback",
                 "available": False
-            },
+            }
+        }
+    
+    def _build_basic_fallback_metadata(self) -> Dict[str, Any]:
+        """Build metadata section for basic fallback."""
+        return {
             "metadata": {
                 "fallback_used": True,
                 "fallback_type": "basic",
@@ -213,19 +224,23 @@ class ExecutionFallbackHandler:
     ) -> None:
         """Send completion update for fallback results."""
         fallback_type = result.get("metadata", {}).get("fallback_type", "unknown")
-        
+        status, message = self._get_completion_status_message(fallback_type)
+        completion_data = self._build_completion_data(status, message, result)
+        await send_update_fn(run_id, completion_data)
+    
+    def _get_completion_status_message(self, fallback_type: str) -> tuple[str, str]:
+        """Get status and message for completion based on fallback type."""
         if fallback_type == "emergency":
-            status = "completed_with_emergency_fallback"
-            message = "Analysis completed using emergency fallback"
-        else:
-            status = "completed_with_fallback"
-            message = "Data analysis completed with limited capabilities"
-        
-        await send_update_fn(run_id, {
+            return "completed_with_emergency_fallback", "Analysis completed using emergency fallback"
+        return "completed_with_fallback", "Data analysis completed with limited capabilities"
+    
+    def _build_completion_data(self, status: str, message: str, result: Dict[str, Any]) -> Dict[str, Any]:
+        """Build completion data structure."""
+        return {
             "status": status,
             "message": message,
             "result": result
-        })
+        }
     
     def get_fallback_health_status(self) -> Dict[str, Any]:
         """Get health status of fallback mechanisms."""

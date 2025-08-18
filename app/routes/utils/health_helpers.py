@@ -41,11 +41,15 @@ def _process_db_stats_result(row) -> Dict[str, Any]:
     }
 
 
+async def _execute_db_stats_query(db: AsyncSession):
+    """Execute database statistics query."""
+    result = await db.execute(text(_build_db_stats_query()))
+    return result.first()
+
 async def _fetch_db_stats_with_error_handling(db: AsyncSession) -> Dict[str, Any]:
     """Fetch database statistics with error handling."""
     try:
-        result = await db.execute(text(_build_db_stats_query()))
-        row = result.first()
+        row = await _execute_db_stats_query(db)
         return _process_db_stats_result(row) if row else {}
     except Exception as e:
         logger.warning(f"Could not fetch database statistics: {e}")
@@ -157,15 +161,19 @@ def build_system_error_response(error: str) -> Dict[str, Any]:
     }
 
 
+def _get_pool_basic_config() -> Dict[str, Any]:
+    """Get basic pool configuration."""
+    return {"pool_size": 20, "max_overflow": 30, "pool_timeout": 30}
+
+def _get_pool_extended_config() -> Dict[str, Any]:
+    """Get extended pool configuration."""
+    return {"pool_recycle": 1800, "max_connections": 100}
+
 def _get_pool_config_data() -> Dict[str, Any]:
     """Get pool configuration dictionary."""
-    return {
-        "pool_size": 20,
-        "max_overflow": 30,
-        "pool_timeout": 30,
-        "pool_recycle": 1800,
-        "max_connections": 100
-    }
+    basic = _get_pool_basic_config()
+    extended = _get_pool_extended_config()
+    return {**basic, **extended}
 
 def get_pool_configuration() -> Dict[str, Any]:
     """Get pool configuration data."""

@@ -31,20 +31,28 @@ class ReportingSubAgent(BaseSubAgent):
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
         super().__init__(llm_manager, name="ReportingSubAgent", description="This agent generates a final report.")
         self.tool_dispatcher = tool_dispatcher
-        
-        # Initialize reliability wrapper
-        self.reliability = get_reliability_wrapper(
-            "ReportingSubAgent",
-            CircuitBreakerConfig(
-                failure_threshold=3,
-                recovery_timeout=30.0,
-                name="ReportingSubAgent"
-            ),
-            RetryConfig(
-                max_retries=2,
-                base_delay=1.0,
-                max_delay=10.0
-            )
+        self.reliability = self._initialize_reliability_wrapper()
+    
+    def _initialize_reliability_wrapper(self):
+        """Initialize reliability wrapper with circuit breaker and retry configs."""
+        circuit_config = self._create_circuit_breaker_config()
+        retry_config = self._create_retry_config()
+        return get_reliability_wrapper("ReportingSubAgent", circuit_config, retry_config)
+    
+    def _create_circuit_breaker_config(self) -> CircuitBreakerConfig:
+        """Create circuit breaker configuration."""
+        return CircuitBreakerConfig(
+            failure_threshold=3,
+            recovery_timeout=30.0,
+            name="ReportingSubAgent"
+        )
+    
+    def _create_retry_config(self) -> RetryConfig:
+        """Create retry configuration."""
+        return RetryConfig(
+            max_retries=2,
+            base_delay=1.0,
+            max_delay=10.0
         )
 
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
@@ -161,17 +169,25 @@ class ReportingSubAgent(BaseSubAgent):
         """Create default fallback report result."""
         return {
             "report": "Report generation failed. Using fallback summary.",
-            "summary": {
-                "status": "Analysis completed with limitations",
-                "data_analyzed": bool(state.data_result),
-                "optimizations_provided": bool(state.optimizations_result),
-                "action_plan_created": bool(state.action_plan_result),
-                "fallback_used": True
-            },
-            "metadata": {
-                "fallback_used": True,
-                "reason": "Primary report generation failed"
-            }
+            "summary": self._create_fallback_summary(state),
+            "metadata": self._create_fallback_metadata()
+        }
+    
+    def _create_fallback_summary(self, state: DeepAgentState) -> dict:
+        """Create fallback summary from state."""
+        return {
+            "status": "Analysis completed with limitations",
+            "data_analyzed": bool(state.data_result),
+            "optimizations_provided": bool(state.optimizations_result),
+            "action_plan_created": bool(state.action_plan_result),
+            "fallback_used": True
+        }
+    
+    def _create_fallback_metadata(self) -> dict:
+        """Create fallback metadata dictionary."""
+        return {
+            "fallback_used": True,
+            "reason": "Primary report generation failed"
         }
     
     async def _send_fallback_update(self, run_id: str, stream_updates: bool, result: dict) -> None:

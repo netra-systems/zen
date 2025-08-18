@@ -197,9 +197,20 @@ def _build_validation_response(result, metrics: Dict[str, Any], validation_id: s
 
 def _prepare_validation_response_params(result, metrics: Dict[str, Any], validation_id: str, timestamp) -> Dict[str, Any]:
     """Prepare validation response parameters."""
+    base_params = _get_validation_base_params(result, metrics)
+    extra_params = _get_validation_extra_params(result, validation_id, timestamp)
+    base_params.update(extra_params)
+    return base_params
+
+
+def _get_validation_base_params(result, metrics: Dict[str, Any]) -> Dict[str, Any]:
+    """Get base validation parameters."""
+    return {"passed": result.passed, "metrics": metrics}
+
+
+def _get_validation_extra_params(result, validation_id: str, timestamp) -> Dict[str, Any]:
+    """Get extra validation parameters."""
     return {
-        "passed": result.passed,
-        "metrics": metrics,
         "retry_suggested": result.retry_suggested,
         "retry_adjustments": result.retry_prompt_adjustments,
         "validation_id": validation_id,
@@ -215,13 +226,20 @@ def _build_acknowledgement_response(alert_id: str, action: str, user_id: str, ti
 
 def _prepare_acknowledgement_params(alert_id: str, action: str, user_id: str, timestamp) -> Dict[str, Any]:
     """Prepare acknowledgement response parameters."""
-    return {
-        "success": True,
-        "alert_id": alert_id,
-        "action": action,
-        "user_id": user_id,
-        "timestamp": timestamp
-    }
+    base_params = _get_acknowledgement_base_params(alert_id, action)
+    extra_params = _get_acknowledgement_extra_params(user_id, timestamp)
+    base_params.update(extra_params)
+    return base_params
+
+
+def _get_acknowledgement_base_params(alert_id: str, action: str) -> Dict[str, Any]:
+    """Get base acknowledgement parameters."""
+    return {"success": True, "alert_id": alert_id, "action": action}
+
+
+def _get_acknowledgement_extra_params(user_id: str, timestamp) -> Dict[str, Any]:
+    """Get extra acknowledgement parameters."""
+    return {"user_id": user_id, "timestamp": timestamp}
 
 
 def _build_quality_report(report_type, data: Dict[str, Any], user_id: str, period_days: int, generated_at) -> QualityReport:
@@ -232,13 +250,20 @@ def _build_quality_report(report_type, data: Dict[str, Any], user_id: str, perio
 
 def _prepare_quality_report_params(report_type, data: Dict[str, Any], user_id: str, period_days: int, generated_at) -> Dict[str, Any]:
     """Prepare quality report parameters."""
-    return {
-        "report_type": report_type,
-        "generated_at": generated_at,
-        "generated_by": user_id,
-        "period_days": period_days,
-        "data": data
-    }
+    base_params = _get_report_base_params(report_type, generated_at)
+    extra_params = _get_report_extra_params(user_id, period_days, data)
+    base_params.update(extra_params)
+    return base_params
+
+
+def _get_report_base_params(report_type, generated_at) -> Dict[str, Any]:
+    """Get base report parameters."""
+    return {"report_type": report_type, "generated_at": generated_at}
+
+
+def _get_report_extra_params(user_id: str, period_days: int, data: Dict[str, Any]) -> Dict[str, Any]:
+    """Get extra report parameters."""
+    return {"generated_by": user_id, "period_days": period_days, "data": data}
 
 
 def _build_error_health_response(error_msg: str, timestamp) -> QualityServiceHealth:
@@ -249,10 +274,17 @@ def _build_error_health_response(error_msg: str, timestamp) -> QualityServiceHea
 
 def _prepare_error_health_params(error_msg: str, timestamp) -> Dict[str, Any]:
     """Prepare error health response parameters."""
-    return {
-        "status": "unhealthy",
-        "services": {},
-        "statistics": {},
-        "timestamp": timestamp,
-        "error": error_msg
-    }
+    base_params = _get_error_health_base_params(timestamp)
+    error_params = _get_error_health_error_params(error_msg)
+    base_params.update(error_params)
+    return base_params
+
+
+def _get_error_health_base_params(timestamp) -> Dict[str, Any]:
+    """Get base error health parameters."""
+    return {"status": "unhealthy", "services": {}, "statistics": {}, "timestamp": timestamp}
+
+
+def _get_error_health_error_params(error_msg: str) -> Dict[str, Any]:
+    """Get error health error parameters."""
+    return {"error": error_msg}

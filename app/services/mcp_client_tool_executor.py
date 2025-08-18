@@ -71,43 +71,62 @@ class MCPToolExecutor:
         """Execute a tool on an MCP server."""
         try:
             start_time = datetime.now()
-            
-            execution = await self.tool_repo.create_execution(
-                db, server_name, tool_name, arguments
-            )
+            execution = await self._start_tool_execution(db, server_name, tool_name, arguments)
             
             try:
-                result = await self._execute_tool_on_server(
-                    server_name, tool_name, arguments
-                )
-                
-                execution_time_ms = int(
-                    (datetime.now() - start_time).total_seconds() * 1000
-                )
-                
-                await self.tool_repo.update_execution_result(
-                    db, execution.id, result, MCPToolExecutionStatus.COMPLETED,
-                    execution_time_ms
-                )
-                
-                return {
-                    "tool_name": tool_name,
-                    "server_name": server_name,
-                    "content": result,
-                    "is_error": False,
-                    "execution_time_ms": execution_time_ms
-                }
+                result = await self._execute_and_time_tool(server_name, tool_name, arguments, start_time)
+                await self._complete_execution_success(db, execution, result, start_time)
+                return self._create_success_response(tool_name, server_name, result, start_time)
                 
             except Exception as tool_error:
-                await self.tool_repo.update_execution_result(
-                    db, execution.id, {}, MCPToolExecutionStatus.FAILED,
-                    error_message=str(tool_error)
-                )
+                await self._complete_execution_failure(db, execution, tool_error)
                 raise
                 
         except Exception as e:
             logger.error(f"Failed to execute tool {tool_name} on {server_name}: {e}")
             raise ServiceError(f"Tool execution failed: {str(e)}")
+    
+    async def _start_tool_execution(self, db, server_name: str, tool_name: str, arguments: Dict[str, Any]):
+        """Start tool execution and create database record"""
+        return await self.tool_repo.create_execution(
+            db, server_name, tool_name, arguments
+        )
+    
+    async def _execute_and_time_tool(self, server_name: str, tool_name: str, arguments: Dict[str, Any], start_time: datetime) -> List[Dict[str, Any]]:
+        """Execute tool on server and return result"""
+        return await self._execute_tool_on_server(
+            server_name, tool_name, arguments
+        )
+    
+    async def _complete_execution_success(self, db, execution, result: List[Dict[str, Any]], start_time: datetime) -> None:
+        """Complete execution with success status"""
+        execution_time_ms = int(
+            (datetime.now() - start_time).total_seconds() * 1000
+        )
+        await self.tool_repo.update_execution_result(
+            db, execution.id, result, MCPToolExecutionStatus.COMPLETED,
+            execution_time_ms
+        )
+    
+    async def _complete_execution_failure(self, db, execution, error: Exception) -> None:
+        """Complete execution with failure status"""
+        await self.tool_repo.update_execution_result(
+            db, execution.id, {}, MCPToolExecutionStatus.FAILED,
+            error_message=str(error)
+        )
+    
+    def _create_success_response(self, tool_name: str, server_name: str, result: List[Dict[str, Any]], start_time: datetime) -> Dict[str, Any]:
+        """Create successful execution response"""
+        execution_time_ms = int(
+            (datetime.now() - start_time).total_seconds() * 1000
+        )
+        return {
+            "tool_name": tool_name,
+            "server_name": server_name,
+            "content": result,
+            "is_error": False,
+            "execution_time_ms": execution_time_ms
+        }
     
     async def _execute_tool_on_server(self, server_name: str, tool_name: str,
                                     arguments: Dict[str, Any]) -> List[Dict[str, Any]]:

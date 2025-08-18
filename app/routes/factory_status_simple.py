@@ -75,16 +75,19 @@ def _build_metrics_section() -> Dict[str, Any]:
     }
 
 
+def _build_complete_report(report_id: str) -> Dict[str, Any]:
+    """Build complete report structure."""
+    metadata = _build_report_metadata(report_id)
+    return {
+        **metadata, "summary": _generate_simple_summary(),
+        "metrics": _build_metrics_section(), "recommendations": _generate_recommendations()
+    }
+
 @router.post("/generate-simple")
 async def generate_simple_report() -> Dict[str, Any]:
     """Generate a simplified factory status report without git operations."""
     report_id = str(uuid.uuid4())[:8]
-    metadata = _build_report_metadata(report_id)
-    return {
-        **metadata, "summary": _generate_simple_summary(),
-        "metrics": _build_metrics_section(),
-        "recommendations": _generate_recommendations()
-    }
+    return _build_complete_report(report_id)
 
 
 @router.get("/test-simple")

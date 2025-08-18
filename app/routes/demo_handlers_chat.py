@@ -23,6 +23,14 @@ async def execute_demo_chat_flow(
 ) -> DemoChatResponse:
     """Execute complete demo chat flow."""
     session_id = get_or_create_session_id(request.session_id)
+    return await complete_chat_flow(request, session_id, background_tasks, demo_service, current_user)
+
+
+async def complete_chat_flow(
+    request: DemoChatRequest, session_id: str, background_tasks: BackgroundTasks,
+    demo_service: DemoService, current_user: Optional[Dict]
+) -> DemoChatResponse:
+    """Complete the chat flow execution."""
     result = await process_chat_request(request, session_id, demo_service, current_user)
     track_chat_interaction(background_tasks, demo_service, session_id, request)
     return create_chat_response(result, session_id)
@@ -37,7 +45,19 @@ async def execute_demo_chat_service(
     request: DemoChatRequest, session_id: str, demo_service: DemoService, current_user: Optional[Dict]
 ) -> Dict[str, Any]:
     """Execute demo chat through service."""
-    user_id = current_user.get("id") if current_user else None
+    user_id = get_user_id_from_current_user(current_user)
+    return await call_demo_service_chat(demo_service, request, session_id, user_id)
+
+
+def get_user_id_from_current_user(current_user: Optional[Dict]) -> Optional[str]:
+    """Extract user ID from current user."""
+    return current_user.get("id") if current_user else None
+
+
+async def call_demo_service_chat(
+    demo_service: DemoService, request: DemoChatRequest, session_id: str, user_id: Optional[str]
+) -> Dict[str, Any]:
+    """Call demo service for chat processing."""
     return await demo_service.process_demo_chat(
         message=request.message, industry=request.industry,
         session_id=session_id, context=request.context, user_id=user_id
@@ -48,11 +68,23 @@ async def process_chat_request(
     request: DemoChatRequest, session_id: str, demo_service: DemoService, current_user: Optional[Dict]
 ) -> Dict[str, Any]:
     """Process the demo chat request using demo service."""
+    return await execute_chat_with_error_handling(request, session_id, demo_service, current_user)
+
+
+async def execute_chat_with_error_handling(
+    request: DemoChatRequest, session_id: str, demo_service: DemoService, current_user: Optional[Dict]
+) -> Dict[str, Any]:
+    """Execute chat with error handling."""
     try:
         return await execute_demo_chat_service(request, session_id, demo_service, current_user)
     except Exception as e:
-        from app.routes.demo_handlers_utils import log_and_raise_error
-        log_and_raise_error("Demo chat processing failed", e)
+        handle_chat_error(e)
+
+
+def handle_chat_error(e: Exception) -> None:
+    """Handle chat processing error."""
+    from app.routes.demo_handlers_utils import log_and_raise_error
+    log_and_raise_error("Demo chat processing failed", e)
 
 
 def create_chat_tracking_data(request: DemoChatRequest) -> Dict[str, Any]:

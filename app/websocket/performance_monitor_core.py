@@ -220,11 +220,22 @@ class PerformanceMonitor:
     
     def _build_performance_summary_dict(self) -> Dict[str, Any]:
         """Build performance summary dictionary."""
+        core_metrics = self._get_core_performance_metrics()
+        supplemental_metrics = self._get_supplemental_performance_metrics()
+        return {**core_metrics, **supplemental_metrics}
+    
+    def _get_core_performance_metrics(self) -> Dict[str, Any]:
+        """Get core performance metrics."""
         return {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "response_time": self._get_response_time_stats(),
             "throughput_messages_per_second": self._calculate_current_throughput(),
-            "total_connections": len(self.connection_stats),
+            "total_connections": len(self.connection_stats)
+        }
+    
+    def _get_supplemental_performance_metrics(self) -> Dict[str, Any]:
+        """Get supplemental performance metrics."""
+        return {
             "active_alerts": self.alert_manager.get_alert_summary(),
             "system_metrics": self._get_system_metrics(),
             "error_counts": dict(self.error_counts),

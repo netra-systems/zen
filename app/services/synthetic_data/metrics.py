@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from app.schemas.data_ingestion_types import IngestionConfig
 from collections import namedtuple
 
-
 def _calculate_validation_rate(records: List[Dict[str, Any]], validate_schema_fn: Callable[[Dict[str, Any]], bool]) -> float:
     """Calculate validation pass rate"""
     if not records:
@@ -32,7 +31,6 @@ def _create_quality_metrics(validation_rate: float) -> namedtuple:
         temporal_consistency=random.uniform(0.98, 1.0),
         corpus_coverage=random.uniform(0.6, 0.9)
     )
-
 
 async def calculate_quality_metrics(records: List[Dict[str, Any]], validate_schema_fn: Callable[[Dict[str, Any]], bool]) -> namedtuple:
     """Calculate quality metrics"""
@@ -72,7 +70,6 @@ def _create_diversity_metrics(unique_traces: int, entropy: float, tool_variety: 
         workload_type_entropy=entropy,
         tool_usage_variety=tool_variety
     )
-
 
 async def calculate_diversity(records: List[Dict]) -> namedtuple:
     """Calculate diversity metrics"""
@@ -121,7 +118,6 @@ async def calculate_correlation(records: List[Dict], field1: str, field2: str) -
         return 0.0
     return numerator / (denom1 * denom2) ** 0.5
 
-
 def _create_anomaly_record(record: Dict) -> Dict:
     """Create anomaly record from input record"""
     return {
@@ -130,7 +126,6 @@ def _create_anomaly_record(record: Dict) -> Dict:
         'severity': random.choice(['low', 'medium', 'high'])
     }
 
-
 async def detect_anomalies(records: List[Dict]) -> List[Dict]:
     """Detect anomalies in records"""
     anomalies = []
@@ -138,7 +133,6 @@ async def detect_anomalies(records: List[Dict]) -> List[Dict]:
         if record.get('anomaly', False):
             anomalies.append(_create_anomaly_record(record))
     return anomalies
-
 
 def _extract_metric_values(records: List[Dict]) -> tuple[List[float], List[float]]:
     """Extract latency and error rate values"""
@@ -155,14 +149,12 @@ def _build_metrics_dict(latencies: List[float], error_rates: List[float], record
         'throughput': record_count * 10  # Mock throughput calculation
     }
 
-
 async def calculate_metrics(records: List[Dict]) -> Dict:
     """Calculate actual metrics from records"""
     if not records:
         return {}
     latencies, error_rates = _extract_metric_values(records)
     return _build_metrics_dict(latencies, error_rates, len(records))
-
 
 def _calculate_schema_validation(records: List[Dict], validate_schema_fn) -> Dict:
     """Calculate schema validation results"""
@@ -177,7 +169,6 @@ def _calculate_overall_score(schema_validation: Dict, statistical_validation, qu
         (1.0 if statistical_validation.distribution_match else 0.0) * 0.3 +
         quality_metrics.validation_pass_rate * 0.3
     )
-
 
 def _build_validation_report(schema_validation: Dict, statistical_validation, quality_metrics, overall_score: float) -> Dict:
     """Build validation report dictionary"""
@@ -194,7 +185,6 @@ def _build_validation_report(schema_validation: Dict, statistical_validation, qu
         "overall_quality_score": overall_score
     }
 
-
 async def generate_validation_report(records: List[Dict], validate_schema_fn, 
                                     validate_distribution_fn, calculate_quality_metrics_fn) -> Dict:
     """Generate comprehensive validation report"""
@@ -203,7 +193,6 @@ async def generate_validation_report(records: List[Dict], validate_schema_fn,
     quality_metrics = await calculate_quality_metrics_fn(records, validate_schema_fn)
     overall_score = _calculate_overall_score(schema_validation, statistical_validation, quality_metrics)
     return _build_validation_report(schema_validation, statistical_validation, quality_metrics, overall_score)
-
 
 def _calculate_elapsed_time(job: Dict) -> float:
     """Calculate elapsed time from job start"""
@@ -229,7 +218,6 @@ def _generate_basic_metrics() -> Dict:
         "records_per_second": random.uniform(100, 500)
     }
 
-
 def _generate_resource_metrics() -> Dict:
     """Generate resource utilization metrics"""
     return {
@@ -237,13 +225,11 @@ def _generate_resource_metrics() -> Dict:
         "memory": random.uniform(0.3, 0.7)
     }
 
-
 async def get_generation_metrics(time_range_hours: int = 24) -> Dict:
     """Get generation metrics for admin dashboard"""
     metrics = _generate_basic_metrics()
     metrics["resource_utilization"] = _generate_resource_metrics()
     return metrics
-
 
 async def get_corpus_analytics() -> Dict:
     """Get corpus usage analytics"""
@@ -253,7 +239,6 @@ async def get_corpus_analytics() -> Dict:
         "content_distribution": {"type_a": 0.4, "type_b": 0.6},
         "access_patterns": {"daily": 1000, "weekly": 7000}
     }
-
 
 def _generate_time_breakdown() -> Dict[str, float]:
     """Generate timing breakdown metrics"""
@@ -274,7 +259,6 @@ def _get_optimization_data() -> tuple[List[str], List[str]]:
     ]
     return bottlenecks, suggestions
 
-
 async def profile_generation(config: Union['SyntheticDataGenParams', 'IngestionConfig']) -> Dict[str, Any]:
     """Profile generation performance"""
     time_breakdown = _generate_time_breakdown()
@@ -284,7 +268,6 @@ async def profile_generation(config: Union['SyntheticDataGenParams', 'IngestionC
         "bottlenecks": bottlenecks,
         "optimization_suggestions": suggestions
     }
-
 
 def _calculate_query_operations(query: str, optimize: bool) -> int:
     """Calculate number of operations for query"""

@@ -24,11 +24,7 @@ class MCPWebSocketHandler:
         websocket: WebSocket, 
         api_key: Optional[str] = None
     ) -> None:
-        """
-        WebSocket endpoint for MCP
-        
-        Connect with: ws://localhost:8000/api/mcp/ws?api_key=YOUR_KEY
-        """
+        """WebSocket endpoint for MCP"""
         await _handle_websocket_connection(self, websocket, api_key)
     
     async def _handle_websocket_session(self, websocket: WebSocket, api_key: Optional[str]) -> Optional[str]:
@@ -71,6 +67,11 @@ class MCPWebSocketHandler:
         """Process WebSocket message"""
         # This would need proper MCP protocol handling
         return _build_websocket_response(session_id)
+    
+    async def _cleanup_session(self, session_id: Optional[str]) -> None:
+        """Clean up WebSocket session"""
+        if session_id:
+            await self.mcp_service.close_session(session_id)
 
 
 def _build_websocket_response(session_id: str) -> dict:
@@ -100,8 +101,3 @@ async def _process_websocket_session(
     await handler._send_session_created(websocket, session_id)
     await handler._handle_messages(websocket, session_id)
     return session_id
-    
-    async def _cleanup_session(self, session_id: Optional[str]) -> None:
-        """Clean up WebSocket session"""
-        if session_id:
-            await self.mcp_service.close_session(session_id)

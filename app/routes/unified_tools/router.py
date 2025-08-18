@@ -35,15 +35,25 @@ permission_service = ToolPermissionService(redis_client)
 tool_registry = UnifiedToolRegistry(permission_service=permission_service)
 
 
+async def extract_tool_data_components(current_user: User, category: Optional[str]) -> tuple:
+    """Extract tool data components."""
+    tool_data = await gather_tool_data(tool_registry, current_user, category)
+    return tool_data
+
+
 async def process_list_tools_request(
     current_user: User, category: Optional[str]
 ) -> ToolAvailabilityResponse:
     """Process list tools request and return response."""
-    tool_data = await gather_tool_data(tool_registry, current_user, category)
-    available_tools, categories, tools_available = tool_data
+    available_tools, categories, tools_available = await extract_tool_data_components(current_user, category)
     return build_tool_availability_response(
         available_tools, tools_available, categories, current_user
     )
+
+
+async def execute_list_tools_logic(current_user: User, category: Optional[str]) -> ToolAvailabilityResponse:
+    """Execute list tools business logic."""
+    return await process_list_tools_request(current_user, category)
 
 
 @router.get("/", summary="List available tools")
@@ -53,9 +63,14 @@ async def list_tools(
 ) -> ToolAvailabilityResponse:
     """Get list of all tools available to the current user"""
     try:
-        return await process_list_tools_request(current_user, category)
+        return await execute_list_tools_logic(current_user, category)
     except Exception as e:
         handle_list_tools_error(e)
+
+
+async def execute_tool_logic(request: ToolExecutionRequest, current_user: User, db: DbDep) -> Dict[str, Any]:
+    """Execute tool business logic."""
+    return await process_tool_execution(tool_registry, request, current_user, db)
 
 
 @router.post("/execute", summary="Execute a tool")
@@ -65,7 +80,7 @@ async def execute_tool(
 ) -> Dict[str, Any]:
     """Execute a tool with permission checking and usage tracking"""
     try:
-        return await process_tool_execution(tool_registry, request, current_user, db)
+        return await execute_tool_logic(request, current_user, db)
     except Exception as e:
         handle_tool_execution_error(e, request.tool_name)
 
@@ -79,6 +94,15 @@ async def get_tool_categories() -> List[Dict[str, Any]]:
         handle_categories_error(e)
 
 
+async def execute_permission_check_logic(
+    tool_name: str, action: str, current_user: User
+) -> Dict[str, Any]:
+    """Execute permission check business logic."""
+    return await execute_permission_check(
+        permission_service, tool_name, action, current_user
+    )
+
+
 @router.get("/permissions/{tool_name}", summary="Check tool permissions")
 async def check_tool_permissions(
     tool_name: str, action: str = Query("execute", description="Action to check"),
@@ -86,19 +110,22 @@ async def check_tool_permissions(
 ) -> Dict[str, Any]:
     """Check if user has permission to use a specific tool"""
     try:
-        return await execute_permission_check(
-            permission_service, tool_name, action, current_user
-        )
+        return await execute_permission_check_logic(tool_name, action, current_user)
     except Exception as e:
         handle_permission_check_error(e, tool_name)
+
+
+async def extract_user_plan_components(current_user: User, db: DbDep) -> tuple:
+    """Extract user plan data components."""
+    plan_data = await gather_user_plan_data(current_user, db)
+    return plan_data
 
 
 async def process_user_plan_request(
     current_user: User, db: DbDep
 ) -> UserPlanResponse:
     """Process user plan request and return response."""
-    plan_data = await gather_user_plan_data(current_user, db)
-    current_plan_def, available_upgrades, usage_summary = plan_data
+    current_plan_def, available_upgrades, usage_summary = await extract_user_plan_components(current_user, db)
     return build_user_plan_response(
         current_user, current_plan_def, available_upgrades, usage_summary
     )

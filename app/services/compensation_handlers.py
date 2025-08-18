@@ -37,42 +37,58 @@ class DatabaseCompensationHandler(BaseCompensationHandler):
     ) -> bool:
         """Execute database rollback compensation."""
         try:
-            # Validate required compensation data
-            if not self.validate_compensation_data(
-                action.compensation_data,
-                ['rollback_operations']
-            ):
+            if not self._validate_compensation_requirements(action):
                 return False
             
-            # Create rollback session
-            session_id = await self.rollback_manager.create_rollback_session({
-                'compensation_action_id': action.action_id,
-                'original_operation_id': action.operation_id
-            })
-            
-            # Add rollback operations from compensation data
-            rollback_ops = action.compensation_data.get('rollback_operations', [])
-            for rollback_op in rollback_ops:
-                await self.rollback_manager.add_rollback_operation(
-                    session_id=session_id,
-                    table_name=rollback_op['table_name'],
-                    operation_type=rollback_op['operation_type'],
-                    rollback_data=rollback_op['rollback_data']
-                )
-            
-            # Execute rollback
-            success = await self.rollback_manager.execute_rollback_session(session_id)
-            
-            if success:
-                logger.info(f"Database compensation completed: {action.action_id}")
-            else:
-                logger.error(f"Database compensation failed: {action.action_id}")
-            
-            return success
+            session_id = await self._create_rollback_session(action)
+            await self._add_rollback_operations(action, session_id)
+            return await self._execute_and_log_rollback(action, session_id)
             
         except Exception as e:
             logger.error(f"Database compensation error: {action.action_id}: {e}")
             return False
+    
+    def _validate_compensation_requirements(self, action: CompensationAction) -> bool:
+        """Validate required compensation data"""
+        return self.validate_compensation_data(
+            action.compensation_data,
+            ['rollback_operations']
+        )
+    
+    async def _create_rollback_session(self, action: CompensationAction) -> str:
+        """Create rollback session for compensation"""
+        return await self.rollback_manager.create_rollback_session({
+            'compensation_action_id': action.action_id,
+            'original_operation_id': action.operation_id
+        })
+    
+    async def _add_rollback_operations(self, action: CompensationAction, session_id: str) -> None:
+        """Add rollback operations from compensation data"""
+        rollback_ops = action.compensation_data.get('rollback_operations', [])
+        for rollback_op in rollback_ops:
+            await self._add_single_rollback_operation(session_id, rollback_op)
+    
+    async def _add_single_rollback_operation(self, session_id: str, rollback_op: Dict) -> None:
+        """Add a single rollback operation"""
+        await self.rollback_manager.add_rollback_operation(
+            session_id=session_id,
+            table_name=rollback_op['table_name'],
+            operation_type=rollback_op['operation_type'],
+            rollback_data=rollback_op['rollback_data']
+        )
+    
+    async def _execute_and_log_rollback(self, action: CompensationAction, session_id: str) -> bool:
+        """Execute rollback and log results"""
+        success = await self.rollback_manager.execute_rollback_session(session_id)
+        self._log_rollback_result(action, success)
+        return success
+    
+    def _log_rollback_result(self, action: CompensationAction, success: bool) -> None:
+        """Log rollback execution result"""
+        if success:
+            logger.info(f"Database compensation completed: {action.action_id}")
+        else:
+            logger.error(f"Database compensation failed: {action.action_id}")
     
     def get_priority(self) -> int:
         """Database operations have high priority for compensation."""

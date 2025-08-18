@@ -40,13 +40,17 @@ def get_fallback_title() -> str:
     return f"Chat {int(time.time())}"
 
 
+async def _call_llm_for_title(content: str) -> str:
+    """Call LLM to generate title."""
+    llm_manager = LLMManager()
+    prompt = build_title_generation_prompt(content)
+    generated_title = await llm_manager.ask_llm(prompt, "triage")
+    return clean_generated_title(generated_title)
+
 async def generate_title_with_llm(content: str) -> str:
     """Generate title using LLM with fallback."""
     try:
-        llm_manager = LLMManager()
-        prompt = build_title_generation_prompt(content)
-        generated_title = await llm_manager.ask_llm(prompt, "triage")
-        return clean_generated_title(generated_title)
+        return await _call_llm_for_title(content)
     except Exception as llm_error:
         logger.warning(f"LLM title generation failed: {llm_error}")
         return get_fallback_title()

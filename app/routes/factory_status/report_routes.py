@@ -37,6 +37,10 @@ def _process_historical_reports(start_date, end_date, limit):
     return sort_and_limit_reports(filtered_reports, limit)
 
 
+async def _get_processed_historical_reports(start_date, end_date, limit):
+    """Get processed historical reports."""
+    return _process_historical_reports(start_date, end_date, limit)
+
 async def get_report_history_handler(
     start_date: datetime = None,
     end_date: datetime = None,
@@ -45,7 +49,7 @@ async def get_report_history_handler(
     current_user: Dict = Depends(get_current_user)
 ) -> List[ReportResponse]:
     """Get historical factory status reports."""
-    limited_reports = _process_historical_reports(start_date, end_date, limit)
+    limited_reports = await _get_processed_historical_reports(start_date, end_date, limit)
     return convert_reports_to_responses(limited_reports)
 
 
@@ -57,13 +61,17 @@ def _handle_generation_error(e: Exception):
     )
 
 
-async def generate_report_handler(
-    request: GenerateReportRequest,
-    current_user: Dict = Depends(get_current_user)
-) -> ReportResponse:
-    """Generate a new factory status report."""
+async def _generate_and_convert_report(request: GenerateReportRequest):
+    """Generate and convert report."""
     try:
         report = await generate_new_report(request.hours)
         return convert_report_to_response(report)
     except Exception as e:
         _handle_generation_error(e)
+
+async def generate_report_handler(
+    request: GenerateReportRequest,
+    current_user: Dict = Depends(get_current_user)
+) -> ReportResponse:
+    """Generate a new factory status report."""
+    return await _generate_and_convert_report(request)

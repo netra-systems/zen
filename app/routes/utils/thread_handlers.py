@@ -17,14 +17,18 @@ async def handle_list_threads_request(db: AsyncSession, user_id: int, offset: in
     return await convert_threads_to_responses(db, threads, offset, limit)
 
 
+def _validate_thread_creation(thread) -> None:
+    """Validate thread creation result."""
+    if not thread:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail="Failed to create thread in database")
+
 async def handle_create_thread_request(db: AsyncSession, thread_data, user_id: int):
     """Handle create thread request logic."""
     thread_id = generate_thread_id()
     metadata = prepare_thread_metadata(thread_data, user_id)
     thread = await create_thread_record(db, thread_id, metadata)
-    if not thread:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=500, detail="Failed to create thread in database")
+    _validate_thread_creation(thread)
     return await build_thread_response(thread, 0, metadata.get("title"))
 
 
@@ -35,12 +39,20 @@ async def handle_get_thread_request(db: AsyncSession, thread_id: str, user_id: i
     return await build_thread_response(thread, message_count)
 
 
-async def update_thread_metadata_fields(thread, thread_update):
-    """Update thread metadata fields."""
+def _initialize_thread_metadata(thread) -> None:
+    """Initialize thread metadata if needed."""
     if not thread.metadata_:
         thread.metadata_ = {}
+
+def _update_title_field(thread, thread_update) -> None:
+    """Update title field if provided."""
     if thread_update.title is not None:
         thread.metadata_["title"] = thread_update.title
+
+async def update_thread_metadata_fields(thread, thread_update):
+    """Update thread metadata fields."""
+    _initialize_thread_metadata(thread)
+    _update_title_field(thread, thread_update)
     if thread_update.metadata:
         thread.metadata_.update(thread_update.metadata)
     thread.metadata_["updated_at"] = int(time.time())

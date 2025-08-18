@@ -54,9 +54,7 @@ class AgentErrorHandler:
         """Attempt recovery through retry or fallback."""
         if self._should_retry_operation(agent_error, context):
             return await self._retry_with_delay(agent_error, context)
-        return await self._try_fallback_or_raise(
-            agent_error, context, fallback_operation
-        )
+        return await self._try_fallback_or_raise(agent_error, context, fallback_operation)
     
     async def _try_fallback_or_raise(
         self, 
@@ -89,30 +87,50 @@ class AgentErrorHandler:
     ) -> AgentError:
         """Convert generic exception to AgentError."""
         if isinstance(error, AgentError):
-            error.context = context
-            return error
-        
+            return self._update_existing_agent_error(error, context)
+        return self._create_new_agent_error(error, context)
+    
+    def _update_existing_agent_error(self, error: AgentError, context: ErrorContext) -> AgentError:
+        """Update existing AgentError with new context."""
+        error.context = context
+        return error
+    
+    def _create_new_agent_error(self, error: Exception, context: ErrorContext) -> AgentError:
+        """Create new AgentError from generic exception."""
         error_type = type(error).__name__
         category = self._determine_error_category(error_type)
         severity = self._determine_error_severity(error_type)
-        
         return AgentError(
-            message=str(error),
-            severity=severity,
-            category=category,
-            context=context,
-            recoverable=self._is_error_recoverable(category)
+            message=str(error), severity=severity, category=category,
+            context=context, recoverable=self._is_error_recoverable(category)
         )
     
     def _get_category_mapping(self) -> dict:
         """Get mapping of exception types to error categories."""
+        validation_mapping = self._get_validation_category_mapping()
+        network_mapping = self._get_network_category_mapping()
+        system_mapping = self._get_system_category_mapping()
+        return {**validation_mapping, **network_mapping, **system_mapping}
+    
+    def _get_validation_category_mapping(self) -> dict:
+        """Get validation error category mapping."""
         return {
             'ValidationError': ErrorCategory.VALIDATION,
             'pydantic.ValidationError': ErrorCategory.VALIDATION,
+        }
+    
+    def _get_network_category_mapping(self) -> dict:
+        """Get network error category mapping."""
+        return {
             'ConnectionError': ErrorCategory.NETWORK,
             'TimeoutError': ErrorCategory.TIMEOUT,
             'asyncio.TimeoutError': ErrorCategory.TIMEOUT,
             'WebSocketDisconnect': ErrorCategory.WEBSOCKET,
+        }
+    
+    def _get_system_category_mapping(self) -> dict:
+        """Get system error category mapping."""
+        return {
             'DatabaseError': ErrorCategory.DATABASE,
             'MemoryError': ErrorCategory.RESOURCE,
             'FileNotFoundError': ErrorCategory.CONFIGURATION,
@@ -148,18 +166,23 @@ class AgentErrorHandler:
         """Log error with appropriate level."""
         context = error.context
         log_message = f"{context.agent_name}.{context.operation_name}: {error.message}"
-        
-        log_levels = [
+        log_levels = self._get_error_log_levels()
+        self._execute_error_logging(error, log_message, log_levels)
+    
+    def _get_error_log_levels(self) -> list:
+        """Get error severity to log function mapping."""
+        return [
             (ErrorSeverity.CRITICAL, logger.critical),
             (ErrorSeverity.HIGH, logger.error),
             (ErrorSeverity.MEDIUM, logger.warning)
         ]
-        
+    
+    def _execute_error_logging(self, error: AgentError, log_message: str, log_levels: list) -> None:
+        """Execute appropriate logging based on error severity."""
         for severity, log_func in log_levels:
             if error.severity == severity:
                 log_func(log_message)
                 return
-        
         logger.info(log_message)
     
     def _store_error(self, error: AgentError) -> None:
@@ -188,19 +211,23 @@ class AgentErrorHandler:
     ) -> None:
         """Retry operation after appropriate delay."""
         delay = self.recovery_strategy.get_recovery_delay(error, context.retry_count)
-        
+        self._log_retry_attempt(context, delay)
+        await asyncio.sleep(delay)
+        raise self._create_retry_error(context)
+    
+    def _log_retry_attempt(self, context: ErrorContext, delay: float) -> None:
+        """Log retry attempt details."""
         logger.info(
             f"Retrying {context.operation_name} in {delay:.2f}s "
             f"(attempt {context.retry_count + 1}/{context.max_retries})"
         )
-        
-        await asyncio.sleep(delay)
-        raise AgentError(
+    
+    def _create_retry_error(self, context: ErrorContext) -> AgentError:
+        """Create retry error for operation."""
+        return AgentError(
             message=f"Retry required for {context.operation_name}",
-            severity=ErrorSeverity.LOW,
-            category=ErrorCategory.PROCESSING,
-            context=context,
-            recoverable=True
+            severity=ErrorSeverity.LOW, category=ErrorCategory.PROCESSING,
+            context=context, recoverable=True
         )
     
     def get_error_stats(self) -> Dict[str, Union[int, Dict[str, int], List[Dict[str, Union[str, float]]]]]:

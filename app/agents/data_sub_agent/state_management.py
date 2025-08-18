@@ -14,13 +14,11 @@ class StateManagementMixin:
     async def save_state(self) -> None:
         """Save agent state for recovery and persistence"""
         self._prepare_state_for_saving()
-        
         try:
             await self._persist_state_to_redis()
             logger.info(f"Saved state for {self.agent_type}")
         except Exception as e:
-            logger.error(f"Failed to persist state: {e}")
-            # Keep in-memory state as fallback
+            await self._handle_state_save_error(e)
     
     def _prepare_state_for_saving(self) -> None:
         """Prepare state data for saving."""
@@ -36,12 +34,8 @@ class StateManagementMixin:
         redis_manager = RedisManager()
         state_key = self._get_state_key()
         state_data = self._build_state_data()
-        
-        await redis_manager.set(
-            state_key,
-            pickle.dumps(state_data),
-            expire=86400  # 24 hour TTL
-        )
+        serialized_data = pickle.dumps(state_data)
+        await redis_manager.set(state_key, serialized_data, expire=86400)
     
     def _get_state_key(self) -> str:
         """Get Redis key for state storage."""
@@ -60,10 +54,7 @@ class StateManagementMixin:
         """Load agent state from storage"""
         try:
             state_data = await self._fetch_state_from_redis()
-            if state_data:
-                self._deserialize_and_restore_state(state_data)
-            else:
-                self._initialize_empty_state()
+            await self._process_loaded_state(state_data)
         except Exception as e:
             logger.error(f"Failed to load state: {e}")
             self._initialize_empty_state()
@@ -109,13 +100,9 @@ class StateManagementMixin:
     
     async def _recover_incomplete_tasks(self) -> None:
         """Recover and resume incomplete tasks from state."""
-        if not (hasattr(self, 'state') and 'incomplete_tasks' in self.state):
+        if not self._has_incomplete_tasks():
             return
-        
         incomplete = self.state['incomplete_tasks']
-        if not incomplete:
-            return
-        
         logger.info(f"Recovering {len(incomplete)} incomplete tasks")
         await self._process_incomplete_tasks(incomplete)
         await self._clear_incomplete_tasks_after_recovery()
@@ -135,11 +122,11 @@ class StateManagementMixin:
     
     async def _resume_from_checkpoint(self) -> None:
         """Resume from the latest checkpoint if available."""
-        if not (hasattr(self, '_checkpoints') and self._checkpoints):
+        if not self._has_available_checkpoints():
             return
-        
         latest_checkpoint = self._checkpoints[-1]
-        logger.info(f"Resuming from checkpoint: {latest_checkpoint.get('timestamp')}")
+        timestamp = latest_checkpoint.get('timestamp')
+        logger.info(f"Resuming from checkpoint: {timestamp}")
     
     async def _resume_task(self, task: Dict[str, Any]) -> None:
         """Resume an incomplete task"""
@@ -156,3 +143,26 @@ class StateManagementMixin:
             await self.process_batch(task_data.get('items', []))
         else:
             logger.warning(f"Unknown task type for recovery: {task_type}")
+    
+    async def _handle_state_save_error(self, error: Exception) -> None:
+        """Handle state saving errors with fallback."""
+        logger.error(f"Failed to persist state: {error}")
+        # Keep in-memory state as fallback
+    
+    async def _process_loaded_state(self, state_data: Optional[bytes]) -> None:
+        """Process loaded state data or initialize empty state."""
+        if state_data:
+            self._deserialize_and_restore_state(state_data)
+        else:
+            self._initialize_empty_state()
+    
+    def _has_incomplete_tasks(self) -> bool:
+        """Check if there are incomplete tasks to recover."""
+        has_state = hasattr(self, 'state') and 'incomplete_tasks' in self.state
+        if not has_state:
+            return False
+        return bool(self.state['incomplete_tasks'])
+    
+    def _has_available_checkpoints(self) -> bool:
+        """Check if checkpoints are available for resumption."""
+        return hasattr(self, '_checkpoints') and bool(self._checkpoints)

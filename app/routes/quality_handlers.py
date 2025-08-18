@@ -70,12 +70,17 @@ async def _validate_content_with_service(quality_gate_service, request, content_
 async def handle_agent_report_request(monitoring_service: QualityMonitoringService, agent_name: str, period_hours: int) -> Dict[str, Any]:
     """Handle agent quality report request."""
     try:
-        report = await _fetch_agent_report(monitoring_service, agent_name, period_hours)
-        return _validate_agent_report(report)
+        return await _process_agent_report_request(monitoring_service, agent_name, period_hours)
     except HTTPException:
         raise
     except Exception as e:
         _handle_agent_report_error(e)
+
+
+async def _process_agent_report_request(monitoring_service: QualityMonitoringService, agent_name: str, period_hours: int) -> Dict[str, Any]:
+    """Process agent report request and validate result."""
+    report = await _fetch_agent_report(monitoring_service, agent_name, period_hours)
+    return _validate_agent_report(report)
 
 
 async def handle_alerts_request(monitoring_service: QualityMonitoringService, severity: str, acknowledged: bool, limit: int) -> List[QualityAlert]:
@@ -91,12 +96,17 @@ async def handle_alerts_request(monitoring_service: QualityMonitoringService, se
 async def handle_alert_acknowledgement(monitoring_service: QualityMonitoringService, request: AlertAcknowledgement, user: User):
     """Handle alert acknowledgement request."""
     try:
-        success = await _process_alert_action(monitoring_service, request)
-        return _build_acknowledgement_result(success, request, user)
+        return await _process_acknowledgement_request(monitoring_service, request, user)
     except HTTPException:
         raise
     except Exception as e:
         _handle_acknowledgement_error(e)
+
+
+async def _process_acknowledgement_request(monitoring_service: QualityMonitoringService, request: AlertAcknowledgement, user: User):
+    """Process alert acknowledgement request."""
+    success = await _process_alert_action(monitoring_service, request)
+    return _build_acknowledgement_result(success, request, user)
 
 
 async def _process_alert_action(monitoring_service: QualityMonitoringService, request: AlertAcknowledgement) -> bool:
@@ -121,13 +131,35 @@ async def handle_report_generation(monitoring_service: QualityMonitoringService,
 
 async def _generate_report_data(monitoring_service: QualityMonitoringService, report_type: QualityReportType, period_hours: int, period_days: int) -> Dict[str, Any]:
     """Generate report data based on report type."""
-    if report_type == QualityReportType.SUMMARY:
-        return await _generate_summary_report_data(monitoring_service)
-    if report_type == QualityReportType.DETAILED:
-        return await _generate_detailed_report_data(monitoring_service, period_hours, period_days)
-    if report_type == QualityReportType.TREND_ANALYSIS:
-        return await _generate_trend_analysis_data(monitoring_service, period_days)
+    report_handlers = _get_report_type_handlers()
+    handler = report_handlers.get(report_type)
+    if handler:
+        return await handler(monitoring_service, period_hours, period_days)
     return _get_unknown_report_type_error()
+
+
+def _get_report_type_handlers():
+    """Get report type handler mapping."""
+    return {
+        QualityReportType.SUMMARY: _handle_summary_report,
+        QualityReportType.DETAILED: _handle_detailed_report,
+        QualityReportType.TREND_ANALYSIS: _handle_trend_analysis_report
+    }
+
+
+async def _handle_summary_report(monitoring_service, period_hours, period_days):
+    """Handle summary report generation."""
+    return await _generate_summary_report_data(monitoring_service)
+
+
+async def _handle_detailed_report(monitoring_service, period_hours, period_days):
+    """Handle detailed report generation."""
+    return await _generate_detailed_report_data(monitoring_service, period_hours, period_days)
+
+
+async def _handle_trend_analysis_report(monitoring_service, period_hours, period_days):
+    """Handle trend analysis report generation."""
+    return await _generate_trend_analysis_data(monitoring_service, period_days)
 
 
 async def _generate_summary_report_data(monitoring_service: QualityMonitoringService) -> Dict[str, Any]:
@@ -194,25 +226,35 @@ async def handle_statistics_request(quality_gate_service: QualityGateService, co
 async def handle_start_monitoring(monitoring_service: QualityMonitoringService, background_tasks: BackgroundTasks, user: User, interval_seconds: int) -> Dict[str, Any]:
     """Handle start monitoring request."""
     try:
-        _validate_admin_access(user)
-        _add_monitoring_task(background_tasks, monitoring_service, interval_seconds)
-        return build_monitoring_response(interval_seconds, user)
+        return await _process_start_monitoring(monitoring_service, background_tasks, user, interval_seconds)
     except HTTPException:
         raise
     except Exception as e:
         _handle_start_monitoring_error(e)
 
 
+async def _process_start_monitoring(monitoring_service: QualityMonitoringService, background_tasks: BackgroundTasks, user: User, interval_seconds: int) -> Dict[str, Any]:
+    """Process start monitoring request with validation."""
+    _validate_admin_access(user)
+    _add_monitoring_task(background_tasks, monitoring_service, interval_seconds)
+    return build_monitoring_response(interval_seconds, user)
+
+
 async def handle_stop_monitoring(monitoring_service: QualityMonitoringService, user: User) -> Dict[str, Any]:
     """Handle stop monitoring request."""
     try:
-        _validate_admin_access(user)
-        await _stop_monitoring_service(monitoring_service)
-        return build_stop_monitoring_response(user)
+        return await _process_stop_monitoring(monitoring_service, user)
     except HTTPException:
         raise
     except Exception as e:
         _handle_stop_monitoring_error(e)
+
+
+async def _process_stop_monitoring(monitoring_service: QualityMonitoringService, user: User) -> Dict[str, Any]:
+    """Process stop monitoring request with validation."""
+    _validate_admin_access(user)
+    await _stop_monitoring_service(monitoring_service)
+    return build_stop_monitoring_response(user)
 
 
 def _validate_admin_access(user: User) -> None:

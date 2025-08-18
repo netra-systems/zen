@@ -48,14 +48,38 @@ async def generate_demo_report(
     request: ExportReportRequest, demo_service: DemoService, current_user: Optional[Dict]
 ) -> str:
     """Generate demo report."""
+    return await execute_report_with_error_handling(request, demo_service, current_user)
+
+
+async def execute_report_with_error_handling(
+    request: ExportReportRequest, demo_service: DemoService, current_user: Optional[Dict]
+) -> str:
+    """Execute report generation with error handling."""
+    return await handle_report_generation(request, demo_service, current_user)
+
+
+async def handle_report_generation(
+    request: ExportReportRequest, demo_service: DemoService, current_user: Optional[Dict]
+) -> str:
+    """Handle report generation with error handling."""
     try:
         return await execute_report_generation(request, demo_service, current_user)
     except ValueError as e:
-        from app.routes.demo_handlers_utils import raise_not_found_error
-        raise_not_found_error(str(e))
+        handle_report_value_error(e)
     except Exception as e:
-        from app.routes.demo_handlers_utils import log_and_raise_error
-        log_and_raise_error("Failed to export report", e)
+        handle_report_general_error(e)
+
+
+def handle_report_value_error(e: ValueError) -> None:
+    """Handle ValueError in report generation."""
+    from app.routes.demo_handlers_utils import raise_not_found_error
+    raise_not_found_error(str(e))
+
+
+def handle_report_general_error(e: Exception) -> None:
+    """Handle general exception in report generation."""
+    from app.routes.demo_handlers_utils import log_and_raise_error
+    log_and_raise_error("Failed to export report", e)
 
 
 def create_export_tracking_data(request: ExportReportRequest) -> Dict[str, Any]:

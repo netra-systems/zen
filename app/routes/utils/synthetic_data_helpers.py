@@ -29,15 +29,23 @@ def calculate_estimated_duration(num_traces: int) -> int:
     return int(num_traces / 100)
 
 
-def _build_result_fields_dict(result: Dict, num_traces: int) -> Dict:
-    """Build result fields dictionary."""
+def _get_result_basic_fields(result: Dict) -> Dict:
+    """Get basic result fields."""
+    return {"job_id": result["job_id"], "status": result["status"]}
+
+def _get_result_extended_fields(result: Dict, num_traces: int) -> Dict:
+    """Get extended result fields."""
     return {
-        "job_id": result["job_id"],
-        "status": result["status"],
         "websocket_channel": result["websocket_channel"],
         "table_name": result["table_name"],
         "estimated_duration_seconds": calculate_estimated_duration(num_traces)
     }
+
+def _build_result_fields_dict(result: Dict, num_traces: int) -> Dict:
+    """Build result fields dictionary."""
+    basic = _get_result_basic_fields(result)
+    extended = _get_result_extended_fields(result, num_traces)
+    return {**basic, **extended}
 
 def extract_result_fields(result: Dict, num_traces: int) -> Dict:
     """Extract fields for generation response."""

@@ -194,14 +194,16 @@ class SlidingWindowCounter:
     def get_count(self, timestamp: float) -> int:
         """Get request count in sliding window."""
         current_bucket = int(timestamp // self.bucket_size)
-        cutoff = current_bucket - (self.window_size // self.bucket_size)
+        cutoff = self._calculate_cutoff_bucket(current_bucket)
+        return self._sum_valid_buckets(cutoff)
         
-        count = 0
-        for bucket, requests in self.buckets.items():
-            if bucket > cutoff:
-                count += requests
+    def _calculate_cutoff_bucket(self, current_bucket: int) -> int:
+        """Calculate cutoff bucket for sliding window."""
+        return current_bucket - (self.window_size // self.bucket_size)
         
-        return count
+    def _sum_valid_buckets(self, cutoff: int) -> int:
+        """Sum requests from valid buckets within window."""
+        return sum(requests for bucket, requests in self.buckets.items() if bucket > cutoff)
     
     def cleanup(self, timestamp: float) -> None:
         """Clean up old buckets."""

@@ -183,12 +183,17 @@ def _perform_warmup_simulation(patterns: List[str], priority: str, max_items: in
 async def warm_up_cache(config: Dict[str, Any]) -> Dict[str, Any]:
     """Warm up cache with specified patterns and configuration"""
     try:
-        patterns, priority, max_items = _extract_warmup_config(config)
-        warmed_up_count, _ = _perform_warmup_simulation(patterns, priority, max_items)
-        return _build_warmup_success_response(warmed_up_count, patterns, priority)
+        return await _process_cache_warmup(config)
     except Exception as e:
         logger.error(f"Error during cache warm-up: {e}")
         return _build_warmup_error_response(str(e))
+
+
+async def _process_cache_warmup(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Process cache warmup with configuration."""
+    patterns, priority, max_items = _extract_warmup_config(config)
+    warmed_up_count, _ = _perform_warmup_simulation(patterns, priority, max_items)
+    return _build_warmup_success_response(warmed_up_count, patterns, priority)
 
 
 def _log_backup_success(backup_result: Dict[str, Any]) -> Dict[str, Any]:

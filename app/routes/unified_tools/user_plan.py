@@ -50,17 +50,28 @@ def get_plan_features(current_plan_def) -> List[str]:
     return []
 
 
+def create_plan_response_params(
+    current_user: User, current_plan_def,
+    available_upgrades: List[str], usage_summary: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Create plan response parameters."""
+    return {
+        "current_plan": current_user.plan_tier,
+        "plan_expires_at": get_plan_expiration_date(current_user),
+        "features": get_plan_features(current_plan_def),
+        "available_upgrades": available_upgrades, "usage_summary": usage_summary
+    }
+
+
 def build_user_plan_response(
     current_user: User, current_plan_def, 
     available_upgrades: List[str], usage_summary: Dict[str, Any]
 ) -> UserPlanResponse:
     """Build user plan response."""
-    return UserPlanResponse(
-        current_plan=current_user.plan_tier,
-        plan_expires_at=get_plan_expiration_date(current_user),
-        features=get_plan_features(current_plan_def),
-        available_upgrades=available_upgrades, usage_summary=usage_summary
+    params = create_plan_response_params(
+        current_user, current_plan_def, available_upgrades, usage_summary
     )
+    return UserPlanResponse(**params)
 
 
 async def gather_user_plan_data(current_user: User, db: AsyncSession):

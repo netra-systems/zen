@@ -28,21 +28,13 @@ class AgentCommunicationMixin:
     
     async def _execute_websocket_update_with_retry(self, run_id: str, data: Dict[str, Any]) -> None:
         """Execute WebSocket update with retry logic."""
-        max_retries = 3
-        retry_count = 0
+        max_retries, retry_count = 3, 0
         
         while retry_count < max_retries:
-            try:
-                await self._attempt_websocket_update(run_id, data)
+            success = await self._attempt_single_update(run_id, data, retry_count, max_retries)
+            if success:
                 return
-            except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
-                retry_count += 1
-                await self._handle_retry_or_failure(run_id, data, e, retry_count, max_retries)
-                if retry_count >= max_retries:
-                    return
-            except Exception as e:
-                self.logger.error(f"Unexpected error in WebSocket update: {e}")
-                return
+            retry_count += 1
     
     async def _handle_retry_or_failure(self, run_id: str, data: Dict[str, Any], 
                                       error: Exception, retry_count: int, max_retries: int) -> None:
@@ -51,17 +43,16 @@ class AgentCommunicationMixin:
             self.logger.warning(f"WebSocket update failed after {max_retries} attempts: {error}")
             await self._handle_websocket_failure(run_id, data, error)
             return
-        
-        # Exponential backoff for retries
+        await self._apply_exponential_backoff(retry_count)
+    
+    async def _apply_exponential_backoff(self, retry_count: int) -> None:
+        """Apply exponential backoff delay."""
         await asyncio.sleep(0.1 * (2 ** retry_count))
                 
     async def _attempt_websocket_update(self, run_id: str, data: Dict[str, Any]) -> None:
         """Attempt to send WebSocket update."""
-        sub_agent_state = self._create_sub_agent_state(data)
+        websocket_message = self._build_websocket_message(run_id, data)
         ws_user_id = self._get_websocket_user_id(run_id)
-        update_payload = self._create_update_payload(sub_agent_state)
-        websocket_message = self._create_websocket_message(update_payload)
-        
         await self.websocket_manager.send_message(
             ws_user_id,
             websocket_message.model_dump()
@@ -69,9 +60,16 @@ class AgentCommunicationMixin:
     
     def _create_sub_agent_state(self, data: Dict[str, Any]) -> SubAgentState:
         """Create SubAgentState from data."""
+        message = self._build_system_message(data)
+        return self._construct_sub_agent_state(message)
+    
+    def _build_system_message(self, data: Dict[str, Any]) -> SystemMessage:
+        """Build SystemMessage from data."""
         message_content = data.get("message", "")
-        message = SystemMessage(content=message_content)
-        
+        return SystemMessage(content=message_content)
+    
+    def _construct_sub_agent_state(self, message: SystemMessage) -> SubAgentState:
+        """Construct SubAgentState with message."""
         return SubAgentState(
             messages=[message],
             next_node="",
@@ -96,13 +94,10 @@ class AgentCommunicationMixin:
         """Get WebSocket user ID with fallback."""
         if hasattr(self, '_user_id'):
             return self._user_id
-        if hasattr(self.websocket_manager, '_current_user_id'):
-            return getattr(self.websocket_manager, '_current_user_id', run_id)
-        # Extract user_id from run_id pattern if possible
-        # run_id format: run_<uuid> vs user_id format: <uuid>
-        if run_id.startswith('run_'):
-            logger.warning(f"Using run_id {run_id} as fallback for user_id")
-        return run_id
+        manager_id = self._get_manager_user_id(run_id)
+        if manager_id:
+            return manager_id
+        return self._handle_fallback_user_id(run_id)
         
     async def _handle_websocket_failure(self, run_id: str, data: Dict[str, Any], error: Exception) -> None:
         """Handle WebSocket failure with graceful degradation and centralized error tracking."""
@@ -113,13 +108,18 @@ class AgentCommunicationMixin:
     
     def _create_error_context(self, run_id: str, data: Dict[str, Any]) -> ErrorContext:
         """Create error context for centralized handling."""
-        return ErrorContext(
-            agent_name=self.name,
-            operation_name="websocket_update",
-            run_id=run_id,
-            timestamp=time.time(),
-            additional_data=data
-        )
+        context_params = self._build_error_context_params(run_id, data)
+        return ErrorContext(**context_params)
+    
+    def _build_error_context_params(self, run_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Build error context parameters."""
+        return {
+            "agent_name": self.name,
+            "operation_name": "websocket_update",
+            "run_id": run_id,
+            "timestamp": time.time(),
+            "additional_data": data
+        }
     
     def _process_websocket_error(self, websocket_error: WebSocketError) -> None:
         """Process WebSocket error through centralized handler."""
@@ -128,15 +128,9 @@ class AgentCommunicationMixin:
     
     def _store_failed_update(self, run_id: str, data: Dict[str, Any], error: Exception) -> None:
         """Store failed update for potential retry later."""
-        if not hasattr(self, '_failed_updates'):
-            self._failed_updates = []
-        
-        self._failed_updates.append({
-            "run_id": run_id,
-            "data": data,
-            "timestamp": time.time(),
-            "error": str(error)
-        })
+        self._ensure_failed_updates_list()
+        failed_update = self._create_failed_update_record(run_id, data, error)
+        self._failed_updates.append(failed_update)
         self._limit_failed_updates_storage()
     
     def _limit_failed_updates_storage(self) -> None:
@@ -148,3 +142,58 @@ class AgentCommunicationMixin:
         """Run agent in background task."""
         loop = asyncio.get_event_loop()
         loop.create_task(self.run(state, run_id, stream_updates))
+    
+    async def _attempt_single_update(
+        self, run_id: str, data: Dict[str, Any], retry_count: int, max_retries: int
+    ) -> bool:
+        """Attempt single WebSocket update with error handling."""
+        try:
+            await self._attempt_websocket_update(run_id, data)
+            return True
+        except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
+            return await self._handle_websocket_exception(run_id, data, e, retry_count + 1, max_retries)
+        except Exception as e:
+            return self._handle_unexpected_websocket_error(e)
+    
+    async def _handle_websocket_exception(self, run_id: str, data: Dict[str, Any], 
+                                        error: Exception, retry_count: int, max_retries: int) -> bool:
+        """Handle WebSocket connection exceptions."""
+        await self._handle_retry_or_failure(run_id, data, error, retry_count, max_retries)
+        return False
+    
+    def _handle_unexpected_websocket_error(self, error: Exception) -> bool:
+        """Handle unexpected WebSocket errors."""
+        self.logger.error(f"Unexpected error in WebSocket update: {error}")
+        return False
+    
+    def _build_websocket_message(self, run_id: str, data: Dict[str, Any]) -> WebSocketMessage:
+        """Build complete WebSocket message."""
+        sub_agent_state = self._create_sub_agent_state(data)
+        update_payload = self._create_update_payload(sub_agent_state)
+        return self._create_websocket_message(update_payload)
+    
+    def _get_manager_user_id(self, run_id: str) -> str:
+        """Get user ID from WebSocket manager."""
+        if hasattr(self.websocket_manager, '_current_user_id'):
+            return getattr(self.websocket_manager, '_current_user_id', None)
+        return None
+    
+    def _handle_fallback_user_id(self, run_id: str) -> str:
+        """Handle fallback user ID logic."""
+        if run_id.startswith('run_'):
+            logger.warning(f"Using run_id {run_id} as fallback for user_id")
+        return run_id
+    
+    def _ensure_failed_updates_list(self) -> None:
+        """Ensure failed updates list exists."""
+        if not hasattr(self, '_failed_updates'):
+            self._failed_updates = []
+    
+    def _create_failed_update_record(self, run_id: str, data: Dict[str, Any], error: Exception) -> dict:
+        """Create failed update record."""
+        return {
+            "run_id": run_id,
+            "data": data,
+            "timestamp": time.time(),
+            "error": str(error)
+        }

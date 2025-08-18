@@ -10,7 +10,7 @@
 # ================================
 
 import time
-from typing import Optional
+from typing import Optional, List
 
 from app.llm.llm_manager import LLMManager
 from app.agents.base import BaseSubAgent
@@ -79,7 +79,7 @@ class SyntheticDataSubAgent(BaseSubAgent):
         
         try:
             await self._execute_generation_flow(state, run_id, stream_updates, start_time)
-            log_agent_communication("SyntheticDataSubAgent", "Supervisor", run_id, "execute_response")
+            self._log_successful_execution(run_id)
         except Exception as e:
             await self._handle_generation_error(e, state, run_id, stream_updates)
             raise
@@ -89,9 +89,11 @@ class SyntheticDataSubAgent(BaseSubAgent):
         """Execute the full generation flow."""
         await self._send_initial_update(run_id, stream_updates)
         workload_profile = await self._determine_workload_profile(state)
+        
         if await self._requires_approval(workload_profile, state):
             await self._handle_approval_flow(workload_profile, state, run_id, stream_updates)
             return
+        
         await self._execute_generation(workload_profile, state, run_id, stream_updates, start_time)
     
     async def _send_initial_update(self, run_id: str, stream_updates: bool) -> None:
@@ -117,6 +119,7 @@ class SyntheticDataSubAgent(BaseSubAgent):
         """Handle approval request flow"""
         approval_message = self._generate_approval_message(profile)
         approval_result = self._create_approval_result(profile, approval_message)
+        
         state.synthetic_data_result = approval_result.model_dump()
         await self._send_approval_if_needed(stream_updates, run_id, profile, approval_message)
     
@@ -130,8 +133,13 @@ class SyntheticDataSubAgent(BaseSubAgent):
     ) -> None:
         """Execute the actual data generation"""
         await self._send_generation_update(profile, run_id, stream_updates)
+        
         result = await self._generate_and_store_result(profile, state, run_id, stream_updates)
         await self._finalize_generation(result, run_id, stream_updates, start_time)
+    
+    def _log_successful_execution(self, run_id: str) -> None:
+        """Log successful execution completion"""
+        log_agent_communication("SyntheticDataSubAgent", "Supervisor", run_id, "execute_response")
     
     async def _send_generation_update(
         self, profile: WorkloadProfile, run_id: str, stream_updates: bool
@@ -150,9 +158,14 @@ class SyntheticDataSubAgent(BaseSubAgent):
         """Send completion update"""
         if not stream_updates:
             return
-        duration = int((time.time() - start_time) * 1000)
+        
+        duration = self._calculate_duration(start_time)
         completion_data = self._build_completion_data(result, duration)
         await self._send_update(run_id, completion_data)
+    
+    def _calculate_duration(self, start_time: float) -> int:
+        """Calculate duration in milliseconds"""
+        return int((time.time() - start_time) * 1000)
     
     def _log_completion(self, run_id: str, result: SyntheticDataResult) -> None:
         """Log successful completion"""
@@ -198,8 +211,12 @@ class SyntheticDataSubAgent(BaseSubAgent):
             params = extract_json_from_response(response)
             return self._create_profile_from_params(params)
         except Exception as e:
-            self.logger.warning(f"Failed to parse workload profile: {e}")
+            self._log_parsing_failure(e)
             return self._get_default_profile()
+    
+    def _log_parsing_failure(self, error: Exception) -> None:
+        """Log workload profile parsing failure"""
+        self.logger.warning(f"Failed to parse workload profile: {error}")
     
     async def _call_llm_with_logging(self, prompt: str) -> str:
         """Call LLM with proper logging and heartbeat."""
@@ -224,22 +241,28 @@ class SyntheticDataSubAgent(BaseSubAgent):
         """Execute LLM call with logging."""
         try:
             self._log_llm_input(prompt, correlation_id)
-            response = await self.llm_manager.ask_llm(prompt, llm_config_name='default')
+            response = await self._get_llm_response(prompt)
             self._log_llm_success(response, correlation_id)
             return response
         except Exception as e:
             self._log_llm_error(correlation_id)
             raise
     
+    async def _get_llm_response(self, prompt: str) -> str:
+        """Get response from LLM manager"""
+        return await self.llm_manager.ask_llm(prompt, llm_config_name='default')
+    
     def _create_parsing_prompt(self, user_request: str) -> str:
         """Create prompt for parsing user request"""
         fields_spec = self._get_prompt_fields_spec()
+        base_prompt = f"Analyze this request for synthetic data parameters: {user_request}"
+        instructions = "Default volume to 1000 if not specified."
         return f"""
-Analyze this request for synthetic data parameters: {user_request}
+{base_prompt}
 
 {fields_spec}
 
-Default volume to 1000 if not specified.
+{instructions}
 """
     
     def _get_default_profile(self) -> WorkloadProfile:
@@ -305,13 +328,23 @@ Default volume to 1000 if not specified.
     def _build_completion_data(self, result: SyntheticDataResult, duration: int) -> dict:
         """Build completion update data dictionary."""
         records_count = result.generation_status.records_generated
-        sample_data = result.sample_data[:5] if result.sample_data else None
+        sample_data = self._get_sample_data(result)
+        message = self._format_completion_message(records_count, duration)
+        
         return {
             "status": "completed",
-            "message": f"✅ Successfully generated {records_count:,} synthetic records in {duration}ms",
+            "message": message,
             "result": result.model_dump(),
             "sample_data": sample_data
         }
+    
+    def _get_sample_data(self, result: SyntheticDataResult) -> Optional[list]:
+        """Get sample data from result"""
+        return result.sample_data[:5] if result.sample_data else None
+    
+    def _format_completion_message(self, records_count: int, duration: int) -> str:
+        """Format completion message"""
+        return f"✅ Successfully generated {records_count:,} synthetic records in {duration}ms"
     
     async def _send_error_update_if_needed(
         self, stream_updates: bool, run_id: str, error: Exception

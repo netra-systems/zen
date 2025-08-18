@@ -35,17 +35,21 @@ async def _fetch_metric_value(metric_name: str, hours: int):
     return await fetch_metric(builder, metric_name, hours)
 
 
+async def _get_metric_with_error_handling(metric_name: str, hours: int) -> Any:
+    """Get metric with error handling."""
+    try:
+        return await _fetch_metric_value(metric_name, hours)
+    except Exception as e:
+        handle_metric_fetch_error(e, metric_name)
+
 async def get_specific_metric_handler(
     metric_name: str,
     hours: int = 24,
     current_user: Dict = Depends(get_current_user)
 ) -> MetricResponse:
     """Get a specific metric from the factory status system."""
-    try:
-        value = await _fetch_metric_value(metric_name, hours)
-        return build_metric_response(metric_name, value, hours)
-    except Exception as e:
-        handle_metric_fetch_error(e, metric_name)
+    value = await _get_metric_with_error_handling(metric_name, hours)
+    return build_metric_response(metric_name, value, hours)
 
 
 def build_velocity_calculator() -> Any:
@@ -64,15 +68,19 @@ def _calculate_start_hours(i: int) -> int:
     return (i + 1) * 24
 
 
-def create_daily_velocity_entry(calculator, i: int) -> Dict[str, Any]:
-    """Create single daily velocity entry."""
-    start_hours = _calculate_start_hours(i)
-    metrics = calculator.calculate_velocity(start_hours)
+def _build_entry_data(i: int, metrics) -> Dict[str, Any]:
+    """Build entry data dictionary."""
     return {
         "date": calculate_entry_date(i),
         "commits": metrics.commits_per_day,
         "velocity": metrics.velocity_trend
     }
+
+def create_daily_velocity_entry(calculator, i: int) -> Dict[str, Any]:
+    """Create single daily velocity entry."""
+    start_hours = _calculate_start_hours(i)
+    metrics = calculator.calculate_velocity(start_hours)
+    return _build_entry_data(i, metrics)
 
 
 def collect_daily_velocities(calculator, days: int) -> List[Dict[str, Any]]:
@@ -89,15 +97,18 @@ def _calculate_overall_trend(daily_velocities: List[Dict[str, Any]]) -> str:
     return calculate_trend(daily_velocities)
 
 
+def _create_trend_data(days: int, daily_velocities: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Create trend data dictionary."""
+    return {
+        "period_days": days, "daily_data": daily_velocities,
+        "overall_trend": _calculate_overall_trend(daily_velocities)
+    }
+
 def build_velocity_trend_response(
     days: int, daily_velocities: List[Dict[str, Any]]
 ) -> Dict[str, Any]:
     """Build complete velocity trend response."""
-    return {
-        "period_days": days,
-        "daily_data": daily_velocities,
-        "overall_trend": _calculate_overall_trend(daily_velocities)
-    }
+    return _create_trend_data(days, daily_velocities)
 
 
 async def get_velocity_trend_handler(

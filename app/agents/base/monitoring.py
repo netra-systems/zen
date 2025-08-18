@@ -314,15 +314,27 @@ class MetricsCollector:
         if not self.monitors:
             return {}
         
-        # Aggregate metrics across all monitors
+        total_metrics = self._aggregate_monitor_metrics()
+        return self._format_metrics_response(total_metrics)
+    
+    def _aggregate_monitor_metrics(self) -> ExecutionMetrics:
+        """Aggregate metrics across all monitors."""
         total_metrics = ExecutionMetrics()
         for monitor in self.monitors:
-            global_metrics = monitor.get_global_metrics()
-            total_metrics.llm_tokens_used += global_metrics.llm_tokens_used
-            total_metrics.database_queries += global_metrics.database_queries
-            total_metrics.websocket_messages_sent += global_metrics.websocket_messages_sent
-            total_metrics.circuit_breaker_trips += global_metrics.circuit_breaker_trips
-        
+            self._accumulate_monitor_metrics(monitor, total_metrics)
+        return total_metrics
+    
+    def _accumulate_monitor_metrics(self, monitor: ExecutionMonitor, 
+                                   total_metrics: ExecutionMetrics) -> None:
+        """Accumulate metrics from a single monitor."""
+        global_metrics = monitor.get_global_metrics()
+        total_metrics.llm_tokens_used += global_metrics.llm_tokens_used
+        total_metrics.database_queries += global_metrics.database_queries
+        total_metrics.websocket_messages_sent += global_metrics.websocket_messages_sent
+        total_metrics.circuit_breaker_trips += global_metrics.circuit_breaker_trips
+    
+    def _format_metrics_response(self, total_metrics: ExecutionMetrics) -> Dict[str, Any]:
+        """Format aggregated metrics into response dictionary."""
         return {
             "total_llm_tokens": total_metrics.llm_tokens_used,
             "total_db_queries": total_metrics.database_queries,

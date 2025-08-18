@@ -97,16 +97,17 @@ class DataCopier:
 
     def _build_remote_insert_query(self, source_table_name: str, dest_db: str, dest_table: str) -> str:
         """Build remote insert query for data transfer."""
-        host_port, database_table, user, password = self._get_remote_connection_params(source_table_name)
-        return f"""
-        INSERT INTO `{dest_db}`.`{dest_table}`
-        SELECT * FROM remote(
-            '{host_port}', 
-            {database_table}, 
-            '{user}', 
-            '{password}'
-        )
-        """
+        connection_params = self._get_remote_connection_params(source_table_name)
+        remote_clause = self._build_remote_clause(*connection_params)
+        return self._create_insert_statement(dest_db, dest_table, remote_clause)
+        
+    def _build_remote_clause(self, host_port: str, database_table: str, user: str, password: str) -> str:
+        """Build remote clause for query."""
+        return f"remote('{host_port}', {database_table}, '{user}', '{password}')"
+        
+    def _create_insert_statement(self, dest_db: str, dest_table: str, remote_clause: str) -> str:
+        """Create INSERT statement with remote source."""
+        return f"INSERT INTO `{dest_db}`.`{dest_table}` SELECT * FROM {remote_clause}"
 
     def _execute_data_transfer(self, insert_query: str) -> None:
         """Execute data transfer with error handling."""

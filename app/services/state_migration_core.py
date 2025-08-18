@@ -112,12 +112,18 @@ class StateVersionManager:
         """Execute chain of migrations."""
         current_data = state_data.copy()
         current_version = from_version
-        
+        current_data, current_version = self._apply_migration_steps(
+            current_data, current_version, migration_path)
+        return current_data
+    
+    def _apply_migration_steps(self, current_data: Dict[str, Any],
+                              current_version: str, migration_path: List[str]) -> Tuple[Dict[str, Any], str]:
+        """Apply each migration step in sequence."""
         for next_version in migration_path:
             current_data = self._execute_single_migration(
                 current_data, current_version, next_version)
             current_version = next_version
-        return current_data
+        return current_data, current_version
     
     def _execute_single_migration(self, current_data: Dict[str, Any], 
                                  current_version: str, next_version: str) -> Dict[str, Any]:
@@ -125,6 +131,14 @@ class StateVersionManager:
         migration_key = f"{current_version}:{next_version}"
         migration = self._get_migration(migration_key)
         original_data = current_data.copy()
+        migrated_data = self._perform_migration_with_validation(
+            migration, current_data, original_data, migration_key, current_version, next_version)
+        return migrated_data
+    
+    def _perform_migration_with_validation(self, migration: StateMigration, current_data: Dict[str, Any],
+                                          original_data: Dict[str, Any], migration_key: str,
+                                          current_version: str, next_version: str) -> Dict[str, Any]:
+        """Perform migration and validate result."""
         migrated_data = migration.migrate(current_data)
         self._validate_migration_result(migration, original_data, migrated_data, migration_key)
         logger.debug(f"Migrated state from {current_version} to {next_version}")
@@ -208,12 +222,21 @@ class StateVersionManager:
         """Process migration candidates from current version."""
         for migration_key, migration in self.migrations.items():
             migration_from, migration_to = migration_key.split(':')
-            if self._should_explore_migration(migration_from, migration_to, 
-                                             current_version, visited):
-                result = self._explore_migration_path(
-                    migration_to, path, to_version, queue, visited)
-                if result is not None:
-                    return result
+            result = self._try_migration_candidate(
+                migration_from, migration_to, current_version, path, 
+                visited, to_version, queue)
+            if result is not None:
+                return result
+        return None
+    
+    def _try_migration_candidate(self, migration_from: str, migration_to: str,
+                                current_version: str, path: List[str], visited: set,
+                                to_version: str, queue: List[Tuple[str, List[str]]]) -> Optional[List[str]]:
+        """Try single migration candidate."""
+        if self._should_explore_migration(migration_from, migration_to, 
+                                         current_version, visited):
+            return self._explore_migration_path(
+                migration_to, path, to_version, queue, visited)
         return None
     
     def _should_explore_migration(self, migration_from: str, migration_to: str,
@@ -229,9 +252,14 @@ class StateVersionManager:
         new_path = path + [migration_to]
         if migration_to == to_version:
             return new_path
+        self._add_to_search_queue(migration_to, new_path, queue, visited)
+        return None
+    
+    def _add_to_search_queue(self, migration_to: str, new_path: List[str],
+                            queue: List[Tuple[str, List[str]]], visited: set) -> None:
+        """Add migration target to search queue."""
         queue.append((migration_to, new_path))
         visited.add(migration_to)
-        return None
     
     def _rebuild_migration_paths(self) -> None:
         """Rebuild migration paths after registering new migrations."""
@@ -260,10 +288,17 @@ class StateVersionManager:
         """Process migration targets from current version."""
         for migration_key in self.migrations:
             migration_from, migration_to = migration_key.split(':')
-            if self._can_reach_version(migration_from, migration_to, current, visited):
-                reachable.add(migration_to)
-                queue.append(migration_to)
-                visited.add(migration_to)
+            self._check_and_add_reachable_version(
+                migration_from, migration_to, current, visited, reachable, queue)
+    
+    def _check_and_add_reachable_version(self, migration_from: str, migration_to: str,
+                                        current: str, visited: set, reachable: set, 
+                                        queue: List[str]) -> None:
+        """Check and add reachable version to collections."""
+        if self._can_reach_version(migration_from, migration_to, current, visited):
+            reachable.add(migration_to)
+            queue.append(migration_to)
+            visited.add(migration_to)
     
     def _can_reach_version(self, migration_from: str, migration_to: str,
                           current: str, visited: set) -> bool:

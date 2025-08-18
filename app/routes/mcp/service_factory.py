@@ -52,9 +52,7 @@ def _create_mcp_service(
     security_service: SecurityService
 ) -> MCPService:
     """Create MCP service with dependencies"""
-    return _build_mcp_service_instance(
-        agent_service, thread_service, corpus_service, security_service
-    )
+    return _build_mcp_service_instance(agent_service, thread_service, corpus_service, security_service)
 
 
 def _build_service_params(
@@ -90,13 +88,7 @@ async def _get_or_create_service(
     corpus_service: CorpusService, security_service: SecurityService
 ) -> MCPService:
     """Get or create service instance"""
-    global _mcp_service
-    if _mcp_service is None:
-        _mcp_service = _create_mcp_service(
-            agent_service, thread_service, corpus_service, security_service
-        )
-        _log_service_initialization()
-    return _mcp_service
+    return await _create_service_if_needed(agent_service, thread_service, corpus_service, security_service)
 
 
 def _build_mcp_service_instance(
@@ -104,9 +96,24 @@ def _build_mcp_service_instance(
     corpus_service: CorpusService, security_service: SecurityService
 ) -> MCPService:
     """Build MCP service instance with all dependencies"""
-    synthetic_data_service, supply_catalog_service = _create_additional_services()
-    service_params = _build_service_params(
+    additional_services = _create_additional_services()
+    service_params = _create_service_params(agent_service, thread_service, corpus_service, security_service, additional_services)
+    return MCPService(**service_params)
+
+
+async def _create_service_if_needed(agent_service, thread_service, corpus_service, security_service) -> MCPService:
+    """Create service if needed"""
+    global _mcp_service
+    if _mcp_service is None:
+        _mcp_service = _create_mcp_service(agent_service, thread_service, corpus_service, security_service)
+        _log_service_initialization()
+    return _mcp_service
+
+
+def _create_service_params(agent_service, thread_service, corpus_service, security_service, additional_services) -> dict:
+    """Create service parameters"""
+    synthetic_data_service, supply_catalog_service = additional_services
+    return _build_service_params(
         agent_service, thread_service, corpus_service, 
         synthetic_data_service, security_service, supply_catalog_service
     )
-    return MCPService(**service_params)

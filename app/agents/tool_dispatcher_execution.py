@@ -33,7 +33,7 @@ class ToolExecutionEngine(ToolExecutionEngineInterface):
     ) -> "ToolDispatchResponse":
         """Execute tool with state and comprehensive error handling"""
         try:
-            result = await self._core_engine.execute_with_state(tool, tool_name, parameters, state, run_id)
+            result = await self._execute_tool_with_core_engine(tool, tool_name, parameters, state, run_id)
             return self._create_success_response(result["result"], tool_name, run_id)
         except Exception as e:
             return self._create_error_response(e, tool_name, run_id)
@@ -94,3 +94,10 @@ class ToolExecutionEngine(ToolExecutionEngineInterface):
             message=str(error),
             metadata={"tool_name": tool_name}
         )
+    
+    async def _execute_tool_with_core_engine(
+        self, tool: Any, tool_name: str, parameters: Dict[str, Any], 
+        state: DeepAgentState, run_id: str
+    ) -> Dict[str, Any]:
+        """Execute tool using core engine."""
+        return await self._core_engine.execute_with_state(tool, tool_name, parameters, state, run_id)

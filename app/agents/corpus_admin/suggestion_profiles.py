@@ -8,24 +8,42 @@ extracted from suggestions.py to maintain 300-line limit.
 from typing import Dict, Any, List
 
 
+def _get_performance_optimization_rules() -> Dict[str, Any]:
+    """Get performance optimization rules."""
+    return {
+        "batch_size": {"value": 256, "impact": "Higher throughput"},
+        "concurrency": {"value": 20, "impact": "Parallel processing"},
+        "compression": {"value": "lz4", "impact": "Fast compression"}
+    }
+
+
+def _get_quality_optimization_rules() -> Dict[str, Any]:
+    """Get quality optimization rules."""
+    return {
+        "error_rate": {"value": 0.001, "impact": "High accuracy"},
+        "validation": {"value": True, "impact": "Data integrity"},
+        "sampling_rate": {"value": 1.0, "impact": "Complete data"}
+    }
+
+
+def _get_balanced_optimization_rules() -> Dict[str, Any]:
+    """Get balanced optimization rules."""
+    return {
+        "batch_size": {"value": 128, "impact": "Balanced load"},
+        "error_rate": {"value": 0.01, "impact": "Acceptable accuracy"},
+        "concurrency": {"value": 10, "impact": "Moderate parallelism"}
+    }
+
+
 def get_optimization_rules() -> Dict[str, Dict[str, Any]]:
     """Initialize optimization rules for different focuses"""
+    performance_rules = _get_performance_optimization_rules()
+    quality_rules = _get_quality_optimization_rules()
+    balanced_rules = _get_balanced_optimization_rules()
     return {
-        "performance": {
-            "batch_size": {"value": 256, "impact": "Higher throughput"},
-            "concurrency": {"value": 20, "impact": "Parallel processing"},
-            "compression": {"value": "lz4", "impact": "Fast compression"}
-        },
-        "quality": {
-            "error_rate": {"value": 0.001, "impact": "High accuracy"},
-            "validation": {"value": True, "impact": "Data integrity"},
-            "sampling_rate": {"value": 1.0, "impact": "Complete data"}
-        },
-        "balanced": {
-            "batch_size": {"value": 128, "impact": "Balanced load"},
-            "error_rate": {"value": 0.01, "impact": "Acceptable accuracy"},
-            "concurrency": {"value": 10, "impact": "Moderate parallelism"}
-        }
+        "performance": performance_rules,
+        "quality": quality_rules,
+        "balanced": balanced_rules
     }
 
 

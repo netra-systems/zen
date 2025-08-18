@@ -14,12 +14,16 @@ async def handle_compliance_scores(handler: ComplianceAPIHandler) -> Dict[str, A
     return {"status": "success", "scores": scores}
 
 
+async def _perform_analysis(handler: ComplianceAPIHandler, modules: List[str], use_claude_cli: bool):
+    """Perform compliance analysis."""
+    return await handler.analyze_modules(modules, use_claude_cli)
+
 async def handle_module_compliance_analysis(
     handler: ComplianceAPIHandler, modules: List[str], use_claude_cli: bool
 ) -> Dict[str, Any]:
     """Handle module compliance analysis."""
     try:
-        results = await handler.analyze_modules(modules, use_claude_cli)
+        results = await _perform_analysis(handler, modules, use_claude_cli)
         return build_analyze_response(results, use_claude_cli)
     except ValidationException as e:
         raise HTTPException(400, str(e))
@@ -33,13 +37,17 @@ async def handle_compliance_violations(
     return build_violations_response(violations, severity, category)
 
 
+async def _score_module_for_remediation(handler: ComplianceAPIHandler, module_path: Path):
+    """Score module for remediation."""
+    return await handler.reporter.scorer.score_module(module_path)
+
 async def handle_remediation_steps(
     handler: ComplianceAPIHandler, module_name: str
 ) -> Dict[str, Any]:
     """Handle remediation steps request."""
     module_path = Path(__file__).parent.parent / module_name
     validate_module_path(module_name, module_path)
-    score = await handler.reporter.scorer.score_module(module_path)
+    score = await _score_module_for_remediation(handler, module_path)
     steps = format_remediation_steps(score)
     return build_remediation_response(module_name, score, steps)
 
@@ -56,12 +64,16 @@ async def handle_orchestration_alignment(handler: ComplianceAPIHandler) -> Dict[
     return build_alignment_response(report)
 
 
+async def _trigger_review(handler: ComplianceAPIHandler, modules: List[str]):
+    """Trigger Claude review."""
+    return await handler.reporter.trigger_claude_review(modules)
+
 async def handle_claude_review(
     handler: ComplianceAPIHandler, modules: List[str]
 ) -> Dict[str, Any]:
     """Handle Claude review request."""
     try:
-        results = await handler.reporter.trigger_claude_review(modules)
+        results = await _trigger_review(handler, modules)
         return build_review_response(results)
     except ValidationException as e:
         raise HTTPException(400, str(e))

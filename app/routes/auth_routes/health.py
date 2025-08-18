@@ -17,10 +17,8 @@ def _create_base_health_status(oauth_config, environment) -> dict:
         "auth_service_url": auth_client.base_url
     }
 
-async def _perform_auth_service_check() -> tuple[bool, str | None]:
-    """Perform auth service reachability check."""
-    if not auth_client.enabled:
-        return True, None
+async def _make_health_request() -> tuple[bool, str | None]:
+    """Make health check request to auth service."""
     try:
         client = await auth_client._get_client()
         response = await client.get("/health", timeout=5.0)
@@ -28,6 +26,12 @@ async def _perform_auth_service_check() -> tuple[bool, str | None]:
     except Exception as e:
         logger.warning(f"Auth service not reachable: {e}")
         return False, str(e)
+
+async def _perform_auth_service_check() -> tuple[bool, str | None]:
+    """Perform auth service reachability check."""
+    if not auth_client.enabled:
+        return True, None
+    return await _make_health_request()
 
 async def _check_auth_service_reachability(health_status: dict) -> None:
     """Check if auth service is reachable and update health status."""
@@ -54,8 +58,8 @@ async def auth_health():
         return {"status": "unhealthy", "error": str(e)}
 
 
-def _create_validation_results(oauth_config, environment) -> dict:
-    """Create validation results for OAuth configuration."""
+def _build_validation_dict(oauth_config, environment) -> dict:
+    """Build validation results dictionary."""
     return {
         "environment": environment.value, "client_id_configured": bool(oauth_config.client_id),
         "client_secret_configured": bool(oauth_config.client_secret),
@@ -64,13 +68,21 @@ def _create_validation_results(oauth_config, environment) -> dict:
         "dev_login_allowed": oauth_config.allow_dev_login, "mock_auth_allowed": oauth_config.allow_mock_auth
     }
 
+def _create_validation_results(oauth_config, environment) -> dict:
+    """Create validation results for OAuth configuration."""
+    return _build_validation_dict(oauth_config, environment)
+
+def _check_client_config(oauth_config, missing_config: list) -> None:
+    """Check client ID and secret configuration."""
+    if not oauth_config.client_id:
+        missing_config.append("google_client_id")
+    if not oauth_config.client_secret:
+        missing_config.append("google_client_secret")
+
 def _check_missing_config(oauth_config, environment) -> list:
     """Check for missing critical configuration items."""
     missing_config = []
-    if not oauth_config.client_id:
-        missing_config.append("google_client_id")
-    if not oauth_config.client_secret and environment in ["staging", "production"]:
-        missing_config.append("google_client_secret")
+    _check_client_config(oauth_config, missing_config)
     if not oauth_config.redirect_uris:
         missing_config.append("redirect_uris")
     return missing_config
@@ -83,13 +95,17 @@ def _build_validation_response(oauth_config, environment) -> dict:
     validation_results["missing_config"] = missing_config
     return validation_results
 
+def _perform_config_validation() -> dict:
+    """Perform OAuth configuration validation."""
+    oauth_config = auth_client.get_oauth_config()
+    environment = auth_client.detect_environment()
+    return _build_validation_response(oauth_config, environment)
+
 @router.get("/config/validate")
 async def validate_auth_config():
     """Validate auth configuration completeness."""
     try:
-        oauth_config = auth_client.get_oauth_config()
-        environment = auth_client.detect_environment()
-        return _build_validation_response(oauth_config, environment)
+        return _perform_config_validation()
     except Exception as e:
         logger.error(f"Auth config validation failed: {e}", exc_info=True)
         return {"is_valid": False, "error": str(e)}

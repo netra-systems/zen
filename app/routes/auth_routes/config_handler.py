@@ -90,15 +90,19 @@ def _get_google_client_id(oauth_config) -> str:
     """Get Google client ID from config or environment."""
     return oauth_config.client_id or os.getenv('GOOGLE_CLIENT_ID', '')
 
-def _build_auth_config_params(endpoints: AuthEndpoints, oauth_config) -> dict:
-    """Build authentication config parameters."""
-    environment = auth_client.detect_environment()
+def _create_config_dict(environment, endpoints: AuthEndpoints, oauth_config) -> dict:
+    """Create authentication configuration dictionary."""
     return {
         "development_mode": environment.value == "development",
         "google_client_id": _get_google_client_id(oauth_config), "endpoints": endpoints,
         "authorized_javascript_origins": oauth_config.javascript_origins,
         "authorized_redirect_uris": oauth_config.redirect_uris
     }
+
+def _build_auth_config_params(endpoints: AuthEndpoints, oauth_config) -> dict:
+    """Build authentication config parameters."""
+    environment = auth_client.detect_environment()
+    return _create_config_dict(environment, endpoints, oauth_config)
 
 def create_auth_response(endpoints: AuthEndpoints, oauth_config) -> AuthConfigResponse:
     """Create authentication configuration response."""

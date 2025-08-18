@@ -216,13 +216,18 @@ async def _collect_specific_agent_data(agent_name: str) -> tuple:
 async def _get_specific_agent_health_data(agent_name: str) -> Dict[str, Any]:
     """Get specific agent health data with validation."""
     try:
-        agent_metrics, health_score, recent_operations = await _collect_specific_agent_data(agent_name)
-        return _build_specific_agent_response(agent_name, agent_metrics, health_score, recent_operations)
+        return await _process_specific_agent_health_data(agent_name)
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Specific agent health check failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+async def _process_specific_agent_health_data(agent_name: str) -> Dict[str, Any]:
+    """Process specific agent health data collection."""
+    agent_metrics, health_score, recent_operations = await _collect_specific_agent_data(agent_name)
+    return _build_specific_agent_response(agent_name, agent_metrics, health_score, recent_operations)
 
 @router.get("/agents/{agent_name}")
 async def specific_agent_health(agent_name: str) -> Dict[str, Any]:

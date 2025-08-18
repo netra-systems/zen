@@ -20,40 +20,60 @@ class SystemManagementHandlers:
         config_service = ConfigurationService(self.db)
         action = arguments['action']
         
+        return await self._execute_configuration_action(config_service, action, arguments, user)
+    
+    async def _execute_configuration_action(self, config_service, action: str, arguments: Dict[str, Any], user: User):
+        """Execute configuration action based on type"""
         if action == 'get':
-            config = await config_service.get_configuration(
-                key=arguments['key'],
-                user_id=user.id
-            )
-            return {
-                "type": "text", 
-                "text": f"Retrieved configuration: {arguments['key']}",
-                "config": config
-            }
+            return await self._handle_config_get_action(config_service, arguments, user)
         elif action == 'set':
-            await config_service.set_configuration(
-                key=arguments['key'],
-                value=arguments['value'],
-                user_id=user.id
-            )
-            return {
-                "type": "text", 
-                "text": f"Updated configuration: {arguments['key']}"
-            }
+            return await self._handle_config_set_action(config_service, arguments, user)
         elif action == 'reset':
-            await config_service.reset_configuration(
-                key=arguments.get('key'),
-                user_id=user.id
-            )
-            return {
-                "type": "text", 
-                "text": "Configuration reset completed"
-            }
+            return await self._handle_config_reset_action(config_service, arguments, user)
         else:
-            return {
-                "type": "text",
-                "text": f"Unknown action: {action}"
-            }
+            return self._create_unknown_action_response(action)
+    
+    async def _handle_config_get_action(self, config_service, arguments: Dict[str, Any], user: User):
+        """Handle configuration get action"""
+        config = await config_service.get_configuration(
+            key=arguments['key'],
+            user_id=user.id
+        )
+        return {
+            "type": "text", 
+            "text": f"Retrieved configuration: {arguments['key']}",
+            "config": config
+        }
+    
+    async def _handle_config_set_action(self, config_service, arguments: Dict[str, Any], user: User):
+        """Handle configuration set action"""
+        await config_service.set_configuration(
+            key=arguments['key'],
+            value=arguments['value'],
+            user_id=user.id
+        )
+        return {
+            "type": "text", 
+            "text": f"Updated configuration: {arguments['key']}"
+        }
+    
+    async def _handle_config_reset_action(self, config_service, arguments: Dict[str, Any], user: User):
+        """Handle configuration reset action"""
+        await config_service.reset_configuration(
+            key=arguments.get('key'),
+            user_id=user.id
+        )
+        return {
+            "type": "text", 
+            "text": "Configuration reset completed"
+        }
+    
+    def _create_unknown_action_response(self, action: str):
+        """Create response for unknown action"""
+        return {
+            "type": "text",
+            "text": f"Unknown action: {action}"
+        }
     
     async def _user_admin_handler(self: "UnifiedToolRegistry", arguments: Dict[str, Any], user: User):
         """Handler for user_admin tool"""
