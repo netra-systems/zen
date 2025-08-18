@@ -273,6 +273,8 @@ class DevelopmentConfig(AppConfig):
     def __init__(self, **data):
         import os
         self._load_database_url(data, os)
+        self._load_clickhouse_config(data, os)
+        self._load_redis_config(data, os)
         service_modes = self._get_service_modes(os)
         self._configure_service_flags(data, service_modes)
         self._log_service_configuration(service_modes)
@@ -294,6 +296,59 @@ class DevelopmentConfig(AppConfig):
             'clickhouse': os_module.environ.get("CLICKHOUSE_MODE", "shared").lower(),
             'llm': os_module.environ.get("LLM_MODE", "shared").lower()
         }
+    
+    def _load_clickhouse_config(self, data: dict, os_module) -> None:
+        """Load ClickHouse configuration from environment variables."""
+        ch_host = os_module.environ.get('CLICKHOUSE_HOST', 'localhost')
+        ch_http_port = int(os_module.environ.get('CLICKHOUSE_HTTP_PORT', '8123'))
+        ch_native_port = int(os_module.environ.get('CLICKHOUSE_NATIVE_PORT', '9000'))
+        ch_user = os_module.environ.get('CLICKHOUSE_USER', 'default')
+        ch_password = os_module.environ.get('CLICKHOUSE_PASSWORD', '')
+        ch_db = os_module.environ.get('CLICKHOUSE_DB', 'default')
+        
+        # Override ClickHouse native config
+        if 'clickhouse_native' not in data:
+            data['clickhouse_native'] = ClickHouseNativeConfig(
+                host=ch_host,
+                port=ch_native_port,
+                user=ch_user,
+                password=ch_password,
+                database=ch_db
+            )
+        
+        # Override ClickHouse HTTPS config
+        if 'clickhouse_https' not in data:
+            data['clickhouse_https'] = ClickHouseHTTPSConfig(
+                host=ch_host,
+                port=ch_http_port,
+                user=ch_user,
+                password=ch_password,
+                database=ch_db
+            )
+    
+    def _load_redis_config(self, data: dict, os_module) -> None:
+        """Load Redis configuration from environment variables."""
+        redis_url = os_module.environ.get('REDIS_URL')
+        if redis_url:
+            # Parse Redis URL if provided
+            from urllib.parse import urlparse
+            parsed = urlparse(redis_url)
+            redis_host = parsed.hostname or 'localhost'
+            redis_port = parsed.port or 6379
+            redis_password = parsed.password
+        else:
+            # Use individual env vars
+            redis_host = os_module.environ.get('REDIS_HOST', 'localhost')
+            redis_port = int(os_module.environ.get('REDIS_PORT', '6379'))
+            redis_password = os_module.environ.get('REDIS_PASSWORD')
+        
+        # Override Redis config
+        if 'redis' not in data:
+            data['redis'] = RedisConfig(
+                host=redis_host,
+                port=redis_port,
+                password=redis_password
+            )
     
     def _configure_service_flags(self, data: dict, service_modes: dict) -> None:
         """Configure service enabled flags based on modes."""

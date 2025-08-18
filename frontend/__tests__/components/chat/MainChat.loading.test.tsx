@@ -29,6 +29,9 @@ jest.mock('@/hooks/useLoadingState', () => ({
 jest.mock('@/hooks/useEventProcessor', () => ({
   useEventProcessor: jest.fn()
 }));
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: jest.fn()
+}));
 jest.mock('@/components/chat/ChatHeader', () => ({
   ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
 }));
@@ -56,6 +59,7 @@ describe('MainChat Loading States', () => {
   const mockUseWebSocket = useWebSocket as jest.MockedFunction<typeof useWebSocket>;
   const mockUseLoadingState = useLoadingState as jest.MockedFunction<typeof useLoadingState>;
   const mockUseEventProcessor = useEventProcessor as jest.MockedFunction<typeof useEventProcessor>;
+  const mockUseThreadNavigation = require('@/hooks/useThreadNavigation').useThreadNavigation as jest.MockedFunction<any>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -85,6 +89,14 @@ describe('MainChat Loading States', () => {
       status: 'OPEN',
       messages: [],
       sendMessage: jest.fn()
+    });
+
+    // Default mock for Thread Navigation
+    mockUseThreadNavigation.mockReturnValue({
+      currentThreadId: null,
+      isNavigating: false,
+      navigateToThread: jest.fn(),
+      createNewThread: jest.fn()
     });
 
     // Default mock for store
@@ -195,15 +207,7 @@ describe('MainChat Loading States', () => {
    * Test Case 4: Should show message list when thread has messages
    */
   it('should show message list when thread has messages', () => {
-    mockUseLoadingState.mockReturnValue({
-      loadingState: ChatLoadingState.THREAD_READY,
-      shouldShowLoading: false,
-      shouldShowEmptyState: false,
-      shouldShowExamplePrompts: false,
-      loadingMessage: 'Thread ready',
-      isInitialized: true
-    });
-
+    // First set up the store with messages
     mockUseUnifiedChatStore.mockReturnValue({
       isProcessing: false,
       messages: [
@@ -218,6 +222,24 @@ describe('MainChat Loading States', () => {
       isThreadLoading: false,
       handleWebSocketEvent: jest.fn()
     } as any);
+
+    // Mock thread navigation (not navigating)
+    mockUseThreadNavigation.mockReturnValue({
+      currentThreadId: 'thread_123',
+      isNavigating: false,
+      navigateToThread: jest.fn(),
+      createNewThread: jest.fn()
+    });
+
+    // Then mock loading state for thread with messages (no loading, no example prompts)
+    mockUseLoadingState.mockReturnValue({
+      loadingState: ChatLoadingState.THREAD_READY,
+      shouldShowLoading: false,
+      shouldShowEmptyState: false,
+      shouldShowExamplePrompts: false,
+      loadingMessage: 'Thread ready',
+      isInitialized: true
+    });
 
     render(<MainChat />);
 

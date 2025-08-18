@@ -62,8 +62,13 @@ async def test_supervisor_flow(mock_reporting_execute, mock_actions_execute,
     
     # Mock the data agent execute method
     async def mock_data_execute_impl(state, run_id, stream_updates):
-        from app.agents.state import DataResult
-        state.data_result = DataResult(data="Some data", confidence_score=0.8)
+        from app.schemas.shared_types import DataAnalysisResponse
+        state.data_result = DataAnalysisResponse(
+            query="Data analysis query",
+            results=[{"key": "value"}],
+            insights={"summary": "Some data insights"},
+            recommendations=["Data recommendation 1"]
+        )
         state.step_count += 1
     
     mock_data_execute.side_effect = mock_data_execute_impl
@@ -84,8 +89,10 @@ async def test_supervisor_flow(mock_reporting_execute, mock_actions_execute,
     async def mock_actions_execute_impl(state, run_id, stream_updates):
         from app.agents.state import ActionPlanResult
         state.action_plan_result = ActionPlanResult(
-            action_plan=["Action 1", "Action 2"],
-            confidence_score=0.85
+            action_plan_summary="Generated action plan for optimization",
+            actions=[{"action": "Action 1", "priority": "high"}, {"action": "Action 2", "priority": "medium"}],
+            priority="high",
+            required_resources=["resource1", "resource2"]
         )
         state.step_count += 1
     
@@ -95,8 +102,9 @@ async def test_supervisor_flow(mock_reporting_execute, mock_actions_execute,
     async def mock_reporting_execute_impl(state, run_id, stream_updates):
         from app.agents.state import ReportResult
         state.report_result = ReportResult(
-            report="This is the final report.",
-            confidence_score=0.9
+            report_type="optimization_report",
+            content="This is the final optimization report with detailed analysis and recommendations.",
+            attachments=["chart1.png", "data_summary.csv"]
         )
         state.step_count += 1
     
@@ -128,8 +136,10 @@ async def test_supervisor_flow(mock_reporting_execute, mock_actions_execute,
     
     # Verify data_result is properly set with typed object
     assert final_state.data_result is not None
-    assert final_state.data_result.data == "Some data"
-    assert final_state.data_result.confidence_score == 0.8
+    assert final_state.data_result.query == "Data analysis query"
+    assert final_state.data_result.results == [{"key": "value"}]
+    assert final_state.data_result.insights == {"summary": "Some data insights"}
+    assert final_state.data_result.recommendations == ["Data recommendation 1"]
     
     # Verify optimizations_result is properly set with typed object (this was the failing assertion)
     assert final_state.optimizations_result is not None  
@@ -139,10 +149,13 @@ async def test_supervisor_flow(mock_reporting_execute, mock_actions_execute,
     
     # Verify action_plan_result is properly set with typed object
     assert final_state.action_plan_result is not None
-    assert final_state.action_plan_result.action_plan == ["Action 1", "Action 2"]
-    assert final_state.action_plan_result.confidence_score == 0.85
+    assert final_state.action_plan_result.action_plan_summary == "Generated action plan for optimization"
+    assert final_state.action_plan_result.actions == [{"action": "Action 1", "priority": "high"}, {"action": "Action 2", "priority": "medium"}]
+    assert final_state.action_plan_result.priority == "high"
+    assert final_state.action_plan_result.required_resources == ["resource1", "resource2"]
     
     # Verify report_result is properly set with typed object
     assert final_state.report_result is not None
-    assert final_state.report_result.report == "This is the final report."
-    assert final_state.report_result.confidence_score == 0.9
+    assert final_state.report_result.report_type == "optimization_report"
+    assert final_state.report_result.content == "This is the final optimization report with detailed analysis and recommendations."
+    assert final_state.report_result.attachments == ["chart1.png", "data_summary.csv"]

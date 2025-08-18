@@ -20,6 +20,10 @@ jest.mock('@/hooks/useEventProcessor', () => ({
   useEventProcessor: mockUseEventProcessor
 }));
 
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: jest.fn()
+}));
+
 // Mock UI components
 jest.mock('@/components/chat/ChatHeader', () => ({
   ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
@@ -126,6 +130,15 @@ const setupMocks = () => {
     shouldShowEmptyState: false,
     shouldShowExamplePrompts: false,
     loadingMessage: ''
+  });
+  
+  // Mock thread navigation
+  const mockUseThreadNavigation = require('@/hooks/useThreadNavigation').useThreadNavigation;
+  mockUseThreadNavigation.mockReturnValue({
+    currentThreadId: null,
+    isNavigating: false,
+    navigateToThread: jest.fn(),
+    createNewThread: jest.fn()
   });
   
   mockUseEventProcessor.mockReturnValue({
@@ -311,10 +324,28 @@ describe('MainChat - WebSocket Connection Tests', () => {
         { id: '1', type: 'user', content: 'Previous message' }
       ];
       
+      // Mock store with messages and error
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         messages,
         error: 'Current error'
+      });
+      
+      // Mock loading state to show messages (not loading)
+      mockUseLoadingState.mockReturnValue({
+        shouldShowLoading: false,
+        shouldShowEmptyState: false,
+        shouldShowExamplePrompts: false,
+        loadingMessage: ''
+      });
+      
+      // Mock thread navigation to not be navigating
+      const mockUseThreadNavigation = require('@/hooks/useThreadNavigation').useThreadNavigation;
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
       });
       
       render(<MainChat />);
