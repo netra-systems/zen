@@ -42,18 +42,24 @@ class MockAdminToolDispatcher:
     
     async def dispatch_admin_operation(self, operation):
         """Mock dispatch admin operation method"""
-        user_role = operation.get("user_role", "admin")
-        if user_role == "viewer" and operation.get("type") == "delete_all_data":
-            raise PermissionError("Insufficient permissions")
-        
+        self._validate_permissions(operation)
         tool_name = self._get_tool_name(operation.get("type"))
         result = await self.tool_dispatcher.execute_tool(tool_name, operation["params"])
-        
-        # Call audit logger if it exists
-        if hasattr(self, 'audit_logger') and self.audit_logger:
-            await self.audit_logger.log_admin_operation(operation, result)
-        
+        await self._log_operation_if_available(operation, result)
         return result
+    
+    def _validate_permissions(self, operation):
+        """Validate user permissions for operation"""
+        user_role = operation.get("user_role", "admin")
+        operation_type = operation.get("type")
+        if user_role == "viewer" and operation_type == "delete_all_data":
+            raise PermissionError("Insufficient permissions")
+    
+    async def _log_operation_if_available(self, operation, result):
+        """Log operation if audit logger is available"""
+        has_logger = hasattr(self, 'audit_logger') and self.audit_logger
+        if has_logger:
+            await self.audit_logger.log_admin_operation(operation, result)
     
     def _get_tool_name(self, operation_type):
         """Map operation type to tool name"""
@@ -104,8 +110,8 @@ class SupplyResearcherSubAgent:
         return await self.enrichment_service.enrich(raw_data)
 
 
-class DemoAgent:
-    """Mock DemoAgent for testing."""
+class DemoService:
+    """Mock DemoService for testing."""
     
     def __init__(self, llm_manager, tool_dispatcher):
         self.llm_manager = llm_manager
@@ -186,9 +192,14 @@ class AgentUtils:
             try:
                 return await func()
             except Exception as e:
-                if attempt == max_retries - 1:
-                    raise
-                await asyncio.sleep(backoff_factor * (2 ** attempt))
+                await self._handle_retry_exception(e, attempt, max_retries, backoff_factor)
+    
+    async def _handle_retry_exception(self, exception, attempt, max_retries, backoff_factor):
+        """Handle exception during retry attempt"""
+        if attempt == max_retries - 1:
+            raise
+        sleep_time = backoff_factor * (2 ** attempt)
+        await asyncio.sleep(sleep_time)
     
     async def execute_parallel(self, tasks):
         """Execute tasks in parallel."""
@@ -220,14 +231,19 @@ class AgentUtils:
         """Merge a single attribute."""
         val1 = getattr(state1, attr, None)
         val2 = getattr(state2, attr, None)
-        
+        merged_value = self._determine_merged_value(val1, val2)
+        if merged_value is not None:
+            setattr(merged, attr, merged_value)
+    
+    def _determine_merged_value(self, val1, val2):
+        """Determine the merged value from two attribute values"""
         if val1 is not None and val2 is not None:
-            merged_val = self._merge_values(val1, val2)
-            setattr(merged, attr, merged_val)
+            return self._merge_values(val1, val2)
         elif val1 is not None:
-            setattr(merged, attr, val1)
+            return val1
         elif val2 is not None:
-            setattr(merged, attr, val2)
+            return val2
+        return None
     
     def _merge_values(self, val1, val2):
         """Merge two values based on their types."""
@@ -242,11 +258,15 @@ class AgentUtils:
         """Merge two dictionaries recursively."""
         merged = dict1.copy()
         for k, v in dict2.items():
-            if k in merged and isinstance(merged[k], dict) and isinstance(v, dict):
-                merged[k] = {**merged[k], **v}
-            else:
-                merged[k] = v
+            merged[k] = self._merge_dictionary_value(merged.get(k), v)
         return merged
+    
+    def _merge_dictionary_value(self, existing_value, new_value):
+        """Merge a single dictionary value"""
+        both_dicts = isinstance(existing_value, dict) and isinstance(new_value, dict)
+        if both_dicts:
+            return {**existing_value, **new_value}
+        return new_value
 
 
 class PermissionError(Exception):

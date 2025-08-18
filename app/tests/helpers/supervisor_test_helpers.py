@@ -245,9 +245,9 @@ def create_supplier_data(supplier_id: str, name: str, reliability: float) -> Dic
     }
 
 
-# Demo agent testing helpers
-def create_demo_agent_mocks():
-    """Create mocks for demo agent tests."""
+# Demo service testing helpers
+def create_demo_service_mocks():
+    """Create mocks for demo service tests."""
     return {
         'llm_manager': AsyncMock(spec=LLMManager),
         'tool_dispatcher': AsyncMock(spec=ToolDispatcher)
