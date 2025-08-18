@@ -241,7 +241,7 @@ class SecretManager:
             "google-client-secret": "GOOGLE_CLIENT_SECRET",
             "jwt-secret-key": "JWT_SECRET_KEY",
             "fernet-key": "FERNET_KEY",
-            "clickhouse-default-password": "CLICKHOUSE_DEFAULT_PASSWORD",
+            "clickhouse-default-password": "CLICKHOUSE_PASSWORD",
             "redis-default": "REDIS_PASSWORD"
         }
     

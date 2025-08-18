@@ -92,7 +92,10 @@ def _get_unified_config():
     return get_config()
 
 def _extract_https_config(config):
-    """Extract HTTPS configuration from unified config."""
+    """Extract appropriate configuration from unified config based on mode."""
+    # Use HTTP config for local development, HTTPS for production
+    if config.clickhouse_mode == "local":
+        return config.clickhouse_https  # This now uses HTTP port for local
     return config.clickhouse_https
 
 def get_clickhouse_config():
