@@ -89,12 +89,22 @@ def get_clickhouse_config():
     import os
     from app.schemas.Config import ClickHouseHTTPSConfig
     
+    # Determine which port to use based on mode
+    clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()
+    
+    if clickhouse_mode == "local":
+        # For local mode, use HTTP port (8123)
+        port = int(os.environ.get("CLICKHOUSE_HTTP_PORT", "8123"))
+    else:
+        # For shared/cloud mode, use HTTPS port (8443)
+        port = 8443
+    
     # Always use environment variables for configuration
     return ClickHouseHTTPSConfig(
         host=os.environ.get("CLICKHOUSE_HOST", "localhost"),
-        port=int(os.environ.get("CLICKHOUSE_HTTP_PORT", "8123")),
+        port=port,
         user=os.environ.get("CLICKHOUSE_USER", "default"),
-        password=os.environ.get("CLICKHOUSE_PASSWORD", ""),
+        password=os.environ.get("CLICKHOUSE_PASSWORD", "netra_dev_password"),
         database=os.environ.get("CLICKHOUSE_DB", "netra_dev")
     )
 
@@ -130,8 +140,14 @@ async def _create_real_client():
     
     This is the default behavior - connects to actual ClickHouse instance.
     """
+    import os
     config = get_clickhouse_config()
-    logger.info(f"[ClickHouse] Connecting to REAL instance at {config.host}")
+    
+    # Determine if we should use secure connection
+    clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()
+    use_secure = clickhouse_mode != "local"
+    
+    logger.info(f"[ClickHouse] Connecting to instance at {config.host}:{config.port} (secure={use_secure})")
     
     try:
         # Create real client
@@ -141,7 +157,7 @@ async def _create_real_client():
             user=config.user,
             password=config.password,
             database=config.database,
-            secure=True
+            secure=use_secure
         )
         
         # Wrap with query interceptor for compatibility
