@@ -41,6 +41,10 @@ class InsightsGenerator:
     
     def _initialize_insights_structure(self) -> Dict[str, Any]:
         """Initialize insights structure with empty collections"""
+        return self._build_empty_insights_dict()
+
+    def _build_empty_insights_dict(self) -> Dict[str, Any]:
+        """Build empty insights dictionary structure."""
         return {
             "performance_insights": [],
             "usage_insights": [],
@@ -75,12 +79,17 @@ class InsightsGenerator:
     
     def _add_latency_degradation_insight(self, insights: Dict[str, Any]) -> None:
         """Add latency degradation insight"""
-        insights["performance_insights"].append({
+        insight = self._create_latency_degradation_insight()
+        insights["performance_insights"].append(insight)
+
+    def _create_latency_degradation_insight(self) -> Dict[str, Any]:
+        """Create latency degradation insight dictionary."""
+        return {
             "type": "performance_degradation",
             "message": "Latency is increasing over time",
             "severity": "medium",
             "metric": "latency"
-        })
+        }
     
     def _add_performance_recommendation(self, insights: Dict[str, Any]) -> None:
         """Add performance optimization recommendation"""
@@ -218,16 +227,27 @@ class InsightsGenerator:
         """Add latency variability insight"""
         p95 = latency_stats.get('p95', 0)
         mean = latency_stats.get('mean', 0)
-        insights.append({
+        insight = self._create_latency_variability_insight(p95, mean)
+        insights.append(insight)
+
+    def _create_latency_variability_insight(self, p95: float, mean: float) -> Dict[str, Any]:
+        """Create latency variability insight dictionary."""
+        return {
             "type": "latency_variability",
             "message": "High latency variability detected (P95 >> average)",
             "severity": "medium",
             "details": f"P95: {p95:.2f}ms, Mean: {mean:.2f}ms"
-        })
+        }
     
     async def generate_cost_insights(self, performance_data: Dict[str, Any], usage_data: Dict[str, Any]) -> List[Dict[str, Any]]:
         """Generate cost-related insights"""
         insights = []
+        return await self._process_cost_insights(performance_data, usage_data, insights)
+
+    async def _process_cost_insights(
+        self, performance_data: Dict[str, Any], usage_data: Dict[str, Any], insights: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """Process all cost insights and return list."""
         self._check_cost_efficiency(performance_data, insights)
         self._check_daily_cost_patterns(usage_data, insights)
         return insights
@@ -249,6 +269,12 @@ class InsightsGenerator:
         total_events = summary.get("total_events", 0)
         if total_events <= 0:
             return
+        self._check_cost_per_event_threshold(total_cost, total_events, insights)
+
+    def _check_cost_per_event_threshold(
+        self, total_cost: float, total_events: int, insights: List[Dict[str, Any]]
+    ) -> None:
+        """Check if cost per event exceeds threshold."""
         cost_per_event = total_cost / total_events
         if cost_per_event > self.thresholds["cost_per_event"]:
             self._add_cost_per_event_insight(cost_per_event, insights)

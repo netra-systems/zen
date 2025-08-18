@@ -29,6 +29,17 @@ class AgentMetricsMiddleware(MetricsMiddlewareCore):
         timeout_seconds: Optional[float] = None
     ):
         """Decorator to track agent operations."""
+        return self._build_operation_decorator(
+            operation_type, include_performance, timeout_seconds
+        )
+    
+    def _build_operation_decorator(
+        self,
+        operation_type: Optional[str],
+        include_performance: bool,
+        timeout_seconds: Optional[float]
+    ):
+        """Build decorator for operation tracking."""
         def decorator(func: Callable):
             return self._create_tracking_wrapper(
                 func, operation_type, include_performance, timeout_seconds
@@ -51,10 +62,24 @@ class AgentMetricsMiddleware(MetricsMiddlewareCore):
         async def async_wrapper(*args, **kwargs):
             if not self._enabled:
                 return await func(*args, **kwargs)
-            return await self._execute_tracked_operation(
+            return await self._execute_wrapped_operation(
                 func, operation_type, include_performance, timeout_seconds, *args, **kwargs
             )
         return async_wrapper
+    
+    async def _execute_wrapped_operation(
+        self,
+        func: Callable,
+        operation_type: Optional[str],
+        include_performance: bool,
+        timeout_seconds: Optional[float],
+        *args,
+        **kwargs
+    ):
+        """Execute wrapped operation with tracking."""
+        return await self._execute_tracked_operation(
+            func, operation_type, include_performance, timeout_seconds, *args, **kwargs
+        )
         
     def _create_sync_wrapper(self, func: Callable, async_wrapper):
         """Create sync wrapper for function."""
@@ -75,6 +100,21 @@ class AgentMetricsMiddleware(MetricsMiddlewareCore):
         """Execute function with tracking."""
         agent_name = self._extract_agent_name(func, args, kwargs)
         op_type = operation_type or self._extract_operation_type(func)
+        return await self._track_with_extracted_context(
+            agent_name, op_type, func, include_performance, timeout_seconds, *args, **kwargs
+        )
+    
+    async def _track_with_extracted_context(
+        self,
+        agent_name: str,
+        op_type: str,
+        func: Callable,
+        include_performance: bool,
+        timeout_seconds: Optional[float],
+        *args,
+        **kwargs
+    ):
+        """Track operation with extracted context."""
         return await self.track_operation_with_context(
             agent_name, op_type, func, include_performance, 
             timeout_seconds, *args, **kwargs
@@ -90,8 +130,23 @@ class AgentMetricsMiddleware(MetricsMiddlewareCore):
         **kwargs
     ) -> Dict[str, Any]:
         """Track a batch operation with multiple items."""
+        batch_operation_id, start_time = await self._prepare_batch_tracking(
+            agent_name, operation_type, batch_size
+        )
+        return await self._execute_batch_tracking(
+            batch_operation_id, batch_size, operation_func, start_time, *args, **kwargs
+        )
+    
+    async def _prepare_batch_tracking(self, agent_name: str, operation_type: str, batch_size: int):
+        """Prepare batch tracking initialization."""
         batch_operation_id = await self._start_batch_tracking(agent_name, operation_type, batch_size)
         start_time = time.time()
+        return batch_operation_id, start_time
+    
+    async def _execute_batch_tracking(
+        self, batch_operation_id: str, batch_size: int, operation_func: Callable, start_time: float, *args, **kwargs
+    ) -> Dict[str, Any]:
+        """Execute batch tracking operation."""
         try:
             result = await operation_func(*args, **kwargs)
             return await self._finalize_batch_tracking(batch_operation_id, batch_size, result, start_time)
@@ -164,32 +219,39 @@ class AgentMetricsContextManager:
     
     async def __aenter__(self):
         """Start operation tracking."""
-        self.operation_id = await self.middleware.metrics_collector.start_operation(
+        self.operation_id = await self._start_context_tracking()
+        self.start_time = time.time()
+        return self
+    
+    async def _start_context_tracking(self) -> str:
+        """Start context manager tracking."""
+        return await self.middleware.metrics_collector.start_operation(
             agent_name=self.agent_name,
             operation_type=self.operation_type,
             metadata={"context_manager": True}
         )
-        self.start_time = time.time()
-        return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """End operation tracking."""
         if self.operation_id:
             if exc_type is None:
-                # Success
-                await self.middleware.metrics_collector.end_operation(
-                    operation_id=self.operation_id,
-                    success=True
-                )
+                await self._handle_successful_exit()
             else:
-                # Error occurred
-                failure_type = self.middleware._classify_failure_type(exc_val, str(exc_val))
-                await self.middleware.metrics_collector.end_operation(
-                    operation_id=self.operation_id,
-                    success=False,
-                    failure_type=failure_type,
-                    error_message=f"{exc_type.__name__}: {exc_val}"
-                )
+                await self._handle_error_exit(exc_type, exc_val)
+    
+    async def _handle_successful_exit(self) -> None:
+        """Handle successful context exit."""
+        await self.middleware.metrics_collector.end_operation(
+            operation_id=self.operation_id, success=True
+        )
+    
+    async def _handle_error_exit(self, exc_type, exc_val) -> None:
+        """Handle error context exit."""
+        failure_type = self.middleware._classify_failure_type(exc_val, str(exc_val))
+        await self.middleware.metrics_collector.end_operation(
+            operation_id=self.operation_id, success=False,
+            failure_type=failure_type, error_message=f"{exc_type.__name__}: {exc_val}"
+        )
 
 
 # Global middleware instance

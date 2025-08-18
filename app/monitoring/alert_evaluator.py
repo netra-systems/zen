@@ -97,12 +97,23 @@ class AlertEvaluator:
 
     def _build_rule_mapping(self, metrics: AgentMetrics, threshold: float) -> Dict[str, bool]:
         """Build mapping of rule IDs to their condition results."""
+        error_rules = self._build_error_rate_rules(metrics, threshold)
+        performance_rules = self._build_performance_rules(metrics, threshold)
+        return {**error_rules, **performance_rules}
+
+    def _build_error_rate_rules(self, metrics: AgentMetrics, threshold: float) -> Dict[str, bool]:
+        """Build error rate rule mappings."""
         return {
             "agent_high_error_rate": metrics.error_rate > threshold,
             "agent_critical_error_rate": metrics.error_rate > threshold,
-            "agent_timeout_spike": metrics.timeout_count > threshold,
-            "agent_avg_execution_time_high": metrics.avg_execution_time_ms > threshold,
             "agent_validation_error_spike": metrics.validation_error_count > threshold
+        }
+
+    def _build_performance_rules(self, metrics: AgentMetrics, threshold: float) -> Dict[str, bool]:
+        """Build performance rule mappings."""
+        return {
+            "agent_timeout_spike": metrics.timeout_count > threshold,
+            "agent_avg_execution_time_high": metrics.avg_execution_time_ms > threshold
         }
     
     def _create_alert(self, rule: AlertRule, metrics_data: Dict[str, Any]) -> Alert:
@@ -116,14 +127,31 @@ class AlertEvaluator:
         self, alert_id: str, rule: AlertRule, current_value: Optional[float], agent_name: Optional[str]
     ) -> Alert:
         """Build alert instance with all required fields."""
-        return Alert(
-            alert_id=alert_id, rule_id=rule.rule_id, level=rule.level,
-            title=rule.name, timestamp=datetime.now(UTC), agent_name=agent_name,
-            metric_name=rule.rule_id, current_value=current_value,
-            threshold_value=rule.threshold_value,
-            message=self._generate_alert_message(rule, current_value, agent_name),
-            metadata={"rule_description": rule.description}
-        )
+        basic_fields = self._get_alert_basic_fields(alert_id, rule, agent_name)
+        metric_fields = self._get_alert_metric_fields(rule, current_value)
+        message_fields = self._get_alert_message_fields(rule, current_value, agent_name)
+        return Alert(**{**basic_fields, **metric_fields, **message_fields})
+
+    def _get_alert_basic_fields(self, alert_id: str, rule: AlertRule, agent_name: Optional[str]) -> Dict[str, Any]:
+        """Get basic alert fields."""
+        return {
+            "alert_id": alert_id, "rule_id": rule.rule_id, "level": rule.level,
+            "title": rule.name, "timestamp": datetime.now(UTC), "agent_name": agent_name
+        }
+
+    def _get_alert_metric_fields(self, rule: AlertRule, current_value: Optional[float]) -> Dict[str, Any]:
+        """Get alert metric fields."""
+        return {
+            "metric_name": rule.rule_id, "current_value": current_value,
+            "threshold_value": rule.threshold_value
+        }
+
+    def _get_alert_message_fields(self, rule: AlertRule, current_value: Optional[float], agent_name: Optional[str]) -> Dict[str, Any]:
+        """Get alert message and metadata fields."""
+        return {
+            "message": self._generate_alert_message(rule, current_value, agent_name),
+            "metadata": {"rule_description": rule.description}
+        }
     
     def _extract_alert_values(self, rule: AlertRule, metrics_data: Dict[str, Any]) -> tuple:
         """Extract current value and agent name for alert."""
@@ -153,12 +181,23 @@ class AlertEvaluator:
 
     def _build_metric_value_mapping(self, metrics: AgentMetrics) -> Dict[str, float]:
         """Build mapping of rule IDs to metric values."""
+        error_mappings = self._build_error_metric_mappings(metrics)
+        performance_mappings = self._build_performance_metric_mappings(metrics)
+        return {**error_mappings, **performance_mappings}
+
+    def _build_error_metric_mappings(self, metrics: AgentMetrics) -> Dict[str, float]:
+        """Build error metric mappings."""
         return {
             "agent_high_error_rate": metrics.error_rate,
             "agent_critical_error_rate": metrics.error_rate,
-            "agent_timeout_spike": float(metrics.timeout_count),
-            "agent_avg_execution_time_high": metrics.avg_execution_time_ms,
             "agent_validation_error_spike": float(metrics.validation_error_count)
+        }
+
+    def _build_performance_metric_mappings(self, metrics: AgentMetrics) -> Dict[str, float]:
+        """Build performance metric mappings."""
+        return {
+            "agent_timeout_spike": float(metrics.timeout_count),
+            "agent_avg_execution_time_high": metrics.avg_execution_time_ms
         }
     
     def _generate_alert_message(
@@ -168,8 +207,12 @@ class AlertEvaluator:
         agent_name: Optional[str]
     ) -> str:
         """Generate human-readable alert message."""
-        base_msg = rule.description
+        base_msg = self._get_base_message(rule)
         return self._append_value_details(base_msg, current_value, agent_name, rule)
+
+    def _get_base_message(self, rule: AlertRule) -> str:
+        """Get base alert message from rule."""
+        return rule.description
 
     def _append_value_details(
         self, base_msg: str, current_value: Optional[float], agent_name: Optional[str], rule: AlertRule

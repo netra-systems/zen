@@ -36,6 +36,7 @@ from app.llm.observability import (
 from app.core.reliability_utils import create_agent_reliability_wrapper
 from app.core.fallback_utils import create_agent_fallback_strategy
 from app.agents.input_validation import validate_agent_input
+from app.agents.actions_goals_plan_builder import ActionPlanBuilder
 
 
 class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
@@ -163,7 +164,7 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
     ) -> None:
         """Handle execution failure with fallback."""
         logger.error(f"Execution failed: {result.error}")
-        fallback_plan = self._get_default_action_plan()
+        fallback_plan = ActionPlanBuilder.get_default_action_plan()
         state.action_plan_result = fallback_plan
 
     async def _execute_fallback_workflow(
@@ -212,95 +213,11 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
         self, llm_response: str, run_id: str
     ) -> ActionPlanResult:
         """Process LLM response to ActionPlanResult."""
-        action_plan_dict = extract_json_from_response(llm_response, max_retries=5)
-        if not action_plan_dict:
-            action_plan_dict = await self._handle_extraction_failure(
-                llm_response, run_id
-            )
-        return self._convert_to_action_plan_result(action_plan_dict)
-
-    def _convert_to_action_plan_result(self, data: dict) -> ActionPlanResult:
-        """Convert dictionary to ActionPlanResult."""
-        valid_fields = {
-            k: v for k, v in data.items()
-            if k in ActionPlanResult.model_fields
-        }
-        if 'actions' in data and 'plan_steps' not in valid_fields:
-            valid_fields['plan_steps'] = self._extract_plan_steps(data)
-        return ActionPlanResult(**valid_fields)
-
-    def _extract_plan_steps(self, data: dict) -> list:
-        """Extract plan steps from data."""
-        steps = data.get('plan_steps', [])
-        if not isinstance(steps, list):
-            return []
-        return [self._create_plan_step(s) for s in steps]
-
-    def _create_plan_step(self, step_data) -> PlanStep:
-        """Create PlanStep from data."""
-        if isinstance(step_data, str):
-            return PlanStep(step_id=str(len(step_data)), description=step_data)
-        elif isinstance(step_data, dict):
-            return PlanStep(
-                step_id=step_data.get('step_id', '1'),
-                description=step_data.get('description', 'No description')
-            )
-        return PlanStep(step_id='1', description='Default step')
-
-    async def _handle_extraction_failure(
-        self, llm_response: str, run_id: str
-    ) -> dict:
-        """Handle JSON extraction failure."""
-        logger.debug(f"JSON extraction failed for {run_id}")
-        partial = extract_partial_json(llm_response, required_fields=None)
-        if partial:
-            return self._build_from_partial(partial).model_dump()
-        return self._get_default_action_plan().model_dump()
-
-    def _build_from_partial(self, partial: dict) -> ActionPlanResult:
-        """Build ActionPlanResult from partial data."""
-        base = self._get_base_data()
-        base.update({
-            k: v for k, v in partial.items()
-            if k in ActionPlanResult.model_fields
-        })
-        base["partial_extraction"] = True
-        return ActionPlanResult(**base)
-
-    def _get_base_data(self) -> dict:
-        """Get base action plan data."""
-        return {
-            "action_plan_summary": "Partial extraction - summary unavailable",
-            "total_estimated_time": "To be determined",
-            "required_approvals": [],
-            "actions": [],
-            "execution_timeline": [],
-            "supply_config_updates": [],
-            "post_implementation": {
-                "monitoring_period": "30 days",
-                "success_metrics": [],
-                "optimization_review_schedule": "Weekly",
-                "documentation_updates": []
-            },
-            "cost_benefit_analysis": {
-                "implementation_cost": {"effort_hours": 0, "resource_cost": 0},
-                "expected_benefits": {
-                    "cost_savings_per_month": 0,
-                    "performance_improvement_percentage": 0,
-                    "roi_months": 0
-                }
-            }
-        }
+        return await ActionPlanBuilder.process_llm_response(llm_response, run_id)
 
     def _get_default_action_plan(self) -> ActionPlanResult:
         """Get default action plan for failures."""
-        data = self._get_base_data()
-        data.update({
-            "action_plan_summary": "Failed to generate action plan",
-            "total_estimated_time": "Unknown",
-            "error": "JSON extraction failed - using default"
-        })
-        return ActionPlanResult(**data)
+        return ActionPlanBuilder.get_default_action_plan()
 
     # Legacy compatibility methods
     def _create_main_executor(self, state, run_id, stream_updates):
@@ -317,7 +234,7 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
     def _create_fallback_executor(self, state, run_id, stream_updates):
         """Legacy fallback executor."""
         async def fallback():
-            plan = self._get_default_action_plan()
+            plan = ActionPlanBuilder.get_default_action_plan()
             state.action_plan_result = plan
             return plan
         return fallback

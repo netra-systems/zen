@@ -305,18 +305,27 @@ class VelocityCalculator:
     
     def _find_peak_day(self, commits: List[CommitInfo]) -> int:
         """Find peak day of week (0=Monday)."""
+        day_counts = self._count_commits_by_weekday(commits)
+        return self._get_peak_day_from_counts(day_counts)
+    
+    def _count_commits_by_weekday(self, commits: List[CommitInfo]) -> Dict[int, int]:
+        """Count commits grouped by weekday."""
         day_counts = {}
         for commit in commits:
             day = commit.timestamp.weekday()
             day_counts[day] = day_counts.get(day, 0) + 1
-        
-        return max(day_counts.keys(), key=lambda d: day_counts[d]) if day_counts else 0
+        return day_counts
+    
+    def _get_peak_day_from_counts(self, day_counts: Dict[int, int]) -> int:
+        """Get peak day from day counts."""
+        if not day_counts:
+            return 0
+        return max(day_counts.keys(), key=lambda d: day_counts[d])
     
     def _calculate_activity_score(self, commits: List[CommitInfo]) -> float:
         """Calculate activity score for commits."""
         if not commits:
             return 0.0
-        
         score_components = self._get_activity_score_components(commits)
         raw_score = self._compute_raw_activity_score(score_components)
         return min(raw_score / 100, 10.0)
@@ -353,10 +362,14 @@ class VelocityCalculator:
         """Calculate delivery times for feature branches."""
         times = []
         for branch in branches:
-            if self._is_merged_branch(branch):
-                delivery_days = self._estimate_delivery_days(branch)
-                times.append(delivery_days)
+            self._process_branch_for_delivery_time(branch, times)
         return times
+    
+    def _process_branch_for_delivery_time(self, branch: BranchInfo, times: List[int]) -> None:
+        """Process single branch for delivery time calculation."""
+        if self._is_merged_branch(branch):
+            delivery_days = self._estimate_delivery_days(branch)
+            times.append(delivery_days)
     
     def _is_merged_branch(self, branch: BranchInfo) -> bool:
         """Check if branch is merged."""
@@ -375,10 +388,13 @@ class VelocityCalculator:
                                      baseline: float) -> FeatureDeliverySpeed:
         """Build feature delivery speed metrics."""
         if not times:
-            return FeatureDeliverySpeed(0, 0, 0, 0, 0, 0)
-        
+            return self._create_empty_delivery_speed()
         stats = self._calculate_delivery_stats(times, baseline)
         return FeatureDeliverySpeed(**stats)
+    
+    def _create_empty_delivery_speed(self) -> FeatureDeliverySpeed:
+        """Create empty delivery speed metrics."""
+        return FeatureDeliverySpeed(0, 0, 0, 0, 0, 0)
     
     def _calculate_delivery_stats(self, times: List[int], baseline: float) -> Dict[str, float]:
         """Calculate delivery speed statistics."""
@@ -406,7 +422,6 @@ class VelocityCalculator:
         """Calculate delivery consistency score."""
         if len(times) < 2:
             return 1.0
-        
         coefficient_of_variation = self._get_coefficient_of_variation(times)
         consistency = max(0, 1 - coefficient_of_variation)
         return min(consistency, 1.0)
@@ -425,7 +440,7 @@ class VelocityCalculator:
     
     def _calculate_baseline_data(self, commits: List[CommitInfo], historical_days: int) -> Dict[str, Any]:
         """Calculate baseline data from commits."""
-        feature_commits = [c for c in commits if c.commit_type == CommitType.FEATURE]
+        feature_commits = self._filter_feature_commits(commits)
         return self._build_baseline_metrics(commits, feature_commits, historical_days)
     
     def _build_baseline_metrics(self, commits: List[CommitInfo], feature_commits: List, historical_days: int) -> Dict[str, Any]:

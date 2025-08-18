@@ -103,9 +103,12 @@ class StateVersionManager:
         """Validate and return migration path."""
         migration_path = self._find_migration_path(from_version, to_version)
         if not migration_path:
-            raise NetraException(
-                f"No migration path from {from_version} to {to_version}")
+            self._raise_no_migration_path_error(from_version, to_version)
         return migration_path
+    
+    def _raise_no_migration_path_error(self, from_version: str, to_version: str) -> None:
+        """Raise error for missing migration path."""
+        raise NetraException(f"No migration path from {from_version} to {to_version}")
     
     def _execute_migration_chain(self, state_data: Dict[str, Any], 
                                 from_version: str, migration_path: List[str]) -> Dict[str, Any]:
@@ -141,8 +144,12 @@ class StateVersionManager:
         """Perform migration and validate result."""
         migrated_data = migration.migrate(current_data)
         self._validate_migration_result(migration, original_data, migrated_data, migration_key)
-        logger.debug(f"Migrated state from {current_version} to {next_version}")
+        self._log_migration_success(current_version, next_version)
         return migrated_data
+    
+    def _log_migration_success(self, current_version: str, next_version: str) -> None:
+        """Log successful migration."""
+        logger.debug(f"Migrated state from {current_version} to {next_version}")
     
     def _get_migration(self, migration_key: str) -> StateMigration:
         """Get migration by key."""
@@ -296,9 +303,13 @@ class StateVersionManager:
                                         queue: List[str]) -> None:
         """Check and add reachable version to collections."""
         if self._can_reach_version(migration_from, migration_to, current, visited):
-            reachable.add(migration_to)
-            queue.append(migration_to)
-            visited.add(migration_to)
+            self._add_reachable_version(migration_to, visited, reachable, queue)
+    
+    def _add_reachable_version(self, migration_to: str, visited: set, reachable: set, queue: List[str]) -> None:
+        """Add reachable version to collections."""
+        reachable.add(migration_to)
+        queue.append(migration_to)
+        visited.add(migration_to)
     
     def _can_reach_version(self, migration_from: str, migration_to: str,
                           current: str, visited: set) -> bool:

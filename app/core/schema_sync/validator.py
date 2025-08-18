@@ -152,6 +152,15 @@ class SchemaValidator:
         common_schemas: Set[str]
     ) -> List[SchemaChangeInfo]:
         """Process common schemas for changes."""
+        return self._collect_common_schema_changes(old_schemas, new_schemas, common_schemas)
+    
+    def _collect_common_schema_changes(
+        self,
+        old_schemas: Dict[str, Dict[str, Any]],
+        new_schemas: Dict[str, Dict[str, Any]],
+        common_schemas: Set[str]
+    ) -> List[SchemaChangeInfo]:
+        """Collect changes from all common schemas."""
         changes = []
         for schema_name in common_schemas:
             schema_changes = self._compare_schemas(
@@ -176,10 +185,21 @@ class SchemaValidator:
         new_schema: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Extract properties and required fields from schemas."""
+        old_data = self._extract_old_schema_data(old_schema)
+        new_data = self._extract_new_schema_data(new_schema)
+        return {**old_data, **new_data}
+    
+    def _extract_old_schema_data(self, old_schema: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract old schema properties and required fields."""
         return {
             'old_props': old_schema.get('properties', {}),
+            'old_required': set(old_schema.get('required', []))
+        }
+    
+    def _extract_new_schema_data(self, new_schema: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract new schema properties and required fields."""
+        return {
             'new_props': new_schema.get('properties', {}),
-            'old_required': set(old_schema.get('required', [])),
             'new_required': set(new_schema.get('required', []))
         }
     
@@ -189,13 +209,25 @@ class SchemaValidator:
         schema_name: str
     ) -> List[SchemaChangeInfo]:
         """Check all types of field changes."""
-        changes = []
-        changes.extend(self._check_removed_fields(schema_props['old_props'], schema_props['new_props'], schema_name))
-        changes.extend(self._check_added_fields(schema_props['old_props'], schema_props['new_props'], schema_name))
-        changes.extend(self._check_modified_fields(
+        removed = self._check_removed_fields(schema_props['old_props'], schema_props['new_props'], schema_name)
+        added = self._check_added_fields(schema_props['old_props'], schema_props['new_props'], schema_name)
+        modified = self._check_modified_fields(
             schema_props['old_props'], schema_props['new_props'],
             schema_props['old_required'], schema_props['new_required'], schema_name
-        ))
+        )
+        return self._combine_field_changes(removed, added, modified)
+    
+    def _combine_field_changes(
+        self,
+        removed: List[SchemaChangeInfo],
+        added: List[SchemaChangeInfo],
+        modified: List[SchemaChangeInfo]
+    ) -> List[SchemaChangeInfo]:
+        """Combine all field changes into single list."""
+        changes = []
+        changes.extend(removed)
+        changes.extend(added)
+        changes.extend(modified)
         return changes
     
     def _check_removed_fields(
@@ -205,10 +237,30 @@ class SchemaValidator:
         schema_name: str
     ) -> List[SchemaChangeInfo]:
         """Check for removed fields"""
-        changes = []
+        removed_fields = self._find_removed_field_names(old_props, new_props)
+        return self._create_field_removal_changes(schema_name, removed_fields)
+    
+    def _find_removed_field_names(
+        self,
+        old_props: Dict[str, Any],
+        new_props: Dict[str, Any]
+    ) -> List[str]:
+        """Find names of fields that were removed."""
+        removed = []
         for field_name in old_props:
             if field_name not in new_props:
-                changes.append(self._create_field_removed_change(schema_name, field_name))
+                removed.append(field_name)
+        return removed
+    
+    def _create_field_removal_changes(
+        self,
+        schema_name: str,
+        field_names: List[str]
+    ) -> List[SchemaChangeInfo]:
+        """Create change info objects for removed fields."""
+        changes = []
+        for field_name in field_names:
+            changes.append(self._create_field_removed_change(schema_name, field_name))
         return changes
     
     def _create_field_removed_change(
@@ -231,10 +283,30 @@ class SchemaValidator:
         schema_name: str
     ) -> List[SchemaChangeInfo]:
         """Check for added fields"""
-        changes = []
+        added_fields = self._find_added_field_names(old_props, new_props)
+        return self._create_field_addition_changes(schema_name, added_fields)
+    
+    def _find_added_field_names(
+        self,
+        old_props: Dict[str, Any],
+        new_props: Dict[str, Any]
+    ) -> List[str]:
+        """Find names of fields that were added."""
+        added = []
         for field_name in new_props:
             if field_name not in old_props:
-                changes.append(self._create_field_added_change(schema_name, field_name))
+                added.append(field_name)
+        return added
+    
+    def _create_field_addition_changes(
+        self,
+        schema_name: str,
+        field_names: List[str]
+    ) -> List[SchemaChangeInfo]:
+        """Create change info objects for added fields."""
+        changes = []
+        for field_name in field_names:
+            changes.append(self._create_field_added_change(schema_name, field_name))
         return changes
     
     def _create_field_added_change(
@@ -259,10 +331,18 @@ class SchemaValidator:
         schema_name: str
     ) -> List[SchemaChangeInfo]:
         """Check for modified fields"""
-        common_fields = set(old_props.keys()) & set(new_props.keys())
+        common_fields = self._find_common_field_names(old_props, new_props)
         return self._process_common_fields(
             old_props, new_props, old_required, new_required, schema_name, common_fields
         )
+    
+    def _find_common_field_names(
+        self,
+        old_props: Dict[str, Any],
+        new_props: Dict[str, Any]
+    ) -> Set[str]:
+        """Find field names common to both old and new properties."""
+        return set(old_props.keys()) & set(new_props.keys())
     
     def _process_common_fields(
         self,
@@ -274,6 +354,20 @@ class SchemaValidator:
         common_fields: Set[str]
     ) -> List[SchemaChangeInfo]:
         """Process common fields for changes."""
+        return self._collect_common_field_changes(
+            old_props, new_props, old_required, new_required, schema_name, common_fields
+        )
+    
+    def _collect_common_field_changes(
+        self,
+        old_props: Dict[str, Any],
+        new_props: Dict[str, Any],
+        old_required: Set[str],
+        new_required: Set[str],
+        schema_name: str,
+        common_fields: Set[str]
+    ) -> List[SchemaChangeInfo]:
+        """Collect changes from all common fields."""
         changes = []
         for field_name in common_fields:
             changes.extend(self._check_field_changes(
@@ -292,9 +386,19 @@ class SchemaValidator:
         field_name: str
     ) -> List[SchemaChangeInfo]:
         """Check individual field for changes."""
+        type_changes = self._check_type_changes(old_field, new_field, schema_name, field_name)
+        required_changes = self._check_required_changes(old_required, new_required, schema_name, field_name)
+        return self._combine_individual_field_changes(type_changes, required_changes)
+    
+    def _combine_individual_field_changes(
+        self,
+        type_changes: List[SchemaChangeInfo],
+        required_changes: List[SchemaChangeInfo]
+    ) -> List[SchemaChangeInfo]:
+        """Combine type and required changes for a field."""
         changes = []
-        changes.extend(self._check_type_changes(old_field, new_field, schema_name, field_name))
-        changes.extend(self._check_required_changes(old_required, new_required, schema_name, field_name))
+        changes.extend(type_changes)
+        changes.extend(required_changes)
         return changes
     
     def _check_type_changes(

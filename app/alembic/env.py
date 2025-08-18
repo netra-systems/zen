@@ -34,6 +34,15 @@ target_metadata = Base.metadata
 # ... etc.
 
 
+def _configure_offline_context() -> None:
+    """Configure context for offline migrations."""
+    url = config.get_main_option("sqlalchemy.url")
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"})
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -44,49 +53,44 @@ def run_migrations_offline() -> None:
 
     Calls to context.execute() here emit the given string to the
     script output.
-
     """
-    url = config.get_main_option("sqlalchemy.url")
-    context.configure(
-        url=url,
-        target_metadata=target_metadata,
-        literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
-    )
-
+    _configure_offline_context()
     with context.begin_transaction():
         context.run_migrations()
 
+
+def _get_configuration() -> dict:
+    """Get database configuration from environment."""
+    database_url = os.environ.get('DATABASE_URL')
+    configuration = config.get_section(config.config_ini_section, {})
+    if database_url:
+        configuration['sqlalchemy.url'] = database_url
+    return configuration
+
+def _create_connectable(configuration: dict):
+    """Create database connectable."""
+    return engine_from_config(
+        configuration,
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool)
+
+def _execute_online_migrations(connection) -> None:
+    """Execute migrations with connection."""
+    context.configure(
+        connection=connection, target_metadata=target_metadata)
+    with context.begin_transaction():
+        context.run_migrations()
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
     In this scenario we need to create an Engine
     and associate a connection with the context.
-
     """
-    # Get DATABASE_URL from environment or use default
-    database_url = os.environ.get('DATABASE_URL')
-    if database_url:
-        # Use DATABASE_URL from environment
-        configuration = config.get_section(config.config_ini_section, {})
-        configuration['sqlalchemy.url'] = database_url
-    else:
-        configuration = config.get_section(config.config_ini_section, {})
-    
-    connectable = engine_from_config(
-        configuration,
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
-
+    configuration = _get_configuration()
+    connectable = _create_connectable(configuration)
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
-
-        with context.begin_transaction():
-            context.run_migrations()
+        _execute_online_migrations(connection)
 
 
 if context.is_offline_mode():

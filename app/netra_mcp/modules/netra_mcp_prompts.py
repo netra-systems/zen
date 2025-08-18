@@ -58,13 +58,21 @@ class NetraMCPPrompts:
     def _build_optimization_content(self, workload_description: str, 
                                    monthly_budget: float, quality_requirements: str) -> str:
         """Build optimization request content"""
+        header = self._create_workload_header(workload_description, monthly_budget, quality_requirements)
+        analysis_items = self._get_analysis_requirements()
+        return f"{header}\n\n{analysis_items}"
+    
+    def _create_workload_header(self, description: str, budget: float, quality: str) -> str:
+        """Create workload analysis header"""
         return f"""Please analyze and optimize the following AI workload:
 
-Workload Description: {workload_description}
-Monthly Budget: ${monthly_budget:,.2f}
-Quality Requirements: {quality_requirements}
-
-Please provide:
+Workload Description: {description}
+Monthly Budget: ${budget:,.2f}
+Quality Requirements: {quality}"""
+    
+    def _get_analysis_requirements(self) -> str:
+        """Get analysis requirements list"""
+        return """Please provide:
 1. Current cost analysis
 2. Optimization recommendations
 3. Implementation strategy
@@ -85,12 +93,18 @@ Please provide:
     def _build_prompt_optimization_content(self, original_prompt: str, 
                                           target_model: str, optimization_goal: str) -> str:
         """Build prompt optimization content"""
-        return f"""Optimize the following prompt for {target_model} with a focus on {optimization_goal}:
-
-Original Prompt:
-{original_prompt}
-
-Please provide:
+        header = self._create_optimization_header(target_model, optimization_goal)
+        prompt_section = f"\nOriginal Prompt:\n{original_prompt}"
+        requirements = self._get_optimization_requirements()
+        return f"{header}{prompt_section}\n\n{requirements}"
+    
+    def _create_optimization_header(self, target_model: str, optimization_goal: str) -> str:
+        """Create optimization request header"""
+        return f"Optimize the following prompt for {target_model} with a focus on {optimization_goal}:"
+    
+    def _get_optimization_requirements(self) -> str:
+        """Get optimization requirements list"""
+        return """Please provide:
 1. Optimized prompt
 2. Explanation of changes
 3. Expected token reduction
@@ -108,14 +122,19 @@ Please provide:
     
     def _build_model_selection_content(self, task_description: str, constraints_str: str) -> str:
         """Build model selection content"""
-        return f"""Help me select the best AI model for this task:
-
-Task: {task_description}
-
-Constraints:
-{constraints_str}
-
-Please recommend:
+        header = self._create_selection_header()
+        task_section = f"\nTask: {task_description}"
+        constraints_section = f"\nConstraints:\n{constraints_str}"
+        recommendations = self._get_selection_requirements()
+        return f"{header}{task_section}{constraints_section}\n\n{recommendations}"
+    
+    def _create_selection_header(self) -> str:
+        """Create model selection header"""
+        return "Help me select the best AI model for this task:"
+    
+    def _get_selection_requirements(self) -> str:
+        """Get model selection requirements"""
+        return """Please recommend:
 1. Primary model choice
 2. Alternative options
 3. Trade-offs analysis

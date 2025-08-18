@@ -60,8 +60,12 @@ class QualityGateService:
         try:
             return await self._perform_validation(content, content_type, context, strict_mode)
         except Exception as e:
-            logger.error(f"Error validating content: {str(e)}")
-            return self._create_error_result(e)
+            return self._handle_validation_error(e)
+
+    def _handle_validation_error(self, error: Exception) -> ValidationResult:
+        """Handle validation error and create error result"""
+        logger.error(f"Error validating content: {str(error)}")
+        return self._create_error_result(error)
 
     async def _perform_validation(self, content: str, content_type: ContentType, 
                                 context: Optional[Dict[str, Any]], strict_mode: bool) -> ValidationResult:
@@ -117,10 +121,11 @@ class QualityGateService:
     def _create_validation_result(self, passed: bool, metrics: QualityMetrics, 
                                 retry_adjustments: Optional[dict]) -> ValidationResult:
         """Create validation result object."""
+        retry_suggested = not passed and retry_adjustments is not None
         return ValidationResult(
             passed=passed,
             metrics=metrics,
-            retry_suggested=not passed and retry_adjustments is not None,
+            retry_suggested=retry_suggested,
             retry_prompt_adjustments=retry_adjustments,
             fallback_response=None
         )

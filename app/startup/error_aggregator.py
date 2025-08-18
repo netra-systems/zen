@@ -46,12 +46,18 @@ class ErrorAggregator:
                           context: Optional[Dict] = None) -> int:
         """Record error in database and return ID."""
         await self._ensure_database_exists()
-        error = StartupError(
-            timestamp=datetime.now(timezone.utc), service=service,
-            phase=phase, severity=severity, error_type=error_type,
-            message=message, stack_trace=stack_trace, context=context or {}
-        )
+        error = self._create_startup_error(service, message, phase, severity, error_type, stack_trace, context)
         return await self._insert_error(error)
+
+    def _create_startup_error(self, service: str, message: str, phase: ErrorPhase, 
+                            severity: str, error_type: ErrorType, 
+                            stack_trace: Optional[str], context: Optional[Dict]) -> StartupError:
+        """Create StartupError instance with provided parameters."""
+        return StartupError(
+            timestamp=datetime.now(timezone.utc), service=service, phase=phase,
+            severity=severity, error_type=error_type, message=message,
+            stack_trace=stack_trace, context=context or {}
+        )
 
     async def find_patterns(self, lookback_hours: int = 168) -> List[ErrorPattern]:
         """Detect similar error patterns using clustering."""
@@ -115,13 +121,17 @@ class ErrorAggregator:
     async def _insert_error(self, error: StartupError) -> int:
         """Insert error record and return ID."""
         async with aiosqlite.connect(self.db_path) as db:
-            cursor = await db.execute(
-                "INSERT INTO startup_errors (timestamp, service, phase, severity, error_type, message, stack_trace, context) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                (error.timestamp, error.service, error.phase.value, error.severity,
-                 error.error_type.value, error.message, error.stack_trace, str(error.context))
-            )
+            sql, params = self._build_insert_query(error)
+            cursor = await db.execute(sql, params)
             await db.commit()
             return cursor.lastrowid
+
+    def _build_insert_query(self, error: StartupError) -> tuple[str, tuple]:
+        """Build insert query and parameters for error record."""
+        sql = "INSERT INTO startup_errors (timestamp, service, phase, severity, error_type, message, stack_trace, context) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        params = (error.timestamp, error.service, error.phase.value, error.severity,
+                 error.error_type.value, error.message, error.stack_trace, str(error.context))
+        return sql, params
 
     async def _get_recent_errors(self, cutoff: datetime) -> List[StartupError]:
         """Retrieve errors since cutoff time."""
@@ -186,13 +196,20 @@ class ErrorAggregator:
         )
 
     def _suggest_fix(self, error_type: ErrorType) -> Optional[str]:
-        fixes = {ErrorType.CONNECTION: "Check network connectivity and service availability",
-                ErrorType.CONFIGURATION: "Verify configuration files and environment variables",
-                ErrorType.DEPENDENCY: "Run dependency installation and version checks",
-                ErrorType.MIGRATION: "Check database migration status and run pending migrations",
-                ErrorType.TIMEOUT: "Increase timeout values or check system resources",
-                ErrorType.PERMISSION: "Verify file/directory permissions and access rights"}
+        """Get suggested fix for error type."""
+        fixes = self._get_error_fix_mapping()
         return fixes.get(error_type, "Review error details and system logs")
+
+    def _get_error_fix_mapping(self) -> Dict[ErrorType, str]:
+        """Get mapping of error types to suggested fixes."""
+        return {
+            ErrorType.CONNECTION: "Check network connectivity and service availability",
+            ErrorType.CONFIGURATION: "Verify configuration files and environment variables",
+            ErrorType.DEPENDENCY: "Run dependency installation and version checks",
+            ErrorType.MIGRATION: "Check database migration status and run pending migrations",
+            ErrorType.TIMEOUT: "Increase timeout values or check system resources",
+            ErrorType.PERMISSION: "Verify file/directory permissions and access rights"
+        }
 
     async def _update_pattern_frequency(self, pattern: ErrorPattern) -> None:
         """Update or insert pattern frequency."""

@@ -49,21 +49,29 @@ def create_agent_tables() -> None:
     create_agent_runs_extended()
 
 
-def create_agent_runs_extended() -> None:
-    """Create extended agent runs."""
+def _add_agent_runs_columns() -> None:
+    """Add agent runs columns."""
     _add_runs_cols1()
     _add_runs_cols2()
     _add_runs_cols3()
     _add_runs_final()
+
+def create_agent_runs_extended() -> None:
+    """Create extended agent runs."""
+    _add_agent_runs_columns()
     _create_messages()
     create_messages_extended()
 
 
-def create_messages_extended() -> None:
-    """Create extended message tables."""
+def _add_message_columns() -> None:
+    """Add message columns."""
     _add_messages_cols()
     _add_messages_final()
     _add_messages_thread_fk()
+
+def create_messages_extended() -> None:
+    """Create extended message tables."""
+    _add_message_columns()
     _create_steps()
     create_steps_extended()
 
@@ -84,11 +92,15 @@ def create_metric_tables() -> None:
     create_analysis_extended()
 
 
-def create_analysis_extended() -> None:
-    """Create extended analysis tables."""
+def _create_analysis_components() -> None:
+    """Create analysis components."""
     _add_analyses_cols()
     _create_analysis_results()
     _add_analysis_results_fk()
+
+def create_analysis_extended() -> None:
+    """Create extended analysis tables."""
+    _create_analysis_components()
     _create_corpora()
     create_supply_tables()
 
@@ -102,13 +114,21 @@ def create_supply_tables() -> None:
     create_supply_options_extended()
 
 
-def create_supply_options_extended() -> None:
-    """Create extended supply options."""
+def _create_supply_options_components() -> None:
+    """Create supply options components."""
     _add_supply_options_cols()
     _add_supply_options_final()
+
+def _create_references_components() -> None:
+    """Create references components."""
     _create_references()
     _add_references_cols()
     _add_references_final_cols()
+
+def create_supply_options_extended() -> None:
+    """Create extended supply options."""
+    _create_supply_options_components()
+    _create_references_components()
 
 
 def create_index_definitions() -> None:
@@ -128,11 +148,19 @@ def add_constraints() -> None:
     _add_corpora_final()
 
 
-def upgrade() -> None:
-    """Upgrade schema with organized table creation."""
+def _create_core_structures() -> None:
+    """Create core database structures."""
     create_user_tables()
     create_agent_tables()
     create_metric_tables()
+
+def _add_relationships() -> None:
+    """Add relationships and constraints."""
     create_index_definitions()
     add_foreign_keys()
     add_constraints()
+
+def upgrade() -> None:
+    """Upgrade schema with organized table creation."""
+    _create_core_structures()
+    _add_relationships()

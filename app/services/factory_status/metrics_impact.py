@@ -266,16 +266,17 @@ class ImpactCalculator:
     
     def _get_category_complexity_factor(self, category: ChangeCategory) -> float:
         """Get complexity factor for change category."""
-        factors = {
-            ChangeCategory.SECURITY: 3.0,
-            ChangeCategory.INFRASTRUCTURE: 2.5,
-            ChangeCategory.FEATURE: 2.0,
-            ChangeCategory.REFACTOR: 1.8,
-            ChangeCategory.BUGFIX: 1.5,
-            ChangeCategory.TEST: 1.0,
+        factors = self._get_category_complexity_factors()
+        return factors.get(category, 1.0)
+    
+    def _get_category_complexity_factors(self) -> Dict[ChangeCategory, float]:
+        """Get category complexity factor mapping."""
+        return {
+            ChangeCategory.SECURITY: 3.0, ChangeCategory.INFRASTRUCTURE: 2.5,
+            ChangeCategory.FEATURE: 2.0, ChangeCategory.REFACTOR: 1.8,
+            ChangeCategory.BUGFIX: 1.5, ChangeCategory.TEST: 1.0,
             ChangeCategory.DOCS: 0.5
         }
-        return factors.get(category, 1.0)
     
     def _calculate_dependency_impact(self, metrics: DiffMetrics) -> float:
         """Calculate dependency impact score."""
@@ -331,13 +332,16 @@ class ImpactCalculator:
         """Assess module coverage of recent changes."""
         coverage_data = self._gather_coverage_data(hours)
         metrics = self._calculate_coverage_metrics(coverage_data)
+        return self._build_module_coverage_object(coverage_data, metrics)
+    
+    def _build_module_coverage_object(self, coverage_data: Dict[str, Any], metrics: Dict[str, Any]) -> ModuleCoverage:
+        """Build ModuleCoverage object from data and metrics."""
         return ModuleCoverage(
             total_modules=len(coverage_data["all_modules"]),
             affected_modules=len(coverage_data["affected_modules"]),
             coverage_percentage=metrics["coverage_percentage"],
             critical_modules_affected=metrics["critical_affected"],
-            new_modules_introduced=metrics["new_modules"],
-            deprecated_modules=0  # Would need deeper analysis
+            new_modules_introduced=metrics["new_modules"], deprecated_modules=0
         )
     
     def _gather_coverage_data(self, hours: int) -> Dict[str, Any]:
@@ -405,14 +409,22 @@ class ImpactCalculator:
     
     def _categorize_commit_changes(self, commits: List[CommitInfo]) -> Dict[str, int]:
         """Categorize changes as customer or internal."""
-        customer_changes, internal_changes = 0, 0
+        changes_data = self._process_commit_changes(commits)
+        return self._aggregate_change_counts(changes_data)
+    
+    def _process_commit_changes(self, commits: List[CommitInfo]) -> List[Tuple[int, bool]]:
+        """Process commits and return change counts with customer_facing flag."""
+        changes_data = []
         for commit in commits:
             diff_metrics = self.diff_analyzer.analyze_commit(commit.hash)
             changes = diff_metrics.lines_added + diff_metrics.lines_deleted
-            if diff_metrics.customer_facing:
-                customer_changes += changes
-            else:
-                internal_changes += changes
+            changes_data.append((changes, diff_metrics.customer_facing))
+        return changes_data
+    
+    def _aggregate_change_counts(self, changes_data: List[Tuple[int, bool]]) -> Dict[str, int]:
+        """Aggregate change counts by customer vs internal."""
+        customer_changes = sum(changes for changes, is_customer in changes_data if is_customer)
+        internal_changes = sum(changes for changes, is_customer in changes_data if not is_customer)
         return {"customer": customer_changes, "internal": internal_changes}
     
     def _compute_ratio(self, change_counts: Dict[str, int]) -> float:
@@ -427,12 +439,16 @@ class ImpactCalculator:
         commits = self.commit_parser.get_commits(hours)
         basic_metrics = self._calculate_basic_impact_metrics(commits)
         advanced_metrics = self._calculate_advanced_impact_metrics(commits, hours, basic_metrics)
+        return self._build_impact_metrics_object(basic_metrics, advanced_metrics)
+    
+    def _build_impact_metrics_object(self, basic: Dict[str, int], advanced: Dict[str, Any]) -> ImpactMetrics:
+        """Build ImpactMetrics object from basic and advanced metrics."""
         return ImpactMetrics(
-            lines_added=basic_metrics["added"], lines_deleted=basic_metrics["deleted"],
-            lines_modified=basic_metrics["modified"], net_change=basic_metrics["net"],
-            files_affected=basic_metrics["files"], complexity=advanced_metrics["complexity"],
-            module_coverage=advanced_metrics["coverage"], impact_level=advanced_metrics["level"],
-            customer_vs_internal_ratio=advanced_metrics["ratio"]
+            lines_added=basic["added"], lines_deleted=basic["deleted"],
+            lines_modified=basic["modified"], net_change=basic["net"],
+            files_affected=basic["files"], complexity=advanced["complexity"],
+            module_coverage=advanced["coverage"], impact_level=advanced["level"],
+            customer_vs_internal_ratio=advanced["ratio"]
         )
     
     def _calculate_basic_impact_metrics(self, commits: List[CommitInfo]) -> Dict[str, int]:

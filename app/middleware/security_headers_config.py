@@ -18,16 +18,29 @@ class SecurityHeadersConfig:
     @staticmethod
     def _get_base_headers() -> Dict[str, str]:
         """Get base security headers common to all environments."""
+        core_headers = SecurityHeadersConfig._get_core_security_headers()
+        additional_headers = SecurityHeadersConfig._get_additional_security_headers()
+        return {**core_headers, **additional_headers}
+    
+    @staticmethod
+    def _get_core_security_headers() -> Dict[str, str]:
+        """Get core security headers."""
         return {
             "X-Content-Type-Options": "nosniff",
             "X-Frame-Options": "DENY", 
             "X-XSS-Protection": "1; mode=block",
             "Referrer-Policy": "strict-origin-when-cross-origin",
-            "Permissions-Policy": SecurityHeadersConfig._get_permissions_policy(),
+            "Permissions-Policy": SecurityHeadersConfig._get_permissions_policy()
+        }
+    
+    @staticmethod
+    def _get_additional_security_headers() -> Dict[str, str]:
+        """Get additional security headers."""
+        return {
             "X-Robots-Tag": "noindex, nofollow, noarchive, nosnippet",
             "Cache-Control": "no-store, no-cache, must-revalidate, private",
             "Pragma": "no-cache",
-            "Expires": "0",
+            "Expires": "0"
         }
     
     @staticmethod

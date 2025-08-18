@@ -139,10 +139,14 @@ class NetraMCPResources:
     async def _collect_system_metrics(self, server) -> Dict[str, Any]:
         """Collect comprehensive system metrics"""
         metrics = self._create_base_metrics()
-        await self._add_thread_metrics(server, metrics)
-        await self._add_llm_metrics(server, metrics)
+        await self._add_service_metrics(server, metrics)
         self._ensure_fallback_metrics(metrics)
         return metrics
+    
+    async def _add_service_metrics(self, server, metrics: Dict[str, Any]) -> None:
+        """Add metrics from all available services"""
+        await self._add_thread_metrics(server, metrics)
+        await self._add_llm_metrics(server, metrics)
     
     def _create_base_metrics(self) -> Dict[str, Any]:
         """Create base metrics structure with timestamp"""
@@ -173,12 +177,17 @@ class NetraMCPResources:
     
     def _update_llm_metrics(self, metrics: Dict[str, Any], llm_data: Dict[str, Any]) -> None:
         """Update metrics with LLM performance data"""
-        metrics.update({
+        performance_metrics = self._build_performance_metrics(llm_data)
+        error_metrics = {"error_rate": llm_data.get("error_rate", 0)}
+        metrics.update({**performance_metrics, **error_metrics})
+    
+    def _build_performance_metrics(self, llm_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Build performance metrics from LLM data"""
+        return {
             "throughput": self._build_throughput_metrics(llm_data),
             "latency": self._build_latency_metrics(llm_data),
-            "cost": self._build_cost_metrics(llm_data),
-            "error_rate": llm_data.get("error_rate", 0)
-        })
+            "cost": self._build_cost_metrics(llm_data)
+        }
     
     def _build_throughput_metrics(self, llm_data: Dict[str, Any]) -> Dict[str, int]:
         """Build throughput metrics section"""
@@ -211,16 +220,31 @@ class NetraMCPResources:
     def _add_sample_metrics(self, metrics: Dict[str, Any]) -> None:
         """Add sample metrics as fallback"""
         sample_data = self._get_sample_metrics_data()
+        self._update_metrics_with_sample_data(metrics, sample_data)
+    
+    def _update_metrics_with_sample_data(self, metrics: Dict[str, Any], 
+                                        sample_data: Dict[str, Any]) -> None:
+        """Update metrics dictionary with sample data"""
         metrics.update(sample_data)
     
     def _get_sample_metrics_data(self) -> Dict[str, Any]:
         """Get sample metrics data structure"""
+        base_metrics = self._get_base_sample_metrics()
+        thread_metrics = self._get_sample_thread_metrics()
+        return {**base_metrics, **thread_metrics}
+    
+    def _get_base_sample_metrics(self) -> Dict[str, Any]:
+        """Get base sample metrics"""
         return {
             "throughput": {"requests_per_minute": 1250, "tokens_per_minute": 450000},
             "latency": {"p50": 120, "p95": 450, "p99": 890},
             "cost": {"last_hour": 125.50, "today": 2450.75, "this_month": 45600.00},
-            "error_rate": 0.02, "active_threads": 45, "queue_depth": 12
+            "error_rate": 0.02
         }
+    
+    def _get_sample_thread_metrics(self) -> Dict[str, Any]:
+        """Get sample thread metrics"""
+        return {"active_threads": 45, "queue_depth": 12}
     
     def _format_error_response(self, error: Exception) -> str:
         """Format error response for metrics"""
@@ -242,9 +266,17 @@ class NetraMCPResources:
     
     async def _fetch_service_history(self, service, dates: Dict[str, str]) -> Dict[str, Any]:
         """Fetch optimization history from service"""
-        history_data = await service.get_optimization_history(
+        history_data = await self._query_service_history(service, dates)
+        return self._validate_history_data(history_data)
+    
+    async def _query_service_history(self, service, dates: Dict[str, str]) -> Dict[str, Any]:
+        """Query service for history data"""
+        return await service.get_optimization_history(
             start_date=dates["start"], end_date=dates["end"]
         )
+    
+    def _validate_history_data(self, history_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate and return history data or fallback"""
         if history_data and "optimizations" in history_data:
             return history_data
         return self._get_fallback_optimization_data()

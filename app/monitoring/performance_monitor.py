@@ -136,7 +136,7 @@ class PerformanceMonitor:
         
         return sum(m.value for m in cpu_metrics) / len(cpu_metrics)
     
-@asynccontextmanager
+    @asynccontextmanager
     async def measure_operation(self, operation_name: str):
         """Context manager to measure operation performance."""
         start_time = asyncio.get_event_loop().time()

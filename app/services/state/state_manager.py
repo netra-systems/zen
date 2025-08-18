@@ -63,13 +63,21 @@ class StateManager:
                  snapshot_interval: int = 10):
         self.storage = storage
         self.snapshot_interval = snapshot_interval
+        self._init_storage_components()
+        self._init_state_tracking()
+        self._lock = asyncio.Lock()
+
+    def _init_storage_components(self) -> None:
+        """Initialize storage-related components"""
         self._memory_store: Dict[str, Any] = {}
         self._redis = redis_manager
+
+    def _init_state_tracking(self) -> None:
+        """Initialize state tracking components"""
         self._transactions: Dict[str, StateTransaction] = {}
         self._change_listeners: Dict[str, List[Callable]] = {}
         self._snapshots: List[StateSnapshot] = []
         self._operation_count = 0
-        self._lock = asyncio.Lock()
     
     async def get(self, key: str, default: Any = None) -> Any:
         """Get state value"""
@@ -141,15 +149,18 @@ class StateManager:
         """Create a state transaction context"""
         transaction_id = f"txn_{datetime.now(timezone.utc).timestamp()}"
         transaction = await self._initialize_transaction(transaction_id)
-        
         try:
             yield transaction_id
             await self._commit_transaction(transaction_id)
         except Exception as e:
-            await self._rollback_transaction(transaction_id)
-            raise e
+            await self._handle_transaction_error(transaction_id, e)
         finally:
             del self._transactions[transaction_id]
+
+    async def _handle_transaction_error(self, transaction_id: str, error: Exception) -> None:
+        """Handle transaction error with rollback"""
+        await self._rollback_transaction(transaction_id)
+        raise error
 
     async def _initialize_transaction(self, transaction_id: str) -> StateTransaction:
         """Initialize new transaction with snapshot"""

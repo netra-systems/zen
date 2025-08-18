@@ -65,12 +65,23 @@ class UnifiedResilienceRegistry:
     ) -> ServiceResilienceComponents:
         """Register service with complete resilience setup."""
         if service_name in self.services:
-            logger.warning(f"Service already registered: {service_name}")
-            return self.services[service_name]
+            return self._get_existing_service(service_name)
         
+        return self._register_new_service(service_name, policy)
+    
+    def _get_existing_service(self, service_name: str) -> ServiceResilienceComponents:
+        """Get existing registered service."""
+        logger.warning(f"Service already registered: {service_name}")
+        return self.services[service_name]
+    
+    def _register_new_service(
+        self, 
+        service_name: str, 
+        policy: ResiliencePolicy
+    ) -> ServiceResilienceComponents:
+        """Register new service with components."""
         components = self._create_service_components(service_name, policy)
         self.services[service_name] = components
-        
         self._setup_monitoring(service_name, policy)
         logger.info(f"Registered resilience components for: {service_name}")
         return components
@@ -85,6 +96,19 @@ class UnifiedResilienceRegistry:
         retry_manager = UnifiedRetryManager(policy.retry_config)
         fallback_chain = self._create_fallback_chain(service_name, policy)
         
+        return self._build_service_components(
+            service_name, circuit_breaker, retry_manager, fallback_chain, policy
+        )
+    
+    def _build_service_components(
+        self, 
+        service_name: str, 
+        circuit_breaker: UnifiedCircuitBreaker, 
+        retry_manager: UnifiedRetryManager, 
+        fallback_chain: Optional[UnifiedFallbackChain], 
+        policy: ResiliencePolicy
+    ) -> ServiceResilienceComponents:
+        """Build service components container."""
         return ServiceResilienceComponents(
             service_name=service_name,
             circuit_breaker=circuit_breaker,
@@ -152,15 +176,26 @@ class UnifiedResilienceRegistry:
     ) -> T:
         """Handle failure by attempting fallback."""
         if components.fallback_chain:
-            try:
-                return await components.fallback_chain.execute_fallback(
-                    context or {}, original_exception
-                )
-            except Exception as fallback_error:
-                logger.error(f"Fallback failed for {components.service_name}: {fallback_error}")
+            return await self._execute_fallback(
+                components, context, original_exception
+            )
         
-        # Re-raise original exception if no fallback or fallback failed
         raise original_exception
+    
+    async def _execute_fallback(
+        self, 
+        components: ServiceResilienceComponents, 
+        context: Optional[Dict[str, Any]], 
+        original_exception: Exception
+    ) -> T:
+        """Execute fallback chain with error handling."""
+        try:
+            return await components.fallback_chain.execute_fallback(
+                context or {}, original_exception
+            )
+        except Exception as fallback_error:
+            logger.error(f"Fallback failed for {components.service_name}: {fallback_error}")
+            raise original_exception
     
     async def _call_operation(self, operation: Callable[[], T]) -> T:
         """Call operation handling both sync and async."""
@@ -174,10 +209,31 @@ class UnifiedResilienceRegistry:
         if not components:
             return None
         
+        return self._build_service_status(service_name, components)
+    
+    def _build_service_status(
+        self, 
+        service_name: str, 
+        components: ServiceResilienceComponents
+    ) -> Dict[str, Any]:
+        """Build comprehensive service status."""
         circuit_status = components.circuit_breaker.get_status()
         retry_metrics = components.retry_manager.get_metrics()
         health = resilience_monitor.get_service_health(service_name)
         
+        return self._create_status_dict(
+            service_name, components, circuit_status, retry_metrics, health
+        )
+    
+    def _create_status_dict(
+        self, 
+        service_name: str, 
+        components: ServiceResilienceComponents, 
+        circuit_status: Dict[str, Any], 
+        retry_metrics: Dict[str, Any], 
+        health: Any
+    ) -> Dict[str, Any]:
+        """Create status dictionary."""
         return {
             "service_name": service_name,
             "enabled": components.enabled,
@@ -287,6 +343,17 @@ class UnifiedResilienceRegistry:
         policy_summary = policy_manager.get_policy_summary()
         service_count = len(self.services)
         
+        return self._build_dashboard_dict(
+            system_summary, policy_summary, service_count
+        )
+    
+    def _build_dashboard_dict(
+        self, 
+        system_summary: Dict[str, Any], 
+        policy_summary: Dict[str, Any], 
+        service_count: int
+    ) -> Dict[str, Any]:
+        """Build system health dashboard dictionary."""
         return {
             "registry_status": "initialized" if self.initialized else "not_initialized",
             "total_registered_services": service_count,

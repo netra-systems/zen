@@ -362,6 +362,21 @@ class StatePersistenceService:
             'is_recovery_point': kwargs.get('is_recovery_point', False), 'expires_at': kwargs.get('expires_at')
         }
     
+    def _handle_save_error(self, request: StatePersistenceRequest, error: Exception) -> Tuple[bool, None]:
+        """Handle save operation error."""
+        logger.error(f"Failed to save state for run {request.run_id}: {error}")
+        return False, None
+    
+    def _handle_load_error(self, run_id: str, error: Exception) -> None:
+        """Handle load operation error."""
+        logger.error(f"Failed to load state for run {run_id}: {error}")
+        return None
+    
+    def _log_recovery_result(self, recovery_id: str, success: bool) -> None:
+        """Log recovery operation result."""
+        status = 'completed' if success else 'failed'
+        logger.info(f"Recovery {recovery_id} {status}")
+    
     async def get_thread_context(self, thread_id: str = None) -> Dict[str, Any]:
         """Get thread context for agent orchestration."""
         # Return empty context for now - can be enhanced to store thread-specific data

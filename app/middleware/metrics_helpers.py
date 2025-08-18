@@ -223,6 +223,19 @@ class BatchResultProcessor:
         throughput: float
     ) -> Dict[str, Union[int, float]]:
         """Create batch operation metadata."""
+        return BatchResultProcessor._build_batch_metadata_dict(
+            batch_size, successful_items, failed_items, execution_time_ms, throughput
+        )
+    
+    @staticmethod
+    def _build_batch_metadata_dict(
+        batch_size: int, 
+        successful_items: int, 
+        failed_items: int, 
+        execution_time_ms: float,
+        throughput: float
+    ) -> Dict[str, Union[int, float]]:
+        """Build batch metadata dictionary."""
         return {
             "batch_size": batch_size,
             "successful_items": successful_items,

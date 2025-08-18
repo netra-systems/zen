@@ -53,6 +53,18 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         circuit_check_response = self._check_circuit_breaker(request)
         if circuit_check_response:
             return circuit_check_response
+        return await self._execute_with_context(
+            request, call_next, operation_id, operation_type
+        )
+    
+    async def _execute_with_context(
+        self,
+        request: Request,
+        call_next: Callable,
+        operation_id: str,
+        operation_type: OperationType
+    ) -> Response:
+        """Execute request with operation context."""
         return await self._execute_request_with_retry(
             request, call_next, operation_id, operation_type
         )
@@ -65,13 +77,16 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
     
     def _check_circuit_breaker(self, request: Request) -> Optional[JSONResponse]:
         """Check circuit breaker and return early response if needed."""
-        circuit_breaker = self.recovery_manager.get_circuit_breaker(
-            f"{request.method}:{request.url.path}"
-        )
+        circuit_breaker = self._get_circuit_breaker_for_path(request)
         if not circuit_breaker.should_allow_request():
             logger.warning(f"Circuit breaker open for {request.url.path}")
             return create_circuit_breaker_response()
         return None
+
+    def _get_circuit_breaker_for_path(self, request: Request):
+        """Get circuit breaker for request path."""
+        path_key = f"{request.method}:{request.url.path}"
+        return self.recovery_manager.get_circuit_breaker(path_key)
     
     async def _execute_request_with_retry(
         self,
@@ -187,6 +202,15 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         request: Request
     ) -> RecoveryContext:
         """Create recovery context for error handling."""
+        return self._build_context_from_request(
+            operation_id, operation_type, error, attempt, max_attempts, request
+        )
+
+    def _build_context_from_request(
+        self, operation_id: str, operation_type: OperationType, error: Exception,
+        attempt: int, max_attempts: int, request: Request
+    ) -> RecoveryContext:
+        """Build recovery context from request parameters."""
         metadata = extract_request_metadata(request)
         severity = determine_severity(error)
         return build_recovery_context(
@@ -215,9 +239,8 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         """Process recovery result and return appropriate response."""
         if recovery_result.success:
             return self._handle_successful_recovery(request, context, recovery_result)
-        else:
-            circuit_breaker.record_failure("recovery_failure")
-            return None
+        circuit_breaker.record_failure("recovery_failure")
+        return None
     
     def _handle_successful_recovery(
         self, request: Request, context: RecoveryContext, recovery_result

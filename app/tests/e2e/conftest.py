@@ -58,22 +58,41 @@ def real_llm_manager(llm_test_config: LLMTestConfig):
         return LLMTestManager(llm_test_config)
 
 
-@pytest.fixture(scope="function")
-def real_websocket_manager():
-    """Create real WebSocket manager for testing."""
+def _create_websocket_mock():
+    """Create WebSocket mock with core interface."""
     from unittest.mock import AsyncMock, Mock
-    
-    # Create a mock that implements the interface agents expect
     mock_ws = Mock()
+    _setup_websocket_methods(mock_ws)
+    return mock_ws
+
+
+def _setup_basic_websocket_methods(mock_ws):
+    """Setup basic WebSocket mock methods."""
+    from unittest.mock import AsyncMock
     mock_ws.send_message = AsyncMock(return_value=True)
     mock_ws.send_to_thread = AsyncMock(return_value=True)
     mock_ws.send_agent_log = AsyncMock(return_value=True)
     mock_ws.send_error = AsyncMock(return_value=True)
+
+
+def _setup_advanced_websocket_methods(mock_ws):
+    """Setup advanced WebSocket mock methods."""
+    from unittest.mock import AsyncMock
     mock_ws.send_agent_update = AsyncMock(return_value=None)
     mock_ws.send_tool_call = AsyncMock(return_value=True)
     mock_ws.send_tool_result = AsyncMock(return_value=True)
-    
-    return mock_ws
+
+
+def _setup_websocket_methods(mock_ws):
+    """Setup all WebSocket mock methods."""
+    _setup_basic_websocket_methods(mock_ws)
+    _setup_advanced_websocket_methods(mock_ws)
+
+
+@pytest.fixture(scope="function")
+def real_websocket_manager():
+    """Create real WebSocket manager for testing."""
+    return _create_websocket_mock()
 
 @pytest.fixture(scope="function")
 def real_tool_dispatcher():
@@ -181,48 +200,74 @@ def _check_model_configuration() -> bool:
         return False
 
 
-@pytest.fixture(scope="function")
-def llm_test_scenarios():
-    """Common test scenarios for LLM testing."""
+def _get_quick_response_scenario():
+    """Get quick response test scenario."""
     return {
-        "quick_response": {
-            "prompt": "What is 2+2?",
-            "expected_type": "short_answer",
-            "timeout": 5
-        },
-        "complex_analysis": {
-            "prompt": "Analyze the performance implications of implementing microservices architecture.",
-            "expected_type": "detailed_analysis",
-            "timeout": 30
-        },
-        "cost_optimization": {
-            "prompt": "How can I reduce infrastructure costs while maintaining performance?",
-            "expected_type": "recommendation_list",
-            "timeout": 15
-        }
+        "prompt": "What is 2+2?",
+        "expected_type": "short_answer",
+        "timeout": 5
+    }
+
+
+def _get_complex_analysis_scenario():
+    """Get complex analysis test scenario."""
+    return {
+        "prompt": "Analyze the performance implications of implementing microservices architecture.",
+        "expected_type": "detailed_analysis",
+        "timeout": 30
+    }
+
+
+def _get_cost_optimization_scenario():
+    """Get cost optimization test scenario."""
+    return {
+        "prompt": "How can I reduce infrastructure costs while maintaining performance?",
+        "expected_type": "recommendation_list",
+        "timeout": 15
+    }
+
+
+def _build_test_scenarios():
+    """Build complete test scenarios dictionary."""
+    return {
+        "quick_response": _get_quick_response_scenario(),
+        "complex_analysis": _get_complex_analysis_scenario(),
+        "cost_optimization": _get_cost_optimization_scenario()
     }
 
 
 @pytest.fixture(scope="function")
-async def setup_test_environment(real_llm_manager: LLMTestManager, fresh_cache: LLMResponseCache):
-    """Setup complete test environment with cleanup."""
-    # Setup phase
-    test_env = {
+def llm_test_scenarios():
+    """Common test scenarios for LLM testing."""
+    return _build_test_scenarios()
+
+
+def _create_test_environment(real_llm_manager: LLMTestManager, fresh_cache: LLMResponseCache):
+    """Create test environment dictionary."""
+    return {
         "llm_manager": real_llm_manager,
         "cache": fresh_cache,
         "test_run_id": f"test_run_{os.getpid()}",
         "cleanup_tasks": []
     }
-    
-    yield test_env
-    
-    # Cleanup phase
+
+
+async def _cleanup_test_environment(test_env, fresh_cache: LLMResponseCache):
+    """Cleanup test environment resources."""
     await fresh_cache.clear_all()
     for task in test_env.get("cleanup_tasks", []):
         try:
             await task()
         except Exception:
             pass  # Ignore cleanup errors
+
+
+@pytest.fixture(scope="function")
+async def setup_test_environment(real_llm_manager: LLMTestManager, fresh_cache: LLMResponseCache):
+    """Setup complete test environment with cleanup."""
+    test_env = _create_test_environment(real_llm_manager, fresh_cache)
+    yield test_env
+    await _cleanup_test_environment(test_env, fresh_cache)
 
 
 @pytest.fixture(scope="function")

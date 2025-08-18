@@ -35,6 +35,10 @@ def create_recovery_response(
     """Create response after successful recovery."""
     content = build_recovery_content(context, recovery_result)
     headers = build_recovery_headers(context, recovery_result)
+    return _build_recovery_json_response(content, headers)
+
+def _build_recovery_json_response(content: Dict[str, Any], headers: Dict[str, str]) -> JSONResponse:
+    """Build JSON response for recovery result."""
     return JSONResponse(status_code=200, content=content, headers=headers)
 
 

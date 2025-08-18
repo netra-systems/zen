@@ -46,9 +46,22 @@ class GracefulDegradationManager:
         policy: DegradationPolicy
     ) -> None:
         """Register a service for degradation management."""
+        self._register_service_components(name, strategy, policy)
+        self._log_service_registration(name)
+    
+    def _register_service_components(
+        self,
+        name: str,
+        strategy: DegradationStrategy,
+        policy: DegradationPolicy
+    ) -> None:
+        """Register service components in internal collections."""
         self.services[name] = self._create_service_status(name)
         self.strategies[name] = strategy
         self.policies[name] = policy
+    
+    def _log_service_registration(self, name: str) -> None:
+        """Log successful service registration."""
         logger.info(f"Registered service for degradation: {name}")
     
     def _create_service_status(self, name: str) -> ServiceStatus:
@@ -130,7 +143,15 @@ class GracefulDegradationManager:
         service_name: str
     ) -> None:
         """Restore service status to normal."""
+        self._log_service_restoration(service_name)
+        self._reset_service_status_fields(service_status)
+    
+    def _log_service_restoration(self, service_name: str) -> None:
+        """Log service restoration to normal."""
         logger.info(f"Restoring service {service_name} to normal")
+    
+    def _reset_service_status_fields(self, service_status: ServiceStatus) -> None:
+        """Reset service status fields to normal values."""
         service_status.degradation_level = DegradationLevel.NORMAL
         service_status.is_healthy = True
         service_status.error_count = 0
@@ -169,7 +190,15 @@ class GracefulDegradationManager:
         """Adjust degradation level based on service tier."""
         if tier == ServiceTier.CRITICAL:
             return self._reduce_degradation_for_critical(level)
-        elif tier == ServiceTier.OPTIONAL:
+        return self._adjust_level_for_non_critical_tier(level, tier)
+    
+    def _adjust_level_for_non_critical_tier(
+        self,
+        level: DegradationLevel,
+        tier: ServiceTier
+    ) -> DegradationLevel:
+        """Adjust degradation level for non-critical service tiers."""
+        if tier == ServiceTier.OPTIONAL:
             return self._increase_degradation_for_optional(level)
         return level
     
@@ -199,10 +228,31 @@ class GracefulDegradationManager:
         service_status: ServiceStatus
     ) -> DegradationLevel:
         """Adjust degradation level based on service health."""
-        if service_status.error_count > 5:
-            return DegradationLevel.MINIMAL
-        elif service_status.error_count > 10:
+        error_count = service_status.error_count
+        return self._determine_health_based_degradation(level, error_count)
+    
+    def _determine_health_based_degradation(
+        self,
+        level: DegradationLevel,
+        error_count: int
+    ) -> DegradationLevel:
+        """Determine degradation level based on error count."""
+        if self._is_critical_error_count(error_count):
             return DegradationLevel.EMERGENCY
+        return self._get_degradation_for_moderate_errors(level, error_count)
+    
+    def _is_critical_error_count(self, error_count: int) -> bool:
+        """Check if error count indicates critical degradation."""
+        return error_count > 10
+    
+    def _get_degradation_for_moderate_errors(
+        self,
+        level: DegradationLevel,
+        error_count: int
+    ) -> DegradationLevel:
+        """Get degradation level for moderate error counts."""
+        if error_count > 5:
+            return DegradationLevel.MINIMAL
         return level
     
     def _calculate_global_degradation_level(
@@ -212,12 +262,43 @@ class GracefulDegradationManager:
         """Calculate global degradation level based on resources."""
         cpu_usage = resource_usage.get('cpu_percent', 0)
         memory_usage = resource_usage.get('memory_percent', 0)
-        
-        if cpu_usage > 95 or memory_usage > 95:
+        return self._determine_degradation_from_usage(cpu_usage, memory_usage)
+    
+    def _determine_degradation_from_usage(
+        self,
+        cpu_usage: float,
+        memory_usage: float
+    ) -> DegradationLevel:
+        """Determine degradation level from CPU and memory usage."""
+        if self._is_emergency_usage_level(cpu_usage, memory_usage):
             return DegradationLevel.EMERGENCY
-        elif cpu_usage > 85 or memory_usage > 90:
+        return self._determine_non_emergency_degradation(cpu_usage, memory_usage)
+    
+    def _is_emergency_usage_level(self, cpu_usage: float, memory_usage: float) -> bool:
+        """Check if usage levels indicate emergency degradation."""
+        return cpu_usage > 95 or memory_usage > 95
+    
+    def _determine_non_emergency_degradation(
+        self,
+        cpu_usage: float,
+        memory_usage: float
+    ) -> DegradationLevel:
+        """Determine non-emergency degradation level from usage."""
+        if self._is_minimal_degradation_needed(cpu_usage, memory_usage):
             return DegradationLevel.MINIMAL
-        elif cpu_usage > 75 or memory_usage > 80:
+        return self._get_reduced_or_normal_degradation(cpu_usage, memory_usage)
+    
+    def _is_minimal_degradation_needed(self, cpu_usage: float, memory_usage: float) -> bool:
+        """Check if minimal degradation is needed based on usage."""
+        return cpu_usage > 85 or memory_usage > 90
+    
+    def _get_reduced_or_normal_degradation(
+        self,
+        cpu_usage: float,
+        memory_usage: float
+    ) -> DegradationLevel:
+        """Get reduced or normal degradation based on usage."""
+        if cpu_usage > 75 or memory_usage > 80:
             return DegradationLevel.REDUCED
         return DegradationLevel.NORMAL
     
@@ -255,13 +336,17 @@ class GracefulDegradationManager:
     def _get_all_service_statuses(self) -> Dict[str, Dict[str, Any]]:
         """Get status for all registered services."""
         return {
-            name: {
-                'healthy': status.is_healthy,
-                'level': status.degradation_level.value,
-                'error_count': status.error_count,
-                'last_check': status.last_check.isoformat()
-            }
+            name: self._create_service_status_dict(status)
             for name, status in self.services.items()
+        }
+    
+    def _create_service_status_dict(self, status: ServiceStatus) -> Dict[str, Any]:
+        """Create status dictionary for a service."""
+        return {
+            'healthy': status.is_healthy,
+            'level': status.degradation_level.value,
+            'error_count': status.error_count,
+            'last_check': status.last_check.isoformat()
         }
 # Global degradation manager instance
 degradation_manager = GracefulDegradationManager()

@@ -49,6 +49,17 @@ class AgentMetricsMiddleware:
         timeout_seconds: Optional[float] = None
     ):
         """Decorator to track agent operations."""
+        return self._create_tracking_decorator(
+            operation_type, include_performance, timeout_seconds
+        )
+    
+    def _create_tracking_decorator(
+        self,
+        operation_type: Optional[str],
+        include_performance: bool,
+        timeout_seconds: Optional[float]
+    ):
+        """Create tracking decorator with parameters."""
         def decorator(func: Callable):
             return self._create_function_wrapper(func, operation_type, include_performance, timeout_seconds)
         return decorator
