@@ -20,7 +20,7 @@ from app.schemas.registry import WebSocketMessage
 from app.schemas.websocket_message_types import ServerMessage
 from app.websocket.connection import ConnectionInfo
 from .message_queue import MessageQueue
-from .message_handlers import MessageHandler, AgentMessageBuilder, MessageProcessor
+from .message_handlers import MessageHandler, MessageBuilder, MessageProcessor
 
 logger = central_logger.get_logger(__name__)
 
@@ -39,7 +39,7 @@ class UnifiedMessagingManager:
         """Initialize message handling components."""
         self.message_handler = MessageHandler(self.manager)
         self.message_processor = MessageProcessor(self.manager, self.message_handler)
-        self.message_builder = AgentMessageBuilder()
+        self.message_builder = MessageBuilder()
     
     def _ensure_queue_processor_started(self) -> None:
         """Lazily start queue processor when first needed."""
@@ -174,9 +174,9 @@ class UnifiedMessagingManager:
 
 # Re-export classes for backward compatibility
 from .message_queue import MessageQueue
-from .message_handlers import MessageHandler, AgentMessageBuilder, MessageProcessor
+from .message_handlers import MessageHandler, MessageBuilder, MessageProcessor
 
 __all__ = [
     "UnifiedMessagingManager", "MessageQueue", "MessageHandler", 
-    "AgentMessageBuilder", "MessageProcessor"
+    "MessageBuilder", "MessageProcessor"
 ]

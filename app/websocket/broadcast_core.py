@@ -1,6 +1,6 @@
 """Core WebSocket broadcasting functionality - Modernized.
 
-Backward-compatible entry point that delegates to the modern WebSocketBroadcastAgent
+Backward-compatible entry point that delegates to the modern WebSocketBroadcastExecutor
 while maintaining all existing API contracts for seamless migration.
 
 Business Value: Zero-disruption migration to modern reliability patterns.
@@ -13,8 +13,8 @@ from app.schemas.registry import WebSocketMessage
 from app.schemas.websocket_message_types import ServerMessage, BroadcastResult
 from app.websocket.connection import ConnectionInfo, ConnectionManager
 from app.websocket.room_manager import RoomManager
-from app.websocket.broadcast_agent import (
-    WebSocketBroadcastAgent, BroadcastContext, BroadcastOperation
+from app.websocket.websocket_broadcast_executor import (
+    WebSocketBroadcastExecutor, BroadcastContext, BroadcastOperation
 )
 from app.websocket import broadcast_utils as utils
 
@@ -24,7 +24,7 @@ logger = central_logger.get_logger(__name__)
 class BroadcastManager:
     """Backward-compatible WebSocket broadcast manager.
     
-    Delegates to modern WebSocketBroadcastAgent while maintaining
+    Delegates to modern WebSocketBroadcastExecutor while maintaining
     exact API compatibility for existing code.
     """
     
@@ -51,12 +51,12 @@ class BroadcastManager:
     
     def _init_modern_agent(self, connection_manager: ConnectionManager,
                           room_manager: RoomManager,
-                          reliability_config: Optional[Dict[str, Any]]) -> WebSocketBroadcastAgent:
-        """Initialize modern WebSocket broadcast agent."""
+                          reliability_config: Optional[Dict[str, Any]]) -> WebSocketBroadcastExecutor:
+        """Initialize modern WebSocket broadcast executor."""
         agent_params = self._get_agent_init_params(
             connection_manager, room_manager, reliability_config
         )
-        return WebSocketBroadcastAgent(**agent_params)
+        return WebSocketBroadcastExecutor(**agent_params)
     
     def _get_agent_init_params(self, connection_manager: ConnectionManager,
                               room_manager: RoomManager,

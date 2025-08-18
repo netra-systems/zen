@@ -1,4 +1,4 @@
-"""Modern WebSocket Broadcast Agent
+"""Modern WebSocket Broadcast Executor
 
 Implements BaseExecutionInterface for standardized broadcast execution with:
 - Circuit breaker protection for WebSocket failures  
@@ -38,8 +38,8 @@ from app.websocket import broadcast_utils as utils
 logger = central_logger.get_logger(__name__)
 
 
-class WebSocketBroadcastAgent(BaseExecutionInterface):
-    """Modern WebSocket broadcast agent with reliability patterns.
+class WebSocketBroadcastExecutor(BaseExecutionInterface):
+    """Modern WebSocket broadcast executor with reliability patterns.
     
     Provides standardized broadcast execution with circuit breaker protection,
     retry logic, performance monitoring, and structured error handling.

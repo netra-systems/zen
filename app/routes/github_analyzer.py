@@ -16,7 +16,7 @@ from app.schemas.github_analyzer import (
     AIOperationsMap
 )
 from app.schemas.core_models import User
-from app.agents.github_analyzer import GitHubAnalyzerAgent
+from app.agents.github_analyzer import GitHubAnalyzerService
 from app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from app.llm.llm_manager import LLMManager
 from app.agents.tool_dispatcher import ToolDispatcher
@@ -138,7 +138,7 @@ async def get_analysis_results(analysis_id: str, current_user: User = Depends(ge
 
 
 async def _run_analysis_workflow(
-    analysis_id: str, request: AnalysisRequest, analyzer: GitHubAnalyzerAgent
+    analysis_id: str, request: AnalysisRequest, analyzer: GitHubAnalyzerService
 ) -> None:
     """Run the analysis workflow."""
     result = await _execute_repository_analysis(analysis_id, request, analyzer)
@@ -146,7 +146,7 @@ async def _run_analysis_workflow(
     await _cleanup_analysis_resources(analyzer)
     logger.info(f"Analysis {analysis_id} completed successfully")
 
-async def _run_analysis_safe(analysis_id: str, request: AnalysisRequest, analyzer: GitHubAnalyzerAgent) -> None:
+async def _run_analysis_safe(analysis_id: str, request: AnalysisRequest, analyzer: GitHubAnalyzerService) -> None:
     """Run analysis with error handling."""
     try:
         await _run_analysis_workflow(analysis_id, request, analyzer)
@@ -159,12 +159,12 @@ async def run_analysis(analysis_id: str, request: AnalysisRequest, user_id: str,
     await _run_analysis_safe(analysis_id, request, analyzer)
 
 
-async def _initialize_analysis_components(analysis_id: str) -> GitHubAnalyzerAgent:
+async def _initialize_analysis_components(analysis_id: str) -> GitHubAnalyzerService:
     """Initialize analysis components and update progress."""
-    _update_analysis_status(analysis_id, "running", 10, "Initializing agent")
+    _update_analysis_status(analysis_id, "running", 10, "Initializing service")
     llm_manager = LLMManager()
     tool_dispatcher = ToolDispatcher()
-    analyzer = GitHubAnalyzerAgent(llm_manager, tool_dispatcher)
+    analyzer = GitHubAnalyzerService(llm_manager, tool_dispatcher)
     _update_analysis_status(analysis_id, "running", 20, "Starting analysis")
     return analyzer
 
@@ -176,7 +176,7 @@ async def _setup_analysis_environment(request: AnalysisRequest) -> tuple:
     context = _build_analysis_context(request)
     return state, context
 
-async def _execute_repository_analysis(analysis_id: str, request: AnalysisRequest, analyzer: GitHubAnalyzerAgent) -> Any:
+async def _execute_repository_analysis(analysis_id: str, request: AnalysisRequest, analyzer: GitHubAnalyzerService) -> Any:
     """Execute the repository analysis with proper context."""
     state, context = await _setup_analysis_environment(request)
     return await analyzer.execute(state, context)
@@ -210,7 +210,7 @@ async def _finalize_analysis_result(analysis_id: str, result: Any) -> None:
     _process_analysis_result(analysis_id, result)
 
 
-async def _cleanup_analysis_resources(analyzer: GitHubAnalyzerAgent) -> None:
+async def _cleanup_analysis_resources(analyzer: GitHubAnalyzerService) -> None:
     """Clean up analysis resources."""
     await analyzer.github_client.cleanup()
 

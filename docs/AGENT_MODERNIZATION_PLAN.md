@@ -85,7 +85,7 @@ class ModernAgent(BaseExecutionInterface):
 2. `TriageSubAgent` - Uses reliability wrapper
 3. `ReportingSubAgent` - Uses reliability wrapper
 4. `OptimizationsCoreSubAgent` - Uses reliability wrapper
-5. `GitHubAnalyzerAgent` - Example implementation
+5. `GitHubAnalyzerService` - Example implementation
 6. `ModernTriageSubAgent` (example) - Full implementation
 7. `CorpusAdminSubAgent` - Partial
 8. `SupplyResearcherAgent` - Partial

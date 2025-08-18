@@ -1,4 +1,4 @@
-"""GitHub Code Analysis Agent - Main orchestration module.
+"""GitHub Code Analysis Service - Main orchestration module.
 
 Analyzes repositories to map AI/LLM operations and configurations.
 Integrates with existing supervisor, state management, and error handling.
@@ -28,8 +28,8 @@ from .output_formatter import AIOperationsMapFormatter
 from .github_client import GitHubAPIClient
 
 
-class GitHubAnalyzerAgent(BaseSubAgent):
-    """Agent for analyzing GitHub repos to map AI operations."""
+class GitHubAnalyzerService(BaseSubAgent):
+    """Service for analyzing GitHub repos to map AI operations."""
     
     def __init__(
         self, 
@@ -46,7 +46,7 @@ class GitHubAnalyzerAgent(BaseSubAgent):
         """Initialize base agent configuration."""
         super().__init__(
             llm_manager=llm_manager,
-            name="GitHubAnalyzerAgent",
+            name="GitHubAnalyzerService",
             description="Analyzes GitHub repositories for AI/LLM usage"
         )
     

@@ -77,7 +77,7 @@ class MessageHandler:
         await websocket.send_json(pong_response)
 
 
-class AgentMessageBuilder:
+class MessageBuilder:
     """Builds specialized messages for agent and tool communication."""
     
     @staticmethod
@@ -166,7 +166,7 @@ class MessageProcessor:
         """Handle rate limit exceeded with error response."""
         rate_info = self.manager.rate_limiter.get_rate_limit_info(conn_info)
         await self.manager.error_handler.handle_rate_limit_error(conn_info, rate_info)
-        error_msg = AgentMessageBuilder.create_rate_limit_error_message()
+        error_msg = MessageBuilder.create_rate_limit_error_message()
         await self._send_system_message(conn_info, error_msg)
     
     async def _validate_and_process_message(self, conn_info: ConnectionInfo, message: Dict[str, Any]) -> bool:

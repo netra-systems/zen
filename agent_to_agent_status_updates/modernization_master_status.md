@@ -20,7 +20,7 @@
 3. **ReportingSubAgent** - Customer deliverables
 4. **OptimizationsCoreSubAgent** - Value recommendations
 5. **SupplyResearcherAgent** - Market intelligence
-6. **GitHubAnalyzerAgent** - Repository analysis
+6. **GitHubAnalyzerService** - Repository analysis
 7. **CorpusAdminSubAgent** - Knowledge management
 8. **Legacy SyntheticDataSubAgent** - Needs full replacement
 
@@ -47,7 +47,7 @@
 - [ ] TriageSubAgent
 - [ ] ReportingSubAgent
 - [ ] OptimizationsCoreSubAgent
-- [ ] GitHubAnalyzerAgent
+- [ ] GitHubAnalyzerService
 - [ ] Factory status agents (8+)
 
 ### Phase 3: Infrastructure (Week 3)
@@ -66,7 +66,7 @@
 3. ReportingSubAgent - Customer deliverables (HIGH)
 4. OptimizationsCoreSubAgent - Value recommendations (HIGH)
 5. SupplyResearcherAgent - Market intelligence (MEDIUM)
-6. GitHubAnalyzerAgent - Repository analysis (MEDIUM)
+6. GitHubAnalyzerService - Repository analysis (MEDIUM)
 7. CorpusAdminSubAgent - Knowledge management (MEDIUM)
 
 ## Timestamp: 2025-08-18

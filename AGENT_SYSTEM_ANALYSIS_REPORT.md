@@ -40,7 +40,7 @@ After comprehensive analysis of the Netra Apex codebase, I've identified signifi
 - Provide infrastructure services to other components
 
 **Current Execution Agents:**
-- **WebSocketBroadcastAgent**: Manages WebSocket broadcasting with 99.9% reliability target
+- **WebSocketBroadcastExecutor**: Manages WebSocket broadcasting with 99.9% reliability target
 - **BaseMCPAgent**: Handles Model Context Protocol integration with fallback patterns
 
 **Purpose:** Infrastructure reliability and standardization, not business logic processing.
@@ -50,7 +50,7 @@ After comprehensive analysis of the Netra Apex codebase, I've identified signifi
 **Definition:** Specialized components that perform specific technical tasks, often called "agents" but are really service modules.
 
 **Examples:**
-- **GitHub Analyzer Agent**: Analyzes GitHub repositories for AI patterns
+- **GitHub Analyzer Service**: Analyzes GitHub repositories for AI patterns
 - **Supply Researcher Agent**: Researches supply chain data
 - **Demo Agent**: Demonstration and testing purposes
 
