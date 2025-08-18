@@ -59,18 +59,24 @@ jest.mock('@/components/chat/ChatSidebarHooks', () => {
     useThreadLoader: jest.fn(() => {
       console.log('🔥 HOOK CALLED: useThreadLoader (DEFAULT)');
       return {
-        threads: [],
+        threads: [], // CRITICAL: Always return array, never undefined/null
         isLoadingThreads: false,  // Fixed: Default to false for tests
         loadError: null,
         loadThreads: jest.fn()
       };
     }),
-    useThreadFiltering: jest.fn(() => {
-      console.log('🔥 HOOK CALLED: useThreadFiltering (DEFAULT)');
+    useThreadFiltering: jest.fn((threads, searchQuery, threadsPerPage, currentPage) => {
+      console.log('🔥 HOOK CALLED: useThreadFiltering (DEFAULT)', { 
+        threadsType: typeof threads, 
+        isArray: Array.isArray(threads), 
+        threadsLength: threads?.length 
+      });
+      // CRITICAL: Ensure threads is always an array to prevent filter errors
+      const safeThreads = Array.isArray(threads) ? threads : [];
       return {
-        sortedThreads: [],
-        paginatedThreads: [],
-        totalPages: 1
+        sortedThreads: safeThreads,
+        paginatedThreads: safeThreads,
+        totalPages: Math.max(1, Math.ceil(safeThreads.length / (threadsPerPage || 50)))
       };
     })
   };
@@ -172,16 +178,20 @@ export const mockChatSidebarHooks = {
     setCurrentPage: jest.fn()
   })),
   useThreadLoader: jest.fn(() => ({
-    threads: [],
+    threads: [], // CRITICAL: Always return array
     isLoadingThreads: false,
     loadError: null,
     loadThreads: jest.fn()
   })),
-  useThreadFiltering: jest.fn(() => ({
-    sortedThreads: [],
-    paginatedThreads: [],
-    totalPages: 1
-  }))
+  useThreadFiltering: jest.fn((threads, searchQuery, threadsPerPage, currentPage) => {
+    // CRITICAL: Ensure threads is always an array to prevent filter errors
+    const safeThreads = Array.isArray(threads) ? threads : [];
+    return {
+      sortedThreads: safeThreads,
+      paginatedThreads: safeThreads,
+      totalPages: Math.max(1, Math.ceil(safeThreads.length / (threadsPerPage || 50)))
+    };
+  })
 };
 
 export const mockThreadService = {
@@ -276,17 +286,29 @@ export class ChatSidebarTestSetup {
     });
     
     (ChatSidebarHooksModule.useThreadLoader as jest.Mock).mockReset().mockReturnValue({
-      threads: [],
+      threads: [], // CRITICAL: Always ensure this is an array
       isLoadingThreads: false,
       loadError: null,
       loadThreads: jest.fn()
     });
     
-    (ChatSidebarHooksModule.useThreadFiltering as jest.Mock).mockReset().mockReturnValue({
-      sortedThreads: [],
-      paginatedThreads: [],
-      totalPages: 1
-    });
+    // CRITICAL: Mock useThreadFiltering with parameter validation
+    (ChatSidebarHooksModule.useThreadFiltering as jest.Mock).mockReset().mockImplementation(
+      (threads, searchQuery, threadsPerPage, currentPage) => {
+        console.log('🔥 HOOK RESET: useThreadFiltering', { 
+          threadsType: typeof threads, 
+          isArray: Array.isArray(threads), 
+          threadsLength: threads?.length 
+        });
+        // Ensure threads is always an array to prevent filter errors
+        const safeThreads = Array.isArray(threads) ? threads : [];
+        return {
+          sortedThreads: safeThreads,
+          paginatedThreads: safeThreads,
+          totalPages: Math.max(1, Math.ceil(safeThreads.length / (threadsPerPage || 50)))
+        };
+      }
+    );
     
     // Configure ThreadService mock methods
     Object.assign(ThreadServiceModule.ThreadService, mockThreadService);
@@ -330,7 +352,7 @@ export class ChatSidebarTestSetup {
     
     // Configure useThreadLoader mock - CRITICAL: ensure isLoadingThreads is false
     const threadLoaderConfig = {
-      threads: threadsToUse,
+      threads: Array.isArray(threadsToUse) ? threadsToUse : [], // CRITICAL: Ensure always array
       isLoadingThreads: false,  // CRITICAL: Always false for tests
       loadError: null,
       loadThreads: jest.fn(),
@@ -338,10 +360,11 @@ export class ChatSidebarTestSetup {
     };
     
     // Configure useThreadFiltering mock
+    const safeThreadsForFiltering = Array.isArray(threadsToUse) ? threadsToUse : [];
     const threadFilteringConfig = {
-      sortedThreads: threadsToUse,
-      paginatedThreads: threadsToUse,
-      totalPages: Math.ceil(threadsToUse.length / 50),
+      sortedThreads: safeThreadsForFiltering,
+      paginatedThreads: safeThreadsForFiltering,
+      totalPages: Math.ceil(safeThreadsForFiltering.length / 50),
       ...overrides.threadFiltering
     };
     
@@ -362,8 +385,23 @@ export class ChatSidebarTestSetup {
       return threadLoaderConfig;
     });
     
-    (ChatSidebarHooksModule.useThreadFiltering as jest.Mock).mockImplementation((...args: any[]) => {
-      console.log('🔥 HOOK CALLED: useThreadFiltering (CONFIGURED)', { args, returning: threadFilteringConfig });
+    (ChatSidebarHooksModule.useThreadFiltering as jest.Mock).mockImplementation((threads, searchQuery, threadsPerPage, currentPage) => {
+      console.log('🔥 HOOK CALLED: useThreadFiltering (CONFIGURED)', { 
+        threadsType: typeof threads, 
+        isArray: Array.isArray(threads), 
+        threadsLength: threads?.length,
+        returning: threadFilteringConfig 
+      });
+      // CRITICAL: Validate threads parameter and provide safe fallback
+      if (!Array.isArray(threads)) {
+        console.warn('⚠️ useThreadFiltering received non-array threads:', threads);
+        const safeConfig = {
+          sortedThreads: [],
+          paginatedThreads: [],
+          totalPages: 1
+        };
+        return safeConfig;
+      }
       return threadFilteringConfig;
     });
     
