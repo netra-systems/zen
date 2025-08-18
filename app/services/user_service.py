@@ -10,6 +10,9 @@ from argon2 import PasswordHasher
 # Initialize Argon2 hasher for password hashing
 ph = PasswordHasher()
 
+# Keep pwd_context alias for backward compatibility in tests
+pwd_context = ph
+
 class CRUDUser(EnhancedCRUDService[User, UserCreate, UserUpdate]):
     async def get_by_email(self, db: AsyncSession, *, email: str) -> User:
         result = await db.execute(select(User).filter(User.email == email))
