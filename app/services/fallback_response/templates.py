@@ -84,96 +84,37 @@ class TemplateManager:
     def _get_optimization_low_quality_templates(self) -> List[str]:
         """Get templates for optimization low quality failures"""
         return [
-            "I need more specific information about your {context} to provide actionable optimization recommendations. "
-            "Could you provide:\n"
-            "• Current performance metrics (latency, throughput)\n"
-            "• Resource constraints (memory, compute)\n"
-            "• Target improvements (e.g., 20% latency reduction)\n"
-            "This will help me generate specific, measurable optimization strategies.",
-            
-            "The optimization analysis for {context} requires additional context. "
-            "To provide value-driven recommendations, I need:\n"
-            "• Baseline performance data\n"
-            "• System architecture details\n"
-            "• Specific bottlenecks you're experiencing\n"
-            "With this information, I can suggest targeted optimizations with expected improvements.",
-            
-            "After multiple attempts to optimize {context}, let's try a different approach. "
-            "Please consider:\n"
-            "• Breaking the optimization into smaller, more focused tasks\n"
-            "• Providing a simplified version of your requirements\n"
-            "• Starting with basic performance profiling first\n"
-            "• Describing the most critical performance issue only\n"
-            "Sometimes a step-by-step approach yields better results."
+            self._get_optimization_info_request_template(),
+            self._get_optimization_context_template(),
+            self._get_optimization_stepwise_template()
         ]
     
     def _get_optimization_context_missing_templates(self) -> List[str]:
         """Get templates for optimization context missing failures"""
         return [
-            "To optimize {context} effectively, I need key information:\n"
-            "• Model/system specifications\n"
-            "• Current configuration parameters\n"
-            "• Performance requirements\n"
-            "• Available resources\n"
-            "Please provide these details for targeted optimization recommendations.",
-            
-            "Optimization requires understanding your specific setup. For {context}, please share:\n"
-            "• Current implementation details\n"
-            "• Performance metrics you're tracking\n"
-            "• Constraints or limitations\n"
-            "This enables me to provide quantified improvement strategies."
+            self._get_optimization_key_info_template(),
+            self._get_optimization_setup_template()
         ]
     
     def _get_optimization_circular_templates(self) -> List[str]:
         """Get templates for optimization circular reasoning failures"""
         return [
-            "Let me provide a more concrete optimization approach for {context}:\n"
-            "1. **Measure**: First, profile your current system using tools like [specific profiler]\n"
-            "2. **Identify**: Look for bottlenecks in [specific areas]\n"
-            "3. **Apply**: Implement specific techniques like [concrete optimization]\n"
-            "4. **Verify**: Measure improvements against baseline\n"
-            "Would you like me to elaborate on any of these steps?",
-            
-            "I'll be more specific about optimizing {context}. Here's a practical approach:\n"
-            "• **Quick win**: [Specific easy optimization]\n"
-            "• **Medium effort**: [Specific moderate optimization]\n"
-            "• **Major improvement**: [Specific significant optimization]\n"
-            "Each includes measurable impact. Which would you like to explore first?"
+            self._get_concrete_optimization_template(),
+            self._get_practical_optimization_template()
         ]
     
     def _get_data_analysis_low_quality_templates(self) -> List[str]:
         """Get templates for data analysis low quality failures"""
         return [
-            "The data analysis for {context} needs more specific parameters:\n"
-            "• Data volume and format\n"
-            "• Key metrics to analyze\n"
-            "• Time range or scope\n"
-            "• Expected insights or patterns\n"
-            "This will enable a focused, valuable analysis.",
-            
-            "To analyze {context} effectively, please provide:\n"
-            "• Sample data or schema\n"
-            "• Analysis objectives\n"
-            "• Historical context if available\n"
-            "• Specific questions to answer\n"
-            "This ensures the analysis delivers actionable insights."
+            self._get_data_analysis_parameters_template(),
+            self._get_data_analysis_objectives_template()
         ]
     
     def _get_data_analysis_parsing_templates(self) -> List[str]:
         """Get templates for data analysis parsing failures"""
         return [
-            "I encountered an issue processing the data for {context}. "
-            "This typically occurs with:\n"
-            "• Inconsistent data formats\n"
-            "• Missing required fields\n"
-            "• Encoding issues\n"
-            "Could you verify the data format and provide a sample?",
-            
-            "Data parsing failed for {context}. Common causes:\n"
-            "• Malformed JSON/CSV\n"
-            "• Unexpected data types\n"
-            "• Schema mismatches\n"
-            "Please check the data structure and try again with validated input."
+            self._get_data_processing_issue_template(),
+            self._get_data_parsing_failure_template()
         ]
     
     def _get_action_plan_low_quality_templates(self) -> List[str]:
