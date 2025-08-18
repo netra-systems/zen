@@ -1,13 +1,13 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-17T19:51:25.815750",
-    "total_runs": 53
+    "last_update": "2025-08-17T19:57:01.992976",
+    "total_runs": 54
   },
   "current_state": {
-    "overall_status": "[FAILED] 86 failures",
-    "last_run_level": "integration",
-    "last_run_time": "2025-08-17T19:51:25.815750",
+    "overall_status": "[FAILED] 3 failures",
+    "last_run_level": "unit",
+    "last_run_time": "2025-08-17T19:57:01.992976",
     "last_exit_code": 2
   },
   "known_test_counts": {
@@ -20,12 +20,12 @@
       "last_update": "2025-08-17T19:47:06.854051"
     },
     "unit:backend": {
-      "total": 1,
-      "passed": 0,
-      "failed": 0,
-      "skipped": 0,
-      "errors": 1,
-      "last_update": "2025-08-17T19:42:12.398486"
+      "total": 503,
+      "passed": 485,
+      "failed": 3,
+      "skipped": 15,
+      "errors": 0,
+      "last_update": "2025-08-17T19:57:01.992976"
     },
     "integration:backend": {
       "total": 47,
@@ -65,11 +65,11 @@
     "unit": {
       "description": "Unit tests",
       "expected": 450,
-      "actual": 1,
-      "passed": 0,
-      "failed": 0,
-      "last_run": "2025-08-17T19:42:12.398486",
-      "status": "[NO TESTS]"
+      "actual": 503,
+      "passed": 485,
+      "failed": 3,
+      "last_run": "2025-08-17T19:57:01.992976",
+      "status": "[FAILED] 3 failures"
     },
     "integration": {
       "description": "Integration tests",
@@ -202,32 +202,29 @@
     "backend": {
       "status": "failed",
       "last_counts": {
-        "total": 47,
-        "passed": 44,
+        "total": 503,
+        "passed": 485,
         "failed": 3,
-        "skipped": 0,
+        "skipped": 15,
         "errors": 0,
         "import_errors": 2,
         "status": "import_error",
-        "test_files": 11
+        "test_files": 59
       },
-      "last_duration": 74.10959815979004,
-      "last_run": "2025-08-17T19:51:25.816755"
+      "last_duration": 59.099687576293945,
+      "last_run": "2025-08-17T19:57:01.992976"
     },
     "frontend": {
-      "status": "failed",
+      "status": "skipped",
       "last_counts": {
-        "total": 140,
-        "passed": 57,
-        "failed": 83,
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
         "skipped": 0,
-        "errors": 0,
-        "import_errors": 0,
-        "test_files": 76,
-        "status": "failed"
+        "errors": 0
       },
-      "last_duration": 73.06879782676697,
-      "last_run": "2025-08-17T19:51:25.816755"
+      "last_duration": 0,
+      "last_run": "2025-08-17T19:57:01.992976"
     },
     "e2e": {
       "status": "pending",
@@ -239,56 +236,42 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-17T19:51:25.816755"
+      "last_run": "2025-08-17T19:57:01.992976"
     }
   },
   "failing_tests": [
     {
       "component": "backend",
-      "test": "\u001b[0m app\\tests\\routes\\test_cache_routes.py::TestLLMCacheRoute::test_cache_health_check",
-      "timestamp": "2025-08-17T19:51:25.816755"
+      "test": "\u001b[0m app\\tests\\services\\test_llm_cache_service.py::test_cache_set_and_get",
+      "timestamp": "2025-08-17T19:57:01.992976"
     },
     {
       "component": "backend",
-      "test": "\u001b[0m app\\tests\\routes\\test_config_routes.py::TestConfigRoute::test_config_backup_and_restore",
-      "timestamp": "2025-08-17T19:51:25.816755"
+      "test": "\u001b[0m app\\tests\\services\\test_circuit_breaker_integration.py::TestCircuitBreakerEndpoints::test_dashboard_endpoint_structure",
+      "timestamp": "2025-08-17T19:57:01.992976"
     },
     {
       "component": "backend",
-      "test": "\u001b[0m app\\test_health.py::test_live_endpoint <- ..\\integration_tests\\test_health.py",
-      "timestamp": "2025-08-17T19:51:25.816755"
+      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_ingestion.py::TestIngestionMethods::test_ingest_with_retry_success Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env",
+      "timestamp": "2025-08-17T19:57:01.992976"
     },
     {
       "component": "backend",
-      "test": "\u001b[0m app\\tests\\routes\\test_cache_routes.py::\u001b[1mTestLLMCacheRoute::test_cache_health_check\u001b[0m - AttributeError: <module 'app.services.llm_cache_service' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\app\\\\services\\\\llm_cache_service.py'> does not have the attribute 'health_check'",
-      "timestamp": "2025-08-17T19:51:25.816755"
+      "test": "\u001b[0m app\\tests\\services\\test_llm_cache_service.py::\u001b[1mtest_cache_set_and_get\u001b[0m - AttributeError: <module 'app.services.llm_cache_service' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\app\\\\services\\\\llm_cache_service.py'> does not have the attribute 'redis_manager'",
+      "timestamp": "2025-08-17T19:57:01.992976"
     },
     {
       "component": "backend",
-      "test": "\u001b[0m app\\tests\\routes\\test_config_routes.py::\u001b[1mTestConfigRoute::test_config_backup_and_restore\u001b[0m - ImportError: cannot import name 'backup_config' from 'app.routes.config' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\routes\\config.py)",
-      "timestamp": "2025-08-17T19:51:25.816755"
+      "test": "\u001b[0m app\\tests\\services\\test_circuit_breaker_integration.py::\u001b[1mTestCircuitBreakerEndpoints::test_dashboard_endpoint_structure\u001b[0m - ModuleNotFoundError: No module named 'app.auth.auth_dependencies'",
+      "timestamp": "2025-08-17T19:57:01.992976"
     },
     {
       "component": "backend",
-      "test": "\u001b[0m app\\test_health.py::\u001b[1mtest_live_endpoint\u001b[0m - AssertionError: assert {'status': 'healthy', 'service': 'netra-ai-platform', 'version': '1.0.0', 'timestamp': '2025-08-18T02:49:18.522035Z', 'environment': 'development'} == {'status': 'healthy', 'service': 'netra-ai-platform'}",
-      "timestamp": "2025-08-17T19:51:25.816755"
+      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_ingestion.py::\u001b[1mTestIngestionMethods::test_ingest_with_retry_success\u001b[0m - KeyError: 'records_ingested'",
+      "timestamp": "2025-08-17T19:57:01.992976"
     }
   ],
   "test_history": [
-    {
-      "timestamp": "2025-08-17T19:28:25.161230",
-      "level": "unit",
-      "exit_code": 4,
-      "status": "[UNKNOWN]",
-      "statistics": {
-        "total_tests_known": 450,
-        "total_tests_run": 0,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
-    },
     {
       "timestamp": "2025-08-17T19:30:54.325495",
       "level": "unit",
@@ -554,14 +537,44 @@
         "total_skipped": 0,
         "pass_rate": 54.01
       }
+    },
+    {
+      "timestamp": "2025-08-17T19:57:01.992976",
+      "level": "unit",
+      "exit_code": 2,
+      "status": "[FAILED] 3 failures",
+      "statistics": {
+        "total_tests_known": 503,
+        "total_tests_run": 503,
+        "total_passed": 485,
+        "total_failed": 3,
+        "total_skipped": 15,
+        "pass_rate": 96.42
+      }
     }
   ],
   "statistics": {
-    "total_tests_known": 140,
-    "total_tests_run": 187,
-    "total_passed": 101,
-    "total_failed": 86,
-    "total_skipped": 0,
-    "pass_rate": 54.01
+    "total_tests_known": 503,
+    "total_tests_run": 503,
+    "total_passed": 485,
+    "total_failed": 3,
+    "total_skipped": 15,
+    "pass_rate": 96.42
+  },
+  "version": "1.0",
+  "tests": {},
+  "runs": [
+    {
+      "run_id": "run_20250817_195321_1892",
+      "timestamp": "2025-08-17T19:54:32.517414",
+      "total_tests": 47,
+      "passed": 44,
+      "failed": 3,
+      "bad_tests_count": 0
+    }
+  ],
+  "stats": {
+    "total_runs": 1,
+    "last_updated": "2025-08-17T19:54:32.517414"
   }
 }
