@@ -80,15 +80,17 @@ def _import_extended_router_modules() -> tuple:
     """Import extended router modules as tuple."""
     from app.routes.health_extended import router as health_extended_router
     from app.routes.monitoring import router as monitoring_router
+    from app.routes.gcp_monitoring import router as gcp_monitoring_router
     from app.routes.websockets import router as websockets_router
-    return health_extended_router, monitoring_router, websockets_router
+    return health_extended_router, monitoring_router, gcp_monitoring_router, websockets_router
 
 
 def _create_extended_router_dict(router_imports: tuple) -> dict:
     """Create extended router dictionary from imports."""
-    health_extended_router, monitoring_router, websockets_router = router_imports
+    health_extended_router, monitoring_router, gcp_monitoring_router, websockets_router = router_imports
     return {"health_extended_router": health_extended_router,
-        "monitoring_router": monitoring_router, "websockets_router": websockets_router}
+        "monitoring_router": monitoring_router, "gcp_monitoring_router": gcp_monitoring_router, 
+        "websockets_router": websockets_router}
 
 
 def import_factory_routers() -> dict:

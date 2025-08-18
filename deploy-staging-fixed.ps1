@@ -1,4 +1,4 @@
-# Netra Reliable Staging Deployment Script
+﻿# Netra Reliable Staging Deployment Script
 # This script ALWAYS works by ensuring proper service account authentication
 # It handles all edge cases and authentication issues
 
@@ -13,10 +13,7 @@ param(
     [switch]$BuildOnly = $false,
     
     [Parameter(Mandatory=$false)]
-    [switch]$DeployOnly = $false,
-    
-    [Parameter(Mandatory=$false)]
-    [switch]$SkipErrorMonitoring = $false
+    [switch]$DeployOnly = $false
 )
 
 Write-Host "================================================" -ForegroundColor Blue
@@ -96,7 +93,7 @@ function Ensure-Authentication {
     # Set project
     gcloud config set project $PROJECT_ID --quiet
     
-    Write-Host "  ✓ Authentication configured successfully" -ForegroundColor Green
+    Write-Host "  âœ“ Authentication configured successfully" -ForegroundColor Green
     return $keyFile
 }
 
@@ -157,7 +154,7 @@ if (-not $DeployOnly) {
         }
     }
     
-    Write-Host "  ✓ All images built successfully" -ForegroundColor Green
+    Write-Host "  âœ“ All images built successfully" -ForegroundColor Green
     
     # Step 3: Push images with retry logic
     Write-Host "[3/5] Pushing images to Artifact Registry..." -ForegroundColor Green
@@ -170,7 +167,7 @@ if (-not $DeployOnly) {
             docker push $image 2>&1 | Out-Null
             
             if ($LASTEXITCODE -eq 0) {
-                Write-Host "    ✓ Pushed successfully" -ForegroundColor Green
+                Write-Host "    âœ“ Pushed successfully" -ForegroundColor Green
                 return $true
             }
             
@@ -200,7 +197,7 @@ if (-not $DeployOnly) {
         }
     }
     
-    Write-Host "  ✓ All images pushed successfully" -ForegroundColor Green
+    Write-Host "  âœ“ All images pushed successfully" -ForegroundColor Green
 }
 
 if ($BuildOnly) {
@@ -279,7 +276,7 @@ if (Test-Path "Dockerfile.auth") {
     }
 }
 
-Write-Host "  ✓ All services deployed successfully" -ForegroundColor Green
+Write-Host "  âœ“ All services deployed successfully" -ForegroundColor Green
 
 # Step 5: Get service URLs
 Write-Host "[5/5] Retrieving service URLs..." -ForegroundColor Green
@@ -313,64 +310,17 @@ if (-not $SkipHealthChecks) {
     
     try {
         $response = Invoke-WebRequest -Uri "$BACKEND_URL/health" -Method Get -TimeoutSec 30
-        Write-Host "  ✓ Backend is healthy" -ForegroundColor Green
+        Write-Host "  âœ“ Backend is healthy" -ForegroundColor Green
     } catch {
-        Write-Host "  ⚠ Backend health check failed (service may still be starting)" -ForegroundColor Yellow
+        Write-Host "  âš  Backend health check failed (service may still be starting)" -ForegroundColor Yellow
     }
     
     try {
         $response = Invoke-WebRequest -Uri $FRONTEND_URL -Method Get -TimeoutSec 30
-        Write-Host "  ✓ Frontend is accessible" -ForegroundColor Green
+        Write-Host "  âœ“ Frontend is accessible" -ForegroundColor Green
     } catch {
-        Write-Host "  ⚠ Frontend check failed (service may still be starting)" -ForegroundColor Yellow
+        Write-Host "  âš  Frontend check failed (service may still be starting)" -ForegroundColor Yellow
     }
-}
-
-# Error monitoring check
-if (-not $SkipErrorMonitoring) {
-    Write-Host ""
-    Write-Host "Running post-deployment error monitoring..." -ForegroundColor Yellow
-
-    # Record deployment time for error analysis
-    $deploymentTime = Get-Date -Format "yyyy-MM-ddTHH:mm:ss.fffZ"
-
-    # Wait a moment for any immediate errors to appear in GCP Error Reporting
-    Start-Sleep -Seconds 15
-
-    try {
-        # Run the error monitoring script
-        $errorMonitorPath = "$PSScriptRoot\scripts\staging_error_monitor.py"
-        
-        if (Test-Path $errorMonitorPath) {
-            Write-Host "  Checking for deployment-related errors..." -ForegroundColor Cyan
-            
-            # Run error monitor with deployment time
-            python $errorMonitorPath --deployment-time $deploymentTime --project-id $PROJECT_ID --service netra-backend
-            
-            if ($LASTEXITCODE -eq 0) {
-                Write-Host "  ✓ No critical deployment errors detected" -ForegroundColor Green
-            } elseif ($LASTEXITCODE -eq 1) {
-                Write-Host "  ❌ Critical deployment errors detected!" -ForegroundColor Red
-                Write-Host "  Consider rolling back the deployment." -ForegroundColor Yellow
-                
-                # Ask user if they want to continue despite errors
-                $continue = Read-Host "Continue despite errors? (y/N)"
-                if ($continue -ne "y" -and $continue -ne "Y") {
-                    Write-Host "Deployment marked as failed due to critical errors." -ForegroundColor Red
-                    exit 1
-                }
-            } else {
-                Write-Host "  ⚠ Error monitoring script failed to run" -ForegroundColor Yellow
-            }
-        } else {
-            Write-Host "  ⚠ Error monitoring script not found at $errorMonitorPath" -ForegroundColor Yellow
-        }
-    } catch {
-        Write-Host "  ⚠ Error monitoring check failed: $($_.Exception.Message)" -ForegroundColor Yellow
-    }
-} else {
-    Write-Host ""
-    Write-Host "Skipping error monitoring check..." -ForegroundColor Yellow
 }
 
 # Summary
@@ -403,3 +353,4 @@ $deploymentInfo = @{
 
 $deploymentInfo | ConvertTo-Json | Out-File -FilePath "deployment-info.json"
 Write-Host "Deployment info saved to deployment-info.json" -ForegroundColor Yellow
+

@@ -18,20 +18,20 @@ class AuthService {
         const { getAuthServiceConfig } = await import('@/lib/auth-service-config');
         const config = getAuthServiceConfig();
         
-        // Transform to expected format
+        // Transform to expected format - use exact endpoints from auth config
         return {
-          development_mode: process.env.NODE_ENV === 'development',
+          development_mode: authConfig.development_mode ?? process.env.NODE_ENV === 'development',
           google_client_id: authConfig.google_client_id || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
           endpoints: {
-            login: config.endpoints.login,
-            logout: config.endpoints.logout,
-            callback: config.endpoints.callback,
-            token: config.endpoints.token,
-            user: config.endpoints.me,
-            ...(process.env.NODE_ENV === 'development' && { dev_login: `${config.baseUrl}/auth/dev_login` })
+            login: authConfig.endpoints?.login || config.endpoints.login,
+            logout: authConfig.endpoints?.logout || config.endpoints.logout,
+            callback: authConfig.endpoints?.callback || config.endpoints.callback,
+            token: authConfig.endpoints?.token || config.endpoints.token,
+            user: authConfig.endpoints?.user || config.endpoints.me,
+            ...(authConfig.endpoints?.dev_login && { dev_login: authConfig.endpoints.dev_login })
           },
-          authorized_javascript_origins: config.oauth.javascriptOrigins,
-          authorized_redirect_uris: [config.oauth.redirectUri]
+          authorized_javascript_origins: authConfig.authorized_javascript_origins || config.oauth.javascriptOrigins,
+          authorized_redirect_uris: authConfig.authorized_redirect_uris || [config.oauth.redirectUri]
         };
       } catch (error) {
         if (i < retries - 1) {

@@ -506,6 +506,51 @@ EVERY AGENT MUST HAVE A FRESH CONTEXT WINDOW TO MAINTAIN INTEGRITY OF PROCESS.
 # Tools notes
 - Use tools like read file, replace_all, etc.
 
+## 🚀 GCP STAGING DEPLOYMENT LEARNINGS (8/18/25)
+
+### WHAT WORKS:
+1. **Service Account Authentication**:
+   - Key file: `gcp-staging-sa-key.json` (NOT staging-deploy-key.json)
+   - Project: `netra-staging` (NOT netra-systems)
+   - Activate: `gcloud auth activate-service-account --key-file=gcp-staging-sa-key.json`
+
+2. **Docker Build Commands**:
+   - Backend: `docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-backend-staging:latest -f Dockerfile.backend .`
+   - Frontend: `docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-frontend-staging:latest -f Dockerfile.frontend.staging .`
+   - Auth: `docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-auth-service:latest -f Dockerfile.auth .`
+
+3. **Correct Service Names** (EXACT):
+   - `netra-backend-staging`
+   - `netra-frontend-staging`
+   - `netra-auth-service`
+
+### WHAT DOESN'T WORK:
+1. **PowerShell Script Issues**:
+   - `deploy-staging-reliable.ps1` has syntax errors (unclosed quotes/brackets)
+   - Manual deployment commands work better than the script
+
+2. **Common Mistakes**:
+   - Wrong Dockerfile names (e.g., Dockerfile.frontend vs Dockerfile.frontend.staging)
+   - Wrong project ID (netra-systems vs netra-staging)
+   - Wrong key file name (staging-deploy-key.json doesn't exist)
+
+### DEPLOYMENT SEQUENCE:
+```bash
+# 1. Authenticate
+gcloud auth activate-service-account --key-file=gcp-staging-sa-key.json
+gcloud config set project netra-staging
+
+# 2. Configure Docker
+gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+# 3. Build & Push Images (parallel)
+docker build -t [IMAGE_URL] -f [DOCKERFILE] .
+docker push [IMAGE_URL]
+
+# 4. Deploy to Cloud Run
+gcloud run deploy [SERVICE_NAME] --image [IMAGE_URL] --region us-central1
+```
+
 ## 🎯 FINAL REMINDERS (Ultra Think 3x)
 Generate a monetization-focused product and engineering value for Netra Apex.
 Ensures every feature directly creates and captures value proportional to a customer's AI spend.

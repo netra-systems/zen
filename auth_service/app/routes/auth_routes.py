@@ -61,7 +61,7 @@ async def get_auth_config(request: Request):
             callback=f"{frontend_url}/auth/callback",
             token=f"{auth_url}/auth/token",
             user=f"{auth_url}/auth/verify",
-            dev_login=f"{auth_url}/auth/dev_login" if dev_mode else None,
+            dev_login=f"{auth_url}/auth/dev/login" if dev_mode else None,
             validate_token=f"{auth_url}/auth/validate",
             refresh=f"{auth_url}/auth/refresh",
             health=f"{auth_url}/auth/health"
@@ -163,6 +163,65 @@ async def verify_auth(authorization: Optional[str] = Header(None)):
         "user_id": response.user_id,
         "email": response.email
     }
+
+@router.post("/dev/login")
+async def dev_login(
+    request: Request,
+    client_info: dict = Depends(get_client_info)
+):
+    """Development mode login endpoint - bypasses authentication"""
+    env = _detect_environment()
+    if env != "development":
+        raise HTTPException(status_code=403, detail="Dev login only available in development mode")
+    
+    try:
+        # Create a dev user for testing
+        dev_user = {
+            "id": "dev-user-123",
+            "email": "dev@example.com",
+            "name": "Development User",
+            "permissions": ["read", "write", "admin"]
+        }
+        
+        # Generate tokens
+        access_token = auth_service.jwt_handler.create_access_token(
+            user_id=dev_user["id"],
+            email=dev_user["email"],
+            permissions=dev_user.get("permissions", [])
+        )
+        
+        refresh_token = auth_service.jwt_handler.create_refresh_token(
+            user_id=dev_user["id"]
+        )
+        
+        # Create session
+        session_id = auth_service.session_manager.create_session(
+            user_id=dev_user["id"],
+            user_data={
+                "email": dev_user["email"],
+                "ip_address": client_info.get("ip"),
+                "user_agent": client_info.get("user_agent")
+            }
+        )
+        
+        logger.info(f"Dev login successful for {dev_user['email']}")
+        
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "Bearer",
+            "expires_in": 900,  # 15 minutes
+            "user": {
+                "id": dev_user["id"],
+                "email": dev_user["email"],
+                "name": dev_user["name"],
+                "session_id": session_id
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Dev login error: {e}")
+        raise HTTPException(status_code=500, detail=f"Dev login failed: {str(e)}")
 
 @router.get("/health", response_model=HealthResponse)
 async def health_check():

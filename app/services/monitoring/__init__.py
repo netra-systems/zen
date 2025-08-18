@@ -8,5 +8,13 @@ Business Value Justification (BVJ):
 """
 
 from .gcp_error_service import GCPErrorService
+from .gcp_client_manager import GCPClientManager
+from .error_formatter import ErrorFormatter
+from .rate_limiter import GCPRateLimiter
 
-__all__ = ["GCPErrorService"]
+__all__ = [
+    "GCPErrorService",
+    "GCPClientManager", 
+    "ErrorFormatter",
+    "GCPRateLimiter"
+]

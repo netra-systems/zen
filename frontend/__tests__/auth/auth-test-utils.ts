@@ -92,7 +92,7 @@ export const createMockAuthConfig = () => ({
     callback: 'http://localhost:8081/auth/callback',
     token: 'http://localhost:8081/auth/token',
     user: 'http://localhost:8081/auth/me',
-    dev_login: 'http://localhost:8081/auth/dev_login'
+    dev_login: 'http://localhost:8081/auth/dev/login'
   },
   authorized_javascript_origins: ['http://localhost:3000'],
   authorized_redirect_uris: ['http://localhost:3000/callback']

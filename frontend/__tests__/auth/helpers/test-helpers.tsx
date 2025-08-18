@@ -17,7 +17,7 @@ export const mockAuthConfig = {
     login: 'http://localhost:8000/auth/login',
     logout: 'http://localhost:8000/auth/logout',
     callback: 'http://localhost:8000/auth/callback',
-    dev_login: 'http://localhost:8000/auth/dev-login'
+    dev_login: 'http://localhost:8000/auth/dev/login'
   }
 };
 

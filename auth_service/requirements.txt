@@ -19,3 +19,4 @@ aioredis
 prometheus-client
 langchain-core
 langchain-community
+loguru==0.7.2
