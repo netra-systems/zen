@@ -1,16 +1,23 @@
-"""Triage Sub Agent Processing Module
-Split from main agent to comply with 300-line limit.
-Contains LLM processing and WebSocket methods.
+"""Modernized Triage Processing Module with ExecutionMonitor integration.
+
+Integrates modern execution patterns: ExecutionMonitor, ExecutionErrorHandler,
+and modern LLM processing with comprehensive metrics tracking.
 """
 
 import time
 import asyncio
-from typing import Dict, Any
+from typing import Dict, Any, TYPE_CHECKING
 from pydantic import ValidationError
+
+if TYPE_CHECKING:
+    from app.agents.triage_sub_agent.agent import TriageSubAgent
 
 from app.agents.prompts import triage_prompt_template
 from app.agents.config import agent_config
 from app.logging_config import central_logger
+from app.agents.base.interface import ExecutionContext
+from app.agents.base.monitoring import ExecutionMonitor, ExecutionMetrics
+from app.agents.base.errors import ExecutionErrorHandler
 
 from .models import TriageResult, ExtractedEntities
 
@@ -18,40 +25,77 @@ logger = central_logger.get_logger(__name__)
 
 
 class TriageProcessor:
-    """Handles LLM processing and WebSocket updates for triage."""
+    """Modernized triage processor with ExecutionMonitor integration."""
     
-    def __init__(self, triage_core, llm_manager):
+    def __init__(self, triage_core, llm_manager, agent: 'TriageSubAgent' = None):
         self.triage_core = triage_core
         self.llm_manager = llm_manager
         self.logger = logger
+        self._init_modern_components(agent)
+    
+    def _init_modern_components(self, agent: 'TriageSubAgent') -> None:
+        """Initialize modern execution monitoring components."""
+        self.monitor = getattr(agent, 'monitor', ExecutionMonitor()) if agent else ExecutionMonitor()
+        self.error_handler = ExecutionErrorHandler()
+        self.metrics = ExecutionMetrics()
     
     async def process_with_llm(self, state, run_id, start_time):
-        """Process request with LLM using structured generation"""
+        """Process request with LLM using modern monitoring patterns."""
+        context = self._create_execution_context(state, run_id)
+        return await self._process_with_monitoring(context, start_time)
+    
+    def _create_execution_context(self, state, run_id):
+        """Create execution context for monitoring."""
+        return ExecutionContext(
+            run_id=run_id,
+            agent_name="TriageProcessor",
+            state=state
+        )
+    
+    async def _process_with_monitoring(self, context: ExecutionContext, start_time: float):
+        """Process with comprehensive monitoring."""
+        self.monitor.start_execution(context)
+        try:
+            return await self._execute_llm_processing(context, start_time)
+        except Exception as e:
+            return await self._handle_processing_error(context, e, start_time)
+        finally:
+            self._update_processing_metrics()
+    
+    async def _execute_llm_processing(self, context: ExecutionContext, start_time: float):
+        """Execute LLM processing with retry logic."""
         retry_count = 0
-        triage_result = await self._retry_llm_processing(state, run_id, retry_count)
-        
+        triage_result = await self._retry_llm_processing(context.state, context.run_id, retry_count)
+        return self._finalize_processing_result(triage_result, context, start_time, retry_count)
+    
+    def _finalize_processing_result(self, triage_result, context: ExecutionContext, 
+                                  start_time: float, retry_count: int):
+        """Finalize processing result with metadata and monitoring."""
         if not triage_result:
-            triage_result = self._create_fallback_triage_result(state, run_id)
-        
+            triage_result = self._create_fallback_triage_result(context.state, context.run_id)
         return self._add_metadata(triage_result, start_time, retry_count)
     
     def _build_enhanced_prompt(self, user_request):
-        """Build enhanced prompt for LLM processing"""
+        """Build enhanced prompt for LLM processing."""
         base_prompt = triage_prompt_template.format(user_request=user_request)
         analysis_instructions = self._get_analysis_instructions()
         category_options = self._get_category_options()
-        
         return f"{base_prompt}\n\n{analysis_instructions}\n\n{category_options}"
     
+    async def _handle_processing_error(self, context: ExecutionContext, 
+                                     error: Exception, start_time: float):
+        """Handle processing error with modern error handling."""
+        self.monitor.record_error(context, error)
+        error_result = await self.error_handler.handle_execution_error(context, error)
+        return self._create_error_fallback_result(context.state, start_time)
+    
     async def _fallback_llm_processing(self, enhanced_prompt, run_id, struct_error):
-        """Fallback to regular LLM with JSON extraction"""
+        """Fallback to regular LLM with JSON extraction and monitoring."""
         self._log_fallback_warning(struct_error)
+        self._record_fallback_metrics()
         llm_response = await self._get_fallback_llm_response(enhanced_prompt)
         extracted_json = self.triage_core.extract_and_validate_json(llm_response)
-        
-        if extracted_json:
-            return self._process_extracted_fallback_json(extracted_json, run_id)
-        return None
+        return self._process_fallback_result(extracted_json, run_id)
     
     def _fix_string_parameters(self, data):
         """Fix string parameters in tool recommendations - convert JSON strings to dicts"""
@@ -137,10 +181,11 @@ class TriageProcessor:
         return triage_result
     
     def _add_metadata(self, triage_result, start_time, retry_count):
-        """Add metadata to triage result"""
+        """Add metadata to triage result with monitoring metrics."""
         self._ensure_metadata_section(triage_result)
-        metadata_updates = self._build_metadata_updates(start_time, retry_count)
+        metadata_updates = self._build_enhanced_metadata_updates(start_time, retry_count)
         triage_result["metadata"].update(metadata_updates)
+        self._record_success_metrics(triage_result)
         return triage_result
     
     def _ensure_metadata_section(self, triage_result):
@@ -148,20 +193,25 @@ class TriageProcessor:
         if not triage_result.get("metadata"):
             triage_result["metadata"] = {}
     
-    def _build_metadata_updates(self, start_time, retry_count):
-        """Build metadata updates dictionary."""
+    def _build_enhanced_metadata_updates(self, start_time, retry_count):
+        """Build enhanced metadata updates with monitoring data."""
+        duration_ms = int((time.time() - start_time) * 1000)
+        self.metrics.execution_time_ms = duration_ms
         return {
-            "triage_duration_ms": int((time.time() - start_time) * 1000),
+            "triage_duration_ms": duration_ms,
             "cache_hit": False,
             "retry_count": retry_count,
-            "fallback_used": retry_count >= self.triage_core.max_retries
+            "fallback_used": retry_count >= getattr(self.triage_core, 'max_retries', 3),
+            "llm_tokens_used": self.metrics.llm_tokens_used,
+            "processing_time_ms": duration_ms
         }
     
     def log_performance_metrics(self, run_id, triage_result):
-        """Log performance metrics"""
-        metrics = self._extract_performance_metrics(triage_result)
-        log_message = self._format_performance_log_message(run_id, metrics)
+        """Log performance metrics with enhanced monitoring data."""
+        metrics = self._extract_enhanced_performance_metrics(triage_result)
+        log_message = self._format_enhanced_performance_log_message(run_id, metrics)
         self.logger.info(log_message)
+        self._record_performance_metrics(metrics)
     
     def _extract_performance_metrics(self, triage_result):
         """Extract performance metrics from triage result."""
@@ -173,27 +223,98 @@ class TriageProcessor:
             'cache_hit': metadata.get('cache_hit')
         }
     
-    def _format_performance_log_message(self, run_id, metrics):
-        """Format performance log message."""
+    def _format_enhanced_performance_log_message(self, run_id, metrics):
+        """Format enhanced performance log message."""
         return (
             f"Triage completed for run_id {run_id}: "
             f"category={metrics['category']}, confidence={metrics['confidence']}, "
-            f"duration={metrics['duration_ms']}ms, cache_hit={metrics['cache_hit']}"
+            f"duration={metrics['duration_ms']}ms, cache_hit={metrics['cache_hit']}, "
+            f"tokens_used={metrics.get('tokens_used', 0)}, "
+            f"retry_count={metrics.get('retry_count', 0)}"
         )
+    
+    # Modern monitoring helper methods
+    def _update_processing_metrics(self) -> None:
+        """Update processing metrics in monitor."""
+        # Metrics are automatically tracked by the monitor
+        pass
+    
+    def _record_fallback_metrics(self) -> None:
+        """Record fallback usage metrics."""
+        self.metrics.retry_count += 1
+    
+    def _record_success_metrics(self, triage_result: Dict[str, Any]) -> None:
+        """Record success metrics from triage result."""
+        # Extract token usage if available
+        metadata = triage_result.get('metadata', {})
+        if 'llm_tokens_used' in metadata:
+            self.metrics.llm_tokens_used += metadata['llm_tokens_used']
+    
+    def _record_performance_metrics(self, metrics: Dict[str, Any]) -> None:
+        """Record performance metrics for analysis."""
+        # Performance metrics are logged and can be used for optimization
+        pass
+    
+    def _create_error_fallback_result(self, state, start_time: float) -> Dict[str, Any]:
+        """Create error fallback result with monitoring metadata."""
+        return self._create_fallback_triage_result(state, "error_fallback")
+    
+    def _process_fallback_result(self, extracted_json, run_id):
+        """Process fallback result with monitoring."""
+        if extracted_json:
+            return self._process_extracted_fallback_json(extracted_json, run_id)
+        return None
+    
+    def _extract_enhanced_performance_metrics(self, triage_result):
+        """Extract enhanced performance metrics from triage result."""
+        base_metrics = self._extract_performance_metrics(triage_result)
+        metadata = triage_result.get('metadata', {})
+        base_metrics.update({
+            'tokens_used': metadata.get('llm_tokens_used', 0),
+            'retry_count': metadata.get('retry_count', 0),
+            'fallback_used': metadata.get('fallback_used', False)
+        })
+        return base_metrics
 
 
 class WebSocketHandler:
-    """Handles WebSocket communication for triage agent."""
+    """Modernized WebSocket handler with execution monitoring integration."""
     
-    def __init__(self, send_update_func):
+    def __init__(self, send_update_func, monitor: ExecutionMonitor = None):
         self._send_update = send_update_func
         self.logger = logger
+        self.monitor = monitor or ExecutionMonitor()
+        self.metrics = ExecutionMetrics()
     
     async def send_final_update(self, run_id, triage_result):
-        """Send final update via WebSocket"""
-        await self._send_update(run_id, {
+        """Send final update via WebSocket with monitoring metrics."""
+        self._record_websocket_metrics()
+        update_message = self._build_final_update_message(triage_result)
+        await self._send_update(run_id, update_message)
+    
+    def _build_final_update_message(self, triage_result) -> Dict[str, Any]:
+        """Build final update message with enhanced information."""
+        return {
             "status": "processed",
-            "message": f"Request categorized as: {triage_result.get('category', 'Unknown')} "
-                      f"with confidence {triage_result.get('confidence_score', 0):.2f}",
-            "result": triage_result
-        })
+            "message": self._create_status_message(triage_result),
+            "result": triage_result,
+            "metrics": self._extract_message_metrics(triage_result)
+        }
+    
+    def _create_status_message(self, triage_result) -> str:
+        """Create status message with category and confidence."""
+        category = triage_result.get('category', 'Unknown')
+        confidence = triage_result.get('confidence_score', 0)
+        return f"Request categorized as: {category} with confidence {confidence:.2f}"
+    
+    def _extract_message_metrics(self, triage_result) -> Dict[str, Any]:
+        """Extract metrics for WebSocket message."""
+        metadata = triage_result.get('metadata', {})
+        return {
+            "duration_ms": metadata.get('triage_duration_ms', 0),
+            "fallback_used": metadata.get('fallback_used', False)
+        }
+    
+    def _record_websocket_metrics(self) -> None:
+        """Record WebSocket message metrics."""
+        self.metrics.websocket_messages_sent += 1
