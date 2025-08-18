@@ -33,6 +33,8 @@ COPY auth_service/main.py ./main.py
 COPY app/__init__.py ./app/
 COPY app/config*.py ./app/
 COPY app/logging_config.py ./app/
+COPY app/auth_dependencies.py ./app/
+COPY app/configuration/ ./app/configuration/
 COPY app/clients/ ./app/clients/
 COPY app/core/ ./app/core/
 COPY app/db/ ./app/db/
@@ -41,7 +43,7 @@ COPY app/routes/__init__.py ./app/routes/
 COPY app/schemas/ ./app/schemas/
 COPY app/services/security_service.py ./app/services/
 COPY app/services/user_service.py ./app/services/
-COPY app/services/__init__.py ./app/services/
+COPY auth_service/services_init.py ./app/services/__init__.py
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
