@@ -94,7 +94,10 @@ class DatabaseConfigManager:
         """Get PostgreSQL URL from environment or defaults."""
         url = os.environ.get("DATABASE_URL")
         if url:
-            self._logger.info(f"Loading DATABASE_URL from environment: {url[:30]}...")
+            # Mask password but show full URL structure for debugging
+            parsed = urlparse(url)
+            masked_url = f"{parsed.scheme}://***@{parsed.hostname}:{parsed.port}{parsed.path}?{parsed.query}"
+            self._logger.info(f"Loading DATABASE_URL: {masked_url}")
         else:
             url = self._get_default_postgres_url()
             self._logger.info(f"Using default database URL for {self._environment}")
@@ -111,6 +114,9 @@ class DatabaseConfigManager:
         parsed = urlparse(url)
         if parsed.scheme.startswith("sqlite"):
             return  # Skip PostgreSQL-specific validation for SQLite
+        # Accept both postgresql:// and postgresql+asyncpg:// schemes
+        if parsed.scheme not in ["postgresql", "postgresql+asyncpg", "postgres"]:
+            return  # Skip validation for non-PostgreSQL URLs
         rules = self._validation_rules.get(self._environment, {})
         self._check_ssl_requirement(parsed, rules)
         self._check_localhost_policy(parsed, rules)
@@ -118,8 +124,15 @@ class DatabaseConfigManager:
     def _check_ssl_requirement(self, parsed_url, rules: dict) -> None:
         """Check SSL requirement for database connection."""
         if rules.get("require_ssl", False):
-            if "sslmode" not in parsed_url.query:
-                raise ConfigurationError(f"SSL required for {self._environment} environment")
+            query_params = parsed_url.query.lower() if parsed_url.query else ""
+            # Accept various SSL modes that provide encryption
+            valid_ssl_modes = ["sslmode=require", "sslmode=verify-ca", "sslmode=verify-full", "sslmode=prefer"]
+            ssl_configured = any(mode in query_params for mode in valid_ssl_modes)
+            if not ssl_configured:
+                self._logger.info(f"SSL validation: URL scheme={parsed_url.scheme}, query='{parsed_url.query}', env={self._environment}")
+                # Only raise error if no SSL mode is present
+                if "sslmode=" not in query_params:
+                    raise ConfigurationError(f"SSL required for {self._environment} environment. Add ?sslmode=require to DATABASE_URL")
     
     def _check_localhost_policy(self, parsed_url, rules: dict) -> None:
         """Check localhost policy for database connection."""

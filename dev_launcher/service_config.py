@@ -85,7 +85,7 @@ class ServicesConfiguration:
     
     clickhouse: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="clickhouse",
-        mode=ResourceMode.LOCAL if os.environ.get("CLICKHOUSE_MODE", "local").lower() == "local" else ResourceMode.SHARED,
+        mode=ResourceMode.LOCAL,  # Always use local ClickHouse for development
         local_config={
             "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
             "port": int(os.environ.get("CLICKHOUSE_NATIVE_PORT", "9000")),

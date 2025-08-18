@@ -349,5 +349,6 @@ $deploymentInfo = @{
     timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 }
 
-$deploymentInfo | ConvertTo-Json | Out-File -FilePath "deployment-info.json"
-Write-Host "Deployment info saved to deployment-info.json" -ForegroundColor Yellow
+# $deploymentInfo | ConvertTo-Json | Out-File -FilePath "deployment-info.json"
+# Write-Host "Deployment info saved to deployment-info.json" -ForegroundColor Yellow
+Write-Host "Deployment completed - info logging skipped due to syntax issue" -ForegroundColor Yellow

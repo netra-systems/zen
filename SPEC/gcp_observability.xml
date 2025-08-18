@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec name="gcp_observability" version="1.0">
+  <metadata>
+    <created>2025-01-18</created>
+    <author>Elite Engineer</author>
+    <purpose>GCP Cloud Observability Error Reporting Integration</purpose>
+  </metadata>
+
+  <business_value_justification>
+    <segment>Mid & Enterprise</segment>
+    <business_goal>Reduce Mean Time To Resolution (MTTR) by 40%</business_goal>
+    <value_impact>
+      - Automated error detection saves 5-10 hours/week of engineering time
+      - Proactive error monitoring prevents customer-facing issues
+      - Faster resolution increases customer satisfaction and retention
+    </value_impact>
+    <revenue_impact>
+      - Reduces churn by catching issues before customers notice
+      - Enables premium monitoring tier ($500-2000/month per enterprise)
+      - Estimated +$15K MRR from enhanced reliability features
+    </revenue_impact>
+  </business_value_justification>
+
+  <architecture>
+    <components>
+      <component name="GCP Error Service">
+        <location>app/services/monitoring/gcp_error_service.py</location>
+        <responsibility>Interface with GCP Error Reporting API</responsibility>
+        <max_lines>300</max_lines>
+      </component>
+      <component name="Error Formatter">
+        <location>app/services/monitoring/error_formatter.py</location>
+        <responsibility>Format and enrich error data</responsibility>
+        <max_lines>300</max_lines>
+      </component>
+      <component name="Monitoring API Routes">
+        <location>app/routes/monitoring.py</location>
+        <responsibility>REST endpoints for error retrieval</responsibility>
+        <max_lines>300</max_lines>
+      </component>
+      <component name="Staging Integration">
+        <location>scripts/staging_error_monitor.py</location>
+        <responsibility>Integration with deployment pipeline</responsibility>
+        <max_lines>300</max_lines>
+      </component>
+    </components>
+  </architecture>
+
+  <api_design>
+    <endpoint path="/api/monitoring/errors" method="GET">
+      <description>Retrieve open errors from GCP</description>
+      <parameters>
+        <param name="status" type="string" default="OPEN">Error status filter</param>
+        <param name="limit" type="int" default="50">Maximum errors to return</param>
+        <param name="service" type="string" optional="true">Filter by service name</param>
+        <param name="severity" type="string" optional="true">Filter by severity</param>
+        <param name="time_range" type="string" default="24h">Time range for errors</param>
+      </parameters>
+      <response>
+        <field name="errors" type="array">List of formatted error objects</field>
+        <field name="summary" type="object">Summary statistics</field>
+        <field name="next_page_token" type="string">Pagination token</field>
+      </response>
+    </endpoint>
+    
+    <endpoint path="/api/monitoring/errors/{error_id}" method="GET">
+      <description>Get detailed error information</description>
+      <response>
+        <field name="error" type="object">Detailed error with stack trace</field>
+        <field name="occurrences" type="array">Recent occurrences</field>
+        <field name="context" type="object">Additional context data</field>
+      </response>
+    </endpoint>
+    
+    <endpoint path="/api/monitoring/errors/{error_id}/resolve" method="POST">
+      <description>Mark error as resolved</description>
+      <parameters>
+        <param name="resolution_note" type="string">Resolution description</param>
+      </parameters>
+    </endpoint>
+  </api_design>
+
+  <gcp_integration>
+    <authentication>
+      <method>Service Account</method>
+      <credentials_location>Environment variable: GOOGLE_APPLICATION_CREDENTIALS</credentials_location>
+      <required_permissions>
+        - errorreporting.errorEvents.list
+        - errorreporting.errorEvents.get
+        - errorreporting.groups.list
+        - errorreporting.groups.update
+      </required_permissions>
+    </authentication>
+    
+    <api_usage>
+      <library>google-cloud-error-reporting</library>
+      <version>1.9.0</version>
+      <rate_limits>
+        <requests_per_minute>1000</requests_per_minute>
+        <batch_size>100</batch_size>
+      </rate_limits>
+    </api_usage>
+  </gcp_integration>
+
+  <error_format>
+    <structure>
+      <field name="id" type="string">Unique error identifier</field>
+      <field name="message" type="string">Error message</field>
+      <field name="stack_trace" type="string">Full stack trace</field>
+      <field name="service" type="string">Service name</field>
+      <field name="version" type="string">Service version</field>
+      <field name="severity" type="enum">CRITICAL|ERROR|WARNING|INFO</field>
+      <field name="occurrences" type="int">Number of occurrences</field>
+      <field name="first_seen" type="datetime">First occurrence time</field>
+      <field name="last_seen" type="datetime">Last occurrence time</field>
+      <field name="status" type="enum">OPEN|ACKNOWLEDGED|RESOLVED|MUTED</field>
+      <field name="affected_users" type="int">Estimated affected users</field>
+      <field name="context" type="object">
+        <field name="request_id" type="string">Request ID if available</field>
+        <field name="user_id" type="string">User ID if available</field>
+        <field name="environment" type="string">Environment (staging/production)</field>
+        <field name="response_code" type="int">HTTP response code</field>
+      </field>
+    </structure>
+  </error_format>
+
+  <staging_integration>
+    <deployment_hook>
+      <trigger>Post-deployment health check</trigger>
+      <action>Query for new errors in last 5 minutes</action>
+      <failure_threshold>3 critical errors</failure_threshold>
+      <notification>Slack webhook to #staging-alerts</notification>
+    </deployment_hook>
+    
+    <monitoring_dashboard>
+      <refresh_interval>30 seconds</refresh_interval>
+      <auto_alert>Critical errors trigger immediate notification</auto_alert>
+      <rollback_trigger>5+ critical errors within 2 minutes</rollback_trigger>
+    </monitoring_dashboard>
+  </staging_integration>
+
+  <security>
+    <data_handling>
+      - PII must be redacted from error messages
+      - Stack traces sanitized to remove sensitive paths
+      - API keys and secrets automatically masked
+    </data_handling>
+    <access_control>
+      - Read access: All authenticated users
+      - Write access: Admin role only
+      - Resolution: Team lead role or higher
+    </access_control>
+  </security>
+
+  <implementation_phases>
+    <phase number="1" name="Core Integration">
+      - GCP Error Reporting service implementation
+      - Basic API endpoints
+      - Authentication setup
+    </phase>
+    <phase number="2" name="Formatting & Enrichment">
+      - Error formatter implementation
+      - Context enrichment
+      - PII redaction
+    </phase>
+    <phase number="3" name="Staging Integration">
+      - Deployment hooks
+      - Automated monitoring
+      - Alert configuration
+    </phase>
+    <phase number="4" name="Dashboard">
+      - Frontend monitoring dashboard
+      - Real-time updates
+      - Error analytics
+    </phase>
+  </implementation_phases>
+
+  <testing_requirements>
+    <unit_tests>
+      - Mock GCP API responses
+      - Error formatting validation
+      - PII redaction verification
+    </unit_tests>
+    <integration_tests>
+      - Real GCP API integration (test project)
+      - End-to-end error flow
+      - Deployment hook validation
+    </integration_tests>
+    <performance_tests>
+      - Handle 1000+ errors per minute
+      - Response time under 500ms
+      - Efficient pagination
+    </performance_tests>
+  </testing_requirements>
+</spec>
