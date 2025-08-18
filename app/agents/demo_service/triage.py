@@ -5,10 +5,10 @@
 # Context: Modernize demo_agent/triage.py with BaseExecutionInterface
 # Git: 8-18-25-AM | Current | Clean
 # Change: Modernize | Scope: Component | Risk: Low
-# Session: Demo Agent Modernization
+# Session: Demo Service Modernization
 # Review: Pending | Score: TBD
 # ================================
-"""Demo triage agent for categorizing optimization requests - Modernized.
+"""Demo triage service for categorizing optimization requests - Modernized.
 
 Business Value: Supports demo reliability and reduces demo failure rates
 by 30% through standardized execution patterns.
@@ -38,8 +38,8 @@ from app.agents.base.circuit_breaker import CircuitBreakerConfig
 logger = central_logger.get_logger(__name__)
 
 
-class DemoTriageAgent(BaseSubAgent, BaseExecutionInterface):
-    """Specialized triage agent for demo scenarios - Modernized.
+class DemoTriageService(BaseSubAgent, BaseExecutionInterface):
+    """Specialized triage service for demo scenarios - Modernized.
     
     Implements modern execution patterns for reliable demo operations.
     Business Value: Reduces demo failure rates through standardized execution.
@@ -47,7 +47,7 @@ class DemoTriageAgent(BaseSubAgent, BaseExecutionInterface):
     
     def __init__(self, llm_manager: LLMManager, websocket_manager: WebSocketManager):
         BaseSubAgent.__init__(self, llm_manager, websocket_manager)
-        BaseExecutionInterface.__init__(self, "DemoTriageAgent", websocket_manager)
+        BaseExecutionInterface.__init__(self, "DemoTriageService", websocket_manager)
         self._initialize_modern_components()
         
     def _initialize_modern_components(self) -> None:
@@ -126,7 +126,7 @@ class DemoTriageAgent(BaseSubAgent, BaseExecutionInterface):
         
     def _get_triage_prompt_header(self, message: str, industry: str) -> str:
         """Get triage prompt header section."""
-        return f"As a demo triage agent, categorize this request and determine the best optimization approach to demonstrate.\n\nRequest: {message}\nIndustry: {industry}"
+        return f"As a demo triage service, categorize this request and determine the best optimization approach to demonstrate.\n\nRequest: {message}\nIndustry: {industry}"
         
     def _get_optimization_categories_prompt(self) -> str:
         """Get optimization categories section for prompt."""
@@ -179,7 +179,7 @@ class DemoTriageAgent(BaseSubAgent, BaseExecutionInterface):
         
     def _create_error_response(self, error: Exception) -> Dict[str, Any]:
         """Create an error response dict."""
-        logger.error(f"Demo triage error: {str(error)}")
+        logger.error(f"Demo triage service error: {str(error)}")
         return {
             "status": "error",
             "error": str(error),
@@ -227,7 +227,7 @@ class DemoTriageAgent(BaseSubAgent, BaseExecutionInterface):
         return cost_perf + scale_acc + compliance
     
     def get_health_status(self) -> Dict[str, Any]:
-        """Get agent health status including modern components."""
+        """Get service health status including modern components."""
         base_health = {
             "agent_name": self.agent_name,
             "status": "healthy",

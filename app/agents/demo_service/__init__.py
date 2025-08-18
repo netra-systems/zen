@@ -1,13 +1,13 @@
-"""Demo agent module for enterprise demonstrations."""
+"""Demo service module for enterprise demonstrations."""
 
-from .core import DemoAgent
-from .triage import DemoTriageAgent  
-from .optimization import DemoOptimizationAgent
-from .reporting import DemoReportingAgent
+from .core import DemoService
+from .triage import DemoTriageService  
+from .optimization import DemoOptimizationService
+from .reporting import DemoReportingService
 
 __all__ = [
-    "DemoAgent",
-    "DemoTriageAgent", 
-    "DemoOptimizationAgent",
-    "DemoReportingAgent"
+    "DemoService",
+    "DemoTriageService", 
+    "DemoOptimizationService",
+    "DemoReportingService"
 ]
