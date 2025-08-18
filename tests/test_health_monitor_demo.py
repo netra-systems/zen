@@ -10,7 +10,6 @@ import asyncio
 import time
 from app.core.system_health_monitor import SystemHealthMonitor
 from app.core.health_types import HealthStatus, HealthCheckResult
-from app.core.alert_manager import AlertManager
 
 
 async def demo_health_checker() -> HealthCheckResult:

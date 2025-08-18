@@ -163,13 +163,14 @@ class MetricsCollector:
         async_pool = pool_status.get("async", {})
         
         return DatabaseMetrics(
+            timestamp=datetime.now(),
             active_connections=(sync_pool.get("total", 0) + async_pool.get("total", 0)),
             pool_size=(sync_pool.get("size", 0) + async_pool.get("size", 0)),
             pool_overflow=(sync_pool.get("overflow", 0) + async_pool.get("overflow", 0)),
-            query_count=query_stats.get("total_queries", 0),
+            total_queries=query_stats.get("total_queries", 0),
             avg_query_time=0.0,  # Would need to calculate from query metrics
-            slow_query_count=query_stats.get("slow_queries", 0),
-            cache_hit_ratio=self._calculate_cache_hit_ratio(perf_stats)
+            slow_queries=query_stats.get("slow_queries", 0),
+            cache_hit_rate=self._calculate_cache_hit_ratio(perf_stats)
         )
     
     def _record_database_metrics(self, metrics: DatabaseMetrics) -> None:
@@ -177,7 +178,7 @@ class MetricsCollector:
         self._record_metric("database.active_connections", metrics.active_connections)
         pool_utilization = metrics.active_connections / max(metrics.pool_size, 1)
         self._record_metric("database.pool_utilization", pool_utilization)
-        self._record_metric("database.cache_hit_ratio", metrics.cache_hit_ratio)
+        self._record_metric("database.cache_hit_ratio", metrics.cache_hit_rate)
         self._metrics_buffer["database_metrics"].append(metrics)
     
     async def _collect_websocket_metrics(self) -> None:

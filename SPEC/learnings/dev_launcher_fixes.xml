@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="dev_launcher" priority="high">
+  <title>Dev Launcher Startup Fixes</title>
+  <date>2025-08-17</date>
+  
+  <learning id="migration-relative-imports">
+    <problem>Database migrations fail with "attempted relative import with no known parent package"</problem>
+    <solution>
+      Convert all relative imports in Alembic migration files to absolute imports.
+      Files to check:
+      - alembic/versions/*.py
+      - alembic/migrations_helpers/*.py
+      
+      Example fix:
+      FROM: from ..migrations_helpers.migration_metadata import
+      TO: from app.alembic.migrations_helpers.migration_metadata import
+    </solution>
+    <files_affected>
+      - app/alembic/versions/f0793432a762_create_initial_tables.py
+      - app/alembic/migrations_helpers/upgrade_workflow.py
+    </files_affected>
+  </learning>
+
+  <learning id="service-mode-configuration">
+    <problem>Services try to connect to cloud endpoints even when local Docker services are running</problem>
+    <solution>
+      Ensure dev_launcher/service_config.py respects REDIS_MODE and CLICKHOUSE_MODE environment variables.
+      When mode is "local", use ResourceMode.LOCAL instead of ResourceMode.SHARED.
+      
+      Key changes:
+      - Read mode from environment: os.getenv("REDIS_MODE", "shared")
+      - Set ResourceMode.LOCAL when mode == "local"
+      - Generate proper local URLs with passwords
+    </solution>
+    <files_affected>
+      - dev_launcher/service_config.py
+      - .env
+    </files_affected>
+  </learning>
+
+  <learning id="database-metrics-schema">
+    <problem>DatabaseMetrics instantiation fails with "unexpected keyword argument 'pool_size'"</problem>
+    <solution>
+      Ensure DatabaseMetrics class has all fields that MetricsCollector tries to pass:
+      - Add pool_size and pool_overflow fields to DatabaseMetrics
+      - Fix parameter name mismatches (query_count -> total_queries, etc.)
+      - Add required timestamp parameter
+    </solution>
+    <files_affected>
+      - app/db/observability_metrics.py
+      - app/monitoring/metrics_collector.py
+    </files_affected>
+  </learning>
+
+  <learning id="health-checks-development">
+    <problem>Health checks fail in development when optional services are unavailable</problem>
+    <solution>
+      Make health checks environment-aware:
+      - In development, only PostgreSQL is critical
+      - Redis and ClickHouse are optional in development
+      - Fix PostgreSQL health check SQL with text() wrapper
+      
+      Check environment with: os.getenv("ENVIRONMENT", "development")
+    </solution>
+    <files_affected>
+      - app/core/health/interface.py
+      - app/core/health_checkers.py
+    </files_affected>
+  </learning>
+
+  <learning id="missing-api-keys">
+    <problem>Environment loader warns about missing ANTHROPIC_API_KEY and OPENAI_API_KEY</problem>
+    <solution>
+      Add placeholder keys for development to .env:
+      ANTHROPIC_API_KEY=sk-ant-dev-placeholder-key-for-development
+      OPENAI_API_KEY=sk-openai-dev-placeholder-key-for-development
+      
+      These satisfy checks but aren't used when LLM_MODE=shared (mocked mode).
+    </solution>
+    <files_affected>
+      - .env
+    </files_affected>
+  </learning>
+
+  <learning id="local-service-env-vars">
+    <problem>Services still try cloud endpoints even with local configuration</problem>
+    <solution>
+      Override ALL service-related environment variables in .env:
+      - Set all REDIS_* variants to localhost
+      - Set all CLICKHOUSE_* variants to localhost
+      - Add DEV_MODE_*_ENABLED flags
+      - Ensure MODE variables are set to "local"
+      
+      Critical variables:
+      REDIS_MODE=local
+      CLICKHOUSE_MODE=local
+      REDIS_HOST=localhost
+      CLICKHOUSE_HOST=localhost
+    </solution>
+    <files_affected>
+      - .env
+    </files_affected>
+  </learning>
+
+  <learning id="database-schema-sync">
+    <problem>Schema validation fails with missing tables and columns</problem>
+    <solution>
+      Generate and run comprehensive migration to create all missing schema elements:
+      1. Check current status: alembic current
+      2. Generate migration: alembic revision --autogenerate -m "description"
+      3. Review and enhance migration file
+      4. Apply: alembic upgrade head
+      
+      Common missing tables:
+      - agent_state_transactions
+      - corpus_audit_logs
+      - agent_state_snapshots
+      - mcp_tool_executions
+      - mcp_external_servers
+      - agent_recovery_logs
+      - mcp_resource_access
+    </solution>
+    <files_affected>
+      - alembic/versions/*.py
+      - Database schema
+    </files_affected>
+  </learning>
+
+  <best_practices>
+    <practice>Always check service mode environment variables before assuming cloud connections</practice>
+    <practice>Make health checks environment-aware to allow degraded operation in development</practice>
+    <practice>Use absolute imports in Alembic migrations to avoid import errors</practice>
+    <practice>Keep placeholder API keys in development to satisfy environment checks</practice>
+    <practice>Ensure all schema types match between models and instantiation code</practice>
+    <practice>Run migrations automatically on startup but handle failures gracefully</practice>
+  </best_practices>
+
+  <testing_checklist>
+    <item>Backend starts without errors</item>
+    <item>Frontend compiles and serves</item>
+    <item>Health endpoint returns 200 OK</item>
+    <item>Database migrations apply successfully</item>
+    <item>Schema validation passes or shows only warnings</item>
+    <item>No critical service connection errors in development</item>
+    <item>Dynamic ports are allocated correctly</item>
+    <item>Auth system configuration loads</item>
+  </testing_checklist>
+</learnings>

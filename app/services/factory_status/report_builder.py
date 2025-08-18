@@ -241,8 +241,15 @@ class ReportBuilder:
         if quality["technical_debt"]["debt_score"] > 30:
             actions.append("Reduce technical debt (score: {:.1f})".format(
                 quality["technical_debt"]["debt_score"]))
-        if quality["architecture_compliance"]["violations"] > 0:
-            actions.append(f"Fix {quality['architecture_compliance']['violations']} architecture violations")
+        # Calculate total violations from available violation fields
+        arch_compliance = quality["architecture_compliance"]
+        total_violations = (
+            arch_compliance.get("line_limit_violations", 0) +
+            arch_compliance.get("function_limit_violations", 0) +
+            len(arch_compliance.get("module_violations", []))
+        )
+        if total_violations > 0:
+            actions.append(f"Fix {total_violations} architecture violations")
         if business["innovation"]["innovation_ratio"] < 0.1:
             actions.append("Increase innovation efforts (currently at {:.0%})".format(
                 business["innovation"]["innovation_ratio"]))

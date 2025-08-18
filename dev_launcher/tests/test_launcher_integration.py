@@ -303,7 +303,7 @@ class TestFileManagement(unittest.TestCase):
     
     def _create_service_instances(self, tmpdir):
         """Create multiple service discovery instances."""
-        from dev_launcher.secret_manager import ServiceDiscovery
+        from dev_launcher.service_discovery import ServiceDiscovery
         instances = []
         for i in range(10):
             sd = ServiceDiscovery(Path(tmpdir))

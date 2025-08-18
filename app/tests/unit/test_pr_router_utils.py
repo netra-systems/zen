@@ -1,234 +1,194 @@
-"""Tests for PR router utility functions and class methods."""
+"""Tests for PR router utility functions.
 
-import os
+Note: This file has been updated to test the current PR router implementation.
+Previous tests for OAuth and CSRF utilities have been moved to test_pr_router_state.py
+or removed as the functionality no longer exists in the current implementation.
+"""
+
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
-from urllib.parse import urlparse
+from unittest.mock import Mock, patch
+from fastapi import HTTPException
 
 from app.auth.pr_router import (
-    get_pr_redirect_url,
-    _generate_secure_csrf_token,
-    _build_oauth_authorization_url,
-    _log_pr_auth_initiation,
-    _validate_pr_in_cache,
-    _get_oauth_client_id,
-    create_pr_auth_router,
-    PRAuthRouter,
+    build_pr_redirect_url,
+    handle_pr_routing_error,
+    get_pr_environment_status,
+    extract_pr_number_from_request,
+    extract_pr_from_host,
+    route_pr_authentication,
     PR_STATE_TTL
 )
 from app.core.exceptions_auth import AuthenticationError
 
 
-# Shared fixtures
-@pytest.fixture
-def mock_redis_manager():
-    """Mock Redis manager for testing."""
-    redis = Mock()
-    redis.enabled = True
-    redis.get = AsyncMock(return_value="active")
-    redis.setex = AsyncMock()
-    redis.delete = AsyncMock()
-    return redis
+class TestBuildPrRedirectUrl:
+    """Test build_pr_redirect_url function."""
 
-
-# Tests for get_pr_redirect_url function
-class TestGetPrRedirectUrl:
-    """Test get_pr_redirect_url function with success and error cases."""
-
-    @patch('app.auth.pr_router._validate_pr_number_format')
-    def test_get_pr_redirect_url_success(self, mock_validate):
-        """Test successful PR redirect URL generation."""
-        result = get_pr_redirect_url("123")
-        
-        expected = "https://pr-123.staging.netrasystems.ai"
+    def test_build_pr_redirect_url_default_path(self):
+        """Test building PR redirect URL with default path."""
+        result = build_pr_redirect_url("123")
+        expected = "https://pr-123.staging.netrasystems.ai/"
         assert result == expected
-        mock_validate.assert_called_once_with("123")
 
-    @patch('app.auth.pr_router._validate_pr_number_format')
-    def test_get_pr_redirect_url_invalid(self, mock_validate):
-        """Test get_pr_redirect_url with invalid PR number."""
-        mock_validate.side_effect = AuthenticationError("Invalid PR number")
-        
-        with pytest.raises(AuthenticationError, match="Invalid PR number"):
-            get_pr_redirect_url("invalid")
+    def test_build_pr_redirect_url_custom_path(self):
+        """Test building PR redirect URL with custom path."""
+        result = build_pr_redirect_url("456", "/dashboard")
+        expected = "https://pr-456.staging.netrasystems.ai/dashboard"
+        assert result == expected
 
-
-# Tests for _generate_secure_csrf_token function
-class TestGenerateSecureCsrfToken:
-    """Test _generate_secure_csrf_token function with success and uniqueness."""
-
-    def test_generate_csrf_token_success(self):
-        """Test successful CSRF token generation."""
-        token = _generate_secure_csrf_token()
-        
-        assert isinstance(token, str)
-        assert len(token) > 0
-        # URL-safe base64 characters only
-        assert all(c.isalnum() or c in '-_' for c in token)
-
-    def test_generate_csrf_token_uniqueness(self):
-        """Test CSRF token uniqueness across multiple generations."""
-        tokens = [_generate_secure_csrf_token() for _ in range(10)]
-        unique_tokens = set(tokens)
-        
-        assert len(unique_tokens) == len(tokens)  # All tokens should be unique
-        assert all(len(token) > 20 for token in tokens)  # Adequate length
+    def test_build_pr_redirect_url_with_query(self):
+        """Test building PR redirect URL with query parameters."""
+        result = build_pr_redirect_url("789", "/app?param=value")
+        expected = "https://pr-789.staging.netrasystems.ai/app?param=value"
+        assert result == expected
 
 
-# Tests for OAuth URL building
-class TestOAuthUrl:
-    """Test OAuth URL building functions."""
-
-    @patch('app.auth.pr_router._get_oauth_client_id')
-    def test_build_oauth_authorization_url_success(self, mock_client_id):
-        """Test successful OAuth URL building."""
-        mock_client_id.return_value = "test-client-id"
-        
-        url = _build_oauth_authorization_url("test-state")
-        
-        parsed = urlparse(url)
-        assert parsed.scheme == "https"
-        assert parsed.netloc == "accounts.google.com"
-        assert "state=test-state" in url
-        assert "client_id=test-client-id" in url
-
-    @patch.dict(os.environ, {}, clear=True)
-    def test_get_oauth_client_id_missing(self):
-        """Test OAuth client ID retrieval when not configured."""
-        with pytest.raises(AuthenticationError, match="OAuth client ID not configured"):
-            _get_oauth_client_id()
-
-    @patch.dict(os.environ, {"GOOGLE_OAUTH_CLIENT_ID_STAGING": "test-id"})
-    def test_get_oauth_client_id_success(self):
-        """Test successful OAuth client ID retrieval."""
-        client_id = _get_oauth_client_id()
-        assert client_id == "test-id"
-
-
-# Tests for cache validation
-class TestCacheValidation:
-    """Test PR cache validation functions."""
-
-    async def test_validate_pr_in_cache_redis_enabled(self, mock_redis_manager):
-        """Test PR cache validation when Redis is enabled."""
-        mock_redis_manager.get.return_value = "active"
-        
-        # Should not raise exception
-        await _validate_pr_in_cache("123", mock_redis_manager)
-        
-        mock_redis_manager.get.assert_called_once_with("active_pr:123")
-
-    async def test_validate_pr_in_cache_redis_disabled(self):
-        """Test PR cache validation when Redis is disabled."""
-        mock_redis = Mock()
-        mock_redis.enabled = False
-        
-        # Should not raise exception and not call Redis
-        await _validate_pr_in_cache("123", mock_redis)
-
-    async def test_validate_pr_in_cache_not_found(self, mock_redis_manager):
-        """Test PR cache validation when PR not in cache."""
-        mock_redis_manager.get.return_value = None
-        
-        # Should add to cache when not found
-        await _validate_pr_in_cache("123", mock_redis_manager)
-        
-        mock_redis_manager.setex.assert_called_once_with("active_pr:123", 3600, "active")
-
-
-# Tests for logging function
-class TestLogging:
-    """Test logging functions."""
+class TestHandlePrRoutingError:
+    """Test handle_pr_routing_error function."""
 
     @patch('app.auth.pr_router.logger')
-    async def test_log_pr_auth_initiation_success(self, mock_logger):
-        """Test successful PR auth logging."""
-        await _log_pr_auth_initiation("123", "https://example.com")
+    def test_handle_pr_routing_error_basic(self, mock_logger):
+        """Test handling basic PR routing error."""
+        error = Exception("Test error")
+        result = handle_pr_routing_error(error, "123")
         
-        mock_logger.info.assert_called_once()
-        call_args = mock_logger.info.call_args
-        assert "PR OAuth initiated" in call_args[0][0]
+        assert isinstance(result, HTTPException)
+        assert result.status_code == 400
+        assert "Invalid PR environment configuration: 123" in result.detail
+        mock_logger.error.assert_called_once()
 
     @patch('app.auth.pr_router.logger')
-    async def test_log_pr_auth_initiation_invalid(self, mock_logger):
-        """Test PR auth logging with invalid data."""
-        await _log_pr_auth_initiation("", "")
+    def test_handle_pr_routing_error_auth_error(self, mock_logger):
+        """Test handling authentication error."""
+        error = AuthenticationError("Auth failed")
+        result = handle_pr_routing_error(error, "456")
         
-        # Should still log even with empty values
-        mock_logger.info.assert_called_once()
+        assert isinstance(result, HTTPException)
+        assert result.status_code == 400
+        mock_logger.error.assert_called_once()
+        # Check that the error message contains the expected parts
+        call_args = mock_logger.error.call_args[0][0]
+        assert "PR routing error for PR 456:" in call_args
+        assert "Auth failed" in call_args
 
 
-# Tests for factory function
-class TestFactoryFunction:
-    """Test PR auth router factory function."""
+class TestGetPrEnvironmentStatus:
+    """Test get_pr_environment_status function."""
 
-    def test_create_pr_auth_router_success(self, mock_redis_manager):
-        """Test successful PR auth router creation."""
-        router = create_pr_auth_router(mock_redis_manager)
+    def test_get_pr_environment_status_basic(self):
+        """Test getting PR environment status."""
+        status = get_pr_environment_status("123")
         
-        assert isinstance(router, PRAuthRouter)
-        assert router.redis == mock_redis_manager
-        assert router.state_ttl == PR_STATE_TTL
+        assert status["pr_number"] == "123"
+        assert status["status"] == "active"
+        assert "auth_domain" in status
+        assert "frontend_domain" in status
+        assert "api_domain" in status
+        assert "last_updated" in status
 
-    def test_create_pr_auth_router_initialization(self, mock_redis_manager):
-        """Test PR auth router proper initialization."""
-        router = create_pr_auth_router(mock_redis_manager)
+    def test_get_pr_environment_status_domains(self):
+        """Test PR environment status contains correct domains."""
+        status = get_pr_environment_status("456")
         
-        assert hasattr(router, 'github_client')
-        assert hasattr(router, 'redis')
-        assert hasattr(router, 'state_ttl')
+        assert "auth-pr-456" in status["auth_domain"]
+        assert "pr-456.staging.netrasystems.ai" in status["frontend_domain"]
+        assert "pr-456-api.staging.netrasystems.ai" in status["api_domain"]
 
 
-# Tests for PRAuthRouter class
-class TestPRAuthRouterClass:
-    """Test PRAuthRouter class methods."""
+class TestExtractPrNumber:
+    """Test PR number extraction functions."""
 
-    def test_pr_auth_router_init_success(self, mock_redis_manager):
-        """Test successful PRAuthRouter initialization."""
-        router = PRAuthRouter(mock_redis_manager)
+    def test_extract_pr_from_host_frontend(self):
+        """Test extracting PR number from frontend host."""
+        result = extract_pr_from_host("pr-123.staging.netrasystems.ai")
+        assert result == "123"
+
+    def test_extract_pr_from_host_api(self):
+        """Test extracting PR number from API host."""
+        result = extract_pr_from_host("pr-456-api.staging.netrasystems.ai")
+        assert result == "456"
+
+    def test_extract_pr_from_host_invalid(self):
+        """Test extracting PR number from invalid host."""
+        result = extract_pr_from_host("invalid.example.com")
+        assert result is None
+
+    def test_extract_pr_from_host_wrong_domain(self):
+        """Test extracting PR number from wrong domain."""
+        result = extract_pr_from_host("pr-123.wrongdomain.com")
+        assert result is None
+
+    def test_extract_pr_number_from_request_header(self):
+        """Test extracting PR number from request header."""
+        headers = {"X-PR-Number": "789"}
+        result = extract_pr_number_from_request(headers)
+        assert result == "789"
+
+    def test_extract_pr_number_from_request_host(self):
+        """Test extracting PR number from host header."""
+        headers = {"host": "pr-123.staging.netrasystems.ai"}
+        result = extract_pr_number_from_request(headers)
+        assert result == "123"
+
+    def test_extract_pr_number_from_request_invalid_header(self):
+        """Test extracting PR number with invalid header value."""
+        headers = {"X-PR-Number": "invalid"}
+        result = extract_pr_number_from_request(headers)
+        assert result is None
+
+    def test_extract_pr_number_from_request_no_match(self):
+        """Test extracting PR number when no match found."""
+        headers = {"host": "invalid.example.com"}
+        result = extract_pr_number_from_request(headers)
+        assert result is None
+
+
+class TestRoutePrAuthentication:
+    """Test route_pr_authentication function."""
+
+    def test_route_pr_authentication_login(self):
+        """Test routing PR authentication for login flow."""
+        redirect_url, config = route_pr_authentication("123", "login")
         
-        assert router.redis == mock_redis_manager
-        assert router.state_ttl == PR_STATE_TTL
+        assert "auth-pr-123" in redirect_url
+        assert "/auth/login" in redirect_url
+        assert config["pr_number"] == "123"
+        assert config["environment"] == "pr"
 
-    @patch('app.auth.pr_router.httpx.AsyncClient')
-    def test_pr_auth_router_github_client_init(self, mock_client, mock_redis_manager):
-        """Test GitHub client initialization in PRAuthRouter."""
-        router = PRAuthRouter(mock_redis_manager)
+    def test_route_pr_authentication_login_with_return_url(self):
+        """Test routing PR authentication for login with return URL."""
+        return_url = "https://example.com"
+        redirect_url, config = route_pr_authentication("123", "login", return_url)
         
-        # GitHub client should be initialized
-        mock_client.assert_called_once_with(base_url="https://api.github.com")
+        assert "auth-pr-123" in redirect_url
+        assert "/auth/login" in redirect_url
+        assert f"return_url={return_url}" in redirect_url
+        assert "pr=123" in redirect_url
 
-    @patch('app.auth.pr_router.httpx.AsyncClient', side_effect=Exception("Connection failed"))
-    def test_pr_auth_router_github_client_failure(self, mock_client, mock_redis_manager):
-        """Test GitHub client initialization failure handling."""
-        router = PRAuthRouter(mock_redis_manager)
+    def test_route_pr_authentication_callback(self):
+        """Test routing PR authentication for callback flow."""
+        redirect_url, config = route_pr_authentication("456", "callback")
         
-        # Should handle failure gracefully
-        assert router.github_client is None
+        assert "pr-456.staging.netrasystems.ai" in redirect_url
+        assert "/auth/callback" in redirect_url
+        assert config["pr_number"] == "456"
 
-    def test_oauth_url_includes_required_params(self):
-        """Test OAuth URL includes all required parameters."""
-        with patch('app.auth.pr_router._get_oauth_client_id', return_value="test-client"):
-            url = _build_oauth_authorization_url("test-state")
-            
-            required_params = [
-                "client_id=test-client",
-                "redirect_uri=",
-                "response_type=code",
-                "scope=openid",
-                "state=test-state",
-                "access_type=online"
-            ]
-            
-            for param in required_params:
-                assert param in url
+    def test_route_pr_authentication_default(self):
+        """Test routing PR authentication for default flow."""
+        redirect_url, config = route_pr_authentication("789", "default")
+        
+        assert redirect_url == "https://pr-789.staging.netrasystems.ai"
+        assert config["pr_number"] == "789"
 
-    def test_pr_redirect_url_format(self):
-        """Test PR redirect URL follows expected format."""
-        with patch('app.auth.pr_router._validate_pr_number_format'):
-            url = get_pr_redirect_url("456")
-            
-            assert url == "https://pr-456.staging.netrasystems.ai"
-            assert url.startswith("https://")
-            assert "pr-456" in url
-            assert "staging.netrasystems.ai" in url
+
+class TestPrStateTtl:
+    """Test PR state TTL constant."""
+
+    def test_pr_state_ttl_value(self):
+        """Test PR state TTL has expected value."""
+        assert PR_STATE_TTL == 300
+        assert isinstance(PR_STATE_TTL, int)
+
+    def test_pr_state_ttl_reasonable(self):
+        """Test PR state TTL is reasonable (between 1 minute and 1 hour)."""
+        assert 60 <= PR_STATE_TTL <= 3600  # Between 1 minute and 1 hour

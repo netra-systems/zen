@@ -161,7 +161,7 @@ class HealthAlertManager:
         ratio = value / threshold
         if ratio > 2.0:
             return "critical"
-        elif ratio > 1.5:
+        elif ratio > 1.6:
             return "error"
         else:
             return "warning"

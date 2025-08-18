@@ -38,16 +38,20 @@ class TestDataSubAgentBasic:
         assert agent.redis_manager == None
     async def test_get_cached_schema_success(self, agent):
         """Test getting cached schema information"""
-        with patch('app.agents.data_sub_agent.get_clickhouse_client') as mock_client:
-            mock_client_instance = AsyncMock()
-            mock_client_instance.execute_query = AsyncMock(return_value=[
-                ("column1", "String"),
-                ("column2", "Int32")
-            ])
-            mock_client.return_value.__aenter__.return_value = mock_client_instance
+        # Mock the clickhouse_ops.get_table_schema method directly
+        expected_schema = {
+            "table": "test_table",
+            "columns": [
+                {"name": "column1", "type": "String"},
+                {"name": "column2", "type": "Int32"}
+            ]
+        }
+        
+        with patch.object(agent.clickhouse_ops, 'get_table_schema', new_callable=AsyncMock) as mock_get_schema:
+            mock_get_schema.return_value = expected_schema
             
             # Clear the cache first
-            agent._get_cached_schema.cache_clear()
+            agent.cache_clear()
             
             result = await agent._get_cached_schema("test_table")
             
@@ -64,7 +68,7 @@ class TestDataSubAgentBasic:
             mock_client.return_value.__aenter__.return_value = mock_client_instance
             
             # Clear the cache first
-            agent._get_cached_schema.cache_clear()
+            agent.cache_clear()
             
             result = await agent._get_cached_schema("test_table")
             

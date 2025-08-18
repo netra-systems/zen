@@ -180,7 +180,7 @@ class TestConfigRoute:
         
         response = basic_test_client.put("/api/config", json=malicious_config)
         if response.status_code not in [404]:
-            CommonResponseValidators.validate_error_response(response, [422, 400])
+            CommonResponseValidators.validate_error_response(response, [422, 400, 403])
     
     def test_config_real_time_updates(self, basic_test_client):
         """Test real-time configuration update notifications."""

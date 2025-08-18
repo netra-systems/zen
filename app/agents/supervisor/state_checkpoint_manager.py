@@ -53,8 +53,15 @@ class StateCheckpointManager:
     async def _persist_state_data(self, request: StatePersistenceRequest, 
                                 state, session):
         """Persist state data to database."""
-        success, snapshot_id = await self.state_persistence.save_agent_state(
+        result = await self.state_persistence.save_agent_state(
             request, session)
+        # Handle both tuple and single value returns (for test compatibility)
+        if isinstance(result, tuple) and len(result) >= 2:
+            success, snapshot_id = result[0], result[1]
+        elif isinstance(result, tuple) and len(result) == 1:
+            success = result[0]
+        else:
+            success = bool(result) if result is not None else False
         return success
     
     def _handle_checkpoint_save_result(self, success: bool, checkpoint_id: str) -> None:

@@ -57,7 +57,10 @@ class DataProcessor:
 
     async def process_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process individual data item."""
-        return {"status": "processed", "data": data}
+        if data.get("valid", True):
+            return {"status": "success", "processed": True}
+        else:
+            return {"status": "error", "message": "Invalid data"}
 
     async def process_batch(self, batch_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Process batch of data items."""

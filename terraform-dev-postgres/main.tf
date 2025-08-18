@@ -1,4 +1,12 @@
-# Development Infrastructure Orchestration
+# LOCAL DEVELOPMENT Infrastructure Orchestration
+# This terraform configuration is ONLY for LOCAL DEVELOPMENT
+# NOT for staging or production environments
+# 
+# Creates Docker containers on your LOCAL machine:
+# - PostgreSQL (port 5433)
+# - Redis (port 6379)
+# - ClickHouse (ports 8123/9000)
+#
 # This file coordinates all infrastructure modules
 
 # Module dependencies are handled via resource references

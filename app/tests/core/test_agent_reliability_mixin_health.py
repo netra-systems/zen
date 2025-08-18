@@ -96,9 +96,9 @@ class TestAgentReliabilityMixinMetrics:
         health = mock_agent._calculate_overall_health(0.9, 2, 1.0)
         assert health == 0.7  # 0.9 - (2 * 0.1) = 0.7
         
-        # Health with slow response time
+        # Health with slow response time (capped at 30% penalty)
         health = mock_agent._calculate_overall_health(0.9, 0, 10.0)
-        assert health == 0.4  # 0.9 - (10-5) * 0.1 = 0.9 - 0.5 = 0.4
+        assert abs(health - 0.6) < 1e-10  # 0.9 - min((10-5) * 0.1, 0.3) = 0.9 - 0.3 = 0.6
         
         # Ensure health doesn't go below 0
         health = mock_agent._calculate_overall_health(0.2, 10, 20.0)

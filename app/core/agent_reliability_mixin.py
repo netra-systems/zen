@@ -73,7 +73,7 @@ class AgentReliabilityMixin:
         self.max_operation_history = 100
         
         # Health monitoring
-        self.last_health_check = time.time()
+        self.last_health_check = 0  # Initialize to 0 so first check is needed
         self.health_check_interval = 60  # seconds
         
         # Recovery strategies

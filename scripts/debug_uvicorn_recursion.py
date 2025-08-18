@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""Test running uvicorn directly to reproduce the recursion error."""
+"""Debug script for reproducing uvicorn recursion errors.
+
+This script was moved from tests/ to scripts/ to prevent pytest from
+discovering it during test collection, which was causing port binding conflicts.
+
+Usage: python scripts/debug_uvicorn_recursion.py"""
 
 import sys
 import uvicorn
 import os
 from pathlib import Path
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent))
+# Add project root to path (parent of scripts directory)
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Set environment variables
 os.environ['BACKEND_PORT'] = '8001'

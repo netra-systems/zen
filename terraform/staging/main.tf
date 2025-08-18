@@ -1,3 +1,7 @@
+# CLOUD STAGING Infrastructure Configuration (Google Cloud Platform)
+# ⚠️ This is for CLOUD STAGING environment - NOT for local development!
+# For local development, use terraform-dev-postgres/ instead
+#
 # Optimized Staging Terraform Configuration
 # Addresses slow planning issues and uses shared infrastructure efficiently
 
