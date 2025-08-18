@@ -14,7 +14,29 @@ jest.mock('@/components/auth/AuthGate', () => ({
   }
 }));
 
-// CRITICAL: ChatSidebar hooks are mocked in setup.tsx - no duplicate mocks needed
+// CRITICAL: Mock ChatSidebar hooks directly in this file to ensure they work
+jest.mock('@/components/chat/ChatSidebarHooks', () => ({
+  useChatSidebarState: jest.fn(),
+  useThreadLoader: jest.fn(),
+  useThreadFiltering: jest.fn()
+}));
+
+// Mock ThreadService for click handlers
+jest.mock('@/services/threadService', () => ({
+  ThreadService: {
+    getThreadMessages: jest.fn().mockResolvedValue({
+      messages: [],
+      thread_id: 'test-thread',
+      total: 0,
+      limit: 50,
+      offset: 0
+    }),
+    listThreads: jest.fn().mockResolvedValue([]),
+    createThread: jest.fn(),
+    deleteThread: jest.fn(),
+    updateThread: jest.fn()
+  }
+}));
 
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import * as ChatSidebarHooksModule from '@/components/chat/ChatSidebarHooks';
@@ -31,6 +53,33 @@ describe('ChatSidebar - Interactions', () => {
 
   beforeEach(() => {
     testSetup.beforeEach();
+    
+    // Configure default hook implementations
+    (ChatSidebarHooksModule.useChatSidebarState as jest.Mock).mockReturnValue({
+      searchQuery: '',
+      setSearchQuery: jest.fn(),
+      isCreatingThread: false,
+      setIsCreatingThread: jest.fn(),
+      showAllThreads: false,
+      setShowAllThreads: jest.fn(),
+      filterType: 'all' as const,
+      setFilterType: jest.fn(),
+      currentPage: 1,
+      setCurrentPage: jest.fn()
+    });
+    
+    (ChatSidebarHooksModule.useThreadLoader as jest.Mock).mockReturnValue({
+      threads: sampleThreads,
+      isLoadingThreads: false,
+      loadError: null,
+      loadThreads: jest.fn()
+    });
+    
+    (ChatSidebarHooksModule.useThreadFiltering as jest.Mock).mockReturnValue({
+      sortedThreads: sampleThreads,
+      paginatedThreads: sampleThreads,
+      totalPages: 1
+    });
   });
 
   afterEach(() => {
@@ -48,12 +97,21 @@ describe('ChatSidebar - Interactions', () => {
       });
       
       testSetup.configureStore({
-        currentThreadId: 'thread-1'
+        activeThreadId: 'thread-1'
       });
       
-      // Configure hooks to return sample threads BEFORE rendering
-      testSetup.configureChatSidebarHooks({
-        threads: sampleThreads
+      // Configure hooks to return sample threads BEFORE rendering - DIRECT CONFIG
+      (ChatSidebarHooksModule.useThreadLoader as jest.Mock).mockReturnValue({
+        threads: sampleThreads,
+        isLoadingThreads: false,
+        loadError: null,
+        loadThreads: jest.fn()
+      });
+      
+      (ChatSidebarHooksModule.useThreadFiltering as jest.Mock).mockReturnValue({
+        sortedThreads: sampleThreads,
+        paginatedThreads: sampleThreads,
+        totalPages: 1
       });
       
       renderWithProvider(<ChatSidebar />);
@@ -629,6 +687,7 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should handle keyboard shortcuts in context menu', () => {
+      // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for thread rendering
       testSetup.configureAuthState({
         isAuthenticated: true,
@@ -638,7 +697,7 @@ describe('ChatSidebar - Interactions', () => {
       
       testSetup.configureStore({});
       
-      // Configure hooks to return sample threads
+      // Configure hooks to return sample threads BEFORE rendering
       testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
@@ -662,6 +721,7 @@ describe('ChatSidebar - Interactions', () => {
 
   describe('Drag and Drop Operations', () => {
     it('should support drag to reorder threads', () => {
+      // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for thread rendering
       testSetup.configureAuthState({
         isAuthenticated: true,
@@ -671,7 +731,7 @@ describe('ChatSidebar - Interactions', () => {
       
       testSetup.configureStore({});
       
-      // Configure hooks to return sample threads
+      // Configure hooks to return sample threads BEFORE rendering
       testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
@@ -692,6 +752,7 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should handle drag and drop for thread organization', () => {
+      // CRITICAL: Configure all mocks BEFORE rendering
       // Ensure authenticated state for thread rendering
       testSetup.configureAuthState({
         isAuthenticated: true,
@@ -703,7 +764,7 @@ describe('ChatSidebar - Interactions', () => {
         folders: [{ id: 'folder-1', name: 'Work Threads' }]
       });
       
-      // Configure hooks to return sample threads
+      // Configure hooks to return sample threads BEFORE rendering
       testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });

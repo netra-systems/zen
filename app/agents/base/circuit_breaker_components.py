@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from app.core.circuit_breaker import CircuitBreaker as CoreCircuitBreaker, CircuitConfig
+from app.schemas.reliability_types import CircuitBreakerMetrics
 
 
 @dataclass
@@ -28,14 +29,6 @@ class CircuitBreakerConfig:
         )
 
 
-@dataclass
-class CircuitBreakerMetrics:
-    """Circuit breaker metrics tracking."""
-    total_requests: int = 0
-    successful_requests: int = 0
-    failed_requests: int = 0
-    consecutive_failures: int = 0
-    last_failure_time: Optional[datetime] = None
 
 
 class CircuitBreaker(CoreCircuitBreaker):
@@ -59,10 +52,9 @@ class CircuitBreaker(CoreCircuitBreaker):
     
     def _update_legacy_metrics_on_failure(self) -> None:
         """Update legacy metrics on failure for compatibility."""
-        self.metrics.failed_requests += 1
-        self.metrics.total_requests += 1
-        self.metrics.consecutive_failures += 1
-        self.metrics.last_failure_time = datetime.utcnow()
+        self.metrics.failed_calls += 1
+        self.metrics.total_calls += 1
+        self.metrics.last_failure_time = time.time()
     
     def get_status(self) -> Dict[str, Any]:
         """Get current circuit breaker status with legacy format."""
@@ -84,10 +76,10 @@ class CircuitBreaker(CoreCircuitBreaker):
     def _build_metrics_data(self, core_status: Dict[str, Any]) -> Dict[str, Any]:
         """Build metrics data for status."""
         return {
-            "total_requests": self.metrics.total_requests,
-            "successful_requests": self.metrics.successful_requests,
-            "failed_requests": self.metrics.failed_requests,
-            "consecutive_failures": self.metrics.consecutive_failures,
+            "total_calls": self.metrics.total_calls,
+            "successful_calls": self.metrics.successful_calls,
+            "failed_calls": self.metrics.failed_calls,
+            "circuit_breaker_opens": self.metrics.circuit_breaker_opens,
             "state_changes": core_status.get("metrics", {}).get("state_changes", 0),
             "last_failure": self._format_last_failure_time()
         }

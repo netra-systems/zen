@@ -67,9 +67,10 @@ class ExecutionErrorHandler:
                                            classification: ErrorClassification) -> ExecutionResult:
         """Generate graceful degradation response."""
         return ExecutionResult(
+            success=False,
             status=ExecutionStatus.DEGRADED,
-            data={"message": "Service temporarily degraded", "retry_after": 30},
-            metadata={"degradation_reason": classification.category.value}
+            result={"message": "Service temporarily degraded", "retry_after": 30},
+            metrics={"degradation_reason": classification.category.value}
         )
     
     def _create_error_result(self, error: Exception, context: ExecutionContext,

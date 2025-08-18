@@ -9,7 +9,7 @@ import asyncio
 import json
 import logging
 from pathlib import Path
-from typing import Dict, any
+from typing import Dict, Any
 
 from .migration_models import MigrationState
 

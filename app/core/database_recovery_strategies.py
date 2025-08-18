@@ -15,7 +15,7 @@ from app.logging_config import central_logger
 
 # Import consolidated types
 from .database_types import DatabaseType, PoolHealth, DatabaseConfig, PoolMetrics
-from .database_health_monitoring import DatabaseHealthChecker
+from .database_health_monitoring import PoolHealthChecker
 
 logger = central_logger.get_logger(__name__)
 
@@ -23,7 +23,7 @@ logger = central_logger.get_logger(__name__)
 # Types imported from database_types.py
 
 
-# DatabaseHealthChecker imported from database_health_monitoring.py
+# PoolHealthChecker imported from database_health_monitoring.py
 
 
 class DatabaseRecoveryStrategy(ABC):
@@ -262,7 +262,7 @@ class DatabaseConnectionManager:
     
     def _initialize_recovery_components(self) -> None:
         """Initialize recovery and health checking components."""
-        self.health_checker = DatabaseHealthChecker(self.db_type)
+        self.health_checker = PoolHealthChecker(self.db_type)
         self.recovery_strategies: List[DatabaseRecoveryStrategy] = []
     
     def _initialize_monitoring_settings(self) -> None:

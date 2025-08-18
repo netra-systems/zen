@@ -11,7 +11,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useWebSocket } from '@/hooks/useWebSocket';
-import * as ChatSidebarHooksModule from '../../../components/chat/ChatSidebarHooks';
+import * as ChatSidebarHooksModule from '@/components/chat/ChatSidebarHooks';
 import * as ThreadServiceModule from '@/services/threadService';
 import { TestProviders } from '../../test-utils/providers';
 
@@ -37,12 +37,12 @@ jest.mock('@/hooks/useWebSocket', () => ({
   }))
 }));
 
-// Mock ChatSidebar hooks with debugging - CRITICAL: Use relative path to match component import
-jest.mock('../../../components/chat/ChatSidebarHooks', () => {
+// Mock ChatSidebar hooks with debugging - CRITICAL: Use exact same path as component import
+jest.mock('@/components/chat/ChatSidebarHooks', () => {
   console.log('📦 ChatSidebarHooks module mock created');
   return {
     useChatSidebarState: jest.fn(() => {
-      console.log('📦 DEFAULT useChatSidebarState mock called');
+      console.log('🔥 HOOK CALLED: useChatSidebarState (DEFAULT)');
       return {
         searchQuery: '',
         setSearchQuery: jest.fn(),
@@ -57,7 +57,7 @@ jest.mock('../../../components/chat/ChatSidebarHooks', () => {
       };
     }),
     useThreadLoader: jest.fn(() => {
-      console.log('📦 DEFAULT useThreadLoader mock called');
+      console.log('🔥 HOOK CALLED: useThreadLoader (DEFAULT)');
       return {
         threads: [],
         isLoadingThreads: false,  // Fixed: Default to false for tests
@@ -66,7 +66,7 @@ jest.mock('../../../components/chat/ChatSidebarHooks', () => {
       };
     }),
     useThreadFiltering: jest.fn(() => {
-      console.log('📦 DEFAULT useThreadFiltering mock called');
+      console.log('🔥 HOOK CALLED: useThreadFiltering (DEFAULT)');
       return {
         sortedThreads: [],
         paginatedThreads: [],
@@ -350,13 +350,24 @@ export class ChatSidebarTestSetup {
       threadFilteringConfig
     });
     
-    // CRITICAL: Use mockReturnValue instead of mockImplementation
-    // This is more resilient to jest.clearAllMocks()
-    (ChatSidebarHooksModule.useChatSidebarState as jest.Mock).mockReturnValue(sidebarStateConfig);
-    (ChatSidebarHooksModule.useThreadLoader as jest.Mock).mockReturnValue(threadLoaderConfig);
-    (ChatSidebarHooksModule.useThreadFiltering as jest.Mock).mockReturnValue(threadFilteringConfig);
+    // CRITICAL: Use mockImplementation with debugging instead of mockReturnValue
+    // This allows us to see when hooks are actually called
+    (ChatSidebarHooksModule.useChatSidebarState as jest.Mock).mockImplementation(() => {
+      console.log('🔥 HOOK CALLED: useChatSidebarState (CONFIGURED)', sidebarStateConfig);
+      return sidebarStateConfig;
+    });
     
-    console.log('🎯 Applied mock configurations using mockReturnValue');
+    (ChatSidebarHooksModule.useThreadLoader as jest.Mock).mockImplementation((...args: any[]) => {
+      console.log('🔥 HOOK CALLED: useThreadLoader (CONFIGURED)', { args, returning: threadLoaderConfig });
+      return threadLoaderConfig;
+    });
+    
+    (ChatSidebarHooksModule.useThreadFiltering as jest.Mock).mockImplementation((...args: any[]) => {
+      console.log('🔥 HOOK CALLED: useThreadFiltering (CONFIGURED)', { args, returning: threadFilteringConfig });
+      return threadFilteringConfig;
+    });
+    
+    console.log('🎯 Applied mock configurations using mockImplementation with debugging');
     
     return {
       sidebarState: sidebarStateConfig,

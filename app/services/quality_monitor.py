@@ -14,9 +14,9 @@ Business Value Justification (BVJ):
 from typing import Dict, Any
 from datetime import datetime, UTC
 
-from app.logging_config import CentralLogger
+import logging
 
-logger = CentralLogger()
+logger = logging.getLogger(__name__)
 
 
 async def start_real_time_monitoring(config: Dict[str, Any]) -> Dict[str, Any]:

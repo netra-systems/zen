@@ -14,9 +14,9 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta, UTC
 import asyncio
 
-from app.logging_config import CentralLogger
+import logging
 
-logger = CentralLogger()
+logger = logging.getLogger(__name__)
 
 
 async def analyze_trends(
