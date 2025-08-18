@@ -93,19 +93,10 @@ async def async_transaction_manager():
     yield manager
     await manager._cleanup_all_sessions()
 
-async def _execute_successful_transaction(repository, manager) -> Any:
-    """Execute successful transaction and return result"""
-    return await repository.execute_with_transaction(
-        repository.create_entity,
-        "test_session_1",
-        name="Test Entity",
-        value=100
-    )
-
-async def _verify_successful_transaction(result, manager) -> None:
-    """Verify successful transaction results"""
-    assert result is not None
-    assert result["name"] == "Test Entity"
+async def _execute_and_verify_transaction(repository, manager) -> None:
+    """Execute and verify successful transaction"""
+    result = await repository.execute_with_transaction(repository.create_entity, "test_session_1", name="Test Entity", value=100)
+    assert result is not None and result["name"] == "Test Entity"
     assert "test_session_1" in manager.transaction_log
     assert manager.transaction_log["test_session_1"]["status"] == "committed"
 
@@ -113,10 +104,8 @@ async def test_successful_async_transaction():
     """Test successful async transaction with proper resource management"""
     manager = AsyncTransactionManager()
     repository = AsyncRepositoryTestBase(manager)
-    
     try:
-        result = await _execute_successful_transaction(repository, manager)
-        await _verify_successful_transaction(result, manager)
+        await _execute_and_verify_transaction(repository, manager)
     finally:
         await manager._cleanup_all_sessions()
 
@@ -145,32 +134,20 @@ async def test_async_transaction_rollback_on_error():
     finally:
         await manager._cleanup_all_sessions()
 
-async def _create_concurrent_tasks(repository, count: int) -> list:
-    """Create concurrent transaction tasks"""
-    return [
-        repository.execute_with_transaction(
-            repository.create_entity,
-            f"concurrent_{i}",
-            name=f"Entity_{i}"
-        )
-        for i in range(count)
-    ]
-
-async def _verify_concurrent_results(results, manager, expected_count: int) -> None:
-    """Verify concurrent transaction results"""
+async def _run_concurrent_transactions(repository, count: int) -> tuple:
+    """Run concurrent transactions and return results"""
+    tasks = [repository.execute_with_transaction(repository.create_entity, f"concurrent_{i}", name=f"Entity_{i}") for i in range(count)]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
     successful_results = [r for r in results if not isinstance(r, Exception)]
-    assert len(successful_results) == expected_count
-    assert len(manager.transaction_log) == expected_count
+    return results, successful_results
 
 async def test_concurrent_async_transactions():
     """Test concurrent async transactions with proper isolation"""
     manager = AsyncTransactionManager()
     repository = AsyncRepositoryTestBase(manager)
-    
     try:
-        tasks = await _create_concurrent_tasks(repository, 5)
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        await _verify_concurrent_results(results, manager, 5)
+        results, successful_results = await _run_concurrent_transactions(repository, 5)
+        assert len(successful_results) == 5 and len(manager.transaction_log) == 5
     finally:
         await manager._cleanup_all_sessions()
 

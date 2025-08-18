@@ -175,7 +175,10 @@ class StateManager:
         transaction = self._transactions.get(transaction_id)
         if not transaction:
             return
-        
+        await self._process_transaction_commit(transaction_id, transaction)
+
+    async def _process_transaction_commit(self, transaction_id: str, transaction: StateTransaction) -> None:
+        """Process transaction commit operations"""
         logger.info(f"Committing transaction {transaction_id} with {len(transaction.operations)} operations")
         await self._execute_transaction_operations(transaction)
         transaction.status = TransactionStatus.COMMITTED

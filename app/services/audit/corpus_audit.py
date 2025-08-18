@@ -41,10 +41,25 @@ class CorpusAuditLogger:
     ) -> CorpusAuditRecord:
         """Log a corpus operation with comprehensive audit trail."""
         try:
-            params = self._build_log_params(action, resource_type, status, user_id, corpus_id, resource_id, operation_duration_ms, result_data, metadata)
-            return await self._execute_audit_logging(db, params)
+            return await self._perform_operation_logging(
+                db, action, resource_type, status, user_id, corpus_id,
+                resource_id, operation_duration_ms, result_data, metadata
+            )
         except Exception as e:
             return self._handle_audit_logging_error(e)
+    
+    async def _perform_operation_logging(
+        self, db: AsyncSession, action: CorpusAuditAction, resource_type: str,
+        status: CorpusAuditStatus, user_id: Optional[str], corpus_id: Optional[str],
+        resource_id: Optional[str], operation_duration_ms: Optional[float],
+        result_data: Optional[Dict[str, Any]], metadata: Optional[CorpusAuditMetadata]
+    ) -> CorpusAuditRecord:
+        """Perform the actual operation logging."""
+        params = self._build_log_params(
+            action, resource_type, status, user_id, corpus_id,
+            resource_id, operation_duration_ms, result_data, metadata
+        )
+        return await self._execute_audit_logging(db, params)
     
     def _build_log_params(self, action: CorpusAuditAction, resource_type: str, status: CorpusAuditStatus, user_id: Optional[str], corpus_id: Optional[str], resource_id: Optional[str], operation_duration_ms: Optional[float], result_data: Optional[Dict[str, Any]], metadata: Optional[CorpusAuditMetadata]) -> Dict[str, Any]:
         """Build parameters dictionary for audit logging."""
@@ -106,7 +121,9 @@ class CorpusAuditLogger:
     ) -> CorpusAuditRecord:
         """Track user-specific actions with enhanced metadata."""
         try:
-            return await self._execute_user_action_logging(db, user_id, action, resource_type, resource_id, metadata)
+            return await self._execute_user_action_logging(
+                db, user_id, action, resource_type, resource_id, metadata
+            )
         except Exception as e:
             self._handle_user_action_error(e)
 

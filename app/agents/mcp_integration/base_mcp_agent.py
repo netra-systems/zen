@@ -78,7 +78,10 @@ class MCPExecutionErrorHandler:
         error_type = self._classify_error(error)
         error_message = self._create_error_message(error_type, error)
         should_fallback = self._should_attempt_fallback(error_type)
-        
+        return self._build_error_execution_result(error_message, should_fallback)
+
+    def _build_error_execution_result(self, error_message: str, should_fallback: bool) -> ExecutionResult:
+        """Build execution result for error scenarios."""
         return ExecutionResult(
             success=False,
             status=ExecutionStatus.FAILED,
@@ -163,7 +166,10 @@ class BaseMCPAgent(BaseExecutionInterface):
     async def execute_with_mcp_patterns(self, context: ExecutionContext) -> MCPExecutionResult:
         """Execute with full MCP patterns and monitoring."""
         base_result = await self.execution_engine.execute(self, context)
-        
+        return self._build_mcp_execution_result(context, base_result)
+
+    def _build_mcp_execution_result(self, context: ExecutionContext, base_result: ExecutionResult) -> MCPExecutionResult:
+        """Build MCP execution result from context and base result."""
         return MCPExecutionResult(
             base_result=base_result,
             mcp_tools_executed=getattr(context, 'mcp_tools_used', []),
@@ -200,28 +206,32 @@ class BaseMCPAgent(BaseExecutionInterface):
     
     async def _create_mcp_context(self, context: ExecutionContext) -> MCPAgentContext:
         """Create MCP agent context for execution."""
-        mcp_context = await self.mcp_context_manager.create_agent_context(
+        mcp_context = await self._build_mcp_agent_context(context)
+        context.mcp_context = mcp_context
+        return mcp_context
+
+    async def _build_mcp_agent_context(self, context: ExecutionContext) -> MCPAgentContext:
+        """Build MCP agent context from execution context."""
+        return await self.mcp_context_manager.create_agent_context(
             agent_name=context.agent_name,
             user_id=context.user_id or "system",
             run_id=context.run_id,
             thread_id=context.thread_id or context.run_id
         )
-        
-        # Store in context for cleanup
-        context.mcp_context = mcp_context
-        return mcp_context
     
     async def _detect_and_validate_intent(self, context: ExecutionContext,
                                         mcp_context: MCPAgentContext) -> MCPIntent:
         """Detect and validate MCP intent from request."""
         request_text = self._extract_request_text(context)
         intent = self.intent_detector.detect_intent(request_text)
-        
-        if not intent.requires_mcp:
-            raise ServiceError("No MCP intent detected in request")
-        
+        self._validate_intent_requires_mcp(intent)
         context.mcp_intent = intent
         return intent
+
+    def _validate_intent_requires_mcp(self, intent: MCPIntent) -> None:
+        """Validate that intent requires MCP processing."""
+        if not intent.requires_mcp:
+            raise ServiceError("No MCP intent detected in request")
     
     async def _execute_mcp_tools(self, context: ExecutionContext,
                                 mcp_context: MCPAgentContext,
@@ -234,14 +244,21 @@ class BaseMCPAgent(BaseExecutionInterface):
     
     async def _execute_discovery_workflow(self, mcp_context: MCPAgentContext) -> Dict[str, Any]:
         """Execute tool discovery workflow."""
-        available_servers = ["filesystem", "web_scraper", "database"]
+        available_servers = self._get_available_server_list()
+        all_tools = await self._discover_tools_from_servers(mcp_context, available_servers)
+        return {"available_tools": all_tools, "discovery_completed": True}
+
+    def _get_available_server_list(self) -> List[str]:
+        """Get list of available MCP servers."""
+        return ["filesystem", "web_scraper", "database"]
+
+    async def _discover_tools_from_servers(self, mcp_context: MCPAgentContext, servers: List[str]) -> List[Dict[str, str]]:
+        """Discover tools from all available servers."""
         all_tools = []
-        
-        for server in available_servers:
+        for server in servers:
             tools = await self.mcp_context_manager.get_available_tools(mcp_context, server)
             all_tools.extend([{"server": server, "tool": tool.name} for tool in tools])
-        
-        return {"available_tools": all_tools, "discovery_completed": True}
+        return all_tools
     
     async def _execute_specific_tool(self, context: ExecutionContext,
                                    mcp_context: MCPAgentContext,

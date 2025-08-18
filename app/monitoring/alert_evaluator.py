@@ -200,12 +200,7 @@ class AlertEvaluator:
             "agent_avg_execution_time_high": metrics.avg_execution_time_ms
         }
     
-    def _generate_alert_message(
-        self, 
-        rule: AlertRule, 
-        current_value: Optional[float], 
-        agent_name: Optional[str]
-    ) -> str:
+    def _generate_alert_message(self, rule: AlertRule, current_value: Optional[float], agent_name: Optional[str]) -> str:
         """Generate human-readable alert message."""
         base_msg = self._get_base_message(rule)
         return self._append_value_details(base_msg, current_value, agent_name, rule)

@@ -53,6 +53,10 @@ class ErrorMetricsMiddleware(BaseHTTPMiddleware):
     ) -> None:
         """Record request completion metrics."""
         self._reset_counters_if_needed()
+        self._process_request_metrics(request, duration, status_code)
+
+    def _process_request_metrics(self, request: Request, duration: float, status_code: int) -> None:
+        """Process request metrics recording."""
         self._record_success_metric(request)
         self._log_slow_request_if_needed(request, duration, status_code)
     
@@ -82,6 +86,10 @@ class ErrorMetricsMiddleware(BaseHTTPMiddleware):
     ) -> None:
         """Record error metrics."""
         self._reset_counters_if_needed()
+        self._process_error_metrics(request, error, duration)
+
+    def _process_error_metrics(self, request: Request, error: Exception, duration: float) -> None:
+        """Process error metrics recording."""
         metric_key = self._build_error_metric_key(request, error)
         self.error_counts[metric_key] = self.error_counts.get(metric_key, 0) + 1
         self._log_error_metric(metric_key, duration, error)
