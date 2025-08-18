@@ -139,6 +139,9 @@ class DevLauncher:
     def _run_services(self) -> int:
         """Run all services."""
         self._clear_service_discovery()
+        auth_result = self._start_and_verify_auth()
+        if auth_result != 0:
+            return auth_result
         backend_result = self._start_and_verify_backend()
         if backend_result != 0:
             return backend_result
@@ -171,6 +174,30 @@ class DevLauncher:
     def _clear_service_discovery(self):
         """Clear old service discovery."""
         self.service_discovery.clear_all()
+    
+    def _start_and_verify_auth(self) -> int:
+        """Start and verify auth service."""
+        auth_process, auth_streamer = self.service_startup.start_auth_service()
+        if not auth_process:
+            # Auth service is optional if disabled in config
+            auth_config = self.config_manager.services_config.auth_service
+            if auth_config.get_config().get("enabled", True):
+                self._print("⚠️", "WARN", "Auth service failed to start but is enabled")
+                return 1
+            else:
+                self._print("ℹ️", "INFO", "Auth service is disabled, skipping")
+                return 0
+        self.process_manager.add_process("Auth", auth_process)
+        return self._verify_auth_readiness()
+    
+    def _verify_auth_readiness(self) -> int:
+        """Verify auth service readiness."""
+        auth_info = self.service_discovery.read_auth_info()
+        if not auth_info:
+            self._print("⚠️", "WARN", "Auth service info not found")
+            return 0  # Continue anyway as auth is optional
+        self._print("✅", "AUTH", f"Auth service ready at {auth_info.get('url')}")
+        return 0
     
     def _start_and_verify_backend(self) -> int:
         """Start and verify backend."""

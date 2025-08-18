@@ -233,7 +233,7 @@
             <name>Testing</name>
             <file>learnings/testing.xml</file>
             <path>SPEC/learnings/testing.xml</path>
-            <learning_count>10</learning_count>
+            <learning_count>11</learning_count>
             <learning_ids>
                 <id>clickhouse-regex-deep-nested-fields</id>
                 <id>clickhouse-function-wrapper-preservation</id>
@@ -245,7 +245,9 @@
                 <id>websocket-mock-server-conflicts</id>
                 <id>frontend-testing-complete-guide</id>
                 <id>test-modularization-300-line-compliance</id>
+                <id>feature-flags-tdd-workflow</id>
             </learning_ids>
+            <important_note>CRITICAL: Feature flags enable TDD workflow without breaking CI/CD - see feature-flags-tdd-workflow learning</important_note>
         </category>
         <category>
             <name>Frontend</name>
@@ -368,6 +370,6 @@
     
     <statistics>
         <total_categories>21</total_categories>
-        <total_learnings>105</total_learnings>
+        <total_learnings>106</total_learnings>
     </statistics>
 </specification>

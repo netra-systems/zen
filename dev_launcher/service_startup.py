@@ -11,6 +11,7 @@ from dev_launcher.log_streamer import LogStreamer, LogManager
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.backend_starter import BackendStarter
 from dev_launcher.frontend_starter import FrontendStarter
+from dev_launcher.auth_starter import AuthStarter
 
 logger = logging.getLogger(__name__)
 
@@ -35,13 +36,18 @@ class ServiceStartupCoordinator:
         self._setup_starters()
     
     def _setup_starters(self):
-        """Setup backend and frontend starters."""
+        """Setup backend, frontend and auth starters."""
         self.backend_starter = BackendStarter(
             self.config, self.services_config,
             self.log_manager, self.service_discovery,
             self.use_emoji
         )
         self.frontend_starter = FrontendStarter(
+            self.config, self.services_config,
+            self.log_manager, self.service_discovery,
+            self.use_emoji
+        )
+        self.auth_starter = AuthStarter(
             self.config, self.services_config,
             self.log_manager, self.service_discovery,
             self.use_emoji
@@ -57,6 +63,11 @@ class ServiceStartupCoordinator:
         """Get frontend health info."""
         return self.frontend_starter.frontend_health_info
     
+    @property
+    def auth_health_info(self):
+        """Get auth service health info."""
+        return self.auth_starter.auth_health_info
+    
     def start_backend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """Start the backend server."""
         return self.backend_starter.start_backend()
@@ -64,3 +75,7 @@ class ServiceStartupCoordinator:
     def start_frontend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """Start the frontend server."""
         return self.frontend_starter.start_frontend()
+    
+    def start_auth_service(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
+        """Start the auth service."""
+        return self.auth_starter.start_auth_service()

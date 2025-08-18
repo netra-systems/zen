@@ -91,6 +91,51 @@
       </automation>
     </checklist-item>
     
+    <checklist-item id="feature-flag-testing" critical="true">
+      <title>Configure Feature Flag Testing for New Features</title>
+      <description>
+        New features MUST use feature flags to enable TDD workflow while maintaining 100% CI/CD pass rate.
+        Configure feature flags before writing tests to prevent build failures during development.
+      </description>
+      <actions>
+        <action type="configuration">
+          Add feature to test_feature_flags.json with status "in_development"
+        </action>
+        <action type="ownership">
+          Specify owner, target_release, and dependencies in feature configuration
+        </action>
+        <action type="test-decoration">
+          Use @tdd_test decorator for tests written before implementation
+        </action>
+        <action type="feature-decoration">
+          Use @feature_flag decorator for basic feature gating
+        </action>
+        <action type="status-update">
+          Change status to "enabled" only when feature is complete and tests pass
+        </action>
+      </actions>
+      <validation>
+        Feature Flag Status: python -c "from test_framework.feature_flags import get_feature_flag_manager; print(get_feature_flag_manager().get_feature_summary())"
+        Test Execution: python test_runner.py --level unit (verify TDD tests are skipped)
+        Coverage Check: Ensure tests run and pass when feature status changed to "enabled"
+      </validation>
+      <tdd-workflow>
+        <step order="1">Configure feature as "in_development" in test_feature_flags.json</step>
+        <step order="2">Write tests with @tdd_test("feature_name") decorator</step>
+        <step order="3">Tests are skipped, maintaining 100% CI/CD pass rate</step>
+        <step order="4">Implement feature functionality</step>
+        <step order="5">Change feature status to "enabled"</step>
+        <step order="6">Verify all tests pass with new implementation</step>
+      </tdd-workflow>
+      <environment-testing>
+        Override feature status for testing: TEST_FEATURE_<NAME>=enabled
+        Enable experimental features: ENABLE_EXPERIMENTAL_TESTS=true
+        Test different combinations for integration scenarios
+      </environment-testing>
+      <reference>SPEC/testing.xml#feature_flag_testing</reference>
+      <reference>SPEC/conventions.xml#feature-flag-tdd</reference>
+    </checklist-item>
+    
     <checklist-item id="agent-tracking" critical="true">
       <title>Add Agent Modification Tracking Headers</title>
       <description>
