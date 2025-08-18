@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import { WebSocketContextType, WebSocketProviderProps } from '../../types/websocket-context-types';
 import { WebSocketStatus } from '../../services/webSocketService';
+import { MessageType } from '../../types/shared/enums';
 
 // Mock WebSocket context value
 export const mockWebSocketContextValue: WebSocketContextType = {
@@ -10,16 +11,23 @@ export const mockWebSocketContextValue: WebSocketContextType = {
   sendOptimisticMessage: jest.fn(() => ({
     id: 'mock-optimistic-id',
     content: 'mock-content',
-    type: 'user' as const,
+    type: MessageType.USER,
+    role: 'user' as const,
     timestamp: Date.now(),
-    isOptimistic: true
+    tempId: 'mock-temp-id',
+    optimisticTimestamp: Date.now(),
+    contentHash: 'mock-hash',
+    reconciliationStatus: 'pending' as const,
+    sequenceNumber: 1,
+    retryCount: 0
   })),
   reconciliationStats: {
-    totalSent: 0,
+    totalOptimistic: 0,
     totalConfirmed: 0,
-    pendingCount: 0,
-    errorCount: 0,
-    averageConfirmationTime: 0
+    totalFailed: 0,
+    totalTimeout: 0,
+    averageReconciliationTime: 0,
+    currentPendingCount: 0
   }
 };
 

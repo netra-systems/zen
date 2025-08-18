@@ -193,6 +193,27 @@ jest.mock('@/providers/WebSocketProvider', () => {
     sendMessage: jest.fn(),
     status: 'OPEN',
     messages: [],
+    sendOptimisticMessage: jest.fn(() => ({
+      id: 'mock-optimistic-id',
+      content: 'mock-content',
+      type: 'user',
+      role: 'user',
+      timestamp: Date.now(),
+      tempId: 'mock-temp-id',
+      optimisticTimestamp: Date.now(),
+      contentHash: 'mock-hash',
+      reconciliationStatus: 'pending',
+      sequenceNumber: 1,
+      retryCount: 0
+    })),
+    reconciliationStats: {
+      totalOptimistic: 0,
+      totalConfirmed: 0,
+      totalFailed: 0,
+      totalTimeout: 0,
+      averageReconciliationTime: 0,
+      currentPendingCount: 0
+    }
   };
   const MockWebSocketContext = React.createContext(mockWebSocketContextValue);
   

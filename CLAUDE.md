@@ -36,6 +36,8 @@ Example:
 - Each function = single task, 8 lines maximum (no exceptions)
 - Composable - All concepts are designed for composable reuse throughout the system.
 - COMPLIANCE STATUS Run: `python scripts/check_architecture_compliance.py` to check current status
+- STABLE BY DEFAULT. MUST FLAG ANY BREAKING CHANGES. MAKE CODE CHANGES IN ATOMIC WAY.
+- Always update relevant docs and xmls after completing work.
 
 ## Core Principles
 
@@ -55,7 +57,7 @@ MANAGE SCOPE
 - Changes must stay within the overall scope and bounds of the existing system architecture unless expressly requested.
 - Keep architecture limited in complexity.
 - Spend extra thinking energy to find elegant and "simple" solutions
-- Modular code ALWAY.
+- Modular code ALWAYS.
 - Avoid creating duplicate files with suffixes like `_enhanced, _fixed, _backup` or similar. 
 Always edit the existing file or create a new file and delete the old if it's now legacy.
 
@@ -203,6 +205,8 @@ python test_runner.py --level integration --no-coverage --fast-fail # DEFAULT te
 | **critical** | 1-2min | Essential paths | `python test_runner.py --level critical` | Quick validation |
 | **real_e2e** | 15-20min | **CRITICAL** - Real LLM testing | `python test_runner.py --level real_e2e --real-llm` | Before major releases |
 | **comprehensive** | 30-45min | Full validation | `python test_runner.py --level comprehensive` | Before production deploy |
+
+- MODULAR ALWAYS. THINK DEEPLY. YOU ARE THE TOP TEAM IN THE WORLD. ACT LIKE IT.
 
 ### Comprehensive Test Categories (10-15min each)
 | Category | Purpose | Command |
