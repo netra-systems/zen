@@ -351,23 +351,40 @@ class ReportBuilder:
     def _gather_summary_components(self, velocity: Dict, impact: Dict, quality: Dict, 
                                  business: Dict, productivity_score: float) -> Dict:
         """Gather components for executive summary"""
+        summary_data = self._extract_summary_insights(velocity, impact, quality, business)
+        return self._build_summary_components_dict(summary_data, productivity_score)
+    
+    def _extract_summary_insights(self, velocity: Dict, impact: Dict, quality: Dict, business: Dict) -> Dict:
+        """Extract insights from all metrics."""
+        return {
+            "highlights": self._extract_highlights(velocity, impact, quality, business),
+            "action_items": self._identify_action_items(velocity, quality, business)
+        }
+    
+    def _build_summary_components_dict(self, summary_data: Dict, productivity_score: float) -> Dict:
+        """Build summary components dictionary."""
         return {
             "productivity_score": productivity_score,
-            "highlights": self._extract_highlights(velocity, impact, quality, business),
-            "action_items": self._identify_action_items(velocity, quality, business),
+            "highlights": summary_data["highlights"],
+            "action_items": summary_data["action_items"],
             "status": self._determine_status(productivity_score)
         }
 
     def _build_executive_summary(self, summary_data: Dict, business: Dict) -> ExecutiveSummary:
         """Build executive summary object"""
-        return ExecutiveSummary(
-            timestamp=datetime.now(),
-            productivity_score=summary_data["productivity_score"],
-            key_highlights=summary_data["highlights"][:3],
-            action_items=summary_data["action_items"][:3],
-            business_value_score=business["overall_value_score"],
-            overall_status=summary_data["status"]
-        )
+        summary_params = self._prepare_executive_summary_params(summary_data, business)
+        return ExecutiveSummary(**summary_params)
+    
+    def _prepare_executive_summary_params(self, summary_data: Dict, business: Dict) -> Dict:
+        """Prepare parameters for ExecutiveSummary construction."""
+        return {
+            "timestamp": datetime.now(),
+            "productivity_score": summary_data["productivity_score"],
+            "key_highlights": summary_data["highlights"][:3],
+            "action_items": summary_data["action_items"][:3],
+            "business_value_score": business["overall_value_score"],
+            "overall_status": summary_data["status"]
+        }
     
     def _calculate_productivity_score(self, velocity: Dict, impact: Dict,
                                      quality: Dict, business: Dict) -> float:
@@ -393,12 +410,17 @@ class ReportBuilder:
     def _extract_highlights(self, velocity: Dict, impact: Dict,
                            quality: Dict, business: Dict) -> List[str]:
         """Extract key highlights from metrics."""
+        highlights = self._collect_all_highlights(velocity, impact, quality, business)
+        return highlights if highlights else ["Steady development progress"]
+    
+    def _collect_all_highlights(self, velocity: Dict, impact: Dict, quality: Dict, business: Dict) -> List[str]:
+        """Collect highlights from all metric categories."""
         highlights = []
         self._check_velocity_highlights(highlights, velocity)
         self._check_impact_highlights(highlights, impact)
         self._check_quality_highlights(highlights, quality)
         self._check_business_highlights(highlights, business)
-        return highlights if highlights else ["Steady development progress"]
+        return highlights
 
     def _check_velocity_highlights(self, highlights: List, velocity: Dict):
         """Check velocity for highlights"""
@@ -471,12 +493,17 @@ class ReportBuilder:
                                  quality: Dict, business: Dict,
                                  branches: Dict) -> List[str]:
         """Generate recommendations based on metrics."""
+        recommendations = self._collect_all_recommendations(velocity, quality, business, branches)
+        return recommendations[:5] if recommendations else ["Maintain current practices"]
+    
+    def _collect_all_recommendations(self, velocity: Dict, quality: Dict, business: Dict, branches: Dict) -> List[str]:
+        """Collect recommendations from all metric categories."""
         recommendations = []
         self._check_branch_recommendations(recommendations, branches)
         self._check_velocity_recommendations(recommendations, velocity)
         self._check_quality_recommendations(recommendations, quality)
         self._check_business_recommendations(recommendations, business)
-        return recommendations[:5] if recommendations else ["Maintain current practices"]
+        return recommendations
 
     def _check_branch_recommendations(self, recommendations: List, branches: Dict):
         """Check branch metrics for recommendations"""
@@ -520,13 +547,25 @@ class ReportBuilder:
     def _get_extended_report_data(self, business: Dict, branches: Dict,
                                  features: Dict, recommendations: List[str]) -> Dict[str, Any]:
         """Get extended report data."""
+        report_metadata = self._generate_report_metadata()
+        extended_data = self._build_extended_metrics_data(business, branches, features, recommendations)
+        return {**extended_data, **report_metadata}
+    
+    def _generate_report_metadata(self) -> Dict[str, Any]:
+        """Generate report metadata."""
+        return {
+            "report_id": self._generate_report_id(),
+            "generated_at": datetime.now()
+        }
+    
+    def _build_extended_metrics_data(self, business: Dict, branches: Dict, 
+                                   features: Dict, recommendations: List[str]) -> Dict[str, Any]:
+        """Build extended metrics data dictionary."""
         return {
             "business_value_metrics": business,
             "branch_metrics": branches,
             "feature_progress": features,
-            "recommendations": recommendations,
-            "report_id": self._generate_report_id(),
-            "generated_at": datetime.now()
+            "recommendations": recommendations
         }
     
     def _generate_report_id(self) -> str:
@@ -548,23 +587,31 @@ class ReportBuilder:
 
     def _build_summary_header(self, summary: ExecutiveSummary) -> List[str]:
         """Build summary header lines"""
+        header_components = self._format_header_components(summary)
+        return [*header_components, ""]
+    
+    def _format_header_components(self, summary: ExecutiveSummary) -> List[str]:
+        """Format individual header components."""
         return [
             f"AI Factory Status Report - {summary.timestamp.strftime('%Y-%m-%d %H:%M')}",
             f"Overall Status: {summary.overall_status.upper()}",
             f"Productivity Score: {summary.productivity_score}/10",
-            f"Business Value Score: {summary.business_value_score}/10",
-            ""
+            f"Business Value Score: {summary.business_value_score}/10"
         ]
 
     def _build_summary_content(self, summary: ExecutiveSummary, report: FactoryStatusReport) -> List[str]:
         """Build summary content lines"""
-        return [
-            "Key Highlights:",
-            *[f"  • {h}" for h in summary.key_highlights],
-            "",
-            "Action Items:",
-            *[f"  • {a}" for a in summary.action_items],
-            "",
-            "Recommendations:",
-            *[f"  • {r}" for r in report.recommendations]
-        ]
+        content_sections = self._format_all_content_sections(summary, report)
+        return self._flatten_content_sections(content_sections)
+    
+    def _format_all_content_sections(self, summary: ExecutiveSummary, report: FactoryStatusReport) -> Dict[str, List[str]]:
+        """Format all content sections."""
+        return {
+            'highlights': ["Key Highlights:", *[f"  • {h}" for h in summary.key_highlights]],
+            'actions': ["Action Items:", *[f"  • {a}" for a in summary.action_items]],
+            'recommendations': ["Recommendations:", *[f"  • {r}" for r in report.recommendations]]
+        }
+    
+    def _flatten_content_sections(self, sections: Dict[str, List[str]]) -> List[str]:
+        """Flatten content sections into single list."""
+        return sections['highlights'] + [""] + sections['actions'] + [""] + sections['recommendations']

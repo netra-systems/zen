@@ -63,35 +63,40 @@ class CustomerImpactCalculator:
     def calculate(self, hours: int = 168) -> CustomerImpactMetrics:
         """Calculate customer impact metrics."""
         commits = self.commit_parser.get_commits(hours)
-        
-        customer_facing = 0
-        ux_improvements = 0
-        performance_enhancements = 0
-        bug_fixes = 0
-        new_features = 0
-        
+        impact_counts = self._count_all_customer_impacts(commits)
+        return self._build_customer_impact_metrics(impact_counts)
+    
+    def _count_all_customer_impacts(self, commits: List[CommitInfo]) -> Dict[str, int]:
+        """Count all types of customer impacts from commits."""
+        counts = {'customer_facing': 0, 'ux_improvements': 0, 'performance': 0, 'bug_fixes': 0, 'new_features': 0}
         for commit in commits:
-            if self._is_customer_facing_commit(commit):
-                customer_facing += 1
-            if self._is_ux_improvement(commit):
-                ux_improvements += 1
-            if self._is_performance_enhancement(commit):
-                performance_enhancements += 1
-            if commit.commit_type == CommitType.FIX:
-                bug_fixes += 1
-            if commit.commit_type == CommitType.FEATURE:
-                new_features += 1
-        
+            self._update_customer_impact_counts(counts, commit)
+        return counts
+    
+    def _update_customer_impact_counts(self, counts: Dict[str, int], commit: CommitInfo) -> None:
+        """Update customer impact counts for a single commit."""
+        if self._is_customer_facing_commit(commit):
+            counts['customer_facing'] += 1
+        if self._is_ux_improvement(commit):
+            counts['ux_improvements'] += 1
+        if self._is_performance_enhancement(commit):
+            counts['performance'] += 1
+        if commit.commit_type == CommitType.FIX:
+            counts['bug_fixes'] += 1
+        if commit.commit_type == CommitType.FEATURE:
+            counts['new_features'] += 1
+    
+    def _build_customer_impact_metrics(self, counts: Dict[str, int]) -> CustomerImpactMetrics:
+        """Build CustomerImpactMetrics from counts."""
         satisfaction_score = self._calculate_satisfaction_score(
-            customer_facing, ux_improvements, bug_fixes, new_features
+            counts['customer_facing'], counts['ux_improvements'], counts['bug_fixes'], counts['new_features']
         )
-        
         return CustomerImpactMetrics(
-            customer_facing_changes=customer_facing,
-            user_experience_improvements=ux_improvements,
-            performance_enhancements=performance_enhancements,
-            bug_fixes_affecting_users=bug_fixes,
-            new_features_delivered=new_features,
+            customer_facing_changes=counts['customer_facing'],
+            user_experience_improvements=counts['ux_improvements'],
+            performance_enhancements=counts['performance'],
+            bug_fixes_affecting_users=counts['bug_fixes'],
+            new_features_delivered=counts['new_features'],
             customer_satisfaction_score=satisfaction_score
         )
     

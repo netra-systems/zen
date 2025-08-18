@@ -29,7 +29,6 @@ class AgentCommunicationMixin:
     async def _execute_websocket_update_with_retry(self, run_id: str, data: Dict[str, Any]) -> None:
         """Execute WebSocket update with retry logic."""
         max_retries, retry_count = 3, 0
-        
         while retry_count < max_retries:
             success = await self._attempt_single_update(run_id, data, retry_count, max_retries)
             if success:
@@ -113,13 +112,22 @@ class AgentCommunicationMixin:
     
     def _build_error_context_params(self, run_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Build error context parameters."""
+        basic_params = self._get_basic_context_params(run_id)
+        extended_params = self._get_extended_context_params(data)
+        return {**basic_params, **extended_params}
+    
+    def _get_basic_context_params(self, run_id: str) -> Dict[str, Any]:
+        """Get basic context parameters."""
         return {
             "agent_name": self.name,
             "operation_name": "websocket_update",
             "run_id": run_id,
-            "timestamp": time.time(),
-            "additional_data": data
+            "timestamp": time.time()
         }
+    
+    def _get_extended_context_params(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Get extended context parameters."""
+        return {"additional_data": data}
     
     def _process_websocket_error(self, websocket_error: WebSocketError) -> None:
         """Process WebSocket error through centralized handler."""
@@ -143,9 +151,7 @@ class AgentCommunicationMixin:
         loop = asyncio.get_event_loop()
         loop.create_task(self.run(state, run_id, stream_updates))
     
-    async def _attempt_single_update(
-        self, run_id: str, data: Dict[str, Any], retry_count: int, max_retries: int
-    ) -> bool:
+    async def _attempt_single_update(self, run_id: str, data: Dict[str, Any], retry_count: int, max_retries: int) -> bool:
         """Attempt single WebSocket update with error handling."""
         try:
             await self._attempt_websocket_update(run_id, data)

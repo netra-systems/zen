@@ -43,6 +43,12 @@ async def get_compliance_handler() -> ComplianceAPIHandler:
     return _compliance_handler
 
 
+async def _handle_module_analysis(modules: List[str], use_claude_cli: bool) -> Dict[str, Any]:
+    """Handle module analysis with compliance handler."""
+    handler = await get_compliance_handler()
+    return await handle_module_compliance_analysis(handler, modules, use_claude_cli)
+
+
 @router.get("/score")
 async def get_compliance_scores(
     current_user: Dict = Depends(get_current_user)
@@ -54,21 +60,18 @@ async def get_compliance_scores(
 
 @router.post("/analyze")
 async def analyze_module_compliance(
-    modules: List[str],
-    use_claude_cli: bool = Query(False),
+    modules: List[str], use_claude_cli: bool = Query(False),
     current_user: Dict = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Trigger compliance analysis for specific modules."""
     validate_claude_cli_access(use_claude_cli)
-    handler = await get_compliance_handler()
-    return await handle_module_compliance_analysis(handler, modules, use_claude_cli)
+    return await _handle_module_analysis(modules, use_claude_cli)
 
 
 @router.get("/violations")
 async def get_compliance_violations(
     severity: Optional[str] = Query(None, regex="^(critical|high|medium|low)$"),
-    category: Optional[str] = Query(None),
-    current_user: Dict = Depends(get_current_user)
+    category: Optional[str] = Query(None), current_user: Dict = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Get list of current spec violations."""
     handler = await get_compliance_handler()

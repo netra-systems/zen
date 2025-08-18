@@ -39,11 +39,6 @@ def _build_demo_overview_response(current_user: Optional[Dict]) -> Dict[str, Any
 
 def _get_demo_features() -> List[str]:
     """Get list of available demo features."""
-    return _build_feature_list()
-
-
-def _build_feature_list() -> List[str]:
-    """Build complete feature list."""
     return [
         "ai_optimization_chat", "roi_calculator", "industry_templates",
         "synthetic_metrics", "export_reports"
@@ -52,8 +47,7 @@ def _build_feature_list() -> List[str]:
 
 @router.post("/chat", response_model=DemoChatResponse)
 async def demo_chat(
-    request: DemoChatRequest,
-    background_tasks: BackgroundTasks,
+    request: DemoChatRequest, background_tasks: BackgroundTasks,
     demo_service: DemoService = Depends(get_demo_service),
     current_user: Optional[Dict] = Depends(get_current_user)
 ) -> DemoChatResponse:
