@@ -76,7 +76,7 @@ class TestSystemStartup:
         # Test with missing critical variable - should use default
         monkeypatch.delenv("DATABASE_URL")
         from app.config import reload_config
-        reload_config()  # Clear cache and reload configuration
+        reload_config(force=True)  # Clear cache and reload configuration
         config_new = config_manager.get_config()
         # Should use default database URL when env var is missing
         assert config_new.database_url != startup_env["DATABASE_URL"]
@@ -84,7 +84,10 @@ class TestSystemStartup:
     
     def test_configuration_loading(self, startup_env):
         """Test configuration file loading and validation"""
-        from app.config import config_manager
+        from app.config import config_manager, reload_config
+        
+        # Force reload configuration to pick up test environment variables
+        reload_config(force=True)
         
         # Use the singleton config_manager directly
         config = config_manager.get_config()

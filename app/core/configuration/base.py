@@ -140,12 +140,13 @@ class UnifiedConfigManager:
             raise ConfigurationError(f"Configuration validation error: {error}")
         raise ConfigurationError(error_msg)
     
-    def reload_config(self) -> None:
+    def reload_config(self, force: bool = False) -> None:
         """Force reload configuration (hot-reload capability)."""
-        if not self._hot_reload_enabled:
+        if not self._hot_reload_enabled and not force:
             self._logger.warning("Hot reload disabled in this environment")
             return
         self._clear_configuration_cache()
+        self._refresh_environment_detection()
         self._logger.info("Configuration reloaded")
     
     def _clear_configuration_cache(self) -> None:
@@ -153,6 +154,13 @@ class UnifiedConfigManager:
         self.get_config.cache_clear()
         self._config_cache = None
         self._load_timestamp = datetime.now()
+    
+    def _refresh_environment_detection(self) -> None:
+        """Refresh environment detection for testing scenarios."""
+        old_env = self._environment
+        self._environment = self._detect_environment()
+        if old_env != self._environment:
+            self._logger.info(f"Environment changed from {old_env} to {self._environment}")
     
     def get_config_summary(self) -> Dict[str, Any]:
         """Get configuration summary for monitoring."""
@@ -198,9 +206,9 @@ def get_unified_config() -> AppConfig:
     return config_manager.get_config()
 
 
-def reload_unified_config() -> None:
+def reload_unified_config(force: bool = False) -> None:
     """Reload unified configuration - Hot reload capability."""
-    config_manager.reload_config()
+    config_manager.reload_config(force=force)
 
 
 def validate_config_integrity() -> Tuple[bool, list]:

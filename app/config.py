@@ -46,9 +46,9 @@ def get_config() -> AppConfig:
     """
     return get_unified_config()
 
-def reload_config():
+def reload_config(force: bool = False):
     """Reload the unified configuration (hot-reload capability)."""
-    reload_unified_config()
+    reload_unified_config(force=force)
 
 def validate_configuration() -> tuple[bool, list]:
     """Validate configuration integrity for Enterprise customers."""

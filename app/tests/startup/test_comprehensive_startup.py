@@ -25,7 +25,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from app.core.exceptions_base import NetraException
-from app.db.clickhouse import get_clickhouse_client
+from app.db.clickhouse import ClickHouseService, get_clickhouse_client
 from app.services.cache_service import CacheService
 from app.auth_integration.client import AuthServiceClient
 
@@ -200,44 +200,43 @@ class ClickHouseValidator:
         if not self.host:
             return ValidationResult(True, "ClickHouse not configured", is_optional=True)
         
+        service = ClickHouseService()
+        
         try:
-            # Test connection
-            conn_result = await self._test_connection()
-            if not conn_result.success:
-                return conn_result
+            # Initialize and test connection
+            await service.initialize()
+            
+            # Check if mock mode
+            if service.is_mock:
+                return ValidationResult(True, "ClickHouse in MOCK mode", is_optional=True)
+            
+            # Test real connection
+            if not service.is_real:
+                return ValidationResult(False, "ClickHouse client not initialized")
             
             # Test permissions
-            perm_result = await self._test_permissions()
+            perm_result = await self._test_permissions(service)
             if not perm_result.success:
                 return perm_result
             
-            return ValidationResult(True, "ClickHouse authenticated")
+            await service.close()
+            return ValidationResult(True, "ClickHouse REAL connection authenticated")
+            
         except Exception as e:
             error_msg = str(e)
             if "Authentication failed" in error_msg:
                 return ValidationResult(False, f"ClickHouse auth failed: Check CLICKHOUSE_USER and CLICKHOUSE_PASSWORD")
             return ValidationResult(False, f"ClickHouse error: {error_msg}")
+        finally:
+            await service.close()
     
-    async def _test_connection(self) -> "ValidationResult":
-        """Test basic connection"""
-        try:
-            client = await get_clickhouse_client()
-            if client is None:
-                return ValidationResult(False, "ClickHouse client not available")
-            return ValidationResult(True, "Connected")
-        except Exception as e:
-            return ValidationResult(False, f"Connection failed: {str(e)}")
-    
-    async def _test_permissions(self) -> "ValidationResult":
+    async def _test_permissions(self, service: ClickHouseService) -> "ValidationResult":
         """Test database permissions"""
         try:
-            client = await get_clickhouse_client()
-            if client is None:
-                return ValidationResult(False, "ClickHouse client not available")
             # Test SELECT permission
-            await client.execute("SELECT 1")
+            await service.execute("SELECT 1")
             # Test table access
-            await client.execute("SHOW TABLES")
+            await service.execute("SHOW TABLES")
             return ValidationResult(True, "Permissions valid")
         except Exception as e:
             return ValidationResult(False, f"Permission error: {str(e)}")
