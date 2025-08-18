@@ -73,54 +73,65 @@ class TypeSafetyValidator:
     def verify_triage_types(self, state: DeepAgentState) -> TypeSafetyResult:
         """Verify type safety for triage stage."""
         result = TypeSafetyResult(stage_name="triage")
+        violations, validated_types = self._validate_triage_type_safety(state)
+        result.type_violations = violations
+        result.validated_types = validated_types
+        result.is_type_safe = len(violations) == 0
+        return result
+    
+    def _validate_triage_type_safety(self, state: DeepAgentState) -> tuple[List[str], List[str]]:
+        """Validate triage type safety and return violations and validated types."""
         violations = []
         validated_types = []
-        
         try:
             self.integrity_checker.type_validator.validate_state_base_types(state)
             validated_types.append("DeepAgentState")
             self.integrity_checker.type_validator.validate_triage_result_types(state.triage_result)
             validated_types.append("TriageResult")
-            result.is_type_safe = True
         except (AssertionError, TypeError) as e:
             violations.append(f"Triage type violation: {str(e)}")
-        
-        result.type_violations = violations
-        result.validated_types = validated_types
-        return result
+        return violations, validated_types
     
     def verify_data_types(self, state: DeepAgentState) -> TypeSafetyResult:
         """Verify type safety for data stage."""
         result = TypeSafetyResult(stage_name="data")
+        violations, validated_types = self._validate_data_type_safety(state)
+        result.type_violations = violations
+        result.validated_types = validated_types
+        result.is_type_safe = len(violations) == 0
+        return result
+    
+    def _validate_data_type_safety(self, state: DeepAgentState) -> tuple[List[str], List[str]]:
+        """Validate data type safety and return violations and validated types."""
         violations = []
         validated_types = []
-        
         try:
             self.integrity_checker.type_validator.validate_complete_state_types(state)
             validated_types.extend(["DeepAgentState", "TriageResult", "DataResult"])
-            result.is_type_safe = True
         except (AssertionError, TypeError) as e:
             violations.append(f"Data type violation: {str(e)}")
-        
-        result.type_violations = violations
-        result.validated_types = validated_types
-        return result
+        return violations, validated_types
     
     def validate_type_transitions(self, before_state: DeepAgentState, 
                                 after_state: DeepAgentState) -> List[str]:
         """Validate type safety during state transitions."""
         violations = []
-        
-        # Check base types preserved
-        if type(before_state.user_request) != type(after_state.user_request):
-            violations.append("User request type changed during transition")
-        
-        # Check result type consistency
-        if before_state.triage_result and after_state.triage_result:
-            if type(before_state.triage_result) != type(after_state.triage_result):
-                violations.append("Triage result type changed during transition")
-        
+        self._check_user_request_type_consistency(before_state, after_state, violations)
+        self._check_triage_result_type_consistency(before_state, after_state, violations)
         return violations
+    
+    def _check_user_request_type_consistency(self, before: DeepAgentState, 
+                                           after: DeepAgentState, violations: List[str]) -> None:
+        """Check user request type consistency."""
+        if type(before.user_request) != type(after.user_request):
+            violations.append("User request type changed during transition")
+    
+    def _check_triage_result_type_consistency(self, before: DeepAgentState,
+                                            after: DeepAgentState, violations: List[str]) -> None:
+        """Check triage result type consistency."""
+        if before.triage_result and after.triage_result:
+            if type(before.triage_result) != type(after.triage_result):
+                violations.append("Triage result type changed during transition")
 
 
 class DataFlowTracker:
@@ -130,36 +141,47 @@ class DataFlowTracker:
                          final_state: DeepAgentState) -> DataFlowResult:
         """Track data flow through triage stage."""
         result = DataFlowResult()
-        
-        # Check data preservation
-        result.data_preserved = self._check_triage_preservation(initial_state, final_state)
-        result.data_corruption_detected = self._detect_triage_corruption(initial_state, final_state)
-        result.data_loss_detected = self._detect_triage_loss(initial_state, final_state)
-        result.data_transformations = self._track_triage_transformations(initial_state, final_state)
-        
+        self._populate_triage_flow_checks(initial_state, final_state, result)
+        self._add_triage_flow_violations(result)
+        return result
+    
+    def _populate_triage_flow_checks(self, initial: DeepAgentState, 
+                                   final: DeepAgentState, result: DataFlowResult) -> None:
+        """Populate triage flow check results."""
+        result.data_preserved = self._check_triage_preservation(initial, final)
+        result.data_corruption_detected = self._detect_triage_corruption(initial, final)
+        result.data_loss_detected = self._detect_triage_loss(initial, final)
+        result.data_transformations = self._track_triage_transformations(initial, final)
+    
+    def _add_triage_flow_violations(self, result: DataFlowResult) -> None:
+        """Add flow violations to triage result."""
         if result.data_corruption_detected:
             result.flow_violations.append("Data corruption detected in triage flow")
         if result.data_loss_detected:
             result.flow_violations.append("Data loss detected in triage flow")
-        
-        return result
     
     def track_data_flow(self, initial_state: DeepAgentState,
                        final_state: DeepAgentState) -> DataFlowResult:
         """Track data flow through data analysis stage."""
         result = DataFlowResult()
-        
-        result.data_preserved = self._check_data_preservation(initial_state, final_state)
-        result.data_corruption_detected = self._detect_data_corruption(initial_state, final_state)
-        result.data_loss_detected = self._detect_data_loss(initial_state, final_state)
-        result.data_transformations = self._track_data_transformations(initial_state, final_state)
-        
+        self._populate_data_flow_checks(initial_state, final_state, result)
+        self._add_data_flow_violations(result)
+        return result
+    
+    def _populate_data_flow_checks(self, initial: DeepAgentState,
+                                 final: DeepAgentState, result: DataFlowResult) -> None:
+        """Populate data flow check results."""
+        result.data_preserved = self._check_data_preservation(initial, final)
+        result.data_corruption_detected = self._detect_data_corruption(initial, final)
+        result.data_loss_detected = self._detect_data_loss(initial, final)
+        result.data_transformations = self._track_data_transformations(initial, final)
+    
+    def _add_data_flow_violations(self, result: DataFlowResult) -> None:
+        """Add flow violations to data result."""
         if result.data_corruption_detected:
             result.flow_violations.append("Data corruption detected in data flow")
         if result.data_loss_detected:
             result.flow_violations.append("Data loss detected in data flow")
-        
-        return result
     
     def _check_triage_preservation(self, initial: DeepAgentState, final: DeepAgentState) -> bool:
         """Check if essential data is preserved during triage."""
@@ -223,39 +245,39 @@ class ReferentialIntegrityChecker:
     def check_triage_references(self, state: DeepAgentState) -> ReferentialIntegrityResult:
         """Check referential integrity for triage stage."""
         result = ReferentialIntegrityResult()
-        
-        broken_refs = []
-        if state.triage_result:
-            # Check if user_request is still referenced properly
-            if not state.user_request:
-                broken_refs.append("Triage result exists but user_request is missing")
-        
+        broken_refs = self._find_triage_broken_references(state)
         result.broken_references = broken_refs
         result.reference_chain_valid = len(broken_refs) == 0
         result.integrity_maintained = result.reference_chain_valid
         return result
     
+    def _find_triage_broken_references(self, state: DeepAgentState) -> List[str]:
+        """Find broken references in triage stage."""
+        broken_refs = []
+        if state.triage_result and not state.user_request:
+            broken_refs.append("Triage result exists but user_request is missing")
+        return broken_refs
+    
     def check_data_references(self, state: DeepAgentState) -> ReferentialIntegrityResult:
         """Check referential integrity for data stage."""
         result = ReferentialIntegrityResult()
-        
-        broken_refs = []
-        orphaned = []
-        
-        # Check data result has proper triage reference
-        if state.data_result and not state.triage_result:
-            orphaned.append("Data result exists without triage result")
-        
-        # Check step count consistency
-        expected_steps = sum([1 for r in [state.triage_result, state.data_result] if r is not None])
-        if state.step_count < expected_steps:
-            broken_refs.append("Step count inconsistent with completed stages")
-        
+        broken_refs, orphaned = self._find_data_integrity_issues(state)
         result.broken_references = broken_refs
         result.orphaned_data = orphaned
         result.reference_chain_valid = len(broken_refs) == 0 and len(orphaned) == 0
         result.integrity_maintained = result.reference_chain_valid
         return result
+    
+    def _find_data_integrity_issues(self, state: DeepAgentState) -> tuple[List[str], List[str]]:
+        """Find data integrity issues and return broken refs and orphaned data."""
+        broken_refs = []
+        orphaned = []
+        if state.data_result and not state.triage_result:
+            orphaned.append("Data result exists without triage result")
+        expected_steps = sum([1 for r in [state.triage_result, state.data_result] if r is not None])
+        if state.step_count < expected_steps:
+            broken_refs.append("Step count inconsistent with completed stages")
+        return broken_refs, orphaned
 
 
 class AuditTrailValidator:
@@ -264,60 +286,73 @@ class AuditTrailValidator:
     def validate_trail(self, state: DeepAgentState) -> AuditTrailResult:
         """Validate complete audit trail."""
         result = AuditTrailResult()
-        
         trail_entries = self._extract_trail_entries(state)
         missing_entries = self._check_missing_entries(state)
         timestamp_consistent = self._validate_timestamps(trail_entries)
-        
+        self._populate_trail_result(result, trail_entries, missing_entries, timestamp_consistent)
+        return result
+    
+    def _populate_trail_result(self, result: AuditTrailResult, trail_entries: List[Dict[str, Any]],
+                             missing_entries: List[str], timestamp_consistent: bool) -> None:
+        """Populate audit trail result."""
         result.trail_entries = trail_entries
         result.missing_trail_entries = missing_entries
         result.timestamp_consistency = timestamp_consistent
         result.trail_complete = len(missing_entries) == 0
-        
-        return result
     
     def _extract_trail_entries(self, state: DeepAgentState) -> List[Dict[str, Any]]:
         """Extract audit trail entries from state."""
         entries = []
-        
+        self._add_triage_trail_entry(state, entries)
+        self._add_data_trail_entry(state, entries)
+        return entries
+    
+    def _add_triage_trail_entry(self, state: DeepAgentState, entries: List[Dict[str, Any]]) -> None:
+        """Add triage trail entry if present."""
         if state.triage_result:
             entries.append({
                 "stage": "triage",
                 "timestamp": datetime.now(UTC).isoformat(),
                 "data_present": True
             })
-        
+    
+    def _add_data_trail_entry(self, state: DeepAgentState, entries: List[Dict[str, Any]]) -> None:
+        """Add data trail entry if present."""
         if state.data_result:
             entries.append({
                 "stage": "data",
                 "timestamp": datetime.now(UTC).isoformat(),
                 "data_present": True
             })
-        
-        return entries
     
     def _check_missing_entries(self, state: DeepAgentState) -> List[str]:
         """Check for missing audit trail entries."""
         missing = []
-        
+        self._check_missing_triage_entry(state, missing)
+        self._check_missing_data_entry(state, missing)
+        return missing
+    
+    def _check_missing_triage_entry(self, state: DeepAgentState, missing: List[str]) -> None:
+        """Check for missing triage audit entry."""
         if state.step_count > 0 and not state.triage_result:
             missing.append("Triage audit entry missing")
-        
+    
+    def _check_missing_data_entry(self, state: DeepAgentState, missing: List[str]) -> None:
+        """Check for missing data analysis audit entry."""
         if state.step_count > 1 and not state.data_result:
             missing.append("Data analysis audit entry missing")
-        
-        return missing
     
     def _validate_timestamps(self, entries: List[Dict[str, Any]]) -> bool:
         """Validate timestamp consistency in trail."""
         if len(entries) < 2:
             return True
-        
-        # Check chronological order
+        return self._check_chronological_order(entries)
+    
+    def _check_chronological_order(self, entries: List[Dict[str, Any]]) -> bool:
+        """Check if timestamps are in chronological order."""
         for i in range(1, len(entries)):
             if entries[i]["timestamp"] < entries[i-1]["timestamp"]:
                 return False
-        
         return True
 
 
@@ -330,8 +365,13 @@ class StateConsistencyValidator:
     def validate_consistency(self, state: DeepAgentState) -> StateConsistencyResult:
         """Validate complete state consistency."""
         result = StateConsistencyResult()
+        violations = self._check_pipeline_consistency(state, result)
+        result.consistency_violations = violations
+        return result
+    
+    def _check_pipeline_consistency(self, state: DeepAgentState, result: StateConsistencyResult) -> List[str]:
+        """Check pipeline consistency and update result flags."""
         violations = []
-        
         try:
             self.integrity_checker.check_pipeline_state_consistency(state)
             result.step_count_valid = True
@@ -340,9 +380,7 @@ class StateConsistencyValidator:
         except AssertionError as e:
             violations.append(str(e))
             result.state_consistent = False
-        
-        result.consistency_violations = violations
-        return result
+        return violations
 
 
 class DataIntegrityValidator:
@@ -358,51 +396,75 @@ class DataIntegrityValidator:
     def validate_triage_integrity(self, initial_state: DeepAgentState,
                                  final_state: DeepAgentState) -> DataIntegrityValidationResult:
         """Validate complete data integrity for triage stage."""
-        type_safety = self.type_safety_validator.verify_triage_types(final_state)
-        data_flow = self.data_flow_tracker.track_triage_flow(initial_state, final_state)
-        referential = self.referential_checker.check_triage_references(final_state)
-        audit_trail = self.audit_validator.validate_trail(final_state)
-        consistency = self.consistency_validator.validate_consistency(final_state)
-        
-        overall_integrity = all([
-            type_safety.is_type_safe,
-            data_flow.data_preserved and not data_flow.data_corruption_detected,
-            referential.integrity_maintained,
-            audit_trail.trail_complete,
-            consistency.state_consistent
+        validation_results = self._gather_triage_validation_results(initial_state, final_state)
+        overall_integrity = self._calculate_triage_overall_integrity(validation_results)
+        return self._build_triage_validation_result(validation_results, overall_integrity)
+    
+    def _gather_triage_validation_results(self, initial: DeepAgentState, final: DeepAgentState) -> Dict[str, Any]:
+        """Gather all triage validation results."""
+        return {
+            'type_safety': self.type_safety_validator.verify_triage_types(final),
+            'data_flow': self.data_flow_tracker.track_triage_flow(initial, final),
+            'referential': self.referential_checker.check_triage_references(final),
+            'audit_trail': self.audit_validator.validate_trail(final),
+            'consistency': self.consistency_validator.validate_consistency(final)
+        }
+    
+    def _calculate_triage_overall_integrity(self, results: Dict[str, Any]) -> bool:
+        """Calculate overall integrity for triage validation."""
+        return all([
+            results['type_safety'].is_type_safe,
+            results['data_flow'].data_preserved and not results['data_flow'].data_corruption_detected,
+            results['referential'].integrity_maintained,
+            results['audit_trail'].trail_complete,
+            results['consistency'].state_consistent
         ])
-        
+    
+    def _build_triage_validation_result(self, results: Dict[str, Any], overall: bool) -> DataIntegrityValidationResult:
+        """Build final triage validation result."""
         return DataIntegrityValidationResult(
-            type_safety=type_safety,
-            data_flow=data_flow,
-            referential_integrity=referential,
-            audit_trail=audit_trail,
-            state_consistency=consistency,
-            overall_integrity=overall_integrity
+            type_safety=results['type_safety'],
+            data_flow=results['data_flow'],
+            referential_integrity=results['referential'],
+            audit_trail=results['audit_trail'],
+            state_consistency=results['consistency'],
+            overall_integrity=overall
         )
     
     def validate_data_integrity(self, initial_state: DeepAgentState,
                                final_state: DeepAgentState) -> DataIntegrityValidationResult:
         """Validate complete data integrity for data analysis stage."""
-        type_safety = self.type_safety_validator.verify_data_types(final_state)
-        data_flow = self.data_flow_tracker.track_data_flow(initial_state, final_state)
-        referential = self.referential_checker.check_data_references(final_state)
-        audit_trail = self.audit_validator.validate_trail(final_state)
-        consistency = self.consistency_validator.validate_consistency(final_state)
-        
-        overall_integrity = all([
-            type_safety.is_type_safe,
-            data_flow.data_preserved and not data_flow.data_corruption_detected,
-            referential.integrity_maintained,
-            audit_trail.trail_complete,
-            consistency.state_consistent
+        validation_results = self._gather_data_validation_results(initial_state, final_state)
+        overall_integrity = self._calculate_data_overall_integrity(validation_results)
+        return self._build_data_validation_result(validation_results, overall_integrity)
+    
+    def _gather_data_validation_results(self, initial: DeepAgentState, final: DeepAgentState) -> Dict[str, Any]:
+        """Gather all data validation results."""
+        return {
+            'type_safety': self.type_safety_validator.verify_data_types(final),
+            'data_flow': self.data_flow_tracker.track_data_flow(initial, final),
+            'referential': self.referential_checker.check_data_references(final),
+            'audit_trail': self.audit_validator.validate_trail(final),
+            'consistency': self.consistency_validator.validate_consistency(final)
+        }
+    
+    def _calculate_data_overall_integrity(self, results: Dict[str, Any]) -> bool:
+        """Calculate overall integrity for data validation."""
+        return all([
+            results['type_safety'].is_type_safe,
+            results['data_flow'].data_preserved and not results['data_flow'].data_corruption_detected,
+            results['referential'].integrity_maintained,
+            results['audit_trail'].trail_complete,
+            results['consistency'].state_consistent
         ])
-        
+    
+    def _build_data_validation_result(self, results: Dict[str, Any], overall: bool) -> DataIntegrityValidationResult:
+        """Build final data validation result."""
         return DataIntegrityValidationResult(
-            type_safety=type_safety,
-            data_flow=data_flow,
-            referential_integrity=referential,
-            audit_trail=audit_trail,
-            state_consistency=consistency,
-            overall_integrity=overall_integrity
+            type_safety=results['type_safety'],
+            data_flow=results['data_flow'],
+            referential_integrity=results['referential'],
+            audit_trail=results['audit_trail'],
+            state_consistency=results['consistency'],
+            overall_integrity=overall
         )
