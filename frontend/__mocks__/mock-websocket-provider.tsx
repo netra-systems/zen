@@ -7,6 +7,20 @@ export const mockWebSocketContextValue: WebSocketContextType = {
   status: 'OPEN' as WebSocketStatus,
   messages: [],
   sendMessage: jest.fn(),
+  sendOptimisticMessage: jest.fn(() => ({
+    id: 'mock-optimistic-id',
+    content: 'mock-content',
+    type: 'user' as const,
+    timestamp: Date.now(),
+    isOptimistic: true
+  })),
+  reconciliationStats: {
+    totalSent: 0,
+    totalConfirmed: 0,
+    pendingCount: 0,
+    errorCount: 0,
+    averageConfirmationTime: 0
+  }
 };
 
 // Create the same context as WebSocketProvider uses

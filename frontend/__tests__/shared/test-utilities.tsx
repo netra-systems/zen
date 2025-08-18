@@ -201,7 +201,7 @@ export const measureRenderTime = (renderFunction: () => any) => {
   return { result, renderTime: endTime - startTime };
 };
 
-export const createLargeDataset = <T>(
+export const createLargeDataset = <T,>(
   factory: (index: number) => T,
   size: number = 1000
 ): T[] => {
