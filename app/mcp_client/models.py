@@ -48,7 +48,7 @@ class AuthType(str, Enum):
     ENVIRONMENT = "environment"
 
 
-class RetryConfig(BaseModel):
+class MCPRetryConfig(BaseModel):
     """Retry configuration for MCP operations."""
     max_attempts: int = Field(default=3, ge=1, le=10)
     initial_delay_ms: int = Field(default=1000, ge=100, le=10000)
@@ -81,7 +81,7 @@ class MCPServerConfig(BaseModel):
     transport: MCPTransport = Field(...)
     auth: Optional[MCPAuthConfig] = Field(default=None)
     timeout_ms: int = Field(default=30000, ge=1000, le=300000)
-    retry_config: Optional[RetryConfig] = Field(default_factory=RetryConfig)
+    retry_config: Optional[MCPRetryConfig] = Field(default_factory=MCPRetryConfig)
     environment: Optional[Dict[str, str]] = Field(default_factory=dict)
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
     
@@ -245,7 +245,7 @@ __all__ = [
     "ConnectionStatus",
     "MCPTransport", 
     "AuthType",
-    "RetryConfig",
+    "MCPRetryConfig",
     "MCPAuthConfig",
     "MCPServerConfig",
     "MCPConnection",

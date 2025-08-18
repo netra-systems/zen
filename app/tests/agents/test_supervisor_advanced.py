@@ -217,49 +217,49 @@ class TestSupervisorAdvancedFeatures:
         assert supervisor.metrics["requests"] == 1
         assert supervisor.metrics["successes"] == 1
         assert supervisor.metrics["failures"] == 0
-    async def test_supervisor_circuit_breaker_recovery(self):
-        """Test supervisor can recover from circuit breaker state"""
+    def _setup_circuit_breaker_supervisor(self):
+        """Setup supervisor with circuit breaker tracking"""
         mock_db = AsyncMock()
         mock_llm = AsyncMock()
         mock_websocket = AsyncMock()
         mock_tool_dispatcher = AsyncMock()
-        
         supervisor = SupervisorAgent(mock_db, mock_llm, mock_websocket, mock_tool_dispatcher)
-        
-        # Add circuit breaker state tracking
         supervisor.circuit_breaker = {"failures": 0, "state": "closed", "last_failure": None}
-        
-        def get_circuit_state():
-            if supervisor.circuit_breaker["failures"] >= 3:
-                supervisor.circuit_breaker["state"] = "open"
-                return "open"
-            return "closed"
-        
-        # Simulate failures followed by recovery
-        call_count = 0
-        async def mock_execute(state, run_id, stream_updates=True):
-            nonlocal call_count
-            call_count += 1
-            
-            circuit_state = get_circuit_state()
-            if circuit_state == "open" and call_count < 6:
-                raise Exception("Circuit breaker is open")
-            
-            if call_count < 4:  # First 3 calls fail
-                supervisor.circuit_breaker["failures"] += 1
-                raise Exception("Service failure")
-            else:  # Later calls succeed
-                supervisor.circuit_breaker["failures"] = 0
-                supervisor.circuit_breaker["state"] = "closed"
-                state.triage_result = {"recovered": True}
-                return state
-        
-        # Mock triage agent for circuit breaker test
+        return supervisor
+
+    def _get_circuit_state(self, supervisor):
+        """Get current circuit breaker state"""
+        if supervisor.circuit_breaker["failures"] >= 3:
+            supervisor.circuit_breaker["state"] = "open"
+            return "open"
+        return "closed"
+
+    async def _mock_circuit_breaker_execute(self, supervisor, state, run_id, stream_updates=True):
+        """Mock execute function with circuit breaker logic"""
+        call_count = getattr(supervisor, '_cb_call_count', 0) + 1
+        supervisor._cb_call_count = call_count
+        circuit_state = self._get_circuit_state(supervisor)
+        if circuit_state == "open" and call_count < 6:
+            raise Exception("Circuit breaker is open")
+        if call_count < 4:  # First 3 calls fail
+            supervisor.circuit_breaker["failures"] += 1
+            raise Exception("Service failure")
+        else:  # Later calls succeed
+            supervisor.circuit_breaker["failures"] = 0
+            supervisor.circuit_breaker["state"] = "closed"
+            state.triage_result = {"recovered": True}
+            return state
+
+    def _setup_circuit_breaker_agent(self, supervisor):
+        """Setup mock triage agent for circuit breaker test"""
         from app.agents.triage_sub_agent.agent import TriageSubAgent
         mock_triage = AsyncMock(spec=TriageSubAgent)
-        mock_triage.execute = mock_execute
+        mock_triage.execute = lambda state, run_id, stream_updates=True: self._mock_circuit_breaker_execute(supervisor, state, run_id, stream_updates)
         supervisor.agents["triage"] = mock_triage
-        
+        supervisor._cb_call_count = 0
+
+    def _create_circuit_breaker_context(self):
+        """Create execution context for circuit breaker test"""
         state = DeepAgentState(user_request="Test recovery")
         context = AgentExecutionContext(
             run_id="recovery-test",
@@ -267,17 +267,18 @@ class TestSupervisorAdvancedFeatures:
             user_id="user-1",
             agent_name="supervisor"
         )
-        
-        # Mock the _route_to_agent method for circuit breaker test
-        async def mock_route_circuit_breaker(state, context, agent_name):
-            if call_count >= 4:
-                return AgentExecutionResult(success=True, state=state)
-            else:
-                return AgentExecutionResult(success=False, error="Circuit breaker test")
-        
-        supervisor._route_to_agent = mock_route_circuit_breaker
-        
-        # Try multiple times to trigger circuit breaker
+        return state, context
+
+    async def _mock_route_circuit_breaker(self, supervisor, state, context, agent_name):
+        """Mock route method for circuit breaker test"""
+        call_count = getattr(supervisor, '_cb_call_count', 0)
+        if call_count >= 4:
+            return AgentExecutionResult(success=True, state=state)
+        else:
+            return AgentExecutionResult(success=False, error="Circuit breaker test")
+
+    async def _execute_circuit_breaker_attempts(self, supervisor, state, context):
+        """Execute multiple attempts to trigger circuit breaker"""
         for attempt in range(6):
             try:
                 result = await supervisor._route_to_agent(state, context, "triage")
@@ -285,7 +286,17 @@ class TestSupervisorAdvancedFeatures:
                     break
             except Exception:
                 await asyncio.sleep(0.1)  # Wait before retry
-        
-        # Verify recovery occurred
+
+    def _verify_circuit_breaker_recovery(self, supervisor):
+        """Verify circuit breaker recovery"""
         assert supervisor.circuit_breaker["state"] == "closed"
         assert supervisor.circuit_breaker["failures"] == 0
+
+    async def test_supervisor_circuit_breaker_recovery(self):
+        """Test supervisor can recover from circuit breaker state"""
+        supervisor = self._setup_circuit_breaker_supervisor()
+        self._setup_circuit_breaker_agent(supervisor)
+        state, context = self._create_circuit_breaker_context()
+        supervisor._route_to_agent = lambda s, c, a: self._mock_route_circuit_breaker(supervisor, s, c, a)
+        await self._execute_circuit_breaker_attempts(supervisor, state, context)
+        self._verify_circuit_breaker_recovery(supervisor)

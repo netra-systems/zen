@@ -42,8 +42,7 @@ class LLMConfigManager:
     
     def _check_if_enabled(self) -> bool:
         """Check if LLMs should be enabled based on service mode configuration."""
-        import os
-        llm_mode = os.environ.get("LLM_MODE", "shared").lower()
+        llm_mode = self.settings.llm_mode.lower()
         if llm_mode in ["disabled", "mock"]:
             logger.info(f"LLMs are disabled (mode: {llm_mode})")
             return False

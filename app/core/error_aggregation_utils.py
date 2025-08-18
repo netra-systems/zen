@@ -12,6 +12,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from app.core.error_codes import ErrorSeverity
+from app.core.resilience.monitor import AlertSeverity
 
 
 class AggregationLevel(Enum):
@@ -21,14 +22,6 @@ class AggregationLevel(Enum):
     PATTERN = "pattern"          # Pattern-based grouping
     TREND = "trend"             # Trend analysis
     PREDICTIVE = "predictive"   # Predictive analysis
-
-
-class AlertSeverity(Enum):
-    """Alert severity levels for escalation and prioritization."""
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
 
 
 @dataclass

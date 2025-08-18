@@ -21,14 +21,9 @@ class DataEnricher:
         self.client.disconnect()
         logging.info("DataEnricher client disconnected.")
 
-    def _get_enriched_table_schema(self, dest_db: str, enriched_table_name: str) -> str:
-        """
-        Defines the schema for the enriched table. Columns match `UnifiedLogEntry`.
-        """
-        # Storing nested data as JSON strings (ClickHouse String type) is flexible.
-        return f"""
-        CREATE TABLE IF NOT EXISTS `{dest_db}`.`{enriched_table_name}`
-        (
+    def _get_enriched_table_columns(self) -> str:
+        """Define the column structure for enriched table."""
+        return """
             `event_metadata` String,
             `trace_context` String,
             `request` String,
@@ -37,33 +32,38 @@ class DataEnricher:
             `response` String,
             `workloadName` String,
             `enriched_metrics` Nullable(String),
-            `embedding` Nullable(String)
+            `embedding` Nullable(String)"""
+
+    def _get_enriched_table_schema(self, dest_db: str, enriched_table_name: str) -> str:
+        """Defines the schema for the enriched table. Columns match `UnifiedLogEntry`."""
+        # Storing nested data as JSON strings (ClickHouse String type) is flexible.
+        columns = self._get_enriched_table_columns()
+        return f"""
+        CREATE TABLE IF NOT EXISTS `{dest_db}`.`{enriched_table_name}`
+        ({columns}
         )
         ENGINE = MergeTree()
         ORDER BY (workloadName)
         """
 
-    def enrich_data(self, source_db: str, source_table: str) -> Tuple[str, str]:
-        """
-        Creates a new, enriched table from the raw source data.
-        """
+    def _setup_enrichment_target(self, source_table: str) -> Tuple[str, str]:
+        """Setup target database and table names for enrichment."""
         enriched_table_name = f"{source_table}_enriched"
         dest_db = self.netra_creds.get('database', 'netra')
         logging.info(f"Starting enrichment process. Target table: `{dest_db}`.`{enriched_table_name}`")
+        return dest_db, enriched_table_name
 
+    def _prepare_enriched_table(self, dest_db: str, enriched_table_name: str) -> None:
+        """Drop existing table and create new empty enriched table."""
         self.client.execute(f"DROP TABLE IF EXISTS `{dest_db}`.`{enriched_table_name}`")
         logging.info(f"Dropped existing table `{enriched_table_name}` if it existed.")
-
         create_schema_query = self._get_enriched_table_schema(dest_db, enriched_table_name)
         self.client.execute(create_schema_query)
         logging.info(f"Created new empty table `{enriched_table_name}` with target schemas.")
 
-        # This core transformation logic assumes a flat source table and builds the
-        # nested JSON structures required by the analysis engine's UnifiedLogEntry model.
-        # This MUST be adapted based on the customer's actual source table columns.
-        transformation_query = f"""
-        INSERT INTO `{dest_db}`.`{enriched_table_name}`
-        SELECT
+    def _get_transformation_select_columns(self) -> str:
+        """Define the SELECT column transformations for enrichment query."""
+        return """
             toJSONString(map('log_schema_version', '23.4.0', 'event_id', generateUUIDv4(), 'timestamp_utc', toUnixTimestamp(now()))) as event_metadata,
             toJSONString(map('trace_id', trace_id, 'span_id', span_id, 'parent_span_id', parent_span_id)) as trace_context,
             toJSONString(map(
@@ -76,17 +76,39 @@ class DataEnricher:
             toJSONString(map('usage', toJSONString(map('prompt_tokens', prompt_tokens, 'completion_tokens', completion_tokens, 'total_tokens', prompt_tokens + completion_tokens)))) as response,
             workload_name as workloadName,
             NULL as enriched_metrics,
-            NULL as embedding
+            NULL as embedding"""
+
+    def _build_transformation_query(self, source_db: str, source_table: str, dest_db: str, enriched_table_name: str) -> str:
+        """Build the core transformation query for data enrichment."""
+        # This core transformation logic assumes a flat source table and builds the
+        # nested JSON structures required by the analysis engine's UnifiedLogEntry model.
+        # This MUST be adapted based on the customer's actual source table columns.
+        select_columns = self._get_transformation_select_columns()
+        return f"""
+        INSERT INTO `{dest_db}`.`{enriched_table_name}`
+        SELECT{select_columns}
         FROM `{source_db}`.`{source_table}`
         """
 
+    def _execute_transformation(self, transformation_query: str, dest_db: str, enriched_table_name: str) -> None:
+        """Execute transformation query with error handling."""
         try:
             logging.info("Executing transformation query to populate the enriched table...")
             self.client.execute(transformation_query)
             logging.info(f"Successfully enriched data and inserted into `{enriched_table_name}`.")
         except Exception as e:
-            logging.error(f"Failed during data enrichment transformation: {e}", exc_info=True)
-            self.client.execute(f"DROP TABLE IF EXISTS `{dest_db}`.`{enriched_table_name}`")
-            raise
+            self._handle_transformation_error(e, dest_db, enriched_table_name)
 
+    def _handle_transformation_error(self, e: Exception, dest_db: str, enriched_table_name: str) -> None:
+        """Handle transformation errors with cleanup."""
+        logging.error(f"Failed during data enrichment transformation: {e}", exc_info=True)
+        self.client.execute(f"DROP TABLE IF EXISTS `{dest_db}`.`{enriched_table_name}`")
+        raise
+
+    def enrich_data(self, source_db: str, source_table: str) -> Tuple[str, str]:
+        """Creates a new, enriched table from the raw source data."""
+        dest_db, enriched_table_name = self._setup_enrichment_target(source_table)
+        self._prepare_enriched_table(dest_db, enriched_table_name)
+        transformation_query = self._build_transformation_query(source_db, source_table, dest_db, enriched_table_name)
+        self._execute_transformation(transformation_query, dest_db, enriched_table_name)
         return dest_db, enriched_table_name

@@ -144,24 +144,36 @@ class PerformanceCalculator:
         return sum(query_times) / len(query_times)
 
     @staticmethod
+    def _split_metrics_by_time(recent_metrics: List[DatabaseMetrics]) -> tuple:
+        """Split metrics into first and second half by time."""
+        mid_point = len(recent_metrics) // 2
+        first_half = recent_metrics[:mid_point]
+        second_half = recent_metrics[mid_point:]
+        return first_half, second_half
+    
+    @staticmethod
+    def _calculate_query_time_trend(first_half: List[DatabaseMetrics], second_half: List[DatabaseMetrics]) -> float:
+        """Calculate query time trend between periods."""
+        first_avg = sum(m.avg_query_time for m in first_half) / len(first_half)
+        second_avg = sum(m.avg_query_time for m in second_half) / len(second_half)
+        return second_avg - first_avg
+    
+    @staticmethod
+    def _calculate_connection_trend(first_half: List[DatabaseMetrics], second_half: List[DatabaseMetrics]) -> float:
+        """Calculate connection trend between periods."""
+        first_avg = sum(m.active_connections for m in first_half) / len(first_half)
+        second_avg = sum(m.active_connections for m in second_half) / len(second_half)
+        return second_avg - first_avg
+    
+    @staticmethod
     def calculate_trends(recent_metrics: List[DatabaseMetrics]) -> Dict[str, float]:
         """Calculate performance trends."""
         if len(recent_metrics) < 2:
             return {'query_time_trend': 0.0, 'connection_trend': 0.0}
         
-        mid_point = len(recent_metrics) // 2
-        first_half = recent_metrics[:mid_point]
-        second_half = recent_metrics[mid_point:]
-        
-        query_time_trend = (
-            sum(m.avg_query_time for m in second_half) / len(second_half) -
-            sum(m.avg_query_time for m in first_half) / len(first_half)
-        )
-        
-        connection_trend = (
-            sum(m.active_connections for m in second_half) / len(second_half) -
-            sum(m.active_connections for m in first_half) / len(first_half)
-        )
+        first_half, second_half = PerformanceCalculator._split_metrics_by_time(recent_metrics)
+        query_time_trend = PerformanceCalculator._calculate_query_time_trend(first_half, second_half)
+        connection_trend = PerformanceCalculator._calculate_connection_trend(first_half, second_half)
         
         return {
             'query_time_trend': query_time_trend,

@@ -8,20 +8,13 @@
  */
 
 import { WebSocketMessageType, AgentStatus } from '../shared/enums';
+import { AgentResult, WebSocketError } from '../backend-sync/payloads';
 
 // ============================================================================
 // CORE WEBSOCKET INTERFACES
 // ============================================================================
 
-export interface WebSocketError {
-  message: string;
-  error_type?: string | null;
-  code?: string | null;
-  severity?: 'low' | 'medium' | 'high' | 'critical';
-  details?: Record<string, unknown> | null;
-  trace_id?: string | null;
-  timestamp?: string; // ISO datetime string
-}
+// WebSocketError imported from canonical source above
 
 export interface BaseWebSocketPayload {
   timestamp?: string; // ISO datetime string
@@ -72,16 +65,7 @@ export interface DeleteThreadPayload extends BaseWebSocketPayload {
 // SERVER TO CLIENT PAYLOAD TYPES
 // ============================================================================
 
-export interface AgentResult {
-  success: boolean;
-  output?: string | Record<string, unknown> | Array<unknown> | null;
-  error?: string | null;
-  metrics?: Record<string, number>;
-  artifacts?: string[];
-  execution_time_ms?: number | null;
-  message?: string;
-  data?: string | Record<string, unknown> | unknown[];
-}
+// AgentResult imported from canonical source above
 
 export interface AgentUpdatePayload extends BaseWebSocketPayload {
   run_id: string;

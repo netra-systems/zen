@@ -266,7 +266,7 @@ If Redis is not available:
 3. Ensure the PR uses a unique database index (0-15)
 
 ### ClickHouse Timeout Issues
-If you see "Connection to xedvrr4c3r.us-central1.gcp.clickhouse.cloud timed out":
+If you see "Connection to clickhouse_host_url_placeholder timed out":
 1. Verify `CLICKHOUSE_PASSWORD` secret is set
 2. Check ClickHouse Cloud service is active
 3. Increase `CLICKHOUSE_TIMEOUT` if needed

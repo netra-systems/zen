@@ -13,6 +13,9 @@
  * For frontend UI-specific types, see './chat-store.ts'
  */
 
+// Import canonical types to prevent duplication
+import { WebSocketError } from './backend-sync/payloads';
+
 // Base types and enums
 export type MessageType = "user" | "agent" | "system" | "error" | "tool";
 export type SubAgentLifecycle = "pending" | "running" | "completed" | "failed" | "shutdown";
@@ -187,9 +190,7 @@ export interface AnalysisResult {
 }
 
 // WebSocket types
-export interface WebSocketError {
-  message: string;
-}
+// WebSocketError imported from canonical source above
 
 export interface WebSocketMessage {
   type: string;

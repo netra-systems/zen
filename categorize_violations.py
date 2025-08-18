@@ -1,95 +1,90 @@
-#!/usr/bin/env python
-"""Categorize violations by module for parallel fixing."""
 import json
-from collections import defaultdict
 import os
 
-def categorize_violations():
-    """Categorize violations by module."""
-    with open('violations.json', 'r') as f:
-        data = json.load(f)
-    
-    # Categorize by module/directory
-    categories = defaultdict(lambda: {'files': [], 'functions': []})
-    
-    # Process file violations
-    for violation in data['file_violations']:
-        file_path = violation['file']
-        parts = file_path.split(os.sep)
-        
-        # Determine category based on path structure
-        if 'tests' in parts:
-            # Test files by subdirectory
-            if len(parts) > 2:
-                category = os.sep.join(parts[:3])  # app/tests/subdirectory
-            else:
-                category = 'app/tests'
-        else:
-            # Non-test files by module
-            if len(parts) > 2:
-                category = os.sep.join(parts[:2])  # app/module
-            else:
-                category = parts[0] if parts else 'root'
-        
-        categories[category]['files'].append(violation)
-    
-    # Process function violations
-    for violation in data['function_violations']:
-        file_path = violation['file']
-        parts = file_path.split(os.sep)
-        
-        # Determine category based on path structure
-        if 'tests' in parts:
-            if len(parts) > 2:
-                category = os.sep.join(parts[:3])
-            else:
-                category = 'app/tests'
-        else:
-            if len(parts) > 2:
-                category = os.sep.join(parts[:2])
-            else:
-                category = parts[0] if parts else 'root'
-        
-        categories[category]['functions'].append(violation)
-    
-    # Convert to sorted list of categories
-    result = []
-    for category, violations in sorted(categories.items()):
-        result.append({
-            'category': category,
-            'file_count': len(violations['files']),
-            'function_count': len(violations['functions']),
-            'files': violations['files'],
-            'functions': violations['functions']
-        })
-    
-    return result
+with open('function_violations.json', 'r') as f:
+    violations = json.load(f)
 
-def main():
-    categories = categorize_violations()
-    
-    # Save categorized violations
-    with open('categorized_violations.json', 'w') as f:
-        json.dump(categories, f, indent=2)
-    
-    print("VIOLATION CATEGORIES")
-    print("=" * 60)
-    
-    # Priority 1: Non-test production code
-    print("\nPRODUCTION CODE (Priority 1):")
-    print("-" * 40)
-    for cat in categories:
-        if 'tests' not in cat['category']:
-            print(f"{cat['category']}: {cat['file_count']} files, {cat['function_count']} functions")
-    
-    # Priority 2: Test code
-    print("\nTEST CODE (Priority 2):")
-    print("-" * 40)
-    for cat in categories:
-        if 'tests' in cat['category']:
-            print(f"{cat['category']}: {cat['file_count']} files, {cat['function_count']} functions")
-    
-    return categories
+# Categorize by module type
+categories = {
+    'core': [],
+    'agents': [],
+    'services': [],
+    'routes': [],
+    'websocket': [],
+    'db': [],
+    'llm': [],
+    'auth': [],
+    'middleware': [],
+    'schemas': [],
+    'startup': [],
+    'mcp': [],
+    'clients': [],
+    'config': [],
+    'security': [],
+    'monitoring': [],
+    'data': [],
+    'alembic': [],
+    'netra_mcp': [],
+    'other': []
+}
 
-if __name__ == '__main__':
-    main()
+for filepath, funcs in violations.items():
+    path = filepath.replace('\', '/').replace('./', '')
+    
+    if path.startswith('core/'):
+        categories['core'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('agents/'):
+        categories['agents'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('services/'):
+        categories['services'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('routes/'):
+        categories['routes'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('websocket/'):
+        categories['websocket'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('db/'):
+        categories['db'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('llm/'):
+        categories['llm'].extend([{**f, 'file': filepath} for f in funcs])
+    elif 'auth' in path:
+        categories['auth'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('middleware/'):
+        categories['middleware'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('schemas/'):
+        categories['schemas'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('startup'):
+        categories['startup'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('mcp_client/'):
+        categories['mcp'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('clients/'):
+        categories['clients'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('config'):
+        categories['config'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('security/'):
+        categories['security'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('monitoring/'):
+        categories['monitoring'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('data/'):
+        categories['data'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('alembic/'):
+        categories['alembic'].extend([{**f, 'file': filepath} for f in funcs])
+    elif path.startswith('netra_mcp/'):
+        categories['netra_mcp'].extend([{**f, 'file': filepath} for f in funcs])
+    else:
+        categories['other'].extend([{**f, 'file': filepath} for f in funcs])
+
+# Print summary
+print('VIOLATIONS BY CATEGORY:')
+print('-' * 40)
+total = 0
+for cat, violations in sorted(categories.items(), key=lambda x: -len(x[1])):
+    if violations:
+        files = len(set(v['file'] for v in violations))
+        print(f'{cat:12} {len(violations):4} violations in {files:3} files')
+        total += len(violations)
+print(f'\nTOTAL: {total} violations')
+
+# Save categorized violations
+for cat, violations in categories.items():
+    if violations:
+        with open(f'{cat}_violations.json', 'w') as f:
+            json.dump(violations, f, indent=2)

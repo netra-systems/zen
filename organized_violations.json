@@ -1,0 +1,1763 @@
+{
+  "high": [
+    {
+      "path": "app\\tests\\e2e\\validators\\data_integrity_validator.py",
+      "violations": [
+        {
+          "function": "validate_triage_integrity",
+          "lines": 22,
+          "line_num": 358
+        },
+        {
+          "function": "validate_data_integrity",
+          "lines": 22,
+          "line_num": 384
+        },
+        {
+          "function": "check_data_references",
+          "lines": 19,
+          "line_num": 238
+        },
+        {
+          "function": "_extract_trail_entries",
+          "lines": 17,
+          "line_num": 279
+        },
+        {
+          "function": "verify_triage_types",
+          "lines": 16,
+          "line_num": 73
+        },
+        {
+          "function": "verify_data_types",
+          "lines": 14,
+          "line_num": 92
+        },
+        {
+          "function": "track_triage_flow",
+          "lines": 14,
+          "line_num": 129
+        },
+        {
+          "function": "validate_consistency",
+          "lines": 14,
+          "line_num": 330
+        },
+        {
+          "function": "track_data_flow",
+          "lines": 13,
+          "line_num": 147
+        },
+        {
+          "function": "validate_type_transitions",
+          "lines": 12,
+          "line_num": 109
+        },
+        {
+          "function": "check_triage_references",
+          "lines": 12,
+          "line_num": 223
+        },
+        {
+          "function": "validate_trail",
+          "lines": 12,
+          "line_num": 264
+        },
+        {
+          "function": "_check_missing_entries",
+          "lines": 9,
+          "line_num": 299
+        },
+        {
+          "function": "_validate_timestamps",
+          "lines": 9,
+          "line_num": 311
+        }
+      ],
+      "count": 14
+    },
+    {
+      "path": "app\\tests\\e2e\\concurrent_load_helpers.py",
+      "violations": [
+        {
+          "function": "simulate_demo_user",
+          "lines": 26,
+          "line_num": 150
+        },
+        {
+          "function": "validate_fair_queuing_results",
+          "lines": 24,
+          "line_num": 236
+        },
+        {
+          "function": "send_chat_messages",
+          "lines": 20,
+          "line_num": 95
+        },
+        {
+          "function": "analyze_pool_exhaustion_results",
+          "lines": 19,
+          "line_num": 264
+        },
+        {
+          "function": "handle_websocket_interaction",
+          "lines": 16,
+          "line_num": 76
+        },
+        {
+          "function": "calculate_load_statistics",
+          "lines": 16,
+          "line_num": 193
+        },
+        {
+          "function": "calculate_roi",
+          "lines": 15,
+          "line_num": 118
+        },
+        {
+          "function": "create_user_session",
+          "lines": 11,
+          "line_num": 38
+        },
+        {
+          "function": "select_industry",
+          "lines": 11,
+          "line_num": 62
+        },
+        {
+          "function": "generate_report",
+          "lines": 11,
+          "line_num": 136
+        },
+        {
+          "function": "run_concurrent_users",
+          "lines": 11,
+          "line_num": 179
+        },
+        {
+          "function": "create_priority_user_request",
+          "lines": 9,
+          "line_num": 223
+        }
+      ],
+      "count": 12
+    },
+    {
+      "path": "app\\tests\\e2e\\data\\plan_step_definitions.py",
+      "violations": [
+        {
+          "function": "create_all_capacity_steps",
+          "lines": 11,
+          "line_num": 52
+        },
+        {
+          "function": "_create_cost_step_6",
+          "lines": 11,
+          "line_num": 68
+        },
+        {
+          "function": "_create_cost_step_7",
+          "lines": 11,
+          "line_num": 83
+        },
+        {
+          "function": "_create_cost_step_8",
+          "lines": 11,
+          "line_num": 98
+        },
+        {
+          "function": "_create_cost_step_9",
+          "lines": 11,
+          "line_num": 113
+        },
+        {
+          "function": "_create_cost_step_10",
+          "lines": 11,
+          "line_num": 128
+        },
+        {
+          "function": "_create_perf_step_1",
+          "lines": 11,
+          "line_num": 144
+        },
+        {
+          "function": "_create_perf_step_2",
+          "lines": 11,
+          "line_num": 159
+        },
+        {
+          "function": "_create_perf_step_3",
+          "lines": 11,
+          "line_num": 174
+        },
+        {
+          "function": "_create_cap_step_1",
+          "lines": 11,
+          "line_num": 190
+        },
+        {
+          "function": "_create_cap_step_2",
+          "lines": 11,
+          "line_num": 205
+        },
+        {
+          "function": "_create_cap_step_3",
+          "lines": 11,
+          "line_num": 220
+        }
+      ],
+      "count": 12
+    },
+    {
+      "path": "app\\tests\\e2e\\validators\\performance_validator.py",
+      "violations": [
+        {
+          "function": "detect_regression",
+          "lines": 27,
+          "line_num": 255
+        },
+        {
+          "function": "sample_resources",
+          "lines": 20,
+          "line_num": 208
+        },
+        {
+          "function": "_calculate_percentiles",
+          "lines": 18,
+          "line_num": 120
+        },
+        {
+          "function": "calculate_metrics",
+          "lines": 16,
+          "line_num": 166
+        },
+        {
+          "function": "calculate_metrics",
+          "lines": 14,
+          "line_num": 103
+        },
+        {
+          "function": "calculate_metrics",
+          "lines": 13,
+          "line_num": 231
+        },
+        {
+          "function": "_generate_comparison_summary",
+          "lines": 13,
+          "line_num": 359
+        },
+        {
+          "function": "_generate_regression_details",
+          "lines": 11,
+          "line_num": 306
+        },
+        {
+          "function": "compare_to_baseline",
+          "lines": 11,
+          "line_num": 328
+        },
+        {
+          "function": "_execute_with_monitoring",
+          "lines": 11,
+          "line_num": 455
+        },
+        {
+          "function": "_execute_stage_with_monitoring",
+          "lines": 10,
+          "line_num": 403
+        }
+      ],
+      "count": 11
+    },
+    {
+      "path": "app\\tests\\websocket\\async_patterns_improved.py",
+      "violations": [
+        {
+          "function": "test_websocket_timeout_handling",
+          "lines": 16,
+          "line_num": 122
+        },
+        {
+          "function": "test_websocket_resource_cleanup",
+          "lines": 14,
+          "line_num": 219
+        },
+        {
+          "function": "test_concurrent_websocket_operations",
+          "lines": 13,
+          "line_num": 79
+        },
+        {
+          "function": "test_websocket_batch_operations",
+          "lines": 13,
+          "line_num": 142
+        },
+        {
+          "function": "test_websocket_performance_metrics",
+          "lines": 13,
+          "line_num": 202
+        },
+        {
+          "function": "test_websocket_graceful_shutdown",
+          "lines": 12,
+          "line_num": 237
+        },
+        {
+          "function": "_graceful_shutdown",
+          "lines": 12,
+          "line_num": 253
+        },
+        {
+          "function": "get_performance_summary",
+          "lines": 10,
+          "line_num": 188
+        },
+        {
+          "function": "_test_concurrent_messaging",
+          "lines": 9,
+          "line_num": 96
+        },
+        {
+          "function": "test_websocket_error_handling",
+          "lines": 9,
+          "line_num": 109
+        },
+        {
+          "function": "measure_connection_time",
+          "lines": 9,
+          "line_num": 176
+        }
+      ],
+      "count": 11
+    },
+    {
+      "path": "app\\tests\\patterns\\async_patterns_validator.py",
+      "violations": [
+        {
+          "function": "validate_async_test_suite",
+          "lines": 23,
+          "line_num": 266
+        },
+        {
+          "function": "_validate_file",
+          "lines": 23,
+          "line_num": 121
+        },
+        {
+          "function": "analyze_test_performance",
+          "lines": 23,
+          "line_num": 227
+        },
+        {
+          "function": "test_validator_functionality",
+          "lines": 18,
+          "line_num": 310
+        },
+        {
+          "function": "validate_project",
+          "lines": 17,
+          "line_num": 101
+        },
+        {
+          "function": "_compile_recommendations",
+          "lines": 13,
+          "line_num": 293
+        },
+        {
+          "function": "_detect_leaks",
+          "lines": 11,
+          "line_num": 194
+        },
+        {
+          "function": "_generate_recommendations",
+          "lines": 9,
+          "line_num": 147
+        },
+        {
+          "function": "_get_leak_recommendations",
+          "lines": 9,
+          "line_num": 208
+        },
+        {
+          "function": "_get_performance_recommendations",
+          "lines": 9,
+          "line_num": 253
+        }
+      ],
+      "count": 10
+    }
+  ],
+  "medium": [
+    {
+      "path": "app\\tests\\run_real_service_tests.py",
+      "violations": [
+        {
+          "function": "main",
+          "lines": 43,
+          "line_num": 260
+        },
+        {
+          "function": "run_real_service_tests",
+          "lines": 38,
+          "line_num": 160
+        },
+        {
+          "function": "print_summary",
+          "lines": 32,
+          "line_num": 224
+        },
+        {
+          "function": "check_environment",
+          "lines": 25,
+          "line_num": 44
+        },
+        {
+          "function": "_execute_single_test",
+          "lines": 25,
+          "line_num": 104
+        },
+        {
+          "function": "run_plumbing_tests",
+          "lines": 20,
+          "line_num": 201
+        },
+        {
+          "function": "_parse_test_output",
+          "lines": 13,
+          "line_num": 88
+        },
+        {
+          "function": "run_category_tests",
+          "lines": 12,
+          "line_num": 145
+        },
+        {
+          "function": "_aggregate_results",
+          "lines": 10,
+          "line_num": 132
+        }
+      ],
+      "count": 9
+    },
+    {
+      "path": "app\\tests\\e2e\\conftest.py",
+      "violations": [
+        {
+          "function": "llm_test_scenarios",
+          "lines": 17,
+          "line_num": 185
+        },
+        {
+          "function": "setup_test_environment",
+          "lines": 16,
+          "line_num": 207
+        },
+        {
+          "function": "real_websocket_manager",
+          "lines": 13,
+          "line_num": 62
+        },
+        {
+          "function": "llm_test_config",
+          "lines": 11,
+          "line_num": 19
+        },
+        {
+          "function": "example_prompts",
+          "lines": 11,
+          "line_num": 121
+        },
+        {
+          "function": "_validate_llm_environment",
+          "lines": 11,
+          "line_num": 143
+        },
+        {
+          "function": "performance_thresholds",
+          "lines": 11,
+          "line_num": 229
+        },
+        {
+          "function": "db_session",
+          "lines": 11,
+          "line_num": 245
+        },
+        {
+          "function": "real_llm_manager",
+          "lines": 10,
+          "line_num": 47
+        }
+      ],
+      "count": 9
+    },
+    {
+      "path": "app\\tests\\database\\async_transaction_patterns_improved.py",
+      "violations": [
+        {
+          "function": "test_concurrent_async_transactions",
+          "lines": 23,
+          "line_num": 156
+        },
+        {
+          "function": "test_async_transaction_rollback_on_error",
+          "lines": 22,
+          "line_num": 130
+        },
+        {
+          "function": "test_async_batch_transaction_processing",
+          "lines": 20,
+          "line_num": 247
+        },
+        {
+          "function": "test_successful_async_transaction",
+          "lines": 19,
+          "line_num": 107
+        },
+        {
+          "function": "test_async_nested_transaction_handling",
+          "lines": 17,
+          "line_num": 271
+        },
+        {
+          "function": "test_async_transaction_timeout_handling",
+          "lines": 15,
+          "line_num": 183
+        },
+        {
+          "function": "transaction_scope",
+          "lines": 10,
+          "line_num": 24
+        },
+        {
+          "function": "process_batch",
+          "lines": 9,
+          "line_num": 210
+        }
+      ],
+      "count": 8
+    },
+    {
+      "path": "app\\tests\\helpers\\fallback_handler_fixtures.py",
+      "violations": [
+        {
+          "function": "sample_metadata",
+          "lines": 13,
+          "line_num": 18
+        },
+        {
+          "function": "data_failure_metadata",
+          "lines": 11,
+          "line_num": 36
+        },
+        {
+          "function": "report_failure_metadata",
+          "lines": 11,
+          "line_num": 52
+        },
+        {
+          "function": "llm_failure_metadata",
+          "lines": 11,
+          "line_num": 68
+        },
+        {
+          "function": "validation_failure_metadata",
+          "lines": 11,
+          "line_num": 84
+        },
+        {
+          "function": "domain_detection_test_cases",
+          "lines": 10,
+          "line_num": 100
+        },
+        {
+          "function": "comprehensive_test_scenarios",
+          "lines": 10,
+          "line_num": 200
+        },
+        {
+          "function": "partial_data_test_cases",
+          "lines": 9,
+          "line_num": 126
+        }
+      ],
+      "count": 8
+    },
+    {
+      "path": "app\\tests\\e2e\\data\\default_plans.py",
+      "violations": [
+        {
+          "function": "get_cost_optimization_plan",
+          "lines": 12,
+          "line_num": 84
+        },
+        {
+          "function": "get_performance_tuning_plan",
+          "lines": 12,
+          "line_num": 100
+        },
+        {
+          "function": "get_capacity_planning_plan",
+          "lines": 12,
+          "line_num": 116
+        },
+        {
+          "function": "_create_cost_step_4",
+          "lines": 12,
+          "line_num": 200
+        },
+        {
+          "function": "_create_cost_step_1",
+          "lines": 11,
+          "line_num": 155
+        },
+        {
+          "function": "_create_cost_step_2",
+          "lines": 11,
+          "line_num": 170
+        },
+        {
+          "function": "_create_cost_step_3",
+          "lines": 11,
+          "line_num": 185
+        },
+        {
+          "function": "_create_cost_step_5",
+          "lines": 11,
+          "line_num": 216
+        }
+      ],
+      "count": 8
+    },
+    {
+      "path": "app\\tests\\performance\\run_performance_tests.py",
+      "violations": [
+        {
+          "function": "_generate_performance_report",
+          "lines": 36,
+          "line_num": 85
+        },
+        {
+          "function": "run_performance_tests",
+          "lines": 30,
+          "line_num": 34
+        },
+        {
+          "function": "main",
+          "lines": 26,
+          "line_num": 176
+        },
+        {
+          "function": "generate_performance_summary",
+          "lines": 15,
+          "line_num": 157
+        },
+        {
+          "function": "_collect_benchmark_results",
+          "lines": 14,
+          "line_num": 124
+        },
+        {
+          "function": "_save_report",
+          "lines": 11,
+          "line_num": 142
+        },
+        {
+          "function": "_stop_monitoring",
+          "lines": 9,
+          "line_num": 73
+        }
+      ],
+      "count": 7
+    },
+    {
+      "path": "app\\tests\\helpers\\tool_permission_helpers.py",
+      "violations": [
+        {
+          "function": "create_tool_registry_sample",
+          "lines": 14,
+          "line_num": 98
+        },
+        {
+          "function": "assert_service_initialization",
+          "lines": 12,
+          "line_num": 182
+        },
+        {
+          "function": "setup_redis_usage",
+          "lines": 10,
+          "line_num": 126
+        },
+        {
+          "function": "create_sample_context",
+          "lines": 9,
+          "line_num": 51
+        },
+        {
+          "function": "create_developer_context",
+          "lines": 9,
+          "line_num": 64
+        },
+        {
+          "function": "create_context_with_special_chars",
+          "lines": 9,
+          "line_num": 275
+        },
+        {
+          "function": "create_heavy_usage_context",
+          "lines": 9,
+          "line_num": 288
+        }
+      ],
+      "count": 7
+    },
+    {
+      "path": "app\\tests\\helpers\\enhanced_llm_manager.py",
+      "violations": [
+        {
+          "function": "_try_available_providers",
+          "lines": 13,
+          "line_num": 219
+        },
+        {
+          "function": "_try_preferred_provider",
+          "lines": 12,
+          "line_num": 204
+        },
+        {
+          "function": "_weighted_random_selection",
+          "lines": 11,
+          "line_num": 173
+        },
+        {
+          "function": "_attempt_provider_invoke",
+          "lines": 11,
+          "line_num": 235
+        },
+        {
+          "function": "_select_provider_by_strategy",
+          "lines": 10,
+          "line_num": 121
+        },
+        {
+          "function": "_record_provider_failure",
+          "lines": 9,
+          "line_num": 249
+        },
+        {
+          "function": "get_provider_statistics",
+          "lines": 9,
+          "line_num": 261
+        }
+      ],
+      "count": 7
+    },
+    {
+      "path": "app\\tests\\fixtures\\fixtures_workloads.py",
+      "violations": [
+        {
+          "function": "_create_training_job",
+          "lines": 10,
+          "line_num": 55
+        },
+        {
+          "function": "_build_batch_job_timing",
+          "lines": 10,
+          "line_num": 187
+        },
+        {
+          "function": "generate_workloads",
+          "lines": 9,
+          "line_num": 22
+        },
+        {
+          "function": "_generate_simulation_workloads",
+          "lines": 9,
+          "line_num": 34
+        },
+        {
+          "function": "_build_training_job_base",
+          "lines": 9,
+          "line_num": 68
+        },
+        {
+          "function": "_build_endpoint_base_info",
+          "lines": 9,
+          "line_num": 126
+        },
+        {
+          "function": "_build_batch_job_processing",
+          "lines": 9,
+          "line_num": 200
+        }
+      ],
+      "count": 7
+    },
+    {
+      "path": "app\\tests\\helpers\\quality_gate_content.py",
+      "violations": [
+        {
+          "function": "get_complete_action_plan_content",
+          "lines": 37,
+          "line_num": 54
+        },
+        {
+          "function": "get_redundant_report_content",
+          "lines": 16,
+          "line_num": 121
+        },
+        {
+          "function": "get_good_error_message_content",
+          "lines": 12,
+          "line_num": 105
+        },
+        {
+          "function": "get_triage_content",
+          "lines": 12,
+          "line_num": 171
+        },
+        {
+          "function": "get_high_quality_optimization_content",
+          "lines": 10,
+          "line_num": 6
+        },
+        {
+          "function": "get_data_analysis_content",
+          "lines": 10,
+          "line_num": 40
+        }
+      ],
+      "count": 6
+    },
+    {
+      "path": "app\\tests\\clickhouse\\multisource_volume_tests.py",
+      "violations": [
+        {
+          "function": "_get_large_scale_query",
+          "lines": 20,
+          "line_num": 98
+        },
+        {
+          "function": "_get_materialized_view_query",
+          "lines": 17,
+          "line_num": 132
+        },
+        {
+          "function": "_get_correlation_select",
+          "lines": 14,
+          "line_num": 54
+        },
+        {
+          "function": "_get_workload_metrics_cte",
+          "lines": 12,
+          "line_num": 27
+        },
+        {
+          "function": "_get_llm_metrics_cte",
+          "lines": 10,
+          "line_num": 14
+        },
+        {
+          "function": "_get_log_metrics_cte",
+          "lines": 9,
+          "line_num": 42
+        }
+      ],
+      "count": 6
+    },
+    {
+      "path": "app\\tests\\agents\\fixtures\\llm_agent_fixtures.py",
+      "violations": [
+        {
+          "function": "supervisor_agent",
+          "lines": 19,
+          "line_num": 181
+        },
+        {
+          "function": "mock_persistence_service",
+          "lines": 17,
+          "line_num": 159
+        },
+        {
+          "function": "_create_triage_result",
+          "lines": 15,
+          "line_num": 67
+        },
+        {
+          "function": "create_supervisor_with_mocks",
+          "lines": 14,
+          "line_num": 236
+        },
+        {
+          "function": "mock_db_session",
+          "lines": 13,
+          "line_num": 117
+        },
+        {
+          "function": "setup_llm_responses",
+          "lines": 13,
+          "line_num": 214
+        }
+      ],
+      "count": 6
+    },
+    {
+      "path": "app\\tests\\e2e\\validators\\stage_validator.py",
+      "violations": [
+        {
+          "function": "create_checkpoint_report",
+          "lines": 18,
+          "line_num": 269
+        },
+        {
+          "function": "validate_triage_stage",
+          "lines": 15,
+          "line_num": 233
+        },
+        {
+          "function": "validate_data_stage",
+          "lines": 15,
+          "line_num": 251
+        },
+        {
+          "function": "validate_triage_processing",
+          "lines": 12,
+          "line_num": 98
+        },
+        {
+          "function": "validate_data_processing",
+          "lines": 12,
+          "line_num": 113
+        },
+        {
+          "function": "_validate_data_format",
+          "lines": 10,
+          "line_num": 186
+        }
+      ],
+      "count": 6
+    },
+    {
+      "path": "app\\tests\\services\\clickhouse_query_fixtures.py",
+      "violations": [
+        {
+          "function": "get_complex_query",
+          "lines": 16,
+          "line_num": 30
+        },
+        {
+          "function": "get_subquery",
+          "lines": 12,
+          "line_num": 64
+        },
+        {
+          "function": "get_aggregation_query",
+          "lines": 11,
+          "line_num": 105
+        },
+        {
+          "function": "get_multiple_fields_query",
+          "lines": 10,
+          "line_num": 50
+        },
+        {
+          "function": "get_all_test_queries",
+          "lines": 10,
+          "line_num": 120
+        },
+        {
+          "function": "get_join_query",
+          "lines": 9,
+          "line_num": 80
+        }
+      ],
+      "count": 6
+    },
+    {
+      "path": "app\\tests\\fixtures\\llm_fixtures_advanced.py",
+      "violations": [
+        {
+          "function": "_setup_circuit_breaker",
+          "lines": 15,
+          "line_num": 143
+        },
+        {
+          "function": "_setup_performance_monitoring",
+          "lines": 12,
+          "line_num": 119
+        },
+        {
+          "function": "circuit_breaker_call",
+          "lines": 12,
+          "line_num": 145
+        },
+        {
+          "function": "_setup_provider_switching",
+          "lines": 9,
+          "line_num": 53
+        },
+        {
+          "function": "_select_weighted_provider",
+          "lines": 9,
+          "line_num": 98
+        },
+        {
+          "function": "monitored_call",
+          "lines": 9,
+          "line_num": 121
+        }
+      ],
+      "count": 6
+    },
+    {
+      "path": "app\\tests\\fixtures\\small_datasets.py",
+      "violations": [
+        {
+          "function": "_create_agent_request",
+          "lines": 12,
+          "line_num": 47
+        },
+        {
+          "function": "_create_multi_constraint_scenario",
+          "lines": 12,
+          "line_num": 103
+        },
+        {
+          "function": "_create_performance_metric",
+          "lines": 11,
+          "line_num": 75
+        },
+        {
+          "function": "_create_kv_cache_config",
+          "lines": 11,
+          "line_num": 89
+        },
+        {
+          "function": "_create_cost_constraint",
+          "lines": 10,
+          "line_num": 62
+        },
+        {
+          "function": "get_typed_finops_data",
+          "lines": 9,
+          "line_num": 216
+        }
+      ],
+      "count": 6
+    },
+    {
+      "path": "app\\tests\\clickhouse\\metrics_aggregation_tests.py",
+      "violations": [
+        {
+          "function": "test_metrics_extraction_with_arrays",
+          "lines": 36,
+          "line_num": 158
+        },
+        {
+          "function": "_create_optimization_opportunities_cte",
+          "lines": 22,
+          "line_num": 75
+        },
+        {
+          "function": "_create_model_costs_cte",
+          "lines": 16,
+          "line_num": 56
+        },
+        {
+          "function": "_get_usage_patterns_query",
+          "lines": 16,
+          "line_num": 125
+        },
+        {
+          "function": "_create_single_metric",
+          "lines": 15,
+          "line_num": 29
+        }
+      ],
+      "count": 5
+    },
+    {
+      "path": "app\\tests\\e2e\\infrastructure\\llm_response_cache.py",
+      "violations": [
+        {
+          "function": "_perform_integrity_check",
+          "lines": 19,
+          "line_num": 235
+        },
+        {
+          "function": "_get_cached_entry",
+          "lines": 16,
+          "line_num": 97
+        },
+        {
+          "function": "get_statistics",
+          "lines": 15,
+          "line_num": 181
+        },
+        {
+          "function": "_create_cache_table",
+          "lines": 10,
+          "line_num": 59
+        },
+        {
+          "function": "_insert_cache_entry",
+          "lines": 9,
+          "line_num": 140
+        }
+      ],
+      "count": 5
+    },
+    {
+      "path": "app\\tests\\fixtures\\fixtures_metrics.py",
+      "violations": [
+        {
+          "function": "generate_log_data",
+          "lines": 19,
+          "line_num": 22
+        },
+        {
+          "function": "_build_corpus_base_info",
+          "lines": 11,
+          "line_num": 164
+        },
+        {
+          "function": "_build_model_base_info",
+          "lines": 11,
+          "line_num": 216
+        },
+        {
+          "function": "_generate_cost_metric",
+          "lines": 9,
+          "line_num": 118
+        },
+        {
+          "function": "generate_ml_models",
+          "lines": 9,
+          "line_num": 196
+        }
+      ],
+      "count": 5
+    }
+  ],
+  "low": [
+    {
+      "path": "app\\tests\\helpers\\workflow_helpers.py",
+      "violations": [
+        {
+          "function": "setup_optimization_outcomes_content",
+          "lines": 28,
+          "line_num": 64
+        },
+        {
+          "function": "setup_optimization_strategy_content",
+          "lines": 22,
+          "line_num": 38
+        },
+        {
+          "function": "setup_complete_optimization_workflow_content",
+          "lines": 15,
+          "line_num": 19
+        },
+        {
+          "function": "create_mixed_content_batch",
+          "lines": 9,
+          "line_num": 6
+        }
+      ],
+      "count": 4
+    },
+    {
+      "path": "app\\tests\\clickhouse\\log_ingestion_tests.py",
+      "violations": [
+        {
+          "function": "generate_realistic_logs",
+          "lines": 22,
+          "line_num": 21
+        },
+        {
+          "function": "test_streaming_log_ingestion",
+          "lines": 22,
+          "line_num": 46
+        },
+        {
+          "function": "test_log_pattern_recognition",
+          "lines": 22,
+          "line_num": 71
+        },
+        {
+          "function": "_generate",
+          "lines": 17,
+          "line_num": 26
+        }
+      ],
+      "count": 4
+    },
+    {
+      "path": "app\\tests\\clickhouse\\conftest.py",
+      "violations": [
+        {
+          "function": "performance_metrics_data",
+          "lines": 16,
+          "line_num": 103
+        },
+        {
+          "function": "sample_corpus_data",
+          "lines": 14,
+          "line_num": 46
+        },
+        {
+          "function": "sample_corpus_records",
+          "lines": 14,
+          "line_num": 65
+        },
+        {
+          "function": "pytest_configure",
+          "lines": 9,
+          "line_num": 134
+        }
+      ],
+      "count": 4
+    },
+    {
+      "path": "app\\tests\\services\\tool_registry_management_core.py",
+      "violations": [
+        {
+          "function": "_determine_overall_status",
+          "lines": 12,
+          "line_num": 195
+        },
+        {
+          "function": "_execute_lifecycle_action",
+          "lines": 10,
+          "line_num": 140
+        },
+        {
+          "function": "_process_chain",
+          "lines": 9,
+          "line_num": 83
+        },
+        {
+          "function": "collect_all_metrics",
+          "lines": 9,
+          "line_num": 229
+        }
+      ],
+      "count": 4
+    },
+    {
+      "path": "app\\tests\\agents\\supply_researcher_fixtures.py",
+      "violations": [
+        {
+          "function": "_get_pricing_test_case",
+          "lines": 10,
+          "line_num": 211
+        },
+        {
+          "function": "_get_capabilities_test_case",
+          "lines": 10,
+          "line_num": 225
+        },
+        {
+          "function": "_get_availability_test_case",
+          "lines": 10,
+          "line_num": 239
+        },
+        {
+          "function": "anomaly_test_data",
+          "lines": 10,
+          "line_num": 254
+        }
+      ],
+      "count": 4
+    },
+    {
+      "path": "app\\tests\\clickhouse\\array_operations_tests.py",
+      "violations": [
+        {
+          "function": "test_fix_incorrect_array_syntax",
+          "lines": 20,
+          "line_num": 19
+        },
+        {
+          "function": "test_query_interceptor_fixes_queries",
+          "lines": 20,
+          "line_num": 56
+        },
+        {
+          "function": "test_validate_query_catches_errors",
+          "lines": 10,
+          "line_num": 42
+        }
+      ],
+      "count": 3
+    },
+    {
+      "path": "app\\tests\\clickhouse\\corpus_generator.py",
+      "violations": [
+        {
+          "function": "_create_corpus_templates",
+          "lines": 20,
+          "line_num": 17
+        },
+        {
+          "function": "generate_corpus_data",
+          "lines": 20,
+          "line_num": 81
+        },
+        {
+          "function": "_fill_corpus_template",
+          "lines": 18,
+          "line_num": 40
+        }
+      ],
+      "count": 3
+    },
+    {
+      "path": "app\\tests\\clickhouse\\llm_event_generator.py",
+      "violations": [
+        {
+          "function": "generate_llm_events",
+          "lines": 19,
+          "line_num": 90
+        },
+        {
+          "function": "_create_llm_event",
+          "lines": 18,
+          "line_num": 68
+        },
+        {
+          "function": "_get_business_hour_timestamp",
+          "lines": 10,
+          "line_num": 18
+        }
+      ],
+      "count": 3
+    },
+    {
+      "path": "app\\tests\\helpers\\supervisor_extensions.py",
+      "violations": [
+        {
+          "function": "_route_to_agent_with_circuit_breaker",
+          "lines": 19,
+          "line_num": 38
+        },
+        {
+          "function": "_route_to_agent_with_retry",
+          "lines": 11,
+          "line_num": 23
+        },
+        {
+          "function": "_route_to_agent",
+          "lines": 9,
+          "line_num": 10
+        }
+      ],
+      "count": 3
+    },
+    {
+      "path": "app\\tests\\e2e\\latency_optimization_helpers.py",
+      "violations": [
+        {
+          "function": "execute_step_with_detailed_timing",
+          "lines": 16,
+          "line_num": 114
+        },
+        {
+          "function": "create_latency_optimization_setup",
+          "lines": 12,
+          "line_num": 19
+        },
+        {
+          "function": "create_enhanced_timed_result",
+          "lines": 9,
+          "line_num": 159
+        }
+      ],
+      "count": 3
+    },
+    {
+      "path": "app\\tests\\e2e\\data\\edge_cases_temporal.py",
+      "violations": [
+        {
+          "function": "_create_boundary_cases",
+          "lines": 14,
+          "line_num": 129
+        },
+        {
+          "function": "_create_null_empty_cases",
+          "lines": 14,
+          "line_num": 147
+        },
+        {
+          "function": "_create_extreme_size_cases",
+          "lines": 14,
+          "line_num": 165
+        }
+      ],
+      "count": 3
+    },
+    {
+      "path": "app\\tests\\clickhouse\\log_entry_generator.py",
+      "violations": [
+        {
+          "function": "_create_log_entry",
+          "lines": 13,
+          "line_num": 96
+        },
+        {
+          "function": "_generate_error_message",
+          "lines": 12,
+          "line_num": 41
+        },
+        {
+          "function": "generate_log_entries",
+          "lines": 10,
+          "line_num": 113
+        }
+      ],
+      "count": 3
+    },
+    {
+      "path": "app\\tests\\helpers\\metrics_helpers.py",
+      "violations": [
+        {
+          "function": "add_quality_distribution_metrics",
+          "lines": 13,
+          "line_num": 81
+        },
+        {
+          "function": "create_all_specific_checks_metrics",
+          "lines": 11,
+          "line_num": 18
+        },
+        {
+          "function": "create_all_issues_metrics",
+          "lines": 9,
+          "line_num": 33
+        }
+      ],
+      "count": 3
+    },
+    {
+      "path": "app\\tests\\helpers\\quality_gate_fixtures.py",
+      "violations": [
+        {
+          "function": "create_borderline_metrics",
+          "lines": 13,
+          "line_num": 53
+        },
+        {
+          "function": "create_good_metrics",
+          "lines": 13,
+          "line_num": 93
+        },
+        {
+          "function": "create_weighted_score_metrics",
+          "lines": 13,
+          "line_num": 121
+        }
+      ],
+      "count": 3
+    },
+    {
+      "path": "app\\tests\\helpers\\quality_monitoring_fixtures.py",
+      "violations": [
+        {
+          "function": "sample_quality_metrics",
+          "lines": 12,
+          "line_num": 69
+        },
+        {
+          "function": "poor_quality_metrics",
+          "lines": 12,
+          "line_num": 86
+        },
+        {
+          "function": "sample_quality_alert",
+          "lines": 10,
+          "line_num": 112
+        }
+      ],
+      "count": 3
+    },
+    {
+      "path": "app\\tests\\performance\\conftest.py",
+      "violations": [
+        {
+          "function": "cleanup_performance_files",
+          "lines": 12,
+          "line_num": 72
+        },
+        {
+          "function": "performance_test_data",
+          "lines": 10,
+          "line_num": 41
+        },
+        {
+          "function": "setup_performance_environment",
+          "lines": 10,
+          "line_num": 56
+        }
+      ],
+      "count": 3
+    },
+    {
+      "path": "app\\tests\\clickhouse\\timeseries_analysis_tests.py",
+      "violations": [
+        {
+          "function": "test_anomaly_detection_with_zscore",
+          "lines": 41,
+          "line_num": 43
+        },
+        {
+          "function": "test_moving_average_calculation",
+          "lines": 28,
+          "line_num": 12
+        }
+      ],
+      "count": 2
+    },
+    {
+      "path": "app\\tests\\clickhouse\\clustering_analysis_tests.py",
+      "violations": [
+        {
+          "function": "test_log_clustering_with_similarity",
+          "lines": 37,
+          "line_num": 12
+        },
+        {
+          "function": "test_error_cascade_detection",
+          "lines": 35,
+          "line_num": 52
+        }
+      ],
+      "count": 2
+    },
+    {
+      "path": "app\\tests\\helpers\\setup_helpers.py",
+      "violations": [
+        {
+          "function": "setup_large_optimization_content",
+          "lines": 25,
+          "line_num": 4
+        },
+        {
+          "function": "setup_quantification_patterns_content",
+          "lines": 9,
+          "line_num": 64
+        }
+      ],
+      "count": 2
+    },
+    {
+      "path": "app\\tests\\fixtures\\fixtures_core.py",
+      "violations": [
+        {
+          "function": "_get_scale_configs",
+          "lines": 23,
+          "line_num": 54
+        },
+        {
+          "function": "_generate_organizations",
+          "lines": 9,
+          "line_num": 145
+        }
+      ],
+      "count": 2
+    },
+    {
+      "path": "app\\tests\\helpers\\startup_check_helpers.py",
+      "violations": [
+        {
+          "function": "create_mock_app",
+          "lines": 23,
+          "line_num": 12
+        },
+        {
+          "function": "setup_all_check_mocks",
+          "lines": 10,
+          "line_num": 79
+        }
+      ],
+      "count": 2
+    },
+    {
+      "path": "app\\tests\\clickhouse\\workload_metric_generator.py",
+      "violations": [
+        {
+          "function": "generate_workload_metrics",
+          "lines": 16,
+          "line_num": 56
+        },
+        {
+          "function": "_create_workload_metric",
+          "lines": 15,
+          "line_num": 36
+        }
+      ],
+      "count": 2
+    },
+    {
+      "path": "app\\tests\\helpers\\quality_monitoring_helpers.py",
+      "violations": [
+        {
+          "function": "record_test_quality_event",
+          "lines": 12,
+          "line_num": 155
+        },
+        {
+          "function": "create_test_alert",
+          "lines": 10,
+          "line_num": 141
+        }
+      ],
+      "count": 2
+    }
+  ],
+  "single": [
+    {
+      "path": "app\\tests\\helpers\\database_repository_fixtures.py",
+      "violations": [
+        {
+          "function": "unit_of_work",
+          "lines": 33,
+          "line_num": 96
+        }
+      ],
+      "count": 1
+    },
+    {
+      "path": "app\\tests\\helpers\\database_repository_helpers.py",
+      "violations": [
+        {
+          "function": "_setup_thread_get_mocks",
+          "lines": 25,
+          "line_num": 84
+        }
+      ],
+      "count": 1
+    },
+    {
+      "path": "app\\tests\\helpers\\thread_helpers.py",
+      "violations": [
+        {
+          "function": "_setup_thread_get_mocks",
+          "lines": 25,
+          "line_num": 84
+        }
+      ],
+      "count": 1
+    },
+    {
+      "path": "app\\tests\\clickhouse\\generator_base.py",
+      "violations": [
+        {
+          "function": "__init__",
+          "lines": 21,
+          "line_num": 13
+        }
+      ],
+      "count": 1
+    },
+    {
+      "path": "app\\tests\\agents\\conftest.py",
+      "violations": [
+        {
+          "function": "_mock_ask_structured_llm",
+          "lines": 14,
+          "line_num": 45
+        }
+      ],
+      "count": 1
+    },
+    {
+      "path": "app\\tests\\e2e\\model_setup_helpers.py",
+      "violations": [
+        {
+          "function": "model_selection_setup",
+          "lines": 12,
+          "line_num": 18
+        }
+      ],
+      "count": 1
+    },
+    {
+      "path": "app\\tests\\e2e\\state_validation_utils.py",
+      "violations": [
+        {
+          "function": "validate_data_result_types",
+          "lines": 12,
+          "line_num": 121
+        }
+      ],
+      "count": 1
+    },
+    {
+      "path": "app\\tests\\e2e\\model_effectiveness_tests.py",
+      "violations": [
+        {
+          "function": "_execute_model_step",
+          "lines": 11,
+          "line_num": 61
+        }
+      ],
+      "count": 1
+    },
+    {
+      "path": "app\\tests\\e2e\\data\\temporal_patterns.py",
+      "violations": [
+        {
+          "function": "_initialize_patterns",
+          "lines": 11,
+          "line_num": 76
+        }
+      ],
+      "count": 1
+    },
+    {
+      "path": "app\\tests\\helpers\\llm_manager_helpers.py",
+      "violations": [
+        {
+          "function": "_create_llm_configs",
+          "lines": 11,
+          "line_num": 41
+        }
+      ],
+      "count": 1
+    },
+    {
+      "path": "app\\tests\\helpers\\fallback_handler_helpers.py",
+      "violations": [
+        {
+          "function": "assert_template_collection_valid",
+          "lines": 10,
+          "line_num": 44
+        }
+      ],
+      "count": 1
+    },
+    {
+      "path": "app\\tests\\services\\apex_optimizer_agent\\conftest.py",
+      "violations": [
+        {
+          "function": "mock_request",
+          "lines": 10,
+          "line_num": 17
+        }
+      ],
+      "count": 1
+    },
+    {
+      "path": "app\\tests\\fixtures\\llm_fixtures_core.py",
+      "violations": [
+        {
+          "function": "_get_mock_field_value",
+          "lines": 9,
+          "line_num": 82
+        }
+      ],
+      "count": 1
+    }
+  ],
+  "total_files": 61,
+  "total_violations": 277
+}

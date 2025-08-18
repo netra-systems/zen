@@ -31,21 +31,22 @@ def _get_or_create_session_id(session_id: Optional[str]) -> str:
     return session_id or str(uuid.uuid4())
 
 
+async def _execute_demo_chat_service(
+    request: DemoChatRequest, session_id: str, demo_service: DemoService, current_user: Optional[Dict]
+) -> Dict[str, Any]:
+    """Execute demo chat through service."""
+    return await demo_service.process_demo_chat(
+        message=request.message, industry=request.industry,
+        session_id=session_id, context=request.context,
+        user_id=current_user.get("id") if current_user else None
+    )
+
 async def _process_chat_request(
-    request: DemoChatRequest,
-    session_id: str,
-    demo_service: DemoService,
-    current_user: Optional[Dict]
+    request: DemoChatRequest, session_id: str, demo_service: DemoService, current_user: Optional[Dict]
 ) -> Dict[str, Any]:
     """Process the demo chat request using demo service."""
     try:
-        return await demo_service.process_demo_chat(
-            message=request.message,
-            industry=request.industry,
-            session_id=session_id,
-            context=request.context,
-            user_id=current_user.get("id") if current_user else None
-        )
+        return await _execute_demo_chat_service(request, session_id, demo_service, current_user)
     except Exception as e:
         _log_and_raise_error("Demo chat processing failed", e)
 
@@ -55,20 +56,21 @@ def _create_chat_tracking_data(request: DemoChatRequest) -> Dict[str, Any]:
     return {"industry": request.industry, "message_length": len(request.message)}
 
 
+def _add_chat_tracking_task(
+    background_tasks: BackgroundTasks, demo_service: DemoService, session_id: str, data: Dict[str, Any]
+) -> None:
+    """Add chat tracking task to background."""
+    background_tasks.add_task(
+        demo_service.track_demo_interaction,
+        session_id=session_id, interaction_type="chat", data=data
+    )
+
 def _track_chat_interaction(
-    background_tasks: BackgroundTasks,
-    demo_service: DemoService,
-    session_id: str,
-    request: DemoChatRequest
+    background_tasks: BackgroundTasks, demo_service: DemoService, session_id: str, request: DemoChatRequest
 ) -> None:
     """Track demo analytics in background."""
     data = _create_chat_tracking_data(request)
-    background_tasks.add_task(
-        demo_service.track_demo_interaction,
-        session_id=session_id,
-        interaction_type="chat",
-        data=data
-    )
+    _add_chat_tracking_task(background_tasks, demo_service, session_id, data)
 
 
 def _create_chat_response(result: Dict[str, Any], session_id: str) -> DemoChatResponse:
@@ -105,18 +107,21 @@ async def handle_roi_calculation(
     return ROICalculationResponse(**result)
 
 
+async def _execute_roi_calculation(
+    request: ROICalculationRequest, demo_service: DemoService
+) -> Dict[str, Any]:
+    """Execute ROI calculation through service."""
+    return await demo_service.calculate_roi(
+        current_spend=request.current_spend, request_volume=request.request_volume,
+        average_latency=request.average_latency, industry=request.industry
+    )
+
 async def _calculate_roi_metrics(
-    request: ROICalculationRequest,
-    demo_service: DemoService
+    request: ROICalculationRequest, demo_service: DemoService
 ) -> Dict[str, Any]:
     """Calculate ROI metrics using demo service."""
     try:
-        return await demo_service.calculate_roi(
-            current_spend=request.current_spend,
-            request_volume=request.request_volume,
-            average_latency=request.average_latency,
-            industry=request.industry
-        )
+        return await _execute_roi_calculation(request, demo_service)
     except Exception as e:
         _log_and_raise_error("ROI calculation failed", e)
 
@@ -126,33 +131,38 @@ def _create_roi_tracking_data(request: ROICalculationRequest, result: Dict[str, 
     return {"industry": request.industry, "potential_savings": result["annual_savings"]}
 
 
+def _add_roi_tracking_task(
+    background_tasks: BackgroundTasks, demo_service: DemoService, data: Dict[str, Any]
+) -> None:
+    """Add ROI tracking task to background."""
+    background_tasks.add_task(
+        demo_service.track_demo_interaction, session_id=str(uuid.uuid4()),
+        interaction_type="roi_calculation", data=data
+    )
+
 def _track_roi_calculation(
-    background_tasks: BackgroundTasks,
-    demo_service: DemoService,
-    request: ROICalculationRequest,
-    result: Dict[str, Any]
+    background_tasks: BackgroundTasks, demo_service: DemoService,
+    request: ROICalculationRequest, result: Dict[str, Any]
 ) -> None:
     """Track ROI calculation for analytics."""
     data = _create_roi_tracking_data(request, result)
-    background_tasks.add_task(
-        demo_service.track_demo_interaction,
-        session_id=str(uuid.uuid4()),
-        interaction_type="roi_calculation",
-        data=data
+    _add_roi_tracking_task(background_tasks, demo_service, data)
+
+
+async def _generate_metrics_from_service(
+    scenario: str, duration_hours: int, demo_service: DemoService
+) -> Dict[str, Any]:
+    """Generate metrics through demo service."""
+    return await demo_service.generate_synthetic_metrics(
+        scenario=scenario, duration_hours=duration_hours
     )
 
-
 async def handle_synthetic_metrics(
-    scenario: str,
-    duration_hours: int,
-    demo_service: DemoService
+    scenario: str, duration_hours: int, demo_service: DemoService
 ) -> DemoMetrics:
     """Generate synthetic performance metrics for demonstrations."""
     try:
-        metrics = await demo_service.generate_synthetic_metrics(
-            scenario=scenario,
-            duration_hours=duration_hours
-        )
+        metrics = await _generate_metrics_from_service(scenario, duration_hours, demo_service)
         return DemoMetrics(**metrics)
     except Exception as e:
         _log_and_raise_error("Failed to generate metrics", e)
@@ -170,19 +180,22 @@ async def handle_export_report(
     return _create_export_response(report_url)
 
 
+async def _execute_report_generation(
+    request: ExportReportRequest, demo_service: DemoService, current_user: Optional[Dict]
+) -> str:
+    """Execute report generation through service."""
+    return await demo_service.generate_report(
+        session_id=request.session_id, format=request.format,
+        include_sections=request.include_sections,
+        user_id=current_user.get("id") if current_user else None
+    )
+
 async def _generate_demo_report(
-    request: ExportReportRequest,
-    demo_service: DemoService,
-    current_user: Optional[Dict]
+    request: ExportReportRequest, demo_service: DemoService, current_user: Optional[Dict]
 ) -> str:
     """Generate the demo report using demo service."""
     try:
-        return await demo_service.generate_report(
-            session_id=request.session_id,
-            format=request.format,
-            include_sections=request.include_sections,
-            user_id=current_user.get("id") if current_user else None
-        )
+        return await _execute_report_generation(request, demo_service, current_user)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
@@ -194,19 +207,22 @@ def _create_export_tracking_data(request: ExportReportRequest) -> Dict[str, Any]
     return {"format": request.format, "sections": request.include_sections}
 
 
+def _add_export_tracking_task(
+    background_tasks: BackgroundTasks, demo_service: DemoService,
+    session_id: str, data: Dict[str, Any]
+) -> None:
+    """Add export tracking task to background."""
+    background_tasks.add_task(
+        demo_service.track_demo_interaction, session_id=session_id,
+        interaction_type="report_export", data=data
+    )
+
 def _track_report_export(
-    background_tasks: BackgroundTasks,
-    demo_service: DemoService,
-    request: ExportReportRequest
+    background_tasks: BackgroundTasks, demo_service: DemoService, request: ExportReportRequest
 ) -> None:
     """Track export for analytics."""
     data = _create_export_tracking_data(request)
-    background_tasks.add_task(
-        demo_service.track_demo_interaction,
-        session_id=request.session_id,
-        interaction_type="report_export",
-        data=data
-    )
+    _add_export_tracking_task(background_tasks, demo_service, request.session_id, data)
 
 
 def _create_export_response(report_url: str) -> Dict[str, str]:

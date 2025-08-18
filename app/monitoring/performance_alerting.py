@@ -28,13 +28,14 @@ class PerformanceAlertManager:
     
     def _initialize_alert_rules(self) -> Dict[str, Dict[str, Any]]:
         """Initialize performance alert rules."""
-        return {
-            "high_cpu": self._create_high_cpu_rule(),
-            "high_memory": self._create_high_memory_rule(),
-            "low_memory": self._create_low_memory_rule(),
-            "database_pool_exhaustion": self._create_pool_exhaustion_rule(),
-            "low_cache_hit_ratio": self._create_cache_hit_rule()
+        rule_creators = {
+            "high_cpu": self._create_high_cpu_rule,
+            "high_memory": self._create_high_memory_rule,
+            "low_memory": self._create_low_memory_rule,
+            "database_pool_exhaustion": self._create_pool_exhaustion_rule,
+            "low_cache_hit_ratio": self._create_cache_hit_rule
         }
+        return {name: creator() for name, creator in rule_creators.items()}
     
     def _create_high_cpu_rule(self) -> Dict[str, Any]:
         """Create high CPU usage alert rule."""
@@ -96,15 +97,22 @@ class PerformanceAlertManager:
         triggered_alerts = []
         
         for alert_name, rule in self.alert_rules.items():
-            try:
-                if await self._evaluate_alert_rule(alert_name, rule):
-                    alert_data = self._create_alert_data(alert_name, rule)
-                    triggered_alerts.append(alert_data)
-                    self._notify_callbacks(alert_name, alert_data)
-            except Exception as e:
-                logger.error(f"Error evaluating alert rule {alert_name}: {e}")
+            alert_data = await self._process_single_alert_rule(alert_name, rule)
+            if alert_data:
+                triggered_alerts.append(alert_data)
         
         return triggered_alerts
+
+    async def _process_single_alert_rule(self, alert_name: str, rule: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Process a single alert rule and return alert data if triggered."""
+        try:
+            if await self._evaluate_alert_rule(alert_name, rule):
+                alert_data = self._create_alert_data(alert_name, rule)
+                self._notify_callbacks(alert_name, alert_data)
+                return alert_data
+        except Exception as e:
+            logger.error(f"Error evaluating alert rule {alert_name}: {e}")
+        return None
     
     def _create_alert_data(self, alert_name: str, rule: Dict[str, Any]) -> Dict[str, Any]:
         """Create alert data structure."""
@@ -129,9 +137,12 @@ class PerformanceAlertManager:
             return False
         
         metrics = self._get_rule_metrics(rule)
+        return self._validate_and_check_violations(metrics, rule, alert_name)
+
+    def _validate_and_check_violations(self, metrics: List, rule: Dict[str, Any], alert_name: str) -> bool:
+        """Validate metrics and check for threshold violations."""
         if not self._validate_metrics(metrics, rule):
             return False
-        
         return self._check_threshold_violations(metrics, rule, alert_name)
     
     def _check_cooldown(self, alert_name: str) -> bool:
@@ -160,14 +171,16 @@ class PerformanceAlertManager:
         """Check if threshold violations exceed trigger ratio."""
         threshold = rule["threshold"]
         operator = rule["operator"]
-        
         violation_count = self._count_violations(metrics, threshold, operator)
-        violation_ratio = violation_count / len(metrics)
+        return self._check_violation_ratio(violation_count, len(metrics), alert_name)
+
+    def _check_violation_ratio(self, violation_count: int, total_count: int, alert_name: str) -> bool:
+        """Check if violation ratio exceeds threshold and update alert timestamp."""
+        violation_ratio = violation_count / total_count
         
         if violation_ratio > 0.5:
             self._last_alerts[alert_name] = datetime.now()
             return True
-        
         return False
     
     def _count_violations(self, metrics: List, threshold: float, operator: str) -> int:
@@ -180,10 +193,10 @@ class PerformanceAlertManager:
     
     def _is_violation(self, value: float, threshold: float, operator: str) -> bool:
         """Check if a single value violates threshold."""
-        if operator == ">":
-            return value > threshold
-        elif operator == "<":
-            return value < threshold
-        elif operator == "==":
-            return value == threshold
-        return False
+        operator_checks = {
+            ">": lambda v, t: v > t,
+            "<": lambda v, t: v < t,
+            "==": lambda v, t: v == t
+        }
+        check_func = operator_checks.get(operator)
+        return check_func(value, threshold) if check_func else False

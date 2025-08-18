@@ -30,6 +30,15 @@ class SecurityAuditor(ABC):
     def get_category(self) -> SecurityCategory:
         """Get the security category this auditor covers."""
         pass
+    
+    def _create_security_finding(self, id: str, title: str, description: str,
+                               severity: SecuritySeverity, category: SecurityCategory,
+                               cwe_id: str, owasp_category: str, recommendation: str,
+                               evidence: Dict[str, Any]) -> SecurityFinding:
+        """Helper to create SecurityFinding objects."""
+        return SecurityFinding(id=id, title=title, description=description, severity=severity,
+                             category=category, cwe_id=cwe_id, owasp_category=owasp_category,
+                             recommendation=recommendation, evidence=evidence, timestamp=datetime.now(timezone.utc))
 
 
 class AuthenticationAuditor(SecurityAuditor):
@@ -52,14 +61,12 @@ class AuthenticationAuditor(SecurityAuditor):
     
     def _create_failed_attempts_finding(self) -> SecurityFinding:
         """Create finding for high failed attempts threshold."""
-        return SecurityFinding(
-            id="AUTH001", title="High Failed Login Attempt Threshold",
-            description=f"Max failed attempts set to {enhanced_auth_security.max_failed_attempts}, recommended <= 5",
-            severity=SecuritySeverity.MEDIUM, category=SecurityCategory.AUTHENTICATION,
-            cwe_id="CWE-307", owasp_category="A02:2021 - Cryptographic Failures",
-            recommendation="Reduce max_failed_attempts to 5 or lower",
-            evidence={"current_threshold": enhanced_auth_security.max_failed_attempts},
-            timestamp=datetime.now(timezone.utc)
+        return self._create_security_finding(
+            "AUTH001", "High Failed Login Attempt Threshold",
+            f"Max failed attempts set to {enhanced_auth_security.max_failed_attempts}, recommended <= 5",
+            SecuritySeverity.MEDIUM, SecurityCategory.AUTHENTICATION, "CWE-307",
+            "A02:2021 - Cryptographic Failures", "Reduce max_failed_attempts to 5 or lower",
+            {"current_threshold": enhanced_auth_security.max_failed_attempts}
         )
     
     def _check_lockout_duration(self, findings: List[SecurityFinding]) -> None:
@@ -70,14 +77,12 @@ class AuthenticationAuditor(SecurityAuditor):
     
     def _create_lockout_duration_finding(self) -> SecurityFinding:
         """Create finding for short lockout duration."""
-        return SecurityFinding(
-            id="AUTH002", title="Short Account Lockout Duration",
-            description=f"Lockout duration is {enhanced_auth_security.lockout_duration.total_seconds()} seconds, recommended >= 300",
-            severity=SecuritySeverity.LOW, category=SecurityCategory.AUTHENTICATION,
-            cwe_id="CWE-307", owasp_category="A02:2021 - Cryptographic Failures",
-            recommendation="Increase lockout duration to at least 5 minutes",
-            evidence={"current_duration": enhanced_auth_security.lockout_duration.total_seconds()},
-            timestamp=datetime.now(timezone.utc)
+        return self._create_security_finding(
+            "AUTH002", "Short Account Lockout Duration",
+            f"Lockout duration is {enhanced_auth_security.lockout_duration.total_seconds()} seconds, recommended >= 300",
+            SecuritySeverity.LOW, SecurityCategory.AUTHENTICATION, "CWE-307",
+            "A02:2021 - Cryptographic Failures", "Increase lockout duration to at least 5 minutes",
+            {"current_duration": enhanced_auth_security.lockout_duration.total_seconds()}
         )
     
     def _check_excessive_failed_logins(self, findings: List[SecurityFinding], auth_status: Dict[str, Any]) -> None:
@@ -88,13 +93,12 @@ class AuthenticationAuditor(SecurityAuditor):
     
     def _create_excessive_logins_finding(self, auth_status: Dict[str, Any]) -> SecurityFinding:
         """Create finding for excessive failed logins."""
-        return SecurityFinding(
-            id="AUTH003", title="High Number of Failed Login Attempts",
-            description=f"Detected {auth_status['metrics']['failed_logins']} failed login attempts",
-            severity=SecuritySeverity.HIGH, category=SecurityCategory.AUTHENTICATION,
-            cwe_id="CWE-307", owasp_category="A07:2021 - Identification and Authentication Failures",
-            recommendation="Investigate potential brute force attacks and implement additional monitoring",
-            evidence=auth_status["metrics"], timestamp=datetime.now(timezone.utc)
+        return self._create_security_finding(
+            "AUTH003", "High Number of Failed Login Attempts",
+            f"Detected {auth_status['metrics']['failed_logins']} failed login attempts",
+            SecuritySeverity.HIGH, SecurityCategory.AUTHENTICATION, "CWE-307",
+            "A07:2021 - Identification and Authentication Failures", "Investigate potential brute force attacks and implement additional monitoring",
+            auth_status["metrics"]
         )
     
     def get_category(self) -> SecurityCategory:
@@ -121,13 +125,12 @@ class ApiSecurityAuditor(SecurityAuditor):
     
     def _create_expired_keys_finding(self, api_metrics: Dict[str, Any]) -> SecurityFinding:
         """Create finding for expired API keys."""
-        return SecurityFinding(
-            id="API001", title="Expired API Keys Not Cleaned Up",
-            description=f"Found {api_metrics['expired_keys']} expired API keys",
-            severity=SecuritySeverity.MEDIUM, category=SecurityCategory.API_SECURITY,
-            cwe_id="CWE-613", owasp_category="A02:2021 - Cryptographic Failures",
-            recommendation="Implement automated cleanup of expired API keys",
-            evidence=api_metrics, timestamp=datetime.now(timezone.utc)
+        return self._create_security_finding(
+            "API001", "Expired API Keys Not Cleaned Up",
+            f"Found {api_metrics['expired_keys']} expired API keys",
+            SecuritySeverity.MEDIUM, SecurityCategory.API_SECURITY, "CWE-613",
+            "A02:2021 - Cryptographic Failures", "Implement automated cleanup of expired API keys",
+            api_metrics
         )
     
     def _check_rotation_needed(self, findings: List[SecurityFinding], api_metrics: Dict[str, Any]) -> None:
@@ -138,14 +141,12 @@ class ApiSecurityAuditor(SecurityAuditor):
     
     def _create_rotation_needed_finding(self, api_metrics: Dict[str, Any]) -> SecurityFinding:
         """Create finding for keys needing rotation."""
-        return SecurityFinding(
-            id="API002", title="API Keys Need Rotation",
-            description=f"{api_metrics['rotation_needed']} API keys are approaching expiration",
-            severity=SecuritySeverity.LOW, category=SecurityCategory.API_SECURITY,
-            cwe_id="CWE-344", owasp_category="A02:2021 - Cryptographic Failures",
-            recommendation="Rotate API keys before they expire",
-            evidence={"rotation_candidates": api_key_manager.get_rotation_candidates()},
-            timestamp=datetime.now(timezone.utc)
+        return self._create_security_finding(
+            "API002", "API Keys Need Rotation",
+            f"{api_metrics['rotation_needed']} API keys are approaching expiration",
+            SecuritySeverity.LOW, SecurityCategory.API_SECURITY, "CWE-344",
+            "A02:2021 - Cryptographic Failures", "Rotate API keys before they expire",
+            {"rotation_candidates": api_key_manager.get_rotation_candidates()}
         )
     
     def _check_keys_per_user(self, findings: List[SecurityFinding], api_metrics: Dict[str, Any]) -> None:
@@ -156,13 +157,12 @@ class ApiSecurityAuditor(SecurityAuditor):
     
     def _create_keys_per_user_finding(self, api_metrics: Dict[str, Any]) -> SecurityFinding:
         """Create finding for high API keys per user."""
-        return SecurityFinding(
-            id="API003", title="High Average API Keys Per User",
-            description=f"Average of {api_metrics['average_keys_per_user']:.1f} keys per user",
-            severity=SecuritySeverity.LOW, category=SecurityCategory.API_SECURITY,
-            cwe_id="CWE-250", owasp_category="A01:2021 - Broken Access Control",
-            recommendation="Review API key usage patterns and implement key limits",
-            evidence=api_metrics, timestamp=datetime.now(timezone.utc)
+        return self._create_security_finding(
+            "API003", "High Average API Keys Per User",
+            f"Average of {api_metrics['average_keys_per_user']:.1f} keys per user",
+            SecuritySeverity.LOW, SecurityCategory.API_SECURITY, "CWE-250",
+            "A01:2021 - Broken Access Control", "Review API key usage patterns and implement key limits",
+            api_metrics
         )
     
     def get_category(self) -> SecurityCategory:
@@ -188,14 +188,12 @@ class SessionManagementAuditor(SecurityAuditor):
     
     def _create_active_sessions_finding(self, auth_status: Dict[str, Any]) -> SecurityFinding:
         """Create finding for high number of active sessions."""
-        return SecurityFinding(
-            id="SESS001", title="High Number of Active Sessions",
-            description=f"Found {auth_status['active_sessions']} active sessions",
-            severity=SecuritySeverity.MEDIUM, category=SecurityCategory.SESSION_MANAGEMENT,
-            cwe_id="CWE-613", owasp_category="A07:2021 - Identification and Authentication Failures",
-            recommendation="Implement session cleanup and monitor for unusual session patterns",
-            evidence={"active_sessions": auth_status["active_sessions"]},
-            timestamp=datetime.now(timezone.utc)
+        return self._create_security_finding(
+            "SESS001", "High Number of Active Sessions",
+            f"Found {auth_status['active_sessions']} active sessions",
+            SecuritySeverity.MEDIUM, SecurityCategory.SESSION_MANAGEMENT, "CWE-613",
+            "A07:2021 - Identification and Authentication Failures", "Implement session cleanup and monitor for unusual session patterns",
+            {"active_sessions": auth_status["active_sessions"]}
         )
     
     def _check_session_timeout(self, findings: List[SecurityFinding]) -> None:
@@ -206,14 +204,12 @@ class SessionManagementAuditor(SecurityAuditor):
     
     def _create_session_timeout_finding(self) -> SecurityFinding:
         """Create finding for long session timeout."""
-        return SecurityFinding(
-            id="SESS002", title="Long Session Timeout",
-            description=f"Session timeout is {enhanced_auth_security.session_timeout.total_seconds()} seconds",
-            severity=SecuritySeverity.LOW, category=SecurityCategory.SESSION_MANAGEMENT,
-            cwe_id="CWE-613", owasp_category="A07:2021 - Identification and Authentication Failures",
-            recommendation="Consider reducing session timeout for better security",
-            evidence={"timeout_seconds": enhanced_auth_security.session_timeout.total_seconds()},
-            timestamp=datetime.now(timezone.utc)
+        return self._create_security_finding(
+            "SESS002", "Long Session Timeout",
+            f"Session timeout is {enhanced_auth_security.session_timeout.total_seconds()} seconds",
+            SecuritySeverity.LOW, SecurityCategory.SESSION_MANAGEMENT, "CWE-613",
+            "A07:2021 - Identification and Authentication Failures", "Consider reducing session timeout for better security",
+            {"timeout_seconds": enhanced_auth_security.session_timeout.total_seconds()}
         )
     
     def get_category(self) -> SecurityCategory:
@@ -239,14 +235,12 @@ class ConfigurationAuditor(SecurityAuditor):
     
     def _create_debug_mode_finding(self, settings: Any) -> SecurityFinding:
         """Create finding for debug mode in production."""
-        return SecurityFinding(
-            id="CONF001", title="Debug Mode Enabled in Non-Development Environment",
-            description=f"Debug mode is enabled in {settings.environment} environment",
-            severity=SecuritySeverity.HIGH, category=SecurityCategory.CONFIGURATION,
-            cwe_id="CWE-489", owasp_category="A05:2021 - Security Misconfiguration",
-            recommendation="Disable debug mode in production and staging environments",
-            evidence={"environment": settings.environment, "debug": settings.debug},
-            timestamp=datetime.now(timezone.utc)
+        return self._create_security_finding(
+            "CONF001", "Debug Mode Enabled in Non-Development Environment",
+            f"Debug mode is enabled in {settings.environment} environment",
+            SecuritySeverity.HIGH, SecurityCategory.CONFIGURATION, "CWE-489",
+            "A05:2021 - Security Misconfiguration", "Disable debug mode in production and staging environments",
+            {"environment": settings.environment, "debug": settings.debug}
         )
     
     def _check_jwt_secret(self, findings: List[SecurityFinding], settings: Any) -> None:
@@ -257,14 +251,12 @@ class ConfigurationAuditor(SecurityAuditor):
     
     def _create_jwt_secret_finding(self, settings: Any) -> SecurityFinding:
         """Create finding for weak JWT secret."""
-        return SecurityFinding(
-            id="CONF002", title="Weak JWT Secret Key",
-            description=f"JWT secret key length is {len(settings.jwt_secret_key)} characters",
-            severity=SecuritySeverity.CRITICAL, category=SecurityCategory.CRYPTOGRAPHY,
-            cwe_id="CWE-326", owasp_category="A02:2021 - Cryptographic Failures",
-            recommendation="Use a JWT secret key of at least 32 characters",
-            evidence={"key_length": len(settings.jwt_secret_key)},
-            timestamp=datetime.now(timezone.utc)
+        return self._create_security_finding(
+            "CONF002", "Weak JWT Secret Key",
+            f"JWT secret key length is {len(settings.jwt_secret_key)} characters",
+            SecuritySeverity.CRITICAL, SecurityCategory.CRYPTOGRAPHY, "CWE-326",
+            "A02:2021 - Cryptographic Failures", "Use a JWT secret key of at least 32 characters",
+            {"key_length": len(settings.jwt_secret_key)}
         )
     
     def get_category(self) -> SecurityCategory:

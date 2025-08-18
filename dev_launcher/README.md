@@ -78,7 +78,7 @@ The default shared resources are configured as follows:
 - **Purpose**: Caching, real-time features, WebSocket coordination
 
 #### ClickHouse (Shared)
-- **Host**: xedvrr4c3r.us-central1.gcp.clickhouse.cloud
+- **Host**: clickhouse_host_url_placeholder
 - **Port**: 8443
 - **User**: default
 - **Password**: Automatically loaded from secrets
@@ -117,7 +117,7 @@ Your service configuration is saved to `.dev_services.json`:
   "clickhouse": {
     "mode": "shared",
     "config": {
-      "host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+      "host": "clickhouse_host_url_placeholder",
       "port": 8443,
       "user": "default",
       "password": "***",

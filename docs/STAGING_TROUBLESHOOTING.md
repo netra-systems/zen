@@ -229,7 +229,7 @@ Redis connection failed: Timeout connecting to server
 #### Issue: Connection Timeout
 **Symptoms**:
 ```
-ClickHouse check failed: Connection to xedvrr4c3r.us-central1.gcp.clickhouse.cloud timed out
+ClickHouse check failed: Connection to clickhouse_host_url_placeholder timed out
 ```
 
 **Note**: ClickHouse failures are non-critical in staging

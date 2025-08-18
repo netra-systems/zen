@@ -17,6 +17,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from dataclasses import dataclass, field
 
 from app.logging_config import central_logger
+from app.core.shared_health_types import HealthStatus
 
 logger = central_logger.get_logger(__name__)
 
@@ -26,14 +27,6 @@ class AlertSeverity(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
-    CRITICAL = "critical"
-
-
-class HealthStatus(Enum):
-    """Health status levels for services."""
-    HEALTHY = "healthy"
-    DEGRADED = "degraded"
-    UNHEALTHY = "unhealthy"
     CRITICAL = "critical"
 
 

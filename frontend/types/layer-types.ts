@@ -107,7 +107,7 @@ export interface FinalReportEvent {
 }
 
 export interface SlowLayerData {
-  completedAgents: AgentResult[];     // From agent_completed events
+  completedAgents: LayerAgentResult[];     // From agent_completed events
   finalReport: FinalReport | null;    // From final_report event
   totalDuration: number;               // From backend
   metrics: ExecutionMetrics;          // From backend
@@ -117,10 +117,10 @@ export interface SlowLayerData {
 // Supporting Types
 // ============================================
 
-export interface AgentResult {
+export interface LayerAgentResult {
   agentName: string;
   duration: number;
-  result: AgentResultData;  // Agent-specific, from backend
+  result: LayerAgentResultData;  // Agent-specific, from backend
   metrics: AgentMetrics; // Agent-specific, from backend
   iteration?: number; // Iteration count for repeated agents
 }
@@ -233,7 +233,7 @@ export interface TechnicalDetails {
   requirements: string[];
 }
 
-export interface AgentResultData {
+export interface LayerAgentResultData {
   output?: string;
   artifacts?: {
     [key: string]: unknown;

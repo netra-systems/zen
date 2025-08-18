@@ -33,80 +33,92 @@ install_supervisor_extensions()
 class TestWorkflowPatterns:
     """Test common workflow patterns and coordination strategies"""
     
-    async def test_fan_out_fan_in_pattern(self):
-        """Test fan-out/fan-in pattern for parallel processing"""
+    async def _setup_fanout_supervisor(self):
+        """Setup supervisor with mocks for fan-out test"""
         mocks = create_supervisor_mocks()
         supervisor = create_supervisor_agent(mocks)
-        
-        # Single triage fans out to multiple parallel processors
         setup_triage_agent_mock(supervisor, {
             'user_request': "Fan out test",
             'triage_result': {"parallel_tasks": ["data_analysis", "optimization", "validation"]}
         })
-        
-        # Setup parallel processors
-        async def mock_data_processor(state, run_id, stream_updates=True):
-            await asyncio.sleep(0.02)
-            state.data_result = {"processor": "data", "result": "data_processed"}
-            return state
-        
-        async def mock_opt_processor(state, run_id, stream_updates=True):
-            await asyncio.sleep(0.03)
-            state.optimizations_result = {
-                "optimization_type": "processor_test",
-                "processor": "optimization",
-                "result": "optimizations_processed"
-            }
-            return state
-        
-        # Mock a third processor using the data agent for validation
-        async def mock_validation_processor(state, run_id, stream_updates=True):
-            await asyncio.sleep(0.01)
-            # Add validation result to data_result
-            if hasattr(state, 'data_result') and state.data_result:
-                state.data_result["validation"] = {"processor": "validation", "status": "valid"}
-            else:
-                state.data_result = {"validation": {"processor": "validation", "status": "valid"}}
-            return state
-        
-        supervisor.agents["data"].execute = mock_data_processor
-        supervisor.agents["optimization"].execute = mock_opt_processor
-        
-        # Create a third mock agent for validation
+        return supervisor
+
+    async def _mock_data_processor(self, state, run_id, stream_updates=True):
+        """Mock data processor for fan-out test"""
+        await asyncio.sleep(0.02)
+        state.data_result = {"processor": "data", "result": "data_processed"}
+        return state
+
+    async def _mock_opt_processor(self, state, run_id, stream_updates=True):
+        """Mock optimization processor for fan-out test"""
+        await asyncio.sleep(0.03)
+        state.optimizations_result = {
+            "optimization_type": "processor_test",
+            "processor": "optimization",
+            "result": "optimizations_processed"
+        }
+        return state
+
+    async def _mock_validation_processor(self, state, run_id, stream_updates=True):
+        """Mock validation processor for fan-out test"""
+        await asyncio.sleep(0.01)
+        if hasattr(state, 'data_result') and state.data_result:
+            state.data_result["validation"] = {"processor": "validation", "status": "valid"}
+        else:
+            state.data_result = {"validation": {"processor": "validation", "status": "valid"}}
+        return state
+
+    def _setup_parallel_processors(self, supervisor):
+        """Setup parallel processors for fan-out test"""
+        supervisor.agents["data"].execute = self._mock_data_processor
+        supervisor.agents["optimization"].execute = self._mock_opt_processor
         validation_agent = AsyncMock()
-        validation_agent.execute = mock_validation_processor
+        validation_agent.execute = self._mock_validation_processor
         supervisor.agents["validation"] = validation_agent
-        
-        state = create_agent_state("Fan out test")
-        context = create_execution_context("fanout-test")
-        
-        # Phase 1: Triage (fan-out trigger)
+
+    async def _execute_triage_phase(self, supervisor, state, context):
+        """Execute triage phase of fan-out test"""
         triage_result = await supervisor._route_to_agent(state, context, "triage")
         assert triage_result.success
-        
-        # Phase 2: Fan-out to parallel processors
+        return triage_result
+
+    async def _execute_parallel_phase(self, supervisor, state, context):
+        """Execute parallel processing phase"""
+        # Create separate state copies for each parallel task to avoid conflicts
+        import copy
+        state_data = copy.deepcopy(state)
+        state_opt = copy.deepcopy(state)
+        state_val = copy.deepcopy(state)
         parallel_tasks = [
-            supervisor._route_to_agent(triage_result.state, context, "data"),
-            supervisor._route_to_agent(triage_result.state, context, "optimization"),
-            supervisor._route_to_agent(triage_result.state, context, "validation")
+            supervisor._route_to_agent(state_data, context, "data"),
+            supervisor._route_to_agent(state_opt, context, "optimization"),
+            supervisor._route_to_agent(state_val, context, "validation")
         ]
-        
-        parallel_results = await asyncio.gather(*parallel_tasks)
-        
-        # Phase 3: Fan-in - combine results
+        return await asyncio.gather(*parallel_tasks)
+
+    def _verify_fanin_results(self, parallel_results):
+        """Verify fan-in results from parallel processing"""
         assert all(result.success for result in parallel_results)
-        
-        # Verify each processor completed its work
-        data_result = next(r for r in parallel_results if hasattr(r.state, 'data_result') 
-                          and r.state.data_result.get("processor") == "data")
-        opt_result = next(r for r in parallel_results if hasattr(r.state, 'optimizations_result'))
-        validation_result = next(r for r in parallel_results 
-                               if hasattr(r.state, 'data_result') 
-                               and r.state.data_result.get("validation"))
-        
-        assert data_result.state.data_result["result"] == "data_processed"
-        assert opt_result.state.optimizations_result["result"] == "optimizations_processed"
-        assert validation_result.state.data_result["validation"]["status"] == "valid"
+        data_result = next((r for r in parallel_results if hasattr(r.state, 'data_result') 
+                          and r.state.data_result and r.state.data_result.get("processor") == "data"), None)
+        opt_result = next((r for r in parallel_results if hasattr(r.state, 'optimizations_result') 
+                          and r.state.optimizations_result), None)
+        validation_result = next((r for r in parallel_results 
+                               if hasattr(r.state, 'data_result') and r.state.data_result
+                               and r.state.data_result.get("validation")), None)
+        assert data_result and data_result.state.data_result["result"] == "data_processed"
+        assert opt_result and opt_result.state.optimizations_result["result"] == "optimizations_processed"
+        assert validation_result and validation_result.state.data_result["validation"]["status"] == "valid"
+
+    async def test_fan_out_fan_in_pattern(self):
+        """Test fan-out/fan-in pattern for parallel processing"""
+        supervisor = await self._setup_fanout_supervisor()
+        self._setup_parallel_processors(supervisor)
+        state = create_agent_state("Fan out test")
+        context = create_execution_context("fanout-test")
+        triage_result = await self._execute_triage_phase(supervisor, state, context)
+        parallel_results = await self._execute_parallel_phase(supervisor, triage_result.state, context)
+        self._verify_fanin_results(parallel_results)
         
     async def test_pipeline_with_feedback_loops(self):
         """Test pipeline with feedback loops and iterative refinement"""

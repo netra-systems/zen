@@ -16,15 +16,14 @@ from enum import Enum
 from typing import Dict, List, Optional, Any, Protocol, Union
 from pydantic import BaseModel, Field
 
+from app.core.resilience.monitor import AlertSeverity as CanonicalAlertSeverity
+from app.core.shared_health_types import HealthStatus
+
 
 # === Core Monitoring Enums ===
 
-class AlertSeverity(str, Enum):
-    """Standard alert severity levels across all domains."""
-    INFO = "info"
-    WARNING = "warning"
-    ERROR = "error"
-    CRITICAL = "critical"
+# Use canonical AlertSeverity from resilience monitor
+AlertSeverity = CanonicalAlertSeverity
 
 
 class AlertLevel(str, Enum):
@@ -282,19 +281,13 @@ class NotificationConfig(BaseModel):
 
 # === System Health Types ===
 
-class ComponentHealthStatus(str, Enum):
-    """Component health status levels."""
-    HEALTHY = "healthy"
-    DEGRADED = "degraded"
-    UNHEALTHY = "unhealthy"
-    CRITICAL = "critical"
-    UNKNOWN = "unknown"
+# ComponentHealthStatus moved to canonical source: app.core.shared_health_types.HealthStatus
 
 
 class ComponentHealth(BaseModel):
     """Individual component health status."""
     name: str = Field(..., description="Component name")
-    status: ComponentHealthStatus = Field(..., description="Health status")
+    status: HealthStatus = Field(..., description="Health status")
     health_score: float = Field(default=1.0, ge=0.0, le=1.0, description="Health score")
     last_check: datetime = Field(..., description="Last health check time")
     error_count: int = Field(default=0, description="Recent error count")
@@ -305,7 +298,7 @@ class ComponentHealth(BaseModel):
 class SystemHealth(BaseModel):
     """Overall system health status."""
     timestamp: datetime = Field(..., description="Health check timestamp")
-    overall_status: ComponentHealthStatus = Field(..., description="Overall system status")
+    overall_status: HealthStatus = Field(..., description="Overall system status")
     overall_score: float = Field(default=1.0, ge=0.0, le=1.0, description="Overall health score")
     components: List[ComponentHealth] = Field(default_factory=list, description="Component statuses")
     active_alerts: int = Field(default=0, description="Number of active alerts")
@@ -332,7 +325,7 @@ def create_threshold_alert(
     metric_name: str,
     current_value: float,
     threshold_value: float,
-    severity: AlertSeverity = AlertSeverity.WARNING,
+    severity: AlertSeverity = AlertSeverity.MEDIUM,
     alert_id: Optional[str] = None
 ) -> ThresholdAlert:
     """Factory function for threshold alerts."""
@@ -356,7 +349,7 @@ def create_performance_alert(
     metric_name: str,
     current_value: float,
     threshold: float,
-    severity: AlertSeverity = AlertSeverity.WARNING,
+    severity: AlertSeverity = AlertSeverity.MEDIUM,
     alert_id: Optional[str] = None
 ) -> PerformanceAlert:
     """Factory function for performance alerts."""

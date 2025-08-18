@@ -8,7 +8,7 @@ from typing import List, Dict, Any
 # ClickHouse configurations
 CLOUD_CONFIG = {
     'name': 'Cloud ClickHouse',
-    'host': os.environ.get('CLICKHOUSE_HOST', 'xedvrr4c3r.us-central1.gcp.clickhouse.cloud'),
+    'host': os.environ.get('CLICKHOUSE_HOST', 'clickhouse_host_url_placeholder'),
     'port': int(os.environ.get('CLICKHOUSE_PORT', '8443')),
     'user': os.environ.get('CLICKHOUSE_USER', 'development_user'),
     'password': os.environ.get('CLICKHOUSE_PASSWORD', ''),

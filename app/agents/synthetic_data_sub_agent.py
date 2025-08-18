@@ -217,29 +217,7 @@ class SyntheticDataSubAgent(BaseSubAgent):
         """Parse custom profile from user request"""
         try:
             prompt = self._create_parsing_prompt(user_request)
-            
-            # Generate correlation ID and start heartbeat
-            correlation_id = generate_llm_correlation_id()
-            start_llm_heartbeat(correlation_id, "SyntheticDataSubAgent")
-            
-            try:
-                # Log input to LLM
-                log_agent_input("SyntheticDataSubAgent", "LLM", len(prompt), correlation_id)
-                
-                response = await self.llm_manager.ask_llm(prompt, llm_config_name='default')
-                
-                # Log output from LLM
-                log_agent_output("LLM", "SyntheticDataSubAgent", 
-                               len(response), "success", correlation_id)
-                
-            except Exception as e:
-                # Log error output
-                log_agent_output("LLM", "SyntheticDataSubAgent", 0, "error", correlation_id)
-                raise
-            finally:
-                # Stop heartbeat
-                stop_llm_heartbeat(correlation_id)
-            
+            response = await self._call_llm_with_logging(prompt)
             params = extract_json_from_response(response)
             
             if params:
@@ -248,6 +226,47 @@ class SyntheticDataSubAgent(BaseSubAgent):
             self.logger.warning(f"Failed to parse workload profile: {e}")
         
         return self._get_default_profile()
+    
+    async def _call_llm_with_logging(self, prompt: str) -> str:
+        """Call LLM with proper logging and heartbeat."""
+        correlation_id = self._setup_llm_tracking()
+        
+        try:
+            return await self._execute_llm_call(prompt, correlation_id)
+        finally:
+            stop_llm_heartbeat(correlation_id)
+    
+    def _setup_llm_tracking(self) -> str:
+        """Setup LLM tracking and heartbeat."""
+        correlation_id = generate_llm_correlation_id()
+        start_llm_heartbeat(correlation_id, "SyntheticDataSubAgent")
+        return correlation_id
+    
+    async def _execute_llm_call(
+        self, 
+        prompt: str, 
+        correlation_id: str
+    ) -> str:
+        """Execute LLM call with logging."""
+        try:
+            log_agent_input(
+                "SyntheticDataSubAgent", "LLM", len(prompt), correlation_id
+            )
+            
+            response = await self.llm_manager.ask_llm(
+                prompt, llm_config_name='default'
+            )
+            
+            log_agent_output(
+                "LLM", "SyntheticDataSubAgent", 
+                len(response), "success", correlation_id
+            )
+            return response
+        except Exception as e:
+            log_agent_output(
+                "LLM", "SyntheticDataSubAgent", 0, "error", correlation_id
+            )
+            raise
     
     def _create_parsing_prompt(self, user_request: str) -> str:
         """Create prompt for parsing user request"""

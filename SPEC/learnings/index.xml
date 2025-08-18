@@ -40,13 +40,15 @@
             <name>Configuration/Secrets</name>
             <file>learnings/configuration_secrets.xml</file>
             <path>SPEC/learnings/configuration_secrets.xml</path>
-            <learning_count>4</learning_count>
+            <learning_count>5</learning_count>
             <learning_ids>
                 <id>staging-env-var-suffix-handling</id>
                 <id>cors-devlauncher-middleware-configuration</id>
                 <id>staging-cors-missing-env-var</id>
                 <id>gemini-api-key-paradox</id>
+                <id>unified-config-direct-env-access</id>
             </learning_ids>
+            <important_note>CRITICAL: All configuration MUST use unified config system - see unified-config-direct-env-access</important_note>
         </category>
         <category>
             <name>Environment Loading</name>

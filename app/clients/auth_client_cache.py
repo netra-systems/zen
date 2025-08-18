@@ -35,14 +35,21 @@ class AuthTokenCache:
         self.cache_ttl = cache_ttl_seconds
         self._token_cache: Dict[str, CachedToken] = {}
     
+    def _remove_expired_token(self, token: str) -> None:
+        """Remove expired token from cache."""
+        if token in self._token_cache:
+            del self._token_cache[token]
+    
     def get_cached_token(self, token: str) -> Optional[Dict]:
         """Get token from cache if valid."""
-        if token in self._token_cache:
-            cached = self._token_cache[token]
-            if cached.is_valid():
-                return cached.data
-            else:
-                del self._token_cache[token]
+        if token not in self._token_cache:
+            return None
+        
+        cached = self._token_cache[token]
+        if cached.is_valid():
+            return cached.data
+        
+        self._remove_expired_token(token)
         return None
     
     def cache_token(self, token: str, data: Dict) -> None:
@@ -77,7 +84,9 @@ class AuthCircuitBreakerManager:
     
     async def call_with_breaker(self, func, *args, **kwargs):
         """Execute function call through circuit breaker."""
-        return await self.circuit_breaker.call(func, *args, **kwargs)
+        async def wrapped_func():
+            return await func(*args, **kwargs)
+        return await self.circuit_breaker.call(wrapped_func)
 
 
 class AuthServiceSettings:

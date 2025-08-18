@@ -20,7 +20,10 @@ from .interface import BaseHealthChecker
 logger = central_logger.get_logger(__name__)
 
 
-class DatabaseHealthChecker(BaseHealthChecker):
+# Import DatabaseHealthChecker from canonical location - CONSOLIDATED
+from app.db.health_checks import DatabaseHealthChecker as CoreDatabaseHealthChecker
+
+class UnifiedDatabaseHealthChecker(BaseHealthChecker):
     """Unified database health checker supporting PostgreSQL and ClickHouse."""
     
     def __init__(self, db_type: str = "postgres", timeout: float = 5.0):
@@ -47,11 +50,14 @@ class DatabaseHealthChecker(BaseHealthChecker):
     def _create_error_result(self, error_msg: str) -> HealthCheckResult:
         """Create error result for health check."""
         return HealthCheckResult(
-            component_name=self.name,
-            success=False,
-            health_score=0.0,
-            response_time_ms=0.0,
-            error_message=error_msg
+            status="unhealthy",
+            response_time=0.0,
+            details={
+                "component_name": self.name,
+                "success": False,
+                "health_score": 0.0,
+                "error_message": error_msg
+            }
         )
 
 
@@ -90,21 +96,27 @@ class ServiceHealthChecker(BaseHealthChecker):
         health_score = 1.0 if success else 0.0
         
         return HealthCheckResult(
-            component_name=self.name,
-            success=success,
-            health_score=health_score,
-            response_time_ms=response_time,
-            metadata=result
+            status="healthy" if success else "unhealthy",
+            response_time=response_time / 1000,  # Convert ms to seconds
+            details={
+                "component_name": self.name,
+                "success": success,
+                "health_score": health_score,
+                "metadata": result
+            }
         )
     
     def _create_service_error(self, error_msg: str, response_time: float) -> HealthCheckResult:
         """Create error result for service check."""
         return HealthCheckResult(
-            component_name=self.name,
-            success=False,
-            health_score=0.0,
-            response_time_ms=response_time,
-            error_message=error_msg
+            status="unhealthy",
+            response_time=response_time / 1000,  # Convert ms to seconds
+            details={
+                "component_name": self.name,
+                "success": False,
+                "health_score": 0.0,
+                "error_message": error_msg
+            }
         )
 
 
@@ -132,7 +144,7 @@ class DependencyHealthChecker(BaseHealthChecker):
         """Perform dependency-specific health check."""
         if self.dependency_name == "websocket":
             result = await check_websocket_health()
-            return result.success
+            return result.details.get("success", result.status == "healthy")
         elif self.dependency_name == "llm":
             return await self._check_llm_connectivity()
         else:
@@ -155,20 +167,26 @@ class DependencyHealthChecker(BaseHealthChecker):
     def _create_dependency_result(self, success: bool, response_time: float) -> HealthCheckResult:
         """Create dependency health result."""
         return HealthCheckResult(
-            component_name=self.name,
-            success=success,
-            health_score=1.0 if success else 0.0,
-            response_time_ms=response_time
+            status="healthy" if success else "unhealthy",
+            response_time=response_time / 1000,  # Convert ms to seconds
+            details={
+                "component_name": self.name,
+                "success": success,
+                "health_score": 1.0 if success else 0.0
+            }
         )
     
     def _create_dependency_error(self, error_msg: str, response_time: float) -> HealthCheckResult:
         """Create error result for dependency check."""
         return HealthCheckResult(
-            component_name=self.name,
-            success=False,
-            health_score=0.0,
-            response_time_ms=response_time,
-            error_message=error_msg
+            status="unhealthy",
+            response_time=response_time / 1000,  # Convert ms to seconds
+            details={
+                "component_name": self.name,
+                "success": False,
+                "health_score": 0.0,
+                "error_message": error_msg
+            }
         )
 
 
@@ -210,7 +228,8 @@ class CircuitBreakerHealthChecker(BaseHealthChecker):
     
     async def _handle_check_result(self, result: HealthCheckResult) -> None:
         """Handle successful or failed check result."""
-        if result.success:
+        success = result.details.get("success", result.status == "healthy")
+        if success:
             self.failure_count = 0
             self.circuit_open = False
         else:
@@ -228,19 +247,29 @@ class CircuitBreakerHealthChecker(BaseHealthChecker):
     def _create_circuit_open_result(self) -> HealthCheckResult:
         """Create result when circuit breaker is open."""
         return HealthCheckResult(
-            component_name=self.name,
-            success=False,
-            health_score=0.0,
-            response_time_ms=0.0,
-            error_message="Circuit breaker open - service unavailable"
+            status="unhealthy",
+            response_time=0.0,
+            details={
+                "component_name": self.name,
+                "success": False,
+                "health_score": 0.0,
+                "error_message": "Circuit breaker open - service unavailable"
+            }
         )
     
     def _create_circuit_error_result(self, error_msg: str) -> HealthCheckResult:
         """Create error result for circuit breaker failure."""
         return HealthCheckResult(
-            component_name=self.name,
-            success=False,
-            health_score=0.0,
-            response_time_ms=0.0,
-            error_message=f"Circuit breaker error: {error_msg}"
+            status="unhealthy",
+            response_time=0.0,
+            details={
+                "component_name": self.name,
+                "success": False,
+                "health_score": 0.0,
+                "error_message": f"Circuit breaker error: {error_msg}"
+            }
         )
+
+
+# Alias for unified health system compatibility
+DatabaseHealthChecker = UnifiedDatabaseHealthChecker

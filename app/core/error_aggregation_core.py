@@ -35,10 +35,14 @@ class ErrorAggregator:
         timestamp = self._extract_timestamp(error_data)
         signature = self.signature_extractor.extract_signature(error_data)
         pattern = self._get_or_create_pattern(signature)
+        self._complete_error_processing(pattern, error_data, timestamp)
+        return pattern
+    
+    def _complete_error_processing(self, pattern: ErrorPattern, error_data: Dict[str, Any], timestamp: datetime) -> None:
+        """Complete error processing pipeline."""
         self._process_error_data(pattern, error_data, timestamp)
         self._add_to_history(timestamp, error_data)
         self._cleanup_if_needed()
-        return pattern
     
     def get_patterns_in_window(self, window_minutes: int = 60) -> List[ErrorPattern]:
         """Get error patterns within specified time window."""
@@ -236,13 +240,20 @@ class ErrorAggregationSystem:
     async def _processing_loop(self) -> None:
         """Background processing loop for periodic analysis."""
         while self.processing_active:
-            try:
-                await self._process_all_patterns()
-                await asyncio.sleep(self.process_interval)
-            except asyncio.CancelledError:
+            if not await self._try_process_patterns():
                 break
-            except Exception as e:
-                await self._handle_processing_error(e)
+    
+    async def _try_process_patterns(self) -> bool:
+        """Try to process patterns with error handling."""
+        try:
+            await self._process_all_patterns()
+            await asyncio.sleep(self.process_interval)
+            return True
+        except asyncio.CancelledError:
+            return False
+        except Exception as e:
+            await self._handle_processing_error(e)
+            return True
     
     async def _handle_processing_error(self, error: Exception) -> None:
         """Handle processing loop errors."""

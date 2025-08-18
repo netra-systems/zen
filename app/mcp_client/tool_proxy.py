@@ -58,14 +58,19 @@ class MCPToolProxy:
 
     def _build_tool_result_from_raw(self, raw_result: Dict[str, Any]) -> MCPToolResult:
         """Build MCPToolResult from raw response data."""
-        return MCPToolResult(
-            tool_name=raw_result.get("tool_name", "unknown"),
-            server_name=raw_result.get("server_name", "unknown"),
-            content=self._extract_content(raw_result),
-            is_error=raw_result.get("isError", False),
-            error_message=raw_result.get("error"),
-            execution_time_ms=raw_result.get("execution_time_ms", 0)
-        )
+        result_data = self._extract_result_data(raw_result)
+        return MCPToolResult(**result_data)
+    
+    def _extract_result_data(self, raw_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract result data from raw response."""
+        return {
+            "tool_name": raw_result.get("tool_name", "unknown"),
+            "server_name": raw_result.get("server_name", "unknown"),
+            "content": self._extract_content(raw_result),
+            "is_error": raw_result.get("isError", False),
+            "error_message": raw_result.get("error"),
+            "execution_time_ms": raw_result.get("execution_time_ms", 0)
+        }
     
     async def _discover_and_cache_tools(self, connection: MCPConnection, cache_key: str) -> List[MCPTool]:
         """Discover tools and cache them."""

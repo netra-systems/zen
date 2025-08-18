@@ -63,7 +63,7 @@ describe('WebSocket Connection Lifecycle Management', () => {
       cy.wait(3000); // Wait for disconnection detection
       
       verifyDisconnectionIndicators();
-      queueMessagesDuring Partition();
+      queueMessagesDuringPartition();
       restoreNetworkConnection();
       
       verifyReconnectionAndMessageDelivery(initialId);

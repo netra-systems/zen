@@ -5,13 +5,9 @@ from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass, field
 
+from app.core.resilience.monitor import AlertSeverity
 
-class AlertSeverity(Enum):
-    """Severity levels for quality alerts"""
-    INFO = "info"
-    WARNING = "warning"
-    ERROR = "error"
-    CRITICAL = "critical"
+
 
 
 class MetricType(Enum):

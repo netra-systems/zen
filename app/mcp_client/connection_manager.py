@@ -28,15 +28,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from app.core.exceptions import NetraException
-
-
-class ConnectionStatus(str, Enum):
-    """MCP connection status states."""
-    CONNECTING = "connecting"
-    CONNECTED = "connected"
-    DISCONNECTED = "disconnected"
-    FAILED = "failed"
-    RECONNECTING = "reconnecting"
+from .models import ConnectionStatus
 
 
 class MCPTransport(str, Enum):
@@ -93,10 +85,14 @@ class MCPConnectionManager:
         self._pools: Dict[str, asyncio.Queue] = {}
         self._active_connections: Dict[str, List[MCPConnection]] = {}
         self._metrics: Dict[str, ConnectionMetrics] = {}
+        self._initialize_settings()
+        self._logger = logging.getLogger(__name__)
+
+    def _initialize_settings(self) -> None:
+        """Initialize default settings and configuration."""
         self._health_check_interval = 30.0
         self._health_check_task: Optional[asyncio.Task] = None
         self._reconnect_backoff_base = 1.0
-        self._logger = logging.getLogger(__name__)
 
     async def create_connection(self, config: MCPServerConfig) -> MCPConnection:
         """Create new MCP connection from server config."""
@@ -138,6 +134,10 @@ class MCPConnectionManager:
         """Check if connection is healthy and responsive."""
         if connection.status != ConnectionStatus.CONNECTED:
             return False
+        return await self._perform_health_check(connection)
+
+    async def _perform_health_check(self, connection: MCPConnection) -> bool:
+        """Perform actual health check with error handling."""
         try:
             return await self._ping_connection(connection)
         except Exception as e:
@@ -147,9 +147,16 @@ class MCPConnectionManager:
     async def reconnect(self, connection: MCPConnection) -> MCPConnection:
         """Reconnect failed connection with exponential backoff."""
         connection.status = ConnectionStatus.RECONNECTING
+        await self._wait_for_backoff()
+        return await self._create_replacement_connection(connection)
+
+    async def _wait_for_backoff(self) -> None:
+        """Wait for exponential backoff delay."""
         backoff_delay = self._calculate_backoff_delay()
         await asyncio.sleep(backoff_delay)
-        
+
+    async def _create_replacement_connection(self, connection: MCPConnection) -> MCPConnection:
+        """Create and set up replacement connection."""
         config = self._get_server_config(connection.server_name)
         new_connection = await self.create_connection(config)
         await self._replace_connection(connection, new_connection)

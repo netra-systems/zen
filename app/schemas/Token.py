@@ -1,14 +1,12 @@
-from pydantic import BaseModel
-from typing import List, Optional
-from datetime import datetime
+"""
+Token Models - DEPRECATED - USE app.schemas.auth_types INSTEAD
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
+This module is now a compatibility wrapper that imports from the canonical source.
+All new code should import directly from app.schemas.auth_types.
+"""
 
-class TokenPayload(BaseModel):
-    sub: str
-    user_id: Optional[str] = None
-    roles: Optional[List[str]] = None
-    permissions: Optional[List[str]] = None
-    exp: Optional[datetime] = None
+# Import from canonical source
+from app.schemas.auth_types import Token, TokenPayload
+
+# Re-export for backward compatibility
+__all__ = ["Token", "TokenPayload"]

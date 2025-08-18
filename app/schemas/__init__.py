@@ -25,7 +25,6 @@ from .Config import (
     OAuthConfig,
     ClickHouseNativeConfig,
     ClickHouseHTTPSConfig,
-    ClickHouseHTTPSDevConfig,
     ClickHouseLoggingConfig,
     LogTableSettings,
     TimePeriodSettings,

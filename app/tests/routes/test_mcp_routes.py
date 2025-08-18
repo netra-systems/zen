@@ -69,10 +69,10 @@ class TestMCPRoute:
     
     async def test_mcp_tool_execution(self):
         """Test MCP tool execution."""
-        from app.routes.mcp import execute_tool
+        from app.routes.mcp.handlers import execute_tool
         
         # Mock tool execution
-        with patch('app.services.mcp_tool_service.execute_tool') as mock_execute:
+        with patch('app.routes.mcp.handlers.execute_tool') as mock_execute:
             mock_execute.return_value = {
                 "result": "success",
                 "tool": "test_tool",
@@ -95,7 +95,7 @@ class TestMCPRoute:
             "id": 1
         }
         
-        with patch('app.services.mcp_tool_service.list_tools') as mock_list:
+        with patch('app.services.mcp_service.get_server_info') as mock_list:
             mock_list.return_value = {
                 "tools": [
                     {
@@ -138,7 +138,7 @@ class TestMCPRoute:
             "id": 2
         }
         
-        with patch('app.services.mcp_tool_service.execute_tool') as mock_execute:
+        with patch('app.services.mcp_service.execute_tool') as mock_execute:
             mock_execute.side_effect = Exception("Tool not found")
             
             response = basic_test_client.post("/api/mcp", json=error_request)
@@ -157,10 +157,10 @@ class TestMCPRoute:
     
     async def test_mcp_resource_management(self):
         """Test MCP resource listing and access."""
-        from app.routes.mcp import list_resources, read_resource
+        from app.routes.mcp.main import list_resources, read_resource
         
         # Test resource listing
-        with patch('app.services.mcp_resource_service.list_resources') as mock_list:
+        with patch('app.routes.mcp.handlers.MCPHandlers.list_resources') as mock_list:
             mock_list.return_value = {
                 "resources": [
                     {
@@ -176,7 +176,7 @@ class TestMCPRoute:
             assert len(resources["resources"]) > 0
         
         # Test resource reading
-        with patch('app.services.mcp_resource_service.read_resource') as mock_read:
+        with patch('app.routes.mcp.handlers.MCPHandlers.read_resource') as mock_read:
             mock_read.return_value = {
                 "contents": [
                     {
@@ -209,7 +209,7 @@ class TestMCPRoute:
             "id": 1
         }
         
-        with patch('app.services.mcp_handler.initialize') as mock_init:
+        with patch('app.routes.mcp.handlers.MCPHandlers.get_server_info') as mock_init:
             mock_init.return_value = {
                 "protocolVersion": "2024-11-05",
                 "capabilities": {

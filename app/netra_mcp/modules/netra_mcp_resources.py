@@ -24,95 +24,30 @@ class NetraMCPResources:
     
     def _register_optimization_history(self, server):
         """Register optimization history resource"""
-        
         @self.mcp.resource("netra://optimization/history")
         async def get_optimization_history() -> str:
             """Get historical optimization results and recommendations"""
             try:
-                if server.corpus_service:
-                    end_date = datetime.now(UTC)
-                    start_date = end_date - timedelta(days=30)
-                    
-                    history_data = await server.corpus_service.get_optimization_history(
-                        start_date=start_date.isoformat(),
-                        end_date=end_date.isoformat()
-                    )
-                    
-                    if history_data and "optimizations" in history_data:
-                        return json.dumps(history_data, indent=2)
-                
-                # Fallback to sample data if service not available
-                history = {
-                    "optimizations": [
-                        {
-                            "id": "opt-001",
-                            "date": "2025-08-10",
-                            "type": "prompt_optimization",
-                            "model": "claude-3-opus",
-                            "cost_reduction": "45%",
-                            "performance_gain": "20%"
-                        },
-                        {
-                            "id": "opt-002",
-                            "date": "2025-08-11",
-                            "type": "model_selection",
-                            "original": "gpt-4",
-                            "recommended": "claude-3-sonnet",
-                            "cost_reduction": "60%",
-                            "quality_maintained": True
-                        }
-                    ],
-                    "total_savings": "$12,450",
-                    "average_optimization": "52%"
-                }
-                
-                return json.dumps(history, indent=2)
+                result = await self._get_optimization_data(server)
+                return self._format_optimization_response(result)
             except Exception as e:
-                logger.error(f"Error retrieving optimization history: {e}")
-                return json.dumps({"error": str(e)}, indent=2)
+                return self._handle_optimization_error(e)
     
     def _register_model_configs(self, server):
         """Register model configuration resource"""
-        
         @self.mcp.resource("netra://config/models")
         async def get_model_configurations() -> str:
             """Get configured model parameters and settings"""
-            configs = {
-                "models": {
-                    "claude-3-opus": {
-                        "context_window": 200000,
-                        "max_output": 4096,
-                        "price_per_1k_input": 0.015,
-                        "price_per_1k_output": 0.075,
-                        "rate_limit": 100
-                    },
-                    "gpt-4": {
-                        "context_window": 128000,
-                        "max_output": 4096,
-                        "price_per_1k_input": 0.03,
-                        "price_per_1k_output": 0.06,
-                        "rate_limit": 500
-                    },
-                    "gemini-pro": {
-                        "context_window": 32000,
-                        "max_output": 2048,
-                        "price_per_1k_input": 0.00025,
-                        "price_per_1k_output": 0.0005,
-                        "rate_limit": 1000
-                    }
-                }
-            }
-            
-            return json.dumps(configs, indent=2)
+            configs = self._build_model_configs()
+            return self._format_config_response(configs)
     
     def _register_agent_catalog(self, server):
         """Register agent catalog resource"""
-        
         @self.mcp.resource("netra://agents/catalog")
         async def get_agent_catalog() -> str:
             """Get detailed catalog of available agents"""
             catalog = self._build_agent_catalog()
-            return json.dumps(catalog, indent=2)
+            return self._format_catalog_response(catalog)
     
     def _build_agent_catalog(self) -> Dict[str, Any]:
         """Build complete agent catalog structure"""
@@ -197,7 +132,7 @@ class NetraMCPResources:
             """Get current system metrics and performance indicators"""
             try:
                 metrics = await self._collect_system_metrics(server)
-                return json.dumps(metrics, indent=2)
+                return self._format_metrics_response(metrics)
             except Exception as e:
                 return self._format_error_response(e)
     
@@ -291,3 +226,118 @@ class NetraMCPResources:
         """Format error response for metrics"""
         logger.error(f"Error retrieving current metrics: {error}")
         return json.dumps({"error": str(error)}, indent=2)
+    
+    async def _get_optimization_data(self, server) -> Dict[str, Any]:
+        """Get optimization data from service or fallback"""
+        if server.corpus_service:
+            dates = self._get_date_range()
+            return await self._fetch_service_history(server.corpus_service, dates)
+        return self._get_fallback_optimization_data()
+    
+    def _get_date_range(self) -> Dict[str, str]:
+        """Get start and end dates for history query"""
+        end_date = datetime.now(UTC)
+        start_date = end_date - timedelta(days=30)
+        return {"start": start_date.isoformat(), "end": end_date.isoformat()}
+    
+    async def _fetch_service_history(self, service, dates: Dict[str, str]) -> Dict[str, Any]:
+        """Fetch optimization history from service"""
+        history_data = await service.get_optimization_history(
+            start_date=dates["start"], end_date=dates["end"]
+        )
+        if history_data and "optimizations" in history_data:
+            return history_data
+        return self._get_fallback_optimization_data()
+    
+    def _get_fallback_optimization_data(self) -> Dict[str, Any]:
+        """Get fallback optimization history data"""
+        return {
+            "optimizations": self._get_sample_optimizations(),
+            "total_savings": "$12,450",
+            "average_optimization": "52%"
+        }
+    
+    def _get_sample_optimizations(self) -> list:
+        """Get sample optimization records"""
+        return [
+            self._create_sample_optimization_1(),
+            self._create_sample_optimization_2()
+        ]
+    
+    def _create_sample_optimization_1(self) -> Dict[str, Any]:
+        """Create first sample optimization record"""
+        return {
+            "id": "opt-001", "date": "2025-08-10",
+            "type": "prompt_optimization", "model": "claude-3-opus",
+            "cost_reduction": "45%", "performance_gain": "20%"
+        }
+    
+    def _create_sample_optimization_2(self) -> Dict[str, Any]:
+        """Create second sample optimization record"""
+        return {
+            "id": "opt-002", "date": "2025-08-11",
+            "type": "model_selection", "original": "gpt-4",
+            "recommended": "claude-3-sonnet", "cost_reduction": "60%",
+            "quality_maintained": True
+        }
+    
+    def _format_optimization_response(self, data: Dict[str, Any]) -> str:
+        """Format optimization response as JSON"""
+        return json.dumps(data, indent=2)
+    
+    def _handle_optimization_error(self, error: Exception) -> str:
+        """Handle optimization history errors"""
+        logger.error(f"Error retrieving optimization history: {error}")
+        return json.dumps({"error": str(error)}, indent=2)
+    
+    def _build_model_configs(self) -> Dict[str, Any]:
+        """Build complete model configurations"""
+        return {
+            "models": {
+                **self._get_claude_config(),
+                **self._get_gpt4_config(),
+                **self._get_gemini_config()
+            }
+        }
+    
+    def _get_claude_config(self) -> Dict[str, Dict[str, Any]]:
+        """Get Claude-3-Opus configuration"""
+        return {
+            "claude-3-opus": {
+                "context_window": 200000, "max_output": 4096,
+                "price_per_1k_input": 0.015, "price_per_1k_output": 0.075,
+                "rate_limit": 100
+            }
+        }
+    
+    def _get_gpt4_config(self) -> Dict[str, Dict[str, Any]]:
+        """Get GPT-4 configuration"""
+        return {
+            "gpt-4": {
+                "context_window": 128000, "max_output": 4096,
+                "price_per_1k_input": 0.03, "price_per_1k_output": 0.06,
+                "rate_limit": 500
+            }
+        }
+    
+    def _get_gemini_config(self) -> Dict[str, Dict[str, Any]]:
+        """Get Gemini Pro configuration"""
+        return {
+            "gemini-pro": {
+                "context_window": 32000, "max_output": 2048,
+                "price_per_1k_input": 0.00025, "price_per_1k_output": 0.0005,
+                "rate_limit": 1000
+            }
+        }
+    
+    def _format_config_response(self, configs: Dict[str, Any]) -> str:
+        """Format model configuration response as JSON"""
+        return json.dumps(configs, indent=2)
+    
+    def _format_catalog_response(self, catalog: Dict[str, Any]) -> str:
+        """Format agent catalog response as JSON"""
+        return json.dumps(catalog, indent=2)
+    
+    def _format_metrics_response(self, metrics: Dict[str, Any]) -> str:
+        """Format metrics response as JSON"""
+        return json.dumps(metrics, indent=2)

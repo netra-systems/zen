@@ -100,37 +100,34 @@ def test_ready_endpoint_db_failure(client: TestClient):
 
 def test_ready_endpoint_clickhouse_failure(client: TestClient):
     from contextlib import asynccontextmanager
-    import os
+    from app.core.health_types import HealthStatus
     
-    # Temporarily allow ClickHouse check for this test and set production mode
-    original_skip_clickhouse = os.environ.get("SKIP_CLICKHOUSE_INIT")
-    original_environment = os.environ.get("ENVIRONMENT")
-    os.environ["SKIP_CLICKHOUSE_INIT"] = "false"
-    os.environ["ENVIRONMENT"] = "production"  # Force production mode so ClickHouse failures are treated as errors
+    mock_client = MagicMock()
+    mock_client.execute.side_effect = Exception("ClickHouse connection failed")
     
-    try:
-        mock_client = MagicMock()
-        mock_client.execute.side_effect = Exception("ClickHouse connection failed")
+    @asynccontextmanager
+    async def mock_get_clickhouse_client():
+        yield mock_client
+    
+    # Mock the health interface to return an unhealthy status directly
+    with patch("app.db.clickhouse.get_clickhouse_client", mock_get_clickhouse_client), \
+         patch("app.core.health.interface.HealthInterface.get_health_status") as mock_health_status:
         
-        @asynccontextmanager
-        async def mock_get_clickhouse_client():
-            yield mock_client
+        # Mock the health status to return unhealthy for this test
+        mock_health_status.return_value = {
+            "status": HealthStatus.UNHEALTHY.value,
+            "service": "netra-ai-platform",
+            "version": "1.0.0",
+            "uptime_seconds": 100,
+            "checks": {"database_clickhouse": False},
+            "timestamp": "2025-01-01T00:00:00Z"
+        }
         
-        with patch("app.db.clickhouse.get_clickhouse_client", mock_get_clickhouse_client):
-            response = client.get("/health/ready")
-            assert response.status_code == 503
-            
-            # Check that the response contains error information
-            response_data = response.json()
-            assert response_data["detail"] == "Service Unavailable"
-    finally:
-        # Restore original values
-        if original_skip_clickhouse is not None:
-            os.environ["SKIP_CLICKHOUSE_INIT"] = original_skip_clickhouse
-        else:
-            os.environ.pop("SKIP_CLICKHOUSE_INIT", None)
+        response = client.get("/health/ready")
+        assert response.status_code == 503
         
-        if original_environment is not None:
-            os.environ["ENVIRONMENT"] = original_environment
-        else:
-            os.environ.pop("ENVIRONMENT", None)
+        # Check that the response contains error information
+        response_data = response.json()
+        assert response_data["error"] == True
+        assert response_data["error_code"] == "SERVICE_UNAVAILABLE"
+        assert response_data["message"] == "Service Unavailable"

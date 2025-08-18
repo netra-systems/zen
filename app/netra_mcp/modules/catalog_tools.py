@@ -31,14 +31,36 @@ class CatalogTools:
     
     def _get_mock_catalog(self) -> str:
         """Get mock catalog data when service unavailable"""
-        catalog = {
+        catalog = self._build_mock_catalog_data()
+        return json.dumps(catalog, indent=2)
+    
+    def _build_mock_catalog_data(self) -> dict:
+        """Build mock catalog structure"""
+        return {
             "providers": [
-                {"name": "Anthropic",
-                 "models": ["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"]},
-                {"name": "OpenAI",
-                 "models": ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"]},
-                {"name": "Google",
-                 "models": ["gemini-pro", "gemini-pro-vision"]}
+                self._get_anthropic_provider(),
+                self._get_openai_provider(),
+                self._get_google_provider()
             ]
         }
-        return json.dumps(catalog, indent=2)
+    
+    def _get_anthropic_provider(self) -> dict:
+        """Get Anthropic provider configuration"""
+        return {
+            "name": "Anthropic",
+            "models": ["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"]
+        }
+    
+    def _get_openai_provider(self) -> dict:
+        """Get OpenAI provider configuration"""
+        return {
+            "name": "OpenAI",
+            "models": ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"]
+        }
+    
+    def _get_google_provider(self) -> dict:
+        """Get Google provider configuration"""
+        return {
+            "name": "Google",
+            "models": ["gemini-pro", "gemini-pro-vision"]
+        }

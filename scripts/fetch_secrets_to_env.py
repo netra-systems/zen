@@ -53,7 +53,7 @@ def _get_secret_mappings() -> dict[str, str]:
 def _get_static_config() -> dict[str, str]:
     """Return static configuration values."""
     return {
-        "CLICKHOUSE_HOST": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
+        "CLICKHOUSE_HOST": "clickhouse_host_url_placeholder",
         "CLICKHOUSE_PORT": "8443",
         "CLICKHOUSE_USER": "default",
         "CLICKHOUSE_DB": "default",

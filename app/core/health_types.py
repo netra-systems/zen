@@ -3,53 +3,13 @@
 Centralized type definitions for system health monitoring components.
 """
 
-from typing import Dict, Any
-from datetime import datetime, UTC
 from enum import Enum
 from dataclasses import dataclass, field
+from datetime import datetime, UTC
 
-
-class HealthStatus(Enum):
-    """Overall health status levels."""
-    HEALTHY = "healthy"
-    DEGRADED = "degraded"
-    UNHEALTHY = "unhealthy"
-    CRITICAL = "critical"
-
-
-@dataclass
-class ComponentHealth:
-    """Health status for a system component."""
-    name: str
-    status: HealthStatus
-    health_score: float  # 0.0 to 1.0
-    last_check: datetime
-    error_count: int = 0
-    uptime: float = 0.0  # in seconds
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class SystemAlert:
-    """System health alert."""
-    alert_id: str
-    component: str
-    severity: str
-    message: str
-    timestamp: datetime
-    resolved: bool = False
-    metadata: Dict[str, Any] = field(default_factory=dict)
-
-
-@dataclass
-class HealthCheckResult:
-    """Result of a health check operation."""
-    component_name: str
-    success: bool
-    health_score: float
-    response_time_ms: float
-    error_message: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+# Import shared types from their single sources of truth
+from app.core.shared_health_types import HealthStatus, ComponentHealth, SystemAlert
+from app.schemas.core_models import HealthCheckResult
 
 
 @dataclass

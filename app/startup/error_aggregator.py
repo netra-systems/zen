@@ -89,30 +89,28 @@ class ErrorAggregator:
 
     async def _create_tables(self, db: aiosqlite.Connection) -> None:
         """Create required database tables."""
-        await db.executescript("""
-            CREATE TABLE IF NOT EXISTS startup_errors (
-                id INTEGER PRIMARY KEY,
-                timestamp DATETIME,
-                service TEXT,
-                phase TEXT,
-                severity TEXT,
-                error_type TEXT,
-                message TEXT,
-                stack_trace TEXT,
-                context JSON,
-                resolved BOOLEAN DEFAULT FALSE,
-                resolution TEXT
-            );
-            CREATE TABLE IF NOT EXISTS error_patterns (
-                pattern_id INTEGER PRIMARY KEY,
-                pattern TEXT UNIQUE,
-                frequency INTEGER DEFAULT 1,
-                last_seen DATETIME,
-                suggested_fix TEXT,
-                auto_fixable BOOLEAN DEFAULT FALSE
-            );
-        """)
+        script = self._build_table_creation_script()
+        await db.executescript(script)
         await db.commit()
+
+    def _build_table_creation_script(self) -> str:
+        """Build table creation SQL script."""
+        errors_table = self._get_errors_table_sql()
+        patterns_table = self._get_patterns_table_sql()
+        return f"{errors_table}\n{patterns_table}"
+
+    def _get_errors_table_sql(self) -> str:
+        """Get startup_errors table SQL."""
+        return """CREATE TABLE IF NOT EXISTS startup_errors (
+                id INTEGER PRIMARY KEY, timestamp DATETIME, service TEXT,
+                phase TEXT, severity TEXT, error_type TEXT, message TEXT,
+                stack_trace TEXT, context JSON, resolved BOOLEAN DEFAULT FALSE, resolution TEXT);"""
+
+    def _get_patterns_table_sql(self) -> str:
+        """Get error_patterns table SQL."""
+        return """CREATE TABLE IF NOT EXISTS error_patterns (
+                pattern_id INTEGER PRIMARY KEY, pattern TEXT UNIQUE, frequency INTEGER DEFAULT 1,
+                last_seen DATETIME, suggested_fix TEXT, auto_fixable BOOLEAN DEFAULT FALSE);"""
 
     async def _insert_error(self, error: StartupError) -> int:
         """Insert error record and return ID."""
@@ -128,12 +126,16 @@ class ErrorAggregator:
     async def _get_recent_errors(self, cutoff: datetime) -> List[StartupError]:
         """Retrieve errors since cutoff time."""
         async with aiosqlite.connect(self.db_path) as db:
-            cursor = await db.execute(
-                "SELECT * FROM startup_errors WHERE timestamp >= ? ORDER BY timestamp DESC",
-                (cutoff,)
-            )
-            rows = await cursor.fetchall()
+            rows = await self._fetch_error_rows(db, cutoff)
             return [self._row_to_error(row) for row in rows]
+
+    async def _fetch_error_rows(self, db: aiosqlite.Connection, cutoff: datetime) -> List:
+        """Fetch error rows from database."""
+        cursor = await db.execute(
+            "SELECT * FROM startup_errors WHERE timestamp >= ? ORDER BY timestamp DESC",
+            (cutoff,)
+        )
+        return await cursor.fetchall()
 
     def _row_to_error(self, row: Tuple) -> StartupError:
         """Convert database row to StartupError."""
@@ -147,17 +149,23 @@ class ErrorAggregator:
         """Group similar errors into patterns."""
         if not errors:
             return []
-        patterns = []
-        processed = set()
-        for i, error in enumerate(errors):
-            if i in processed:
-                continue
-            similar_indices = self._find_similar_messages(error.message, errors, i)
-            if len(similar_indices) > 1:
-                pattern = self._create_pattern_from_errors([errors[j] for j in similar_indices])
-                patterns.append(pattern)
-                processed.update(similar_indices)
+        patterns, processed = [], set()
+        self._process_error_patterns(errors, patterns, processed)
         return patterns
+
+    def _process_error_patterns(self, errors: List[StartupError], patterns: List, processed: set) -> None:
+        """Process errors to find patterns."""
+        for i, error in enumerate(errors):
+            if i not in processed:
+                self._process_single_error_pattern(errors, i, patterns, processed)
+
+    def _process_single_error_pattern(self, errors: List[StartupError], i: int, patterns: List, processed: set) -> None:
+        """Process single error for pattern matching."""
+        similar_indices = self._find_similar_messages(errors[i].message, errors, i)
+        if len(similar_indices) > 1:
+            pattern = self._create_pattern_from_errors([errors[j] for j in similar_indices])
+            patterns.append(pattern)
+            processed.update(similar_indices)
 
     def _find_similar_messages(self, message: str, errors: List[StartupError], start_idx: int) -> List[int]:
         """Find error indices with similar messages."""

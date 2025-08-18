@@ -1,6 +1,6 @@
 """Configuration validation utilities."""
 
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from pydantic import ValidationError
 from app.logging_config import central_logger as logger
 
@@ -60,8 +60,7 @@ class ConfigValidator:
         elif config.clickhouse_logging.enabled:
             clickhouse_configs = [
                 ("clickhouse_native", config.clickhouse_native),
-                ("clickhouse_https", config.clickhouse_https),
-                ("clickhouse_https_dev", config.clickhouse_https_dev)
+                ("clickhouse_https", config.clickhouse_https)
             ]
             
             for name, ch_config in clickhouse_configs:
@@ -104,44 +103,76 @@ class ConfigValidator:
     
     def _validate_llm_config(self, config: AppConfig) -> None:
         """Validate LLM configuration - only Gemini API key is required."""
-        errors = []
-        warnings = []
-        
-        # Skip LLM validation if LLMs are disabled in dev mode
-        if hasattr(config, 'dev_mode_llm_enabled') and not config.dev_mode_llm_enabled:
-            self._logger.info("LLMs disabled in dev mode - skipping API key validation")
+        if self._should_skip_llm_validation(config):
             return
         
+        errors = self._check_llm_configurations(config)
+        gemini_key_found = self._check_gemini_api_key(config, errors)
+        self._handle_llm_validation_results(config, errors, gemini_key_found)
+    
+    def _should_skip_llm_validation(self, config: AppConfig) -> bool:
+        """Check if LLM validation should be skipped."""
+        if hasattr(config, 'dev_mode_llm_enabled') and not config.dev_mode_llm_enabled:
+            self._logger.info("LLMs disabled in dev mode - skipping API key validation")
+            return True
+        return False
+    
+    def _check_llm_configurations(self, config: AppConfig) -> List[str]:
+        """Check basic LLM configuration requirements."""
+        errors = []
         if not config.llm_configs:
             errors.append("No LLM configurations defined")
         else:
-            # Check for Gemini API key - this is the only required key
-            gemini_key_found = False
-            missing_keys = []
-            
-            for name, llm_config in config.llm_configs.items():
-                if not llm_config.model_name:
-                    errors.append(f"LLM '{name}' is missing model name")
-                if not llm_config.provider:
-                    errors.append(f"LLM '{name}' is missing provider")
-                    
-                # Check if this config has the Gemini API key
-                if llm_config.api_key:
-                    # If any config has an API key, we assume Gemini key was loaded
-                    gemini_key_found = True
-                elif config.environment != "testing":
-                    missing_keys.append(name)
-            
-            # Only require Gemini API key to be present in at least one config
-            if not gemini_key_found and config.environment != "testing":
-                errors.append("Gemini API key is not configured (required for all LLM operations)")
-            elif missing_keys:
-                # Just log as warning if some configs don't have keys (they should inherit from Gemini)
-                self._logger.info(f"LLM configs without explicit keys (will use Gemini key): {', '.join(missing_keys)}")
+            errors.extend(self._validate_individual_llm_configs(config))
+        return errors
+    
+    def _validate_individual_llm_configs(self, config: AppConfig) -> List[str]:
+        """Validate individual LLM configuration entries."""
+        errors = []
+        for name, llm_config in config.llm_configs.items():
+            if not llm_config.model_name:
+                errors.append(f"LLM '{name}' is missing model name")
+            if not llm_config.provider:
+                errors.append(f"LLM '{name}' is missing provider")
+        return errors
+    
+    def _check_gemini_api_key(self, config: AppConfig, errors: List[str]) -> bool:
+        """Check for Gemini API key availability."""
+        if not config.llm_configs:
+            return False
         
+        gemini_key_found, missing_keys = self._scan_for_api_keys(config)
+        self._log_missing_keys_warning(missing_keys)
+        self._validate_gemini_key_requirement(config, gemini_key_found, errors)
+        return gemini_key_found
+    
+    def _scan_for_api_keys(self, config: AppConfig) -> Tuple[bool, List[str]]:
+        """Scan LLM configs for API keys."""
+        gemini_key_found = False
+        missing_keys = []
+        
+        for name, llm_config in config.llm_configs.items():
+            if llm_config.api_key:
+                gemini_key_found = True
+            elif config.environment != "testing":
+                missing_keys.append(name)
+        
+        return gemini_key_found, missing_keys
+    
+    def _log_missing_keys_warning(self, missing_keys: List[str]) -> None:
+        """Log warning for configs without explicit keys."""
+        if missing_keys:
+            self._logger.info(f"LLM configs without explicit keys (will use Gemini key): {', '.join(missing_keys)}")
+    
+    def _validate_gemini_key_requirement(self, config: AppConfig, gemini_key_found: bool, errors: List[str]) -> None:
+        """Validate Gemini API key requirement."""
+        if not gemini_key_found and config.environment != "testing":
+            errors.append("Gemini API key is not configured (required for all LLM operations)")
+    
+    def _handle_llm_validation_results(self, config: AppConfig, errors: List[str], gemini_key_found: bool) -> None:
+        """Handle LLM validation results and errors."""
         if errors:
             self._logger.warning(f"LLM configuration warnings: {', '.join(errors)}")
-            # Only fail in production/staging if Gemini key is missing
             if config.environment in ["production", "staging"] and not gemini_key_found:
                 raise ConfigurationValidationError(f"LLM configuration errors: {', '.join(errors)}")
     

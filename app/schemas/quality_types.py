@@ -6,6 +6,8 @@ from datetime import datetime, UTC
 from enum import Enum
 from abc import ABC, abstractmethod
 
+from app.core.resilience.monitor import AlertSeverity
+
 # Import types only for type checking to avoid circular dependencies  
 if TYPE_CHECKING:
     pass
@@ -31,12 +33,6 @@ class ContentType(str, Enum):
     GENERAL = "general"
 
 
-class AlertSeverity(str, Enum):
-    """Severity levels for quality alerts."""
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
 
 
 class MetricType(str, Enum):

@@ -2,7 +2,7 @@
 
 ## Error Message
 ```
-Failed to create workload_events table: HTTPDriver for https://xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443 
+Failed to create workload_events table: HTTPDriver for https://clickhouse_host_url_placeholder:8443 
 received ClickHouse error code 497
 Code: 497. DB::Exception: development_user: Not enough privileges. 
 To execute this query, it's necessary to have the grant CREATE TABLE ON development.workload_events. (ACCESS_DENIED)
@@ -33,7 +33,7 @@ GRANT CREATE, ALTER, DROP, INSERT, SELECT, DELETE, UPDATE ON development.* TO de
 Use the ClickHouse Cloud console or CLI with admin credentials:
 
 ```bash
-clickhouse-client --host xedvrr4c3r.us-central1.gcp.clickhouse.cloud \
+clickhouse-client --host clickhouse_host_url_placeholder \
                   --port 8443 \
                   --user admin_user \
                   --password YOUR_ADMIN_PASSWORD \
@@ -77,7 +77,7 @@ SHOW GRANTS FOR development_user;
 Update your `.env` file if using a different user:
 
 ```env
-CLICKHOUSE_URL=https://xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443
+CLICKHOUSE_URL=https://clickhouse_host_url_placeholder:8443
 CLICKHOUSE_USER=user_with_permissions
 CLICKHOUSE_PASSWORD=secure_password
 CLICKHOUSE_DATABASE=development

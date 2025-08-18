@@ -44,10 +44,15 @@ def extract_message_type(message: Union[WebSocketMessage, ServerMessage, Dict[st
 def create_broadcast_result(successful_sends: int, failed_sends: int, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> BroadcastResult:
     """Create broadcast result object."""
     message_type = extract_message_type(message)
+    total_connections = successful_sends + failed_sends
+    return _build_broadcast_result(successful_sends, failed_sends, total_connections, message_type)
+
+def _build_broadcast_result(successful: int, failed: int, total: int, message_type: str) -> BroadcastResult:
+    """Build broadcast result with given parameters."""
     return BroadcastResult(
-        successful=successful_sends,
-        failed=failed_sends,
-        total_connections=successful_sends + failed_sends,
+        successful=successful,
+        failed=failed,
+        total_connections=total,
         message_type=message_type
     )
 
@@ -56,24 +61,29 @@ def create_room_broadcast_result(successful_sends: int, failed_sends: int, total
                                message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> BroadcastResult:
     """Create broadcast result for room broadcast."""
     message_type = extract_message_type(message)
-    return BroadcastResult(
-        successful=successful_sends,
-        failed=failed_sends,
-        total_connections=total_connections,
-        message_type=message_type
-    )
+    return _build_broadcast_result(successful_sends, failed_sends, total_connections, message_type)
 
 
 def update_broadcast_counters(success: bool, should_remove: bool, successful_sends: int, 
                             failed_sends: int, connections_to_remove: list, user_id: str, conn_info) -> Tuple[int, int, list]:
     """Update broadcast counters based on send result."""
+    successful_sends, failed_sends = _update_send_counters(success, successful_sends, failed_sends)
+    connections_to_remove = _update_removal_list(should_remove, connections_to_remove, user_id, conn_info)
+    return successful_sends, failed_sends, connections_to_remove
+
+def _update_send_counters(success: bool, successful_sends: int, failed_sends: int) -> Tuple[int, int]:
+    """Update success and failure counters."""
     if success:
         successful_sends += 1
     else:
         failed_sends += 1
-        if should_remove:
-            connections_to_remove.append((user_id, conn_info))
-    return successful_sends, failed_sends, connections_to_remove
+    return successful_sends, failed_sends
+
+def _update_removal_list(should_remove: bool, connections_to_remove: list, user_id: str, conn_info) -> list:
+    """Update connections removal list."""
+    if should_remove:
+        connections_to_remove.append((user_id, conn_info))
+    return connections_to_remove
 
 
 def update_user_broadcast_counters(success: bool, should_remove: bool, successful_sends: int, 
@@ -89,13 +99,15 @@ def update_user_broadcast_counters(success: bool, should_remove: bool, successfu
 def update_room_broadcast_counters(success: bool, should_remove: bool, successful_sends: int, 
                                  failed_sends: int, connections_to_remove: list, conn_id: str) -> Tuple[int, int, list]:
     """Update room broadcast counters."""
-    if success:
-        successful_sends += 1
-    else:
-        failed_sends += 1
-        if should_remove:
-            connections_to_remove.append(conn_id)
+    successful_sends, failed_sends = _update_send_counters(success, successful_sends, failed_sends)
+    connections_to_remove = _update_room_removal_list(should_remove, connections_to_remove, conn_id)
     return successful_sends, failed_sends, connections_to_remove
+
+def _update_room_removal_list(should_remove: bool, connections_to_remove: list, conn_id: str) -> list:
+    """Update room connections removal list."""
+    if should_remove:
+        connections_to_remove.append(conn_id)
+    return connections_to_remove
 
 
 def log_broadcast_completion(successful_sends: int, failed_sends: int) -> None:

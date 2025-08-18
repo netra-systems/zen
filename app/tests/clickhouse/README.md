@@ -54,7 +54,7 @@ The `ClickHouseQueryInterceptor` class wraps all queries to:
 ### Environment Variables
 ```bash
 # Production
-CLICKHOUSE_HOST=xedvrr4c3r.us-central1.gcp.clickhouse.cloud
+CLICKHOUSE_HOST=clickhouse_host_url_placeholder
 CLICKHOUSE_PORT=8443
 CLICKHOUSE_USER=default
 CLICKHOUSE_DEFAULT_PASSWORD=<production_password>

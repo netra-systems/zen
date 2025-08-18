@@ -81,15 +81,19 @@ class CompactAlertManager:
             return
         
         self._running = False
-        
-        if self._monitoring_task:
-            self._monitoring_task.cancel()
-            try:
-                await self._monitoring_task
-            except asyncio.CancelledError:
-                pass
-        
+        await self._cancel_monitoring_task()
         logger.info("Alert monitoring stopped")
+
+    async def _cancel_monitoring_task(self) -> None:
+        """Cancel and wait for monitoring task completion."""
+        if not self._monitoring_task:
+            return
+        
+        self._monitoring_task.cancel()
+        try:
+            await self._monitoring_task
+        except asyncio.CancelledError:
+            pass
 
     async def _monitoring_loop(self) -> None:
         """Main monitoring loop that evaluates alert rules."""
@@ -106,37 +110,50 @@ class CompactAlertManager:
     async def _evaluate_all_rules(self) -> None:
         """Evaluate all enabled alert rules."""
         for rule_id, rule in self.alert_rules.items():
-            if not rule.enabled or rule_id in self.suppressed_rules:
+            if await self._should_skip_rule(rule_id, rule):
                 continue
             
-            # Check cooldown
-            if await self._is_in_cooldown(rule_id):
-                continue
-            
-            try:
-                alert = await self.evaluator.evaluate_rule(rule)
-                if alert:
-                    await self._process_triggered_alert(alert, rule)
-            except Exception as e:
-                logger.error(f"Error evaluating rule {rule_id}: {e}")
+            await self._evaluate_single_rule(rule_id, rule)
+
+    async def _should_skip_rule(self, rule_id: str, rule: AlertRule) -> bool:
+        """Check if rule should be skipped."""
+        if not rule.enabled or rule_id in self.suppressed_rules:
+            return True
+        return await self._is_in_cooldown(rule_id)
+
+    async def _evaluate_single_rule(self, rule_id: str, rule: AlertRule) -> None:
+        """Evaluate a single alert rule."""
+        try:
+            alert = await self.evaluator.evaluate_rule(rule)
+            if alert:
+                await self._process_triggered_alert(alert, rule)
+        except Exception as e:
+            logger.error(f"Error evaluating rule {rule_id}: {e}")
 
     async def _process_triggered_alert(self, alert: Alert, rule: AlertRule) -> None:
         """Process a triggered alert."""
-        # Store alert
+        self._store_alert(alert)
+        await self._send_alert_notifications(alert, rule)
+        self._set_rule_cooldown(rule.rule_id)
+        logger.info(f"Alert triggered: {alert.title}")
+
+    def _store_alert(self, alert: Alert) -> None:
+        """Store alert in active and history collections."""
         self.active_alerts[alert.alert_id] = alert
         self.alert_history.append(alert)
         
-        # Trim history if needed
         if len(self.alert_history) > self.max_history_size:
             self.alert_history = self.alert_history[-self.max_history_size:]
-        
-        # Send notifications
-        await self.notifier.send_notifications(alert, rule.channels, self.notification_configs)
-        
-        # Set cooldown
-        self.cooldown_tracker[rule.rule_id] = datetime.now(UTC)
-        
-        logger.info(f"Alert triggered: {alert.title}")
+
+    async def _send_alert_notifications(self, alert: Alert, rule: AlertRule) -> None:
+        """Send notifications for the alert."""
+        await self.notifier.send_notifications(
+            alert, rule.channels, self.notification_configs
+        )
+
+    def _set_rule_cooldown(self, rule_id: str) -> None:
+        """Set cooldown timestamp for rule."""
+        self.cooldown_tracker[rule_id] = datetime.now(UTC)
 
     async def _is_in_cooldown(self, rule_id: str) -> bool:
         """Check if rule is in cooldown period."""
@@ -147,9 +164,12 @@ class CompactAlertManager:
         if not rule:
             return False
         
+        return self._check_cooldown_time(rule_id, rule)
+
+    def _check_cooldown_time(self, rule_id: str, rule: AlertRule) -> bool:
+        """Check if cooldown time has elapsed."""
         last_triggered = self.cooldown_tracker[rule_id]
         cooldown_duration = timedelta(minutes=rule.cooldown_minutes)
-        
         return datetime.now(UTC) - last_triggered < cooldown_duration
 
     # Rule management methods

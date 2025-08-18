@@ -3,7 +3,7 @@
 This module handles tool recommendations based on category and extracted entities.
 """
 
-from typing import List
+from typing import List, Dict
 from .models import ToolRecommendation, ExtractedEntities
 
 
@@ -12,32 +12,72 @@ class ToolRecommender:
     
     def __init__(self):
         """Initialize the tool recommender"""
-        self.tool_mapping = {
+        self.tool_mapping = self._initialize_tool_mapping()
+    
+    def _initialize_tool_mapping(self) -> Dict[str, List[str]]:
+        """Initialize tool mapping dictionary."""
+        mapping = {}
+        mapping.update(self._get_workload_tools())
+        mapping.update(self._get_cost_tools())
+        mapping.update(self._get_performance_tools())
+        mapping.update(self._get_model_tools())
+        mapping.update(self._get_catalog_tools())
+        mapping.update(self._get_monitoring_tools())
+        return mapping
+    
+    def _get_workload_tools(self) -> Dict[str, List[str]]:
+        """Get workload analysis tools."""
+        return {
             "Workload Analysis": [
                 "analyze_workload_events", 
                 "get_workload_metrics", 
                 "identify_patterns"
-            ],
+            ]
+        }
+    
+    def _get_cost_tools(self) -> Dict[str, List[str]]:
+        """Get cost optimization tools."""
+        return {
             "Cost Optimization": [
                 "calculate_cost_savings", 
                 "simulate_cost_optimization", 
                 "analyze_cost_trends"
-            ],
+            ]
+        }
+    
+    def _get_performance_tools(self) -> Dict[str, List[str]]:
+        """Get performance optimization tools."""
+        return {
             "Performance Optimization": [
                 "identify_latency_bottlenecks", 
                 "optimize_throughput", 
                 "analyze_performance"
-            ],
+            ]
+        }
+    
+    def _get_model_tools(self) -> Dict[str, List[str]]:
+        """Get model selection tools."""
+        return {
             "Model Selection": [
                 "compare_models", 
                 "get_model_capabilities", 
                 "recommend_model"
-            ],
+            ]
+        }
+    
+    def _get_catalog_tools(self) -> Dict[str, List[str]]:
+        """Get supply catalog management tools."""
+        return {
             "Supply Catalog Management": [
                 "get_supply_catalog", 
                 "update_model_config", 
                 "add_new_model"
-            ],
+            ]
+        }
+    
+    def _get_monitoring_tools(self) -> Dict[str, List[str]]:
+        """Get monitoring and reporting tools."""
+        return {
             "Monitoring & Reporting": [
                 "generate_report", 
                 "create_dashboard", 

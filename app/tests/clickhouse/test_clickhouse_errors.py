@@ -40,8 +40,6 @@ class TestClickHouseErrorHandling:
 
     def _get_test_config(self):
         """Get test configuration for connection tests"""
-        if settings.environment == "development":
-            return settings.clickhouse_https_dev
         return settings.clickhouse_https
 
     def _create_test_client(self, config):

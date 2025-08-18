@@ -1,4 +1,7 @@
 // Global test type definitions
+/// <reference types="jest" />
+/// <reference types="@testing-library/jest-dom" />
+
 declare global {
   var mockWebSocket: {
     send: jest.Mock;

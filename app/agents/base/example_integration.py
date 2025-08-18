@@ -247,16 +247,43 @@ class ModernTriageSubAgent(BaseExecutionInterface):
 # Factory function for creating modernized agents
 def create_modern_agent(agent_class, *args, **kwargs):
     """Factory function to create agents with standardized execution."""
-    # This could be used to automatically wrap existing agents
-    # with the new execution interface
-    pass
+    if not issubclass(agent_class, BaseExecutionInterface):
+        raise ValueError(f"Agent class {agent_class.__name__} must inherit from BaseExecutionInterface")
+    
+    try:
+        return agent_class(*args, **kwargs)
+    except Exception as e:
+        raise ValueError(f"Failed to create modern agent: {str(e)}")
 
 
 # Migration helper functions
 def migrate_agent_to_base_interface(legacy_agent_class):
     """Helper to migrate legacy agents to use base interface."""
-    # This could be a decorator or utility function to help with migration
-    pass
+    from typing import Type, get_type_hints
+    
+    # Check if agent already inherits from BaseExecutionInterface
+    if issubclass(legacy_agent_class, BaseExecutionInterface):
+        return legacy_agent_class
+    
+    if not hasattr(legacy_agent_class, 'execute'):
+        raise ValueError(f"Legacy agent {legacy_agent_class.__name__} must have execute method")
+    
+    # Create wrapper to adapt legacy agent to new interface
+    class MigratedAgent(BaseExecutionInterface):
+        def __init__(self, *args, **kwargs):
+            super().__init__(legacy_agent_class.__name__)
+            self.legacy_agent = legacy_agent_class(*args, **kwargs)
+        
+        async def validate_preconditions(self, context: ExecutionContext) -> bool:
+            if hasattr(self.legacy_agent, 'check_entry_conditions'):
+                return await self.legacy_agent.check_entry_conditions(context.state, context.run_id)
+            return True
+        
+        async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+            await self.legacy_agent.execute(context.state, context.run_id, context.stream_updates)
+            return {"migrated": True, "agent": legacy_agent_class.__name__}
+    
+    return MigratedAgent
 
 
 class AgentMigrationGuide:

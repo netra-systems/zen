@@ -194,31 +194,36 @@ def _log_final_retry_failure(strategy: RetryStrategy) -> None:
 
 
 class CircuitBreakerRetryStrategy:
-    """Combines circuit breaker with retry strategy."""
+    """Combines circuit breaker with retry strategy using canonical implementation."""
     
     def __init__(self, retry_strategy: RetryStrategy):
         self.retry_strategy = retry_strategy
-        self.consecutive_failures = 0
-        self.circuit_open_until: Optional[float] = None
+        # Use canonical circuit breaker implementation
+        from app.core.circuit_breaker_core import CircuitBreaker
+        from app.core.circuit_breaker_types import CircuitConfig
+        
+        circuit_config = CircuitConfig(
+            name="llm_retry_circuit",
+            failure_threshold=5,
+            recovery_timeout=30.0,
+            timeout_seconds=60.0
+        )
+        self.circuit_breaker = CircuitBreaker(circuit_config)
     
     async def execute_with_retry(self, func: Callable, *args, **kwargs) -> Any:
         """Execute function with retry and circuit breaker."""
-        self._check_circuit_state()
-        return await self._execute_with_circuit_handling(func, *args, **kwargs)
-    
-    def _check_circuit_state(self) -> None:
-        """Check if circuit breaker is open and raise if needed."""
-        if self._is_circuit_open():
+        if not await self.circuit_breaker.can_execute_async():
             raise Exception("Circuit breaker is open")
+        return await self._execute_with_circuit_handling(func, *args, **kwargs)
     
     async def _execute_with_circuit_handling(self, func: Callable, *args, **kwargs) -> Any:
         """Execute with circuit breaker success/failure handling."""
         try:
             result = await self._execute_with_strategy(func, *args, **kwargs)
-            self._on_success()
+            self.circuit_breaker.record_success()
             return result
         except Exception as e:
-            self._on_failure()
+            self.circuit_breaker.record_failure(type(e).__name__)
             raise e
     
     async def _execute_with_strategy(self, func: Callable, *args, **kwargs) -> Any:
@@ -228,36 +233,13 @@ class CircuitBreakerRetryStrategy:
             return await func(*args, **kwargs)
         return await wrapped()
     
-    def _is_circuit_open(self) -> bool:
+    def is_circuit_open(self) -> bool:
         """Check if circuit breaker is open."""
-        if self.circuit_open_until is None:
-            return False
-        return self._check_circuit_recovery()
+        return self.circuit_breaker.is_open
     
-    def _check_circuit_recovery(self) -> bool:
-        """Check if circuit should recover and return open status."""
-        import time
-        if time.time() >= self.circuit_open_until:
-            self._reset_circuit_state()
-            return False
-        return True
-    
-    def _reset_circuit_state(self) -> None:
-        """Reset circuit breaker to closed state."""
-        self.circuit_open_until = None
-        self.consecutive_failures = 0
-    
-    def _on_success(self) -> None:
-        """Handle successful execution."""
-        self.consecutive_failures = 0
-    
-    def _on_failure(self) -> None:
-        """Handle failed execution."""
-        self.consecutive_failures += 1
-        if self.consecutive_failures >= 5:
-            import time
-            self.circuit_open_until = time.time() + 30
-            logger.error("Circuit breaker opened due to consecutive failures")
+    def get_circuit_status(self) -> dict:
+        """Get circuit breaker status for monitoring."""
+        return self.circuit_breaker.get_status()
 
 
 # Pre-configured strategies

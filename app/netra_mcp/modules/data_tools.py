@@ -80,11 +80,19 @@ class DataTools:
     def _format_synthetic_data_result(self, data: Any, count: int, format: str) -> str:
         """Format synthetic data generation result"""
         if format == "json":
-            return json.dumps({
-                "status": "success", "count": count, "data": data
-            }, indent=2)
+            return self._format_json_result(data, count)
         else:
-            return json.dumps({
-                "status": "success", "count": count, "format": format,
-                "message": f"Generated {count} records in {format} format"
-            }, indent=2)
+            return self._format_custom_result(count, format)
+    
+    def _format_json_result(self, data: Any, count: int) -> str:
+        """Format JSON format result"""
+        return json.dumps({
+            "status": "success", "count": count, "data": data
+        }, indent=2)
+    
+    def _format_custom_result(self, count: int, format: str) -> str:
+        """Format custom format result"""
+        return json.dumps({
+            "status": "success", "count": count, "format": format,
+            "message": f"Generated {count} records in {format} format"
+        }, indent=2)

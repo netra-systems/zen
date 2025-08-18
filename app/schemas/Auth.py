@@ -1,40 +1,21 @@
-from typing import List, Optional
-from pydantic import BaseModel
-from .registry import User
+# This file is deprecated - all auth types have been moved to auth_types.py
+# Import from auth_types.py instead:
+# from app.schemas.auth_types import GoogleUser, DevUser, DevLoginRequest, AuthEndpoints, AuthConfigResponse
 
-class GoogleUser(BaseModel):
-    """
-    Represents the user information received from Google's OAuth service.
-    """
-    email: str
-    name: Optional[str] = None
-    picture: Optional[str] = None
+# Temporary backward compatibility imports (will be removed in future version)
+from .auth_types import (
+    GoogleUser,
+    DevUser, 
+    DevLoginRequest,
+    AuthEndpoints,
+    AuthConfigResponse
+)
 
-class DevUser(BaseModel):
-    email: str = "dev@example.com"
-    full_name: str = "Dev User"
-    picture: Optional[str] = None
-    is_dev: bool = True
-
-class DevLoginRequest(BaseModel):
-    email: str
-
-class AuthEndpoints(BaseModel):
-    login: str
-    logout: str
-    callback: str
-    token: str
-    user: str
-    dev_login: Optional[str] = None
-
-class AuthConfigResponse(BaseModel):
-    google_client_id: str
-    endpoints: AuthEndpoints
-    development_mode: bool
-    user: Optional[User] = None
-    authorized_javascript_origins: List[str]
-    authorized_redirect_uris: List[str]
-    # PR-specific fields for staging environments
-    pr_number: Optional[str] = None
-    use_proxy: Optional[bool] = False
-    proxy_url: Optional[str] = None
+# Re-export for backward compatibility
+__all__ = [
+    "GoogleUser",
+    "DevUser",
+    "DevLoginRequest", 
+    "AuthEndpoints",
+    "AuthConfigResponse"
+]

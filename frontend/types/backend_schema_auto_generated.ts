@@ -13,6 +13,9 @@
  * MIGRATION PATH:
  * - OLD: import { WebSocketMessage } from '@/types/backend_schema_auto_generated'
  * - NEW: import { WebSocketMessage } from '@/types/registry'
+
+// Import canonical types to prevent duplication
+import { AgentResult, WebSocketError } from './backend-sync/payloads';
  */
 
 // ============================================================================
@@ -250,12 +253,7 @@ export interface WebSocketMessage {
 // SUPPORTING DATA TYPES
 // ============================================================================
 
-export interface AgentResult {
-  success: boolean;
-  message: string;
-  data?: string | Record<string, unknown> | unknown[];
-  metrics?: Record<string, number>;
-}
+// AgentResult imported from canonical source above
 
 export interface MessageData {
   id: string;
@@ -274,19 +272,7 @@ export interface ThreadHistoryResponse {
 // WEBSOCKET ERROR TYPES
 // ============================================================================
 
-/**
- * @deprecated Use WebSocketError from @/types/registry instead
- * @see {@link @/types/registry#WebSocketError} for the canonical type definition
- */
-export interface WebSocketError {
-  message: string;
-  error_type?: string;
-  code?: string;
-  severity?: "low" | "medium" | "high" | "critical";
-  details?: Record<string, unknown>;
-  trace_id?: string;
-  timestamp?: string; // ISO datetime string
-}
+// WebSocketError imported from canonical source above
 
 // ============================================================================
 // UTILITY TYPES

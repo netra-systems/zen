@@ -69,11 +69,15 @@ class LoadMonitor:
         total_weight = 0.0
         weighted_sum = 0.0
         
+        total_weight, weighted_sum = self._process_load_entries(now, total_weight, weighted_sum)
+        return total_weight, weighted_sum
+    
+    def _process_load_entries(self, now: float, total_weight: float, weighted_sum: float) -> Tuple[float, float]:
+        """Process load history entries and accumulate weights."""
         for timestamp, load in self._load_history:
             weight = self._calculate_entry_weight(now, timestamp)
             weighted_sum += load * weight
             total_weight += weight
-        
         return total_weight, weighted_sum
     
     def _calculate_entry_weight(self, now: float, timestamp: float) -> float:

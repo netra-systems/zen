@@ -16,12 +16,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.config import ConfigManager
 from app.schemas.Config import AppConfig
-from app.db.postgres import get_async_db
-from app.redis_manager import RedisManager
-from app.ws_manager import WebSocketManager
-from app.services.core.service_container import ServiceContainer
 from app.logging_config import central_logger
 
 
@@ -66,8 +61,8 @@ class TestSystemStartup:
     def test_environment_validation(self, startup_env, monkeypatch):
         """Test that required environment variables are validated"""
         # Test with all required variables present
-        from app.config import ConfigManager
-        config_manager = ConfigManager()
+        from app.config import config_manager
+        # Use the singleton config_manager directly
         config = config_manager.get_config()
         assert config.database_url == startup_env["DATABASE_URL"]
         # Secret key is loaded from environment or defaults
@@ -75,18 +70,21 @@ class TestSystemStartup:
         
         # Test with missing critical variable - should use default
         monkeypatch.delenv("DATABASE_URL")
-        config_manager_new = ConfigManager()
-        config_manager_new._config = None  # Clear cache
-        config_new = config_manager_new.get_config()
+        from app.config import reload_config
+        reload_config(force=True)  # Clear cache and reload configuration
+        config_new = config_manager.get_config()
         # Should use default database URL when env var is missing
         assert config_new.database_url != startup_env["DATABASE_URL"]
         assert "postgres" in config_new.database_url  # Has default postgres URL
     
     def test_configuration_loading(self, startup_env):
         """Test configuration file loading and validation"""
-        from app.config import ConfigManager
+        from app.config import config_manager, reload_config
         
-        config_manager = ConfigManager()
+        # Force reload configuration to pick up test environment variables
+        reload_config(force=True)
+        
+        # Use the singleton config_manager directly
         config = config_manager.get_config()
         assert config is not None
         assert config.app_name == "netra"
@@ -138,6 +136,7 @@ sqlalchemy.url = sqlite:///:memory:
             mock_redis_class.from_url.return_value = mock_redis
             
             # Initialize Redis manager
+            from app.redis_manager import RedisManager
             redis_manager = RedisManager()
             # RedisManager doesn't have initialize, it uses connect
             await redis_manager.connect()
@@ -260,9 +259,9 @@ sqlalchemy.url = sqlite:///:memory:
         monkeypatch.delenv("DATABASE_URL", raising=False)
         
         with pytest.raises(Exception) as exc_info:
-            from app.config import ConfigManager
-            config_manager = ConfigManager()
-            config_manager._config = None  # Clear cache
+            from app.config import config_manager, reload_config
+            # Use the singleton config_manager directly
+            reload_config()  # Clear cache and reload configuration
             config_manager.get_config()
         
         # Verify error message is informative
@@ -288,8 +287,8 @@ sqlalchemy.url = sqlite:///:memory:
         start_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
         
         # Simulate startup operations
-        from app.config import ConfigManager
-        config_manager = ConfigManager()
+        from app.config import config_manager
+        # Use the singleton config_manager directly
         config = config_manager.get_config()
         
         # Calculate metrics

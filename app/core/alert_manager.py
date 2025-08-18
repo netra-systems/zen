@@ -9,7 +9,8 @@ from typing import List, Dict, Any, Callable, Optional
 from datetime import datetime, UTC
 
 from app.logging_config import central_logger
-from .health_types import SystemAlert, AlertSeverity, HealthStatus, ComponentHealth, RecoveryAction
+from .shared_health_types import HealthStatus, ComponentHealth, SystemAlert
+from .health_types import AlertSeverity, RecoveryAction
 
 logger = central_logger.get_logger(__name__)
 

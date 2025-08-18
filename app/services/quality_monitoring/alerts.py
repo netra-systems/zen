@@ -17,28 +17,28 @@ class QualityAlertManager:
     
     ALERT_THRESHOLDS = {
         MetricType.QUALITY_SCORE: {
-            AlertSeverity.WARNING: 0.5,
-            AlertSeverity.ERROR: 0.4,
+            AlertSeverity.MEDIUM: 0.5,
+            AlertSeverity.HIGH: 0.4,
             AlertSeverity.CRITICAL: 0.3
         },
         MetricType.SLOP_DETECTION_RATE: {
-            AlertSeverity.WARNING: 0.1,
-            AlertSeverity.ERROR: 0.2,
+            AlertSeverity.MEDIUM: 0.1,
+            AlertSeverity.HIGH: 0.2,
             AlertSeverity.CRITICAL: 0.3
         },
         MetricType.RETRY_RATE: {
-            AlertSeverity.WARNING: 0.15,
-            AlertSeverity.ERROR: 0.25,
+            AlertSeverity.MEDIUM: 0.15,
+            AlertSeverity.HIGH: 0.25,
             AlertSeverity.CRITICAL: 0.4
         },
         MetricType.FALLBACK_RATE: {
-            AlertSeverity.WARNING: 0.1,
-            AlertSeverity.ERROR: 0.2,
+            AlertSeverity.MEDIUM: 0.1,
+            AlertSeverity.HIGH: 0.2,
             AlertSeverity.CRITICAL: 0.3
         },
         MetricType.ERROR_RATE: {
-            AlertSeverity.WARNING: 0.05,
-            AlertSeverity.ERROR: 0.1,
+            AlertSeverity.MEDIUM: 0.05,
+            AlertSeverity.HIGH: 0.1,
             AlertSeverity.CRITICAL: 0.2
         }
     }
@@ -96,7 +96,7 @@ class QualityAlertManager:
             return QualityAlert(
                 id=f"circular_{agent}_{datetime.now(UTC).timestamp()}",
                 timestamp=datetime.now(UTC),
-                severity=AlertSeverity.WARNING,
+                severity=AlertSeverity.MEDIUM,
                 metric_type=MetricType.QUALITY_SCORE,
                 agent=agent,
                 message=f"Repeated circular reasoning in {agent}",
@@ -114,7 +114,7 @@ class QualityAlertManager:
         if metric_type not in self.ALERT_THRESHOLDS:
             return None
         thresholds = self.ALERT_THRESHOLDS[metric_type]
-        for severity in [AlertSeverity.CRITICAL, AlertSeverity.ERROR, AlertSeverity.WARNING]:
+        for severity in [AlertSeverity.CRITICAL, AlertSeverity.HIGH, AlertSeverity.MEDIUM]:
             if severity not in thresholds:
                 continue
             threshold = thresholds[severity]

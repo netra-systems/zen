@@ -11,7 +11,8 @@ from datetime import datetime, UTC
 from enum import Enum
 
 from app.logging_config import central_logger
-from ..health_types import HealthCheckResult, HealthStatus
+from ..shared_health_types import HealthStatus
+from app.schemas.core_models import HealthCheckResult
 from .telemetry import telemetry_manager
 
 logger = central_logger.get_logger(__name__)
@@ -47,11 +48,14 @@ class BaseHealthChecker(ABC):
     def _create_timeout_result(self) -> HealthCheckResult:
         """Create timeout result for health check."""
         return HealthCheckResult(
-            component_name=self.name,
-            success=False,
-            health_score=0.0,
-            response_time_ms=self.timeout * 1000,
-            error_message=f"Health check timeout after {self.timeout}s"
+            status="unhealthy",
+            response_time=self.timeout,
+            details={
+                "component_name": self.name,
+                "success": False,
+                "health_score": 0.0,
+                "error_message": f"Health check timeout after {self.timeout}s"
+            }
         )
 
 
@@ -101,7 +105,7 @@ class HealthInterface:
             "service": self.service_name,
             "version": self.version,
             "uptime_seconds": self._get_uptime_seconds(),
-            "checks": {name: result.success for name, result in checks.items()},
+            "checks": {name: result.details.get("success", True) for name, result in checks.items()},
             "timestamp": datetime.now(UTC).isoformat()
         }
     
@@ -173,10 +177,10 @@ class HealthInterface:
         """Format detailed check results for comprehensive response."""
         return {
             name: {
-                "success": result.success,
-                "health_score": result.health_score,
-                "response_time_ms": result.response_time_ms,
-                "error": result.error_message if not result.success else None
+                "success": result.details.get("success", result.status == "healthy"),
+                "health_score": result.details.get("health_score", 1.0 if result.status == "healthy" else 0.0),
+                "response_time_ms": result.response_time * 1000,  # Convert seconds to ms
+                "error": result.details.get("error_message") if result.status != "healthy" else None
             }
             for name, result in checks.items()
         }
@@ -226,12 +230,16 @@ class HealthInterface:
         """Create a warning result for optional development services."""
         from ..health_types import HealthCheckResult
         return HealthCheckResult(
-            component_name=component_name,
-            success=True,  # Mark as success in development
-            health_score=0.8,  # Slightly degraded but acceptable
-            response_time_ms=0.0,
-            error_message=f"Development mode - {component_name} unavailable: {error_msg}",
-            metadata={"status": "development_optional", "available": False}
+            status="healthy",  # Mark as healthy in development
+            response_time=0.0,
+            details={
+                "component_name": component_name,
+                "success": True,
+                "health_score": 0.8,  # Slightly degraded but acceptable
+                "error_message": f"Development mode - {component_name} unavailable: {error_msg}",
+                "status": "development_optional",
+                "available": False
+            }
         )
     
     def _count_critical_failures(self, checks: Dict[str, HealthCheckResult]) -> int:
@@ -241,7 +249,8 @@ class HealthInterface:
         
         for name, result in checks.items():
             if any(comp in name.lower() for comp in critical_components):
-                if not result.success:
+                success = result.details.get("success", result.status == "healthy")
+                if not success:
                     critical_failed += 1
         
         return critical_failed

@@ -88,15 +88,32 @@ def set_llm_api_key(config: 'Settings', llm_name: str, api_key: str) -> None:
 
 def get_critical_vars_mapping() -> Dict[str, str]:
     """Get mapping of critical environment variables."""
+    database_vars = _get_database_vars()
+    auth_vars = _get_auth_vars()
+    env_vars = _get_env_vars()
+    return {**database_vars, **auth_vars, **env_vars}
+
+def _get_database_vars() -> Dict[str, str]:
+    """Get database-related environment variable mappings."""
     return {
         "DATABASE_URL": "database_url",
         "REDIS_URL": "redis_url",
-        "CLICKHOUSE_URL": "clickhouse_url",
+        "CLICKHOUSE_URL": "clickhouse_url"
+    }
+
+def _get_auth_vars() -> Dict[str, str]:
+    """Get authentication-related environment variable mappings."""
+    return {
         "SECRET_KEY": "secret_key",
         "JWT_SECRET_KEY": "jwt_secret_key",
-        "FERNET_KEY": "fernet_key",
+        "FERNET_KEY": "fernet_key"
+    }
+
+def _get_env_vars() -> Dict[str, str]:
+    """Get general environment variable mappings."""
+    return {
         "LOG_LEVEL": "log_level",
-        "ENVIRONMENT": "environment",
+        "ENVIRONMENT": "environment"
     }
 
 
@@ -104,11 +121,16 @@ def _navigate_to_parent_object(config: 'Settings', path_parts: list) -> object:
     """Navigate to parent object in config path."""
     obj = config
     for part in path_parts[:-1]:
-        if hasattr(obj, part):
-            obj = getattr(obj, part)
-        else:
+        obj = _get_attribute_or_none(obj, part)
+        if obj is None:
             return None
     return obj
+
+def _get_attribute_or_none(obj: object, attr: str) -> object:
+    """Get attribute from object or return None if not found."""
+    if hasattr(obj, attr):
+        return getattr(obj, attr)
+    return None
 
 def _set_field_on_target(parent_obj: object, target_name: str, field: str, value: str) -> None:
     """Set field on target object if it exists."""

@@ -7,7 +7,7 @@ Contains all Pydantic models for configuration validation.
 import os
 from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
-from app.schemas.Auth import AuthEndpoints, AuthConfigResponse, DevUser
+from app.schemas.auth_types import AuthEndpoints, AuthConfigResponse, DevUser
 from app.schemas.registry import User
 from app.schemas.llm_types import LLMProvider
 
@@ -37,7 +37,6 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="langfuse-secret-key", target_models=["langfuse"], target_field="secret_key"),
     SecretReference(name="langfuse-public-key", target_models=["langfuse"], target_field="public_key"),
     SecretReference(name="clickhouse-default-password", target_models=["clickhouse_native", "clickhouse_https"], target_field="password"),
-    SecretReference(name="clickhouse-development-password", target_models=["clickhouse_https_dev"], target_field="password"),
     SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
     SecretReference(name="fernet-key", target_field="fernet_key"),
     SecretReference(name="redis-default", target_models=["redis"], target_field="password"),
@@ -76,7 +75,7 @@ class OAuthConfig(BaseModel):
 
 
 class ClickHouseNativeConfig(BaseModel):
-    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+    host: str = "clickhouse_host_url_placeholder"
     port: int = 9440
     user: str = "default"
     password: str = ""
@@ -84,20 +83,13 @@ class ClickHouseNativeConfig(BaseModel):
 
 
 class ClickHouseHTTPSConfig(BaseModel):
-    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+    host: str = "clickhouse_host_url_placeholder"
     port: int = 8443
     user: str = "default"
     password: str = ""
     database: str = "default"
 
 
-class ClickHouseHTTPSDevConfig(BaseModel):
-    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
-    port: int = 8443
-    user: str = "development_user"
-    password: str = ""
-    database: str = "development"
-    superuser: bool = True
 
 
 class ClickHouseLoggingConfig(BaseModel):
@@ -148,7 +140,6 @@ class AppConfig(BaseModel):
     oauth_config: OAuthConfig = Field(default_factory=OAuthConfig)
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
     clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
-    clickhouse_https_dev: ClickHouseHTTPSDevConfig = ClickHouseHTTPSDevConfig()
     clickhouse_logging: ClickHouseLoggingConfig = ClickHouseLoggingConfig()
     langfuse: LangfuseConfig = LangfuseConfig()
     ws_config: WebSocketConfig = Field(default_factory=WebSocketConfig)
@@ -185,6 +176,20 @@ class AppConfig(BaseModel):
     
     # SubAgent Communication Logging Settings (INFO level)
     subagent_logging_enabled: bool = True  # Enable/disable subagent communication logging
+    
+    # Service modes configuration (local/shared/mock/disabled)
+    redis_mode: str = Field(
+        default="shared",
+        description="Redis service mode: local, shared, mock, or disabled"
+    )
+    clickhouse_mode: str = Field(
+        default="shared", 
+        description="ClickHouse service mode: local, shared, mock, or disabled"
+    )
+    llm_mode: str = Field(
+        default="shared",
+        description="LLM service mode: local, shared, mock, or disabled"
+    )
     
     # Service configuration is now managed through dev_launcher service config
     # Services use the mode specified in the launcher (local/shared/mock)

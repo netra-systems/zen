@@ -30,7 +30,6 @@ class TestConfigValidator:
         config.clickhouse_logging = Mock(enabled=True)
         config.clickhouse_native = Mock(host="localhost", password="pass")
         config.clickhouse_https = Mock(host="localhost", password="pass")
-        config.clickhouse_https_dev = Mock(host="localhost", password="pass")
         config.oauth_config = Mock(client_id="id", client_secret="secret")
         config.llm_configs = {
             "default": Mock(api_key="key", model_name="model", provider="openai")

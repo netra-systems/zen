@@ -1,164 +1,28 @@
 /**
- * Performance Benchmarks Integration Tests
+ * Performance Test Helpers
  * 
- * BVJ: Enterprise segment - ensures platform meets performance SLAs
- * Tests render performance, interaction latency, and resource utilization.
+ * Shared utilities, components, and verification functions for performance testing.
+ * BVJ: Enterprise segment - reusable performance testing infrastructure.
  */
 
 import {
   React,
-  render,
-  waitFor,
   fireEvent,
-  act,
-  setupTestEnvironment,
-  cleanupTestEnvironment,
-  createMockWebSocketServer,
-  TEST_TIMEOUTS,
-  WS
-} from './test-utils';
-
-import {
+  waitFor,
+  simulateAsyncDelay,
   PERFORMANCE_THRESHOLDS,
   usePerformanceMonitor,
-  simulateAsyncDelay
-} from './utils/performance-test-utils';
-
-// Apply Next.js navigation mock
-jest.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    refresh: jest.fn(),
-    back: jest.fn(),
-    forward: jest.fn(),
-    pathname: '/',
-    query: {},
-    asPath: '/',
-  }),
-  usePathname: () => '/',
-  useSearchParams: () => new URLSearchParams(),
-}));
-
-describe('Performance Benchmarks Integration Tests', () => {
-  let server: WS;
-  
-  beforeEach(() => {
-    server = createMockWebSocketServer();
-    setupTestEnvironment(server);
-  });
-
-  afterEach(() => {
-    cleanupTestEnvironment();
-  });
-
-  describe('Render Performance', () => {
-    it('should meet render time thresholds for large lists', async () => {
-      const LargeListComponent = createLargeListComponent();
-      
-      const startTime = performance.now();
-      const { getByTestId } = render(<LargeListComponent />);
-      const renderTime = performance.now() - startTime;
-      
-      await verifyRenderPerformance(getByTestId, renderTime);
-    });
-
-    it('should maintain performance during rapid re-renders', async () => {
-      const RapidRerenderComponent = createRapidRerenderComponent();
-      
-      const { getByText, getByTestId } = render(<RapidRerenderComponent />);
-      
-      await testRapidRerendering(getByText, getByTestId);
-    });
-
-    it('should optimize virtual scrolling performance', async () => {
-      const VirtualScrollComponent = createVirtualScrollComponent();
-      
-      const { getByTestId } = render(<VirtualScrollComponent />);
-      
-      await testVirtualScrolling(getByTestId);
-    });
-  });
-
-  describe('Interaction Latency', () => {
-    it('should respond to user interactions within threshold', async () => {
-      const InteractiveComponent = createInteractiveComponent();
-      
-      const { getByText, getByTestId } = render(<InteractiveComponent />);
-      
-      await testInteractionLatency(getByText, getByTestId);
-    });
-
-    it('should maintain responsiveness during heavy computations', async () => {
-      const HeavyComputationComponent = createHeavyComputationComponent();
-      
-      const { getByText, getByTestId } = render(<HeavyComputationComponent />);
-      
-      await testComputationResponsiveness(getByText, getByTestId);
-    });
-
-    it('should debounce high-frequency interactions', async () => {
-      const DebounceComponent = createDebounceComponent();
-      
-      const { getByTestId } = render(<DebounceComponent />);
-      
-      await testInteractionDebouncing(getByTestId);
-    });
-  });
-
-  describe('Resource Utilization', () => {
-    it('should maintain memory usage within limits', async () => {
-      const MemoryMonitorComponent = createMemoryMonitorComponent();
-      
-      const { getByText, getByTestId } = render(<MemoryMonitorComponent />);
-      
-      await testMemoryUtilization(getByText, getByTestId);
-    });
-
-    it('should optimize bundle size impact', async () => {
-      const BundleOptimizationComponent = createBundleOptimizationComponent();
-      
-      const { getByTestId } = render(<BundleOptimizationComponent />);
-      
-      await testBundleOptimization(getByTestId);
-    });
-
-    it('should efficient manage DOM nodes', async () => {
-      const DOMManagementComponent = createDOMManagementComponent();
-      
-      const { getByText, getByTestId } = render(<DOMManagementComponent />);
-      
-      await testDOMNodeManagement(getByText, getByTestId);
-    });
-  });
-
-  describe('Concurrent Performance', () => {
-    it('should handle concurrent updates efficiently', async () => {
-      const ConcurrentUpdateComponent = createConcurrentUpdateComponent();
-      
-      const { getByText, getByTestId } = render(<ConcurrentUpdateComponent />);
-      
-      await testConcurrentUpdates(getByText, getByTestId);
-    });
-
-    it('should prioritize critical updates', async () => {
-      const PriorityUpdateComponent = createPriorityUpdateComponent();
-      
-      const { getByText, getByTestId } = render(<PriorityUpdateComponent />);
-      
-      await testUpdatePrioritization(getByText, getByTestId);
-    });
-  });
-});
+  TEST_TIMEOUTS
+} from '../test-utils';
 
 // Performance monitoring utilities (≤8 lines each)
-const measureRenderTime = (renderFn: () => void): number => {
+export const measureRenderTime = (renderFn: () => void): number => {
   const startTime = performance.now();
   renderFn();
   return performance.now() - startTime;
 };
 
-const measureInteractionLatency = async (
+export const measureInteractionLatency = async (
   interaction: () => void,
   verification: () => boolean
 ): Promise<number> => {
@@ -172,7 +36,7 @@ const measureInteractionLatency = async (
   return performance.now() - startTime;
 };
 
-const createPerformanceProfiler = () => {
+export const createPerformanceProfiler = () => {
   const measurements: Array<{ name: string; duration: number; timestamp: number }> = [];
   
   const startMeasurement = (name: string) => {
@@ -187,8 +51,18 @@ const createPerformanceProfiler = () => {
   return { measurements, startMeasurement };
 };
 
+// Utility functions (≤8 lines each)
+export const debounce = <T extends (...args: any[]) => void>(func: T, delay: number): T => {
+  let timeoutId: NodeJS.Timeout;
+  
+  return ((...args: any[]) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => func(...args), delay);
+  }) as T;
+};
+
 // Component factory functions (≤8 lines each)
-const createLargeListComponent = () => {
+export const createLargeListComponent = () => {
   return () => {
     const items = React.useMemo(() => 
       Array.from({ length: 1000 }, (_, i) => ({ id: i, value: `Item ${i}` })), []
@@ -204,7 +78,7 @@ const createLargeListComponent = () => {
   };
 };
 
-const createRapidRerenderComponent = () => {
+export const createRapidRerenderComponent = () => {
   return () => {
     const [counter, setCounter] = React.useState(0);
     const [renderTimes, setRenderTimes] = React.useState<number[]>([]);
@@ -222,7 +96,7 @@ const createRapidRerenderComponent = () => {
   };
 };
 
-const createVirtualScrollComponent = () => {
+export const createVirtualScrollComponent = () => {
   return () => {
     const [visibleItems, setVisibleItems] = React.useState(20);
     const [scrollPerformance, setScrollPerformance] = React.useState<number[]>([]);
@@ -243,7 +117,7 @@ const createVirtualScrollComponent = () => {
   };
 };
 
-const createInteractiveComponent = () => {
+export const createInteractiveComponent = () => {
   return () => {
     const [interactions, setInteractions] = React.useState<Array<{ latency: number; timestamp: number }>>([]);
     
@@ -260,7 +134,7 @@ const createInteractiveComponent = () => {
   };
 };
 
-const createHeavyComputationComponent = () => {
+export const createHeavyComputationComponent = () => {
   return () => {
     const [isComputing, setIsComputing] = React.useState(false);
     const [responsiveness, setResponsiveness] = React.useState<number[]>([]);
@@ -295,7 +169,7 @@ const createHeavyComputationComponent = () => {
   };
 };
 
-const createDebounceComponent = () => {
+export const createDebounceComponent = () => {
   return () => {
     const [inputValue, setInputValue] = React.useState('');
     const [debouncedValue, setDebouncedValue] = React.useState('');
@@ -317,7 +191,7 @@ const createDebounceComponent = () => {
   };
 };
 
-const createMemoryMonitorComponent = () => {
+export const createMemoryMonitorComponent = () => {
   return () => {
     const [memoryData, setMemoryData] = React.useState<any[]>([]);
     const [memoryUsage, setMemoryUsage] = React.useState(0);
@@ -341,7 +215,7 @@ const createMemoryMonitorComponent = () => {
   };
 };
 
-const createBundleOptimizationComponent = () => {
+export const createBundleOptimizationComponent = () => {
   return () => {
     const [lazyComponents, setLazyComponents] = React.useState<string[]>([]);
     const [loadTimes, setLoadTimes] = React.useState<number[]>([]);
@@ -361,7 +235,7 @@ const createBundleOptimizationComponent = () => {
   };
 };
 
-const createDOMManagementComponent = () => {
+export const createDOMManagementComponent = () => {
   return () => {
     const [domNodes, setDomNodes] = React.useState(100);
     const [domPerformance, setDomPerformance] = React.useState<number[]>([]);
@@ -379,7 +253,7 @@ const createDOMManagementComponent = () => {
   };
 };
 
-const createConcurrentUpdateComponent = () => {
+export const createConcurrentUpdateComponent = () => {
   return () => {
     const [updates, setUpdates] = React.useState<Array<{ id: number; value: number; priority: string }>>([]);
     
@@ -400,7 +274,7 @@ const createConcurrentUpdateComponent = () => {
   };
 };
 
-const createPriorityUpdateComponent = () => {
+export const createPriorityUpdateComponent = () => {
   return () => {
     const [criticalData, setCriticalData] = React.useState('');
     const [normalData, setNormalData] = React.useState('');
@@ -424,16 +298,6 @@ const createPriorityUpdateComponent = () => {
     
     return renderPriorityUpdateComponent(criticalData, normalData, updateLatencies, triggerPriorityUpdate);
   };
-};
-
-// Utility functions (≤8 lines each)
-const debounce = <T extends (...args: any[]) => void>(func: T, delay: number): T => {
-  let timeoutId: NodeJS.Timeout;
-  
-  return ((...args: any[]) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => func(...args), delay);
-  }) as T;
 };
 
 // UI rendering functions (≤8 lines each)
@@ -561,7 +425,7 @@ const renderPriorityUpdateComponent = (
 );
 
 // Test verification functions (≤8 lines each)
-const verifyRenderPerformance = async (getByTestId: any, renderTime: number): Promise<void> => {
+export const verifyRenderPerformance = async (getByTestId: any, renderTime: number): Promise<void> => {
   expect(renderTime).toBeLessThan(PERFORMANCE_THRESHOLDS.MAX_RENDER_TIME_MS);
   expect(getByTestId('item-count')).toHaveTextContent('1000 items');
   
@@ -570,7 +434,7 @@ const verifyRenderPerformance = async (getByTestId: any, renderTime: number): Pr
   });
 };
 
-const testRapidRerendering = async (getByText: any, getByTestId: any): Promise<void> => {
+export const testRapidRerendering = async (getByText: any, getByTestId: any): Promise<void> => {
   // Trigger multiple rapid rerenders
   for (let i = 0; i < 10; i++) {
     fireEvent.click(getByText('Trigger Rerender'));
@@ -584,7 +448,7 @@ const testRapidRerendering = async (getByText: any, getByTestId: any): Promise<v
   expect(avgRenderTime).toBeLessThan(PERFORMANCE_THRESHOLDS.MAX_RENDER_TIME_MS);
 };
 
-const testVirtualScrolling = async (getByTestId: any): Promise<void> => {
+export const testVirtualScrolling = async (getByTestId: any): Promise<void> => {
   const scrollUpButton = getByTestId('scroll-performance').closest('div')?.querySelector('button:last-child');
   const scrollDownButton = getByTestId('scroll-performance').closest('div')?.querySelector('button:first-child');
   
@@ -596,7 +460,7 @@ const testVirtualScrolling = async (getByTestId: any): Promise<void> => {
   });
 };
 
-const testInteractionLatency = async (getByText: any, getByTestId: any): Promise<void> => {
+export const testInteractionLatency = async (getByText: any, getByTestId: any): Promise<void> => {
   fireEvent.click(getByText('Interact'));
   fireEvent.click(getByText('Interact'));
   fireEvent.click(getByText('Interact'));
@@ -609,7 +473,7 @@ const testInteractionLatency = async (getByText: any, getByTestId: any): Promise
   expect(avgLatency).toBeLessThan(PERFORMANCE_THRESHOLDS.MAX_INTERACTION_TIME_MS);
 };
 
-const testComputationResponsiveness = async (getByText: any, getByTestId: any): Promise<void> => {
+export const testComputationResponsiveness = async (getByText: any, getByTestId: any): Promise<void> => {
   fireEvent.click(getByText('Start Computation'));
   
   await waitFor(() => {
@@ -621,7 +485,7 @@ const testComputationResponsiveness = async (getByText: any, getByTestId: any): 
   }, { timeout: TEST_TIMEOUTS.LONG });
 };
 
-const testInteractionDebouncing = async (getByTestId: any): Promise<void> => {
+export const testInteractionDebouncing = async (getByTestId: any): Promise<void> => {
   const input = getByTestId('debounce-input');
   
   // Rapid typing
@@ -635,7 +499,7 @@ const testInteractionDebouncing = async (getByTestId: any): Promise<void> => {
   }, { timeout: 500 });
 };
 
-const testMemoryUtilization = async (getByText: any, getByTestId: any): Promise<void> => {
+export const testMemoryUtilization = async (getByText: any, getByTestId: any): Promise<void> => {
   fireEvent.click(getByText('Allocate Memory'));
   fireEvent.click(getByText('Allocate Memory'));
   
@@ -652,7 +516,7 @@ const testMemoryUtilization = async (getByText: any, getByTestId: any): Promise<
   });
 };
 
-const testBundleOptimization = async (getByTestId: any): Promise<void> => {
+export const testBundleOptimization = async (getByTestId: any): Promise<void> => {
   const loadButton1 = getByTestId('loaded-components').closest('div')?.querySelector('button:first-of-type');
   const loadButton2 = getByTestId('loaded-components').closest('div')?.querySelector('button:last-of-type');
   
@@ -664,7 +528,7 @@ const testBundleOptimization = async (getByTestId: any): Promise<void> => {
   });
 };
 
-const testDOMNodeManagement = async (getByText: any, getByTestId: any): Promise<void> => {
+export const testDOMNodeManagement = async (getByText: any, getByTestId: any): Promise<void> => {
   fireEvent.click(getByText('Add Nodes'));
   
   await waitFor(() => {
@@ -678,7 +542,7 @@ const testDOMNodeManagement = async (getByText: any, getByTestId: any): Promise<
   });
 };
 
-const testConcurrentUpdates = async (getByText: any, getByTestId: any): Promise<void> => {
+export const testConcurrentUpdates = async (getByText: any, getByTestId: any): Promise<void> => {
   fireEvent.click(getByText('Trigger Concurrent Updates'));
   
   await waitFor(() => {
@@ -687,7 +551,7 @@ const testConcurrentUpdates = async (getByText: any, getByTestId: any): Promise<
   });
 };
 
-const testUpdatePrioritization = async (getByText: any, getByTestId: any): Promise<void> => {
+export const testUpdatePrioritization = async (getByText: any, getByTestId: any): Promise<void> => {
   fireEvent.click(getByText('Critical Update'));
   fireEvent.click(getByText('Normal Update'));
   

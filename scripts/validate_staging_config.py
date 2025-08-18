@@ -255,7 +255,7 @@ def check_clickhouse_connection() -> bool:
     """Test ClickHouse connection."""
     print_section("ClickHouse Connection Test")
     
-    ch_host = os.getenv("CLICKHOUSE_HOST", "xedvrr4c3r.us-central1.gcp.clickhouse.cloud")
+    ch_host = os.getenv("CLICKHOUSE_HOST", "clickhouse_host_url_placeholder")
     ch_port = int(os.getenv("CLICKHOUSE_PORT", "8443"))
     ch_user = os.getenv("CLICKHOUSE_USER", "default")
     ch_password = os.getenv("CLICKHOUSE_PASSWORD", "")

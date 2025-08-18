@@ -92,11 +92,18 @@ class ServiceConfigManager:
     
     def populate_service_config(self, config: AppConfig) -> None:
         """Populate all service configuration in config object."""
+        self._populate_service_modes(config)
         self._populate_llm_config(config)
         self._populate_service_flags(config)
         self._populate_external_urls(config)
         self._populate_oauth_config(config)
         self._logger.info(f"Populated service config for {self._environment}")
+    
+    def _populate_service_modes(self, config: AppConfig) -> None:
+        """Populate service modes into config."""
+        config.redis_mode = self._service_modes.get("redis", "shared")
+        config.clickhouse_mode = self._service_modes.get("clickhouse", "shared")
+        config.llm_mode = self._service_modes.get("llm", "shared")
     
     def _populate_llm_config(self, config: AppConfig) -> None:
         """Populate LLM configuration."""

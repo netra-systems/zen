@@ -281,18 +281,36 @@ class ExecutionMonitor:
         logger.error(f"Execution error in {context.agent_name}: {error}")
 
 
+# Import MetricsCollector from canonical location - CONSOLIDATED
+from app.monitoring.metrics_collector import MetricsCollector as CoreMetricsCollector
+
 class MetricsCollector:
-    """Collects and aggregates metrics from multiple monitoring sources."""
+    """Agent-specific metrics collector with ExecutionMonitor aggregation."""
     
     def __init__(self):
         self.monitors: List[ExecutionMonitor] = []
+        self.core_collector = CoreMetricsCollector()
         
     def add_monitor(self, monitor: ExecutionMonitor) -> None:
         """Add monitor to collection."""
         self.monitors.append(monitor)
     
     def get_aggregated_metrics(self) -> Dict[str, Any]:
-        """Get aggregated metrics from all monitors."""
+        """Get aggregated metrics from all monitors and core collector."""
+        agent_metrics = self._get_agent_specific_metrics()
+        
+        # Get core system metrics
+        try:
+            core_metrics = self.core_collector.get_metric_summary("system.cpu_percent")
+            agent_metrics["system_metrics"] = core_metrics
+        except Exception:
+            # Core collector may not be started yet
+            pass
+        
+        return agent_metrics
+    
+    def _get_agent_specific_metrics(self) -> Dict[str, Any]:
+        """Get agent-specific metrics from monitors."""
         if not self.monitors:
             return {}
         

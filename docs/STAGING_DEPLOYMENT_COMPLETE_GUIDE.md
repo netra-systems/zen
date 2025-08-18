@@ -243,7 +243,7 @@ Each PR gets its own database:
 
 ### ClickHouse Configuration
 ```env
-CLICKHOUSE_URL=clickhouse://default:@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1
+CLICKHOUSE_URL=clickhouse://default:@clickhouse_host_url_placeholder:8443/default?secure=1
 CLICKHOUSE_TIMEOUT=30
 ```
 

@@ -139,8 +139,8 @@ resource "google_cloud_run_v2_service" "backend" {
           ENVIRONMENT  = "staging"
           
           # ClickHouse configuration
-          CLICKHOUSE_URL      = coalesce(var.clickhouse_url, "clickhouse://default:${var.clickhouse_password}@xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443/default?secure=1")
-          CLICKHOUSE_HOST     = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
+          CLICKHOUSE_URL      = coalesce(var.clickhouse_url, "clickhouse://default:${var.clickhouse_password}@clickhouse_host_url_placeholder:8443/default?secure=1")
+          CLICKHOUSE_HOST     = "clickhouse_host_url_placeholder"
           CLICKHOUSE_PORT     = "8443"
           CLICKHOUSE_SECURE   = "true"
           CLICKHOUSE_TIMEOUT  = "60"

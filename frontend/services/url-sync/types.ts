@@ -36,6 +36,11 @@ export interface UseUrlSyncResult {
   readonly syncUrlToStore: (url: string) => Promise<boolean>;
   readonly syncStoreToUrl: (threadId: string | null) => void;
   readonly validateThreadId: (threadId: string) => Promise<boolean>;
+  // Aliases for backward compatibility
+  readonly updateUrl: (threadId: string | null) => void;
+  readonly currentThreadId: string | null;
+  readonly navigateToThread: (threadId: string) => void;
+  readonly navigateToChat: () => void;
 }
 
 /**

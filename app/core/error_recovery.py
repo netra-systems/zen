@@ -167,73 +167,40 @@ class RetryStrategy:
 
 
 # Import CircuitBreaker from canonical location - CONSOLIDATED
-from app.core.circuit_breaker import CircuitBreaker as CoreCircuitBreaker, CircuitConfig
+from app.core.circuit_breaker_core import CircuitBreaker as CoreCircuitBreaker
+from app.core.circuit_breaker_types import CircuitConfig
 
-class CircuitBreaker(CoreCircuitBreaker):
-    """Compatibility wrapper for error recovery CircuitBreaker - delegates to canonical implementation."""
+class ErrorRecoveryCircuitBreaker(CoreCircuitBreaker):
+    """Specialized circuit breaker for error recovery operations."""
     
-    def __init__(self, failure_threshold: int = 5, timeout: int = 60):
-        """Initialize circuit breaker with legacy interface."""
+    def __init__(self, 
+                 failure_threshold: int = 5, 
+                 timeout: int = 60,
+                 name: str = "error_recovery_circuit"):
+        """Initialize circuit breaker with error recovery defaults."""
         config = CircuitConfig(
-            name="error_recovery_circuit",
+            name=name,
             failure_threshold=failure_threshold,
             recovery_timeout=float(timeout),
             timeout_seconds=float(timeout)
         )
         super().__init__(config)
-        
-    def should_allow_request(self) -> bool:
-        """Check if request should be allowed through."""
-        # Convert async to sync for compatibility
-        try:
-            return self._check_with_event_loop()
-        except RuntimeError:
-            # No event loop - use synchronous check
-            return not self.is_open
     
-    def _check_with_event_loop(self) -> bool:
-        """Check circuit state with event loop handling."""
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            # If in async context, use direct property
-            return not self.is_open
-        else:
-            # If not in async context, check synchronously
-            return not self.is_open
+    def should_allow_request(self) -> bool:
+        """Synchronous check if request should be allowed through."""
+        return self.can_execute()
     
     def record_success(self) -> None:
-        """Record successful operation."""
-        # Convert to async call when possible
-        try:
-            self._execute_success_recording()
-        except RuntimeError:
-            # Best effort - set state manually for compatibility
-            self.state = self.config.name
+        """Record successful operation synchronously."""
+        super().record_success()
     
-    def _execute_success_recording(self) -> None:
-        """Execute success recording with proper event loop handling."""
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(self._record_success())
-        else:
-            asyncio.run(self._record_success())
-    
-    def record_failure(self) -> None:
-        """Record failed operation."""
-        # Convert to async call when possible
-        try:
-            self._execute_failure_recording()
-        except RuntimeError:
-            # Best effort - increment failure tracking for compatibility
-            self._failure_count += 1
-    
-    def _execute_failure_recording(self) -> None:
-        """Execute failure recording with proper event loop handling."""
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(self._record_failure("ErrorRecoveryFailure"))
-        else:
-            asyncio.run(self._record_failure("ErrorRecoveryFailure"))
+    def record_failure(self, error_type: str = "ErrorRecoveryFailure") -> None:
+        """Record failed operation synchronously."""
+        super().record_failure(error_type)
+
+
+# Compatibility alias for legacy code
+CircuitBreaker = ErrorRecoveryCircuitBreaker
 
 
 class ErrorRecoveryManager:
@@ -243,7 +210,7 @@ class ErrorRecoveryManager:
         """Initialize error recovery manager."""
         self.compensation_actions: List[CompensationAction] = []
         self.retry_strategies: Dict[OperationType, RetryStrategy] = {}
-        self.circuit_breakers: Dict[str, CircuitBreaker] = {}
+        self.circuit_breakers: Dict[str, ErrorRecoveryCircuitBreaker] = {}
         self.active_operations: Dict[str, RecoveryContext] = {}
         
         # Initialize default retry strategies
@@ -277,10 +244,12 @@ class ErrorRecoveryManager:
         """Register a compensation action."""
         self.compensation_actions.append(action)
     
-    def get_circuit_breaker(self, service_name: str) -> CircuitBreaker:
+    def get_circuit_breaker(self, service_name: str) -> ErrorRecoveryCircuitBreaker:
         """Get or create circuit breaker for service."""
         if service_name not in self.circuit_breakers:
-            self.circuit_breakers[service_name] = CircuitBreaker()
+            self.circuit_breakers[service_name] = ErrorRecoveryCircuitBreaker(
+                name=f"recovery_{service_name}"
+            )
         return self.circuit_breakers[service_name]
 
 
@@ -342,7 +311,7 @@ class RecoveryExecutor:
             error_message=error_message
         )
     
-    def _get_circuit_breaker(self, context: RecoveryContext) -> CircuitBreaker:
+    def _get_circuit_breaker(self, context: RecoveryContext) -> ErrorRecoveryCircuitBreaker:
         """Get circuit breaker for operation."""
         service_name = f"{context.operation_type.value}"
         return self.recovery_manager.get_circuit_breaker(service_name)

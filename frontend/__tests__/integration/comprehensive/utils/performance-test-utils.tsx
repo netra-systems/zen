@@ -195,7 +195,7 @@ export const resolveConflictContent = (
 };
 
 // History management utilities
-export const trimHistory = <T>(
+export const trimHistory = <T,>(
   history: T[],
   maxSize: number
 ): T[] => {
@@ -204,7 +204,7 @@ export const trimHistory = <T>(
     : history;
 };
 
-export const addToHistory = <T>(
+export const addToHistory = <T,>(
   history: T[],
   currentIndex: number,
   newItem: T,
@@ -236,7 +236,7 @@ export const simulateAsyncDelay = (ms: number = 10): Promise<void> => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };
 
-export const createTestComponent = <P extends object>(
+export const createTestComponent = <P extends object,>(
   Component: React.ComponentType<P>
 ) => {
   return (props: P) => <Component {...props} />;

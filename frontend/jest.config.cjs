@@ -40,7 +40,7 @@ const config = {
         'react-markdown': '<rootDir>/__mocks__/react-markdown.tsx',
       },
       transformIgnorePatterns: [
-        'node_modules/(?!(react-markdown|remark-gfm|remark-math|rehype-katex|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|hast-util-whitespace|space-separated-tokens|comma-separated-tokens|vfile|unist-|unified|bail|is-plain-obj|trough|micromark|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|hast-util-parse-selector|mdast-util-)/)',
+        'node_modules/(?!(react-markdown|remark-.*|rehype-.*|unified|micromark.*|mdast-.*|hast-.*|unist-.*|vfile|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|space-separated-tokens|comma-separated-tokens|bail|is-plain-obj|trough|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|estree-util-.*|devlop|zwitch|longest-streak|markdown-table|trim-lines|ccount|escape-string-regexp|html-void-elements|web-namespaces|estree-walker)/)',
       ],
     },
     {
@@ -64,7 +64,7 @@ const config = {
         'react-markdown': '<rootDir>/__mocks__/react-markdown.tsx',
       },
       transformIgnorePatterns: [
-        'node_modules/(?!(react-markdown|remark-gfm|remark-math|rehype-katex|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|hast-util-whitespace|space-separated-tokens|comma-separated-tokens|vfile|unist-|unified|bail|is-plain-obj|trough|micromark|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|hast-util-parse-selector|mdast-util-)/)',
+        'node_modules/(?!(react-markdown|remark-.*|rehype-.*|unified|micromark.*|mdast-.*|hast-.*|unist-.*|vfile|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|space-separated-tokens|comma-separated-tokens|bail|is-plain-obj|trough|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|estree-util-.*|devlop|zwitch|longest-streak|markdown-table|trim-lines|ccount|escape-string-regexp|html-void-elements|web-namespaces|estree-walker)/)',
       ],
     },
     {
@@ -88,7 +88,7 @@ const config = {
         'react-markdown': '<rootDir>/__mocks__/react-markdown.tsx',
       },
       transformIgnorePatterns: [
-        'node_modules/(?!(react-markdown|remark-gfm|remark-math|rehype-katex|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|hast-util-whitespace|space-separated-tokens|comma-separated-tokens|vfile|unist-|unified|bail|is-plain-obj|trough|micromark|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|hast-util-parse-selector|mdast-util-)/)',
+        'node_modules/(?!(react-markdown|remark-.*|rehype-.*|unified|micromark.*|mdast-.*|hast-.*|unist-.*|vfile|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|space-separated-tokens|comma-separated-tokens|bail|is-plain-obj|trough|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|estree-util-.*|devlop|zwitch|longest-streak|markdown-table|trim-lines|ccount|escape-string-regexp|html-void-elements|web-namespaces|estree-walker)/)',
       ],
     },
     {
@@ -112,7 +112,7 @@ const config = {
         'react-markdown': '<rootDir>/__mocks__/react-markdown.tsx',
       },
       transformIgnorePatterns: [
-        'node_modules/(?!(react-markdown|remark-gfm|remark-math|rehype-katex|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|hast-util-whitespace|space-separated-tokens|comma-separated-tokens|vfile|unist-|unified|bail|is-plain-obj|trough|micromark|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|hast-util-parse-selector|mdast-util-)/)',
+        'node_modules/(?!(react-markdown|remark-.*|rehype-.*|unified|micromark.*|mdast-.*|hast-.*|unist-.*|vfile|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|space-separated-tokens|comma-separated-tokens|bail|is-plain-obj|trough|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|estree-util-.*|devlop|zwitch|longest-streak|markdown-table|trim-lines|ccount|escape-string-regexp|html-void-elements|web-namespaces|estree-walker)/)',
       ],
     },
     {
@@ -136,7 +136,7 @@ const config = {
         'react-markdown': '<rootDir>/__mocks__/react-markdown.tsx',
       },
       transformIgnorePatterns: [
-        'node_modules/(?!(react-markdown|remark-gfm|remark-math|rehype-katex|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|hast-util-whitespace|space-separated-tokens|comma-separated-tokens|vfile|unist-|unified|bail|is-plain-obj|trough|micromark|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|hast-util-parse-selector|mdast-util-)/)',
+        'node_modules/(?!(react-markdown|remark-.*|rehype-.*|unified|micromark.*|mdast-.*|hast-.*|unist-.*|vfile|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|space-separated-tokens|comma-separated-tokens|bail|is-plain-obj|trough|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|estree-util-.*|devlop|zwitch|longest-streak|markdown-table|trim-lines|ccount|escape-string-regexp|html-void-elements|web-namespaces|estree-walker)/)',
       ],
     },
     {
@@ -160,7 +160,7 @@ const config = {
         'react-markdown': '<rootDir>/__mocks__/react-markdown.tsx',
       },
       transformIgnorePatterns: [
-        'node_modules/(?!(react-markdown|remark-gfm|remark-math|rehype-katex|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|hast-util-whitespace|space-separated-tokens|comma-separated-tokens|vfile|unist-|unified|bail|is-plain-obj|trough|micromark|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|hast-util-parse-selector|mdast-util-)/)',
+        'node_modules/(?!(react-markdown|remark-.*|rehype-.*|unified|micromark.*|mdast-.*|hast-.*|unist-.*|vfile|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|space-separated-tokens|comma-separated-tokens|bail|is-plain-obj|trough|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|estree-util-.*|devlop|zwitch|longest-streak|markdown-table|trim-lines|ccount|escape-string-regexp|html-void-elements|web-namespaces|estree-walker)/)',
       ],
     },
     {
@@ -184,7 +184,7 @@ const config = {
         'react-markdown': '<rootDir>/__mocks__/react-markdown.tsx',
       },
       transformIgnorePatterns: [
-        'node_modules/(?!(react-markdown|remark-gfm|remark-math|rehype-katex|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|hast-util-whitespace|space-separated-tokens|comma-separated-tokens|vfile|unist-|unified|bail|is-plain-obj|trough|micromark|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|hast-util-parse-selector|mdast-util-)/)',
+        'node_modules/(?!(react-markdown|remark-.*|rehype-.*|unified|micromark.*|mdast-.*|hast-.*|unist-.*|vfile|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|space-separated-tokens|comma-separated-tokens|bail|is-plain-obj|trough|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|estree-util-.*|devlop|zwitch|longest-streak|markdown-table|trim-lines|ccount|escape-string-regexp|html-void-elements|web-namespaces|estree-walker)/)',
       ],
     },
   ],
@@ -204,7 +204,7 @@ const config = {
     'react-markdown': '<rootDir>/__mocks__/react-markdown.tsx',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-markdown|remark-gfm|remark-math|rehype-katex|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|hast-util-whitespace|space-separated-tokens|comma-separated-tokens|vfile|unist-|unified|bail|is-plain-obj|trough|micromark|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|hast-util-parse-selector|mdast-util-)/)',
+    'node_modules/(?!(react-markdown|remark-.*|rehype-.*|unified|micromark.*|mdast-.*|hast-.*|unist-.*|vfile|react-syntax-highlighter|refractor|parse-entities|character-entities|property-information|space-separated-tokens|comma-separated-tokens|bail|is-plain-obj|trough|decode-named-character-reference|character-entities-html4|character-entities-legacy|hastscript|estree-util-.*|devlop|zwitch|longest-streak|markdown-table|trim-lines|ccount|escape-string-regexp|html-void-elements|web-namespaces|estree-walker)/)',
   ],
 };
 

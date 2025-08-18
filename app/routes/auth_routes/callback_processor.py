@@ -75,27 +75,29 @@ async def process_oauth_callback(
     return build_callback_redirect(access_token)
 
 
+def _determine_callback_auth_service_url(environment) -> str:
+    """Determine auth service URL for callback."""
+    import os
+    if environment.value == 'staging':
+        return 'https://auth.staging.netrasystems.ai'
+    elif environment.value == 'production':
+        return 'https://auth.netrasystems.ai'
+    return os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081')
+
+def _build_callback_url_with_params(auth_service_url: str, query_string: str) -> str:
+    """Build callback URL with query parameters."""
+    callback_url = f"{auth_service_url}/auth/callback"
+    if query_string:
+        callback_url += f"?{query_string}"
+    return callback_url
+
 async def handle_callback_request(
     request: Request, db: AsyncSession, security_service: SecurityService
 ):
     """Forward OAuth callback to auth service."""
-    import os
     from fastapi.responses import RedirectResponse
-    
-    # Determine auth service URL based on environment
     environment = auth_client.detect_environment()
-    
-    if environment.value == 'staging':
-        auth_service_url = 'https://auth.staging.netrasystems.ai'
-    elif environment.value == 'production':
-        auth_service_url = 'https://auth.netrasystems.ai'
-    else:
-        auth_service_url = os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081')
-    
-    # Forward all query params to auth service
+    auth_service_url = _determine_callback_auth_service_url(environment)
     query_string = str(request.url.query)
-    callback_url = f"{auth_service_url}/auth/callback"
-    if query_string:
-        callback_url += f"?{query_string}"
-    
+    callback_url = _build_callback_url_with_params(auth_service_url, query_string)
     return RedirectResponse(url=callback_url, status_code=302)

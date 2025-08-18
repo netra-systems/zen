@@ -38,7 +38,11 @@ class ConnectionMemoryTracker:
         self.connection_refs: weakref.WeakSet[ConnectionInfo] = weakref.WeakSet()
         self.message_buffers: Dict[str, List[Any]] = {}
         self.buffer_sizes: Dict[str, float] = {}  # Cache buffer sizes
-        self.buffer_limits = {
+        self.buffer_limits = self._init_buffer_limits()
+    
+    def _init_buffer_limits(self) -> Dict[str, float]:
+        """Initialize buffer limit configuration."""
+        return {
             "max_messages_per_connection": 1000,
             "max_buffer_size_mb": 10.0,
             "max_connection_age_hours": 24
@@ -65,38 +69,48 @@ class ConnectionMemoryTracker:
         buffer = self.message_buffers[connection_id]
         message_size = sys.getsizeof(message) / (1024 * 1024)  # Calculate once
         
-        # Check message count limit and remove oldest if needed
+        self._enforce_message_count_limit(connection_id, buffer)
+        self._add_message_and_update_size(connection_id, buffer, message, message_size)
+        return True
+    
+    def _enforce_message_count_limit(self, connection_id: str, buffer: List[Any]) -> None:
+        """Enforce message count limit by removing oldest if needed."""
         if len(buffer) >= self.buffer_limits["max_messages_per_connection"]:
             removed_msg = buffer.pop(0)
             self.buffer_sizes[connection_id] -= sys.getsizeof(removed_msg) / (1024 * 1024)
-        
+    
+    def _add_message_and_update_size(self, connection_id: str, buffer: List[Any], message: Any, message_size: float) -> None:
+        """Add message and update buffer size, checking limits."""
         buffer.append(message)
         self.buffer_sizes[connection_id] += message_size
         
-        # Check buffer size limit with cached value
         if self.buffer_sizes[connection_id] > self.buffer_limits["max_buffer_size_mb"]:
             self._reduce_buffer_size(connection_id)
-        
-        return True
     
     def _reduce_buffer_size(self, connection_id: str) -> None:
         """Reduce buffer size efficiently when over limit."""
         buffer = self.message_buffers[connection_id]
         target_size = len(buffer) // 2
-        
-        # Remove first half of messages and recalculate size
-        removed_messages = buffer[:target_size]
-        buffer[:] = buffer[target_size:]
-        
-        # Recalculate cached size after bulk removal
-        self.buffer_sizes[connection_id] = sum(sys.getsizeof(msg) for msg in buffer) / (1024 * 1024)
+        self._remove_half_messages(buffer, target_size)
+        self._recalculate_buffer_size(connection_id, buffer)
         logger.warning(f"Reduced buffer size for {connection_id} to {len(buffer)} messages")
+    
+    def _remove_half_messages(self, buffer: List[Any], target_size: int) -> None:
+        """Remove first half of messages from buffer."""
+        buffer[:] = buffer[target_size:]
+    
+    def _recalculate_buffer_size(self, connection_id: str, buffer: List[Any]) -> None:
+        """Recalculate cached buffer size after bulk removal."""
+        self.buffer_sizes[connection_id] = sum(sys.getsizeof(msg) for msg in buffer) / (1024 * 1024)
     
     def get_connection_memory_info(self, connection_id: str) -> Dict[str, Any]:
         """Get memory information for a specific connection."""
         buffer = self.message_buffers.get(connection_id, [])
         buffer_size_mb = self.buffer_sizes.get(connection_id, 0.0)
-        
+        return self._build_connection_info_dict(connection_id, buffer, buffer_size_mb)
+    
+    def _build_connection_info_dict(self, connection_id: str, buffer: List[Any], buffer_size_mb: float) -> Dict[str, Any]:
+        """Build connection memory information dictionary."""
         return {
             "connection_id": connection_id,
             "message_count": len(buffer),
@@ -128,13 +142,17 @@ class WebSocketMemoryManager:
     async def stop_monitoring(self) -> None:
         """Stop memory monitoring."""
         self._running = False
+        await self._cancel_cleanup_task()
+        logger.info("WebSocket memory manager stopped")
+    
+    async def _cancel_cleanup_task(self) -> None:
+        """Cancel cleanup task safely."""
         if self._cleanup_task and not self._cleanup_task.done():
             self._cleanup_task.cancel()
             try:
                 await self._cleanup_task
             except asyncio.CancelledError:
                 pass
-        logger.info("WebSocket memory manager stopped")
     
     def register_connection(self, conn_info: ConnectionInfo) -> None:
         """Register connection for memory tracking."""
@@ -158,14 +176,22 @@ class WebSocketMemoryManager:
         """Main cleanup monitoring loop."""
         while self._running:
             try:
-                await self._perform_cleanup()
-                await self._collect_metrics()
+                await self._execute_cleanup_cycle()
                 await asyncio.sleep(self.cleanup_interval_seconds)
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"Memory cleanup loop error: {e}")
-                await asyncio.sleep(30)
+                await self._handle_cleanup_error(e)
+    
+    async def _execute_cleanup_cycle(self) -> None:
+        """Execute one cleanup cycle."""
+        await self._perform_cleanup()
+        await self._collect_metrics()
+    
+    async def _handle_cleanup_error(self, error: Exception) -> None:
+        """Handle error in cleanup loop."""
+        logger.error(f"Memory cleanup loop error: {error}")
+        await asyncio.sleep(30)
     
     async def _perform_cleanup(self) -> Dict[str, Any]:
         """Perform memory cleanup operations."""
@@ -213,23 +239,40 @@ class WebSocketMemoryManager:
                            cleaned_metrics: int, freed_memory_mb: float) -> Dict[str, Any]:
         """Build cleanup statistics report."""
         cleanup_time = time.time() - start_time
-        cleanup_stats = {
+        cleanup_stats = self._create_cleanup_stats_dict(cleaned_connections, cleaned_metrics, freed_memory_mb, cleanup_time)
+        self._log_cleanup_results(cleanup_stats, cleaned_connections, cleaned_metrics)
+        return cleanup_stats
+    
+    def _create_cleanup_stats_dict(self, cleaned_connections: int, cleaned_metrics: int, 
+                                  freed_memory_mb: float, cleanup_time: float) -> Dict[str, Any]:
+        """Create cleanup statistics dictionary."""
+        return {
             "cleaned_connections": cleaned_connections,
             "cleaned_metrics": cleaned_metrics,
             "freed_memory_mb": freed_memory_mb,
             "cleanup_time_seconds": cleanup_time
         }
+    
+    def _log_cleanup_results(self, cleanup_stats: Dict[str, Any], cleaned_connections: int, cleaned_metrics: int) -> None:
+        """Log cleanup results if any cleanup occurred."""
         if cleaned_connections > 0 or cleaned_metrics > 0:
             logger.info(f"Memory cleanup completed: {cleanup_stats}")
-        return cleanup_stats
     
     async def _collect_garbage(self) -> None:
         """Force garbage collection."""
         gc.collect()
+        collections = self._calculate_gc_collections()
+        self._log_gc_stats(collections)
+    
+    def _calculate_gc_collections(self) -> tuple:
+        """Calculate garbage collection counts since last check."""
         current_gc_count = gc.get_count()
         collections = tuple(a - b for a, b in zip(current_gc_count, self._last_gc_count))
         self._last_gc_count = current_gc_count
-        
+        return collections
+    
+    def _log_gc_stats(self, collections: tuple) -> None:
+        """Log garbage collection statistics if any occurred."""
         if any(collections):
             logger.debug(f"Garbage collection stats: {collections}")
     

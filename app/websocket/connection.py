@@ -146,10 +146,18 @@ class ConnectionManager:
     
     def _should_attempt_close(self, websocket: WebSocket) -> bool:
         """Check if websocket should be closed based on state."""
+        if not self._has_valid_client_state_for_close(websocket):
+            return False
+        return self._check_application_state_for_close(websocket)
+    
+    def _has_valid_client_state_for_close(self, websocket: WebSocket) -> bool:
+        """Check if websocket has valid client state for closing."""
         if not hasattr(websocket, 'client_state'):
             return False
-        if websocket.client_state != WebSocketState.CONNECTED:
-            return False
+        return websocket.client_state == WebSocketState.CONNECTED
+    
+    def _check_application_state_for_close(self, websocket: WebSocket) -> bool:
+        """Check application state conditions for closing."""
         if not hasattr(websocket, 'application_state'):
             return True
         return websocket.application_state != WebSocketState.DISCONNECTED

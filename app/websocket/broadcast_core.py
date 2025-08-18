@@ -30,8 +30,16 @@ class BroadcastManager:
             room_manager: Optional room manager instance (creates new one if None)
         """
         self.connection_manager = connection_manager
-        self.room_manager = room_manager if room_manager is not None else RoomManager(connection_manager)
-        self._stats = {
+        self.room_manager = self._init_room_manager(room_manager)
+        self._stats = self._init_broadcast_stats()
+    
+    def _init_room_manager(self, room_manager: RoomManager = None) -> RoomManager:
+        """Initialize room manager instance."""
+        return room_manager if room_manager is not None else RoomManager(self.connection_manager)
+    
+    def _init_broadcast_stats(self) -> Dict[str, int]:
+        """Initialize broadcast statistics."""
+        return {
             "total_broadcasts": 0,
             "successful_sends": 0,
             "failed_sends": 0
@@ -47,6 +55,10 @@ class BroadcastManager:
             BroadcastResult with send statistics
         """
         prepared_message = utils.prepare_broadcast_message(message)
+        return await self._execute_all_broadcast(prepared_message)
+    
+    async def _execute_all_broadcast(self, prepared_message) -> BroadcastResult:
+        """Execute broadcast to all connections."""
         connections_snapshot = await self._create_connections_snapshot()
         successful_sends, failed_sends, dead_connections = await self._broadcast_to_connections(connections_snapshot, prepared_message)
         await self._cleanup_broadcast_dead_connections(dead_connections)
@@ -67,6 +79,10 @@ class BroadcastManager:
         connections = self.connection_manager.get_user_connections(user_id)
         if not utils.validate_user_connections(user_id, connections):
             return False
+        return await self._execute_user_broadcast(user_id, connections, message)
+    
+    async def _execute_user_broadcast(self, user_id: str, connections: List[ConnectionInfo], message) -> bool:
+        """Execute broadcast to user connections."""
         prepared_message = utils.prepare_broadcast_message(message)
         successful_sends, dead_connections = await self._broadcast_to_user_connections(user_id, connections, prepared_message)
         await self._cleanup_user_dead_connections(user_id, dead_connections)
@@ -85,6 +101,10 @@ class BroadcastManager:
         connection_ids = self.room_manager.get_room_connections(room_id)
         if not utils.validate_room_connections(room_id, connection_ids):
             return utils.create_empty_room_broadcast_result()
+        return await self._execute_room_broadcast(room_id, connection_ids, message)
+    
+    async def _execute_room_broadcast(self, room_id: str, connection_ids: List[str], message) -> BroadcastResult:
+        """Execute broadcast to room connections."""
         prepared_message = utils.prepare_broadcast_message(message)
         successful_sends, failed_sends, invalid_connections = await self._broadcast_to_room_connections(room_id, connection_ids, prepared_message)
         self._cleanup_room_invalid_connections(invalid_connections)
@@ -104,6 +124,10 @@ class BroadcastManager:
         successful_sends = 0
         failed_sends = 0
         connections_to_remove = []
+        return await self._process_connection_batch(connections_snapshot, message, successful_sends, failed_sends, connections_to_remove)
+    
+    async def _process_connection_batch(self, connections_snapshot: List[Tuple[str, ConnectionInfo]], message, successful_sends: int, failed_sends: int, connections_to_remove: List[Tuple[str, ConnectionInfo]]) -> Tuple[int, int, List[Tuple[str, ConnectionInfo]]]:
+        """Process batch of connections for broadcast."""
         for user_id, conn_info in connections_snapshot:
             success, should_remove = await self._send_to_single_connection(user_id, conn_info, message)
             successful_sends, failed_sends, connections_to_remove = utils.update_broadcast_counters(
@@ -152,6 +176,10 @@ class BroadcastManager:
         """Broadcast message to user's connections."""
         successful_sends = 0
         connections_to_remove = []
+        return await self._process_user_connections(connections, message, successful_sends, connections_to_remove)
+    
+    async def _process_user_connections(self, connections: List[ConnectionInfo], message, successful_sends: int, connections_to_remove: List[ConnectionInfo]) -> Tuple[int, List[ConnectionInfo]]:
+        """Process user connections for broadcast."""
         for conn_info in connections:
             success, should_remove = await self._send_to_user_connection(conn_info, message)
             successful_sends, connections_to_remove = utils.update_user_broadcast_counters(
@@ -195,6 +223,10 @@ class BroadcastManager:
         successful_sends = 0
         failed_sends = 0
         connections_to_remove = []
+        return await self._process_room_connections(room_id, connection_ids, message, successful_sends, failed_sends, connections_to_remove)
+    
+    async def _process_room_connections(self, room_id: str, connection_ids: List[str], message, successful_sends: int, failed_sends: int, connections_to_remove: List[str]) -> Tuple[int, int, List[str]]:
+        """Process room connections for broadcast."""
         for conn_id in connection_ids:
             success, should_remove = await self._send_to_room_connection(room_id, conn_id, message)
             successful_sends, failed_sends, connections_to_remove = utils.update_room_broadcast_counters(
@@ -206,6 +238,10 @@ class BroadcastManager:
         conn_info = self.connection_manager.get_connection_by_id(conn_id)
         if not conn_info:
             return False, True
+        return await self._execute_room_connection_send(room_id, conn_id, conn_info, message)
+    
+    async def _execute_room_connection_send(self, room_id: str, conn_id: str, conn_info: ConnectionInfo, message) -> Tuple[bool, bool]:
+        """Execute send to room connection with error handling."""
         try:
             success = await self._send_to_connection(conn_info, message)
             return self._handle_room_connection_result(success, conn_info)
@@ -243,6 +279,10 @@ class BroadcastManager:
         """
         if not self._is_connection_ready(conn_info):
             return False
+        return await self._execute_connection_send(conn_info, message)
+    
+    async def _execute_connection_send(self, conn_info: ConnectionInfo, message) -> bool:
+        """Execute connection send with comprehensive error handling."""
         try:
             return await self._perform_message_send(conn_info, message)
         except (RuntimeError, ConnectionError) as e:
@@ -254,47 +294,72 @@ class BroadcastManager:
 
     def _is_connection_ready(self, conn_info: ConnectionInfo) -> bool:
         """Check if connection is ready for sending."""
-        # Check if connection is marked as closing
+        if not self._check_connection_not_closing(conn_info):
+            return False
+        return self._check_websocket_states(conn_info)
+    
+    def _check_connection_not_closing(self, conn_info: ConnectionInfo) -> bool:
+        """Check if connection is not marked as closing."""
         if conn_info.is_closing:
             logger.debug(f"Connection {conn_info.connection_id} is closing, skipping send")
             return False
-            
+        return True
+    
+    def _check_websocket_states(self, conn_info: ConnectionInfo) -> bool:
+        """Check WebSocket client and application states."""
         ws_state = conn_info.websocket.client_state
         app_state = conn_info.websocket.application_state
-        
-        # Check both client and application states
+        return self._validate_connection_states(conn_info, ws_state, app_state)
+    
+    def _validate_connection_states(self, conn_info: ConnectionInfo, ws_state, app_state) -> bool:
+        """Validate WebSocket connection states."""
+        if not self._check_client_state(conn_info, ws_state):
+            return False
+        return self._check_application_state(conn_info, app_state)
+    
+    def _check_client_state(self, conn_info: ConnectionInfo, ws_state) -> bool:
+        """Check WebSocket client state."""
         if ws_state != WebSocketState.CONNECTED:
             logger.debug(f"Connection {conn_info.connection_id} not in CONNECTED state: {ws_state.name}")
             return False
-        
-        # Check if connection is closing or closed on app side
+        return True
+    
+    def _check_application_state(self, conn_info: ConnectionInfo, app_state) -> bool:
+        """Check WebSocket application state."""
         if app_state != WebSocketState.CONNECTED:
             logger.debug(f"Connection {conn_info.connection_id} application state not connected: {app_state.name}")
             return False
-            
         return True
 
     async def _perform_message_send(self, conn_info: ConnectionInfo, message: Union[Dict[str, Any], Any]) -> bool:
         """Perform actual message sending."""
-        try:
-            prepared_message = prepare_websocket_message(message)
-            await conn_info.websocket.send_json(prepared_message)
-            return True
-        except RuntimeError as e:
-            # Re-raise to be handled by outer error handler
-            raise e
+        prepared_message = prepare_websocket_message(message)
+        await conn_info.websocket.send_json(prepared_message)
+        return True
 
     def _handle_connection_error(self, conn_info: ConnectionInfo, error: Exception) -> None:
         """Handle connection-related errors."""
         error_msg = str(error)
-        
-        # Handle specific case where send is called after close message
-        if "Cannot call \"send\" once a close message has been sent" in error_msg:
-            logger.debug(f"Connection {conn_info.connection_id} already closing, skipping send")
-        elif "Cannot call" in error_msg or "close" in error_msg.lower():
-            logger.debug(f"Connection {conn_info.connection_id} closed: {error}")
+        self._log_connection_error(conn_info, error, error_msg)
+    
+    def _log_connection_error(self, conn_info: ConnectionInfo, error: Exception, error_msg: str) -> None:
+        """Log connection error with appropriate level."""
+        if self._is_close_related_error(error_msg):
+            self._log_close_error(conn_info, error, error_msg)
         else:
             logger.warning(f"Error sending to connection {conn_info.connection_id}: {error}")
+    
+    def _is_close_related_error(self, error_msg: str) -> bool:
+        """Check if error is related to connection closing."""
+        return ("Cannot call \"send\" once a close message has been sent" in error_msg or
+                "Cannot call" in error_msg or "close" in error_msg.lower())
+    
+    def _log_close_error(self, conn_info: ConnectionInfo, error: Exception, error_msg: str) -> None:
+        """Log connection close related errors."""
+        if "Cannot call \"send\" once a close message has been sent" in error_msg:
+            logger.debug(f"Connection {conn_info.connection_id} already closing, skipping send")
+        else:
+            logger.debug(f"Connection {conn_info.connection_id} closed: {error}")
 
     def _handle_unexpected_error(self, conn_info: ConnectionInfo, error: Exception) -> None:
         """Handle unexpected errors during message sending."""

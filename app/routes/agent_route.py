@@ -286,29 +286,47 @@ async def process_with_fallback(message: str) -> Dict[str, Any]:
     except Exception:
         return await _attempt_fallback_processing(message)
 
+async def _handle_websocket_json_parse(websocket: WebSocket, data: str) -> Dict:
+    """Handle JSON parsing for WebSocket data."""
+    try:
+        return json.loads(data)
+    except json.JSONDecodeError:
+        await websocket.send_json({"type": "error", "message": "Invalid JSON"})
+        return None
+
+async def _process_websocket_message(websocket: WebSocket, message_data: Dict) -> Dict:
+    """Process valid WebSocket message."""
+    response = {
+        "type": "agent_response", 
+        "response": f"Processed: {message_data.get('message', '')}"
+    }
+    if "thread_id" in message_data:
+        response["thread_id"] = message_data["thread_id"]
+    return response
+
+async def _handle_websocket_error(websocket: WebSocket, e: Exception) -> None:
+    """Handle WebSocket errors gracefully."""
+    try:
+        await websocket.send_json({"type": "error", "message": f"Server error: {str(e)}"})
+    except:
+        pass
+
+async def _process_websocket_loop(websocket: WebSocket) -> None:
+    """Process WebSocket message loop."""
+    while True:
+        data = await websocket.receive_text()
+        message_data = await _handle_websocket_json_parse(websocket, data)
+        if message_data:
+            response = await _process_websocket_message(websocket, message_data)
+            await websocket.send_json(response)
+
 @router.websocket("/ws/agent")
 async def agent_websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for agent communication."""
     await websocket.accept()
     try:
-        while True:
-            data = await websocket.receive_text()
-            import json
-            try:
-                message_data = json.loads(data)
-                response = {
-                    "type": "agent_response", 
-                    "response": f"Processed: {message_data.get('message', '')}"
-                }
-                if "thread_id" in message_data:
-                    response["thread_id"] = message_data["thread_id"]
-                await websocket.send_json(response)
-            except json.JSONDecodeError:
-                await websocket.send_json({"type": "error", "message": "Invalid JSON"})
+        await _process_websocket_loop(websocket)
     except WebSocketDisconnect:
         pass
     except Exception as e:
-        try:
-            await websocket.send_json({"type": "error", "message": f"Server error: {str(e)}"})
-        except:
-            pass
+        await _handle_websocket_error(websocket, e)

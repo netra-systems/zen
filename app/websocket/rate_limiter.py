@@ -2,12 +2,15 @@
 
 Provides rate limiting capabilities for WebSocket connections to prevent abuse
 and ensure fair resource usage.
+
+UPDATED: Now uses canonical rate limit types from app.schemas.rate_limit_types
 """
 
 from datetime import datetime, timezone
 from typing import Dict, Any
 
 from app.logging_config import central_logger
+from app.schemas.rate_limit_types import RateLimitConfig, RateLimitResult, TokenBucket
 from .connection import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)

@@ -82,13 +82,12 @@ class MetricsCollector:
     
     def _create_collection_tasks(self) -> List[asyncio.Task]:
         """Create all collection tasks."""
-        return [
-            asyncio.create_task(self._collect_system_metrics()),
-            asyncio.create_task(self._collect_database_metrics()),
-            asyncio.create_task(self._collect_websocket_metrics()),
-            asyncio.create_task(self._collect_memory_metrics()),
-            asyncio.create_task(self._cleanup_old_metrics())
+        task_creators = [
+            self._collect_system_metrics, self._collect_database_metrics,
+            self._collect_websocket_metrics, self._collect_memory_metrics,
+            self._cleanup_old_metrics
         ]
+        return [asyncio.create_task(creator()) for creator in task_creators]
     
     async def stop_collection(self) -> None:
         """Stop metric collection."""
@@ -108,30 +107,46 @@ class MetricsCollector:
     async def _collect_system_metrics(self) -> None:
         """Collect system resource metrics."""
         while not self._shutdown:
-            try:
-                metrics = self._gather_system_metrics()
-                self._record_system_metrics(metrics)
-            except Exception as e:
-                logger.error(f"Error collecting system metrics: {e}")
+            await self._collect_single_system_metrics_cycle()
             await asyncio.sleep(self._collection_interval)
+
+    async def _collect_single_system_metrics_cycle(self) -> None:
+        """Collect system metrics for one cycle."""
+        try:
+            metrics = self._gather_system_metrics()
+            self._record_system_metrics(metrics)
+        except Exception as e:
+            logger.error(f"Error collecting system metrics: {e}")
     
     def _gather_system_metrics(self) -> SystemResourceMetrics:
         """Gather system resource metrics from psutil."""
-        cpu_percent = psutil.cpu_percent(interval=1)
-        memory = psutil.virtual_memory()
-        disk_io = psutil.disk_io_counters()
-        net_io = psutil.net_io_counters()
-        connections = len(psutil.net_connections())
+        system_stats = self._collect_system_stats()
+        return self._build_system_metrics(system_stats)
+
+    def _collect_system_stats(self) -> Dict[str, Any]:
+        """Collect raw system statistics."""
+        return {
+            "cpu_percent": psutil.cpu_percent(interval=1),
+            "memory": psutil.virtual_memory(),
+            "disk_io": psutil.disk_io_counters(),
+            "net_io": psutil.net_io_counters(),
+            "connections": len(psutil.net_connections())
+        }
+
+    def _build_system_metrics(self, stats: Dict[str, Any]) -> SystemResourceMetrics:
+        """Build SystemResourceMetrics from raw stats."""
+        memory = stats["memory"]
+        disk_io = stats["disk_io"]
+        net_io = stats["net_io"]
         
         return SystemResourceMetrics(
-            cpu_percent=cpu_percent,
-            memory_percent=memory.percent,
+            cpu_percent=stats["cpu_percent"], memory_percent=memory.percent,
             memory_available_mb=memory.available / (1024 * 1024),
             disk_io_read_mb=disk_io.read_bytes / (1024 * 1024) if disk_io else 0,
             disk_io_write_mb=disk_io.write_bytes / (1024 * 1024) if disk_io else 0,
             network_bytes_sent=net_io.bytes_sent if net_io else 0,
             network_bytes_recv=net_io.bytes_recv if net_io else 0,
-            active_connections=connections
+            active_connections=stats["connections"]
         )
     
     def _record_system_metrics(self, metrics: SystemResourceMetrics) -> None:
@@ -145,32 +160,47 @@ class MetricsCollector:
     async def _collect_database_metrics(self) -> None:
         """Collect database performance metrics."""
         while not self._shutdown:
-            try:
-                metrics = self._gather_database_metrics()
-                self._record_database_metrics(metrics)
-            except Exception as e:
-                logger.error(f"Error collecting database metrics: {e}")
+            await self._collect_single_database_metrics_cycle()
             await asyncio.sleep(self._collection_interval)
+
+    async def _collect_single_database_metrics_cycle(self) -> None:
+        """Collect database metrics for one cycle."""
+        try:
+            metrics = self._gather_database_metrics()
+            self._record_database_metrics(metrics)
+        except Exception as e:
+            logger.error(f"Error collecting database metrics: {e}")
     
     def _gather_database_metrics(self) -> DatabaseMetrics:
         """Gather database metrics from pools and performance manager."""
+        db_stats = self._collect_database_stats()
+        return self._build_database_metrics(db_stats)
+
+    def _collect_database_stats(self) -> Dict[str, Any]:
+        """Collect raw database statistics."""
         from app.db.postgres import get_pool_status
         pool_status = get_pool_status()
         perf_stats = performance_manager.get_performance_stats()
-        query_stats = perf_stats.get("query_optimizer", {})
-        
+        return {
+            "pool_status": pool_status, "perf_stats": perf_stats,
+            "query_stats": perf_stats.get("query_optimizer", {})
+        }
+
+    def _build_database_metrics(self, stats: Dict[str, Any]) -> DatabaseMetrics:
+        """Build DatabaseMetrics from raw stats."""
+        pool_status = stats["pool_status"]
         sync_pool = pool_status.get("sync", {})
         async_pool = pool_status.get("async", {})
+        query_stats = stats["query_stats"]
         
         return DatabaseMetrics(
             timestamp=datetime.now(),
             active_connections=(sync_pool.get("total", 0) + async_pool.get("total", 0)),
             pool_size=(sync_pool.get("size", 0) + async_pool.get("size", 0)),
             pool_overflow=(sync_pool.get("overflow", 0) + async_pool.get("overflow", 0)),
-            total_queries=query_stats.get("total_queries", 0),
-            avg_query_time=0.0,  # Would need to calculate from query metrics
+            total_queries=query_stats.get("total_queries", 0), avg_query_time=0.0,
             slow_queries=query_stats.get("slow_queries", 0),
-            cache_hit_rate=self._calculate_cache_hit_ratio(perf_stats)
+            cache_hit_rate=self._calculate_cache_hit_ratio(stats["perf_stats"])
         )
     
     def _record_database_metrics(self, metrics: DatabaseMetrics) -> None:
@@ -184,26 +214,30 @@ class MetricsCollector:
     async def _collect_websocket_metrics(self) -> None:
         """Collect WebSocket performance metrics."""
         while not self._shutdown:
-            try:
-                metrics = self._gather_websocket_metrics()
-                self._record_websocket_metrics(metrics)
-            except Exception as e:
-                logger.error(f"Error collecting WebSocket metrics: {e}")
+            await self._collect_single_websocket_metrics_cycle()
             await asyncio.sleep(self._collection_interval)
+
+    async def _collect_single_websocket_metrics_cycle(self) -> None:
+        """Collect WebSocket metrics for one cycle."""
+        try:
+            metrics = self._gather_websocket_metrics()
+            self._record_websocket_metrics(metrics)
+        except Exception as e:
+            logger.error(f"Error collecting WebSocket metrics: {e}")
     
     def _gather_websocket_metrics(self) -> WebSocketMetrics:
         """Gather WebSocket metrics from connection manager."""
         from app.websocket.connection import connection_manager
         conn_stats = connection_manager.get_stats()
-        
+        return self._build_websocket_metrics(conn_stats)
+
+    def _build_websocket_metrics(self, conn_stats: Dict[str, Any]) -> WebSocketMetrics:
+        """Build WebSocketMetrics from connection stats."""
         return WebSocketMetrics(
             active_connections=conn_stats.get("active_connections", 0),
             total_connections=conn_stats.get("total_connections", 0),
-            messages_sent=0,  # Would need to track this
-            messages_received=0,  # Would need to track this
-            failed_sends=0,  # Would need to track this
-            avg_message_size=0.0,  # Would need to track this
-            batch_efficiency=0.0  # Would calculate from batching stats
+            messages_sent=0, messages_received=0, failed_sends=0,
+            avg_message_size=0.0, batch_efficiency=0.0
         )
     
     def _record_websocket_metrics(self, metrics: WebSocketMetrics) -> None:
@@ -287,15 +321,26 @@ class MetricsCollector:
         if metric_name not in self._metrics_buffer:
             return []
         
+        return self._filter_metrics_by_time(
+            self._metrics_buffer[metric_name], cutoff_time
+        )
+
+    def _filter_metrics_by_time(
+        self, metrics: deque, cutoff_time: datetime
+    ) -> List[PerformanceMetric]:
+        """Filter metrics by timestamp."""
         return [
-            metric for metric in self._metrics_buffer[metric_name]
+            metric for metric in metrics
             if metric.timestamp > cutoff_time
         ]
     
     def get_metric_summary(self, metric_name: str, duration_seconds: int = 300) -> Dict[str, float]:
         """Get statistical summary of a metric."""
         metrics = self.get_recent_metrics(metric_name, duration_seconds)
-        
+        return self._build_metric_summary(metrics)
+
+    def _build_metric_summary(self, metrics: List[PerformanceMetric]) -> Dict[str, float]:
+        """Build summary statistics from metrics."""
         if not metrics:
             return {}
         

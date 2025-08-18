@@ -69,12 +69,18 @@ async def get_current_user(
             detail="Invalid token payload",
         )
     
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
+    from sqlalchemy import select
+    
+    # Use async session properly with context manager
+    async with db as session:
+        result = await session.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found",
+            )
     
     return user
 

@@ -62,7 +62,7 @@ const hasAgentData = (data: FastLayerData | null): boolean => {
 };
 
 const hasActiveTools = (data: FastLayerData | null): boolean => {
-  return data?.activeTools?.length > 0;
+  return data?.activeTools?.length ? data.activeTools.length > 0 : false;
 };
 
 // ============================================
@@ -108,7 +108,7 @@ export const shouldShowSlowLayer = (
 };
 
 const hasCompletedAgents = (data: SlowLayerData | null): boolean => {
-  return data?.completedAgents?.length > 0;
+  return data?.completedAgents?.length ? data.completedAgents.length > 0 : false;
 };
 
 const hasFinalReport = (data: SlowLayerData | null): boolean => {
