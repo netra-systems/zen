@@ -3,12 +3,12 @@
   "last_successful_counts": {
     "backend": {
       "unit": {
-        "total": 402,
-        "timestamp": "2025-08-17T18:05:08.721975"
+        "total": 408,
+        "timestamp": "2025-08-17T18:12:34.707007"
       },
       "real_e2e": {
         "total": 1,
-        "timestamp": "2025-08-17T18:06:10.461176"
+        "timestamp": "2025-08-17T18:11:39.995453"
       },
       "comprehensive": {
         "total": 1,
@@ -16,10 +16,10 @@
       },
       "comprehensive-api": {
         "total": 2,
-        "timestamp": "2025-08-17T18:07:47.351668"
+        "timestamp": "2025-08-17T18:09:13.346762"
       }
     }
   },
   "category_status": {},
-  "last_update": "2025-08-17T18:07:47.351668"
+  "last_update": "2025-08-17T18:12:34.707007"
 }

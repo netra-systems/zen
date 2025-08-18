@@ -366,8 +366,23 @@ Ensures every feature directly creates and captures value proportional to a cust
 - Database via repositories only
 - NetraException for errors
 
-### Engineering Coding Process
+### COMPLEX CODING: MULTI STEP PLAN Process
+MUST FOLLOW THIS:
 
+TASK 1: Spawn an Isolated ULTRA THINK ELITE ENGINEER agent
+to **write** the code. Return the result to you.
+
+TASK 2: Spawn an Isolated ULTRA THINK ELITE REVIEWER agent
+to **review** the code. Return the review result (CRITICAL: Critic's comments only without code).
+
+TASK 3: Spawn an Isolated ULTRA THINK ELITE ENGINEER agent
+pass a: original goal, b: output from Task 1, c: output from Task 2.
+Instruct Agent 3 to Address all critique points and rewrite higher quality code.
+
+TASK 4: Spawn an Isolated ULTRA THINK TESTING agent
+Takes the code from agent 3 and runs tests.
+
+EVERY AGENT MUST HAVE A FRESH CONTEXT WINDOW TO MAINTAIN INTEGRITY OF PROCESS.
 
 ## 🚧 SYSTEM BOUNDARIES (ENFORCE 300/8 LIMITS)
 
@@ -376,6 +391,7 @@ Ensures every feature directly creates and captures value proportional to a cust
 - **EXTRACTION**: Extract functions approaching 6 lines BEFORE they hit 8
 - **Healthy GROWTH ONLY**: Subdivide concepts. Use existing modules.
 - **COMPOSITION**: Use small focused components, not monoliths
+- **KEEP SCOPE REASONABLE**: ONLY BUILD WHAT IS REQUIRED FOR BUSINESS GOALS.
 
 ### Critical References
 - [`SPEC/system_boundaries.xml`](SPEC/system_boundaries.xml) - Hard limits & enforcement
@@ -383,8 +399,7 @@ Ensures every feature directly creates and captures value proportional to a cust
 - [`SPEC/conventions.xml`](SPEC/conventions.xml) - Boundary enforcement integration
 
 ## Testing (Use UNIFIED TEST RUNNER)
-- **DEFAULT**: `python test_runner.py --level integration --no-coverage --fast-fail` (fast feedback)
-- **QUICK CHECK**: `python test_runner.py --level smoke --fast-fail` (before commits)
+- **DEFAULT**: `python test_runner.py --level integration --no-coverage --fast-fail`
 - **AGENT CHANGES**: `python test_runner.py --level agents --real-llm` (MANDATORY for agent changes)
 - **REAL LLM TESTING**: `python test_runner.py --level integration --real-llm` (before releases)
 - **FULL VALIDATION**: `python test_runner.py --level comprehensive` (before production)

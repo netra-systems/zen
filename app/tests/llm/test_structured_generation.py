@@ -199,7 +199,8 @@ class TestLLMManagerStructuredGeneration:
             "tags": ["fallback"]
         })
         
-        with patch.object(llm_manager, 'get_structured_llm') as mock_get:
+        # Mock the structured operations to trigger fallback behavior
+        with patch.object(llm_manager._structured, 'get_structured_llm') as mock_get:
             # Make structured call fail
             mock_structured_llm = AsyncMock()
             mock_structured_llm.ainvoke = AsyncMock(
@@ -207,8 +208,8 @@ class TestLLMManagerStructuredGeneration:
             )
             mock_get.return_value = mock_structured_llm
             
-            # Mock regular LLM to return JSON
-            with patch.object(llm_manager, 'ask_llm') as mock_ask:
+            # Mock the core ask_llm for fallback
+            with patch.object(llm_manager._structured.core, 'ask_llm') as mock_ask:
                 mock_ask.return_value = json_response
                 
                 result = await llm_manager.ask_structured_llm(
@@ -223,7 +224,7 @@ class TestLLMManagerStructuredGeneration:
                 assert result.confidence == 0.75
     async def test_ask_structured_llm_complete_failure(self, llm_manager):
         """Test complete failure of structured generation."""
-        with patch.object(llm_manager, 'get_structured_llm') as mock_get:
+        with patch.object(llm_manager._structured, 'get_structured_llm') as mock_get:
             # Make structured call fail
             mock_structured_llm = AsyncMock()
             mock_structured_llm.ainvoke = AsyncMock(
@@ -232,7 +233,7 @@ class TestLLMManagerStructuredGeneration:
             mock_get.return_value = mock_structured_llm
             
             # Make fallback also fail
-            with patch.object(llm_manager, 'ask_llm') as mock_ask:
+            with patch.object(llm_manager._structured.core, 'ask_llm') as mock_ask:
                 mock_ask.return_value = "Not JSON"
                 
                 with pytest.raises(Exception) as exc_info:

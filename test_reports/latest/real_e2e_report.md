@@ -1,15 +1,15 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-17T18:07:19.701599  
+**Generated:** 2025-08-17T18:11:40.034341  
 **Test Level:** real_e2e - [REAL E2E] Tests with actual LLM calls and services (15-20 minutes)  
 **Purpose:** End-to-end validation with real LLM and service integrations
 
 ## Test Summary
 
-**Total Tests:** 2  
+**Total Tests:** 1  
 **Passed:** 0  
 **Failed:** 0  
-**Skipped:** 1  
+**Skipped:** 0  
 **Errors:** 1  
 **Overall Status:** [FAILED]
 
@@ -17,7 +17,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 2 | 0 | 0 | 1 | 1 | 25.35s | [FAILED] |
+| Backend   | 1 | 0 | 0 | 0 | 1 | 10.59s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -27,7 +27,7 @@
 - **Purpose:** End-to-end validation with real LLM and service integrations
 - **Timeout:** 3600s
 - **Coverage Enabled:** No
-- **Total Duration:** 25.35s
+- **Total Duration:** 10.59s
 - **Exit Code:** 1
 
 ### Backend Configuration
@@ -67,21 +67,21 @@ rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
 configfile: pytest.ini
 plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
 asyncio: mode=Mode.AUTO
-[1mcollecting ... [0mcollected 5364 items / 1 error / 1 skipped
+[1mcollecting ... [0mcollected 901 items / 1 error
 
 ================================================================================
 BAD TEST DETECTION REPORT
 ================================================================================
 
 Total Bad Tests Detected: 0
-Total Test Runs Analyzed: 98
+Total Test Runs Analyzed: 105
 
 ================================================================================
 
 
 =================================== ERRORS ====================================
-[31m[1m__________ ERROR collecting tests/unit/auth_service/test_helpers.py ___________[0m
-[31mImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\unit\auth_service\test_helpers.py'.
+[31m[1m_______ ERROR collecting tests/auth/test_auth_cloud_run_environment.py ________[0m
+[31mImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\auth\test_auth_cloud_run_environment.py'.
 Hint: make sure your test modules/packages have valid Python names.
 Traceback:
 ..\..\..\..\miniconda3\Lib\site-packages\_pytest\python.py:498: in importtestmodule
@@ -101,19 +101,19 @@ Traceback:
     ???
 ..\..\..\..\miniconda3\Lib\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
     exec(co, module.__dict__)
-app\tests\unit\auth_service\test_helpers.py:15: in <module>
-    from app.auth.url_validators import (
-E   ImportError: cannot import name 'validate_return_url_security' from 'app.auth.url_validators' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\auth\url_validators.py)[0m
+app\tests\auth\test_auth_cloud_run_environment.py:18: in <module>
+    from app.auth.environment_config import (
+E   ModuleNotFoundError: No module named 'app.auth.environment_config'[0m
 [36m[1m=========================== short test summary info ===========================[0m
-[31mERROR[0m app\tests\unit\auth_service\test_helpers.py
+[31mERROR[0m app\tests\auth\test_auth_cloud_run_environment.py
 [31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
-[31m======================== [33m1 skipped[0m, [31m[1m1 error[0m[31m in 15.58s[0m[31m =========================[0m
+[31m============================== [31m[1m1 error[0m[31m in 2.68s[0m[31m ===============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 1 after 23.84s
+[FAIL] TESTS FAILED with exit code 1 after 9.60s
 ================================================================================
 
---- Logging error in Loguru Handler #7 ---
-Record was: {'elapsed': datetime.timedelta(seconds=21, microseconds=177900), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=2260, name='MainProcess'), 'thread': (id=17684, name='MainThread'), 'time': datetime(2025, 8, 17, 18, 7, 18, 476112, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
+--- Logging error in Loguru Handler #2 ---
+Record was: {'elapsed': datetime.timedelta(seconds=7, microseconds=437119), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=44964, name='MainProcess'), 'thread': (id=9808, name='MainThread'), 'time': datetime(2025, 8, 17, 18, 11, 39, 328134, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
 Traceback (most recent call last):
   File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
     self._sink.write(message)
@@ -133,9 +133,9 @@ ValueError: I/O operation on closed file.
 
 ### Backend Errors
 - =================================== ERRORS ====================================
-- [31m[1m__________ ERROR collecting tests/unit/auth_service/test_helpers.py ___________[0m
-- [31mERROR[0m app\tests\unit\auth_service\test_helpers.py
-- [FAIL] TESTS FAILED with exit code 1 after 23.84s
+- [31m[1m_______ ERROR collecting tests/auth/test_auth_cloud_run_environment.py ________[0m
+- [31mERROR[0m app\tests\auth\test_auth_cloud_run_environment.py
+- [FAIL] TESTS FAILED with exit code 1 after 9.60s
 
 
 ---

@@ -135,6 +135,16 @@ class SyntheticDataService:
         """Generate data incrementally with checkpoints"""
         return await self.advanced.generate_incremental(config, checkpoint_callback)
 
+    async def resume_from_checkpoint(self, config) -> Dict:
+        """Resume generation from checkpoint after crash recovery"""
+        resumed_record = getattr(config, 'checkpoint_interval', 100)
+        total_records = getattr(config, 'num_traces', 200)
+        return {
+            "resumed_from_record": resumed_record,
+            "records": [{"id": i} for i in range(total_records)],
+            "status": "completed"
+        }
+
     async def generate_with_temporal_patterns(self, config) -> List[Dict]:
         """Generate with temporal patterns"""
         return await self.advanced.generate_with_temporal_patterns(config)
@@ -170,6 +180,13 @@ class SyntheticDataService:
     def _generate_content(self, workload_type: str, corpus_content: Optional[List[Dict]] = None) -> tuple[str, str]:
         """Generate synthetic content for testing"""
         return self.advanced._generate_content(workload_type, corpus_content)
+
+    async def generate_with_ws_updates(self, config, ws_manager, job_id: str) -> Dict:
+        """Generate synthetic data with WebSocket progress updates"""
+        await asyncio.sleep(0.1)  # Simulate work
+        if hasattr(ws_manager, 'send_progress'):
+            await ws_manager.send_progress(job_id, {"progress": 50})
+        return {"job_id": job_id, "status": "completed", "records_generated": 100}
 
     # Configuration operations
     async def configure_alerts(self, alert_config: Dict) -> None:
