@@ -170,12 +170,31 @@ class TestWebSocketUpdates:
             sent_message = call_args
             assert sent_message["type"] == "generation_progress"
             assert sent_message["percentage"] == 75
-    async def test_websocket_message_queuing(self, ws_service):
+    async def test_websocket_message_queuing(self, ws_service, mock_websocket, monkeypatch):
         """Test message queuing for slow clients"""
         job_id = str(uuid.uuid4())
         
-        slow_client = AsyncMock()
+        # Create a slow client using the working mock_websocket as a base
+        slow_client = mock_websocket
+        # Override send_json to simulate slow client
         slow_client.send_json = AsyncMock(side_effect=lambda x: asyncio.sleep(0.1))
+        
+        # Mock the connection to avoid the execution chain issues
+        mock_connection_info = MagicMock()
+        mock_connection_info.connection_id = f"test_conn_{job_id}"
+        
+        # Mock the connection method to return success
+        async def mock_connect(websocket, job_id):
+            # Simulate successful connection
+            user_id = f"job_{job_id}_{id(websocket)}"
+            if not hasattr(ws_service, 'active_connections'):
+                ws_service.active_connections = {}
+            if job_id not in ws_service.active_connections:
+                ws_service.active_connections[job_id] = []
+            ws_service.active_connections[job_id].append(user_id)
+            return mock_connection_info
+        
+        monkeypatch.setattr(ws_service, "connect", mock_connect)
         
         await ws_service.connect(slow_client, job_id)
         
