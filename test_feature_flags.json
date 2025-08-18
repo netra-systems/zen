@@ -1,0 +1,106 @@
+{
+  "features": {
+    "roi_calculator": {
+      "status": "in_development",
+      "description": "ROI Calculator feature for demonstrating value to customers",
+      "owner": "frontend-team",
+      "target_release": "v1.2.0",
+      "dependencies": [],
+      "metadata": {
+        "jira_ticket": "NETRA-456",
+        "added_date": "2025-01-18"
+      }
+    },
+    "first_time_user_flow": {
+      "status": "in_development",
+      "description": "Comprehensive first-time user onboarding and experience",
+      "owner": "product-team",
+      "target_release": "v1.1.0",
+      "dependencies": ["auth_integration"],
+      "metadata": {
+        "jira_ticket": "NETRA-123",
+        "added_date": "2025-01-18"
+      }
+    },
+    "auth_integration": {
+      "status": "enabled",
+      "description": "Unified authentication service integration",
+      "owner": "backend-team",
+      "target_release": "v1.0.0",
+      "dependencies": [],
+      "metadata": {
+        "completed_date": "2025-01-15"
+      }
+    },
+    "websocket_streaming": {
+      "status": "enabled",
+      "description": "WebSocket-based real-time streaming",
+      "owner": "backend-team",
+      "target_release": "v1.0.0",
+      "dependencies": [],
+      "metadata": {
+        "completed_date": "2025-01-10"
+      }
+    },
+    "agent_orchestration": {
+      "status": "enabled",
+      "description": "Multi-agent orchestration system",
+      "owner": "ai-team",
+      "target_release": "v1.0.0",
+      "dependencies": [],
+      "metadata": {
+        "completed_date": "2025-01-12"
+      }
+    },
+    "clickhouse_analytics": {
+      "status": "disabled",
+      "description": "ClickHouse-based analytics pipeline",
+      "owner": "data-team",
+      "target_release": "v2.0.0",
+      "dependencies": ["clickhouse_setup"],
+      "metadata": {
+        "reason": "Awaiting infrastructure setup"
+      }
+    },
+    "advanced_rate_limiting": {
+      "status": "experimental",
+      "description": "Advanced ML-based rate limiting",
+      "owner": "security-team",
+      "target_release": "v1.3.0",
+      "dependencies": [],
+      "metadata": {
+        "experiment_start": "2025-01-16"
+      }
+    },
+    "github_integration": {
+      "status": "in_development",
+      "description": "GitHub repository analysis and integration",
+      "owner": "integrations-team",
+      "target_release": "v1.2.0",
+      "dependencies": [],
+      "metadata": {
+        "jira_ticket": "NETRA-789"
+      }
+    },
+    "enterprise_sso": {
+      "status": "disabled",
+      "description": "Enterprise SSO integration",
+      "owner": "enterprise-team",
+      "target_release": "v2.0.0",
+      "dependencies": ["auth_integration"],
+      "metadata": {
+        "reason": "Enterprise tier not yet launched"
+      }
+    },
+    "usage_tracking": {
+      "status": "enabled",
+      "description": "User usage tracking and analytics",
+      "owner": "product-team",
+      "target_release": "v1.0.0",
+      "dependencies": [],
+      "metadata": {
+        "completed_date": "2025-01-14"
+      }
+    }
+  }
+}
