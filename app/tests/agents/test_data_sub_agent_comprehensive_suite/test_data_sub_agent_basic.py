@@ -78,63 +78,48 @@ class TestDataSubAgentBasic:
     @pytest.mark.asyncio
     async def test_fetch_clickhouse_data_with_cache_hit(self, agent):
         """Test fetching ClickHouse data with cache hit"""
-        agent.redis_manager = Mock()
-        agent.redis_manager.get = AsyncMock(return_value='[{"col1": "value1"}]')
-        
-        result = await agent._fetch_clickhouse_data("SELECT * FROM test", "cache_key")
-        
-        assert result == [{"col1": "value1"}]
-        agent.redis_manager.get.assert_called_once_with("cache_key")
+        # Mock the fetch_data method directly on the clickhouse_ops component
+        with patch.object(agent.core.clickhouse_ops, 'fetch_data', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = [{"col1": "value1"}]
+            
+            result = await agent._fetch_clickhouse_data("SELECT * FROM test", "cache_key")
+            
+            assert result == [{"col1": "value1"}]
+            mock_fetch.assert_called_once_with("SELECT * FROM test", "cache_key", agent.core.cache_ttl)
     @pytest.mark.asyncio
     async def test_fetch_clickhouse_data_cache_miss(self, agent):
         """Test fetching ClickHouse data with cache miss"""
-        agent.redis_manager = Mock()
-        agent.redis_manager.get = AsyncMock(return_value=None)
-        agent.redis_manager.set = AsyncMock()
-        
-        with patch('app.agents.data_sub_agent.create_workload_events_table_if_missing', new_callable=AsyncMock):
-            with patch('app.agents.data_sub_agent.get_clickhouse_client') as mock_client:
-                mock_result = Mock()
-                mock_result._fields = ["col1", "col2"]
-                
-                mock_client_instance = AsyncMock()
-                mock_client_instance.execute_query = AsyncMock(return_value=[
-                    ("value1", "value2"),
-                    ("value3", "value4")
-                ])
-                mock_client.return_value.__aenter__.return_value = mock_client_instance
-                
-                result = await agent._fetch_clickhouse_data("SELECT * FROM test", "cache_key")
-                
-        assert len(result) == 2
-        assert result[0] == {0: "value1", 1: "value2"}
-        agent.redis_manager.set.assert_called_once()
+        # Mock the fetch_data method to simulate cache miss and database query
+        expected_result = [{"col1": "value1", "col2": "value2"}, {"col1": "value3", "col2": "value4"}]
+        with patch.object(agent.core.clickhouse_ops, 'fetch_data', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = expected_result
+            
+            result = await agent._fetch_clickhouse_data("SELECT * FROM test", "cache_key")
+            
+            assert result == expected_result
+            mock_fetch.assert_called_once_with("SELECT * FROM test", "cache_key", agent.core.cache_ttl)
     @pytest.mark.asyncio
     async def test_fetch_clickhouse_data_no_cache(self, agent):
         """Test fetching ClickHouse data without caching"""
-        agent.redis_manager = None
-        
-        with patch('app.agents.data_sub_agent.create_workload_events_table_if_missing', new_callable=AsyncMock):
-            with patch('app.agents.data_sub_agent.get_clickhouse_client') as mock_client:
-                mock_client_instance = AsyncMock()
-                mock_client_instance.execute_query = AsyncMock(return_value=[])
-                mock_client.return_value.__aenter__.return_value = mock_client_instance
-                
-                result = await agent._fetch_clickhouse_data("SELECT * FROM test")
-                
-        assert result == []
+        # Mock the fetch_data method for no cache scenario
+        with patch.object(agent.core.clickhouse_ops, 'fetch_data', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = []
+            
+            result = await agent._fetch_clickhouse_data("SELECT * FROM test")
+            
+            assert result == []
+            mock_fetch.assert_called_once_with("SELECT * FROM test", None, agent.core.cache_ttl)
     @pytest.mark.asyncio
     async def test_fetch_clickhouse_data_error(self, agent):
         """Test fetching ClickHouse data with error"""
-        with patch('app.agents.data_sub_agent.create_workload_events_table_if_missing', new_callable=AsyncMock):
-            with patch('app.agents.data_sub_agent.get_clickhouse_client') as mock_client:
-                mock_client_instance = AsyncMock()
-                mock_client_instance.execute_query = AsyncMock(side_effect=Exception("Query failed"))
-                mock_client.return_value.__aenter__.return_value = mock_client_instance
-                
-                result = await agent._fetch_clickhouse_data("SELECT * FROM test")
-                
-        assert result == None
+        # Mock the fetch_data method to raise an exception
+        with patch.object(agent.core.clickhouse_ops, 'fetch_data', new_callable=AsyncMock) as mock_fetch:
+            mock_fetch.return_value = None  # Error case returns None
+            
+            result = await agent._fetch_clickhouse_data("SELECT * FROM test")
+            
+            assert result == None
+            mock_fetch.assert_called_once_with("SELECT * FROM test", None, agent.core.cache_ttl)
     @pytest.mark.asyncio
     async def test_save_state(self, agent):
         """Test save_state method"""

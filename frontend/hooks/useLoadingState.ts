@@ -12,6 +12,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useUnifiedChatStore } from '../store/unified-chat';
 import { useWebSocket } from './useWebSocket';
 import type { UnifiedChatState } from '../types/store-types';
+import { logger } from '@/utils/debug-logger';
 import {
   ChatLoadingState,
   LoadingStateResult,
@@ -69,7 +70,7 @@ export const useLoadingState = (): UseLoadingStateResult => {
   
   // Debug logging
   if (process.env.NODE_ENV === 'development') {
-    console.log('[useLoadingState] Debug:', {
+    logger.debug('[useLoadingState] Debug:', {
       wsStatus,
       isInitialized,
       activeThreadId,
@@ -105,7 +106,7 @@ export const useLoadingState = (): UseLoadingStateResult => {
   
   // Debug the final result
   if (process.env.NODE_ENV === 'development') {
-    console.log('[useLoadingState] Final result:', {
+    logger.debug('[useLoadingState] Final result:', {
       currentState,
       loadingState: result.state,
       shouldShowLoading: result.shouldShowLoading,
@@ -215,7 +216,7 @@ const createHookResult = (
 export const useLoadingStateDebug = (state: ChatLoadingState) => {
   useEffect(() => {
     if (process.env.NODE_ENV === 'development') {
-      console.debug('Loading state changed:', state);
+      logger.debug('Loading state changed:', state);
     }
   }, [state]);
 };

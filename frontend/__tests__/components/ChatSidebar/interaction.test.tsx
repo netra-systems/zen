@@ -6,7 +6,18 @@
 import React from 'react';
 import { screen, fireEvent, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+// CRITICAL: Mock AuthGate before importing ChatSidebar
+jest.mock('@/components/auth/AuthGate', () => ({
+  AuthGate: ({ children }: { children: React.ReactNode }) => {
+    return <div data-testid="mocked-authgate">{children}</div>;
+  }
+}));
+
+// CRITICAL: ChatSidebar hooks are mocked in setup.tsx - no duplicate mocks needed
+
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
+import * as ChatSidebarHooksModule from '@/components/chat/ChatSidebarHooks';
 import { 
   createTestSetup, 
   renderWithProvider, 
@@ -28,9 +39,21 @@ describe('ChatSidebar - Interactions', () => {
 
   describe('Thread Navigation and Switching', () => {
     it('should navigate to thread when clicked', async () => {
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
       testSetup.configureStore({
-        threads: sampleThreads,
         currentThreadId: 'thread-1'
+      });
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
+        threads: sampleThreads
       });
       
       renderWithProvider(<ChatSidebar />);
@@ -44,10 +67,22 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should not trigger navigation when already on current thread', () => {
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
       testSetup.configureStore({
-        threads: sampleThreads,
         currentThreadId: 'thread-1',
         activeThreadId: 'thread-1'
+      });
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
+        threads: sampleThreads
       });
       
       renderWithProvider(<ChatSidebar />);
@@ -60,7 +95,18 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should handle keyboard navigation between threads', async () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -82,7 +128,18 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should support Enter key to activate thread', async () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -99,7 +156,18 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should handle thread selection with Space key', async () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -118,6 +186,19 @@ describe('ChatSidebar - Interactions', () => {
 
   describe('Thread Management Operations', () => {
     it('should create new thread when new thread button is clicked', async () => {
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for UI interactions
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks BEFORE rendering
+      testSetup.configureChatSidebarHooks({});
+      
       mockThreadService.createThread.mockResolvedValue({
         id: 'new-thread-id',
         title: 'New Thread',
@@ -138,7 +219,18 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should handle thread deletion', async () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -174,7 +266,18 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should handle thread rename operation', async () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -206,7 +309,18 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should handle thread archiving', async () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -231,9 +345,21 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should handle bulk operations on multiple threads', async () => {
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
       testSetup.configureStore({
-        threads: sampleThreads,
         selectionMode: true
+      });
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
+        threads: sampleThreads
       });
       
       renderWithProvider(<ChatSidebar />);
@@ -261,7 +387,18 @@ describe('ChatSidebar - Interactions', () => {
 
   describe('Thread Search and Filtering', () => {
     it('should filter threads based on search query', async () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -282,9 +419,22 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should clear search and show all threads', async () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads with search query BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads,
-        searchQuery: 'Performance'
+        sidebarState: {
+          searchQuery: 'Performance'
+        }
       });
       
       renderWithProvider(<ChatSidebar />);
@@ -303,7 +453,18 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should search by thread content and tags', async () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -332,7 +493,18 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should show no results message when search has no matches', async () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -356,7 +528,18 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should handle search with debouncing', async () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -381,7 +564,18 @@ describe('ChatSidebar - Interactions', () => {
 
   describe('Context Menu Operations', () => {
     it('should show context menu on right click', () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -405,7 +599,18 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should close context menu when clicking elsewhere', () => {
-      testSetup.configureStore({
+      // CRITICAL: Configure all mocks BEFORE rendering
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads BEFORE rendering
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -424,7 +629,17 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should handle keyboard shortcuts in context menu', () => {
-      testSetup.configureStore({
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -447,7 +662,17 @@ describe('ChatSidebar - Interactions', () => {
 
   describe('Drag and Drop Operations', () => {
     it('should support drag to reorder threads', () => {
-      testSetup.configureStore({
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
+      testSetup.configureStore({});
+      
+      // Configure hooks to return sample threads
+      testSetup.configureChatSidebarHooks({
         threads: sampleThreads
       });
       
@@ -467,9 +692,20 @@ describe('ChatSidebar - Interactions', () => {
     });
 
     it('should handle drag and drop for thread organization', () => {
+      // Ensure authenticated state for thread rendering
+      testSetup.configureAuthState({
+        isAuthenticated: true,
+        isLoading: false,
+        userTier: 'Early'
+      });
+      
       testSetup.configureStore({
-        threads: sampleThreads,
         folders: [{ id: 'folder-1', name: 'Work Threads' }]
+      });
+      
+      // Configure hooks to return sample threads
+      testSetup.configureChatSidebarHooks({
+        threads: sampleThreads
       });
       
       renderWithProvider(<ChatSidebar />);

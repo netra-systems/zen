@@ -18,7 +18,6 @@ from app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
     WebSocketManagerProtocol
 )
-from app.agents.base.executor import BaseExecutionEngine
 from app.agents.base.reliability_manager import ReliabilityManager
 from app.agents.base.monitoring import ExecutionMonitor
 from app.agents.base.errors import ExecutionErrorHandler, AgentExecutionError
@@ -71,6 +70,8 @@ class WebSocketBroadcastExecutor(BaseExecutionInterface):
         """Initialize modern architecture components."""
         self.reliability_manager = self._init_reliability_manager(reliability_config)
         self.monitor = ExecutionMonitor()
+        # Delayed import to avoid circular dependency
+        from app.agents.base.executor import BaseExecutionEngine
         self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
         self.error_handler = ExecutionErrorHandler()
     

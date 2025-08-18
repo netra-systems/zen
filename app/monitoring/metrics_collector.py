@@ -288,15 +288,15 @@ class MetricsCollector:
     async def _collect_single_websocket_metrics_cycle(self) -> None:
         """Collect WebSocket metrics for one cycle."""
         try:
-            metrics = self._gather_websocket_metrics()
+            metrics = await self._gather_websocket_metrics()
             self._record_websocket_metrics(metrics)
         except Exception as e:
             logger.error(f"Error collecting WebSocket metrics: {e}")
     
-    def _gather_websocket_metrics(self) -> WebSocketMetrics:
+    async def _gather_websocket_metrics(self) -> WebSocketMetrics:
         """Gather WebSocket metrics from connection manager."""
         from app.websocket.connection import connection_manager
-        conn_stats = connection_manager.get_stats()
+        conn_stats = await connection_manager.get_stats()
         return self._build_websocket_metrics(conn_stats)
 
     def _build_websocket_metrics(self, conn_stats: Dict[str, Any]) -> WebSocketMetrics:

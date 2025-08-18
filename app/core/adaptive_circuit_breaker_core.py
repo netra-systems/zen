@@ -39,7 +39,7 @@ class AdaptiveCircuitBreaker:
     
     def _initialize_metrics(self) -> None:
         """Initialize metrics tracking."""
-        self.total_requests = self.successful_requests = self.failed_requests = self.slow_requests = 0
+        self.total_calls = self.successful_calls = self.failed_calls = self.slow_requests = 0
         self.adaptive_failure_threshold = self.config.failure_threshold
         self.recent_response_times: List[float] = []
     
@@ -56,7 +56,7 @@ class AdaptiveCircuitBreaker:
     
     async def call(self, operation: Callable, *args, **kwargs) -> Any:
         """Execute operation with circuit breaker protection."""
-        self.total_requests += 1
+        self.total_calls += 1
         if not self.should_allow_request():
             raise CircuitBreakerOpenError(f"Circuit breaker {self.name} is open")
         return await self._execute_protected_operation(operation, *args, **kwargs)
@@ -109,7 +109,7 @@ class AdaptiveCircuitBreaker:
     
     def _record_success(self, response_time: float) -> None:
         """Record successful operation."""
-        self.successful_requests += 1
+        self.successful_calls += 1
         self._track_response_time(response_time)
         self._handle_success_by_state()
     
@@ -136,7 +136,7 @@ class AdaptiveCircuitBreaker:
     
     def _record_failure(self, response_time: float) -> None:
         """Record failed operation."""
-        self.failed_requests += 1
+        self.failed_calls += 1
         self.failure_count += 1
         self.last_failure_time = datetime.now()
         self._adapt_threshold_if_enabled()
@@ -274,8 +274,8 @@ class AdaptiveCircuitBreaker:
         return {
             'name': self.name, 'state': self.state.value,
             'failure_count': self.failure_count, 'success_count': self.success_count,
-            'total_requests': self.total_requests, 'successful_requests': self.successful_requests,
-            'failed_requests': self.failed_requests, 'slow_requests': self.slow_requests
+            'total_calls': self.total_calls, 'successful_calls': self.successful_calls,
+            'failed_calls': self.failed_calls, 'slow_requests': self.slow_requests
         }
 
     def _get_calculated_metrics(self) -> Dict[str, Any]:
@@ -290,7 +290,7 @@ class AdaptiveCircuitBreaker:
     
     def _calculate_failure_rate(self) -> float:
         """Calculate current failure rate."""
-        return self.failed_requests / max(self.total_requests, 1)
+        return self.failed_calls / max(self.total_calls, 1)
     
     def _get_last_health_status(self) -> Optional[str]:
         """Get last health status as string."""

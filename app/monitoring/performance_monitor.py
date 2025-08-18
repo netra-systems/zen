@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
 from datetime import datetime
 

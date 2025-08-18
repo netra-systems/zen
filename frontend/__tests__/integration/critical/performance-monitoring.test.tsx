@@ -76,7 +76,7 @@ describe('Performance Monitoring Integration', () => {
       const checkPerformance = (metric: string, value: number) => {
         const threshold = performanceThresholds[metric];
         if (value > threshold) {
-          console.warn(`Performance degradation: ${metric} = ${value}ms (threshold: ${threshold}ms)`);
+          // test debug removed: console.log(`Performance degradation: ${metric} = ${value}ms (threshold: ${threshold}ms)`);
           return false;
         }
         return true;

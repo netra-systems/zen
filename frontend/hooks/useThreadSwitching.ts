@@ -22,6 +22,7 @@ import { executeWithRetry } from '@/lib/retry-manager';
 import { globalCleanupManager } from '@/lib/operation-cleanup';
 import type { ThreadError, createThreadError } from '@/types/thread-error-types';
 import { useURLSync, useBrowserHistorySync } from '@/services/urlSyncService';
+import { logger } from '@/utils/debug-logger';
 
 /**
  * Thread switching state
@@ -162,10 +163,10 @@ const createTimeoutManager = () => {
     timeoutMs: 10000, // 10 seconds
     retryCount: 1,
     onTimeout: (threadId) => {
-      console.warn(`Thread loading timeout for ${threadId}, retrying...`);
+      logger.warn(`Thread loading timeout for ${threadId}, retrying...`);
     },
     onRetryExhausted: (threadId) => {
-      console.error(`Thread loading failed for ${threadId} after retries`);
+      logger.error(`Thread loading failed for ${threadId} after retries`);
     }
   });
 };

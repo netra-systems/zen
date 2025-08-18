@@ -237,7 +237,7 @@ export const createErrorBoundary = () => {
     }
 
     componentDidCatch(error: Error, errorInfo: any) {
-      console.error('Error boundary caught error:', error, errorInfo);
+      // test debug removed: console.log('Error boundary caught error:', error, errorInfo);
     }
 
     render() {

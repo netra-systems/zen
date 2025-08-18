@@ -117,4 +117,4 @@ testsWithMissingButtons.forEach(({ test, button }) => {
 
 // Write the fixed content back
 fs.writeFileSync(testFile, content, 'utf8');
-console.log('✅ Fixed comprehensive integration tests');
+// test debug removed: console.log('✅ Fixed comprehensive integration tests');

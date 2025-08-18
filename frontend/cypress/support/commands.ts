@@ -27,7 +27,7 @@ class MockWebSocket {
   
   send(data: string | ArrayBuffer | Blob): void {
     // Mock send implementation
-    console.log('MockWebSocket send:', data);
+    // console output removed: console.log('MockWebSocket send:', data);
   }
   
   close(): void {

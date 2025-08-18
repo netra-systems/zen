@@ -13,7 +13,6 @@ from app.logging_config import central_logger
 from app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus
 )
-from app.agents.base.executor import BaseExecutionEngine
 from app.agents.base.monitoring import ExecutionMonitor
 from app.agents.base.reliability_manager import ReliabilityManager
 from app.websocket.connection_info import ConnectionInfo, ConnectionMetrics
@@ -42,6 +41,8 @@ class ConnectionExecutor(BaseExecutionInterface):
         
     def _initialize_execution_engine(self):
         """Initialize execution engine."""
+        # Delayed import to avoid circular dependency
+        from app.agents.base.executor import BaseExecutionEngine
         self.execution_engine = BaseExecutionEngine(
             reliability_manager=None,  # Using our custom reliability manager
             monitor=self.monitor

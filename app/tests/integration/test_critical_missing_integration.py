@@ -23,8 +23,8 @@ import os
 # Core system imports
 from app.auth_integration.auth import get_current_user
 from app.agents.supervisor_consolidated import SupervisorAgent
-from app.agents.triage_sub_agent import TriageSubAgent
-from app.agents.supply_researcher_sub_agent import SupplyResearcherSubAgent
+from app.agents.triage_sub_agent.agent import TriageSubAgent
+from app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
 from app.agents.synthetic_data_sub_agent import SyntheticDataSubAgent
 from app.ws_manager import WebSocketManager
 from app.core.circuit_breaker import CircuitBreaker

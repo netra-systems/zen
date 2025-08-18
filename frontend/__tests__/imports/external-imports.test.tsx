@@ -72,7 +72,7 @@ describe('External NPM Dependencies Import Tests', () => {
         const radixDialog = require('@radix-ui/react-dialog');
         expect(radixDialog).toBeDefined();
       } catch (e) {
-        console.log('@radix-ui/react-dialog not installed');
+        // test debug removed: console.log('@radix-ui/react-dialog not installed');
       }
 
       const radixDropdown = require('@radix-ui/react-dropdown-menu');
@@ -88,14 +88,14 @@ describe('External NPM Dependencies Import Tests', () => {
         const radixToast = require('@radix-ui/react-toast');
         expect(radixToast).toBeDefined();
       } catch (e) {
-        console.log('@radix-ui/react-toast not installed');
+        // test debug removed: console.log('@radix-ui/react-toast not installed');
       }
 
       try {
         const radixTooltip = require('@radix-ui/react-tooltip');
         expect(radixTooltip).toBeDefined();
       } catch (e) {
-        console.log('@radix-ui/react-tooltip not installed');
+        // test debug removed: console.log('@radix-ui/react-tooltip not installed');
       }
 
       const radixTabs = require('@radix-ui/react-tabs');
@@ -114,7 +114,7 @@ describe('External NPM Dependencies Import Tests', () => {
         const radixPopover = require('@radix-ui/react-popover');
         expect(radixPopover).toBeDefined();
       } catch (e) {
-        console.log('@radix-ui/react-popover not installed');
+        // test debug removed: console.log('@radix-ui/react-popover not installed');
       }
 
       const radixAvatar = require('@radix-ui/react-avatar');
@@ -204,7 +204,7 @@ describe('External NPM Dependencies Import Tests', () => {
         const reactMarkdown = require('react-markdown');
         expect(reactMarkdown).toBeDefined();
       } catch (e) {
-        console.log('react-markdown not installed');
+        // test debug removed: console.log('react-markdown not installed');
       }
     });
 
@@ -213,7 +213,7 @@ describe('External NPM Dependencies Import Tests', () => {
         const remarkGfm = require('remark-gfm');
         expect(remarkGfm).toBeDefined();
       } catch (e) {
-        console.log('remark-gfm not installed');
+        // test debug removed: console.log('remark-gfm not installed');
       }
     });
 
@@ -291,7 +291,7 @@ describe('External NPM Dependencies Import Tests', () => {
         expect(userEvent).toBeDefined();
         expect(userEvent.default).toBeDefined();
       } catch (e) {
-        console.log('@testing-library/user-event not properly configured');
+        // test debug removed: console.log('@testing-library/user-event not properly configured');
       }
     });
 
@@ -302,7 +302,7 @@ describe('External NPM Dependencies Import Tests', () => {
         expect(jestEnv).toBeDefined();
       } catch (e) {
         // May not be available in production builds
-        console.log('jest-environment-jsdom not available (dev dependency)');
+        // test debug removed: console.log('jest-environment-jsdom not available (dev dependency)');
       }
     });
   });
@@ -319,7 +319,7 @@ describe('External NPM Dependencies Import Tests', () => {
         const pkgPath = path.join(nodeModulesPath, ...pkg.split('/'));
         const exists = fs.existsSync(pkgPath);
         if (!exists) {
-          console.log(`Type package ${pkg} not found`);
+          // test debug removed: console.log(`Type package ${pkg} not found`);
         }
         expect(exists).toBe(true);
       });
@@ -340,7 +340,7 @@ describe('External NPM Dependencies Import Tests', () => {
         const eslintNext = require('eslint-config-next');
         expect(eslintNext).toBeDefined();
       } catch (e) {
-        console.log('ESLint config packages not available (dev dependencies)');
+        // test debug removed: console.log('ESLint config packages not available (dev dependencies)');
       }
     });
   });
@@ -396,7 +396,7 @@ describe('External NPM Dependencies Import Tests', () => {
       });
 
       if (warnings.length > 0) {
-        console.log('Optional dependencies not installed:', warnings);
+        // test debug removed: console.log('Optional dependencies not installed:', warnings);
       }
     });
   });

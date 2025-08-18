@@ -7,7 +7,7 @@ Compliance: <300 lines, 8-line max functions, modular design.
 import asyncio
 import pytest
 import time
-from typing import List, Dict, Any
+from typing import Dict, Any, List
 from unittest.mock import Mock, AsyncMock, patch
 
 from app.core.performance_optimization_manager import (

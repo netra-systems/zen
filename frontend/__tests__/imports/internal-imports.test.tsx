@@ -59,7 +59,7 @@ describe('Internal Frontend Module Import Tests', () => {
         require('@/components/demo/DemoChat');
         require('@/components/demo/DemoAgentPanel');
       } catch (e) {
-        console.log('Demo components not found (optional)');
+        // test debug removed: console.log('Demo components not found (optional)');
       }
     });
   });
@@ -115,7 +115,7 @@ describe('Internal Frontend Module Import Tests', () => {
         require('@/store/configStore');
         require('@/store/metricsStore');
       } catch (e) {
-        console.log('Some additional stores not found (optional)');
+        // test debug removed: console.log('Some additional stores not found (optional)');
       }
       
       // Verify store exports
@@ -150,7 +150,7 @@ describe('Internal Frontend Module Import Tests', () => {
         require('@/services/configService');
         require('@/services/generationService');
       } catch (e) {
-        console.log('Some additional services not found (optional)');
+        // test debug removed: console.log('Some additional services not found (optional)');
       }
       
       // Verify service exports
@@ -180,7 +180,7 @@ describe('Internal Frontend Module Import Tests', () => {
         require('@/utils/validators');
         require('@/utils/helpers');
       } catch (e) {
-        console.log('Some utility modules not found (optional)');
+        // test debug removed: console.log('Some utility modules not found (optional)');
       }
     });
 
@@ -208,11 +208,11 @@ describe('Internal Frontend Module Import Tests', () => {
         expectedTypes.forEach(typeFile => {
           const exists = typeFiles.includes(typeFile);
           if (!exists) {
-            console.log(`Type file ${typeFile} not found`);
+            // test debug removed: console.log(`Type file ${typeFile} not found`);
           }
         });
       } else {
-        console.log('Types directory not found');
+        // test debug removed: console.log('Types directory not found');
       }
     });
   });
@@ -230,7 +230,7 @@ describe('Internal Frontend Module Import Tests', () => {
         require('@/app/auth/login/page');
         require('@/app/auth/register/page');
       } catch (e) {
-        console.log('Some app pages not found (may use different structure)');
+        // test debug removed: console.log('Some app pages not found (may use different structure)');
       }
     });
   });
@@ -356,7 +356,7 @@ describe('Internal Frontend Module Import Tests', () => {
         const testPath = path.join(testDir, testFile);
         const exists = fs.existsSync(testPath);
         if (!exists) {
-          console.log(`Integration test file ${testFile} not found`);
+          // test debug removed: console.log(`Integration test file ${testFile} not found`);
         }
         expect(exists).toBe(true);
       });

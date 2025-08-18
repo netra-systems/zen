@@ -47,7 +47,7 @@ if (typeof window !== 'undefined') {
 
 // Fast fail for unhandled promises
 process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled Promise Rejection:', reason);
+  // console mocked: console.log('Unhandled Promise Rejection:', reason);
   process.exit(1);
 });
 

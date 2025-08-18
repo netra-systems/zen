@@ -138,7 +138,7 @@ export const createErrorBoundary = () => {
     }
     
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-      console.log('Error caught:', error, errorInfo);
+      // test debug removed: console.log('Error caught:', error, errorInfo);
     }
     
     render() {

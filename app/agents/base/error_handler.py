@@ -52,7 +52,8 @@ class ExecutionErrorHandler:
     
     def _build_cache_key(self, context: ExecutionContext) -> str:
         """Build cache key from execution context."""
-        return f"{context.agent_name}_{context.operation_name}"
+        operation_name = getattr(context, 'operation_name', context.run_id)
+        return f"{context.agent_name}_{operation_name}"
     
     def _create_cached_result(self, cached_data: Any) -> ExecutionResult:
         """Create execution result from cached data."""
@@ -95,7 +96,8 @@ class ExecutionErrorHandler:
     
     def cache_fallback_data(self, context: ExecutionContext, data: Any) -> None:
         """Cache data for future fallback use."""
-        cache_key = f"{context.agent_name}_{context.operation_name}"
+        operation_name = getattr(context, 'operation_name', context.run_id)
+        cache_key = f"{context.agent_name}_{operation_name}"
         self._fallback_data_cache[cache_key] = {
             "data": data,
             "timestamp": time.time(),

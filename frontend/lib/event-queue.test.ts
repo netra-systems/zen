@@ -75,7 +75,7 @@ export class EventQueueTestRunner {
    * Test 1: Rapid event burst
    */
   async testRapidEventBurst(): Promise<TestResult> {
-    console.log('Testing rapid event burst...');
+    // test output removed: console.log('Testing rapid event burst...');
     this.reset();
     
     const eventQueue = new EventQueue(this.testProcessor, {
@@ -123,7 +123,7 @@ export class EventQueueTestRunner {
    * Test 2: Duplicate event filtering
    */
   async testDuplicateFiltering(): Promise<TestResult> {
-    console.log('Testing duplicate event filtering...');
+    // test output removed: console.log('Testing duplicate event filtering...');
     this.reset();
     
     const eventQueue = new EventQueue(this.testProcessor, {
@@ -167,7 +167,7 @@ export class EventQueueTestRunner {
    * Test 3: Error recovery
    */
   async testErrorRecovery(): Promise<TestResult> {
-    console.log('Testing error recovery...');
+    // test output removed: console.log('Testing error recovery...');
     this.reset();
     
     const eventQueue = new EventQueue(this.errorProneProcessor, {
@@ -209,7 +209,7 @@ export class EventQueueTestRunner {
    * Test 4: Queue overflow handling
    */
   async testQueueOverflow(): Promise<TestResult> {
-    console.log('Testing queue overflow handling...');
+    // test output removed: console.log('Testing queue overflow handling...');
     this.reset();
     
     const eventQueue = new EventQueue(this.testProcessor, {
@@ -252,7 +252,7 @@ export class EventQueueTestRunner {
    * Run all tests
    */
   async runAllTests(): Promise<TestSuite> {
-    console.log('Starting EventQueue test suite...');
+    // test output removed: console.log('Starting EventQueue test suite...');
     
     const results: TestResult[] = [];
     
@@ -262,7 +262,7 @@ export class EventQueueTestRunner {
       results.push(await this.testErrorRecovery());
       results.push(await this.testQueueOverflow());
     } catch (error) {
-      console.error('Test suite failed:', error);
+      // test output removed: console.log('Test suite failed:', error);
     }
     
     const passedTests = results.filter(r => r.success).length;

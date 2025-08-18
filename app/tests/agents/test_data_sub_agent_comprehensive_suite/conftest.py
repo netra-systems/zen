@@ -20,8 +20,20 @@ def mock_dependencies():
 def agent(mock_dependencies):
     """Create DataSubAgent instance with mocked dependencies"""
     mock_llm_manager, mock_tool_dispatcher = mock_dependencies
-    with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
+    with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager') as mock_redis_class:
+        # Setup proper async mocks for redis operations
+        mock_redis_instance = Mock()
+        mock_redis_instance.get = AsyncMock()
+        mock_redis_instance.set = AsyncMock()
+        mock_redis_instance.delete = AsyncMock()
+        mock_redis_instance.exists = AsyncMock()
+        mock_redis_class.return_value = mock_redis_instance
+        
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
+        # Ensure redis_manager is properly mocked
+        if hasattr(agent, 'redis_manager') and agent.redis_manager:
+            agent.redis_manager.get = AsyncMock()
+            agent.redis_manager.set = AsyncMock()
     return agent
 
 

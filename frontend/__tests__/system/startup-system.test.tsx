@@ -224,7 +224,7 @@ describe('Frontend System Startup - System Tests', () => {
       const mockMetrics = createMockMetrics();
       const logSpy = jest.spyOn(console, 'log').mockImplementation();
       
-      console.log('Startup metrics:', mockMetrics);
+      // test debug removed: console.log('Startup metrics:', mockMetrics);
       
       expect(logSpy).toHaveBeenCalledWith('Startup metrics:', mockMetrics);
       logSpy.mockRestore();

@@ -101,11 +101,11 @@ class TestShardRunner {
     const currentShardIndex = this.shardConfig.currentShard - 1;
     const currentShardFiles = shards[currentShardIndex]?.files || [];
 
-    console.log(`📊 Shard Distribution (${this.shardConfig.currentShard}/${this.shardConfig.totalShards}):`);
+    // console output removed: console.log(`📊 Shard Distribution (${this.shardConfig.currentShard}/${this.shardConfig.totalShards}):`);
     shards.forEach((shard, index) => {
       const isCurrent = index === currentShardIndex;
       const marker = isCurrent ? '👉' : '  ';
-      console.log(`${marker} Shard ${index + 1}: ${shard.files.length} files, ~${Math.round(shard.totalDuration / 1000)}s`);
+      // console output removed: console.log(`${marker} Shard ${index + 1}: ${shard.files.length} files, ~${Math.round(shard.totalDuration / 1000)}s`);
     });
 
     return currentShardFiles;
@@ -142,14 +142,14 @@ class TestShardRunner {
     const shardFiles = this.distributeTestsAcrossShards();
 
     if (shardFiles.length === 0) {
-      console.log(`⚠️  No tests allocated to shard ${this.shardConfig.currentShard}`);
+      // console output removed: console.log(`⚠️  No tests allocated to shard ${this.shardConfig.currentShard}`);
       return { success: true, tests: 0 };
     }
 
-    console.log(`🚀 Running Shard ${this.shardConfig.currentShard}/${this.shardConfig.totalShards}`);
-    console.log(`📁 Files: ${shardFiles.length}`);
-    console.log(`⏱️  Estimated: ~${Math.round(shardFiles.reduce((sum, f) => sum + f.estimatedDuration, 0) / 1000)}s`);
-    console.log('='.repeat(60));
+    // console output removed: console.log(`🚀 Running Shard ${this.shardConfig.currentShard}/${this.shardConfig.totalShards}`);
+    // console output removed: console.log(`📁 Files: ${shardFiles.length}`);
+    // console output removed: console.log(`⏱️  Estimated: ~${Math.round(shardFiles.reduce((sum, f) => sum + f.estimatedDuration, 0) / 1000)}s`);
+    // console output removed: console.log('='.repeat(60));
 
     const jestArgs = [
       '--config', await this.writeShardConfig(shardFiles),
@@ -185,9 +185,9 @@ class TestShardRunner {
       jestProcess.on('close', (code) => {
         const duration = Date.now() - startTime;
         
-        console.log('\n' + '='.repeat(60));
-        console.log(`🏁 Shard ${this.shardConfig.currentShard} completed in ${duration}ms`);
-        console.log(`📊 Performance: ${Math.round(shardFiles.length / (duration / 1000))} files/second`);
+        // console output removed: console.log('\n' + '='.repeat(60));
+        // console output removed: console.log(`🏁 Shard ${this.shardConfig.currentShard} completed in ${duration}ms`);
+        // console output removed: console.log(`📊 Performance: ${Math.round(shardFiles.length / (duration / 1000))} files/second`);
         
         resolve({
           success: code === 0,
@@ -228,18 +228,18 @@ module.exports = createJestConfig(config);
     const coverageDir = path.join(__dirname, 'coverage');
     
     if (!fs.existsSync(resultsDir)) {
-      console.log('⚠️  No shard results found');
+      // console output removed: console.log('⚠️  No shard results found');
       return;
     }
 
-    console.log('📊 Aggregating shard results...');
+    // console output removed: console.log('📊 Aggregating shard results...');
     
     // Find all shard result files
     const resultFiles = fs.readdirSync(resultsDir)
       .filter(file => file.match(/^shard-\d+-results\.xml$/))
       .map(file => path.join(resultsDir, file));
 
-    console.log(`📄 Found ${resultFiles.length} shard result files`);
+    // console output removed: console.log(`📄 Found ${resultFiles.length} shard result files`);
 
     // Merge coverage if exists
     const shardCoverageDirs = fs.readdirSync(coverageDir, { withFileTypes: true })
@@ -247,7 +247,7 @@ module.exports = createJestConfig(config);
       .map(item => path.join(coverageDir, item.name));
 
     if (shardCoverageDirs.length > 0) {
-      console.log('🔄 Merging coverage reports...');
+      // console output removed: console.log('🔄 Merging coverage reports...');
       
       // Use nyc to merge coverage reports
       const nycArgs = [
@@ -265,10 +265,10 @@ module.exports = createJestConfig(config);
 
           nycProcess.on('close', (code) => {
             if (code === 0) {
-              console.log('✅ Coverage reports merged successfully');
+              // console output removed: console.log('✅ Coverage reports merged successfully');
               resolve();
             } else {
-              console.log('⚠️  Coverage merge failed');
+              // console output removed: console.log('⚠️  Coverage merge failed');
               resolve(); // Don't fail the whole process
             }
           });
@@ -276,11 +276,11 @@ module.exports = createJestConfig(config);
           nycProcess.on('error', reject);
         });
       } catch (error) {
-        console.log('⚠️  Coverage merge error:', error.message);
+        // console output removed: console.log('⚠️  Coverage merge error:', error.message);
       }
     }
 
-    console.log('✅ Shard aggregation completed');
+    // console output removed: console.log('✅ Shard aggregation completed');
   }
 }
 
@@ -289,7 +289,7 @@ async function main() {
   const args = process.argv.slice(2);
   
   if (args.includes('--help')) {
-    console.log(`
+    // console output removed: console.log(`
 Test Shard Runner - Parallel Jest Execution
 
 Usage: node test-shard-runner.js [options]
@@ -337,7 +337,7 @@ Examples:
     
     process.exit(result.success ? 0 : 1);
   } catch (error) {
-    console.error('❌ Shard execution failed:', error.message);
+    // console output removed: console.log('❌ Shard execution failed:', error.message);
     process.exit(1);
   }
 }

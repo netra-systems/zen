@@ -13,6 +13,7 @@ import { ThreadService } from '@/services/threadService';
 import { useThreadSwitching } from './useThreadSwitching';
 import { createThreadCreatedEvent } from '@/utils/threadEventHandler';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { logger } from '@/utils/debug-logger';
 
 /**
  * Thread creation state
@@ -142,7 +143,7 @@ const handleCreationSuccess = (
     
     return true;
   } catch (error) {
-    console.error('Failed to emit thread created event:', error);
+    logger.error('Failed to emit thread created event:', error);
     return false;
   }
 };

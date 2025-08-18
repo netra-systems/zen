@@ -3,6 +3,8 @@
  * Centralized configuration for auth service endpoints
  */
 
+import { logger } from '@/utils/debug-logger';
+
 interface AuthServiceConfig {
   baseUrl: string;
   endpoints: {
@@ -99,7 +101,7 @@ export class AuthServiceClient {
       }
       return response.json();
     } catch (error) {
-      console.warn('Auth service unavailable, using offline configuration:', error);
+      logger.warn('Auth service unavailable, using offline configuration:', error);
       
       // Return offline configuration for development
       return {

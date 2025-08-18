@@ -17,8 +17,12 @@ from typing import Dict, Any
 from app.config_loader import (
     load_env_var, set_clickhouse_host, set_clickhouse_port, set_clickhouse_password,
     set_clickhouse_user, set_gemini_api_key, set_llm_api_key, get_critical_vars_mapping,
-    apply_single_secret, detect_cloud_run_environment, _check_k_service_for_staging,
-    _check_pr_number_for_staging, _navigate_to_parent_object, _get_attribute_or_none
+    apply_single_secret, _navigate_to_parent_object, _get_attribute_or_none
+)
+
+# Cloud environment detection components
+from app.cloud_environment_detector import (
+    detect_cloud_run_environment, _check_k_service_for_staging, _check_pr_number_for_staging
 )
 
 

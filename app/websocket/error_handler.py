@@ -23,7 +23,6 @@ from app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
     WebSocketManagerProtocol
 )
-from app.agents.base.executor import BaseExecutionEngine
 from app.agents.base.reliability_manager import ReliabilityManager
 from app.agents.base.monitoring import ExecutionMonitor
 from app.agents.base.errors import ExecutionErrorHandler
@@ -44,8 +43,25 @@ class ModernWebSocketErrorInterface(BaseExecutionInterface):
         """Initialize modern architecture components."""
         self.monitor = ExecutionMonitor()
         self.reliability_manager = self._create_reliability_manager()
-        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
+        # Initialize execution engine only if needed to avoid circular dependency
+        self._execution_engine = None
         self.error_handler = ExecutionErrorHandler()
+    
+    def _get_execution_engine(self):
+        """Lazy load execution engine to avoid circular dependency."""
+        if self._execution_engine is None:
+            try:
+                from app.agents.base.executor import BaseExecutionEngine
+                self._execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
+            except ImportError:
+                # Fallback to a basic error handler if BaseExecutionEngine is not available
+                self._execution_engine = self.error_handler
+        return self._execution_engine
+    
+    @property
+    def execution_engine(self):
+        """Get execution engine with lazy loading."""
+        return self._get_execution_engine()
         
     def _create_reliability_manager(self) -> ReliabilityManager:
         """Create reliability manager with WebSocket-specific config."""
@@ -275,7 +291,15 @@ class WebSocketErrorHandler:
 
 
 # Default error handler instance - now uses modern architecture
-default_error_handler = WebSocketErrorHandler()
+# Lazy initialization to avoid circular import during module load
+default_error_handler: Optional[WebSocketErrorHandler] = None
+
+def get_default_error_handler() -> WebSocketErrorHandler:
+    """Get default error handler with lazy initialization."""
+    global default_error_handler
+    if default_error_handler is None:
+        default_error_handler = WebSocketErrorHandler()
+    return default_error_handler
 
 # Alias for backward compatibility
 ErrorHandler = WebSocketErrorHandler

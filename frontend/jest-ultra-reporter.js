@@ -10,7 +10,7 @@ class UltraFastReporter {
   onRunStart() {
     this.startTime = Date.now();
     if (!process.env.JEST_ULTRA_SILENT) {
-      console.log('🚀 Ultra Test Execution Starting...');
+      // console output removed: console.log('🚀 Ultra Test Execution Starting...');
     }
   }
 
@@ -29,17 +29,17 @@ class UltraFastReporter {
       const timing = duration > 1000 ? ` (${duration}ms)` : '';
       
       if (failed) {
-        console.log(`${status} ${fileName}${timing}`);
+        // console output removed: console.log(`${status} ${fileName}${timing}`);
         testResult.testResults
           .filter(tr => tr.status === 'failed')
           .forEach(tr => {
-            console.log(`   ↳ ${tr.fullName}`);
+            // console output removed: console.log(`   ↳ ${tr.fullName}`);
             if (tr.failureMessages?.length > 0) {
-              console.log(`     ${tr.failureMessages[0].split('\n')[0]}`);
+              // console output removed: console.log(`     ${tr.failureMessages[0].split('\n')[0]}`);
             }
           });
       } else if (!process.env.JEST_ULTRA_SILENT) {
-        console.log(`${status} ${fileName}${timing}`);
+        // console output removed: console.log(`${status} ${fileName}${timing}`);
       }
     }
     
@@ -65,27 +65,27 @@ class UltraFastReporter {
       .sort((a, b) => b.duration - a.duration)
       .slice(0, 5);
     
-    console.log('\n' + '='.repeat(60));
-    console.log('🚀 ULTRA TEST RESULTS');
-    console.log('='.repeat(60));
+    // console output removed: console.log('\n' + '='.repeat(60));
+    // console output removed: console.log('🚀 ULTRA TEST RESULTS');
+    // console output removed: console.log('='.repeat(60));
     
     if (failedTests > 0) {
-      console.log(`❌ ${failedTests} failed, ✅ ${passedTests} passed`);
+      // console output removed: console.log(`❌ ${failedTests} failed, ✅ ${passedTests} passed`);
     } else {
-      console.log(`✅ All ${passedTests} tests passed!`);
+      // console output removed: console.log(`✅ All ${passedTests} tests passed!`);
     }
     
     if (skippedTests > 0) {
-      console.log(`⏭️  ${skippedTests} skipped`);
+      // console output removed: console.log(`⏭️  ${skippedTests} skipped`);
     }
     
-    console.log(`⚡ ${totalTime}ms total (${testsPerSecond} tests/sec)`);
+    // console output removed: console.log(`⚡ ${totalTime}ms total (${testsPerSecond} tests/sec)`);
     
     if (slowFiles.length > 0) {
-      console.log('\n📊 Performance Analysis:');
+      // console output removed: console.log('\n📊 Performance Analysis:');
       slowFiles.forEach(file => {
         const fileName = file.path.split('/').pop();
-        console.log(`   ${fileName}: ${file.duration}ms (${file.numTests} tests)`);
+        // console output removed: console.log(`   ${fileName}: ${file.duration}ms (${file.numTests} tests)`);
       });
     }
     
@@ -93,18 +93,18 @@ class UltraFastReporter {
     if (process.memoryUsage) {
       const memory = process.memoryUsage();
       const usedMB = Math.round(memory.heapUsed / 1024 / 1024);
-      console.log(`💾 Memory: ${usedMB}MB heap used`);
+      // console output removed: console.log(`💾 Memory: ${usedMB}MB heap used`);
     }
     
     // Performance recommendations
     if (totalTime > 10000) {
-      console.log('\n⚠️  Performance Tips:');
-      console.log('   • Use --maxWorkers for better parallelization');
-      console.log('   • Consider test sharding for CI/CD');
-      console.log('   • Mock heavy dependencies');
+      // console output removed: console.log('\n⚠️  Performance Tips:');
+      // console output removed: console.log('   • Use --maxWorkers for better parallelization');
+      // console output removed: console.log('   • Consider test sharding for CI/CD');
+      // console output removed: console.log('   • Mock heavy dependencies');
     }
     
-    console.log('='.repeat(60));
+    // console output removed: console.log('='.repeat(60));
     
     // Exit with proper code
     if (failedTests > 0) {

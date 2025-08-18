@@ -120,7 +120,7 @@ function analyzeHTMLResponse(response) {
  * Tests a single route
  */
 async function testRoute(route) {
-  console.log(`Testing route: ${route}`);
+  // console output removed: console.log(`Testing route: ${route}`);
   
   const response = await makeRequest(`${FRONTEND_BASE}${route}`);
   
@@ -143,7 +143,7 @@ async function testRoute(route) {
  * Tests backend connectivity
  */
 async function testBackendConnectivity() {
-  console.log('Testing backend connectivity...');
+  // console output removed: console.log('Testing backend connectivity...');
   
   const results = [];
   
@@ -165,10 +165,10 @@ async function testBackendConnectivity() {
  * Main testing function
  */
 async function runTests() {
-  console.log('🚀 Starting Frontend Navigation and Error Testing\n');
+  // console output removed: console.log('🚀 Starting Frontend Navigation and Error Testing\n');
   
   // Test all routes
-  console.log('📝 Testing Frontend Routes...');
+  // console output removed: console.log('📝 Testing Frontend Routes...');
   const routeResults = [];
   
   for (const route of ROUTES) {
@@ -176,66 +176,66 @@ async function runTests() {
     routeResults.push(result);
     
     if (result.accessible) {
-      console.log(`✅ ${route} - OK`);
+      // console output removed: console.log(`✅ ${route} - OK`);
       if (result.issues.length > 0) {
-        console.log(`⚠️  Issues found: ${result.issues.join(', ')}`);
+        // console output removed: console.log(`⚠️  Issues found: ${result.issues.join(', ')}`);
       }
     } else {
-      console.log(`❌ ${route} - Failed (${result.statusCode}) ${result.error || ''}`);
+      // console output removed: console.log(`❌ ${route} - Failed (${result.statusCode}) ${result.error || ''}`);
     }
   }
   
-  console.log('\n🔗 Testing Backend Connectivity...');
+  // console output removed: console.log('\n🔗 Testing Backend Connectivity...');
   const backendResults = await testBackendConnectivity();
   
   for (const result of backendResults) {
     if (result.accessible) {
-      console.log(`✅ Backend ${result.endpoint} - OK (${result.statusCode})`);
+      // console output removed: console.log(`✅ Backend ${result.endpoint} - OK (${result.statusCode})`);
     } else {
-      console.log(`❌ Backend ${result.endpoint} - Failed (${result.statusCode}) ${result.error || ''}`);
+      // console output removed: console.log(`❌ Backend ${result.endpoint} - Failed (${result.statusCode}) ${result.error || ''}`);
     }
   }
   
   // Generate summary
-  console.log('\n📊 Test Summary:');
-  console.log('================');
+  // console output removed: console.log('\n📊 Test Summary:');
+  // console output removed: console.log('================');
   
   const accessibleRoutes = routeResults.filter(r => r.accessible).length;
   const totalRoutes = routeResults.length;
   
-  console.log(`Frontend Routes: ${accessibleRoutes}/${totalRoutes} accessible`);
+  // console output removed: console.log(`Frontend Routes: ${accessibleRoutes}/${totalRoutes} accessible`);
   
   const routesWithIssues = routeResults.filter(r => r.issues.length > 0);
   if (routesWithIssues.length > 0) {
-    console.log(`⚠️  Routes with issues: ${routesWithIssues.length}`);
+    // console output removed: console.log(`⚠️  Routes with issues: ${routesWithIssues.length}`);
     routesWithIssues.forEach(r => {
-      console.log(`   ${r.route}: ${r.issues.join(', ')}`);
+      // console output removed: console.log(`   ${r.route}: ${r.issues.join(', ')}`);
     });
   }
   
   const accessibleBackend = backendResults.filter(r => r.accessible).length;
   const totalBackend = backendResults.length;
   
-  console.log(`Backend Endpoints: ${accessibleBackend}/${totalBackend} accessible`);
+  // console output removed: console.log(`Backend Endpoints: ${accessibleBackend}/${totalBackend} accessible`);
   
   if (accessibleBackend === 0) {
-    console.log('⚠️  Backend appears to be offline - frontend will work with limited functionality');
+    // console output removed: console.log('⚠️  Backend appears to be offline - frontend will work with limited functionality');
   }
   
-  console.log('\n🎯 Recommendations:');
-  console.log('==================');
+  // console output removed: console.log('\n🎯 Recommendations:');
+  // console output removed: console.log('==================');
   
   if (accessibleRoutes === totalRoutes && routesWithIssues.length === 0) {
-    console.log('✅ All frontend routes are working correctly!');
+    // console output removed: console.log('✅ All frontend routes are working correctly!');
   }
   
   if (routesWithIssues.length > 0) {
-    console.log('⚠️  Some routes have issues - check browser console for details');
+    // console output removed: console.log('⚠️  Some routes have issues - check browser console for details');
   }
   
   if (accessibleBackend === 0) {
-    console.log('🔧 Start the backend server to enable full functionality');
-    console.log('   Run: python app/main.py (or appropriate backend startup command)');
+    // console output removed: console.log('🔧 Start the backend server to enable full functionality');
+    // console output removed: console.log('   Run: python app/main.py (or appropriate backend startup command)');
   }
   
   return {

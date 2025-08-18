@@ -47,6 +47,6 @@ child.on('close', (code) => {
 });
 
 child.on('error', (err) => {
-  console.error('Error running Jest:', err);
+  // console output removed: console.log('Error running Jest:', err);
   process.exit(1);
 });

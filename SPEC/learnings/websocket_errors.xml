@@ -191,13 +191,94 @@ if (not conn_info.is_closing and
         </learning>
     </learnings>
     
+    <learnings>
+        <learning>
+            <id>websocket-metrics-async-coroutine-error</id>
+            <date>2025-08-18</date>
+            <category>WebSocket/Metrics Collection</category>
+            <severity>high</severity>
+            <title>WebSocket Metrics Collection: Coroutine Not Awaited Error</title>
+            
+            <problem>
+                <description>Metrics collector fails when gathering WebSocket stats due to missing await</description>
+                <error_message>'coroutine' object has no attribute 'get'</error_message>
+                <symptoms>
+                    <symptom>ERROR logged in metrics_collector at line 294</symptom>
+                    <symptom>Occurs during periodic WebSocket metrics collection</symptom>
+                    <symptom>Metrics collection silently fails every interval</symptom>
+                </symptoms>
+                <root_cause>connection_manager.get_stats() is an async method but was called without await</root_cause>
+                <impact>WebSocket metrics not collected, preventing monitoring and alerting</impact>
+            </problem>
+            
+            <solution>
+                <description>Make metrics gathering method async and properly await async calls</description>
+                <implementation>
+                    <step>Changed _gather_websocket_metrics from sync to async method</step>
+                    <step>Added await when calling connection_manager.get_stats()</step>
+                    <step>Updated _collect_single_websocket_metrics_cycle to await the gather method</step>
+                </implementation>
+                <code_changes>
+                    <file>app/monitoring/metrics_collector.py</file>
+                    <change>Changed _gather_websocket_metrics to async method</change>
+                    <change>Added await for connection_manager.get_stats() call</change>
+                    <change>Added await when calling _gather_websocket_metrics</change>
+                </code_changes>
+            </solution>
+            
+            <prevention>
+                <recommendation>Always check if methods return coroutines and need await</recommendation>
+                <recommendation>Use type hints to clarify async vs sync methods</recommendation>
+                <recommendation>Enable asyncio warnings during development</recommendation>
+                <pattern>
+                    <name>Async Metrics Collection Pattern</name>
+                    <code><![CDATA[
+async def _gather_websocket_metrics(self) -> WebSocketMetrics:
+    """Gather WebSocket metrics from connection manager."""
+    from app.websocket.connection import connection_manager
+    conn_stats = await connection_manager.get_stats()  # Note the await!
+    return self._build_websocket_metrics(conn_stats)
+                    ]]></code>
+                </pattern>
+            </prevention>
+            
+            <testing>
+                <test_file>app/tests/unit/monitoring/test_metrics_collector.py</test_file>
+                <test_cases>
+                    <test>test_websocket_metrics_collection_async</test>
+                    <test>test_gather_websocket_metrics_awaits_stats</test>
+                    <test>test_metrics_collection_handles_async_errors</test>
+                </test_cases>
+            </testing>
+            
+            <affected_files>
+                <file>app/monitoring/metrics_collector.py</file>
+                <file>app/websocket/connection.py</file>
+                <file>app/websocket/connection_manager.py</file>
+            </affected_files>
+            
+            <related_patterns>
+                <pattern>Async/await patterns in monitoring</pattern>
+                <pattern>Coroutine handling in periodic tasks</pattern>
+                <pattern>Type safety for async methods</pattern>
+            </related_patterns>
+            
+            <business_impact>
+                <impact>Restores WebSocket monitoring for production reliability</impact>
+                <impact>Enables performance tracking for customer segments</impact>
+                <impact>Critical for detecting connection issues affecting revenue</impact>
+            </business_impact>
+        </learning>
+    </learnings>
+    
     <summary>
-        <total_learnings>3</total_learnings>
+        <total_learnings>4</total_learnings>
         <categories>
             <category>WebSocket/Error Handling</category>
             <category>WebSocket/Implementation Details</category>
             <category>WebSocket/Race Conditions</category>
+            <category>WebSocket/Metrics Collection</category>
         </categories>
-        <key_takeaway>Always validate WebSocket connection state before performing operations to prevent secondary errors and handle race conditions with proper state flags</key_takeaway>
+        <key_takeaway>Always validate WebSocket connection state before operations, handle race conditions with proper state flags, and ensure async methods are properly awaited in monitoring systems</key_takeaway>
     </summary>
 </specification>

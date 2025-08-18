@@ -74,7 +74,8 @@ class AgentErrorHandler:
     ) -> Any:
         """Execute fallback operation with error handling."""
         try:
-            logger.info(f"Using fallback operation for {context.operation_name}")
+            operation_name = getattr(context, 'operation_name', 'unknown')
+            logger.info(f"Using fallback operation for {operation_name}")
             return await fallback_operation()
         except Exception as fallback_error:
             logger.error(f"Fallback operation failed: {fallback_error}")
@@ -165,7 +166,8 @@ class AgentErrorHandler:
     def _log_error(self, error: AgentError) -> None:
         """Log error with appropriate level."""
         context = error.context
-        log_message = f"{context.agent_name}.{context.operation_name}: {error.message}"
+        operation_name = getattr(context, 'operation_name', 'unknown')
+        log_message = f"{context.agent_name}.{operation_name}: {error.message}"
         log_levels = self._get_error_log_levels()
         self._execute_error_logging(error, log_message, log_levels)
     
@@ -217,15 +219,17 @@ class AgentErrorHandler:
     
     def _log_retry_attempt(self, context: ErrorContext, delay: float) -> None:
         """Log retry attempt details."""
+        operation_name = getattr(context, 'operation_name', 'unknown')
         logger.info(
-            f"Retrying {context.operation_name} in {delay:.2f}s "
+            f"Retrying {operation_name} in {delay:.2f}s "
             f"(attempt {context.retry_count + 1}/{context.max_retries})"
         )
     
     def _create_retry_error(self, context: ErrorContext) -> AgentError:
         """Create retry error for operation."""
+        operation_name = getattr(context, 'operation_name', 'unknown')
         return AgentError(
-            message=f"Retry required for {context.operation_name}",
+            message=f"Retry required for {operation_name}",
             severity=ErrorSeverity.LOW, category=ErrorCategory.PROCESSING,
             context=context, recoverable=True
         )

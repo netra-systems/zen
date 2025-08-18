@@ -355,5 +355,12 @@ class ModernConnectionManager:
         }
 
 
-# Global instance for backward compatibility
-connection_manager = ModernConnectionManager()
+# Global instance for backward compatibility - lazy initialization
+connection_manager: Optional[ModernConnectionManager] = None
+
+def get_connection_manager() -> ModernConnectionManager:
+    """Get global connection manager instance with lazy initialization."""
+    global connection_manager
+    if connection_manager is None:
+        connection_manager = ModernConnectionManager()
+    return connection_manager

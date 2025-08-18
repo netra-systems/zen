@@ -8,6 +8,8 @@
  * @compliance type_safety.xml - Strongly typed cleanup management
  */
 
+import { logger } from '@/utils/debug-logger';
+
 /**
  * Cleanup operation function type
  */
@@ -144,7 +146,7 @@ export class OperationCleanupManager {
       
       await Promise.race([cleanupPromise, timeoutPromise]);
     } catch (error) {
-      console.warn(`Cleanup operation failed for ${cleanup.id}:`, error);
+      logger.warn(`Cleanup operation failed for ${cleanup.id}:`, error);
     }
   }
 

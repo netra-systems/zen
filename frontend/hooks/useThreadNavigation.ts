@@ -17,6 +17,7 @@ import {
   useBrowserHistorySync, 
   validateThreadId 
 } from '@/services/urlSyncService';
+import { logger } from '@/utils/debug-logger';
 
 /**
  * Thread navigation configuration
@@ -141,7 +142,7 @@ const navigateToThreadSafely = async (
   navigateToThread: (threadId: string) => void
 ): Promise<boolean> => {
   if (!validateThreadId(threadId)) {
-    console.error('Invalid thread ID format:', threadId);
+    logger.error('Invalid thread ID format:', threadId);
     return false;
   }
   
@@ -152,11 +153,11 @@ const navigateToThreadSafely = async (
       // URL will be updated by the switchToThread hook
       return true;
     } else {
-      console.error('Failed to load thread:', threadId);
+      logger.error('Failed to load thread:', threadId);
       return false;
     }
   } catch (error) {
-    console.error('Error navigating to thread:', error);
+    logger.error('Error navigating to thread:', error);
     return false;
   }
 };
