@@ -71,6 +71,9 @@ class UnifiedConfigManager:
     
     def _detect_environment(self) -> str:
         """Detect current environment from environment variables."""
+        # Check TESTING first for test environments
+        if os.environ.get("TESTING"):
+            return "testing"
         return os.environ.get("ENVIRONMENT", "development").lower()
     
     def _check_hot_reload_enabled(self) -> bool:
