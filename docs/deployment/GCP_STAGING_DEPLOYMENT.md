@@ -32,9 +32,13 @@ gcloud auth login
 # 2. Run setup to create service account
 .\setup-staging-auth.ps1
 
+# 3. Setup database secret (CRITICAL for backend connectivity)
+.\setup-staging-database-secret.ps1
+
 # This creates:
 # - Service account: netra-staging-deploy@netra-staging.iam.gserviceaccount.com
 # - Key file: gcp-staging-sa-key.json
+# - Database URL secret in Secret Manager
 # - Environment variables: GCP_STAGING_SA_KEY_PATH, GOOGLE_APPLICATION_CREDENTIALS
 ```
 
@@ -127,6 +131,21 @@ The following service names MUST be used exactly as shown for domain mapping to 
 - `GCP_REGION` - us-central1
 
 ## Troubleshooting
+
+### Database Connection Issues
+```powershell
+# Setup or update database URL secret
+.\setup-staging-database-secret.ps1
+
+# Check if database secret exists
+gcloud secrets describe database-url-staging --project=701982941522
+
+# View current database URL (be careful, contains password!)
+gcloud secrets versions access latest --secret=database-url-staging --project=701982941522
+
+# Check backend logs for database errors
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=netra-backend-staging AND textPayload:(database OR postgresql OR connection)" --limit 50
+```
 
 ### Any Authentication Issue
 ```powershell
