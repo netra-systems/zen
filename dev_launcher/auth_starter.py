@@ -51,7 +51,24 @@ class AuthStarter:
             self._print("⚠️", "AUTH", "Auth service is disabled in configuration")
             return None, None
         
-        self._print("🔐", "AUTH", "Starting auth service...")
+        # Show Redis mode for auth service
+        from dev_launcher.service_config import ResourceMode
+        redis_mode = self.services_config.redis.mode
+        redis_config = self.services_config.redis.get_config()
+        
+        if redis_mode == ResourceMode.LOCAL:
+            mode_desc = f"using local Redis (localhost:{redis_config.get('port', 6379)})"
+        elif redis_mode == ResourceMode.SHARED:
+            host = redis_config.get('host', 'cloud')
+            if len(host) > 30:
+                host = host[:27] + '...'
+            mode_desc = f"using cloud Redis ({host})"
+        elif redis_mode == ResourceMode.MOCK:
+            mode_desc = "using mock Redis"
+        else:
+            mode_desc = "with Redis disabled"
+        
+        self._print("🔐", "AUTH", f"Starting auth service ({mode_desc})...")
         
         # Get auth service configuration
         port = auth_config.get_config().get("port", 8081)
