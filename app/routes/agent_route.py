@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.schemas import RequestModel
@@ -8,14 +8,23 @@ from app.services.agent_service import get_agent_service, AgentService
 from app.dependencies import get_llm_manager, DbDep
 from app.llm.llm_manager import LLMManager
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import json
 from typing import List
 
 router = APIRouter()
 
+# Export all public functions for proper module imports
+__all__ = [
+    'router',
+    'process_multimodal_message',
+    'process_with_context', 
+    'process_with_fallback',
+    'stream_agent_response'
+]
+
 class MessageRequest(BaseModel):
-    message: str
+    message: str = Field(..., min_length=1, description="Message cannot be empty")
     thread_id: Optional[str] = None
 
 class AttachmentData(BaseModel):
@@ -276,3 +285,30 @@ async def process_with_fallback(message: str) -> Dict[str, Any]:
         return await _attempt_primary_processing(message)
     except Exception:
         return await _attempt_fallback_processing(message)
+
+@router.websocket("/ws/agent")
+async def agent_websocket_endpoint(websocket: WebSocket):
+    """WebSocket endpoint for agent communication."""
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            import json
+            try:
+                message_data = json.loads(data)
+                response = {
+                    "type": "agent_response", 
+                    "response": f"Processed: {message_data.get('message', '')}"
+                }
+                if "thread_id" in message_data:
+                    response["thread_id"] = message_data["thread_id"]
+                await websocket.send_json(response)
+            except json.JSONDecodeError:
+                await websocket.send_json({"type": "error", "message": "Invalid JSON"})
+    except WebSocketDisconnect:
+        pass
+    except Exception as e:
+        try:
+            await websocket.send_json({"type": "error", "message": f"Server error: {str(e)}"})
+        except:
+            pass

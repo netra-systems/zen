@@ -101,11 +101,27 @@ class CoreMetricsCalculator:
     
     async def calculate_actionability(self, content: str, content_type: ContentType) -> float:
         """Calculate how actionable the content is"""
-        score = 0.0
         content_lower = content.lower()
+        score = 0.0
         
-        # Check for action verbs (including gerund forms)
-        action_verbs = [
+        score += self._calculate_action_verb_score(content_lower)
+        score += self._calculate_instruction_patterns_score(content_lower)
+        score += self._calculate_code_patterns_score(content)
+        score += self._calculate_path_patterns_score(content)
+        score -= self._calculate_uncertainty_penalty(content_lower)
+        score += self._calculate_content_type_bonus(content_type, content_lower)
+        
+        return max(0.0, min(1.0, score))
+    
+    def _calculate_action_verb_score(self, content_lower: str) -> float:
+        """Calculate score based on action verbs"""
+        action_verbs = self._get_action_verbs_list()
+        action_count = sum(1 for verb in action_verbs if verb in content_lower)
+        return min(action_count * 0.08, 0.4)
+    
+    def _get_action_verbs_list(self) -> list:
+        """Get comprehensive list of action verbs"""
+        return [
             "set", "configure", "install", "run", "execute", "implement",
             "add", "remove", "update", "modify", "change", "apply",
             "enable", "disable", "increase", "decrease", "adjust",
@@ -113,20 +129,19 @@ class CoreMetricsCalculator:
             "implementing", "enabling", "increasing", "adjusting", "reducing",
             "editing", "downloading", "uploading", "creating", "deleting", "copying"
         ]
-        action_count = sum(1 for verb in action_verbs if verb in content_lower)
-        score += min(action_count * 0.08, 0.4)
-        
-        # Check for step-by-step instructions
+    
+    def _calculate_instruction_patterns_score(self, content_lower: str) -> float:
+        """Calculate score for step-by-step instruction patterns"""
         step_pattern = r'(step \d+|first|second|third|then|next|finally)'
-        if re.search(step_pattern, content_lower):
-            score += 0.2
-        
-        # Check for specific commands or code
+        return 0.2 if re.search(step_pattern, content_lower) else 0.0
+    
+    def _calculate_code_patterns_score(self, content: str) -> float:
+        """Calculate score for code patterns"""
         code_pattern = r'```|`[^`]+`|\$\s*\w+|pip install|npm install|docker run'
-        if re.search(code_pattern, content):
-            score += 0.3
-        
-        # Check for specific file paths or URLs
+        return 0.3 if re.search(code_pattern, content) else 0.0
+    
+    def _calculate_path_patterns_score(self, content: str) -> float:
+        """Calculate score for file path and URL patterns"""
         path_patterns = [
             r'/[\w\-./]+\.\w+',
             r'[A-Z]:\\[\w\\\-.]+\.\w+',
@@ -134,18 +149,19 @@ class CoreMetricsCalculator:
             r'[\w\-./]+\.(?:yaml|yml|py|json|xml|conf|cfg|ini)\b'
         ]
         path_matches = sum(1 for pattern in path_patterns if re.search(pattern, content))
-        score += min(path_matches * 0.15, 0.3)
-        
-        # Penalty for conditional or uncertain language
+        return min(path_matches * 0.15, 0.3)
+    
+    def _calculate_uncertainty_penalty(self, content_lower: str) -> float:
+        """Calculate penalty for uncertain language"""
         uncertain_terms = ["might", "could", "perhaps", "maybe", "possibly", "consider", "think about"]
         uncertain_count = sum(1 for term in uncertain_terms if term in content_lower)
-        score -= uncertain_count * 0.05
-        
-        # ERROR_MESSAGE specific actionability bonuses
+        return uncertain_count * 0.05
+    
+    def _calculate_content_type_bonus(self, content_type: ContentType, content_lower: str) -> float:
+        """Calculate content type specific bonus"""
         if content_type == ContentType.ERROR_MESSAGE:
-            score += self._calculate_error_actionability(content_lower)
-        
-        return max(0.0, min(1.0, score))
+            return self._calculate_error_actionability(content_lower)
+        return 0.0
     
     async def calculate_quantification(self, content: str) -> float:
         """Calculate the level of quantification in the content"""

@@ -22,6 +22,11 @@ async def update_user_role(user_id: str, role: str) -> Dict[str, Any]:
     from app.services import user_service
     return await user_service.update_user_role(user_id, role)
 
+async def get_audit_logs(limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+    """Get recent audit logs with pagination."""
+    from app.services import audit_service
+    return await audit_service.get_recent_logs(limit, offset)
+
 @router.get("/settings", response_model=AppConfig)
 async def get_app_settings(
     current_user: schemas.User = Depends(require_permission("system_config"))

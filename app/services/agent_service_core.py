@@ -15,7 +15,7 @@ from app import schemas
 from app.ws_manager import manager
 from app.services.thread_service import ThreadService
 from app.services.message_handlers import MessageHandlerService
-from app.services.service_locator import IAgentService
+from app.services.service_interfaces import IAgentService
 from app.services.streaming_service import TextStreamProcessor, get_streaming_service
 
 logger = central_logger.get_logger(__name__)

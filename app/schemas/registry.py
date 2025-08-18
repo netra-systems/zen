@@ -64,6 +64,11 @@ from app.schemas.audit_models import (
     CorpusAuditReport
 )
 
+# Import additional WebSocket message types from websocket_payloads
+from app.schemas.websocket_payloads import (
+    BaseWebSocketMessage, ClientToServerMessage, ServerToClientMessage
+)
+
 
 # ============================================================================
 # BACKWARD COMPATIBILITY AND EXPORTS
@@ -96,6 +101,7 @@ __all__ = [
     "DeleteThreadPayload", "MessageData", "ThreadHistoryResponse",
     "AgentResponseData", "AgentResponse", "AgentCompletedPayload", "AgentStoppedPayload",
     "AgentUpdate", "AgentLog", "ToolCall", "ToolResult", "StreamChunk", "StreamComplete",
+    "BaseWebSocketMessage", "ClientToServerMessage", "ServerToClientMessage",
     
     # Audit models
     "CorpusAuditRecord", "CorpusAuditMetadata", "CorpusAuditSearchFilter", 
@@ -155,6 +161,9 @@ TYPE_REGISTRY = {
     "AgentStarted": AgentStarted,
     "SubAgentUpdate": SubAgentUpdate,
     "AgentCompleted": AgentCompleted,
+    "BaseWebSocketMessage": BaseWebSocketMessage,
+    "ClientToServerMessage": ClientToServerMessage,
+    "ServerToClientMessage": ServerToClientMessage,
     
     # Enums
     "MessageType": MessageType,

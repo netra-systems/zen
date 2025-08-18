@@ -67,11 +67,25 @@ The Netra platform employs a comprehensive testing strategy across multiple laye
 
 | Level | Duration | Coverage | When to Run | Command |
 |-------|----------|----------|-------------|---------|  
-| **Smoke** | <30s | Critical paths | Before commits | `python test_runner.py --level smoke` |
-| **Unit** | 1-2min | Components | DEFAULT - Development | `python test_runner.py --level unit` |
-| **Integration** | 3-5min | Services | Feature validation | `python test_runner.py --level integration` |
+| **Smoke** | <30s | Critical paths | Before commits | `python test_runner.py --level smoke --fast-fail` |
+| **Unit** | 1-2min | Components | Development | `python test_runner.py --level unit --no-coverage --fast-fail` |
+| **Agents** | 2-3min | Agent systems | Agent changes | `python test_runner.py --level agents` |
+| **Integration** | 3-5min | Services | DEFAULT - Feature validation | `python test_runner.py --level integration --no-coverage --fast-fail` |
 | **Critical** | 1-2min | Revenue paths | Pre-deployment | `python test_runner.py --level critical` |
+| **Real E2E** | 15-20min | With real LLMs | Before releases | `python test_runner.py --level real_e2e --real-llm` |
 | **Comprehensive** | 30-45min | Full coverage | Release | `python test_runner.py --level comprehensive` |
+
+### Comprehensive Test Categories (10-15min each)
+
+| Category | Purpose | Command |
+|----------|---------|---------|  
+| **Backend** | Full backend validation | `python test_runner.py --level comprehensive-backend` |
+| **Frontend** | Full frontend validation | `python test_runner.py --level comprehensive-frontend` |
+| **Core** | Core components deep test | `python test_runner.py --level comprehensive-core` |
+| **Agents** | Multi-agent system validation | `python test_runner.py --level comprehensive-agents` |
+| **WebSocket** | WebSocket deep validation | `python test_runner.py --level comprehensive-websocket` |
+| **Database** | Database operations validation | `python test_runner.py --level comprehensive-database` |
+| **API** | API endpoints validation | `python test_runner.py --level comprehensive-api` |
 
 ### Speed Optimization Options
 
@@ -82,11 +96,11 @@ python test_runner.py --level unit --ci
 
 # Individual safe optimizations
 python test_runner.py --level unit --no-warnings    # Suppress warnings
-python test_runner.py --level unit --no-coverage    # Skip coverage collection
+python test_runner.py --level unit --no-coverage    # Skip coverage collection (30-50% faster)
 python test_runner.py --level unit --fast-fail      # Stop on first failure
 
-# Combined safe optimizations
-python test_runner.py --level unit --ci --no-warnings --no-coverage --fast-fail
+# Combined safe optimizations (DEFAULT RECOMMENDATION)
+python test_runner.py --level integration --no-coverage --fast-fail
 ```
 
 #### Aggressive Optimizations (Use with Caution)
@@ -98,6 +112,11 @@ python test_runner.py --level unit --speed
 python test_runner.py --level unit --parallel 1      # Sequential (for debugging)
 python test_runner.py --level unit --parallel auto   # Auto-detect optimal
 python test_runner.py --level unit --parallel 4      # Custom worker count
+
+# Real LLM Testing (CRITICAL for agent changes)
+python test_runner.py --level agents --real-llm
+python test_runner.py --level integration --real-llm --llm-model gemini-2.5-flash
+python test_runner.py --level real_e2e --real-llm --llm-timeout 60
 ```
 
 ### Bad Test Detection System
@@ -149,7 +168,7 @@ python -m test_framework.bad_test_reporter --reset --reset-test "test_name" # Re
 
 ```bash
 # RECOMMENDED: Use test runner for consistent environment setup
-python test_runner.py --level unit
+python test_runner.py --level integration --no-coverage --fast-fail
 
 # Manual setup (if needed)
 python -m venv venv

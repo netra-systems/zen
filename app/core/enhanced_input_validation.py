@@ -138,8 +138,20 @@ class EnhancedInputValidator:
     """Comprehensive input validator with threat detection."""
     
     def __init__(self, validation_level: ValidationLevel = ValidationLevel.MODERATE):
+        self._set_validation_level(validation_level)
+        self._initialize_threat_detection()
+        self._set_input_constraints()
+
+    def _set_validation_level(self, validation_level: ValidationLevel) -> None:
+        """Set the validation level for this validator."""
         self.validation_level = validation_level
+
+    def _initialize_threat_detection(self) -> None:
+        """Initialize threat detection patterns."""
         self.threat_patterns = self._compile_patterns()
+
+    def _set_input_constraints(self) -> None:
+        """Set input length and character constraints."""
         self.max_input_length = self._get_max_length()
         self.suspicious_chars = set('<>"\'&;|`$(){}[]\\')
         

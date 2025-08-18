@@ -78,7 +78,7 @@ SECRET_KEY=your-secret-key
 #### Recommended: Using Dev Launcher
 ```bash
 # Best configuration for development
-python dev_launcher.py --dynamic --no-backend-reload --load-secrets
+python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets
 
 # What this does:
 # - Finds free ports automatically
@@ -91,25 +91,28 @@ python dev_launcher.py --dynamic --no-backend-reload --load-secrets
 #### Alternative Configurations
 ```bash
 # With hot reload (slower but auto-refreshes)
-python dev_launcher.py --dynamic
+python scripts/dev_launcher.py --dynamic
 
 # Maximum performance (no reload at all)
-python dev_launcher.py --dynamic --no-reload
+python scripts/dev_launcher.py --dynamic --no-reload
 
 # Custom ports
-python dev_launcher.py --backend-port 8080 --frontend-port 3001
+python scripts/dev_launcher.py --backend-port 8080 --frontend-port 3001
 
 # Backend only
-python dev_launcher.py --backend-only
+python scripts/dev_launcher.py --backend-only
 
 # Frontend only  
-python dev_launcher.py --frontend-only
+python scripts/dev_launcher.py --frontend-only
 ```
 
 ### Step 4: Verify Installation
 ```bash
 # Run quick smoke tests (< 30 seconds)
-python test_runner.py --level smoke
+python test_runner.py --level smoke --fast-fail
+
+# Run integration tests (DEFAULT for feature validation)
+python test_runner.py --level integration --no-coverage --fast-fail
 
 # If test runner has issues, use fallback
 python test_runner.py --simple

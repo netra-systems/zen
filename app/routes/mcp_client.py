@@ -8,7 +8,8 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPBearer
 
-from app.services.service_locator import get_service, IMCPClientService
+from app.services.service_locator import get_service
+from app.services.service_interfaces import IMCPClientService
 from app.schemas.mcp_client import (
     RegisterServerRequest, RegisterServerResponse,
     ConnectServerRequest, ConnectServerResponse,

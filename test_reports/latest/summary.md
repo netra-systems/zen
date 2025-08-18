@@ -1,13 +1,13 @@
 # Test Summary
-**Level**: integration | **Time**: 2025-08-17 15:54:51
+**Level**: integration | **Time**: 2025-08-17 17:40:45
 
-**Status**: ⚠️ Unknown - Check test output
+**Status**: ❌ Failed - 2 test(s) failed
 
-**Backend**: ⚫ No tests found
+**Backend**: ❌ 42 passed, 2 failed
 **Frontend**: ⚫ No tests ran
 **E2E**: ⚫ No tests ran
 
 ## Issues
-- backend: No tests found to run
+- backend: 2 test(s) failed
 - frontend: Test collection failed
 - e2e: Test collection failed

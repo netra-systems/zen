@@ -87,3 +87,11 @@ def auto_inject(service_locator: ServiceLocator, service_type: Type[T]) -> Calla
                 return func(service, *args, **kwargs)
             return sync_wrapper
     return decorator
+
+
+def inject(*service_types: Type) -> Callable:
+    """Global inject decorator using default service locator."""
+    def decorator(func: Callable) -> Callable:
+        service_locator = ServiceLocator()
+        return _select_wrapper(service_locator, func, service_types)
+    return decorator

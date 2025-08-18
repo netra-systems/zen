@@ -12,12 +12,12 @@ from app.schemas.registry import (
     WebSocketConnectionState,
     StartAgentPayload,
     ClientToServerMessage,
-    ServerToClientMessage
-)
-from app.schemas.websocket_payloads import (
-    AgentStartedPayload,
+    ServerToClientMessage,
     UserMessagePayload,
     BaseWebSocketMessage
+)
+from app.schemas.websocket_payloads import (
+    AgentStartedPayload
 )
 from .test_websocket_type_safety_factory import WebSocketMessageFactory
 

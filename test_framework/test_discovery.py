@@ -100,10 +100,7 @@ class TestDiscovery:
     
     def _scan_backend_test_directories(self, test_dirs: List[Path], discovered: defaultdict):
         """Scan backend test directories for Python test files"""
-        for test_dir in test_dirs:
-            for test_file in test_dir.rglob("test_*.py"):
-                category = self._categorize_test(test_file)
-                discovered[category].append(str(test_file))
+        self.scanners._scan_backend_test_directories(test_dirs, discovered)
     
     def _collect_frontend_tests(self, path: Path, frontend_tests: List[str]):
         """Collect frontend test files"""

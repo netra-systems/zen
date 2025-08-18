@@ -1,7 +1,11 @@
-"""Mock data generator for factory status reports.
+"""
+Mock data generator for factory status testing.
 
-Provides mock data for testing and development.
-Module follows 300-line limit with 8-line function limit.
+Business Value Justification (BVJ):
+- Segment: All segments  
+- Business Goal: Enable testing and development
+- Value Impact: Supports development velocity and testing reliability
+- Revenue Impact: Indirect - ensures system reliability for production
 """
 
 from typing import Dict, List, Any
@@ -10,40 +14,40 @@ import random
 
 
 class MockDataGenerator:
-    """Generate mock data for factory status reports."""
+    """Generates mock data for factory status reporting and testing."""
     
     def __init__(self):
         """Initialize mock data generator."""
-        self.base_seed = 42
-        random.seed(self.base_seed)
+        self.commit_types = ["feat", "fix", "docs", "style", "refactor", "test", "chore"]
+        self.authors = ["dev1", "dev2", "dev3", "dev4"]
     
-    def generate_mock_commit(self) -> Dict[str, Any]:
-        """Generate a mock git commit."""
-        commit_types = ["feature", "fix", "refactor", "test", "docs"]
+    def generate_mock_commits(self, count: int = 10) -> List[Dict[str, Any]]:
+        """Generate mock commit data."""
+        commits = []
+        for i in range(count):
+            commit = self._create_mock_commit(i)
+            commits.append(commit)
+        return commits
+    
+    def _create_mock_commit(self, index: int) -> Dict[str, Any]:
+        """Create a single mock commit."""
+        commit_type = random.choice(self.commit_types)
+        author = random.choice(self.authors)
+        timestamp = datetime.now() - timedelta(days=random.randint(0, 30))
         return {
-            "hash": self._generate_hash(),
-            "message": f"{random.choice(commit_types)}: Mock commit message",
-            "author": "Mock Author",
-            "date": datetime.now() - timedelta(days=random.randint(0, 30))
+            "hash": f"abc123{index}",
+            "type": commit_type,
+            "message": f"{commit_type}: mock commit {index}",
+            "author": author,
+            "timestamp": timestamp.isoformat(),
+            "files_changed": random.randint(1, 5)
         }
     
-    def generate_mock_metrics(self) -> Dict[str, float]:
+    def generate_mock_metrics(self) -> Dict[str, Any]:
         """Generate mock metrics data."""
         return {
-            "code_quality": random.uniform(0.7, 1.0),
-            "test_coverage": random.uniform(0.6, 0.95),
-            "performance": random.uniform(0.8, 1.0),
-            "security_score": random.uniform(0.85, 1.0)
+            "test_coverage": random.uniform(0.7, 0.95),
+            "code_quality": random.uniform(0.8, 1.0),
+            "build_success_rate": random.uniform(0.85, 1.0),
+            "deployment_frequency": random.randint(1, 10)
         }
-    
-    def generate_mock_report(self) -> Dict[str, Any]:
-        """Generate a complete mock report."""
-        commits = [self.generate_mock_commit() for _ in range(10)]
-        metrics = self.generate_mock_metrics()
-        return {"commits": commits, "metrics": metrics, "timestamp": datetime.now()}
-    
-    def _generate_hash(self) -> str:
-        """Generate a mock git hash."""
-        chars = "0123456789abcdef"
-        hash_length = 40
-        return "".join(random.choice(chars) for _ in range(hash_length))

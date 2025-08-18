@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch, AsyncMock
 from fastapi import Request
 
 from app.middleware.security_middleware import SecurityMiddleware, RateLimitTracker
-from app.core.exceptions import NetraSecurityException
+from app.core.exceptions_auth import NetraSecurityException
 
 
 class TestSecurityMiddleware:
@@ -100,9 +100,9 @@ class TestSecurityMiddleware:
         """Test detection of various malicious payloads."""
         malicious_payloads = [
             b'{"cmd": "rm -rf /"}',
-            b'{"eval": "eval(malicious_code)"}',
+            b'{"shell": "bash -c malicious"}',
             b'{"script": "<script>document.cookie</script>"}',
-            b'{"injection": "1\'; DROP TABLE users; --"}';
+            b'{"injection": "1\'; DROP TABLE users; --"}'
         ]
         
         for payload in malicious_payloads:

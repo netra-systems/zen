@@ -81,6 +81,23 @@ class MockAppStateManager:
         if not hasattr(app.state, 'security_service'):
             key_manager = KeyManager.load_from_settings(settings)
             app.state.security_service = SecurityService(key_manager)
+        
+        # Set up LLM manager for dependency injection
+        if not hasattr(app.state, 'llm_manager'):
+            app.state.llm_manager = Mock()
+        
+        # Set up other required services for dependency injection
+        if not hasattr(app.state, 'agent_supervisor'):
+            app.state.agent_supervisor = Mock()
+        
+        if not hasattr(app.state, 'agent_service'):
+            app.state.agent_service = Mock()
+        
+        if not hasattr(app.state, 'thread_service'):
+            app.state.thread_service = Mock()
+        
+        if not hasattr(app.state, 'corpus_service'):
+            app.state.corpus_service = Mock()
 
 
 @pytest.fixture

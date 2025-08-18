@@ -186,7 +186,7 @@ root/
 
 ## Quick Start
 ```bash
-python dev_launcher.py # Start dev
+python scripts/dev_launcher.py # Start dev
 python test_runner.py --level integration --no-coverage --fast-fail # DEFAULT tests (fast feedback)
 ```
 

@@ -29,51 +29,67 @@ class ResearchExecutor:
     ) -> Dict[str, Any]:
         """Execute a scheduled research task"""
         logger.info(f"Executing scheduled research: {schedule.name}")
+        result = self._initialize_research_result(schedule)
         
-        result = {
+        try:
+            await self._execute_research_workflow(schedule, result)
+        except Exception as e:
+            self._handle_research_error(e, schedule, result)
+        
+        return result
+    
+    def _initialize_research_result(self, schedule: ResearchSchedule) -> Dict[str, Any]:
+        """Initialize research result structure"""
+        return {
             "schedule_name": schedule.name,
             "started_at": datetime.now(UTC).isoformat(),
             "research_type": schedule.research_type.value,
             "providers": schedule.providers,
             "results": []
         }
+    
+    async def _execute_research_workflow(self, schedule: ResearchSchedule, result: Dict[str, Any]):
+        """Execute the main research workflow"""
+        db_manager = Database(settings.database_url)
+        with db_manager.get_db() as db:
+            research_result = await self._run_research_agents(schedule, db)
+            await self._process_research_completion(schedule, result, research_result, db)
+    
+    async def _run_research_agents(self, schedule: ResearchSchedule, db) -> Dict[str, Any]:
+        """Run research agents for the schedule"""
+        supply_service = SupplyResearchService(db)
+        agent = SupplyResearcherAgent(self.llm_manager, db, supply_service)
+        return await agent.process_scheduled_research(
+            schedule.research_type,
+            schedule.providers
+        )
+    
+    async def _process_research_completion(
+        self, schedule: ResearchSchedule, result: Dict[str, Any], 
+        research_result: Dict[str, Any], db
+    ):
+        """Process research completion tasks"""
+        result["results"] = research_result.get("results", [])
+        result["status"] = "completed"
+        result["completed_at"] = datetime.now(UTC).isoformat()
         
-        try:
-            # Get database session
-            db_manager = Database(settings.database_url)
-            with db_manager.get_db() as db:
-                # Create agent and service
-                supply_service = SupplyResearchService(db)
-                agent = SupplyResearcherAgent(self.llm_manager, db, supply_service)
-                
-                # Process research for each provider
-                research_result = await agent.process_scheduled_research(
-                    schedule.research_type,
-                    schedule.providers
-                )
-                
-                result["results"] = research_result.get("results", [])
-                result["status"] = "completed"
-                result["completed_at"] = datetime.now(UTC).isoformat()
-                
-                # Cache result if Redis available
-                if self.redis_manager:
-                    await self._cache_result(schedule, result)
-                
-                # Check for significant changes and send notifications
-                await self._check_and_notify_changes(result, supply_service)
-                
-                # Update schedule
-                schedule.update_after_run()
-                
-                logger.info(f"Completed scheduled research: {schedule.name}")
-            
-        except Exception as e:
-            logger.error(f"Failed to execute scheduled research {schedule.name}: {e}")
-            result["status"] = "failed"
-            result["error"] = str(e)
+        await self._finalize_research_tasks(schedule, result, db)
+    
+    async def _finalize_research_tasks(self, schedule: ResearchSchedule, result: Dict[str, Any], db):
+        """Finalize research tasks and notifications"""
+        if self.redis_manager:
+            await self._cache_result(schedule, result)
         
-        return result
+        supply_service = SupplyResearchService(db)
+        await self._check_and_notify_changes(result, supply_service)
+        schedule.update_after_run()
+        logger.info(f"Completed scheduled research: {schedule.name}")
+    
+    def _handle_research_error(self, error: Exception, schedule: ResearchSchedule, result: Dict[str, Any]):
+        """Handle research execution error"""
+        logger.error(f"Failed to execute scheduled research {schedule.name}: {error}")
+        result["status"] = "failed"
+        result["error"] = str(error)
     
     async def _cache_result(self, schedule: ResearchSchedule, result: Dict[str, Any]):
         """Cache research result"""

@@ -84,7 +84,7 @@ chmod +x scripts/setup.sh
 ./scripts/setup.sh
 
 # 4. Start with OPTIMAL configuration
-python dev_launcher.py --dynamic --no-backend-reload --load-secrets
+python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets
 
 # 5. Verify compliance
 python scripts/check_architecture_compliance.py

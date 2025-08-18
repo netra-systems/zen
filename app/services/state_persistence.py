@@ -42,9 +42,19 @@ class StatePersistenceService:
         self.serializer = StateSerializer()
         self.validator = StateValidator()
     
-    async def save_agent_state(self, request: StatePersistenceRequest,
-                              db_session: AsyncSession) -> Tuple[bool, Optional[str]]:
+    async def save_agent_state(self, *args, **kwargs) -> Tuple[bool, Optional[str]]:
         """Save agent state with atomic transactions and versioning."""
+        # Handle both calling patterns for backward compatibility
+        if len(args) == 2 and isinstance(args[0], StatePersistenceRequest):
+            # New pattern: save_agent_state(request, db_session)
+            request, db_session = args
+        elif 'run_id' in kwargs and 'db_session' in kwargs:
+            # Legacy pattern: save_agent_state(run_id=..., thread_id=..., user_id=..., state=..., db_session=...)
+            request = self._build_persistence_request_from_kwargs(kwargs)
+            db_session = kwargs['db_session']
+        else:
+            raise ValueError("Invalid arguments for save_agent_state")
+        
         try:
             snapshot_id = await self._execute_state_save_transaction(request, db_session)
             logger.info(f"Saved state snapshot {snapshot_id} for run {request.run_id}")
@@ -240,6 +250,21 @@ class StatePersistenceService:
         # For now, state_data is already stored as JSON in database
         # In future, could support other formats stored as BLOB
         return state_data
+
+    def _build_persistence_request_from_kwargs(self, kwargs: Dict[str, Any]) -> StatePersistenceRequest:
+        """Build StatePersistenceRequest from legacy kwargs."""
+        state_data = kwargs['state'].model_dump() if hasattr(kwargs['state'], 'model_dump') else kwargs['state']
+        return StatePersistenceRequest(
+            run_id=kwargs['run_id'],
+            thread_id=kwargs.get('thread_id'),
+            user_id=kwargs.get('user_id'),
+            state_data=state_data,
+            checkpoint_type=kwargs.get('checkpoint_type', CheckpointType.MANUAL),
+            agent_phase=kwargs.get('agent_phase'),
+            execution_context=kwargs.get('execution_context', {}),
+            is_recovery_point=kwargs.get('is_recovery_point', False),
+            expires_at=kwargs.get('expires_at')
+        )
 
 # Global instance
 state_persistence_service = StatePersistenceService()

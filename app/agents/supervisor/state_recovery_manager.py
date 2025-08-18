@@ -14,8 +14,8 @@ logger = central_logger.get_logger(__name__)
 class StateRecoveryManager:
     """Manages state recovery and rollback operations."""
     
-    def __init__(self, db_session_factory):
-        self.db_session_factory = db_session_factory
+    def __init__(self, db_session):
+        self.db_session = db_session
         self.state_persistence = state_persistence_service
     
     async def handle_agent_crash_recovery(self, run_id: str, thread_id: str,
@@ -104,9 +104,8 @@ class StateRecoveryManager:
     
     async def _load_previous_state(self, run_id: str) -> Optional[DeepAgentState]:
         """Load the most recent state."""
-        async with self.db_session_factory() as session:
-            return await self.state_persistence.load_agent_state(
-                run_id, session)
+        session = self.db_session
+        return await self.state_persistence.load_agent_state(run_id, session)
     
     def _validate_recovered_state(self, recovered_state: Optional[DeepAgentState], 
                                  run_id: str) -> Optional[DeepAgentState]:

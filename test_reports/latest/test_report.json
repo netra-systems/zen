@@ -1,21 +1,21 @@
 {
-  "timestamp": "2025-08-17T15:54:51.271776",
+  "timestamp": "2025-08-17T17:40:45.366091",
   "level": "integration",
   "components": {
     "backend": {
-      "total": 0,
-      "passed": 0,
-      "failed": 0,
+      "total": 44,
+      "passed": 42,
+      "failed": 2,
       "skipped": 0,
       "errors": 0,
       "import_errors": 0,
-      "duration": 32.24257826805115,
-      "status": "no_tests",
-      "exit_code": 3,
-      "pass_rate": 0.0,
-      "has_issues": false,
-      "status_icon": "\u26ab",
-      "summary_text": "No tests found"
+      "duration": 30.572069883346558,
+      "status": "failed",
+      "exit_code": 2,
+      "pass_rate": 95.45454545454545,
+      "has_issues": true,
+      "status_icon": "\u274c",
+      "summary_text": "42 passed, 2 failed"
     },
     "frontend": {
       "total": 0,
@@ -24,7 +24,7 @@
       "skipped": 0,
       "errors": 0,
       "import_errors": 0,
-      "duration": 0.1189420223236084,
+      "duration": 0.14383292198181152,
       "status": "collection_failed",
       "exit_code": 2,
       "pass_rate": 0.0,
@@ -48,9 +48,9 @@
       "summary_text": "No tests ran"
     }
   },
-  "overall_status": "\u26a0\ufe0f Unknown - Check test output",
+  "overall_status": "\u274c Failed - 2 test(s) failed",
   "issues": [
-    "backend: No tests found to run",
+    "backend: 2 test(s) failed",
     "frontend: Test collection failed",
     "e2e: Test collection failed"
   ]

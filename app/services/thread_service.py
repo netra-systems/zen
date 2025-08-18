@@ -1,7 +1,7 @@
 from typing import Optional, List, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.database.unit_of_work import UnitOfWork, get_unit_of_work
-from app.services.service_locator import IThreadService
+from app.services.service_interfaces import IThreadService
 from app.core.exceptions_database import DatabaseError, RecordNotFoundError
 from app.core.exceptions_base import NetraException
 from app.core.error_codes import ErrorCode, ErrorSeverity
@@ -55,13 +55,21 @@ class ThreadService(IThreadService):
         except Exception as e:
             raise _handle_database_error(f"get or create thread for user {user_id}", {"user_id": user_id}, e)
     
-    async def get_thread(self, thread_id: str, db: Optional[AsyncSession] = None) -> Optional[Thread]:
+    async def get_thread(self, thread_id: str, user_id: str = None, db: Optional[AsyncSession] = None) -> Optional[Thread]:
         """Get a thread by ID using repository pattern"""
         try:
             return await self._execute_with_uow(lambda uow: uow.threads.get_by_id(uow.session, thread_id), db)
         except Exception as e:
             logger.error(f"Error getting thread {thread_id}: {e}")
             return None
+    
+    async def get_threads(self, user_id: str, db: Optional[AsyncSession] = None) -> List[Thread]:
+        """Get all threads for a user using repository pattern"""
+        try:
+            return await self._execute_with_uow(lambda uow: uow.threads.get_by_user(uow.session, user_id), db)
+        except Exception as e:
+            logger.error(f"Error getting threads for user {user_id}: {e}")
+            return []
     
     def _prepare_message_data(self, thread_id: str, role: str, content: str, assistant_id: Optional[str], run_id: Optional[str], metadata: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         """Prepare message data for creation"""
@@ -165,7 +173,7 @@ class ThreadService(IThreadService):
     async def switch_thread(self, user_id: str, thread_id: str, db=None):
         """Switch user to a different thread."""
         # Validate that the thread exists and belongs to the user
-        thread = await self.get_thread(thread_id, db)
+        thread = await self.get_thread(thread_id, user_id, db)
         if thread:
             await manager.send_message(user_id, {
                 "type": "thread_switched", 

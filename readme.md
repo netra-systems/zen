@@ -198,7 +198,7 @@ python database_scripts/create_db.py
 python database_scripts/run_migrations.py
 
 # 5. Start services (RECOMMENDED CONFIGURATION)
-python dev_launcher.py --dynamic --no-backend-reload --load-secrets
+python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets
 ```
 
 ### 🔧 Local Development Mode (Without External Services)
@@ -484,7 +484,7 @@ ORDER BY timestamp;
 ```bash
 # BEST CONFIGURATION FOR NEW DEVELOPERS
 # Single command that handles everything optimally
-python dev_launcher.py --dynamic --no-backend-reload --load-secrets
+python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets
 
 # What this does:
 # ✅ Finds free ports automatically (no conflicts)
@@ -497,13 +497,13 @@ python dev_launcher.py --dynamic --no-backend-reload --load-secrets
 ##### Other Useful Configurations:
 ```bash
 # Development with hot reload (slower but auto-refreshes)
-python dev_launcher.py --dynamic
+python scripts/dev_launcher.py --dynamic
 
 # Maximum performance (no hot reload at all)
-python dev_launcher.py --dynamic --no-reload
+python scripts/dev_launcher.py --dynamic --no-reload
 
 # Custom ports
-python dev_launcher.py --backend-port 8080 --frontend-port 3001
+python scripts/dev_launcher.py --backend-port 8080 --frontend-port 3001
 
 # Check service status
 python scripts/service_discovery.py status
@@ -636,13 +636,13 @@ interface WebSocketMessage {
 
 ```bash
 # Quick smoke tests (< 30 seconds) - Use before commits
-python test_runner.py --level smoke
+python test_runner.py --level smoke --fast-fail
 
-# Unit tests (1-2 minutes) - Development validation (DEFAULT)
-python test_runner.py --level unit
+# Unit tests (1-2 minutes) - Development validation
+python test_runner.py --level unit --no-coverage --fast-fail
 
-# Integration tests (3-5 minutes) - Feature validation
-python test_runner.py --level integration
+# Integration tests (3-5 minutes) - Feature validation (DEFAULT for features)
+python test_runner.py --level integration --no-coverage --fast-fail
 
 # Comprehensive tests with coverage (30-45 minutes)
 python test_runner.py --level comprehensive

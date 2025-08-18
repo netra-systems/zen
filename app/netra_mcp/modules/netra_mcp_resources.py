@@ -111,49 +111,84 @@ class NetraMCPResources:
         @self.mcp.resource("netra://agents/catalog")
         async def get_agent_catalog() -> str:
             """Get detailed catalog of available agents"""
-            catalog = {
-                "agents": {
-                    "SupervisorAgent": {
-                        "description": "Main orchestrator for multi-agent workflows",
-                        "capabilities": [
-                            "Task decomposition",
-                            "Agent coordination",
-                            "Result aggregation",
-                            "Error recovery"
-                        ],
-                        "input_schema": {
-                            "type": "object",
-                            "properties": {
-                                "task": {"type": "string"},
-                                "context": {"type": "object"},
-                                "goals": {"type": "array"}
-                            }
-                        },
-                        "example_usage": {
-                            "task": "Optimize our LLM usage for cost",
-                            "context": {"current_spend": 50000},
-                            "goals": ["reduce_cost", "maintain_quality"]
-                        }
-                    },
-                    "OptimizationsCoreSubAgent": {
-                        "description": "Core optimization engine",
-                        "capabilities": [
-                            "Prompt optimization",
-                            "Model selection",
-                            "Batch processing strategies",
-                            "Caching recommendations"
-                        ],
-                        "optimization_strategies": [
-                            "prompt_compression",
-                            "model_downgrade",
-                            "response_caching",
-                            "batch_aggregation"
-                        ]
-                    }
-                }
-            }
-            
+            catalog = self._build_agent_catalog()
             return json.dumps(catalog, indent=2)
+    
+    def _build_agent_catalog(self) -> Dict[str, Any]:
+        """Build complete agent catalog structure"""
+        return {
+            "agents": {
+                **self._create_supervisor_agent_spec(),
+                **self._create_optimization_agent_spec()
+            }
+        }
+    
+    def _create_supervisor_agent_spec(self) -> Dict[str, Dict[str, Any]]:
+        """Create SupervisorAgent specification"""
+        return {
+            "SupervisorAgent": {
+                "description": "Main orchestrator for multi-agent workflows",
+                "capabilities": self._get_supervisor_capabilities(),
+                "input_schema": self._get_supervisor_schema(),
+                "example_usage": self._get_supervisor_example()
+            }
+        }
+    
+    def _create_optimization_agent_spec(self) -> Dict[str, Dict[str, Any]]:
+        """Create OptimizationsCoreSubAgent specification"""
+        return {
+            "OptimizationsCoreSubAgent": {
+                "description": "Core optimization engine",
+                "capabilities": self._get_optimization_capabilities(),
+                "optimization_strategies": self._get_optimization_strategies()
+            }
+        }
+    
+    def _get_supervisor_capabilities(self) -> list:
+        """Get SupervisorAgent capabilities list"""
+        return [
+            "Task decomposition",
+            "Agent coordination",
+            "Result aggregation",
+            "Error recovery"
+        ]
+    
+    def _get_supervisor_schema(self) -> Dict[str, Any]:
+        """Get SupervisorAgent input schema"""
+        return {
+            "type": "object",
+            "properties": {
+                "task": {"type": "string"},
+                "context": {"type": "object"},
+                "goals": {"type": "array"}
+            }
+        }
+    
+    def _get_supervisor_example(self) -> Dict[str, Any]:
+        """Get SupervisorAgent example usage"""
+        return {
+            "task": "Optimize our LLM usage for cost",
+            "context": {"current_spend": 50000},
+            "goals": ["reduce_cost", "maintain_quality"]
+        }
+    
+    def _get_optimization_capabilities(self) -> list:
+        """Get optimization agent capabilities"""
+        return [
+            "Prompt optimization",
+            "Model selection",
+            "Batch processing strategies",
+            "Caching recommendations"
+        ]
+    
+    def _get_optimization_strategies(self) -> list:
+        """Get optimization strategies list"""
+        return [
+            "prompt_compression",
+            "model_downgrade",
+            "response_caching",
+            "batch_aggregation"
+        ]
     
     def _register_current_metrics(self, server):
         """Register current metrics resource"""

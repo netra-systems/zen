@@ -487,4 +487,4 @@ Write-Host ""
 Write-Host "To destroy this deployment:" -ForegroundColor Yellow
 Write-Host "  terraform destroy -var-file=terraform.staging.tfvars"
 Write-Host ""
-Write-Host "Deployment completed at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" -ForegroundColor Gray
+Write-Host "Deployment completed successfully" -ForegroundColor Gray
