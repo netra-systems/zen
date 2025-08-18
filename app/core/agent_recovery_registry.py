@@ -37,19 +37,22 @@ class AgentRecoveryRegistry:
     
     def _register_default_strategies(self) -> None:
         """Register default recovery strategies."""
-        self.strategies = {
-            AgentType.TRIAGE: TriageAgentRecoveryStrategy(
-                self.configs[AgentType.TRIAGE]
-            ),
-            AgentType.DATA_ANALYSIS: DataAnalysisRecoveryStrategy(
-                self.configs[AgentType.DATA_ANALYSIS]
-            ),
-            AgentType.CORPUS_ADMIN: CorpusAdminRecoveryStrategy(
-                self.configs[AgentType.CORPUS_ADMIN]
-            ),
-            AgentType.SUPERVISOR: SupervisorRecoveryStrategy(
-                self.configs[AgentType.SUPERVISOR]
-            ),
+        triage_strategies = self._create_triage_strategies()
+        data_strategies = self._create_data_analysis_strategies()
+        self.strategies = {**triage_strategies, **data_strategies}
+
+    def _create_triage_strategies(self) -> Dict[AgentType, BaseAgentRecoveryStrategy]:
+        """Create triage and corpus admin strategies."""
+        return {
+            AgentType.TRIAGE: TriageAgentRecoveryStrategy(self.configs[AgentType.TRIAGE]),
+            AgentType.CORPUS_ADMIN: CorpusAdminRecoveryStrategy(self.configs[AgentType.CORPUS_ADMIN])
+        }
+
+    def _create_data_analysis_strategies(self) -> Dict[AgentType, BaseAgentRecoveryStrategy]:
+        """Create data analysis and supervisor strategies."""
+        return {
+            AgentType.DATA_ANALYSIS: DataAnalysisRecoveryStrategy(self.configs[AgentType.DATA_ANALYSIS]),
+            AgentType.SUPERVISOR: SupervisorRecoveryStrategy(self.configs[AgentType.SUPERVISOR])
         }
     
     def register_strategy(
@@ -84,10 +87,21 @@ class AgentRecoveryRegistry:
     
     def get_registry_status(self) -> Dict[str, Any]:
         """Get status of the recovery registry."""
+        basic_stats = self._get_basic_registry_stats()
+        agent_info = self._get_agent_priority_info()
+        return {**basic_stats, **agent_info}
+
+    def _get_basic_registry_stats(self) -> Dict[str, Any]:
+        """Get basic registry statistics."""
         return {
             'total_strategies': len(self.strategies),
             'total_configs': len(self.configs),
-            'registered_agents': [agent.value for agent in self.strategies.keys()],
+            'registered_agents': [agent.value for agent in self.strategies.keys()]
+        }
+
+    def _get_agent_priority_info(self) -> Dict[str, Any]:
+        """Get agent priority information."""
+        return {
             'agent_priorities': {
                 agent.value: config.priority.value 
                 for agent, config in self.configs.items()
@@ -112,24 +126,57 @@ class AgentRecoveryRegistry:
         recovery_requests: list[tuple[AgentType, RecoveryContext]]
     ) -> Dict[str, Any]:
         """Execute recovery for multiple agent operations."""
+        results, failed_recoveries = await self._process_recovery_requests(recovery_requests)
+        return self._build_batch_recovery_summary(results, failed_recoveries, recovery_requests)
+
+    async def _process_recovery_requests(
+        self, recovery_requests: list[tuple[AgentType, RecoveryContext]]
+    ) -> tuple[Dict[str, Any], list[Dict[str, Any]]]:
+        """Process all recovery requests and collect results."""
         results = {}
         failed_recoveries = []
-        
         for agent_type, context in recovery_requests:
-            try:
-                result = await self.recover_agent_operation(agent_type, context)
-                results[context.operation_id] = {
-                    'agent_type': agent_type.value,
-                    'status': 'recovered',
-                    'result': result
-                }
-            except Exception as e:
-                failed_recoveries.append({
-                    'agent_type': agent_type.value,
-                    'operation_id': context.operation_id,
-                    'error': str(e)
-                })
-        
+            await self._process_single_recovery_request(agent_type, context, results, failed_recoveries)
+        return results, failed_recoveries
+
+    async def _process_single_recovery_request(
+        self, agent_type: AgentType, context: RecoveryContext, 
+        results: Dict[str, Any], failed_recoveries: list[Dict[str, Any]]
+    ) -> None:
+        """Process a single recovery request."""
+        try:
+            result = await self.recover_agent_operation(agent_type, context)
+            self._record_successful_recovery(results, context, agent_type, result)
+        except Exception as e:
+            self._record_failed_recovery(failed_recoveries, agent_type, context, e)
+
+    def _record_successful_recovery(
+        self, results: Dict[str, Any], context: RecoveryContext, 
+        agent_type: AgentType, result: Any
+    ) -> None:
+        """Record a successful recovery operation."""
+        results[context.operation_id] = {
+            'agent_type': agent_type.value,
+            'status': 'recovered',
+            'result': result
+        }
+
+    def _record_failed_recovery(
+        self, failed_recoveries: list[Dict[str, Any]], agent_type: AgentType,
+        context: RecoveryContext, error: Exception
+    ) -> None:
+        """Record a failed recovery operation."""
+        failed_recoveries.append({
+            'agent_type': agent_type.value,
+            'operation_id': context.operation_id,
+            'error': str(error)
+        })
+
+    def _build_batch_recovery_summary(
+        self, results: Dict[str, Any], failed_recoveries: list[Dict[str, Any]],
+        recovery_requests: list[tuple[AgentType, RecoveryContext]]
+    ) -> Dict[str, Any]:
+        """Build summary of batch recovery operation."""
         return {
             'successful_recoveries': results,
             'failed_recoveries': failed_recoveries,

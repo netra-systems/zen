@@ -25,16 +25,21 @@ class AgentErrorHandler:
         self, operation_name: str, error: Exception, context: Optional[Dict[str, Any]], agent_name: str
     ) -> AgentError:
         """Create an error record for failed operation."""
-        return AgentError(
-            error_id=f"{int(time.time() * 1000)}_{len(self.error_history)}",
-            agent_name=agent_name,
-            operation=operation_name,
-            error_type=type(error).__name__,
-            message=str(error),
-            timestamp=datetime.now(timezone.utc),
-            severity=self.classify_error_severity(error),
-            context=context or {}
-        )
+        error_attrs = self._build_error_attributes(operation_name, error, context, agent_name)
+        return AgentError(**error_attrs)
+
+    def _build_error_attributes(self, operation_name: str, error: Exception, context: Optional[Dict[str, Any]], agent_name: str) -> Dict[str, Any]:
+        """Build error attributes dictionary for AgentError creation."""
+        return {
+            'error_id': f"{int(time.time() * 1000)}_{len(self.error_history)}",
+            'agent_name': agent_name,
+            'operation': operation_name,
+            'error_type': type(error).__name__,
+            'message': str(error),
+            'timestamp': datetime.now(timezone.utc),
+            'severity': self.classify_error_severity(error),
+            'context': context or {}
+        }
 
     def add_error_to_history(self, error_record: AgentError) -> None:
         """Add error record to history with size management."""

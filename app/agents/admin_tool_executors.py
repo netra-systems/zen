@@ -34,28 +34,43 @@ class AdminToolExecutors:
     
     async def execute_corpus_manager(self, action: str, **kwargs) -> ToolResult:
         """Execute corpus manager actions via corpus service"""
-        if action == 'create':
-            return await self._create_corpus(**kwargs)
-        elif action == 'list':
-            return await self._list_corpora()
-        elif action == 'validate':
-            return await self._validate_corpus(**kwargs)
-        else:
-            return {"error": f"Unknown corpus action: {action}"}
+        return await self._route_corpus_action(action, **kwargs)
+    
+    async def _route_corpus_action(self, action: str, **kwargs) -> ToolResult:
+        """Route corpus action to appropriate handler"""
+        action_handlers = self._get_corpus_action_handlers()
+        if action in action_handlers:
+            return await action_handlers[action](**kwargs)
+        return {"error": f"Unknown corpus action: {action}"}
+    
+    def _get_corpus_action_handlers(self) -> Dict[str, Any]:
+        """Get corpus action handler mapping"""
+        return {
+            'create': self._create_corpus,
+            'list': self._list_corpora,
+            'validate': self._validate_corpus
+        }
     
     async def _create_corpus(self, **kwargs) -> ToolResult:
         """Create new corpus"""
         from app.services import corpus_service
         
+        corpus_params = self._extract_corpus_params(**kwargs)
+        result = await self._call_corpus_service(corpus_service, corpus_params)
+        return {"status": "success", "corpus": result}
+    
+    async def _call_corpus_service(self, corpus_service, corpus_params: Dict[str, str]):
+        """Call corpus service with parameters"""
+        return await corpus_service.create_corpus(
+            **corpus_params, user_id=self.user.id, db=self.db
+        )
+    
+    def _extract_corpus_params(self, **kwargs) -> Dict[str, str]:
+        """Extract corpus creation parameters"""
         domain = kwargs.get('domain', 'general')
         name = kwargs.get('name', f'corpus_{domain}')
         description = kwargs.get('description', f'Corpus for {domain} domain')
-        
-        result = await corpus_service.create_corpus(
-            name=name, domain=domain, description=description,
-            user_id=self.user.id, db=self.db
-        )
-        return {"status": "success", "corpus": result}
+        return {"name": name, "domain": domain, "description": description}
     
     async def _list_corpora(self) -> ToolResult:
         """List all available corpora"""
@@ -87,15 +102,22 @@ class AdminToolExecutors:
         from app.services.synthetic_data_service import SyntheticDataService
         
         synthetic_service = SyntheticDataService(self.db)
+        generation_params = self._extract_synthetic_params(**kwargs)
+        result = await self._call_synthetic_service(synthetic_service, generation_params)
+        return {"status": "success", "data": result}
+    
+    async def _call_synthetic_service(self, service, params: Dict[str, Any]):
+        """Call synthetic data service with parameters"""
+        return await service.generate_synthetic_data(
+            **params, user_id=self.user.id
+        )
+    
+    def _extract_synthetic_params(self, **kwargs) -> Dict[str, Any]:
+        """Extract synthetic data generation parameters"""
         preset = kwargs.get('preset')
         corpus_id = kwargs.get('corpus_id')
         count = kwargs.get('count', 10)
-        
-        result = await synthetic_service.generate_synthetic_data(
-            preset=preset, corpus_id=corpus_id,
-            count=count, user_id=self.user.id
-        )
-        return {"status": "success", "data": result}
+        return {"preset": preset, "corpus_id": corpus_id, "count": count}
     
     async def _list_synthetic_presets(self) -> Dict[str, Any]:
         """List available synthetic data presets"""
@@ -118,31 +140,59 @@ class AdminToolExecutors:
         """Create new user"""
         from app.services import user_service
         
-        email = kwargs.get('email')
-        role = kwargs.get('role', 'standard_user')
-        
-        if not email:
-            return {"error": "email required for user creation"}
-        
+        email, role = self._extract_user_params(**kwargs)
+        validation_error = self._validate_user_creation(email)
+        if validation_error:
+            return validation_error
+        return await self._call_user_service(user_service, email, role)
+    
+    async def _call_user_service(self, user_service, email: str, role: str) -> Dict[str, Any]:
+        """Call user service to create user"""
         result = await user_service.create_user(
             email=email, role=role, db=self.db
         )
         return {"status": "success", "user": result}
     
+    def _extract_user_params(self, **kwargs) -> tuple:
+        """Extract user creation parameters"""
+        email = kwargs.get('email')
+        role = kwargs.get('role', 'standard_user')
+        return email, role
+    
+    def _validate_user_creation(self, email: str) -> Dict[str, str] | None:
+        """Validate user creation requirements"""
+        if not email:
+            return {"error": "email required for user creation"}
+        return None
+    
     async def _grant_permission(self, **kwargs) -> Dict[str, Any]:
         """Grant permission to user"""
         from app.services.permission_service import PermissionService
         
-        user_email = kwargs.get('user_email')
-        permission = kwargs.get('permission')
-        
-        if not user_email or not permission:
-            return {"error": "user_email and permission required"}
-        
-        success = await PermissionService.grant_permission(
+        user_email, permission = self._extract_permission_params(**kwargs)
+        validation_error = self._validate_permission_grant(user_email, permission)
+        if validation_error:
+            return validation_error
+        return await self._call_permission_service(PermissionService, user_email, permission)
+    
+    async def _call_permission_service(self, service, user_email: str, permission: str) -> Dict[str, Any]:
+        """Call permission service to grant permission"""
+        success = await service.grant_permission(
             user_email, permission, self.db
         )
         return {"status": "success" if success else "error", "granted": success}
+    
+    def _extract_permission_params(self, **kwargs) -> tuple:
+        """Extract permission grant parameters"""
+        user_email = kwargs.get('user_email')
+        permission = kwargs.get('permission')
+        return user_email, permission
+    
+    def _validate_permission_grant(self, user_email: str, permission: str) -> Dict[str, str] | None:
+        """Validate permission grant requirements"""
+        if not user_email or not permission:
+            return {"error": "user_email and permission required"}
+        return None
     
     async def execute_system_configurator(self, action: str, **kwargs) -> Dict[str, Any]:
         """Execute system configurator actions"""
@@ -155,18 +205,29 @@ class AdminToolExecutors:
     
     async def _update_system_setting(self, **kwargs) -> Dict[str, Any]:
         """Update system configuration setting"""
+        setting_name, value = self._extract_setting_params(**kwargs)
+        validation_error = self._validate_setting_update(setting_name)
+        if validation_error:
+            return validation_error
+        # For now, return simulated response since dynamic config updates would require more infrastructure
+        return self._build_setting_update_response(setting_name, value)
+    
+    def _extract_setting_params(self, **kwargs) -> tuple:
+        """Extract system setting parameters"""
         setting_name = kwargs.get('setting_name')
         value = kwargs.get('value')
-        
+        return setting_name, value
+    
+    def _validate_setting_update(self, setting_name: str) -> Dict[str, str] | None:
+        """Validate setting update requirements"""
         if not setting_name:
             return {"error": "setting_name required"}
-        
-        # For now, return simulated response since dynamic config updates
-        # would require more infrastructure
+        return None
+    
+    def _build_setting_update_response(self, setting_name: str, value: Any) -> Dict[str, Any]:
+        """Build setting update response"""
         return {
-            "status": "success", 
-            "setting": setting_name, 
-            "value": value,
+            "status": "success", "setting": setting_name, "value": value,
             "message": "Setting update simulated (would require restart)"
         }
     
@@ -175,13 +236,16 @@ class AdminToolExecutors:
         from app.core.config import get_settings
         
         settings = get_settings()
-        # Return safe subset of settings (no secrets)
-        safe_settings = {
+        safe_settings = self._build_safe_settings(settings)
+        return {"status": "success", "settings": safe_settings}
+    
+    def _build_safe_settings(self, settings) -> Dict[str, Any]:
+        """Build safe subset of settings without secrets"""
+        return {
             "environment": getattr(settings, 'ENVIRONMENT', 'unknown'),
             "database_url": "***hidden***",
             "debug_mode": getattr(settings, 'DEBUG', False)
         }
-        return {"status": "success", "settings": safe_settings}
     
     async def execute_log_analyzer(self, action: str, **kwargs) -> Dict[str, Any]:
         """Execute log analyzer actions via debug service"""

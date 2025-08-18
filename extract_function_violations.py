@@ -7,18 +7,20 @@ with open('agents_violations.json', 'r') as f:
     data = json.load(f)
 
 # Extract function violations
-function_violations = data.get('function_violations', {})
+all_violations = data.get('violations', [])
 
-# Group by file
+# Group by file - only function violations in app/agents
 violations_by_file = defaultdict(list)
 
-for violation in function_violations.get('violations', []):
-    file_path = violation['file_path']
-    if 'app\\agents\\' in file_path:
-        violations_by_file[file_path].append({
-            'function': violation['function_name'],
-            'lines': violation['actual_value']
-        })
+for violation in all_violations:
+    if violation.get('violation_type') == 'function_complexity':
+        file_path = violation['file_path']
+        if 'app\\agents\\' in file_path or 'app/agents/' in file_path:
+            violations_by_file[file_path].append({
+                'function': violation.get('function_name', 'unknown'),
+                'lines': violation.get('actual_value', 0),
+                'location': violation.get('location', '')
+            })
 
 # Sort by number of violations per file (descending)
 sorted_files = sorted(violations_by_file.items(), key=lambda x: len(x[1]), reverse=True)

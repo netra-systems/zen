@@ -65,14 +65,22 @@ class AdaptiveCircuitBreaker:
         """Execute operation with timing and error handling."""
         start_time = datetime.now()
         try:
-            result = await operation(*args, **kwargs)
-            response_time = self._calculate_response_time(start_time)
-            self._record_success(response_time)
-            return result
+            return await self._execute_operation_and_record_success(operation, start_time, *args, **kwargs)
         except Exception as e:
-            response_time = self._calculate_response_time(start_time)
-            self._record_failure(response_time)
+            self._handle_operation_exception(e, start_time)
             raise e
+
+    async def _execute_operation_and_record_success(self, operation: Callable, start_time: datetime, *args, **kwargs) -> Any:
+        """Execute operation and record success metrics."""
+        result = await operation(*args, **kwargs)
+        response_time = self._calculate_response_time(start_time)
+        self._record_success(response_time)
+        return result
+
+    def _handle_operation_exception(self, error: Exception, start_time: datetime) -> None:
+        """Handle operation exception and record failure."""
+        response_time = self._calculate_response_time(start_time)
+        self._record_failure(response_time)
     
     def _calculate_response_time(self, start_time: datetime) -> float:
         """Calculate response time in seconds."""
@@ -257,11 +265,22 @@ class AdaptiveCircuitBreaker:
     
     def _build_metrics_dict(self) -> Dict[str, Any]:
         """Build comprehensive metrics dictionary."""
+        basic_metrics = self._get_basic_metrics()
+        calculated_metrics = self._get_calculated_metrics()
+        return {**basic_metrics, **calculated_metrics}
+
+    def _get_basic_metrics(self) -> Dict[str, Any]:
+        """Get basic circuit breaker metrics."""
         return {
             'name': self.name, 'state': self.state.value,
             'failure_count': self.failure_count, 'success_count': self.success_count,
             'total_requests': self.total_requests, 'successful_requests': self.successful_requests,
-            'failed_requests': self.failed_requests, 'slow_requests': self.slow_requests,
+            'failed_requests': self.failed_requests, 'slow_requests': self.slow_requests
+        }
+
+    def _get_calculated_metrics(self) -> Dict[str, Any]:
+        """Get calculated metrics for circuit breaker."""
+        return {
             'failure_rate': self._calculate_failure_rate(),
             'adaptive_threshold': self.adaptive_failure_threshold,
             'last_state_change': self.last_state_change.isoformat(),

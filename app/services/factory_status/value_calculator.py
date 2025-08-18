@@ -137,34 +137,44 @@ class RevenueCalculator:
     def calculate(self, hours: int = 168) -> RevenueMetrics:
         """Calculate revenue-related metrics."""
         commits = self.commit_parser.get_commits(hours)
-        
-        revenue_features = 0
-        monetization_improvements = 0
-        market_expansion = 0
-        conversion_improvements = 0
-        
+        counts = self._count_revenue_features(commits)
+        scores = self._calculate_revenue_scores(commits, counts)
+        return self._build_revenue_metrics(counts, scores)
+    
+    def _count_revenue_features(self, commits: List[CommitInfo]) -> Dict[str, int]:
+        """Count all revenue-related features from commits."""
+        counts = {'revenue': 0, 'monetization': 0, 'market': 0, 'conversion': 0}
         for commit in commits:
-            if self._is_revenue_generating(commit):
-                revenue_features += 1
-            if self._is_monetization_improvement(commit):
-                monetization_improvements += 1
-            if self._is_market_expansion(commit):
-                market_expansion += 1
-            if self._is_conversion_improvement(commit):
-                conversion_improvements += 1
-        
-        subscription_score = self._calculate_subscription_impact(commits)
-        revenue_impact = self._estimate_revenue_impact(
-            revenue_features, monetization_improvements
-        )
-        
+            self._update_revenue_counts(counts, commit)
+        return counts
+    
+    def _update_revenue_counts(self, counts: Dict[str, int], commit: CommitInfo) -> None:
+        """Update revenue counts for a single commit."""
+        if self._is_revenue_generating(commit):
+            counts['revenue'] += 1
+        if self._is_monetization_improvement(commit):
+            counts['monetization'] += 1
+        if self._is_market_expansion(commit):
+            counts['market'] += 1
+        if self._is_conversion_improvement(commit):
+            counts['conversion'] += 1
+    
+    def _calculate_revenue_scores(self, commits: List[CommitInfo], counts: Dict[str, int]) -> Dict[str, float]:
+        """Calculate subscription score and revenue impact."""
+        return {
+            'subscription': self._calculate_subscription_impact(commits),
+            'impact': self._estimate_revenue_impact(counts['revenue'], counts['monetization'])
+        }
+    
+    def _build_revenue_metrics(self, counts: Dict[str, int], scores: Dict[str, float]) -> RevenueMetrics:
+        """Build RevenueMetrics from counts and scores."""
         return RevenueMetrics(
-            revenue_generating_features=revenue_features,
-            monetization_improvements=monetization_improvements,
-            market_expansion_features=market_expansion,
-            subscription_impact_score=subscription_score,
-            estimated_revenue_impact=revenue_impact,
-            conversion_improvements=conversion_improvements
+            revenue_generating_features=counts['revenue'],
+            monetization_improvements=counts['monetization'],
+            market_expansion_features=counts['market'],
+            subscription_impact_score=scores['subscription'],
+            estimated_revenue_impact=scores['impact'],
+            conversion_improvements=counts['conversion']
         )
     
     def _is_revenue_generating(self, commit: CommitInfo) -> bool:
@@ -194,10 +204,8 @@ class RevenueCalculator:
         """Calculate subscription impact score."""
         subscription_commits = [c for c in commits 
                               if "subscription" in c.message.lower()]
-        
         if not subscription_commits:
             return 0.0
-        
         return min(len(subscription_commits) * 2.5, 10.0)
     
     def _estimate_revenue_impact(self, revenue_features: int, 
@@ -205,9 +213,7 @@ class RevenueCalculator:
         """Estimate revenue impact in dollars."""
         base_feature_value = 10000
         monetization_value = 25000
-        
-        return (revenue_features * base_feature_value + 
-                monetization * monetization_value)
+        return (revenue_features * base_feature_value + monetization * monetization_value)
 
 
 class ComplianceSecurityCalculator:
@@ -220,36 +226,44 @@ class ComplianceSecurityCalculator:
     def calculate(self, hours: int = 168) -> ComplianceSecurityMetrics:
         """Calculate compliance and security metrics."""
         commits = self.commit_parser.get_commits(hours)
-        
-        security_fixes = 0
-        compliance_improvements = 0
-        audit_items = 0
-        data_protection = 0
-        
+        counts = self._count_security_features(commits)
+        scores = self._calculate_security_scores(counts)
+        return self._build_security_metrics(counts, scores)
+    
+    def _count_security_features(self, commits: List[CommitInfo]) -> Dict[str, int]:
+        """Count all security-related features from commits."""
+        counts = {'security': 0, 'compliance': 0, 'audit': 0, 'protection': 0}
         for commit in commits:
-            if self._is_security_fix(commit):
-                security_fixes += 1
-            if self._is_compliance_improvement(commit):
-                compliance_improvements += 1
-            if self._is_audit_preparation(commit):
-                audit_items += 1
-            if self._is_data_protection(commit):
-                data_protection += 1
-        
-        compliance_score = self._calculate_compliance_score(
-            security_fixes, compliance_improvements, audit_items
-        )
-        risk_reduction = self._calculate_risk_reduction(
-            security_fixes, data_protection
-        )
-        
+            self._update_security_counts(counts, commit)
+        return counts
+    
+    def _update_security_counts(self, counts: Dict[str, int], commit: CommitInfo) -> None:
+        """Update security counts for a single commit."""
+        if self._is_security_fix(commit):
+            counts['security'] += 1
+        if self._is_compliance_improvement(commit):
+            counts['compliance'] += 1
+        if self._is_audit_preparation(commit):
+            counts['audit'] += 1
+        if self._is_data_protection(commit):
+            counts['protection'] += 1
+    
+    def _calculate_security_scores(self, counts: Dict[str, int]) -> Dict[str, float]:
+        """Calculate compliance score and risk reduction."""
+        return {
+            'compliance': self._calculate_compliance_score(counts['security'], counts['compliance'], counts['audit']),
+            'risk': self._calculate_risk_reduction(counts['security'], counts['protection'])
+        }
+    
+    def _build_security_metrics(self, counts: Dict[str, int], scores: Dict[str, float]) -> ComplianceSecurityMetrics:
+        """Build ComplianceSecurityMetrics from counts and scores."""
         return ComplianceSecurityMetrics(
-            security_fixes=security_fixes,
-            compliance_improvements=compliance_improvements,
-            audit_preparation_items=audit_items,
-            data_protection_enhancements=data_protection,
-            regulatory_compliance_score=compliance_score,
-            security_risk_reduction=risk_reduction
+            security_fixes=counts['security'],
+            compliance_improvements=counts['compliance'],
+            audit_preparation_items=counts['audit'],
+            data_protection_enhancements=counts['protection'],
+            regulatory_compliance_score=scores['compliance'],
+            security_risk_reduction=scores['risk']
         )
     
     def _is_security_fix(self, commit: CommitInfo) -> bool:
@@ -278,10 +292,8 @@ class ComplianceSecurityCalculator:
     def _calculate_compliance_score(self, security: int, compliance: int, 
                                    audit: int) -> float:
         """Calculate compliance score."""
-        total_items = security + compliance + audit
-        return min(total_items * 2.5, 10.0)
+        return min((security + compliance + audit) * 2.5, 10.0)
     
     def _calculate_risk_reduction(self, security: int, protection: int) -> float:
         """Calculate security risk reduction percentage."""
-        risk_items = security + protection
-        return min(risk_items * 15, 100.0)
+        return min((security + protection) * 15, 100.0)

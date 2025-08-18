@@ -59,18 +59,24 @@ class AgentHealthMonitor:
         metrics: tuple[int, int, float, float], status: str, error_history: List[AgentError]
     ) -> AgentHealthStatus:
         """Build AgentHealthStatus object from calculated values."""
-        recent_errors, total_operations, success_rate, avg_response_time = metrics
-        return AgentHealthStatus(
-            agent_name=agent_name,
-            overall_health=overall_health,
-            circuit_breaker_state=cb_state,
-            recent_errors=recent_errors,
-            total_operations=total_operations,
-            success_rate=success_rate,
-            average_response_time=avg_response_time,
-            last_error=error_history[-1] if error_history else None,
-            status=status
+        health_attrs = self._create_health_status_attributes(
+            agent_name, overall_health, cb_state, metrics, status, error_history
         )
+        return AgentHealthStatus(**health_attrs)
+
+    def _create_health_status_attributes(
+        self, agent_name: str, overall_health: float, cb_state: str,
+        metrics: tuple[int, int, float, float], status: str, error_history: List[AgentError]
+    ) -> Dict[str, Any]:
+        """Create health status attributes dictionary."""
+        recent_errors, total_operations, success_rate, avg_response_time = metrics
+        return {
+            'agent_name': agent_name, 'overall_health': overall_health,
+            'circuit_breaker_state': cb_state, 'recent_errors': recent_errors,
+            'total_operations': total_operations, 'success_rate': success_rate,
+            'average_response_time': avg_response_time, 'status': status,
+            'last_error': error_history[-1] if error_history else None
+        }
 
     def _count_recent_errors(self, error_history: List[AgentError], seconds: int) -> int:
         """Count errors in the last N seconds."""
