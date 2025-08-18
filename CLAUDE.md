@@ -68,6 +68,34 @@ Always edit the existing file or create a new file and delete the old if it's no
 - Each module must have clear interface and single purpose
 - It's okay to have many modules.
 
+## 🔴 AGENT NAMING CONVENTIONS (MANDATORY)
+**CRITICAL**: Use precise naming to prevent confusion and ensure clear component identification
+
+### Component Naming Rules:
+**MANDATORY**: Follow these naming patterns to distinguish between component types
+
+1. **"Agent" suffix**: ONLY for LLM-based SubAgents extending BaseSubAgent
+   - ✅ TriageSubAgent, DataSubAgent, ReportingSubAgent
+   - ❌ Never use for utilities or services
+   - **Business Value**: Clear distinction ensures proper agent scaling and billing
+
+2. **"Executor/Manager" suffix**: For infrastructure patterns
+   - ✅ BroadcastExecutor, ExecutionManager, MCPManager
+   - Focus: Reliability, monitoring, infrastructure
+   - **Business Value**: Separates core business logic from infrastructure
+
+3. **"Service" suffix**: For specialized processors
+   - ✅ GitHubAnalyzerService, DemoService
+   - Focus: Task-specific operations
+   - **Business Value**: Modular services enable targeted feature monetization
+
+4. **Utility naming**: Descriptive names without "Agent"
+   - ✅ ToolDispatcher, StateManager, ErrorHandler
+   - ❌ Never append "Agent" to utilities
+   - **Business Value**: Clear separation prevents architectural confusion
+
+**ENFORCEMENT**: These naming conventions are MANDATORY for all new development and must be followed during refactoring.
+
 ## AI Factory Productivity
 - The system is built by Agents (LLM based) based on XML specs.
 - WHENEVER REASONABLE: Use "Tasks" system to spawn new agents as needed.

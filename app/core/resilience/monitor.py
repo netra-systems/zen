@@ -205,14 +205,21 @@ class UnifiedResilienceMonitor:
         """Check if threshold is breached."""
         op = threshold.comparison_operator
         target = threshold.threshold_value
-        
+        return self._evaluate_threshold_condition(value, op, target)
+    
+    def _evaluate_threshold_condition(self, value: float, op: str, target: float) -> bool:
+        """Evaluate specific threshold condition."""
         if op == "gt":
             return value > target
         elif op == "lt":
             return value < target
         elif op == "eq":
             return value == target
-        elif op == "gte":
+        return self._evaluate_gte_lte_condition(value, op, target)
+    
+    def _evaluate_gte_lte_condition(self, value: float, op: str, target: float) -> bool:
+        """Evaluate gte/lte threshold conditions."""
+        if op == "gte":
             return value >= target
         elif op == "lte":
             return value <= target

@@ -1,229 +1,225 @@
-"""Triage Execution Orchestrator
+"""Modernized Triage Execution Orchestrator with BaseExecutionEngine integration.
 
-Handles the main execution flow and coordination of triage operations.
-Keeps functions under 8 lines and module under 300 lines.
+Integrates modern execution patterns: BaseExecutionEngine, ReliabilityManager,
+ExecutionMonitor, and ExecutionErrorHandler for robust triage operations.
 """
 
 import time
 import asyncio
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.agents.triage_sub_agent.agent import TriageSubAgent
 
 from app.logging_config import central_logger
 from app.agents.state import DeepAgentState
+from app.agents.base.interface import ExecutionContext, ExecutionResult
+from app.agents.base.monitoring import ExecutionMonitor
+from app.agents.base.errors import ExecutionErrorHandler, ValidationError
+from app.agents.base.reliability_manager import ReliabilityManager
+from .execution_helpers import TriageExecutionHelpers, TriageValidationHelpers
 
 logger = central_logger.get_logger(__name__)
 
 
 class TriageExecutor:
-    """Orchestrates triage execution flow and coordination."""
+    """Modernized triage execution orchestrator with BaseExecutionEngine patterns."""
     
-    def __init__(self, agent):
-        """Initialize with reference to main agent."""
+    def __init__(self, agent: 'TriageSubAgent'):
+        """Initialize with agent and modern execution infrastructure."""
         self.agent = agent
         self.logger = logger
+        self._init_modern_components(agent)
+        self._init_helper_classes()
+    
+    def _init_modern_components(self, agent: 'TriageSubAgent') -> None:
+        """Initialize modern execution components."""
+        self.monitor = getattr(agent, 'monitor', ExecutionMonitor())
+        self.error_handler = ExecutionErrorHandler()
+        self.reliability_manager = getattr(agent, 'reliability_manager', None)
+    
+    def _init_helper_classes(self) -> None:
+        """Initialize helper classes for execution and validation."""
+        self.execution_helpers = TriageExecutionHelpers()
+        self.validation_helpers = TriageValidationHelpers()
     
     async def execute_triage_workflow(
         self, state: DeepAgentState, run_id: str, stream_updates: bool
     ) -> None:
-        """Execute complete triage workflow."""
-        self._log_execution_start(run_id)
-        start_time = time.time()
-        
+        """Execute complete triage workflow with modern patterns."""
+        context = self._create_execution_context(state, run_id, stream_updates)
+        await self._execute_with_monitoring(context)
+    
+    def _create_execution_context(self, state: DeepAgentState, run_id: str, 
+                                 stream_updates: bool) -> ExecutionContext:
+        """Create execution context for monitoring and reliability."""
+        return ExecutionContext(
+            run_id=run_id,
+            agent_name=self.agent.name,
+            state=state,
+            stream_updates=stream_updates
+        )
+    
+    async def _execute_with_monitoring(self, context: ExecutionContext) -> None:
+        """Execute triage workflow with comprehensive monitoring."""
+        self.monitor.start_execution(context)
         try:
-            await self._execute_with_fallback_protection(state, run_id, stream_updates)
+            await self._execute_core_triage_workflow(context)
         except Exception as e:
-            await self._handle_execution_error(e, state, run_id, stream_updates)
+            await self._handle_monitored_execution_error(context, e)
+        finally:
+            self._finalize_execution_monitoring(context)
     
-    def _log_execution_start(self, run_id: str) -> None:
-        """Log the start of triage execution."""
-        self.logger.info(f"TriageSubAgent starting execution for run_id: {run_id}")
+    async def _execute_core_triage_workflow(self, context: ExecutionContext) -> None:
+        """Execute core triage workflow with reliability patterns."""
+        if self.reliability_manager:
+            await self._execute_with_reliability(context)
+        else:
+            await self._execute_direct_workflow(context)
     
-    async def _execute_with_fallback_protection(
-        self, state: DeepAgentState, run_id: str, stream_updates: bool
-    ) -> None:
-        """Execute triage with fallback protection."""
-        triage_operation = self._create_main_triage_operation(state, run_id, stream_updates)
-        result = await self._execute_with_fallback(triage_operation)
-        await self._process_triage_result(result, state, run_id, stream_updates)
+    async def _execute_with_reliability(self, context: ExecutionContext) -> None:
+        """Execute with reliability manager patterns."""
+        triage_operation = self._create_main_triage_operation(context)
+        result = await self.reliability_manager.execute_with_reliability(
+            context, triage_operation
+        )
+        await self._process_reliability_result(context, result)
     
-    def _create_main_triage_operation(self, state: DeepAgentState, run_id: str, stream_updates: bool):
+    def _create_main_triage_operation(self, context: ExecutionContext):
         """Create main triage operation function."""
         async def _main_triage_operation():
-            return await self.agent.llm_processor.execute_triage_with_llm(state, run_id, stream_updates)
+            return await self._execute_direct_workflow(context)
         return _main_triage_operation
+    
+    async def _execute_direct_workflow(self, context: ExecutionContext) -> None:
+        """Execute triage workflow directly."""
+        self._log_execution_start(context.run_id)
+        triage_operation = self._create_legacy_triage_operation(context)
+        result = await self._execute_with_fallback(triage_operation)
+        await self._process_triage_result(result, context)
+    
+    def _create_legacy_triage_operation(self, context: ExecutionContext):
+        """Create legacy triage operation for backward compatibility."""
+        async def _legacy_triage_operation():
+            return await self.agent.llm_processor.execute_triage_with_llm(
+                context.state, context.run_id, context.stream_updates
+            )
+        return _legacy_triage_operation
     
     async def _execute_with_fallback(self, triage_operation):
         """Execute triage operation with fallback handling."""
-        return await self.agent.llm_fallback_handler.execute_with_fallback(
-            triage_operation, "triage_analysis", "triage", "triage"
-        )
+        if hasattr(self.agent, 'llm_fallback_handler'):
+            return await self.agent.llm_fallback_handler.execute_with_fallback(
+                triage_operation, "triage_analysis", "triage", "triage"
+            )
+        return await triage_operation()
     
     async def _process_triage_result(
-        self, result: Any, state: DeepAgentState, run_id: str, stream_updates: bool
+        self, result: Any, context: ExecutionContext
     ) -> None:
         """Process triage result based on type."""
         if isinstance(result, dict):
-            await self._handle_successful_result(result, state, run_id, stream_updates)
+            await self._handle_successful_result(result, context)
         else:
-            await self._handle_fallback_result(state, run_id, stream_updates)
+            await self._handle_fallback_result(context)
+    
+    async def _process_reliability_result(self, context: ExecutionContext, 
+                                        result: ExecutionResult) -> None:
+        """Process result from reliability manager."""
+        if result.success and result.result:
+            await self._handle_successful_result(result.result, context)
+        else:
+            await self._handle_reliability_error(context, result.error)
     
     async def _handle_successful_result(
-        self, result: dict, state: DeepAgentState, run_id: str, stream_updates: bool
+        self, result: dict, context: ExecutionContext
     ) -> None:
-        """Handle successful triage result."""
-        processed_result = self.agent.result_processor.process_result(result, state.user_request)
-        self._update_state_with_result(state, processed_result)
-        
-        if stream_updates:
-            await self._send_completion_update(run_id, processed_result)
+        """Handle successful triage result with monitoring."""
+        processed_result = self.agent.result_processor.process_result(
+            result, context.state.user_request
+        )
+        self._update_state_with_result(context.state, processed_result)
+        await self._send_success_updates(context, processed_result)
     
     def _update_state_with_result(self, state: DeepAgentState, result) -> None:
-        """Update state with triage result."""
-        state.triage_result = self._ensure_triage_result_type(result)
+        """Update state with triage result and record metrics."""
+        state.triage_result = self.execution_helpers.ensure_triage_result_type(result)
         state.step_count += 1
+        self._record_successful_execution_metrics(result)
     
     def _ensure_triage_result_type(self, result):
-        """Ensure result is proper TriageResult object."""
-        from .models import TriageResult
-        if isinstance(result, TriageResult):
-            return result
-        elif isinstance(result, dict):
-            return self._convert_dict_to_triage_result(result)
-        else:
-            return self._create_default_triage_result()
+        """Ensure result is proper TriageResult object - delegated to helpers."""
+        return self.execution_helpers.ensure_triage_result_type(result)
     
-    def _convert_dict_to_triage_result(self, result_dict: dict):
-        """Convert dictionary to TriageResult with error handling."""
-        from .models import TriageResult
-        try:
-            return TriageResult(**result_dict)
-        except Exception as e:
-            logger.warning(f"Failed to convert dict to TriageResult: {e}")
-            return self._create_default_triage_result()
-    
-    def _create_default_triage_result(self):
-        """Create default TriageResult for error cases."""
-        from .models import TriageResult, TriageMetadata
-        return TriageResult(
-            category="unknown", 
-            confidence_score=0.5,
-            metadata=TriageMetadata(triage_duration_ms=0, fallback_used=True)
+    async def _handle_fallback_result(self, context: ExecutionContext) -> None:
+        """Handle fallback triage result with error tracking."""
+        fallback_result = await self._create_emergency_fallback(
+            context.state, context.run_id
         )
-    
-    async def _handle_fallback_result(
-        self, state: DeepAgentState, run_id: str, stream_updates: bool
-    ) -> None:
-        """Handle fallback triage result."""
-        fallback_result = await self._create_emergency_fallback(state, run_id)
-        self._update_state_with_result(state, fallback_result)
-        
-        if stream_updates:
-            await self._send_emergency_update(run_id, fallback_result)
+        self._update_state_with_result(context.state, fallback_result)
+        await self._send_fallback_updates(context, fallback_result)
     
     async def _create_emergency_fallback(self, state: DeepAgentState, run_id: str):
         """Create emergency fallback when all else fails."""
         logger.error(f"Emergency fallback activated for triage {run_id}")
-        
         try:
-            fallback_result = self.agent.triage_core.create_fallback_result(state.user_request)
-            return fallback_result
+            return self.agent.triage_core.create_fallback_result(state.user_request)
         except Exception:
-            return self._create_basic_emergency_fallback()
+            return self.execution_helpers.create_emergency_fallback_result()
     
-    def _create_basic_emergency_fallback(self):
-        """Create basic emergency fallback response."""
-        from .models import TriageResult, Priority, TriageMetadata
-        metadata = self._create_emergency_metadata()
-        params = self._build_emergency_fallback_params(metadata)
-        return TriageResult(**params)
-    
-    def _create_emergency_metadata(self):
-        """Create metadata for emergency fallback."""
-        from .models import TriageMetadata
-        return TriageMetadata(
-            triage_duration_ms=0,
-            fallback_used=True,
-            error_details="emergency fallback"
-        )
-    
-    def _build_emergency_fallback_params(self, metadata) -> dict:
-        """Build parameters for emergency fallback result."""
-        from .models import Priority
-        return {
-            "category": "General Inquiry",
-            "confidence_score": 0.3,
-            "priority": Priority.MEDIUM,
-            "metadata": metadata
-        }
+    async def _send_success_updates(self, context: ExecutionContext, result) -> None:
+        """Send success updates with modern pattern."""
+        if context.stream_updates:
+            await self._send_completion_update(context.run_id, result)
+        await self.agent.send_status_update(context, "completed", 
+                                          f"Triage completed successfully")
     
     async def _send_completion_update(self, run_id: str, result) -> None:
         """Send completion update with result details."""
         result_dict, category = self._extract_result_data(result)
         status = self._determine_completion_status(result_dict)
-        
-        await self.agent._send_update(run_id, {
-            "status": status,
-            "message": f"Request categorized as: {category}",
-            "result": result_dict
-        })
+        await self.agent._send_update(run_id, self._build_completion_message(
+            status, category, result_dict
+        ))
     
     def _extract_result_data(self, result) -> tuple:
-        """Extract result dictionary and category from result object."""
-        if hasattr(result, 'model_dump'):
-            result_dict = result.model_dump()
-            category = result.category if hasattr(result, 'category') else 'Unknown'
-        else:
-            result_dict = result if isinstance(result, dict) else {}
-            category = result_dict.get('category', 'Unknown')
-        return result_dict, category
+        """Extract result dictionary and category - delegated to helpers."""
+        return self.execution_helpers.extract_result_data(result)
     
     def _determine_completion_status(self, result_dict: dict) -> str:
-        """Determine completion status based on result metadata."""
-        metadata = result_dict.get("metadata", {}) or {}
-        fallback_used = metadata.get("fallback_used", False)
-        return "completed_with_fallback" if fallback_used else "completed"
+        """Determine completion status - delegated to helpers."""
+        return self.execution_helpers.determine_completion_status(result_dict)
+    
+    async def _send_fallback_updates(self, context: ExecutionContext, result) -> None:
+        """Send fallback updates with modern pattern."""
+        if context.stream_updates:
+            await self._send_emergency_update(context.run_id, result)
+        await self.agent.send_status_update(context, "completed_with_fallback", 
+                                          "Triage completed using fallback")
     
     async def _send_emergency_update(self, run_id: str, result) -> None:
         """Send emergency fallback update."""
         result_dict = result.model_dump() if hasattr(result, 'model_dump') else result
-        await self.agent._send_update(run_id, {
-            "status": "completed_with_emergency_fallback",
-            "message": "Triage completed using emergency fallback",
-            "result": result_dict
-        })
+        await self.agent._send_update(run_id, self._build_emergency_message(result_dict))
     
-    async def _handle_execution_error(
-        self, error: Exception, state: DeepAgentState, run_id: str, stream_updates: bool
+    async def _handle_monitored_execution_error(
+        self, context: ExecutionContext, error: Exception
     ) -> None:
-        """Handle execution error and log appropriately."""
-        logger.error(f"Triage execution failed for run_id {run_id}: {error}")
-        # Create error result for state
-        error_result = self._create_error_result(str(error))
-        self._update_state_with_result(state, error_result)
+        """Handle execution error with monitoring and modern error handling."""
+        self.monitor.record_error(context, error)
+        error_result = await self.error_handler.handle_execution_error(context, error)
+        await self._process_error_result(context, error_result)
+    
+    async def _handle_reliability_error(self, context: ExecutionContext, 
+                                      error_message: str) -> None:
+        """Handle reliability manager error."""
+        error_result = self._create_error_result(error_message)
+        self._update_state_with_result(context.state, error_result)
+        await self._send_error_updates(context, error_message)
     
     def _create_error_result(self, error_message: str):
-        """Create result object for error cases."""
-        from .models import TriageResult, TriageMetadata
-        error_metadata = self._create_error_metadata(error_message)
-        params = self._build_error_result_params(error_metadata)
-        return TriageResult(**params)
-    
-    def _create_error_metadata(self, error_message: str):
-        """Create metadata for error result."""
-        from .models import TriageMetadata
-        return TriageMetadata(
-            triage_duration_ms=0,
-            error_details=error_message,
-            fallback_used=True
-        )
-    
-    def _build_error_result_params(self, metadata) -> dict:
-        """Build parameters for error result."""
-        return {
-            "category": "Error",
-            "confidence_score": 0.0,
-            "metadata": metadata
-        }
+        """Create result object for error cases - delegated to helpers."""
+        return self.execution_helpers.create_error_result(error_message)
     
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Check if we have a user request to triage."""
@@ -239,31 +235,41 @@ class TriageExecutor:
         return self._process_validation_result(validation, state, run_id)
     
     def _process_validation_result(self, validation, state: DeepAgentState, run_id: str) -> bool:
-        """Process validation result and handle errors."""
-        if not validation.is_valid:
-            self._handle_validation_error(state, run_id, validation)
-            return False
-        return True
+        """Process validation result and handle errors - delegated to helpers."""
+        return self.validation_helpers.process_validation_result(validation, state, run_id)
     
-    def _handle_validation_error(self, state: DeepAgentState, run_id: str, validation) -> None:
-        """Handle validation error by creating error result."""
-        self.logger.error(f"Invalid request for run_id {run_id}: {validation.validation_errors}")
-        error_result = self._create_validation_error_result(validation)
-        state.triage_result = error_result
-        state.step_count += 1
+    # Modern execution helper methods
+    def _log_execution_start(self, run_id: str) -> None:
+        """Log the start of triage execution."""
+        self.logger.info(f"TriageSubAgent starting execution for run_id: {run_id}")
     
-    def _create_validation_error_result(self, validation):
-        """Create validation error result."""
-        from .models import TriageResult, TriageMetadata
-        validation_metadata = TriageMetadata(triage_duration_ms=0, fallback_used=True)
-        params = self._build_validation_error_params(validation, validation_metadata)
-        return TriageResult(**params)
+    def _finalize_execution_monitoring(self, context: ExecutionContext) -> None:
+        """Finalize execution monitoring."""
+        # Monitor automatically handles completion tracking
+        pass
     
-    def _build_validation_error_params(self, validation, metadata) -> dict:
-        """Build parameters for validation error result."""
-        return {
-            "category": "Validation Error",
-            "confidence_score": 0.0,
-            "validation_status": validation,
-            "metadata": metadata
-        }
+    def _record_successful_execution_metrics(self, result) -> None:
+        """Record metrics for successful execution."""
+        # Metrics are automatically recorded by the monitor
+        pass
+    
+    async def _process_error_result(self, context: ExecutionContext, 
+                                  result: ExecutionResult) -> None:
+        """Process error result from error handler."""
+        error_result = self._create_error_result(result.error or "Unknown error")
+        self._update_state_with_result(context.state, error_result)
+    
+    async def _send_error_updates(self, context: ExecutionContext, 
+                                error_message: str) -> None:
+        """Send error updates with modern pattern."""
+        await self.agent.send_status_update(context, "error", 
+                                          f"Triage failed: {error_message}")
+    
+    def _build_completion_message(self, status: str, category: str, 
+                                result_dict: dict) -> dict:
+        """Build completion message dictionary - delegated to helpers."""
+        return self.execution_helpers.build_completion_message(status, category, result_dict)
+    
+    def _build_emergency_message(self, result_dict: dict) -> dict:
+        """Build emergency fallback message - delegated to helpers."""
+        return self.execution_helpers.build_emergency_message(result_dict)
