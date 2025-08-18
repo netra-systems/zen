@@ -259,13 +259,17 @@ class SupplyResearchScheduler:
     
     async def _execute_job_with_metrics(self, schedule: ResearchSchedule) -> bool:
         """Execute job with metrics tracking - simplified wrapper"""
-        from datetime import datetime, UTC
-        start_time = datetime.now(UTC)
+        start_time = self._get_current_time()
         try:
             return await self._execute_job_timed(schedule, start_time)
         except Exception:
             await self._handle_metrics_recording(schedule, start_time, False)
             return False
+    
+    def _get_current_time(self):
+        """Get current UTC time"""
+        from datetime import datetime, UTC
+        return datetime.now(UTC)
     
     async def _execute_job_timed(self, schedule: ResearchSchedule, start_time) -> bool:
         """Execute job and record success metrics"""
@@ -290,14 +294,32 @@ class SupplyResearchScheduler:
     
     def _build_metrics_data(self, job_name: str, execution_time: Any, success: bool) -> dict:
         """Build metrics data dictionary"""
+        base_data = self._create_base_metrics(job_name, success)
+        base_data["execution_time_seconds"] = self._calculate_execution_seconds(execution_time)
+        return base_data
+    
+    def _create_base_metrics(self, job_name: str, success: bool) -> dict:
+        """Create base metrics dictionary"""
+        timestamp = self._get_current_timestamp()
+        return self._build_base_dict(job_name, success, timestamp)
+    
+    def _get_current_timestamp(self) -> str:
+        """Get current UTC timestamp as ISO string"""
         from datetime import datetime, UTC
+        return datetime.now(UTC).isoformat()
+    
+    def _build_base_dict(self, job_name: str, success: bool, timestamp: str) -> dict:
+        """Build base metrics dictionary"""
         return {
             "job_name": job_name,
-            "execution_time_seconds": execution_time.total_seconds() if hasattr(execution_time, 'total_seconds') else float(execution_time),
             "success": success,
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": timestamp,
             "scheduler_type": "supply_research"
         }
+    
+    def _calculate_execution_seconds(self, execution_time: Any) -> float:
+        """Calculate execution time in seconds"""
+        return execution_time.total_seconds() if hasattr(execution_time, 'total_seconds') else float(execution_time)
     
     async def _store_metrics_data(self, job_name: str, metrics_data: dict):
         """Store metrics data in logger and result manager"""

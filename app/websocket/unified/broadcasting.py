@@ -33,14 +33,21 @@ class BroadcastMetrics:
 
     def _initialize_broadcast_stats(self) -> None:
         """Initialize core broadcast statistics."""
-        self.stats = {
-            "total_broadcasts": 0,
-            "successful_sends": 0,
-            "failed_sends": 0,
-            "room_broadcasts": 0,
-            "global_broadcasts": 0,
-            "job_broadcasts": 0,
-            "average_room_size": 0.0
+        base_stats = self._get_base_broadcast_stats()
+        extended_stats = self._get_extended_broadcast_stats()
+        self.stats = {**base_stats, **extended_stats}
+
+    def _get_base_broadcast_stats(self) -> Dict[str, Any]:
+        """Get base broadcast statistics dictionary."""
+        return {
+            "total_broadcasts": 0, "successful_sends": 0, "failed_sends": 0,
+            "room_broadcasts": 0
+        }
+
+    def _get_extended_broadcast_stats(self) -> Dict[str, Any]:
+        """Get extended broadcast statistics dictionary."""
+        return {
+            "global_broadcasts": 0, "job_broadcasts": 0, "average_room_size": 0.0
         }
 
     def _initialize_room_tracking(self) -> None:

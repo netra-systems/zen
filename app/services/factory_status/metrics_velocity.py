@@ -208,22 +208,50 @@ class VelocityCalculator:
     def _create_velocity_metrics(self, period: VelocityPeriod, trend: Tuple[TrendDirection, float], 
                                commits: List[CommitInfo], metrics_data: Dict[str, float]) -> VelocityMetrics:
         """Create velocity metrics from components."""
+        trend_data = self._extract_trend_data(trend)
+        confidence = self._calculate_confidence(commits)
+        return self._build_velocity_metrics_object(period, trend_data, confidence, metrics_data)
+    
+    def _extract_trend_data(self, trend: Tuple[TrendDirection, float]) -> Dict[str, Any]:
+        """Extract trend direction and slope."""
+        return {'direction': trend[0], 'slope': trend[1]}
+    
+    def _build_velocity_metrics_object(self, period: VelocityPeriod, trend_data: Dict[str, Any], 
+                                      confidence: float, metrics_data: Dict[str, float]) -> VelocityMetrics:
+        """Build the final VelocityMetrics object."""
         return VelocityMetrics(
             period=period,
-            trend_direction=trend[0],
-            trend_slope=trend[1],
-            confidence=self._calculate_confidence(commits),
+            trend_direction=trend_data['direction'],
+            trend_slope=trend_data['slope'],
+            confidence=confidence,
             **metrics_data
         )
     
     def _calculate_metrics_data(self, commits: List[CommitInfo], period_count: float) -> Dict[str, float]:
         """Calculate velocity metrics data."""
-        feature_commits = [c for c in commits if c.commit_type == CommitType.FEATURE]
+        feature_commits = self._filter_feature_commits(commits)
+        commit_totals = self._calculate_commit_totals(commits)
+        return self._build_metrics_data_dict(commits, feature_commits, commit_totals, period_count)
+    
+    def _filter_feature_commits(self, commits: List[CommitInfo]) -> List[CommitInfo]:
+        """Filter commits to get only feature commits."""
+        return [c for c in commits if c.commit_type == CommitType.FEATURE]
+    
+    def _calculate_commit_totals(self, commits: List[CommitInfo]) -> Dict[str, int]:
+        """Calculate total lines and files changed from commits."""
+        return {
+            'total_lines': sum(c.insertions + c.deletions for c in commits),
+            'total_files': sum(c.files_changed for c in commits)
+        }
+    
+    def _build_metrics_data_dict(self, commits: List[CommitInfo], feature_commits: List[CommitInfo], 
+                               commit_totals: Dict[str, int], period_count: float) -> Dict[str, float]:
+        """Build the metrics data dictionary."""
         return {
             'commits_per_period': len(commits) / period_count,
-            'lines_per_period': sum(c.insertions + c.deletions for c in commits) / period_count,
+            'lines_per_period': commit_totals['total_lines'] / period_count,
             'features_per_period': len(feature_commits) / period_count,
-            'files_per_period': sum(c.files_changed for c in commits) / period_count
+            'files_per_period': commit_totals['total_files'] / period_count
         }
     
     def _get_period_count(self, period: VelocityPeriod, hours: int) -> float:
@@ -259,13 +287,21 @@ class VelocityCalculator:
     
     def _build_peak_activity_data(self, commits: List[CommitInfo], peak_hour: int, peak_commits: List) -> dict:
         """Build peak activity data dictionary."""
+        activity_metrics = self._calculate_peak_activity_metrics(commits, peak_commits)
+        return self._format_peak_activity_dict(peak_hour, activity_metrics)
+    
+    def _calculate_peak_activity_metrics(self, commits: List[CommitInfo], peak_commits: List) -> Dict[str, Any]:
+        """Calculate metrics for peak activity period."""
         return {
-            'hour': peak_hour,
             'day_of_week': self._find_peak_day(commits),
             'commits_count': len(peak_commits),
             'activity_score': self._calculate_activity_score(peak_commits),
             'authors_active': len(set(c.author for c in peak_commits))
         }
+    
+    def _format_peak_activity_dict(self, peak_hour: int, activity_metrics: Dict[str, Any]) -> dict:
+        """Format peak activity data into final dictionary."""
+        return {'hour': peak_hour, **activity_metrics}
     
     def _find_peak_day(self, commits: List[CommitInfo]) -> int:
         """Find peak day of week (0=Monday)."""
@@ -394,12 +430,25 @@ class VelocityCalculator:
     
     def _build_baseline_metrics(self, commits: List[CommitInfo], feature_commits: List, historical_days: int) -> Dict[str, Any]:
         """Build baseline metrics dictionary."""
+        daily_rates = self._calculate_daily_baseline_rates(commits, feature_commits, historical_days)
+        return self._format_baseline_metrics_dict(historical_days, daily_rates)
+    
+    def _calculate_daily_baseline_rates(self, commits: List[CommitInfo], feature_commits: List, 
+                                      historical_days: int) -> Dict[str, float]:
+        """Calculate daily rates for baseline metrics."""
+        total_lines = sum(c.insertions + c.deletions for c in commits)
+        return {
+            'commits_per_day': len(commits) / historical_days,
+            'lines_per_day': total_lines / historical_days,
+            'features_per_week': len(feature_commits) / (historical_days / 7)
+        }
+    
+    def _format_baseline_metrics_dict(self, historical_days: int, daily_rates: Dict[str, float]) -> Dict[str, Any]:
+        """Format baseline metrics into final dictionary."""
         return {
             'period_days': historical_days,
-            'commits_per_day': len(commits) / historical_days,
-            'lines_per_day': sum(c.insertions + c.deletions for c in commits) / historical_days,
-            'features_per_week': len(feature_commits) / (historical_days / 7),
-            'established_date': datetime.now()
+            'established_date': datetime.now(),
+            **daily_rates
         }
     
     def compare_to_baseline(self, current: VelocityMetrics, 

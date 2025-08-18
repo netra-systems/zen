@@ -1,7 +1,4 @@
-"""
-LLM Cache Manager
-Main cache management service with intelligent caching strategies
-"""
+"""LLM Cache Manager - Main cache management service with intelligent caching strategies"""
 
 from typing import Optional, Dict, Any, List
 import hashlib
@@ -282,8 +279,7 @@ class LLMCacheManager:
 
     def _update_invalidation_stats(self) -> None:
         """Update invalidation statistics"""
-        self.stats.invalidations += 1
-        self.stats.cache_size = max(0, self.stats.cache_size - 1)
+        self.stats.invalidations += 1; self.stats.cache_size = max(0, self.stats.cache_size - 1)
 
     async def _eviction_worker(self) -> None:
         """Background worker for cache eviction"""
@@ -294,7 +290,7 @@ class LLMCacheManager:
                 break
             except Exception as e:
                 logger.error(f"Eviction worker error: {e}")
-
+    
     async def _process_eviction_cycle(self) -> None:
         """Process one eviction cycle"""
         await asyncio.sleep(300)

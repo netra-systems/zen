@@ -23,36 +23,40 @@ class InnovationCalculator:
     def calculate(self, hours: int = 168) -> InnovationMetrics:
         """Calculate innovation vs maintenance metrics."""
         commits = self.commit_parser.get_commits(hours)
-        
-        innovation_commits = 0
-        maintenance_commits = 0
-        new_tech = 0
-        experimental = 0
-        
+        commit_counters = self._analyze_commits_for_innovation(commits)
+        return self._build_innovation_metrics(commit_counters, len(commits))
+    
+    def _analyze_commits_for_innovation(self, commits: List[CommitInfo]) -> dict:
+        """Analyze commits and count innovation indicators."""
+        counters = {'innovation': 0, 'maintenance': 0, 'new_tech': 0, 'experimental': 0}
         for commit in commits:
-            if self._is_innovation_commit(commit):
-                innovation_commits += 1
-            elif self._is_maintenance_commit(commit):
-                maintenance_commits += 1
-            
-            if self._involves_new_technology(commit):
-                new_tech += 1
-            if self._is_experimental(commit):
-                experimental += 1
+            self._update_commit_counters(counters, commit)
+        return counters
+    
+    def _update_commit_counters(self, counters: dict, commit: CommitInfo) -> None:
+        """Update commit counters based on commit type."""
+        if self._is_innovation_commit(commit):
+            counters['innovation'] += 1
+        elif self._is_maintenance_commit(commit):
+            counters['maintenance'] += 1
         
-        total_commits = len(commits)
-        innovation_ratio = (innovation_commits / max(total_commits, 1)) * 100
-        
+        if self._involves_new_technology(commit):
+            counters['new_tech'] += 1
+        if self._is_experimental(commit):
+            counters['experimental'] += 1
+    
+    def _build_innovation_metrics(self, counters: dict, total_commits: int) -> InnovationMetrics:
+        """Build innovation metrics from counters."""
+        innovation_ratio = (counters['innovation'] / max(total_commits, 1)) * 100
         advancement_score = self._calculate_advancement_score(
-            innovation_commits, new_tech, experimental
+            counters['innovation'], counters['new_tech'], counters['experimental']
         )
-        
         return InnovationMetrics(
-            innovation_commits=innovation_commits,
-            maintenance_commits=maintenance_commits,
+            innovation_commits=counters['innovation'],
+            maintenance_commits=counters['maintenance'],
             innovation_ratio=innovation_ratio,
-            new_technology_adoption=new_tech,
-            experimental_features=experimental,
+            new_technology_adoption=counters['new_tech'],
+            experimental_features=counters['experimental'],
             technical_advancement_score=advancement_score
         )
     
@@ -98,22 +102,31 @@ class ROICalculator:
     def estimate(self, hours: int = 168) -> ROIEstimate:
         """Estimate return on investment."""
         commits = self.commit_parser.get_commits(hours)
-        
+        roi_data = self._calculate_roi_data(commits)
+        return self._build_roi_estimate(roi_data)
+    
+    def _calculate_roi_data(self, commits: List[CommitInfo]) -> dict:
+        """Calculate ROI calculation data."""
         investment_hours = self._calculate_investment_hours(commits)
         benefit_value = self._estimate_benefit_value(commits)
-        
-        roi_percentage = self._calculate_roi_percentage(investment_hours, benefit_value)
-        payback_days = self._calculate_payback_period(investment_hours, benefit_value)
-        confidence = self._calculate_confidence_level(commits)
-        timeline = self._estimate_value_timeline(commits)
-        
+        return {
+            'investment_hours': investment_hours,
+            'benefit_value': benefit_value,
+            'roi_percentage': self._calculate_roi_percentage(investment_hours, benefit_value),
+            'payback_days': self._calculate_payback_period(investment_hours, benefit_value),
+            'confidence': self._calculate_confidence_level(commits),
+            'timeline': self._estimate_value_timeline(commits)
+        }
+    
+    def _build_roi_estimate(self, roi_data: dict) -> ROIEstimate:
+        """Build ROI estimate from data."""
         return ROIEstimate(
-            investment_hours=investment_hours,
-            estimated_benefit_value=benefit_value,
-            roi_percentage=roi_percentage,
-            payback_period_days=payback_days,
-            confidence_level=confidence,
-            value_realization_timeline=timeline
+            investment_hours=roi_data['investment_hours'],
+            estimated_benefit_value=roi_data['benefit_value'],
+            roi_percentage=roi_data['roi_percentage'],
+            payback_period_days=roi_data['payback_days'],
+            confidence_level=roi_data['confidence'],
+            value_realization_timeline=roi_data['timeline']
         )
     
     def _calculate_investment_hours(self, commits: List[CommitInfo]) -> float:
@@ -125,17 +138,20 @@ class ROICalculator:
     
     def _estimate_benefit_value(self, commits: List[CommitInfo]) -> float:
         """Estimate total benefit value."""
-        benefit = 0.0
-        
-        for commit in commits:
-            if commit.commit_type == CommitType.FEATURE:
-                benefit += 5000
-            elif commit.commit_type == CommitType.FIX:
-                benefit += 2000
-            elif commit.commit_type == CommitType.PERF:
-                benefit += 3000
-        
-        return benefit
+        benefit_values = self._get_benefit_type_values()
+        return sum(self._calculate_commit_benefit(commit, benefit_values) for commit in commits)
+    
+    def _get_benefit_type_values(self) -> dict:
+        """Get benefit values for different commit types."""
+        return {
+            CommitType.FEATURE: 5000,
+            CommitType.FIX: 2000,
+            CommitType.PERF: 3000
+        }
+    
+    def _calculate_commit_benefit(self, commit: CommitInfo, benefit_values: dict) -> float:
+        """Calculate benefit value for a single commit."""
+        return benefit_values.get(commit.commit_type, 0.0)
     
     def _calculate_roi_percentage(self, hours: float, benefit: float) -> float:
         """Calculate ROI percentage."""
@@ -191,37 +207,49 @@ class BusinessValueCalculator:
     
     def calculate_business_value_metrics(self, hours: int = 168) -> BusinessValueMetrics:
         """Calculate comprehensive business value metrics."""
+        calculators = self._initialize_value_calculators()
+        metrics_data = self._calculate_all_metrics(calculators, hours)
+        return self._build_business_value_metrics(metrics_data)
+    
+    def _initialize_value_calculators(self) -> dict:
+        """Initialize all value calculation components."""
         from .value_calculator import (
             ObjectiveMapper, CustomerImpactCalculator, 
             RevenueCalculator, ComplianceSecurityCalculator
         )
-        
-        objective_mapper = ObjectiveMapper(self.repo_path)
-        customer_calc = CustomerImpactCalculator(self.repo_path)
-        revenue_calc = RevenueCalculator(self.repo_path)
-        compliance_calc = ComplianceSecurityCalculator(self.repo_path)
-        innovation_calc = InnovationCalculator(self.repo_path)
-        roi_calc = ROICalculator(self.repo_path)
-        
-        objective_mapping = objective_mapper.map_commits(hours)
-        customer_impact = customer_calc.calculate(hours)
-        revenue_metrics = revenue_calc.calculate(hours)
-        compliance_security = compliance_calc.calculate(hours)
-        innovation_metrics = innovation_calc.calculate(hours)
-        roi_estimate = roi_calc.estimate(hours)
-        
+        return {
+            'objective_mapper': ObjectiveMapper(self.repo_path),
+            'customer_calc': CustomerImpactCalculator(self.repo_path),
+            'revenue_calc': RevenueCalculator(self.repo_path),
+            'compliance_calc': ComplianceSecurityCalculator(self.repo_path),
+            'innovation_calc': InnovationCalculator(self.repo_path),
+            'roi_calc': ROICalculator(self.repo_path)
+        }
+    
+    def _calculate_all_metrics(self, calculators: dict, hours: int) -> dict:
+        """Calculate all business metrics using calculators."""
+        return {
+            'objective_mapping': calculators['objective_mapper'].map_commits(hours),
+            'customer_impact': calculators['customer_calc'].calculate(hours),
+            'revenue_metrics': calculators['revenue_calc'].calculate(hours),
+            'compliance_security': calculators['compliance_calc'].calculate(hours),
+            'innovation_metrics': calculators['innovation_calc'].calculate(hours),
+            'roi_estimate': calculators['roi_calc'].estimate(hours)
+        }
+    
+    def _build_business_value_metrics(self, metrics_data: dict) -> BusinessValueMetrics:
+        """Build final BusinessValueMetrics object."""
         overall_value = self._calculate_overall_business_value(
-            customer_impact, revenue_metrics, compliance_security, 
-            innovation_metrics
+            metrics_data['customer_impact'], metrics_data['revenue_metrics'], 
+            metrics_data['compliance_security'], metrics_data['innovation_metrics']
         )
-        
         return BusinessValueMetrics(
-            objective_mapping=objective_mapping,
-            customer_impact=customer_impact,
-            revenue_metrics=revenue_metrics,
-            compliance_security=compliance_security,
-            roi_estimate=roi_estimate,
-            innovation_metrics=innovation_metrics,
+            objective_mapping=metrics_data['objective_mapping'],
+            customer_impact=metrics_data['customer_impact'],
+            revenue_metrics=metrics_data['revenue_metrics'],
+            compliance_security=metrics_data['compliance_security'],
+            roi_estimate=metrics_data['roi_estimate'],
+            innovation_metrics=metrics_data['innovation_metrics'],
             overall_business_value=overall_value
         )
     
@@ -230,12 +258,20 @@ class BusinessValueCalculator:
                                          security: ComplianceSecurityMetrics,
                                          innovation: InnovationMetrics) -> float:
         """Calculate overall business value score."""
-        customer_score = customer.customer_satisfaction_score
-        revenue_score = min(revenue.estimated_revenue_impact / 10000, 10)
-        security_score = security.regulatory_compliance_score
-        innovation_score = innovation.technical_advancement_score
-        
+        component_scores = self._extract_component_scores(customer, revenue, security, innovation)
+        return self._apply_business_value_weights(component_scores)
+    
+    def _extract_component_scores(self, customer: CustomerImpactMetrics, revenue: RevenueMetrics,
+                                 security: ComplianceSecurityMetrics, innovation: InnovationMetrics) -> list:
+        """Extract component scores for business value calculation."""
+        return [
+            customer.customer_satisfaction_score,
+            min(revenue.estimated_revenue_impact / 10000, 10),
+            security.regulatory_compliance_score,
+            innovation.technical_advancement_score
+        ]
+    
+    def _apply_business_value_weights(self, scores: list) -> float:
+        """Apply weights to business value component scores."""
         weights = [0.3, 0.25, 0.25, 0.2]
-        scores = [customer_score, revenue_score, security_score, innovation_score]
-        
         return sum(w * s for w, s in zip(weights, scores))

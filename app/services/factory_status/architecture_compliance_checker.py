@@ -6,7 +6,7 @@ Follows 300-line limit with 8-line function limit.
 
 import re
 import subprocess
-from typing import Dict, List
+from typing import Dict, List, Any
 
 from .quality_models import ArchitectureCompliance, ComplianceStatus
 
@@ -23,25 +23,9 @@ class ArchitectureComplianceChecker:
     
     def check_compliance(self) -> ArchitectureCompliance:
         """Check architecture compliance against limits."""
-        line_violations = self._check_file_line_limits()
-        function_violations = self._check_function_line_limits()
-        module_violations = self._check_module_violations()
-        
-        compliance_score = self._calculate_compliance_score(
-            line_violations, function_violations, module_violations
-        )
-        status = self._determine_status(compliance_score)
-        
-        return ArchitectureCompliance(
-            line_limit_violations=line_violations,
-            function_limit_violations=function_violations,
-            module_violations=module_violations,
-            compliance_score=compliance_score,
-            compliance_status=status,
-            violation_details=self._build_violation_details(
-                line_violations, function_violations, module_violations
-            )
-        )
+        violations_data = self._collect_all_violations()
+        compliance_metrics = self._calculate_compliance_metrics(violations_data)
+        return self._build_compliance_result(violations_data, compliance_metrics)
     
     def _calculate_compliance_score(self, line_violations: int,
                                    function_violations: int,
@@ -50,14 +34,39 @@ class ArchitectureComplianceChecker:
         total_violations = line_violations + function_violations + len(module_violations)
         return max(0, 100 - (total_violations * 5))
     
-    def _build_violation_details(self, line_violations: int,
-                               function_violations: int,
-                               module_violations: List[str]) -> Dict[str, int]:
+    def _collect_all_violations(self) -> Dict[str, Any]:
+        """Collect all types of violations."""
+        line_violations = self._check_file_line_limits()
+        function_violations = self._check_function_line_limits()
+        module_violations = self._check_module_violations()
+        return {'line': line_violations, 'function': function_violations, 'module': module_violations}
+    
+    def _calculate_compliance_metrics(self, violations_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Calculate compliance score and status from violations."""
+        compliance_score = self._calculate_compliance_score(
+            violations_data['line'], violations_data['function'], violations_data['module']
+        )
+        status = self._determine_status(compliance_score)
+        return {'score': compliance_score, 'status': status}
+    
+    def _build_compliance_result(self, violations_data: Dict[str, Any], 
+                                compliance_metrics: Dict[str, Any]) -> ArchitectureCompliance:
+        """Build final compliance result object."""
+        return ArchitectureCompliance(
+            line_limit_violations=violations_data['line'],
+            function_limit_violations=violations_data['function'],
+            module_violations=violations_data['module'],
+            compliance_score=compliance_metrics['score'],
+            compliance_status=compliance_metrics['status'],
+            violation_details=self._build_violation_details(violations_data)
+        )
+    
+    def _build_violation_details(self, violations_data: Dict[str, Any]) -> Dict[str, int]:
         """Build violation details dictionary."""
         return {
-            "file_line_limit": line_violations,
-            "function_line_limit": function_violations,
-            "module_structure": len(module_violations)
+            "file_line_limit": violations_data['line'],
+            "function_line_limit": violations_data['function'],
+            "module_structure": len(violations_data['module'])
         }
     
     def _check_file_line_limits(self) -> int:

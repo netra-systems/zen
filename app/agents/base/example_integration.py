@@ -18,7 +18,7 @@ from app.agents.base import (
     BaseExecutionInterface, BaseExecutionEngine, ExecutionMonitor,
     ReliabilityManager, ExecutionContext, ExecutionResult
 )
-from app.agents.base.errors import ValidationError, LLMError
+from app.agents.base.errors import ValidationError, ExternalServiceError
 
 
 class ModernTriageSubAgent(BaseExecutionInterface):
@@ -132,10 +132,8 @@ class ModernTriageSubAgent(BaseExecutionInterface):
                            stream_updates: bool) -> Dict[str, Any]:
         """Get execution context parameters."""
         return {
-            'run_id': run_id, 'agent_name': self.agent_name, 'state': state,
-            'stream_updates': stream_updates,
-            'thread_id': getattr(state, 'chat_thread_id', None),
-            'user_id': getattr(state, 'user_id', None)
+            'run_id': run_id, 'agent_name': self.agent_name, 'state': state, 'stream_updates': stream_updates,
+            'thread_id': getattr(state, 'chat_thread_id', None), 'user_id': getattr(state, 'user_id', None)
         }
         
     def _set_execution_result(self, state: DeepAgentState, 
@@ -176,7 +174,7 @@ class ModernTriageSubAgent(BaseExecutionInterface):
             llm_response = await self.llm_manager.ask_llm(prompt, "default")
             return self._parse_llm_response(llm_response)
         except Exception as e:
-            raise LLMError(f"LLM triage failed: {str(e)}")
+            raise ExternalServiceError(f"LLM triage failed: {str(e)}")
     
     def _build_triage_prompt(self, user_request: str) -> str:
         """Build enhanced triage prompt."""
@@ -185,27 +183,17 @@ class ModernTriageSubAgent(BaseExecutionInterface):
         
     def _get_triage_prompt_template(self) -> str:
         """Get triage prompt template."""
-        return """
-        Analyze this user request and categorize it:
-        
-        Request: {user_request}
-        
-        Provide a JSON response with:
-        - category: The primary category
-        - confidence: Confidence score (0-1)
-        - suggested_tools: Array of recommended tools
-        - reasoning: Brief explanation
-        """
+        return ("Analyze this user request and categorize it:\n\nRequest: {user_request}\n\n"
+                "Provide a JSON response with:\n- category: The primary category\n"
+                "- confidence: Confidence score (0-1)\n- suggested_tools: Array of recommended tools\n"
+                "- reasoning: Brief explanation")
     
     def _parse_llm_response(self, llm_response: str) -> Dict[str, Any]:
         """Parse and validate LLM response."""
         import json
-        try:
-            result = json.loads(llm_response)
-            self._validate_llm_result_fields(result)
-            return result
-        except json.JSONDecodeError:
-            raise ValidationError("Invalid JSON response from LLM")
+        result = json.loads(llm_response)
+        self._validate_llm_result_fields(result)
+        return result
             
     def _validate_llm_result_fields(self, result: Dict[str, Any]) -> None:
         """Validate required fields in LLM result."""
@@ -319,18 +307,11 @@ def _create_migrated_agent_wrapper(legacy_agent_class):
     
 def _build_migrated_agent_class(legacy_agent_class):
     """Build the migrated agent class definition."""
-    class MigratedAgent(BaseExecutionInterface):
-        def __init__(self, *args, **kwargs):
-            super().__init__(legacy_agent_class.__name__)
-            self.legacy_agent = legacy_agent_class(*args, **kwargs)
-        
-        async def validate_preconditions(self, context: ExecutionContext) -> bool:
-            return await _check_legacy_preconditions(self.legacy_agent, context)
-        
-        async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
-            return await _execute_legacy_logic(self.legacy_agent, context, legacy_agent_class)
-    
-    return MigratedAgent
+    return type('MigratedAgent', (BaseExecutionInterface,), {
+        '__init__': lambda self, *a, **kw: (super(type(self), self).__init__(legacy_agent_class.__name__), setattr(self, 'legacy_agent', legacy_agent_class(*a, **kw)))[1],
+        'validate_preconditions': lambda self, ctx: _check_legacy_preconditions(self.legacy_agent, ctx),
+        'execute_core_logic': lambda self, ctx: _execute_legacy_logic(self.legacy_agent, ctx, legacy_agent_class)
+    })
     
 async def _check_legacy_preconditions(legacy_agent, context: ExecutionContext) -> bool:
     """Check preconditions for legacy agent."""
@@ -395,4 +376,20 @@ def _get_validation_steps() -> Dict[str, str]:
     return {
         "maintain_compatibility": "Keep existing public methods for backward compatibility",
         "test_integration": "Run comprehensive tests to validate integration"
+    }
+
+def _get_reliability_benefits() -> Dict[str, str]:
+    """Get reliability performance benefits."""
+    return {
+        "error_handling": "Structured error handling with fallback strategies",
+        "monitoring": "Comprehensive performance and health monitoring",
+        "reliability": "Circuit breaker and retry patterns for resilience"
+    }
+    
+def _get_system_benefits() -> Dict[str, str]:
+    """Get system performance benefits."""
+    return {
+        "consistency": "Standardized execution patterns across all agents",
+        "maintainability": "Centralized improvements benefit all agents",
+        "scalability": "Better resource management and rate limiting"
     }

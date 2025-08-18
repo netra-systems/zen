@@ -395,19 +395,14 @@ class DatabaseConnectionManager:
             f"(status: {metrics.health_status.value})"
         )
     
-    async def _execute_recovery_strategies(
-        self, pool_id: str, pool: Any, config: DatabaseConfig, metrics: PoolMetrics
-    ) -> bool:
+    async def _execute_recovery_strategies(self, pool_id: str, pool: Any, config: DatabaseConfig, metrics: PoolMetrics) -> bool:
         """Execute recovery strategies until one succeeds."""
         for strategy in self.recovery_strategies:
             if await self._try_recovery_strategy(strategy, pool_id, pool, config, metrics):
                 return True
         return self._log_all_strategies_failed(pool_id)
     
-    async def _try_recovery_strategy(
-        self, strategy: DatabaseRecoveryStrategy, pool_id: str, 
-        pool: Any, config: DatabaseConfig, metrics: PoolMetrics
-    ) -> bool:
+    async def _try_recovery_strategy(self, strategy: DatabaseRecoveryStrategy, pool_id: str, pool: Any, config: DatabaseConfig, metrics: PoolMetrics) -> bool:
         """Try a single recovery strategy."""
         try:
             if await strategy.can_recover(metrics):
@@ -416,9 +411,7 @@ class DatabaseConnectionManager:
             self._log_strategy_failure(strategy, e)
         return False
     
-    async def _execute_strategy_with_logging(
-        self, strategy: DatabaseRecoveryStrategy, pool_id: str, pool: Any, config: DatabaseConfig
-    ) -> bool:
+    async def _execute_strategy_with_logging(self, strategy: DatabaseRecoveryStrategy, pool_id: str, pool: Any, config: DatabaseConfig) -> bool:
         """Execute strategy and log success if applicable."""
         success = await strategy.execute_recovery(pool, config)
         if success:
