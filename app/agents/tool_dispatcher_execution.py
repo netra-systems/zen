@@ -62,26 +62,35 @@ class ToolExecutionEngine(ToolExecutionEngineInterface):
     ) -> ToolExecuteResponse:
         """Execute a tool by name with parameters - implements ToolExecutionEngineInterface"""
         try:
-            # Create a basic tool instance
-            tool = ProductionTool(tool_name)
-            
-            # Execute using core engine infrastructure
-            if hasattr(tool, 'arun'):
-                result = await tool.arun(parameters)
-            else:
-                result = tool(parameters)
-            
-            return ToolExecuteResponse(
-                success=True,
-                data=result,
-                message="Tool executed successfully",
-                metadata={"tool_name": tool_name}
-            )
+            result = await self._execute_production_tool(tool_name, parameters)
+            return self._create_success_tool_response(result, tool_name)
         except Exception as e:
             logger.error(f"Tool execution failed: {tool_name} - {e}")
-            return ToolExecuteResponse(
-                success=False,
-                data=None,
-                message=str(e),
-                metadata={"tool_name": tool_name}
-            )
+            return self._create_error_tool_response(e, tool_name)
+    
+    async def _execute_production_tool(self, tool_name: str, parameters: Dict[str, Any]) -> Any:
+        """Execute production tool instance."""
+        tool = ProductionTool(tool_name)
+        
+        if hasattr(tool, 'arun'):
+            return await tool.arun(parameters)
+        else:
+            return tool(parameters)
+    
+    def _create_success_tool_response(self, result: Any, tool_name: str) -> ToolExecuteResponse:
+        """Create successful tool execution response."""
+        return ToolExecuteResponse(
+            success=True,
+            data=result,
+            message="Tool executed successfully",
+            metadata={"tool_name": tool_name}
+        )
+    
+    def _create_error_tool_response(self, error: Exception, tool_name: str) -> ToolExecuteResponse:
+        """Create error tool execution response."""
+        return ToolExecuteResponse(
+            success=False,
+            data=None,
+            message=str(error),
+            metadata={"tool_name": tool_name}
+        )

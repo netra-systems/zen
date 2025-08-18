@@ -24,53 +24,72 @@ class AgentCommunicationMixin:
         """Send WebSocket update with proper error recovery."""
         if not self.websocket_manager:
             return
-            
+        await self._execute_websocket_update_with_retry(run_id, data)
+    
+    async def _execute_websocket_update_with_retry(self, run_id: str, data: Dict[str, Any]) -> None:
+        """Execute WebSocket update with retry logic."""
         max_retries = 3
         retry_count = 0
         
         while retry_count < max_retries:
             try:
                 await self._attempt_websocket_update(run_id, data)
-                return  # Success, exit retry loop
+                return
             except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
                 retry_count += 1
+                await self._handle_retry_or_failure(run_id, data, e, retry_count, max_retries)
                 if retry_count >= max_retries:
-                    self.logger.warning(f"WebSocket update failed after {max_retries} attempts: {e}")
-                    await self._handle_websocket_failure(run_id, data, e)
                     return
-                
-                # Exponential backoff for retries
-                await asyncio.sleep(0.1 * (2 ** retry_count))
             except Exception as e:
                 self.logger.error(f"Unexpected error in WebSocket update: {e}")
                 return
+    
+    async def _handle_retry_or_failure(self, run_id: str, data: Dict[str, Any], 
+                                      error: Exception, retry_count: int, max_retries: int) -> None:
+        """Handle retry logic or final failure."""
+        if retry_count >= max_retries:
+            self.logger.warning(f"WebSocket update failed after {max_retries} attempts: {error}")
+            await self._handle_websocket_failure(run_id, data, error)
+            return
+        
+        # Exponential backoff for retries
+        await asyncio.sleep(0.1 * (2 ** retry_count))
                 
     async def _attempt_websocket_update(self, run_id: str, data: Dict[str, Any]) -> None:
         """Attempt to send WebSocket update."""
-        message_content = data.get("message", "")
-        message = SystemMessage(content=message_content)
-        
-        sub_agent_state = SubAgentState(
-            messages=[message],
-            next_node="",
-            lifecycle=self.get_state()
-        )
-        
+        sub_agent_state = self._create_sub_agent_state(data)
         ws_user_id = self._get_websocket_user_id(run_id)
-        
-        update_payload = SubAgentUpdate(
-            sub_agent_name=self.name,
-            state=sub_agent_state
-        )
-        
-        websocket_message = WebSocketMessage(
-            type=WebSocketMessageType.SUB_AGENT_UPDATE,
-            payload=update_payload.model_dump()
-        )
+        update_payload = self._create_update_payload(sub_agent_state)
+        websocket_message = self._create_websocket_message(update_payload)
         
         await self.websocket_manager.send_message(
             ws_user_id,
             websocket_message.model_dump()
+        )
+    
+    def _create_sub_agent_state(self, data: Dict[str, Any]) -> SubAgentState:
+        """Create SubAgentState from data."""
+        message_content = data.get("message", "")
+        message = SystemMessage(content=message_content)
+        
+        return SubAgentState(
+            messages=[message],
+            next_node="",
+            lifecycle=self.get_state()
+        )
+    
+    def _create_update_payload(self, sub_agent_state: SubAgentState) -> SubAgentUpdate:
+        """Create update payload from state."""
+        return SubAgentUpdate(
+            sub_agent_name=self.name,
+            state=sub_agent_state
+        )
+    
+    def _create_websocket_message(self, update_payload: SubAgentUpdate) -> WebSocketMessage:
+        """Create WebSocket message from payload."""
+        return WebSocketMessage(
+            type=WebSocketMessageType.SUB_AGENT_UPDATE,
+            payload=update_payload.model_dump()
         )
         
     def _get_websocket_user_id(self, run_id: str) -> str:
@@ -87,21 +106,28 @@ class AgentCommunicationMixin:
         
     async def _handle_websocket_failure(self, run_id: str, data: Dict[str, Any], error: Exception) -> None:
         """Handle WebSocket failure with graceful degradation and centralized error tracking."""
-        # Create error context for centralized handling
-        context = ErrorContext(
+        context = self._create_error_context(run_id, data)
+        websocket_error = WebSocketError(f"WebSocket update failed: {str(error)}", context)
+        self._process_websocket_error(websocket_error)
+        self._store_failed_update(run_id, data, error)
+    
+    def _create_error_context(self, run_id: str, data: Dict[str, Any]) -> ErrorContext:
+        """Create error context for centralized handling."""
+        return ErrorContext(
             agent_name=self.name,
-            operation_name="websocket_update", 
+            operation_name="websocket_update",
             run_id=run_id,
             timestamp=time.time(),
             additional_data=data
         )
-        
-        # Use centralized error handler for consistent tracking
-        websocket_error = WebSocketError(f"WebSocket update failed: {str(error)}", context)
+    
+    def _process_websocket_error(self, websocket_error: WebSocketError) -> None:
+        """Process WebSocket error through centralized handler."""
         global_error_handler._store_error(websocket_error)
         global_error_handler._log_error(websocket_error)
-        
-        # Store failed update for potential retry later
+    
+    def _store_failed_update(self, run_id: str, data: Dict[str, Any], error: Exception) -> None:
+        """Store failed update for potential retry later."""
         if not hasattr(self, '_failed_updates'):
             self._failed_updates = []
         
@@ -111,8 +137,10 @@ class AgentCommunicationMixin:
             "timestamp": time.time(),
             "error": str(error)
         })
-        
-        # Keep only recent failed updates (max 10)
+        self._limit_failed_updates_storage()
+    
+    def _limit_failed_updates_storage(self) -> None:
+        """Limit failed updates storage to recent entries."""
         if len(self._failed_updates) > 10:
             self._failed_updates = self._failed_updates[-10:]
 

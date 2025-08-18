@@ -51,16 +51,9 @@ class ErrorLogger:
     ) -> str:
         """Log error with comprehensive context."""
         context = self._ensure_context(error, context, **kwargs)
-        
-        # Update metrics and aggregate
         self._process_error(error, context)
-        
-        # Log with appropriate level
         self._perform_logging(error, context)
-        
-        # Track correlation
         self._track_correlation(context)
-        
         return context.error_id
     
     def _ensure_context(
@@ -97,13 +90,38 @@ class ErrorLogger:
         details: Optional[Dict] = None
     ) -> None:
         """Log error recovery attempts."""
-        context = recovery_logger.log_recovery_attempt(
+        context = self._create_recovery_context(
             recovery_context, recovery_action, success, details
         )
-        
+        self._log_recovery_result(recovery_action, success, context)
+    
+    def _create_recovery_context(
+        self,
+        recovery_context: RecoveryContext,
+        recovery_action: str,
+        success: bool,
+        details: Optional[Dict]
+    ) -> Any:
+        """Create recovery context."""
+        return recovery_logger.log_recovery_attempt(
+            recovery_context, recovery_action, success, details
+        )
+    
+    def _log_recovery_result(
+        self,
+        recovery_action: str,
+        success: bool,
+        context: Any
+    ) -> None:
+        """Log the recovery result."""
         log_message = self._format_recovery_message(recovery_action, success)
+        self._write_recovery_log(success, log_message, context)
+    
+    def _write_recovery_log(
+        self, success: bool, log_message: str, context: Any
+    ) -> None:
+        """Write recovery log with appropriate level."""
         log_data = self._prepare_log_data(None, context)
-        
         level = LogLevel.INFO if success else LogLevel.WARNING
         self._write_log_level(level, log_message, log_data)
     
@@ -121,10 +139,23 @@ class ErrorLogger:
         context: Optional[ErrorContext] = None
     ) -> str:
         """Log error with business impact assessment."""
-        enhanced_context = recovery_logger.log_business_impact_context(
+        enhanced_context = self._create_business_impact_context(
             error, impact_description, affected_users, financial_impact, context
         )
         return self.log_error(error, enhanced_context)
+    
+    def _create_business_impact_context(
+        self,
+        error: Exception,
+        impact_description: str,
+        affected_users: int,
+        financial_impact: float,
+        context: Optional[ErrorContext]
+    ) -> Any:
+        """Create business impact context."""
+        return recovery_logger.log_business_impact_context(
+            error, impact_description, affected_users, financial_impact, context
+        )
     
     def log_security_incident(
         self,
@@ -134,10 +165,22 @@ class ErrorLogger:
         context: Optional[ErrorContext] = None
     ) -> str:
         """Log security-related errors."""
-        enhanced_context = recovery_logger.log_security_incident_context(
+        enhanced_context = self._create_security_incident_context(
             error, incident_type, risk_level, context
         )
         return self.log_error(error, enhanced_context)
+    
+    def _create_security_incident_context(
+        self,
+        error: Exception,
+        incident_type: str,
+        risk_level: str,
+        context: Optional[ErrorContext]
+    ) -> Any:
+        """Create security incident context."""
+        return recovery_logger.log_security_incident_context(
+            error, incident_type, risk_level, context
+        )
     
     def get_error_patterns(
         self,
@@ -336,10 +379,8 @@ class ErrorLogger:
     ) -> Dict[str, Any]:
         """Prepare structured log data."""
         log_data = context.to_dict()
-        
         if error:
             log_data.update(self._extract_error_data(error))
-        
         return log_data
     
     def _extract_error_data(self, error: Exception) -> Dict[str, Any]:
@@ -357,13 +398,17 @@ class ErrorLogger:
         data: Dict[str, Any]
     ) -> None:
         """Write log with appropriate level."""
-        severity_map = {
+        severity_map = self._get_severity_log_map()
+        log_func = severity_map.get(severity, logger.info)
+        log_func(message, **data)
+    
+    def _get_severity_log_map(self) -> Dict[ErrorSeverity, Any]:
+        """Get severity to log function mapping."""
+        return {
             ErrorSeverity.CRITICAL: logger.critical,
             ErrorSeverity.HIGH: logger.error,
             ErrorSeverity.MEDIUM: logger.warning,
         }
-        log_func = severity_map.get(severity, logger.info)
-        log_func(message, **data)
     
     def _write_log_level(
         self,
@@ -372,14 +417,18 @@ class ErrorLogger:
         data: Dict[str, Any]
     ) -> None:
         """Write log with specific level."""
-        level_map = {
+        level_map = self._get_level_log_map()
+        log_func = level_map.get(level, logger.debug)
+        log_func(message, **data)
+    
+    def _get_level_log_map(self) -> Dict[LogLevel, Any]:
+        """Get level to log function mapping."""
+        return {
             LogLevel.CRITICAL: logger.critical,
             LogLevel.ERROR: logger.error,
             LogLevel.WARNING: logger.warning,
             LogLevel.INFO: logger.info,
         }
-        log_func = level_map.get(level, logger.debug)
-        log_func(message, **data)
 
 
 # Global error logger instance

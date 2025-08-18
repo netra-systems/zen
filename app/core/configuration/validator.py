@@ -56,30 +56,28 @@ class ConfigurationValidator:
     def _load_validation_rules(self) -> Dict[str, dict]:
         """Load validation rules per environment."""
         return {
-            "development": {
-                "require_ssl": False,
-                "allow_localhost": True,
-                "require_secrets": False,
-                "strict_validation": False
-            },
-            "staging": {
-                "require_ssl": True,
-                "allow_localhost": False,
-                "require_secrets": True,
-                "strict_validation": True
-            },
-            "production": {
-                "require_ssl": True,
-                "allow_localhost": False,
-                "require_secrets": True,
-                "strict_validation": True
-            },
-            "testing": {
-                "require_ssl": False,
-                "allow_localhost": True,
-                "require_secrets": False,
-                "strict_validation": False
-            }
+            "development": self._get_development_rules(),
+            "staging": self._get_production_rules(),
+            "production": self._get_production_rules(),
+            "testing": self._get_development_rules()
+        }
+    
+    def _get_development_rules(self) -> Dict[str, bool]:
+        """Get development/testing validation rules."""
+        return {
+            "require_ssl": False,
+            "allow_localhost": True,
+            "require_secrets": False,
+            "strict_validation": False
+        }
+    
+    def _get_production_rules(self) -> Dict[str, bool]:
+        """Get production/staging validation rules."""
+        return {
+            "require_ssl": True,
+            "allow_localhost": False,
+            "require_secrets": True,
+            "strict_validation": True
         }
     
     def _load_critical_fields(self) -> Dict[str, List[str]]:
@@ -94,33 +92,40 @@ class ConfigurationValidator:
     
     def validate_complete_config(self, config: AppConfig) -> ValidationResult:
         """Perform comprehensive configuration validation."""
+        errors, warnings = self._collect_validation_results(config)
+        score = self._calculate_config_health_score(config, errors, warnings)
+        is_valid = len(errors) == 0
+        return ValidationResult(is_valid, errors, warnings, score)
+    
+    def _collect_validation_results(self, config: AppConfig) -> Tuple[List[str], List[str]]:
+        """Collect all validation errors and warnings."""
+        errors = self._collect_all_errors(config)
+        warnings = self._validate_optional_features(config)
+        return errors, warnings
+    
+    def _collect_all_errors(self, config: AppConfig) -> List[str]:
+        """Collect all validation errors."""
         errors = []
-        warnings = []
-        
         errors.extend(self._validate_database_config(config))
         errors.extend(self._validate_llm_config(config))
         errors.extend(self._validate_auth_config(config))
         errors.extend(self._validate_external_services(config))
-        warnings.extend(self._validate_optional_features(config))
-        
-        score = self._calculate_config_health_score(config, errors, warnings)
-        is_valid = len(errors) == 0
-        
-        return ValidationResult(is_valid, errors, warnings, score)
+        return errors
     
     def _validate_database_config(self, config: AppConfig) -> List[str]:
         """Validate database configuration."""
         errors = []
-        
+        self._check_postgres_config(config, errors)
+        errors.extend(self._validate_clickhouse_config(config))
+        errors.extend(self._validate_redis_config(config))
+        return errors
+    
+    def _check_postgres_config(self, config: AppConfig, errors: List[str]) -> None:
+        """Check PostgreSQL configuration."""
         if not config.database_url:
             errors.append("database_url is required")
         else:
             errors.extend(self._validate_postgres_url(config.database_url))
-        
-        errors.extend(self._validate_clickhouse_config(config))
-        errors.extend(self._validate_redis_config(config))
-        
-        return errors
     
     def _validate_llm_config(self, config: AppConfig) -> List[str]:
         """Validate LLM configuration."""
@@ -160,24 +165,36 @@ class ConfigurationValidator:
         """Validate database URL format and requirements."""
         try:
             parsed = urlparse(url)
-            errors = self._validate_url_scheme(parsed)
-            errors.extend(self._validate_url_host(parsed))
-            errors.extend(self._validate_url_security(parsed))
-            return errors
+            return self._check_url_components(parsed)
         except Exception:
             return ["Invalid database URL format"]
     
+    def _check_url_components(self, parsed_url) -> List[str]:
+        """Check all URL components for validation."""
+        errors = self._validate_url_scheme(parsed_url)
+        errors.extend(self._validate_url_host(parsed_url))
+        errors.extend(self._validate_url_security(parsed_url))
+        return errors
+    
     def _validate_url_scheme(self, parsed_url) -> List[str]:
         """Validate database URL scheme."""
-        valid_schemes = ["postgresql", "postgresql+asyncpg"]
-        if self._environment == "testing":
-            valid_schemes.extend(["sqlite", "sqlite+aiosqlite"])
-        
+        valid_schemes = self._get_valid_db_schemes()
         if parsed_url.scheme not in valid_schemes:
-            if parsed_url.scheme.startswith("sqlite") and self._environment != "testing":
-                return ["SQLite URLs only allowed in testing environment"]
-            return ["Invalid database URL scheme"]
+            return self._handle_invalid_scheme(parsed_url.scheme)
         return []
+    
+    def _get_valid_db_schemes(self) -> List[str]:
+        """Get valid database schemes for current environment."""
+        schemes = ["postgresql", "postgresql+asyncpg"]
+        if self._environment == "testing":
+            schemes.extend(["sqlite", "sqlite+aiosqlite"])
+        return schemes
+    
+    def _handle_invalid_scheme(self, scheme: str) -> List[str]:
+        """Handle invalid database scheme."""
+        if scheme.startswith("sqlite") and self._environment != "testing":
+            return ["SQLite URLs only allowed in testing environment"]
+        return ["Invalid database URL scheme"]
     
     def _validate_url_host(self, parsed_url) -> List[str]:
         """Validate database URL host information."""
@@ -194,16 +211,21 @@ class ConfigurationValidator:
     def _validate_clickhouse_config(self, config: AppConfig) -> List[str]:
         """Validate ClickHouse configuration."""
         errors = []
-        
+        self._check_clickhouse_native(config, errors)
+        self._check_clickhouse_consistency(config, errors)
+        return errors
+    
+    def _check_clickhouse_native(self, config: AppConfig, errors: List[str]) -> None:
+        """Check ClickHouse native configuration."""
         if not hasattr(config, 'clickhouse_native'):
             errors.append("ClickHouse native configuration missing")
         else:
             errors.extend(self._validate_clickhouse_connection(config.clickhouse_native))
-        
+    
+    def _check_clickhouse_consistency(self, config: AppConfig, errors: List[str]) -> None:
+        """Check ClickHouse configuration consistency."""
         if hasattr(config, 'clickhouse_https') and hasattr(config, 'clickhouse_native'):
             errors.extend(self._validate_clickhouse_consistency(config))
-        
-        return errors
     
     def _validate_redis_config(self, config: AppConfig) -> List[str]:
         """Validate Redis configuration."""
@@ -219,21 +241,20 @@ class ConfigurationValidator:
     
     def _validate_llm_api_keys(self, config: AppConfig) -> List[str]:
         """Validate LLM API key configuration."""
-        errors = []
         rules = self._validation_rules.get(self._environment, {})
-        
         if not rules.get("require_secrets", False):
-            return errors
-        
+            return []
+        return self._check_missing_api_keys(config)
+    
+    def _check_missing_api_keys(self, config: AppConfig) -> List[str]:
+        """Check for missing LLM API keys."""
         missing_keys = []
         for llm_name, llm_config in config.llm_configs.items():
             if not hasattr(llm_config, 'api_key') or not llm_config.api_key:
                 missing_keys.append(llm_name)
-        
         if missing_keys:
-            errors.append(f"LLM API keys missing for: {', '.join(missing_keys)}")
-        
-        return errors
+            return [f"LLM API keys missing for: {', '.join(missing_keys)}"]
+        return []
     
     def _validate_llm_models(self, config: AppConfig) -> List[str]:
         """Validate LLM model configurations."""
@@ -251,16 +272,21 @@ class ConfigurationValidator:
     def _validate_auth_secrets(self, config: AppConfig) -> List[str]:
         """Validate authentication secrets."""
         errors = []
-        
+        self._check_jwt_secret(config, errors)
+        self._check_fernet_key(config, errors)
+        return errors
+    
+    def _check_jwt_secret(self, config: AppConfig, errors: List[str]) -> None:
+        """Check JWT secret key validation."""
         if not config.jwt_secret_key:
             errors.append("JWT secret key is required")
         elif len(config.jwt_secret_key) < 32:
             errors.append("JWT secret key too short (minimum 32 characters)")
-        
+    
+    def _check_fernet_key(self, config: AppConfig, errors: List[str]) -> None:
+        """Check Fernet encryption key validation."""
         if not config.fernet_key:
             errors.append("Fernet encryption key is required")
-        
-        return errors
     
     def _validate_oauth_config(self, config: AppConfig) -> List[str]:
         """Validate OAuth configuration."""
@@ -277,15 +303,17 @@ class ConfigurationValidator:
     def _validate_urls(self, config: AppConfig) -> List[str]:
         """Validate URL configurations."""
         errors = []
-        
         url_fields = ["frontend_url", "api_base_url"]
         for field in url_fields:
-            if hasattr(config, field):
-                url = getattr(config, field)
-                if url:
-                    errors.extend(self._validate_single_url(field, url))
-        
+            self._check_url_field(config, field, errors)
         return errors
+    
+    def _check_url_field(self, config: AppConfig, field: str, errors: List[str]) -> None:
+        """Check individual URL field validation."""
+        if hasattr(config, field):
+            url = getattr(config, field)
+            if url:
+                errors.extend(self._validate_single_url(field, url))
     
     def _validate_environment_consistency(self, config: AppConfig) -> List[str]:
         """Validate environment-specific configuration consistency."""

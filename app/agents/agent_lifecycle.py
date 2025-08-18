@@ -34,31 +34,41 @@ class AgentLifecycleMixin(ABC):
     
     async def _post_run(self, state: DeepAgentState, run_id: str, stream_updates: bool, success: bool) -> None:
         """Exit conditions and cleanup."""
+        execution_time = self._finalize_execution_timing()
+        status = self._update_lifecycle_status(success)
+        self._log_execution_completion(run_id, status, execution_time)
+        await self._send_completion_update(run_id, stream_updates, status, execution_time)
+        await self.cleanup(state, run_id)
+    
+    def _finalize_execution_timing(self) -> float:
+        """Finalize execution timing and return duration."""
         self.end_time = time.time()
-        execution_time = self.end_time - self.start_time
-        
+        return self.end_time - self.start_time
+    
+    def _update_lifecycle_status(self, success: bool) -> str:
+        """Update lifecycle state and return status string."""
         if success:
             self.set_state(SubAgentLifecycle.COMPLETED)
-            status = "completed"
+            return "completed"
         else:
             self.set_state(SubAgentLifecycle.FAILED)
-            status = "failed"
-        
+            return "failed"
+    
+    def _log_execution_completion(self, run_id: str, status: str, execution_time: float) -> None:
+        """Log execution completion details."""
         self.logger.info(f"{self.name} {status} for run_id: {run_id} in {execution_time:.2f}s")
-        
-        # Log agent completion communication
         self._log_agent_completion(run_id, status)
+    
+    async def _send_completion_update(self, run_id: str, stream_updates: bool, status: str, execution_time: float) -> None:
+        """Send completion update via WebSocket."""
+        if not (stream_updates and self.websocket_manager):
+            return
         
-        # Stream update that agent finished
-        if stream_updates and self.websocket_manager:
-            await self._send_update(run_id, {
-                "status": status,
-                "message": f"{self.name} {status}",
-                "execution_time": execution_time
-            })
-        
-        # Cleanup
-        await self.cleanup(state, run_id)
+        await self._send_update(run_id, {
+            "status": status,
+            "message": f"{self.name} {status}",
+            "execution_time": execution_time
+        })
     
     async def run(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Main run method with lifecycle management."""
