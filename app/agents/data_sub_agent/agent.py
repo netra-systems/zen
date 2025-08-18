@@ -61,13 +61,23 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
                  websocket_manager: Optional[WebSocketManagerProtocol] = None,
                  reliability_manager: Optional[ReliabilityManager] = None) -> None:
+        self._init_base_components(llm_manager, websocket_manager, tool_dispatcher)
+        self._init_execution_systems(reliability_manager)
+        self._init_modular_components()
+    
+    def _init_base_components(self, llm_manager: LLMManager, 
+                            websocket_manager: Optional[WebSocketManagerProtocol],
+                            tool_dispatcher: ToolDispatcher) -> None:
+        """Initialize base components."""
         self._init_base_agent(llm_manager)
         BaseExecutionInterface.__init__(self, "DataSubAgent", websocket_manager)
         self.tool_dispatcher = tool_dispatcher
+    
+    def _init_execution_systems(self, reliability_manager: Optional[ReliabilityManager]) -> None:
+        """Initialize execution systems."""
         self._init_all_components()
         self._init_modern_execution_engine(reliability_manager)
         self._setup_cache_wrapper()
-        self._init_modular_components()
     
     def _init_all_components(self) -> None:
         """Initialize all agent components."""
@@ -79,7 +89,10 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         """Initialize modern execution engine with reliability patterns."""
         if not reliability_manager:
             reliability_manager = self._create_modern_reliability_manager()
-        
+        self._setup_modern_components(reliability_manager)
+    
+    def _setup_modern_components(self, reliability_manager: ReliabilityManager) -> None:
+        """Setup modern execution components."""
         monitor = ExecutionMonitor(max_history_size=1000)
         self.execution_engine = BaseExecutionEngine(reliability_manager, monitor)
         self.execution_monitor = monitor
@@ -149,17 +162,25 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     
     def _create_modern_reliability_manager(self) -> ReliabilityManager:
         """Create modern reliability manager with data agent optimized settings."""
-        modern_circuit_config = ModernCircuitConfig(
+        circuit_config = self._create_modern_circuit_config()
+        retry_config = self._create_modern_retry_config()
+        return ReliabilityManager(circuit_config, retry_config)
+    
+    def _create_modern_circuit_config(self) -> ModernCircuitConfig:
+        """Create modern circuit breaker configuration."""
+        return ModernCircuitConfig(
             name="DataSubAgent",
             failure_threshold=agent_config.failure_threshold,
             recovery_timeout=agent_config.timeout.recovery_timeout
         )
-        modern_retry_config = ModernRetryConfig(
+    
+    def _create_modern_retry_config(self) -> ModernRetryConfig:
+        """Create modern retry configuration."""
+        return ModernRetryConfig(
             max_retries=agent_config.retry.max_retries,
             base_delay=agent_config.retry.base_delay,
             max_delay=agent_config.retry.max_delay
         )
-        return ReliabilityManager(modern_circuit_config, modern_retry_config)
     
     # Cache management delegation
     async def _get_cached_schema(self, table_name: str, force_refresh: bool = False) -> Optional[Dict[str, Any]]:
@@ -200,17 +221,24 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate execution preconditions for data analysis."""
         try:
-            validation_result = await self.modern_execution.validate_data_analysis_preconditions(context)
-            await self.modern_execution.log_precondition_validation(context, validation_result)
-            return validation_result
+            return await self._validate_with_logging(context)
         except Exception as e:
             logger.error(f"Precondition validation failed: {e}", exc_info=True)
             return False
     
+    async def _validate_with_logging(self, context: ExecutionContext) -> bool:
+        """Validate preconditions with logging."""
+        validation_result = await self.modern_execution.validate_data_analysis_preconditions(context)
+        await self.modern_execution.log_precondition_validation(context, validation_result)
+        return validation_result
+    
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute data analysis core logic with modern patterns."""
         await self.modern_execution.track_modern_execution_start(context)
-        
+        return await self._execute_with_error_handling(context)
+    
+    async def _execute_with_error_handling(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute with comprehensive error handling."""
         try:
             result = await self.modern_execution.execute_legacy_data_analysis(context)
             return await self.modern_execution.finalize_modern_execution(context, result)
@@ -228,14 +256,18 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     async def execute_with_modern_patterns(self, state: DeepAgentState, run_id: str,
                                          stream_updates: bool = False) -> ExecutionResult:
         """Execute using modern execution patterns with full orchestration."""
-        context = ExecutionContext(
+        context = self._create_execution_context(state, run_id, stream_updates)
+        return await self.execution_engine.execute(self, context)
+    
+    def _create_execution_context(self, state: DeepAgentState, run_id: str,
+                                stream_updates: bool) -> ExecutionContext:
+        """Create execution context for modern patterns."""
+        return ExecutionContext(
             run_id=run_id,
             agent_name=self.agent_name,
             state=state,
             stream_updates=stream_updates
         )
-        
-        return await self.execution_engine.execute(self, context)
     
     # Anomaly processing delegation (used by execution manager)
     def _ensure_data_result(self, result):

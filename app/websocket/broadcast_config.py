@@ -139,12 +139,25 @@ class BroadcastExecutionContextManager:
     def create_broadcast_execution_context(broadcast_ctx: BroadcastContext,
                                          run_id: str, agent_name: str, stream_updates: bool) -> ExecutionContext:
         """Create execution context for broadcast operation."""
-        from app.agents.state import DeepAgentState
-        state = DeepAgentState()
-        context_run_id = run_id or f"broadcast_{int(time.time() * 1000)}"
+        state_and_run_id = BroadcastExecutionContextManager._prepare_context_data(run_id)
         return BroadcastExecutionContextManager._build_execution_context(
-            context_run_id, agent_name, state, stream_updates, broadcast_ctx
+            state_and_run_id["context_run_id"], agent_name, state_and_run_id["state"], 
+            stream_updates, broadcast_ctx
         )
+    
+    @staticmethod
+    def _prepare_context_data(run_id: str) -> Dict[str, Any]:
+        """Prepare context data for execution context creation."""
+        from app.agents.state import DeepAgentState
+        return {
+            "state": DeepAgentState(),
+            "context_run_id": BroadcastExecutionContextManager._generate_run_id(run_id)
+        }
+    
+    @staticmethod
+    def _generate_run_id(run_id: str) -> str:
+        """Generate run ID for execution context."""
+        return run_id or f"broadcast_{int(time.time() * 1000)}"
     
     @staticmethod
     def _build_execution_context(run_id: str, agent_name: str, state, stream_updates: bool, 

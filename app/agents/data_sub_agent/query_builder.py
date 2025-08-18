@@ -152,7 +152,8 @@ class QueryBuilder(BaseExecutionInterface):
         
     def _build_performance_query(self, user_id: int, params: Dict[str, Any]) -> str:
         """Build performance metrics query from parameters."""
-        return self.build_performance_metrics_query(
+        from .query_operations import QueryOperations
+        return QueryOperations.build_performance_metrics_query(
             user_id=user_id,
             workload_id=params.get('workload_id'),
             start_time=params.get('start_time'),
@@ -162,7 +163,8 @@ class QueryBuilder(BaseExecutionInterface):
         
     def _build_anomaly_query(self, user_id: int, params: Dict[str, Any]) -> str:
         """Build anomaly detection query from parameters."""
-        return self.build_anomaly_detection_query(
+        from .query_operations import QueryOperations
+        return QueryOperations.build_anomaly_detection_query(
             user_id=user_id,
             metric_name=params.get('metric_name', 'latency_ms'),
             start_time=params.get('start_time'),
@@ -172,7 +174,8 @@ class QueryBuilder(BaseExecutionInterface):
         
     def _build_correlation_query(self, user_id: int, params: Dict[str, Any]) -> str:
         """Build correlation analysis query from parameters."""
-        return self.build_correlation_analysis_query(
+        from .query_operations import QueryOperations
+        return QueryOperations.build_correlation_analysis_query(
             user_id=user_id,
             metric1=params.get('metric1', 'latency_ms'),
             metric2=params.get('metric2', 'throughput'),
@@ -182,7 +185,8 @@ class QueryBuilder(BaseExecutionInterface):
         
     def _build_usage_query(self, user_id: int, params: Dict[str, Any]) -> str:
         """Build usage patterns query from parameters."""
-        return self.build_usage_patterns_query(
+        from .query_operations import QueryOperations
+        return QueryOperations.build_usage_patterns_query(
             user_id=user_id,
             days_back=params.get('days_back', 30)
         )
@@ -229,12 +233,11 @@ class QueryBuilder(BaseExecutionInterface):
         end_time: datetime,
         aggregation_level: str = "minute"
     ) -> str:
-        """Build query for performance metrics"""
-        time_function = QueryBuilder._get_time_function(aggregation_level)
-        workload_filter = QueryBuilder._build_workload_filter(workload_id)
-        select_clause = QueryBuilder._build_performance_select_clause(time_function)
-        subquery = QueryBuilder._build_performance_subquery(user_id, start_time, end_time, workload_filter)
-        return QueryBuilder._assemble_performance_query(select_clause, subquery)
+        """Build query for performance metrics - backward compatibility."""
+        from .query_operations import QueryOperations
+        return QueryOperations.build_performance_metrics_query(
+            user_id, workload_id, start_time, end_time, aggregation_level
+        )
     
     @staticmethod
     def _get_time_function(aggregation_level: str) -> str:

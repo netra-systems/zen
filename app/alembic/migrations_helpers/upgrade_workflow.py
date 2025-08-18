@@ -39,11 +39,15 @@ def create_user_tables() -> None:
     _add_secrets_final()
 
 
-def create_agent_tables() -> None:
-    """Create agent and AI-related tables."""
+def _create_assistant_structures() -> None:
+    """Create assistant table structures."""
     _create_assistants()
     _add_assistants_cols()
     _add_assistants_final_cols()
+
+def create_agent_tables() -> None:
+    """Create agent and AI-related tables."""
+    _create_assistant_structures()
     _create_threads()
     _create_runs()
     create_agent_runs_extended()
