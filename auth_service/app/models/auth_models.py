@@ -129,3 +129,27 @@ class AuditLog(BaseModel):
     error_message: Optional[str] = None
     metadata: Dict[str, Any] = {}
     timestamp: datetime = Field(default_factory=datetime.utcnow)
+
+class AuthEndpoints(BaseModel):
+    """Auth service endpoint configuration"""
+    login: str
+    logout: str
+    callback: str
+    token: str
+    user: str
+    dev_login: Optional[str] = None
+    validate_token: Optional[str] = None
+    refresh: Optional[str] = None
+    health: Optional[str] = None
+
+class AuthConfigResponse(BaseModel):
+    """Auth configuration response for frontend integration"""
+    google_client_id: str
+    endpoints: AuthEndpoints
+    development_mode: bool
+    user: Optional[Dict[str, Any]] = None
+    authorized_javascript_origins: List[str]
+    authorized_redirect_uris: List[str]
+    pr_number: Optional[str] = None
+    use_proxy: Optional[bool] = False
+    proxy_url: Optional[str] = None
