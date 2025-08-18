@@ -1,14 +1,14 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-18T16:46:54.988615",
-    "total_runs": 89
+    "last_update": "2025-08-18T16:47:59.362970",
+    "total_runs": 90
   },
   "current_state": {
     "overall_status": "[FAILED] 2 failures",
     "last_run_level": "unit",
-    "last_run_time": "2025-08-18T16:46:54.988615",
-    "last_exit_code": 15
+    "last_run_time": "2025-08-18T16:47:59.362970",
+    "last_exit_code": 255
   },
   "known_test_counts": {
     "unit:backend": {
@@ -17,7 +17,7 @@
       "failed": 2,
       "skipped": 16,
       "errors": 1,
-      "last_update": "2025-08-18T16:46:54.988615"
+      "last_update": "2025-08-18T16:47:59.362970"
     },
     "critical:backend": {
       "total": 85,
@@ -92,7 +92,7 @@
       "actual": 362,
       "passed": 343,
       "failed": 2,
-      "last_run": "2025-08-18T16:46:54.988615",
+      "last_run": "2025-08-18T16:47:59.362970",
       "status": "[FAILED] 2 failures"
     },
     "integration": {
@@ -235,8 +235,8 @@
         "test_files": 41,
         "status": "failed"
       },
-      "last_duration": 59.05352449417114,
-      "last_run": "2025-08-18T16:46:54.988615"
+      "last_duration": 56.18985342979431,
+      "last_run": "2025-08-18T16:47:59.362970"
     },
     "frontend": {
       "status": "failed",
@@ -250,8 +250,8 @@
         "test_files": 0,
         "status": "unknown"
       },
-      "last_duration": 0.4100813865661621,
-      "last_run": "2025-08-18T16:46:54.988615"
+      "last_duration": 0.30512070655822754,
+      "last_run": "2025-08-18T16:47:59.362970"
     },
     "e2e": {
       "status": "pending",
@@ -263,46 +263,32 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-18T16:46:54.988615"
+      "last_run": "2025-08-18T16:47:59.362970"
     }
   },
   "failing_tests": [
     {
       "component": "backend",
       "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_websocket_updates.py::TestWebSocketUpdates::test_websocket_heartbeat",
-      "timestamp": "2025-08-18T16:46:54.988615"
+      "timestamp": "2025-08-18T16:47:59.362970"
     },
     {
       "component": "backend",
       "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_initialization.py::TestWorkloadTypeSelection::test_select_workload_type Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env",
-      "timestamp": "2025-08-18T16:46:54.988615"
+      "timestamp": "2025-08-18T16:47:59.362970"
     },
     {
       "component": "backend",
       "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_websocket_updates.py::\u001b[1mTestWebSocketUpdates::test_websocket_heartbeat\u001b[0m - Exception: Connection failed: None",
-      "timestamp": "2025-08-18T16:46:54.988615"
+      "timestamp": "2025-08-18T16:47:59.362970"
     },
     {
       "component": "backend",
       "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_initialization.py::\u001b[1mTestWorkloadTypeSelection::test_select_workload_type\u001b[0m - AttributeError: 'SyntheticDataService' object has no attribute '_select_workload_type'",
-      "timestamp": "2025-08-18T16:46:54.988615"
+      "timestamp": "2025-08-18T16:47:59.362970"
     }
   ],
   "test_history": [
-    {
-      "timestamp": "2025-08-18T14:49:06.581282",
-      "level": "unit",
-      "exit_code": 2,
-      "status": "[FAILED] 4 failures",
-      "statistics": {
-        "total_tests_known": 6357,
-        "total_tests_run": 374,
-        "total_passed": 357,
-        "total_failed": 4,
-        "total_skipped": 13,
-        "pass_rate": 95.45
-      }
-    },
     {
       "timestamp": "2025-08-18T14:52:08.396184",
       "level": "integration",
@@ -559,6 +545,20 @@
       "timestamp": "2025-08-18T16:46:54.988615",
       "level": "unit",
       "exit_code": 15,
+      "status": "[FAILED] 2 failures",
+      "statistics": {
+        "total_tests_known": 6357,
+        "total_tests_run": 362,
+        "total_passed": 343,
+        "total_failed": 2,
+        "total_skipped": 16,
+        "pass_rate": 94.75
+      }
+    },
+    {
+      "timestamp": "2025-08-18T16:47:59.362970",
+      "level": "unit",
+      "exit_code": 255,
       "status": "[FAILED] 2 failures",
       "statistics": {
         "total_tests_known": 6357,
