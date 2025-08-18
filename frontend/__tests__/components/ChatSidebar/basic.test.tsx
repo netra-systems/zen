@@ -30,6 +30,11 @@ describe('ChatSidebar - Basic Functionality', () => {
         activeThreadId: 'thread-2'
       });
       
+      // CRITICAL: Configure hooks to provide thread data
+      testSetup.configureChatSidebarHooks({
+        threads: sampleThreads
+      });
+      
       renderWithProvider(<ChatSidebar />);
       
       expect(screen.getByTestId('thread-list')).toBeInTheDocument();
@@ -59,6 +64,11 @@ describe('ChatSidebar - Basic Functionality', () => {
       });
       
       testSetup.configureStore({
+        threads: [threadWithMetadata]
+      });
+      
+      // Configure hooks to provide thread data
+      testSetup.configureChatSidebarHooks({
         threads: [threadWithMetadata]
       });
       

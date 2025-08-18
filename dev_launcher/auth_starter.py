@@ -96,6 +96,9 @@ class AuthStarter:
         # Add auth service specific environment variables
         env["AUTH_SERVICE_PORT"] = str(port)
         env["AUTH_SERVICE_HOST"] = "0.0.0.0"
+        env["PORT"] = str(port)
+        env["ENVIRONMENT"] = "development"
+        env["CORS_ORIGINS"] = "*"  # Allow all origins in development
         
         # Add Redis configuration from services config
         redis_config = self.services_config.redis.get_config()

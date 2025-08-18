@@ -47,8 +47,8 @@ class TestReferenceManagement:
         mock_reference.created_at = datetime.now()
         mock_reference.updated_at = datetime.now()
         
-        # Setup mock session - use regular MagicMock with specific async methods
-        mock_session = MagicMock()
+        # Setup mock session
+        mock_session = AsyncMock()
         
         # Setup proper mock chain for result.scalars().first()
         mock_scalars = MagicMock()
@@ -59,7 +59,10 @@ class TestReferenceManagement:
         # Mock execute as an async method that returns the result
         mock_session.execute = AsyncMock(return_value=mock_result)
         
-        # Setup mock context manager
+        # Setup mock context manager - session should be a context manager itself
+        mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+        mock_session.__aexit__ = AsyncMock(return_value=None)
+        
         async def mock_get_db_session():
             yield mock_session
         

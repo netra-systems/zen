@@ -81,7 +81,7 @@ export const ChatSidebar: React.FC = () => {
   };
 
   return (
-    <div className="w-80 h-full bg-white/95 backdrop-blur-md border-r border-gray-200 flex flex-col">
+    <div className="w-80 h-full bg-white/95 backdrop-blur-md border-r border-gray-200 flex flex-col" data-testid="chat-sidebar" role="complementary">
       {/* Header with New Chat Button - Auth Protected */}
       <AuthGate 
         showLoginPrompt={false}
