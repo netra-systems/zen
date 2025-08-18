@@ -7,14 +7,15 @@
 ## Table of Contents
 
 1. [Business-Critical Testing](#business-critical-testing) **← Revenue Path Coverage**
-2. [Testing Overview](#testing-overview)
-3. [Backend Testing](#backend-testing)
-4. [Frontend Testing](#frontend-testing)
-5. [Integration Testing](#integration-testing)
-6. [End-to-End Testing](#end-to-end-testing)
-7. [Test Coverage Requirements](#test-coverage-requirements) **← 97% Target**
-8. [CI/CD Testing](#cicd-testing)
-9. [Performance Testing](#performance-testing)
+2. [Feature Flags & TDD](#feature-flags--tdd) **← NEW: TDD without breaking CI/CD**
+3. [Testing Overview](#testing-overview)
+4. [Backend Testing](#backend-testing)
+5. [Frontend Testing](#frontend-testing)
+6. [Integration Testing](#integration-testing)
+7. [End-to-End Testing](#end-to-end-testing)
+8. [Test Coverage Requirements](#test-coverage-requirements) **← 97% Target**
+9. [CI/CD Testing](#cicd-testing)
+10. [Performance Testing](#performance-testing)
 
 ## Business-Critical Testing
 
@@ -50,6 +51,101 @@ def test_usage_metering():
     # Test implementation
     pass
 ```
+
+## Feature Flags & TDD
+
+### Test-Driven Development Without Breaking CI/CD
+
+**CRITICAL**: Use feature flags to write tests before implementation while maintaining 100% CI/CD pass rate.
+
+#### Quick Start
+
+```python
+from test_framework.decorators import feature_flag, tdd_test
+
+# Write test before implementation
+@tdd_test("new_payment_system", expected_to_fail=True)
+def test_payment_processing():
+    """Test written before feature implementation."""
+    result = process_payment(100)
+    assert result.status == "success"
+
+# Feature-gated test
+@feature_flag("roi_calculator")
+def test_roi_calculation():
+    """Skipped if feature not enabled."""
+    assert calculate_roi(10000) > 0
+```
+
+#### Feature Status Configuration
+
+Configure in `test_feature_flags.json`:
+```json
+{
+  "features": {
+    "new_payment_system": {
+      "status": "in_development",  // or: enabled, disabled, experimental
+      "owner": "payments-team",
+      "target_release": "v1.2.0"
+    }
+  }
+}
+```
+
+#### TDD Workflow
+
+1. **Write Test First** (status: `in_development`)
+   - Test is skipped in CI
+   - Can run locally with override
+
+2. **Implement Feature**
+   - Test remains skipped during development
+   - Use `TEST_FEATURE_NAME=enabled` to test locally
+
+3. **Enable Feature** (status: `enabled`)
+   - Test now runs in CI
+   - Must pass for deployment
+
+#### Available Decorators
+
+| Decorator | Purpose | When to Use |
+|-----------|---------|------------|
+| `@feature_flag(name)` | Skip if not enabled | Features that may not be ready |
+| `@tdd_test(name)` | TDD with expected failure | Writing tests before code |
+| `@requires_feature(*names)` | Multiple features required | Complex integrations |
+| `@experimental_test()` | Opt-in experimental | Research/prototype features |
+| `@performance_test(ms)` | Performance threshold | Critical path optimization |
+
+#### Environment Overrides
+
+```bash
+# Enable feature for local testing
+TEST_FEATURE_NEW_PAYMENT_SYSTEM=enabled python test_runner.py
+
+# Run experimental tests
+ENABLE_EXPERIMENTAL_TESTS=true python test_runner.py
+```
+
+#### Frontend Testing
+
+```typescript
+import { describeFeature, testTDD } from '@/test-utils/feature-flags';
+
+describeFeature('roi_calculator', 'ROI Calculator Tests', () => {
+  testTDD('roi_calculator', 'should calculate savings', () => {
+    expect(calculateSavings(10000)).toBeGreaterThan(0);
+  });
+});
+```
+
+#### Business Benefits
+
+- **50% Faster Development**: Write tests immediately, implement later
+- **100% CI/CD Pass Rate**: Only enabled features tested in production
+- **Clear Progress Tracking**: Feature status visible in test output
+- **Risk Mitigation**: Test complex features without breaking builds
+
+See [TESTING_WITH_FEATURE_FLAGS.md](TESTING_WITH_FEATURE_FLAGS.md) for complete documentation.
 
 ## Testing Overview
 

@@ -125,7 +125,8 @@ class DevLauncher:
         """Register health monitoring after services are verified ready."""
         self.health_helper.register_all_services(
             self.service_startup.backend_health_info,
-            self.service_startup.frontend_health_info
+            self.service_startup.frontend_health_info,
+            self.service_startup.auth_health_info
         )
     
     def run(self) -> int:

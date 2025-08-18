@@ -94,6 +94,8 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         self.clickhouse_ops = self.core.clickhouse_ops
         self.redis_manager = self.core.redis_manager
         self.cache_ttl = self.core.cache_ttl
+        # Add extended_ops as alias to self for test compatibility
+        self.extended_ops = self
         
     # Modern BaseExecutionInterface Implementation
     async def validate_preconditions(self, context: ExecutionContext) -> bool:

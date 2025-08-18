@@ -170,13 +170,11 @@ class AuthStarter:
     
     def _create_auth_streamer(self, process: subprocess.Popen) -> LogStreamer:
         """Create log streamer for auth service."""
-        streamer = LogStreamer(
-            process,
+        streamer = self.log_manager.add_streamer(
             "AUTH",
-            Colors.CYAN,
-            self.config.verbose
+            process,
+            Colors.CYAN
         )
-        self.log_manager.add_streamer(streamer)
         return streamer
     
     def _handle_auth_startup_failure(self, process: subprocess.Popen):

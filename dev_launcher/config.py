@@ -38,6 +38,9 @@ class LauncherConfig:
     fail_on_boundary_violations: bool = False  # Stop dev server on violations
     show_boundary_warnings: bool = True  # Show boundary warning messages
     
+    # Environment configuration
+    production: bool = False  # Default to development mode
+    
     # Paths
     project_root: Path = field(default_factory=lambda: Path.cwd())
     log_dir: Optional[Path] = None

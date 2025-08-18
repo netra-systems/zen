@@ -120,6 +120,36 @@ def mock_dependencies():
 
 
 @pytest.fixture
+def agent(mock_dependencies):
+    """Create DataSubAgent instance with mocked dependencies for test compatibility"""
+    from app.agents.data_sub_agent.agent import DataSubAgent
+    from unittest.mock import patch
+    
+    llm_manager, tool_dispatcher = mock_dependencies
+    with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager') as mock_redis_class:
+        # Setup proper async mocks for redis operations
+        mock_redis_instance = Mock()
+        mock_redis_instance.get = AsyncMock()
+        mock_redis_instance.set = AsyncMock()
+        mock_redis_instance.delete = AsyncMock()
+        mock_redis_instance.exists = AsyncMock()
+        mock_redis_class.return_value = mock_redis_instance
+        
+        agent = DataSubAgent(llm_manager, tool_dispatcher)
+        # Ensure redis_manager is properly mocked
+        if hasattr(agent, 'redis_manager') and agent.redis_manager:
+            agent.redis_manager.get = AsyncMock()
+            agent.redis_manager.set = AsyncMock()
+    return agent
+
+
+@pytest.fixture
+def service(agent):
+    """Alias agent as service for integration test compatibility"""
+    return agent
+
+
+@pytest.fixture
 def setup_real_infrastructure():
     """Setup infrastructure for real LLM tests."""
     config = get_config()
