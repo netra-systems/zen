@@ -11,11 +11,14 @@ from app.agents.data_sub_agent.agent import DataSubAgent
 
 class TestDataTransformation:
     """Test data transformation capabilities"""
+    @pytest.mark.asyncio
     async def test_transform_text_data(self):
         """Test transformation of text data"""
         mock_llm_manager = Mock()
         mock_tool_dispatcher = Mock()
-        agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
+        
+        with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
+            agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         input_data = {
             "type": "text",
@@ -29,11 +32,14 @@ class TestDataTransformation:
         assert "transformed" in result
         assert result["type"] == "text"
 
+    @pytest.mark.asyncio
     async def test_transform_json_data(self):
         """Test transformation of JSON data"""
         mock_llm_manager = Mock()
         mock_tool_dispatcher = Mock()
-        agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
+        
+        with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
+            agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         input_data = {
             "type": "json",
@@ -47,11 +53,14 @@ class TestDataTransformation:
         assert "parsed" in result
         assert result["parsed"]["key"] == "value"
 
+    @pytest.mark.asyncio
     async def test_transform_with_pipeline(self):
         """Test transformation with processing pipeline"""
         mock_llm_manager = Mock()
         mock_tool_dispatcher = Mock()
-        agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
+        
+        with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
+            agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         pipeline = [
             {"operation": "normalize"},
@@ -74,11 +83,14 @@ class TestDataTransformation:
 
 class TestDataEnrichment:
     """Test data enrichment functionality"""
+    @pytest.mark.asyncio
     async def test_enrich_with_metadata(self):
         """Test data enrichment with metadata"""
         mock_llm_manager = Mock()
         mock_tool_dispatcher = Mock()
-        agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
+        
+        with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
+            agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         input_data = {
             "content": "raw data",
@@ -92,11 +104,14 @@ class TestDataEnrichment:
         assert "source" in enriched["metadata"]
         assert enriched["metadata"]["source"] == "api"
 
+    @pytest.mark.asyncio
     async def test_enrich_with_external_source(self):
         """Test enrichment with external data source"""
         mock_llm_manager = Mock()
         mock_tool_dispatcher = Mock()
-        agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
+        
+        with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
+            agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         
         # The enrich_data method handles external enrichment internally
         input_data = {"id": "123", "enrich": True}

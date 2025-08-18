@@ -36,6 +36,7 @@ class TestDataSubAgentBasic:
             agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
             
         assert agent.redis_manager == None
+    @pytest.mark.asyncio
     async def test_get_cached_schema_success(self, agent):
         """Test getting cached schema information"""
         # Mock the clickhouse_ops.get_table_schema method directly
@@ -60,6 +61,7 @@ class TestDataSubAgentBasic:
         assert len(result["columns"]) == 2
         assert result["columns"][0]["name"] == "column1"
         assert result["columns"][0]["type"] == "String"
+    @pytest.mark.asyncio
     async def test_get_cached_schema_failure(self, agent):
         """Test getting cached schema with error"""
         with patch('app.agents.data_sub_agent.get_clickhouse_client') as mock_client:
@@ -73,6 +75,7 @@ class TestDataSubAgentBasic:
             result = await agent._get_cached_schema("test_table")
             
         assert result == None
+    @pytest.mark.asyncio
     async def test_fetch_clickhouse_data_with_cache_hit(self, agent):
         """Test fetching ClickHouse data with cache hit"""
         agent.redis_manager = Mock()
@@ -82,6 +85,7 @@ class TestDataSubAgentBasic:
         
         assert result == [{"col1": "value1"}]
         agent.redis_manager.get.assert_called_once_with("cache_key")
+    @pytest.mark.asyncio
     async def test_fetch_clickhouse_data_cache_miss(self, agent):
         """Test fetching ClickHouse data with cache miss"""
         agent.redis_manager = Mock()
@@ -105,6 +109,7 @@ class TestDataSubAgentBasic:
         assert len(result) == 2
         assert result[0] == {0: "value1", 1: "value2"}
         agent.redis_manager.set.assert_called_once()
+    @pytest.mark.asyncio
     async def test_fetch_clickhouse_data_no_cache(self, agent):
         """Test fetching ClickHouse data without caching"""
         agent.redis_manager = None
@@ -118,6 +123,7 @@ class TestDataSubAgentBasic:
                 result = await agent._fetch_clickhouse_data("SELECT * FROM test")
                 
         assert result == []
+    @pytest.mark.asyncio
     async def test_fetch_clickhouse_data_error(self, agent):
         """Test fetching ClickHouse data with error"""
         with patch('app.agents.data_sub_agent.create_workload_events_table_if_missing', new_callable=AsyncMock):
@@ -129,6 +135,7 @@ class TestDataSubAgentBasic:
                 result = await agent._fetch_clickhouse_data("SELECT * FROM test")
                 
         assert result == None
+    @pytest.mark.asyncio
     async def test_save_state(self, agent):
         """Test save_state method"""
         agent.state = {"key": "value", "count": 42}
@@ -137,6 +144,7 @@ class TestDataSubAgentBasic:
         await agent.save_state()
         
         assert agent.state == {"key": "value", "count": 42}
+    @pytest.mark.asyncio
     async def test_save_state_no_existing(self, agent):
         """Test save_state without existing state"""
         if hasattr(agent, 'state'):
@@ -145,12 +153,14 @@ class TestDataSubAgentBasic:
         await agent.save_state()
         
         assert agent.state == {}
+    @pytest.mark.asyncio
     async def test_load_state(self, agent):
         """Test load_state method"""
         await agent.load_state()
         
         assert hasattr(agent, 'state')
         assert isinstance(agent.state, dict)
+    @pytest.mark.asyncio
     async def test_load_state_existing(self, agent):
         """Test load_state overwrites existing state"""
         agent.state = {"existing": "data"}
@@ -161,6 +171,7 @@ class TestDataSubAgentBasic:
         # load_state initializes with empty state when no saved state is found
         assert agent.state == {}
         assert hasattr(agent, '_saved_state')
+    @pytest.mark.asyncio
     async def test_recover(self, agent):
         """Test recover method"""
         with patch.object(agent, 'load_state', new_callable=AsyncMock) as mock_load:

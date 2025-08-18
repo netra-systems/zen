@@ -7,6 +7,7 @@ import { ThreadRenameService } from '@/services/threadRenameService';
 import { generateUniqueId } from '@/lib/utils';
 import { ChatMessage, MessageSendingParams, MESSAGE_INPUT_CONSTANTS } from '../types';
 import { optimisticMessageManager } from '@/services/optimistic-updates';
+import { logger } from '@/utils/debug-logger';
 
 const { CHAR_LIMIT } = MESSAGE_INPUT_CONSTANTS;
 
@@ -98,7 +99,7 @@ export const useMessageSending = () => {
       await handleThreadRename(threadId, trimmedMessage);
       setProcessing(true);
     } catch (error) {
-      console.error('Failed to send message:', error);
+      logger.error('Failed to send message:', error);
       await handleSendFailure(error);
     } finally {
       setIsSending(false);
@@ -131,7 +132,7 @@ export const useMessageSending = () => {
       await optimisticMessageManager.retryMessage(message.localId);
       updateOptimisticMessage(message.localId, { status: 'pending' });
     } catch (retryError) {
-      console.error('Retry failed:', retryError);
+      logger.error('Retry failed:', retryError);
       updateOptimisticMessage(message.localId, { status: 'failed' });
     }
   };

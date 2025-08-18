@@ -76,8 +76,10 @@ class DataSubAgentHelpers:
     # Data operations delegation
     async def fetch_clickhouse_data(self, query: str, cache_key: Optional[str] = None):
         """Execute ClickHouse query with caching support."""
+        # Proper delegation to the modernized interface
+        self.agent.core.clickhouse_ops.redis_manager = self.agent.core.redis_manager
         return await self.agent.core.clickhouse_ops.fetch_data(
-            query, cache_key, self.agent.core.redis_manager, self.agent.core.cache_ttl
+            query, cache_key, self.agent.core.cache_ttl
         )
     
     # Data processing delegation

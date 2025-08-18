@@ -1,5 +1,6 @@
 import React from 'react';
 import type { ErrorHandlerHookReturn } from './error-boundary-types';
+import { logger } from '@/utils/debug-logger';
 
 export const useErrorHandler = (): ErrorHandlerHookReturn => {
   const [error, setError] = React.useState<Error | null>(null);
@@ -26,7 +27,7 @@ export const useErrorReporting = () => {
     error: Error,
     context: string = 'unknown'
   ) => {
-    console.error(`Error in ${context}:`, error);
+    logger.error(`Error in ${context}:`, error);
   }, []);
 
   return { reportError };

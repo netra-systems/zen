@@ -13,6 +13,7 @@ import { useWebSocket } from '@/hooks/useWebSocket';
 import { useLoadingState } from '@/hooks/useLoadingState';
 import { useEventProcessor } from '@/hooks/useEventProcessor';
 import { useThreadNavigation } from '@/hooks/useThreadNavigation';
+import { logger } from '@/utils/debug-logger';
 
 // Helper Functions (8 lines max each)
 const executeTestRun = async (
@@ -24,7 +25,7 @@ const executeTestRun = async (
     const { runEventQueueTests } = await import('@/lib/event-queue.test');
     const results = await runEventQueueTests();
     setTestResults(results);
-    console.log('Event Queue Test Results:', results);
+    logger.debug('Event Queue Test Results:', results);
   } catch (error) {
     handleTestExecutionError(error, setTestResults);
   } finally {
@@ -36,7 +37,7 @@ const handleTestExecutionError = (
   error: unknown,
   setTestResults: (results: any) => void
 ): void => {
-  console.error('Test execution failed:', error);
+  logger.error('Test execution failed:', error);
   setTestResults({ error: (error as Error).message });
 };
 

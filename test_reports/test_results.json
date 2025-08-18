@@ -1,13 +1,13 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-18T12:48:26.476064",
-    "total_runs": 19
+    "last_update": "2025-08-18T12:51:17.121529",
+    "total_runs": 21
   },
   "current_state": {
     "overall_status": "[ERRORS] 1 errors",
     "last_run_level": "real_e2e",
-    "last_run_time": "2025-08-18T12:48:26.476064",
+    "last_run_time": "2025-08-18T12:51:17.121529",
     "last_exit_code": 1
   },
   "known_test_counts": {
@@ -33,15 +33,15 @@
       "failed": 0,
       "skipped": 0,
       "errors": 0,
-      "last_update": "2025-08-18T12:25:09.051717"
+      "last_update": "2025-08-18T12:50:51.940593"
     },
     "integration:backend": {
-      "total": 56,
-      "passed": 53,
+      "total": 64,
+      "passed": 61,
       "failed": 1,
       "skipped": 0,
       "errors": 2,
-      "last_update": "2025-08-18T12:09:33.657995"
+      "last_update": "2025-08-18T12:50:35.053045"
     },
     "integration:frontend": {
       "total": 191,
@@ -57,7 +57,7 @@
       "failed": 0,
       "skipped": 0,
       "errors": 1,
-      "last_update": "2025-08-18T12:48:26.476064"
+      "last_update": "2025-08-18T12:51:17.121529"
     },
     "agents:backend": {
       "total": 75,
@@ -75,7 +75,7 @@
       "actual": 7,
       "passed": 7,
       "failed": 0,
-      "last_run": "2025-08-18T12:25:09.051717",
+      "last_run": "2025-08-18T12:50:51.940593",
       "status": "[PASSED] 7 tests"
     },
     "unit": {
@@ -90,11 +90,11 @@
     "integration": {
       "description": "Integration tests",
       "expected": 60,
-      "actual": 191,
-      "passed": 60,
-      "failed": 131,
-      "last_run": "2025-08-18T12:36:46.552571",
-      "status": "[FAILED] 131 failures"
+      "actual": 64,
+      "passed": 61,
+      "failed": 1,
+      "last_run": "2025-08-18T12:50:35.053045",
+      "status": "[FAILED] 1 failures"
     },
     "critical": {
       "description": "Critical path tests",
@@ -223,12 +223,12 @@
         "failed": 0,
         "skipped": 0,
         "errors": 1,
-        "import_errors": 2,
-        "status": "import_error",
-        "test_files": 0
+        "import_errors": 0,
+        "test_files": 0,
+        "status": "failed"
       },
-      "last_duration": 8.692280530929565,
-      "last_run": "2025-08-18T12:48:26.476064"
+      "last_duration": 14.466891050338745,
+      "last_run": "2025-08-18T12:51:17.121529"
     },
     "frontend": {
       "status": "skipped",
@@ -240,7 +240,7 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-18T12:48:26.476064"
+      "last_run": "2025-08-18T12:51:17.121529"
     },
     "e2e": {
       "status": "pending",
@@ -252,25 +252,11 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-18T12:48:26.476064"
+      "last_run": "2025-08-18T12:51:17.121529"
     }
   },
   "failing_tests": [],
   "test_history": [
-    {
-      "timestamp": "2025-08-18T11:41:40.366013",
-      "level": "agents",
-      "exit_code": 4,
-      "status": "[UNKNOWN]",
-      "statistics": {
-        "total_tests_known": 0,
-        "total_tests_run": 0,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
-    },
     {
       "timestamp": "2025-08-18T11:43:35.834046",
       "level": "unit",
@@ -510,7 +496,35 @@
       }
     },
     {
-      "timestamp": "2025-08-18T12:48:26.476064",
+      "timestamp": "2025-08-18T12:50:35.053045",
+      "level": "integration",
+      "exit_code": 15,
+      "status": "[FAILED] 1 failures",
+      "statistics": {
+        "total_tests_known": 191,
+        "total_tests_run": 64,
+        "total_passed": 61,
+        "total_failed": 1,
+        "total_skipped": 0,
+        "pass_rate": 95.31
+      }
+    },
+    {
+      "timestamp": "2025-08-18T12:50:51.940593",
+      "level": "smoke",
+      "exit_code": 0,
+      "status": "[PASSED]",
+      "statistics": {
+        "total_tests_known": 191,
+        "total_tests_run": 7,
+        "total_passed": 7,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 100.0
+      }
+    },
+    {
+      "timestamp": "2025-08-18T12:51:17.121529",
       "level": "real_e2e",
       "exit_code": 1,
       "status": "[ERRORS] 1 errors",

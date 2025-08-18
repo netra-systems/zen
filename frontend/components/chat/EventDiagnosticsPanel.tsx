@@ -11,6 +11,7 @@
 import React from 'react';
 import { runEventQueueTests } from '@/lib/event-queue.test';
 import { websocketDebugger } from '@/services/websocketDebugger';
+import { logger } from '@/utils/debug-logger';
 
 // ============================================
 // Helper Functions (8 lines max each)
@@ -24,7 +25,7 @@ const handleTestExecution = async (
   try {
     const results = await runEventQueueTests();
     setTestResults(results);
-    console.log('Event Queue Test Results:', results);
+    logger.debug('Event Queue Test Results:', results);
   } catch (error) {
     handleTestError(error, setTestResults);
   } finally {
@@ -33,13 +34,13 @@ const handleTestExecution = async (
 };
 
 const handleTestError = (error: unknown, setTestResults: (results: any) => void): void => {
-  console.error('Test execution failed:', error);
+  logger.error('Test execution failed:', error);
   setTestResults({ error: (error as Error).message });
 };
 
 const handleDebugReportGeneration = (): void => {
   const report = websocketDebugger.generateDebugReport();
-  console.log('WebSocket Debug Report:\n', report);
+  logger.debug('WebSocket Debug Report:\n', report);
   navigator.clipboard.writeText(report).catch(() => {});
 };
 

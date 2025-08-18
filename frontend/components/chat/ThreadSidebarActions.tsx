@@ -4,6 +4,7 @@ import { useThreadSwitching } from '@/hooks/useThreadSwitching';
 import { useThreadCreation } from '@/hooks/useThreadCreation';
 import { defaultRecoveryManager } from '@/lib/thread-error-recovery';
 import { createThreadErrorFromError } from './ThreadSidebarErrorHandling';
+import { logger } from '@/utils/debug-logger';
 import {
   executeThreadLoad,
   executeThreadCreation,
@@ -98,7 +99,7 @@ export const useThreadSidebarActions = (): ThreadSidebarActionsResult => {
   };
 
   const handleErrorBoundaryError = (error: Error, errorInfo: any, threadId?: string) => {
-    console.error('Thread error boundary caught error:', { error, errorInfo, threadId });
+    logger.error('Thread error boundary caught error:', { error, errorInfo, threadId });
   };
 
   const handleErrorBoundaryRetry = (
