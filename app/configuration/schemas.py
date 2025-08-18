@@ -37,7 +37,6 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="langfuse-secret-key", target_models=["langfuse"], target_field="secret_key"),
     SecretReference(name="langfuse-public-key", target_models=["langfuse"], target_field="public_key"),
     SecretReference(name="clickhouse-default-password", target_models=["clickhouse_native", "clickhouse_https"], target_field="password"),
-    SecretReference(name="clickhouse-development-password", target_models=["clickhouse_https_dev"], target_field="password"),
     SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
     SecretReference(name="fernet-key", target_field="fernet_key"),
     SecretReference(name="redis-default", target_models=["redis"], target_field="password"),
