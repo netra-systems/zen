@@ -12,8 +12,6 @@ from app.config import settings
 
 def _get_clickhouse_config():
     """Get ClickHouse configuration based on environment"""
-    if settings.environment == "development":
-        return settings.clickhouse_https_dev
     return settings.clickhouse_https
 
 
