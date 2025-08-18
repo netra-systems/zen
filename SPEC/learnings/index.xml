@@ -248,6 +248,19 @@
             </learning_ids>
         </category>
         <category>
+            <name>Frontend</name>
+            <file>learnings/frontend.xml</file>
+            <path>SPEC/learnings/frontend.xml</path>
+            <learning_count>4</learning_count>
+            <learning_ids>
+                <id>zustand-selector-infinite-loop</id>
+                <id>websocket-race-condition-solution</id>
+                <id>websocket-client-handshake-improvements</id>
+                <id>module-default-export-initialization</id>
+            </learning_ids>
+            <important_note>Module initialization and state management patterns</important_note>
+        </category>
+        <category>
             <name>E2E Testing</name>
             <file>learnings/e2e_testing.xml</file>
             <path>SPEC/learnings/e2e_testing.xml</path>
