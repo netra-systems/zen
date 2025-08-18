@@ -21,18 +21,7 @@ def save_test_report(results: Dict, level: str, config: Dict, exit_code: int, re
     comprehensive = ComprehensiveTestReporter(reports_dir)
     comprehensive.generate_comprehensive_report(results=results, level=level, config=config, exit_code=exit_code)
     
-    # Also save legacy format for backward compatibility
-    latest_path = reports_dir / "latest" / f"{level}_report.md"
-    latest_path.parent.mkdir(exist_ok=True)
-    
-    md_content = generate_markdown_report(results, level, config, exit_code)
-    with open(latest_path, "w", encoding='utf-8') as f:
-        f.write(md_content)
-    
-    print(f"\n[REPORT] Test reports saved:")
-    print(f"  - Dashboard: {reports_dir / 'dashboard.md'}")
-    print(f"  - Summary: {reports_dir / 'summary.md'}")
-    print(f"  - Latest: {latest_path}")
+    print(f"\n[REPORT] Test results saved to: {reports_dir / 'test_results.json'}")
 
 
 def print_summary(results: Dict):

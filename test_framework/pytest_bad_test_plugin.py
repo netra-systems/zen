@@ -53,8 +53,8 @@ class BadTestPlugin:
         """
         if hasattr(config.option, 'bad_test_data_file') and config.option.bad_test_data_file:
             return Path(config.option.bad_test_data_file)
-        # Default to test_reports/bad_tests.json
-        return Path("test_reports/bad_tests.json")
+        # Default to test_reports/test_results.json (single source of truth)
+        return Path("test_reports/test_results.json")
     
     def record_test_outcome(self, nodeid: str, outcome: str, 
                            longrepr=None):
