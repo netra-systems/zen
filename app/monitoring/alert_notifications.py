@@ -52,13 +52,16 @@ def _create_log_config() -> NotificationConfig:
 
 def _create_email_config() -> NotificationConfig:
     """Create email notification configuration."""
-    return NotificationConfig(
-        channel=NotificationChannel.EMAIL,
-        enabled=False,
-        rate_limit_per_hour=20,
-        min_level=AlertLevel.ERROR,
-        config=_get_email_default_config()
-    )
+    config_params = _get_email_config_params()
+    return NotificationConfig(**config_params)
+
+def _get_email_config_params() -> Dict[str, Any]:
+    """Get email configuration parameters."""
+    return {
+        "channel": NotificationChannel.EMAIL, "enabled": False,
+        "rate_limit_per_hour": 20, "min_level": AlertLevel.ERROR,
+        "config": _get_email_default_config()
+    }
 
 def _get_email_default_config() -> Dict[str, Any]:
     """Get default email configuration."""
@@ -67,13 +70,16 @@ def _get_email_default_config() -> Dict[str, Any]:
 
 def _create_slack_config() -> NotificationConfig:
     """Create Slack notification configuration."""
-    return NotificationConfig(
-        channel=NotificationChannel.SLACK,
-        enabled=False,
-        rate_limit_per_hour=50,
-        min_level=AlertLevel.WARNING,
-        config=_get_slack_default_config()
-    )
+    config_params = _get_slack_config_params()
+    return NotificationConfig(**config_params)
+
+def _get_slack_config_params() -> Dict[str, Any]:
+    """Get Slack configuration parameters."""
+    return {
+        "channel": NotificationChannel.SLACK, "enabled": False,
+        "rate_limit_per_hour": 50, "min_level": AlertLevel.WARNING,
+        "config": _get_slack_default_config()
+    }
 
 def _get_slack_default_config() -> Dict[str, Any]:
     """Get default Slack configuration."""
@@ -82,13 +88,16 @@ def _get_slack_default_config() -> Dict[str, Any]:
 
 def _create_webhook_config() -> NotificationConfig:
     """Create webhook notification configuration."""
-    return NotificationConfig(
-        channel=NotificationChannel.WEBHOOK,
-        enabled=False,
-        rate_limit_per_hour=100,
-        min_level=AlertLevel.WARNING,
-        config=_get_webhook_default_config()
-    )
+    config_params = _get_webhook_config_params()
+    return NotificationConfig(**config_params)
+
+def _get_webhook_config_params() -> Dict[str, Any]:
+    """Get webhook configuration parameters."""
+    return {
+        "channel": NotificationChannel.WEBHOOK, "enabled": False,
+        "rate_limit_per_hour": 100, "min_level": AlertLevel.WARNING,
+        "config": _get_webhook_default_config()
+    }
 
 def _get_webhook_default_config() -> Dict[str, Any]:
     """Get default webhook configuration."""

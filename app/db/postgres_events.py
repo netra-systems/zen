@@ -33,12 +33,16 @@ def _configure_async_connection_timeouts(dbapi_conn: Connection):
     """Configure timeouts for async database connection."""
     cursor = dbapi_conn.cursor()
     try:
-        _execute_timeout_statements(cursor)
-        dbapi_conn.commit()
+        _execute_and_commit_timeout_config(dbapi_conn, cursor)
     except Exception as e:
         _handle_timeout_config_error(dbapi_conn, e)
     finally:
         cursor.close()
+
+def _execute_and_commit_timeout_config(dbapi_conn: Connection, cursor):
+    """Execute timeout statements and commit transaction."""
+    _execute_timeout_statements(cursor)
+    dbapi_conn.commit()
 
 
 def _set_connection_pid(dbapi_conn: Connection, connection_record: ConnectionPoolEntry):

@@ -102,6 +102,7 @@ class MigrationTracker:
             return state
         except Exception as e:
             await self._handle_migration_check_error(state, e)
+            return state
 
     async def _update_migration_state(self, cfg: alembic.config.Config, state: MigrationState) -> None:
         """Update migration state with current and head revisions."""

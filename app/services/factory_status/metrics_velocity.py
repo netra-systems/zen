@@ -128,12 +128,18 @@ class VelocityCalculator:
     
     def _determine_period(self, hours: int) -> VelocityPeriod:
         """Determine appropriate period for hours."""
-        if hours <= 24:
-            return VelocityPeriod.HOUR
-        elif hours <= 168:
-            return VelocityPeriod.DAY
-        elif hours <= 744:
-            return VelocityPeriod.WEEK
+        period_thresholds = self._get_period_thresholds()
+        return self._select_period_by_hours(hours, period_thresholds)
+    
+    def _get_period_thresholds(self) -> Dict[int, VelocityPeriod]:
+        """Get period thresholds mapping."""
+        return {24: VelocityPeriod.HOUR, 168: VelocityPeriod.DAY, 744: VelocityPeriod.WEEK}
+    
+    def _select_period_by_hours(self, hours: int, thresholds: Dict[int, VelocityPeriod]) -> VelocityPeriod:
+        """Select period based on hours and thresholds."""
+        for threshold, period in thresholds.items():
+            if hours <= threshold:
+                return period
         return VelocityPeriod.MONTH
     
     def _calculate_trend(self, daily_data: Dict[str, List[CommitInfo]]) -> Tuple[TrendDirection, float]:
@@ -188,9 +194,17 @@ class VelocityCalculator:
     
     def _determine_trend_direction(self, slope: float, volatility: float) -> TrendDirection:
         """Determine trend direction from slope and volatility."""
-        if volatility > 0.5:
+        if self._is_volatile_trend(volatility):
             return TrendDirection.VOLATILE
-        elif slope > 0.1:
+        return self._classify_trend_by_slope(slope)
+    
+    def _is_volatile_trend(self, volatility: float) -> bool:
+        """Check if trend is volatile."""
+        return volatility > 0.5
+    
+    def _classify_trend_by_slope(self, slope: float) -> TrendDirection:
+        """Classify trend direction by slope value."""
+        if slope > 0.1:
             return TrendDirection.INCREASING
         elif slope < -0.1:
             return TrendDirection.DECREASING
@@ -219,13 +233,16 @@ class VelocityCalculator:
     def _build_velocity_metrics_object(self, period: VelocityPeriod, trend_data: Dict[str, Any], 
                                       confidence: float, metrics_data: Dict[str, float]) -> VelocityMetrics:
         """Build the final VelocityMetrics object."""
-        return VelocityMetrics(
-            period=period,
-            trend_direction=trend_data['direction'],
-            trend_slope=trend_data['slope'],
-            confidence=confidence,
-            **metrics_data
-        )
+        base_fields = self._get_velocity_metrics_base_fields(period, trend_data, confidence)
+        return VelocityMetrics(**base_fields, **metrics_data)
+    
+    def _get_velocity_metrics_base_fields(self, period: VelocityPeriod, trend_data: Dict[str, Any], 
+                                        confidence: float) -> Dict[str, Any]:
+        """Get base fields for VelocityMetrics."""
+        return {
+            'period': period, 'trend_direction': trend_data['direction'],
+            'trend_slope': trend_data['slope'], 'confidence': confidence
+        }
     
     def _calculate_metrics_data(self, commits: List[CommitInfo], period_count: float) -> Dict[str, float]:
         """Calculate velocity metrics data."""
@@ -247,6 +264,12 @@ class VelocityCalculator:
     def _build_metrics_data_dict(self, commits: List[CommitInfo], feature_commits: List[CommitInfo], 
                                commit_totals: Dict[str, int], period_count: float) -> Dict[str, float]:
         """Build the metrics data dictionary."""
+        rates = self._calculate_per_period_rates(commits, feature_commits, commit_totals, period_count)
+        return rates
+    
+    def _calculate_per_period_rates(self, commits: List[CommitInfo], feature_commits: List[CommitInfo],
+                                  commit_totals: Dict[str, int], period_count: float) -> Dict[str, float]:
+        """Calculate rates per period."""
         return {
             'commits_per_period': len(commits) / period_count,
             'lines_per_period': commit_totals['total_lines'] / period_count,
@@ -256,13 +279,16 @@ class VelocityCalculator:
     
     def _get_period_count(self, period: VelocityPeriod, hours: int) -> float:
         """Get number of periods in timeframe."""
-        period_mappings = {
-            VelocityPeriod.HOUR: hours,
-            VelocityPeriod.DAY: hours / 24,
-            VelocityPeriod.WEEK: hours / 168,
-            VelocityPeriod.MONTH: hours / 744
+        period_mappings = self._get_period_hour_mappings(hours)
+        period_count = period_mappings.get(period, hours / 744)
+        return max(period_count, 1)
+    
+    def _get_period_hour_mappings(self, hours: int) -> Dict[VelocityPeriod, float]:
+        """Get period to hour count mappings."""
+        return {
+            VelocityPeriod.HOUR: hours, VelocityPeriod.DAY: hours / 24,
+            VelocityPeriod.WEEK: hours / 168, VelocityPeriod.MONTH: hours / 744
         }
-        return max(period_mappings.get(period, hours / 744), 1)
     
     def _calculate_confidence(self, commits: List[CommitInfo]) -> float:
         """Calculate confidence in velocity measurement."""
@@ -451,7 +477,16 @@ class VelocityCalculator:
     def _calculate_daily_baseline_rates(self, commits: List[CommitInfo], feature_commits: List, 
                                       historical_days: int) -> Dict[str, float]:
         """Calculate daily rates for baseline metrics."""
-        total_lines = sum(c.insertions + c.deletions for c in commits)
+        total_lines = self._sum_commit_changes(commits)
+        return self._build_baseline_rates_dict(commits, feature_commits, historical_days, total_lines)
+    
+    def _sum_commit_changes(self, commits: List[CommitInfo]) -> int:
+        """Sum total line changes from commits."""
+        return sum(c.insertions + c.deletions for c in commits)
+    
+    def _build_baseline_rates_dict(self, commits: List[CommitInfo], feature_commits: List,
+                                 historical_days: int, total_lines: int) -> Dict[str, float]:
+        """Build baseline rates dictionary."""
         return {
             'commits_per_day': len(commits) / historical_days,
             'lines_per_day': total_lines / historical_days,

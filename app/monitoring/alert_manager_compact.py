@@ -264,14 +264,27 @@ class CompactAlertManager:
         
     def _build_alert_summary(self, active_count: int, level_counts: Dict[str, int]) -> Dict[str, Any]:
         """Build alert summary dictionary."""
+        alert_stats = self._get_alert_stats(active_count, level_counts)
+        rule_stats = self._get_rule_stats()
+        channel_stats = self._get_channel_stats()
+        return {**alert_stats, **rule_stats, **channel_stats}
+
+    def _get_alert_stats(self, active_count: int, level_counts: Dict[str, int]) -> Dict[str, Any]:
+        """Get alert statistics."""
+        return {"active_alerts": active_count, "alerts_by_level": level_counts}
+
+    def _get_rule_stats(self) -> Dict[str, Any]:
+        """Get rule statistics."""
+        enabled_count = len([r for r in self.alert_rules.values() if r.enabled])
         return {
-            "active_alerts": active_count,
-            "alerts_by_level": level_counts,
             "suppressed_rules": len(self.suppressed_rules),
-            "total_rules": len(self.alert_rules),
-            "enabled_rules": len([r for r in self.alert_rules.values() if r.enabled]),
-            "notification_channels": len([c for c in self.notification_configs.values() if c.enabled])
+            "total_rules": len(self.alert_rules), "enabled_rules": enabled_count
         }
+
+    def _get_channel_stats(self) -> Dict[str, Any]:
+        """Get notification channel statistics."""
+        enabled_channels = len([c for c in self.notification_configs.values() if c.enabled])
+        return {"notification_channels": enabled_channels}
 
     # Notification handler registration
     def register_notification_handler(self, channel: NotificationChannel, handler) -> None:

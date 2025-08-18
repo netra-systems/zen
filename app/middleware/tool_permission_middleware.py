@@ -356,6 +356,10 @@ def create_tool_permission_dependency(
     tool_registry: UnifiedToolRegistry
 ):
     """Create a dependency for checking tool permissions in FastAPI endpoints"""
+    return _build_permission_dependency_function(permission_service)
+
+def _build_permission_dependency_function(permission_service: ToolPermissionService):
+    """Build permission dependency function."""
     async def check_tool_permission(
         tool_name: str,
         action: str = "execute",

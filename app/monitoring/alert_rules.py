@@ -36,13 +36,21 @@ def _create_high_error_rate_rule() -> AlertRule:
 
 def _get_high_error_rate_rule_config() -> Dict[str, Any]:
     """Get high error rate rule configuration."""
+    base_config = _get_error_rate_base_config()
+    specific_config = _get_high_error_specific_config()
+    return {**base_config, **specific_config}
+
+def _get_error_rate_base_config() -> Dict[str, Any]:
+    """Get base error rate configuration."""
     return {
         "rule_id": "agent_high_error_rate",
         "name": "High Agent Error Rate",
-        "description": "Agent error rate exceeds threshold",
-        "level": AlertLevel.ERROR,
-        "threshold_value": 0.2
+        "description": "Agent error rate exceeds threshold"
     }
+
+def _get_high_error_specific_config() -> Dict[str, Any]:
+    """Get high error specific configuration."""
+    return {"level": AlertLevel.ERROR, "threshold_value": 0.2}
 
 def _build_high_error_rate_rule(config: Dict[str, Any]) -> AlertRule:
     """Build high error rate alert rule."""

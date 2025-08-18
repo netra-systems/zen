@@ -23,16 +23,18 @@ class DataEnricher:
 
     def _get_enriched_table_columns(self) -> str:
         """Define the column structure for enriched table."""
-        return """
-            `event_metadata` String,
-            `trace_context` String,
-            `request` String,
-            `performance` String,
-            `finops` String,
-            `response` String,
-            `workloadName` String,
-            `enriched_metrics` Nullable(String),
-            `embedding` Nullable(String)"""
+        columns = [
+            "`event_metadata` String",
+            "`trace_context` String",
+            "`request` String",
+            "`performance` String",
+            "`finops` String",
+            "`response` String",
+            "`workloadName` String",
+            "`enriched_metrics` Nullable(String)",
+            "`embedding` Nullable(String)"
+        ]
+        return ",\n            ".join(columns)
 
     def _get_enriched_table_schema(self, dest_db: str, enriched_table_name: str) -> str:
         """Defines the schema for the enriched table. Columns match `UnifiedLogEntry`."""
@@ -55,19 +57,30 @@ class DataEnricher:
 
     def _prepare_enriched_table(self, dest_db: str, enriched_table_name: str) -> None:
         """Drop existing table and create new empty enriched table."""
-        self.client.execute(f"DROP TABLE IF EXISTS `{dest_db}`.`{enriched_table_name}`")
-        logging.info(f"Dropped existing table `{enriched_table_name}` if it existed.")
-        create_schema_query = self._get_enriched_table_schema(dest_db, enriched_table_name)
+        self._drop_existing_enriched_table(dest_db, enriched_table_name)
+        self._create_enriched_table(dest_db, enriched_table_name)
+
+    def _drop_existing_enriched_table(self, dest_db: str, table_name: str) -> None:
+        """Drop existing enriched table if it exists."""
+        self.client.execute(f"DROP TABLE IF EXISTS `{dest_db}`.`{table_name}`")
+        logging.info(f"Dropped existing table `{table_name}` if it existed.")
+
+    def _create_enriched_table(self, dest_db: str, table_name: str) -> None:
+        """Create new enriched table with schema."""
+        create_schema_query = self._get_enriched_table_schema(dest_db, table_name)
         self.client.execute(create_schema_query)
-        logging.info(f"Created new empty table `{enriched_table_name}` with target schemas.")
+        logging.info(f"Created new empty table `{table_name}` with target schemas.")
 
     def _get_transformation_select_columns(self) -> str:
         """Define the SELECT column transformations for enrichment query."""
-        event_metadata = self._get_event_metadata_transformation()
-        trace_context = self._get_trace_context_transformation()
-        request_data = self._get_request_data_transformation()
-        performance_data = self._get_performance_data_transformation()
-        return f"{event_metadata},\n{trace_context},\n{request_data},\n{performance_data},\n{self._get_remaining_transformations()}"
+        transformations = [
+            self._get_event_metadata_transformation(),
+            self._get_trace_context_transformation(),
+            self._get_request_data_transformation(),
+            self._get_performance_data_transformation(),
+            self._get_remaining_transformations()
+        ]
+        return ",\n".join(transformations)
         
     def _get_event_metadata_transformation(self) -> str:
         """Get event metadata transformation."""
@@ -112,11 +125,15 @@ class DataEnricher:
     def _execute_transformation(self, transformation_query: str, dest_db: str, enriched_table_name: str) -> None:
         """Execute transformation query with error handling."""
         try:
-            logging.info("Executing transformation query to populate the enriched table...")
-            self.client.execute(transformation_query)
-            logging.info(f"Successfully enriched data and inserted into `{enriched_table_name}`.")
+            self._run_transformation_query(transformation_query, enriched_table_name)
         except Exception as e:
             self._handle_transformation_error(e, dest_db, enriched_table_name)
+
+    def _run_transformation_query(self, query: str, table_name: str) -> None:
+        """Run the transformation query and log success."""
+        logging.info("Executing transformation query to populate the enriched table...")
+        self.client.execute(query)
+        logging.info(f"Successfully enriched data and inserted into `{table_name}`.")
 
     def _handle_transformation_error(self, e: Exception, dest_db: str, enriched_table_name: str) -> None:
         """Handle transformation errors with cleanup."""
@@ -128,6 +145,10 @@ class DataEnricher:
         """Creates a new, enriched table from the raw source data."""
         dest_db, enriched_table_name = self._setup_enrichment_target(source_table)
         self._prepare_enriched_table(dest_db, enriched_table_name)
+        self._execute_enrichment_workflow(source_db, source_table, dest_db, enriched_table_name)
+        return dest_db, enriched_table_name
+
+    def _execute_enrichment_workflow(self, source_db: str, source_table: str, dest_db: str, enriched_table_name: str) -> None:
+        """Execute the enrichment workflow."""
         transformation_query = self._build_transformation_query(source_db, source_table, dest_db, enriched_table_name)
         self._execute_transformation(transformation_query, dest_db, enriched_table_name)
-        return dest_db, enriched_table_name

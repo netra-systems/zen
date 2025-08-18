@@ -61,12 +61,17 @@ class AuthenticationAuditor(SecurityAuditor):
     
     def _create_failed_attempts_finding(self) -> SecurityFinding:
         """Create finding for high failed attempts threshold."""
+        return self._build_failed_attempts_security_finding()
+    
+    def _build_failed_attempts_security_finding(self) -> SecurityFinding:
+        """Build security finding for failed attempts threshold."""
+        current_threshold = enhanced_auth_security.max_failed_attempts
+        description = f"Max failed attempts set to {current_threshold}, recommended <= 5"
         return self._create_security_finding(
-            "AUTH001", "High Failed Login Attempt Threshold",
-            f"Max failed attempts set to {enhanced_auth_security.max_failed_attempts}, recommended <= 5",
+            "AUTH001", "High Failed Login Attempt Threshold", description,
             SecuritySeverity.MEDIUM, SecurityCategory.AUTHENTICATION, "CWE-307",
             "A02:2021 - Cryptographic Failures", "Reduce max_failed_attempts to 5 or lower",
-            {"current_threshold": enhanced_auth_security.max_failed_attempts}
+            {"current_threshold": current_threshold}
         )
     
     def _check_lockout_duration(self, findings: List[SecurityFinding]) -> None:

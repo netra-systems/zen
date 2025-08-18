@@ -37,6 +37,12 @@ class JobManager:
         table_name: str
     ) -> Dict:
         """Build job record data structure"""
+        base_record = self._create_base_job_record(config, corpus_id, table_name)
+        base_record["user_id"] = user_id
+        return base_record
+
+    def _create_base_job_record(self, config: schemas.LogGenParams, corpus_id: Optional[str], table_name: str) -> Dict:
+        """Create base job record with essential fields"""
         return {
             "status": GenerationStatus.INITIATED.value,
             "config": config,
@@ -45,8 +51,7 @@ class JobManager:
             "records_generated": 0,
             "records_ingested": 0,
             "errors": [],
-            "table_name": table_name,
-            "user_id": user_id
+            "table_name": table_name
         }
 
     async def start_job(self, job_id: str, active_jobs: Dict) -> None:

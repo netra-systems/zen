@@ -26,10 +26,21 @@ class TechnicalDebtCalculator:
 
     def _collect_debt_metrics(self) -> dict:
         """Collect all debt metrics."""
+        base_metrics = self._get_base_debt_metrics()
+        additional_metrics = self._get_additional_debt_metrics()
+        return {**base_metrics, **additional_metrics}
+    
+    def _get_base_debt_metrics(self) -> dict:
+        """Get base debt metrics."""
         return {
             'code_smells': self._count_code_smells(),
             'duplication': self._calculate_duplication(),
-            'hotspots': self._find_complexity_hotspots(),
+            'hotspots': self._find_complexity_hotspots()
+        }
+    
+    def _get_additional_debt_metrics(self) -> dict:
+        """Get additional debt metrics."""
+        return {
             'deprecated': self._count_deprecated_usage(),
             'todos': self._count_todo_items()
         }
@@ -43,15 +54,20 @@ class TechnicalDebtCalculator:
 
     def _build_technical_debt(self, metrics: dict, debt_score: float, debt_trend: float) -> TechnicalDebt:
         """Build TechnicalDebt object from metrics."""
-        return TechnicalDebt(
-            code_smells=metrics['code_smells'],
-            duplication_percentage=metrics['duplication'],
-            complexity_hotspots=metrics['hotspots'],
-            deprecated_usage=metrics['deprecated'],
-            todo_count=metrics['todos'],
-            debt_score=debt_score,
-            debt_trend=debt_trend
-        )
+        debt_params = self._prepare_debt_params(metrics, debt_score, debt_trend)
+        return TechnicalDebt(**debt_params)
+    
+    def _prepare_debt_params(self, metrics: dict, debt_score: float, debt_trend: float) -> dict:
+        """Prepare parameters for TechnicalDebt constructor."""
+        return {
+            'code_smells': metrics['code_smells'],
+            'duplication_percentage': metrics['duplication'],
+            'complexity_hotspots': metrics['hotspots'],
+            'deprecated_usage': metrics['deprecated'],
+            'todo_count': metrics['todos'],
+            'debt_score': debt_score,
+            'debt_trend': debt_trend
+        }
     
     def _count_code_smells(self) -> int:
         """Count code smells using pattern matching."""

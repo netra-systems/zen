@@ -42,8 +42,7 @@ class QualityValidator:
         metrics = await self._get_content_metrics(content, content_type)
         passed = self.check_thresholds(metrics, content_type, strict_mode)
         result = self._build_validation_result(metrics, passed)
-        self._update_validation_stats(result)
-        return result
+        return self._finalize_validation(result)
     
     async def _analyze_content_quality(self, content: str, content_type: ContentType) -> QualityMetrics:
         """Analyze content quality and extract metrics."""
@@ -278,3 +277,8 @@ class QualityValidator:
         """Validate metric values against their thresholds."""
         return all(metrics_value >= thresholds.get(threshold_key, 0) 
                   for threshold_key, metrics_value in checks if threshold_key in thresholds)
+    
+    def _finalize_validation(self, result: ValidationResult) -> ValidationResult:
+        """Finalize validation by updating stats and returning result."""
+        self._update_validation_stats(result)
+        return result
