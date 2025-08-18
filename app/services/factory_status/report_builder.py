@@ -67,40 +67,60 @@ class ReportBuilder:
     
     def build_report(self, hours: int = 24) -> FactoryStatusReport:
         """Build complete factory status report."""
-        # Gather all metrics
-        velocity = self._gather_velocity_metrics(hours)
-        impact = self._gather_impact_metrics(hours)
-        quality = self._gather_quality_metrics(hours)
-        business = self._gather_business_metrics(hours)
-        branches = self._gather_branch_metrics()
-        features = self._gather_feature_progress(hours)
-        
-        # Generate summary and recommendations
+        metrics = self._gather_all_metrics(hours)
+        summary_data = self._generate_summary_and_recommendations(metrics)
+        return self._create_report_from_data(metrics, summary_data)
+
+    def _gather_all_metrics(self, hours: int) -> Dict[str, Any]:
+        """Gather all metrics for report"""
+        return {
+            "velocity": self._gather_velocity_metrics(hours),
+            "impact": self._gather_impact_metrics(hours),
+            "quality": self._gather_quality_metrics(hours),
+            "business": self._gather_business_metrics(hours),
+            "branches": self._gather_branch_metrics(),
+            "features": self._gather_feature_progress(hours)
+        }
+
+    def _generate_summary_and_recommendations(self, metrics: Dict) -> Dict[str, Any]:
+        """Generate summary and recommendations"""
         summary = self._generate_executive_summary(
-            velocity, impact, quality, business
+            metrics["velocity"], metrics["impact"], metrics["quality"], metrics["business"]
         )
         recommendations = self._generate_recommendations(
-            velocity, impact, quality, business, branches
+            metrics["velocity"], metrics["impact"], metrics["quality"], 
+            metrics["business"], metrics["branches"]
         )
-        
+        return {"summary": summary, "recommendations": recommendations}
+
+    def _create_report_from_data(self, metrics: Dict, summary_data: Dict) -> FactoryStatusReport:
+        """Create report from gathered data"""
         return self._create_report(
-            summary, velocity, impact, quality, 
-            business, branches, features, recommendations
+            summary_data["summary"], metrics["velocity"], metrics["impact"], 
+            metrics["quality"], metrics["business"], metrics["branches"], 
+            metrics["features"], summary_data["recommendations"]
         )
     
     def _gather_velocity_metrics(self, hours: int) -> Dict[str, Any]:
         """Gather velocity metrics."""
         metrics = self.velocity_calc.calculate_velocity(hours)
-        # Calculate per-hour and per-day from per-period
         period_hours = hours if hours <= 24 else 24
+        commit_rates = self._calculate_commit_rates(metrics, period_hours, hours)
+        return self._build_velocity_metrics(metrics, commit_rates)
+
+    def _calculate_commit_rates(self, metrics, period_hours: int, hours: int) -> Dict[str, float]:
+        """Calculate commit rates per hour and day"""
         commits_per_hour = metrics.commits_per_period / period_hours if period_hours > 0 else 0
         commits_per_day = metrics.commits_per_period if hours >= 24 else metrics.commits_per_period * (24 / hours)
-        
+        return {"per_hour": commits_per_hour, "per_day": commits_per_day}
+
+    def _build_velocity_metrics(self, metrics, commit_rates: Dict) -> Dict[str, Any]:
+        """Build velocity metrics dictionary"""
         return {
-            "commits_per_hour": commits_per_hour,
-            "commits_per_day": commits_per_day,
+            "commits_per_hour": commit_rates["per_hour"],
+            "commits_per_day": commit_rates["per_day"],
             "velocity_trend": metrics.trend_slope,
-            "peak_activity": {"hours": [], "days": []},  # Simplified for now
+            "peak_activity": {"hours": [], "days": []},
             "feature_delivery": {"vs_baseline": 1.0, "speed": metrics.features_per_period},
             "confidence_score": metrics.confidence
         }
@@ -108,11 +128,15 @@ class ReportBuilder:
     def _gather_impact_metrics(self, hours: int) -> Dict[str, Any]:
         """Gather impact metrics."""
         metrics = self.impact_calc.calculate_impact_metrics(hours)
+        return self._build_impact_metrics(metrics)
+
+    def _build_impact_metrics(self, metrics) -> Dict[str, Any]:
+        """Build impact metrics dictionary"""
         return {
             "total_lines_added": metrics.lines_added,
             "total_lines_deleted": metrics.lines_deleted,
             "files_changed": metrics.files_affected,
-            "modules_affected": [],  # Module names not available in current structure
+            "modules_affected": [],
             "change_complexity": asdict(metrics.complexity),
             "customer_facing_ratio": metrics.customer_vs_internal_ratio,
             "risk_score": metrics.complexity.risk_score
@@ -121,20 +145,31 @@ class ReportBuilder:
     def _gather_quality_metrics(self, hours: int) -> Dict[str, Any]:
         """Gather quality metrics."""
         metrics = self.quality_calc.calculate_quality_metrics()
+        return self._build_quality_metrics(metrics)
+
+    def _build_quality_metrics(self, metrics) -> Dict[str, Any]:
+        """Build quality metrics dictionary"""
         return {
             "test_coverage": asdict(metrics.test_coverage),
             "documentation": asdict(metrics.documentation),
             "architecture_compliance": asdict(metrics.architecture),
             "technical_debt": asdict(metrics.technical_debt),
             "quality_score": metrics.overall_quality_score,
-            "confidence": 0.8  # Fixed confidence value for now
+            "confidence": 0.8
         }
     
     def _gather_business_metrics(self, hours: int) -> Dict[str, Any]:
         """Gather business value metrics."""
         metrics = self.business_calc.calculate_business_value_metrics(hours)
-        # Convert objective mapping to scores dict
-        objective_scores = {obj.value: count for obj, count in metrics.objective_mapping.items()}
+        objective_scores = self._convert_objective_mapping(metrics)
+        return self._build_business_metrics(metrics, objective_scores)
+
+    def _convert_objective_mapping(self, metrics) -> Dict[str, int]:
+        """Convert objective mapping to scores dict"""
+        return {obj.value: count for obj, count in metrics.objective_mapping.items()}
+
+    def _build_business_metrics(self, metrics, objective_scores: Dict) -> Dict[str, Any]:
+        """Build business metrics dictionary"""
         return {
             "objective_scores": objective_scores,
             "customer_impact": asdict(metrics.customer_impact),
@@ -148,6 +183,10 @@ class ReportBuilder:
     def _gather_branch_metrics(self) -> Dict[str, Any]:
         """Gather branch metrics."""
         metrics = self.branch_tracker.calculate_metrics()
+        return self._build_branch_metrics(metrics)
+
+    def _build_branch_metrics(self, metrics) -> Dict[str, Any]:
+        """Build branch metrics dictionary"""
         return {
             "total_branches": metrics.total_branches,
             "active_branches": metrics.active_branches,
@@ -163,15 +202,27 @@ class ReportBuilder:
         """Gather feature progress information."""
         commits = self.commit_parser.get_commits(hours)
         patterns = self.commit_parser.analyze_commit_patterns(hours)
-        
+        feature_data = self._analyze_feature_commits(commits)
+        return self._build_feature_progress(feature_data, patterns)
+
+    def _analyze_feature_commits(self, commits) -> Dict[str, Any]:
+        """Analyze commits for features and fixes"""
         features = [c for c in commits if "feat" in c.commit_type.value]
         fixes = [c for c in commits if "fix" in c.commit_type.value]
-        
         return {
-            "features_added": len(features),
-            "features_list": [f.message[:100] for f in features[:5]],
-            "bugs_fixed": len(fixes),
-            "fixes_list": [f.message[:100] for f in fixes[:5]],
+            "features": features,
+            "fixes": fixes,
+            "features_count": len(features),
+            "fixes_count": len(fixes)
+        }
+
+    def _build_feature_progress(self, feature_data: Dict, patterns: Dict) -> Dict[str, Any]:
+        """Build feature progress dictionary"""
+        return {
+            "features_added": feature_data["features_count"],
+            "features_list": [f.message[:100] for f in feature_data["features"][:5]],
+            "bugs_fixed": feature_data["fixes_count"],
+            "fixes_list": [f.message[:100] for f in feature_data["fixes"][:5]],
             "commit_distribution": patterns["commits_by_type"],
             "top_contributors": self._get_top_contributors(patterns)
         }

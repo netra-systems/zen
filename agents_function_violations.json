@@ -1,0 +1,3769 @@
+{
+  "total_violations": 287,
+  "files_count": 86,
+  "batches": [
+    {
+      "batch_number": 1,
+      "files": [
+        {
+          "filepath": "app\\agents\\base\\reliability.py",
+          "violations_count": 11,
+          "violations": [
+            {
+              "file_path": "app\\agents\\base\\reliability.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 137,
+              "function_name": "execute_with_retry",
+              "actual_value": 20,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'execute_with_retry' has 20 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\reliability.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 210,
+              "function_name": "__init__",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '__init__' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\reliability.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 299,
+              "function_name": "get_health_status",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_health_status' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\reliability.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 96,
+              "function_name": "get_status",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_status' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\reliability.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 257,
+              "function_name": "_create_reliability_error_result",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_reliability_error_result' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\reliability.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 169,
+              "function_name": "_is_retryable_exception",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_is_retryable_exception' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\reliability.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 385,
+              "function_name": "get_status",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_status' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\reliability.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 338,
+              "function_name": "__init__",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '__init__' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\reliability.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 353,
+              "function_name": "_create_agent_connection_info",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_agent_connection_info' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\reliability.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 231,
+              "function_name": "execute_with_reliability",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'execute_with_reliability' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\reliability.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 366,
+              "function_name": "acquire",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'acquire' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\github_analyzer\\config_parser.py",
+          "violations_count": 10,
+          "violations": [
+            {
+              "file_path": "app\\agents\\github_analyzer\\config_parser.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 240,
+              "function_name": "_parse_python",
+              "actual_value": 19,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_parse_python' has 19 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\config_parser.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 262,
+              "function_name": "_parse_javascript",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_parse_javascript' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\config_parser.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 223,
+              "function_name": "_parse_toml",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_parse_toml' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\config_parser.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 295,
+              "function_name": "_is_ai_config",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_is_ai_config' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\config_parser.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 321,
+              "function_name": "_merge_configs",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_merge_configs' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\config_parser.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 355,
+              "function_name": "_detect_providers",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_detect_providers' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\config_parser.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 281,
+              "function_name": "_extract_ai_configs",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_extract_ai_configs' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\config_parser.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 78,
+              "function_name": "_init_parsers",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_init_parsers' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\config_parser.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 211,
+              "function_name": "_process_yaml_line",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_process_yaml_line' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\config_parser.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 343,
+              "function_name": "_generate_summary",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_generate_summary' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\metrics_recovery.py",
+          "violations_count": 9,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\metrics_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 102,
+              "function_name": "_calculate_performance_metrics",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_performance_metrics' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\metrics_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 26,
+              "function_name": "handle_calculation_failure",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'handle_calculation_failure' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\metrics_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 81,
+              "function_name": "_try_approximation_calculation",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_approximation_calculation' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\metrics_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 139,
+              "function_name": "_calculate_cost_metrics",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_cost_metrics' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\metrics_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 159,
+              "function_name": "_calculate_error_metrics",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_error_metrics' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\metrics_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 177,
+              "function_name": "_analyze_hourly_patterns",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_analyze_hourly_patterns' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\metrics_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 51,
+              "function_name": "_create_error_context",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_error_context' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\metrics_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 66,
+              "function_name": "_try_simplified_calculation",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_simplified_calculation' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\metrics_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 124,
+              "function_name": "_calculate_usage_patterns",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_usage_patterns' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\base\\errors.py",
+          "violations_count": 8,
+          "violations": [
+            {
+              "file_path": "app\\agents\\base\\errors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 204,
+              "function_name": "_classify_by_message",
+              "actual_value": 21,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_classify_by_message' has 21 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\errors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 132,
+              "function_name": "_initialize_error_classifiers",
+              "actual_value": 20,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_initialize_error_classifiers' has 20 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\errors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 332,
+              "function_name": "_create_error_result",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_error_result' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\errors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 188,
+              "function_name": "_classify_error",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_classify_error' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\errors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 241,
+              "function_name": "_apply_fallback_strategy",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_apply_fallback_strategy' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\errors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 316,
+              "function_name": "_create_fallback_result",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_fallback_result' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\errors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 381,
+              "function_name": "_get_most_common_errors",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_most_common_errors' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\errors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 57,
+              "function_name": "__init__",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '__init__' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\admin_tool_executors.py",
+          "violations_count": 8,
+          "violations": [
+            {
+              "file_path": "app\\agents\\admin_tool_executors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 195,
+              "function_name": "_analyze_logs",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_analyze_logs' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\admin_tool_executors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 215,
+              "function_name": "_get_recent_logs",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_recent_logs' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\admin_tool_executors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 156,
+              "function_name": "_update_system_setting",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_update_system_setting' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\admin_tool_executors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 85,
+              "function_name": "_generate_synthetic_data",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_generate_synthetic_data' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\admin_tool_executors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 117,
+              "function_name": "_create_user",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_user' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\admin_tool_executors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 132,
+              "function_name": "_grant_permission",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_grant_permission' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\admin_tool_executors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 46,
+              "function_name": "_create_corpus",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_corpus' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\admin_tool_executors.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 173,
+              "function_name": "_get_system_settings",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_system_settings' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 2,
+      "files": [
+        {
+          "filepath": "app\\agents\\data_sub_agent\\data_fetching_recovery.py",
+          "violations_count": 7,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_fetching_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 22,
+              "function_name": "handle_fetching_failure",
+              "actual_value": 23,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'handle_fetching_failure' has 23 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_fetching_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 103,
+              "function_name": "_try_cached_data",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_cached_data' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_fetching_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 69,
+              "function_name": "_try_alternative_time_range",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_alternative_time_range' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_fetching_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 129,
+              "function_name": "_generate_synthetic_data",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_generate_synthetic_data' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_fetching_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 148,
+              "function_name": "_create_daily_data_points",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_daily_data_points' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_fetching_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 89,
+              "function_name": "_calculate_reduced_range",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_reduced_range' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_fetching_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 54,
+              "function_name": "_create_error_context",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_error_context' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\extended_operations.py",
+          "violations_count": 7,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\extended_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 55,
+              "function_name": "process_with_cache",
+              "actual_value": 21,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'process_with_cache' has 21 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\extended_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 32,
+              "function_name": "process_with_retry",
+              "actual_value": 19,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'process_with_retry' has 19 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\extended_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 96,
+              "function_name": "process_concurrent",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'process_concurrent' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\extended_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 126,
+              "function_name": "process_and_persist",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'process_and_persist' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\extended_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 183,
+              "function_name": "save_state",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'save_state' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\extended_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 84,
+              "function_name": "process_batch_safe",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'process_batch_safe' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\extended_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 153,
+              "function_name": "enrich_data_extended",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'enrich_data_extended' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\github_analyzer\\scanner_core.py",
+          "violations_count": 7,
+          "violations": [
+            {
+              "file_path": "app\\agents\\github_analyzer\\scanner_core.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 133,
+              "function_name": "_sampling_scan",
+              "actual_value": 20,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_sampling_scan' has 20 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\scanner_core.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 111,
+              "function_name": "_targeted_scan",
+              "actual_value": 19,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_targeted_scan' has 19 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\scanner_core.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 156,
+              "function_name": "_scan_directory",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_scan_directory' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\scanner_core.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 180,
+              "function_name": "_sample_files",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_sample_files' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\scanner_core.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 46,
+              "function_name": "get_relevant_files",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_relevant_files' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\scanner_core.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 204,
+              "function_name": "_find_config_files",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_find_config_files' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\scanner_core.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 96,
+              "function_name": "_complete_scan",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_complete_scan' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\input_validation.py",
+          "violations_count": 7,
+          "violations": [
+            {
+              "file_path": "app\\agents\\input_validation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 250,
+              "function_name": "validate_agent_input",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'validate_agent_input' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\input_validation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 196,
+              "function_name": "_process_validation_errors",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_process_validation_errors' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\input_validation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 222,
+              "function_name": "validate_and_raise",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'validate_and_raise' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\input_validation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 252,
+              "function_name": "decorator",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'decorator' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\input_validation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 34,
+              "function_name": "validate_triage_state",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'validate_triage_state' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\input_validation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 144,
+              "function_name": "validate_execution_input",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'validate_execution_input' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\input_validation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 253,
+              "function_name": "wrapper",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'wrapper' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\production_tool_corpus.py",
+          "violations_count": 7,
+          "violations": [
+            {
+              "file_path": "app\\agents\\production_tool_corpus.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 72,
+              "function_name": "_execute_search_corpus",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_execute_search_corpus' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\production_tool_corpus.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 20,
+              "function_name": "_get_corpus_tool_mapping",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_corpus_tool_mapping' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\production_tool_corpus.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 228,
+              "function_name": "_execute_validate_corpus",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_execute_validate_corpus' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\production_tool_corpus.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 104,
+              "function_name": "_create_search_success_response",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_search_success_response' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\production_tool_corpus.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 125,
+              "function_name": "_execute_update_corpus",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_execute_update_corpus' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\production_tool_corpus.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 154,
+              "function_name": "_execute_delete_corpus",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_execute_delete_corpus' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\production_tool_corpus.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 180,
+              "function_name": "_execute_analyze_corpus",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_execute_analyze_corpus' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 3,
+      "files": [
+        {
+          "filepath": "app\\agents\\quality_fallback.py",
+          "violations_count": 7,
+          "violations": [
+            {
+              "file_path": "app\\agents\\quality_fallback.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 53,
+              "function_name": "_generate_error_fallback",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_generate_error_fallback' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_fallback.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 134,
+              "function_name": "_apply_prompt_adjustments",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_apply_prompt_adjustments' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_fallback.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 177,
+              "function_name": "_generate_quality_fallback",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_generate_quality_fallback' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_fallback.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 94,
+              "function_name": "retry_with_quality_adjustments",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'retry_with_quality_adjustments' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_fallback.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 70,
+              "function_name": "_create_error_fallback_context",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_error_fallback_context' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_fallback.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 161,
+              "function_name": "apply_fallback_response",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'apply_fallback_response' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_fallback.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 195,
+              "function_name": "_create_quality_fallback_context",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_quality_fallback_context' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\execution_fallbacks.py",
+          "violations_count": 6,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\execution_fallbacks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 125,
+              "function_name": "_create_basic_fallback_result",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_basic_fallback_result' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\execution_fallbacks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 208,
+              "function_name": "_send_fallback_completion",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_send_fallback_completion' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\execution_fallbacks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 79,
+              "function_name": "_generate_llm_insights",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_generate_llm_insights' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\execution_fallbacks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 161,
+              "function_name": "_create_emergency_data_fallback",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_emergency_data_fallback' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\execution_fallbacks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 24,
+              "function_name": "handle_execution_error",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'handle_execution_error' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\execution_fallbacks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 94,
+              "function_name": "_parse_llm_fallback_response",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_parse_llm_fallback_response' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\corpus_admin\\corpus_validation_handlers.py",
+          "violations_count": 6,
+          "violations": [
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_validation_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 147,
+              "function_name": "_create_fixes_success_response",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_fixes_success_response' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_validation_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 214,
+              "function_name": "_create_validation_report",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_validation_report' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_validation_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 196,
+              "function_name": "_create_relaxed_success_response",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_relaxed_success_response' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_validation_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 119,
+              "function_name": "_try_validation_fixes",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_validation_fixes' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_validation_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 99,
+              "function_name": "_attempt_validation_recovery",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_attempt_validation_recovery' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_validation_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 172,
+              "function_name": "_try_relaxed_validation",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_relaxed_validation' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\data_operations.py",
+          "violations_count": 6,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 81,
+              "function_name": "analyze_correlations",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'analyze_correlations' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 253,
+              "function_name": "_format_correlation_result",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_format_correlation_result' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 208,
+              "function_name": "_process_anomaly_data",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_process_anomaly_data' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 282,
+              "function_name": "_format_correlation_results",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_format_correlation_results' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 231,
+              "function_name": "_calculate_pairwise_correlation",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_pairwise_correlation' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 62,
+              "function_name": "detect_anomalies",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'detect_anomalies' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\fallback_providers.py",
+          "violations_count": 6,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\fallback_providers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 168,
+              "function_name": "_calculate_cost_from_usage",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_cost_from_usage' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\fallback_providers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 20,
+              "function_name": "get_performance_metrics_fallback",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_performance_metrics_fallback' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\fallback_providers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 36,
+              "function_name": "get_usage_patterns_fallback",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_usage_patterns_fallback' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\fallback_providers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 85,
+              "function_name": "_calculate_system_baseline_metrics",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_system_baseline_metrics' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\fallback_providers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 148,
+              "function_name": "_derive_patterns_from_system_metrics",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_derive_patterns_from_system_metrics' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\fallback_providers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 73,
+              "function_name": "_create_performance_from_baseline",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_performance_from_baseline' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 4,
+      "files": [
+        {
+          "filepath": "app\\agents\\agent_error_handler.py",
+          "violations_count": 6,
+          "violations": [
+            {
+              "file_path": "app\\agents\\agent_error_handler.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 85,
+              "function_name": "_convert_to_agent_error",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_convert_to_agent_error' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\agent_error_handler.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 147,
+              "function_name": "_log_error",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_log_error' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\agent_error_handler.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 184,
+              "function_name": "_retry_with_delay",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_retry_with_delay' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\agent_error_handler.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 126,
+              "function_name": "_determine_error_severity",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_determine_error_severity' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\agent_error_handler.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 107,
+              "function_name": "_get_category_mapping",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_category_mapping' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\agent_error_handler.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 248,
+              "function_name": "_get_last_error_info",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_last_error_info' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\corpus_admin\\corpus_upload_handlers.py",
+          "violations_count": 6,
+          "violations": [
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_upload_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 224,
+              "function_name": "_create_chunked_success_response",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_chunked_success_response' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_upload_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 169,
+              "function_name": "_try_alternative_upload",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_alternative_upload' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_upload_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 96,
+              "function_name": "_try_recovery_methods",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_recovery_methods' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_upload_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 189,
+              "function_name": "_create_multipart_success_response",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_multipart_success_response' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_upload_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 205,
+              "function_name": "_try_chunked_upload",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_chunked_upload' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_upload_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 66,
+              "function_name": "_create_upload_error_context",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_upload_error_context' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\data_analysis_ops.py",
+          "violations_count": 6,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_analysis_ops.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 237,
+              "function_name": "_format_correlation_data",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_format_correlation_data' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_analysis_ops.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 320,
+              "function_name": "_calculate_usage_summary",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_usage_summary' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_analysis_ops.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 16,
+              "function_name": "analyze_performance_metrics",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'analyze_performance_metrics' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_analysis_ops.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 115,
+              "function_name": "_build_base_result",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_build_base_result' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_analysis_ops.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 201,
+              "function_name": "_format_anomaly_list",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_format_anomaly_list' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_analysis_ops.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 214,
+              "function_name": "_calculate_pairwise_correlations",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_pairwise_correlations' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\synthetic_data_sub_agent.py",
+          "violations_count": 5,
+          "violations": [
+            {
+              "file_path": "app\\agents\\synthetic_data_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 75,
+              "function_name": "execute",
+              "actual_value": 23,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'execute' has 23 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\synthetic_data_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 245,
+              "function_name": "_execute_llm_call",
+              "actual_value": 19,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_execute_llm_call' has 19 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\synthetic_data_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 353,
+              "function_name": "cleanup",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'cleanup' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\synthetic_data_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 216,
+              "function_name": "_parse_custom_profile",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_parse_custom_profile' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\synthetic_data_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 181,
+              "function_name": "_handle_generation_error",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_handle_generation_error' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\github_analyzer\\tool_analyzer.py",
+          "violations_count": 5,
+          "violations": [
+            {
+              "file_path": "app\\agents\\github_analyzer\\tool_analyzer.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 134,
+              "function_name": "_extract_tool_info",
+              "actual_value": 21,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_extract_tool_info' has 21 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\tool_analyzer.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 162,
+              "function_name": "_identify_tool_type",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_identify_tool_type' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\tool_analyzer.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 349,
+              "function_name": "_build_summary_dict",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_build_summary_dict' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\tool_analyzer.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 177,
+              "function_name": "_extract_tool_details",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_extract_tool_details' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\tool_analyzer.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 368,
+              "function_name": "_estimate_complexity",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_estimate_complexity' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 5,
+      "files": [
+        {
+          "filepath": "app\\agents\\base\\monitoring.py",
+          "violations_count": 5,
+          "violations": [
+            {
+              "file_path": "app\\agents\\base\\monitoring.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 312,
+              "function_name": "_get_agent_specific_metrics",
+              "actual_value": 19,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_agent_specific_metrics' has 19 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\monitoring.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 248,
+              "function_name": "_get_health_metrics",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_health_metrics' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\monitoring.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 232,
+              "function_name": "_determine_overall_health",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_determine_overall_health' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\monitoring.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 114,
+              "function_name": "get_agent_performance_stats",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_agent_performance_stats' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\monitoring.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 298,
+              "function_name": "get_aggregated_metrics",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_aggregated_metrics' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\clickhouse_recovery.py",
+          "violations_count": 5,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\clickhouse_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 23,
+              "function_name": "handle_query_failure",
+              "actual_value": 19,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'handle_query_failure' has 19 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\clickhouse_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 132,
+              "function_name": "_try_cached_fallback",
+              "actual_value": 18,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_cached_fallback' has 18 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\clickhouse_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 76,
+              "function_name": "_try_simplified_query",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_simplified_query' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\clickhouse_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 95,
+              "function_name": "_simplify_query",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_simplify_query' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\clickhouse_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 51,
+              "function_name": "_create_error_context",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_error_context' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\corpus_admin\\corpus_indexing_handlers.py",
+          "violations_count": 5,
+          "violations": [
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_indexing_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 214,
+              "function_name": "_queue_for_later_indexing",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_queue_for_later_indexing' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_indexing_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 169,
+              "function_name": "_try_alternative_indexing",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_alternative_indexing' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_indexing_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 151,
+              "function_name": "_create_simplified_success_response",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_simplified_success_response' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_indexing_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 192,
+              "function_name": "_create_alternative_success_response",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_alternative_success_response' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_indexing_handlers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 73,
+              "function_name": "_create_indexing_error_context",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_indexing_error_context' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\supply_researcher\\research_engine.py",
+          "violations_count": 5,
+          "violations": [
+            {
+              "file_path": "app\\agents\\supply_researcher\\research_engine.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 47,
+              "function_name": "_get_template_for_type",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_template_for_type' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\supply_researcher\\research_engine.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 59,
+              "function_name": "_get_pricing_template",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_pricing_template' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\supply_researcher\\research_engine.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 71,
+              "function_name": "_get_capabilities_template",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_capabilities_template' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\supply_researcher\\research_engine.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 116,
+              "function_name": "_get_market_overview_template",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_market_overview_template' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\supply_researcher\\research_engine.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 148,
+              "function_name": "_create_response",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_response' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\optimizations_core_sub_agent.py",
+          "violations_count": 4,
+          "violations": [
+            {
+              "file_path": "app\\agents\\optimizations_core_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 31,
+              "function_name": "__init__",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '__init__' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\optimizations_core_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 54,
+              "function_name": "execute",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'execute' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\optimizations_core_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 154,
+              "function_name": "_create_default_fallback_result",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_default_fallback_result' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\optimizations_core_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 219,
+              "function_name": "_build_optimizations_result",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_build_optimizations_result' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 6,
+      "files": [
+        {
+          "filepath": "app\\agents\\quality_checks.py",
+          "violations_count": 4,
+          "violations": [
+            {
+              "file_path": "app\\agents\\quality_checks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 179,
+              "function_name": "_create_default_validation_result",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_default_validation_result' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_checks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 37,
+              "function_name": "validate_agent_output",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'validate_agent_output' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_checks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 150,
+              "function_name": "validate_content",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'validate_content' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_checks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 23,
+              "function_name": "__init__",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '__init__' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\agent_lifecycle.py",
+          "violations_count": 4,
+          "violations": [
+            {
+              "file_path": "app\\agents\\agent_lifecycle.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 73,
+              "function_name": "run",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'run' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\agent_lifecycle.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 19,
+              "function_name": "_pre_run",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_pre_run' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\agent_lifecycle.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 102,
+              "function_name": "_send_entry_condition_warning",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_send_entry_condition_warning' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\agent_lifecycle.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 128,
+              "function_name": "_send_error_notification",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_send_error_notification' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\github_analyzer\\llm_mapper.py",
+          "violations_count": 4,
+          "violations": [
+            {
+              "file_path": "app\\agents\\github_analyzer\\llm_mapper.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 278,
+              "function_name": "_generate_summary",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_generate_summary' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\llm_mapper.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 70,
+              "function_name": "_init_model_patterns",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_init_model_patterns' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\llm_mapper.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 84,
+              "function_name": "_init_param_patterns",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_init_param_patterns' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\llm_mapper.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 176,
+              "function_name": "_extract_direct_model",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_extract_direct_model' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\triage_sub_agent\\llm_processor.py",
+          "violations_count": 4,
+          "violations": [
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\llm_processor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 191,
+              "function_name": "_get_llm_response_with_json_instruction",
+              "actual_value": 16,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_llm_response_with_json_instruction' has 16 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\llm_processor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 225,
+              "function_name": "_create_basic_triage_fallback",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_basic_triage_fallback' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\llm_processor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 120,
+              "function_name": "_try_structured_then_fallback_llm",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_try_structured_then_fallback_llm' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\llm_processor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 133,
+              "function_name": "_execute_structured_llm_with_retries",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_execute_structured_llm_with_retries' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\agent_communication.py",
+          "violations_count": 4,
+          "violations": [
+            {
+              "file_path": "app\\agents\\agent_communication.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 29,
+              "function_name": "_execute_websocket_update_with_retry",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_execute_websocket_update_with_retry' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\agent_communication.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 129,
+              "function_name": "_store_failed_update",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_store_failed_update' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\agent_communication.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 58,
+              "function_name": "_attempt_websocket_update",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_attempt_websocket_update' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\agent_communication.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 95,
+              "function_name": "_get_websocket_user_id",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_websocket_user_id' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 7,
+      "files": [
+        {
+          "filepath": "app\\agents\\github_analyzer\\agent.py",
+          "violations_count": 4,
+          "violations": [
+            {
+              "file_path": "app\\agents\\github_analyzer\\agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 264,
+              "function_name": "handle_delegation",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'handle_delegation' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 81,
+              "function_name": "_execute_analysis_phases",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_execute_analysis_phases' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 237,
+              "function_name": "_create_success_result",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_success_result' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 252,
+              "function_name": "_create_error_result",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_error_result' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\actions_to_meet_goals_sub_agent.py",
+          "violations_count": 4,
+          "violations": [
+            {
+              "file_path": "app\\agents\\actions_to_meet_goals_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 136,
+              "function_name": "_convert_dict_to_action_plan_result",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_convert_dict_to_action_plan_result' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\actions_to_meet_goals_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 249,
+              "function_name": "_get_base_action_plan_data",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_base_action_plan_data' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\actions_to_meet_goals_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 43,
+              "function_name": "execute",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'execute' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\actions_to_meet_goals_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 56,
+              "function_name": "_create_main_executor",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_main_executor' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\quality_hooks.py",
+          "violations_count": 4,
+          "violations": [
+            {
+              "file_path": "app\\agents\\quality_hooks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 162,
+              "function_name": "_record_quality_event",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_record_quality_event' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_hooks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 68,
+              "function_name": "_perform_validation",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_perform_validation' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_hooks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 179,
+              "function_name": "_extract_agent_output",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_extract_agent_output' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_hooks.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 231,
+              "function_name": "_should_retry_based_on_quality",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_should_retry_based_on_quality' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\analysis_engine.py",
+          "violations_count": 4,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\analysis_engine.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 190,
+              "function_name": "_build_trend_result",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_build_trend_result' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\analysis_engine.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 260,
+              "function_name": "_identify_iqr_outliers",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_identify_iqr_outliers' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\analysis_engine.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 275,
+              "function_name": "_identify_zscore_outliers",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_identify_zscore_outliers' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\analysis_engine.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 177,
+              "function_name": "_calculate_linear_regression",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_linear_regression' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\github_analyzer\\github_client.py",
+          "violations_count": 4,
+          "violations": [
+            {
+              "file_path": "app\\agents\\github_analyzer\\github_client.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 45,
+              "function_name": "_parse_http_url",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_parse_http_url' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\github_client.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 58,
+              "function_name": "_parse_git_url",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_parse_git_url' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\github_client.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 70,
+              "function_name": "_parse_owner_repo_format",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_parse_owner_repo_format' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\github_client.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 182,
+              "function_name": "cleanup",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'cleanup' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 8,
+      "files": [
+        {
+          "filepath": "app\\agents\\state.py",
+          "violations_count": 3,
+          "violations": [
+            {
+              "file_path": "app\\agents\\state.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 164,
+              "function_name": "validate_optimizations_result",
+              "actual_value": 18,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'validate_optimizations_result' has 18 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\state.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 209,
+              "function_name": "clear_sensitive_data",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'clear_sensitive_data' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\state.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 243,
+              "function_name": "_create_merged_results",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_merged_results' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\reporting_sub_agent.py",
+          "violations_count": 3,
+          "violations": [
+            {
+              "file_path": "app\\agents\\reporting_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 31,
+              "function_name": "__init__",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '__init__' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\reporting_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 58,
+              "function_name": "execute",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'execute' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\reporting_sub_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 160,
+              "function_name": "_create_default_fallback_report",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_default_fallback_report' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\supervisor_admin_init.py",
+          "violations_count": 3,
+          "violations": [
+            {
+              "file_path": "app\\agents\\supervisor_admin_init.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 189,
+              "function_name": "handle_admin_request",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'handle_admin_request' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\supervisor_admin_init.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 70,
+              "function_name": "_create_supervisor_instance",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_supervisor_instance' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\supervisor_admin_init.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 248,
+              "function_name": "_validate_command_type",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_validate_command_type' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\delegation.py",
+          "violations_count": 3,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\delegation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 96,
+              "function_name": "_analyze_usage_patterns",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_analyze_usage_patterns' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\delegation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 112,
+              "function_name": "_analyze_correlations",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_analyze_correlations' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\delegation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 46,
+              "function_name": "enrich_data_external",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'enrich_data_external' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\github_analyzer\\pattern_matcher.py",
+          "violations_count": 3,
+          "violations": [
+            {
+              "file_path": "app\\agents\\github_analyzer\\pattern_matcher.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 16,
+              "function_name": "scan_content",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'scan_content' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\pattern_matcher.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 50,
+              "function_name": "_add_pattern_matches",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_add_pattern_matches' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\pattern_matcher.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 135,
+              "function_name": "_estimate_complexity",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_estimate_complexity' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 9,
+      "files": [
+        {
+          "filepath": "app\\agents\\utils_json_extraction.py",
+          "violations_count": 3,
+          "violations": [
+            {
+              "file_path": "app\\agents\\utils_json_extraction.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 145,
+              "function_name": "extract_partial_json",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'extract_partial_json' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\utils_json_extraction.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 122,
+              "function_name": "execute_strategies",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'execute_strategies' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\utils_json_extraction.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 109,
+              "function_name": "try_extraction_strategies",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'try_extraction_strategies' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\github_analyzer\\pattern_scanner.py",
+          "violations_count": 3,
+          "violations": [
+            {
+              "file_path": "app\\agents\\github_analyzer\\pattern_scanner.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 34,
+              "function_name": "detect_patterns",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'detect_patterns' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\pattern_scanner.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 51,
+              "function_name": "_process_files_in_batches",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_process_files_in_batches' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\github_analyzer\\pattern_scanner.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 87,
+              "function_name": "_analyze_file",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_analyze_file' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\state_management.py",
+          "violations_count": 3,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\state_management.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 110,
+              "function_name": "_recover_incomplete_tasks",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_recover_incomplete_tasks' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\state_management.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 34,
+              "function_name": "_persist_state_to_redis",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_persist_state_to_redis' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\state_management.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 59,
+              "function_name": "load_state",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'load_state' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\triage_sub_agent\\error_core.py",
+          "violations_count": 3,
+          "violations": [
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\error_core.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 68,
+              "function_name": "_create_entity_error_context",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_entity_error_context' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\error_core.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 103,
+              "function_name": "_create_tool_error_context",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_tool_error_context' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\error_core.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 34,
+              "function_name": "_create_intent_error_context",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_intent_error_context' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\data_fetching.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_fetching.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 218,
+              "function_name": "_build_workload_list_query",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_build_workload_list_query' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\data_fetching.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 143,
+              "function_name": "_build_availability_query",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_build_availability_query' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 10,
+      "files": [
+        {
+          "filepath": "app\\agents\\triage_sub_agent\\fallback.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\fallback.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 53,
+              "function_name": "fallback_categorization",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'fallback_categorization' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\fallback.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 22,
+              "function_name": "get_fallback_categories",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_fallback_categories' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\triage_sub_agent\\error_recovery.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\error_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 60,
+              "function_name": "fallback_entity_extraction",
+              "actual_value": 13,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'fallback_entity_extraction' has 13 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\error_recovery.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 132,
+              "function_name": "should_attempt_recovery",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'should_attempt_recovery' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\mcp_integration\\mcp_intent_detector.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\mcp_integration\\mcp_intent_detector.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 166,
+              "function_name": "_build_mcp_intent",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_build_mcp_intent' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\mcp_integration\\mcp_intent_detector.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 95,
+              "function_name": "find_matching_server",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'find_matching_server' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\triage_sub_agent\\intent_detection.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\intent_detection.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 56,
+              "function_name": "determine_intent",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'determine_intent' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\intent_detection.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 17,
+              "function_name": "get_intent_keywords",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_intent_keywords' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\utils_json_parsers.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\utils_json_parsers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 96,
+              "function_name": "try_close_truncated_array",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'try_close_truncated_array' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\utils_json_parsers.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 67,
+              "function_name": "try_parse_complex_value",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'try_parse_complex_value' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 11,
+      "files": [
+        {
+          "filepath": "app\\agents\\data_sub_agent\\usage_pattern_processor.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\usage_pattern_processor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 85,
+              "function_name": "_format_pattern_result",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_format_pattern_result' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\usage_pattern_processor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 56,
+              "function_name": "_create_pattern_summary",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_pattern_summary' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\admin_tool_permissions.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\admin_tool_permissions.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 98,
+              "function_name": "create_permission_check",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'create_permission_check' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\admin_tool_permissions.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 151,
+              "function_name": "get_user_permissions_summary",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_user_permissions_summary' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\quality_supervisor.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\quality_supervisor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 173,
+              "function_name": "get_quality_dashboard",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_quality_dashboard' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\quality_supervisor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 230,
+              "function_name": "get_configuration",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_configuration' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\admin_tool_dispatcher\\corpus_tools.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\admin_tool_dispatcher\\corpus_tools.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 39,
+              "function_name": "_build_tool_mapping",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_build_tool_mapping' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\admin_tool_dispatcher\\corpus_tools.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 103,
+              "function_name": "_build_tool_descriptions",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_build_tool_descriptions' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\admin_tool_dispatcher\\validation.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\admin_tool_dispatcher\\validation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 22,
+              "function_name": "get_available_admin_tools",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_available_admin_tools' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\admin_tool_dispatcher\\validation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 64,
+              "function_name": "validate_admin_tool_access",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'validate_admin_tool_access' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 12,
+      "files": [
+        {
+          "filepath": "app\\agents\\base\\executor.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\base\\executor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 114,
+              "function_name": "_create_success_result",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_success_result' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\base\\executor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 127,
+              "function_name": "_create_error_result",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_create_error_result' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\llm_query_detector.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\llm_query_detector.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 51,
+              "function_name": "is_likely_llm_generated",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'is_likely_llm_generated' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\data_sub_agent\\llm_query_detector.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 236,
+              "function_name": "_infer_return_structure",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_infer_return_structure' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\triage_sub_agent\\error_types.py",
+          "violations_count": 2,
+          "violations": [
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\error_types.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 80,
+              "function_name": "execute",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'execute' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            },
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\error_types.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 100,
+              "function_name": "execute",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'execute' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\corpus_admin\\suggestion_profiles.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\corpus_admin\\suggestion_profiles.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 11,
+              "function_name": "get_optimization_rules",
+              "actual_value": 17,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_optimization_rules' has 17 lines (max: 8)",
+              "fix_suggestion": "Split into 3 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\config.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\config.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 66,
+              "function_name": "from_env",
+              "actual_value": 15,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'from_env' has 15 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 13,
+      "files": [
+        {
+          "filepath": "app\\agents\\triage_sub_agent\\error_reporting.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\error_reporting.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 98,
+              "function_name": "calculate_success_rate",
+              "actual_value": 14,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'calculate_success_rate' has 14 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\base_agent.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\base_agent.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 32,
+              "function_name": "__init__",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '__init__' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\corpus_admin\\corpus_error_compensation.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\corpus_admin\\corpus_error_compensation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 23,
+              "function_name": "execute",
+              "actual_value": 12,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'execute' has 12 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\clickhouse_operations.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\clickhouse_operations.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 96,
+              "function_name": "fetch_data",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'fetch_data' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\usage_pattern_analyzer.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\usage_pattern_analyzer.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 110,
+              "function_name": "_calculate_usage_summary",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_usage_summary' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 14,
+      "files": [
+        {
+          "filepath": "app\\agents\\github_analyzer\\html_formatter.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\github_analyzer\\html_formatter.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 32,
+              "function_name": "_get_html_template",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_html_template' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\github_analyzer\\metrics_calculator.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\github_analyzer\\metrics_calculator.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 15,
+              "function_name": "calculate_metrics",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'calculate_metrics' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\triage_sub_agent\\result_processor.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\result_processor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 178,
+              "function_name": "create_error_result",
+              "actual_value": 11,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'create_error_result' has 11 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\synthetic_data_generator.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\synthetic_data_generator.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 34,
+              "function_name": "generate_data",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'generate_data' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\base\\interface.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\base\\interface.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 153,
+              "function_name": "create_execution_context",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'create_execution_context' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 15,
+      "files": [
+        {
+          "filepath": "app\\agents\\data_sub_agent\\execution_analysis.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\execution_analysis.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 29,
+              "function_name": "_route_analysis_by_intent",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_route_analysis_by_intent' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\execution_parameters.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\execution_parameters.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 49,
+              "function_name": "_build_params_from_dict",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_build_params_from_dict' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\data_sub_agent\\metric_percentile_analyzer.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\data_sub_agent\\metric_percentile_analyzer.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 61,
+              "function_name": "_format_percentiles_result",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_format_percentiles_result' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\mcp_integration\\context_manager.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\mcp_integration\\context_manager.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 220,
+              "function_name": "create_agent_context",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'create_agent_context' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\supervisor\\state_checkpoint_manager.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\supervisor\\state_checkpoint_manager.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 53,
+              "function_name": "_persist_state_data",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_persist_state_data' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 16,
+      "files": [
+        {
+          "filepath": "app\\agents\\triage_sub_agent\\entity_extractor.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\entity_extractor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 19,
+              "function_name": "_get_model_patterns",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_model_patterns' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\triage_sub_agent\\intent_detector.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\intent_detector.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 18,
+              "function_name": "_get_intent_keywords",
+              "actual_value": 10,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_intent_keywords' has 10 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\agent_observability.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\agent_observability.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 67,
+              "function_name": "_calculate_data_size",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_calculate_data_size' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\error_decorators.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\error_decorators.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 47,
+              "function_name": "_execute_with_retry",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_execute_with_retry' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\error_recovery_strategy.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\error_recovery_strategy.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 30,
+              "function_name": "_get_base_delays",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_get_base_delays' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 17,
+      "files": [
+        {
+          "filepath": "app\\agents\\production_tool.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\production_tool.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 65,
+              "function_name": "_execute_internal",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_execute_internal' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\synthetic_data_batch_processor.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\synthetic_data_batch_processor.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 46,
+              "function_name": "_process_single_batch",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function '_process_single_batch' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\corpus_admin\\validators.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\corpus_admin\\validators.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 37,
+              "function_name": "generate_approval_message",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'generate_approval_message' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\github_analyzer\\recommendation_generator.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\github_analyzer\\recommendation_generator.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 15,
+              "function_name": "generate_recommendations",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'generate_recommendations' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        },
+        {
+          "filepath": "app\\agents\\triage_sub_agent\\entity_extraction.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\entity_extraction.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 99,
+              "function_name": "extract_numbers",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'extract_numbers' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "batch_number": 18,
+      "files": [
+        {
+          "filepath": "app\\agents\\triage_sub_agent\\tool_recommendation.py",
+          "violations_count": 1,
+          "violations": [
+            {
+              "file_path": "app\\agents\\triage_sub_agent\\tool_recommendation.py",
+              "violation_type": "function_complexity",
+              "severity": "medium",
+              "line_number": 17,
+              "function_name": "get_tool_mapping",
+              "actual_value": 9,
+              "expected_value": 8,
+              "description": "[VIOLATION] Function 'get_tool_mapping' has 9 lines (max: 8)",
+              "fix_suggestion": "Split into 2 smaller functions"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

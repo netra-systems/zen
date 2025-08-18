@@ -148,28 +148,41 @@ class WebSocketRecoveryManager:
         
         return context.attempt_count <= context.max_attempts
     
-    async def _circuit_breaker_recovery(self, context: RecoveryContext) -> bool:
-        """Implement circuit breaker pattern for recovery."""
-        connection_id = context.connection_id
-        
-        # Check connection health
-        health = self.connection_health.get(connection_id, 1.0)
-        
-        # If health is too low, don't attempt recovery
+    def _get_connection_health(self, connection_id: str) -> float:
+        """Get current health for connection."""
+        return self.connection_health.get(connection_id, 1.0)
+    
+    def _is_health_sufficient_for_recovery(self, health: float, connection_id: str) -> bool:
+        """Check if health is above threshold for recovery attempt."""
         if health < 0.3:  # 30% health threshold
             logger.warning(f"Connection {connection_id} health too low: {health}")
             return False
-        
-        # Update health based on error severity
-        if context.error.severity == ErrorSeverity.CRITICAL:
-            health *= 0.5
-        elif context.error.severity == ErrorSeverity.HIGH:
-            health *= 0.7
+        return True
+    
+    def _calculate_new_health_from_severity(self, health: float, severity: ErrorSeverity) -> float:
+        """Calculate new health value based on error severity."""
+        if severity == ErrorSeverity.CRITICAL:
+            return health * 0.5
+        elif severity == ErrorSeverity.HIGH:
+            return health * 0.7
         else:
-            health *= 0.9
+            return health * 0.9
+    
+    def _update_and_validate_health(self, connection_id: str, new_health: float) -> bool:
+        """Update stored health and validate against minimum threshold."""
+        self.connection_health[connection_id] = new_health
+        return new_health > 0.1  # Minimum viable threshold
+    
+    async def _circuit_breaker_recovery(self, context: RecoveryContext) -> bool:
+        """Implement circuit breaker pattern for recovery."""
+        connection_id = context.connection_id
+        health = self._get_connection_health(connection_id)
         
-        self.connection_health[connection_id] = health
-        return health > 0.1  # Minimum viable threshold
+        if not self._is_health_sufficient_for_recovery(health, connection_id):
+            return False
+        
+        new_health = self._calculate_new_health_from_severity(health, context.error.severity)
+        return self._update_and_validate_health(connection_id, new_health)
     
     async def _state_sync_recovery(self, context: RecoveryContext) -> bool:
         """Implement state synchronization recovery."""

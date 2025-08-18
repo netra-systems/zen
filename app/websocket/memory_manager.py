@@ -294,20 +294,42 @@ class WebSocketMemoryManager:
     
     def get_memory_stats(self) -> Dict[str, Any]:
         """Get comprehensive memory statistics."""
-        current_metrics = self.metrics_history[-1] if self.metrics_history else MemoryMetrics()
-        
+        current_metrics = self._get_current_metrics()
+        connection_stats = self._collect_connection_stats()
+        return self._build_memory_stats_dict(current_metrics, connection_stats)
+    
+    def _get_current_metrics(self) -> MemoryMetrics:
+        """Get current memory metrics or default if none available."""
+        return self.metrics_history[-1] if self.metrics_history else MemoryMetrics()
+    
+    def _collect_connection_stats(self) -> Dict[str, Dict[str, Any]]:
+        """Collect memory statistics for all tracked connections."""
         connection_stats = {}
         for connection_id in self.memory_tracker.message_buffers.keys():
             connection_stats[connection_id] = self.memory_tracker.get_connection_memory_info(connection_id)
-        
+        return connection_stats
+    
+    def _build_memory_stats_dict(self, current_metrics: MemoryMetrics, 
+                               connection_stats: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+        """Build final memory statistics dictionary."""
+        current_metrics_dict = self._build_current_metrics_dict(current_metrics)
+        return self._combine_stats_components(current_metrics_dict, connection_stats)
+    
+    def _build_current_metrics_dict(self, current_metrics: MemoryMetrics) -> Dict[str, Any]:
+        """Build current metrics dictionary from MemoryMetrics object."""
         return {
-            "current_metrics": {
-                "total_memory_mb": current_metrics.total_memory_mb,
-                "connection_memory_mb": current_metrics.connection_memory_mb,
-                "active_connections": current_metrics.active_connections,
-                "total_allocations": current_metrics.total_allocations,
-                "gc_collections": current_metrics.gc_collections
-            },
+            "total_memory_mb": current_metrics.total_memory_mb,
+            "connection_memory_mb": current_metrics.connection_memory_mb,
+            "active_connections": current_metrics.active_connections,
+            "total_allocations": current_metrics.total_allocations,
+            "gc_collections": current_metrics.gc_collections
+        }
+    
+    def _combine_stats_components(self, current_metrics_dict: Dict[str, Any],
+                                connection_stats: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+        """Combine all statistics components into final result."""
+        return {
+            "current_metrics": current_metrics_dict,
             "connection_details": connection_stats,
             "buffer_limits": self.memory_tracker.buffer_limits,
             "metrics_history_count": len(self.metrics_history),

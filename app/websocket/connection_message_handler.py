@@ -25,26 +25,40 @@ class ConnectionMessageHandler:
     
     async def handle_message(self, connection_id: str, raw_message: str) -> bool:
         """Handle incoming message from connection."""
+        conn_info = self._validate_connection(connection_id)
+        if not conn_info:
+            return False
+        
+        self._update_connection_activity(conn_info)
+        success = await self._process_message(raw_message, conn_info)
+        
+        if success:
+            self._handle_success(connection_id)
+        
+        return success
+    
+    def _validate_connection(self, connection_id: str):
+        """Validate connection exists and return connection info."""
         conn_info = self.connection_manager.get_connection_by_id(connection_id)
         if not conn_info:
             logger.warning(f"Received message from unknown connection: {connection_id}")
-            return False
-        
-        # Update connection activity
+        return conn_info
+    
+    def _update_connection_activity(self, conn_info) -> None:
+        """Update connection's last activity timestamp."""
         conn_info.last_activity = datetime.now(timezone.utc)
-        
-        # Handle message through reliable handler
-        success = await self.message_handler.handle_message(
+    
+    async def _process_message(self, raw_message: str, conn_info) -> bool:
+        """Process message through reliable handler."""
+        return await self.message_handler.handle_message(
             raw_message,
             conn_info,
             self.message_router.route_message
         )
-        
-        if success:
-            # Update timeout
-            self.connection_timeouts[connection_id] = time.time() + self.connection_timeout
-        
-        return success
+    
+    def _handle_success(self, connection_id: str) -> None:
+        """Handle successful message processing by updating timeout."""
+        self.connection_timeouts[connection_id] = time.time() + self.connection_timeout
     
     async def send_message(self, connection_id: str, message: dict) -> bool:
         """Send message to connection with reliability protection."""

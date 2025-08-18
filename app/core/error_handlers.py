@@ -130,6 +130,12 @@ class ApiErrorHandler:
     ) -> ErrorResponse:
         """Create error response for Netra exception."""
         error_code_value = self._extract_error_code_value(exc.error_details.code)
+        return self._build_netra_response(exc, error_code_value, trace_id, request_id)
+    
+    def _build_netra_response(
+        self, exc: NetraException, error_code_value: str, trace_id: str, request_id: Optional[str]
+    ) -> ErrorResponse:
+        """Build ErrorResponse from Netra exception details."""
         return ErrorResponse(
             error_code=error_code_value,
             message=exc.error_details.message,
@@ -315,13 +321,17 @@ class ApiErrorHandler:
     
     def _get_log_method(self, severity_value: str):
         """Get appropriate logging method for severity level."""
-        log_methods = {
+        log_methods = self._build_log_methods_map()
+        return log_methods.get(severity_value, self._logger.info)
+    
+    def _build_log_methods_map(self) -> Dict[str, callable]:
+        """Build mapping of severity values to log methods."""
+        return {
             ErrorSeverity.CRITICAL.value: lambda msg: self._logger.critical(msg, exc_info=True),
             ErrorSeverity.HIGH.value: lambda msg: self._logger.error(msg, exc_info=True),
             ErrorSeverity.MEDIUM.value: self._logger.warning,
             ErrorSeverity.LOW.value: self._logger.info
         }
-        return log_methods.get(severity_value, self._logger.info)
     
     def get_http_status_code(self, error_code: ErrorCode) -> int:
         """Map error codes to HTTP status codes."""
@@ -330,13 +340,20 @@ class ApiErrorHandler:
     
     def _get_error_status_map(self) -> Dict[ErrorCode, int]:
         """Get error code to HTTP status mapping."""
-        auth_map = self._get_auth_error_status_map()
-        db_map = self._get_db_error_status_map()
-        validation_map = self._get_validation_error_status_map()
-        service_map = self._get_service_error_status_map()
-        websocket_map = self._get_websocket_error_status_map()
-        file_map = self._get_file_error_status_map()
-        return {**auth_map, **db_map, **validation_map, **service_map, **websocket_map, **file_map}
+        maps = self._collect_error_status_maps()
+        return {**maps['auth'], **maps['db'], **maps['validation'], 
+                **maps['service'], **maps['websocket'], **maps['file']}
+    
+    def _collect_error_status_maps(self) -> Dict[str, Dict[ErrorCode, int]]:
+        """Collect all error status maps."""
+        return {
+            'auth': self._get_auth_error_status_map(),
+            'db': self._get_db_error_status_map(),
+            'validation': self._get_validation_error_status_map(),
+            'service': self._get_service_error_status_map(),
+            'websocket': self._get_websocket_error_status_map(),
+            'file': self._get_file_error_status_map()
+        }
     
     def _get_auth_error_status_map(self) -> Dict[ErrorCode, int]:
         """Get authentication/authorization error status mapping."""

@@ -140,23 +140,42 @@ class RetryManager:
         last_exception = None
         
         for attempt in range(self.config.max_retries + 1):
-            try:
-                if attempt > 0:
-                    await self._wait_for_retry(attempt)
-                    context.retry_count = attempt
-                    
-                return await func()
-                
-            except Exception as e:
-                last_exception = e
-                
-                if not self._should_retry(e, attempt):
-                    break
-                    
-                self._log_retry_attempt(context, attempt, e)
+            result = await self._attempt_execution(func, context, attempt)
+            success, value, exception = self._extract_result_data(result)
+            if success:
+                return value
         
-        # All retries exhausted
         raise last_exception
+    
+    def _extract_result_data(self, result: Dict[str, Any]) -> tuple[bool, Any, Optional[Exception]]:
+        """Extract success, value, and exception from execution result."""
+        success = result["success"]
+        value = result["value"] 
+        exception = result["exception"]
+        
+        if not success and not self._should_retry(exception, attempt):
+            self._update_last_exception(exception)
+        
+        return success, value, exception
+    
+    def _update_last_exception(self, exception: Exception) -> None:
+        """Update the last exception for final raise."""
+        nonlocal last_exception
+        last_exception = exception
+    
+    async def _attempt_execution(self, func: Callable[[], Awaitable[Any]], 
+                               context: ExecutionContext, attempt: int) -> Dict[str, Any]:
+        """Attempt single execution with retry preparation."""
+        try:
+            if attempt > 0:
+                await self._wait_for_retry(attempt)
+                context.retry_count = attempt
+                
+            result = await func()
+            return {"success": True, "value": result, "exception": None}
+        except Exception as e:
+            self._log_retry_attempt(context, attempt, e)
+            return {"success": False, "value": None, "exception": e}
     
     def _should_retry(self, exception: Exception, attempt: int) -> bool:
         """Check if operation should be retried."""

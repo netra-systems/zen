@@ -31,22 +31,8 @@ class MetricsRecoveryManager:
         original_error: Exception
     ) -> Dict[str, Any]:
         """Handle metrics calculation failures with recovery strategies."""
-        context = self._create_error_context(metric_type, data, run_id, original_error)
-        error = MetricsCalculationError(metric_type, len(data), context)
-        
-        try:
-            # Try simplified calculation
-            simplified_result = await self._try_simplified_calculation(metric_type, data)
-            if simplified_result:
-                return simplified_result
-            
-            # Use approximation methods
-            approximation_result = await self._try_approximation_calculation(metric_type, data)
-            return approximation_result
-            
-        except Exception as fallback_error:
-            logger.error(f"Metrics calculation recovery failed: {fallback_error}")
-            raise error
+        error = self._prepare_calculation_error(metric_type, data, run_id, original_error)
+        return await self._execute_recovery_strategies(metric_type, data, error)
     
     def _create_error_context(
         self, metric_type: str, data: List[Dict], run_id: str, error: Exception
@@ -84,42 +70,19 @@ class MetricsRecoveryManager:
         """Use approximation methods for metrics calculation."""
         sample_size = min(1000, len(data))
         sampled_data = data[:sample_size]
-        
-        calculator = self.calculation_strategies.get(metric_type)
-        if calculator:
-            result = await calculator(sampled_data, approximation=True)
-        else:
-            result = self._basic_approximation(sampled_data)
-        
-        result.update({
-            'method': 'sampling_approximation',
-            'sample_size': sample_size,
-            'total_size': len(data)
-        })
-        
-        return result
+        result = await self._calculate_with_approximation(metric_type, sampled_data)
+        return self._add_approximation_metadata(result, sample_size, len(data))
     
     async def _calculate_performance_metrics(
         self, data: List[Dict], simplified: bool = False, approximation: bool = False
     ) -> Dict[str, Any]:
         """Calculate performance metrics with fallback strategies."""
-        values = [item.get('value', 0) for item in data if 'value' in item]
-        
+        values = self._extract_numeric_values(data, 'value')
         if not values:
             return {'average': 0, 'count': 0}
-        
         if simplified or approximation:
-            # Simple average calculation
-            avg_value = sum(values) / len(values)
-            return {'average': avg_value, 'count': len(values)}
-        
-        # Full calculation would include more complex metrics
-        return {
-            'average': sum(values) / len(values),
-            'count': len(values),
-            'min': min(values),
-            'max': max(values)
-        }
+            return self._calculate_simple_performance_metrics(values)
+        return self._calculate_full_performance_metrics(values)
     
     async def _calculate_usage_patterns(
         self, data: List[Dict], simplified: bool = False, approximation: bool = False

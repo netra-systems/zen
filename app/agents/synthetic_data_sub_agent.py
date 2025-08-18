@@ -74,30 +74,27 @@ class SyntheticDataSubAgent(BaseSubAgent):
 
     async def execute(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
         """Execute synthetic data generation"""
-        # Log agent communication start
         log_agent_communication("Supervisor", "SyntheticDataSubAgent", run_id, "execute_request")
-        
         start_time = time.time()
         
         try:
-            await self._send_initial_update(run_id, stream_updates)
-            
-            workload_profile = await self._determine_workload_profile(state)
-            
-            if await self._requires_approval(workload_profile, state):
-                await self._handle_approval_flow(workload_profile, state, run_id, stream_updates)
-                return
-            
-            await self._execute_generation(
-                workload_profile, state, run_id, stream_updates, start_time
-            )
-            
-            # Log agent communication completion
+            await self._execute_generation_flow(state, run_id, stream_updates, start_time)
             log_agent_communication("SyntheticDataSubAgent", "Supervisor", run_id, "execute_response")
-            
         except Exception as e:
             await self._handle_generation_error(e, state, run_id, stream_updates)
             raise
+    
+    async def _execute_generation_flow(self, state: DeepAgentState, run_id: str, 
+                                     stream_updates: bool, start_time: float) -> None:
+        """Execute the full generation flow."""
+        await self._send_initial_update(run_id, stream_updates)
+        workload_profile = await self._determine_workload_profile(state)
+        
+        if await self._requires_approval(workload_profile, state):
+            await self._handle_approval_flow(workload_profile, state, run_id, stream_updates)
+            return
+        
+        await self._execute_generation(workload_profile, state, run_id, stream_updates, start_time)
     
     async def _send_initial_update(self, run_id: str, stream_updates: bool) -> None:
         """Send initial status update"""

@@ -31,25 +31,25 @@ class DataFetchingRecoveryManager:
         error = DataFetchingError(data_source, time_range, context)
         
         try:
-            # Try alternative time range
-            alternative_result = await self._try_alternative_time_range(
-                data_source, time_range, run_id
-            )
-            if alternative_result:
-                return alternative_result
-            
-            # Try cached data
-            cached_result = await self._try_cached_data(data_source, time_range)
-            if cached_result:
-                return cached_result
-            
-            # Use synthetic data as last resort
-            synthetic_result = await self._generate_synthetic_data(data_source, time_range)
-            return synthetic_result
-            
+            return await self._attempt_recovery_strategies(data_source, time_range, run_id)
         except Exception as fallback_error:
             logger.error(f"Data fetching recovery failed: {fallback_error}")
             raise error
+    
+    async def _attempt_recovery_strategies(self, data_source: str, time_range: Dict, run_id: str) -> Dict[str, Any]:
+        """Attempt various recovery strategies in order."""
+        # Try alternative time range
+        alternative_result = await self._try_alternative_time_range(data_source, time_range, run_id)
+        if alternative_result:
+            return alternative_result
+        
+        # Try cached data
+        cached_result = await self._try_cached_data(data_source, time_range)
+        if cached_result:
+            return cached_result
+        
+        # Use synthetic data as last resort
+        return await self._generate_synthetic_data(data_source, time_range)
     
     def _create_error_context(
         self, data_source: str, time_range: Dict, run_id: str, error: Exception
