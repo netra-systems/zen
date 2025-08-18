@@ -175,7 +175,7 @@ class TestCorpusRoute:
                 data = response.json()
                 assert "results" in data or "documents" in data
             else:
-                assert response.status_code in [404, 422]
+                assert response.status_code in [403, 404, 422]
     
     def test_corpus_metadata_extraction(self, client):
         """Test automatic metadata extraction from documents."""

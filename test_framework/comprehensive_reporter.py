@@ -55,15 +55,8 @@ class ComprehensiveTestReporter:
     
     def _load_test_results(self) -> Dict:
         """Load the single test results file."""
-        if self.results_file.exists():
-            try:
-                with open(self.results_file, 'r') as f:
-                    return json.load(f)
-            except:
-                pass
-        
-        # Initialize with complete structure
-        return {
+        # Initialize with complete structure first
+        default_structure = {
             "metadata": {
                 "version": "2.0",
                 "last_update": None,
@@ -89,6 +82,28 @@ class ComprehensiveTestReporter:
                 "pass_rate": 0.0
             }
         }
+        
+        if self.results_file.exists():
+            try:
+                with open(self.results_file, 'r') as f:
+                    loaded_data = json.load(f)
+                    
+                # Ensure loaded data has proper structure - merge with defaults
+                if isinstance(loaded_data, dict):
+                    # Merge existing data with default structure to ensure all keys exist
+                    for key, value in default_structure.items():
+                        if key not in loaded_data:
+                            loaded_data[key] = value
+                        elif isinstance(value, dict) and isinstance(loaded_data[key], dict):
+                            # Merge nested dictionaries
+                            for subkey, subvalue in value.items():
+                                if subkey not in loaded_data[key]:
+                                    loaded_data[key][subkey] = subvalue
+                    return loaded_data
+            except:
+                pass
+        
+        return default_structure
     
     def generate_comprehensive_report(self, 
                                      level: str, 

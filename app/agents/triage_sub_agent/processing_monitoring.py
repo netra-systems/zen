@@ -24,11 +24,22 @@ class TriageProcessingMonitor:
         """Build enhanced metadata updates with monitoring data."""
         duration_ms = int((time.time() - start_time) * 1000)
         self.metrics.execution_time_ms = duration_ms
+        base_metadata = self._build_base_metadata(duration_ms, retry_count, max_retries)
+        base_metadata.update(self._build_extended_metadata(duration_ms))
+        return base_metadata
+    
+    def _build_base_metadata(self, duration_ms: int, retry_count: int, max_retries: int) -> Dict[str, Any]:
+        """Build base metadata structure."""
         return {
             "triage_duration_ms": duration_ms,
             "cache_hit": False,
             "retry_count": retry_count,
-            "fallback_used": retry_count >= max_retries,
+            "fallback_used": retry_count >= max_retries
+        }
+    
+    def _build_extended_metadata(self, duration_ms: int) -> Dict[str, Any]:
+        """Build extended metadata structure."""
+        return {
             "llm_tokens_used": self.metrics.llm_tokens_used,
             "processing_time_ms": duration_ms
         }
@@ -143,18 +154,27 @@ class TriageProcessingErrorHelper:
     def create_error_fallback_result(self, state, start_time: float = None) -> Dict[str, Any]:
         """Create error fallback result with monitoring metadata."""
         duration_ms = int((time.time() - start_time) * 1000) if start_time else 0
+        base_result = self._create_error_result_structure()
+        base_result["metadata"] = self._create_error_metadata(duration_ms)
+        return base_result
+    
+    def _create_error_result_structure(self) -> Dict[str, Any]:
+        """Create error result structure."""
         return {
             "category": "Error",
             "confidence_score": 0.0,
             "user_intent": {"intent": "unknown", "confidence": 0.0},
             "extracted_entities": {},
-            "tool_recommendations": [],
-            "metadata": {
-                "triage_duration_ms": duration_ms,
-                "error_details": "Processing error occurred",
-                "fallback_used": True,
-                "retry_count": 0
-            }
+            "tool_recommendations": []
+        }
+    
+    def _create_error_metadata(self, duration_ms: int) -> Dict[str, Any]:
+        """Create error metadata."""
+        return {
+            "triage_duration_ms": duration_ms,
+            "error_details": "Processing error occurred",
+            "fallback_used": True,
+            "retry_count": 0
         }
     
     def log_processing_error(self, error: Exception, run_id: str) -> None:
@@ -166,16 +186,25 @@ class TriageProcessingErrorHelper:
                                              start_time: float = None) -> Dict[str, Any]:
         """Create fallback result with comprehensive monitoring data."""
         duration_ms = int((time.time() - start_time) * 1000) if start_time else 0
+        base_result = self._create_fallback_result_structure()
+        base_result["metadata"] = self._create_fallback_monitoring_metadata(duration_ms, run_id)
+        return base_result
+    
+    def _create_fallback_result_structure(self) -> Dict[str, Any]:
+        """Create fallback result structure."""
         return {
             "category": "General Inquiry",
             "confidence_score": 0.3,
             "user_intent": {"intent": "general", "confidence": 0.3},
             "extracted_entities": {},
-            "tool_recommendations": [],
-            "metadata": {
-                "triage_duration_ms": duration_ms,
-                "fallback_used": True,
-                "error_details": f"Fallback activated for {run_id}",
-                "retry_count": 0
-            }
+            "tool_recommendations": []
+        }
+    
+    def _create_fallback_monitoring_metadata(self, duration_ms: int, run_id: str) -> Dict[str, Any]:
+        """Create fallback monitoring metadata."""
+        return {
+            "triage_duration_ms": duration_ms,
+            "fallback_used": True,
+            "error_details": f"Fallback activated for {run_id}",
+            "retry_count": 0
         }

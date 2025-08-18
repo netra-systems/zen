@@ -138,13 +138,17 @@ class AdminToolExecutors:
     
     async def _create_user(self, **kwargs) -> Dict[str, Any]:
         """Create new user"""
-        from app.services import user_service
-        
         email, role = self._extract_user_params(**kwargs)
         validation_error = self._validate_user_creation(email)
         if validation_error:
             return validation_error
-        return await self._call_user_service(user_service, email, role)
+        return await self._create_user_with_service(email, role)
+    
+    async def _create_user_with_service(self, email: str, role: str) -> Dict[str, Any]:
+        """Create user using service"""
+        from app.services import user_service
+        result = await user_service.create_user(email=email, role=role, db=self.db)
+        return {"status": "success", "user": result}
     
     async def _call_user_service(self, user_service, email: str, role: str) -> Dict[str, Any]:
         """Call user service to create user"""
@@ -167,13 +171,17 @@ class AdminToolExecutors:
     
     async def _grant_permission(self, **kwargs) -> Dict[str, Any]:
         """Grant permission to user"""
-        from app.services.permission_service import PermissionService
-        
         user_email, permission = self._extract_permission_params(**kwargs)
         validation_error = self._validate_permission_grant(user_email, permission)
         if validation_error:
             return validation_error
-        return await self._call_permission_service(PermissionService, user_email, permission)
+        return await self._grant_permission_with_service(user_email, permission)
+    
+    async def _grant_permission_with_service(self, user_email: str, permission: str) -> Dict[str, Any]:
+        """Grant permission using service"""
+        from app.services.permission_service import PermissionService
+        success = await PermissionService.grant_permission(user_email, permission, self.db)
+        return {"status": "success" if success else "error", "granted": success}
     
     async def _call_permission_service(self, service, user_email: str, permission: str) -> Dict[str, Any]:
         """Call permission service to grant permission"""

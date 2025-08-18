@@ -17,29 +17,46 @@ class AgentError(NetraException):
     """
     
     def __init__(self, message: str = None, agent_name: str = None, severity: ErrorSeverity = None, **kwargs):
-        if message is None and agent_name is not None:
-            # Handle old pattern where first arg was agent_name
-            message = f"Agent error in {agent_name}"
-        
+        message = self._handle_message_fallback(message, agent_name)
         agent_msg = self._build_agent_message(agent_name, message)
         final_severity = severity or ErrorSeverity.HIGH
-        super().__init__(
-            message=agent_msg, code=ErrorCode.AGENT_EXECUTION_FAILED, severity=final_severity,
-            details={"agent": agent_name}, **kwargs
-        )
+        init_params = self._build_init_params(agent_msg, final_severity, agent_name, kwargs)
+        super().__init__(**init_params)
+    
+    def _handle_message_fallback(self, message: str, agent_name: str) -> str:
+        """Handle message fallback when message is None."""
+        if message is None and agent_name is not None:
+            return f"Agent error in {agent_name}"
+        return message
+    
+    def _build_init_params(self, agent_msg: str, final_severity: ErrorSeverity, agent_name: str, kwargs: dict) -> dict:
+        """Build initialization parameters for AgentError."""
+        return {
+            "message": agent_msg, "code": ErrorCode.AGENT_EXECUTION_FAILED, 
+            "severity": final_severity, "details": {"agent": agent_name}, **kwargs
+        }
     
     @property
     def severity(self):
         """Get error severity from error details."""
         severity_value = self.error_details.severity
         if isinstance(severity_value, str):
-            # Convert string back to enum if needed
-            from app.core.error_codes import ErrorSeverity
-            for severity_enum in ErrorSeverity:
-                if severity_enum.value == severity_value:
-                    return severity_enum
-            return ErrorSeverity.MEDIUM  # Default if not found
+            return self._convert_string_to_severity_enum(severity_value)
         return severity_value
+    
+    def _convert_string_to_severity_enum(self, severity_value: str):
+        """Convert string severity to enum."""
+        from app.core.error_codes import ErrorSeverity
+        enum_match = self._find_matching_severity_enum(severity_value)
+        return enum_match if enum_match else ErrorSeverity.MEDIUM
+    
+    def _find_matching_severity_enum(self, severity_value: str):
+        """Find matching severity enum for string value."""
+        from app.core.error_codes import ErrorSeverity
+        for severity_enum in ErrorSeverity:
+            if severity_enum.value == severity_value:
+                return severity_enum
+        return None
     
     @property
     def category(self):

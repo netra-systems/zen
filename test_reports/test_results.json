@@ -1,114 +1,309 @@
 {
+  "metadata": {
+    "version": "2.0",
+    "last_update": "2025-08-18T11:43:35.834046",
+    "total_runs": 2
+  },
+  "current_state": {
+    "overall_status": "[FAILED] 4 failures",
+    "last_run_level": "unit",
+    "last_run_time": "2025-08-18T11:43:35.834046",
+    "last_exit_code": 255
+  },
+  "known_test_counts": {
+    "unit:backend": {
+      "total": 488,
+      "passed": 469,
+      "failed": 4,
+      "skipped": 15,
+      "errors": 0,
+      "last_update": "2025-08-18T11:43:35.834046"
+    }
+  },
+  "category_results": {
+    "smoke": {
+      "description": "Quick smoke tests",
+      "expected": 10,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "unit": {
+      "description": "Unit tests",
+      "expected": 450,
+      "actual": 488,
+      "passed": 469,
+      "failed": 4,
+      "last_run": "2025-08-18T11:43:35.834046",
+      "status": "[FAILED] 4 failures"
+    },
+    "integration": {
+      "description": "Integration tests",
+      "expected": 60,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "critical": {
+      "description": "Critical path tests",
+      "expected": 20,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "agents": {
+      "description": "Agent tests",
+      "expected": 45,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": "2025-08-18T11:41:40.366013",
+      "status": "[NO TESTS]"
+    },
+    "websocket": {
+      "description": "WebSocket tests",
+      "expected": 25,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "database": {
+      "description": "Database tests",
+      "expected": 35,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "api": {
+      "description": "API tests",
+      "expected": 50,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "e2e": {
+      "description": "End-to-end tests",
+      "expected": 20,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "real_services": {
+      "description": "Real service tests",
+      "expected": 15,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "auth": {
+      "description": "Authentication tests",
+      "expected": 30,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "corpus": {
+      "description": "Corpus management tests",
+      "expected": 20,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "synthetic_data": {
+      "description": "Synthetic data tests",
+      "expected": 25,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "metrics": {
+      "description": "Metrics tests",
+      "expected": 15,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "frontend": {
+      "description": "Frontend tests",
+      "expected": 40,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    },
+    "comprehensive": {
+      "description": "Full comprehensive suite",
+      "expected": 500,
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": null,
+      "status": "[NOT RUN]"
+    }
+  },
+  "component_results": {
+    "backend": {
+      "status": "failed",
+      "last_counts": {
+        "total": 488,
+        "passed": 469,
+        "failed": 4,
+        "skipped": 15,
+        "errors": 0,
+        "import_errors": 2,
+        "status": "import_error",
+        "test_files": 57
+      },
+      "last_duration": 64.17067456245422,
+      "last_run": "2025-08-18T11:43:35.834046"
+    },
+    "frontend": {
+      "status": "failed",
+      "last_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0,
+        "import_errors": 0,
+        "test_files": 0,
+        "status": "unknown"
+      },
+      "last_duration": 0.5231842994689941,
+      "last_run": "2025-08-18T11:43:35.834046"
+    },
+    "e2e": {
+      "status": "pending",
+      "last_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0
+      },
+      "last_duration": 0,
+      "last_run": "2025-08-18T11:43:35.834046"
+    }
+  },
+  "failing_tests": [
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\services\\test_generation_service.py::test_get_corpus_from_clickhouse",
+      "timestamp": "2025-08-18T11:43:35.834046"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\services\\test_quality_gate_advanced.py::TestQualityGateAdvanced::test_get_weights_for_content_types",
+      "timestamp": "2025-08-18T11:43:35.835045"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\services\\test_circuit_breaker_integration.py::TestCircuitBreakerEndpoints::test_dashboard_endpoint_structure",
+      "timestamp": "2025-08-18T11:43:35.835045"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_initialization.py::TestServiceInitialization::test_initialization Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env",
+      "timestamp": "2025-08-18T11:43:35.835045"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\services\\test_generation_service.py::\u001b[1mtest_get_corpus_from_clickhouse\u001b[0m -   File \"C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\agents\\data_sub_agent\\clickhouse_operations.py\", line 499",
+      "timestamp": "2025-08-18T11:43:35.835045"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\services\\test_quality_gate_advanced.py::\u001b[1mTestQualityGateAdvanced::test_get_weights_for_content_types\u001b[0m - assert 0.2 == 0.25",
+      "timestamp": "2025-08-18T11:43:35.835045"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\services\\test_circuit_breaker_integration.py::\u001b[1mTestCircuitBreakerEndpoints::test_dashboard_endpoint_structure\u001b[0m - ModuleNotFoundError: No module named 'app.auth.auth_dependencies'",
+      "timestamp": "2025-08-18T11:43:35.835045"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_initialization.py::\u001b[1mTestServiceInitialization::test_initialization\u001b[0m - AttributeError: 'SyntheticDataService' object has no attribute 'active_jobs'",
+      "timestamp": "2025-08-18T11:43:35.835045"
+    }
+  ],
+  "test_history": [
+    {
+      "timestamp": "2025-08-18T11:41:40.366013",
+      "level": "agents",
+      "exit_code": 4,
+      "status": "[UNKNOWN]",
+      "statistics": {
+        "total_tests_known": 0,
+        "total_tests_run": 0,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
+    },
+    {
+      "timestamp": "2025-08-18T11:43:35.834046",
+      "level": "unit",
+      "exit_code": 255,
+      "status": "[FAILED] 4 failures",
+      "statistics": {
+        "total_tests_known": 488,
+        "total_tests_run": 488,
+        "total_passed": 469,
+        "total_failed": 4,
+        "total_skipped": 15,
+        "pass_rate": 96.11
+      }
+    }
+  ],
+  "statistics": {
+    "total_tests_known": 488,
+    "total_tests_run": 488,
+    "total_passed": 469,
+    "total_failed": 4,
+    "total_skipped": 15,
+    "pass_rate": 96.11
+  },
   "version": "1.0",
   "tests": {},
   "runs": [
     {
-      "run_id": "run_20250818_112052_52672",
-      "timestamp": "2025-08-18T11:20:59.853956",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_112129_89537",
-      "timestamp": "2025-08-18T11:22:06.785784",
-      "total_tests": 55,
-      "passed": 52,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_112222_42126",
-      "timestamp": "2025-08-18T11:22:29.987732",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_112343_23619",
-      "timestamp": "2025-08-18T11:23:57.888273",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_112436_76520",
-      "timestamp": "2025-08-18T11:25:02.471513",
-      "total_tests": 69,
-      "passed": 66,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_112658_18139",
-      "timestamp": "2025-08-18T11:27:21.176666",
-      "total_tests": 62,
-      "passed": 59,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_112735_55724",
-      "timestamp": "2025-08-18T11:28:36.169645",
-      "total_tests": 587,
-      "passed": 568,
-      "failed": 4,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_112912_52962",
-      "timestamp": "2025-08-18T11:29:18.943554",
-      "total_tests": 7,
-      "passed": 7,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_113130_90577",
-      "timestamp": "2025-08-18T11:32:34.436009",
-      "total_tests": 587,
-      "passed": 568,
-      "failed": 4,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_113253_73366",
-      "timestamp": "2025-08-18T11:34:06.935128",
-      "total_tests": 465,
-      "passed": 446,
-      "failed": 4,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_113556_56788",
-      "timestamp": "2025-08-18T11:35:56.934837",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_113603_63419",
-      "timestamp": "2025-08-18T11:36:32.741082",
-      "total_tests": 62,
-      "passed": 59,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_113638_98312",
-      "timestamp": "2025-08-18T11:36:48.278311",
-      "total_tests": 7,
-      "passed": 7,
-      "failed": 0,
+      "run_id": "run_20250818_114152_12062",
+      "timestamp": "2025-08-18T11:42:20.081680",
+      "total_tests": 42,
+      "passed": 38,
+      "failed": 2,
       "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 13,
-    "last_updated": "2025-08-18T11:36:48.278311"
+    "total_runs": 1,
+    "last_updated": "2025-08-18T11:42:20.081680"
   }
 }

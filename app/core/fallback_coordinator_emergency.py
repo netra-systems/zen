@@ -18,26 +18,13 @@ class EmergencyFallbackManager:
     
     def _init_emergency_responses(self) -> None:
         """Initialize emergency response templates"""
+        triage_response = self._create_triage_response()
+        data_analysis_response = self._create_data_analysis_response()
+        general_response = self._create_general_response()
         self.emergency_responses = {
-            "triage": {
-                "category": "System Maintenance",
-                "confidence_score": 0.1,
-                "priority": "low",
-                "message": "System is temporarily unavailable for maintenance",
-                "fallback_type": "emergency"
-            },
-            "data_analysis": {
-                "analysis_type": "emergency_fallback",
-                "insights": ["System temporarily unavailable"],
-                "recommendations": ["Please try again later"],
-                "data": {"available": False},
-                "fallback_type": "emergency"
-            },
-            "general": {
-                "message": "System is temporarily experiencing issues. Please try again later.",
-                "status": "emergency_fallback",
-                "fallback_type": "emergency"
-            }
+            "triage": triage_response,
+            "data_analysis": data_analysis_response,
+            "general": general_response
         }
     
     async def execute_emergency_fallback(self, agent_name: str, operation_name: str, 
@@ -51,15 +38,48 @@ class EmergencyFallbackManager:
         """Get emergency response template for fallback type."""
         return self.emergency_responses.get(fallback_type, self.emergency_responses["general"]).copy()
     
+    def _create_triage_response(self) -> Dict[str, Any]:
+        """Create triage emergency response template."""
+        return {
+            "category": "System Maintenance",
+            "confidence_score": 0.1,
+            "priority": "low",
+            "message": "System is temporarily unavailable for maintenance",
+            "fallback_type": "emergency"
+        }
+    
+    def _create_data_analysis_response(self) -> Dict[str, Any]:
+        """Create data analysis emergency response template."""
+        return {
+            "analysis_type": "emergency_fallback",
+            "insights": ["System temporarily unavailable"],
+            "recommendations": ["Please try again later"],
+            "data": {"available": False},
+            "fallback_type": "emergency"
+        }
+    
+    def _create_general_response(self) -> Dict[str, Any]:
+        """Create general emergency response template."""
+        return {
+            "message": "System is temporarily experiencing issues. Please try again later.",
+            "status": "emergency_fallback",
+            "fallback_type": "emergency"
+        }
+    
     def _add_emergency_metadata(self, response: Dict[str, Any], agent_name: str, operation_name: str) -> Dict[str, Any]:
         """Add metadata to emergency response."""
-        response.update({
+        metadata = self._create_emergency_metadata(agent_name, operation_name)
+        response.update(metadata)
+        return response
+    
+    def _create_emergency_metadata(self, agent_name: str, operation_name: str) -> Dict[str, Any]:
+        """Create emergency metadata dictionary."""
+        return {
             "agent": agent_name,
             "operation": operation_name,
             "timestamp": datetime.now(UTC).isoformat(),
             "status": "emergency_fallback"
-        })
-        return response
+        }
     
     async def execute_limited_fallback(self, agent_name: str, operation_name: str) -> Dict[str, Any]:
         """Execute limited fallback to prevent cascade"""
@@ -69,11 +89,22 @@ class EmergencyFallbackManager:
     
     def _build_basic_cascade_response(self, agent_name: str, operation_name: str) -> Dict[str, Any]:
         """Build basic cascade prevention response."""
+        basic_data = self._create_cascade_basic_data(agent_name, operation_name)
+        timestamp_data = self._create_cascade_timestamp_data()
+        return {**basic_data, **timestamp_data}
+    
+    def _create_cascade_basic_data(self, agent_name: str, operation_name: str) -> Dict[str, Any]:
+        """Create basic cascade prevention data."""
         return {
             "status": "cascade_prevention",
             "message": f"Limited fallback for {agent_name} to prevent system cascade failure",
             "agent": agent_name,
-            "operation": operation_name,
+            "operation": operation_name
+        }
+    
+    def _create_cascade_timestamp_data(self) -> Dict[str, Any]:
+        """Create cascade prevention timestamp data."""
+        return {
             "timestamp": datetime.now(UTC).isoformat(),
             "fallback_type": "cascade_prevention"
         }

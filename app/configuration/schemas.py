@@ -150,7 +150,7 @@ class AppConfig(BaseModel):
     fernet_key: str = None
     jwt_secret_key: str = None
     api_base_url: str = "http://localhost:8000"
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
+    database_url: str = None  # Will be loaded from environment or config manager
     redis_url: str = None  # Added for staging/production Redis URL
     clickhouse_url: str = None  # Added for staging/production ClickHouse URL
     log_level: str = "DEBUG"
@@ -242,12 +242,12 @@ class AppConfig(BaseModel):
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
     debug: bool = True
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
+    database_url: str = None  # Will be loaded from environment
     dev_user_email: str = "dev@example.com"
     log_level: str = "DEBUG"
     secret_key: str = os.environ.get("SECRET_KEY", "development_secret_key_that_is_at_least_32_characters_long_for_validation")
-    jwt_secret_key: str = "development_secret_key_for_jwt_do_not_use_in_production"
-    fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Generated with Fernet.generate_key()
+    jwt_secret_key: str = os.environ.get("JWT_SECRET_KEY", "development_secret_key_for_jwt_do_not_use_in_production")
+    fernet_key: str = os.environ.get("FERNET_KEY", "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg=")  # Generated with Fernet.generate_key()
     
     # OAuth configuration for development - populated by SecretReference system
     oauth_config: OAuthConfig = OAuthConfig(
@@ -279,11 +279,13 @@ class DevelopmentConfig(AppConfig):
         super().__init__(**data)
     
     def _load_database_url(self, data: dict, os_module) -> None:
-        """Load database URL from environment if not provided."""
-        if 'database_url' not in data:
-            env_db_url = os_module.environ.get('DATABASE_URL')
-            if env_db_url:
-                data['database_url'] = env_db_url
+        """Load database URL from environment - always prefer environment over defaults."""
+        env_db_url = os_module.environ.get('DATABASE_URL')
+        if env_db_url:
+            data['database_url'] = env_db_url
+        elif 'database_url' not in data or data.get('database_url') is None:
+            # Fallback only if no env var and no value provided
+            data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
     
     def _get_service_modes(self, os_module) -> dict:
         """Get service modes from environment variables."""

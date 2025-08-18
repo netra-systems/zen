@@ -171,6 +171,27 @@ async def search_corpus(q: str = Query(...), corpus_id: str = Query(default="def
     """Search corpus documents"""
     return await _search_corpus_safe(corpus_id, q)
 
+class SearchRequest(BaseModel):
+    q: str
+    filters: Dict[str, Any] = None
+    limit: int = 10
+    offset: int = 0
+
+@router.post("/search")
+async def search_corpus_advanced(request: SearchRequest, current_user: User = Depends(get_current_user)):
+    """Advanced corpus search with filters"""
+    try:
+        # Use the corpus service for advanced search
+        results = await corpus_service.search_corpus_content(
+            query=request.q,
+            filters=request.filters,
+            limit=request.limit,
+            offset=request.offset
+        )
+        return results
+    except Exception as e:
+        _handle_search_error(e)
+
 @router.post("/bulk")
 async def bulk_index_documents(request: BulkIndexRequest):
     """Bulk index documents"""

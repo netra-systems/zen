@@ -102,6 +102,11 @@ class ModernClickHouseOperations(BaseExecutionInterface, AgentExecutionMixin):
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute core ClickHouse operation logic."""
         query_context = self._extract_query_context(context)
+        return await self._execute_operation_by_type(query_context, context)
+    
+    async def _execute_operation_by_type(self, query_context: QueryContext, 
+                                        context: ExecutionContext) -> Dict[str, Any]:
+        """Execute operation based on query context type."""
         operation_type = query_context.operation_type
         return await self._route_operation_by_type(operation_type, query_context, context)
     
@@ -178,7 +183,7 @@ class ModernClickHouseOperations(BaseExecutionInterface, AgentExecutionMixin):
             schema_data = await self._execute_describe_query(table_name)
             return await self._process_schema_data(schema_data, table_name)
         except Exception as e:
-            return self._create_failed_schema_result(f"Schema query failed: {str(e)}")
+            return self._handle_schema_query_error(e)
     
     async def _process_schema_data(self, schema_data: Optional[List[Any]], 
                                   table_name: str) -> ExecutionResult:
@@ -309,7 +314,10 @@ class ModernClickHouseOperations(BaseExecutionInterface, AgentExecutionMixin):
         """Check Redis cache with error handling."""
         if not cache_key or not self.redis_manager:
             return None
-        
+        return await self._execute_cache_retrieval(cache_key)
+    
+    async def _execute_cache_retrieval(self, cache_key: str) -> Optional[List[Dict[str, Any]]]:
+        """Execute cache retrieval with error handling."""
         try:
             cached_data = await self.redis_manager.get(cache_key)
             return json.loads(cached_data) if cached_data else None
@@ -322,7 +330,11 @@ class ModernClickHouseOperations(BaseExecutionInterface, AgentExecutionMixin):
         """Cache query result with error handling."""
         if not self._should_cache_result(query_context):
             return
-        
+        await self._execute_cache_storage(data, query_context)
+    
+    async def _execute_cache_storage(self, data: List[Dict[str, Any]], 
+                                   query_context: QueryContext) -> None:
+        """Execute cache storage with error handling."""
         try:
             await self._store_data_in_cache(data, query_context)
         except Exception as e:
@@ -348,7 +360,7 @@ class ModernClickHouseOperations(BaseExecutionInterface, AgentExecutionMixin):
             query_result = await self._execute_clickhouse_query_safe(query_context.query)
             return await self._process_query_result(query_result)
         except Exception as e:
-            return self._create_failed_query_result(f"Database query failed: {str(e)}")
+            return self._handle_database_query_error(e)
     
     async def _process_query_result(self, query_result: Optional[List[Any]]) -> ExecutionResult:
         """Process database query result and return appropriate result."""
@@ -482,6 +494,15 @@ class ModernClickHouseOperations(BaseExecutionInterface, AgentExecutionMixin):
         """Reset performance metrics for new tracking period."""
         self._performance_metrics = self._initialize_performance_metrics()
         self.reliability_manager.reset_health_tracking()
+    
+    
+    def _handle_schema_query_error(self, error: Exception) -> ExecutionResult:
+        """Handle schema query error and return failed result."""
+        return self._create_failed_schema_result(f"Schema query failed: {str(error)}")
+    
+    def _handle_database_query_error(self, error: Exception) -> ExecutionResult:
+        """Handle database query error and return failed result."""
+        return self._create_failed_query_result(f"Database query failed: {str(error)}")
 
 
 # Legacy compatibility alias

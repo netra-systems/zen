@@ -230,12 +230,14 @@ class RecoveryLogger:
         context: Optional[ErrorContext] = None
     ) -> DetailedErrorContext:
         """Create context for business impact logging."""
+        context = self._get_or_create_context(error, context)
+        enhanced_context = self._enhance_business_context(context, impact_description, affected_users, financial_impact)
+        return enhanced_context
+    
+    def _get_or_create_context(self, error: Exception, context: Optional[ErrorContext]) -> DetailedErrorContext:
+        """Get existing context or create new one."""
         if context is None:
-            context = self.context_manager.create_context(error)
-        
-        context = self._enhance_business_context(
-            context, impact_description, affected_users, financial_impact
-        )
+            return self.context_manager.create_context(error)
         return context
     
     def log_security_incident_context(
@@ -260,17 +262,26 @@ class RecoveryLogger:
         details: Optional[dict]
     ) -> DetailedErrorContext:
         """Build context for recovery logging."""
-        return DetailedErrorContext(
-            correlation_id=recovery_context.operation_id,
-            operation_type=recovery_context.operation_type,
-            operation_id=recovery_context.operation_id,
-            severity=ErrorSeverity.INFO if success else ErrorSeverity.WARNING,
-            category=ErrorCategory.SYSTEM,
-            metadata=self._build_recovery_metadata(
-                recovery_action, success, recovery_context, details
-            ),
-            tags=['recovery', 'automation']
-        )
+        context_data = self._prepare_recovery_context_data(recovery_context, recovery_action, success, details)
+        return DetailedErrorContext(**context_data)
+    
+    def _prepare_recovery_context_data(
+        self, recovery_context: RecoveryContext, recovery_action: str, success: bool, details: Optional[dict]
+    ) -> dict:
+        """Prepare recovery context data dictionary."""
+        basic_data = self._get_recovery_basic_data(recovery_context, success)
+        metadata = self._build_recovery_metadata(recovery_action, success, recovery_context, details)
+        return {**basic_data, 'metadata': metadata, 'tags': ['recovery', 'automation']}
+    
+    def _get_recovery_basic_data(self, recovery_context: RecoveryContext, success: bool) -> dict:
+        """Get basic recovery context data."""
+        return {
+            'correlation_id': recovery_context.operation_id,
+            'operation_type': recovery_context.operation_type,
+            'operation_id': recovery_context.operation_id,
+            'severity': ErrorSeverity.INFO if success else ErrorSeverity.WARNING,
+            'category': ErrorCategory.SYSTEM
+        }
     
     def _enhance_business_context(
         self,
@@ -294,15 +305,27 @@ class RecoveryLogger:
         risk_level: str
     ) -> DetailedErrorContext:
         """Enhance context with security incident information."""
+        self._apply_security_settings(context)
+        self._add_security_metadata(context, incident_type, risk_level)
+        self._add_security_tags(context, risk_level)
+        return context
+    
+    def _apply_security_settings(self, context: DetailedErrorContext) -> None:
+        """Apply security-specific severity and category."""
         context.severity = ErrorSeverity.HIGH
         context.category = ErrorCategory.SECURITY
+    
+    def _add_security_metadata(self, context: DetailedErrorContext, incident_type: str, risk_level: str) -> None:
+        """Add security incident metadata to context."""
         context.metadata.update({
             'incident_type': incident_type,
             'risk_level': risk_level,
             'requires_investigation': True
         })
+    
+    def _add_security_tags(self, context: DetailedErrorContext, risk_level: str) -> None:
+        """Add security-related tags to context."""
         context.tags.extend(['security', 'incident', risk_level])
-        return context
     
     def _build_recovery_metadata(
         self,

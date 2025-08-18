@@ -12,33 +12,46 @@ if TYPE_CHECKING:
     from app.schemas.Generation import SyntheticDataGenParams
 
 
+def _setup_temporal_config(config: 'SyntheticDataGenParams'):
+    """Extract temporal pattern configuration"""
+    num_traces = getattr(config, 'num_traces', 1000)
+    pattern = getattr(config, 'temporal_pattern', 'uniform')
+    return num_traces, pattern
+
+
+def _get_business_hour():
+    """Get weighted business hour"""
+    return random.choices(
+        range(24),
+        weights=[0.5 if h < 9 or h > 17 else 2.0 for h in range(24)]
+    )[0]
+
+
+def _get_business_weekday():
+    """Get weighted business weekday"""
+    return random.choices(
+        range(7),
+        weights=[2.0 if d < 5 else 0.5 for d in range(7)]
+    )[0]
+
+
+def _apply_business_hours_pattern(record: Dict[str, Any]):
+    """Apply business hours temporal pattern to record"""
+    hour = _get_business_hour()
+    weekday = _get_business_weekday()
+    base_time = datetime.now(UTC) - timedelta(hours=24)
+    record['timestamp'] = base_time.replace(hour=hour, minute=random.randint(0, 59))
+
+
 async def generate_with_temporal_patterns(config: 'SyntheticDataGenParams', generate_single_record_fn: Callable[..., Awaitable[Dict]]) -> List[Dict[str, Any]]:
     """Generate data with temporal patterns"""
     records = []
-    num_traces = getattr(config, 'num_traces', 1000)
-    pattern = getattr(config, 'temporal_pattern', 'uniform')
+    num_traces, pattern = _setup_temporal_config(config)
     
     for i in range(num_traces):
         record = await generate_single_record_fn(config, None, i)
-        
-        # Apply temporal pattern
         if pattern == 'business_hours':
-            # Weight business hours more heavily
-            hour = random.choices(
-                range(24),
-                weights=[0.5 if h < 9 or h > 17 else 2.0 for h in range(24)]
-            )[0]
-            
-            # Set weekday preference
-            weekday = random.choices(
-                range(7),
-                weights=[2.0 if d < 5 else 0.5 for d in range(7)]
-            )[0]
-            
-            # Adjust timestamp to match pattern
-            base_time = datetime.now(UTC) - timedelta(hours=24)
-            record['timestamp'] = base_time.replace(hour=hour, minute=random.randint(0, 59))
-        
+            _apply_business_hours_pattern(record)
         records.append(record)
     
     return records
@@ -67,35 +80,58 @@ async def generate_with_errors(config: 'SyntheticDataGenParams', generate_single
     return records
 
 
+def _setup_domain_config(config: 'SyntheticDataGenParams'):
+    """Extract domain-specific configuration"""
+    num_traces = getattr(config, 'num_traces', 100)
+    domain = getattr(config, 'domain_focus', 'general')
+    return num_traces, domain
+
+
+def _create_ecommerce_metadata() -> Dict[str, Any]:
+    """Create e-commerce domain metadata"""
+    return {
+        'cart_value': random.uniform(10.0, 500.0),
+        'product_count': random.randint(1, 10),
+        'customer_tier': random.choice(['bronze', 'silver', 'gold'])
+    }
+
+
+def _create_healthcare_metadata() -> Dict[str, Any]:
+    """Create healthcare domain metadata"""
+    return {
+        'patient_id': f"P{random.randint(1000, 9999)}",
+        'appointment_type': random.choice(['consultation', 'followup', 'emergency']),
+        'department': random.choice(['cardiology', 'neurology', 'orthopedics'])
+    }
+
+
+def _create_finance_metadata() -> Dict[str, Any]:
+    """Create finance domain metadata"""
+    return {
+        'transaction_amount': random.uniform(100.0, 10000.0),
+        'account_type': random.choice(['checking', 'savings', 'credit']),
+        'risk_score': random.uniform(0.0, 1.0)
+    }
+
+
+def _apply_domain_metadata(record: Dict[str, Any], domain: str):
+    """Apply domain-specific metadata to record"""
+    if domain == 'e-commerce':
+        record['metadata'] = _create_ecommerce_metadata()
+    elif domain == 'healthcare':
+        record['metadata'] = _create_healthcare_metadata()
+    elif domain == 'finance':
+        record['metadata'] = _create_finance_metadata()
+
+
 async def generate_domain_specific(config: 'SyntheticDataGenParams', generate_single_record_fn: Callable[..., Awaitable[Dict]]) -> List[Dict[str, Any]]:
     """Generate domain-specific data"""
     records = []
-    num_traces = getattr(config, 'num_traces', 100)
-    domain = getattr(config, 'domain_focus', 'general')
+    num_traces, domain = _setup_domain_config(config)
     
     for i in range(num_traces):
         record = await generate_single_record_fn(config, None, i)
-        
-        # Add domain-specific metadata
-        if domain == 'e-commerce':
-            record['metadata'] = {
-                'cart_value': random.uniform(10.0, 500.0),
-                'product_count': random.randint(1, 10),
-                'customer_tier': random.choice(['bronze', 'silver', 'gold'])
-            }
-        elif domain == 'healthcare':
-            record['metadata'] = {
-                'patient_id': f"P{random.randint(1000, 9999)}",
-                'appointment_type': random.choice(['consultation', 'followup', 'emergency']),
-                'department': random.choice(['cardiology', 'neurology', 'orthopedics'])
-            }
-        elif domain == 'finance':
-            record['metadata'] = {
-                'transaction_amount': random.uniform(100.0, 10000.0),
-                'account_type': random.choice(['checking', 'savings', 'credit']),
-                'risk_score': random.uniform(0.0, 1.0)
-            }
-        
+        _apply_domain_metadata(record, domain)
         records.append(record)
     
     return records
@@ -183,34 +219,48 @@ async def generate_geo_distributed(config: 'SyntheticDataGenParams', generate_si
     return records
 
 
+def _setup_correlation_config(config: 'SyntheticDataGenParams'):
+    """Extract correlation configuration"""
+    num_traces = getattr(config, 'num_traces', 1000)
+    correlations = getattr(config, 'correlations', [])
+    return num_traces, correlations
+
+
+def _apply_request_size_latency_correlation(record: Dict[str, Any]):
+    """Apply request size to latency correlation"""
+    request_size = random.uniform(100, 1000)
+    latency = 50 + (request_size / 10) + random.uniform(-20, 20)
+    record['request_size'] = request_size
+    record['latency'] = max(10, latency)
+
+
+def _apply_error_rate_throughput_correlation(record: Dict[str, Any]):
+    """Apply error rate to throughput correlation"""
+    error_rate = random.uniform(0.01, 0.10)
+    throughput = 1000 - (error_rate * 5000) + random.uniform(-100, 100)
+    record['error_rate'] = error_rate
+    record['throughput'] = max(100, throughput)
+
+
+def _apply_correlation_logic(record: Dict[str, Any], corr: Dict[str, Any]):
+    """Apply specific correlation logic to record"""
+    field1, field2 = corr['field1'], corr['field2']
+    
+    if field1 == 'request_size' and field2 == 'latency':
+        _apply_request_size_latency_correlation(record)
+    elif field1 == 'error_rate' and field2 == 'throughput':
+        _apply_error_rate_throughput_correlation(record)
+
+
 async def generate_with_correlations(config: 'SyntheticDataGenParams', generate_single_record_fn: Callable[..., Awaitable[Dict]]) -> List[Dict[str, Any]]:
     """Generate data with cross-correlations"""
     records = []
-    num_traces = getattr(config, 'num_traces', 1000)
-    correlations = getattr(config, 'correlations', [])
+    num_traces, correlations = _setup_correlation_config(config)
     
     for i in range(num_traces):
         record = await generate_single_record_fn(config, None, i)
-        
-        # Apply correlations
         for corr in correlations:
-            field1, field2 = corr['field1'], corr['field2']
-            coefficient = corr['coefficient']
-            
-            if field1 == 'request_size' and field2 == 'latency':
-                request_size = random.uniform(100, 1000)
-                # Positive correlation: larger requests -> higher latency
-                latency = 50 + (request_size / 10) + random.uniform(-20, 20)
-                record['request_size'] = request_size
-                record['latency'] = max(10, latency)
-            
-            elif field1 == 'error_rate' and field2 == 'throughput':
-                error_rate = random.uniform(0.01, 0.10)
-                # Negative correlation: higher error rate -> lower throughput
-                throughput = 1000 - (error_rate * 5000) + random.uniform(-100, 100)
-                record['error_rate'] = error_rate
-                record['throughput'] = max(100, throughput)
-        
+            _apply_correlation_logic(record, corr)
         records.append(record)
     
     return records

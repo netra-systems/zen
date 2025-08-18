@@ -72,6 +72,10 @@ class UploadErrorHandler:
     ) -> ErrorContext:
         """Create error context for upload failures."""
         additional_data = self._build_upload_error_data(filename, file_size, original_error)
+        return self._build_error_context(run_id, additional_data)
+    
+    def _build_error_context(self, run_id: str, additional_data: Dict[str, Any]) -> ErrorContext:
+        """Build error context for upload failures."""
         return ErrorContext(
             agent_name="corpus_admin_agent",
             operation_name="document_upload",
@@ -175,8 +179,12 @@ class UploadErrorHandler:
         try:
             return await self._attempt_multipart_upload(filename, file_size, run_id)
         except Exception as e:
-            logger.debug(f"Alternative upload failed: {e}")
-            return None
+            return self._handle_alternative_upload_failure(e)
+    
+    def _handle_alternative_upload_failure(self, e: Exception) -> None:
+        """Handle failure in alternative upload attempt."""
+        logger.debug(f"Alternative upload failed: {e}")
+        return None
     
     async def _attempt_multipart_upload(
         self, filename: str, file_size: int, run_id: str
@@ -222,14 +230,24 @@ class UploadErrorHandler:
         """Try chunked upload for large files."""
         try:
             chunk_size = 1024 * 1024  # 1MB chunks
-            if file_size > chunk_size:
-                # Simulate chunked upload success
-                return self._create_chunked_success_response(
-                    filename, file_size, chunk_size, run_id
-                )
+            return await self._attempt_chunked_upload_process(filename, file_size, chunk_size, run_id)
         except Exception as e:
-            logger.debug(f"Chunked upload failed: {e}")
-        
+            return self._handle_chunked_upload_failure(e)
+    
+    async def _attempt_chunked_upload_process(
+        self, filename: str, file_size: int, chunk_size: int, run_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """Attempt chunked upload process for large files."""
+        if file_size > chunk_size:
+            # Simulate chunked upload success
+            return self._create_chunked_success_response(
+                filename, file_size, chunk_size, run_id
+            )
+        return None
+    
+    def _handle_chunked_upload_failure(self, e: Exception) -> None:
+        """Handle failure in chunked upload attempt."""
+        logger.debug(f"Chunked upload failed: {e}")
         return None
     
     def _create_chunked_success_response(
