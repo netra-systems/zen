@@ -235,6 +235,18 @@ python scripts/dev_launcher.py # Start dev
 python test_runner.py --level integration --no-coverage --fast-fail # DEFAULT tests (fast feedback)
 ```
 
+## 🚀 DEPLOYMENT COMMANDS (GCP Staging)
+```bash
+# Setup (first time only)
+.\setup-gcp-staging-resources.ps1
+
+# Deploy to staging
+.\deploy-staging-automated.ps1
+
+# Quick deploy (skip health checks)
+.\deploy-staging-automated.ps1 -SkipHealthChecks
+```
+
 ## 🧪 UNIFIED TEST RUNNER (test_runner.py)
 **SINGLE AUTHORITATIVE TEST RUNNER** - Do not create alternatives
 
@@ -415,6 +427,10 @@ Ensures every feature directly creates and captures value proportional to a cust
 - async/await for ALL I/O
 - Database via repositories only
 - NetraException for errors
+
+
+### Complex Debugging:
+- Use Root Cause Analysis (5 Whys)
 
 ### COMPLEX CODING: MULTI STEP PLAN Process
 MUST FOLLOW THIS:

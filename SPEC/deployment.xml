@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec name="deployment" version="1.0">
+  <description>
+    Deployment commands and procedures for Netra Apex.
+    Quick reference for deploying to various environments.
+  </description>
+
+  <gcp-staging>
+    <description>Deploy to GCP Staging Environment</description>
+    
+    <quick-commands>
+      <setup>
+        <!-- First time setup only -->
+        <command>.\setup-gcp-staging-resources.ps1</command>
+        <description>Creates service account, Artifact Registry, secrets, and all required GCP resources</description>
+      </setup>
+      
+      <deploy>
+        <!-- Standard deployment -->
+        <command>.\deploy-staging-automated.ps1</command>
+        <description>Full deployment with health checks</description>
+      </deploy>
+      
+      <deploy-fast>
+        <!-- Fast deployment without health checks -->
+        <command>.\deploy-staging-automated.ps1 -SkipHealthChecks</command>
+        <description>Skip health checks for faster deployment</description>
+      </deploy>
+      
+      <deploy-with-key>
+        <!-- Deploy with specific service account key -->
+        <command>.\deploy-staging-automated.ps1 -ServiceAccountKeyPath "path\to\key.json"</command>
+        <description>Use specific service account key file</description>
+      </deploy>
+    </quick-commands>
+
+    <environment-variables>
+      <variable name="GCP_STAGING_SA_KEY_PATH">Path to staging service account key (preferred)</variable>
+      <variable name="GCP_SA_KEY_PATH">Fallback path to service account key</variable>
+    </environment-variables>
+
+    <service-account>
+      <email>netra-staging-deploy@netra-staging.iam.gserviceaccount.com</email>
+      <key-locations>
+        <location>.\gcp-staging-sa-key.json</location>
+        <location>.\secrets\gcp-staging-sa-key.json</location>
+        <location>.\terraform-gcp\gcp-staging-sa-key.json</location>
+      </key-locations>
+    </service-account>
+
+    <health-endpoints>
+      <backend>/health, /health/live, /health/ready, /health/detailed</backend>
+      <frontend>/ (root path)</frontend>
+      <auth>/health</auth>
+    </health-endpoints>
+
+    <troubleshooting>
+      <issue name="Authentication Failed">
+        <solution>Ensure service account key exists and has correct permissions</solution>
+        <command>gcloud auth activate-service-account --key-file=gcp-staging-sa-key.json</command>
+      </issue>
+      
+      <issue name="Artifact Registry Not Found">
+        <solution>Run setup script to create resources</solution>
+        <command>.\setup-gcp-staging-resources.ps1</command>
+      </issue>
+      
+      <issue name="Health Check Failed">
+        <solution>Wait 2-3 minutes for services to start, then check logs</solution>
+        <command>gcloud logging read "resource.type=cloud_run_revision" --limit 50</command>
+      </issue>
+    </troubleshooting>
+  </gcp-staging>
+
+  <local-development>
+    <quick-commands>
+      <start>
+        <command>python scripts/dev_launcher.py</command>
+        <description>Start development environment</description>
+      </start>
+      
+      <test-default>
+        <command>python test_runner.py --level integration --no-coverage --fast-fail</command>
+        <description>Run default integration tests</description>
+      </test-default>
+      
+      <test-agents>
+        <command>python test_runner.py --level agents --real-llm</command>
+        <description>Test agents with real LLM (required for agent changes)</description>
+      </test-agents>
+    </quick-commands>
+  </local-development>
+
+  <github-actions>
+    <description>CI/CD deployment via GitHub Actions</description>
+    
+    <trigger-deployment>
+      <method>Push to staging or main branch</method>
+      <method>Manual workflow dispatch from GitHub Actions tab</method>
+    </trigger-deployment>
+    
+    <required-secrets>
+      <secret name="GCP_STAGING_SA_KEY">Service account JSON key for staging</secret>
+      <secret name="OPENAI_API_KEY">OpenAI API key</secret>
+      <secret name="ANTHROPIC_API_KEY">Anthropic API key</secret>
+      <secret name="GEMINI_API_KEY">Google Gemini API key</secret>
+    </required-secrets>
+  </github-actions>
+
+  <production>
+    <warning>Production deployment requires additional approvals and security checks</warning>
+    <documentation>See docs/PRODUCTION_DEPLOYMENT.md</documentation>
+  </production>
+
+  <rollback>
+    <quick-rollback>
+      <command>gcloud run services update-traffic SERVICE_NAME --to-revisions=PREVIOUS_REVISION=100</command>
+      <description>Rollback to previous Cloud Run revision</description>
+    </quick-rollback>
+  </rollback>
+
+  <monitoring>
+    <logs>
+      <command>gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=netra-backend" --limit 50</command>
+      <description>View backend logs</description>
+    </logs>
+    
+    <status>
+      <command>gcloud run services list --platform managed --region us-central1</command>
+      <description>List all deployed services</description>
+    </status>
+  </monitoring>
+
+  <claude-quick-reference>
+    <instruction>
+      When asked to "deploy to staging" or similar, use these commands:
+      1. First time: .\setup-gcp-staging-resources.ps1
+      2. Deploy: .\deploy-staging-automated.ps1
+      3. For issues, check docs/GCP_STAGING_DEPLOYMENT.md
+    </instruction>
+  </claude-quick-reference>
+</spec>

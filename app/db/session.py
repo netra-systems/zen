@@ -63,6 +63,7 @@ def _validate_session_factory():
         logger.error("async_session_factory is not initialized")
         raise RuntimeError("Database not configured")
 
+@asynccontextmanager
 async def _get_validated_session() -> AsyncIterator[AsyncSession]:
     """Get validated session for backward compatibility."""
     _validate_session_factory()

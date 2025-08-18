@@ -3,6 +3,18 @@
  * Tests environment validation, configuration loading, and dependency management
  */
 
+// JEST MODULE HOISTING - Global mocks BEFORE imports
+global.fetch = jest.fn();
+global.WebSocket = jest.fn(() => ({
+  send: jest.fn(),
+  close: jest.fn(),
+  addEventListener: jest.fn(),
+  removeEventListener: jest.fn(),
+  readyState: WebSocket.OPEN
+})) as any;
+
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Mock environment variables
@@ -114,9 +126,6 @@ describe('Frontend Startup - Environment', () => {
 
   describe('Dependency Loading', () => {
     it('should load required React dependencies', () => {
-      const React = require('react');
-      const { render, screen, waitFor } = require('@testing-library/react');
-      
       expect(React).toBeDefined();
       expect(React.version).toBeDefined();
       expect(render).toBeDefined();

@@ -357,7 +357,7 @@ if (-not $SkipHealthChecks) {
         }
     }
 } else {
-    Write-Host "[10/10] Skipping health checks (--SkipHealthChecks flag set)" -ForegroundColor Yellow
+    Write-Host "[10/10] Skipping health checks (SkipHealthChecks flag set)" -ForegroundColor Yellow
 }
 
 Write-Host ""

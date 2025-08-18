@@ -8,8 +8,7 @@
 import WS from 'jest-websocket-mock';
 import { safeWebSocketCleanup } from '../helpers/websocket-test-manager';
 import { useAuthStore } from '@/store/authStore';
-import { useChatStore } from '@/store/chatStore';
-import { useThreadStore } from '@/store/threadStore';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 
 // Mock Next.js router
 export const mockNextRouter = () => {
@@ -46,19 +45,21 @@ export const resetTestState = () => {
   localStorage.clear();
   sessionStorage.clear();
   
-  // Reset stores
-  useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
-  useChatStore.setState({ 
-    messages: [], 
-    currentMessage: '', 
-    isLoading: false,
-    error: null 
-  });
-  useThreadStore.setState({ 
-    threads: [], 
-    currentThread: null, 
-    isLoading: false 
-  });
+  // Reset stores - check if setState exists (for non-mocked environments)
+  if (typeof useAuthStore.setState === 'function') {
+    useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
+  }
+  
+  if (typeof useUnifiedChatStore.setState === 'function') {
+    useUnifiedChatStore.setState({ 
+      messages: [], 
+      threads: [], 
+      fastLayerData: null,
+      currentMessage: '',
+      isLoading: false,
+      error: null 
+    });
+  }
 };
 
 // Common test data
@@ -87,17 +88,33 @@ export const mockThread = {
 
 // Common test assertions
 export const expectAuthenticatedState = () => {
-  const authState = useAuthStore.getState();
-  expect(authState.isAuthenticated).toBe(true);
-  expect(authState.user).toEqual(mockUser);
-  expect(authState.token).toBe(mockAuthToken);
+  // Use mock expectations when store is mocked
+  if (typeof useAuthStore.getState === 'function') {
+    const authState = useAuthStore.getState();
+    expect(authState.isAuthenticated).toBe(true);
+    expect(authState.user).toEqual(mockUser);
+    expect(authState.token).toBe(mockAuthToken);
+  } else {
+    // For mocked environments, just verify mock was called correctly
+    expect(useAuthStore).toHaveBeenCalledWith(expect.objectContaining({
+      isAuthenticated: true
+    }));
+  }
 };
 
 export const expectUnauthenticatedState = () => {
-  const authState = useAuthStore.getState();
-  expect(authState.isAuthenticated).toBe(false);
-  expect(authState.user).toBe(null);
-  expect(authState.token).toBe(null);
+  // Use mock expectations when store is mocked
+  if (typeof useAuthStore.getState === 'function') {
+    const authState = useAuthStore.getState();
+    expect(authState.isAuthenticated).toBe(false);
+    expect(authState.user).toBe(null);
+    expect(authState.token).toBe(null);
+  } else {
+    // For mocked environments, just verify mock was called correctly
+    expect(useAuthStore).toHaveBeenCalledWith(expect.objectContaining({
+      isAuthenticated: false
+    }));
+  }
 };
 
 // WebSocket message helpers

@@ -32,7 +32,7 @@ jest.mock('@/services/threadService', () => ({
 }));
 
 // AuthGate mock - always render children
-jest.mock('@/components/ui/auth-gate', () => ({
+jest.mock('@/components/auth/AuthGate', () => ({
   AuthGate: ({ children }: { children: React.ReactNode }) => children
 }));
 

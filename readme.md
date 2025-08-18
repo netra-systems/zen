@@ -717,6 +717,29 @@ tests/
 
 ## 🚀 Deployment
 
+### GCP Staging Deployment (Recommended for Testing)
+
+```bash
+# One-time setup
+.\setup-gcp-staging-resources.ps1
+
+# Deploy to staging
+.\deploy-staging-automated.ps1
+
+# Fast deployment (skip health checks)
+.\deploy-staging-automated.ps1 -SkipHealthChecks
+
+# Deploy with resource pre-creation
+.\deploy-staging-automated.ps1 -PreCreateResources
+```
+
+**Features**:
+- Auto-scaling (0-10 instances)
+- Automatic API enablement
+- Environment-specific builds
+- Versioned deployments
+- See [Developer Deployment Guide](docs/DEVELOPER_DEPLOYMENT_GUIDE.md) for details
+
 ### Docker Deployment
 
 ```bash

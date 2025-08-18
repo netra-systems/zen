@@ -3,6 +3,38 @@
  * Tests for Environment, Error Boundary, Performance, Dependencies, and First-Time Run
  */
 
+// JEST MODULE HOISTING - Mocks BEFORE imports
+// Mock global fetch
+global.fetch = jest.fn();
+
+// Mock performance.memory
+Object.defineProperty(performance, 'memory', {
+  value: {
+    usedJSHeapSize: 1000000,
+    totalJSHeapSize: 2000000,
+    jsHeapSizeLimit: 4000000
+  },
+  writable: true
+});
+
+// Mock performance.mark and getEntriesByType
+performance.mark = jest.fn();
+performance.getEntriesByType = jest.fn(() => []);
+
+// Mock console methods
+const originalConsoleError = console.error;
+const originalConsoleLog = console.log;
+console.error = jest.fn();
+console.log = jest.fn();
+
+// Mock environment variables
+process.env.NEXT_PUBLIC_API_URL = 'http://localhost:8000';
+process.env.NEXT_PUBLIC_WS_URL = 'ws://localhost:8000';
+process.env.NODE_ENV = 'test';
+
+// Import global test setup
+import '../setup/startup-setup';
+
 import React from 'react';
 import { render } from '@testing-library/react';
 import { screen } from '@testing-library/react';
@@ -21,22 +53,22 @@ import {
 } from './helpers/startup-test-utilities';
 
 import {
-  initializeAllMocks,
   createErrorBoundary,
   createThrowErrorComponent,
   mockPerformanceAPI
 } from './helpers/startup-test-mocks';
 
-// Initialize all mocks
-initializeAllMocks();
-
 describe('Frontend System Startup - System Tests', () => {
   beforeEach(() => {
     setupTestEnvironment();
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
     cleanupTestEnvironment();
+    // Restore console methods
+    console.error = originalConsoleError;
+    console.log = originalConsoleLog;
   });
 
   describe('Environment Validation', () => {
@@ -224,7 +256,7 @@ describe('Frontend System Startup - System Tests', () => {
       const mockMetrics = createMockMetrics();
       const logSpy = jest.spyOn(console, 'log').mockImplementation();
       
-      // test debug removed: console.log('Startup metrics:', mockMetrics);
+      console.log('Startup metrics:', mockMetrics);
       
       expect(logSpy).toHaveBeenCalledWith('Startup metrics:', mockMetrics);
       logSpy.mockRestore();
