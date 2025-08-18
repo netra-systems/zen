@@ -44,7 +44,7 @@ SECRET_CONFIG: List[SecretReference] = [
 
 
 class RedisConfig(BaseModel):
-    host: str = 'redis-10504.fcrce190.us-east-1-1.ec2.redns.redis-cloud.com'
+    host: str = '________________________placeholder_redis_host________________________'
     port: int = 10504
     username: str = "default"
     password: Optional[str] = None

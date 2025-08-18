@@ -122,14 +122,11 @@ prioritizing the conversion of free users to paid tiers.
 
 ```
 root/
+├── agent_to_agent/           # Agent communication reports
+├── agent_to_agent_status_updates/ # Status update reports
 ├── app/                      # Main backend application
-│   ├── agents/              # AI agent implementations
-│   │   ├── admin_tool_dispatcher/   # Admin tool dispatch modules
-│   │   ├── corpus_admin/            # Corpus administration agents
-│   │   ├── data_sub_agent/          # Data processing sub-agents
-│   │   ├── supervisor/              # Supervisor agent modules
-│   │   ├── supply_researcher/       # Supply research agents
-│   │   └── triage_sub_agent/        # Triage sub-agent modules
+│   ├── agents/              # AI agent implementations (consolidated modules)
+│   ├── agent_to_agent/      # Agent-to-agent communication reports
 │   ├── auth/                # Authentication & authorization
 │   ├── auth_integration/    # SHARED AUTH SERVICE (MANDATORY USE)
 │   ├── core/                # Core utilities & exceptions
@@ -156,7 +153,11 @@ root/
 │   │   └── metrics/               # Metrics collection
 │   ├── startup_checks/      # Startup validation modules
 │   ├── tests/               # Backend test suite
+│   │   ├── auth_integration/      # Auth integration tests
+│   │   ├── config/                # Test configuration
+│   │   ├── critical/              # Critical path tests
 │   │   ├── e2e/                   # End-to-end tests
+│   │   ├── integration/           # Integration tests
 │   │   └── unit/                  # Unit tests
 │   ├── websocket/           # WebSocket management
 │   │   ├── connection.py          # Connection handling
@@ -193,15 +194,21 @@ root/
 │   └── comprehensive_reporter.py  # Test reporting (single source of truth)
 │
 ├── SPEC/                    # Specification documents
+│   ├── learnings/           # Modular learnings by category
+│   │   ├── index.xml              # Master index of learnings
+│   │   ├── testing.xml            # Testing-related learnings
+│   │   ├── startup.xml            # Startup and initialization
+│   │   ├── critical_tests_implementation.xml # Critical test insights
+│   │   └── *.xml                  # Category-specific learnings
 │   ├── type_safety.xml      # Type safety rules
 │   ├── conventions.xml      # Coding conventions
-│   ├── learnings.xml        # Documented learnings
 │   └── *.xml                # Other spec files
 │
 ├── docs/                    # Documentation
 │   ├── API_DOCUMENTATION.md
 │   ├── ARCHITECTURE.md
-│   └── TESTING_GUIDE.md
+│   ├── TESTING_GUIDE.md
+│   └── USER_GUIDE.md        # User guide documentation
 │
 ├── terraform-gcp/           # GCP infrastructure as code
 ├── terraform-dev-postgres/  # PostgreSQL dev setup
@@ -352,6 +359,7 @@ Ensures every feature directly creates and captures value proportional to a cust
 ### Critical Specs - ALWAYS CONSULT FIRST
 | Spec | Purpose | When |
 |------|---------|------|
+| [`learnings/index.xml`](SPEC/learnings/index.xml) | **#0 PRIORITY** - Master index of all learnings | ALWAYS check first |
 | [`type_safety.xml`](SPEC/type_safety.xml) | **#1 PRIORITY** - Type safety, duplicate-free | BEFORE any code |
 | [`conventions.xml`](SPEC/conventions.xml) | **#2 PRIORITY** - Standards, 300-line limit | BEFORE any code |
 | [`code_changes.xml`](SPEC/code_changes.xml) | **#3 PRIORITY** - Change checklist | BEFORE changes |
@@ -361,12 +369,14 @@ Ensures every feature directly creates and captures value proportional to a cust
 ### Domain Specs
 | Domain | Key Specs |
 |--------|-----------|
-| **Testing** | [`testing.xml`](SPEC/testing.xml), [`coverage_requirements.xml`](SPEC/coverage_requirements.xml) |
+| **Testing** | [`testing.xml`](SPEC/testing.xml), [`coverage_requirements.xml`](SPEC/coverage_requirements.xml), [`learnings/testing.xml`](SPEC/learnings/testing.xml) |
 | **Database** | [`clickhouse.xml`](SPEC/clickhouse.xml), [`postgres.xml`](SPEC/postgres.xml) |
 | **WebSocket** | [`websockets.xml`](SPEC/websockets.xml), [`websocket_communication.xml`](SPEC/websocket_communication.xml) |
 | **Security** | [`security.xml`](SPEC/security.xml), [`PRODUCTION_SECRETS_ISOLATION.xml`](SPEC/PRODUCTION_SECRETS_ISOLATION.xml) |
 | **GitHub Actions** | [`github_actions.xml`](SPEC/github_actions.xml) - **CRITICAL: Check permissions first!** |
-| **⚠️ LEARNINGS** | [`learnings/index.xml`](SPEC/learnings/index.xml) - **ALWAYS CHECK FIRST - Modular learnings by category** |
+| **⚠️ LEARNINGS** | [`learnings/`](SPEC/learnings/) - **Directory of modular learnings by category** |
+| **Startup** | [`learnings/startup.xml`](SPEC/learnings/startup.xml) - Startup and initialization insights |
+| **Critical Tests** | [`learnings/critical_tests_implementation.xml`](SPEC/learnings/critical_tests_implementation.xml) - Critical test patterns |
 
 ## ⚠️ CRITICAL RULES (Memorize These)
 

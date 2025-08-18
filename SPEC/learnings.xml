@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <specification>
     <metadata>
-        <name>Learnings and Troubleshooting</name>
+        <name>Learnings and Troubleshooting (LEGACY)</name>
         <type>reference</type>
         <version>1.0</version>
-        <last_updated>2025-08-16</last_updated>
-        <description>Historical learnings, troubleshooting patterns, and resolved issues</description>
+        <last_updated>2025-08-18</last_updated>
+        <description>IMPORTANT: This file is LEGACY. See SPEC/learnings/ directory for modular, categorized learnings</description>
+        <redirect>
+            <notice>⚠️ LEARNINGS HAVE BEEN MODULARIZED</notice>
+            <location>SPEC/learnings/</location>
+            <index>SPEC/learnings/index.xml</index>
+            <message>All new learnings should be added to appropriate category files in SPEC/learnings/</message>
+        </redirect>
     </metadata>
     
     <gcp-project-configuration>

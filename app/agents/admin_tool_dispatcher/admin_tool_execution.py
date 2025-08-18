@@ -8,17 +8,7 @@
 # Session: admin-tool-modernization | Seq: 1
 # Review: Complete | Score: 100
 # ================================
-"""
-Admin Tool Execution Engine - Modern Architecture
 
-Modernized admin tool execution using BaseExecutionInterface with:
-- Standardized execution patterns
-- Integrated reliability management (circuit breaker, retry)
-- Comprehensive monitoring and error handling
-- 300-line limit compliance with 8-line functions
-
-Business Value: Eliminates duplicate execution patterns, improves reliability.
-"""
 from typing import TYPE_CHECKING, Optional, Dict, Any
 from datetime import datetime, UTC
 

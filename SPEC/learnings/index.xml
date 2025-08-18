@@ -297,6 +297,20 @@
                 <id>llm-api-keys</id>
             </learning_ids>
         </category>
+        <category>
+            <name>Startup</name>
+            <file>learnings/startup.xml</file>
+            <path>SPEC/learnings/startup.xml</path>
+            <learning_count>5</learning_count>
+            <learning_ids>
+                <id>startup-clickhouse-port-configuration</id>
+                <id>startup-secrets-env-var-mapping</id>
+                <id>startup-redis-local-fallback</id>
+                <id>startup-app-state-initialization</id>
+                <id>startup-comprehensive-fix-process</id>
+            </learning_ids>
+            <important_note>CRITICAL: Startup errors often cascade - fix configuration first, then secrets, then connections</important_note>
+        </category>
     </categories>
     
     <usage>
@@ -307,7 +321,7 @@
     </usage>
     
     <statistics>
-        <total_categories>19</total_categories>
-        <total_learnings>75</total_learnings>
+        <total_categories>20</total_categories>
+        <total_learnings>80</total_learnings>
     </statistics>
 </specification>

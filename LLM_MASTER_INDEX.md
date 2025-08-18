@@ -22,7 +22,7 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 |------|----------|---------|---------------|
 | `clickhouse.py` | `/app/db/clickhouse.py` | ClickHouse connection | get_clickhouse_client() |
 | `postgres.py` | `/app/db/postgres.py` | PostgreSQL connection | get_postgres_db() |
-| `clickhouse_operations.py` | `/app/agents/data_sub_agent/clickhouse_operations.py` | ClickHouse data operations | Agent-specific queries |
+| `clickhouse_operations.py` | `/app/agents/` | ClickHouse data operations | Agent-specific queries |
 | `models_auth.py` | `/app/db/models_auth.py` | Auth database models | User, Team, Session |
 | `models_corpus.py` | `/app/db/models_corpus.py` | Corpus database models | CorpusData, CorpusEntry |
 | `models_metrics.py` | `/app/db/models_metrics.py` | Metrics database models | MetricsData |
