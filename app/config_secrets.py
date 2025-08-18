@@ -73,10 +73,6 @@ def get_database_mappings() -> Dict[str, Dict[str, Any]]:
             "targets": ["clickhouse_native", "clickhouse_https"],
             "field": "password"
         },
-        "clickhouse-development-password": {
-            "targets": ["clickhouse_https_dev"],
-            "field": "password"
-        },
         "redis-default": {
             "targets": ["redis"],
             "field": "password"
