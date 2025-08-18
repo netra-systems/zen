@@ -190,6 +190,10 @@ class AlertEngine:
         trend: Optional[ErrorTrend]
     ) -> bool:
         """Safely evaluate rule condition with error handling."""
+        return self._execute_condition_evaluation(rule, pattern, trend)
+    
+    def _execute_condition_evaluation(self, rule: AlertRule, pattern: ErrorPattern, trend: Optional[ErrorTrend]) -> bool:
+        """Execute condition evaluation with error handling."""
         try:
             context = self._build_evaluation_context(rule, pattern, trend)
             return eval(rule.condition, {'__builtins__': {}}, context)
@@ -248,13 +252,15 @@ class AlertEngine:
         message: str
     ) -> ErrorAlert:
         """Build ErrorAlert object with provided components."""
-        return ErrorAlert(
-            alert_id=alert_id,
-            rule=rule,
-            pattern=pattern,
-            trend=trend,
-            message=message
-        )
+        alert_params = self._prepare_alert_params(alert_id, rule, pattern, trend, message)
+        return ErrorAlert(**alert_params)
+    
+    def _prepare_alert_params(self, alert_id: str, rule: AlertRule, pattern: ErrorPattern, trend: Optional[ErrorTrend], message: str) -> Dict[str, Any]:
+        """Prepare parameters for ErrorAlert creation."""
+        return {
+            'alert_id': alert_id, 'rule': rule, 'pattern': pattern,
+            'trend': trend, 'message': message
+        }
     
     def _generate_alert_message(
         self,
