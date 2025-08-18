@@ -58,9 +58,10 @@ export interface GoogleUser {
 export interface AuthEndpoints {
   login: string;
   logout: string;
+  callback: string;
   token: string;
   user: string;
-  dev_login: string;
+  dev_login?: string;
 }
 
 export interface AuthConfigResponse {

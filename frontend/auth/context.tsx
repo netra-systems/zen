@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authStore.login({
         id: userData.id || (userData as any).sub || '',
         email: userData.email,
-        name: userData.full_name || (userData as any).name,
+        full_name: userData.full_name || (userData as any).name,
         role: (userData as any).role
       }, tokenData);
     } else {
@@ -109,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           callback: '/auth/callback',
           token: '/auth/token',
           user: '/auth/me',
-          dev_login: process.env.NODE_ENV === 'development' ? '/auth/dev_login' : undefined
+          ...(process.env.NODE_ENV === 'development' && { dev_login: '/auth/dev_login' })
         },
         authorized_javascript_origins: ['http://localhost:3000'],
         authorized_redirect_uris: ['http://localhost:3000/auth/callback']

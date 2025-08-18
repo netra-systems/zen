@@ -7,6 +7,7 @@ import sys
 import time
 import logging
 from typing import Optional
+from pathlib import Path
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.environment_checker import EnvironmentChecker
@@ -37,6 +38,7 @@ class DevLauncher:
         """Initialize the development launcher."""
         self.config = config
         self.use_emoji = check_emoji_support()
+        self._load_env_file()  # Load .env file first
         self._setup_managers()
         self._setup_components()
         self._setup_helpers()
@@ -75,6 +77,21 @@ class DevLauncher:
         return ServiceStartupCoordinator(
             self.config, self.config_manager.services_config,
             self.log_manager, self.service_discovery, self.use_emoji)
+    
+    def _load_env_file(self):
+        """Load .env file into os.environ."""
+        env_file = self.config.project_root / ".env"
+        if env_file.exists():
+            with open(env_file, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        key = key.strip()
+                        value = value.strip('"\'').strip()
+                        # Only set if not already in environment
+                        if key not in os.environ:
+                            os.environ[key] = value
     
     def _setup_logging(self):
         """Setup logging and show verbose configuration."""

@@ -257,9 +257,20 @@ class TriageLLMProcessor:
         """Validate JSON or return raw data."""
         try:
             from .models import TriageResult
+            # Ensure metadata exists and has required fields
+            if "metadata" not in extracted_json or extracted_json["metadata"] is None:
+                extracted_json["metadata"] = self._create_fallback_metadata()
+            elif "triage_duration_ms" not in extracted_json["metadata"]:
+                extracted_json["metadata"]["triage_duration_ms"] = 0
+                
             validated_result = TriageResult(**extracted_json)
             return validated_result.model_dump()
         except ValidationError:
+            # Ensure raw JSON has proper metadata structure for later use
+            if "metadata" not in extracted_json or extracted_json["metadata"] is None:
+                extracted_json["metadata"] = self._create_fallback_metadata()
+            elif "triage_duration_ms" not in extracted_json["metadata"]:
+                extracted_json["metadata"]["triage_duration_ms"] = 0
             return extracted_json
     
     def _create_basic_triage_fallback(self) -> dict:
@@ -278,8 +289,11 @@ class TriageLLMProcessor:
     def _create_fallback_metadata(self) -> dict:
         """Create fallback metadata."""
         return {
+            "triage_duration_ms": 0,
             "fallback_used": True,
-            "fallback_type": "basic_triage"
+            "fallback_type": "basic_triage",
+            "cache_hit": False,
+            "retry_count": 0
         }
     
     def _add_metadata(self, triage_result: dict, start_time: float, retry_count: int) -> dict:

@@ -175,29 +175,6 @@ export type {
 export type RegisteredTypeName = keyof typeof TYPE_REGISTRY;
 
 // ============================================================================
-// DEFAULT EXPORT - Consolidated utilities for convenience
+// NO DEFAULT EXPORT - Prevents module initialization issues
+// All exports are available as named exports above
 // ============================================================================
-
-export default {
-  // Core enums
-  MessageType,
-  AgentStatus,
-  WebSocketMessageType,
-  
-  // Validation functions
-  isValidMessageType,
-  isValidAgentStatus,
-  isValidWebSocketMessageType,
-  
-  // WebSocket utilities
-  createWebSocketError,
-  createWebSocketMessage,
-  isWebSocketMessage,
-  isAgentStartedMessage,
-  isAgentCompletedMessage,
-  isSubAgentUpdateMessage,
-  isToolCallMessage,
-  isErrorMessage,
-  isUserMessagePayload,
-  isAgentUpdateMessage
-};

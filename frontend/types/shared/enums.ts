@@ -207,26 +207,6 @@ export const ENUM_REGISTRY = {
 export type RegisteredEnumName = keyof typeof ENUM_REGISTRY;
 
 // ============================================================================
-// DEFAULT EXPORT - All enums and utilities
+// NO DEFAULT EXPORT - Prevents module initialization issues
+// All exports are available as named exports above
 // ============================================================================
-
-export default {
-  // Enums
-  MessageType,
-  AgentStatus,
-  WebSocketMessageType,
-  
-  // Validation functions
-  isValidMessageType,
-  isValidAgentStatus,
-  isValidWebSocketMessageType,
-  
-  // Utility functions
-  getMessageTypeValues,
-  getAgentStatusValues,
-  getWebSocketMessageTypeValues,
-  getEnumKey,
-  
-  // Registry
-  ENUM_REGISTRY
-};

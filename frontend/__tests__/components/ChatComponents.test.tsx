@@ -126,11 +126,12 @@ jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
   }),
 }));
 
+const mockHandleSend = jest.fn().mockResolvedValue(undefined);
 jest.mock('@/components/chat/hooks/useMessageSending', () => ({
-  useMessageSending: () => ({
+  useMessageSending: jest.fn(() => ({
     isSending: false,
-    handleSend: jest.fn().mockResolvedValue(undefined),
-  }),
+    handleSend: mockHandleSend,
+  })),
 }));
 
 // Mock MessageInput components
@@ -213,13 +214,8 @@ describe('test_MessageInput_validation', () => {
   }, 10000);
 
   it('should handle text input and sending', async () => {
-    const mockHandleSend = jest.fn().mockResolvedValue(undefined);
-    
-    // Override the mock for this test
-    (require('@/components/chat/hooks/useMessageSending').useMessageSending as jest.Mock).mockReturnValue({
-      isSending: false,
-      handleSend: mockHandleSend,
-    });
+    // Clear previous calls
+    mockHandleSend.mockClear();
     
     await act(async () => {
       render(<MessageInput />);
@@ -257,19 +253,21 @@ describe('test_MessageInput_validation', () => {
     expect(input.value).toBe('');
   });
 
-  it('should prevent empty message submission', () => {
-    const mockSendMessage = jest.fn();
-    (require('@/hooks/useWebSocket').useWebSocket as jest.Mock).mockReturnValue({
-      sendMessage: mockSendMessage,
+  it('should prevent empty message submission', async () => {
+    // Clear previous calls
+    mockHandleSend.mockClear();
+    
+    await act(async () => {
+      render(<MessageInput />);
     });
     
-    render(<MessageInput />);
-    
     const sendButton = screen.getByRole('button', { name: /send/i });
-    fireEvent.click(sendButton);
+    await act(async () => {
+      fireEvent.click(sendButton);
+    });
     
     // Should not send empty message
-    expect(mockSendMessage).not.toHaveBeenCalled();
+    expect(mockHandleSend).not.toHaveBeenCalled();
   });
 });
 
