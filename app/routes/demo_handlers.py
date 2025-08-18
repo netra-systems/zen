@@ -140,8 +140,12 @@ def _generate_metrics_from_service(scenario, duration_hours, demo_service):
     return generate_metrics_from_service(scenario, duration_hours, demo_service)
 
 
-def _build_demo_metrics_response(metrics):
+async def _build_demo_metrics_response(metrics):
     """Legacy alias."""
+    # The actual function is async, so we need to await it
+    import asyncio
+    if asyncio.iscoroutinefunction(build_demo_metrics_response):
+        return await build_demo_metrics_response(metrics)
     return build_demo_metrics_response(metrics)
 
 

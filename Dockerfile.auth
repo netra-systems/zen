@@ -43,6 +43,8 @@ COPY app/routes/__init__.py ./app/routes/
 COPY app/schemas/ ./app/schemas/
 COPY app/services/security_service.py ./app/services/
 COPY app/services/user_service.py ./app/services/
+COPY app/services/key_manager.py ./app/services/
+COPY app/services/base.py ./app/services/
 COPY auth_service/services_init.py ./app/services/__init__.py
 
 # Set environment variables
