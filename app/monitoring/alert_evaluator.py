@@ -127,10 +127,15 @@ class AlertEvaluator:
         self, alert_id: str, rule: AlertRule, current_value: Optional[float], agent_name: Optional[str]
     ) -> Alert:
         """Build alert instance with all required fields."""
+        alert_fields = self._gather_alert_fields(alert_id, rule, current_value, agent_name)
+        return Alert(**alert_fields)
+
+    def _gather_alert_fields(self, alert_id: str, rule: AlertRule, current_value: Optional[float], agent_name: Optional[str]) -> Dict[str, Any]:
+        """Gather all alert fields from different sources."""
         basic_fields = self._get_alert_basic_fields(alert_id, rule, agent_name)
         metric_fields = self._get_alert_metric_fields(rule, current_value)
         message_fields = self._get_alert_message_fields(rule, current_value, agent_name)
-        return Alert(**{**basic_fields, **metric_fields, **message_fields})
+        return {**basic_fields, **metric_fields, **message_fields}
 
     def _get_alert_basic_fields(self, alert_id: str, rule: AlertRule, agent_name: Optional[str]) -> Dict[str, Any]:
         """Get basic alert fields."""
@@ -168,6 +173,10 @@ class AlertEvaluator:
     def _extract_agent_alert_values(self, rule: AlertRule, metrics_data: Dict[str, Any]) -> tuple:
         """Extract alert values for agent-specific rules."""
         agent_metrics = metrics_data.get("agent_metrics", {})
+        return self._find_matching_agent_values(rule, agent_metrics)
+
+    def _find_matching_agent_values(self, rule: AlertRule, agent_metrics: Dict[str, Any]) -> tuple:
+        """Find agent with values matching rule condition."""
         for agent_name, metrics in agent_metrics.items():
             if self._check_agent_against_rule(rule, metrics, rule.threshold_value):
                 value = self._get_metric_value_for_rule(rule.rule_id, metrics)
