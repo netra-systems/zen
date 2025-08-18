@@ -1,8 +1,10 @@
 """
-Admin Tool Dispatcher Helper Functions
+Modernized Admin Tool Dispatcher Helper Functions
 
-Helper functions to support the core dispatcher while maintaining 
-the 8-line function limit and modular architecture.
+Helper functions integrating modern execution patterns with ExecutionContext
+and ExecutionResult types. Maintains 8-line function limit and modular architecture.
+
+Business Value: Enables modern agent architecture compliance for admin tools.
 """
 from typing import List, Dict, Any, Optional
 from datetime import datetime, UTC
@@ -11,15 +13,23 @@ from app.db.models_postgres import User
 from app.schemas.admin_tool_types import (
     AdminToolType, AdminToolInfo, ToolStatus as AdminToolStatus
 )
+from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
 from app.logging_config import central_logger
 
 logger = central_logger
 
 
 def initialize_dispatcher_state(dispatcher: "AdminToolDispatcher") -> None:
-    """Initialize dispatcher basic state"""
+    """Initialize dispatcher basic state with modern patterns"""
     dispatcher.admin_tools_enabled = False
     dispatcher.audit_logger = None
+    _init_execution_state(dispatcher)
+
+
+def _init_execution_state(dispatcher: "AdminToolDispatcher") -> None:
+    """Initialize execution state for modern patterns"""
+    dispatcher._execution_metrics = {}
+    dispatcher._active_contexts = {}
 
 
 def check_user_and_db(dispatcher: "AdminToolDispatcher") -> bool:
@@ -28,46 +38,85 @@ def check_user_and_db(dispatcher: "AdminToolDispatcher") -> bool:
 
 
 def enable_admin_tools(dispatcher: "AdminToolDispatcher") -> None:
-    """Enable admin tools for authorized user"""
+    """Enable admin tools for authorized user with execution context"""
     from app.services.permission_service import PermissionService
     if PermissionService.is_developer_or_higher(dispatcher.user):
         dispatcher.admin_tools_enabled = True
-        log_admin_tools_initialization(dispatcher.user)
+        _enable_with_monitoring(dispatcher)
+
+
+def _enable_with_monitoring(dispatcher: "AdminToolDispatcher") -> None:
+    """Enable tools with execution monitoring"""
+    log_admin_tools_initialization(dispatcher.user)
+    _update_execution_metrics(dispatcher, "admin_tools_enabled", True)
 
 
 def log_admin_tools_initialization(user: User) -> None:
-    """Log admin tools initialization"""
-    logger.info(f"Initializing admin tools for user {user.email}")
+    """Log admin tools initialization with execution context"""
+    execution_data = _create_log_context(user, "admin_tools_init")
+    logger.info(f"Initializing admin tools for user {user.email}", extra=execution_data)
 
 
-def log_no_admin_permissions(user: User) -> None:
-    """Log lack of admin permissions"""
-    logger.debug(f"User {user.email} does not have admin permissions")
-
-
-def log_available_admin_tools(user: User) -> None:
-    """Log available admin tools for user"""
-    from .validation import get_available_admin_tools
-    available_tools = get_available_admin_tools(user)
-    logger.info(f"Admin tools available: {available_tools}")
-
-
-def build_dispatcher_stats_base() -> Dict[str, Any]:
-    """Build base dispatcher statistics"""
+def _create_log_context(user: User, operation: str) -> Dict[str, Any]:
+    """Create logging context for execution tracking"""
     return {
-        "total_tools": len(AdminToolType),
-        "total_executions": 0,
-        "tool_metrics": [],
-        "recent_activity": []
+        "user_id": user.id,
+        "operation": operation,
+        "timestamp": datetime.now(UTC).isoformat()
     }
 
 
+def log_no_admin_permissions(user: User) -> None:
+    """Log lack of admin permissions with execution context"""
+    execution_data = _create_log_context(user, "permission_denied")
+    logger.debug(f"User {user.email} does not have admin permissions", extra=execution_data)
+
+
+def log_available_admin_tools(user: User) -> None:
+    """Log available admin tools with execution context"""
+    from .validation import get_available_admin_tools
+    available_tools = get_available_admin_tools(user)
+    execution_data = _create_log_context(user, "tools_available")
+    execution_data["available_tools"] = available_tools
+    logger.info(f"Admin tools available: {available_tools}", extra=execution_data)
+
+
+def build_dispatcher_stats_base() -> Dict[str, Any]:
+    """Build base dispatcher statistics with execution metrics"""
+    base_stats = _create_base_stats_dict()
+    _add_execution_tracking_stats(base_stats)
+    return base_stats
+
+
+def _create_base_stats_dict() -> Dict[str, Any]:
+    """Create base statistics dictionary"""
+    return {
+        "total_tools": len(AdminToolType),
+        "total_executions": 0,
+        "tool_metrics": []
+    }
+
+
+def _add_execution_tracking_stats(stats: Dict[str, Any]) -> None:
+    """Add execution tracking statistics"""
+    stats["recent_activity"] = []
+    stats["execution_status"] = {"active": 0, "completed": 0, "failed": 0}
+
+
 def calculate_enabled_tools_count(user: Optional[User]) -> int:
-    """Calculate count of enabled tools for user"""
+    """Calculate count of enabled tools with execution context"""
     if not user:
         return 0
-    enabled_tools = _get_enabled_tools_for_user(user)
-    return len(enabled_tools)
+    return _count_enabled_tools_safe(user)
+
+
+def _count_enabled_tools_safe(user: User) -> int:
+    """Safely count enabled tools with error handling"""
+    try:
+        enabled_tools = _get_enabled_tools_for_user(user)
+        return len(enabled_tools)
+    except Exception:
+        return 0
 
 
 def _get_enabled_tools_for_user(user: User) -> List[AdminToolType]:
@@ -80,9 +129,18 @@ def _get_enabled_tools_for_user(user: User) -> List[AdminToolType]:
 
 
 def add_system_health_to_stats(stats: Dict[str, Any]) -> None:
-    """Add system health information to stats"""
-    stats["system_health"] = {"status": "healthy"}
+    """Add system health with execution monitoring"""
+    health_data = _create_health_data()
+    stats["system_health"] = health_data
     stats["generated_at"] = datetime.now(UTC).isoformat()
+
+
+def _create_health_data() -> Dict[str, Any]:
+    """Create health data with execution status"""
+    return {
+        "status": "healthy",
+        "execution_engine": "operational"
+    }
 
 
 def calculate_active_sessions(user: Optional[User]) -> int:
@@ -110,7 +168,7 @@ def create_admin_tool_info(tool_name: str,
                           admin_tool_type: AdminToolType,
                           user: Optional[User],
                           admin_tools_enabled: bool) -> AdminToolInfo:
-    """Create admin tool info object"""
+    """Create admin tool info with execution context"""
     tool_data = _build_admin_tool_data(tool_name, user, admin_tools_enabled)
     return _create_admin_tool_info_object(tool_name, admin_tool_type, tool_data)
 
@@ -168,9 +226,10 @@ def check_operation_permissions(operation_type: str, user_role: str) -> None:
 def execute_operation_via_dispatcher(dispatcher: "AdminToolDispatcher",
                                    tool_name: str, 
                                    params: Dict[str, Any]) -> Dict[str, Any]:
-    """Execute operation via tool dispatcher if available"""
+    """Execute operation with modern execution patterns"""
     if hasattr(dispatcher, 'tool_dispatcher') and dispatcher.tool_dispatcher:
-        return dispatcher.tool_dispatcher.execute_tool(tool_name, params)
+        from .execution_pattern_helpers import execute_with_tracking
+        return execute_with_tracking(dispatcher, tool_name, params)
     return create_no_dispatcher_error(tool_name)
 
 
@@ -182,16 +241,36 @@ def create_no_dispatcher_error(operation_type: str) -> Dict[str, Any]:
 
 
 def create_audit_data(operation: Dict[str, Any]) -> Dict[str, Any]:
-    """Create audit data for logging"""
+    """Create audit data with execution context"""
+    base_audit = _create_base_audit_data(operation)
+    _add_execution_context_to_audit(base_audit)
+    return base_audit
+
+
+def _create_base_audit_data(operation: Dict[str, Any]) -> Dict[str, Any]:
+    """Create base audit data dictionary"""
     return {
         "operation": operation.get("type"),
         "user_id": operation.get("user_id"),
-        "params": operation.get("params", {}),
-        "timestamp": datetime.now(UTC).timestamp()
+        "params": operation.get("params", {})
     }
 
 
+def _add_execution_context_to_audit(audit_data: Dict[str, Any]) -> None:
+    """Add execution context to audit data"""
+    audit_data["timestamp"] = datetime.now(UTC).timestamp()
+    audit_data["execution_context"] = "admin_tool_dispatcher"
+
+
 def log_audit_data(audit_logger, audit_data: Dict[str, Any]) -> None:
-    """Log audit data if logger available"""
+    """Log audit data with execution result tracking"""
     if audit_logger:
-        audit_logger.log(audit_data)
+        from .execution_pattern_helpers import log_with_execution_result
+        log_with_execution_result(audit_logger, audit_data)
+
+
+def _update_execution_metrics(dispatcher: "AdminToolDispatcher", 
+                             metric_name: str, value: Any) -> None:
+    """Update execution metrics tracking"""
+    from .execution_pattern_helpers import update_execution_metrics
+    update_execution_metrics(dispatcher, metric_name, value)

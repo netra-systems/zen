@@ -9,16 +9,27 @@
 # Review: Pending | Score: 85
 # ================================
 import json
+from typing import Dict, Any, Optional
+from datetime import datetime
 
 from app.llm.llm_manager import LLMManager
 from app.agents.base import BaseSubAgent
+from app.agents.base.interface import (
+    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
+    WebSocketManagerProtocol
+)
+from app.agents.base.reliability_manager import ReliabilityManager
+from app.agents.base.monitoring import ExecutionMonitor
+from app.agents.base.errors import ExecutionErrorHandler
+from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from app.schemas.shared_types import RetryConfig
 from app.agents.prompts import reporting_prompt_template
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.agents.state import DeepAgentState
 from app.agents.utils import extract_json_from_response
 from app.logging_config import central_logger as logger
 from app.core.reliability import (
-    get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
+    get_reliability_wrapper, CircuitBreakerConfig as LegacyCircuitConfig, RetryConfig as LegacyRetryConfig
 )
 from app.agents.input_validation import validate_agent_input
 from app.llm.observability import (
@@ -27,28 +38,67 @@ from app.llm.observability import (
 )
 
 
-class ReportingSubAgent(BaseSubAgent):
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
-        super().__init__(llm_manager, name="ReportingSubAgent", description="This agent generates a final report.")
+class ReportingSubAgent(BaseSubAgent, BaseExecutionInterface):
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
+                 websocket_manager: Optional[WebSocketManagerProtocol] = None):
+        BaseSubAgent.__init__(self, llm_manager, name="ReportingSubAgent", description="This agent generates a final report.")
+        BaseExecutionInterface.__init__(self, "ReportingSubAgent", websocket_manager)
         self.tool_dispatcher = tool_dispatcher
         self.reliability = self._initialize_reliability_wrapper()
+        self._initialize_modern_components()
     
     def _initialize_reliability_wrapper(self):
         """Initialize reliability wrapper with circuit breaker and retry configs."""
-        circuit_config = self._create_circuit_breaker_config()
-        retry_config = self._create_retry_config()
+        circuit_config = self._create_legacy_circuit_breaker_config()
+        retry_config = self._create_legacy_retry_config()
         return get_reliability_wrapper("ReportingSubAgent", circuit_config, retry_config)
     
-    def _create_circuit_breaker_config(self) -> CircuitBreakerConfig:
-        """Create circuit breaker configuration."""
-        return CircuitBreakerConfig(
+    def _initialize_modern_components(self) -> None:
+        """Initialize modern execution components."""
+        self._init_reliability_manager()
+        self._init_monitoring()
+        self._init_error_handler()
+    
+    def _init_reliability_manager(self) -> None:
+        """Initialize modern reliability manager."""
+        circuit_config = self._create_modern_circuit_config()
+        retry_config = self._create_modern_retry_config()
+        self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
+    
+    def _init_monitoring(self) -> None:
+        """Initialize execution monitoring."""
+        self.execution_monitor = ExecutionMonitor()
+    
+    def _init_error_handler(self) -> None:
+        """Initialize modern error handling."""
+        self.error_handler = ExecutionErrorHandler()
+    
+    def _create_legacy_circuit_breaker_config(self) -> LegacyCircuitConfig:
+        """Create legacy circuit breaker configuration."""
+        return LegacyCircuitConfig(
             failure_threshold=3,
             recovery_timeout=30.0,
             name="ReportingSubAgent"
         )
     
-    def _create_retry_config(self) -> RetryConfig:
-        """Create retry configuration."""
+    def _create_modern_circuit_config(self) -> CircuitBreakerConfig:
+        """Create modern circuit breaker configuration."""
+        return CircuitBreakerConfig(
+            name="ReportingSubAgent_Modern",
+            failure_threshold=3,
+            recovery_timeout=30
+        )
+    
+    def _create_legacy_retry_config(self) -> LegacyRetryConfig:
+        """Create legacy retry configuration."""
+        return LegacyRetryConfig(
+            max_retries=2,
+            base_delay=1.0,
+            max_delay=10.0
+        )
+    
+    def _create_modern_retry_config(self) -> RetryConfig:
+        """Create modern retry configuration."""
         return RetryConfig(
             max_retries=2,
             base_delay=1.0,
@@ -200,8 +250,18 @@ class ReportingSubAgent(BaseSubAgent):
             })
 
     def get_health_status(self) -> dict:
-        """Get agent health status"""
-        return self.reliability.get_health_status()
+        """Get comprehensive agent health status"""
+        legacy_health = self.reliability.get_health_status()
+        modern_health = self._get_modern_health_status()
+        return {**legacy_health, "modern_components": modern_health}
+    
+    def _get_modern_health_status(self) -> Dict[str, Any]:
+        """Get modern component health status."""
+        return {
+            "reliability_manager": self.reliability_manager.get_health_status(),
+            "execution_monitor": self.execution_monitor.get_health_status(),
+            "error_handler": self.error_handler.get_health_status()
+        }
     
     def get_circuit_breaker_status(self) -> dict:
         """Get circuit breaker status"""
@@ -215,4 +275,109 @@ class ReportingSubAgent(BaseSubAgent):
             content=data.get("report", "No content available"),
             sections=data.get("sections", []),
             metadata=data.get("metadata", {})
+        )
+    
+    # BaseExecutionInterface implementation
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate execution preconditions for reporting."""
+        return self._validate_state_has_results(context.state)
+    
+    def _validate_state_has_results(self, state: DeepAgentState) -> bool:
+        """Check if state has all required analysis results."""
+        required_results = [state.action_plan_result, state.optimizations_result, 
+                          state.data_result, state.triage_result]
+        return all(result is not None for result in required_results)
+    
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute core reporting logic with modern patterns."""
+        await self.send_status_update(context, "processing", 
+                                    "Generating final report with all analysis results...")
+        
+        prompt = self._build_reporting_prompt(context.state)
+        correlation_id = generate_llm_correlation_id()
+        
+        llm_response_str = await self._execute_reporting_llm_with_observability(
+            prompt, correlation_id)
+        return await self._process_reporting_response_modern(llm_response_str, context)
+    
+    async def _process_reporting_response_modern(self, llm_response_str: str, 
+                                               context: ExecutionContext) -> Dict[str, Any]:
+        """Process LLM response with modern context handling."""
+        report_result = self._extract_and_validate_report(llm_response_str, context.run_id)
+        context.state.report_result = self._create_report_result(report_result)
+        
+        await self.send_status_update(context, "processed", 
+                                    "Final report generated successfully")
+        return report_result
+    
+    async def execute_modern(self, state: DeepAgentState, run_id: str, 
+                           stream_updates: bool = False) -> ExecutionResult:
+        """Modern execute method using BaseExecutionInterface pattern."""
+        context = self._create_execution_context(state, run_id, stream_updates)
+        
+        try:
+            return await self._execute_with_reliability(context)
+        except Exception as e:
+            return await self.error_handler.handle_execution_error(e, context)
+    
+    def _create_execution_context(self, state: DeepAgentState, run_id: str, 
+                                stream_updates: bool) -> ExecutionContext:
+        """Create execution context for modern interface."""
+        return ExecutionContext(
+            run_id=run_id,
+            agent_name=self.agent_name,
+            state=state,
+            stream_updates=stream_updates,
+            start_time=datetime.utcnow(),
+            correlation_id=generate_llm_correlation_id()
+        )
+    
+    async def _execute_with_reliability(self, context: ExecutionContext) -> ExecutionResult:
+        """Execute with reliability manager patterns."""
+        if not await self.validate_preconditions(context):
+            error_msg = "Missing required analysis results for reporting"
+            return self._create_precondition_error_result(error_msg)
+        
+        return await self.reliability_manager.execute_with_reliability(
+            context, self._core_execution_wrapper
+        )
+    
+    def _create_precondition_error_result(self, error_msg: str) -> ExecutionResult:
+        """Create error result for precondition failures."""
+        return ExecutionResult(
+            success=False,
+            status=ExecutionStatus.FAILED,
+            error=error_msg,
+            execution_time_ms=0.0
+        )
+    
+    async def _core_execution_wrapper(self, context: ExecutionContext) -> ExecutionResult:
+        """Wrapper for core execution logic."""
+        start_time = datetime.utcnow()
+        try:
+            result = await self.execute_core_logic(context)
+            execution_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+            return self._create_success_execution_result(result, execution_time)
+        except Exception as e:
+            execution_time = (datetime.utcnow() - start_time).total_seconds() * 1000
+            return self._create_error_execution_result(str(e), execution_time)
+    
+    def _create_success_execution_result(self, result: Dict[str, Any], 
+                                       execution_time_ms: float) -> ExecutionResult:
+        """Create successful execution result."""
+        return ExecutionResult(
+            success=True,
+            status=ExecutionStatus.COMPLETED,
+            result=result,
+            execution_time_ms=execution_time_ms
+        )
+    
+    def _create_error_execution_result(self, error: str, 
+                                     execution_time_ms: float) -> ExecutionResult:
+        """Create error execution result."""
+        return ExecutionResult(
+            success=False,
+            status=ExecutionStatus.FAILED,
+            error=error,
+            execution_time_ms=execution_time_ms
         )

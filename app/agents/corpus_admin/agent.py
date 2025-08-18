@@ -3,7 +3,7 @@ Modernized Corpus Admin Agent with BaseExecutionInterface pattern (<300 lines).
 
 Business Value: Standardized execution patterns for corpus administration,
 improved reliability, and comprehensive monitoring.
-"
+"""
 
 import time
 from typing import Dict, Any, Optional, TYPE_CHECKING
@@ -298,4 +298,3 @@ class CorpusAdminSubAgent(BaseExecutionInterface, BaseSubAgent):
         corpus_keywords = ["corpus", "knowledge base", "documentation", "reference data", "embeddings"]
         request_lower = state.user_request.lower()
         return any(keyword in request_lower for keyword in corpus_keywords)
-    

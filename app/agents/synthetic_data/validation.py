@@ -5,7 +5,6 @@ Handles entry condition checks and request validation
 for synthetic data sub-agent operations.
 """
 
-from typing import bool
 from app.agents.state import DeepAgentState
 from app.logging_config import central_logger
 

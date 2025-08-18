@@ -240,96 +240,6 @@ class QueryBuilder(BaseExecutionInterface):
         )
     
     @staticmethod
-    def _get_time_function(aggregation_level: str) -> str:
-        """Get ClickHouse time function for aggregation level."""
-        time_functions = {
-            "second": "toStartOfSecond", "minute": "toStartOfMinute",
-            "hour": "toStartOfHour", "day": "toStartOfDay"
-        }
-        return time_functions.get(aggregation_level, "toStartOfMinute")
-    
-    @staticmethod
-    def _build_workload_filter(workload_id: Optional[str]) -> str:
-        """Build workload filter clause."""
-        return f"AND workload_id = '{workload_id}'" if workload_id else ""
-    
-    @staticmethod
-    def _build_performance_select_clause(time_function: str) -> str:
-        """Build SELECT clause for performance metrics."""
-        basic_fields = f"{time_function}(timestamp) as time_bucket, count() as event_count"
-        latency_fields = QueryBuilder._build_latency_fields()
-        throughput_fields = QueryBuilder._build_throughput_fields()
-        cost_fields = QueryBuilder._build_cost_fields()
-        return f"SELECT {basic_fields}, {latency_fields}, {throughput_fields}, {cost_fields}, uniqExact(workload_id) as unique_workloads"
-    
-    @staticmethod
-    def _build_latency_fields() -> str:
-        """Build latency-related fields for SELECT clause."""
-        return ("quantileIf(0.5, toFloat64(metric_value), has_latency) as latency_p50, "
-                "quantileIf(0.95, toFloat64(metric_value), has_latency) as latency_p95, "
-                "quantileIf(0.99, toFloat64(metric_value), has_latency) as latency_p99")
-    
-    @staticmethod
-    def _build_throughput_fields() -> str:
-        """Build throughput-related fields for SELECT clause."""
-        return ("avgIf(toFloat64(throughput_value), has_throughput) as avg_throughput, "
-                "maxIf(toFloat64(throughput_value), has_throughput) as peak_throughput")
-    
-    @staticmethod
-    def _build_cost_fields() -> str:
-        """Build cost and error fields for SELECT clause."""
-        return ("countIf(event_type = 'error') / count() * 100 as error_rate, "
-                "sumIf(toFloat64(cost_value), has_cost) / 100.0 as total_cost")
-    
-    @staticmethod
-    def _build_performance_subquery(user_id: int, start_time: datetime, end_time: datetime, workload_filter: str) -> str:
-        """Build subquery for performance metrics."""
-        select_part = QueryBuilder._build_subquery_select_part()
-        from_part = QueryBuilder._build_subquery_from_part(user_id, start_time, end_time, workload_filter)
-        return f"FROM ({select_part} {from_part})"
-    
-    @staticmethod
-    def _build_subquery_select_part() -> str:
-        """Build SELECT part of subquery."""
-        index_fields = QueryBuilder._build_index_fields()
-        value_fields = QueryBuilder._build_value_fields()
-        flag_fields = QueryBuilder._build_flag_fields()
-        return f"SELECT *, {index_fields}, {value_fields}, {flag_fields}"
-    
-    @staticmethod
-    def _build_index_fields() -> str:
-        """Build index fields for subquery."""
-        return ("arrayFirstIndex(x -> x = 'latency_ms', metrics.name) as idx, "
-                "arrayFirstIndex(x -> x = 'throughput', metrics.name) as idx2, "
-                "arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx3")
-    
-    @staticmethod
-    def _build_value_fields() -> str:
-        """Build value fields for subquery."""
-        return ("if(idx > 0, arrayElement(metrics.value, idx), 0.0) as metric_value, "
-                "if(idx2 > 0, arrayElement(metrics.value, idx2), 0.0) as throughput_value, "
-                "if(idx3 > 0, arrayElement(metrics.value, idx3), 0.0) as cost_value")
-    
-    @staticmethod
-    def _build_flag_fields() -> str:
-        """Build flag fields for subquery."""
-        return "idx > 0 as has_latency, idx2 > 0 as has_throughput, idx3 > 0 as has_cost"
-    
-    @staticmethod
-    def _build_subquery_from_part(user_id: int, start_time: datetime, end_time: datetime, workload_filter: str) -> str:
-        """Build FROM part of subquery."""
-        return (f"FROM workload_events WHERE user_id = {user_id} "
-                f"AND timestamp >= '{start_time.isoformat()}' "
-                f"AND timestamp <= '{end_time.isoformat()}' {workload_filter}")
-    
-    @staticmethod
-    def _assemble_performance_query(select_clause: str, subquery: str) -> str:
-        """Assemble complete performance query."""
-        return f"""{QueryBuilder.QUERY_SOURCE_MARKER}
-        {select_clause} {subquery}
-        GROUP BY time_bucket ORDER BY time_bucket DESC LIMIT 10000"""
-    
-    @staticmethod
     def build_anomaly_detection_query(
         user_id: int,
         metric_name: str,
@@ -337,57 +247,11 @@ class QueryBuilder(BaseExecutionInterface):
         end_time: datetime,
         z_score_threshold: float = 2.0
     ) -> str:
-        """Build query for anomaly detection"""
-        baseline_clause = QueryBuilder._build_anomaly_baseline_clause(user_id, metric_name, start_time)
-        main_query = QueryBuilder._build_anomaly_main_query(user_id, metric_name, start_time, end_time, z_score_threshold)
-        return QueryBuilder._assemble_anomaly_query(baseline_clause, main_query)
-    
-    @staticmethod
-    def _build_anomaly_baseline_clause(user_id: int, metric_name: str, start_time: datetime) -> str:
-        """Build baseline CTE for anomaly detection."""
-        baseline_start = (start_time - timedelta(days=7)).isoformat()
-        select_part = QueryBuilder._build_baseline_select_part(metric_name)
-        where_part = QueryBuilder._build_baseline_where_part(user_id, baseline_start, start_time)
-        return f"WITH baseline AS ({select_part} {where_part})"
-    
-    @staticmethod
-    def _build_baseline_select_part(metric_name: str) -> str:
-        """Build SELECT part of baseline CTE."""
-        return (f"SELECT arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx, "
-                "avg(if(idx > 0, arrayElement(metrics.value, idx), 0.0)) as mean_val, "
-                "stddevPop(if(idx > 0, arrayElement(metrics.value, idx), 0.0)) as std_val FROM workload_events")
-    
-    @staticmethod
-    def _build_baseline_where_part(user_id: int, baseline_start: str, start_time: datetime) -> str:
-        """Build WHERE part of baseline CTE."""
-        return (f"WHERE user_id = {user_id} AND timestamp >= '{baseline_start}' "
-                f"AND timestamp < '{start_time.isoformat()}'")
-    
-    @staticmethod
-    def _build_anomaly_main_query(user_id: int, metric_name: str, start_time: datetime, end_time: datetime, z_score_threshold: float) -> str:
-        """Build main SELECT for anomaly detection."""
-        select_part = QueryBuilder._build_anomaly_select_part(metric_name, z_score_threshold)
-        where_part = QueryBuilder._build_anomaly_where_part(user_id, start_time, end_time)
-        return f"{select_part} FROM workload_events, baseline {where_part} ORDER BY abs(z_score) DESC LIMIT 100"
-    
-    @staticmethod
-    def _build_anomaly_select_part(metric_name: str, z_score_threshold: float) -> str:
-        """Build SELECT part of anomaly detection."""
-        return (f"SELECT timestamp, arrayFirstIndex(x -> x = '{metric_name}', metrics.name) as idx, "
-                "if(idx > 0, arrayElement(metrics.value, idx), 0.0) as metric_value, "
-                "if(baseline.std_val > 0, (toFloat64(metric_value) - baseline.mean_val) / baseline.std_val, 0.0) as z_score, "
-                f"abs(z_score) > {z_score_threshold} as is_anomaly")
-    
-    @staticmethod
-    def _build_anomaly_where_part(user_id: int, start_time: datetime, end_time: datetime) -> str:
-        """Build WHERE part of anomaly detection."""
-        return (f"WHERE user_id = {user_id} AND timestamp >= '{start_time.isoformat()}' "
-                f"AND timestamp <= '{end_time.isoformat()}' AND is_anomaly = 1")
-    
-    @staticmethod
-    def _assemble_anomaly_query(baseline_clause: str, main_query: str) -> str:
-        """Assemble complete anomaly detection query."""
-        return f"{QueryBuilder.QUERY_SOURCE_MARKER} {baseline_clause} {main_query}"
+        """Build query for anomaly detection - backward compatibility."""
+        from .query_operations import QueryOperations
+        return QueryOperations.build_anomaly_detection_query(
+            user_id, metric_name, start_time, end_time, z_score_threshold
+        )
     
     @staticmethod
     def build_correlation_analysis_query(
@@ -397,49 +261,41 @@ class QueryBuilder(BaseExecutionInterface):
         start_time: datetime,
         end_time: datetime
     ) -> str:
-        """Build query for correlation analysis between two metrics"""
-        select_part = QueryBuilder._build_correlation_select_part()
-        subquery_part = QueryBuilder._build_correlation_subquery(user_id, metric1, metric2, start_time, end_time)
-        return f"{QueryBuilder.QUERY_SOURCE_MARKER} {select_part} FROM ({subquery_part}) WHERE idx1 > 0 AND idx2 > 0"
-    
-    @staticmethod
-    def _build_correlation_select_part() -> str:
-        """Build SELECT part of correlation query."""
-        return ("SELECT corr(toFloat64(m1_value), toFloat64(m2_value)) as correlation_coefficient, "
-                "count() as sample_size, avg(toFloat64(m1_value)) as metric1_avg, "
-                "avg(toFloat64(m2_value)) as metric2_avg, stddevPop(toFloat64(m1_value)) as metric1_std, "
-                "stddevPop(toFloat64(m2_value)) as metric2_std")
-    
-    @staticmethod
-    def _build_correlation_subquery(user_id: int, metric1: str, metric2: str, start_time: datetime, end_time: datetime) -> str:
-        """Build subquery for correlation analysis."""
-        select_indices = f"arrayFirstIndex(x -> x = '{metric1}', metrics.name) as idx1, arrayFirstIndex(x -> x = '{metric2}', metrics.name) as idx2"
-        select_values = "if(idx1 > 0, arrayElement(metrics.value, idx1), 0.0) as m1_value, if(idx2 > 0, arrayElement(metrics.value, idx2), 0.0) as m2_value"
-        where_clause = f"WHERE user_id = {user_id} AND timestamp >= '{start_time.isoformat()}' AND timestamp <= '{end_time.isoformat()}'"
-        return f"SELECT {select_indices}, {select_values} FROM workload_events {where_clause}"
+        """Build query for correlation analysis - backward compatibility."""
+        from .query_operations import QueryOperations
+        return QueryOperations.build_correlation_analysis_query(
+            user_id, metric1, metric2, start_time, end_time
+        )
     
     @staticmethod
     def build_usage_patterns_query(
         user_id: int,
         days_back: int = 30
     ) -> str:
-        """Build query for usage pattern analysis"""
-        select_part = QueryBuilder._build_usage_select_part()
-        subquery_part = QueryBuilder._build_usage_subquery(user_id, days_back)
-        return f"{QueryBuilder.QUERY_SOURCE_MARKER} {select_part} FROM ({subquery_part}) GROUP BY day_of_week, hour_of_day ORDER BY day_of_week, hour_of_day"
-    
-    @staticmethod
-    def _build_usage_select_part() -> str:
-        """Build SELECT part of usage patterns query."""
-        return ("SELECT toDayOfWeek(timestamp) as day_of_week, toHour(timestamp) as hour_of_day, "
-                "count() as event_count, uniqExact(workload_id) as unique_workloads, "
-                "uniqExact(event_category) as unique_categories, sumIf(toFloat64(cost_value), has_cost) / 100.0 as total_cost")
-    
-    @staticmethod
-    def _build_usage_subquery(user_id: int, days_back: int) -> str:
-        """Build subquery for usage patterns analysis."""
-        select_fields = ("SELECT timestamp, workload_id, event_category, "
-                        "arrayFirstIndex(x -> x = 'cost_cents', metrics.name) as idx, "
-                        "if(idx > 0, arrayElement(metrics.value, idx), 0.0) as cost_value, idx > 0 as has_cost")
-        where_clause = f"FROM workload_events WHERE user_id = {user_id} AND timestamp >= now() - INTERVAL {days_back} DAY"
-        return f"{select_fields} {where_clause}"
+        """Build query for usage pattern analysis - backward compatibility."""
+        from .query_operations import QueryOperations
+        return QueryOperations.build_usage_patterns_query(
+            user_id, days_back
+        )
+        
+    def get_performance_metrics(self) -> Dict[str, Any]:
+        """Get query builder performance metrics."""
+        recent_executions = self.execution_history[-10:] if self.execution_history else []
+        avg_execution_time = sum(e.get('execution_time_ms', 0) for e in recent_executions) / max(len(recent_executions), 1)
+        return {
+            'total_queries_built': len(self.execution_history),
+            'average_build_time_ms': avg_execution_time,
+            'supported_query_types': list(self.supported_query_types),
+            'recent_executions_count': len(recent_executions),
+            'current_metrics': self.query_metrics.__dict__
+        }
+        
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get health status for monitoring."""
+        performance = self.get_performance_metrics()
+        return {
+            'status': 'healthy' if performance['total_queries_built'] >= 0 else 'unknown',
+            'uptime_queries': performance['total_queries_built'],
+            'avg_performance_ms': performance['average_build_time_ms'],
+            'last_updated': datetime.utcnow().isoformat()
+        }

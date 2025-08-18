@@ -2,7 +2,7 @@
 
 Business Value: Standardized execution patterns for corpus operations,
 improved reliability, and comprehensive monitoring.
-"
+"""
 
 import time
 from typing import Dict, Any, Optional, TYPE_CHECKING
@@ -52,16 +52,51 @@ class CorpusOperationExecutor(BaseExecutionInterface):
         retry_config = RetryConfig(max_retries=3, base_delay=1.0, max_delay=10.0)
         return ReliabilityManager(circuit_config, retry_config)
     
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate execution preconditions for corpus operations."""
+        await self._validate_state_requirements(context.state)
+        await self._validate_execution_resources(context)
+        await self._validate_corpus_operation_dependencies()
+        return True
+    
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute core corpus operation logic."""
+        self.monitor.start_operation(f"corpus_operation_execution_{context.run_id}")
+        await self.send_status_update(context, "executing", "Starting corpus operation...")
+        
+        result = await self._execute_modernized_workflow(context)
+        
+        self.monitor.complete_operation(f"corpus_operation_execution_{context.run_id}")
+        await self.send_status_update(context, "completed", "Corpus operation completed")
+        return result
+    
     async def execute_corpus_operation_workflow(
         self, state: DeepAgentState, run_id: str, stream_updates: bool, start_time: float,
         approval_manager, update_manager
     ) -> None:
-        """Execute the complete corpus operation workflow."""
-        await update_manager.send_initial_update(run_id, stream_updates)
-        operation_request = await self._parse_operation_request(state)
-        await self._process_operation_with_approval(
-            operation_request, state, run_id, stream_updates, start_time, approval_manager, update_manager
+        """Execute the complete corpus operation workflow (legacy compatibility)."""
+        # Create execution context for modern pattern
+        context = ExecutionContext(
+            run_id=run_id, agent_name=self.agent_name, state=state,
+            stream_updates=stream_updates, thread_id=getattr(state, 'chat_thread_id', run_id),
+            user_id=getattr(state, 'user_id', 'default_user')
         )
+        
+        try:
+            # Execute with modern pattern using reliability manager
+            result = await self.reliability_manager.execute_with_reliability(
+                context, lambda: self.execution_engine.execute(self, context)
+            )
+            
+            # Handle result with error handler
+            if not result.success:
+                await self.error_handler.handle_execution_error(result.error, context)
+                
+        except Exception as e:
+            # Handle with error handler and fallback
+            await self.error_handler.handle_execution_error(str(e), context)
+            logger.error(f"Modern execution failed, falling back to legacy: {e}")
+            await self._execute_legacy_workflow(state, run_id, stream_updates, start_time, approval_manager, update_manager)
     
     async def _parse_operation_request(self, state: DeepAgentState):
         """Parse operation request from state."""
@@ -133,3 +168,50 @@ class CorpusOperationExecutor(BaseExecutionInterface):
     def _get_corpus_name(self, result: dict) -> str:
         """Get corpus name from result."""
         return result.get('corpus_metadata', {}).get('corpus_name')
+    
+    async def _validate_state_requirements(self, state: DeepAgentState) -> None:
+        """Validate required state attributes."""
+        if not hasattr(state, 'user_request') or not state.user_request:
+            raise ValidationError("Missing required user_request in state")
+    
+    async def _validate_execution_resources(self, context: ExecutionContext) -> None:
+        """Validate execution resources are available."""
+        if not self.parser or not self.operations:
+            raise ValidationError("Corpus operation components not initialized")
+    
+    async def _validate_corpus_operation_dependencies(self) -> None:
+        """Validate corpus operation dependencies are healthy."""
+        if not self.reliability_manager.get_health_status().get('overall_health') == 'healthy':
+            logger.warning("Corpus operation dependencies in degraded state")
+    
+    async def _execute_modernized_workflow(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute modernized corpus operation workflow."""
+        operation_request = await self._parse_operation_request(context.state)
+        result = await self._execute_operation(operation_request, context.run_id, context.stream_updates)
+        updated_state = self._update_state_with_result(result, context.state)
+        return {"corpus_operation_result": "completed", "updated_state": updated_state}
+    
+    def _update_state_with_result(self, result, state: DeepAgentState) -> DeepAgentState:
+        """Update state with operation result."""
+        state.corpus_admin_result = result.model_dump()
+        return state
+    
+    async def _execute_legacy_workflow(self, state: DeepAgentState, run_id: str, stream_updates: bool,
+                                     start_time: float, approval_manager, update_manager) -> None:
+        """Legacy execution workflow for backward compatibility."""
+        await update_manager.send_initial_update(run_id, stream_updates)
+        operation_request = await self._parse_operation_request(state)
+        await self._process_operation_with_approval(
+            operation_request, state, run_id, stream_updates, start_time, approval_manager, update_manager
+        )
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get comprehensive health status from modern execution infrastructure."""
+        status = {
+            "executor_health": "healthy",
+            "monitor": self.monitor.get_health_status(),
+            "error_handler": self.error_handler.get_health_status()
+        }
+        if self.reliability_manager:
+            status["reliability"] = self.reliability_manager.get_health_status()
+        return status

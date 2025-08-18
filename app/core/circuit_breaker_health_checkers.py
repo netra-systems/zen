@@ -113,13 +113,28 @@ class ServiceHealthChecker(HealthChecker):
     def _create_result_from_check(self, result: Any, response_time: float) -> HealthCheckResult:
         """Create result from check function output."""
         if isinstance(result, bool):
-            status = HealthStatus.HEALTHY if result else HealthStatus.UNHEALTHY
-            return HealthCheckResult(status=status, response_time=response_time)
+            return self._create_boolean_result(result, response_time)
         elif isinstance(result, dict) and 'healthy' in result:
-            status = HealthStatus.HEALTHY if result['healthy'] else HealthStatus.UNHEALTHY
-            return HealthCheckResult(status=status, response_time=response_time, details=result)
+            return self._create_dict_result(result, response_time)
         else:
-            return HealthCheckResult(status=HealthStatus.HEALTHY, response_time=response_time, details={'result': str(result)})
+            return self._create_default_result(result, response_time)
+    
+    def _create_boolean_result(self, result: bool, response_time: float) -> HealthCheckResult:
+        """Create result from boolean check."""
+        status = HealthStatus.HEALTHY if result else HealthStatus.UNHEALTHY
+        return HealthCheckResult(status=status, response_time=response_time)
+    
+    def _create_dict_result(self, result: dict, response_time: float) -> HealthCheckResult:
+        """Create result from dictionary check."""
+        status = HealthStatus.HEALTHY if result['healthy'] else HealthStatus.UNHEALTHY
+        return HealthCheckResult(status=status, response_time=response_time, details=result)
+    
+    def _create_default_result(self, result: Any, response_time: float) -> HealthCheckResult:
+        """Create result from generic check."""
+        return HealthCheckResult(
+            status=HealthStatus.HEALTHY, response_time=response_time, 
+            details={'result': str(result)}
+        )
     
     def _create_failed_result(self, start_time: datetime, error: Exception) -> HealthCheckResult:
         """Create failed health check result."""

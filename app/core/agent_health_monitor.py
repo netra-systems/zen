@@ -133,12 +133,20 @@ class AgentHealthMonitor:
         """Count error types and recent errors."""
         error_types = {}
         recent_errors = 0
-        cutoff_time = datetime.now(timezone.utc) - timedelta(minutes=5)
+        cutoff_time = self._get_recent_cutoff_time()
         for error in error_history:
-            error_types[error.error_type] = error_types.get(error.error_type, 0) + 1
+            self._count_error_type(error_types, error)
             if error.timestamp >= cutoff_time:
                 recent_errors += 1
         return error_types, recent_errors
+
+    def _get_recent_cutoff_time(self) -> datetime:
+        """Get cutoff time for recent errors (5 minutes ago)."""
+        return datetime.now(timezone.utc) - timedelta(minutes=5)
+    
+    def _count_error_type(self, error_types: Dict[str, int], error: AgentError) -> None:
+        """Count error type in error_types dictionary."""
+        error_types[error.error_type] = error_types.get(error.error_type, 0) + 1
 
     def _get_last_error_info(self, error_history: List[AgentError]) -> Dict[str, str]:
         """Get last error information."""

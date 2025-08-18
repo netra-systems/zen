@@ -160,10 +160,19 @@ class AnomalyDetector(BaseExecutionInterface):
         z_score_threshold: float, time_range: Tuple[datetime, datetime]
     ) -> AnomalyDetectionResponse:
         """Build typed response for detected anomalies."""
-        start_time, end_time = time_range
         anomaly_details = self._convert_to_anomaly_details(data, metric_name)
         max_severity = self._determine_max_severity(data)
-        
+        return self._create_anomaly_response_object(
+            data, anomaly_details, max_severity, z_score_threshold, time_range
+        )
+    
+    def _create_anomaly_response_object(
+        self, data: List[Dict], anomaly_details: List[AnomalyDetail],
+        max_severity: AnomalySeverity, z_score_threshold: float,
+        time_range: Tuple[datetime, datetime]
+    ) -> AnomalyDetectionResponse:
+        """Create AnomalyDetectionResponse object."""
+        start_time, end_time = time_range
         return AnomalyDetectionResponse(
             anomalies_detected=True,
             anomaly_count=len(data),
@@ -183,18 +192,31 @@ class AnomalyDetector(BaseExecutionInterface):
     def _convert_single_anomaly(self, row: Dict, 
                               metric_name: str) -> AnomalyDetail:
         """Convert single anomaly to typed AnomalyDetail."""
+        values = self._extract_anomaly_values(row)
+        return self._create_anomaly_detail_object(
+            row, metric_name, values
+        )
+    
+    def _extract_anomaly_values(self, row: Dict) -> Tuple[float, float, float]:
+        """Extract and convert anomaly values from row."""
         actual_value = float(row.get('metric_value', 0))
         expected_value = float(row.get('expected_value', actual_value))
         z_score = float(row.get('z_score', 0))
-        
+        return actual_value, expected_value, z_score
+    
+    def _create_anomaly_detail_object(
+        self, row: Dict, metric_name: str, 
+        values: Tuple[float, float, float]
+    ) -> AnomalyDetail:
+        """Create AnomalyDetail object from extracted values."""
+        actual_value, expected_value, z_score = values
+        deviation_pct = self._calculate_deviation_percentage(actual_value, expected_value)
         return AnomalyDetail(
             timestamp=row.get('timestamp', datetime.utcnow()),
             metric_name=metric_name,
             actual_value=actual_value,
             expected_value=expected_value,
-            deviation_percentage=self._calculate_deviation_percentage(
-                actual_value, expected_value
-            ),
+            deviation_percentage=deviation_pct,
             z_score=z_score,
             severity=self._determine_severity(z_score)
         )
@@ -219,8 +241,15 @@ class AnomalyDetector(BaseExecutionInterface):
     
     def _determine_max_severity(self, data: List[Dict]) -> AnomalySeverity:
         """Determine maximum severity from all anomalies."""
-        severities = [self._determine_severity(row.get('z_score', 0)) 
-                     for row in data]
+        severities = self._extract_all_severities(data)
+        return self._find_highest_severity(severities)
+    
+    def _extract_all_severities(self, data: List[Dict]) -> List[AnomalySeverity]:
+        """Extract severity levels from all anomalies."""
+        return [self._determine_severity(row.get('z_score', 0)) for row in data]
+    
+    def _find_highest_severity(self, severities: List[AnomalySeverity]) -> AnomalySeverity:
+        """Find highest severity from list of severities."""
         severity_order = [
             AnomalySeverity.CRITICAL, AnomalySeverity.HIGH,
             AnomalySeverity.MEDIUM, AnomalySeverity.LOW

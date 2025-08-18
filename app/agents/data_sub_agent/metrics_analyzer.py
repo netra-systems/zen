@@ -32,27 +32,37 @@ class MetricsAnalyzer(BaseExecutionInterface):
     with reliability management and performance monitoring.
     """
     
-    def __init__(
-        self,
-        query_builder: Any,
-        analysis_engine: Any,
-        clickhouse_ops: Any,
-        websocket_manager: Optional[WebSocketManagerProtocol] = None,
-        reliability_manager: Optional[ReliabilityManager] = None
-    ) -> None:
+    def __init__(self, query_builder: Any, analysis_engine: Any, clickhouse_ops: Any,
+                 websocket_manager: Optional[WebSocketManagerProtocol] = None,
+                 reliability_manager: Optional[ReliabilityManager] = None) -> None:
+        self._init_base_interface(websocket_manager)
+        self._init_all_components(query_builder, analysis_engine, clickhouse_ops, reliability_manager)
+        
+    def _init_base_interface(self, websocket_manager: Optional[WebSocketManagerProtocol]) -> None:
+        """Initialize base execution interface."""
         BaseExecutionInterface.__init__(self, "MetricsAnalyzer", websocket_manager)
+        
+    def _init_all_components(self, query_builder: Any, analysis_engine: Any, 
+                           clickhouse_ops: Any, reliability_manager: Optional[ReliabilityManager]) -> None:
+        """Initialize analyzers and modern components."""
         self._initialize_specialized_analyzers(query_builder, analysis_engine, clickhouse_ops)
         self._initialize_modern_components(reliability_manager)
     
-    def _initialize_specialized_analyzers(
-        self, query_builder: Any, analysis_engine: Any, clickhouse_ops: Any
-    ) -> None:
+    def _initialize_specialized_analyzers(self, query_builder: Any, analysis_engine: Any, clickhouse_ops: Any) -> None:
         """Initialize specialized analyzer modules."""
+        self._create_primary_analyzers(query_builder, analysis_engine, clickhouse_ops)
+        self._create_secondary_analyzers(query_builder, clickhouse_ops)
+        
+    def _create_primary_analyzers(self, query_builder: Any, analysis_engine: Any, clickhouse_ops: Any) -> None:
+        """Create primary analyzers with full engine support."""
         self.distribution_analyzer = MetricDistributionAnalyzer(query_builder, analysis_engine, clickhouse_ops)
         self.trend_analyzer = MetricTrendAnalyzer(query_builder, analysis_engine, clickhouse_ops)
+        self.seasonality_analyzer = MetricSeasonalityAnalyzer(query_builder, analysis_engine, clickhouse_ops)
+        
+    def _create_secondary_analyzers(self, query_builder: Any, clickhouse_ops: Any) -> None:
+        """Create secondary analyzers with basic operations."""
         self.percentile_analyzer = MetricPercentileAnalyzer(query_builder, clickhouse_ops)
         self.comparison_analyzer = MetricComparisonAnalyzer(query_builder, clickhouse_ops)
-        self.seasonality_analyzer = MetricSeasonalityAnalyzer(query_builder, analysis_engine, clickhouse_ops)
         
     def _initialize_modern_components(self, reliability_manager: Optional[ReliabilityManager]) -> None:
         """Initialize modern execution components."""
@@ -189,11 +199,9 @@ class MetricsAnalyzer(BaseExecutionInterface):
     def _extract_analysis_parameters(self, state_data: Dict[str, Any]) -> Dict[str, Any]:
         """Extract analysis parameters from state data."""
         return {
-            'user_id': state_data.get('user_id'),
-            'metric_name': state_data.get('metric_name'),
-            'time_range': state_data.get('time_range'),
-            'percentiles': state_data.get('percentiles', [50.0, 75.0, 90.0, 95.0, 99.0]),
-            'metric_names': state_data.get('metric_names', [])
+            'user_id': state_data.get('user_id'), 'metric_name': state_data.get('metric_name'),
+            'time_range': state_data.get('time_range'), 'metric_names': state_data.get('metric_names', []),
+            'percentiles': state_data.get('percentiles', [50.0, 75.0, 90.0, 95.0, 99.0])
         }
     
     async def _route_to_specialized_analyzer(self, analysis_type: str, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -205,10 +213,8 @@ class MetricsAnalyzer(BaseExecutionInterface):
     def _get_analysis_routing_map(self) -> Dict[str, Any]:
         """Get routing map for analysis types to methods."""
         return {
-            'distribution': self.analyze_metric_distribution,
-            'trends': self.detect_metric_trends,
-            'percentiles': self.calculate_metric_percentiles,
-            'comparison': self.compare_metrics_performance,
+            'distribution': self.analyze_metric_distribution, 'trends': self.detect_metric_trends,
+            'percentiles': self.calculate_metric_percentiles, 'comparison': self.compare_metrics_performance,
             'seasonality': self.detect_metric_seasonality
         }
     
@@ -267,12 +273,18 @@ class MetricsAnalyzer(BaseExecutionInterface):
     
     def _get_analyzers_health_status(self) -> Dict[str, str]:
         """Get health status of all specialized analyzers."""
-        analyzers = {
-            'distribution': self.distribution_analyzer,
-            'trend': self.trend_analyzer,
-            'percentile': self.percentile_analyzer,
-            'comparison': self.comparison_analyzer,
+        analyzers = self._get_analyzer_instances()
+        return self._evaluate_analyzer_health(analyzers)
+        
+    def _get_analyzer_instances(self) -> Dict[str, Any]:
+        """Get all analyzer instances."""
+        return {
+            'distribution': self.distribution_analyzer, 'trend': self.trend_analyzer,
+            'percentile': self.percentile_analyzer, 'comparison': self.comparison_analyzer,
             'seasonality': self.seasonality_analyzer
         }
+        
+    def _evaluate_analyzer_health(self, analyzers: Dict[str, Any]) -> Dict[str, str]:
+        """Evaluate health status of analyzer instances."""
         return {name: 'healthy' if analyzer else 'unavailable' 
                 for name, analyzer in analyzers.items()}

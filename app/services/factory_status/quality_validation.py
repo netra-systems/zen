@@ -83,8 +83,7 @@ class ArchitectureValidator:
         """Extract file list from subprocess result."""
         if not result.stdout:
             return []
-        return result.stdout.strip().split("
-")
+        return result.stdout.strip().split("\n")
     
     def _count_file_violations(self, files: List[str]) -> int:
         """Count violations in file list."""
@@ -118,8 +117,7 @@ class ArchitectureValidator:
         """Extract Python file list from subprocess result."""
         if not result.stdout:
             return []
-        return result.stdout.strip().split("
-")
+        return result.stdout.strip().split("\n")
     
     def _sum_function_violations(self, files: List[str]) -> int:
         """Sum function violations across all files."""
@@ -152,8 +150,7 @@ class ArchitectureValidator:
         """Count functions exceeding line limit."""
         violations = 0
         for func in functions:
-            lines = len([line for line in func.split('
-') if line.strip()])
+            lines = len([line for line in func.split('\n') if line.strip()])
             if lines > QualityConstants.MAX_LINES_PER_FUNCTION:
                 violations += 1
         return violations
@@ -168,8 +165,7 @@ class ArchitectureValidator:
         """Extract deeply nested directories from result."""
         if not result.stdout:
             return []
-        return result.stdout.strip().split("
-")
+        return result.stdout.strip().split("\n")
     
     def _determine_compliance_status(self, score: float) -> ComplianceStatus:
         """Determine compliance status from score."""

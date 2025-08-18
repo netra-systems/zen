@@ -46,6 +46,16 @@ class ErrorClassifier:
         from .agent_errors import ValidationError, ExternalServiceError, DatabaseError
         return self._build_error_classifier_mapping(ValidationError, ExternalServiceError, DatabaseError)
     
+    def _build_error_classifier_mapping(self, ValidationError: Type[Exception], 
+                                      ExternalServiceError: Type[Exception],
+                                      DatabaseError: Type[Exception]) -> Dict[Type[Exception], ErrorClassification]:
+        """Build error classification mapping."""
+        return {
+            ValidationError: self._create_validation_classification(),
+            ExternalServiceError: self._create_service_classification(),
+            DatabaseError: self._create_database_classification()
+        }
+    
     def _create_validation_classification(self) -> ErrorClassification:
         """Create classification for validation errors."""
         return ErrorClassification(

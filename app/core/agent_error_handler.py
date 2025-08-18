@@ -75,14 +75,19 @@ class AgentErrorHandler:
         self, error_type: str, critical: List[str], high: List[str], medium: List[str]
     ) -> ErrorSeverity:
         """Determine severity level based on error type."""
-        if error_type in critical:
-            return ErrorSeverity.CRITICAL
-        elif error_type in high:
-            return ErrorSeverity.HIGH
-        elif error_type in medium:
-            return ErrorSeverity.MEDIUM
-        else:
-            return ErrorSeverity.LOW
+        severity_map = self._build_severity_map(critical, high, medium)
+        return severity_map.get(error_type, ErrorSeverity.LOW)
+    
+    def _build_severity_map(self, critical: List[str], high: List[str], medium: List[str]) -> Dict[str, ErrorSeverity]:
+        """Build mapping of error types to severity levels."""
+        severity_map = {}
+        for error_type in critical:
+            severity_map[error_type] = ErrorSeverity.CRITICAL
+        for error_type in high:
+            severity_map[error_type] = ErrorSeverity.HIGH
+        for error_type in medium:
+            severity_map[error_type] = ErrorSeverity.MEDIUM
+        return severity_map
 
     def log_error(self, error_record: AgentError) -> None:
         """Log error with appropriate level."""
@@ -112,14 +117,18 @@ class AgentErrorHandler:
         self, severity: ErrorSeverity, message: str, context: Dict[str, Any]
     ) -> None:
         """Write log with appropriate severity level."""
-        if severity == ErrorSeverity.CRITICAL:
-            logger.critical(message, extra=context)
-        elif severity == ErrorSeverity.HIGH:
-            logger.error(message, extra=context)
-        elif severity == ErrorSeverity.MEDIUM:
-            logger.warning(message, extra=context)
-        else:
-            logger.info(message, extra=context)
+        log_methods = self._get_severity_log_methods()
+        log_method = log_methods.get(severity, logger.info)
+        log_method(message, extra=context)
+    
+    def _get_severity_log_methods(self) -> Dict[ErrorSeverity, callable]:
+        """Get mapping of severity levels to log methods."""
+        return {
+            ErrorSeverity.CRITICAL: logger.critical,
+            ErrorSeverity.HIGH: logger.error,
+            ErrorSeverity.MEDIUM: logger.warning,
+            ErrorSeverity.LOW: logger.info
+        }
 
     async def record_failed_operation(
         self,

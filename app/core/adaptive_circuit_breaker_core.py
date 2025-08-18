@@ -80,13 +80,17 @@ class AdaptiveCircuitBreaker:
     
     def should_allow_request(self) -> bool:
         """Check if request should be allowed through circuit."""
-        if self.state == CircuitBreakerState.CLOSED:
-            return True
-        elif self.state == CircuitBreakerState.OPEN:
-            return self._handle_open_state()
-        elif self.state == CircuitBreakerState.HALF_OPEN:
-            return True
-        return False
+        state_handlers = self._get_state_handlers()
+        handler = state_handlers.get(self.state, lambda: False)
+        return handler()
+    
+    def _get_state_handlers(self) -> Dict:
+        """Get mapping of circuit states to handler functions."""
+        return {
+            CircuitBreakerState.CLOSED: lambda: True,
+            CircuitBreakerState.OPEN: self._handle_open_state,
+            CircuitBreakerState.HALF_OPEN: lambda: True
+        }
     
     def _handle_open_state(self) -> bool:
         """Handle request when circuit is open."""

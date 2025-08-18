@@ -97,30 +97,39 @@ class ConfigValidator:
     def _validate_auth_config(self, config: AppConfig) -> None:
         """Validate authentication configuration."""
         errors = []
-        
-        # Check JWT configuration
+        self._validate_jwt_config(config, errors)
+        self._validate_fernet_config(config, errors)
+        self._validate_oauth_config(config, errors)
+        if errors:
+            raise ConfigurationValidationError(f"Authentication configuration errors: {', '.join(errors)}")
+    
+    def _validate_jwt_config(self, config: AppConfig, errors: List[str]) -> None:
+        """Validate JWT configuration."""
         if not config.jwt_secret_key:
             errors.append("JWT secret key is not configured")
         elif config.environment == "production":
-            # Check for weak or default secrets in production
-            if len(config.jwt_secret_key) < 32:
-                errors.append("JWT secret key must be at least 32 characters in production")
-            if "development" in config.jwt_secret_key.lower() or "test" in config.jwt_secret_key.lower():
-                errors.append("JWT secret key appears to be a development/test key - not suitable for production")
-            
-        # Check Fernet key
+            self._validate_production_jwt_key(config, errors)
+    
+    def _validate_production_jwt_key(self, config: AppConfig, errors: List[str]) -> None:
+        """Validate JWT key for production environment."""
+        if len(config.jwt_secret_key) < 32:
+            errors.append("JWT secret key must be at least 32 characters in production")
+        if "development" in config.jwt_secret_key.lower() or "test" in config.jwt_secret_key.lower():
+            errors.append("JWT secret key appears to be a development/test key - not suitable for production")
+    
+    def _validate_fernet_config(self, config: AppConfig, errors: List[str]) -> None:
+        """Validate Fernet key configuration."""
         if not config.fernet_key:
             errors.append("Fernet key is not configured")
-            
-        # Check OAuth configuration
+    
+    def _validate_oauth_config(self, config: AppConfig, errors: List[str]) -> None:
+        """Validate OAuth configuration."""
         oauth = config.oauth_config
-        if not oauth.client_id and config.environment not in ["testing", "development", "staging"]:
+        dev_environments = ["testing", "development", "staging"]
+        if not oauth.client_id and config.environment not in dev_environments:
             errors.append("OAuth client ID is not configured")
-        if not oauth.client_secret and config.environment not in ["testing", "development", "staging"]:
+        if not oauth.client_secret and config.environment not in dev_environments:
             errors.append("OAuth client secret is not configured")
-            
-        if errors:
-            raise ConfigurationValidationError(f"Authentication configuration errors: {', '.join(errors)}")
     
     def _validate_llm_config(self, config: AppConfig) -> None:
         """Validate LLM configuration - only Gemini API key is required."""

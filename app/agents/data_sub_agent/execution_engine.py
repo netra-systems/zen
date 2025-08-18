@@ -133,13 +133,18 @@ class DataSubAgentExecutionEngine(BaseExecutionInterface):
                                    analysis_params: Dict[str, Any]) -> Dict[str, Any]:
         """Execute complete data analysis workflow."""
         await self.send_status_update(context, "analyzing", "Starting data analysis...")
-        run_id = context.run_id
-        data_ops = self._get_data_operations()
-        result = await self.analysis_router.perform_complete_analysis(
-            analysis_params, run_id, context.stream_updates, self._create_update_sender(context), data_ops
-        )
+        result = await self._perform_analysis_execution(context, analysis_params)
         await self.send_status_update(context, "completed", "Data analysis completed successfully")
         return result
+        
+    async def _perform_analysis_execution(self, context: ExecutionContext, 
+                                        analysis_params: Dict[str, Any]) -> Dict[str, Any]:
+        """Perform the analysis execution with all required parameters."""
+        data_ops = self._get_data_operations()
+        return await self.analysis_router.perform_complete_analysis(
+            analysis_params, context.run_id, context.stream_updates, 
+            self._create_update_sender(context), data_ops
+        )
         
     def _get_data_operations(self) -> Any:
         """Get data operations instance for analysis."""

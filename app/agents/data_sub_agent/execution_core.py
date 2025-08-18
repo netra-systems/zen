@@ -221,11 +221,15 @@ class ExecutionCore(BaseExecutionInterface):
             "execution_core": "healthy",
             "reliability_manager": self.reliability_manager.get_health_status(),
             "execution_monitor": self.execution_monitor.get_health_status(),
-            "components": {
-                "parameter_processor": hasattr(self.engine, 'parameter_processor'),
-                "analysis_router": hasattr(self.engine, 'analysis_router'),
-                "fallback_handler": hasattr(self.engine, 'fallback_handler')
-            }
+            "components": self._get_component_status()
+        }
+        
+    def _get_component_status(self) -> Dict[str, bool]:
+        """Get component availability status."""
+        return {
+            "parameter_processor": hasattr(self.engine, 'parameter_processor'),
+            "analysis_router": hasattr(self.engine, 'analysis_router'),
+            "fallback_handler": hasattr(self.engine, 'fallback_handler')
         }
     
     async def send_progress_update(

@@ -1,13 +1,132 @@
-"""Usage pattern processing module with ≤8 line functions."""
+"""Modernized Usage Pattern Processor with BaseExecutionInterface
 
-from typing import Dict, List, Any
+Usage pattern analysis with standardized execution patterns.
+Now modernized with BaseExecutionInterface for reliability and monitoring.
+
+Business Value: Critical for customer usage optimization insights.
+BVJ: Growth & Enterprise | Usage Analytics | +20% optimization value capture
+"""
+
+from typing import Dict, List, Any, Optional
+from datetime import datetime
+import time
+
+from app.logging_config import central_logger as logger
+from app.agents.base.interface import (
+    BaseExecutionInterface, ExecutionContext, WebSocketManagerProtocol
+)
+from app.agents.base.reliability_manager import ReliabilityManager
+from app.agents.base.monitoring import ExecutionMonitor
+from app.core.exceptions import ProcessingError
 
 
-class UsagePatternProcessor:
-    """Process usage patterns with focused functions."""
+class UsagePatternProcessor(BaseExecutionInterface):
+    """Modernized usage pattern processor with standardized execution.
     
-    def process_patterns(self, data: List[Dict[str, Any]], days_back: int) -> Dict[str, Any]:
-        """Process usage patterns data."""
+    Provides usage pattern analysis with reliability patterns
+    and performance monitoring via BaseExecutionInterface.
+    """
+    
+    def __init__(self, websocket_manager: Optional[WebSocketManagerProtocol] = None,
+                 reliability_manager: Optional[ReliabilityManager] = None) -> None:
+        self._init_base_interface(websocket_manager)
+        self._init_modern_components(reliability_manager)
+        
+    def _init_base_interface(self, websocket_manager: Optional[WebSocketManagerProtocol]) -> None:
+        """Initialize base execution interface."""
+        BaseExecutionInterface.__init__(self, "UsagePatternProcessor", websocket_manager)
+        
+    def _init_modern_components(self, reliability_manager: Optional[ReliabilityManager]) -> None:
+        """Initialize modern reliability and monitoring components."""
+        self.reliability_manager = reliability_manager or ReliabilityManager()
+        self.execution_monitor = ExecutionMonitor("UsagePatternProcessor")
+        self.processor_core = UsagePatternProcessorCore()
+    
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute usage pattern processing with monitoring."""
+        await self.send_status_update(context, "processing", "Starting pattern analysis")
+        
+        data = self._extract_data_from_context(context)
+        days_back = self._extract_days_back_from_context(context)
+        
+        result = await self._execute_pattern_processing(data, days_back, context)
+        return self._format_execution_result(result)
+        
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate preconditions for pattern processing."""
+        return self._validate_context_data(context) and self._validate_context_params(context)
+        
+    async def process_patterns(self, data: List[Dict[str, Any]], days_back: int) -> Dict[str, Any]:
+        """Process usage patterns with reliability patterns."""
+        start_time = time.time()
+        
+        try:
+            return await self._process_with_monitoring(data, days_back, start_time)
+        except Exception as e:
+            execution_time = (time.time() - start_time) * 1000
+            self._log_processing_error(e, execution_time)
+            raise ProcessingError(f"Pattern processing failed: {str(e)}")
+    
+    async def _execute_pattern_processing(self, data: List[Dict[str, Any]], 
+                                        days_back: int, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute pattern processing with reliability."""
+        async def processing_func():
+            return self.processor_core.process_patterns_sync(data, days_back)
+            
+        return await self.reliability_manager.execute_with_reliability(
+            context, processing_func
+        )
+        
+    async def _process_with_monitoring(self, data: List[Dict[str, Any]], 
+                                     days_back: int, start_time: float) -> Dict[str, Any]:
+        """Process patterns with performance monitoring."""
+        with self.execution_monitor.track_execution("pattern_processing"):
+            result = self.processor_core.process_patterns_sync(data, days_back)
+            execution_time = (time.time() - start_time) * 1000
+            logger.info(f"Pattern processing completed in {execution_time:.2f}ms")
+            return result
+    
+    def _extract_data_from_context(self, context: ExecutionContext) -> List[Dict[str, Any]]:
+        """Extract data from execution context."""
+        return context.state.data_result.get('raw_data', []) if context.state.data_result else []
+        
+    def _extract_days_back_from_context(self, context: ExecutionContext) -> int:
+        """Extract days_back parameter from context."""
+        return context.metadata.get('days_back', 30)
+        
+    def _validate_context_data(self, context: ExecutionContext) -> bool:
+        """Validate context contains required data."""
+        return hasattr(context.state, 'data_result') and context.state.data_result is not None
+        
+    def _validate_context_params(self, context: ExecutionContext) -> bool:
+        """Validate context contains required parameters."""
+        return 'days_back' in context.metadata or hasattr(context.state, 'data_result')
+    
+    def _format_execution_result(self, result: Dict[str, Any]) -> Dict[str, Any]:
+        """Format result for BaseExecutionInterface."""
+        return {
+            "success": True,
+            "pattern_analysis": result,
+            "processor": "UsagePatternProcessor",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        
+    def _log_processing_error(self, error: Exception, execution_time: float) -> None:
+        """Log processing error with details."""
+        logger.error(
+            f"Usage pattern processing failed in {execution_time:.2f}ms: {str(error)}"
+        )
+
+
+class UsagePatternProcessorCore:
+    """Core processing logic separated for modularity.
+    
+    Contains the actual pattern processing algorithms
+    without the execution interface overhead.
+    """
+    
+    def process_patterns_sync(self, data: List[Dict[str, Any]], days_back: int) -> Dict[str, Any]:
+        """Process usage patterns data synchronously."""
         daily_patterns = {}
         hourly_patterns = {}
         
@@ -26,7 +145,7 @@ class UsagePatternProcessor:
         
         daily_patterns[dow]["total_events"] += row['event_count']
         daily_patterns[dow]["total_cost"] += row['total_cost']
-    
+        
     def _aggregate_hourly_patterns(self, row: Dict[str, Any], hourly_patterns: Dict[int, Dict[str, Any]]) -> None:
         """Aggregate hourly usage patterns."""
         hour = row['hour_of_day']
@@ -52,7 +171,7 @@ class UsagePatternProcessor:
             "total_events": 0,
             "total_cost": 0
         }
-    
+        
     def _create_pattern_summary(
         self,
         daily_patterns: Dict[int, Dict[str, Any]],
@@ -81,7 +200,7 @@ class UsagePatternProcessor:
     def _calculate_total_cost(self, daily_patterns: Dict[int, Dict[str, Any]]) -> float:
         """Calculate total cost across all days."""
         return sum(d["total_cost"] for d in daily_patterns.values())
-    
+        
     def _format_pattern_result(
         self,
         daily_patterns: Dict[int, Dict[str, Any]],
