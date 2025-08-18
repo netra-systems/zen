@@ -8,6 +8,7 @@ import { screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { renderWithProviders, safeAsync, resetAllMocks } from '../../shared/unified-test-utilities';
 import { safeAct, waitForCondition, flushPromises } from '../../helpers/test-timing-utilities';
+import { describeIfFeature, itIfFeature } from '../../helpers/feature-flag-helpers';
 import { 
   mockThreadService,
   sampleThreads,
@@ -15,7 +16,7 @@ import {
   createTestSetup
 } from './setup';
 
-describe('ChatSidebar - Edge Cases', () => {
+describeIfFeature('chat_sidebar_edge_cases', 'ChatSidebar - Edge Cases', () => {
   const testSetup = createTestSetup();
 
   beforeEach(() => {

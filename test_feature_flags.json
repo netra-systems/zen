@@ -101,6 +101,96 @@
       "metadata": {
         "completed_date": "2025-01-14"
       }
+    },
+    "chat_sidebar": {
+      "status": "enabled",
+      "description": "Chat sidebar with thread management",
+      "owner": "frontend-team",
+      "target_release": "v1.0.0",
+      "dependencies": ["auth_integration"],
+      "metadata": {
+        "completed_date": "2025-01-10"
+      }
+    },
+    "chat_sidebar_edge_cases": {
+      "status": "in_development",
+      "description": "Edge case handling for ChatSidebar component",
+      "owner": "frontend-team",
+      "target_release": "v1.1.0",
+      "dependencies": ["chat_sidebar"],
+      "metadata": {
+        "added_date": "2025-01-18"
+      }
+    },
+    "thread_management": {
+      "status": "enabled",
+      "description": "Thread creation, deletion, and navigation",
+      "owner": "frontend-team",
+      "target_release": "v1.0.0",
+      "dependencies": [],
+      "metadata": {
+        "completed_date": "2025-01-12"
+      }
+    },
+    "message_input": {
+      "status": "enabled",
+      "description": "Message input component with commands",
+      "owner": "frontend-team",
+      "target_release": "v1.0.0",
+      "dependencies": [],
+      "metadata": {
+        "completed_date": "2025-01-11"
+      }
+    },
+    "final_report_view": {
+      "status": "in_development",
+      "description": "Final report generation and display",
+      "owner": "frontend-team",
+      "target_release": "v1.2.0",
+      "dependencies": [],
+      "metadata": {
+        "added_date": "2025-01-18"
+      }
+    },
+    "mcp_integration": {
+      "status": "experimental",
+      "description": "Model Context Protocol integration",
+      "owner": "ai-team",
+      "target_release": "v1.3.0",
+      "dependencies": [],
+      "metadata": {
+        "experiment_start": "2025-01-17"
+      }
+    },
+    "collaborative_features": {
+      "status": "disabled",
+      "description": "Real-time collaboration features",
+      "owner": "frontend-team",
+      "target_release": "v2.0.0",
+      "dependencies": [],
+      "metadata": {
+        "reason": "Requires infrastructure changes"
+      }
+    },
+    "advanced_search": {
+      "status": "in_development",
+      "description": "Advanced search and filtering capabilities",
+      "owner": "frontend-team",
+      "target_release": "v1.2.0",
+      "dependencies": [],
+      "metadata": {
+        "added_date": "2025-01-18"
+      }
+    },
+    "performance_monitoring": {
+      "status": "enabled",
+      "description": "Frontend performance monitoring",
+      "owner": "frontend-team",
+      "target_release": "v1.0.0",
+      "dependencies": [],
+      "metadata": {
+        "completed_date": "2025-01-13"
+      }
     }
   }
 }

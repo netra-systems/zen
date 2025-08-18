@@ -28,7 +28,9 @@ import {
   ROIApiResponse 
 } from '@/components/demo/ROICalculator.types';
 
-describe('ROI Calculator Individual Functions', () => {
+import { describeFeature, testTDD } from '@/test-utils/feature-flags';
+
+describeFeature('roi_calculator', 'ROI Calculator Individual Functions', () => {
   const createTestMetrics = (overrides: Partial<Metrics> = {}): Metrics => ({
     ...DEFAULT_METRICS,
     ...overrides

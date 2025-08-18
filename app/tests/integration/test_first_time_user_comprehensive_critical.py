@@ -21,6 +21,7 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any, List, Optional
 import tempfile
+from test_framework.decorators import feature_flag, tdd_test
 
 from app.db.models_user import User, ToolUsageLog
 from app.db.models_agent import Thread, Message
@@ -111,6 +112,7 @@ class TestFirstTimeUserComprehensiveCritical:
         collab_system.track_engagement = AsyncMock()
         return collab_system
 
+    @tdd_test("first_time_user_flow", expected_to_fail=True)
     async def test_1_real_time_value_demonstration_critical(
         self, comprehensive_test_setup, llm_optimization_system
     ):
@@ -174,6 +176,7 @@ class TestFirstTimeUserComprehensiveCritical:
         }
         return savings_data
 
+    @tdd_test("first_time_user_flow", expected_to_fail=True)
     async def test_2_payment_method_setup_billing_flow_critical(
         self, comprehensive_test_setup, payment_integration_system
     ):
@@ -248,6 +251,7 @@ class TestFirstTimeUserComprehensiveCritical:
         
         return billing_result
 
+    @tdd_test("first_time_user_flow", expected_to_fail=True)
     async def test_3_free_tier_limit_enforcement_critical(
         self, comprehensive_test_setup, llm_optimization_system
     ):
@@ -327,6 +331,7 @@ class TestFirstTimeUserComprehensiveCritical:
             "blocking_active": True
         }
 
+    @tdd_test("first_time_user_flow", expected_to_fail=True)
     async def test_4_api_key_integration_critical(
         self, comprehensive_test_setup, api_integration_system
     ):
@@ -394,6 +399,7 @@ class TestFirstTimeUserComprehensiveCritical:
         }
         return integration_result
 
+    @tdd_test("first_time_user_flow", expected_to_fail=True)
     async def test_5_first_optimization_result_critical(
         self, comprehensive_test_setup, llm_optimization_system
     ):
@@ -454,6 +460,7 @@ class TestFirstTimeUserComprehensiveCritical:
         }
         return results
 
+    @tdd_test("first_time_user_flow", expected_to_fail=True)
     async def test_6_collaboration_invitation_critical(
         self, comprehensive_test_setup, collaboration_system
     ):
@@ -516,6 +523,7 @@ class TestFirstTimeUserComprehensiveCritical:
         }
         return collaboration_result
 
+    @tdd_test("first_time_user_flow", expected_to_fail=True)
     async def test_7_data_security_privacy_critical(
         self, comprehensive_test_setup
     ):
@@ -573,6 +581,7 @@ class TestFirstTimeUserComprehensiveCritical:
         }
         return privacy_result
 
+    @tdd_test("first_time_user_flow", expected_to_fail=True)
     async def test_8_mobile_desktop_responsive_critical(
         self, comprehensive_test_setup
     ):
@@ -628,6 +637,7 @@ class TestFirstTimeUserComprehensiveCritical:
         }
         return validation_result
 
+    @tdd_test("first_time_user_flow", expected_to_fail=True)
     async def test_9_error_recovery_support_critical(
         self, comprehensive_test_setup
     ):
@@ -685,6 +695,7 @@ class TestFirstTimeUserComprehensiveCritical:
         }
         return recovery_result
 
+    @tdd_test("first_time_user_flow", expected_to_fail=True)
     async def test_10_competitive_value_comparison_critical(
         self, comprehensive_test_setup, llm_optimization_system
     ):

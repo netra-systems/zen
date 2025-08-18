@@ -161,6 +161,17 @@ class FeatureFlagManager:
         return {name for name, flag in self.flags.items() 
                 if flag.status == FeatureStatus.DISABLED}
     
+    def get_feature_summary(self) -> Dict:
+        """Get summary of all feature flags."""
+        return {
+            "enabled": list(self.get_enabled_features()),
+            "in_development": list(self.get_in_development_features()),
+            "disabled": list(self.get_disabled_features()),
+            "experimental": list({name for name, flag in self.flags.items() 
+                                 if flag.status == FeatureStatus.EXPERIMENTAL}),
+            "total": len(self.flags)
+        }
+    
     def save_flags(self):
         """Save current flags to config file."""
         data = {

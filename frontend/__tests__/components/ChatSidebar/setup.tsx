@@ -20,10 +20,61 @@ jest.mock('@/store/unified-chat');
 jest.mock('@/store/authStore');
 jest.mock('@/hooks/useAuthState');
 
-// Mock AuthGate to always render children (authenticated state) - CRITICAL
+// Mock AuthGate with proper authentication logic - CRITICAL
 jest.mock('@/components/auth/AuthGate', () => ({
-  AuthGate: ({ children }: { children: React.ReactNode }) => {
-    console.log('AuthGate mock called, rendering children');
+  AuthGate: ({ 
+    children, 
+    fallback, 
+    showLoginPrompt = true, 
+    requireTier, 
+    customMessage 
+  }: { 
+    children: React.ReactNode; 
+    fallback?: React.ReactNode; 
+    showLoginPrompt?: boolean; 
+    requireTier?: 'Early' | 'Mid' | 'Enterprise';
+    customMessage?: string;
+  }) => {
+    // Use the mocked useAuthState hook to get authentication status
+    const { useAuthState } = require('@/hooks/useAuthState');
+    const { isAuthenticated, isLoading, userTier } = useAuthState();
+    
+    console.log('AuthGate mock called', { 
+      isAuthenticated, 
+      isLoading, 
+      userTier, 
+      requireTier, 
+      hasFallback: !!fallback 
+    });
+
+    // Show loading state during auth check
+    if (isLoading) {
+      return <div data-testid="auth-loading">Verifying access...</div>;
+    }
+
+    // Show fallback for unauthenticated users
+    if (!isAuthenticated) {
+      if (fallback) return <div data-testid="auth-fallback">{fallback}</div>;
+      if (!showLoginPrompt) return null;
+      return <div data-testid="login-prompt">Login Required</div>;
+    }
+
+    // Check tier requirements
+    if (requireTier) {
+      const tierLevels = { Free: 0, Early: 1, Mid: 2, Enterprise: 3 };
+      const current = tierLevels[userTier as keyof typeof tierLevels] || 0;
+      const required = tierLevels[requireTier as keyof typeof tierLevels] || 0;
+      
+      if (current < required) {
+        return (
+          <div data-testid="tier-upgrade">
+            Upgrade to {requireTier} required (current: {userTier})
+          </div>
+        );
+      }
+    }
+
+    // Render authenticated content
     return <div data-testid="mocked-authgate">{children}</div>;
   }
 }));
@@ -265,10 +316,16 @@ export class ChatSidebarTestSetup {
     // This ensures our configurations aren't cleared
     jest.clearAllMocks();
     
-    // Configure core store mocks
-    (useUnifiedChatStore as jest.Mock).mockReturnValue(mockChatStore);
-    (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
+    // Configure authentication FIRST - critical for AuthGate mock
+    console.log('🔧 Configuring authentication mocks with:', { 
+      isAuthenticated: mockAuthState.isAuthenticated, 
+      userTier: mockAuthState.userTier 
+    });
     (useAuthState as jest.Mock).mockReturnValue(mockAuthState);
+    (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
+    
+    // Configure other store mocks
+    (useUnifiedChatStore as jest.Mock).mockReturnValue(mockChatStore);
     
     // CRITICAL: Reset ChatSidebar hooks to default empty state
     // This ensures clean state before each test - use mockReset then mockReturnValue
@@ -424,6 +481,8 @@ export class ChatSidebarTestSetup {
   // Configure auth state
   configureAuthState(overrides: Partial<typeof mockAuthState>) {
     const authStateConfig = { ...mockAuthState, ...overrides };
+    console.log('🔧 configureAuthState called with overrides:', overrides);
+    console.log('🎯 Final authStateConfig:', authStateConfig);
     (useAuthState as jest.Mock).mockReturnValue(authStateConfig);
     return authStateConfig;
   }
