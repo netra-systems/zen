@@ -19,6 +19,11 @@ class DocumentCreate(BaseModel):
 class BulkIndexRequest(BaseModel):
     documents: List[DocumentCreate]
 
+class ExtractMetadataRequest(BaseModel):
+    title: str
+    file_url: str
+    extract_metadata: bool = True
+
 @router.get("/tables", response_model=List[str])
 async def list_corpus_tables(current_user: User = Depends(get_current_user)) -> List[str]:
     return await clickhouse_service.list_corpus_tables()
@@ -196,4 +201,17 @@ async def search_corpus_advanced(request: SearchRequest, current_user: User = De
 async def bulk_index_documents(request: BulkIndexRequest):
     """Bulk index documents"""
     return {"indexed": len(request.documents), "failed": 0}
+
+@router.post("/extract")
+async def extract_document_metadata(request: ExtractMetadataRequest, current_user: User = Depends(get_current_user)):
+    """Extract metadata from document using file URL"""
+    try:
+        result = await corpus_service.batch_index_documents([{
+            "title": request.title,
+            "file_url": request.file_url,
+            "extract_metadata": request.extract_metadata
+        }])
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Metadata extraction failed: {str(e)}")
 
