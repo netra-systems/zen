@@ -6,7 +6,7 @@ with configurable rules and cooldown mechanisms.
 
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 
 from app.core.error_aggregation_base import (
     AlertRule, AlertSeverity, ErrorAlert, ErrorPattern, ErrorTrend
@@ -41,49 +41,59 @@ class AlertEngine:
     
     def _create_high_error_rate_rule(self) -> AlertRule:
         """Create high error rate alert rule."""
-        return self._build_alert_rule(
-            rule_id='high_error_rate',
-            name='High Error Rate',
-            description='Error rate exceeds threshold',
-            condition='pattern.count > 50 and window_minutes <= 60',
-            severity=AlertSeverity.HIGH,
-            threshold_count=50,
-            time_window_minutes=60
-        )
+        params = self._get_high_error_rate_params()
+        return self._build_alert_rule(**params)
+    
+    def _get_high_error_rate_params(self) -> Dict:
+        """Get parameters for high error rate rule."""
+        return {
+            'rule_id': 'high_error_rate', 'name': 'High Error Rate',
+            'description': 'Error rate exceeds threshold',
+            'condition': 'pattern.count > 50 and window_minutes <= 60',
+            'severity': AlertSeverity.HIGH, 'threshold_count': 50, 'time_window_minutes': 60
+        }
     
     def _create_critical_spike_rule(self) -> AlertRule:
         """Create critical error spike alert rule."""
-        return self._build_alert_rule(
-            rule_id='critical_error_spike',
-            name='Critical Error Spike',
-            description='Sudden spike in critical errors',
-            condition='trend.is_spike and pattern.severity_distribution.get("critical", 0) > 0',
-            severity=AlertSeverity.CRITICAL,
-            time_window_minutes=30
-        )
+        params = self._get_critical_spike_params()
+        return self._build_alert_rule(**params)
+    
+    def _get_critical_spike_params(self) -> Dict:
+        """Get parameters for critical spike rule."""
+        return {
+            'rule_id': 'critical_error_spike', 'name': 'Critical Error Spike',
+            'description': 'Sudden spike in critical errors',
+            'condition': 'trend.is_spike and pattern.severity_distribution.get("critical", 0) > 0',
+            'severity': AlertSeverity.CRITICAL, 'time_window_minutes': 30
+        }
     
     def _create_sustained_errors_rule(self) -> AlertRule:
         """Create sustained error pattern alert rule."""
-        return self._build_alert_rule(
-            rule_id='sustained_errors',
-            name='Sustained Error Pattern',
-            description='Errors occurring consistently over time',
-            condition='trend.is_sustained and pattern.count > 20',
-            severity=AlertSeverity.MEDIUM,
-            time_window_minutes=120
-        )
+        params = self._get_sustained_errors_params()
+        return self._build_alert_rule(**params)
+    
+    def _get_sustained_errors_params(self) -> Dict:
+        """Get parameters for sustained errors rule."""
+        return {
+            'rule_id': 'sustained_errors', 'name': 'Sustained Error Pattern',
+            'description': 'Errors occurring consistently over time',
+            'condition': 'trend.is_sustained and pattern.count > 20',
+            'severity': AlertSeverity.MEDIUM, 'time_window_minutes': 120
+        }
     
     def _create_new_pattern_rule(self) -> AlertRule:
         """Create new error pattern alert rule."""
-        return self._build_alert_rule(
-            rule_id='new_error_pattern',
-            name='New Error Pattern',
-            description='Previously unseen error pattern',
-            condition='pattern.count >= 5 and pattern_age_minutes < 30',
-            severity=AlertSeverity.MEDIUM,
-            threshold_count=5,
-            time_window_minutes=30
-        )
+        params = self._get_new_pattern_params()
+        return self._build_alert_rule(**params)
+    
+    def _get_new_pattern_params(self) -> Dict:
+        """Get parameters for new pattern rule."""
+        return {
+            'rule_id': 'new_error_pattern', 'name': 'New Error Pattern',
+            'description': 'Previously unseen error pattern',
+            'condition': 'pattern.count >= 5 and pattern_age_minutes < 30',
+            'severity': AlertSeverity.MEDIUM, 'threshold_count': 5, 'time_window_minutes': 30
+        }
     
     def _build_alert_rule(
         self,
@@ -96,15 +106,21 @@ class AlertEngine:
         threshold_count: Optional[int] = None
     ) -> AlertRule:
         """Build alert rule with parameters."""
-        return AlertRule(
-            rule_id=rule_id,
-            name=name,
-            description=description,
-            condition=condition,
-            severity=severity,
-            threshold_count=threshold_count,
-            time_window_minutes=time_window_minutes
+        rule_params = self._prepare_rule_parameters(
+            rule_id, name, description, condition, severity, threshold_count, time_window_minutes
         )
+        return AlertRule(**rule_params)
+    
+    def _prepare_rule_parameters(
+        self, rule_id: str, name: str, description: str, condition: str, 
+        severity: AlertSeverity, threshold_count: Optional[int], time_window_minutes: int
+    ) -> Dict:
+        """Prepare parameters for AlertRule creation."""
+        return {
+            'rule_id': rule_id, 'name': name, 'description': description,
+            'condition': condition, 'severity': severity,
+            'threshold_count': threshold_count, 'time_window_minutes': time_window_minutes
+        }
     
     def add_rule(self, rule: AlertRule) -> None:
         """Add custom alert rule."""
@@ -187,6 +203,10 @@ class AlertEngine:
         trend: Optional[ErrorTrend]
     ) -> bool:
         """Evaluate rule condition."""
+        return self._safe_rule_evaluation(rule, pattern, trend)
+    
+    def _safe_rule_evaluation(self, rule: AlertRule, pattern: ErrorPattern, trend: Optional[ErrorTrend]) -> bool:
+        """Safely evaluate rule with error handling."""
         try:
             return self._execute_rule_evaluation(rule, pattern, trend)
         except Exception as e:
@@ -222,11 +242,14 @@ class AlertEngine:
         self, rule: AlertRule, pattern: ErrorPattern, trend: Optional[ErrorTrend], pattern_age: float
     ) -> Dict:
         """Create evaluation dictionary."""
+        context_data = self._prepare_context_data(pattern, trend, rule.time_window_minutes, pattern_age)
+        return context_data
+    
+    def _prepare_context_data(self, pattern: ErrorPattern, trend: Optional[ErrorTrend], window_minutes: int, pattern_age: float) -> Dict:
+        """Prepare context data for evaluation."""
         return {
-            'pattern': pattern,
-            'trend': trend,
-            'window_minutes': rule.time_window_minutes,
-            'pattern_age_minutes': pattern_age
+            'pattern': pattern, 'trend': trend,
+            'window_minutes': window_minutes, 'pattern_age_minutes': pattern_age
         }
     
     def _create_alert(
@@ -236,9 +259,14 @@ class AlertEngine:
         trend: Optional[ErrorTrend]
     ) -> ErrorAlert:
         """Create alert from rule and pattern."""
+        alert_components = self._prepare_alert_components(rule, pattern, trend)
+        return self._build_error_alert(**alert_components)
+    
+    def _prepare_alert_components(self, rule: AlertRule, pattern: ErrorPattern, trend: Optional[ErrorTrend]) -> Dict:
+        """Prepare components for alert creation."""
         alert_id = self._generate_alert_id()
         message = self._generate_alert_message(rule, pattern, trend)
-        return self._build_error_alert(alert_id, rule, pattern, trend, message)
+        return {'alert_id': alert_id, 'rule': rule, 'pattern': pattern, 'trend': trend, 'message': message}
     
     def _generate_alert_id(self) -> str:
         """Generate unique alert ID."""
@@ -249,13 +277,18 @@ class AlertEngine:
         trend: Optional[ErrorTrend], message: str
     ) -> ErrorAlert:
         """Build error alert instance."""
-        return ErrorAlert(
-            alert_id=alert_id,
-            rule=rule,
-            pattern=pattern,
-            trend=trend,
-            message=message
-        )
+        alert_params = self._prepare_alert_parameters(alert_id, rule, pattern, trend, message)
+        return ErrorAlert(**alert_params)
+    
+    def _prepare_alert_parameters(
+        self, alert_id: str, rule: AlertRule, pattern: ErrorPattern, 
+        trend: Optional[ErrorTrend], message: str
+    ) -> Dict:
+        """Prepare parameters for ErrorAlert creation."""
+        return {
+            'alert_id': alert_id, 'rule': rule, 'pattern': pattern,
+            'trend': trend, 'message': message
+        }
     
     def _generate_alert_message(
         self,
@@ -264,9 +297,14 @@ class AlertEngine:
         trend: Optional[ErrorTrend]
     ) -> str:
         """Generate alert message."""
+        message_components = self._collect_message_components(rule, pattern, trend)
+        return self._combine_message_parts(message_components['base_parts'], message_components['trend_parts'])
+    
+    def _collect_message_components(self, rule: AlertRule, pattern: ErrorPattern, trend: Optional[ErrorTrend]) -> Dict:
+        """Collect all message components."""
         base_parts = self._get_base_message_parts(rule, pattern)
         trend_parts = self._get_trend_message_parts(trend)
-        return self._combine_message_parts(base_parts, trend_parts)
+        return {'base_parts': base_parts, 'trend_parts': trend_parts}
     
     def _combine_message_parts(self, base_parts: List[str], trend_parts: List[str]) -> str:
         """Combine message parts into final message."""
@@ -333,6 +371,11 @@ class MetricsReporter:
     
     def _build_status_dict(self) -> Dict:
         """Build system status dictionary."""
+        status_components = self._collect_status_components()
+        return status_components
+    
+    def _collect_status_components(self) -> Dict:
+        """Collect all status components."""
         return {
             'total_patterns': len(self.aggregator.patterns),
             'active_patterns': len(self.aggregator.get_patterns_in_window(60)),

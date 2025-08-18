@@ -101,15 +101,20 @@ class GracefulDegradationManager:
         context: Optional[Dict[str, Any]] = None
     ) -> Any:
         """Manually degrade a specific service."""
+        self._validate_service_exists(service_name)
+        return await self._perform_service_degradation(service_name, level, context or {})
+    
+    def _validate_service_exists(self, service_name: str) -> None:
+        """Validate that service exists in strategies."""
         if service_name not in self.strategies:
             raise ValueError(f"Unknown service: {service_name}")
-        
+    
+    async def _perform_service_degradation(self, service_name: str, level: DegradationLevel, context: Dict[str, Any]) -> Any:
+        """Perform the actual service degradation."""
         strategy = self.strategies[service_name]
         service_status = self.services[service_name]
         logger.info(f"Degrading service {service_name} to {level.value}")
-        return await self._execute_service_degradation(
-            strategy, service_status, level, context or {}
-        )
+        return await self._execute_service_degradation(strategy, service_status, level, context)
     
     async def _execute_service_degradation(
         self,
@@ -120,18 +125,24 @@ class GracefulDegradationManager:
     ) -> Any:
         """Execute degradation for a service."""
         result = await strategy.degrade_to_level(level, context)
+        self._update_service_status(service_status, level)
+        return result
+    
+    def _update_service_status(self, service_status: ServiceStatus, level: DegradationLevel) -> None:
+        """Update service status after degradation."""
         service_status.degradation_level = level
         service_status.last_check = datetime.now()
-        return result
     
     async def restore_service(self, service_name: str) -> bool:
         """Attempt to restore service to normal operation."""
         if service_name not in self.strategies:
             return False
-        
+        return await self._attempt_service_restoration(service_name)
+    
+    async def _attempt_service_restoration(self, service_name: str) -> bool:
+        """Attempt to restore service if possible."""
         strategy = self.strategies[service_name]
         service_status = self.services[service_name]
-        
         if await strategy.can_restore_service():
             self._restore_service_status(service_status, service_name)
             return True
@@ -163,11 +174,16 @@ class GracefulDegradationManager:
         service_status: ServiceStatus
     ) -> None:
         """Check if service needs degradation and apply it."""
+        target_level = self._determine_target_level(service_name, service_status)
+        await self._apply_degradation_if_changed(service_name, service_status, target_level)
+    
+    def _determine_target_level(self, service_name: str, service_status: ServiceStatus) -> DegradationLevel:
+        """Determine target degradation level for service."""
         policy = self.policies[service_name]
-        target_level = self._calculate_target_degradation_level(
-            service_name, service_status, policy
-        )
-        
+        return self._calculate_target_degradation_level(service_name, service_status, policy)
+    
+    async def _apply_degradation_if_changed(self, service_name: str, service_status: ServiceStatus, target_level: DegradationLevel) -> None:
+        """Apply degradation if target level differs from current."""
         if target_level != service_status.degradation_level:
             await self.degrade_service(service_name, target_level)
     

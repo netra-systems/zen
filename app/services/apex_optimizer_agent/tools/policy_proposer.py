@@ -67,8 +67,9 @@ class PolicyProposer(BaseTool):
             policies.append(self._create_learned_policy(pattern, sorted_outcomes, baseline_metrics, pattern_impact_fraction))
         return policies, outcomes
 
-    async def _simulate_policy_outcome(self, context: ToolContext, pattern: DiscoveredPattern, supply_option: SupplyOption, user_goal: str, span: UnifiedLogEntry) -> PredictedOutcome:
-        prompt = f"""
+    def _build_simulation_prompt(self, pattern: DiscoveredPattern, supply_option: SupplyOption, user_goal: str) -> str:
+        """Build prompt for simulation LLM call"""
+        return f"""
         Simulate the outcome of routing a request with the following characteristics to the given supply option.
 
         Request Pattern:
@@ -91,14 +92,26 @@ class PolicyProposer(BaseTool):
 
         Return the result as a JSON object.
         """
+
+    async def _execute_llm_simulation(self, context: ToolContext, prompt: str) -> Any:
+        """Execute LLM simulation call"""
         llm = context.llm_manager.get_llm(self.llm_name or "default")
         response = await llm.ainvoke(prompt)
+        return response
+
+    def _parse_simulation_response(self, response: Any) -> PredictedOutcome:
+        """Parse simulation response and handle errors"""
         try:
             content = response.content if hasattr(response, 'content') else str(response)
             return PredictedOutcome.model_validate_json(content)
         except Exception as e:
-            # Handle parsing errors
             return None
+
+    async def _simulate_policy_outcome(self, context: ToolContext, pattern: DiscoveredPattern, supply_option: SupplyOption, user_goal: str, span: UnifiedLogEntry) -> PredictedOutcome:
+        """Simulate policy outcome through LLM prediction"""
+        prompt = self._build_simulation_prompt(pattern, supply_option, user_goal)
+        response = await self._execute_llm_simulation(context, prompt)
+        return self._parse_simulation_response(response)
 
     async def _get_supply_catalog(self, context: ToolContext) -> List[SupplyOption]:
         """Retrieves the supply catalog from the database."""

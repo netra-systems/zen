@@ -100,13 +100,17 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
 
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute core action plan generation logic."""
+        await self._send_execution_start_update(context)
+        action_plan_result = await self._execute_action_plan_generation(context)
+        await self._update_state_and_notify(context, action_plan_result)
+        return {"action_plan_result": action_plan_result}
+
+    async def _send_execution_start_update(self, context: ExecutionContext) -> None:
+        """Send execution start update."""
         await self.send_status_update(
             context, "executing", 
             "Creating action plan based on optimization strategies..."
         )
-        action_plan_result = await self._execute_action_plan_generation(context)
-        await self._update_state_and_notify(context, action_plan_result)
-        return {"action_plan_result": action_plan_result}
 
     async def _execute_action_plan_generation(self, context: ExecutionContext) -> ActionPlanResult:
         """Generate action plan from state data."""
@@ -130,8 +134,12 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
     ) -> None:
         """Send status update via WebSocket."""
         if context.stream_updates:
-            mapped_status = self._map_status_to_websocket_format(status)
-            await self._send_mapped_update(context.run_id, mapped_status, message)
+            await self._process_and_send_status_update(context.run_id, status, message)
+
+    async def _process_and_send_status_update(self, run_id: str, status: str, message: str) -> None:
+        """Process and send status update."""
+        mapped_status = self._map_status_to_websocket_format(status)
+        await self._send_mapped_update(run_id, mapped_status, message)
 
     def _map_status_to_websocket_format(self, status: str) -> str:
         """Map internal status to websocket format."""
@@ -155,6 +163,10 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
         run_id: str, stream_updates: bool
     ) -> None:
         """Modernized execute using BaseExecutionEngine."""
+        await self._execute_with_logging(state, run_id, stream_updates)
+
+    async def _execute_with_logging(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+        """Execute with logging wrapper."""
         self._log_execution_start(run_id)
         context = self._create_execution_context(state, run_id, stream_updates)
         await self._execute_with_modern_pattern_and_fallback(context, state, run_id, stream_updates)
@@ -232,6 +244,10 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
     async def _get_llm_response(self, prompt: str, run_id: str) -> str:
         """Get LLM response with monitoring."""
         correlation_id = self._prepare_llm_request(prompt, run_id)
+        return await self._execute_monitored_llm_request(prompt, correlation_id)
+
+    async def _execute_monitored_llm_request(self, prompt: str, correlation_id: str) -> str:
+        """Execute LLM request with monitoring cleanup."""
         try:
             response = await self._execute_llm_request(prompt, correlation_id)
             self._finalize_llm_request_success(response, correlation_id)

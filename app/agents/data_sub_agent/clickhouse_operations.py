@@ -101,11 +101,21 @@ class ModernClickHouseOperations(BaseExecutionInterface, AgentExecutionMixin):
     
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute core ClickHouse operation logic."""
+        query_context = self._extract_query_context(context)
+        operation_type = query_context.operation_type
+        return await self._route_operation_by_type(operation_type, query_context, context)
+    
+    def _extract_query_context(self, context: ExecutionContext) -> QueryContext:
+        """Extract and validate query context from execution context."""
         query_context = context.metadata.get("query_context")
         if not query_context:
             raise DatabaseError("Missing query context in execution")
-        
-        operation_type = query_context.operation_type
+        return query_context
+    
+    async def _route_operation_by_type(self, operation_type: str, 
+                                      query_context: QueryContext, 
+                                      context: ExecutionContext) -> Dict[str, Any]:
+        """Route operation execution based on operation type."""
         if operation_type == "fetch_data":
             return await self._execute_fetch_data_operation(query_context, context)
         elif operation_type == "get_schema":
@@ -166,13 +176,18 @@ class ModernClickHouseOperations(BaseExecutionInterface, AgentExecutionMixin):
         """Perform the actual schema query."""
         try:
             schema_data = await self._execute_describe_query(table_name)
-            if schema_data is None:
-                return self._create_failed_schema_result("Schema query returned no data")
-            
-            formatted_result = self._format_schema_result(schema_data, table_name)
-            return self._create_successful_schema_result(formatted_result)
+            return await self._process_schema_data(schema_data, table_name)
         except Exception as e:
             return self._create_failed_schema_result(f"Schema query failed: {str(e)}")
+    
+    async def _process_schema_data(self, schema_data: Optional[List[Any]], 
+                                  table_name: str) -> ExecutionResult:
+        """Process schema data and return appropriate result."""
+        if schema_data is None:
+            return self._create_failed_schema_result("Schema query returned no data")
+        
+        formatted_result = self._format_schema_result(schema_data, table_name)
+        return self._create_successful_schema_result(formatted_result)
     
     def _create_failed_schema_result(self, error_message: str) -> ExecutionResult:
         """Create failed schema query result."""
@@ -305,30 +320,43 @@ class ModernClickHouseOperations(BaseExecutionInterface, AgentExecutionMixin):
     async def _cache_result_with_reliability(self, data: List[Dict[str, Any]], 
                                            query_context: QueryContext) -> None:
         """Cache query result with error handling."""
-        if not query_context.cache_key or not self.redis_manager:
+        if not self._should_cache_result(query_context):
             return
         
         try:
-            serialized_data = json.dumps(data, default=str)
-            await self.redis_manager.set(
-                query_context.cache_key, 
-                serialized_data, 
-                ex=query_context.cache_ttl
-            )
+            await self._store_data_in_cache(data, query_context)
         except Exception as e:
             logger.debug(f"Cache storage failed: {e}")
+    
+    def _should_cache_result(self, query_context: QueryContext) -> bool:
+        """Check if result should be cached."""
+        return bool(query_context.cache_key and self.redis_manager)
+    
+    async def _store_data_in_cache(self, data: List[Dict[str, Any]], 
+                                  query_context: QueryContext) -> None:
+        """Store serialized data in Redis cache."""
+        serialized_data = json.dumps(data, default=str)
+        await self.redis_manager.set(
+            query_context.cache_key, 
+            serialized_data, 
+            ex=query_context.cache_ttl
+        )
     
     async def _perform_database_query(self, query_context: QueryContext) -> ExecutionResult:
         """Perform the actual database query with full error handling."""
         try:
             query_result = await self._execute_clickhouse_query_safe(query_context.query)
-            if query_result is None:
-                return self._create_failed_query_result("Query returned no data")
-            
-            formatted_data = self._convert_result_to_dicts(query_result)
-            return self._create_successful_query_result(formatted_data)
+            return await self._process_query_result(query_result)
         except Exception as e:
             return self._create_failed_query_result(f"Database query failed: {str(e)}")
+    
+    async def _process_query_result(self, query_result: Optional[List[Any]]) -> ExecutionResult:
+        """Process database query result and return appropriate result."""
+        if query_result is None:
+            return self._create_failed_query_result("Query returned no data")
+        
+        formatted_data = self._convert_result_to_dicts(query_result)
+        return self._create_successful_query_result(formatted_data)
     
     def _create_failed_query_result(self, error_message: str) -> ExecutionResult:
         """Create failed query result."""

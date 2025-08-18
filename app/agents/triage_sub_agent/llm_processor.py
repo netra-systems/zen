@@ -120,7 +120,6 @@ class TriageLLMProcessor:
     async def _try_structured_then_fallback_llm(self, enhanced_prompt: str, run_id: str) -> dict:
         """Try structured LLM first with retry for ValidationError, then fallback to regular LLM."""
         correlation_id = generate_llm_correlation_id()
-        
         start_llm_heartbeat(correlation_id, "TriageSubAgent")
         
         try:
@@ -133,14 +132,22 @@ class TriageLLMProcessor:
     async def _execute_structured_llm_with_retries(self, enhanced_prompt: str, correlation_id: str) -> dict:
         """Execute structured LLM with retry mechanism."""
         log_agent_input("TriageSubAgent", "LLM", len(enhanced_prompt), correlation_id)
-        
         max_retries = 2
+        
         for attempt in range(max_retries):
-            try:
-                return await self._attempt_structured_llm_call(enhanced_prompt, correlation_id)
-            except ValidationError as ve:
-                if not self._should_retry_validation_error(attempt, max_retries, ve):
-                    raise ve
+            result = await self._try_structured_llm_attempt(enhanced_prompt, correlation_id, attempt, max_retries)
+            if result:
+                return result
+    
+    async def _try_structured_llm_attempt(self, enhanced_prompt: str, correlation_id: str, 
+                                        attempt: int, max_retries: int):
+        """Try a single structured LLM attempt."""
+        try:
+            return await self._attempt_structured_llm_call(enhanced_prompt, correlation_id)
+        except ValidationError as ve:
+            if not self._should_retry_validation_error(attempt, max_retries, ve):
+                raise ve
+            return None
     
     async def _attempt_structured_llm_call(self, enhanced_prompt: str, correlation_id: str) -> dict:
         """Attempt a single structured LLM call."""
@@ -191,21 +198,22 @@ class TriageLLMProcessor:
     async def _get_llm_response_with_json_instruction(self, enhanced_prompt: str) -> str:
         """Get LLM response with JSON formatting instruction."""
         correlation_id = generate_llm_correlation_id()
-        
         start_llm_heartbeat(correlation_id, "TriageSubAgent-Fallback")
         
         try:
-            prompt = enhanced_prompt + "\n\nIMPORTANT: Return a properly formatted JSON object."
-            log_agent_input("TriageSubAgent-Fallback", "LLM", len(prompt), correlation_id)
-            
-            response = await self.agent.llm_manager.ask_llm(prompt, llm_config_name='triage')
-            
-            log_agent_output("LLM", "TriageSubAgent-Fallback", 
-                           len(response), "success", correlation_id)
-            
-            return response
+            return await self._execute_llm_call_with_json_instruction(enhanced_prompt, correlation_id)
         finally:
             stop_llm_heartbeat(correlation_id)
+    
+    async def _execute_llm_call_with_json_instruction(self, enhanced_prompt: str, correlation_id: str) -> str:
+        """Execute LLM call with JSON formatting instruction."""
+        prompt = enhanced_prompt + "\n\nIMPORTANT: Return a properly formatted JSON object."
+        log_agent_input("TriageSubAgent-Fallback", "LLM", len(prompt), correlation_id)
+        
+        response = await self.agent.llm_manager.ask_llm(prompt, llm_config_name='triage')
+        log_agent_output("LLM", "TriageSubAgent-Fallback", 
+                       len(response), "success", correlation_id)
+        return response
     
     def _process_extracted_json(self, extracted_json: Optional[dict]) -> dict:
         """Process extracted JSON with validation attempt."""
@@ -224,16 +232,25 @@ class TriageLLMProcessor:
     
     def _create_basic_triage_fallback(self) -> dict:
         """Create basic triage fallback response."""
+        base_result = self._create_basic_fallback_structure()
+        base_result["metadata"] = self._create_fallback_metadata()
+        return base_result
+    
+    def _create_basic_fallback_structure(self) -> dict:
+        """Create basic fallback structure."""
         return {
             "category": "General Inquiry",
             "confidence_score": 0.3,
             "priority": "medium",
             "extracted_entities": {},
-            "tool_recommendations": [],
-            "metadata": {
-                "fallback_used": True,
-                "fallback_type": "basic_triage"
-            }
+            "tool_recommendations": []
+        }
+    
+    def _create_fallback_metadata(self) -> dict:
+        """Create fallback metadata."""
+        return {
+            "fallback_used": True,
+            "fallback_type": "basic_triage"
         }
     
     def _add_metadata(self, triage_result: dict, start_time: float, retry_count: int) -> dict:

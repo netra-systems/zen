@@ -56,9 +56,14 @@ class ApiErrorHandler:
         trace_id: Optional[str]
     ) -> ErrorResponse:
         """Process exception with trace ID and request context."""
+        context_data = self._prepare_exception_context(trace_id, request)
+        return self._route_exception_to_handler(exc, context_data['trace_id'], context_data['request_id'])
+    
+    def _prepare_exception_context(self, trace_id: Optional[str], request: Optional[Request]) -> Dict[str, Optional[str]]:
+        """Prepare exception context data."""
         prepared_trace_id = self._prepare_trace_id(trace_id)
         request_id = self._extract_request_id(request)
-        return self._route_exception_to_handler(exc, prepared_trace_id, request_id)
+        return {'trace_id': prepared_trace_id, 'request_id': request_id}
     
     def _prepare_trace_id(self, trace_id: Optional[str]) -> str:
         """Prepare trace ID for exception handling."""
@@ -77,9 +82,13 @@ class ApiErrorHandler:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Route exception to appropriate handler based on type."""
-        handler_map = self._get_exception_handler_map()
-        handler = self._find_exception_handler(exc, handler_map)
+        handler = self._select_exception_handler(exc)
         return handler(exc, trace_id, request_id)
+    
+    def _select_exception_handler(self, exc: Exception) -> callable:
+        """Select appropriate handler for exception type."""
+        handler_map = self._get_exception_handler_map()
+        return self._find_exception_handler(exc, handler_map)
     
     def _get_exception_handler_map(self) -> Dict[type, callable]:
         """Get mapping of exception types to handler methods."""
@@ -121,9 +130,13 @@ class ApiErrorHandler:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Process Netra exception with logging and response creation."""
+        self._handle_netra_exception_data(exc, trace_id)
+        return self._create_netra_error_response(exc, trace_id, request_id)
+    
+    def _handle_netra_exception_data(self, exc: NetraException, trace_id: str) -> None:
+        """Handle Netra exception data updates and logging."""
         self._update_exception_trace_id(exc, trace_id)
         self._log_error(exc, exc.error_details.severity)
-        return self._create_netra_error_response(exc, trace_id, request_id)
     
     def _update_exception_trace_id(self, exc: NetraException, trace_id: str) -> None:
         """Update trace ID in exception details."""
@@ -155,15 +168,18 @@ class ApiErrorHandler:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Construct ErrorResponse with Netra exception data."""
-        return ErrorResponse(
-            error_code=error_code_value,
-            message=exc.error_details.message,
-            user_message=exc.error_details.user_message,
-            details=exc.error_details.details,
-            trace_id=trace_id,
-            timestamp=exc.error_details.timestamp.isoformat(),
-            request_id=request_id
-        )
+        response_params = self._prepare_netra_response_params(exc, error_code_value, trace_id, request_id)
+        return ErrorResponse(**response_params)
+    
+    def _prepare_netra_response_params(
+        self, exc: NetraException, error_code_value: str, trace_id: str, request_id: Optional[str]
+    ) -> Dict[str, Any]:
+        """Prepare parameters for Netra error response."""
+        return {
+            'error_code': error_code_value, 'message': exc.error_details.message,
+            'user_message': exc.error_details.user_message, 'details': exc.error_details.details,
+            'trace_id': trace_id, 'timestamp': exc.error_details.timestamp.isoformat(), 'request_id': request_id
+        }
     
     def _extract_error_code_value(self, code) -> str:
         """Extract string value from error code."""
@@ -212,8 +228,12 @@ class ApiErrorHandler:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Process unknown exception with logging."""
-        self._logger.error(f"Unhandled exception: {exc}", exc_info=True)
+        self._log_unknown_exception(exc)
         return self._create_unknown_error_response(trace_id, request_id)
+    
+    def _log_unknown_exception(self, exc: Exception) -> None:
+        """Log unknown exception with full details."""
+        self._logger.error(f"Unhandled exception: {exc}", exc_info=True)
     
     def _create_unknown_error_response(
         self,
@@ -225,15 +245,16 @@ class ApiErrorHandler:
     
     def _build_unknown_error_response(self, trace_id: str, request_id: Optional[str]) -> ErrorResponse:
         """Build unknown exception error response."""
-        return ErrorResponse(
-            error_code=ErrorCode.INTERNAL_ERROR.value,
-            message="An internal server error occurred",
-            user_message="Something went wrong. Please try again later",
-            details={"error_id": trace_id},
-            trace_id=trace_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            request_id=request_id
-        )
+        response_params = self._prepare_unknown_response_params(trace_id, request_id)
+        return ErrorResponse(**response_params)
+    
+    def _prepare_unknown_response_params(self, trace_id: str, request_id: Optional[str]) -> Dict[str, Any]:
+        """Prepare parameters for unknown error response."""
+        return {
+            'error_code': ErrorCode.INTERNAL_ERROR.value, 'message': "An internal server error occurred",
+            'user_message': "Something went wrong. Please try again later", 'details': {"error_id": trace_id},
+            'trace_id': trace_id, 'timestamp': datetime.now(timezone.utc).isoformat(), 'request_id': request_id
+        }
     
     def _log_error(self, exc: Exception, severity: Union[ErrorSeverity, str]):
         """Log error based on severity level."""

@@ -217,8 +217,12 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     async def execute(self, state: DeepAgentState, 
                      run_id: str, stream_updates: bool) -> None:
         """Modernized execute using BaseExecutionEngine."""
-        # Create execution context for modern pattern
-        context = ExecutionContext(
+        context = self._create_supervisor_execution_context(state, run_id, stream_updates)
+        await self._execute_with_modern_pattern_and_fallback(context, state, run_id, stream_updates)
+
+    def _create_supervisor_execution_context(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> ExecutionContext:
+        """Create execution context for supervisor."""
+        return ExecutionContext(
             run_id=run_id,
             agent_name=self.name,
             state=state,
@@ -227,22 +231,34 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
             user_id=getattr(state, 'user_id', 'default_user'),
             metadata={"description": self.description}
         )
-        
+
+    async def _execute_with_modern_pattern_and_fallback(self, context: ExecutionContext, 
+                                                       state: DeepAgentState, 
+                                                       run_id: str, stream_updates: bool) -> None:
+        """Execute with modern pattern and fallback handling."""
         try:
-            # Execute with modern pattern using reliability manager
-            result = await self.reliability_manager.execute_with_reliability(
-                context, lambda: self.execution_engine.execute(self, context)
-            )
-            
-            # Handle result with error handler
-            if not result.success:
-                await self.error_handler.handle_execution_error(result.error, context)
-                
+            await self._execute_with_modern_reliability_pattern(context)
         except Exception as e:
-            # Handle with error handler and fallback
-            await self.error_handler.handle_execution_error(str(e), context)
-            logger.error(f"Modern execution failed, falling back to legacy: {e}")
-            await self._execute_legacy_workflow(state, run_id, stream_updates)
+            await self._handle_execution_exception(e, context, state, run_id, stream_updates)
+
+    async def _execute_with_modern_reliability_pattern(self, context: ExecutionContext) -> None:
+        """Execute with modern reliability pattern."""
+        result = await self.reliability_manager.execute_with_reliability(
+            context, lambda: self.execution_engine.execute(self, context)
+        )
+        await self._handle_execution_result(result, context)
+
+    async def _handle_execution_result(self, result, context: ExecutionContext) -> None:
+        """Handle execution result with error handling."""
+        if not result.success:
+            await self.error_handler.handle_execution_error(result.error, context)
+
+    async def _handle_execution_exception(self, exception: Exception, context: ExecutionContext,
+                                        state: DeepAgentState, run_id: str, stream_updates: bool) -> None:
+        """Handle execution exception with fallback."""
+        await self.error_handler.handle_execution_error(str(exception), context)
+        logger.error(f"Modern execution failed, falling back to legacy: {exception}")
+        await self._execute_legacy_workflow(state, run_id, stream_updates)
     
     async def _run_supervisor_workflow(self, state: DeepAgentState, run_id: str) -> DeepAgentState:
         """Run supervisor workflow using legacy run method."""

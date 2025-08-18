@@ -74,29 +74,35 @@ class CorpusRequestProcessor(BaseExecutionInterface):
     
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Check if conditions are met for corpus administration (legacy compatibility)."""
-        # Create execution context for modern pattern
-        context = ExecutionContext(
+        context = self._create_execution_context(state, run_id)
+        
+        try:
+            result = await self._execute_modern_entry_check(context)
+            return self._process_entry_check_result(result, run_id)
+        except Exception as e:
+            logger.error(f"Modern execution failed, falling back to legacy: {e}")
+            return await self._check_entry_conditions_legacy(state, run_id)
+    
+    def _create_execution_context(self, state: DeepAgentState, run_id: str) -> ExecutionContext:
+        """Create execution context for modern pattern."""
+        return ExecutionContext(
             run_id=run_id, agent_name=self.agent_name, state=state,
             stream_updates=False, thread_id=getattr(state, 'chat_thread_id', run_id),
             user_id=getattr(state, 'user_id', 'default_user')
         )
-        
-        try:
-            # Execute with modern pattern using reliability manager
-            result = await self.reliability_manager.execute_with_reliability(
-                context, lambda: self.execution_engine.execute(self, context)
-            )
-            
-            # Return True if conditions are met based on processing result
-            if result.success and result.result:
-                conditions_met = result.result.get('conditions_met', False)
-                if conditions_met:
-                    return True
-            
-        except Exception as e:
-            logger.error(f"Modern execution failed, falling back to legacy: {e}")
-            return await self._check_entry_conditions_legacy(state, run_id)
-        
+    
+    async def _execute_modern_entry_check(self, context: ExecutionContext):
+        """Execute with modern pattern using reliability manager."""
+        return await self.reliability_manager.execute_with_reliability(
+            context, lambda: self.execution_engine.execute(self, context)
+        )
+    
+    def _process_entry_check_result(self, result, run_id: str) -> bool:
+        """Process entry check result and return conditions met status."""
+        if result.success and result.result:
+            conditions_met = result.result.get('conditions_met', False)
+            if conditions_met:
+                return True
         logger.info(f"Corpus administration not required for run_id: {run_id}")
         return False
     
@@ -172,12 +178,20 @@ class CorpusRequestProcessor(BaseExecutionInterface):
     
     def get_health_status(self) -> Dict[str, Any]:
         """Get comprehensive health status from modern execution infrastructure."""
-        status = {
+        status = self._build_base_health_status()
+        self._add_reliability_status(status)
+        return status
+    
+    def _build_base_health_status(self) -> Dict[str, Any]:
+        """Build base health status information."""
+        return {
             "processor_health": "healthy",
             "monitor": self.monitor.get_health_status(),
             "error_handler": self.error_handler.get_health_status(),
             "corpus_keywords_count": len(self.corpus_keywords)
         }
+    
+    def _add_reliability_status(self, status: Dict[str, Any]) -> None:
+        """Add reliability status to health information."""
         if self.reliability_manager:
             status["reliability"] = self.reliability_manager.get_health_status()
-        return status

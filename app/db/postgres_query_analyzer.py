@@ -87,11 +87,8 @@ class PostgreSQLSlowQueryAnalyzer:
                                   benefit: float, priority: int) -> Dict[str, Any]:
         """Build recommendation dictionary with common fields."""
         return {
-            "table_name": table_name,
-            "columns": columns,
-            "reason": reason,
-            "estimated_benefit": benefit,
-            "priority": priority
+            "table_name": table_name, "columns": columns, "reason": reason,
+            "estimated_benefit": benefit, "priority": priority
         }
     
     def _create_where_recommendation_data(self, table_name: str, where_conditions: List,
