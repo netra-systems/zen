@@ -277,6 +277,18 @@ export const getContentForRendering = (message: Message): string => {
 
 export class MessageFormatterService {
   /**
+   * Formats single message for display (legacy interface)
+   */
+  static format(message: Message) {
+    const enhanced = enhanceMessageWithFormatting(message);
+    return {
+      content: enhanced.content,
+      metadata: enhanced.metadata,
+      renderHints: enhanced.metadata?.renderingHints || {}
+    };
+  }
+
+  /**
    * Formats single message for display
    */
   static formatMessage(message: Message): Message {

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import WS from 'jest-websocket-mock';
 
@@ -120,7 +120,9 @@ describe('Authentication Integration Tests', () => {
       
       const { getByText, getByTestId } = render(<ErrorComponent />);
       
-      fireEvent.click(getByText('Fetch Data'));
+      await act(async () => {
+        fireEvent.click(getByText('Fetch Data'));
+      });
       
       await assertTextContent(getByTestId('error'), 'Network error');
     });
