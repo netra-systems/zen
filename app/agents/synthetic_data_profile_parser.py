@@ -16,7 +16,7 @@ Handles preset matching, custom profile parsing, and default profile creation.
 Single responsibility: Profile parsing and workload type determination.
 """
 
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 from app.llm.llm_manager import LLMManager
 from app.agents.synthetic_data_presets import (
     WorkloadProfile, DataGenerationType, get_all_presets
@@ -143,40 +143,69 @@ def normalize_workload_type(workload_type_str: str) -> DataGenerationType:
 def extract_volume_from_text(text: str) -> Optional[int]:
     """Extract volume number from text using pattern matching."""
     import re
-    volume_patterns = [
+    volume_patterns = _get_volume_patterns()
+    for pattern in volume_patterns:
+        match = re.search(pattern, text.lower())
+        if match:
+            return _process_volume_match(match)
+    return None
+
+
+def _get_volume_patterns() -> List[str]:
+    """Get volume extraction patterns."""
+    return [
         r'(\d+)k?\s*(?:records?|entries|rows?|samples?)',
         r'volume[:\s]*(\d+)',
         r'generate[:\s]*(\d+)'
     ]
-    for pattern in volume_patterns:
-        match = re.search(pattern, text.lower())
-        if match:
-            volume = int(match.group(1))
-            return volume * 1000 if 'k' in match.group(0).lower() else volume
-    return None
+
+
+def _process_volume_match(match) -> int:
+    """Process volume match and apply multipliers."""
+    volume = int(match.group(1))
+    is_k_notation = 'k' in match.group(0).lower()
+    return volume * 1000 if is_k_notation else volume
 
 
 def extract_time_range_from_text(text: str) -> Optional[int]:
     """Extract time range from text using pattern matching."""
     import re
-    time_patterns = [
+    time_patterns = _get_time_patterns()
+    multipliers = _get_time_multipliers()
+    for pattern in time_patterns:
+        match = re.search(pattern, text.lower())
+        if match:
+            return _process_time_match(match, multipliers)
+    return None
+
+
+def _get_time_patterns() -> List[str]:
+    """Get time range extraction patterns."""
+    return [
         r'(\d+)\s*days?',
         r'(\d+)\s*weeks?',
         r'(\d+)\s*months?'
     ]
-    multipliers = {'days': 1, 'weeks': 7, 'months': 30}
-    
-    for pattern in time_patterns:
-        match = re.search(pattern, text.lower())
-        if match:
-            value = int(match.group(1))
-            unit = 'days'
-            for unit_key in multipliers:
-                if unit_key in match.group(0):
-                    unit = unit_key
-                    break
-            return value * multipliers[unit]
-    return None
+
+
+def _get_time_multipliers() -> Dict[str, int]:
+    """Get time unit multipliers."""
+    return {'days': 1, 'weeks': 7, 'months': 30}
+
+
+def _process_time_match(match, multipliers: Dict[str, int]) -> int:
+    """Process time match and apply unit multipliers."""
+    value = int(match.group(1))
+    unit = _determine_time_unit(match, multipliers)
+    return value * multipliers[unit]
+
+
+def _determine_time_unit(match, multipliers: Dict[str, int]) -> str:
+    """Determine time unit from match."""
+    for unit_key in multipliers:
+        if unit_key in match.group(0):
+            return unit_key
+    return 'days'
 
 
 def detect_distribution_from_text(text: str) -> str:
@@ -193,23 +222,30 @@ def detect_distribution_from_text(text: str) -> str:
 def build_profile_from_text_analysis(text: str) -> Dict[str, Any]:
     """Build profile parameters from comprehensive text analysis."""
     params = {}
-    
-    # Extract basic parameters
+    _extract_volume_to_params(text, params)
+    _extract_time_range_to_params(text, params)
+    _set_distribution_and_defaults(text, params)
+    return params
+
+
+def _extract_volume_to_params(text: str, params: Dict[str, Any]) -> None:
+    """Extract volume and add to params if found."""
     volume = extract_volume_from_text(text)
     if volume:
         params['volume'] = volume
-    
+
+
+def _extract_time_range_to_params(text: str, params: Dict[str, Any]) -> None:
+    """Extract time range and add to params if found."""
     time_range = extract_time_range_from_text(text)
     if time_range:
         params['time_range_days'] = time_range
-    
-    # Detect distribution pattern
+
+
+def _set_distribution_and_defaults(text: str, params: Dict[str, Any]) -> None:
+    """Set distribution pattern and default workload type."""
     params['distribution'] = detect_distribution_from_text(text)
-    
-    # Set default workload type
     params['workload_type'] = DataGenerationType.INFERENCE_LOGS.value
-    
-    return params
 
 
 # Export main parser class and factory function

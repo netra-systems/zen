@@ -46,7 +46,7 @@ class MessageHandlingContext:
     
     def to_execution_context(self) -> ExecutionContext:
         """Convert to standard ExecutionContext."""
-        state = DeepAgentState()
+        state = DeepAgentState(user_request="websocket_message_handling")
         metadata = self._build_execution_metadata()
         return ExecutionContext(
             run_id=self.run_id,

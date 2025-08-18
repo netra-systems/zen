@@ -124,9 +124,21 @@ class TriageLLMProcessor:
     
     async def _try_structured_then_fallback_llm(self, enhanced_prompt: str, run_id: str) -> dict:
         """Try structured LLM first with retry for ValidationError, then fallback to regular LLM."""
+        correlation_id = self._init_llm_correlation()
+        return await self._execute_llm_with_heartbeat_protection(
+            enhanced_prompt, run_id, correlation_id
+        )
+    
+    def _init_llm_correlation(self) -> str:
+        """Initialize LLM correlation and heartbeat."""
         correlation_id = generate_llm_correlation_id()
         start_llm_heartbeat(correlation_id, "TriageSubAgent")
-        
+        return correlation_id
+    
+    async def _execute_llm_with_heartbeat_protection(
+        self, enhanced_prompt: str, run_id: str, correlation_id: str
+    ) -> dict:
+        """Execute LLM with heartbeat protection and error handling."""
         try:
             return await self._execute_structured_llm_with_retries(enhanced_prompt, correlation_id)
         except Exception as e:
@@ -136,9 +148,18 @@ class TriageLLMProcessor:
     
     async def _execute_structured_llm_with_retries(self, enhanced_prompt: str, correlation_id: str) -> dict:
         """Execute structured LLM with retry mechanism."""
-        log_agent_input("TriageSubAgent", "LLM", len(enhanced_prompt), correlation_id)
+        self._log_llm_input(enhanced_prompt, correlation_id)
         max_retries = 2
-        
+        return await self._retry_structured_llm_attempts(enhanced_prompt, correlation_id, max_retries)
+    
+    def _log_llm_input(self, enhanced_prompt: str, correlation_id: str) -> None:
+        """Log LLM input for tracking."""
+        log_agent_input("TriageSubAgent", "LLM", len(enhanced_prompt), correlation_id)
+    
+    async def _retry_structured_llm_attempts(
+        self, enhanced_prompt: str, correlation_id: str, max_retries: int
+    ) -> dict:
+        """Retry structured LLM attempts until success."""
         for attempt in range(max_retries):
             result = await self._try_structured_llm_attempt(enhanced_prompt, correlation_id, attempt, max_retries)
             if result:
@@ -150,9 +171,15 @@ class TriageLLMProcessor:
         try:
             return await self._attempt_structured_llm_call(enhanced_prompt, correlation_id)
         except ValidationError as ve:
-            if not self._should_retry_validation_error(attempt, max_retries, ve):
-                raise ve
-            return None
+            return self._handle_validation_error_in_attempt(attempt, max_retries, ve)
+    
+    def _handle_validation_error_in_attempt(
+        self, attempt: int, max_retries: int, ve: ValidationError
+    ):
+        """Handle validation error during LLM attempt."""
+        if not self._should_retry_validation_error(attempt, max_retries, ve):
+            raise ve
+        return None
     
     async def _attempt_structured_llm_call(self, enhanced_prompt: str, correlation_id: str) -> dict:
         """Attempt a single structured LLM call."""

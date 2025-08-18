@@ -20,18 +20,28 @@ class GitHubAnalyzerPatternMatcher:
         patterns: Dict[str, Dict[str, List[str]]]
     ) -> Dict[str, Any]:
         """Scan content for patterns."""
-        results = {
+        results = self._init_scan_results(file_path)
+        lines = content.split('\n')
+        self._process_all_patterns(results, lines, patterns)
+        return results
+    
+    def _init_scan_results(self, file_path: str) -> Dict[str, Any]:
+        """Initialize scan results structure."""
+        return {
             "file": file_path,
             "providers": set(),
             "patterns": []
         }
-        
-        lines = content.split('\n')
-        
+    
+    def _process_all_patterns(
+        self, 
+        results: Dict[str, Any], 
+        lines: List[str], 
+        patterns: Dict[str, Dict[str, List[str]]]
+    ) -> None:
+        """Process all provider patterns."""
         for provider, categories in patterns.items():
             self._scan_provider_patterns(results, lines, provider, categories)
-        
-        return results
     
     def _scan_provider_patterns(
         self,
@@ -57,14 +67,37 @@ class GitHubAnalyzerPatternMatcher:
     ) -> None:
         """Add pattern matches to results."""
         results["providers"].add(provider)
+        self._append_match_details(results, provider, category, pattern, matches)
+    
+    def _append_match_details(
+        self,
+        results: Dict[str, Any],
+        provider: str,
+        category: str,
+        pattern: str,
+        matches: List[Tuple[int, str]]
+    ) -> None:
+        """Append match details to results."""
         for line_num, line_content in matches:
-            results["patterns"].append({
-                "provider": provider,
-                "category": category,
-                "pattern": pattern,
-                "line": line_num,
-                "content": line_content[:100]
-            })
+            match_entry = self._create_match_entry(provider, category, pattern, line_num, line_content)
+            results["patterns"].append(match_entry)
+    
+    def _create_match_entry(
+        self,
+        provider: str,
+        category: str,
+        pattern: str,
+        line_num: int,
+        line_content: str
+    ) -> Dict[str, Any]:
+        """Create a single match entry."""
+        return {
+            "provider": provider,
+            "category": category,
+            "pattern": pattern,
+            "line": line_num,
+            "content": line_content[:100]
+        }
     
     def find_matches(
         self, 
@@ -136,7 +169,10 @@ class GitHubAnalyzerPatternMatcher:
         """Estimate AI infrastructure complexity."""
         total_patterns = sum(pattern_counts.values())
         providers = len(pattern_counts)
-        
+        return self._classify_complexity(total_patterns, providers)
+    
+    def _classify_complexity(self, total_patterns: int, providers: int) -> str:
+        """Classify complexity based on counts."""
         if total_patterns > 100 or providers > 3:
             return "high"
         elif total_patterns > 30 or providers > 1:

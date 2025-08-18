@@ -69,7 +69,7 @@ class ModernWebSocketErrorInterface(BaseExecutionInterface):
     def _create_error_context(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo]) -> ExecutionContext:
         """Create execution context for error handling."""
         from app.agents.state import DeepAgentState
-        state = DeepAgentState()
+        state = DeepAgentState(user_request="websocket_error_handling")
         state.websocket_error = error
         state.connection_info = conn_info
         return ExecutionContext(error.error_id, self.agent_name, state)

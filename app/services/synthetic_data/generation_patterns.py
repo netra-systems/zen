@@ -57,24 +57,32 @@ async def generate_with_temporal_patterns(config: 'SyntheticDataGenParams', gene
     return records
 
 
-async def generate_with_errors(config: 'SyntheticDataGenParams', generate_single_record_fn: Callable[..., Awaitable[Dict]]) -> List[Dict[str, Any]]:
-    """Generate data with error scenarios"""
-    records = []
+def _setup_error_config(config: 'SyntheticDataGenParams'):
+    """Extract error generation configuration"""
     num_traces = getattr(config, 'num_traces', 100)
     error_rate = getattr(config, 'error_rate', 0.15)
     error_patterns = getattr(config, 'error_patterns', ['timeout', 'rate_limit', 'invalid_input'])
+    return num_traces, error_rate, error_patterns
+
+
+def _apply_error_injection(record: Dict[str, Any], error_rate: float, error_patterns: List[str]):
+    """Apply error injection to record"""
+    if random.random() < error_rate:
+        record['status'] = 'failed'
+        record['error_type'] = random.choice(error_patterns)
+        record['error_message'] = f"Simulated {record['error_type']} error"
+    else:
+        record['status'] = 'success'
+
+
+async def generate_with_errors(config: 'SyntheticDataGenParams', generate_single_record_fn: Callable[..., Awaitable[Dict]]) -> List[Dict[str, Any]]:
+    """Generate data with error scenarios"""
+    records = []
+    num_traces, error_rate, error_patterns = _setup_error_config(config)
     
     for i in range(num_traces):
         record = await generate_single_record_fn(config, None, i)
-        
-        # Inject errors based on rate
-        if random.random() < error_rate:
-            record['status'] = 'failed'
-            record['error_type'] = random.choice(error_patterns)
-            record['error_message'] = f"Simulated {record['error_type']} error"
-        else:
-            record['status'] = 'success'
-        
+        _apply_error_injection(record, error_rate, error_patterns)
         records.append(record)
     
     return records
@@ -137,83 +145,138 @@ async def generate_domain_specific(config: 'SyntheticDataGenParams', generate_si
     return records
 
 
+def _setup_distribution_config(config: 'SyntheticDataGenParams'):
+    """Extract distribution configuration"""
+    num_traces = getattr(config, 'num_traces', 1000)
+    distribution = getattr(config, 'latency_distribution', 'normal')
+    return num_traces, distribution
+
+
+def _apply_latency_distribution(record: Dict[str, Any], distribution: str):
+    """Apply statistical distribution to latency"""
+    if distribution == 'normal':
+        record['latency_ms'] = max(0, np.random.normal(200, 50))
+    elif distribution == 'exponential':
+        record['latency_ms'] = np.random.exponential(150)
+    elif distribution == 'uniform':
+        record['latency_ms'] = np.random.uniform(50, 500)
+    elif distribution == 'bimodal':
+        _apply_bimodal_distribution(record)
+
+
+def _apply_bimodal_distribution(record: Dict[str, Any]):
+    """Apply bimodal distribution to latency"""
+    if random.random() < 0.5:
+        record['latency_ms'] = np.random.normal(100, 25)
+    else:
+        record['latency_ms'] = np.random.normal(400, 50)
+
+
 async def generate_with_distribution(config: 'SyntheticDataGenParams', generate_single_record_fn: Callable[..., Awaitable[Dict]]) -> List[Dict[str, Any]]:
     """Generate data with specific statistical distributions"""
     records = []
-    num_traces = getattr(config, 'num_traces', 1000)
-    distribution = getattr(config, 'latency_distribution', 'normal')
+    num_traces, distribution = _setup_distribution_config(config)
     
     for i in range(num_traces):
         record = await generate_single_record_fn(config, None, i)
-        
-        # Apply distribution to latency
-        if distribution == 'normal':
-            record['latency_ms'] = max(0, np.random.normal(200, 50))
-        elif distribution == 'exponential':
-            record['latency_ms'] = np.random.exponential(150)
-        elif distribution == 'uniform':
-            record['latency_ms'] = np.random.uniform(50, 500)
-        elif distribution == 'bimodal':
-            if random.random() < 0.5:
-                record['latency_ms'] = np.random.normal(100, 25)
-            else:
-                record['latency_ms'] = np.random.normal(400, 50)
-        
+        _apply_latency_distribution(record, distribution)
         records.append(record)
     
     return records
+
+
+def _setup_anomaly_config(config: 'SyntheticDataGenParams'):
+    """Extract anomaly injection configuration"""
+    num_traces = getattr(config, 'num_traces', 1000)
+    anomaly_rate = getattr(config, 'anomaly_injection_rate', 0.05)
+    return num_traces, anomaly_rate
+
+
+def _inject_anomaly_spike(record: Dict[str, Any]):
+    """Inject spike anomaly into record"""
+    record['latency_ms'] = record.get('latency_ms', 100) * random.uniform(5, 10)
+
+
+def _inject_anomaly_degradation(record: Dict[str, Any]):
+    """Inject degradation anomaly into record"""
+    record['latency_ms'] = record.get('latency_ms', 100) * random.uniform(2, 3)
+
+
+def _apply_anomaly_injection(record: Dict[str, Any], anomaly_rate: float):
+    """Apply anomaly injection to record"""
+    if random.random() < anomaly_rate:
+        record['anomaly'] = True
+        anomaly_type = random.choice(['spike', 'degradation', 'failure'])
+        record['anomaly_type'] = anomaly_type
+        _execute_anomaly_modification(record, anomaly_type)
+
+
+def _execute_anomaly_modification(record: Dict[str, Any], anomaly_type: str):
+    """Execute specific anomaly modification"""
+    if anomaly_type == 'spike':
+        _inject_anomaly_spike(record)
+    elif anomaly_type == 'degradation':
+        _inject_anomaly_degradation(record)
+    elif anomaly_type == 'failure':
+        record['status'] = 'failed'
 
 
 async def generate_with_anomalies(config: 'SyntheticDataGenParams', generate_single_record_fn: Callable[..., Awaitable[Dict]]) -> List[Dict[str, Any]]:
     """Generate data with injected anomalies"""
     records = []
-    num_traces = getattr(config, 'num_traces', 1000)
-    anomaly_rate = getattr(config, 'anomaly_injection_rate', 0.05)
+    num_traces, anomaly_rate = _setup_anomaly_config(config)
     
     for i in range(num_traces):
         record = await generate_single_record_fn(config, None, i)
-        
-        # Inject anomalies
-        if random.random() < anomaly_rate:
-            record['anomaly'] = True
-            record['anomaly_type'] = random.choice(['spike', 'degradation', 'failure'])
-            
-            # Modify record based on anomaly type
-            if record['anomaly_type'] == 'spike':
-                record['latency_ms'] = record.get('latency_ms', 100) * random.uniform(5, 10)
-            elif record['anomaly_type'] == 'degradation':
-                record['latency_ms'] = record.get('latency_ms', 100) * random.uniform(2, 3)
-            elif record['anomaly_type'] == 'failure':
-                record['status'] = 'failed'
-        
+        _apply_anomaly_injection(record, anomaly_rate)
         records.append(record)
     
     return records
 
 
-async def generate_geo_distributed(config: 'SyntheticDataGenParams', generate_single_record_fn: Callable[..., Awaitable[Dict]]) -> List[Dict[str, Any]]:
-    """Generate geo-distributed workload data"""
-    records = []
+def _setup_geo_config(config: 'SyntheticDataGenParams'):
+    """Extract geo-distribution configuration"""
     num_traces = getattr(config, 'num_traces', 1000)
     geo_distribution = getattr(config, 'geo_distribution', {})
     latency_by_region = getattr(config, 'latency_by_region', {})
-    
-    # Create region selection based on distribution
+    return num_traces, geo_distribution, latency_by_region
+
+
+def _get_region_selection_data(geo_distribution: Dict[str, float]):
+    """Get region and weights for selection"""
     regions = list(geo_distribution.keys())
     weights = list(geo_distribution.values())
+    return regions, weights
+
+
+def _select_region(regions: List[str], weights: List[float]) -> str:
+    """Select region based on weights"""
+    return random.choices(regions, weights=weights)[0] if regions else "us-east"
+
+
+def _apply_geo_data(record: Dict[str, Any], geo_distribution: Dict, latency_by_region: Dict):
+    """Apply geo-distributed data to record"""
+    regions, weights = _get_region_selection_data(geo_distribution)
+    region = _select_region(regions, weights)
+    record['region'] = region
+    _apply_regional_latency(record, region, latency_by_region)
+
+
+def _apply_regional_latency(record: Dict[str, Any], region: str, latency_by_region: Dict):
+    """Apply region-specific latency to record"""
+    if region in latency_by_region:
+        latency_range = latency_by_region[region]
+        record['latency_ms'] = random.uniform(latency_range[0], latency_range[1])
+
+
+async def generate_geo_distributed(config: 'SyntheticDataGenParams', generate_single_record_fn: Callable[..., Awaitable[Dict]]) -> List[Dict[str, Any]]:
+    """Generate geo-distributed workload data"""
+    records = []
+    num_traces, geo_distribution, latency_by_region = _setup_geo_config(config)
     
     for i in range(num_traces):
         record = await generate_single_record_fn(config, None, i)
-        
-        # Select region based on weights
-        region = random.choices(regions, weights=weights)[0] if regions else "us-east"
-        record['region'] = region
-        
-        # Apply region-specific latency
-        if region in latency_by_region:
-            latency_range = latency_by_region[region]
-            record['latency_ms'] = random.uniform(latency_range[0], latency_range[1])
-        
+        _apply_geo_data(record, geo_distribution, latency_by_region)
         records.append(record)
     
     return records

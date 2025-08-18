@@ -111,20 +111,27 @@ class DemoService(BaseSubAgent, BaseExecutionInterface):
     def _create_process_context(self, message: str, context: Optional[Dict[str, Any]]) -> ExecutionContext:
         """Create execution context for demo processing."""
         from app.agents.state import DeepAgentState
-        
         state = DeepAgentState()
-        exec_context = ExecutionContext(
+        exec_context = self._build_execution_context(state)
+        exec_context.metadata = self._build_context_metadata(message, context)
+        return exec_context
+
+    def _build_execution_context(self, state) -> ExecutionContext:
+        """Build the base execution context."""
+        return ExecutionContext(
             run_id=f"demo_{datetime.now(UTC).timestamp()}",
             agent_name=self.agent_name,
             state=state,
             stream_updates=True
         )
-        exec_context.metadata = {
+
+    def _build_context_metadata(self, message: str, context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        """Build the metadata for execution context."""
+        return {
             "message": message,
             "context": context or {},
             "industry": self._get_industry_from_context(context)
         }
-        return exec_context
         
     def _convert_result_to_response(self, result: ExecutionResult) -> Dict[str, Any]:
         """Convert execution result to process response format."""
@@ -184,25 +191,43 @@ class DemoService(BaseSubAgent, BaseExecutionInterface):
         
     def _build_demo_prompt_content(self, message: str, industry: str) -> str:
         """Build the complete demo prompt content."""
-        return f"""You are an AI optimization expert demonstrating the Netra platform to a {industry} enterprise customer.
+        role_section = self._build_role_section(industry)
+        context_section = self._build_context_section(industry, message)
+        requirements_section = self._build_requirements_section()
+        return f"{role_section}\n\n{context_section}\n\n{requirements_section}"
 
-Your role is to:
+    def _build_role_section(self, industry: str) -> str:
+        """Build the role definition section of the prompt."""
+        role_intro = f"You are an AI optimization expert demonstrating the Netra platform to a {industry} enterprise customer."
+        responsibilities = self._build_role_responsibilities()
+        return f"{role_intro}\n\n{responsibilities}"
+
+    def _build_role_responsibilities(self) -> str:
+        """Build the role responsibilities section."""
+        return """Your role is to:
 1. Analyze their specific AI workload challenges
 2. Provide concrete, quantified optimization recommendations
 3. Show immediate business value with specific metrics
-4. Be professional yet engaging
+4. Be professional yet engaging"""
 
-Industry Context: {industry}
-Customer Message: {message}
+    def _build_context_section(self, industry: str, message: str) -> str:
+        """Build the context section of the prompt."""
+        return f"""Industry Context: {industry}
+Customer Message: {message}"""
 
-Provide a response that:
-- Identifies 2-3 specific optimization opportunities
+    def _build_requirements_section(self) -> str:
+        """Build the requirements section of the prompt."""
+        requirements = self._get_response_requirements()
+        focus = "Focus on demonstrable value and actionable insights."
+        return f"Provide a response that:\n{requirements}\n\n{focus}"
+
+    def _get_response_requirements(self) -> str:
+        """Get the specific response requirements."""
+        return """- Identifies 2-3 specific optimization opportunities
 - Quantifies potential improvements (cost, latency, throughput)
 - Suggests immediate next steps
 - Maintains enterprise-level professionalism
-- Uses industry-specific terminology and examples
-
-Focus on demonstrable value and actionable insights."""
+- Uses industry-specific terminology and examples"""
         
     def _enhance_with_metrics(
         self,

@@ -51,6 +51,11 @@ class QualityValidator(QualityValidatorInterface):
         if not agent_output:
             return None
         
+        return await self._validate_and_finalize(agent_output, agent_name, context, state)
+    
+    async def _validate_and_finalize(self, agent_output: str, agent_name: str, 
+                                   context: AgentExecutionContext, state: DeepAgentState) -> ValidationResult:
+        """Execute validation and finalize result."""
         validation_result = await self._execute_validation(agent_output, agent_name, context, state)
         return self._finalize_validation(validation_result, agent_name)
     
@@ -176,14 +181,17 @@ class QualityValidator(QualityValidatorInterface):
             return self._create_default_validation_result(content)
         
         content_type_enum = self._convert_content_type_string(content_type)
-        validation_result = await self._core_validator.validate_content(
+        return await self._execute_core_validation(content, content_type_enum, context)
+    
+    async def _execute_core_validation(self, content: str, content_type_enum, 
+                                     context: Optional[Dict[str, Any]]) -> QualityValidationResult:
+        """Execute core validation process."""
+        return await self._core_validator.validate_content(
             content=content,
             content_type=content_type_enum,
             context=context or {},
             strict_mode=self.strict_mode
         )
-        
-        return validation_result
     
     def _convert_content_type_string(self, content_type: Optional[str]) -> ContentType:
         """Convert string content type to ContentType enum"""
